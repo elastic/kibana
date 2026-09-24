@@ -18,7 +18,7 @@ import { createCriteriaEvaluator } from './evaluators/criteria';
 import { getGitMetadata } from './utils/git_metadata';
 import { buildExecutionId } from './utils/build_execution_id';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
-import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
+import { createConnectorFixture } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
 import { createAgentBuilderClient } from './utils/agent_builder_client';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
@@ -138,13 +138,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   evaluationConnector: [
-    async ({ fetch, log, connector, evaluationConnectorParam }, use) => {
+    async ({ fetch, log, connector, connectorParam, evaluationConnectorParam }, use) => {
       if (!evaluationConnectorParam) {
         throw new Error(
           'The `evaluationConnectorParam` option must be set per-project in the Playwright config.'
         );
       }
-      if (resolveConnectorId(evaluationConnectorParam.id) !== connector.id) {
+      if (evaluationConnectorParam.id !== connectorParam?.id) {
         await createConnectorFixture({
           predefinedConnector: evaluationConnectorParam,
           fetch,
@@ -230,6 +230,22 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
           ],
           [
+            'HitRate@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'MRR@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'NDCG@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'MAP@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
             ESQL_EQUIVALENCE_EVALUATOR_NAME,
             { decimalPlaces: 2, statsToInclude: ['mean', 'stdDev'] },
           ],
@@ -240,8 +256,16 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             combinedColumnName: 'Tokens',
           },
           {
-            evaluatorNames: ['Precision@K', 'F1@K', 'Recall@K'],
-            combinedColumnName: 'RAG',
+            evaluatorNames: [
+              'Precision@K',
+              'F1@K',
+              'Recall@K',
+              'HitRate@K',
+              'MRR@K',
+              'NDCG@K',
+              'MAP@K',
+            ],
+            combinedColumnName: 'IR',
           },
         ],
       });

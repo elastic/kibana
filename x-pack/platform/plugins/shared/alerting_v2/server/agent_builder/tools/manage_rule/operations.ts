@@ -32,6 +32,7 @@ import {
   isStateTransitionAllowed,
   isSignalUsingStandaloneFormat,
   isSignalQueryBreachOnly,
+  isRecoveryTransitionConsistentWithStrategy,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isNoDataQueryConsistentWithStrategy,
@@ -139,7 +140,6 @@ const toRunbookArtifact = (
 
 export const setMetadataOperationSchema = metadataSchema
   .partial()
-  .omit({ owner: true })
   .extend({ operation: z.literal('set_metadata') })
   .describe(
     'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
@@ -567,6 +567,12 @@ export const executeRuleOperations = async (
   if (!isSignalQueryBreachOnly(next)) {
     throw new RuleOperationValidationError(
       'Signal rules cannot set recovery_strategy or no_data_strategy.'
+    );
+  }
+
+  if (!isRecoveryTransitionConsistentWithStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).'
     );
   }
 

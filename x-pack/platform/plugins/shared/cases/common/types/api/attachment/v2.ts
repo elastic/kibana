@@ -6,19 +6,15 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../constants';
+import {
+  MAX_BULK_CREATE_ATTACHMENTS,
+  MAX_COMMENTS_PER_PAGE,
+  MAX_ATTACHMENT_TYPE_LENGTH,
+  MAX_ATTACHMENT_TYPES_PER_QUERY,
+} from '../../../constants';
 import type { BulkGetAttachmentsRequest } from './v1';
-import {
-  AttachmentPatchRequestRt,
-  AttachmentRequestRt,
-  AttachmentRequestWithoutRefsRt,
-} from './v1';
-import {
-  AttachmentRtV2,
-  AttachmentsRtV2,
-  UnifiedAttachmentPayloadRt,
-} from '../../domain/attachment/v2';
-import { limitedArraySchema } from '../../../schema';
+import { UnifiedAttachmentRt, UnifiedAttachmentPayloadRt } from '../../domain/attachment/v2';
+import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema';
 export type { BulkGetAttachmentsRequest as BulkGetAttachmentsRequestV2 };
 
 export const UnifiedAttachmentPatchRequestRt = rt.intersection([
@@ -26,44 +22,49 @@ export const UnifiedAttachmentPatchRequestRt = rt.intersection([
   rt.strict({ id: rt.string, version: rt.string }),
 ]);
 
-export const AttachmentRequestRtV2 = rt.union([AttachmentRequestRt, UnifiedAttachmentPayloadRt]);
-export const AttachmentRequestWithoutRefsRtV2 = rt.union([
-  AttachmentRequestWithoutRefsRt,
-  UnifiedAttachmentPayloadRt,
-]);
-export const AttachmentPatchRequestRtV2 = rt.union([
-  AttachmentPatchRequestRt,
-  UnifiedAttachmentPatchRequestRt,
-]);
-
-export const AttachmentsFindResponseRtV2 = rt.strict({
-  comments: rt.array(AttachmentRtV2),
-  page: rt.number,
-  per_page: rt.number,
-  total: rt.number,
-});
-
-export const BulkCreateAttachmentsRequestRtV2 = limitedArraySchema({
-  codec: AttachmentRequestRtV2,
+export const BulkCreateUnifiedAttachmentsRequestRt = limitedArraySchema({
+  codec: UnifiedAttachmentPayloadRt,
   min: 0,
   max: MAX_BULK_CREATE_ATTACHMENTS,
   fieldName: 'attachments',
 });
 
-export const BulkGetAttachmentsResponseRtV2 = rt.strict({
-  attachments: AttachmentsRtV2,
-  errors: rt.array(
-    rt.strict({
-      error: rt.string,
-      message: rt.string,
-      status: rt.union([rt.undefined, rt.number]),
-      savedObjectId: rt.string,
+const AttachmentTypeStringRt = limitedStringSchema({
+  fieldName: 'type',
+  min: 1,
+  max: MAX_ATTACHMENT_TYPE_LENGTH,
+});
+const AttachmentTypeQueryParamRt = rt.union([
+  AttachmentTypeStringRt,
+  limitedArraySchema({
+    codec: AttachmentTypeStringRt,
+    min: 1,
+    max: MAX_ATTACHMENT_TYPES_PER_QUERY,
+    fieldName: 'type',
+  }),
+]);
+
+export const UnifiedAttachmentsFindQueryParamsRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+      type: AttachmentTypeQueryParamRt,
     })
   ),
+  paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
+]);
+
+export const UnifiedAttachmentsFindResponseRt = rt.strict({
+  data: rt.array(UnifiedAttachmentRt),
+  page: rt.number,
+  per_page: rt.number,
+  total: rt.number,
 });
 
-export type AttachmentRequestV2 = rt.TypeOf<typeof AttachmentRequestRtV2>;
-export type AttachmentPatchRequestV2 = rt.TypeOf<typeof AttachmentPatchRequestRtV2>;
-export type AttachmentsFindResponseV2 = rt.TypeOf<typeof AttachmentsFindResponseRtV2>;
-export type BulkCreateAttachmentsRequestV2 = rt.TypeOf<typeof BulkCreateAttachmentsRequestRtV2>;
-export type BulkGetAttachmentsResponseV2 = rt.TypeOf<typeof BulkGetAttachmentsResponseRtV2>;
+export type BulkCreateUnifiedAttachmentsRequest = rt.TypeOf<
+  typeof BulkCreateUnifiedAttachmentsRequestRt
+>;
+export type UnifiedAttachmentsFindQueryParams = rt.TypeOf<
+  typeof UnifiedAttachmentsFindQueryParamsRt
+>;
+export type UnifiedAttachmentsFindResponse = rt.TypeOf<typeof UnifiedAttachmentsFindResponseRt>;

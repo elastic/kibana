@@ -14,7 +14,7 @@ import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesDataLoading,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesWritableTimeRange,
   ViewMode,
 } from '@kbn/presentation-publishing';
@@ -42,6 +42,7 @@ import {
   combineLatest,
   distinctUntilChanged,
   EMPTY,
+  finalize,
   from,
   map,
   merge,
@@ -89,7 +90,7 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   HasEditCapabilities &
   PublishesDataViews &
   PublishesDataLoading &
-  PublishesEsqlUsage &
+  PublishesEsql &
   PublishesWritableTimeRange;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
@@ -126,7 +127,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
-    const usesEsql$ = new BehaviorSubject<boolean>(Boolean(readEsqlQuery(initialState)));
+    const isGenerating$ = new BehaviorSubject<boolean>(false);
+    const chatGeneratingCallbacks = {
+      onSubmit: () => isGenerating$.next(true),
+      onClose: () => {
+        if (isGenerating$.getValue()) isGenerating$.next(false);
+      },
+    };
+    const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
@@ -193,7 +201,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ...titleManager.api,
       ...timeRangeManager.api,
       serializeState,
-      usesEsql$,
+      esql$,
       approximationApplied$,
       dataViews$,
       dataLoading$,
@@ -239,6 +247,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               closeFlyout();
               agentBuilder.openChat({
                 newConversation: true,
+                ...chatGeneratingCallbacks,
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
@@ -322,8 +331,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     });
 
     const esqlUsageSubscription = esqlQuery$
-      .pipe(map(Boolean), distinctUntilChanged())
-      .subscribe((usesEsql) => usesEsql$.next(usesEsql));
+      .pipe(
+        map((q) => (q ? [{ esql: q }] : [])),
+        distinctUntilChanged((a, b) => a.length === b.length && a[0]?.esql === b[0]?.esql)
+      )
+      .subscribe(esql$);
 
     // Important for unified search support — KQL bar and filter builder suggestions.
     const dataViewsSubscription = combineLatest([esqlQuery$, projectRouting$])
@@ -371,6 +383,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlVariables,
           previewHtml,
           timeRange,
+          isGenerating,
           viewMode,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
@@ -383,6 +396,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlVariables$,
           previewHtml$,
           effectiveTimeRange$,
+          isGenerating$,
           viewMode$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
@@ -415,12 +429,26 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
           const sub = agentBuilder.events.ui.activeConversation$
             .pipe(
+              distinctUntilChanged((a, b) => a?.id === b?.id),
               switchMap((conversation) =>
-                conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
+                conversation?.id
+                  ? agentBuilder.events.getChatEvents$(conversation.id).pipe(
+                      catchError(() => {
+                        isGenerating$.next(false);
+                        return EMPTY;
+                      }),
+                      finalize(() => {
+                        if (isGenerating$.getValue()) isGenerating$.next(false);
+                      })
+                    )
+                  : EMPTY
               )
             )
             .subscribe((event) => {
               if (!isRoundCompleteEvent(event)) return;
+              if (isGenerating$.getValue()) {
+                isGenerating$.next(false);
+              }
 
               // A round can touch several attachments — the dashboard's, and one per custom content
               // panel. Scan every agent-authored ref instead of only the first, or an unrelated
@@ -475,6 +503,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
             newConversation: true,
+            ...chatGeneratingCallbacks,
             attachments: [
               buildCustomContentContextAttachment({
                 template: '',
@@ -508,6 +537,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               esqlVariables={esqlVariables}
               previewHtml={previewHtml}
               isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
+              isGenerating={isGenerating}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

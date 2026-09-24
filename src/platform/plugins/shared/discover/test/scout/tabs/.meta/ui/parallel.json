@@ -1,5 +1,5 @@
 {
-  "sha1": "a56d807169262adc6d6e6b470aae065bca603ee5",
+  "sha1": "1d6d22c7856f7673313fa162e1bab1078100aaa6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -115,7 +115,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 154,
+        "line": 153,
         "column": 24
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 154,
+        "line": 153,
         "column": 24
       }
     },
@@ -258,7 +258,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 23,
+        "line": 33,
         "column": 64
       }
     },
@@ -271,7 +271,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 60,
+        "line": 68,
         "column": 7
       }
     },
@@ -284,8 +284,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 94,
-        "column": 26
+        "line": 100,
+        "column": 50
       }
     },
     {
@@ -349,8 +349,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/on_tab_change.spec.ts",
-        "line": 100,
-        "column": 22
+        "line": 99,
+        "column": 62
       }
     },
     {
@@ -362,7 +362,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/on_tab_change.spec.ts",
-        "line": 136,
+        "line": 134,
         "column": 22
       }
     },
@@ -441,7 +441,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_data_grid.spec.ts",
         "line": 32,
-        "column": 62
+        "column": 35
       }
     },
     {
@@ -453,7 +453,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_data_grid.spec.ts",
-        "line": 83,
+        "line": 81,
         "column": 22
       }
     },
@@ -480,7 +480,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_source.spec.ts",
         "line": 55,
-        "column": 79
+        "column": 77
       }
     },
     {
@@ -492,8 +492,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_source.spec.ts",
-        "line": 80,
-        "column": 23
+        "line": 78,
+        "column": 7
       }
     },
     {
@@ -518,21 +518,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_table.spec.ts",
-        "line": 55,
-        "column": 29
-      }
-    },
-    {
-      "id": "4fa03f2bd8c05c6-1c81fcd0d15cbfe",
-      "title": "Discover tabs - restorable DocViewer table state restores DocViewer rows per page and page number per tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_table.spec.ts",
-        "line": 97,
-        "column": 33
+        "line": 54,
+        "column": 15
       }
     },
     {
@@ -557,8 +544,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_field_cache.spec.ts",
-        "line": 62,
-        "column": 37
+        "line": 60,
+        "column": 30
       }
     },
     {
@@ -583,7 +570,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 71,
+        "line": 69,
         "column": 24
       }
     },
@@ -596,7 +583,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 117,
+        "line": 115,
         "column": 22
       }
     },
@@ -609,8 +596,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 149,
-        "column": 7
+        "line": 145,
+        "column": 13
       }
     },
     {
@@ -636,7 +623,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_sidebar.spec.ts",
         "line": 32,
-        "column": 25
+        "column": 23
       }
     },
     {
@@ -648,8 +635,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_sidebar.spec.ts",
-        "line": 52,
-        "column": 58
+        "line": 51,
+        "column": 15
       }
     },
     {
@@ -778,7 +765,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tabs_time_range.spec.ts",
-        "line": 81,
+        "line": 79,
         "column": 32
       }
     },
@@ -791,8 +778,73 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tabs_time_range.spec.ts",
-        "line": 92,
+        "line": 90,
         "column": 29
+      }
+    },
+    {
+      "id": "7be90204a8998f3-07610a376c199ae",
+      "title": "Discover tabs - uninitialized search experience keeps a new tab uninitialized while switching between tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
+        "line": 23,
+        "column": 35
+      }
+    },
+    {
+      "id": "7be90204a8998f3-17ca568b62bd21b",
+      "title": "Discover tabs - uninitialized search experience opens query history on a new ES|QL tab and closes it after searching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
+        "line": 45,
+        "column": 29
+      }
+    },
+    {
+      "id": "7be90204a8998f3-76f9615b600b7ae",
+      "title": "Discover tabs - uninitialized search experience keeps manually opened query history open across searches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "7be90204a8998f3-58392c9db846013",
+      "title": "Discover tabs - uninitialized search experience switches to ES|QL from a new classic empty tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
+        "line": 79,
+        "column": 24
+      }
+    },
+    {
+      "id": "7be90204a8998f3-5cab75fc0fdfe3c",
+      "title": "Discover tabs - uninitialized search experience shows keyboard shortcuts and disables search on an empty ES|QL tab until a query is entered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
+        "line": 93,
+        "column": 42
       }
     },
     {

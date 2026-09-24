@@ -34,6 +34,8 @@ export {
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENTS_SEVERITY_MAP,
+  SIGNIFICANT_EVENTS_STATUS_MAP,
   significantEventInvestigationSchema,
   significantEventSchema,
   significantEventStatusSchema,
@@ -53,6 +55,7 @@ export {
   NO_RAW_SENSITIVE_VALUES_RULE,
   SUMMARY_ROLE_RULE,
   SYMPTOM_HYPOTHESIS_ROLE_RULE,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
 } from './constants';
 export {
   INVESTIGATION_PROGRESS_UI_EVENT,

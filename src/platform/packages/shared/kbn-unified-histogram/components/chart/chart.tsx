@@ -8,10 +8,11 @@
  */
 
 import type { ReactElement } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ApproximationBadge } from '@kbn/esql-browser';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
@@ -19,6 +20,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
@@ -73,6 +75,7 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -96,6 +99,7 @@ export function UnifiedHistogramChart({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
+  onApiAvailable: consumerOnApiAvailable,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -104,6 +108,25 @@ export function UnifiedHistogramChart({
 
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isApproximationApplied, setIsApproximationApplied] = useState(false);
+  const approximationSubscription = useRef<{ unsubscribe: () => void } | undefined>(undefined);
+
+  useEffect(() => {
+    return () => approximationSubscription.current?.unsubscribe();
+  }, []);
+
+  const onApiAvailable = useCallback(
+    (api: unknown) => {
+      approximationSubscription.current?.unsubscribe();
+      if (apiPublishesEsql(api)) {
+        approximationSubscription.current = api.approximationApplied$.subscribe((value) => {
+          setIsApproximationApplied(Boolean(value));
+        });
+      }
+      consumerOnApiAvailable?.(api);
+    },
+    [consumerOnApiAvailable]
+  );
 
   const chartVisible =
     isChartAvailable && !!chart && !chart.hidden && !!visContext && !!visContext?.attributes;
@@ -328,6 +351,16 @@ export function UnifiedHistogramChart({
           toggleActions: toolbarToggleActions,
           leftSide: toolbarSelectors,
           rightSide: chartVisible ? actions : [],
+          additionalControls: {
+            prependRight: (
+              <span style={{ marginRight: 4 }}>
+                <ApproximationBadge
+                  isApproximationApplied={chartVisible && isApproximationApplied}
+                  data-test-subj="unifiedHistogramApproximationApplied"
+                />
+              </span>
+            ),
+          },
         }}
       >
         {chartVisible && (
@@ -362,6 +395,7 @@ export function UnifiedHistogramChart({
                   abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
+                  onApiAvailable={onApiAvailable}
                 />
               )}
             </section>

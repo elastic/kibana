@@ -1,5 +1,5 @@
 {
-  "sha1": "ff7f97bae55c2fa4e58fb21e152994b100a2c935",
+  "sha1": "cd8c4427ac2cd898369a3d3a33b55f280cbc1bae",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -486,8 +486,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/discover_session_dashboard_reload.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 29,
+        "column": 31
       }
     },
     {
@@ -565,8 +565,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/embedded_search_cancellation.spec.ts",
-        "line": 27,
-        "column": 35
+        "line": 79,
+        "column": 58
+      }
+    },
+    {
+      "id": "622bf1c9b192201-7fee3ed80f874de",
+      "title": "Discover session embedded in dashboard - request cancellation cancels async search when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/embedded_search_cancellation.spec.ts",
+        "line": 94,
+        "column": 17
       }
     },
     {
@@ -1059,7 +1072,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/panels_toggle_data_view.spec.ts",
-        "line": 35,
+        "line": 40,
         "column": 25
       }
     },
@@ -1150,8 +1163,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_cancellation.spec.ts",
-        "line": 31,
-        "column": 23
+        "line": 48,
+        "column": 13
+      }
+    },
+    {
+      "id": "f21ee4af972064b-9f0fc828458be5d",
+      "title": "Discover request cancellation recovers when a newer time range aborts an active request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_cancellation.spec.ts",
+        "line": 60,
+        "column": 11
       }
     },
     {

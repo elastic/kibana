@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
@@ -71,6 +71,7 @@ export function LensRenderer({
   lastReloadRequestTime,
   titleHighlight,
   parentApi,
+  onApiAvailable,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -90,6 +91,13 @@ export function LensRenderer({
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
+  const handleApiAvailable = useCallback(
+    (api: LensApi) => {
+      setLensApi(api);
+      onApiAvailable?.(api);
+    },
+    [onApiAvailable]
+  );
   const cleanedAttributes = useMemo(() => {
     // TODO find where people are setting type on attributes to lens
     const {
@@ -189,7 +197,7 @@ export function LensRenderer({
           reload$, // trigger a reload (replacement for deprecated searchSessionId)
         } satisfies LensParentApi)
       }
-      onApiAvailable={setLensApi}
+      onApiAvailable={handleApiAvailable}
       hidePanelChrome={!showPanelChrome}
       panelProps={panelProps}
     />

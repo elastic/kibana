@@ -14,8 +14,8 @@ import type {
   ConverseInput,
   ChatAgentEvent,
   AgentConfigurationOverrides,
-  ConversationAction,
   AgentExecutionMode,
+  AutoApprovedApi,
   ChatEvent,
   ExecutionStatus,
   InteractivityConfig,
@@ -49,6 +49,7 @@ import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 import type { AiIndexResolver } from './ai_index_resolver';
+import type { AgentRegistry } from './registry';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
@@ -96,6 +97,7 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -110,6 +112,7 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -167,8 +170,8 @@ export interface ExperimentalFeatures {
   askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
-  /** Whether the HTTP API introspection tools (discover/describe/execute) are enabled */
-  apiTools: boolean;
+  /** Whether the `discover_apis` tool is enabled. */
+  apiDiscovery: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -312,10 +315,20 @@ export interface AgentHandlerContext {
    */
   subAgentExecutor: SubAgentExecutor;
   /**
+   * Agent registry scoped to the current user
+   */
+  agentRegistry: AgentRegistry;
+  /**
    * Conversation store client scoped to the current user. Prefer this over
    * issuing raw ES queries against the conversation index.
    */
   conversationClient: ConversationClient;
+  /**
+   * Resolved runtime configuration for the external Deductive execution path.
+   * Populated from Advanced Settings (agentBuilder:deductive*) when the
+   * per-deployment feature flag is enabled; empty when the path is inactive.
+   */
+  deductive?: DeductiveRuntimeConfig;
   /**
    * Optional analytics surface for emitting agent-runtime events such as
    * SkillInvoked. Provided by the plugin when telemetry is wired.
@@ -336,6 +349,12 @@ export interface AgentHandlerContext {
 /**
  * Event handler function to listen to run events during execution of tools, agents or other agentBuilder primitives.
  */
+export interface DeductiveRuntimeConfig {
+  enabled: boolean;
+  endpoint: string;
+  apiKey: string | undefined;
+}
+
 export type AgentEventEmitterFn = (event: ChatAgentEvent) => void;
 
 export interface AgentEventEmitter {
@@ -381,10 +400,6 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
-  /**
-   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
-   */
-  action?: ConversationAction;
   /**
    * The execution ID for this run. Used for sub-agent parent tracking.
    */

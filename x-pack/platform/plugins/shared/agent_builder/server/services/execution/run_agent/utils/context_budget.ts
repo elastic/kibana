@@ -7,7 +7,6 @@
 
 import type { InferenceConnector } from '@kbn/inference-common';
 import { getContextWindowSize } from '@kbn/inference-common';
-import type { CompactionSummary } from '@kbn/agent-builder-common';
 
 /**
  * Fraction of the context window reserved for system prompt, output generation,
@@ -46,24 +45,6 @@ export const computeContextBudget = (connector: InferenceConnector): ContextBudg
   return { totalBudget, historyBudget, triggerThreshold };
 };
 
-const sumTokens = (counts: number[]): number => counts.reduce((total, count) => total + count, 0);
-
-/**
- * Determines whether compaction should be triggered given precomputed per-round
- * token counts, the context budget, and any existing compaction summary.
- *
- * When an existing summary is provided, the effective token count is the summary's
- * token cost plus only the rounds not yet covered by the summary, rather than the
- * raw total of all stored rounds.
- */
-export const shouldTriggerCompaction = (
-  perRoundTokenCounts: number[],
-  budget: ContextBudget,
-  existingSummary?: CompactionSummary
-): boolean => {
-  const effectiveTokens = existingSummary
-    ? existingSummary.token_count +
-      sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_round_count))
-    : sumTokens(perRoundTokenCounts);
-  return effectiveTokens > budget.triggerThreshold;
-};
+/** True when the effective history (summary tokens + uncovered rounds) exceeds the trigger threshold. */
+export const shouldTriggerCompaction = (effectiveTokens: number, budget: ContextBudget): boolean =>
+  effectiveTokens > budget.triggerThreshold;

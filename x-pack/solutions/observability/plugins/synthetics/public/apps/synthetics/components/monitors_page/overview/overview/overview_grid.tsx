@@ -29,6 +29,7 @@ import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
 import { ViewButtons } from './view_buttons/view_buttons';
 import { OverviewCardView } from './overview_cards_view/overview_card_view';
+import { OverviewTableColumnSelector } from './compact_view/components/overview_table_column_selector';
 
 export const OverviewGrid = memo(
   ({
@@ -108,6 +109,7 @@ export const OverviewGrid = memo(
                 </EuiFlexItem>
               ) : null}
 
+<<<<<<< HEAD
               <EuiFlexItem grow={false}>
                 <AutodiscoveredMonitorsTour>
                   <DisplayOptionsPopover />
@@ -115,6 +117,25 @@ export const OverviewGrid = memo(
               </EuiFlexItem>
             </>
           )}
+=======
+          <EuiFlexItem grow={false}>
+            <SortFields />
+          </EuiFlexItem>
+          {view === 'compactView' ? <OverviewTableColumnSelector /> : null}
+          <EuiFlexItem grow={false}>
+            <GroupFields />
+          </EuiFlexItem>
+          {!isEmbeddable ? (
+            <EuiFlexItem grow={false}>
+              <ViewButtons />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <AutodiscoveredMonitorsTour>
+              <DisplayOptionsPopover />
+            </AutodiscoveredMonitorsTour>
+          </EuiFlexItem>
+>>>>>>> afcf307a563e05d79e9981dcb85dcef521367252
         </EuiFlexGroup>
         {/*
           Card view has no built-in refresh indicator, so we surface a thin

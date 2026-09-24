@@ -41,7 +41,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer), markdown panels (source: "config", type: "markdown"), custom content panels (source: "config", type: "custom_content"), and ML anomaly panels (source: "config", type: "ml_anomaly_charts" | "ml_anomaly_swimlane" | "ml_single_metric_viewer"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing. Report this limitation and only replace them when the user explicitly approves.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -123,6 +123,8 @@ export const editPanelsOperation = defineOperation({
             nlQuery: panelInput.query,
             chartType: panelInput.chartType,
             esql: panelInput.esql,
+            preserveESQL: panelInput.preserveESQL,
+            applyChartRules: panelInput.applyChartRules,
             existingPanel,
           })
         )

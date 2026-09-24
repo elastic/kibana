@@ -191,23 +191,24 @@ export class IacProvisionerConfigError extends FleetError {
 }
 
 /**
- * The IaC Provisioner rejected the render request (4xx). `errorCodes` carries the
- * provider's `errors[].code` values (e.g. `render.blueprint_not_found`) so the
+ * The IaC Provisioner rejected the request (4xx). `errorCodes` carries the
+ * provider's `errors[].code` values (e.g. `render.unknown_blueprint`) so the
  * route can decide whether the caller may fall back to the static template.
  */
-export class IacProvisionerRenderError extends FleetError {
+export class IacProvisionerRequestError extends FleetError {
   constructor(
     message: string,
     public readonly statusCode: number,
     public readonly errorCodes: string[] = []
   ) {
-    super(`Error rendering IaC template, ${message}`);
+    super(`Error calling IaC Provisioner, ${message}`);
   }
 }
 
 /**
- * The IaC Provisioner could not be reached or returned a 5xx — a retryable
- * availability problem rather than a contract rejection.
+ * The IaC Provisioner could not be reached, returned a 5xx, or responded
+ * without the expected payload — a retryable availability problem rather
+ * than a contract rejection.
  */
 export class IacProvisionerUnavailableError extends FleetError {
   constructor(message: string, public readonly statusCode?: number) {

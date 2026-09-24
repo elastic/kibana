@@ -19,14 +19,17 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     openInChat: i18n.translate('xpack.alertzero.baseActions.openInChat', {
       defaultMessage: 'Open in chat',
     }),
-    openIncident: i18n.translate('xpack.alertzero.baseActions.openIncident', {
-      defaultMessage: 'Open an incident',
+    openEscalation: i18n.translate('xpack.alertzero.baseActions.openEscalation', {
+      defaultMessage: 'Open an escalation',
+    }),
+    addToEscalation: i18n.translate('xpack.alertzero.baseActions.addToEscalation', {
+      defaultMessage: 'Add to an escalation',
     }),
     assign: i18n.translate('xpack.alertzero.baseActions.assign', {
       defaultMessage: 'Assign',
     }),
-    dismiss: i18n.translate('xpack.alertzero.baseActions.dismiss', {
-      defaultMessage: 'Dismiss',
+    close: i18n.translate('xpack.alertzero.baseActions.closeInvestigation', {
+      defaultMessage: 'Close investigation',
     }),
   },
   tooltips: {

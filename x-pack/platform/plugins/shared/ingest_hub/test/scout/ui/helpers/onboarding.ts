@@ -14,20 +14,21 @@ import { test } from '../fixtures';
 export const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
 export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 export const ECF_LAUNCH_STEP_SESSION_KEY = 'onboarding.aws.ecfLaunchStep';
+export const AUTHENTICATE_AND_DEPLOY_SESSION_KEY = 'onboarding.aws.authenticateAndDeployStep';
+export const DETECT_AND_REVIEW_SESSION_KEY = 'onboarding.aws.detectAndReviewStep';
 
 // Derives the root test-subj for a step from its id, matching the convention used in each step's
 // root <div data-test-subj={`onboardingStep-${id}`}>.
 const stepSubj = (step: string) => `onboardingStep-${step}`;
 
 export async function mockAwsPackage(page: ScoutPage, response: unknown): Promise<void> {
+  const body = JSON.stringify(response);
+  // Intercept both the unversioned path and any versioned path (e.g. /aws/7.1.1) so that
+  // cleanup flows calling sendGetPackageInfoByKey(name, existingVersion) don't hit the real
+  // package registry and get a different manifest or time out.
   await page.route(
-    (url) => /\/api\/fleet\/epm\/packages\/aws$/.test(url.pathname),
-    (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(response),
-      })
+    (url) => /\/api\/fleet\/epm\/packages\/aws(\/[^/]+)?$/.test(url.pathname),
+    (route) => route.fulfill({ status: 200, contentType: 'application/json', body })
   );
 }
 
@@ -42,6 +43,20 @@ export async function navigateToOnboardingStep(
     instances?: unknown[];
     /** Optional ECF launch step to seed — sets the post-launch state without clicking the button. */
     ecfLaunchStep?: PersistedEcfLaunchStep;
+    /** Optional authenticate-and-deploy step to seed (connector, static-keys auth, or agent-based). */
+    authenticateAndDeployStep?: {
+      connectorId?: string;
+      authMethod?: 'identity_federation' | 'static_keys';
+      deploymentMethod?: 'managed_integration' | 'agent_based';
+      agentHostsMode?: 'new' | 'existing';
+      selectedAgentPolicyIds?: string[];
+    };
+    /** Seed detectAndReviewStep session state to simulate post-deploy conditions. */
+    detectAndReviewStep?: {
+      policyIdsByInstance?: Record<string, string>;
+      serviceStatuses?: Record<string, string>;
+      onboardingDeploymentId?: string;
+    };
   }
 ): Promise<void> {
   const {
@@ -50,6 +65,8 @@ export async function navigateToOnboardingStep(
     serviceVars = {},
     instances,
     ecfLaunchStep,
+    authenticateAndDeployStep,
+    detectAndReviewStep,
   } = opts;
   await browserAuth.loginAsAdmin();
   await page.gotoApp(`onboarding/aws#${step}`);
@@ -60,18 +77,32 @@ export async function navigateToOnboardingStep(
       vars,
       insts,
       ecfStep,
+      authStep,
+      detectReview,
       servicesKey,
       settingsKey,
       ecfStepKey,
+      authStepKey,
+      detectReviewKey,
     }: {
       ids: string[];
       region: string;
       vars: Record<string, ServiceVars>;
       insts: unknown[] | undefined;
       ecfStep: PersistedEcfLaunchStep | undefined;
+      authStep: { connectorId?: string; authMethod?: string } | undefined;
+      detectReview:
+        | {
+            policyIdsByInstance?: Record<string, string>;
+            serviceStatuses?: Record<string, string>;
+            onboardingDeploymentId?: string;
+          }
+        | undefined;
       servicesKey: string;
       settingsKey: string;
       ecfStepKey: string;
+      authStepKey: string;
+      detectReviewKey: string;
     }) => {
       sessionStorage.setItem(servicesKey, JSON.stringify({ selectedServiceIds: ids }));
       const settingsPayload: Record<string, unknown> = { globalRegion: region, serviceVars: vars };
@@ -80,6 +111,19 @@ export async function navigateToOnboardingStep(
       if (ecfStep !== undefined) {
         sessionStorage.setItem(ecfStepKey, JSON.stringify(ecfStep));
       }
+      if (authStep !== undefined) {
+        sessionStorage.setItem(authStepKey, JSON.stringify(authStep));
+      }
+      if (detectReview !== undefined) {
+        const detectReviewPayload: Record<string, unknown> = {
+          policyIdsByInstance: detectReview.policyIdsByInstance ?? {},
+          serviceStatuses: detectReview.serviceStatuses ?? {},
+        };
+        if (detectReview.onboardingDeploymentId !== undefined) {
+          detectReviewPayload.onboardingDeploymentId = detectReview.onboardingDeploymentId;
+        }
+        sessionStorage.setItem(detectReviewKey, JSON.stringify(detectReviewPayload));
+      }
     },
     {
       ids: selectedServiceIds,
@@ -87,9 +131,13 @@ export async function navigateToOnboardingStep(
       vars: serviceVars,
       insts: instances,
       ecfStep: ecfLaunchStep,
+      authStep: authenticateAndDeployStep,
+      detectReview: detectAndReviewStep,
       servicesKey: SERVICES_STEP_SESSION_KEY,
       settingsKey: SERVICE_SETTINGS_SESSION_KEY,
       ecfStepKey: ECF_LAUNCH_STEP_SESSION_KEY,
+      authStepKey: AUTHENTICATE_AND_DEPLOY_SESSION_KEY,
+      detectReviewKey: DETECT_AND_REVIEW_SESSION_KEY,
     }
   );
   await page.reload();

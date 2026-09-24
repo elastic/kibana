@@ -16,7 +16,7 @@ describe('getMaskableIconUrl', () => {
     expect(getMaskableIconUrl(dataUrl)).toBe(dataUrl);
   });
 
-  // The regression this guards: `@kbn/optimizer` inlines assets under 8kb, but
+  // The regression this guards: `@kbn/rspack-optimizer` inlines assets under 8kb, but
   // other bundlers emit them as files. Matching only `data:` left the built-in
   // glyphs as untintable `<img>` elements — invisible on a dark canvas.
   it('returns emitted `.svg` file URLs, with or without a cache-busting query', () => {

@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { render, act, fireEvent, waitFor } from '@testing-library/react';
 
-import { SelectSeverity } from './select_severity';
+import { SelectSeverity, SelectSeverityUI } from './select_severity';
 import type { SeverityOption } from '../../../explorer/hooks/use_severity_options';
 
 // Mock severity options that match the structure from useSeverityOptions
@@ -77,25 +77,23 @@ describe('SelectSeverity', () => {
     expect(getByTestId('mlAnomalySeverityThresholdControls')).toBeInTheDocument();
   });
 
-  it('opens popover when clicked', async () => {
-    const { getByTestId, getByRole } = render(<SelectSeverity />);
+  it('opens popover when clicked', () => {
+    const { getByTestId, getAllByRole } = render(<SelectSeverity />);
 
     // Click the button inside the control to open popover
     const control = getByTestId('mlAnomalySeverityThresholdControls');
     const button = control.querySelector('button');
     expect(button).toBeInTheDocument();
-    act(() => {
-      fireEvent.click(button!);
-    });
+    fireEvent.click(button!);
 
     // Should show the selectable options with threshold ranges
-    await waitFor(() => {
-      expect(getByRole('option', { name: '0-3' })).toBeInTheDocument();
-      expect(getByRole('option', { name: '3-25' })).toBeInTheDocument();
-      expect(getByRole('option', { name: '25-50' })).toBeInTheDocument();
-      expect(getByRole('option', { name: '50-75' })).toBeInTheDocument();
-      expect(getByRole('option', { name: '75-100' })).toBeInTheDocument();
-    });
+    expect(getAllByRole('option').map((option) => option.textContent)).toEqual([
+      '0-3',
+      '3-25',
+      '25-50',
+      '50-75',
+      '75-100',
+    ]);
   });
 
   it('allows deselecting severity options', async () => {
@@ -198,5 +196,95 @@ describe('SelectSeverity', () => {
     const control = getByTestId('mlAnomalySeverityThresholdControls');
 
     expect(control).toHaveTextContent('25-50');
+  });
+});
+
+describe('SelectSeverityUI', () => {
+  it('displays a custom open-ended floor as N-100 and checks overlapping bands', async () => {
+    const { getByTestId, getByRole } = render(
+      <SelectSeverityUI severity={[{ min: 30 }]} onChange={jest.fn()} />
+    );
+
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    expect(control).toHaveTextContent('30-100');
+    expect(control).not.toHaveTextContent('Multiple');
+
+    const button = control.querySelector('button');
+    expect(button).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(button!);
+    });
+
+    await waitFor(() => {
+      expect(getByRole('option', { name: '25-50' })).toBeInTheDocument();
+    });
+
+    expect(getByRole('option', { name: '0-3' })).toHaveAttribute('aria-checked', 'false');
+    expect(getByRole('option', { name: '3-25' })).toHaveAttribute('aria-checked', 'false');
+    expect(getByRole('option', { name: '25-50' })).toHaveAttribute('aria-checked', 'true');
+    expect(getByRole('option', { name: '50-75' })).toHaveAttribute('aria-checked', 'true');
+    expect(getByRole('option', { name: '75-100' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('drops the partial first band when deselecting a higher overlapping band', async () => {
+    const onChange = jest.fn();
+    const { getByTestId, getByRole } = render(
+      <SelectSeverityUI severity={[{ min: 30 }]} onChange={onChange} />
+    );
+
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    const button = control.querySelector('button');
+    act(() => {
+      fireEvent.click(button!);
+    });
+
+    await waitFor(() => {
+      expect(getByRole('option', { name: '75-100' })).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(getByRole('option', { name: '75-100' }));
+    });
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(
+      onChange.mock.calls[0][0].map((option: { threshold: unknown }) => option.threshold)
+    ).toEqual([{ min: 50, max: 75 }]);
+  });
+
+  it('drops the partial first band when deselecting a middle overlapping band', async () => {
+    const onChange = jest.fn();
+    const { getByTestId, getByRole } = render(
+      <SelectSeverityUI severity={[{ min: 30 }]} onChange={onChange} />
+    );
+
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    const button = control.querySelector('button');
+    act(() => {
+      fireEvent.click(button!);
+    });
+
+    await waitFor(() => {
+      expect(getByRole('option', { name: '50-75' })).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(getByRole('option', { name: '50-75' }));
+    });
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(
+      onChange.mock.calls[0][0].map((option: { threshold: unknown }) => option.threshold)
+    ).toEqual([{ min: 75 }]);
+  });
+
+  it('displays the canonical critical band as 75-100', () => {
+    const { getByTestId } = render(
+      <SelectSeverityUI severity={[{ min: 75 }]} onChange={jest.fn()} />
+    );
+
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    expect(control).toHaveTextContent('75-100');
+    expect(control).not.toHaveTextContent('Multiple');
   });
 });

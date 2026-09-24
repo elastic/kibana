@@ -21,7 +21,7 @@ cleanup() {
   # exits, particularly the optimizer and Elasticsearch JVM.
   pkill -f 'org.elasticsearch.bootstrap' 2>/dev/null || true
   pkill -f 'scripts/kibana' 2>/dev/null || true
-  pkill -f 'kbn-optimizer' 2>/dev/null || true
+  pkill -f 'kbn-rspack-optimizer' 2>/dev/null || true
   sleep 3
   pkill -9 -f 'org.elasticsearch.bootstrap' 2>/dev/null || true
   pkill -9 -f 'scripts/kibana' 2>/dev/null || true
@@ -45,7 +45,7 @@ if ! pgrep -f 'Xvfb :99' >/dev/null 2>&1; then
 fi
 
 echo "=== Starting Elasticsearch ==="
-yarn es snapshot >target/river-elasticsearch-warmup.log 2>&1 &
+pnpm es snapshot >target/river-elasticsearch-warmup.log 2>&1 &
 ELASTICSEARCH_PID=$!
 
 for attempt in $(seq 1 60); do
@@ -67,11 +67,8 @@ for attempt in $(seq 1 60); do
 done
 
 echo "=== Starting Kibana ==="
-# Use the rspack optimizer: a single unified compilation instead of multiple
-# webpack worker processes, which OOM-kill on memory-constrained VMs.
-KBN_USE_RSPACK=true \
-  NODE_OPTIONS="${NODE_OPTIONS:+${NODE_OPTIONS} }--max-old-space-size=8192" \
-  yarn start --no-base-path --server.host=0.0.0.0 >target/river-kibana-warmup.log 2>&1 &
+NODE_OPTIONS="${NODE_OPTIONS:+${NODE_OPTIONS} }--max-old-space-size=8192" \
+  pnpm start --no-base-path --server.host=0.0.0.0 >target/river-kibana-warmup.log 2>&1 &
 KIBANA_PID=$!
 
 for attempt in $(seq 1 120); do
