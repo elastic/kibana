@@ -17,7 +17,9 @@ import {
   NOTIFICATION_TYPE_SETTINGS,
 } from '../common/ui_settings';
 
-const CATEGORY = ['notifications'];
+// Deliberately not core's `notifications` category, which holds toast and banner lifetimes:
+// same word, unrelated concept. Its display name is registered in @kbn/management-settings-utilities.
+const CATEGORY = ['notificationCenter'];
 
 /**
  * One toggle per registered type, ordered after the master toggle. Names and descriptions come
@@ -61,7 +63,7 @@ export const registerNotificationCenterUiSettings = (uiSettings: CoreSetup['uiSe
   uiSettings.register({
     [NOTIFICATION_CENTER_ENABLED_SETTING]: {
       name: i18n.translate('xpack.notificationCenter.uiSettings.enabled.name', {
-        defaultMessage: 'Kibana global notifications',
+        defaultMessage: 'Notification Center',
       }),
       description: i18n.translate('xpack.notificationCenter.uiSettings.enabled.description', {
         defaultMessage:

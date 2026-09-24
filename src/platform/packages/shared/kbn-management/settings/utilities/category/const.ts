@@ -16,6 +16,7 @@ export const AUTOCOMPLETE_CATEGORY = 'autocomplete';
 export const BANNER_CATEGORY = 'banner';
 export const DISCOVER_CATEGORY = 'discover';
 export const MACHINE_LEARNING_CATEGORY = 'machineLearning';
+export const NOTIFICATION_CENTER_CATEGORY = 'notificationCenter';
 export const NOTIFICATIONS_CATEGORY = 'notifications';
 export const OBSERVABILITY_CATEGORY = 'observability';
 export const REPORTING_CATEGORY = 'reporting';
@@ -37,6 +38,7 @@ export const CATEGORY_ORDER = [
   BANNER_CATEGORY,
   DISCOVER_CATEGORY,
   MACHINE_LEARNING_CATEGORY,
+  NOTIFICATION_CENTER_CATEGORY,
   NOTIFICATIONS_CATEGORY,
   OBSERVABILITY_CATEGORY,
   REPORTING_CATEGORY,

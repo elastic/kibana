@@ -38,7 +38,7 @@ describe('registerNotificationCenterUiSettings', () => {
     for (const setting of Object.values(register())) {
       expect(setting.value).toBe(false);
       expect(setting.type).toBe('boolean');
-      expect(setting.category).toEqual(['notifications']);
+      expect(setting.category).toEqual(['notificationCenter']);
       // `scope` defaults to 'namespace', which is what keeps the opt-in per space.
       expect(setting.scope).toBeUndefined();
       expect(setting.schema.validate(true)).toBe(true);

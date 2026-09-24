@@ -19,6 +19,7 @@ import {
   ENTERPRISE_SEARCH_CATEGORY,
   GENERAL_CATEGORY,
   MACHINE_LEARNING_CATEGORY,
+  NOTIFICATION_CENTER_CATEGORY,
   NOTIFICATIONS_CATEGORY,
   OBSERVABILITY_CATEGORY,
   PRESENTATION_LAB_CATEGORY,
@@ -48,6 +49,12 @@ const names: Record<string, string> = {
   [TIMELION_CATEGORY]: i18n.translate('management.settings.categoryNames.timelionLabel', {
     defaultMessage: 'Timelion',
   }),
+  [NOTIFICATION_CENTER_CATEGORY]: i18n.translate(
+    'management.settings.categoryNames.notificationCenterLabel',
+    {
+      defaultMessage: 'Notification Center',
+    }
+  ),
   [NOTIFICATIONS_CATEGORY]: i18n.translate('management.settings.categoryNames.notificationsLabel', {
     defaultMessage: 'Notifications',
   }),
