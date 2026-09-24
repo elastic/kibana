@@ -142,12 +142,13 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
               esClient: esClient as EsClient,
               kbnRequest,
               world,
+              onCleanupFailure: (cleanup) => pendingCleanups.add(cleanup),
             });
             const investigationId = await createInvestigation(
               fetch,
               `FP/TP eval ${exampleId}`
             ).catch(async (error) => {
-              await fixture.cleanup();
+              await fixture.cleanup().catch(() => pendingCleanups.add(fixture.cleanup));
               throw error;
             });
 

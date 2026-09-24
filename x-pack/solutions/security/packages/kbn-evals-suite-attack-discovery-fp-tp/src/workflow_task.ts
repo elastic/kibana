@@ -116,7 +116,8 @@ export const toOutcome = (
 /**
  * Runs the FP/TP analysis workflow for one seeded Attack Discovery and returns its
  * outcome. A run that is not terminal by `maxWaitMs` counts as `failed`: the contract
- * has a hard timeout, so an overrun is itself a failure.
+ * has a hard timeout, so an overrun is itself a failure. The overrun is cancelled and
+ * awaited for up to `cancelWaitMs`, so the caller does not remove its fixture mid-run.
  */
 export const runFpTpAnalysisWorkflow = async ({
   fetch,
@@ -128,6 +129,7 @@ export const runFpTpAnalysisWorkflow = async ({
   seededIds,
   seededEvidence,
   maxWaitMs = 15 * 60_000,
+  cancelWaitMs = 60_000,
   pollIntervalMs = 3_000,
 }: {
   fetch: HttpHandler;
@@ -139,6 +141,7 @@ export const runFpTpAnalysisWorkflow = async ({
   seededIds: FpTpSeededIds;
   seededEvidence: FpTpSeededEvidence;
   maxWaitMs?: number;
+  cancelWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<FpTpTaskOutput> => {
   const { workflowExecutionId } = (await fetch(
@@ -173,10 +176,30 @@ export const runFpTpAnalysisWorkflow = async ({
     execution = await readExecution();
   }
 
-  if (!isTerminal(execution.status)) {
+  const timedOut = !isTerminal(execution.status);
+  if (timedOut) {
     log.warning(
-      `FP/TP analysis execution ${workflowExecutionId} was not terminal after ${maxWaitMs}ms (last status: ${execution.status}); counting it as failed`
+      `FP/TP analysis execution ${workflowExecutionId} was not terminal after ${maxWaitMs}ms (last status: ${execution.status}); cancelling it and counting it as failed`
     );
+    await fetch(`/api/workflows/executions/${encodeURIComponent(workflowExecutionId)}/cancel`, {
+      method: 'POST',
+      version: PUBLIC_API_VERSION,
+      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+    }).catch((error: Error) =>
+      log.warning(
+        `Could not cancel FP/TP analysis execution ${workflowExecutionId}: ${error.message}`
+      )
+    );
+    const cancelDeadline = Date.now() + cancelWaitMs;
+    do {
+      await sleep(pollIntervalMs);
+      execution = await readExecution();
+    } while (!isTerminal(execution.status) && Date.now() < cancelDeadline);
+    if (!isTerminal(execution.status)) {
+      log.warning(
+        `FP/TP analysis execution ${workflowExecutionId} was still ${execution.status} ${cancelWaitMs}ms after cancelling`
+      );
+    }
   } else if (execution.status !== ExecutionStatus.COMPLETED) {
     log.info(
       `FP/TP analysis execution ${workflowExecutionId} ended ${execution.status}: ${
@@ -201,7 +224,7 @@ export const runFpTpAnalysisWorkflow = async ({
   return {
     executionId: workflowExecutionId,
     executionStatus: execution.status,
-    outcome: toOutcome(execution, output),
+    outcome: timedOut ? 'failed' : toOutcome(execution, output),
     payload: output?.payload,
     attackDiscoveryIdEcho: output?.attack_discovery_id,
     raw: output,

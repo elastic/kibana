@@ -62,6 +62,12 @@ const mockFetch = (records: WorkflowExecutionDto[]): HttpHandler => {
     if (path.endsWith('/run')) {
       return { workflowExecutionId: 'exec-1' };
     }
+    if (path.endsWith('/cancel')) {
+      return undefined;
+    }
+    if (path.endsWith('/cancel')) {
+      return undefined;
+    }
     const record = records[Math.min(poll, records.length - 1)];
     poll += 1;
     return record;
@@ -78,8 +84,12 @@ const run = (fetch: HttpHandler, maxWaitMs = 60_000) =>
     seededIds,
     seededEvidence,
     maxWaitMs,
+    cancelWaitMs: 0,
     pollIntervalMs: 0,
   });
+
+const cancelCalls = (fetch: HttpHandler) =>
+  (fetch as unknown as jest.Mock).mock.calls.filter(([path]) => String(path).endsWith('/cancel'));
 
 describe('readAnalysisOutput', () => {
   it('returns the output from the execution context', () => {
@@ -147,6 +157,45 @@ describe('runFpTpAnalysisWorkflow', () => {
   it('returns failed when the run is not terminal by the deadline', async () => {
     const fetch = mockFetch([execution({ status: ExecutionStatus.RUNNING })]);
     expect((await run(fetch, 0)).outcome).toBe('failed');
+  });
+
+  it('returns after cancelling a run that is not terminal by the deadline', async () => {
+    const fetch = mockFetch([execution({ status: ExecutionStatus.RUNNING })]);
+    await run(fetch, 0);
+    expect(cancelCalls(fetch).map(([path]) => path)).toEqual([
+      '/api/workflows/executions/exec-1/cancel',
+    ]);
+  });
+
+  it('returns without cancelling a run that is terminal by the deadline', async () => {
+    const fetch = mockFetch([execution({ context: { output } })]);
+    await run(fetch);
+    expect(cancelCalls(fetch)).toEqual([]);
+  });
+
+  it('returns failed when an overrun completes while being cancelled', async () => {
+    const fetch = mockFetch([
+      execution({ status: ExecutionStatus.RUNNING }),
+      execution({ context: { output } }),
+    ]);
+    expect((await run(fetch, 0)).outcome).toBe('failed');
+  });
+
+  it('returns the conversation ids from the record read after cancelling', async () => {
+    const fetch = mockFetch([
+      execution({ status: ExecutionStatus.RUNNING }),
+      execution({
+        status: ExecutionStatus.CANCELLED,
+        stepExecutions: [
+          outputStep({
+            stepId: 'analyze',
+            stepType: 'ai.agent',
+            output: { conversation_id: 'c1' },
+          }),
+        ],
+      }),
+    ]);
+    expect((await run(fetch, 0)).agentConversationIds).toEqual(['c1']);
   });
 
   it('returns the seeded ids unchanged', async () => {

@@ -413,18 +413,21 @@ const cleanupLiveSeedPlan = async ({
 /**
  * Seeds one world and returns the handle that removes it. Call
  * `ensureFpTpSeedPrerequisites` once beforehand. A partial seed is cleaned up
- * before the error is rethrown.
+ * before the error is rethrown; if that cleanup fails, it is handed to
+ * `onCleanupFailure` so the caller can retry it.
  */
 export const seedFixture = async ({
   esClient,
   kbnRequest,
   world,
   now = new Date(),
+  onCleanupFailure,
 }: {
   esClient: EsClient;
   kbnRequest: FpTpLiveKbnRequest;
   world: FpTpWorld;
   now?: Date;
+  onCleanupFailure?: (cleanup: () => Promise<void>) => void;
 }): Promise<FpTpSeededFixture> => {
   const plan = buildLiveSeedPlan(world, now);
   const cleanup = () => cleanupLiveSeedPlan({ esClient, kbnRequest, plan });
@@ -455,7 +458,7 @@ export const seedFixture = async ({
       await writeIdentityFields(esClient, entity);
     }
   } catch (error) {
-    await cleanup().catch(() => undefined);
+    await cleanup().catch(() => onCleanupFailure?.(cleanup));
     throw error;
   }
 

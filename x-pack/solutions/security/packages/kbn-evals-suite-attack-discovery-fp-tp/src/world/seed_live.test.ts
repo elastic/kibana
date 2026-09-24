@@ -236,4 +236,19 @@ describe('seedFixture', () => {
       expect.objectContaining({ index: AD2_ALERTS_INDEX })
     );
   });
+
+  it('returns the partial-seed cleanup to onCleanupFailure when that cleanup fails', async () => {
+    esClient.index.mockRejectedValue(new Error('index failed'));
+    esClient.deleteByQuery.mockRejectedValue(new Error('delete failed'));
+    const onCleanupFailure = jest.fn();
+
+    await seedFixture({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest,
+      world,
+      onCleanupFailure,
+    }).catch(() => undefined);
+
+    expect(onCleanupFailure).toHaveBeenCalledWith(expect.any(Function));
+  });
 });
