@@ -32,13 +32,11 @@ const SEARCH_DEBOUNCE_MS = 300;
 const getEsqlQuery = (query: AggregateQuery): string => ('esql' in query ? query.esql : '');
 
 interface ElasticsearchSourcesTabProps {
-  enabled: boolean;
   onAddIndex: (indexName: string) => void;
   onAddEsql: (query: string) => void;
 }
 
 export const ElasticsearchSourcesTab = ({
-  enabled,
   onAddIndex,
   onAddEsql,
 }: ElasticsearchSourcesTabProps) => {
@@ -54,7 +52,7 @@ export const ElasticsearchSourcesTab = ({
 
   const { indexNames, isLoading, isError } = useIndices({
     search: debouncedSearch.trim(),
-    enabled: enabled && hasFocused,
+    enabled: hasFocused,
   });
 
   const indexOptions = useMemo<EuiComboBoxOptionOption<string>[]>(
@@ -83,7 +81,7 @@ export const ElasticsearchSourcesTab = ({
   };
 
   const handleIndexChange = (nextSelectedOptions: EuiComboBoxOptionOption<string>[]) => {
-    const picked = nextSelectedOptions[0]?.label;
+    const picked = nextSelectedOptions[0]?.value;
     if (picked) {
       addIndexFromCombo(picked);
     }

@@ -103,7 +103,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
         <EuiTab
           isSelected={selectedTab === 'esql'}
           onClick={() => setSelectedTab('esql')}
-          prepend={<EuiIcon type="indexOpen" aria-hidden={true} />}
+          prepend={<EuiIcon type="tablePlus" aria-hidden={true} />}
           append={
             selectedEsqlCount > 0 ? (
               <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
@@ -145,11 +145,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
       <EuiSpacer size="m" />
 
       {selectedTab === 'esql' && (
-        <ElasticsearchSourcesTab
-          enabled={selectedTab === 'esql'}
-          onAddIndex={addIndexSource}
-          onAddEsql={addEsqlSource}
-        />
+        <ElasticsearchSourcesTab onAddIndex={addIndexSource} onAddEsql={addEsqlSource} />
       )}
       {selectedTab === 'connectors' && (
         <ConnectorsTab

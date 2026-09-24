@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MatchedItem } from '@kbn/data-views-plugin/public';
+import type { IndexKind, MatchedItem } from '@kbn/data-views-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { contextEngineQueryKeys } from './query_keys';
@@ -15,7 +15,13 @@ import { useKibana } from './use_kibana';
 const DEFAULT_PATTERN = '*,-.*';
 const NOT_ROLLUP_INDEX = () => false;
 
+/** Cap on combobox options after type filtering, to keep the list usable. */
+export const MAX_INDEX_SEARCH_RESULTS = 50;
+
 export type IndexResourceType = 'index' | 'alias' | 'data_stream';
+
+const isIndexResourceType = (key: IndexKind): key is IndexResourceType =>
+  key === 'index' || key === 'alias' || key === 'data_stream';
 
 export interface UseIndicesOptions {
   search: string;
@@ -30,7 +36,7 @@ export interface UseIndicesResult {
 }
 
 const matchesTypes = (match: MatchedItem, types: IndexResourceType[] | undefined): boolean =>
-  !types || match.tags.some((tag) => types.includes(tag.key as IndexResourceType));
+  !types || match.tags.some((tag) => isIndexResourceType(tag.key) && types.includes(tag.key));
 
 /**
  * Lists indices, aliases, and data streams matching the given search text.
@@ -59,7 +65,11 @@ export const useIndices = ({
   });
 
   const indexNames = useMemo(
-    () => (matches ?? []).filter((match) => matchesTypes(match, types)).map((match) => match.name),
+    () =>
+      (matches ?? [])
+        .filter((match) => matchesTypes(match, types))
+        .map((match) => match.name)
+        .slice(0, MAX_INDEX_SEARCH_RESULTS),
     [matches, types]
   );
 

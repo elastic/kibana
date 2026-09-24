@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useIndices } from './use_indices';
+import { MAX_INDEX_SEARCH_RESULTS, useIndices } from './use_indices';
 
 const buildMatchedItem = (name: string, kind: IndexKind = 'index'): MatchedItem => ({
   name,
@@ -126,6 +126,25 @@ describe('useIndices', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.indexNames).toEqual(['logs-index', 'logs-alias', 'logs-ds']);
+  });
+
+  it('caps results after type filtering', async () => {
+    const getIndices = jest
+      .fn()
+      .mockResolvedValue(
+        Array.from({ length: MAX_INDEX_SEARCH_RESULTS + 3 }, (_, index) =>
+          buildMatchedItem(`logs-${index}`)
+        )
+      );
+    const { result } = renderUseIndices({ search: '' }, getIndices);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.indexNames).toHaveLength(MAX_INDEX_SEARCH_RESULTS);
+    expect(result.current.indexNames[0]).toBe('logs-0');
+    expect(result.current.indexNames[MAX_INDEX_SEARCH_RESULTS - 1]).toBe(
+      `logs-${MAX_INDEX_SEARCH_RESULTS - 1}`
+    );
   });
 
   it('filters results down to the given types', async () => {
