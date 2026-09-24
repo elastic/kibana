@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { errors } from '@elastic/elasticsearch';
 import type { MsearchRequestItem, MsearchResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
-import { isResponseError } from '@kbn/es-errors';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 
 interface FilterReadableAiIndicesParams {
@@ -28,12 +25,6 @@ const probe = (target: string): MsearchRequestItem[] => [
 const isMissingIndex = (target: string, item: MsearchResponseItem): boolean =>
   !target.includes(',') && 'error' in item && item.error.type === 'index_not_found_exception';
 
-/** Not every 403 is an authorization failure: a cluster read block is also a 403 and must surface. */
-const isAuthorizationError = (error: unknown): error is errors.ResponseError =>
-  isResponseError(error) &&
-  error.statusCode === 403 &&
-  (error.body as ElasticsearchErrorDetails | undefined)?.error?.type === 'security_exception';
-
 /** Error, timeout, or failed shard; undefined when the probe can be trusted. */
 const failureReason = (item: MsearchResponseItem): string | undefined => {
   if ('error' in item) {
@@ -51,7 +42,7 @@ const failureReason = (item: MsearchResponseItem): string | undefined => {
 /**
  * Keeps the AI Indices whose backing index the caller can read. One `msearch` as the caller, one
  * probe per entry. A backing index that does not exist yet is kept: the entry was just registered.
- * Also the gate for describing a single entry, so both take the same privileges.
+ * A caller with no read privilege on any index is refused the whole `msearch`: that 403 propagates.
  */
 export const filterReadableAiIndices = async ({
   esClient,
@@ -62,22 +53,12 @@ export const filterReadableAiIndices = async ({
     return [];
   }
 
-  const result = await esClient
-    .msearch({ searches: aiIndices.flatMap(({ dest }) => probe(dest.value)) })
-    .catch((error) => {
-      // A caller with no search privilege on any index is refused the whole msearch.
-      if (isAuthorizationError(error)) {
-        logger.debug(`No AI index is readable: ${error.message}`);
-        return undefined;
-      }
-      throw error;
-    });
-  if (result === undefined) {
-    return [];
-  }
+  const { responses } = await esClient.msearch({
+    searches: aiIndices.flatMap(({ dest }) => probe(dest.value)),
+  });
 
   return aiIndices.filter((aiIndex, index) => {
-    const response = result.responses[index];
+    const response = responses[index];
     if (isMissingIndex(aiIndex.dest.value, response)) {
       return true;
     }

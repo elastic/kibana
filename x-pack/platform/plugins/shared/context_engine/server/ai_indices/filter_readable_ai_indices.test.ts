@@ -98,7 +98,7 @@ describe('filterReadableAiIndices', () => {
   });
 
   // Elasticsearch refuses the whole `msearch` for a caller with no search privilege anywhere.
-  it('keeps nothing when the request itself is rejected as unauthorized', async () => {
+  it('propagates the 403 when the request itself is rejected as unauthorized', async () => {
     msearch.mockRejectedValue(
       new errors.ResponseError(
         elasticsearchClientMock.createApiResponse({
@@ -108,10 +108,9 @@ describe('filterReadableAiIndices', () => {
       )
     );
 
-    const result = await filterReadableAiIndices({ ...params, aiIndices: [aiIndex('a')] });
-
-    expect(result).toEqual([]);
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('No AI index is readable'));
+    await expect(filterReadableAiIndices({ ...params, aiIndices: [aiIndex('a')] })).rejects.toThrow(
+      'security_exception'
+    );
   });
 
   // `existing,missing` is a 404 as a whole, so it says nothing about `existing`.
@@ -126,22 +125,6 @@ describe('filterReadableAiIndices', () => {
     });
 
     expect(result).toEqual([]);
-  });
-
-  // A cluster read block is also a 403; it is an outage, not a missing privilege.
-  it('propagates a rejected msearch whose 403 is not a security_exception', async () => {
-    msearch.mockRejectedValue(
-      new errors.ResponseError(
-        elasticsearchClientMock.createApiResponse({
-          statusCode: 403,
-          body: { error: { type: 'cluster_block_exception' } },
-        })
-      )
-    );
-
-    await expect(filterReadableAiIndices({ ...params, aiIndices: [aiIndex('a')] })).rejects.toThrow(
-      'cluster_block_exception'
-    );
   });
 
   it('propagates a failed msearch request', async () => {
