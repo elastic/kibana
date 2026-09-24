@@ -300,7 +300,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // what amortises the ~28k-token agent framework prompt across the whole batch.
     expect(loops).toHaveLength(1);
     expect(loops[0].foreach).toBe(
-      "{{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
+      "{{ event.alerts | default: inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
     );
     expect(workflow.consts.batch_size).toEqual(expect.any(Number));
     expect(workflow.consts.batch_size).toBeGreaterThan(1);
@@ -456,7 +456,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const anchorStep = findStepByName(workflow.steps, 'set_enrichment_anchor') as {
       with: { anchor_timestamp: string };
     };
-    expect(anchorStep.with.anchor_timestamp).toBe('{{ variables.alert_set[0]["@timestamp"] }}');
+    expect(anchorStep.with.anchor_timestamp).toBe(
+      '{{ event.alerts[0]["@timestamp"] | default: inputs.alerts[0]["@timestamp"] }}'
+    );
   });
 
   it('scopes enrichment alert-index queries to the executing Kibana space', () => {
@@ -940,20 +942,6 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(alertTrigger).toBeDefined();
     expect(alertTrigger?.inputs).toBeUndefined();
 
-    // Default is the trigger's own alerts, so the standalone path is unchanged.
-    const defaultStep = findStepByName(workflow.steps, 'set_alert_set') as {
-      with: { alert_set: string };
-    };
-    expect(defaultStep.with.alert_set).toBe('${{ event.alerts }}');
-
-    // The override is gated on calledByWorker — only a Worker call supplies an alert set.
-    const overrideStep = findStepByName(workflow.steps, 'use_caller_alerts_if_provided') as {
-      condition: string;
-      steps: Array<{ name: string; with: { alert_set: string } }>;
-    };
-    expect(overrideStep.condition).toBe('${{ inputs.calledByWorker == true }}');
-    expect(overrideStep.steps[0].with.alert_set).toBe('${{ inputs.alerts }}');
-
     // Worker child runs have no event.rule — derive from the supplied alert set.
     const ruleContext = findStepByName(workflow.steps, 'set_rule_context') as {
       with: { rule_id: string; rule_name: string };
@@ -966,11 +954,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       steps: Array<{ with: { rule_id: string; rule_name: string } }>;
     };
     expect(deriveRule.condition).toBe('${{ inputs.calledByWorker == true }}');
-    expect(deriveRule.steps[0].with.rule_id).toBe(
-      '{{ variables.alert_set[0].kibana.alert.rule.uuid }}'
-    );
+    expect(deriveRule.steps[0].with.rule_id).toBe('{{ inputs.alerts[0].kibana.alert.rule.uuid }}');
     expect(deriveRule.steps[0].with.rule_name).toBe(
-      '{{ variables.alert_set[0].kibana.alert.rule.name }}'
+      '{{ inputs.alerts[0].kibana.alert.rule.name }}'
     );
 
     // Enrichment / logs must use the resolved variables, not the (missing) child event.rule.
@@ -981,13 +967,14 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(JSON.stringify(stepsWithoutRuleSource)).not.toContain('event.rule.name');
     expect(JSON.stringify(workflow.steps)).toContain('variables.rule_id');
 
-    // Every site that iterates or counts alerts must read the resolved set, or a caller's
-    // alerts would be analysed in one place and ignored in another. `set_alert_set` is the
-    // sole legitimate reader of the trigger event.
-    const stepsWithoutResolver = (workflow.steps as Array<{ name: string }>).filter(
-      ({ name }) => name !== 'set_alert_set'
-    );
-    expect(JSON.stringify(stepsWithoutResolver)).not.toContain('event.alerts');
+    // Alerts are never stored in a step output (max-step-size, duplicated state). Every
+    // read of the trigger event falls back to the caller's alerts, so a site cannot
+    // analyse one source while another site ignores it.
+    const serializedSteps = JSON.stringify(workflow.steps);
+    const countOf = (needle: string) => serializedSteps.split(needle).length - 1;
+    expect(serializedSteps).not.toContain('alert_set');
+    expect(countOf('event.alerts')).toBe(5);
+    expect(countOf('| default: inputs.alerts')).toBe(5);
   });
 
   it('fails the Worker path when alerts is missing or empty instead of completing empty', () => {
@@ -1019,9 +1006,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(rejectGate.type).toBe('if');
     expect(rejectGate.condition).toBe('${{ inputs.calledByWorker == true }}');
     expect(rejectGate.steps[0].name).toBe('compute_caller_alert_id_counts');
-    expect(rejectGate.steps[0].with?.caller_alert_count).toBe('${{ variables.alert_set.size }}');
+    expect(rejectGate.steps[0].with?.caller_alert_count).toBe('${{ inputs.alerts.size }}');
     expect(rejectGate.steps[0].with?.caller_unique_alert_id_count).toBe(
-      "${{ variables.alert_set | map: '_id' | uniq | size }}"
+      "${{ inputs.alerts | map: '_id' | uniq | size }}"
     );
     expect(rejectGate.steps[1].condition).toBe(
       '${{ variables.caller_alert_count != variables.caller_unique_alert_id_count }}'
@@ -1046,7 +1033,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(rejectGate.condition).toBe('${{ inputs.calledByWorker == true }}');
     expect(rejectGate.steps[0].name).toBe('compute_caller_unique_rule_count');
     expect(rejectGate.steps[0].with?.caller_unique_rule_uuid_count).toBe(
-      "${{ variables.alert_set | map: 'kibana.alert.rule.uuid' | uniq | size }}"
+      "${{ inputs.alerts | map: 'kibana.alert.rule.uuid' | uniq | size }}"
     );
     expect(rejectGate.steps[1].condition).toBe(
       '${{ variables.caller_unique_rule_uuid_count > 1 }}'
@@ -1538,10 +1525,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     ];
 
     const total = evaluateExpression(engine, computeStep.with.caller_alert_count, {
-      variables: { alert_set: alerts },
+      inputs: { alerts },
     });
     const unique = evaluateExpression(engine, computeStep.with.caller_unique_alert_id_count, {
-      variables: { alert_set: alerts },
+      inputs: { alerts },
     });
     expect(total).toBe(3);
     expect(unique).toBe(2);
@@ -1574,10 +1561,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const singleRuleAlerts = [makeAlert('rule-1'), makeAlert('rule-1')];
 
     const multiCount = evaluateExpression(engine, computeStep.with.caller_unique_rule_uuid_count, {
-      variables: { alert_set: multiRuleAlerts },
+      inputs: { alerts: multiRuleAlerts },
     });
     const singleCount = evaluateExpression(engine, computeStep.with.caller_unique_rule_uuid_count, {
-      variables: { alert_set: singleRuleAlerts },
+      inputs: { alerts: singleRuleAlerts },
     });
     expect(multiCount).toBe(2);
     expect(singleCount).toBe(1);
@@ -1719,13 +1706,43 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     };
 
     const result = evaluateExpression(engine, skipFallback.with.missing_alert_ids, {
-      variables: {
-        alert_set: [{ _id: 'a1' }, { _id: 'a2' }],
-        pending_filter_expr: 'false',
-      },
+      inputs: { alerts: [{ _id: 'a1' }, { _id: 'a2' }] },
+      variables: { pending_filter_expr: 'false' },
     });
 
     expect(result).toEqual(['a1', 'a2']);
+  });
+
+  it('reads the trigger alerts when present and falls back to the caller alerts otherwise', () => {
+    const countsStep = findStepByName(workflow.steps, 'set_alert_counts') as {
+      with: { total_alert_count: string };
+    };
+    const anchorStep = findStepByName(workflow.steps, 'set_enrichment_anchor') as {
+      with: { anchor_timestamp: string };
+    };
+    const triggerAlerts = [
+      { _id: 't1', '@timestamp': '2026-01-01T00:00:00.000Z' },
+      { _id: 't2', '@timestamp': '2026-01-01T00:01:00.000Z' },
+    ];
+    const callerAlerts = [{ _id: 'c1', '@timestamp': '2026-02-01T00:00:00.000Z' }];
+
+    const standaloneContexts = [
+      { event: { alerts: triggerAlerts }, inputs: { alerts: [] } },
+      { event: { alerts: triggerAlerts }, inputs: {} },
+      { event: { alerts: triggerAlerts }, inputs: { alerts: callerAlerts } },
+    ];
+    for (const context of standaloneContexts) {
+      expect(evaluateExpression(engine, countsStep.with.total_alert_count, context)).toBe(2);
+      expect(engine.parseAndRenderSync(anchorStep.with.anchor_timestamp, context)).toBe(
+        '2026-01-01T00:00:00.000Z'
+      );
+    }
+
+    const workerContext = { inputs: { alerts: callerAlerts } };
+    expect(evaluateExpression(engine, countsStep.with.total_alert_count, workerContext)).toBe(1);
+    expect(engine.parseAndRenderSync(anchorStep.with.anchor_timestamp, workerContext)).toBe(
+      '2026-02-01T00:00:00.000Z'
+    );
   });
 
   it('emits workflow.output counts and fields from accumulated Worker verdicts', () => {
