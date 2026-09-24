@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { firstValueFrom, filter } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
 
 /**
- * Returns whether legacy Security-scoped Entity Store assets may be migrated to
- * solution-neutral names. Default is false so existing deployments keep reads and
- * writes on the old concrete indices until this flag is enabled for a given env.
+ * Resolves when the legacy Security-scoped Entity Store migration FF becomes true.
+ * Uses the observable API to avoid the race condition where a single evaluation
+ * can return the fallback before the provider has finished initializing.
  */
 export const isLegacySecurityAssetsMigrationEnabled = (
   featureFlags: FeatureFlagsStart
-): Promise<boolean> => featureFlags.getBooleanValue(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
+): Promise<boolean> =>
+  firstValueFrom(
+    featureFlags
+      .getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false)
+      .pipe(filter((isEnabled) => isEnabled))
+  );
