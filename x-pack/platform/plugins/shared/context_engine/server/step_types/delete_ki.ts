@@ -35,7 +35,7 @@ export const getDeleteKiStepDefinition = ({
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, refresh = true } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, refresh = false } = context.input;
       return withKiWriteTelemetry({
         action: 'delete',
         aiIndexId,

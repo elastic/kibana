@@ -19,7 +19,7 @@ export const deleteKiInputSchema = z.object({
   refresh: z
     .boolean()
     .optional()
-    .describe('Wait for the write to become searchable before the step completes (default true)'),
+    .describe('Wait for the write to become searchable before the step completes (default false)'),
 });
 
 export const deleteKiOutputSchema = z.object({

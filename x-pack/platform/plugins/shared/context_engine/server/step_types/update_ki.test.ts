@@ -134,13 +134,12 @@ describe('getUpdateKiStepDefinition', () => {
         },
         if_seq_no: 5,
         if_primary_term: 1,
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );
   });
 
-  it('skips the refresh when refresh is false', async () => {
+  it('waits for the refresh when refresh is true', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
       update: jest.fn().mockResolvedValue({ result: 'updated' }),
@@ -150,7 +149,7 @@ describe('getUpdateKiStepDefinition', () => {
         ai_index_id: 'my-ai-index',
         ki_id: 'ki-1',
         ki: { description: 'Updated' },
-        refresh: false,
+        refresh: true,
       },
       esClient,
     });
@@ -164,10 +163,9 @@ describe('getUpdateKiStepDefinition', () => {
     });
     await handler(context);
 
-    expect(esClient.update).toHaveBeenCalledWith(
-      expect.not.objectContaining({ refresh: 'wait_for' }),
-      { signal: context.abortSignal }
-    );
+    expect(esClient.update).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }), {
+      signal: context.abortSignal,
+    });
   });
 
   it('sets the lifecycle status when provided', async () => {
@@ -377,7 +375,6 @@ describe('getUpdateKiStepDefinition', () => {
           },
         },
         op_type: 'create',
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );

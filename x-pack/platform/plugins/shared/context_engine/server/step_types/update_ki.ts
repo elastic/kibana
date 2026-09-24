@@ -43,7 +43,7 @@ export const getUpdateKiStepDefinition = ({
         ki,
         lifecycle,
         force = false,
-        refresh = true,
+        refresh = false,
       } = context.input;
       return withKiWriteTelemetry({
         action: 'update',
