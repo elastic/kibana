@@ -65,9 +65,6 @@ const mockFetch = (records: WorkflowExecutionDto[]): HttpHandler => {
     if (path.endsWith('/cancel')) {
       return undefined;
     }
-    if (path.endsWith('/cancel')) {
-      return undefined;
-    }
     const record = records[Math.min(poll, records.length - 1)];
     poll += 1;
     return record;
