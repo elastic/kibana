@@ -82,10 +82,10 @@ test.describe(
         await trigger.focus();
         await trigger.press('Enter');
         await expect(panel).toBeVisible();
-        // Wait for focus to enter the panel — this also confirms the popover's opening
-        // animation has settled (isOpenStable), so the focus trap is active.
+        // The popover focuses its own panel first, then EuiContextMenu moves focus into its inner
+        // panel. An Escape between the two lets that deferred focus pull focus off the trigger.
         await expect
-          .poll(async () => app.isFocusWithin(panel), {
+          .poll(async () => app.isFocusWithin(panel.locator('.euiContextMenuPanel')), {
             message: 'focus should move into the menu before Escape is pressed',
           })
           .toBe(true);
