@@ -574,6 +574,7 @@ export async function create(
         updated_by: null,
         observableTypes: validatedConfigurationRequest.observableTypes ?? [],
         extractObservables: validatedConfigurationRequest.extractObservables ?? true,
+        workflowTags: validatedConfigurationRequest.workflowTags ?? [],
       },
       id: savedObjectID,
     });

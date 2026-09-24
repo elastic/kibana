@@ -29,9 +29,13 @@ jest.mock('@kbn/workflows-ui', () => ({
 jest.mock('../../workflows/use_run_workflow_on_cases', () => ({
   useRunWorkflowOnCases: jest.fn().mockReturnValue(jest.fn()),
 }));
+jest.mock('../../../containers/configure/use_get_case_configuration');
 
 const { useCasesContext } = jest.requireMock('../../cases_context/use_cases_context');
 const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+const { useGetCaseConfiguration } = jest.requireMock(
+  '../../../containers/configure/use_get_case_configuration'
+);
 
 const setupMocks = ({
   permissionsUpdate = true,
@@ -43,6 +47,7 @@ const setupMocks = ({
   useCasesConfig.mockReturnValue({ runWorkflowsEnabled });
   mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow });
   mockUseWorkflowsUIEnabledSetting.mockReturnValue(workflowsUIEnabled);
+  useGetCaseConfiguration.mockReturnValue({ data: { workflowTags: [] } });
   mockCanRunWorkflow.mockReturnValue(
     permissionsUpdate && runWorkflowsEnabled && workflowsUIEnabled && canExecuteWorkflow
   );
