@@ -7,8 +7,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from '../constants';
@@ -85,26 +84,23 @@ describe('SimpleWorkflowBuilder', () => {
     expect(screen.queryByTestId('simpleWorkflowBuilder')).not.toBeInTheDocument();
   });
 
-  it('adds a draft with its inline editor when an add button is clicked', async () => {
-    const user = userEvent.setup();
+  it('adds a draft with its inline editor when an add button is clicked', () => {
     renderBuilder();
 
-    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+    fireEvent.click(screen.getByTestId('simpleWorkflowAdd-slack'));
 
-    const editor = await screen.findByTestId(/inlineWorkflowEditor-/);
-    expect(editor).toBeInTheDocument();
+    expect(screen.getByTestId(/inlineWorkflowEditor-/)).toBeInTheDocument();
     // The add buttons remain so more workflows can be created.
     expect(screen.getByTestId('simpleWorkflowAdd-slack')).toBeInTheDocument();
   });
 
-  it('removes a draft when its remove button is clicked', async () => {
-    const user = userEvent.setup();
+  it('removes a draft when its remove button is clicked', () => {
     renderBuilder();
 
-    await user.click(screen.getByTestId('simpleWorkflowAdd-email'));
-    expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('simpleWorkflowAdd-email'));
+    expect(screen.getByTestId(/inlineWorkflowEditor-/)).toBeInTheDocument();
 
-    await user.click(screen.getByTestId(/simpleWorkflowRemove-/));
+    fireEvent.click(screen.getByTestId(/simpleWorkflowRemove-/));
     expect(screen.queryByTestId(/inlineWorkflowEditor-/)).not.toBeInTheDocument();
   });
 });
