@@ -46,6 +46,8 @@ export const createKiOutputSchema = z.object({
   ),
 });
 
+export type CreateKiOutput = z.infer<typeof createKiOutputSchema>;
+
 export const createKiStepCommonDefinition: CommonStepDefinition<
   typeof createKiInputSchema,
   typeof createKiOutputSchema

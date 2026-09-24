@@ -6,10 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { createKiStepCommonDefinition } from '../../common/step_types/create_ki';
-import type { createKiOutputSchema } from '../../common/step_types/create_ki';
+import type { CreateKiOutput } from '../../common/step_types/create_ki';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
@@ -37,7 +36,7 @@ export const getCreateKiStepDefinition = ({
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
       const { ai_index_id: aiIndexId, ki_id: kiId, ki, verifiers, refresh = false } = context.input;
-      return withKiWriteTelemetry<z.infer<typeof createKiOutputSchema>>({
+      return withKiWriteTelemetry<CreateKiOutput>({
         action: 'create',
         aiIndexId,
         analyticsService,
