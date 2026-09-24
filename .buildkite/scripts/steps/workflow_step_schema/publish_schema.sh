@@ -114,6 +114,7 @@ jq -S --arg v "$STAMP_VERSION" --arg h "$BUILD_HASH" --arg c "$CHANNEL" \
 
 echo "--- Fetch GCS credentials from Vault"
 GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish)"
+buildkite-agent redactor add "$GCS_SA_KEY" 2>/dev/null || true
 GCS_SA_EMAIL="$(jq -r '.client_email // empty' <<<"$GCS_SA_KEY")"
 
 echo "--- Authenticate to GCP"
