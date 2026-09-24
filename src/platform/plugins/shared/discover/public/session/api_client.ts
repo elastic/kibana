@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import { buildPath, isHttpFetchError } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
@@ -15,38 +16,37 @@ import {
   DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../common/constants';
-import type {
-  DiscoverSessionApiDataInput,
-  DiscoverSessionApiResponse,
-  DiscoverSessionGetResponse,
-} from '../../server';
+import type { DiscoverSessionApiResponse, DiscoverSessionGetResponse } from '../../server';
 import type { deserializeEsqlControls } from '../../common/session/control_panels';
 
 export const DISCOVER_SESSION_HTTP_ERROR_NAME = 'DiscoverSessionHttpError';
 
 export interface DiscoverSessionClient {
-  create: (data: DiscoverSessionRequestData) => Promise<DiscoverSessionApiResponse>;
-  get: (id: string) => Promise<DiscoverSessionGetResult>;
-  upsert: (id: string, data: DiscoverSessionRequestData) => Promise<DiscoverSessionApiResponse>;
+  create: (data: DiscoverSessionClientRequestData) => Promise<DiscoverSessionApiResponse>;
+  get: (id: string) => Promise<DiscoverSessionClientGetResult>;
+  upsert: (
+    id: string,
+    data: DiscoverSessionClientRequestData
+  ) => Promise<DiscoverSessionApiResponse>;
 }
 
-export type DiscoverSessionRequestData = Omit<DiscoverSessionApiDataInput, 'tabs'> & {
-  tabs: DiscoverSessionRequestTab[];
+export type DiscoverSessionClientRequestData = Omit<DiscoverSessionApiDataInput, 'tabs'> & {
+  tabs: DiscoverSessionClientRequestTab[];
 };
 
-export type DiscoverSessionRequestTab<Tab = DiscoverSessionApiDataInput['tabs'][number]> = {
+export type DiscoverSessionClientRequestTab<Tab = DiscoverSessionApiDataInput['tabs'][number]> = {
   [Key in keyof Tab]: Key extends 'control_panels'
     ? ReturnType<typeof deserializeEsqlControls>
     : Tab[Key];
 };
 
-export type DiscoverSessionResolve = Pick<
+export type DiscoverSessionResolveMetadata = Pick<
   NonNullable<DiscoverSession['sharingSavedObjectProps']>,
   'outcome' | 'aliasTargetId' | 'aliasPurpose'
 >;
 
-export type DiscoverSessionGetResult = DiscoverSessionGetResponse & {
-  resolve: DiscoverSessionResolve;
+export type DiscoverSessionClientGetResult = DiscoverSessionGetResponse & {
+  resolve: DiscoverSessionResolveMetadata;
 };
 
 /** Creates the browser client used by Discover's core session flows. */
@@ -77,7 +77,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
             aliasTargetId: response?.headers.get('kbn-resolve-alias-target-id') ?? undefined,
             aliasPurpose: response?.headers.get('kbn-resolve-purpose') ?? undefined,
           },
-        } as DiscoverSessionGetResult;
+        } as DiscoverSessionClientGetResult;
       },
       () => new SavedObjectNotFound({ type: SavedSearchType, id })
     ),

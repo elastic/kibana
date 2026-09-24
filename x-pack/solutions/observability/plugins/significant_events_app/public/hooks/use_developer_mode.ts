@@ -39,7 +39,9 @@ export const useDeveloperMode = (): UseDeveloperModeResult => {
           throw new Error(
             i18n.translate(
               'xpack.significantEventsApp.settings.developerModeSaveFailedErrorMessage',
-              { defaultMessage: 'The developer mode setting could not be saved.' }
+              {
+                defaultMessage: 'The Nightshift developer mode setting could not be saved.',
+              }
             )
           );
         }
@@ -48,7 +50,7 @@ export const useDeveloperMode = (): UseDeveloperModeResult => {
           title: i18n.translate(
             'xpack.significantEventsApp.settings.developerModeSaveFailedTitle',
             {
-              defaultMessage: 'Unable to update developer mode',
+              defaultMessage: 'Unable to update Nightshift developer mode',
             }
           ),
           text: getFormattedError(error).message,

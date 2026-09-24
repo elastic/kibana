@@ -16,18 +16,14 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isString } from 'lodash';
-import {
-  useConversationError,
-  useConversationRounds,
-  useHasActiveConversation,
-} from '../../hooks/use_conversation';
+import { useConversationError, useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
-import { ConversationRounds } from './conversation_rounds/conversation_rounds';
+import { TimelineConnector } from './timeline/timeline_connector';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
-import { useOnRoundFromOtherParticipant } from '../../hooks/use_on_round_from_other_participant';
-import { useAnchoredRoundIndex } from '../../hooks/use_anchored_round';
+import { useAnchoredItemKey } from '../../hooks/use_anchored_item_key';
+import { useOnMessageFromOtherParticipant } from '../../hooks/use_on_message_from_other_participant';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 import {
@@ -39,9 +35,8 @@ import { ScrollButton } from './scroll_button';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 import { StartNewConversationButton } from './actions/start_new_conversation_button';
-import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
-import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
-import { RoundsScreenReaderStatus } from './conversation_rounds/rounds_screen_reader_status';
+import { CanvasProvider } from './timeline/response/attachments/canvas_context';
+import { CanvasFlyout } from './timeline/response/attachments/canvas_flyout';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
@@ -51,8 +46,6 @@ export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
-  const conversationRounds = useConversationRounds();
-  const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
   const { errorType } = useConversationError();
   const { attachmentsService } = useAgentBuilderServices();
@@ -68,6 +61,11 @@ export const Conversation: React.FC<{}> = () => {
   useSendPredefinedInitialMessage();
 
   const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
+  const [timelineContent, setTimelineContent] = useState<HTMLDivElement | null>(null);
+
+  const { height: scrollContainerHeight } = useResizeObserver(scrollContainer, 'height');
+  const anchoredItemKey = useAnchoredItemKey();
+
   const {
     showScrollButton,
     onMessageSent,
@@ -76,13 +74,10 @@ export const Conversation: React.FC<{}> = () => {
     stickToBottom,
   } = useConversationScrollActions({
     scrollContainer,
+    scrollContainerHeight,
+    timelineContent,
+    anchoredItemKey,
   });
-
-  // Observed, not read during render: a stale height makes the current round taller than the
-  // viewport, scrolling its input out of view.
-  const { height: scrollContainerHeight } = useResizeObserver(scrollContainer, 'height');
-
-  const anchoredRoundIndex = useAnchoredRoundIndex();
 
   const stagedAttachmentIds = useMemo(() => {
     const ids = stagedAttachments.map((attachment) => attachment.id).filter(isString);
@@ -105,7 +100,7 @@ export const Conversation: React.FC<{}> = () => {
     setDismissStaleAttachments(false);
   }, [staleAttachments, conversationId]);
 
-  useOnRoundFromOtherParticipant(stopFollowingBottom);
+  useOnMessageFromOtherParticipant(stopFollowingBottom);
 
   // Stick to bottom when opening a conversation, once its data has loaded
   useEffect(() => {
@@ -171,7 +166,6 @@ export const Conversation: React.FC<{}> = () => {
 
   return (
     <CanvasProvider>
-      <RoundsScreenReaderStatus lastRound={lastRound} />
       <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
         <EuiFlexItem grow={true} css={scrollWrapperStyles}>
           <EuiFlexGroup
@@ -181,10 +175,9 @@ export const Conversation: React.FC<{}> = () => {
             css={scrollableStyles}
           >
             <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
-              <ConversationRounds
-                scrollContainerHeight={scrollContainerHeight}
-                anchoredRoundIndex={anchoredRoundIndex}
-              />
+              <div ref={setTimelineContent}>
+                <TimelineConnector />
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
           {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}

@@ -7,22 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { dataTableSchema, dataTableLimitsSchema, documentsDisplayModeSchema } from './data_table';
-export { viewModeSchema } from './view_mode';
-export { panelOverridesSchema } from './panel_overrides';
-export { classicTabSchema, esqlTabSchema, tabSchema } from './tab';
-export { visContextSchema } from './vis_context';
 export {
-  discoverSessionControlPanelSchema,
-  discoverSessionControlPanelsSchema,
+  discoverSessionApiControlPanelSchema,
+  discoverSessionApiControlPanelsSchema,
 } from './control_panel';
-export { discoverSessionMetricsTabTypeStateSchema } from './metrics_tab';
-export { panelTabSchema } from './panel_tab';
 export {
-  discoverSessionDefaultTabTypeStateSchema,
-  discoverSessionClassicTabSchema,
-  discoverSessionEsqlTabSchema,
-  discoverSessionMetricsTabSchema,
-  discoverSessionApiTabSchema,
-  discoverSessionApiDataSchema,
-} from './session_data';
+  discoverSessionApiEmbeddableByValueConfigSchema,
+  discoverSessionApiEmbeddableByReferenceConfigSchema,
+} from './embeddable';
+export { discoverSessionApiTabSchema, discoverSessionApiDataSchema } from './session_data';

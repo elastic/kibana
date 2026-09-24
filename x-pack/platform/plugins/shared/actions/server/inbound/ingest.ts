@@ -7,6 +7,7 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
+  connectorTypeIsDual,
   getConnectorSpec,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
   normalizeConnectorTypeId,
@@ -134,6 +135,18 @@ export async function ingestInboundEvent({
   });
   if (!connector) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'load_miss' });
+    return { status: 'not_found' };
+  }
+
+  if (
+    connectorTypeIsDual(connector.connectorTypeId) &&
+    connector.hasInboundEventIdentity !== true
+  ) {
+    logInboundIngressOutcome(logger, {
+      ...baseLog,
+      outcome: 'load_miss',
+      detail: 'inbound_events_disabled',
+    });
     return { status: 'not_found' };
   }
 

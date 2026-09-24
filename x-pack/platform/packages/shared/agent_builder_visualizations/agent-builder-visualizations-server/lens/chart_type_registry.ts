@@ -99,6 +99,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         'For a secondary trend or delta, hide the label with `styling.secondary.label.visible: false` and omit `label`. Label a secondary metric only when it is a distinct named measure.',
         'Omit `color` by default. Bounded metrics (percent, ratio, utilization, error/success rate, SLO compliance) are the usual exception. When such a measure reads as good or bad, apply explicit 3-band `steps` using "Status", "Negative", "Positive", or "Temperature", with a status or adverse palette when higher is worse. Take thresholds from the query or context when available, otherwise use conventional bands for the measure, in the same unit and scale as the metric output. Unbounded values (counts, bytes, durations, rates with unknown scale) stay uncolored unless the user asks.',
         'Color the value, never the background. Set `apply_color_to: "value"` in the same edit that sets the `color` config. Never set `apply_color_to` on its own, because without a `color` config Lens tints the value with a default green that carries no meaning. When a metric is not colored, omit both `color` and `apply_color_to`.',
+        'Never combine `background_chart` with coloring. Lens forces `apply_color_to` to "background" whenever a background chart is present, so a `color` config would paint the whole panel instead of the value. When using a `background_chart`, omit both `color` and `apply_color_to`.',
       ],
       coloring: {
         dynamic: { recommendedStepCount: 3 },

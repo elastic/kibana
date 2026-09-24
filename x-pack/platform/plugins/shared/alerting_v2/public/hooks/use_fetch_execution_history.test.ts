@@ -48,7 +48,7 @@ describe('useFetchExecutionHistory', () => {
       items: [],
       page: 2,
       perPage: 25,
-      totalEvents: 0,
+      total: 0,
       searchMatches: null,
     });
 
@@ -75,7 +75,7 @@ describe('useFetchExecutionHistory', () => {
       items: [{ dispatched_at: '2026-05-05T10:00:00Z' }],
       page: 1,
       perPage: 50,
-      totalEvents: 1,
+      total: 1,
       searchMatches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
@@ -105,7 +105,7 @@ describe('useFetchExecutionHistory', () => {
       items: [],
       page: 1,
       perPage: 50,
-      totalEvents: 0,
+      total: 0,
       searchMatches: null,
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -119,7 +119,7 @@ describe('useFetchExecutionHistory', () => {
       items: [],
       page: 1,
       perPage: 50,
-      totalEvents: 0,
+      total: 0,
       searchMatches: null,
     });
   });
@@ -129,7 +129,7 @@ describe('useFetchExecutionHistory', () => {
       items: [],
       page: 1,
       perPage: 50,
-      totalEvents: 0,
+      total: 0,
       searchMatches: null,
     });
 
@@ -155,7 +155,8 @@ describe('toListExecutionHistoryRequest', () => {
         ruleIds: ['rule-1', 'rule-2'],
         outcome: ['dispatched'],
         episodeIds: ['ep-1'],
-        startDate: '2026-01-01T00:00:00.000Z',
+        sort: 'dispatchedAt',
+        sortOrder: 'asc',
       })
     ).toEqual({
       page: 1,
@@ -164,7 +165,8 @@ describe('toListExecutionHistoryRequest', () => {
       rule_ids: ['rule-1', 'rule-2'],
       outcome: ['dispatched'],
       episode_ids: ['ep-1'],
-      start_date: '2026-01-01T00:00:00.000Z',
+      sort: 'dispatched_at',
+      sort_order: 'asc',
     });
   });
 });
