@@ -142,6 +142,8 @@ describe('Header Actions', () => {
       handleInvestigate: jest.fn(),
       isInvestigating: false,
       investigateActionLabel: 'Investigate',
+      viewInvestigationUrl: '/app/nightshift?investigationId=investigation-1',
+      viewInvestigationActionLabel: 'View investigation',
     });
     useAlertSnoozeStateMock.mockReturnValue(snoozeStateWithoutInstance);
     useAlertSnoozeMock.mockReturnValue({
@@ -230,6 +232,48 @@ describe('Header Actions', () => {
       fireEvent.click(await findByTestId('alertDetailsInvestigate'));
 
       expect(handleInvestigate).toHaveBeenCalled();
+    });
+
+    it('links to a completed investigation from the alert details menu', async () => {
+      const { findByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex="alert-index"
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+
+      expect(await findByTestId('alertDetailsViewInvestigation')).toHaveAttribute(
+        'href',
+        '/app/nightshift?investigationId=investigation-1'
+      );
+    });
+
+    it('hides the view action when the alert has no completed investigation', async () => {
+      useInvestigateAlertMock.mockReturnValue({
+        showInvestigateAction: true,
+        handleInvestigate: jest.fn(),
+        isInvestigating: false,
+        investigateActionLabel: 'Investigate',
+        viewInvestigationUrl: undefined,
+        viewInvestigationActionLabel: 'View investigation',
+      });
+      const { findByTestId, queryByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex="alert-index"
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      expect(queryByTestId('alertDetailsViewInvestigation')).not.toBeInTheDocument();
     });
 
     it('hides the investigate action when no investigation connector is available', async () => {

@@ -28,9 +28,9 @@ import {
 
 const serverFields = {
   enabled: true,
-  createdBy: 'user-1',
+  createdBy: { profile_uid: 'user-1' },
   createdAt: '2025-01-01T00:00:00.000Z',
-  updatedBy: 'user-1',
+  updatedBy: { profile_uid: 'user-1' },
   updatedAt: '2025-01-01T00:00:00.000Z',
   version: 1,
 };
@@ -130,7 +130,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -148,7 +148,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -166,7 +166,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -183,7 +183,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -200,7 +200,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -217,7 +217,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -232,7 +232,7 @@ describe('utils', () => {
       const updateData: UpdateRuleData = {};
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -247,7 +247,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -264,7 +264,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -282,7 +282,7 @@ describe('utils', () => {
 
       expect(() =>
         buildUpdateRuleAttributes(existing, updateData, {
-          updatedBy: 'user-2',
+          updatedBy: { profile_uid: 'user-2' },
           updatedAt: '2025-01-02T00:00:00.000Z',
           version: 2,
         })
@@ -299,7 +299,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -316,7 +316,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -334,7 +334,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -352,7 +352,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -369,7 +369,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -387,7 +387,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -405,7 +405,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -427,7 +427,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -446,7 +446,7 @@ describe('utils', () => {
         existing,
         {},
         {
-          updatedBy: 'user-2',
+          updatedBy: { profile_uid: 'user-2' },
           updatedAt: '2025-01-02T00:00:00.000Z',
           version: 2,
         }

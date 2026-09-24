@@ -1,0 +1,17 @@
+summary: A paginated list of reusable field definitions.
+value:
+  {
+    "fieldDefinitions": [
+      {
+        "fieldDefinitionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "name": "priority",
+        "owner": "cases",
+        "definition": "name: priority\nlabel: Priority\ntype: keyword\ncontrol: SELECT_BASIC\nmetadata:\n  options: [low, medium, high]\n  default: medium\n",
+        "description": "Ticket priority level.",
+        "isGlobal": false
+      }
+    ],
+    "page": 1,
+    "perPage": 20,
+    "total": 1
+  }
