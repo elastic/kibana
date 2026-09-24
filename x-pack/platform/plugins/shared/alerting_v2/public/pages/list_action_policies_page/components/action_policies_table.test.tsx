@@ -33,6 +33,7 @@ const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all:
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -67,6 +68,8 @@ jest.mock('@kbn/core-di-browser', () => {
           get: (id: string) =>
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
+              : id === 'alerting:v2:experimentalFeatures'
+              ? mockAlertingV2ExperimentalFeaturesEnabled
               : undefined,
         };
       }
@@ -176,10 +179,9 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
   snoozed_until: null,
-  auth: { owner: 'elastic', created_by_user: false },
-  created_by: 'elastic_profile_uid',
+  created_by: { profile_uid: 'elastic_profile_uid' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'elastic_profile_uid',
+  updated_by: { profile_uid: 'elastic_profile_uid' },
   updated_at: '2026-01-02T03:04:05.000Z',
   ...overrides,
 });
@@ -197,6 +199,7 @@ describe('ActionPoliciesTable', () => {
     mockCapabilities = WRITE_CAPABILITIES;
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -226,6 +229,17 @@ describe('ActionPoliciesTable', () => {
     renderTable();
 
     await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
+  });
+
+  it('hides create-with-agent controls when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderTable();
+
+    await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
+    expect(
+      screen.queryByTestId('createActionPolicyButton-secondary-button')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createActionPolicyWithAgentButton')).not.toBeInTheDocument();
   });
 
   it('navigates to create action policy when the header create button is clicked', async () => {
@@ -528,6 +542,9 @@ describe('ActionPoliciesTable', () => {
       });
       expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument();
       expect(screen.getByTestId('createActionPolicyWithAgentCard')).toBeInTheDocument();
+      expect(screen.getByTestId('createActionPolicyWithAgentExperimentalBadge')).toHaveTextContent(
+        'Experimental'
+      );
     });
 
     it('hides the header create button in the empty state', async () => {
@@ -535,6 +552,14 @@ describe('ActionPoliciesTable', () => {
 
       await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
       expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
+    });
+
+    it('hides the empty-state create-with-agent card when Alerting V2 experimental features are disabled', async () => {
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+      renderTable();
+
+      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      expect(screen.queryByTestId('createActionPolicyWithAgentCard')).not.toBeInTheDocument();
     });
 
     it('navigates to the create form from the empty state create-policy card', async () => {

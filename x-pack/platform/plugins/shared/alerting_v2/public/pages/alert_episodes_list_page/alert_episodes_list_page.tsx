@@ -84,6 +84,7 @@ import {
   EPISODE_ACTIONS_PRIVILEGE,
 } from '../../utils/filter_episode_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { useManageRulesHref } from '../../application/manage_rules_href_context';
 
 const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {
@@ -514,7 +515,9 @@ const AlertEpisodesListPageContent = () => {
     [setVisibleColumns]
   );
 
-  const manageRulesHref = rulesLocators.useUrl({});
+  const locatorHref = rulesLocators.useUrl({});
+  const manageRulesHrefOverride = useManageRulesHref();
+  const manageRulesHref = manageRulesHrefOverride ?? locatorHref;
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({

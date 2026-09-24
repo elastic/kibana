@@ -53,7 +53,7 @@ export const RULE_TYPE_MODAL_TEST_SUBJECTS = {
 } as const;
 
 /**
- * Constants for data-test-subj values used in logs tab tests
+ * Constants for data-test-subj values used in Logs page tests
  */
 export const LOGS_TAB_TEST_SUBJECTS = {
   RULES_LOGS_MENU_ITEM: 'rulesLogsLink',

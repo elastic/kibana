@@ -15,6 +15,12 @@ import { RulesListHeader } from './rules_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
 let mockCanReadV1Rules = true;
+let mockExperimentalFeaturesEnabled = true;
+let mockAreAgentBuilderSkillsAvailable = true;
+let mockAgentBuilderSkillsRequirements = {
+  hasAgentBuilderCapability: true,
+  isExperimentalFeaturesEnabled: true,
+};
 
 /** Non-empty so the assertions below prove each href is run through `basePath.prepend`. */
 const MOCK_BASE_PATH = '/mock-base';
@@ -51,6 +57,15 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
+jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
+  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
+}));
+
+jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
+  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
+
 const onCreateRule = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
@@ -75,6 +90,12 @@ describe('RulesListHeader', () => {
     jest.clearAllMocks();
     mockPhase = 'populated';
     mockCanReadV1Rules = true;
+    mockExperimentalFeaturesEnabled = true;
+    mockAreAgentBuilderSkillsAvailable = true;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: true,
+    };
   });
 
   it('renders V1 rules and V2 rules tabs with V2 selected', async () => {

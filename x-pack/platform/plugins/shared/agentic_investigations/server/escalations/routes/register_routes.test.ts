@@ -14,9 +14,11 @@ import {
 import {
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_SUGGEST_USERS_URL,
+  ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,
 } from '../../../common/escalations/constants';
 import { ESCALATIONS_API_PRIVILEGE_MANAGE, ESCALATIONS_API_PRIVILEGE_READ } from '../constants';
+import type { AssignmentsService } from '../../assignments/assignments_service';
 import type { EscalationsService } from '../services/escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from '../services/errors';
 import type { EscalationRouteDependencies } from '../types';
@@ -45,6 +47,7 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
   const gets: RegisteredRoute[] = [];
   const posts: RegisteredRoute[] = [];
   const patches: RegisteredRoute[] = [];
+  const puts: RegisteredRoute[] = [];
   // Unversioned posts (e.g. the suggest-users endpoint)
   const plainPosts: RegisteredRoute[] = [];
 
@@ -57,6 +60,9 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
   (router.versioned.patch as jest.Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => patches.push({ config, handler }),
   }));
+  (router.versioned.put as jest.Mock).mockImplementation((config) => ({
+    addVersion: (_version: unknown, handler: Handler) => puts.push({ config, handler }),
+  }));
   (router.post as jest.Mock).mockImplementation((config, handler: Handler) =>
     plainPosts.push({ config, handler })
   );
@@ -65,6 +71,7 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
     router,
     logger: loggingSystemMock.createLogger(),
     getEscalationsService: () => service as EscalationsService,
+    getAssignmentsService: jest.fn() as unknown as () => AssignmentsService,
     getSpaceId: () => 'default',
     getSecurity: jest.fn().mockResolvedValue(undefined),
   } as unknown as EscalationRouteDependencies);
@@ -72,7 +79,7 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
   const byPath = (routes: RegisteredRoute[], path: string) =>
     routes.find(({ config }) => config.path === path)!;
 
-  return { router, gets, posts, patches, plainPosts, byPath };
+  return { router, gets, posts, patches, puts, plainPosts, byPath };
 };
 
 describe('escalation routes', () => {
@@ -102,11 +109,19 @@ describe('escalation routes', () => {
       ).toEqual([ESCALATIONS_API_PRIVILEGE_MANAGE]);
     });
 
+    it('gates assign on ESCALATIONS_API_PRIVILEGE_MANAGE', () => {
+      const { byPath, puts } = registerAndCollect({});
+      expect(
+        byPath(puts, ESCALATION_ASSIGN_URL).config.security?.authz?.requiredPrivileges
+      ).toEqual([ESCALATIONS_API_PRIVILEGE_MANAGE]);
+    });
+
     it('marks all routes as internal', () => {
-      const { byPath, gets, posts, patches, plainPosts } = registerAndCollect({});
+      const { byPath, gets, posts, patches, puts, plainPosts } = registerAndCollect({});
       expect(byPath(gets, ESCALATIONS_INTERNAL_URL).config.access).toBe('internal');
       expect(byPath(posts, ESCALATIONS_INTERNAL_URL).config.access).toBe('internal');
       expect(byPath(patches, ESCALATION_BY_ID_URL).config.access).toBe('internal');
+      expect(byPath(puts, ESCALATION_ASSIGN_URL).config.access).toBe('internal');
       expect(byPath(plainPosts, ESCALATIONS_SUGGEST_USERS_URL).config.options?.access).toBe(
         'internal'
       );
@@ -126,9 +141,13 @@ describe('escalation routes', () => {
       expect(byPath(gets, ESCALATIONS_INTERNAL_URL)).toBeDefined();
     });
 
-    it('does not register a PUT or DELETE route', () => {
+    it('registers a PUT route at ESCALATION_ASSIGN_URL for the assign endpoint', () => {
+      const { byPath, puts } = registerAndCollect({});
+      expect(byPath(puts, ESCALATION_ASSIGN_URL)).toBeDefined();
+    });
+
+    it('does not register a DELETE route', () => {
       const { router } = registerAndCollect({});
-      expect(router.versioned.put).not.toHaveBeenCalled();
       expect(router.versioned.delete).not.toHaveBeenCalled();
     });
   });

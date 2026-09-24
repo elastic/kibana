@@ -162,7 +162,7 @@ test.describe('Classic (v1) Rules host-aware URLs', { tag: tags.stateful.classic
     await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
 
     await test.step('navigate to logs and back to rules', async () => {
-      await rules.clickLogsTab();
+      await rules.openLogsFromMoreMenu();
       await expectManagementHost(page, CLASSIC_RULES_LOGS_URL_RE);
 
       await rules.clickBack();
@@ -170,7 +170,7 @@ test.describe('Classic (v1) Rules host-aware URLs', { tag: tags.stateful.classic
     });
 
     await test.step('browser back and forward keep the management host', async () => {
-      await rules.clickLogsTab();
+      await rules.openLogsFromMoreMenu();
       await expectManagementHost(page, CLASSIC_RULES_LOGS_URL_RE);
 
       await page.goBack();

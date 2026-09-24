@@ -196,7 +196,7 @@ export class RulesPage {
   /**
    * Navigates to the logs page via URL
    */
-  async gotoLogsTab() {
+  async gotoLogsPage() {
     await this.page.gotoApp('rules/logs');
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
       timeout: BIGGER_TIMEOUT,
@@ -204,11 +204,9 @@ export class RulesPage {
   }
 
   /**
-   * Navigates to the logs page via the app menu's "Logs" item (the classic Logs
-   * tab only renders when alerting v2 isn't loaded; with it loaded, Logs moves
-   * into the overflow menu).
+   * Navigates to the Logs page via the app menu's "Logs" item.
    */
-  async clickLogsTab() {
+  async openLogsFromMoreMenu() {
     await new AppMenu(this.page).clickItem(LOGS_TAB_TEST_SUBJECTS.RULES_LOGS_MENU_ITEM);
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
       timeout: BIGGER_TIMEOUT,
@@ -225,10 +223,9 @@ export class RulesPage {
   }
 
   /**
-   * Verifies the logs page is the current page (there's no tab to mark
-   * selected once Logs is an app-menu item rather than a header tab).
+   * Verifies the Logs page is the current page.
    */
-  async expectLogsTabActive() {
+  async expectLogsPageActive() {
     expect(this.page.url()).toContain('/logs');
   }
 

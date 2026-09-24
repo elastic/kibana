@@ -38,8 +38,6 @@ export class ClassicRulesPage {
   public readonly esQueryRuleTypeOption: Locator;
   public readonly ruleForm: Locator;
   public readonly cancelButton: Locator;
-  public readonly rulesTab: Locator;
-  public readonly logsTab: Locator;
   public readonly searchField: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -56,8 +54,6 @@ export class ClassicRulesPage {
     this.esQueryRuleTypeOption = this.page.testSubj.locator('.es-query-SelectOption');
     this.ruleForm = this.page.testSubj.locator('ruleForm');
     this.cancelButton = this.page.testSubj.locator('rulePageFooterCancelButton');
-    this.rulesTab = this.page.testSubj.locator('rulesTab');
-    this.logsTab = this.page.testSubj.locator('logsTab');
     this.searchField = this.page.testSubj.locator('ruleSearchField');
   }
 
@@ -132,19 +128,11 @@ export class ClassicRulesPage {
   }
 
   /**
-   * Navigates to Logs via the app menu's "Logs" item. The classic Logs tab
-   * only renders when alerting v2 isn't loaded; with it loaded, Logs moves
-   * into the overflow menu.
+   * Navigates to Logs via the app menu's "Logs" item.
    */
-  async clickLogsTab(): Promise<void> {
+  async openLogsFromMoreMenu(): Promise<void> {
     await new AppMenu(this.page).clickItem('rulesLogsLink');
     await this.page.waitForURL(CLASSIC_RULES_LOGS_URL_RE);
-  }
-
-  async clickRulesTab(): Promise<void> {
-    await this.rulesTab.click();
-    await this.page.waitForURL(CLASSIC_RULES_LIST_URL_RE);
-    await this.rulesList.waitFor({ state: 'visible' });
   }
 
   async openEditFromList(ruleId: string): Promise<void> {

@@ -29,6 +29,7 @@ jest.mock('../../application/breadcrumb_context', () => ({
 
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
 let mockCanWriteActionPolicies = true;
 let mockToursEnabled = true;
@@ -64,6 +65,8 @@ jest.mock('@kbn/core-di-browser', () => {
           get: (id: string) =>
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
+              : id === 'alerting:v2:experimentalFeatures'
+              ? mockAlertingV2ExperimentalFeaturesEnabled
               : undefined,
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
@@ -221,6 +224,7 @@ describe('RulesListPage', () => {
     window.localStorage.clear();
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
     mockCanWriteActionPolicies = true;
     mockToursEnabled = true;
@@ -654,6 +658,12 @@ describe('RulesListPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
     });
+    expect(
+      screen.getByTestId('createWithAgentButton').querySelector('[data-euiicon-type="sparkles"]')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent(
+      'Create with agent (Experimental)'
+    );
 
     fireEvent.click(screen.getByTestId('createWithAgentButton'));
 
@@ -661,6 +671,30 @@ describe('RulesListPage', () => {
       path: '/agents/elastic-ai-agent/conversations/new',
       state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
     });
+  });
+
+  it('hides all Create with AI Agent entry points when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    resolveRules([], 0);
+
+    renderPage();
+
+    await waitFor(() => expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument());
+    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createWithAgentExperimentalBadge')).not.toBeInTheDocument();
+  });
+
+  it('hides the populated-list Create with AI Agent menu option when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPage();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
+
+    await waitFor(() => expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument());
+    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
   });
 
   it('disables the split button agent option (does not hide it) when agent builder is not available', async () => {

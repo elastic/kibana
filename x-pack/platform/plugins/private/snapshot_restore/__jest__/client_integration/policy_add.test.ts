@@ -7,6 +7,7 @@
 
 import './helpers/mocks';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 
 import * as fixtures from '../../test/fixtures';
@@ -76,7 +77,7 @@ describe('<PolicyAdd />', () => {
     });
 
     test('should set the correct page title', async () => {
-      const title = await screen.findByTestId('pageTitle');
+      const title = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
       expect(title).toHaveTextContent('Create policy');
     });
 

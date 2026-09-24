@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+import type { SchemaOutput } from './schema_output';
 import { ConfigKey } from './monitor_management/config_key';
 import { MonitorTypeCodec } from './monitor_management/monitor_configs';
 import { MonitorServiceLocationCodec } from './monitor_management/locations';
@@ -23,8 +24,8 @@ import type { SelectedSyntheticsMonitor } from './external_monitor';
  * monitors — same shape of problem (pings exist, no saved object), different
  * source (local index instead of a remote cluster).
  */
-export const MonitorOriginCodec = t.literal('heartbeat');
-export type MonitorOrigin = t.TypeOf<typeof MonitorOriginCodec>;
+export const MonitorOriginCodec = z.literal('heartbeat');
+export type MonitorOrigin = SchemaOutput<typeof MonitorOriginCodec>;
 
 /**
  * Fallback location for Heartbeat / Agent autodiscovery pings that carry no
@@ -54,17 +55,17 @@ export const HEARTBEAT_UNMAPPED_LOCATION_LABEL = 'Heartbeat';
  * monitor with `origin: 'heartbeat'` is Heartbeat-managed. Use the
  * {@link isHeartbeatSyntheticsMonitor} type guard to narrow.
  */
-export const HeartbeatSyntheticsMonitorCodec = t.type({
-  [ConfigKey.CONFIG_ID]: t.string,
-  [ConfigKey.MONITOR_QUERY_ID]: t.string,
-  [ConfigKey.NAME]: t.string,
+export const HeartbeatSyntheticsMonitorCodec = z.looseObject({
+  [ConfigKey.CONFIG_ID]: z.string(),
+  [ConfigKey.MONITOR_QUERY_ID]: z.string(),
+  [ConfigKey.NAME]: z.string(),
   [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
-  [ConfigKey.TAGS]: t.array(t.string),
-  [ConfigKey.LOCATIONS]: t.array(MonitorServiceLocationCodec),
+  [ConfigKey.TAGS]: z.array(z.string()),
+  [ConfigKey.LOCATIONS]: z.array(MonitorServiceLocationCodec),
   origin: MonitorOriginCodec,
 });
 
-export type HeartbeatSyntheticsMonitor = t.TypeOf<typeof HeartbeatSyntheticsMonitorCodec>;
+export type HeartbeatSyntheticsMonitor = SchemaOutput<typeof HeartbeatSyntheticsMonitorCodec>;
 
 /**
  * Type guard distinguishing Heartbeat-managed monitors from local saved
