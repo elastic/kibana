@@ -133,8 +133,9 @@ export const registerHuntCoordinatorRoute = ({
 
           // SSE entries ride the response only on a confirmed hit for a named
           // report; the hunt child fans out over them with ai.attachment.add.
+          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone.
           const body: HuntCoordinatorResponse =
-            result.tier1.hasConfirmedHit && report_id
+            result.hasConfirmedHit && report_id
               ? { ...result, sse: buildSseData(result, report_id, { spaceId }) }
               : result;
           return response.ok({ body });

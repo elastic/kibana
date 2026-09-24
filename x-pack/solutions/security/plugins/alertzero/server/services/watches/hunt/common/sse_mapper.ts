@@ -161,18 +161,44 @@ const hitTimestamp = (hit: HuntCoordinatorResult['tier1']['hits'][number]): stri
   return typeof timestamp === 'string' ? timestamp : undefined;
 };
 
-// Tier 1 doesn't attribute a hit to a specific IOC/technique today.
-// `events[].matched` needs Tier 1 to tag which IOC produced each hit, e.g.
-// via `highlight` or a per-IOC query (deferred, not silently dropped). Events
-// and alerts therefore stay shared across every SSE for a hit run, unlike
-// `security_knowledge_indicators` which IS attributable.
+const toEventMatched = (
+  matched: HuntCoordinatorResult['tier1']['hits'][number]['matched']
+): SseEventRef['matched'] | undefined => {
+  if (!matched) return undefined;
+  // Schema requires `field` whenever `matched` is present.
+  if (!matched.field) return undefined;
+  return {
+    field: matched.field,
+    ...(matched.ioc?.type && matched.ioc?.value
+      ? { ioc: { type: matched.ioc.type, value: matched.ioc.value } }
+      : {}),
+    ...(matched.technique_id ? { technique_id: matched.technique_id } : {}),
+  };
+};
+
+/**
+ * Tier 1 hits become event/alert refs. When `onlyTechniqueId` is set:
+ * - include hits with `matched.technique_id === onlyTechniqueId`
+ * - include IOC-only / unscoped hits (no technique_id) as shared context
+ * - exclude hits attributed to a different technique
+ */
 const splitHits = (
-  result: HuntCoordinatorResult
+  result: HuntCoordinatorResult,
+  onlyTechniqueId?: string
 ): { events: SseEventRef[]; alerts: SseAlertRef[] } => {
   const events: SseEventRef[] = [];
   const alerts: SseAlertRef[] = [];
   for (const hit of result.tier1.hits) {
+    const attributedTechnique = hit.matched?.technique_id?.toUpperCase();
+    if (
+      onlyTechniqueId &&
+      attributedTechnique &&
+      attributedTechnique !== onlyTechniqueId.toUpperCase()
+    ) {
+      continue;
+    }
     const timestamp = hitTimestamp(hit);
+    const matched = toEventMatched(hit.matched);
     if (isAlertsIndex(hit.index)) {
       alerts.push({
         alert_id: hit.id,
@@ -184,10 +210,66 @@ const splitHits = (
         event_id: hit.id,
         source_index: hit.index,
         ...(timestamp ? { timestamp } : {}),
+        ...(matched ? { matched } : {}),
       });
     }
   }
-  return { events: events.slice(0, MAX_HIT_REFS), alerts: alerts.slice(0, MAX_HIT_REFS) };
+  return { events, alerts };
+};
+
+const mergeTierHitRefs = ({
+  events: tier1Events,
+  alerts: tier1Alerts,
+  result,
+  onlyTechniqueId,
+}: {
+  events: SseEventRef[];
+  alerts: SseAlertRef[];
+  result: HuntCoordinatorResult;
+  onlyTechniqueId?: string;
+}): { events: SseEventRef[]; alerts: SseAlertRef[] } => {
+  const events = [...tier1Events];
+  const alerts = [...tier1Alerts];
+  const seen = new Set([
+    ...events.map((e) => `${e.source_index}|${e.event_id}`),
+    ...alerts.map((a) => `${a.index}|${a.alert_id}`),
+  ]);
+
+  const behaviors = (result.tier2?.behaviors ?? []).filter(
+    (behavior) => !onlyTechniqueId || behavior.technique_id === onlyTechniqueId
+  );
+
+  for (const behavior of behaviors) {
+    for (const ref of behavior.hit_refs ?? []) {
+      const key = `${ref.source_index}|${ref.event_id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if (isAlertsIndex(ref.source_index)) {
+        if (alerts.length >= MAX_HIT_REFS) continue;
+        alerts.push({
+          alert_id: ref.event_id,
+          index: ref.source_index,
+          ...(ref.timestamp ? { timestamp: ref.timestamp } : {}),
+        });
+      } else {
+        if (events.length >= MAX_HIT_REFS) continue;
+        events.push({
+          event_id: ref.event_id,
+          source_index: ref.source_index,
+          ...(ref.timestamp ? { timestamp: ref.timestamp } : {}),
+          matched: {
+            technique_id: behavior.technique_id,
+            field: '_id',
+          },
+        });
+      }
+    }
+  }
+
+  return {
+    events: events.slice(0, MAX_HIT_REFS),
+    alerts: alerts.slice(0, MAX_HIT_REFS),
+  };
 };
 
 /**
@@ -241,12 +323,10 @@ const buildHuntResult = (
  * `hunt_coordinator` returns and fans out over the result with
  * `ai.attachment.add`, one call per entry.
  *
- * Each technique-scoped entry's `security_knowledge_indicators` AND
- * `hunt_result.tier2.behaviors` are filtered to that technique alone. The
- * SSE is 1:1 with a Proposal, so the T1078.004 entry must not carry
- * T1552.001's behavior/rule name in either place. `events`/`entities`/
- * `hunt_result.tier1` stay shared: Tier 1 doesn't attribute hits to a
- * specific technique (see `buildEvents`).
+ * Each technique-scoped entry's `security_knowledge_indicators`,
+ * `hunt_result.tier2.behaviors`, and Tier 2 `hit_refs` are filtered to that
+ * technique. Tier 1 events attributed to another technique are excluded;
+ * IOC-only / unscoped Tier 1 hits stay shared.
  */
 export const buildSseData = (
   result: HuntCoordinatorResult,
@@ -254,11 +334,14 @@ export const buildSseData = (
   options: SseMapperOptions
 ): SseEntry[] => {
   const entities = buildEntities(result);
-  const { events, alerts } = splitHits(result);
 
   const techniqueIds = result.tier2?.behaviors.map((behavior) => behavior.technique_id) ?? [];
 
   if (techniqueIds.length === 0) {
+    const { events, alerts } = mergeTierHitRefs({
+      ...splitHits(result),
+      result,
+    });
     return [
       {
         attachment_id: buildSseAttachmentId({ spaceId: options.spaceId, reportId }),
@@ -277,18 +360,25 @@ export const buildSseData = (
     ];
   }
 
-  return techniqueIds.map((techniqueId) => ({
-    attachment_id: buildSseAttachmentId({ spaceId: options.spaceId, reportId, techniqueId }),
-    data: {
-      source_watch: SOURCE_WATCH_MANAGED_ID,
-      capability: CAPABILITY_ID,
-      run_id: result.runId,
-      report_id: reportId,
-      security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, techniqueId),
-      entities,
-      alerts,
-      events,
-      hunt_result: buildHuntResult(result, techniqueId),
-    },
-  }));
+  return techniqueIds.map((techniqueId) => {
+    const { events, alerts } = mergeTierHitRefs({
+      ...splitHits(result, techniqueId),
+      result,
+      onlyTechniqueId: techniqueId,
+    });
+    return {
+      attachment_id: buildSseAttachmentId({ spaceId: options.spaceId, reportId, techniqueId }),
+      data: {
+        source_watch: SOURCE_WATCH_MANAGED_ID,
+        capability: CAPABILITY_ID,
+        run_id: result.runId,
+        report_id: reportId,
+        security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, techniqueId),
+        entities,
+        alerts,
+        events,
+        hunt_result: buildHuntResult(result, techniqueId),
+      },
+    };
+  });
 };
