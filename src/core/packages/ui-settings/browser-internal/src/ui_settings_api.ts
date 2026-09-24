@@ -38,7 +38,7 @@ const NOOP_CHANGES = {
 };
 
 export class UiSettingsApi {
-  private pendingChanges?: Changes;
+  private pendingChanges: Partial<Record<UiSettingsScope, Changes>> = {};
   private sendInProgress = false;
 
   private readonly loadingCount$ = new BehaviorSubject(0);
@@ -51,35 +51,18 @@ export class UiSettingsApi {
    * before sending the next request
    */
   public batchSet(key: string, value: any) {
-    return new Promise<UiSettingsApiResponse>((resolve, reject) => {
-      const prev = this.pendingChanges || NOOP_CHANGES;
-
-      this.pendingChanges = {
-        values: {
-          ...prev.values,
-          [key]: value,
-        },
-
-        callback(error, resp) {
-          prev.callback(error, resp);
-
-          if (error) {
-            reject(error);
-          } else {
-            resolve(resp!);
-          }
-        },
-      };
-
-      this.flushPendingChanges('namespace');
-    });
+    return this.queueChange('namespace', key, value);
   }
 
   public batchSetGlobal(key: string, value: any) {
-    return new Promise<UiSettingsApiResponse>((resolve, reject) => {
-      const prev = this.pendingChanges || NOOP_CHANGES;
+    return this.queueChange('global', key, value);
+  }
 
-      this.pendingChanges = {
+  private queueChange(scope: UiSettingsScope, key: string, value: any) {
+    return new Promise<UiSettingsApiResponse>((resolve, reject) => {
+      const prev = this.pendingChanges[scope] || NOOP_CHANGES;
+
+      this.pendingChanges[scope] = {
         values: {
           ...prev.values,
           [key]: value,
@@ -96,7 +79,7 @@ export class UiSettingsApi {
         },
       };
 
-      this.flushPendingChanges('global');
+      this.flushPendingChanges(scope);
     });
   }
 
@@ -127,7 +110,7 @@ export class UiSettingsApi {
    * Report back if there are pending changes waiting to be sent.
    */
   public hasPendingChanges() {
-    return !!(this.pendingChanges && this.sendInProgress);
+    return !!(this.sendInProgress && (this.pendingChanges.namespace || this.pendingChanges.global));
   }
 
   /**
@@ -139,7 +122,8 @@ export class UiSettingsApi {
    * sent to the server.
    */
   private async flushPendingChanges(scope: UiSettingsScope) {
-    if (!this.pendingChanges) {
+    const changes = this.pendingChanges[scope];
+    if (!changes) {
       return;
     }
 
@@ -147,8 +131,7 @@ export class UiSettingsApi {
       return;
     }
 
-    const changes = this.pendingChanges;
-    this.pendingChanges = undefined;
+    delete this.pendingChanges[scope];
 
     try {
       this.sendInProgress = true;
@@ -164,7 +147,8 @@ export class UiSettingsApi {
       changes.callback(error);
     } finally {
       this.sendInProgress = false;
-      this.flushPendingChanges(scope);
+      this.flushPendingChanges('namespace');
+      this.flushPendingChanges('global');
     }
   }
 

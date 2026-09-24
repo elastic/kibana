@@ -85,6 +85,32 @@ test.describe(
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Settings');
     });
 
+    test('enables the Detections tab from Settings', async ({ page, pageObjects, kbnClient }) => {
+      await page.gotoApp('significant_events/streams');
+      const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
+      await expect(tabBar).toBeVisible({ timeout: 60_000 });
+      await expect(tabBar.getByRole('tab', { name: 'Detections' })).toHaveCount(0);
+
+      await pageObjects.appMenu.clickItem('significantEventsSettingsLink');
+      await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
+
+      const developerModeSwitch = page.testSubj.locator('nightshiftDeveloperModeSwitch');
+      await expect(developerModeSwitch).toBeEnabled();
+      await expect(developerModeSwitch).not.toBeChecked();
+      await developerModeSwitch.click();
+      await expect(developerModeSwitch).toBeChecked();
+      await expect
+        .poll(() => kbnClient.uiSettings.get(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE))
+        .toBe(true);
+
+      await page.gotoApp('significant_events/streams');
+      const detectionsTab = tabBar.getByRole('tab', { name: 'Detections' });
+      await expect(detectionsTab).toBeVisible({ timeout: 60_000 });
+      await detectionsTab.click();
+      await expect(page).toHaveURL(/\/app\/significant_events\/detections/);
+      await expect(detectionsTab).toHaveAttribute('aria-selected', 'true');
+    });
+
     test('shows the not-enabled empty prompt when the feature flag is disabled', async ({
       apiServices,
       page,
