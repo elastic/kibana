@@ -126,10 +126,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_write_file',
 
   // Nightshift – Decision trees
-  'submit_optimizer_result',
-  'record_system_learning',
-  'record_tool_learning',
-  'record_remediation',
+  'nightshift_submit_optimizer_result',
+  'nightshift_record_system_learning',
+  'nightshift_record_tool_learning',
+  'nightshift_record_remediation',
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
