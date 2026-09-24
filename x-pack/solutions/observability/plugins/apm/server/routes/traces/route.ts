@@ -180,13 +180,14 @@ const unifiedTracesByIdErrorsRoute = createApmServerRoute({
       createLogsClient(resources),
     ]);
 
-    const { params } = resources;
+    const { params, logger } = resources;
     const { traceId } = params.path;
     const { start, end, docId } = params.query;
 
     const { apmErrors, unprocessedOtelErrors } = await getUnifiedTraceErrors({
       apmEventClient,
       logsClient,
+      logger,
       docId,
       traceId,
       start,

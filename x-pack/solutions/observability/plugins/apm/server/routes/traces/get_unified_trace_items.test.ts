@@ -374,6 +374,7 @@ describe('getUnifiedTraceItems', () => {
       expect(getUnifiedTraceErrors).toHaveBeenCalledWith({
         apmEventClient: mockApmEventClient,
         logsClient: mockLogsClient,
+        logger: mockLogger,
         traceId: 'test-trace-id',
         start: 0,
         end: 1000,

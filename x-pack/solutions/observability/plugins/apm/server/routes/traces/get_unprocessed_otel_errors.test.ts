@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   AT_TIMESTAMP,
   EXCEPTION_MESSAGE,
@@ -40,9 +41,16 @@ function createLogsClientMock(hits: Hit[]): LogsClient {
 }
 
 describe('getUnprocessedOtelErrors', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
   function callGetUnprocessedOtelErrors(hits: Hit[]) {
     return getUnprocessedOtelErrors({
       logsClient: createLogsClientMock(hits),
+      logger,
       traceId: 'trace-1',
       start: 0,
       end: 1000,
@@ -51,6 +59,7 @@ describe('getUnprocessedOtelErrors', () => {
 
   it('returns an empty array when there are no hits', async () => {
     await expect(callGetUnprocessedOtelErrors([])).resolves.toEqual([]);
+    expect(logger.debug).not.toHaveBeenCalled();
   });
 
   it('maps a document that has all the required fields', async () => {
@@ -75,6 +84,7 @@ describe('getUnprocessedOtelErrors', () => {
         index: 'logs-generic.otel-default',
       },
     ]);
+    expect(logger.debug).not.toHaveBeenCalled();
   });
 
   it('derives the timestamp from @timestamp when timestamp.us is missing', async () => {
@@ -85,14 +95,18 @@ describe('getUnprocessedOtelErrors', () => {
     expect(errors[0].timestamp).toEqual({ us: 1672531200000000 });
   });
 
-  it('skips a document without fields instead of throwing', async () => {
+  it('skips a document without fields and logs at debug', async () => {
     await expect(
       callGetUnprocessedOtelErrors([{ _id: 'error-1', _index: 'logs-generic.otel-default' }])
     ).resolves.toEqual([]);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('[get_unprocessed_otel_errors] Skipping document id [error-1]')
+    );
   });
 
   it.each([SERVICE_NAME, AT_TIMESTAMP])(
-    'skips a document missing %s instead of throwing',
+    'skips a document missing %s and logs at debug',
     async (missingField) => {
       const fields = omit(validFields, missingField);
 
@@ -101,6 +115,8 @@ describe('getUnprocessedOtelErrors', () => {
           { _id: 'error-1', _index: 'logs-generic.otel-default', fields },
         ])
       ).resolves.toEqual([]);
+
+      expect(logger.debug).toHaveBeenCalled();
     }
   );
 
@@ -115,6 +131,7 @@ describe('getUnprocessedOtelErrors', () => {
 
     expect(errors).toHaveLength(1);
     expect(errors[0].span).toBeUndefined();
+    expect(logger.debug).not.toHaveBeenCalled();
   });
 
   it('returns the valid documents and skips the malformed ones', async () => {
@@ -139,5 +156,6 @@ describe('getUnprocessedOtelErrors', () => {
 
     expect(errors.map((error) => error.id)).toEqual(['error-2', 'error-4']);
     expect(errors.map((error) => error.service?.name)).toEqual(['my-service', 'another-service']);
+    expect(logger.debug).toHaveBeenCalledTimes(2);
   });
 });
