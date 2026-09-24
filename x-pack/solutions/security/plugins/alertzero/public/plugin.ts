@@ -27,6 +27,7 @@ import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
   type RenderAssignees,
+  type RenderLinkedInvestigations,
 } from '@kbn/agentic-investigations-common';
 import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { getAlertZeroDeepLinks } from './deep_links';
@@ -184,6 +185,18 @@ export class AlertZeroPublicPlugin
       >;
     });
 
+    // ---------------------------------------------------------------------------
+    // Linked investigations list (escalation flyout overview tab body)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedLinkedInvestigations = makeLazyWithProviders(async () => {
+      const { ConnectedLinkedInvestigations } = await import(
+        './components/connected_linked_investigations/connected_linked_investigations'
+      );
+      return ConnectedLinkedInvestigations as React.ComponentType<
+        React.ComponentProps<typeof ConnectedLinkedInvestigations>
+      >;
+    });
+
     const { manageEscalations: canManageEscalations } = getAgenticInvestigationsCapabilities(
       core.application.capabilities
     );
@@ -196,6 +209,16 @@ export class AlertZeroPublicPlugin
         EscalationModalBoundary,
         null,
         React.createElement(LazyConnectedAssignees, props)
+      );
+
+    // ---------------------------------------------------------------------------
+    // renderLinkedInvestigations render prop — escalation overview tab
+    // ---------------------------------------------------------------------------
+    const renderLinkedInvestigations: RenderLinkedInvestigations = (props) =>
+      React.createElement(
+        EscalationModalBoundary,
+        null,
+        React.createElement(LazyConnectedLinkedInvestigations, props)
       );
 
     registerAgenticInvestigationTemplateUI({
@@ -220,6 +243,7 @@ export class AlertZeroPublicPlugin
       name: ESCALATION_TEMPLATE_NAME,
       icon: 'warning',
       renderAssignees,
+      renderLinkedInvestigations,
     });
 
     return {};
