@@ -115,7 +115,6 @@ export async function getUnifiedTraceItems({
     getUnifiedTraceErrors({
       apmEventClient,
       logsClient,
-      logger,
       traceId,
       start,
       end,
