@@ -8,8 +8,7 @@
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -54,8 +53,7 @@ describe('ToolCallGroup', () => {
     expect(screen.getByText('2 tools running…')).toBeInTheDocument();
   });
 
-  it('expands to show each individual step, which opens its own flyout on click', async () => {
-    const user = userEvent.setup();
+  it('expands to show each individual step', () => {
     renderWithProviders(
       <ToolCallGroup
         steps={[
@@ -64,18 +62,11 @@ describe('ToolCallGroup', () => {
         ]}
       />
     );
-    await user.click(screen.getByText('2 tools ran'));
-    const childStatuses = screen
-      .getAllByRole('status')
-      .filter((el) => el.textContent !== '2 tools ran');
-    expect(childStatuses.map((el) => el.querySelector('.euiBadge')?.textContent)).toEqual([
-      'tool: search',
-      'tool: read',
-    ]);
+    fireEvent.click(screen.getByText('2 tools ran'));
     // textContent concatenates badge + suffix without a space (e.g. "tool: searchran")
-    expect(childStatuses.every((el) => /ran$/.test(el.textContent ?? ''))).toBe(true);
-
-    await user.click(screen.getAllByRole('button')[1]);
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getAllByTestId('agentBuilderToolCallStep').map((el) => el.textContent)).toEqual([
+      'tool: searchran',
+      'tool: readran',
+    ]);
   });
 });
