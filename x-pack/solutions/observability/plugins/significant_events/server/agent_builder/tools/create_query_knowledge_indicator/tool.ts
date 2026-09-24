@@ -17,7 +17,7 @@ import type { Logger } from '@kbn/core/server';
 import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
 import { MAX_ID_LENGTH, upsertStreamQueryRequestSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -53,7 +53,7 @@ export function createQueryKnowledgeIndicatorTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof createQueryKnowledgeIndicatorSchema> {

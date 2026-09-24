@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { i18n } from '@kbn/i18n';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('remote clusters', () => {
-    loadTestFile(require.resolve('./remote_clusters'));
+export const MAX_CASES_TOOLTIP = (max: number): string =>
+  i18n.translate('xpack.cases.actions.runWorkflow.maxCasesTooltip', {
+    defaultMessage: 'Select {max} or fewer cases to run a workflow.',
+    values: { max },
   });
-}
