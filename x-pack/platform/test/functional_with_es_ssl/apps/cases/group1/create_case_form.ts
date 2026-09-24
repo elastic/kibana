@@ -170,6 +170,9 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('appHeaderTitle');
 
+        // The legacy custom fields accordion is closed by default; open it before asserting.
+        await testSubjects.click('case-view-sidebar-legacy-custom-fields-toggle');
+
         // validate custom fields
         const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
 
@@ -220,6 +223,9 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
 
         await testSubjects.existOrFail('appHeaderTitle');
+
+        // The legacy custom fields accordion is closed by default; open it before asserting.
+        await testSubjects.click('case-view-sidebar-legacy-custom-fields-toggle');
 
         // validate custom fields
         const textCustomField = await testSubjects.find(
