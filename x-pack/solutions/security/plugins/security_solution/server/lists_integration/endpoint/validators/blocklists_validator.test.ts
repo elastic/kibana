@@ -151,6 +151,12 @@ describe('Blocklists API validations', () => {
       );
     });
 
+    it('rejects a nested signer match_any whose members all trim to empty', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(signerEntry([' ', '\t'])))
+      ).rejects.toThrow(/array size is \[0\]/);
+    });
+
     it('rejects a nested match_any null character on update', async () => {
       await expect(
         validator.validatePreUpdateItem(

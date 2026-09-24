@@ -107,6 +107,7 @@ const WindowsSignerEntrySchema = schema.object({
         schema.literal('match'),
         schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }),
         schema.arrayOf(schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }), {
+          minSize: 1,
           maxSize: 2000,
         })
       ),
