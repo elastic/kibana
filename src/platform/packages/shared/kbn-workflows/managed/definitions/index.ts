@@ -222,7 +222,7 @@ export const managedWorkflowDefinitions = [
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW,
   // Threat intel supply workflows are FF-off safe: registry membership only
   // makes a definition discoverable by id. security_solution installs them
-  // in start() only when `threatIntelSupplyEnabled` is on.
+  // in start() only when `xpack.alertzero.enabled` is on.
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW,
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW,

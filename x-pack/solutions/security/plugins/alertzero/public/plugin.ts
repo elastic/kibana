@@ -84,7 +84,7 @@ export class AlertZeroPublicPlugin
     _setupDeps: AlertZeroSetupDependencies
   ): AlertZeroPublicSetup {
     if (!this.config.enabled) {
-      return {};
+      return { enabled: false };
     }
 
     coreSetup.application.register({
@@ -111,7 +111,7 @@ export class AlertZeroPublicPlugin
       },
     });
 
-    return {};
+    return { enabled: true };
   }
 
   public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
