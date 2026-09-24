@@ -97,6 +97,37 @@ export const getModelMetadata = (
   return undefined;
 };
 
+const mergeModelMetadata = (
+  current: EisInferenceEndpointMetadata | undefined,
+  incoming: EisInferenceEndpointMetadata | undefined
+): EisInferenceEndpointMetadata | undefined => {
+  if (!incoming) {
+    return current;
+  }
+  if (!current) {
+    return incoming;
+  }
+
+  const currentHeuristics = current.heuristics;
+  const incomingHeuristics = incoming.heuristics;
+  const releaseDate = currentHeuristics?.release_date ?? incomingHeuristics?.release_date;
+  const endOfLifeDate = currentHeuristics?.end_of_life_date ?? incomingHeuristics?.end_of_life_date;
+  const releaseUnchanged = releaseDate === currentHeuristics?.release_date;
+  const endOfLifeUnchanged = endOfLifeDate === currentHeuristics?.end_of_life_date;
+  if (releaseUnchanged && endOfLifeUnchanged) {
+    return current;
+  }
+
+  return {
+    ...current,
+    heuristics: {
+      ...currentHeuristics,
+      ...(releaseDate ? { release_date: releaseDate } : {}),
+      ...(endOfLifeDate ? { end_of_life_date: endOfLifeDate } : {}),
+    },
+  };
+};
+
 export const getModelStatus = (
   metadata: EisInferenceEndpointMetadata | undefined
 ): EisModelStatus => {
@@ -153,9 +184,10 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
       if (isInferenceEndpointWithDisplayCreatorMetadata(ep)) {
         existing.modelCreator = ep.metadata.display.model_creator;
       }
-      if (!existing.modelMetadata && isInferenceEndpointWithMetadata(ep)) {
-        existing.modelMetadata = ep.metadata;
-        existing.modelStatus = getModelStatus(ep.metadata);
+      const mergedMetadata = mergeModelMetadata(existing.modelMetadata, getModelMetadata(ep));
+      if (mergedMetadata !== existing.modelMetadata) {
+        existing.modelMetadata = mergedMetadata;
+        existing.modelStatus = getModelStatus(mergedMetadata);
       }
     } else {
       const cat = TASK_TYPE_CATEGORY[ep.task_type];
