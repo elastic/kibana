@@ -168,7 +168,7 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('severity == "critical", 4');
     expect(queryString).toContain('severity == "info", 0');
     expect(queryString).toContain(', -1)');
-    expect(queryString).toContain('SORT _severity_sort DESC');
+    expect(queryString).toContain('SORT _severity_sort DESC, @timestamp DESC');
   });
 
   it('should filter on episode.status when a single status filter is set', () => {
@@ -377,6 +377,18 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain('WHERE (severity IN ("high")) OR severity IS NULL');
+  });
+
+  it('should exclude all v2 rows when only v1-only severity values are selected', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['warning'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE FALSE');
+    expect(queryString).not.toContain('severity IN');
   });
 
   it('should trim queryString before applying', () => {
