@@ -31,13 +31,13 @@ import { useDeleteObservable } from '../../containers/use_delete_observables';
 import { RunCaseWorkflowModal } from '../workflows/run_case_workflow_modal';
 import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_executor';
 import {
-  createCaseWorkflowFilter,
-  createCaseWorkflowComparator,
+  untaggedCaseWorkflowFilter,
+  untaggedCaseWorkflowComparator,
 } from '../workflows/use_run_case_workflow';
 import { OBSERVABLE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 
-/** Stable empty array for workflow tag filtering (pass-through: all workflows shown). */
-const NO_WORKFLOW_TAGS: readonly string[] = [];
+/** The Cases API derives the workflow event from the origin, so no client inputs are sent. */
+const WORKFLOW_INPUTS: Record<string, unknown> = {};
 
 export interface ObservableActionsPopoverButtonProps {
   caseData: CaseUI;
@@ -85,9 +85,6 @@ export const ObservableActionsPopoverButton: React.FC<ObservableActionsPopoverBu
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
-  const filterWorkflow = useMemo(() => createCaseWorkflowFilter(NO_WORKFLOW_TAGS), []);
-  const sortWorkflow = useMemo(() => createCaseWorkflowComparator(NO_WORKFLOW_TAGS), []);
-  const inputs = useMemo(() => ({}), []);
 
   const tooglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -192,10 +189,10 @@ export const ObservableActionsPopoverButton: React.FC<ObservableActionsPopoverBu
       )}
       {showRunWorkflowModal && (
         <RunCaseWorkflowModal
-          inputs={inputs}
+          inputs={WORKFLOW_INPUTS}
           runWorkflow={runWorkflow}
-          filterWorkflow={filterWorkflow}
-          sortWorkflow={sortWorkflow}
+          filterWorkflow={untaggedCaseWorkflowFilter}
+          sortWorkflow={untaggedCaseWorkflowComparator}
           onClose={() => setShowRunWorkflowModal(false)}
           focusButtonRef={buttonRef}
         />

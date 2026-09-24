@@ -23,6 +23,7 @@ import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
 
+const GENERIC_RUN_PROPS = { runWorkflow: undefined, showSuccessToast: true };
 const mockUseCaseAttachmentWorkflowRun = jest.fn();
 jest.mock('@kbn/cases-plugin/public', () => ({
   useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
@@ -163,7 +164,7 @@ const renderContextMenu = (
 describe('useRunAlertWorkflowPanel', () => {
   beforeEach(() => {
     mockRunWorkflowPanelProps.length = 0;
-    mockUseCaseAttachmentWorkflowRun.mockReturnValue(undefined);
+    mockUseCaseAttachmentWorkflowRun.mockReturnValue(GENERIC_RUN_PROPS);
     mockUseRunWorkflow.mockReturnValue({ mutate: mockMutate });
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
@@ -304,7 +305,7 @@ describe('useRunAlertWorkflowPanel', () => {
     });
 
     it('passes runWorkflow as undefined when outside a case (falls back to generic Workflows API)', async () => {
-      mockUseCaseAttachmentWorkflowRun.mockReturnValue(undefined);
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue(GENERIC_RUN_PROPS);
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
@@ -322,7 +323,10 @@ describe('useRunAlertWorkflowPanel', () => {
 
     it('passes the Cases executor as runWorkflow when inside a case', async () => {
       const mockExecutor = jest.fn();
-      mockUseCaseAttachmentWorkflowRun.mockReturnValue(mockExecutor);
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
+        runWorkflow: mockExecutor,
+        showSuccessToast: false,
+      });
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
@@ -349,7 +353,7 @@ describe('useRunAlertWorkflowPanel', () => {
       await waitFor(() => {
         expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
           attachmentType: 'security.alert',
-          attachmentId: 'alert-123',
+          target: { attachmentId: 'alert-123' },
         });
       });
     });
@@ -369,7 +373,7 @@ describe('useRunAlertWorkflowPanel', () => {
       await waitFor(() => {
         expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
           attachmentType: 'security.alert',
-          attachmentIds: ['alert-1', 'alert-2'],
+          target: { attachmentIds: ['alert-1', 'alert-2'] },
         });
       });
     });

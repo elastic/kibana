@@ -13,15 +13,15 @@ import type { CaseUI } from '../../containers/types';
 import { OBSERVABLES_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_executor';
 import {
-  createCaseWorkflowFilter,
-  createCaseWorkflowComparator,
+  untaggedCaseWorkflowFilter,
+  untaggedCaseWorkflowComparator,
 } from '../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../workflows/run_case_workflow_modal';
 import * as i18n from './translations';
 import * as workflowI18n from '../workflows/translations';
 
-/** Stable empty array for workflow tag filtering (pass-through: all workflows shown). */
-const NO_WORKFLOW_TAGS: readonly string[] = [];
+/** The Cases API derives the workflow event from the origin, so no client inputs are sent. */
+const WORKFLOW_INPUTS: Record<string, unknown> = {};
 
 export interface ObservablesBulkActionsProps {
   caseData: CaseUI;
@@ -54,9 +54,6 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
-  const filterWorkflow = useMemo(() => createCaseWorkflowFilter(NO_WORKFLOW_TAGS), []);
-  const sortWorkflow = useMemo(() => createCaseWorkflowComparator(NO_WORKFLOW_TAGS), []);
-  const inputs = useMemo(() => ({}), []);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
     () => [
@@ -86,7 +83,7 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
     <>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued" data-test-subj="cases-observables-selected-count">
-          {i18n.SHOWING_SELECTED_OBSERVABLES(selectedObservables.length)}
+          {i18n.SELECTED_OBSERVABLES(selectedObservables.length)}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -118,10 +115,10 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
       </EuiFlexItem>
       {showRunWorkflowModal && (
         <RunCaseWorkflowModal
-          inputs={inputs}
+          inputs={WORKFLOW_INPUTS}
           runWorkflow={runWorkflow}
-          filterWorkflow={filterWorkflow}
-          sortWorkflow={sortWorkflow}
+          filterWorkflow={untaggedCaseWorkflowFilter}
+          sortWorkflow={untaggedCaseWorkflowComparator}
           onClose={() => setShowRunWorkflowModal(false)}
         />
       )}

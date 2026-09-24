@@ -190,10 +190,10 @@ export const DEFAULT_OBSERVABLE_TYPES_MODAL_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SHOWING_SELECTED_OBSERVABLES = (count: number) =>
-  i18n.translate('xpack.cases.caseView.observables.showingSelectedObservables', {
+export const SELECTED_OBSERVABLES = (count: number) =>
+  i18n.translate('xpack.cases.caseView.observables.selectedObservables', {
     values: { count },
-    defaultMessage: 'Showing {count} selected {count, plural, =1 {observable} other {observables}}',
+    defaultMessage: '{count} selected',
   });
 
 export const BULK_ACTIONS = i18n.translate('xpack.cases.caseView.observables.bulkActions', {

@@ -66,11 +66,12 @@ export const AlertWorkflowsPanel = ({
   // is authorized, audited, and recorded in the case activity feed. The panel falls back to its
   // built-in executor (generic Workflows API) when `runWorkflow` is undefined.
   const selectedAlertIds = useMemo(() => alertIds.map(({ _id }) => _id), [alertIds]);
-  const caseRunWorkflow = useCaseAttachmentWorkflowRun({
+  const caseRunProps = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
-    ...(originAlertId !== undefined
-      ? { attachmentId: originAlertId }
-      : { attachmentIds: selectedAlertIds }),
+    target:
+      originAlertId !== undefined
+        ? { attachmentId: originAlertId }
+        : { attachmentIds: selectedAlertIds },
   });
 
   const inputs = useMemo(
@@ -86,8 +87,7 @@ export const AlertWorkflowsPanel = ({
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      runWorkflow={caseRunWorkflow}
-      showSuccessToast={caseRunWorkflow === undefined}
+      {...caseRunProps}
       visibility={ALERT_WORKFLOW_VISIBILITY}
       sortWorkflow={sortAlertWorkflow}
       filterWorkflow={isAlertWorkflow}

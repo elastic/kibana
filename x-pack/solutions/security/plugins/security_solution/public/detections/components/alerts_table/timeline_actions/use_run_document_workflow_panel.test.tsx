@@ -22,7 +22,10 @@ import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_re
 import * as i18n from '../translations';
 
 const mockCaseRunWorkflow = jest.fn();
-const mockUseCaseAttachmentWorkflowRun: jest.Mock = jest.fn(() => mockCaseRunWorkflow);
+const mockUseCaseAttachmentWorkflowRun: jest.Mock = jest.fn(() => ({
+  runWorkflow: mockCaseRunWorkflow,
+  showSuccessToast: false,
+}));
 
 jest.mock('@kbn/cases-plugin/public', () => ({
   useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
@@ -179,7 +182,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       await waitFor(() => {
         expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
           attachmentType: 'security.event',
-          attachmentId: 'event-123',
+          target: { attachmentId: 'event-123' },
         });
       });
     });
@@ -195,7 +198,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       await waitFor(() => {
         expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
           attachmentType: 'security.event',
-          attachmentId: undefined,
+          target: undefined,
         });
       });
     });
@@ -217,8 +220,11 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(panelProps?.showSuccessToast).toBe(false);
     });
 
-    it('passes undefined as runWorkflow when the attachment hook returns undefined', async () => {
-      mockUseCaseAttachmentWorkflowRun.mockReturnValueOnce(undefined);
+    it('passes undefined as runWorkflow when the attachment hook has no Cases executor', async () => {
+      mockUseCaseAttachmentWorkflowRun.mockReturnValueOnce({
+        runWorkflow: undefined,
+        showSuccessToast: true,
+      });
       const { result } = renderHook(
         () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
         { wrapper: TestProviders }

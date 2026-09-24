@@ -45,7 +45,11 @@ export type {
 export { AttachmentActionType, defineAttachment } from './client/attachment_framework/types';
 export { useCasesContext } from './components/cases_context/use_cases_context';
 export { useCaseAttachmentWorkflowRun } from './components/workflows/use_case_attachment_workflow_run';
-export type { UseCaseAttachmentWorkflowRunParams } from './components/workflows/use_case_attachment_workflow_run';
+export type {
+  CaseAttachmentWorkflowRunProps,
+  CaseAttachmentWorkflowTarget,
+  UseCaseAttachmentWorkflowRunParams,
+} from './components/workflows/use_case_attachment_workflow_run';
 export { ShowTableButton } from './components/attachments/common/show_table_button';
 export type {
   CasesTimelineIntegration,
