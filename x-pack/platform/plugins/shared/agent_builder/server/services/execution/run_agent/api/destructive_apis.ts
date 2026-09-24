@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { partition } from 'lodash';
 import type { AutoApprovedApi } from '@kbn/agent-builder-common';
 import { isApiWildcardSelector } from '@kbn/agent-builder-common/apis/known_apis';
 import { loadApi } from './load_api';
@@ -18,16 +19,15 @@ export interface DestructiveApiPartition {
  * Splits pre-approval selectors by whether they can reach an operation that changes state.
  *
  * @param apis - Target and selector pairs to split, in caller order.
- * @returns The selectors to keep and the read-only identifiers to drop, each preserving input order.
+ * @returns The selectors to keep, wildcards ahead of exact identifiers, and the read-only
+ * identifiers to drop. Each group preserves input order.
  */
 export const partitionDestructiveApis = async (
   apis: readonly AutoApprovedApi[]
 ): Promise<DestructiveApiPartition> => {
+  const [wildcards, identifiers] = partition(apis, ({ api }) => isApiWildcardSelector(api));
   const classified = await Promise.all(
-    apis.map(async (entry) => {
-      if (isApiWildcardSelector(entry.api)) {
-        return { entry, destructive: true };
-      }
+    identifiers.map(async (entry) => {
       const result = await loadApi(entry.target, entry.api);
       return {
         entry,
@@ -37,7 +37,10 @@ export const partitionDestructiveApis = async (
   );
 
   return {
-    destructive: classified.filter((item) => item.destructive).map(({ entry }) => entry),
+    destructive: [
+      ...wildcards,
+      ...classified.filter((item) => item.destructive).map(({ entry }) => entry),
+    ],
     nonDestructive: classified.filter((item) => !item.destructive).map(({ entry }) => entry),
   };
 };

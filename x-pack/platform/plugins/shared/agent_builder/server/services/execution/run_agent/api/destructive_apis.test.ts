@@ -48,6 +48,20 @@ describe('partitionDestructiveApis', () => {
     expect(nonDestructive).toEqual([]);
   });
 
+  it('lists wildcards ahead of the state-changing identifiers requested alongside them', async () => {
+    const { destructive, nonDestructive } = await partitionDestructiveApis([
+      { target: 'elasticsearch', api: 'indices.delete' },
+      { target: 'elasticsearch', api: 'indices.get' },
+      { target: 'kibana', api: 'alerting.*' },
+    ]);
+
+    expect(destructive).toEqual([
+      { target: 'kibana', api: 'alerting.*' },
+      { target: 'elasticsearch', api: 'indices.delete' },
+    ]);
+    expect(nonDestructive).toEqual([{ target: 'elasticsearch', api: 'indices.get' }]);
+  });
+
   it('keeps an identifier it cannot load, so a registry failure never narrows a grant', async () => {
     const { destructive, nonDestructive } = await partitionDestructiveApis([
       { target: 'elasticsearch', api: 'indices.does-not-exist' },
