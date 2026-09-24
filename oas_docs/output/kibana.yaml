@@ -45488,6 +45488,12 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      policyIdsByInstance:
+                        additionalProperties:
+                          maxLength: 255
+                          type: string
+                        description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                        type: object
                       provider:
                         description: Cloud provider.
                         enum:
@@ -45804,6 +45810,12 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      policyIdsByInstance:
+                        additionalProperties:
+                          maxLength: 255
+                          type: string
+                        description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                        type: object
                       provider:
                         description: Cloud provider.
                         enum:
@@ -45949,6 +45961,17 @@ paths:
                   description: Incremented by callers performing a retry.
                   minimum: 1
                   type: number
+                authMethod:
+                  enum:
+                    - identity_federation
+                    - static_keys
+                    - null
+                  nullable: true
+                  type: string
+                connectorId:
+                  maxLength: 255
+                  nullable: true
+                  type: string
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
                   maxLength: 2048
@@ -45985,11 +46008,36 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                mechanisms:
+                  description: Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.
+                  items:
+                    description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                    enum:
+                      - managed_integration
+                      - ecf
+                      - agent_based
+                    type: string
+                  maxItems: 10
+                  type: array
                 packagePolicyIds:
                   items:
                     maxLength: 255
                     type: string
                   maxItems: 100
+                  type: array
+                policyIdsByInstance:
+                  additionalProperties:
+                    maxLength: 255
+                    type: string
+                  type: object
+                services:
+                  description: Updated service list. Replaces the stored services array.
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  maxItems: 1000
+                  minItems: 1
                   type: array
                 serviceVars:
                   additionalProperties:
@@ -46122,6 +46170,12 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      policyIdsByInstance:
+                        additionalProperties:
+                          maxLength: 255
+                          type: string
+                        description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                        type: object
                       provider:
                         description: Cloud provider.
                         enum:
@@ -46364,6 +46418,12 @@ paths:
                             type: string
                           maxItems: 100
                           type: array
+                        policyIdsByInstance:
+                          additionalProperties:
+                            maxLength: 255
+                            type: string
+                          description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                          type: object
                         provider:
                           description: Cloud provider.
                           enum:

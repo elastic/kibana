@@ -38,7 +38,6 @@ describe('FetchActiveGroupsStep', () => {
           query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       },
-      esql: { responseFormat: 'json' },
     };
     const pluginConfigAccessor =
       coreMock.createPluginInitializerContext<PluginConfig>(config).config;

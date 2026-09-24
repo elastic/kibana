@@ -364,17 +364,19 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
   /**
-   * The escape hatch fired but the pipeline stopped before FetchEpisodesStep so
-   * no episodes are known for the window, and watermark lag is still within one
-   * max scan window. The watermark is held; the stuck counter is reset so
-   * transient infra pressure can recover without dropping the window.
+   * The escape hatch fired but no episodes were fetched for the window (the
+   * pipeline was aborted before or during FetchEpisodesStep, or the scan query
+   * was rejected, e.g. `inline_stats_too_large`), and watermark lag is still
+   * within one max scan window. The watermark is held; the stuck counter is
+   * reset so the scan can recover without dropping the window. The message
+   * carries the tick's `halt_reason`.
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK',
   /**
-   * The pre-fetch escape hatch fired and watermark lag already exceeds one max
-   * scan window. The window is force-advanced without knowing its episodes;
-   * unread events in that window are skipped so the dispatcher cannot stall
-   * indefinitely.
+   * The escape hatch fired with no fetched episodes and watermark lag already
+   * exceeds one max scan window. The window is force-advanced without knowing
+   * its episodes; unread events in that window are skipped so the dispatcher
+   * cannot stall indefinitely. The message carries the tick's `halt_reason`.
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE:
     'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
@@ -383,6 +385,16 @@ export const ALERTING_LOG_CODES = {
    * call failed. The watermark is held so episodes will be retried next tick.
    */
   DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
+  /**
+   * ES rejected the INLINE STATS pre-fetch query with HTTP 400
+   * `illegal_argument_exception: sub-plan execution results too large`. This is a
+   * deterministic, non-retryable failure at the current cardinality level. The
+   * tick returns a halt (watermark held) so the existing stuck-tick counter
+   * increments; the escape hatch force-advances the watermark on its first fire
+   * after lag exceeds PRE_FETCH_STUCK_ADVANCE_LAG_MS, skipping the window. See
+   * the dispatcher README for the recovery timeline.
+   */
+  DISPATCHER_INLINE_STATS_TOO_LARGE: 'DISPATCHER_INLINE_STATS_TOO_LARGE',
 
   // ────────────────────────────── Director ───────────────────────────
   /**
@@ -479,6 +491,12 @@ export const ALERTING_LOG_CODES = {
   STORAGE_BULK_INDEX_FAILED: 'STORAGE_BULK_INDEX_FAILED',
   /** An ES|QL query issued by the plugin failed to execute. */
   QUERY_ESQL_EXECUTION_FAILED: 'QUERY_ESQL_EXECUTION_FAILED',
+  /**
+   * The `alertingV2.esqlResponseFormat` feature flag resolved to a format name
+   * that is not in the response format registry. Queries keep running on the
+   * default format; the flag's variations need correcting.
+   */
+  QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN: 'QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN',
 
   // ────────────────────────────── Resources ──────────────────────────
   /**

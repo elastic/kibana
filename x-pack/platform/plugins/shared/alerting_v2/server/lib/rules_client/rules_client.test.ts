@@ -150,7 +150,6 @@ describe('RulesClient', () => {
         },
         ...rulesConfigOverrides,
       },
-      esql: { responseFormat: 'json' },
     };
 
     const pluginConfigAccessor =

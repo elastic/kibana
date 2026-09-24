@@ -415,11 +415,6 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.nameInput));
-      await user.tab();
-      await user.click(screen.getByTestId(TEST_SUBJ.descriptionInput));
-      await user.tab();
-
       const updateButton = screen.getByTestId(TEST_SUBJ.submitButton);
       await waitFor(() => expect(updateButton).toBeEnabled());
       await user.click(updateButton);
