@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
