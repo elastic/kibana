@@ -53,11 +53,11 @@ export const alertStatusChangedEventSchema = z.object({
           }
         )
       ),
-      ruleTypeId: z.string().describe(
+      ruleTypeId: z.string().nullable().describe(
         i18n.translate(
           'xpack.alertingWorkflowTriggers.triggers.alertStatusChanged.schema.rule.ruleTypeId',
           {
-            defaultMessage: 'Rule type identifier.',
+            defaultMessage: 'Rule type identifier. Null for rule engines that do not expose this field.',
           }
         )
       ),
@@ -69,11 +69,11 @@ export const alertStatusChangedEventSchema = z.object({
           }
         )
       ),
-      ruleCategory: z.string().describe(
+      ruleCategory: z.string().nullable().describe(
         i18n.translate(
           'xpack.alertingWorkflowTriggers.triggers.alertStatusChanged.schema.rule.ruleCategory',
           {
-            defaultMessage: "Rule type display name (e.g. 'Elasticsearch query').",
+            defaultMessage: "Rule type display name (e.g. 'Elasticsearch query'). Null for rule engines that do not expose this field.",
           }
         )
       ),
@@ -85,21 +85,21 @@ export const alertStatusChangedEventSchema = z.object({
     ),
   alert: z
     .object({
-      id: z.string().describe(
+      id: z.string().nullable().describe(
         i18n.translate(
           'xpack.alertingWorkflowTriggers.triggers.alertStatusChanged.schema.alert.id',
           {
             defaultMessage:
-              'Alert instance ID (the key the rule type uses to identify this instance).',
+              'Alert instance ID (the key the rule type uses to identify this instance). Null for rule engines that use episode-based identity.',
           }
         )
       ),
-      uuid: z.string().describe(
+      uuid: z.string().nullable().describe(
         i18n.translate(
           'xpack.alertingWorkflowTriggers.triggers.alertStatusChanged.schema.alert.uuid',
           {
             defaultMessage:
-              'Stable UUID for this alert instance. Matches kibana.alert.uuid in the alert document.',
+              'Stable UUID for this alert instance. Matches kibana.alert.uuid in the alert document. Null for rule engines that use episode-based identity.',
           }
         )
       ),
