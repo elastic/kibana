@@ -68,7 +68,7 @@ TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
 
 </details>
 
-Left out: 1 error (5 failures) seen only on pull request builds.
+Errors that only appeared in PR builds were excluded.
 
 #### Failures by Branch
 

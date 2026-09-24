@@ -371,9 +371,7 @@ describe('renderFlakySuiteIssueBody', () => {
     );
     // the pull-request-only error is counted, not shown
     expect(body).not.toContain('Cannot read properties of undefined');
-    expect(body).toContain(
-      '</details>\n\nLeft out: 1 error (5 failures) seen only on pull request builds.'
-    );
+    expect(body).toContain('</details>\n\nErrors that only appeared in PR builds were excluded.');
   });
 
   it('says so when every error was seen on pull request builds only', () => {
@@ -386,7 +384,7 @@ describe('renderFlakySuiteIssueBody', () => {
       }),
     ]);
     expect(renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report })).toContain(
-      '### Failures\n\n#### Failures by Error Message\n\nLeft out: 2 errors (63 failures) seen only on pull request builds.\n\n#### Failures by Branch'
+      '### Failures\n\n#### Failures by Error Message\n\nErrors that only appeared in PR builds were excluded.\n\n#### Failures by Branch'
     );
   });
 

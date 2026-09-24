@@ -467,8 +467,8 @@ const isPullRequestOnly = (error: SuiteError): boolean =>
 
 /**
  * The suite's distinct errors over the window, most failures first, at most `MAX_ERRORS` shown.
- * Errors seen only on pull request builds are left out and counted, so the section says what the
- * suite does on real branches.
+ * Errors seen only on pull request builds are left out, and the section says so, so that it
+ * describes what the suite does on real branches.
  */
 const failuresByErrorMessage = (suite: FlakySuite): string => {
   const all = suiteErrors(suite);
@@ -476,13 +476,9 @@ const failuresByErrorMessage = (suite: FlakySuite): string => {
     return 'No failure messages were recorded for this suite.';
   }
   const errors = all.filter((error) => !isPullRequestOnly(error));
-  const pullRequestOnly = all.filter(isPullRequestOnly);
   const leftOut =
-    pullRequestOnly.length > 0
-      ? `Left out: ${plural(pullRequestOnly.length, 'error')} (${plural(
-          pullRequestOnly.reduce((sum, error) => sum + error.failures, 0),
-          'failure'
-        )}) seen only on pull request builds.`
+    errors.length < all.length
+      ? 'Errors that only appeared in PR builds were excluded.'
       : undefined;
   if (errors.length === 0) {
     return ['#### Failures by Error Message', leftOut].join('\n\n');
