@@ -20,9 +20,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     overview: i18n.translate('xpack.alertzero.detailsFlyout.sections.situation', {
       defaultMessage: "What's happened",
     }),
-    impact: i18n.translate('xpack.alertzero.detailsFlyout.sections.impact', {
-      defaultMessage: 'Impact',
-    }),
     conclusion: i18n.translate('xpack.alertzero.detailsFlyout.sections.conclusion', {
       defaultMessage: 'Conclusion',
     }),
@@ -43,25 +40,10 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     triggerAlert: i18n.translate('xpack.alertzero.detailsFlyout.overview.triggerAlert', {
       defaultMessage: 'Trigger · Alert',
     }),
-    fieldColumn: i18n.translate('xpack.alertzero.detailsFlyout.overview.fieldColumn', {
-      defaultMessage: 'Field',
-    }),
-    tableCaption: i18n.translate('xpack.alertzero.detailsFlyout.tabs.tableCaption', {
-      defaultMessage: 'Conversation overview tabs',
-    }),
-    valueColumn: i18n.translate('xpack.alertzero.detailsFlyout.overview.valueColumn', {
-      defaultMessage: 'Value',
-    }),
-    compromised: i18n.translate('xpack.alertzero.detailsFlyout.overview.compromised', {
-      defaultMessage: 'Compromised',
-    }),
-    severity: i18n.translate('xpack.alertzero.detailsFlyout.overview.severity', {
-      defaultMessage: 'Severity',
-    }),
   },
   actions: {
     openChat: i18n.translate('xpack.alertzero.detailsFlyout.actions.openChat', {
-      defaultMessage: 'Open in chat',
+      defaultMessage: 'Open chat',
     }),
     openCase: i18n.translate('xpack.alertzero.detailsFlyout.actions.openCase', {
       defaultMessage: 'Open a case',
