@@ -16,6 +16,7 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
+import { getAgentPolicySavedObjectType } from '../agent_policy';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
@@ -24,7 +25,7 @@ import {
   removeVersionSuffixFromPolicyId,
   buildPolicyBaseIdsWithFallbackEsFilter,
 } from '../../../common/services/version_specific_policies_utils';
-import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENTS_INDEX } from '../../constants';
 import {
   FleetError,
   isESClientError,
@@ -286,8 +287,13 @@ export async function getAgentsByKuery(
   // in other spaces, leaving their agents in the list. Without spaceId '*', the namespaces
   // filter defaults to the caller's space and excludes cross-space policies.
   //
-  // fetchAllAgentPolicyIds is used (rather than a single list() call) so that deployments with
-  // more than SO_SEARCH_LIMIT agentless policies across all spaces are not silently truncated.
+  // fetchAllAgentPolicyIds paginates through all results so deployments with more than
+  // SO_SEARCH_LIMIT agentless policies across spaces are not silently truncated. Collection
+  // is capped at ES_MAX_TERMS_COUNT (the Elasticsearch index.max_terms_count default) because
+  // buildPolicyBaseIdsWithFallbackEsFilter puts the array in a terms query; exceeding the limit
+  // would make showAgentless=false requests fail with an ES error. If the cap is hit the
+  // remaining agentless agents will not be filtered — the warning log makes this observable.
+  const ES_MAX_TERMS_COUNT = 65536;
   let agentlessExcludeFilter: ReturnType<typeof buildPolicyBaseIdsWithFallbackEsFilter> | null =
     null;
   if (showAgentless === false) {
@@ -297,12 +303,31 @@ export async function getAgentsByKuery(
       internalSoClientWithoutSpaceExtension,
       {
         spaceId: '*',
-        kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
+        kuery: `${await getAgentPolicySavedObjectType()}.supports_agentless:true`,
       }
     );
     const agentlessPolicyIds: string[] = [];
+    let truncated = false;
     for await (const pageOfIds of agentlessPolicyIdPages) {
-      agentlessPolicyIds.push(...pageOfIds);
+      const remaining = ES_MAX_TERMS_COUNT - agentlessPolicyIds.length;
+      if (remaining <= 0) {
+        truncated = true;
+        break;
+      }
+      agentlessPolicyIds.push(...pageOfIds.slice(0, remaining));
+      if (agentlessPolicyIds.length >= ES_MAX_TERMS_COUNT) {
+        truncated = true;
+        break;
+      }
+    }
+    if (truncated) {
+      appContextService
+        .getLogger()
+        .warn(
+          `showAgentless=false: found more than ${ES_MAX_TERMS_COUNT} agentless policies across all spaces. ` +
+            `Only the first ${ES_MAX_TERMS_COUNT} are excluded from the agents list; agentless agents ` +
+            `enrolled against the remaining policies will not be filtered.`
+        );
     }
     if (agentlessPolicyIds.length > 0) {
       // Use the policy_base_id-with-fallback ES DSL filter so agents whose policy_id carries a

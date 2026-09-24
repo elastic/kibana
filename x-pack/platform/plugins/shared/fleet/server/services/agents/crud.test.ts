@@ -48,6 +48,7 @@ jest.mock('../agent_policy', () => ({
     // fetchAllAgentPolicyIds returns an AsyncIterable<string[]>; default to empty.
     fetchAllAgentPolicyIds: jest.fn().mockResolvedValue((async function* () {})()),
   },
+  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('fleet-agent-policies'),
 }));
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeAvailable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
@@ -853,6 +854,27 @@ describe('Agents CRUD test', () => {
         expect(query.bool.must_not).toEqual([
           buildPolicyBaseIdsWithFallbackEsFilter(crossSpacePolicyIds),
         ]);
+      });
+
+      it('exhausts all pages from fetchAllAgentPolicyIds — policy on page 2 is still excluded', async () => {
+        // A single-page mock cannot catch regressions where only the first page is consumed.
+        // This test yields a policy ID only on the second page and asserts it still reaches
+        // the must_not filter, proving the for-await loop drains all pages.
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+          (async function* () {
+            yield ['policy-page-1'];
+            yield ['policy-page-2-only'];
+          })()
+        );
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        const queryStr = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
+        expect(queryStr).toContain('policy-page-1');
+        expect(queryStr).toContain('policy-page-2-only');
       });
 
       it('adds no exclusion clause when there are no agentless policies', async () => {
