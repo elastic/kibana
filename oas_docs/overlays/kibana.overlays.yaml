@@ -112,6 +112,17 @@ actions:
         description: Workflows documentation
         url: https://www.elastic.co/docs/explore-analyze/workflows
       x-displayName: 'Workflows'
+  - target: '$.tags[?(@.name=="Universal Profiling")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Universal Profiling provides whole-system, always-on, continuous profiling with zero instrumentation.
+        Use these APIs to check whether the Elasticsearch resources Universal Profiling depends on are set up, and to set them up.
+        Universal Profiling is available on Elastic Cloud Hosted and self-managed deployments.
+      externalDocs:
+        description: Universal Profiling documentation
+        url: https://www.elastic.co/docs/solutions/observability/infra-and-hosts/universal-profiling
+      x-displayName: 'Universal Profiling'
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
