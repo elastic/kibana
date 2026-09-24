@@ -40,6 +40,7 @@ import {
   mockTimestamp,
   mappings,
   createRegistry,
+  createType,
   createDocumentMigrator,
   getMockMgetResponse,
   type TypeIdTuple,
@@ -55,6 +56,9 @@ import {
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { schema } from '@kbn/config-schema';
+
+const UPDATE_SCHEMA_TYPE = 'update-schema-type';
 
 interface ExpectedErrorResult {
   type: string;
@@ -71,6 +75,18 @@ describe('#bulkUpdate', () => {
   let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
+  const updateSchema = schema.object(
+    { title: schema.string(), count: schema.maybe(schema.number()) },
+    { unknowns: 'ignore' }
+  );
+  registry.registerType(
+    createType(UPDATE_SCHEMA_TYPE, {
+      migrations: {},
+      modelVersions: {
+        1: { changes: [], schemas: { create: updateSchema, update: updateSchema } },
+      },
+    })
+  );
   const documentMigrator = createDocumentMigrator(registry);
 
   const expectSuccess = ({ type, id }: { type: string; id: string }) => {
@@ -569,6 +585,20 @@ describe('#bulkUpdate', () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE };
         const mgetResponse = getMockMgetResponse(registry, [obj1, obj2, _obj], 'bar-namespace');
         await bulkUpdateMultiError([obj1, obj2, _obj], { namespace }, mgetResponse);
+      });
+
+      it(`returns error when update schema validation fails`, async () => {
+        const _obj = { type: UPDATE_SCHEMA_TYPE, id: 'three', attributes: { count: 'lots' } };
+        await bulkUpdateError(
+          _obj,
+          false,
+          expectErrorResult(
+            _obj,
+            createBadRequestErrorPayload(
+              '[attributes.count]: expected value of type [number] but got [string]'
+            )
+          )
+        );
       });
 
       it(`returns bulk error`, async () => {
