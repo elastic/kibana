@@ -70,3 +70,41 @@ export const HITL_EXTERNAL_CHANNELS_DESCRIPTION =
 /** Returns false only when config explicitly sets `enabled: false`. */
 export const isHitlExternalResumeEnabled = (enabled: boolean | undefined): boolean =>
   enabled !== false;
+
+export type HitlWaitStepType = 'waitForInput' | 'waitForApproval';
+
+export const isHitlWaitStepType = (stepType: string | undefined): stepType is HitlWaitStepType =>
+  stepType === 'waitForInput' || stepType === 'waitForApproval';
+
+/** Maps `with.channels` keys to Kibana connector action types for connector-id autocomplete/validation. */
+export const HITL_CHANNEL_CONNECTOR_TYPES = {
+  slack: 'slack',
+  slack_api: 'slack_api',
+} as const satisfies Record<string, string>;
+
+export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;
+
+/**
+ * Resolves the connector type for a nested HITL `with.channels.<key>.connector-id`
+ * path. Shared by YAML validation and editor autocomplete so waitForInput and
+ * waitForApproval stay in lockstep.
+ */
+export function getHitlChannelConnectorTypeFromPath(
+  path: readonly unknown[] | undefined
+): string | null {
+  if (!path || path.length === 0) {
+    return null;
+  }
+
+  const connectorIdIndex = path.lastIndexOf('connector-id');
+  if (connectorIdIndex < 2 || path[connectorIdIndex - 2] !== 'channels') {
+    return null;
+  }
+
+  const channelKey = path[connectorIdIndex - 1];
+  if (typeof channelKey !== 'string') {
+    return null;
+  }
+
+  return HITL_CHANNEL_CONNECTOR_TYPES[channelKey as HitlChannelKey] ?? null;
+}

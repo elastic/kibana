@@ -2,10 +2,7 @@
 
 Evaluation suite for [Nightshift investigations](../../plugins/nightshift_investigations).
 
-The default smoke eval checks seed data loading and score ingestion. An explicitly selected
-trace-only eval runs the real manual investigation workflow on file-based or stored questions and persists
-its report, conversation and full agent trace. Its single placeholder score is **ungraded**; it
-does not measure investigation quality or establish execution success.
+By default every eval runs, locally and in CI, as long as sandbox credentials are available. Set `NIGHTSHIFT_DATASETS` to run just one. The smoke eval checks seed data loading and score ingestion. The trace-only eval runs the real manual investigation workflow on file-based or stored questions and persists its report, conversation and full agent trace. Its single placeholder score is **ungraded**. It does not measure investigation quality or establish execution success.
 
 ## Running the suite
 
@@ -19,7 +16,7 @@ when they are already up.
 
 ### Choosing where scores are recorded
 
-The `--profile` flag decides which cluster records the run. Refer to [`--profile` in the `@kbn/evals` README](../kbn-evals/README.md#profiles) for the full list of profiles and how each one resolves its credentials. The two that matter most here:
+The `--profile` flag decides which cluster records the run. Refer to [`--profile` in the `@kbn/evals` README](../../../../platform/packages/shared/kbn-evals/README.md#profiles) for the full list of profiles and how each one resolves its credentials. The two that matter most here:
 
 | Goal                                 | Command                                                                          |
 | ------------------------------------ | -------------------------------------------------------------------------------- |
@@ -42,32 +39,66 @@ yarn start                         # Kibana on localhost:5601
 
 Either way the profile also supplies this suite's `GCS_CREDENTIALS`, read from `gcsDatasetAccessCredentials` in the profile's config — from Vault for `dev-vault`, from `config.<profile>.json` otherwise, and `node scripts/evals init` can fill it in. Export the variable by hand only when running outside a profile, as [publishing](#publishing-the-synthetic-snapshot) does.
 
-For model and judge selection, `--grep` and repetitions, see [running evals locally](../kbn-evals/README.md#11-getting-started-locally). This suite does not override any of those flags.
+For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). This suite does not override any of those flags.
 
 ## Trace-only investigations
 
-Start an external sandbox-api and its Docker backend before running this selection. Supply
-`SANDBOX_API_KEY`, `SANDBOX_CLIENT_CERT_PATH` and `SANDBOX_CLIENT_KEY_PATH`; for a private CA also
-supply `SANDBOX_CA_CERT_PATH`. `SANDBOX_API_HOST` and `SANDBOX_API_PORT` default to `localhost:9090`
-(the probe port is not the gRPC endpoint). The sandbox must accept these client certificates and
-allow sandbox-api to reach its containers. Leave sandbox-service's `WORKSPACE_SNAPSHOT_*`
-settings unset for isolated conversations. Provisioning the sandbox is a separate follow-up.
-
-Set `SANDBOX_MAX_CONCURRENT_SESSIONS` on the external sandbox-api process to at least the requested
-eval concurrency (for example, 64 for this 61-example, concurrency-16 run). Its default pool holds only ten active
-sessions; changing Kibana Task Manager capacity does not resize it. Restart sandbox-api with the
-new value after active runs finish. Verify concurrent sandbox commands can allocate successfully
-before launching a larger dataset; completed reports can still contain sandbox resource errors.
-
-Use an existing evaluations profile with a model endpoint and a results/trace destination:
+This selection runs code in the shared sandbox-api on GCP. Its credentials are already in the dev
+Vault, so run with `--profile dev-vault` and there is nothing to configure:
 
 ```bash
-node scripts/evals stop
-NIGHTSHIFT_DATASETS=trace-only node scripts/evals start \
-  --suite nightshift-investigations --profile golden \
-  --model openrouter-anthropic-claude-sonnet-4-6 \
-  --judge openrouter-anthropic-claude-sonnet-4-6
+# Every eval (smoke + trace-only); prefix NIGHTSHIFT_DATASETS=trace-only to run only this one
+node scripts/evals start \
+  --suite nightshift-investigations --profile dev-vault \
+  --model eis-anthropic-claude-4-6-sonnet \
+  --judge eis-anthropic-claude-4-6-sonnet
 ```
+
+The suite owns its sandbox wiring through the `scoutHook` in its
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) entry,
+[`scout/scout_hook.sh`](scout/scout_hook.sh). The evals CLI (and `run_suite.sh` in CI) pipes the
+profile's evals config to it; the hook reads the `sandbox` block and exports the `SANDBOX_*`
+variables plus `SANDBOX_KIBANA_CONFIG`, which tells the `evals_nightshift_investigations` Scout
+config set to load [`scout/kibana.sandbox.yml`](scout/kibana.sandbox.yml). Kibana resolves the
+`${SANDBOX_*}` references in that file from its environment, so credentials never reach disk or
+process arguments. CI reads the same block from the ci-prod Vault. The hook needs `jq`.
+
+#### Other profiles or a different sandbox
+
+A profile backed by a local config file (for example `--profile local`, reading
+`scripts/vault/config.local.json` in `@kbn/evals`) needs its own `sandbox` block:
+
+```json
+"sandbox": {
+  "host": "sandbox-api.example.com",
+  "port": 9090,
+  "apiKey": "...",
+  "ssl": {
+    "certificate": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+    "key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+    "certificateAuthorities": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
+  }
+}
+```
+
+PEM fields hold certificate **contents**, not paths; `certificateAuthorities` is optional.
+
+Alternatively, export the variables yourself, for example to point at a sandbox you run locally:
+`SANDBOX_API_KEY`, `SANDBOX_CLIENT_CERT` and `SANDBOX_CLIENT_KEY`, and for a private CA
+`SANDBOX_CA_CERT`, all as PEM contents (e.g. `export SANDBOX_CLIENT_CERT="$(cat tls.crt)"`).
+Existing local setups can instead use `SANDBOX_CLIENT_CERT_PATH`, `SANDBOX_CLIENT_KEY_PATH`,
+and optional `SANDBOX_CA_CERT_PATH`; the hook reads these files when PEM contents are not supplied.
+Profile values take precedence over exported ones. `SANDBOX_API_HOST` and `SANDBOX_API_PORT`
+default to `localhost:9090` (the probe port is not the gRPC endpoint). A self-hosted sandbox must
+accept these client certificates and allow sandbox-api to reach its containers; leave
+sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated conversations.
+
+Set `SANDBOX_MAX_CONCURRENT_SESSIONS` on a self-hosted sandbox-api process to support the run
+(for example, 64 for a 61-example, concurrency-16 run). Its default pool holds only ten active
+sessions; Kibana Task Manager capacity does not resize it. Restart sandbox-api after active runs
+finish and verify concurrent commands can allocate before launching a larger dataset.
+
+#### What the run does
 
 The native framework still requires an evaluation endpoint in its configuration; the command
 reuses the target endpoint for that metadata. This suite never invokes an LLM evaluator or judge.
@@ -97,21 +128,22 @@ fallback. Full report evidence remains available through the investigation and a
 Independently, error text above 10,000 characters keeps that prefix plus a truncation marker and
 remains an execution failure. Ordinary reports are preserved unchanged.
 
-The `evals_nightshift_investigations` server config extends `evals_tracing` only for `trace-only`.
-It enables the investigation engine, its `nightshift.enabled` feature flag and
-sandbox, disables Cortex, and exports full Agent Builder
-payloads (user messages, system instructions, responses, tool arguments/results and conversation
-IDs) to the profile's configured destination. Sandbox credentials, PEM material and trace-exporter
-headers are passed in an owner-only temporary config, removed on exit and termination signals.
-Full payloads have the destination's access controls; use synthetic questions or data you are
-allowed to export there. Existing sandbox connector authorization remains unchanged.
+The `evals_nightshift_investigations` server config extends `evals_tracing` whenever the hook
+exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
+sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
+and sandbox, disables Cortex, and exports full Agent Builder payloads (user messages, system
+instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
+destination. Trace-exporter headers and remote telemetry credentials reach Kibana through
+environment references in committed YAML, without generated secret files or credential arguments.
+Full payloads have the destination's access controls; use synthetic questions or data
+you are allowed to export there. Existing sandbox connector authorization remains unchanged.
 
 To run another file with the same loader and task:
 
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/absolute/path/examples.json \
-  node scripts/evals run --suite nightshift-investigations --profile golden \
-  --model openrouter-anthropic-claude-sonnet-4-6 --judge openrouter-anthropic-claude-sonnet-4-6
+  node scripts/evals run --suite nightshift-investigations --profile dev-vault \
+  --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 ```json
@@ -119,7 +151,9 @@ NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/absolute/path/examples.
   "dataset": "nightshift/my-traces",
   "examples": [
     {
-      "input": { "question": "Investigate this fictional incident using the evidence supplied here..." },
+      "input": {
+        "question": "Investigate this fictional incident using the evidence supplied here..."
+      },
       "metadata": { "case_id": "synthetic-incident-1" }
     }
   ]
@@ -144,44 +178,34 @@ investigation, conversation and trace IDs for sharing. Inspect them in the evalu
 Historical full-grader runs are not acceptance evidence for this runner. Graders, native trace
 metrics, automatic provisioning and generalized CI defaults are deferred.
 
-Known acceptance limitation: Agent Builder replaces non-MCP tool results above its 2 MiB storage
-limit with a preview in the saved conversation, while the execution trace retains the full result.
-The strict trace oracle currently requires exact equality between those representations, so a
-completed investigation with a valid storage preview still fails acceptance. Precise validation of
-that preview is deferred to [#292859](https://github.com/elastic/kibana/issues/292859);
-the suite does not skip the comparison or treat the failure as a pass. This is separate from the
-bounded score representation, which prevents conversation size from overflowing score ingestion.
+`evals start` restarts Scout automatically when connectors, the server config set,
+`TRACING_EXPORTERS`, `GCS_CREDENTIALS` or any variable the hook exports changes. Switching
+`NIGHTSHIFT_DATASETS` needs no restart: whenever sandbox credentials are present, Scout starts with
+the investigation engine and sandbox, and the smoke eval runs on that server too.
 
-Stop and restart the managed stack after changing any `SANDBOX_*` variable or certificate/key
-file contents. The native CLI does not detect those startup inputs; automatic freshness detection
-for sandbox credentials is a separate follow-up. Use `evals run` to repeat a run with unchanged startup settings. Plain
-`start` and CI keep the original smoke selection and `evals_tracing` behavior, without requiring
-sandbox credentials.
+Use `evals run` to repeat a run with unchanged startup settings. Without sandbox credentials (for
+example a profile that has no `sandbox` block), an unset `NIGHTSHIFT_DATASETS` runs only the smoke
+eval and prints a warning.
 
 ## Stored investigation datasets and concurrency
-
-[`run_config.ts`](./run_config.ts) owns the CLI options, defaults, validation, and separate
-Scout/Playwright environment settings. The suite registry points to this module so both
-`start` and `run` resolve it before execution; the shared CLI has no Nightshift-specific logic.
-
 
 Select an existing evaluations dataset directly by its UI ID:
 
 ```bash
-node scripts/evals start --suite nightshift-investigations --profile golden \
-  --dataset-id <dataset-id> --concurrency 16 --repetitions 1 \
+NIGHTSHIFT_DATASET_ID=<dataset-id> NIGHTSHIFT_CONCURRENCY=16 \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
   --model openrouter-anthropic-claude-sonnet-4-6 \
   --judge openrouter-anthropic-claude-sonnet-4-6
 ```
 
-`--dataset-id` selects trace-only investigations and reads the dataset from the results profile's
-Kibana, in the first `--space-ids` Space (default: `default`). It preserves the original dataset
+`NIGHTSHIFT_DATASET_ID` selects trace-only investigations when `NIGHTSHIFT_DATASETS` is unset.
+It reads the dataset from the results profile's Kibana, in the first `--space-ids` Space (default: `default`). It preserves the original dataset
 and example IDs, labels, tags and metadata without updating the stored dataset. Its examples
 must satisfy the same question and distinct `case_id` requirements as a file. Do not combine it
 with `NIGHTSHIFT_EXAMPLES_FILE`. The dataset's telemetry source still needs the sandbox and remote
 telemetry settings below; selecting a dataset does not provision its source data.
 
-`--concurrency` also selects trace-only investigations. It defaults to 2 and accepts integers
+`NIGHTSHIFT_CONCURRENCY` controls investigation concurrency. It defaults to 2 and accepts integers
 from 1 to 45. The managed stack allocates one normal-task slot per concurrent workflow
 plus five background task slots, with a minimum capacity of 10: concurrency 16 sets
 `xpack.task_manager.capacity=21` (42 raw cost units).
@@ -191,11 +215,11 @@ the number of example/repetition batches and the existing 20-minute investigatio
 two additional minutes per batch for agent and evaluator trace ingestion. Independent trace
 checks use the same concurrency limit.
 
-Both flags work with `start` and `run`. Prefer `start` after changing concurrency: it restarts
-Scout when concurrency or smoke/trace-only selection changes. `run` and `start --skip-server`
-use your existing stack, whose Task Manager capacity you must configure yourself. Wait for any
-active eval to finish before restarting a shared local stack. Environment equivalents are
-`NIGHTSHIFT_DATASET_ID` and `NIGHTSHIFT_CONCURRENCY` (with `NIGHTSHIFT_DATASETS=trace-only`).
+Both variables work with `start` and `run`. Prefer `start` after changing concurrency: the hook
+exports it to Scout and Playwright, and Scout restarts when the hook output changes. Dataset
+selection alone does not restart Scout. `run` and `start --skip-server` use your existing stack,
+whose Task Manager capacity you must configure yourself. Wait for any active eval to finish before
+restarting a shared local stack.
 
 ## Remote telemetry investigations
 
@@ -208,6 +232,24 @@ Configure a dedicated API key restricted to `read` and `view_index_metadata` on 
 patterns the example needs, with only the cluster privileges required for discovery. For
 cross-cluster search, verify that the key can read the intended remote and index pattern. Keep
 endpoints, keys, readable-index hints and customer examples in private, uncommitted files.
+
+Add a `nightshift.telemetry` block beside `sandbox` in the profile's existing evals Vault config
+(or local profile JSON). The suite hook reads it without adding Nightshift fields to the shared
+CLI or global config schema:
+
+```json
+"nightshift": {
+  "telemetry": {
+    "url": "https://telemetry.example.com",
+    "apiKey": "...",
+    "readableIndices": "Read remote-a:logs-service-*"
+  }
+}
+```
+
+`url` and `apiKey` are required together; `readableIndices` is optional. Profile values take
+precedence over the following shell fallbacks. The hook selects the telemetry YAML only when the
+URL and key are configured, and requires sandbox credentials for remote investigations.
 
 | Variable | Purpose |
 | --- | --- |
@@ -225,10 +267,10 @@ NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.j
   --model openrouter-anthropic-claude-sonnet-4-6 --judge openrouter-anthropic-claude-sonnet-4-6
 ```
 
-The runtime config creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
+The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
 `Authorization` header. The existing credential resolver authorizes connector access and execution,
 checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
-Credentials remain in the owner-only temporary config, alongside the existing mTLS configuration.
+Remote telemetry and sandbox mTLS credentials are supplied through the hook environment.
 `/workspace/elastic.md` contains variable names and query guidance, never credential values. Its
 examples bound requests by time and advise using explicit remote names and narrow index patterns.
 These are instructions for the agent; the API key's privileges enforce the read restrictions.
@@ -300,8 +342,9 @@ evaluate.describe(dataset.id, () => {
 ## Adding a new eval
 
 For seeded evals, follow [`evals/smoke/`](evals/smoke). For file-driven investigations, follow
-[`evals/investigation/`](evals/investigation). Include new selections explicitly in
-`playwright.config.ts` so sandbox-dependent specs do not silently enter smoke CI.
+[`evals/investigation/`](evals/investigation). Which folders run is decided by
+[`resolveEvalSelection`](src/datasets/eval_selection.ts) and applied as `testIgnore` in
+`playwright.config.ts`; a new seeded eval is covered by adding its datasets to `selectDatasets`.
 
 1. **`types.ts`** — describe an example: its input, the expected output your evaluators will read,
    and an evaluator type bound to your task's output.
@@ -391,11 +434,11 @@ against.
 
 ## Environment variables
 
-| Variable              | Effect                                                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS` | Unset, `all` or `synthetic-smoke` runs the seed smoke eval. `trace-only` runs file-driven investigations. Unknown values fail early. |
-| `SELECTED_EVALUATORS` | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                    |
-| `GCS_CREDENTIALS`     | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                    |
+| Variable              | Effect                                                                                                                                                                                                                                                                                              |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NIGHTSHIFT_DATASETS` | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_ID` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. Unknown ids fail early. |
+| `SELECTED_EVALUATORS` | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                      |
+| `GCS_CREDENTIALS`     | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                      |
 
 Because every eval dataset gets its own `describe` block, Playwright's `--grep` filters by dataset id as well.
 
@@ -408,11 +451,15 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 Registered in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json)
 as `nightshift-investigations`.
 
-- **On a PR:** add the `evals:nightshift-investigations` label. No `models:` label is needed —
-  the suite pins a cheap connector through `defaultModelGroups`, and since no model affects the
-  smoke eval's score, which one runs does not matter.
+- **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
+  hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
+  `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the
+  sandbox-api host.
+- **On a PR:** add the `evals:nightshift-investigations` label plus a `models:` label (for example
+  `models:eis/anthropic-claude-4.6-sonnet`) to choose which model investigates. Without a `models:`
+  label the suite is skipped, like other suites that run the real agent.
 - **Weekly:** a step in [`llm_evals.yml`](../../../../../.buildkite/pipelines/evals/llm_evals.yml)
-  runs it against that same connector.
+  runs it against the weekly core models (`weekly_eis_core_models`).
 - **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
 

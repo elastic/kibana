@@ -7,142 +7,125 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'fs';
-import { tmpdir } from 'os';
-import { dirname, join } from 'path';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-jest.mock('../../evals_tracing/stateful/classic.stateful.config', () => ({
-  servers: {
-    kbnTestServer: {
-      serverArgs: ['--xpack.actions.preconfigured={"existing":{"name":"Existing connector"}}'],
-    },
-  },
-}));
+// `src/` packages cannot import `@kbn/nightshift-shared` (x-pack), so read the flag from its source
+// to fail if it is renamed again without this config set following (see #292333).
+const NIGHTSHIFT_ENABLED_FLAG = /NIGHTSHIFT_ENABLED_FLAG = '([^']+)'/.exec(
+  readFileSync(
+    join(REPO_ROOT, 'x-pack/platform/packages/shared/kbn-nightshift-shared/index.ts'),
+    'utf8'
+  )
+)?.[1];
 
-describe('Nightshift remote telemetry configuration', () => {
+const SANDBOX_KIBANA_CONFIG = join(
+  REPO_ROOT,
+  'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/kibana.sandbox.yml'
+);
+
+const loadConfig = (env: Record<string, string>) => {
+  let loaded: typeof import('./classic.stateful.config') | undefined;
+  jest.isolateModules(() => {
+    Object.assign(process.env, env);
+    loaded = jest.requireActual('./classic.stateful.config');
+  });
+  if (!loaded) throw new Error('config failed to load');
+  return loaded;
+};
+
+describe('evals_nightshift_investigations config set', () => {
   const originalEnv = process.env;
-  const signals = ['SIGINT', 'SIGTERM', 'SIGHUP'] as const;
-  const originalExitListeners = process.listeners('exit');
-  const originalListeners = signals.map((signal) => process.listeners(signal));
-  let fixtureDirectory: string;
-  const configDirectories: string[] = [];
-
-  const readServers = () => {
-    const servers = jest.requireActual<typeof import('./classic.stateful.config')>(
-      './classic.stateful.config'
-    ).servers;
-    const configPath = servers.kbnTestServer.serverArgs
-      .find((arg) => arg.startsWith('--config='))
-      ?.slice(9);
-    if (configPath) configDirectories.push(dirname(configPath));
-    return servers;
-  };
 
   beforeEach(() => {
-    jest.resetModules();
-    fixtureDirectory = mkdtempSync(join(tmpdir(), 'nightshift-config-test-'));
-    writeFileSync(join(fixtureDirectory, 'client.crt'), 'test certificate');
-    writeFileSync(join(fixtureDirectory, 'client.key'), 'test private key');
-    process.env = {
-      ...originalEnv,
-      NIGHTSHIFT_DATASETS: 'trace-only',
-      SANDBOX_API_KEY: 'sandbox-test-key',
-      SANDBOX_CLIENT_CERT_PATH: join(fixtureDirectory, 'client.crt'),
-      SANDBOX_CLIENT_KEY_PATH: join(fixtureDirectory, 'client.key'),
-    };
-    delete process.env.SANDBOX_CA_CERT_PATH;
-    delete process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL;
-    delete process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY;
-    delete process.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES;
+    process.env = { ...originalEnv };
+    delete process.env.NIGHTSHIFT_DATASETS;
     delete process.env.NIGHTSHIFT_CONCURRENCY;
+    delete process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
+    for (const key of Object.keys(process.env)) {
+      if (key.startsWith('SANDBOX_')) delete process.env[key];
+    }
   });
 
   afterEach(() => {
     process.env = originalEnv;
-    for (const directory of [...configDirectories.splice(0), fixtureDirectory]) {
-      rmSync(directory, { recursive: true, force: true });
-    }
-    for (const listener of process.listeners('exit')) {
-      if (!originalExitListeners.includes(listener)) process.removeListener('exit', listener);
-    }
-    for (const [index, signal] of signals.entries()) {
-      for (const listener of process.listeners(signal)) {
-        if (!originalListeners[index].includes(listener)) process.removeListener(signal, listener);
-      }
-    }
   });
 
-  it('keeps remote credentials private while preserving existing connectors', () => {
-    process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL = 'https://telemetry.example.com';
-    process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY = 'restricted-test-key';
-    process.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES = 'Read remote-a:logs-service-*';
-
-    const { serverArgs } = readServers().kbnTestServer;
-    const configPath = serverArgs.find((arg) => arg.startsWith('--config='))?.slice(9);
-    expect(configPath).toBeDefined();
-    if (!configPath) throw new Error('Missing private runtime configuration');
-    const privateConfig = JSON.parse(readFileSync(configPath, 'utf8'));
-
-    expect(statSync(configPath).mode.toString(8).slice(-3)).toBe('600');
-    expect(serverArgs.join(' ')).not.toContain('restricted-test-key');
-    expect(serverArgs.some((arg) => arg.startsWith('--xpack.actions.preconfigured='))).toBe(false);
-    expect(privateConfig['xpack.actions.preconfigured']).toEqual({
-      existing: { name: 'Existing connector' },
-      'nightshift-evals-telemetry': {
-        name: 'Remote Elasticsearch telemetry',
-        actionTypeId: '.webhook',
-        config: {
-          url: 'https://telemetry.example.com',
-          method: 'post',
-          hasAuth: false,
-          authType: null,
-        },
-        secrets: { secretHeaders: { Authorization: 'ApiKey restricted-test-key' } },
-      },
-    });
-    expect(privateConfig['xpack.nightshift_investigations.sandbox']).toEqual({
-      telemetry_connector_id: 'nightshift-evals-telemetry',
-      telemetry_readable_indices: 'Read remote-a:logs-service-*',
-    });
-  });
-
-  it('reserves capacity for sixteen normal workflow tasks plus background tasks', () => {
-    process.env.NIGHTSHIFT_CONCURRENCY = '16';
-    expect(readServers().kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
-  });
-
-  it('enables the current investigation availability flag', () => {
-    expect(readServers().kbnTestServer.serverArgs).toContain(
-      `--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`
-    );
-  });
-
-  it.each([
-    ['2', '--xpack.task_manager.capacity=10'],
-    ['45', '--xpack.task_manager.capacity=50'],
-  ])(
-    'respects the default floor and maximum capacity for concurrency %s',
-    (concurrency, capacity) => {
-      process.env.NIGHTSHIFT_CONCURRENCY = concurrency;
-      expect(readServers().kbnTestServer.serverArgs).toContain(capacity);
+  // The config set must ignore NIGHTSHIFT_DATASETS: Scout is reused when only the selection changes.
+  it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
+    'starts plain evals_tracing without the sandbox Kibana config (NIGHTSHIFT_DATASETS=%s)',
+    (selection) => {
+      const { servers } = loadConfig({
+        SANDBOX_API_KEY: 'key',
+        ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
+      });
+      const { servers: tracing } = jest.requireActual(
+        '../../evals_tracing/stateful/classic.stateful.config'
+      );
+      expect(servers.kbnTestServer.serverArgs).toEqual(tracing.kbnTestServer.serverArgs);
     }
   );
 
-  it.each(['0', '46', '1.5', 'invalid'])('rejects unsupported concurrency %s', (value) => {
-    process.env.NIGHTSHIFT_CONCURRENCY = value;
-    expect(readServers).toThrow('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 45');
+  it('enables the investigation engine and loads the sandbox config with SANDBOX_KIBANA_CONFIG', () => {
+    const { servers } = loadConfig({ SANDBOX_KIBANA_CONFIG });
+    const args = servers.kbnTestServer.serverArgs;
+
+    expect(NIGHTSHIFT_ENABLED_FLAG).toBeTruthy();
+    expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`);
+    expect(args).toContain('--xpack.nightshift_investigations.enabled=true');
+    expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
+    expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
+      `--config=${SANDBOX_KIBANA_CONFIG}`,
+    ]);
+    expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
   });
 
-  it.each([
-    ['NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL', 'https://telemetry.example.com'],
-    ['NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY', 'restricted-test-key'],
-    ['NIGHTSHIFT_SANDBOX_READABLE_INDICES', 'remote-a:logs-*'],
-  ])('rejects an incomplete remote configuration containing only %s', (name, value) => {
-    process.env[name] = value;
-
-    expect(readServers).toThrow(
-      'Remote telemetry requires both NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL and NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY'
+  it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', () => {
+    expect(() =>
+      loadConfig({ SANDBOX_KIBANA_CONFIG: '/does/not/exist/kibana.sandbox.yml' })
+    ).toThrow(
+      'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
     );
+  });
+  it.each([
+    ['2', 10],
+    ['16', 21],
+    ['45', 50],
+  ])('reserves matching capacity for concurrency %s', (concurrency, capacity) => {
+    const { servers } = loadConfig({ SANDBOX_KIBANA_CONFIG, NIGHTSHIFT_CONCURRENCY: concurrency });
+    expect(servers.kbnTestServer.serverArgs).toContain(`--xpack.task_manager.capacity=${capacity}`);
+  });
+
+  it.each(['0', '46', '1.5', 'invalid', ''])('rejects invalid concurrency %s', (concurrency) => {
+    expect(() =>
+      loadConfig({ SANDBOX_KIBANA_CONFIG, NIGHTSHIFT_CONCURRENCY: concurrency })
+    ).toThrow('integer between 1 and 45');
+  });
+
+  it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {
+    const telemetryConfig = join(SANDBOX_KIBANA_CONFIG, '../kibana.telemetry.yml');
+    const exporters = JSON.stringify([
+      {
+        http: {
+          url: 'https://traces.example.com',
+          headers: { Authorization: 'ApiKey trace-test-key' },
+        },
+      },
+    ]);
+    const { servers } = loadConfig({
+      SANDBOX_KIBANA_CONFIG,
+      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: telemetryConfig,
+      TRACING_EXPORTERS: exporters,
+    });
+    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${telemetryConfig}`);
+    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('trace-test-key');
+    expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
+  });
+
+  it('fails fast when the telemetry YAML is missing', () => {
+    expect(() =>
+      loadConfig({ SANDBOX_KIBANA_CONFIG, NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: '/missing.yml' })
+    ).toThrow('NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file');
   });
 });

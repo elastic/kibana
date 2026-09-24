@@ -1,0 +1,16 @@
+# Sandbox-api connection for the investigation evals, loaded by the evals_nightshift_investigations
+# Scout config set when scout_hook.sh exports SANDBOX_KIBANA_CONFIG. Kibana resolves ${SANDBOX_*}
+# from the environment the hook exports, so no secret is written to disk or passed as an argument.
+
+xpack.sandbox:
+  enabled: true
+  host: ${SANDBOX_API_HOST:localhost}
+  port: ${SANDBOX_API_PORT:9090}
+  api_key: ${SANDBOX_API_KEY}
+  ssl:
+    certificate: ${SANDBOX_CLIENT_CERT}
+    key: ${SANDBOX_CLIENT_KEY}
+    certificate_authorities: ${SANDBOX_CA_CERT}
+
+# Scout moves the inherited exporter configuration into the environment to keep headers out of argv.
+telemetry.tracing.exporters: ${NIGHTSHIFT_TRACING_EXPORTERS}

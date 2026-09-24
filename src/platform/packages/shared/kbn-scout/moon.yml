@@ -42,9 +42,9 @@ dependsOn:
   - '@kbn/test-docker-servers'
   - '@kbn/app-header'
   - '@kbn/utils'
+  - '@kbn/core-chrome-browser-components'
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/as-code-discover-schema'
-  - '@kbn/nightshift-shared'
 tags:
   - test-helper
   - package

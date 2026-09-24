@@ -14,7 +14,6 @@ import {
   resolveEvalSuite,
   resolveEvalRunContext,
   buildEvalRunEnv,
-  readSuiteRunEnv,
   buildEvalRunArgs,
   formatEvalCliCommand,
   evalRunFlags,
@@ -109,13 +108,13 @@ export const redTeamCmd: Command<void> = {
       evaluationConnectorId,
       projects,
       profileEnvOverrides,
+      suiteScoutEnv,
       exportProfile,
       datasetsProfile,
       requiresEisCcm,
-    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
+    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
     const skipServer = flagsReader.boolean('skip-server');
-    const suiteEnv = await readSuiteRunEnv(repoRoot, flagsReader, suite);
 
     log.info('');
     log.info(`Suite:     ${suiteId}`);
@@ -161,8 +160,8 @@ export const redTeamCmd: Command<void> = {
         repoRoot,
         log,
         profileEnvOverrides,
+        suiteScoutEnv,
         serverConfigSet: suite?.serverConfigSet,
-        serverEnv: suiteEnv.server,
         requiresEisCcm,
       });
     }
@@ -179,11 +178,10 @@ export const redTeamCmd: Command<void> = {
       skipServer,
       suite,
       profileEnvOverrides,
+      suiteScoutEnv,
       flagsReader,
       log,
     });
-
-    Object.assign(envOverrides, suiteEnv.playwright);
 
     await new Promise<void>((resolve, reject) => {
       const childEnv: Record<string, string> = { ...process.env, ...envOverrides } as Record<

@@ -108,8 +108,9 @@ export const ProcessResult = memo<ProcessResultProps>(
       }
 
       if (
-        processResult.error &&
-        // We treat "Not found" as a non-error condition on the UI
+        // Check for `process_error` in `code` here is needed for when providing the result for the top-level process
+        (processResult.error || processResult.code?.includes('process_error')) &&
+        // We treat "Not found" as a non-error condition for display on the UI
         processResult.code !== 'ra_kill-process_descendant_error_not-found' &&
         processResult.code !== 'ra_kill-process_error_not-found'
       ) {

@@ -27,7 +27,8 @@ interface ServiceEntry {
   /** The serverConfigSet used to start Scout */
   serverConfigSet?: string;
   /**
-   * SHA-256 of explicit server env overrides (Scout) or ELASTICSEARCH_HOST (EDOT).
+   * SHA-256 of the env the service was started with (Scout: TRACING_EXPORTERS,
+   * GCS_CREDENTIALS, suite scoutHook output; EDOT: ELASTICSEARCH_HOST).
    */
   envHash?: string;
 }
@@ -79,8 +80,14 @@ export const connectorsHash = (): string =>
     process.env.KIBANA_TESTING_AI_CONNECTORS,
   ]);
 
-export const scoutEnvHash = (env: Record<string, string> | undefined): string =>
-  hashParts([JSON.stringify(Object.entries(env ?? {}).sort(([a], [b]) => a.localeCompare(b)))]);
+export const scoutEnvHash = (env: Record<string, string> | undefined): string => {
+  const { TRACING_EXPORTERS, GCS_CREDENTIALS, ...suiteEnv } = env ?? {};
+  const suiteParts = Object.entries(suiteEnv)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`);
+  // Suite hook output only extends the hash when present, so stacks started without it stay reusable.
+  return hashParts([TRACING_EXPORTERS, GCS_CREDENTIALS, ...suiteParts]);
+};
 
 export const edotEnvHash = (elasticsearchHost: string | undefined): string =>
   hashParts([elasticsearchHost]);
@@ -110,11 +117,11 @@ export const isScoutStale = (
   }
 
   const currentEnvHash = scoutEnvHash(scoutEnv);
-  if (
-    (entry.envHash || Object.keys(scoutEnv ?? {}).length > 0) &&
-    entry.envHash !== currentEnvHash
-  ) {
-    return { stale: true, reason: 'Scout server environment changed' };
+  if (entry.envHash && entry.envHash !== currentEnvHash) {
+    return {
+      stale: true,
+      reason: "TRACING_EXPORTERS, GCS_CREDENTIALS or the suite's scoutHook output changed",
+    };
   }
 
   const runningConfigSet = entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET;

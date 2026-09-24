@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { connectorsHash, scoutEnvHash, isScoutStale, edotEnvHash, isEdotStale } from './services';
+import { edotEnvHash, isEdotStale, scoutEnvHash } from './services';
 
 const LOCAL_ES = 'http://elastic:changeme@localhost:9200';
 const CLOUD_ES = 'https://kbn-evals-serverless.es.us-central1.gcp.elastic.cloud';
@@ -79,62 +79,23 @@ describe('isEdotStale', () => {
   });
 });
 
-describe('Scout server configuration freshness', () => {
-  let repoRoot: string;
-  beforeEach(() => {
-    repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-scout-'));
-    Fs.mkdirSync(Path.join(repoRoot, 'target/evals'), { recursive: true });
-    Fs.writeFileSync(
-      Path.join(repoRoot, 'target/evals/services.json'),
-      JSON.stringify({
-        scout: {
-          pid: process.pid,
-          connectorsHash: connectorsHash(),
-          serverConfigSet: 'evals_example',
-          envHash: scoutEnvHash({ EXAMPLE_MODE: 'dataset', EXAMPLE_WORKERS: '2' }),
-        },
-      })
+describe('scoutEnvHash', () => {
+  const base = { TRACING_EXPORTERS: '[]', GCS_CREDENTIALS: '{}' };
+
+  it('keeps the hash of stacks started without scoutHook output', () => {
+    expect(scoutEnvHash({ ...base })).toBe(scoutEnvHash(base));
+    expect(scoutEnvHash(undefined)).toBe(scoutEnvHash({}));
+  });
+
+  it('changes when a scoutHook variable is added or changed', () => {
+    const withHook = scoutEnvHash({ ...base, SUITE_KEY: 'a' });
+    expect(withHook).not.toBe(scoutEnvHash(base));
+    expect(scoutEnvHash({ ...base, SUITE_KEY: 'b' })).not.toBe(withHook);
+  });
+
+  it('ignores the order scoutHook variables were provided in', () => {
+    expect(scoutEnvHash({ ...base, B: 'k', A: 'h' })).toBe(
+      scoutEnvHash({ ...base, A: 'h', B: 'k' })
     );
   });
-  afterEach(() => Fs.rmSync(repoRoot, { recursive: true, force: true }));
-
-  it('restarts for changed server settings', () => {
-    expect(
-      isScoutStale(repoRoot, 'evals_example', {
-        EXAMPLE_MODE: 'dataset',
-        EXAMPLE_WORKERS: '16',
-      }).stale
-    ).toBe(true);
-  });
-
-  it('restarts a legacy stack whose requested server settings were never recorded', () => {
-    const statePath = Path.join(repoRoot, 'target/evals/services.json');
-    const state = JSON.parse(Fs.readFileSync(statePath, 'utf8'));
-    delete state.scout.envHash;
-    Fs.writeFileSync(statePath, JSON.stringify(state));
-    expect(
-      isScoutStale(repoRoot, 'evals_example', {
-        EXAMPLE_MODE: 'dataset',
-        EXAMPLE_WORKERS: '16',
-      }).stale
-    ).toBe(true);
-  });
-
-  it('restarts when removing server settings but reuses a matching configuration', () => {
-    expect(isScoutStale(repoRoot, 'evals_example', {}).stale).toBe(true);
-    expect(
-      isScoutStale(repoRoot, 'evals_example', {
-        EXAMPLE_MODE: 'dataset',
-        EXAMPLE_WORKERS: '2',
-      }).stale
-    ).toBe(false);
-  });
-});
-
-it('fingerprints environment names and values independently of insertion order', () => {
-  expect(scoutEnvHash({ MODE: 'dataset', WORKERS: '16' })).toBe(
-    scoutEnvHash({ WORKERS: '16', MODE: 'dataset' })
-  );
-  expect(scoutEnvHash({ MODE: 'dataset' })).not.toBe(scoutEnvHash({ OTHER_MODE: 'dataset' }));
-  expect(scoutEnvHash({ MODE: 'dataset' })).not.toBe(scoutEnvHash({ MODE: 'smoke' }));
 });

@@ -55,7 +55,7 @@ describe('stored investigation dataset', () => {
         datasetId: dataset.id,
         examplesFile: '/tmp/examples.json',
       })
-    ).rejects.toThrow('Choose either --dataset-id or NIGHTSHIFT_EXAMPLES_FILE');
+    ).rejects.toThrow('Choose either NIGHTSHIFT_DATASET_ID or NIGHTSHIFT_EXAMPLES_FILE');
     expect(client.getDatasetById).not.toHaveBeenCalled();
   });
 });

@@ -52,41 +52,9 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 | `--grep <pattern>`  | Filter tests by name                                                   |
 | `--repetitions <n>` | Repeat each example N times                                            |
 | `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
-| `--dataset-id <id>` | Stored dataset ID, when supported by the selected suite |
-| `--concurrency <n>` | Concurrency, with limits and server capacity defined by the selected suite |
 | `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
 | `--skip-init`       | Skip config and connector setup                                        |
 | `--dry-run`         | Print configuration and exit                                           |
-
-#### Suite-owned run configuration
-
-A suite can register an optional `runConfigPath` in `evals.suites.json` (relative to the
-repository root). The module exports `runConfig`, typed as `EvalSuiteRunConfig` from `@kbn/evals`:
-
-```ts
-export const runConfig: EvalSuiteRunConfig = {
-  options: ['dataset-id', 'concurrency'],
-  resolve: ({ options, env }) => {
-    // Validate options and environment defaults here before services start.
-    return {
-      playwright: { EXAMPLE_DATASET_ID: options['dataset-id'] ?? env.EXAMPLE_DATASET_ID ?? 'default' },
-      server: { EXAMPLE_WORKERS: options.concurrency ?? '2' },
-    };
-  },
-};
-```
-
-`start` and `run` pass CLI options and the current environment to the suite resolver.
-Suites opt into the shared `--dataset-id` and `--concurrency` options; unsupported options
-produce an error instead of being silently ignored. The suite owns defaults, validation,
-selection logic, and environment variable names. Keep this module free of service startup
-and other side effects so `--dry-run` can resolve it safely.
-
-Return Playwright overrides in `playwright` and only settings needed by Scout in `server`.
-Both processes still inherit the shell environment. Profile-derived evaluation client
-credentials are not forwarded to Scout; server tracing exporters and GCS credentials are
-forwarded separately. `start` fingerprints all explicit server settings and restarts Scout
-when they change or are removed. Client-only changes do not trigger a restart.
 
 #### EIS connector setup
 
@@ -297,6 +265,21 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 Each eval suite lives in its own `kbn-evals-suite-<name>` package. The package contains a Playwright config, evaluation specs, and optionally custom fixtures.
 
 To scaffold a new suite, you can use the [`evals-create-suite`](../../../../../.agents/skills/evals-create-suite/SKILL.md) skill (available to AI coding agents) or follow its templates manually. Register suites in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) for CI labeling and `node scripts/evals list`.
+
+### Suite-owned secrets (`scoutHook`)
+
+A suite whose Scout server needs secrets from the evals config can map them into env with a hook in its own package, rather than teaching the shared evals tooling about them. Point `scoutHook` in its `evals.suites.json` entry at a repo-relative bash script:
+
+```json
+{
+  "id": "my-suite",
+  "configPath": "x-pack/.../kbn-evals-suite-my-suite/playwright.config.ts",
+  "serverConfigSet": "evals_my_suite",
+  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh"
+}
+```
+
+The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
 
 ### Playwright config
 

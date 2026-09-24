@@ -47,7 +47,11 @@ export interface EvalSuiteMetadata {
   tags?: string[];
   ciLabels?: string[];
   serverConfigSet?: string;
-  runConfigPath?: string;
+  /**
+   * Repo-relative bash script that adds env for the suite's Scout server and Playwright run.
+   * It reads the evals config JSON on stdin and prints `{ "env"?: {...} }`.
+   */
+  scoutHook?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -64,7 +68,7 @@ export interface EvalSuiteDefinition {
   description?: string;
   source: 'metadata' | 'discovery';
   serverConfigSet?: string;
-  runConfigPath?: string;
+  scoutHook?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -172,7 +176,7 @@ const normalizeSuite = (
     description: metadata?.description,
     source: metadata ? 'metadata' : 'discovery',
     serverConfigSet: metadata?.serverConfigSet,
-    runConfigPath: metadata?.runConfigPath,
+    scoutHook: metadata?.scoutHook,
     shards: metadata?.shards,
     stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
   };

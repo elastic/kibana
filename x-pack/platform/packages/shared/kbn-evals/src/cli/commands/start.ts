@@ -7,7 +7,6 @@
 
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
-import { readSuiteRunEnv } from '../suite_run_config';
 import { ensureEvalStack } from '../eval_stack';
 import {
   ensureEvalInit,
@@ -51,25 +50,13 @@ export const startCmd: Command<void> = {
       evaluationConnectorId,
       projects,
       profileEnvOverrides,
+      suiteScoutEnv,
       exportProfile,
       datasetsProfile,
       requiresEisCcm,
-    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
+    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
     const skipServer = flagsReader.boolean('skip-server');
-
-    const suiteEnv = await readSuiteRunEnv(repoRoot, flagsReader, suite);
-    const envOverrides = buildEvalRunEnv({
-      evaluationConnectorId,
-      requiresEisCcm,
-      skipServer,
-      suite,
-      profileEnvOverrides,
-      flagsReader,
-      log,
-    });
-
-    Object.assign(envOverrides, suiteEnv.playwright);
 
     log.info('');
     log.info(`Suite:     ${suiteId ?? configPath}`);
@@ -110,15 +97,26 @@ export const startCmd: Command<void> = {
       await ensureEvalStack({
         repoRoot,
         log,
-        profileEnvOverrides: envOverrides,
+        profileEnvOverrides,
+        suiteScoutEnv,
         serverConfigSet: suite?.serverConfigSet,
-        serverEnv: suiteEnv.server,
         requiresEisCcm,
       });
     }
 
     log.info(`[run] Running suite: ${suiteId ?? configPath}`);
     log.info('');
+
+    const envOverrides = buildEvalRunEnv({
+      evaluationConnectorId,
+      requiresEisCcm,
+      skipServer,
+      suite,
+      profileEnvOverrides,
+      suiteScoutEnv,
+      flagsReader,
+      log,
+    });
 
     const args = ['scripts/playwright', 'test', '--config', resolvedConfigPath];
     for (const p of projects) {

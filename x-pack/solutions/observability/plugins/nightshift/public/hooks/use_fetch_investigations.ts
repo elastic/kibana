@@ -16,7 +16,7 @@ import type {
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from './use_kibana';
 
-const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
+export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
 
 const INVESTIGATIONS_PAGE_SIZE = 10;
 

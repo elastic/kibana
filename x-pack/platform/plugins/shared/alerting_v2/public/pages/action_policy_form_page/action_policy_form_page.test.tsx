@@ -205,14 +205,10 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozed_until: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
-  created_by: 'elastic',
+  created_by: { profile_uid: 'elastic' },
   created_at: '2026-03-01T10:00:00.000Z',
-  updated_by: 'elastic',
+  updated_by: { profile_uid: 'elastic' },
   updated_at: '2026-03-01T10:00:00.000Z',
-  auth: {
-    owner: 'elastic',
-    created_by_user: false,
-  },
 };
 
 const renderPage = () => {
@@ -418,11 +414,6 @@ describe('ActionPolicyFormPage', () => {
       });
 
       renderPage();
-
-      await user.click(screen.getByTestId(TEST_SUBJ.nameInput));
-      await user.tab();
-      await user.click(screen.getByTestId(TEST_SUBJ.descriptionInput));
-      await user.tab();
 
       const updateButton = screen.getByTestId(TEST_SUBJ.submitButton);
       await waitFor(() => expect(updateButton).toBeEnabled());

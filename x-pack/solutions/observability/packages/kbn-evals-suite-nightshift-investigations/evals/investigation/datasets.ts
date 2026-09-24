@@ -44,7 +44,7 @@ export const loadInvestigationDataset = async (
   EvaluationDataset<InvestigationExample> | EvaluationDatasetWithId<InvestigationExample>
 > => {
   if (datasetId && examplesFile) {
-    throw new Error('Choose either --dataset-id or NIGHTSHIFT_EXAMPLES_FILE, not both');
+    throw new Error('Choose either NIGHTSHIFT_DATASET_ID or NIGHTSHIFT_EXAMPLES_FILE, not both');
   }
   if (!datasetId) return readInvestigationDataset(examplesFile);
 

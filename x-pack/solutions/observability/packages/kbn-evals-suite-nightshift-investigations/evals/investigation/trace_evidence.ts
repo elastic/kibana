@@ -43,6 +43,25 @@ export const assertSuccessfulSandboxCommand = (
   );
 };
 
+/**
+ * True when `text` contains every literal piece of `template` in order. `{{placeholders}}` (filled
+ * at runtime, e.g. the optional decision-tree sections) may expand to anything, including nothing.
+ */
+export const containsTemplate = (text: string, template: string): boolean => {
+  const pieces = template
+    .trim()
+    .split(/\{\{[a-z_]+\}\}/)
+    .map((piece) => piece.trim())
+    .filter(Boolean);
+  let from = 0;
+  for (const piece of pieces) {
+    const at = text.indexOf(piece, from);
+    if (at === -1) return false;
+    from = at + piece.length;
+  }
+  return pieces.length > 0;
+};
+
 /** Validates exported agent payloads independently of the placeholder score. */
 export const assertAgentTrace = (
   attributes: GenAISemConvAttributes[],
@@ -100,7 +119,7 @@ export const assertAgentTrace = (
   assert(
     systemInstructions.trim() &&
       instructions.some(
-        (part) => part.type === 'text' && part.content.includes(systemInstructions.trim())
+        (part) => part.type === 'text' && containsTemplate(part.content, systemInstructions)
       ),
     'Agent trace must include the actual system instructions'
   );

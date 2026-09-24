@@ -14,6 +14,7 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { GenAISemConvAttributes } from '@kbn/inference-tracing';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import { DEDUCTIVE_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
 import { ungradedPlaceholder } from './placeholder';
@@ -62,6 +63,20 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
                 '/internal/nightshift/investigations/availability'
               )
             ).available,
+          { timeout: 60_000 }
+        )
+        .toBe(true);
+      // Availability checks the significant-events workflow, but manual investigations run the
+      // deductive one, which Kibana may still be installing right after a cold start.
+      await expect
+        .poll(
+          async () =>
+            fetch(`/api/workflows/workflow/${DEDUCTIVE_INVESTIGATION_WORKFLOW_ID}`, {
+              headers: { 'elastic-api-version': '2023-10-31' },
+            }).then(
+              () => true,
+              () => false
+            ),
           { timeout: 60_000 }
         )
         .toBe(true);
