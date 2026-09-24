@@ -8,6 +8,7 @@
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { kiRetrievalSkill } from './ki_retrieval_skill';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 
 describe('kiRetrievalSkill', () => {
   it('registers with stable id, name, and context-engine base path', () => {
@@ -20,8 +21,9 @@ describe('kiRetrievalSkill', () => {
     expect(isAllowedBuiltinSkill(kiRetrievalSkill.id)).toBe(true);
   });
 
-  it('is not gated behind experimental features', () => {
+  it('is gated behind Context Engine availability but not experimental features', () => {
     expect(kiRetrievalSkill.experimental).toBeFalsy();
+    expect(kiRetrievalSkill.availability).toBe(contextEngineSkillAvailability);
   });
 
   it('ships non-empty markdown content', () => {

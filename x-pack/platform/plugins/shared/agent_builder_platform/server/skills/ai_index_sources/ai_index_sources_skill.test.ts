@@ -9,6 +9,7 @@ import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { aiIndexSourcesSkill } from './ai_index_sources_skill';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 
 describe('aiIndexSourcesSkill', () => {
   it('registers with stable id, name, and context-engine base path', () => {
@@ -21,8 +22,9 @@ describe('aiIndexSourcesSkill', () => {
     expect(isAllowedBuiltinSkill(aiIndexSourcesSkill.id)).toBe(true);
   });
 
-  it('is not gated behind experimental features', () => {
+  it('is gated behind Context Engine availability but not experimental features', () => {
     expect(aiIndexSourcesSkill.experimental).toBeFalsy();
+    expect(aiIndexSourcesSkill.availability).toBe(contextEngineSkillAvailability);
   });
 
   it('ships non-empty markdown content', () => {
