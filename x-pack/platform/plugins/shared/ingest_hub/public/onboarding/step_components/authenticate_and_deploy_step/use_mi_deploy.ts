@@ -79,8 +79,7 @@ export function planMiInitialRun(
     .map((group) => {
       const untrackedMembers = group.members.filter(
         ({ instance }) =>
-          !(instance.instanceId in serviceStatuses) &&
-          !(instance.instanceId in policyIdsByInstance)
+          !(instance.instanceId in serviceStatuses) && !(instance.instanceId in policyIdsByInstance)
       );
       if (untrackedMembers.length === 0) return null;
       return {
@@ -173,9 +172,7 @@ export function reconcileMiCleanupOps(
     ...cleanupOps.toUpdate.map((u) => u.policyId),
   ]);
   // Surviving instances from toUpdate still have an active policy — they must not be pruned.
-  const survivingFromUpdate = new Set(
-    cleanupOps.toUpdate.flatMap((u) => u.survivingInstanceIds)
-  );
+  const survivingFromUpdate = new Set(cleanupOps.toUpdate.flatMap((u) => u.survivingInstanceIds));
   const cleanedLiveStale = buildCleanedLiveStale(
     liveStalePolicyIds,
     succeededIds,

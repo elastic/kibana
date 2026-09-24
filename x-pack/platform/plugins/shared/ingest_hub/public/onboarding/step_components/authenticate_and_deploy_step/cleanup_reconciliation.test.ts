@@ -23,12 +23,7 @@ describe('buildLiveStalePolicyIds', () => {
       new Set(['a']),
       { b: 'p2', c: 'p3' },
     ],
-    [
-      'single stale',
-      { a: 'p1', b: 'p2' },
-      new Set(['a', 'b', 'c']),
-      {},
-    ],
+    ['single stale', { a: 'p1', b: 'p2' }, new Set(['a', 'b', 'c']), {}],
   ])('%s', (_desc, policyIdsByInstance, activeInstanceIds, expected) => {
     expect(buildLiveStalePolicyIds(policyIdsByInstance, activeInstanceIds)).toEqual(expected);
   });
@@ -54,8 +49,20 @@ describe('buildEffectivePendingCleanup', () => {
 describe('buildCleanedLiveStale', () => {
   it.each([
     ['nothing succeeded — nothing cleaned', { a: 'p1', b: 'p2' }, new Set<string>(), undefined, []],
-    ['all succeeded — all cleaned', { a: 'p1', b: 'p2' }, new Set(['p1', 'p2']), undefined, ['a', 'b']],
-    ['partial — only succeeded ids cleaned', { a: 'p1', b: 'p2' }, new Set(['p1']), undefined, ['a']],
+    [
+      'all succeeded — all cleaned',
+      { a: 'p1', b: 'p2' },
+      new Set(['p1', 'p2']),
+      undefined,
+      ['a', 'b'],
+    ],
+    [
+      'partial — only succeeded ids cleaned',
+      { a: 'p1', b: 'p2' },
+      new Set(['p1']),
+      undefined,
+      ['a'],
+    ],
     [
       'surviving filters out even when policy succeeded (MI update case)',
       { a: 'p1', b: 'p2' },
@@ -71,14 +78,11 @@ describe('buildCleanedLiveStale', () => {
       ['a'],
     ],
     ['empty liveStale', {}, new Set(['p1']), undefined, []],
-  ])(
-    '%s',
-    (_desc, liveStale, succeeded, surviving, expected) => {
-      const result = buildCleanedLiveStale(liveStale, succeeded, surviving);
-      expect(result).toHaveLength(expected.length);
-      expect(result).toEqual(expect.arrayContaining(expected));
-    }
-  );
+  ])('%s', (_desc, liveStale, succeeded, surviving, expected) => {
+    const result = buildCleanedLiveStale(liveStale, succeeded, surviving);
+    expect(result).toHaveLength(expected.length);
+    expect(result).toEqual(expect.arrayContaining(expected));
+  });
 });
 
 describe('buildRemainingPending', () => {
@@ -92,7 +96,12 @@ describe('buildRemainingPending', () => {
       new Set(['p1']),
       { b: 'p2' },
     ],
-    ['none succeeded — all remaining', { a: 'p1', b: 'p2' }, new Set<string>(), { a: 'p1', b: 'p2' }],
+    [
+      'none succeeded — all remaining',
+      { a: 'p1', b: 'p2' },
+      new Set<string>(),
+      { a: 'p1', b: 'p2' },
+    ],
   ])('%s', (_desc, pending, succeeded, expected) => {
     expect(buildRemainingPending(pending, succeeded)).toEqual(expected);
   });
