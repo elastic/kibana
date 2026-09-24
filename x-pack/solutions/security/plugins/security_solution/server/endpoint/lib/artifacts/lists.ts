@@ -27,6 +27,7 @@ import type { ExperimentalFeatures } from '../../../../common';
 import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import { MetaArchValue, EndpointArtifactScanContext } from '../../../../common/endpoint/types';
 import type { YaraCompiledRule } from '../libyara';
+import { YaraEngineUnavailableError } from '../libyara';
 import { validateCustomYaraRule } from '../custom_yara_signatures';
 import type {
   InternalArtifactCompleteSchema,
@@ -182,6 +183,9 @@ const DEFAULT_YARA_SCAN_CONTEXT: TranslatedYaraRule['scan_context'] = [
   EndpointArtifactScanContext.MEMORY,
 ];
 
+/** Retries per item for transient libyara engine failures while packing artifacts. */
+const YARA_ITEM_VALIDATE_MAX_ATTEMPTS = 3;
+
 /**
  * Reads `arch_context` from rules that already passed `validateCustomYaraRule`.
  * Product validation guarantees a non-empty rule list and that `meta.arch` is either
@@ -204,6 +208,34 @@ const skipYaraItem = (logger: Logger | undefined, itemId: string, reason: string
   );
 };
 
+async function validateCustomYaraRuleWithRetries(
+  ruleText: string,
+  osTypes: ExceptionListItemSchema['os_types'],
+  itemId: string,
+  logger?: Logger
+): Promise<Awaited<ReturnType<typeof validateCustomYaraRule>>> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await validateCustomYaraRule(ruleText, osTypes);
+    } catch (error) {
+      if (!(error instanceof YaraEngineUnavailableError)) {
+        throw error;
+      }
+
+      if (attempt >= YARA_ITEM_VALIDATE_MAX_ATTEMPTS) {
+        logger?.error(
+          `libyara engine failed validating Custom YARA Signature [${itemId}] after ${YARA_ITEM_VALIDATE_MAX_ATTEMPTS} attempts; aborting artifact build. ${error.message}`
+        );
+        throw error;
+      }
+
+      logger?.warn(
+        `libyara engine failed validating Custom YARA Signature [${itemId}] on attempt ${attempt}/${YARA_ITEM_VALIDATE_MAX_ATTEMPTS}; retrying. ${error.message}`
+      );
+    }
+  }
+}
+
 async function translateOneYaraException(
   exception: ExceptionListItemSchema,
   logger?: Logger
@@ -217,12 +249,16 @@ async function translateOneYaraException(
     return undefined;
   }
 
-  // Sequential: libyara WASM is a process singleton and is not safe for concurrent ccall.
   // Full product validation (compile + meta constraints) so invalid arch/scan_type/etc.
   // are skipped here instead of aborting later schema validation of the whole artifact.
-  // Throws (engine trap/load/allocation) propagate — any throw fails the pack so a flaky
-  // engine cannot publish a partial or empty YARA artifact.
-  const result = await validateCustomYaraRule(entry.value, exception.os_types);
+  // Engine failures are retried per item; exhausted retries propagate so the packager
+  // cannot publish a partial or empty YARA artifact from a flaky/unavailable engine.
+  const result = await validateCustomYaraRuleWithRetries(
+    entry.value,
+    exception.os_types,
+    exception.item_id,
+    logger
+  );
 
   if (result.errorCount > 0) {
     skipYaraItem(logger, exception.item_id, `validation reported ${result.errorCount} error(s)`);
@@ -241,7 +277,8 @@ async function translateOneYaraException(
 /**
  * Translates Custom YARA Signature exception items into the endpoint YARA artifact format.
  * Items that fail product validation are omitted so one bad entry cannot fail the packager.
- * `YaraEngineUnavailableError` from libyara propagates so the packager can retain baseline YARA.
+ * Exhausted per-item `YaraEngineUnavailableError` retries propagate so the packager aborts
+ * the manifest build and keeps the previous committed manifest.
  */
 async function translateToYaraRules(
   exceptions: ExceptionListItemSchema[],

@@ -14,6 +14,7 @@ import type {
   EntryList,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type { Logger } from '@kbn/logging';
 import {
   buildArtifact,
   getAllItemsFromEndpointExceptionList,
@@ -92,6 +93,7 @@ describe('artifacts lists', () => {
     jest.clearAllMocks();
     mockExceptionClient = listMock.getExceptionListClient();
     defaultFeatures = allowedExperimentalValues;
+    mockValidateYaraRule.mockReset();
     mockValidateYaraRule.mockResolvedValue(createYaraValidateResult([{}]));
   });
 
@@ -848,11 +850,50 @@ describe('artifacts lists', () => {
       ).resolves.toEqual({ entries: [] });
     });
 
-    test('it should fail the conversion when libyara throws for any entry', async () => {
+    test('it should retry a transient libyara engine failure for one entry and continue', async () => {
       const validRule = 'rule Valid { condition: true }';
+      const logger = { warn: jest.fn(), error: jest.fn() } as unknown as Logger;
       mockValidateYaraRule
         .mockRejectedValueOnce(new YaraEngineUnavailableError('libyara WASM trap'))
+        .mockResolvedValueOnce(createYaraValidateResult([{}]))
         .mockResolvedValueOnce(createYaraValidateResult([{}]));
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [
+            getCustomYaraExceptionItem('rule Flaky { condition: true }'),
+            getCustomYaraExceptionItem(validRule),
+          ],
+          'v1',
+          logger
+        )
+      ).resolves.toEqual({
+        entries: [
+          {
+            yara_rule_data: 'rule Flaky { condition: true }',
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
+          },
+          {
+            yara_rule_data: validRule,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
+          },
+        ],
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('libyara engine failed validating Custom YARA Signature')
+      );
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+    });
+
+    test('it should fail the conversion when per-item libyara retries are exhausted', async () => {
+      const validRule = 'rule Valid { condition: true }';
+      mockValidateYaraRule.mockRejectedValue(new YaraEngineUnavailableError('libyara WASM trap'));
 
       await expect(
         convertYaraRulesToEndpointFormat(
@@ -863,6 +904,7 @@ describe('artifacts lists', () => {
           'v1'
         )
       ).rejects.toThrow(YaraEngineUnavailableError);
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
     });
 
     test('it should fail the conversion when every libyara call throws', async () => {
@@ -879,6 +921,7 @@ describe('artifacts lists', () => {
           'v1'
         )
       ).rejects.toThrow(YaraEngineUnavailableError);
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
     });
 
     test('it should return a stable hash regardless of order of entries', async () => {
