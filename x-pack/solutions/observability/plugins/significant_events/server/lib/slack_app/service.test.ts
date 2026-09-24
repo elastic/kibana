@@ -7,7 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID, SlackAppService } from './service';
@@ -99,7 +99,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
         getCurrentUser: jest.fn().mockReturnValue({ username: 'admin' }),
       },
     },
-  } as unknown as StreamsServer;
+  } as unknown as SignificantEventsServer;
 
   return {
     server,

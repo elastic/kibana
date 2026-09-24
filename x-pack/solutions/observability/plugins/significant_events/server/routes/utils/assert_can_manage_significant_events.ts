@@ -8,14 +8,14 @@
 import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 
 export const assertCanManageSignificantEvents = async ({
   request,
   server,
 }: {
   request: KibanaRequest;
-  server: StreamsServer;
+  server: SignificantEventsServer;
 }): Promise<void> => {
   const authz = server.security.authz;
   if (!authz) {

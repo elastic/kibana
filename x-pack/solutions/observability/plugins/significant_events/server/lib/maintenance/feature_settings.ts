@@ -12,8 +12,8 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import type { SignificantEventsServer } from '../../types';
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import type { GetScopedClients } from '../../routes/types';
@@ -74,7 +74,7 @@ export const createFeatureSettingsController = ({
   server,
   getScopedClients,
 }: {
-  server: StreamsServer;
+  server: SignificantEventsServer;
   getScopedClients: GetScopedClients;
 }) => {
   const getGlobalClient = async (request: KibanaRequest): Promise<IUiSettingsClient> => {
