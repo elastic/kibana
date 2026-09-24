@@ -475,7 +475,7 @@ const failuresByErrorMessage = (suite: FlakySuite): string => {
   const errors = all.filter((error) => !isPullRequestOnly(error));
   const leftOut =
     errors.length < all.length
-      ? 'Errors that only appeared in PR builds were excluded.'
+      ? '*Errors that only appeared in PR builds were excluded.*'
       : undefined;
   if (errors.length === 0) {
     return ['#### Failures by Error Message', leftOut].join('\n\n');
