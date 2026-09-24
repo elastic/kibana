@@ -54,9 +54,9 @@ const getUpdatedSearchSourceRuleParams = (dataViewId: string) =>
     },
   ]);
 
-const getAdHocDataViewSpec = (id: string) => ({
+const getAdHocDataViewSpec = (id: string, title: string) => ({
   id,
-  title: 'search-source-*',
+  title,
   name: '',
   timeFieldName: '@timestamp',
   sourceFilters: [],
@@ -561,7 +561,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
         connectorId,
         dataViewId: adHocDataViewId,
         name: ruleName,
-        searchConfigurationIndex: getAdHocDataViewSpec(adHocDataViewId),
+        searchConfigurationIndex: getAdHocDataViewSpec(adHocDataViewId, sourceIndex),
         spaceId: scoutSpace.id,
       });
       createdRuleIds.push(ruleId);
@@ -569,9 +569,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       const contextLink = await getGeneratedContextLink(esClient, outputIndex, ruleId);
 
       const assertAdHocResults = async () => {
-        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-          'search-source-*'
-        );
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(sourceIndex);
         await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
         await expect(pageObjects.dataGrid.getCell(0, '_source')).toContainText(
           'runtime-message-field'

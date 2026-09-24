@@ -190,6 +190,12 @@ describe('DataViewSelectPopover', () => {
     });
 
     expect(screen.getByTestId('selectDataViewExpression')).toHaveTextContent('Select a data view');
+
+    await userEvent.click(screen.getByTestId('selectDataViewExpression'));
+    await screen.findByTestId('chooseDataViewPopoverContent');
+
+    const lastCall = MockedDataViewSelector.mock.calls.at(-1)![0];
+    expect(lastCall.dataViewsList).toEqual([]);
   });
 
   test('should open a popover on click and display loaded data views', async () => {
