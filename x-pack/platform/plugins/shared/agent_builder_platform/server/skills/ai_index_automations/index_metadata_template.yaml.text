@@ -69,6 +69,17 @@ steps:
 
   - name: generate_index_profile
     type: ai.prompt
+    # The default model for every prompt step. Change it to another AI connector id if the
+    # user asks for one; leave it in place otherwise.
+    connector-id: .google-gemini-3.5-flash-chat_completion
+    # Transient connector errors, rate limits and structured-output parse failures are retried; a
+    # prompt that can never satisfy its schema still fails every attempt.
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+        jitter: true
     with:
       prompt: |
         You are documenting an Elasticsearch index for an AI Context Engine knowledge base.
@@ -102,14 +113,16 @@ steps:
           it stands alone.
         - when_to_use: guidance on when an analyst or agent should query this index.
         - answers_questions: example natural-language questions this index can answer.
-        - access_patterns: an array (at least 1 entry) of the common query patterns for this
-          index, one per question class an analyst would actually ask. For each entry provide:
+        - access_patterns: an array of the common query patterns for this index, one per
+          question class an analyst would actually ask. Return an empty array rather than an
+          invented query when no ES|QL against this index is meaningful; a profile that only
+          orients is allowed, a profile carrying a query that answers nothing is not. For each
+          entry provide:
             - question_type: short label for the pattern.
             - esql_template: a parameterized ES|QL query using named `?param` placeholders where
               filters would go. Start with FROM {{ consts.source_index }}.
             - esql_example: the same query with real example values substituted in place of the
               placeholders, including a small LIMIT so it is cheap to run.
-            - params: list of the template's parameters, each with name/type/example.
             - returns: short description of what the query returns.
 
         ES|QL correctness rules for esql_template and esql_example — both are executed by the
@@ -121,8 +134,8 @@ steps:
           which fail at runtime on a boolean. For a rate, divide that count by the total with
           `EVAL rate = TO_DOUBLE(count_true) / total`.
         - Only use AVG()/SUM() on genuinely numeric fields.
-        - Give each ?param a correct type (keyword, long, double, date, boolean) with a matching
-          example value. Date literals are strict ISO-8601, e.g. "2024-01-01T00:00:00.000Z".
+        - In esql_example, give each ?param a value of the field's type (keyword, long, double,
+          date, boolean). Date literals are strict ISO-8601, e.g. "2024-01-01T00:00:00.000Z".
         - Keep esql_example runnable and cheap: end it with a small `| LIMIT n`.
       schema:
         type: object
@@ -159,7 +172,6 @@ steps:
               type: string
           access_patterns:
             type: array
-            minItems: 1
             items:
               type: object
               properties:
@@ -169,28 +181,12 @@ steps:
                   type: string
                 esql_example:
                   type: string
-                params:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      type:
-                        type: string
-                      example:
-                        type: string
-                    required:
-                      - name
-                      - type
-                      - example
                 returns:
                   type: string
               required:
                 - question_type
                 - esql_template
                 - esql_example
-                - params
                 - returns
         required:
           - display_name
@@ -219,6 +215,13 @@ steps:
           - {{ kf.field }}: {{ kf.meaning }}
           {%- endfor %}
 
+          Joins:
+          {%- for join in steps.generate_index_profile.output.content.joins %}
+          - {{ join }}
+          {%- else %}
+          - none; this index stands alone.
+          {%- endfor %}
+
           Does not contain:
           {%- for item in steps.generate_index_profile.output.content.does_not_contain %}
           - {{ item }}
@@ -232,18 +235,30 @@ steps:
           - {{ q }}
           {%- endfor %}
 
+          {%- if steps.generate_index_profile.output.content.access_patterns.size > 0 %}
+
           Access patterns:
           {%- for ap in steps.generate_index_profile.output.content.access_patterns %}
           - {{ ap.question_type }}: {{ ap.returns }}
             Template: {{ ap.esql_template }}
             Example: {{ ap.esql_example }}
           {%- endfor %}
+          {%- else %}
+
+          Access patterns: none. Query the index directly.
+          {%- endif %}
         tags:
           - "{{ consts.source_index }}"
           - index_metadata
+        # What the KI was derived from. Who wrote it is stamped by `createKi` itself.
+        references:
+          - uri: "index://{{ consts.source_index }}"
+            relation: derived_from
         attributes:
-          # Every ES|QL the KI carries goes here, which is what the verifiers check.
-          esql: "${{ steps.generate_index_profile.output.content.access_patterns | map: 'esql_example' }}"
+          # Every ES|QL the KI carries goes here, which is what the verifiers check. `default: nil`
+          # omits the attribute when there are no access patterns, so the verifiers skip the KI
+          # instead of failing an empty list.
+          esql: "${{ steps.generate_index_profile.output.content.access_patterns | map: 'esql_example' | default: nil }}"
           key_fields: "{{ steps.generate_index_profile.output.content.key_fields | json }}"
           when_to_use: "{{ steps.generate_index_profile.output.content.when_to_use }}"
 
@@ -259,8 +274,8 @@ steps:
     type: if
     condition: "steps.verify_ki.output.passed : true"
     steps:
-      # `ki_id` is the index name, so a re-run replaces this profile rather than appending a
-      # second copy. Omit `ki_id` entirely on a data-stream destination, which rejects it.
+      # `ki_id` is the index name, so a re-run replaces this profile on an index destination, and
+      # appends a newer revision of the same KI on a data stream, rather than writing a second KI.
       - name: create_ki
         type: context-engine.createKi
         with:

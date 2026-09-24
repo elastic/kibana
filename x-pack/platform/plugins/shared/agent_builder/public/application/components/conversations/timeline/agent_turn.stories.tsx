@@ -7,10 +7,9 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
+import { storyAgent } from '../../../__storybook__/agent_builder_services';
 import { AgentTurn } from './agent_turn';
 import {
   createCompletedTurnItem,
@@ -20,17 +19,6 @@ import {
   createFailedTurnItem,
   createAbortedTurnItem,
 } from './items/timeline_item.factory';
-
-const storyAgent: AgentDefinition = {
-  id: agentBuilderDefaultAgentId,
-  type: 'chat',
-  name: 'Elastic AI Agent',
-  description: '',
-  readonly: true,
-  configuration: {
-    tools: [],
-  },
-};
 
 const meta: Meta<typeof AgentTurn> = {
   title: 'Conversations/Timeline/Agent Turn',
