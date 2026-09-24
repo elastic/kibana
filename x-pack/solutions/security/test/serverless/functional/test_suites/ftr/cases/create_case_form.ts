@@ -46,8 +46,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         category: 'new',
       });
 
-      await testSubjects.click('create-case-submit');
-
       await cases.common.waitForCaseViewToLoad();
 
       const title = await testSubjects.find('appHeaderTitle');
