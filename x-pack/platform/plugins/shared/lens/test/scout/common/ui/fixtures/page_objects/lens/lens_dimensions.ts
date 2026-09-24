@@ -19,10 +19,7 @@ interface LensDimensionsDeps {
   closeDimensionEditorButton: Locator;
   closeDimensionEditor: () => Promise<void>;
   getVisualizationRenderCount: (chartTestSubj: string) => Promise<number | null>;
-  waitForVisualization: (
-    chartTestSubj: string,
-    options?: { afterCount?: number }
-  ) => Promise<void>;
+  waitForVisualization: (chartTestSubj: string, options?: { afterCount?: number }) => Promise<void>;
 }
 
 /**
@@ -370,9 +367,8 @@ export class LensDimensions {
     await this.page.testSubj.click(axisSideButtonTestSubj);
     await this.page.waitForFunction(
       (testSubj) =>
-        document
-          .querySelector(`[data-test-subj="${testSubj}"]`)
-          ?.getAttribute('aria-pressed') === 'true',
+        document.querySelector(`[data-test-subj="${testSubj}"]`)?.getAttribute('aria-pressed') ===
+        'true',
       axisSideButtonTestSubj,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
