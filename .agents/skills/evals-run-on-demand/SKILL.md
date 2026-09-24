@@ -1,5 +1,6 @@
 ---
 name: evals-run-on-demand
+disable-model-invocation: true
 description: >
   Trigger an on-demand @kbn/evals Buildkite run by describing what you want in plain English.
   Use when asked to run evals, trigger a Buildkite eval build, test a suite against a model,
@@ -29,13 +30,13 @@ Manual fallback: trigger the build from the Buildkite UI as described in
 
 From `$ARGUMENTS` and the conversation, extract:
 
-| Field    | Required | Maps to                                   | Default                         |
-| -------- | -------- | ----------------------------------------- | ------------------------------- |
-| Suite(s) | yes      | `EVAL_SUITE_ID` (comma-separated)         | ask                             |
+| Field    | Required | Maps to                                         | Default                            |
+| -------- | -------- | ----------------------------------------------- | ---------------------------------- |
+| Suite(s) | yes      | `EVAL_SUITE_ID` (comma-separated)               | ask                                |
 | Model(s) | no       | `EVAL_MODEL_GROUPS` / `EVAL_INCLUDE_EIS_MODELS` | all OpenRouter models (CI default) |
-| Judge    | no       | `EVAL_CONNECTOR_ID`                       | CI default judge                |
-| Branch   | no       | `--branch` (branch or `refs/pull/<N>/head`) | current branch (Step 3)       |
-| Grep     | no       | `EVAL_GREP`                               | none                            |
+| Judge    | no       | `EVAL_CONNECTOR_ID`                             | CI default judge                   |
+| Branch   | no       | `--branch` (branch or `refs/pull/<N>/head`)     | current branch (Step 3)            |
+| Grep     | no       | `EVAL_GREP`                                     | none                               |
 
 ## Step 1: Check `bk` authentication
 
@@ -52,15 +53,15 @@ If this fails or shows no organization, stop and tell the user:
 Read `.buildkite/pipelines/evals/evals.suites.json` with the Read tool. Match the user's words
 against each entry's `id` and `name`. Typical shorthand:
 
-| User says                         | Suite ID                    |
-| --------------------------------- | --------------------------- |
-| obs ai, observability ai          | `observability-ai`          |
-| sig events, significant events    | `significant-events`        |
-| nightshift                        | `nightshift-investigations` |
-| attack discovery                  | `attack-discovery`          |
-| smoke, smoke tests                | `smoke-tests`               |
-| agent builder                     | `agent-builder`             |
-| esql, es|ql generation            | `esql-generation`           |
+| User says                      | Suite ID                    |
+| ------------------------------ | --------------------------- | ----------------- |
+| obs ai, observability ai       | `observability-ai`          |
+| sig events, significant events | `significant-events`        |
+| nightshift                     | `nightshift-investigations` |
+| attack discovery               | `attack-discovery`          |
+| smoke, smoke tests             | `smoke-tests`               |
+| agent builder                  | `agent-builder`             |
+| esql, es                       | ql generation               | `esql-generation` |
 
 Several suites in one build is fine: join IDs with commas (`agent-builder,observability-ai`).
 
@@ -72,11 +73,11 @@ from the JSON and ask the user to pick before continuing.
 The pipeline can only build refs that exist in `elastic/kibana`. Branches on forks must be run
 through their PR ref.
 
-| User says                                 | `--branch`                           |
-| ----------------------------------------- | ------------------------------------ |
-| a branch name, including `main`           | that branch                          |
-| PR 1234, #1234, a PR URL                  | `refs/pull/1234/head`                |
-| nothing, my branch, this branch, this PR  | current branch, resolved as below    |
+| User says                                | `--branch`                        |
+| ---------------------------------------- | --------------------------------- |
+| a branch name, including `main`          | that branch                       |
+| PR 1234, #1234, a PR URL                 | `refs/pull/1234/head`             |
+| nothing, my branch, this branch, this PR | current branch, resolved as below |
 
 For the current branch:
 
@@ -109,18 +110,18 @@ Read `.buildkite/pipelines/evals/evals.suites.json` and collect every unique val
 suites' `weeklyEisModelGroups` and `defaultModelGroups` arrays. That set is the current list of
 EIS model groups (format `eis/<provider>-<model>`). Match short names against it by suffix:
 
-| User says                 | Match rule                                          |
-| ------------------------- | --------------------------------------------------- |
-| haiku, claude haiku       | newest id ending in `-haiku`                        |
-| sonnet, claude sonnet     | newest id ending in `-sonnet`                       |
-| opus, claude opus         | newest id ending in `-opus`                         |
-| opus 4.6 / 4.7 / 4.8      | the id with that exact version                      |
-| flash, gemini flash       | newest id ending in `-flash`                        |
-| flash lite                | id ending in `-flash-lite`                          |
-| gpt, gpt 5.4              | `eis/openai-gpt-5.4`                                |
-| gpt mini / gpt nano       | `eis/openai-gpt-5.4-mini` / `eis/openai-gpt-5.4-nano` |
-| luna / terra              | `eis/openai-gpt-5.6-luna` / `eis/openai-gpt-5.6-terra` |
-| gpt oss                   | `eis/openai-gpt-oss-120b`                           |
+| User says             | Match rule                                             |
+| --------------------- | ------------------------------------------------------ |
+| haiku, claude haiku   | newest id ending in `-haiku`                           |
+| sonnet, claude sonnet | newest id ending in `-sonnet`                          |
+| opus, claude opus     | newest id ending in `-opus`                            |
+| opus 4.6 / 4.7 / 4.8  | the id with that exact version                         |
+| flash, gemini flash   | newest id ending in `-flash`                           |
+| flash lite            | id ending in `-flash-lite`                             |
+| gpt, gpt 5.4          | `eis/openai-gpt-5.4`                                   |
+| gpt mini / gpt nano   | `eis/openai-gpt-5.4-mini` / `eis/openai-gpt-5.4-nano`  |
+| luna / terra          | `eis/openai-gpt-5.6-luna` / `eis/openai-gpt-5.6-terra` |
+| gpt oss               | `eis/openai-gpt-oss-120b`                              |
 
 "Newest" means the highest version number among matching ids. If the user names a version that
 is not in the list, show the matching ids and ask.
