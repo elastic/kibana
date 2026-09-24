@@ -220,12 +220,14 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(revision.decision).toBe('approved');
     });
 
-    // The post-gate settles used to run before the adoption, so a decision
-    // arriving late on a revised chain wrote to the superseded predecessor.
-    // `superseded` is terminal, so the write was refused rather than accepted —
-    // and the workflow-level handler then failed on the same conflict, leaving
-    // the live revision `pending` against an execution that was already over.
-    it('settles the live revision when a decision arrives after the deadline', async () => {
+    // The loop no longer re-checks the clock after the gate. The engine's own
+    // timeout task settles anything the deadline caught, and the release route
+    // refuses an expired decision, so the only thing that reached the old
+    // post-gate check was a resume landing in the seconds before Task Manager
+    // claimed the timeout task. That decision is now honoured, and — the part
+    // worth pinning — it is honoured against the revision, not the row it
+    // replaced.
+    it('honours a decision resumed after the deadline, against the live revision', async () => {
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
       const original = fixture.onlyProposal();
 
@@ -234,24 +236,10 @@ describe('create-investigation-proposal workflow execution', () => {
 
       const [predecessor, revision] = fixture.proposals();
       expect(predecessor.id).toBe(original.id);
-      // Untouched: settling has to land on the head, not resurrect the row it
-      // replaced.
+      // Untouched: the decision has to land on the head, not resurrect the row
+      // it replaced.
       expect(predecessor.status).toBe('superseded');
-      // Past the deadline, so the approval is refused rather than run — but it
-      // is the revision that gets settled, and it does get settled.
-      expect(revision.status).toBe('expired');
-      expect(revision.decision).toBeUndefined();
-    });
-
-    it('completes the run rather than stranding it when that decision is late', async () => {
-      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
-
-      await fixture.revise({ comment: 'clarified per analyst request' });
-      await fixture.resumeAfterDeadline(true);
-
-      expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
-      // The action must not run: the deadline passed before the answer landed.
-      expect(fixture.stepExecutions('execute_action', 'workflow.execute')).toHaveLength(0);
+      expect(revision.decision).toBe('approved');
     });
   });
 

@@ -36,17 +36,21 @@ settings:
       # Last chance to settle the record, so it adopts for the same reason the
       # loop does: a revision may have superseded the carried id, and every
       # write below would be refused on it.
-      - name: resolve_live_head_on_failure
+      #
+      # The `if` guards here are the only ones the id needs. This handler runs
+      # even when `create_proposal` itself failed, which is the one case where
+      # there is no id to settle; inside the loop it is always set.
+      - name: get_last_revision_on_failure
         type: proposals.getLatestRevision
         if: '${{ variables.current_proposal_id != blank }}'
         with:
           proposalId: '{{ variables.current_proposal_id }}'
 
-      - name: adopt_live_head_on_failure
+      - name: adopt_last_revision_on_failure
         type: data.set
         if: '${{ variables.current_proposal_id != blank }}'
         with:
-          current_proposal_id: '{{ steps.resolve_live_head_on_failure.output.proposalId }}'
+          current_proposal_id: '{{ steps.get_last_revision_on_failure.output.proposalId }}'
 
       # The carried id, not the create step's output: a clone moves the id, and
       # only `data.set` variables survive the loop and a HITL park.
@@ -215,74 +219,22 @@ steps:
     # Deliberately NO `iteration-timeout`: it wraps the body in a step-timeout
     # zone, which would cut the parked approval gate short.
     steps:
-      # Liquid cannot read a variable written by the same `data.set`, so `now`
-      # is negated and added rather than stored and subtracted.
-      - name: compute_remaining
-        type: data.set
-        with:
-          remaining_seconds: "${{ 'now' | date: '%s' | times: -1 | plus: variables.expires_epoch }}"
-
-      # One of the loop's two adopts. A revision appended between iterations
-      # moves the chain head, and `updateProposal` refuses a superseded row, so
-      # `settle_expired` below would fail and leave the live revision pending.
-      # The other adopt covers everything after the gate.
-      - name: adopt_live_head_each_iteration_branch
-        type: if
-        condition: '${{ variables.current_proposal_id != blank }}'
-        steps:
-          - name: resolve_live_head_each_iteration
-            type: proposals.getLatestRevision
-            with:
-              proposalId: '{{ variables.current_proposal_id }}'
-          - name: adopt_live_head_each_iteration
-            type: data.set
-            with:
-              current_proposal_id: '{{ steps.resolve_live_head_each_iteration.output.proposalId }}'
-              # The input travels with the id: an approval applies to the
-              # parameters the analyst actually saw.
-              action_input: '${{ steps.resolve_live_head_each_iteration.output.actionInput }}'
       # Conditions throughout use a single `and` or a single comparison on
       # purpose. Liquid has no operator precedence and no parentheses, so a
       # mixed `and`/`or` expression binds in a way that does not match how it
       # reads.
-      - name: settle_expired
-        type: if
-        condition: '${{ variables.remaining_seconds <= 0 }}'
-        on-failure:
-          # A revision can supersede the carried id between the adopt above and
-          # the write below, which throws ConflictError. Retry re-runs the
-          # block, so the re-resolve comes first and the write lands on the new
-          # head. Non-conflict errors are left to the workflow-level handler.
-          retry:
-            max-attempts: 2
-            condition: "${{ error.type == 'ConflictError' }}"
-        steps:
-          - name: resolve_live_head_on_expiry_conflict
-            type: proposals.getLatestRevision
-            with:
-              proposalId: '{{ variables.current_proposal_id }}'
-          - name: adopt_live_head_on_expiry_conflict
-            type: data.set
-            with:
-              current_proposal_id: '{{ steps.resolve_live_head_on_expiry_conflict.output.proposalId }}'
-              action_input: '${{ steps.resolve_live_head_on_expiry_conflict.output.actionInput }}'
-          - name: record_expiry
-            type: proposals.updateProposal
-            with:
-              proposalId: '{{ variables.current_proposal_id }}'
-              status: expired
-          - name: complete_expired
-            type: data.set
-            with:
-              completed: true
-              final_status: expired
-          - name: break_expired
-            type: loop.break
-
       - name: gate_branch
         type: if
         condition: '${{ variables.needs_gate == true }}'
         steps:
+          # Only the gate needs the clock; the autonomy path never waits.
+          # Liquid cannot read a variable written by the same `data.set`, so
+          # `now` is negated and added rather than stored and subtracted.
+          - name: compute_remaining
+            type: data.set
+            with:
+              remaining_seconds: "${{ 'now' | date: '%s' | times: -1 | plus: variables.expires_epoch }}"
+
           - name: await_decision
             type: waitForApproval
             # Parks for what is left of the deadline, so re-parks share one
@@ -290,9 +242,12 @@ steps:
             # wait-entry and frozen on step state as `dynamicTimeout`, so the
             # idle wake-up and the resume check read the same deadline.
             #
-            # `settle_expired` above guarantees this is positive; a
-            # non-positive render is rejected by `assertValidDuration`.
-            timeout: '{{ variables.remaining_seconds }}s'
+            # `at_least: 1` because a proposal can reach here already past its
+            # deadline — a cloned retry after a long action, say. It then parks
+            # for a second and times out into `handle_gate_timeout`, which is
+            # the single path that settles an expiry. A zero or negative render
+            # would be rejected by `assertValidDuration` instead.
+            timeout: '{{ variables.remaining_seconds | at_least: 1 }}s'
             on-failure:
               # A timeout is the expected end of an unanswered proposal, not a
               # malfunction, so `handle_gate_timeout` settles it inside the
@@ -375,51 +330,34 @@ steps:
               - name: park_for_privileged
                 type: loop.continue
 
-      # The single adopt every write below depends on, and the reason those
-      # branches read as a plain sequence: a revision appended while the gate
-      # was parked moves the chain head, and `updateProposal` refuses a
-      # superseded row.
+      # The loop's only adopt, and the reason every branch below reads as a
+      # plain sequence: a revision appended while the gate was parked moves the
+      # chain head, and `updateProposal` refuses a superseded row.
       #
       # Placement carries the invariant. After `authorize_decision`, so an
       # unprivileged resumer re-parks before this reads the chain; before every
       # branch that writes, so all of them settle the live head.
-      #
-      # Not redundant with the top-of-loop adopt, which covers `settle_expired`
-      # — that runs before the gate and never reaches this.
-      - name: adopt_live_head_before_writes_branch
-        type: if
-        condition: '${{ variables.current_proposal_id != blank }}'
-        steps:
-          - name: resolve_live_head_before_writes
-            type: proposals.getLatestRevision
-            with:
-              proposalId: '{{ variables.current_proposal_id }}'
-          - name: adopt_live_head_before_writes
-            type: data.set
-            with:
-              current_proposal_id: '{{ steps.resolve_live_head_before_writes.output.proposalId }}'
-              # The revision's own input, not the trigger's: an analyst who
-              # approved a corrected revision approved those parameters.
-              action_input: '${{ steps.resolve_live_head_before_writes.output.actionInput }}'
+      - name: get_last_revision
+        type: proposals.getLatestRevision
+        with:
+          proposalId: '{{ variables.current_proposal_id }}'
 
-      # Re-read after the gate, because the check at the top of the iteration
-      # ran before a park that may have lasted days. Only the HTTP routes
-      # refuse an expired decision, so a resume through the platform API or the
-      # Inbox would otherwise run its action past the deadline.
-      - name: recompute_remaining
+      - name: adopt_last_revision
         type: data.set
         with:
-          remaining_seconds: "${{ 'now' | date: '%s' | times: -1 | plus: variables.expires_epoch }}"
+          current_proposal_id: '{{ steps.get_last_revision.output.proposalId }}'
+          # The revision's own input, not the trigger's: an analyst who
+          # approved a corrected revision approved those parameters.
+          action_input: '${{ steps.get_last_revision.output.actionInput }}'
 
-      # Two orderings are load-bearing here, both against branches below.
+      # The only expiry path. The gate's timeout is the time left on the
+      # deadline, so a proposal nobody answered in time arrives here; one that
+      # was already expired when it reached the gate parked for a second and
+      # arrives here too.
       #
-      # Before `settle_expired_after_gate`: the gate's timeout *is* the time
-      # left on the deadline, so every timeout also satisfies that branch,
-      # which would record a late decision when none arrived at all.
-      #
-      # Before `handle_dismissal`: a timed-out gate answers blank, leaving
-      # `gate_approved` false, which that branch would record as a dismissal
-      # nobody made.
+      # Must precede `handle_dismissal`: a timed-out gate answers blank,
+      # leaving `gate_approved` false, which that branch would otherwise record
+      # as a dismissal nobody made.
       - name: handle_gate_timeout
         type: if
         condition: '${{ variables.gate_timed_out == true }}'
@@ -438,27 +376,6 @@ steps:
               completed: true
               final_status: expired
           - name: break_gate_expiry
-            type: loop.break
-
-      # A decision that arrived after the deadline, which only reaches here
-      # through a surface that does not refuse one: the platform resume API or
-      # the Inbox. A gate that simply ran out is handled above.
-      - name: settle_expired_after_gate
-        type: if
-        condition: '${{ variables.remaining_seconds <= 0 }}'
-        steps:
-          - name: record_late_expiry
-            type: proposals.updateProposal
-            with:
-              proposalId: '{{ variables.current_proposal_id }}'
-              status: expired
-              executionError: 'The decision arrived after the deadline had passed.'
-          - name: complete_late_expiry
-            type: data.set
-            with:
-              completed: true
-              final_status: expired
-          - name: break_late_expiry
             type: loop.break
 
       - name: handle_dismissal
