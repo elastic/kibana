@@ -357,9 +357,9 @@ describe('renderFlakySuiteIssueBody', () => {
         '| **Last seen** | [#12350](https://buildkite.com/elastic/kibana-on-merge/builds/12350#0199-b000) · 2026-09-09 12:00 UTC |',
       ].join('\n')
     );
-    // the newest failure's message is the one shown
+    // the newest failure's message is the one shown, first thing inside the block
     expect(body).toContain(
-      '<b>Message</b> (5 lines)\n\n```text\nError: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b\n```'
+      '</summary>\n\n```text\nError: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b\n```\n\n| Field | Value |'
     );
     // a single-test error keeps its build count; an unknown target is not a target
     expect(body).toContain(

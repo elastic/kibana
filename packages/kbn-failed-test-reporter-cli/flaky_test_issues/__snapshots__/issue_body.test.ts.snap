@@ -30,16 +30,6 @@ Latest run on \`main\` was skipped (2026-09-09).
 <details>
 <summary><b>96% of failures</b> (23 across 2 tests) · <code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>
 
-| Field | Value |
-|---|---|
-| **Tests** | *does not keep a hidden histogram after visiting Dashboard*, *reverts breakdown, interval, and visibility on a saved session* |
-| **Pipelines** | \`kibana-on-merge\` (15), \`kibana-pull-request\` (8) |
-| **Branches** | \`main\`, \`9.2\`, 2 PRs |
-| **Targets** | \`serverless-security_complete\`, \`stateful-classic\` |
-| **Last seen** | [#12350](https://buildkite.com/elastic/kibana-on-merge/builds/12350#0199-b000) · 2026-09-09 12:00 UTC |
-
-<b>Message</b> (5 lines)
-
 \`\`\`text
 Error: expect(locator).toBeVisible() failed
 
@@ -48,10 +38,22 @@ Locator: chart | pipe
 from b
 \`\`\`
 
+| Field | Value |
+|---|---|
+| **Tests** | *does not keep a hidden histogram after visiting Dashboard*, *reverts breakdown, interval, and visibility on a saved session* |
+| **Pipelines** | \`kibana-on-merge\` (15), \`kibana-pull-request\` (8) |
+| **Branches** | \`main\`, \`9.2\`, 2 PRs |
+| **Targets** | \`serverless-security_complete\`, \`stateful-classic\` |
+| **Last seen** | [#12350](https://buildkite.com/elastic/kibana-on-merge/builds/12350#0199-b000) · 2026-09-09 12:00 UTC |
+
 </details>
 
 <details>
 <summary><b>4% of failures</b> (1 in 1 build) · <code>TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.</code> · 7 Sep 2026</summary>
+
+\`\`\`text
+TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+\`\`\`
 
 | Field | Value |
 |---|---|
@@ -59,12 +61,6 @@ from b
 | **Pipelines** | \`kibana-on-merge\` only |
 | **Branches** | \`main\` |
 | **Last seen** | [#12200](https://buildkite.com/elastic/kibana-on-merge/builds/12200) · 2026-09-07 06:12 UTC |
-
-<b>Message</b> (1 line)
-
-\`\`\`text
-TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
-\`\`\`
 
 </details>
 
@@ -117,18 +113,16 @@ exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
 <details>
 <summary><b>100% of failures</b> (61 in 49 builds) · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
 
+\`\`\`text
+Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
+\`\`\`
+
 | Field | Value |
 |---|---|
 | **Pipelines** | \`kibana-on-merge\` (49), \`kibana-pull-request\` (12) |
 | **Branches** | \`main\`, 1 PR |
 | **Target** | \`stateful-classic\` |
 | **Last seen** | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-
-<b>Message</b> (1 line)
-
-\`\`\`text
-Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
-\`\`\`
 
 </details>
 

@@ -416,8 +416,8 @@ const formatErrorPipelines = (byPipeline: Map<string, number>): string => {
 };
 
 /**
- * One error, collapsed under its share of the suite's failures and its first line; inside, where
- * it was seen and the full message.
+ * One error, collapsed under its share of the suite's failures and its first line; inside, the
+ * full message, then where it was seen.
  */
 const errorSection = (suite: FlakySuite, error: SuiteError, totalFailures: number): string => {
   const counts =
@@ -450,14 +450,11 @@ const errorSection = (suite: FlakySuite, error: SuiteError, totalFailures: numbe
       ),
     ],
   ];
-  const message = formatFullFailureMessage(error.message);
   return collapsed(
     summary,
-    [
-      table(['Field', 'Value'], rows),
-      `<b>Message</b> (${plural(message.split('\n').length, 'line')})`,
-      codeBlock(message),
-    ].join('\n\n')
+    [codeBlock(formatFullFailureMessage(error.message)), table(['Field', 'Value'], rows)].join(
+      '\n\n'
+    )
   );
 };
 
