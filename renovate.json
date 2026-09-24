@@ -1699,7 +1699,6 @@
     {
       "groupName": "cypress",
       "matchDepPatterns": ["cypress"],
-      "excludeDepNames": ["eslint-plugin-cypress"],
       "reviewers": ["team:security-engineering-productivity"],
       "matchBaseBranches": ["main"],
       "addLabels": ["buildkite-ci", "ci:all-cypress-suites"],
