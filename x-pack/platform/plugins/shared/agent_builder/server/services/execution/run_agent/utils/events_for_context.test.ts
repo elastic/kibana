@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationRound, TimelineEvent } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
+  ConversationRoundStepType,
   TimelineEventType,
+  isExecutionTerminalEvent,
 } from '@kbn/agent-builder-common';
-import { pausedAndResumedRoundTimeline } from '../../../../test_utils/timeline';
+import {
+  abortedExec0Timeline,
+  completedRoundTimeline,
+  failedExec0Timeline,
+  pausedAndResumedRoundTimeline,
+  pausedThenInterruptedResumeTimeline,
+} from '../../../../test_utils/timeline';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
 import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
 import { eventsForContext } from './context_timeline';
@@ -95,5 +103,57 @@ describe('eventsForContext', () => {
 
   it('returns an empty timeline for a conversation without rounds or events', () => {
     expect(eventsForContext(conversationWith({}))).toEqual([]);
+  });
+});
+
+describe('eventsForContext — interrupted executions', () => {
+  const eventsNativeConversation = (events: TimelineEvent[]): Conversation =>
+    conversationWith({ schema_version: CONVERSATION_SCHEMA_VERSION, events });
+
+  const roundIds = (events: TimelineEvent[]) =>
+    Array.from(new Set(events.map((event) => event.id.split('::')[0])));
+
+  it('includes a failed and an aborted initial execution as interrupted rounds, in stored order', () => {
+    const events = [
+      ...completedRoundTimeline('r1', '2026-01-01T00:00:00.000Z'),
+      ...failedExec0Timeline(
+        'r2',
+        [{ type: ConversationRoundStepType.reasoning, reasoning: 'thinking' }],
+        '2026-01-01T00:01:00.000Z'
+      ),
+      ...abortedExec0Timeline('r3', '2026-01-01T00:02:00.000Z'),
+      ...completedRoundTimeline('r4', '2026-01-01T00:03:00.000Z'),
+    ];
+
+    const timeline = eventsForContext(eventsNativeConversation(events));
+
+    expect(roundIds(timeline)).toEqual(['r1', 'r2', 'r3', 'r4']);
+    expect(timeline.filter(isExecutionTerminalEvent).map((event) => event.type)).toEqual([
+      TimelineEventType.executionTerminated,
+      TimelineEventType.executionFailed,
+      TimelineEventType.executionAborted,
+      TimelineEventType.executionTerminated,
+    ]);
+    expect(timeline.filter((event) => event.type === TimelineEventType.executionStep)).toHaveLength(
+      1
+    );
+    // no duplicates
+    expect(new Set(timeline.map((event) => event.id)).size).toBe(timeline.length);
+  });
+
+  it('folds an interrupted resume into its round: one execution whose terminal is execution_failed', () => {
+    const timeline = eventsForContext(
+      eventsNativeConversation(pausedThenInterruptedResumeTimeline('r1'))
+    );
+
+    expect(
+      timeline.filter((event) => event.type === TimelineEventType.promptResponse)
+    ).toHaveLength(0);
+    expect(timeline.filter(isExecutionTerminalEvent).map((event) => event.id)).toEqual([
+      'r1::execution_failed',
+    ]);
+    expect(new Set(timeline.map((event) => event.execution_id).filter(Boolean))).toEqual(
+      new Set(['r1::execution'])
+    );
   });
 });

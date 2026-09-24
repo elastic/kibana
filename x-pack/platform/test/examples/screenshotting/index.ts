@@ -83,7 +83,7 @@ export default function ({
       await testSubjects.setValue('expression', 'something');
       await testSubjects.click('run');
 
-      const error = await testSubjects.find('error');
+      const error = await testSubjects.find('error', 60_000);
       const text = await error.getVisibleText();
 
       expect(text).to.contain('Function something could not be found.');

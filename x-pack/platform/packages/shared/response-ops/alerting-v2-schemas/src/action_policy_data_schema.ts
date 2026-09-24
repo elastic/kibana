@@ -177,9 +177,16 @@ export const bulkSnoozeActionPoliciesBodySchema = bulkByIdsSchema
 
 export type BulkSnoozeActionPoliciesBody = z.infer<typeof bulkSnoozeActionPoliciesBodySchema>;
 
+const actionPolicyNameSchema = z
+  .string()
+  .max(MAX_NAME_LENGTH)
+  .trim()
+  .min(1)
+  .describe('The name of the action policy.');
+
 const createActionPolicyDataBaseSchema = z
   .object({
-    name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
+    name: actionPolicyNameSchema,
     description: z
       .string()
       .max(MAX_DESCRIPTION_LENGTH)
@@ -211,12 +218,7 @@ export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataS
 
 export const updateActionPolicyDataSchema = z
   .object({
-    name: z
-      .string()
-      .min(1)
-      .max(MAX_NAME_LENGTH)
-      .optional()
-      .describe('The name of the action policy.'),
+    name: actionPolicyNameSchema.optional(),
     description: z
       .string()
       .max(MAX_DESCRIPTION_LENGTH)
@@ -301,6 +303,7 @@ export const findActionPoliciesRequestSchema = z
       .describe('The field to sort action policies by.'),
     sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
   })
+  .strict()
   .refine(
     ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
     { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }

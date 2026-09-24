@@ -8,8 +8,8 @@
  */
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { validateConnectorIds } from './validate_connector_ids';
-import type { ConnectorIdItem } from '../model/types';
 
 describe('validateConnectorIds', () => {
   const mockConnectorInstance = {
@@ -289,6 +289,31 @@ describe('validateConnectorIds', () => {
       expect(results[0].message).toContain(
         'Unknown-type connector UUID "non-existent-connector" not found'
       );
+    });
+
+    it('does not offer Create connector for waitForInput or waitForApproval step types', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: 'non-existent-connector',
+            connectorType: 'waitForInput',
+          }),
+          createConnectorIdItem({
+            id: 'test-id-2',
+            key: 'non-existent-connector',
+            connectorType: 'waitForApproval',
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toHaveLength(2);
+      for (const result of results) {
+        expect(result.hoverMessage).not.toContain('createConnector');
+        expect(result.hoverMessage).not.toContain('.waitForInput');
+        expect(result.hoverMessage).not.toContain('.waitForApproval');
+      }
     });
   });
 
