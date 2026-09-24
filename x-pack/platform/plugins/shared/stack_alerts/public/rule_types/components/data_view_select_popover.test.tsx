@@ -128,11 +128,18 @@ const dataViewOptions = [
 
 const mockAddDanger = jest.fn();
 
-const mount = () => {
+const mount = (
+  options: {
+    availableDataViews?: DataViewListItem[];
+    dataView?: DataView;
+  } = {}
+) => {
+  const { availableDataViews = dataViewListItems } = options;
+  const dataView = 'dataView' in options ? options.dataView : selectedDataView;
   const dataViewsMock = dataViewPluginMocks.createStartContract();
   dataViewsMock.getIdsWithTitle = jest
     .fn()
-    .mockImplementation(() => Promise.resolve(dataViewListItems));
+    .mockImplementation(() => Promise.resolve(availableDataViews));
   dataViewsMock.get = jest
     .fn()
     .mockImplementation((id: string) =>
@@ -145,7 +152,7 @@ const mount = () => {
     dependencies: { dataViews: dataViewsMock, dataViewEditor: dataViewEditorMock, toasts },
     onSelectDataView,
     onChangeMetaData: () => {},
-    dataView: selectedDataView,
+    dataView,
   };
 
   return {
@@ -173,6 +180,16 @@ describe('DataViewSelectPopover', () => {
 
     const getIdsWithTitleResult = await dataViewsMock.getIdsWithTitle.mock.results[0].value;
     expect(getIdsWithTitleResult).toBe(dataViewListItems);
+  });
+
+  test('shows an unselected data-view prompt when no data views are available', async () => {
+    const { dataViewsMock } = mount({ availableDataViews: [], dataView: undefined });
+
+    await waitFor(() => {
+      expect(dataViewsMock.getIdsWithTitle).toHaveBeenCalledWith(true);
+    });
+
+    expect(screen.getByTestId('selectDataViewExpression')).toHaveTextContent('Select a data view');
   });
 
   test('should open a popover on click and display loaded data views', async () => {

@@ -12,10 +12,8 @@ import { KibanaCodeEditorWrapper, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, type DiscoverPageObjects } from '../../../common/ui/fixtures';
 
-const SOURCE_INDEX = 'search-source-alert';
-const OUTPUT_INDEX = 'search-source-alert-output';
-const OTHER_DATA_VIEW = 'search-*';
-const CONNECTOR_NAME = 'search-source-alert-test-connector';
+const SOURCE_INDEX_PREFIX = 'search-source-alert';
+const OUTPUT_INDEX_PREFIX = 'search-source-alert-output';
 
 const getSearchSourceRuleParams = (
   dataView: string | Record<string, unknown>,
@@ -121,7 +119,7 @@ const createSearchSourceRule = async ({
   return response.data.id as string;
 };
 
-const getGeneratedContextLink = async (esClient: Client, ruleId: string) => {
+const getGeneratedContextLink = async (esClient: Client, outputIndex: string, ruleId: string) => {
   let contextLink = '';
   await expect
     .poll(
@@ -130,7 +128,7 @@ const getGeneratedContextLink = async (esClient: Client, ruleId: string) => {
           rule_id: string;
           context_link: string;
         }>({
-          index: OUTPUT_INDEX,
+          index: outputIndex,
           query: { match_phrase: { rule_id: ruleId } },
           size: 1,
         });
@@ -208,15 +206,18 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
   const createdRuleIds: string[] = [];
   let connectorId = '';
   let sourceDataViewId = '';
+  let sourceIndex = '';
+  let outputIndex = '';
+  let otherDataView = '';
 
   spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
-    await esClient.indices.delete({
-      index: [SOURCE_INDEX, OUTPUT_INDEX],
-      ignore_unavailable: true,
-    });
+    const uniqueSuffix = `${scoutSpace.id}-${Date.now()}`;
+    sourceIndex = `${SOURCE_INDEX_PREFIX}-${uniqueSuffix}`;
+    outputIndex = `${OUTPUT_INDEX_PREFIX}-${uniqueSuffix}`;
+    otherDataView = `${SOURCE_INDEX_PREFIX}-${uniqueSuffix}*`;
 
     await esClient.indices.create({
-      index: SOURCE_INDEX,
+      index: sourceIndex,
       settings: { number_of_shards: 1 },
       mappings: {
         properties: {
@@ -235,13 +236,13 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
     await esClient.bulk({
       refresh: 'wait_for',
       operations: Array.from({ length: 5 }, (_, i) => [
-        { index: { _index: SOURCE_INDEX } },
+        { index: { _index: sourceIndex } },
         { '@timestamp': timestamp, message: `msg-${i}` },
       ]).flat(),
     });
 
     await esClient.indices.create({
-      index: OUTPUT_INDEX,
+      index: outputIndex,
       settings: { number_of_shards: 1 },
       mappings: {
         properties: {
@@ -255,9 +256,9 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
 
     const connector = await apiServices.alerting.connectors.create(
       {
-        name: CONNECTOR_NAME,
+        name: `search-source-alert-test-connector-${uniqueSuffix}`,
         connectorTypeId: '.index',
-        config: { index: OUTPUT_INDEX },
+        config: { index: outputIndex },
         secrets: {},
       },
       scoutSpace.id
@@ -265,19 +266,29 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
     connectorId = connector.id;
 
     const sourceDataViewResponse = await apiServices.dataViews.create({
-      title: 'search-source-alert',
+      title: sourceIndex,
       timeFieldName: '@timestamp',
       spaceId: scoutSpace.id,
     });
     sourceDataViewId = sourceDataViewResponse.data.id;
     const {
+      data: { id: outputDataViewId },
+    } = await apiServices.dataViews.create({
+      title: outputIndex,
+      spaceId: scoutSpace.id,
+    });
+    const {
       data: { id: searchSourceAlertWildcardDataViewId },
     } = await apiServices.dataViews.create({
-      title: 'search-*',
+      title: otherDataView,
       timeFieldName: '@timestamp',
       spaceId: scoutSpace.id,
     });
-    createdDataViewIds.push(sourceDataViewId, searchSourceAlertWildcardDataViewId);
+    createdDataViewIds.push(
+      sourceDataViewId,
+      outputDataViewId,
+      searchSourceAlertWildcardDataViewId
+    );
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -297,55 +308,77 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       await apiServices.alerting.connectors.delete(connectorId, scoutSpace.id);
     }
     await esClient.indices.delete({
-      index: [SOURCE_INDEX, OUTPUT_INDEX],
+      index: [sourceIndex, outputIndex],
       ignore_unavailable: true,
     });
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('should validate the time field and create an alert', async ({ page, pageObjects }) => {
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.selectDataView(SOURCE_INDEX);
-    await pageObjects.datePicker.setCommonlyUsedTime('Last_15 minutes');
+  spaceTest(
+    'should validate the time field and create an alert',
+    async ({ apiServices, esClient, page, pageObjects, scoutSpace }) => {
+      const alertName = `tmp-rule-${Date.now()}`;
+      await pageObjects.discover.goto({ queryMode: 'classic' });
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.selectDataView(sourceIndex);
+      await pageObjects.datePicker.setCommonlyUsedTime('Last_15 minutes');
 
-    await pageObjects.discover.openSearchThresholdRuleFlyout();
-    await defineSearchSourceAlert(page, `tmp-rule-${Date.now()}`);
+      await pageObjects.discover.openSearchThresholdRuleFlyout();
+      await defineSearchSourceAlert(page, alertName);
 
-    await spaceTest.step('rejects a data view without a time field', async () => {
-      await page.testSubj.click('selectDataViewExpression');
-      const dataViewSearchInput = page.testSubj.locator('indexPattern-switcher--input');
-      await dataViewSearchInput.waitFor({ state: 'visible' });
-      await dataViewSearchInput.fill('search-source-alert-o*');
-      await page.testSubj.click('explore-matching-indices-button');
+      await spaceTest.step('rejects a data view without a time field', async () => {
+        await page.testSubj.click('selectDataViewExpression');
+        const dataViewSearchInput = page.testSubj.locator('indexPattern-switcher--input');
+        await dataViewSearchInput.waitFor({ state: 'visible' });
+        await dataViewSearchInput.fill('search-source-alert-o*');
+        await page.testSubj.click('explore-matching-indices-button');
 
-      await expect(page.testSubj.locator('selectDataViewExpression')).toContainText(
-        'search-source-alert-o*'
-      );
-      await expect(page.testSubj.locator('esQueryAlertExpressionError')).toHaveText(
-        'Data view should have a time field.'
-      );
-    });
+        await expect(page.testSubj.locator('selectDataViewExpression')).toContainText(
+          'search-source-alert-o*'
+        );
+        await expect(page.testSubj.locator('esQueryAlertExpressionError')).toHaveText(
+          'Data view should have a time field.'
+        );
+        await page.testSubj.click('ruleFormStep-details');
+        await page.components.toast().closeAll();
+        await expect(page.testSubj.locator('ruleFlyoutFooterSaveButton')).toBeDisabled();
+        await page.testSubj.click('ruleFormStep-definition');
+      });
 
-    await spaceTest.step('switches to a valid data view and creates the alert', async () => {
-      await page.testSubj.click('selectDataViewExpression');
-      const dataViewSwitcher = page.testSubj.locator('indexPattern-switcher');
-      await dataViewSwitcher.waitFor({ state: 'visible' });
-      await page.testSubj.locator('indexPattern-switcher--input').fill('');
-      await dataViewSwitcher.locator(`[data-test-subj="dataView-${SOURCE_INDEX}"]`).click();
+      await spaceTest.step('switches to a valid data view and creates the alert', async () => {
+        await page.testSubj.click('selectDataViewExpression');
+        const dataViewSwitcher = page.testSubj.locator('indexPattern-switcher');
+        await dataViewSwitcher.waitFor({ state: 'visible' });
+        await page.testSubj.locator('indexPattern-switcher--input').fill('');
+        await dataViewSwitcher.locator(`[data-test-subj="dataView-${sourceIndex}"]`).click();
 
-      await expect(page.testSubj.locator('selectDataViewExpression')).toContainText(SOURCE_INDEX);
-      await expect(page.testSubj.locator('esQueryAlertExpressionError')).toBeHidden();
+        await expect(page.testSubj.locator('selectDataViewExpression')).toContainText(sourceIndex);
+        await expect(page.testSubj.locator('esQueryAlertExpressionError')).toBeHidden();
 
-      await page.testSubj.click('ruleFormStep-details');
-      await page.components.toast().closeAll();
-      const saveButton = page.testSubj.locator('ruleFlyoutFooterSaveButton');
-      await saveButton.click();
-      await saveButton.waitFor({ state: 'hidden' });
+        await page.testSubj.click('ruleFormStep-details');
+        await page.components.toast().closeAll();
+        const saveButton = page.testSubj.locator('ruleFlyoutFooterSaveButton');
+        await saveButton.click();
+        await saveButton.waitFor({ state: 'hidden' });
 
-      await pageObjects.toasts.waitForToastWithText('Created rule');
-    });
-  });
+        await pageObjects.toasts.waitForToastWithText('Created rule');
+        const {
+          data: { data: createdRules },
+        } = await apiServices.alerting.rules.find(
+          { search: alertName, search_fields: 'name' },
+          scoutSpace.id
+        );
+        const [createdRule] = createdRules;
+        if (!createdRule) {
+          throw new Error(
+            `Could not find the rule created through the Discover flyout: ${alertName}`
+          );
+        }
+        createdRuleIds.push(createdRule.id);
+        await getGeneratedContextLink(esClient, outputIndex, createdRule.id);
+      });
+    }
+  );
 
   spaceTest(
     'should preserve snapshot rule state while View in Discover uses updated params',
@@ -360,7 +393,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       });
       createdRuleIds.push(ruleId);
 
-      const contextLink = await getGeneratedContextLink(esClient, ruleId);
+      const contextLink = await getGeneratedContextLink(esClient, outputIndex, ruleId);
 
       await apiServices.alerting.rules.update(
         ruleId,
@@ -376,7 +409,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
         await pageObjects.dataGrid.waitForDocTableRendered();
 
         await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
-        await assertInitialResults(pageObjects, SOURCE_INDEX);
+        await assertInitialResults(pageObjects, sourceIndex);
       });
 
       await spaceTest.step('View in Discover uses current params', async () => {
@@ -387,7 +420,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
         await pageObjects.dataGrid.waitForDocTableRendered();
 
         await expect(page.testSubj.locator('globalToastList')).toBeHidden();
-        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(SOURCE_INDEX);
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(sourceIndex);
         await assertCurrentResults(pageObjects, sourceDataViewId);
       });
     }
@@ -417,21 +450,21 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       await openRuleInDiscover();
 
       await expect(page.testSubj.locator('globalToastList')).toBeHidden();
-      await assertInitialResults(pageObjects, SOURCE_INDEX);
+      await assertInitialResults(pageObjects, sourceIndex);
       expect(await pageObjects.discover.getCurrentDataViewId()).toBe(sourceDataViewId);
 
-      await pageObjects.discover.selectDataView(OTHER_DATA_VIEW);
+      await pageObjects.discover.selectDataView(otherDataView);
       await pageObjects.discover.clickNewSearch();
 
-      expect(await pageObjects.discover.getSelectedDataViewName()).toBe(OTHER_DATA_VIEW);
+      expect(await pageObjects.discover.getSelectedDataViewName()).toBe(otherDataView);
 
       await openRuleInDiscover();
-      await pageObjects.discover.selectDataView(OTHER_DATA_VIEW);
+      await pageObjects.discover.selectDataView(otherDataView);
       await pageObjects.discover.saveSearch(
         `search-source-alert-session-${scoutSpace.id}-${Date.now()}`
       );
 
-      expect(await pageObjects.discover.getSelectedDataViewName()).toBe(OTHER_DATA_VIEW);
+      expect(await pageObjects.discover.getSelectedDataViewName()).toBe(otherDataView);
     }
   );
 
@@ -443,8 +476,8 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       const updatedDataViewTitle = `search-source-alert-updated-${uniqueSuffix}`;
       await esClient.indices.updateAliases({
         actions: [
-          { add: { index: SOURCE_INDEX, alias: initialDataViewTitle } },
-          { add: { index: SOURCE_INDEX, alias: updatedDataViewTitle } },
+          { add: { index: sourceIndex, alias: initialDataViewTitle } },
+          { add: { index: sourceIndex, alias: updatedDataViewTitle } },
         ],
       });
 
@@ -466,7 +499,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       });
       createdRuleIds.push(ruleId);
 
-      const contextLink = await getGeneratedContextLink(esClient, ruleId);
+      const contextLink = await getGeneratedContextLink(esClient, outputIndex, ruleId);
 
       await apiServices.alerting.rules.update(
         ruleId,
@@ -537,7 +570,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       });
       createdRuleIds.push(ruleId);
 
-      const contextLink = await getGeneratedContextLink(esClient, ruleId);
+      const contextLink = await getGeneratedContextLink(esClient, outputIndex, ruleId);
 
       const assertAdHocResults = async () => {
         await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
@@ -576,7 +609,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       const uniqueSuffix = `${scoutSpace.id}-${Date.now()}`;
       const dataViewTitle = `search-source-alert-deleted-${uniqueSuffix}`;
       await esClient.indices.putAlias({
-        index: SOURCE_INDEX,
+        index: sourceIndex,
         name: dataViewTitle,
       });
 
@@ -598,7 +631,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       });
       createdRuleIds.push(ruleId);
 
-      const contextLink = await getGeneratedContextLink(esClient, ruleId);
+      const contextLink = await getGeneratedContextLink(esClient, outputIndex, ruleId);
       await apiServices.dataViews.delete(dataViewId, scoutSpace.id);
 
       await spaceTest.step('the previous notification link still renders results', async () => {
@@ -634,7 +667,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       const uniqueSuffix = `${scoutSpace.id}-${Date.now()}`;
       const dataViewTitle = `search-source-alert-deleted-rule-${uniqueSuffix}`;
       await esClient.indices.putAlias({
-        index: SOURCE_INDEX,
+        index: sourceIndex,
         name: dataViewTitle,
       });
 
@@ -655,7 +688,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       });
       createdRuleIds.push(ruleId);
 
-      const contextLink = await getGeneratedContextLink(esClient, ruleId);
+      const contextLink = await getGeneratedContextLink(esClient, outputIndex, ruleId);
       await apiServices.alerting.rules.delete(ruleId, scoutSpace.id);
 
       await page.goto(new URL(contextLink, page.url()).toString());
