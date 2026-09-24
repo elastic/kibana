@@ -9,6 +9,7 @@ import { getAvailableConnectors, takeRandomLlmSample } from '@kbn/gen-ai-functio
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { chatCompleteSuite } from './chat_complete';
 import { productDocsBaseInstallationSuite } from './product_docs_base';
+import { productDocsSearchQualitySuite } from './product_docs_search_quality';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -34,5 +35,6 @@ export default function (providerContext: FtrProviderContext) {
 
     const firstConnector = connectors[0];
     productDocsBaseInstallationSuite(firstConnector, providerContext);
+    productDocsSearchQualitySuite(firstConnector, providerContext);
   });
 }
