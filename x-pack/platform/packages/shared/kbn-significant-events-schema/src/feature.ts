@@ -35,9 +35,10 @@ export const INFERRED_FEATURE_TYPES = [
 ] as const;
 
 // TODO: it would be nice to rename id->slug and uuid->id for consistency with queries
+// The owning source is not part of the write payload: the server stamps it from the
+// route (or tool) it was submitted through. See `featureSchema` for the read shape.
 export const baseFeatureSchema = z.object({
   id: z.string().max(MAX_ID_LENGTH),
-  stream_name: z.string().max(MAX_ID_LENGTH),
   type: z.string().max(MAX_ID_LENGTH),
   subtype: z.string().max(MAX_ID_LENGTH).optional(),
   title: z.string().max(MAX_TITLE_LENGTH).optional(),
@@ -89,10 +90,13 @@ export const featureUpsertSchema = baseFeatureSchema.and(
 export type FeatureUpsert = z.infer<typeof featureUpsertSchema>;
 
 // Canonical persisted feature. Once a feature has been stored and read back it
-// always carries its derived `uuid`.
+// always carries its derived `uuid` and the stream it belongs to. `stream_name`
+// is stamped by the server from the route the feature was written through;
+// internally it maps to `source.id` in storage.
 export const featureSchema = featureUpsertSchema.and(
   z.object({
     uuid: z.string().max(MAX_ID_LENGTH),
+    stream_name: z.string().max(MAX_ID_LENGTH),
   })
 );
 
@@ -147,7 +151,7 @@ export function normalizeFeatureSlugForMatching(id: string): string {
  * pair (slug, stream_name). The slug is normalized via `normalizeFeatureSlug`.
  * Used as the storage document id and for delete/exclude/restore operations.
  */
-export function computeFeatureUuid(feature: Pick<BaseFeature, 'id' | 'stream_name'>): string {
+export function computeFeatureUuid(feature: Pick<Feature, 'id' | 'stream_name'>): string {
   const slug = normalizeFeatureSlug(feature.id);
   return v5(objectHash([feature.stream_name, slug]), v5.DNS);
 }
@@ -194,7 +198,6 @@ const getStringArray = (value: unknown): string[] =>
 export function toBaseFeature(feature: Feature): BaseFeature {
   return {
     id: feature.id,
-    stream_name: feature.stream_name,
     type: feature.type,
     subtype: feature.subtype,
     title: feature.title,
@@ -236,7 +239,6 @@ export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): Base
 
   return {
     id: existing.id,
-    stream_name: existing.stream_name,
     type: existing.type,
     subtype: existing.subtype,
     title: incoming.title,

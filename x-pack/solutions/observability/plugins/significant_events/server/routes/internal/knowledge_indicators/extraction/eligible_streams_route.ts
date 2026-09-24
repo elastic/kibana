@@ -9,10 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
 } from '@kbn/management-settings-ids';
-import { parseIndexPatterns } from '@kbn/streams-schema';
 import {
   MAX_ID_LENGTH,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -27,21 +24,21 @@ import {
 import { StatusError } from '../../../../lib/errors/status_error';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import {
-  classifyStreams,
-  filterEligibleStreams,
-  type StreamCandidate,
-  type StreamClassificationResult,
-} from './classify_streams';
+  classifySources,
+  type SourceCandidate,
+  type SourceClassificationResult,
+} from './classify_sources';
+import { reconcileSourceCatalog } from '../reconcile_source_catalog';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
 export interface EligibleStreamsResponse {
-  candidates: StreamCandidate[];
-  alreadyRunning: StreamClassificationResult['alreadyRunning'];
-  upToDate: StreamCandidate[];
+  candidates: SourceCandidate[];
+  alreadyRunning: SourceClassificationResult['alreadyRunning'];
+  upToDate: SourceCandidate[];
   unsupported: string[];
-  skipped: StreamCandidate[];
+  skipped: SourceCandidate[];
   settings: {
     enabled: boolean;
     intervalHours: number;
@@ -76,7 +73,7 @@ const eligibleStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -94,13 +91,14 @@ const eligibleStreamsRoute = createServerRoute({
     getScopedClients,
     server,
     workflowClients,
+    maintenanceService,
   }): Promise<EligibleStreamsResponse> => {
     const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing } =
+    const { sourcesClient, globalUiSettingsClient, licensing, getKnowledgeIndicatorClient } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
@@ -122,33 +120,29 @@ const eligibleStreamsRoute = createServerRoute({
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
-    const [connectorId, executions, allStreams, isQueryStreamsEnabled, rawIndexPatterns] =
-      await Promise.all([
-        resolveConnectorForFeature({
-          searchInferenceEndpoints: server.searchInferenceEndpoints,
-          featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-          featureName: 'knowledge indicator extraction',
-          request,
-        }),
-        streamsKIsOnboardingClient.getRecentExecutions(),
-        streamsClient.listStreams(),
-        uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
-        uiSettingsClient.get<string>(OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS),
-      ]);
-
-    const indexPatterns = parseIndexPatterns(rawIndexPatterns);
-
-    const eligibleStreams = filterEligibleStreams({
-      allStreams,
-      isQueryStreamsEnabled,
-      indexPatterns,
-    });
+    const kiClient = await getKnowledgeIndicatorClient();
+    const [connectorId, { sources }] = await Promise.all([
+      resolveConnectorForFeature({
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+        featureName: 'knowledge indicator extraction',
+        request,
+      }),
+      reconcileSourceCatalog({
+        sourcesClient,
+        kiClient,
+        onboardingClient: streamsKIsOnboardingClient,
+        maintenanceService,
+        request,
+      }),
+    ]);
+    const executions = await streamsKIsOnboardingClient.getRecentExecutions();
 
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
-    const { alreadyRunning, candidates, upToDate, unsupported } = classifyStreams({
-      allStreams: eligibleStreams,
+    const { alreadyRunning, candidates, upToDate, unsupported } = classifySources({
+      sources: sources.filter((source) => source.enabled),
       executions,
       intervalHours,
     });

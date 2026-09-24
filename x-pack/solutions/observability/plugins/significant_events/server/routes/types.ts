@@ -7,11 +7,13 @@
 
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { SignificantEventsTuningConfig } from '@kbn/significant-events-schema';
+import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
@@ -22,6 +24,7 @@ import type { SignificantEventsAlertingContext } from '../lib/significant_events
 import type { SignificantEventsServer } from '../types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
+
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
 import type { CleanupWorkflowService } from '../lib/workflows/cleanup_workflow';
@@ -46,6 +49,8 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
    */
   streamDataEsClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  /** Request space (`request.spaceId`); knowledge indicators and their rules are scoped to it. */
+  space: string;
   attachmentClient: AttachmentClient;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>;
@@ -57,6 +62,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   globalUiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   streamsClient: StreamsClient;
+  sourcesClient: SourcesClient;
   isSecurityEnabled: boolean;
   tuningConfig: SignificantEventsTuningConfig;
 }

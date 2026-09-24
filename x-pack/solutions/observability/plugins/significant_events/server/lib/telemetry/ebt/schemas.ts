@@ -59,16 +59,10 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
         description: 'Duration of the query generation operation in milliseconds',
       },
     },
-    stream_type: {
+    source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
+        description: 'The Nightshift source id the queries were generated for',
       },
     },
     external_content_tool_continuations: {
@@ -221,16 +215,10 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
         description: 'Duration of this iteration in milliseconds',
       },
     },
-    stream_type: {
+    source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
+        description: 'The Nightshift source id the features were identified for',
       },
     },
     state: {
@@ -280,16 +268,10 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
         description: 'Whether KI creation succeeded',
       },
     },
-    stream_name: {
+    source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired, classic, query, or unknown',
+        description: 'The Nightshift source id the knowledge indicator was created for',
       },
     },
     error_message: {
@@ -309,10 +291,10 @@ const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentTo
         description: 'Whether starting KI identification succeeded',
       },
     },
-    stream_name: {
+    source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The name of the Stream',
+        description: 'The Nightshift source id identification was started for',
       },
     },
     error_message: {
@@ -381,16 +363,10 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
 };
 
 const codeAnalysisGroundingSchema: RootSchema<CodeAnalysisGroundingProps> = {
-  stream_name: {
+  source_id: {
     type: 'keyword',
     _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  stream_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the stream: wired or classic',
+      description: 'The Nightshift source id the code analysis was grounded for',
     },
   },
   status: {
@@ -515,10 +491,10 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
 };
 
 const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingScheduledProps> = {
-  stream_name: {
+  source_id: {
     type: 'keyword',
     _meta: {
-      description: 'The name of the stream being onboarded',
+      description: 'The Nightshift source id being onboarded',
     },
   },
   execution_id: {

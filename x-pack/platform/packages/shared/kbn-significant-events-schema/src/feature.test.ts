@@ -24,7 +24,6 @@ const createFeature = ({
   meta?: Record<string, unknown>;
 } = {}): BaseFeature => ({
   id,
-  stream_name: 'logs.test',
   type: 'technology',
   subtype: 'identity_provider',
   title: 'Okta',

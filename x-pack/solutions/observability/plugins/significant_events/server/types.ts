@@ -41,6 +41,10 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type {
+  NightshiftSourcesServerSetup,
+  NightshiftSourcesServerStart,
+} from '@kbn/nightshift-sources-plugin/server';
+import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
@@ -63,6 +67,7 @@ export interface SignificantEventsPluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   streams: StreamsPluginSetup;
+  nightshiftSources: NightshiftSourcesServerSetup;
   nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
 }
 
@@ -81,6 +86,7 @@ export interface SignificantEventsPluginStartDependencies {
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   streams: StreamsPluginStart;
+  nightshiftSources: NightshiftSourcesServerStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
 

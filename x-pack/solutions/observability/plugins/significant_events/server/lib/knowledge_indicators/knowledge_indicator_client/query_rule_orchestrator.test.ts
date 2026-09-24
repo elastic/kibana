@@ -7,15 +7,14 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
-import type { Streams } from '@kbn/streams-schema';
 import type { Feature, QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { BulkCreateRulesError, type IRulesManagementClient } from './rules/rules_management_client';
 import type { IndicatorReader } from './indicator_reader';
 import type { IndicatorWriter } from './indicator_writer';
 import { QueryRuleOrchestrator } from './query_rule_orchestrator';
 
-const STREAM = 'logs.test';
-const definition = { name: STREAM } as Streams.all.Definition;
+const SPACE = 'default';
+const SOURCE = 'logs.test';
 
 const makeQuery = (
   overrides: Partial<StreamQuery> & { id?: string; severity_score?: number } = {}
@@ -33,7 +32,7 @@ const makeLink = (
   overrides: Partial<StreamQuery> & { id?: string; ruleBacked?: boolean } = {}
 ): QueryLink => ({
   query: makeQuery(overrides),
-  stream_name: STREAM,
+  stream_name: SOURCE,
   rule_backed: overrides.ruleBacked ?? false,
   rule_id: `rule-${overrides.id ?? 'q1'}`,
 });
@@ -59,7 +58,7 @@ function createOrchestrator({
   } as unknown as jest.Mocked<IndicatorWriter>;
 
   const reader = {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ [STREAM]: currentLinks }),
+    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ [SOURCE]: currentLinks }),
   } as unknown as jest.Mocked<IndicatorReader>;
 
   const logger = loggerMock.create();
@@ -68,7 +67,8 @@ function createOrchestrator({
     logger,
     true,
     writer,
-    reader
+    reader,
+    SPACE
   );
 
   return { orchestrator, rulesManagementClient, writer, reader, logger };
@@ -84,7 +84,7 @@ describe('QueryRuleOrchestrator', () => {
         esql: { query: 'FROM logs | WHERE body.text:"critical"' },
       });
 
-      await orchestrator.syncQueries(definition, [newQuery]);
+      await orchestrator.syncQueries(SOURCE, [newQuery]);
 
       expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
     });
@@ -99,7 +99,7 @@ describe('QueryRuleOrchestrator', () => {
         esql: { query: 'FROM logs | WHERE body.text:"critical"' },
       });
 
-      await expect(orchestrator.syncQueries(definition, [newQuery])).rejects.toBe(createError);
+      await expect(orchestrator.syncQueries(SOURCE, [newQuery])).rejects.toBe(createError);
 
       expect(rulesManagementClient.bulkDeleteRules).not.toHaveBeenCalled();
       expect(writer.bulk).not.toHaveBeenCalled();
@@ -125,7 +125,7 @@ describe('QueryRuleOrchestrator', () => {
         })
       );
 
-      await expect(orchestrator.syncQueries(definition, queries)).rejects.toBe(createError);
+      await expect(orchestrator.syncQueries(SOURCE, queries)).rejects.toBe(createError);
 
       const createdChunks = rulesManagementClient.bulkCreateRules.mock.calls
         .slice(0, 2)
@@ -144,7 +144,7 @@ describe('QueryRuleOrchestrator', () => {
       );
 
       await expect(
-        orchestrator.syncQueries(definition, [
+        orchestrator.syncQueries(SOURCE, [
           makeQuery({
             id: 'new-high',
             severity_score: 80,
@@ -174,7 +174,7 @@ describe('QueryRuleOrchestrator', () => {
         })
       );
 
-      await expect(orchestrator.syncQueries(definition, queries)).rejects.toBe(storageError);
+      await expect(orchestrator.syncQueries(SOURCE, queries)).rejects.toBe(storageError);
 
       const createdIds = rulesManagementClient.bulkCreateRules.mock.calls.flatMap(([rules]) =>
         rules.map(({ id }) => id)
@@ -203,7 +203,7 @@ describe('QueryRuleOrchestrator', () => {
       });
 
       await expect(
-        orchestrator.syncQueries(definition, [replacement], { currentLinks: [existing] })
+        orchestrator.syncQueries(SOURCE, [replacement], { currentLinks: [existing] })
       ).rejects.toBe(storageError);
 
       const [{ id: createdId }] = rulesManagementClient.bulkCreateRules.mock.calls[0][0];
@@ -232,7 +232,7 @@ describe('QueryRuleOrchestrator', () => {
       });
 
       await expect(
-        orchestrator.syncQueries(definition, [replacement], { currentLinks: [existing] })
+        orchestrator.syncQueries(SOURCE, [replacement], { currentLinks: [existing] })
       ).rejects.toBeInstanceOf(AggregateError);
 
       const [{ id: createdId }] = rulesManagementClient.bulkCreateRules.mock.calls[0][0];
@@ -262,7 +262,7 @@ describe('QueryRuleOrchestrator', () => {
         esql: { query: 'FROM logs | WHERE body.text:"oom"' },
       });
 
-      await orchestrator.syncQueries(definition, [existingLow.query, newHigh], {
+      await orchestrator.syncQueries(SOURCE, [existingLow.query, newHigh], {
         currentLinks: [existingLow],
       });
 
@@ -291,7 +291,7 @@ describe('QueryRuleOrchestrator', () => {
         currentLinks: [existingLow],
       });
 
-      await orchestrator.promoteQueries(definition, ['low-sev']);
+      await orchestrator.promoteQueries(SOURCE, ['low-sev']);
 
       expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
@@ -322,7 +322,7 @@ describe('QueryRuleOrchestrator', () => {
 
       await expect(
         orchestrator.promoteQueries(
-          definition,
+          SOURCE,
           links.map(({ query }) => query.id)
         )
       ).rejects.toBe(createError);
@@ -344,7 +344,7 @@ describe('QueryRuleOrchestrator', () => {
         esql: { query: 'FROM logs-* | KEEP message | WHERE level == "error"' },
       });
 
-      await orchestrator.syncQueries(definition, [unsupported]);
+      await orchestrator.syncQueries(SOURCE, [unsupported]);
 
       expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
@@ -368,7 +368,7 @@ describe('QueryRuleOrchestrator', () => {
         esql: { query: 'FROM logs-* | KEEP message | WHERE level == "error"' },
       });
 
-      await orchestrator.syncQueries(definition, [next], { currentLinks: [existing] });
+      await orchestrator.syncQueries(SOURCE, [next], { currentLinks: [existing] });
 
       expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
       expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-was-backed']);
@@ -387,7 +387,7 @@ describe('QueryRuleOrchestrator', () => {
         currentLinks: [unsupported],
       });
 
-      const result = await orchestrator.promoteQueries(definition, ['bad-match']);
+      const result = await orchestrator.promoteQueries(SOURCE, ['bad-match']);
 
       // Counted apart from STATS: the user's remedy is to rewrite the query.
       expect(result).toEqual({ promoted: 0, skipped_stats: 0, skipped_ineligible: 1 });
@@ -408,7 +408,7 @@ describe('QueryRuleOrchestrator', () => {
         currentLinks: [stats],
       });
 
-      const result = await orchestrator.promoteQueries(definition, ['stats-ki']);
+      const result = await orchestrator.promoteQueries(SOURCE, ['stats-ki']);
 
       expect(result).toEqual({ promoted: 0, skipped_stats: 1, skipped_ineligible: 0 });
       expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
@@ -421,7 +421,7 @@ describe('QueryRuleOrchestrator', () => {
       const { orchestrator, writer } = createOrchestrator({ currentLinks: [existing] });
 
       await orchestrator.upsertQuery(
-        definition,
+        SOURCE,
         makeQuery({ id: 'q1', expires_at: '2030-01-01T00:00:00.000Z' })
       );
 
@@ -436,10 +436,7 @@ describe('QueryRuleOrchestrator', () => {
       const existing = makeLink({ id: 'q1', features: [{ id: 'feat-1' }] });
       const { orchestrator, writer } = createOrchestrator({ currentLinks: [existing] });
 
-      await orchestrator.upsertQuery(
-        definition,
-        makeQuery({ id: 'q1', features: [{ id: 'feat-2' }] })
-      );
+      await orchestrator.upsertQuery(SOURCE, makeQuery({ id: 'q1', features: [{ id: 'feat-2' }] }));
 
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
       const op = bulkOps.find(
@@ -456,10 +453,10 @@ describe('QueryRuleOrchestrator', () => {
         currentLinks: [expiredBacked],
       });
 
-      const result = await orchestrator.demoteQueries(definition, ['expired-1']);
+      const result = await orchestrator.demoteQueries(SOURCE, ['expired-1']);
 
       expect(reader.getStreamToQueryLinksMap).toHaveBeenCalledWith(
-        [STREAM],
+        [SOURCE],
         expect.objectContaining({ includeExpired: true })
       );
       expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-expired-1']);
@@ -471,7 +468,7 @@ describe('QueryRuleOrchestrator', () => {
   describe('reconcileStream', () => {
     function makeReconcileLink(overrides: Partial<QueryLink> = {}): QueryLink {
       return {
-        stream_name: STREAM,
+        stream_name: SOURCE,
         rule_backed: true,
         rule_id: 'rule-1',
         expires_at: '2020-01-01T00:00:00.000Z',
@@ -490,7 +487,7 @@ describe('QueryRuleOrchestrator', () => {
     function makeFeature(id: string): Feature {
       return {
         id,
-        stream_name: STREAM,
+        stream_name: SOURCE,
         type: 'entity',
         description: '',
         properties: {},
@@ -518,9 +515,11 @@ describe('QueryRuleOrchestrator', () => {
           ),
         updateRule: jest.fn().mockResolvedValue(undefined),
         bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+        setRulesEnabled: jest.fn().mockResolvedValue(undefined),
         findExistingRuleIds: jest.fn().mockResolvedValue([]),
         findOwnedRuleIds: jest.fn().mockResolvedValue([]),
         findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+        findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
       };
     }
 
@@ -539,21 +538,21 @@ describe('QueryRuleOrchestrator', () => {
       isEnabled?: boolean;
       logger?: Logger;
     } = {}) {
-      return new QueryRuleOrchestrator(rulesClient, logger, isEnabled, writer, reader);
+      return new QueryRuleOrchestrator(rulesClient, logger, isEnabled, writer, reader, SPACE);
     }
 
     it('returns zeroed summary when significant events is disabled', async () => {
       const rulesClient = makeReconcileRulesClient();
       const orchestrator = makeReconcileOrchestrator({ rulesClient, isEnabled: false });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       expect(summary).toEqual({ tombstoned: 0, orphanRulesDeleted: 0 });
       expect(rulesClient.findOwnedRuleIds).not.toHaveBeenCalled();
     });
 
     it('is a no-op when there are no links, rules, or features', async () => {
-      const summary = await makeReconcileOrchestrator().reconcileStream(definition);
+      const summary = await makeReconcileOrchestrator().reconcileStream(SOURCE);
       expect(summary).toEqual({ tombstoned: 0, orphanRulesDeleted: 0 });
     });
 
@@ -567,11 +566,11 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [] }); // feat-1 gone
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-1']);
       expect(writer.bulk).toHaveBeenCalledWith(
-        STREAM,
+        SOURCE,
         expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
       );
       expect(summary.tombstoned).toBe(1);
@@ -587,7 +586,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       expect(writer.bulk).not.toHaveBeenCalled();
       expect(rulesClient.bulkDeleteRules).not.toHaveBeenCalled();
@@ -607,11 +606,11 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-1']);
       expect(writer.bulk).toHaveBeenCalledWith(
-        STREAM,
+        SOURCE,
         expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
       );
       expect(summary.tombstoned).toBe(1);
@@ -627,7 +626,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       expect(writer.bulk).not.toHaveBeenCalled();
       expect(summary.tombstoned).toBe(0);
@@ -637,10 +636,10 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader();
       const orchestrator = makeReconcileOrchestrator({ reader });
 
-      await orchestrator.reconcileStream(definition);
+      await orchestrator.reconcileStream(SOURCE);
 
       expect(reader.getQueryLinks).toHaveBeenCalledWith(
-        [STREAM],
+        [SOURCE],
         expect.objectContaining({ includeExpired: true })
       );
     });
@@ -657,35 +656,38 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [] });
       const orchestrator = makeReconcileOrchestrator({ writer, reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       expect(writer.bulk).toHaveBeenCalledWith(
-        STREAM,
+        SOURCE,
         expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
       );
       expect(summary.tombstoned).toBe(1);
     });
 
-    it('deletes an orphan rule with no backing KI query', async () => {
+    it('leaves owned rules in place when no knowledge indicators are visible', async () => {
       const rulesClient = makeReconcileRulesClient();
+      const logger = loggerMock.create();
       rulesClient.findOwnedRuleIds.mockResolvedValue(['orphan-rule']);
       const reader = makeReconcileReader({ links: [] });
-      const orchestrator = makeReconcileOrchestrator({ rulesClient, reader });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, reader, logger });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
-      expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(['orphan-rule']);
-      expect(summary.orphanRulesDeleted).toBe(1);
+      expect(rulesClient.bulkDeleteRules).not.toHaveBeenCalled();
+      expect(summary.orphanRulesDeleted).toBe(0);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('leaving 1 owned rule'));
     });
 
     it('chunks orphan rule deletion at the Alerting bulk limit', async () => {
       const rulesClient = makeReconcileRulesClient();
       const orphanIds = Array.from({ length: 201 }, (_, index) => `orphan-rule-${index}`);
       rulesClient.findOwnedRuleIds.mockResolvedValue(orphanIds);
-      const reader = makeReconcileReader({ links: [] });
+      // A visible feature means the empty-KI guard does not apply; these rules are real orphans.
+      const reader = makeReconcileReader({ links: [], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       const chunks = rulesClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
       expect(chunks.map((ids) => ids.length)).toEqual([100, 51, 50]);
@@ -704,11 +706,11 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       // No live rule to enumerate as an orphan; the seam tombstones the query instead.
       expect(writer.bulk).toHaveBeenCalledWith(
-        STREAM,
+        SOURCE,
         expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
       );
       expect(summary.tombstoned).toBe(1);
@@ -725,7 +727,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       expect(writer.bulk).not.toHaveBeenCalled();
       expect(summary.tombstoned).toBe(0);
@@ -742,10 +744,10 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      const summary = await orchestrator.reconcileStream(SOURCE);
 
       expect(writer.bulk).toHaveBeenCalledTimes(1);
-      expect(writer.bulk).toHaveBeenCalledWith(STREAM, [{ delete: { type: 'query', id: 'q-1' } }]);
+      expect(writer.bulk).toHaveBeenCalledWith(SOURCE, [{ delete: { type: 'query', id: 'q-1' } }]);
       expect(summary.tombstoned).toBe(1);
     });
   });

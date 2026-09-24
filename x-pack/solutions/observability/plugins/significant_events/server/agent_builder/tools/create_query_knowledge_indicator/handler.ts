@@ -66,7 +66,7 @@ export async function createQueryKnowledgeIndicatorToolHandler({
     expires_at: queryInput.expires_at,
   };
 
-  await kiClient.upsertQuery(definition, query);
+  await kiClient.upsertQuery(definition.name, query);
 
   logger.debug(
     `ki_query_create: created query KI for stream "${definition.name}" with id "${query.id}"`

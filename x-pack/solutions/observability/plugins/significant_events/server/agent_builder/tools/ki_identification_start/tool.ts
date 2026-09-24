@@ -82,7 +82,7 @@ export const createKiIdentificationStartTool = ({
 
       telemetry.trackAgentToolKiIdentificationStarted({
         success: true,
-        stream_name: streamName,
+        source_id: streamName,
       });
 
       return {
@@ -98,7 +98,7 @@ export const createKiIdentificationStartTool = ({
 
       telemetry.trackAgentToolKiIdentificationStarted({
         success: false,
-        stream_name: streamName,
+        source_id: streamName,
         error_message: message,
       });
 

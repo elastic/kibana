@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { Streams } from '@kbn/streams-schema';
+import type { AnalysisTarget } from '@kbn/nightshift-ai';
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
@@ -24,7 +24,6 @@ import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { KiExtractionContextTools } from './ki_extraction_context_tools';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
-import { streamToAnalysisTarget } from './stream_to_analysis_target';
 
 /**
  * Step budget for the query-generation reasoning agent when semantic code
@@ -36,7 +35,8 @@ const MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS = 10;
 type KiDiscoveryToolset = KiExtractionContextTools | SemanticCodeSearchTools;
 
 interface Params {
-  definition: Streams.all.Definition;
+  sourceId: string;
+  target: AnalysisTarget;
   connectorId: string;
   systemPrompt?: string;
   maxExistingQueriesForContext?: number;
@@ -64,7 +64,8 @@ export async function identifyKIQueries(
   reasoningDiagnostics: ReasoningPromptDiagnostics;
 }> {
   const {
-    definition,
+    sourceId,
+    target,
     connectorId,
     systemPrompt = significantEventsPrompt,
     maxExistingQueriesForContext,
@@ -100,9 +101,7 @@ export async function identifyKIQueries(
     systemPrompt
   );
 
-  const { [definition.name]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
-    definition.name,
-  ]);
+  const { [sourceId]: existingLinks } = await kiClient.getStreamToQueryLinksMap([sourceId]);
 
   const existingQueries = existingLinks.map(({ query: q }) => ({
     id: q.id,
@@ -125,14 +124,14 @@ export async function identifyKIQueries(
 
   const { queries, tokensUsed, toolUsage, reasoningDiagnostics } =
     await identifyKIQueriesThroughAgent({
-      target: streamToAnalysisTarget(definition),
+      target,
       esClient,
       inferenceClient: boundInferenceClient,
       logger,
       signal,
       systemPrompt: combinedSystemPrompt,
       getFeatures: async (filters) => {
-        const response = await kiClient.getFeatures(definition.name, {
+        const response = await kiClient.getFeatures(sourceId, {
           ...filters,
           excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
         });

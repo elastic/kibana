@@ -53,7 +53,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
     expect(result).toEqual({ id: 'provided-id' });
     expect(kiClient.upsertQuery).toHaveBeenCalledWith(
-      definition,
+      definition.name,
       expect.objectContaining({
         id: 'provided-id',
         type: 'stats',
@@ -83,7 +83,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
     expect(result).toEqual({ id: 'generated-query-id' });
     expect(kiClient.upsertQuery).toHaveBeenCalledWith(
-      definition,
+      definition.name,
       expect.objectContaining({
         id: 'generated-query-id',
       })

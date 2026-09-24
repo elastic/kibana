@@ -20,6 +20,8 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
+import { StatusError } from '../../../../lib/errors/status_error';
+import { listAllSources } from '../../../utils/list_all_sources';
 import {
   MAX_STREAMS_PER_QUERY,
   type SignificantEventsKIsOnboardingInputs,
@@ -100,7 +102,7 @@ const onboardingExecuteRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, streamsClient } = await getScopedClients({ request });
+    const { licensing, sourcesClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
@@ -108,14 +110,17 @@ const onboardingExecuteRoute = createServerRoute({
       body,
     } = params;
 
-    await streamsClient.ensureStream(streamName);
+    const { source } = await sourcesClient.get(streamName);
 
     if (body.action === 'schedule') {
+      if (!source.enabled) {
+        throw new StatusError('Cannot schedule onboarding for a disabled source', 400);
+      }
       await assertNotPaused({ maintenanceService, request });
       const { skipFeatures, skipQueries } = mapStepsToSkipFlags(body.steps);
 
       const inputs: SignificantEventsKIsOnboardingInputs = {
-        streamName,
+        streamName: source.id,
         features: {
           skip: skipFeatures,
           start: body.from,
@@ -136,9 +141,9 @@ const onboardingExecuteRoute = createServerRoute({
     // action === 'cancel'
     // Cancellation may be a no-op (nothing running, or already terminal), so we
     // return the real post-cancel status rather than assuming `canceled`.
-    await streamsKIsOnboardingClient.cancel({ streamName, request });
+    await streamsKIsOnboardingClient.cancel({ streamName: source.id, request });
 
-    return streamsKIsOnboardingClient.getStatus({ streamName });
+    return streamsKIsOnboardingClient.getStatus({ streamName: source.id });
   },
 });
 
@@ -169,16 +174,16 @@ const onboardingStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, streamsClient } = await getScopedClients({ request });
+    const { licensing, sourcesClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { streamName },
     } = params;
 
-    await streamsClient.assertReadAccess(streamName);
+    const { source } = await sourcesClient.get(streamName);
 
-    return streamsKIsOnboardingClient.getStatus({ streamName });
+    return streamsKIsOnboardingClient.getStatus({ streamName: source.id });
   },
 });
 
@@ -188,7 +193,7 @@ const onboardingBulkStatusRoute = createServerRoute({
     access: 'internal',
     summary: 'Check the onboarding status of multiple streams',
     description:
-      'Check the status of onboarding progress for a list of streams in a single request. Streams the caller cannot read are omitted from the response.',
+      'Check the status of onboarding progress for a list of source ids in a single request.',
   },
   security: {
     authz: {
@@ -215,19 +220,27 @@ const onboardingBulkStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, streamsClient } = await getScopedClients({ request });
+    const { licensing, sourcesClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
       body: { streamNames },
     } = params;
 
-    const readableStreamNames = await streamsClient.getReadableStreamNames(streamNames);
-    if (readableStreamNames.length === 0) {
-      return {};
-    }
+    // Executions are stored in the default space. Only ids in this space's catalog
+    // are looked up; anything else stays not_started.
+    const catalogIds = new Set((await listAllSources(sourcesClient)).map((source) => source.id));
+    const knownIds = streamNames.filter((sourceId) => catalogIds.has(sourceId));
+    const knownStatuses = await streamsKIsOnboardingClient.getStatuses({ streamNames: knownIds });
 
-    return streamsKIsOnboardingClient.getStatuses({ streamNames: readableStreamNames });
+    const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
+    for (const sourceId of streamNames) {
+      statuses[sourceId] = knownStatuses[sourceId] ?? {
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      };
+    }
+    return statuses;
   },
 });
 
