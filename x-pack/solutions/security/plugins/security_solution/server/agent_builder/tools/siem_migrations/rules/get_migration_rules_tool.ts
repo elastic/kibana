@@ -58,7 +58,7 @@ const schema = GetRuleMigrationRulesRequestQuery.extend({
     .default(50)
     .describe('Number of rules per page (1-200).'),
   search_term: z.string().max(500).optional(),
-  ids: z.array(NonEmptyString).max(200).optional(),
+  ids: z.array(NonEmptyString).min(1).max(200).optional(),
   sort_field: z
     .enum(SORT_FIELDS)
     .optional()

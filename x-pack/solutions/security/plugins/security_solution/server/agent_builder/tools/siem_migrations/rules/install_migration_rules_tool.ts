@@ -30,6 +30,7 @@ const schema = InstallMigrationRulesRequestBody.extend({
   migration_id: NonEmptyString.describe('The id of the rule migration whose rules to install.'),
   ids: z
     .array(NonEmptyString)
+    .min(1)
     .max(200)
     .optional()
     .describe(
