@@ -12,7 +12,7 @@ import {
   getBuiltInTriggerDefinition,
 } from './builtin_trigger_definitions';
 
-const EXPECTED_TRIGGER_IDS = ['manual', 'scheduled', 'alert'];
+const EXPECTED_TRIGGER_IDS = ['manual', 'scheduled', 'alert', 'page'];
 
 describe('builtInTriggerDefinitions', () => {
   it('covers all expected trigger types', () => {

@@ -72,6 +72,15 @@ const configSchema = schema.object({
    * this plugin).
    */
   library: librarySchema,
+  /**
+   * Workflow pages (proof of concept): hosted, tokenized forms for the `page`
+   * trigger. Both `enabled` and `signingKey` are required before the
+   * unauthenticated routes are mounted.
+   */
+  pages: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    signingKey: schema.maybe(schema.string({ minLength: 32, maxLength: 256 })),
+  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
