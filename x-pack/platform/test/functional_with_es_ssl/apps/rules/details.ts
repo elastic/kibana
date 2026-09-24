@@ -774,7 +774,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('management', {
           path: 'insightsAndAlerting/triggersActions',
         });
-        await testSubjects.click('rulesTab');
 
         const alerts = [{ id: 'us-central' }];
         const rule = await createRuleWithActionsAndParams(testRunUuid, {
@@ -797,7 +796,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('management', {
           path: 'insightsAndAlerting/triggersActions',
         });
-        await testSubjects.click('rulesTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);

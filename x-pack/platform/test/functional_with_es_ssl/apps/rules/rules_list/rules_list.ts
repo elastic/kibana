@@ -38,8 +38,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('refreshRulesButton');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
     }
-    await testSubjects.click('logsTab');
-    await testSubjects.click('rulesTab');
   };
 
   const toggleRuleStatusFilter = (selector: string) => {
@@ -70,7 +68,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
-      await testSubjects.click('rulesTab');
     });
 
     afterEach(async () => {
