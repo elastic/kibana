@@ -9,6 +9,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
 import { AgentTurn } from './agent_turn';
 import {
@@ -84,5 +85,46 @@ export const Failed: Story = {
 export const Aborted: Story = {
   args: {
     item: createAbortedTurnItem(),
+  },
+};
+
+// A single tool call that never returned inside a stopped turn. Reads "running…" before the fix,
+// "interrupted" after.
+export const AbortedWithInterruptedToolCall: Story = {
+  args: {
+    item: createAbortedTurnItem({
+      steps: [
+        createToolCallStep({ tool_call_id: 'tc-1', tool_id: 'search', params: {}, results: [] }),
+      ],
+    }),
+  },
+};
+
+// A group of tool calls in flight when the turn was stopped. Reads "N tools running…" before the
+// fix, "N tools interrupted" after.
+export const AbortedWithInterruptedToolCallGroup: Story = {
+  args: {
+    item: createAbortedTurnItem({
+      steps: [
+        createToolCallStep({ tool_call_id: 'tc-1', tool_id: 'search', params: {}, results: [] }),
+        createToolCallStep({
+          tool_call_id: 'tc-2',
+          tool_id: 'get_index_info',
+          params: {},
+          results: [],
+        }),
+      ],
+    }),
+  },
+};
+
+// Same interrupted tool call inside a failed turn, to confirm both terminals share the treatment.
+export const FailedWithInterruptedToolCall: Story = {
+  args: {
+    item: createFailedTurnItem({
+      steps: [
+        createToolCallStep({ tool_call_id: 'tc-1', tool_id: 'search', params: {}, results: [] }),
+      ],
+    }),
   },
 };

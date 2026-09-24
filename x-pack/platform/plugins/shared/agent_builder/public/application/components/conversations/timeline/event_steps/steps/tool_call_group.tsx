@@ -16,9 +16,10 @@ import { ToolCallStep } from './tool_call_step';
 
 interface ToolCallGroupProps {
   steps: ToolCallStepData[];
+  isInterrupted?: boolean;
 }
 
-export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
+export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps, isInterrupted = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const onToggle = () => setIsExpanded((v) => !v);
 
@@ -32,6 +33,12 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
           <FormattedMessage
             id="xpack.agentBuilder.eventSteps.toolCallGroup.ran"
             defaultMessage="{count, plural, one {# tool ran} other {# tools ran}}"
+            values={{ count: steps.length }}
+          />
+        ) : isInterrupted ? (
+          <FormattedMessage
+            id="xpack.agentBuilder.eventSteps.toolCallGroup.interrupted"
+            defaultMessage="{count, plural, one {# tool interrupted} other {# tools interrupted}}"
             values={{ count: steps.length }}
           />
         ) : (
@@ -55,7 +62,7 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
           <EuiFlexGroup direction="column" gutterSize="s">
             {steps.map((step) => (
               <EuiFlexItem grow={false} key={step.tool_call_id}>
-                <ToolCallStep step={step} />
+                <ToolCallStep step={step} isInterrupted={isInterrupted} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

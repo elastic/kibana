@@ -171,12 +171,12 @@ describe('AgentTurn', () => {
     expect(screen.getByTestId('agentBuilderExecutionError')).toBeInTheDocument();
   });
 
-  it('renders the steps that ran above the stopped notice for an aborted turn', () => {
+  it('renders the steps that ran above the interrupted notice for an aborted turn', () => {
     renderTimeline(aborted);
 
     fireEvent.click(screen.getByRole('button', { name: /tool/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
-    expect(screen.getByText('Response stopped by petr')).toBeInTheDocument();
+    expect(screen.getByText('Response interrupted by petr')).toBeInTheDocument();
   });
 
   it('keeps an expanded tool group open through completion and the saved replacement', () => {

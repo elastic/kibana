@@ -38,3 +38,25 @@ describe('EventSteps — single vs grouped tool calls', () => {
     expect(screen.queryByTestId('agentBuilderToolCallStep')).not.toBeInTheDocument();
   });
 });
+
+describe('EventSteps — interrupted turn threads isInterrupted to the labels', () => {
+  it('a lone in-flight tool call reads "interrupted", not "running…"', () => {
+    renderWithProviders(<EventSteps steps={[toolStep('tc-1', 'search')]} isInterrupted />);
+    expect(screen.getByText('interrupted')).toBeInTheDocument();
+    expect(screen.queryByText('running…')).not.toBeInTheDocument();
+  });
+
+  it('a group of in-flight tool calls reads "N tools interrupted"', () => {
+    renderWithProviders(
+      <EventSteps steps={[toolStep('tc-1', 'search'), toolStep('tc-2', 'read')]} isInterrupted />
+    );
+    expect(screen.getByText('2 tools interrupted')).toBeInTheDocument();
+    expect(screen.queryByText('2 tools running…')).not.toBeInTheDocument();
+  });
+
+  it('leaves a running turn (default) reading "running…"', () => {
+    renderWithProviders(<EventSteps steps={[toolStep('tc-1', 'search')]} />);
+    expect(screen.getByText('running…')).toBeInTheDocument();
+    expect(screen.queryByText('interrupted')).not.toBeInTheDocument();
+  });
+});
