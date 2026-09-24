@@ -16,6 +16,7 @@ import type {
   RoundModelUsageStats,
 } from './conversation';
 import type { RoundState } from './round_state';
+import type { ExecutionInterruption } from './events';
 
 /**
  * The projection format that new writes are stamped at.
@@ -223,13 +224,14 @@ export type ExecutionTerminatedEvent = BaseTimelineEvent<
 
 /**
  * The run summary of an execution that did not complete. Same fields as `ExecutionRunSummary`
- * minus `steps` (stored as separate `execution_step` events), `state` (an interrupted execution is
- * never resumed) and `time_to_first_token` (unknown when no answer streamed).
+ * minus `steps` (stored as separate `execution_step` events) and `state` (an interrupted
+ * execution is never resumed). `time_to_first_token` is optional: the interruption writes never
+ * set it (unknown when no answer streamed); it appears only on re-serialisations of a round whose
+ * paused execution had a non-zero value, so that rounds → events → rounds is an identity.
  *
  * Invariants: an execution has at most one terminal event (`execution_terminated`,
  * `execution_failed` or `execution_aborted`), and exactly one whenever the conversation store
- * accepted the terminal write. An execution with no `execution_terminated` never forms a round
- * and never answers a prompt.
+ * accepted the terminal write. An execution with no terminal never forms a round.
  */
 export type ExecutionPartialRunSummary = Pick<
   ExecutionRunSummary,
@@ -237,6 +239,8 @@ export type ExecutionPartialRunSummary = Pick<
 > & {
   /** Model usage; absent when the run failed before the model provider was resolved. */
   model_usage?: RoundModelUsageStats;
+  /** Time to first token, in ms, when known. */
+  time_to_first_token?: number;
 };
 
 /** A run that ended in an error. */
@@ -338,6 +342,63 @@ export type ExecutionTerminalEvent =
 export const isExecutionTerminalEvent = (event: {
   type: string;
 }): event is ExecutionTerminalEvent => EXECUTION_TERMINAL_EVENT_TYPES.has(event.type);
+
+/**
+ * Ids of the `execution_terminated` (`prompt_requested`) events some `prompt_response` answers.
+ * Raw events only: the folded context timeline carries no `prompt_response`.
+ */
+export const answeredPromptRequestIds = (events: ReadonlyArray<ConversationEvent>): Set<string> => {
+  const ids = new Set<string>();
+  for (const event of events) {
+    if (event.type === TimelineEventType.promptResponse) {
+      ids.add((event as PromptResponseEvent).data.prompt_requested_event_id);
+    }
+  }
+  return ids;
+};
+
+/** The last terminal event of any kind, by array position. */
+export const lastExecutionTerminal = (
+  events: ReadonlyArray<ConversationEvent>
+): ExecutionTerminalEvent | undefined => {
+  for (let index = events.length - 1; index >= 0; index--) {
+    const event = events[index];
+    if (isExecutionTerminalEvent(event)) {
+      return event;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * The pause the next input must answer, or undefined. The single definition of "paused": the
+ * last terminal is an `execution_terminated` with a `prompt_requested` outcome that no
+ * `prompt_response` answers. On the folded context timeline the join is always empty, so this
+ * reduces to "the last terminal is a pause".
+ */
+export const pendingPromptRequest = (
+  events: ReadonlyArray<ConversationEvent>
+): ExecutionTerminatedEvent | undefined => {
+  const terminal = lastExecutionTerminal(events);
+  if (!terminal || terminal.type !== TimelineEventType.executionTerminated) {
+    return undefined;
+  }
+  if (terminal.data.outcome.type !== 'prompt_requested') {
+    return undefined;
+  }
+  return answeredPromptRequestIds(events).has(terminal.id) ? undefined : terminal;
+};
+
+/** How an interrupted execution ended, from its terminal event. */
+export const interruptionOfTerminal = (
+  terminal: ExecutionFailedEvent | ExecutionAbortedEvent
+): ExecutionInterruption =>
+  terminal.type === TimelineEventType.executionFailed
+    ? { type: 'failed', error: terminal.data.error }
+    : {
+        type: 'aborted',
+        ...(terminal.data.aborted_by ? { aborted_by: terminal.data.aborted_by } : {}),
+      };
 
 /** The discriminated union of all stored timeline events. */
 export type TimelineEvent =
@@ -481,6 +542,31 @@ export type ValidConversationEventType<T extends string> =
     : T extends BuiltInConversationEventTypeValue
     ? never
     : T;
+
+/**
+ * Validates a conversation event type name at runtime, throwing a descriptive error if invalid.
+ * Enforces the same three naming rules as the server-side registry:
+ *   1. May not contain the id delimiter (`::`)
+ *   2. May not be a reserved type (`execution`, `step`)
+ *   3. May not shadow a built-in timeline event type
+ *
+ * Pair with the compile-time {@link ValidConversationEventType} guard for full coverage.
+ */
+export const assertValidConversationEventType = (type: string): void => {
+  if (type.includes(CONVERSATION_EVENT_ID_DELIMITER)) {
+    throw new Error(
+      `Conversation event type "${type}" must not contain "${CONVERSATION_EVENT_ID_DELIMITER}"`
+    );
+  }
+  if ((RESERVED_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type)) {
+    throw new Error(`Conversation event type "${type}" is reserved and cannot be registered`);
+  }
+  if (isBuiltInConversationEventType(type)) {
+    throw new Error(
+      `Conversation event type "${type}" is a built-in timeline event type and cannot be registered`
+    );
+  }
+};
 
 /** Input event for adding to a conversation. Server assigns id, created_at, and actor. */
 export interface ConversationAddEventInput {
