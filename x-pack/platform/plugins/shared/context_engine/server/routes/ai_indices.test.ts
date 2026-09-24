@@ -464,6 +464,19 @@ describe('ai indices routes', () => {
       });
     });
 
+    it('returns 400 without creating when an ES|QL source is invalid', async () => {
+      await callRoute('POST', aiIndexPath, {
+        body: { ...postBody, sources: [{ type: 'esql', value: 'FROM logs | WHERE' }] },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringMatching(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /),
+        },
+      });
+    });
+
     it('does not consult the actions client when there are no connector sources', async () => {
       aiIndexService.create.mockResolvedValue(undefined);
 
@@ -575,6 +588,20 @@ describe('ai indices routes', () => {
 
       expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', defaultSpaceId, body);
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
+    });
+
+    it('returns 400 without updating when an ES|QL source is invalid', async () => {
+      await callRoute('PUT', aiIndexByIdPath, {
+        ...putRequest,
+        body: { ...putRequest.body, sources: [{ type: 'esql', value: 'FROM logs | WHERE' }] },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringMatching(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /),
+        },
+      });
     });
 
     it('returns 400 without updating when a connector source is not a data connector', async () => {
@@ -1949,10 +1976,10 @@ describe('ai indices routes', () => {
       ).toThrow();
     });
 
-    it('accepts an ES|QL source with an empty value', () => {
+    it('rejects an ES|QL source with an empty value', () => {
       expect(() =>
         validateBody({ ...validBody, sources: [{ type: 'esql', value: '' }] })
-      ).not.toThrow();
+      ).toThrow();
     });
 
     it('rejects sources exceeding the max size', () => {
@@ -2037,14 +2064,16 @@ describe('ai indices routes', () => {
       expect(() => validateBody({ ...validBody, automations: [], sources: [] })).not.toThrow();
     });
 
-    it('accepts automations and sources with empty values', () => {
+    it('rejects an automation with an empty value', () => {
       expect(() =>
-        validateBody({
-          ...validBody,
-          automations: [{ type: 'workflow', value: '' }],
-          sources: [{ type: 'esql', value: '' }],
-        })
-      ).not.toThrow();
+        validateBody({ ...validBody, automations: [{ type: 'workflow', value: '' }] })
+      ).toThrow();
+    });
+
+    it('rejects an ES|QL source with an empty value', () => {
+      expect(() =>
+        validateBody({ ...validBody, sources: [{ type: 'esql', value: '' }] })
+      ).toThrow();
     });
 
     it('rejects an id in the update body', () => {

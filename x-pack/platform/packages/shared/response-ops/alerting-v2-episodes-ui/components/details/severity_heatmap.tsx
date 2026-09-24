@@ -30,7 +30,7 @@ import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { resolveEpisodeEventData } from '../../utils/resolve_episode_event_data';
 import {
   EPISODE_SEVERITY_CHART_VALUE,
-  getEpisodeSeverityHeatmapColor,
+  getEpisodeSeverityColor,
   getEpisodeSeverityLabel,
   getHeatmapDatumFromElementClick,
   isSupportedEpisodeSeverity,
@@ -42,6 +42,7 @@ import {
 } from '../severity/severity_utils';
 import { SeverityHeatmapDetailPanel } from './severity_heatmap_detail_panel';
 import { SeverityHeatmapHoverSummary } from './severity_heatmap_hover_summary';
+import { getPanelTitleSize } from './panel_title_sizes';
 import * as i18n from './translations';
 
 interface AlertEpisodeSeverityHeatmapServices {
@@ -81,9 +82,14 @@ export interface HeatmapDatum {
 
 export interface AlertEpisodeSeverityHeatmapProps {
   eventRows: EpisodeEventRow[];
+  /** Renders the title one step smaller, for narrow hosts like the details flyout. */
+  compressed?: boolean;
 }
 
-export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityHeatmapProps) => {
+export const AlertEpisodeSeverityHeatmap = ({
+  eventRows,
+  compressed,
+}: AlertEpisodeSeverityHeatmapProps) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<AlertEpisodeSeverityHeatmapServices>();
   const baseTheme = services.charts.theme.useChartsBaseTheme();
@@ -144,9 +150,7 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
 
   const colorBands = useMemo(
     () =>
-      toEpisodeSeverityChartColorBands((severity) =>
-        getEpisodeSeverityHeatmapColor(euiTheme, severity)
-      ),
+      toEpisodeSeverityChartColorBands((severity) => getEpisodeSeverityColor(euiTheme, severity)),
     [euiTheme]
   );
 
@@ -168,7 +172,7 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
       paddingSize="none"
       data-test-subj="alertingV2EpisodeSeverityHeatmap"
     >
-      <EuiTitle size="xxs">
+      <EuiTitle size={getPanelTitleSize(compressed)}>
         <h2>{i18n.SEVERITY_HEATMAP_TITLE}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />

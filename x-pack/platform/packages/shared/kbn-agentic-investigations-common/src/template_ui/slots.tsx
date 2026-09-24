@@ -11,12 +11,15 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
+  EscalationFlyoutHeader,
   type ConversationDetailsFlyoutFooterProps,
-  AttachmentsTab,
   OverviewTab,
-  TimelineTab,
 } from '../components/details';
-import { conversationToInvestigation } from './conversation_to_investigation';
+import {
+  conversationToInvestigation,
+  conversationToEscalationHeader,
+} from './conversation_to_investigation';
+import type { RenderAssignees } from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -27,28 +30,48 @@ import { conversationToInvestigation } from './conversation_to_investigation';
  */
 interface InvestigationSlotProps {
   conversation: Conversation;
+  refetchConversation?: () => Promise<void>;
 }
 
-export const OverviewSlot = ({ conversation }: InvestigationSlotProps) => (
-  <OverviewTab investigation={conversationToInvestigation(conversation)} />
-);
-
-export const TimelineSlot = ({ conversation }: InvestigationSlotProps) => (
-  <TimelineTab events={conversationToInvestigation(conversation).events} />
-);
-
-export interface AttachmentsSlotProps {
-  conversation: Conversation;
+export interface OverviewSlotProps extends InvestigationSlotProps {
+  /**
+   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
+   * attachment registry cannot be reached from ambient context.
+   */
   attachmentsService: AttachmentServiceStartContract;
 }
 
-export const AttachmentsSlot = ({ conversation, attachmentsService }: AttachmentsSlotProps) => (
-  <AttachmentsTab conversation={conversation} attachmentsService={attachmentsService} />
+export const OverviewSlot = ({ conversation, attachmentsService }: OverviewSlotProps) => (
+  <OverviewTab
+    investigation={conversationToInvestigation(conversation)}
+    attachments={conversation.attachments}
+    attachmentsService={attachmentsService}
+  />
 );
 
-export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (
-  <ConversationDetailsFlyoutHeader investigation={conversationToInvestigation(conversation)} />
-);
+export interface HeaderSlotProps extends InvestigationSlotProps {
+  renderAssignees?: RenderAssignees;
+}
+
+export const HeaderSlot = ({
+  conversation,
+  renderAssignees,
+  refetchConversation,
+}: HeaderSlotProps) => {
+  const investigation = conversationToInvestigation(conversation);
+  const assigneesNode = renderAssignees
+    ? renderAssignees({
+        conversationId: conversation.id,
+        templateId: 'investigation',
+        assigneeUids: investigation.assignees,
+        status: investigation.status,
+        refetchConversation,
+      })
+    : undefined;
+  return (
+    <ConversationDetailsFlyoutHeader investigation={investigation} assigneesNode={assigneesNode} />
+  );
+};
 
 export interface FooterSlotProps extends InvestigationSlotProps {
   onOpenChat: () => void;
@@ -62,3 +85,41 @@ export const FooterSlot = ({ conversation, onOpenChat, onOpenEscalation }: Foote
     onOpenEscalation={onOpenEscalation}
   />
 );
+
+// ---------------------------------------------------------------------------
+// Escalation header slot
+// ---------------------------------------------------------------------------
+
+export interface EscalationHeaderSlotProps {
+  conversation: Conversation;
+  refetchConversation?: () => Promise<void>;
+  renderAssignees?: RenderAssignees;
+}
+
+export const EscalationHeaderSlot = ({
+  conversation,
+  renderAssignees,
+  refetchConversation,
+}: EscalationHeaderSlotProps) => {
+  const { status, assigneeUids } = conversationToEscalationHeader(conversation);
+
+  const assigneesNode = renderAssignees
+    ? renderAssignees({
+        conversationId: conversation.id,
+        templateId: 'escalation',
+        assigneeUids,
+        status,
+        refetchConversation,
+      })
+    : undefined;
+
+  return (
+    <EscalationFlyoutHeader
+      title={conversation.title}
+      createdAt={conversation.created_at}
+      status={status}
+      assigneeUids={assigneeUids}
+      assigneesNode={assigneesNode}
+    />
+  );
+};
