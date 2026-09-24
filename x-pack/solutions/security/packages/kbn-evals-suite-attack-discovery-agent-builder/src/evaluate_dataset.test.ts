@@ -9,6 +9,7 @@ import {
   ALERT_INDEX_FAMILY,
   buildWorkflow,
   computeWorkflowAlertCounts,
+  createEvaluateAttackDiscoveryAgentBuilderDataset,
   extractAdToolEsqlQuery,
   extractAgentAlertRetrievalPopulation,
   extractAgentEsqlRowCounts,
@@ -1719,5 +1720,105 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
   // to a finite number (and ignored when set to garbage).
   it('defaults to a 10-minute safety valve', () => {
     expect(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS).toBeGreaterThanOrEqual(600_000);
+  });
+});
+
+describe('slow-path handoff (#293046): task-level backfill', () => {
+  // Removing the `insights: response.insights ?? insightsFromValidatedDiscoveries(...)`
+  // assignment in buildTask leaves every other test green while handoff runs
+  // score as having no discoveries. This invokes the real task through the
+  // dataset factory — the executor is the only thing mocked — and asserts the
+  // output handed to evaluators carries the pipeline-validated insights.
+  it('passes the pipeline-validated discoveries to evaluators when converse returns only the handoff', async () => {
+    jest.useFakeTimers();
+    try {
+      const converseResponse = {
+        steps: [
+          {
+            type: 'tool_call',
+            tool_id: 'security.attack-discovery.run',
+            results: [
+              {
+                // The 90s soft-deadline handoff: an execution id, no status,
+                // no discoveries.
+                data: { execution_uuid: 'exec-task-level' },
+                tool_result_id: 'handoff',
+                type: 'other',
+              },
+            ],
+          },
+        ],
+        insights: undefined,
+      };
+      const chatClient = {
+        converse: jest.fn().mockResolvedValue(converseResponse),
+      };
+
+      const fetch = jest.fn(async (url: string) => {
+        if (url.endsWith('/tracking')) {
+          return {
+            generation: { workflow_id: 'wf-gen', workflow_run_id: 'run-gen-task-1' },
+            validation: { workflow_id: 'wf-val', workflow_run_id: 'run-val-task-1' },
+          };
+        }
+        if (url.startsWith('/api/workflows/executions/')) {
+          return { status: 'completed' };
+        }
+        // Pipeline response: generation completed, discoveries validated.
+        return {
+          validated_discoveries: [
+            {
+              title: 'LSASS credential access chain',
+              summary_markdown: 'summary A',
+              details_markdown: 'details A',
+              alert_ids: ['a1', 'a2'],
+            },
+          ],
+        };
+      });
+
+      let taskOutput: unknown;
+      const executorClient = {
+        runExperiment: jest.fn(
+          async ({
+            datasets,
+            task,
+          }: {
+            datasets: Array<{ examples: Array<{ question: string }> }>;
+            task: (args: { input: { question: string } }) => Promise<unknown>;
+          }) => {
+            for (const example of datasets[0].examples) {
+              taskOutput = await task({ input: example });
+            }
+          }
+        ),
+      };
+
+      const run = createEvaluateAttackDiscoveryAgentBuilderDataset({
+        chatClient: chatClient as never,
+        fetch: fetch as never,
+        evaluators: { traceBasedEvaluators: {} } as never,
+        executorClient: executorClient as never,
+        traceEsClient: {} as never,
+      });
+
+      const pending = run({
+        dataset: { name: 'slow-path-task', description: '', examples: [{ question: 'q' }] },
+      });
+      await jest.advanceTimersByTimeAsync(60_000).then(() => pending);
+
+      expect(fetch).toHaveBeenCalled();
+      expect(converseResponse.insights).toBeUndefined(); // the fallback had to fire
+      expect((taskOutput as { insights?: unknown }).insights).toEqual([
+        {
+          title: 'LSASS credential access chain',
+          summaryMarkdown: 'summary A',
+          detailsMarkdown: 'details A',
+          alertIds: ['a1', 'a2'],
+        },
+      ]);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
