@@ -46,6 +46,24 @@ const toEnvValue = (value: unknown): string | undefined => {
   return JSON.stringify(value);
 };
 
+/** Reads Authorization from a header record or from the JSON string preconfigured connectors store. */
+const readAuthorizationHeader = (secretHeaders: unknown): string | undefined => {
+  let record = secretHeaders;
+  if (typeof record === 'string') {
+    try {
+      record = JSON.parse(record);
+    } catch {
+      return undefined;
+    }
+  }
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return undefined;
+
+  const authorization = Object.entries(record).find(
+    ([key]) => key.toLowerCase() === 'authorization'
+  )?.[1];
+  return typeof authorization === 'string' ? authorization : undefined;
+};
+
 /**
  * Builds the CONNECTOR_* environment for a connector. Config keys map to CONNECTOR_CONFIG_<KEY>,
  * secret keys to CONNECTOR_SECRET_<KEY>; nested values are JSON-encoded.
@@ -79,9 +97,8 @@ export const buildConnectorEnv = ({
   }
 
   // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
-  const authorization = (secrets.secretHeaders as { Authorization?: string } | undefined)
-    ?.Authorization;
-  if (typeof authorization === 'string' && authorization.startsWith('ApiKey ')) {
+  const authorization = readAuthorizationHeader(secrets.secretHeaders);
+  if (authorization?.startsWith('ApiKey ')) {
     const apiKey = authorization.slice('ApiKey '.length);
     if (env.CONNECTOR_SECRET_PASSWORD === undefined) {
       env.CONNECTOR_SECRET_PASSWORD = apiKey;
