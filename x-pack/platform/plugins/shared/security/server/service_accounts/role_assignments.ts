@@ -39,3 +39,28 @@ export const buildRoleAssignments = (
     },
   ],
 });
+
+/**
+ * Reads the application roles an account holds on this project out of the role assignments UIAM
+ * reports for it, in the order UIAM lists them and without duplicates.
+ *
+ * Organization entries apply on every project, and project entries only on the projects they
+ * cover. An account created before Kibana sent application roles carries none, so it reads as
+ * having no roles even though it acts with its creator's application privileges.
+ */
+export const readApplicationRoles = (
+  { projectId, projectType }: Pick<CloudProjectContext, 'projectId' | 'projectType'>,
+  { organization = [], project = {} }: UiamRoleAssignments
+): string[] => {
+  const projectEntries = (project[projectType] ?? []).filter(
+    ({ all, project_ids: projectIds = [] }) => all || projectIds.includes(projectId)
+  );
+
+  return Array.from(
+    new Set(
+      [...organization, ...projectEntries].flatMap(
+        ({ application_roles: applicationRoles = [] }) => applicationRoles
+      )
+    )
+  );
+};

@@ -17,7 +17,7 @@ import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
-import { buildRoleAssignments } from './role_assignments';
+import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
   CloudProjectContext,
@@ -80,22 +80,21 @@ const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirector
 };
 
 /**
- * Narrows a UIAM account to the directory entry. UIAM has no disabled state and reports no role
- * names yet, so those two answers are constants.
+ * Narrows a UIAM account to the directory entry. UIAM has no disabled state, so `enabled` is a
+ * constant.
  *
  * So is `assumable`, for a different reason: UIAM authorizes both reads against the account's
  * `assumable_by` policy and will not report an account this project cannot assume. Anything that
  * reaches this function is assumable by definition, which is why the policy itself is left
  * unparsed rather than re-checked here.
  */
-const toDirectoryEntry = ({
+const toDirectoryEntry = (
+  cloudProjectContext: CloudProjectContext,
+  { id, name, role_assignments: roleAssignments, creator }: UiamServiceAccountDetails
+): ServiceAccountDirectoryEntry => ({
   id,
   name,
-  creator,
-}: UiamServiceAccountDetails): ServiceAccountDirectoryEntry => ({
-  id,
-  name,
-  roles: [],
+  roles: readApplicationRoles(cloudProjectContext, roleAssignments),
   enabled: true,
   assumable: true,
   createdBy: toCreatedBy(creator),
@@ -264,8 +263,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       throw Boom.badGateway('The service account was created but could not be reported back.');
     }
 
-    // The roles are echoed from the request rather than read back: UIAM stores them as sent, and
-    // reading them out of its role assignments model is a job for the directory view.
+    // The roles are echoed from the request rather than read back. UIAM stores them as sent, and
+    // the directory reads the same roles out of its role assignments on list and get.
     return { ...parsed.data, roles };
   }
 
@@ -299,7 +298,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           ...(after !== undefined ? { after } : {}),
         });
 
-      const serviceAccounts = accounts.map(toDirectoryEntry);
+      const serviceAccounts = accounts.map((account) =>
+        toDirectoryEntry(this.cloudProjectContext, account)
+      );
 
       return {
         serviceAccounts,
@@ -329,7 +330,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.logger.debug(`Attempting to get service account ${id}`);
 
     try {
-      return toDirectoryEntry(await this.uiam.getServiceAccount(id));
+      return toDirectoryEntry(this.cloudProjectContext, await this.uiam.getServiceAccount(id));
     } catch (e) {
       this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
       throw e;

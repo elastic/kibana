@@ -497,7 +497,7 @@ describe('UiamServiceAccounts', () => {
     const expectedEntry = {
       id: validResponse.id,
       name: validResponse.name,
-      roles: [],
+      roles: ['viewer', 'editor'],
       enabled: true,
       assumable: true,
       createdBy: { type: 'user' as const, username: 'user-id', displayName: 'Ada Lovelace' },
@@ -530,6 +530,35 @@ describe('UiamServiceAccounts', () => {
       ).resolves.toEqual({ serviceAccounts: [expectedEntry], nextPage: 'next' });
 
       expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith(params);
+    });
+
+    // The same roles the account was created with, so the directory and the create response agree.
+    it('reports the application roles UIAM holds for the account on this project', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [
+          {
+            ...listedAccount,
+            role_assignments: {
+              ...expectedRoleAssignments,
+              project: {
+                security: [
+                  {
+                    role_id: 'security-custom',
+                    organization_id: 'organization-id',
+                    all: false,
+                    project_ids: ['project-id'],
+                    application_roles: ['analyst'],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      });
+
+      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
+
+      expect(result.serviceAccounts[0].roles).toEqual(['viewer', 'editor', 'analyst']);
     });
 
     it('omits the display name when UIAM reports the creator without a name', async () => {
@@ -632,7 +661,7 @@ describe('UiamServiceAccounts', () => {
       ).resolves.toEqual({
         id: validResponse.id,
         name: validResponse.name,
-        roles: [],
+        roles: ['viewer', 'editor'],
         enabled: true,
         assumable: true,
         createdBy: { type: 'user', username: 'user-id', displayName: 'Ada Lovelace' },
