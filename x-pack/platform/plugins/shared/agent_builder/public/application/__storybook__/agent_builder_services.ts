@@ -7,14 +7,17 @@
 
 import React from 'react';
 import { EMPTY } from 'rxjs';
-import { EuiCodeBlock, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiPanel, EuiText } from '@elastic/eui';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
 } from '@kbn/agent-builder-common/attachments';
 import type { ImageAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
+import type {
+  AttachmentUIDefinition,
+  ConversationEventUIDefinition,
+} from '@kbn/agent-builder-browser';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { AttachmentsService } from '../../services/attachments';
 import { ConversationEventsService } from '../../services/conversation_events';
@@ -119,6 +122,32 @@ storybookAttachmentsService.addAttachmentType(
   storybookInlineAttachmentDefinition
 );
 
+/**
+ * Custom event type the timeline stories use. Mirrors the platform's `text_note` type, which lives
+ * in a plugin this one cannot import.
+ */
+export const STORY_CUSTOM_EVENT_TYPE = 'story_note';
+
+export const storyNoteEventDefinition: ConversationEventUIDefinition = {
+  type: STORY_CUSTOM_EVENT_TYPE,
+  render: (event) => {
+    const { title, text } = event.data as { title?: string; text: string };
+    return React.createElement(
+      EuiPanel,
+      { paddingSize: 's', hasShadow: false, hasBorder: true },
+      React.createElement(
+        EuiText,
+        { size: 's' },
+        title && React.createElement('h4', null, title),
+        React.createElement('p', null, text)
+      )
+    );
+  },
+};
+
+const storybookConversationEventsService = new ConversationEventsService();
+storybookConversationEventsService.register(storyNoteEventDefinition);
+
 const defaultServices: AgentBuilderInternalService = {
   filesClient: storybookFilesClient,
   agentService: {
@@ -137,7 +166,7 @@ const defaultServices: AgentBuilderInternalService = {
     delete: () => Promise.resolve({} as never),
   } as never,
   attachmentsService: storybookAttachmentsService,
-  conversationEventsService: new ConversationEventsService(),
+  conversationEventsService: storybookConversationEventsService,
   renderersService: {} as never,
   chatService: {} as never,
   conversationsService: {} as never,

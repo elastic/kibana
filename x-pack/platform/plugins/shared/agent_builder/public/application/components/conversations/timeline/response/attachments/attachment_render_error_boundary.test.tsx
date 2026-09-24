@@ -39,4 +39,14 @@ describe('AttachmentRenderErrorBoundary', () => {
 
     expect(screen.getByText("Couldn't render this attachment")).toBeInTheDocument();
   });
+
+  it('uses the given title for the fallback callout', () => {
+    render(
+      <AttachmentRenderErrorBoundary title="Couldn't render this event">
+        {() => <ThrowingContent />}
+      </AttachmentRenderErrorBoundary>
+    );
+
+    expect(screen.getByText("Couldn't render this event")).toBeInTheDocument();
+  });
 });

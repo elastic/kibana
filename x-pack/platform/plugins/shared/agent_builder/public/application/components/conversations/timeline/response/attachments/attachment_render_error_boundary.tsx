@@ -15,6 +15,8 @@ const fallbackTitle = i18n.translate('xpack.agentBuilder.attachments.renderError
 
 interface AttachmentRenderErrorBoundaryProps {
   children: () => ReactNode;
+  /** Callout title shown when `children` throws. */
+  title?: string;
 }
 
 interface AttachmentRenderErrorBoundaryState {
@@ -43,7 +45,7 @@ export class AttachmentRenderErrorBoundary extends Component<
       return (
         <EuiCallOut
           announceOnMount
-          title={fallbackTitle}
+          title={this.props.title ?? fallbackTitle}
           color="warning"
           iconType="warning"
           size="s"
