@@ -25,6 +25,7 @@ export {
 export {
   browserAuthFixture,
   apiServicesFixture,
+  apiClientFixture,
   coreWorkerFixtures,
   esArchiverFixture,
   createPlaywrightConfig,
@@ -79,7 +80,11 @@ export type {
 
 // Authentication types
 export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
-export type { ApiClientFixture } from './src/playwright/fixtures/scope/worker/api_client';
+export type {
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
+} from './src/playwright/fixtures/scope/worker/api_client';
 export type {
   RoleSessionCredentials,
   CookieHeader,
