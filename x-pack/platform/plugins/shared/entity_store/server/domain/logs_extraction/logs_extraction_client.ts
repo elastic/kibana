@@ -18,7 +18,11 @@ import type {
   ExtractionMode,
 } from '../../../common/domain/definitions/entity_schema';
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
-import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import {
+  getEntityDefinition,
+  supportsNonPrioritySampling,
+} from '../../../common/domain/definitions/registry';
+import { resolveSamplingRate } from './sampling';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
 import {
   buildLogPaginationCursorProbeEsql,
@@ -38,7 +42,7 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
-import { getMergedConfig } from '../config';
+import { getMergedConfig, type MergedLogExtractionConfig } from '../config';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { executeEsqlQueryRetryingRemoteResources } from '../../infra/elasticsearch/remote_resource_not_supported';
@@ -167,9 +171,10 @@ export class LogsExtractionClient {
     return { [this.descriptorFields.error]: error } as Partial<EngineDescriptor>;
   }
 
-  private async getLogExtractionConfigAndState(
-    type: EntityType
-  ): Promise<{ config: LogExtractionConfig; engineState: EngineLogExtractionState }> {
+  private async getLogExtractionConfigAndState(type: EntityType): Promise<{
+    config: MergedLogExtractionConfig;
+    engineState: EngineLogExtractionState;
+  }> {
     const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
     const status = engineDescriptor[this.descriptorFields.status];
     if (status !== ENGINE_STATUS.STARTED) {
@@ -202,7 +207,7 @@ export class LogsExtractionClient {
   public async getMergedConfigForType(
     type: EntityType,
     extractionMode: ExtractionMode = this.extractionMode
-  ): Promise<LogExtractionConfig> {
+  ): Promise<MergedLogExtractionConfig> {
     const [globalOverrides, engineDescriptor] = await Promise.all([
       this.globalStateClient.findLogExtractionOverrides(),
       this.engineDescriptorClient.findOrThrow(type),
@@ -298,7 +303,7 @@ export class LogsExtractionClient {
     entityDefinition,
   }: {
     type: EntityType;
-    config: LogExtractionConfig;
+    config: MergedLogExtractionConfig;
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
@@ -360,7 +365,7 @@ export class LogsExtractionClient {
     latestIndex,
   }: {
     type: EntityType;
-    config: LogExtractionConfig;
+    config: MergedLogExtractionConfig;
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
@@ -376,6 +381,7 @@ export class LogsExtractionClient {
     logsProcessed: number;
   }> {
     const { docsLimit, maxLogsPerPage, maxLogsPerWindow, maxLogsPerWindowCapBehavior } = config;
+    const samplingRateOverride = config.samplingRate;
 
     if (opts?.specificWindow) {
       const { fromDateISO, toDateISO } = opts.specificWindow;
@@ -392,6 +398,9 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow,
         entityDefinition,
+        windowEndISO: toDateISO,
+        processedLogsBefore: 0,
+        samplingRateOverride,
       });
       let { lastSearchTimestamp } = result;
       if (result.logsCapApplied) {
@@ -478,6 +487,10 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow: remainingCap,
         entityDefinition,
+        // Sampling projects density to the end of the whole run's window, not the sub-window.
+        windowEndISO: effectiveWindowEnd,
+        processedLogsBefore: totalLogs,
+        samplingRateOverride,
       });
 
       totalCount += subResult.count;
@@ -558,6 +571,9 @@ export class LogsExtractionClient {
     maxLogsPerPage,
     maxLogsPerWindow,
     entityDefinition,
+    windowEndISO,
+    processedLogsBefore = 0,
+    samplingRateOverride,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -570,6 +586,11 @@ export class LogsExtractionClient {
     maxLogsPerPage: number;
     maxLogsPerWindow: number;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
+    /** End of the whole run's window, used to project remaining volume for sampling. */
+    windowEndISO: string;
+    /** Logs already counted against the run's budget by earlier sub-windows. */
+    processedLogsBefore?: number;
+    samplingRateOverride?: number | null;
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
@@ -578,6 +599,9 @@ export class LogsExtractionClient {
     // pickSampleProbability. Computed once per loop invocation: effectiveMaxLogsPerPage is
     // fixed for the whole loop.
     const effectiveSampleProbability = pickSampleProbability(effectiveMaxLogsPerPage);
+    // Sampling policy: only the non-priority process of a capability-declaring type may sample.
+    const samplingEligible =
+      this.extractionMode === EXTRACTION_MODE.nonPriority && supportsNonPrioritySampling(type);
     let totalCount = 0;
     let totalLogs = 0;
     let pages = 0;
@@ -681,7 +705,25 @@ export class LogsExtractionClient {
             remote: false,
           });
         } else {
-          totalLogs += sliceLogCount;
+          // p = 1 is not passed on: no SAMPLE stage and raw accounting. A mid-slice resume has
+          // sliceLogCount 0, so the dynamic rate degenerates to 1; an override still applies.
+          const dynamicOrOverrideRate = samplingEligible
+            ? resolveSamplingRate(
+                {
+                  scannedLogs: processedLogsBefore + totalLogs,
+                  sliceLogCount,
+                  sliceStartISO: logsPageCursorStart?.timestampCursor ?? fromDateISO,
+                  sliceEndISO: logsPageCursorEnd.timestampCursor,
+                  windowEndISO,
+                },
+                samplingRateOverride
+              )
+            : 1;
+          const samplingRate = dynamicOrOverrideRate < 1 ? dynamicOrOverrideRate : undefined;
+
+          // The budget counts processed volume, letting it stretch across the whole window.
+          totalLogs +=
+            samplingRate !== undefined ? Math.round(sliceLogCount * samplingRate) : sliceLogCount;
 
           const sliceIngestOutcome = await this.ingestEntityPagesWithinCurrentLogPage({
             type,
@@ -696,6 +738,7 @@ export class LogsExtractionClient {
             logsPageCursorEnd,
             entityPagination,
             state,
+            samplingRate,
           });
 
           totalCount += sliceIngestOutcome.addedToTotalCount;
@@ -818,6 +861,7 @@ export class LogsExtractionClient {
     logsPageCursorEnd,
     entityPagination,
     state: initialSliceState,
+    samplingRate,
   }: {
     type: EntityType;
     opts?: LogsExtractionOptions;
@@ -831,6 +875,7 @@ export class LogsExtractionClient {
     logsPageCursorEnd: LogSlicePaginationParams;
     entityPagination: PaginationParams | undefined;
     state: EngineLogExtractionState;
+    samplingRate?: number;
   }): Promise<{
     addedToTotalCount: number;
     addedToPageCount: number;
@@ -853,6 +898,7 @@ export class LogsExtractionClient {
         pagination,
         logsPageCursorStart,
         logsPageCursorEnd,
+        samplingRate,
       });
 
       this.logger.debug(

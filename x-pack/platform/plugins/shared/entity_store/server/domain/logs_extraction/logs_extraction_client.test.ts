@@ -2296,3 +2296,199 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
     expect(firstQuery).not.toContain('2025-01-15T09:00:00.000Z');
   });
 });
+
+describe('LogsExtractionClient sampling wiring', () => {
+  const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+  // Window: lookbackPeriod 10m → 11:50, delay 1m → effectiveWindowEnd 11:59. Kept inside one
+  // 15m sub-window because non-priority ignores the global maxTimeWindowSize override
+  // (NON_PRIORITY_EXCLUSIVE_FIELDS) and falls back to the 15m default.
+
+  const extractionColumns: ESQLSearchResponse['columns'] = [
+    { name: '@timestamp', type: 'date' },
+    { name: HASHED_ID_FIELD, type: 'keyword' },
+    { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
+  ];
+
+  const extractionRow: ESQLSearchResponse = {
+    columns: extractionColumns,
+    values: [['2025-01-15T11:52:00.000Z', 'hash1', 'entity1']],
+  };
+
+  function createSamplingContext(
+    mode: ExtractionMode,
+    descriptorExtras: Record<string, unknown> = {}
+  ) {
+    jest.clearAllMocks();
+    mockExecuteEsqlQuery.mockReset();
+    mockIngestEntities.mockReset();
+
+    const mockEsClient = {
+      indices: {
+        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      },
+    } as unknown as jest.Mocked<ElasticsearchClient>;
+    const mockDataViewsService = {
+      get: jest.fn().mockResolvedValue({ getIndexPattern: jest.fn().mockReturnValue('logs-*') }),
+    } as unknown as jest.Mocked<DataViewsService>;
+    const mockEngineDescriptorClient: jest.Mocked<
+      Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
+    > = {
+      findOrThrow: jest.fn().mockResolvedValue({
+        ...createMockEngineDescriptor('user'),
+        ...descriptorExtras,
+      } as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>),
+      update: jest.fn().mockResolvedValue({}),
+    };
+
+    const client = new LogsExtractionClient({
+      logger: loggerMock.create(),
+      namespace: 'default',
+      esClient: mockEsClient,
+      dataViewsService: mockDataViewsService,
+      engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+      globalStateClient: createMockGlobalStateClient({
+        lookbackPeriod: '10m',
+      }) as unknown as EntityStoreGlobalStateClient,
+      extractionMode: mode,
+    });
+
+    mockIngestEntities.mockResolvedValue(undefined);
+    return client;
+  }
+
+  /** Queries sent as extraction (the probe has its own estimation SAMPLE and is excluded). */
+  const extractionQueries = (): string[] =>
+    mockExecuteEsqlQuery.mock.calls
+      .filter(([args]) => args.telemetry?.name === 'extraction_query')
+      .map(([args]) => args.query);
+
+  /**
+   * One probed slice (11:50 → 11:55, 4 min of window left) followed by an empty probe and the
+   * sweep it triggers. sliceLogCount = sampledProbeDocs x 10 (probe sample probability 0.1) and
+   * the window projection = sliceLogCount x 1.8 (5-min slice density over the remaining 4 min).
+   */
+  const mockVolumeSequence = (sampledProbeDocs: number) => {
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow('2025-01-15T11:55:00.000Z', sampledProbeDocs)
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
+  };
+
+  /** ~500K raw in the window, far above the 100K default cap. */
+  const mockHighVolumeSequence = () => mockVolumeSequence(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+
+  /** ~1.8K raw in the window, far below the 100K default cap. */
+  const mockLowVolumeSequence = () => mockVolumeSequence(100);
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: fixedNow.getTime() });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('nonPriority above the default cap samples the extraction query', async () => {
+    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    mockHighVolumeSequence();
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.');
+  });
+
+  it('nonPriority below the default cap emits no SAMPLE stage', async () => {
+    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    mockLowVolumeSequence();
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    for (const query of extractionQueries()) {
+      expect(query).not.toContain('SAMPLE');
+    }
+  });
+
+  it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
+    '%s mode never samples, even far above the default cap',
+    async (mode) => {
+      const client = createSamplingContext(mode);
+      mockHighVolumeSequence();
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      expect(extractionQueries().length).toBeGreaterThan(0);
+      for (const query of extractionQueries()) {
+        expect(query).not.toContain('SAMPLE');
+      }
+    }
+  );
+
+  it('a window projecting just above the 100K default samples', async () => {
+    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    // 6000 sampled → 60K raw → projection 108K > 100K
+    mockVolumeSequence(6000);
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.9');
+  });
+
+  it('a window projecting just below the 100K default does not sample', async () => {
+    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    // 5000 sampled → 50K raw → projection 90K < 100K
+    mockVolumeSequence(5000);
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries().length).toBeGreaterThan(0);
+    for (const query of extractionQueries()) {
+      expect(query).not.toContain('SAMPLE');
+    }
+  });
+
+  it('a descriptor samplingRate override samples even below the default cap', async () => {
+    const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
+    });
+    mockLowVolumeSequence();
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.5');
+  });
+
+  it('a descriptor samplingRate override replaces the dynamic rate above the cap', async () => {
+    const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
+    });
+    mockHighVolumeSequence(); // dynamic rate would be ~0.11
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.5');
+  });
+
+  it('the budget counts processed volume, so a sampled over-cap window does not fire the cap', async () => {
+    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    mockHighVolumeSequence();
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    // ~500K raw at the computed rate lands well under the 100K default cap; raw accounting
+    // would have fired the cap on the first slice.
+    expect(result.success && result.logsCapApplied).toBe(false);
+    expect(result.success && result.logsProcessed).toBeGreaterThan(0);
+    expect(result.success && result.logsProcessed).toBeLessThan(100_000);
+  });
+});

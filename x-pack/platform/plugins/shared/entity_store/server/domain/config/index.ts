@@ -6,3 +6,4 @@
  */
 
 export { getMergedConfig, DEFAULT_CONFIG_BY_TYPE } from './merge_config';
+export type { MergedLogExtractionConfig } from './merge_config';
