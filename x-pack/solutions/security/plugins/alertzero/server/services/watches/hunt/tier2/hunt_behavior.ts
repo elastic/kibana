@@ -321,8 +321,7 @@ const resolveGenerationIndex = (
   articleContext: HuntBehaviorArticleContext | undefined,
   requiredIndices: string[]
 ): string => {
-  const allowlist =
-    requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns();
+  const allowlist = requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns();
   const matched = matchedIndexPatterns(articleContext).filter((pattern) =>
     isIndexPatternAllowed(pattern, allowlist)
   );
@@ -414,26 +413,28 @@ const generateGroundedEsql = async ({
           rowLimit,
         });
         if (error || !query) {
+          logger.warn(
+            `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} failed — ` +
+              `falling back to a non-executable placeholder. ${(error ?? 'no query returned').slice(
+                0,
+                300
+              )}`
+          );
+          return undefined;
+        }
+        return [behavior.technique_id, query.trim()];
+      } catch (err) {
         logger.warn(
-          `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} failed — ` +
-            `falling back to a non-executable placeholder. ${(
-              error ?? 'no query returned'
-            ).slice(0, 300)}`
+          `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} threw — ` +
+            `falling back to a non-executable placeholder. ${((err as Error).message ?? '').slice(
+              0,
+              300
+            )}`
         );
         return undefined;
       }
-      return [behavior.technique_id, query.trim()];
-    } catch (err) {
-      logger.warn(
-        `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} threw — ` +
-          `falling back to a non-executable placeholder. ${(
-            (err as Error).message ?? ''
-          ).slice(0, 300)}`
-      );
-      return undefined;
-    }
-  },
-  { concurrency: ESQL_GENERATION_CONCURRENCY }
+    },
+    { concurrency: ESQL_GENERATION_CONCURRENCY }
   );
 
   const generated = new Map<string, string>(

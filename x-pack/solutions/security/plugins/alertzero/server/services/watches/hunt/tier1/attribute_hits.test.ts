@@ -7,7 +7,10 @@
 
 import { attributeHits, type HitDocument } from './attribute_hits';
 
-const baseDoc = (source: Record<string, unknown> = {}, overrides: Partial<HitDocument> = {}): HitDocument => ({
+const baseDoc = (
+  source: Record<string, unknown> = {},
+  overrides: Partial<HitDocument> = {}
+): HitDocument => ({
   index: 'logs-aws.cloudtrail-default',
   id: 'evt-1',
   timestamp: '2026-09-01T00:00:00.000Z',
