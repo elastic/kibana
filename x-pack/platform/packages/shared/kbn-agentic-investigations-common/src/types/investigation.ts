@@ -37,6 +37,12 @@ export interface Investigation {
   recommendedAction?: RecommendedAction;
   /** Primary asset or surface impacted */
   affectedSurface?: string;
+  /**
+   * Opaque entity ids this investigation is about. The landing-page pills and
+   * their filter read this list; `affectedSurface` remains the single-value
+   * fallback used by sample data and the flyout Overview row.
+   */
+  entityIds?: string[];
   summary?: string;
   /** Brief priority score (0-100) for queue ranking */
   priorityScore?: number;

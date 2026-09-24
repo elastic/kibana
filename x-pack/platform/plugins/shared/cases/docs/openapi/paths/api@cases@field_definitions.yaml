@@ -1,0 +1,181 @@
+get:
+  summary: Get all field definitions
+  operationId: getCaseFieldDefinitionsDefaultSpace
+  description: >
+    Returns a paginated list of field definitions (field library entries) for the given
+    owner. Requires the Cases feature to be enabled in the space.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - in: query
+      name: owner
+      description: >
+        The application that owns the field definitions (for example `cases`, `observability`, or
+        `securitySolution`). Required.
+      required: true
+      schema:
+        oneOf:
+          - type: string
+            maxLength: 50
+          - type: array
+            items:
+              type: string
+              maxLength: 50
+            maxItems: 10
+    - in: query
+      name: isGlobal
+      description: >
+        When true, returns only global field definitions (rendered on every case). When false,
+        returns all definitions. Omit to return all.
+      required: false
+      schema:
+        type: boolean
+    - $ref: '../components/parameters/page_index.yaml'
+    - $ref: '../components/parameters/page_size.yaml'
+    - in: query
+      name: sortField
+      description: >
+        The field to sort by. When omitted, results are sorted by `fieldDefinitionId` ascending
+        and `sortOrder` is ignored.
+      required: false
+      schema:
+        type: string
+        enum:
+          - name
+          - owner
+          - isGlobal
+          - displayOrder
+    - $ref: '../components/parameters/sort_order.yaml'
+    - in: query
+      name: search
+      description: >
+        A case-insensitive substring to match against each definition's `name` and `description`
+        fields. Definitions where neither field contains the substring are excluded.
+      required: false
+      schema:
+        type: string
+        maxLength: 1000
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/get_case_field_definitions_response.yaml'
+          examples:
+            getCaseFieldDefinitionsResponse:
+              $ref: '../components/examples/get_case_field_definitions_response.yaml'
+    '400':
+      description: The request is invalid. For example, the `owner` query parameter is missing or `page`/`perPage` are not integers.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_invalid_template.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have permission to read field definitions for the owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+post:
+  summary: Create a field definition
+  operationId: createCaseFieldDefinitionDefaultSpace
+  description: >
+    Creates a field definition in the field library. You must have the "Manage templates"
+    sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be
+    enabled in the space. Use `dry_run=true` to validate the request without writing anything.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - in: query
+      name: dry_run
+      description: >
+        When true, runs authorization, body, and name-uniqueness validation without creating the
+        field definition. Returns `{ "valid": true }` on success.
+      required: false
+      schema:
+        type: boolean
+        default: false
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/field_definition_write_request.yaml'
+        examples:
+          createCaseFieldDefinitionRequest:
+            $ref: '../components/examples/field_definition_write_request.yaml'
+  responses:
+    '200':
+      description: >
+        Indicates a successful call. Returns the created field definition, or `{ "valid": true }`
+        when `dry_run=true`.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '../components/schemas/field_definition_response.yaml'
+              - type: object
+                required:
+                  - valid
+                properties:
+                  valid:
+                    type: boolean
+          examples:
+            createCaseFieldDefinitionResponse:
+              $ref: '../components/examples/get_case_field_definition_response.yaml'
+    '400':
+      description: >
+        The request body is invalid, the YAML definition is malformed, the `name` does not match
+        the YAML definition's `name`, or the owner already has 200 field definitions.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_invalid_template.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have the manage templates privilege for the owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+    '409':
+      description: A field definition with the same name already exists for the owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response409:
+              $ref: '../components/examples/response_409.yaml'
