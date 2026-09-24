@@ -286,6 +286,21 @@ synthetic execution continues to need no telemetry connector. The former `remote
 `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file workflow. Grading, snapshot
 provisioning and micro-evals are separate follow-ups.
 
+## Deferred sandbox session isolation
+
+The shared sandbox workspace is scoped to a space and conversation, not to an agent's connector
+allow-list or a user's current execution privileges. Telemetry hints are authorized before seeding
+and cleared when access or configuration is removed, but overlapping calls with different
+authorization contexts can race between manifest preparation and file access. Previously created
+files can also remain in that workspace. This PR does not establish isolation between those contexts.
+
+A separate follow-up must define the workspace ownership boundary and cover manifest updates,
+tool execution, retained files, permission changes, and reuse across Kibana restarts or instances.
+Serializing manifest writes alone does not close the gap before a subsequent tool operation.
+Until then, use a conversation only within one trusted authorization context. The outstanding
+[review finding](https://github.com/elastic/kibana/pull/291603#discussion_r4097938707) records this
+explicitly deferred scope.
+
 ## Two kinds of dataset
 
 The word "dataset" means two different things in evals, and this suite keeps them apart deliberately. It is worth reading once.

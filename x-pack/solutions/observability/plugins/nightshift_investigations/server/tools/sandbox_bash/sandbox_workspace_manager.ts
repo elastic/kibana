@@ -59,7 +59,7 @@ export const createSandboxWorkspaceManager = ({
       const lastKey = lastConnectorIds.get(session);
       if (!session.isReset && lastKey === currentKey) return;
 
-      if (telemetryConnectorId && !canUseTelemetry) {
+      if (!canUseTelemetry) {
         lastConnectorIds.delete(session);
         // Clear previously seeded hints on revocation; a failed clear must block file access.
         const [result] = await session.writeFiles([

@@ -253,6 +253,23 @@ describe('createSandboxWorkspaceManager', () => {
       expect(mockWriteElasticManifest).not.toHaveBeenCalled();
     });
 
+    it('clears retained hints after telemetry configuration is removed on restart', async () => {
+      const session = createSessionMock(false);
+      const callContext = createCallContext(['elasticsearch-telemetry']);
+      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
+      mockWriteElasticManifest.mockClear();
+
+      await manager.ensureWorkspaceReady({ session, callContext });
+
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
+      expect(session.writeFiles).toHaveBeenCalledWith([
+        {
+          path: '/workspace/elastic.md',
+          content: Buffer.from('No telemetry connector is available.\n'),
+        },
+      ]);
+    });
+
     it('swallows elastic manifest write failures (best-effort)', async () => {
       mockWriteElasticManifest.mockRejectedValueOnce(new Error('gRPC timeout'));
       const session = createSessionMock(true);
