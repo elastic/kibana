@@ -64,7 +64,7 @@ src/
 - `UnsafeClose`: 0 when the run predicts `false_positive` and the gold is anything else. A false positive closes the attack.
 - `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` did not complete and produced no payload.
 - `trajectory`: the agent called no tools. N/A when traces are unavailable.
-- LLM criteria on the summary and rationale: cited ids exist in the seeded data, nothing is invented (the task output carries the seeded documents in `seededEvidence`), the deciding checks are named, and an `inconclusive` verdict says what was missing or conflicting. N/A for failed runs.
+- LLM criteria on the summary and rationale: cited ids exist in the seeded data, nothing is invented (the task output carries the seeded documents in `seededEvidence`), the discovery's and alerts' story is stated as fact only where the entities or raw events show it, the deciding checks are named, and an `inconclusive` verdict says what was missing or conflicting. N/A for failed runs.
 
 A grader for whether `claims` are grounded in the seeded data waits for the verification gate; the raw `coverage`, `checks`, and `claims` are already captured in the task output.
 

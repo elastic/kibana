@@ -168,19 +168,9 @@ export const runFpTpAnalysisWorkflow = async ({
       query: { includeOutput: true },
     })) as WorkflowExecutionDto;
 
-  const deadline = Date.now() + maxWaitMs;
-  let execution = await readExecution();
-
-  while (!isTerminal(execution.status) && Date.now() < deadline) {
-    await sleep(pollIntervalMs);
-    execution = await readExecution();
-  }
-
-  const timedOut = !isTerminal(execution.status);
-  if (timedOut) {
-    log.warning(
-      `FP/TP analysis execution ${workflowExecutionId} was not terminal after ${maxWaitMs}ms (last status: ${execution.status}); cancelling it and counting it as failed`
-    );
+  // Cancels the run and waits up to `cancelWaitMs` for it to stop. Read errors are
+  // tolerated here; the last record read, if any, is returned.
+  const cancelAndAwait = async (): Promise<WorkflowExecutionDto | undefined> => {
     await fetch(`/api/workflows/executions/${encodeURIComponent(workflowExecutionId)}/cancel`, {
       method: 'POST',
       version: PUBLIC_API_VERSION,
@@ -191,15 +181,43 @@ export const runFpTpAnalysisWorkflow = async ({
       )
     );
     const cancelDeadline = Date.now() + cancelWaitMs;
+    let last: WorkflowExecutionDto | undefined;
     do {
       await sleep(pollIntervalMs);
-      execution = await readExecution();
-    } while (!isTerminal(execution.status) && Date.now() < cancelDeadline);
-    if (!isTerminal(execution.status)) {
+      last = (await readExecution().catch(() => undefined)) ?? last;
+    } while ((last === undefined || !isTerminal(last.status)) && Date.now() < cancelDeadline);
+    if (last === undefined || !isTerminal(last.status)) {
       log.warning(
-        `FP/TP analysis execution ${workflowExecutionId} was still ${execution.status} ${cancelWaitMs}ms after cancelling`
+        `FP/TP analysis execution ${workflowExecutionId} was still ${
+          last?.status ?? 'unreadable'
+        } ${cancelWaitMs}ms after cancelling`
       );
     }
+    return last;
+  };
+
+  const deadline = Date.now() + maxWaitMs;
+  let execution: WorkflowExecutionDto;
+  try {
+    execution = await readExecution();
+    while (!isTerminal(execution.status) && Date.now() < deadline) {
+      await sleep(pollIntervalMs);
+      execution = await readExecution();
+    }
+  } catch (error) {
+    log.warning(
+      `Could not read FP/TP analysis execution ${workflowExecutionId}: ${error.message}; cancelling it`
+    );
+    await cancelAndAwait();
+    throw error;
+  }
+
+  const timedOut = !isTerminal(execution.status);
+  if (timedOut) {
+    log.warning(
+      `FP/TP analysis execution ${workflowExecutionId} was not terminal after ${maxWaitMs}ms (last status: ${execution.status}); cancelling it and counting it as failed`
+    );
+    execution = (await cancelAndAwait()) ?? execution;
   } else if (execution.status !== ExecutionStatus.COMPLETED) {
     log.info(
       `FP/TP analysis execution ${workflowExecutionId} ended ${execution.status}: ${

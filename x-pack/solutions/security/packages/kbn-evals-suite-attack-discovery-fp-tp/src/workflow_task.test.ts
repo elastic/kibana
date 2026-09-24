@@ -170,6 +170,31 @@ describe('runFpTpAnalysisWorkflow', () => {
     expect(cancelCalls(fetch)).toEqual([]);
   });
 
+  describe('when reading the execution fails', () => {
+    const failingFetch = (): HttpHandler =>
+      jest.fn(async (path: string) => {
+        if (path.endsWith('/run')) {
+          return { workflowExecutionId: 'exec-1' };
+        }
+        if (path.endsWith('/cancel')) {
+          return undefined;
+        }
+        throw new Error('read failed');
+      }) as unknown as HttpHandler;
+
+    it('rethrows the read error', async () => {
+      await expect(run(failingFetch())).rejects.toThrow('read failed');
+    });
+
+    it('cancels the run before rethrowing', async () => {
+      const fetch = failingFetch();
+      await run(fetch).catch(() => undefined);
+      expect(cancelCalls(fetch).map(([path]) => path)).toEqual([
+        '/api/workflows/executions/exec-1/cancel',
+      ]);
+    });
+  });
+
   it('returns failed when an overrun completes while being cancelled', async () => {
     const fetch = mockFetch([
       execution({ status: ExecutionStatus.RUNNING }),

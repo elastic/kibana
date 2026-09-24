@@ -50,6 +50,7 @@ import { ensureFpTpSeedPrerequisites, seedFixture, toSeededEvidence } from '../s
 const SUMMARY_CRITERIA = [
   'Every id the summary or rationale cites (document ids, host.id, process.entity_id, or any other identifier) appears in output.seededIds or output.seededEvidence (the documents seeded for this run)',
   'The summary and rationale do not invent hosts, users, processes, domains, events, or entity roles that are not in output.seededEvidence (the documents this run seeded)',
+  'The summary and rationale state that something actually happened only when output.seededEvidence.entities or output.seededEvidence.events show it; output.seededEvidence.attackDiscovery and output.seededEvidence.alerts are the claims under review, so presenting their story as established fact where the entities or raw events contradict it or do not show it fails this criterion',
   'The summary or rationale names the check or checks that decided the verdict (alert_linkage, entity_role, process_parent, network_destination)',
   'When the verdict is inconclusive, the summary or rationale says which evidence was missing or which checks conflicted',
   'When the entity store or raw events were empty or unavailable, the summary or rationale names that source, whatever the verdict',
