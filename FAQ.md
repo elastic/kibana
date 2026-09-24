@@ -21,3 +21,6 @@
 
 **Q:** What happened to templated/scripted dashboards?
 **A:** Check out the URL. The state of each app is stored there, including any filters, queries or columns. This should be a lot easier than constructing scripted dashboards. The encoding of the URL is RISON.
+
+**Q:** How do I report a bug?
+**A:** Open an issue at https://github.com/elastic/kibana/issues with steps to reproduce, the Kibana version, and your browser console output.
