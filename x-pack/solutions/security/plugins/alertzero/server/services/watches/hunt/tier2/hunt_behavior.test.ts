@@ -179,9 +179,9 @@ describe('huntBehavior', () => {
     );
   });
 
-  it('returns generateEsql with index discovery when neither hits nor scope name an index', async () => {
+  it('returns generateEsql targeting logs-* when neither hits nor scope name an index', async () => {
     await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: 'report' }, esClient);
-    expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: undefined }));
+    expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: 'logs-*' }));
   });
 
   it('returns generateEsql in schema-probe mode with the hunt instructions and row limit', async () => {

@@ -125,6 +125,12 @@ const MAX_ESQL_PROMPT_TEXT_CHARS = 6000;
 const ESQL_GENERATION_CONCURRENCY = 3;
 /** LIMIT the generator writes into a proposed rule when the caller has no row bound. */
 const DEFAULT_PROPOSED_RULE_LIMIT = 100;
+/**
+ * Generation target when neither Tier 1 hits nor the scope name an index (the
+ * standalone route). Letting the generator discover one lands on a dated
+ * physical index, which is never what a proposed rule should cite.
+ */
+const DEFAULT_GENERATION_INDEX = 'logs-*';
 
 const columnIndex = (columns: Array<{ name: string }> | undefined, name: string): number =>
   columns?.findIndex((c) => c.name === name) ?? -1;
@@ -290,16 +296,16 @@ const matchedIndexPatterns = (articleContext: HuntBehaviorArticleContext | undef
 
 /**
  * Target for `generateEsql`. Prefer integrations with confirmed hits, then the
- * scope's required patterns. `undefined` lets the generator run index discovery.
+ * scope's required patterns, then the generic logs pattern.
  */
 const resolveGenerationIndex = (
   articleContext: HuntBehaviorArticleContext | undefined,
   requiredIndices: string[]
-): string | undefined => {
+): string => {
   const matched = matchedIndexPatterns(articleContext);
   if (matched.length > 0) return matched.join(',');
   if (requiredIndices.length > 0) return requiredIndices.join(',');
-  return undefined;
+  return DEFAULT_GENERATION_INDEX;
 };
 
 /** Report-level grounding shared by every per-behavior generation call. */
