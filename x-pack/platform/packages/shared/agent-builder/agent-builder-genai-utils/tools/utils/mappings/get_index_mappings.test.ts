@@ -179,5 +179,19 @@ describe('getIndexMappings', () => {
         getIndexMappings({ indices: ['index-a'], esClient, skipUnauthorized: true })
       ).rejects.toThrow('network error');
     });
+
+    it('rethrows non-403 errors from per-index retries after a batch 403', async () => {
+      esClient.indices.getMapping.mockImplementation((params: any) => {
+        const names: string[] = params.index;
+        if (names.length > 1) {
+          return Promise.reject(make403());
+        }
+        return Promise.reject(new Error('service unavailable'));
+      });
+
+      await expect(
+        getIndexMappings({ indices: ['index-a', 'index-b'], esClient, skipUnauthorized: true })
+      ).rejects.toThrow('service unavailable');
+    });
   });
 });

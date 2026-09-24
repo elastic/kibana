@@ -7,7 +7,7 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import pLimit from 'p-limit';
+import pMap from 'p-map';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { cleanupMapping } from './cleanup_mapping';
 import { batchByUrlLength } from '../batch_by_url_length';
@@ -51,21 +51,24 @@ export const getIndexMappings = async ({
         if (!skipUnauthorized || !isAuthorizationError(err)) {
           throw err;
         }
-        // Retry per-index (concurrency-limited) and drop any that are denied.
-        const limit = pLimit(5);
-        const settled = await Promise.allSettled(
-          batch.map((indexName) =>
-            limit(async () => {
+        // Retry per-index (concurrency-limited). Drop 403s; rethrow all other errors.
+        const indexResults = await pMap(
+          batch,
+          async (indexName) => {
+            try {
               const response = await esClient.indices.getMapping({ index: [indexName] });
               return { indexName, mappings: response[indexName].mappings };
-            })
-          )
+            } catch (retryErr) {
+              if (!isAuthorizationError(retryErr)) throw retryErr;
+              return null;
+            }
+          },
+          { concurrency: 10 }
         );
-        return settled.reduce((res, result) => {
-          if (result.status === 'fulfilled') {
-            const { indexName, mappings } = result.value;
-            res[indexName] = {
-              mappings: cleanup ? cleanupMapping(mappings) : mappings,
+        return indexResults.reduce((res, item) => {
+          if (item !== null) {
+            res[item.indexName] = {
+              mappings: cleanup ? cleanupMapping(item.mappings) : item.mappings,
             };
           }
           return res;
