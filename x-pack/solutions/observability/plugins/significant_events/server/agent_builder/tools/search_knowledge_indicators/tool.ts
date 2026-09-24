@@ -22,8 +22,8 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
-import type { SignificantEventsServer } from '../../../types';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/nightshift-ai';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
