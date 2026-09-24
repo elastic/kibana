@@ -9,26 +9,7 @@
 
 import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../common/ui/fixtures';
-
-const getSearchSourceRuleParams = (dataViewId: string) => ({
-  searchType: 'searchSource',
-  timeWindowSize: 30,
-  timeWindowUnit: 'm',
-  threshold: [1],
-  thresholdComparator: '>',
-  size: 100,
-  aggType: 'count',
-  groupBy: 'all',
-  termSize: 5,
-  excludeHitsFromPreviousRun: false,
-  sourceFields: [],
-  searchConfiguration: {
-    query: { query: '', language: 'kuery' },
-    index: dataViewId,
-    filter: [],
-  },
-});
+import { getSearchSourceRuleParams, spaceTest } from '../../../common/ui/fixtures';
 
 spaceTest.describe(
   'Discover app - search source alert privileges',
@@ -110,10 +91,8 @@ spaceTest.describe(
           ],
         };
         await browserAuth.loginWithCustomRole(role);
-        await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
-        const rulesList = page.testSubj.locator('rulesList');
-        await rulesList.waitFor({ state: 'visible' });
-        await rulesList.locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`).click();
+        await page.gotoApp(`management/insightsAndAlerting/triggersActions/rule/${ruleId}`);
+        await page.testSubj.locator('appHeaderTitle').waitFor({ state: 'visible' });
         await page.testSubj.click('app-menu-overflow-button');
         await page.testSubj.click('ruleDetails-viewInDiscover');
         await pageObjects.discover.waitUntilSearchingHasFinished();

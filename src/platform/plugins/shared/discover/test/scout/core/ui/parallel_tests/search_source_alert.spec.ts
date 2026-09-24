@@ -10,33 +10,14 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ApiServicesFixture, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, type DiscoverPageObjects } from '../../../common/ui/fixtures';
+import {
+  getSearchSourceRuleParams,
+  spaceTest,
+  type DiscoverPageObjects,
+} from '../../../common/ui/fixtures';
 
 const SOURCE_INDEX_PREFIX = 'search-source-alert';
 const OUTPUT_INDEX_PREFIX = 'search-source-alert-output';
-
-const getSearchSourceRuleParams = (
-  dataView: string | Record<string, unknown>,
-  query = '',
-  filter: Array<Record<string, unknown>> = []
-) => ({
-  searchType: 'searchSource',
-  timeWindowSize: 30,
-  timeWindowUnit: 'm',
-  threshold: [1],
-  thresholdComparator: '>',
-  size: 100,
-  aggType: 'count',
-  groupBy: 'all',
-  termSize: 5,
-  excludeHitsFromPreviousRun: false,
-  sourceFields: [],
-  searchConfiguration: {
-    query: { query, language: 'kuery' },
-    index: dataView,
-    filter,
-  },
-});
 
 const getUpdatedSearchSourceRuleParams = (dataViewId: string) =>
   getSearchSourceRuleParams(dataViewId, 'message:msg-1', [
@@ -75,7 +56,7 @@ const getAdHocDataViewSpec = (id: string, title: string) => ({
 });
 
 const refreshSourceDocuments = async (esClient: Client, sourceIndex: string): Promise<void> => {
-  const timestamp = new Date().toISOString();
+  const timestamp = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   await esClient.bulk({
     refresh: 'wait_for',
     operations: Array.from({ length: 5 }, (_, i) => [
@@ -105,6 +86,7 @@ const createSearchSourceRule = async ({
       name,
       ruleTypeId: '.es-query',
       consumer: 'stackAlerts',
+      enabled: true,
       schedule: { interval: '1m' },
       notifyWhen: 'onActiveAlert',
       params: getSearchSourceRuleParams(searchConfigurationIndex ?? dataViewId),
@@ -127,7 +109,9 @@ const createSearchSourceRule = async ({
     },
     spaceId
   );
-  return response.data.id as string;
+  const ruleId = response.data.id as string;
+  await apiServices.alerting.rules.runSoon(ruleId, spaceId);
+  return ruleId;
 };
 
 const getGeneratedContextLink = async (esClient: Client, outputIndex: string, ruleId: string) => {
@@ -396,13 +380,22 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
 
       const contextLink = await getGeneratedContextLink(esClient, outputIndex, ruleId);
 
-      await apiServices.alerting.rules.update(
-        ruleId,
-        {
-          params: getUpdatedSearchSourceRuleParams(sourceDataViewId),
-        },
-        scoutSpace.id
-      );
+      await spaceTest.step('updates the rule through the edit UI', async () => {
+        await openRuleInManagement(page, ruleName);
+        await page.testSubj.click('app-menu-overflow-button');
+        await page.testSubj.click('openEditRuleFlyoutButton');
+        await page.testSubj.locator('ruleForm').waitFor({ state: 'visible' });
+        await pageObjects.queryBar.setQuery('message:msg-1');
+        await pageObjects.filterBar.addFilter({
+          field: 'message.keyword',
+          operator: 'is',
+          value: 'msg-1',
+        });
+        await page.testSubj.click('thresholdPopover');
+        await page.testSubj.fill('alertThresholdInput0', '1');
+        await page.testSubj.click('rulePageFooterSaveButton');
+        await page.testSubj.locator('ruleForm').waitFor({ state: 'hidden' });
+      });
 
       await spaceTest.step('the previous notification link restores original params', async () => {
         await page.goto(new URL(contextLink, page.url()).toString());

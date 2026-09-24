@@ -14,6 +14,29 @@ import * as testData from './constants';
 
 export type QueryMode = 'classic' | 'esql';
 
+export const getSearchSourceRuleParams = (
+  dataView: string | Record<string, unknown>,
+  query = '',
+  filter: Array<Record<string, unknown>> = []
+) => ({
+  searchType: 'searchSource',
+  timeWindowSize: 30,
+  timeWindowUnit: 'm',
+  threshold: [1],
+  thresholdComparator: '>',
+  size: 100,
+  aggType: 'count',
+  groupBy: 'all',
+  termSize: 5,
+  excludeHitsFromPreviousRun: false,
+  sourceFields: [],
+  searchConfiguration: {
+    query: { query, language: 'kuery' },
+    index: dataView,
+    filter,
+  },
+});
+
 export const expectSampleSizeFooter = async ({
   pageObjects,
   sampleSize,
