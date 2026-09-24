@@ -127,6 +127,14 @@ export class MapsPage {
   async waitForLayersToLoad() {
     await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
 
+    // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
+    // visible before that, so gate both branches on this signal.
+    await this.page.waitForFunction(
+      () => document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas') !== null,
+      undefined,
+      { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
+    );
+
     // Wait until one of the two TOC states has rendered before branching; an immediate
     // isVisible() snapshot after mapContainer can race with the TOC appearing.
     const mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
