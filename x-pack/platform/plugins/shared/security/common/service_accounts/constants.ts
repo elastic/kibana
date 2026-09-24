@@ -63,3 +63,8 @@ export interface ServiceAccountRoleLimits {
   /** The longest role name the backend accepts. */
   readonly maxRoleNameLength: number;
 }
+
+/**
+ * Cap on a single page of listed service accounts.
+ */
+export const SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE = 100;

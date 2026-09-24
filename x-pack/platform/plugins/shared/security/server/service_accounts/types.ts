@@ -14,7 +14,20 @@ import type {
 
 import type { ServiceAccountWorkloadBindingsApi } from './bindings';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
-import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
+import type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryEntry,
+  ServiceAccountRoleLimits,
+} from '../../common/service_accounts';
+
+/**
+ * Paging parameters for listing service accounts. `after` is the `next_page` cursor of the
+ * previous page, opaque to the caller and specific to the backend that issued it.
+ */
+export interface ListServiceAccountsParams {
+  limit?: number;
+  after?: string;
+}
 
 /**
  * A backend capable of managing service accounts for the current runtime.
@@ -27,6 +40,22 @@ export interface ServiceAccountsBackend {
   readonly roleLimits: ServiceAccountRoleLimits;
 
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+
+  /**
+   * Lists the service accounts this Kibana can see, one page at a time.
+   *
+   * Authorizes the Kibana caller first. On UIAM the outbound call is then authenticated as Kibana
+   * over mTLS, not as the user.
+   */
+  list(
+    request: KibanaRequest,
+    params?: ListServiceAccountsParams
+  ): Promise<ListServiceAccountsResponse>;
+
+  /**
+   * Fetches one service account by id, with the same authorization model as {@link list}.
+   */
+  get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry>;
 
   /**
    * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`

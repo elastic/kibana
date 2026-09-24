@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
-  createSystemIndicesEsClient,
-  SYSTEM_INDICES_HEADERS,
-} from '../fixtures/system_indices_es_client';
+  ES_SERVICE_ACCOUNT_NAMESPACE,
+  ES_SERVICE_ACCOUNT_TOKEN_NAME,
+} from '../../../../common/service_accounts';
+import {
+  deleteServiceAccounts,
+  type ServiceAccountPrincipal,
+} from '../fixtures/service_account_cleanup';
 
 /**
  * Local only: this suite needs the `service_accounts` custom server config set, and custom config
@@ -28,14 +30,6 @@ const CREATE_ENDPOINT = 'internal/security/service_account';
  * server config ever stop disabling `server.restrictInternalApis`.
  */
 const REQUEST_HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
-const NAMESPACE = 'kibana';
-/** The single token Kibana mints per account, named in `ES_SERVICE_ACCOUNT_TOKEN_NAME`. */
-const TOKEN_NAME = 'kibana-managed';
-const CREDENTIAL_TYPE = 'service-account-credential';
-/** Alias of the main saved objects index, which the credential type lands in. */
-const KIBANA_INDEX = '.kibana';
-/** Raw field path of an attribute on a saved object document, which nests them under the type. */
-const CREDENTIAL_ACCOUNT_FIELD = `${CREDENTIAL_TYPE}.serviceAccountId`;
 
 /**
  * How many roles Elasticsearch allows on a user-managed service account, and so the most Kibana
@@ -61,98 +55,10 @@ const sorted = (values: string[]) => [...values].sort();
 const distinctRoles = (count: number) => Array.from({ length: count }, (_, i) => `role-${i}`);
 
 apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, () => {
-  const created: string[] = [];
+  const created: ServiceAccountPrincipal[] = [];
 
   apiTest.afterAll(async ({ esClient, config }) => {
-    const failures: string[] = [];
-
-    for (const name of created) {
-      // Token first, then the account, the same order `EsServiceAccounts.rollback` uses: a forced
-      // account delete can leave the token behind, and a lingering token blocks recreating the
-      // name on the next run. A 404 is the expected answer for a name a failing test registered
-      // but never got created.
-      try {
-        await esClient.transport.request(
-          {
-            method: 'DELETE',
-            path: `/_security/service/${NAMESPACE}/${name}/credential/token/${TOKEN_NAME}`,
-          },
-          { ignore: [404] }
-        );
-      } catch (err) {
-        failures.push(`service account token [${NAMESPACE}/${name}/${TOKEN_NAME}]: ${err.message}`);
-      }
-
-      try {
-        // `force`, in case the token delete above did not land: Elasticsearch refuses an unforced
-        // delete while any token remains.
-        await esClient.transport.request(
-          {
-            method: 'DELETE',
-            path: `/_security/service/${NAMESPACE}/${name}`,
-            querystring: { force: 'true' },
-          },
-          { ignore: [404] }
-        );
-      } catch (err) {
-        failures.push(`service account [${NAMESPACE}/${name}]: ${err.message}`);
-      }
-    }
-
-    // Every successful create also writes an encrypted credential saved object, and there is no
-    // API to remove one yet, so it is deleted straight out of the index. The type registers no
-    // `indexPattern`, which puts it in the main saved objects index, and `serviceAccountId` is
-    // mapped as a keyword. Matching on that rather than re-deriving the hashed document ID keeps
-    // this working if the derivation ever changes.
-    //
-    // `.kibana` is restricted, and the plain `esClient` authenticates as `elastic`, whose
-    // `superuser` role does not reach restricted indices. The `allow_restricted_indices` role
-    // behind the client below, plus the product-origin header, is what makes the delete land.
-    if (created.length > 0) {
-      let systemIndicesEsClient: Client | undefined;
-
-      try {
-        systemIndicesEsClient = await createSystemIndicesEsClient(esClient, config);
-
-        const result = await systemIndicesEsClient.deleteByQuery(
-          {
-            index: KIBANA_INDEX,
-            refresh: true,
-            conflicts: 'proceed',
-            query: {
-              bool: {
-                filter: [
-                  { term: { type: CREDENTIAL_TYPE } },
-                  {
-                    terms: {
-                      [CREDENTIAL_ACCOUNT_FIELD]: created.map((name) => `${NAMESPACE}/${name}`),
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          { headers: SYSTEM_INDICES_HEADERS }
-        );
-
-        // A partial delete still resolves, so shard-level failures only surface here. The
-        // `deleted` count is not worth asserting on: the tests that expect a 400 or a 403
-        // register a name that never gets a credential saved object written for it.
-        if (result.failures?.length) {
-          failures.push(`credential saved objects: ${JSON.stringify(result.failures)}`);
-        }
-      } catch (err) {
-        failures.push(`credential saved objects: ${err.message}`);
-      } finally {
-        await systemIndicesEsClient?.close();
-      }
-    }
-
-    // Thrown rather than warned: these accounts are cluster-scoped and each holds a live
-    // credential, so a leak has to fail the suite instead of scrolling past in the log.
-    if (failures.length > 0) {
-      throw new Error(`Failed to clean up after the suite:\n${failures.join('\n')}`);
-    }
+    await deleteServiceAccounts(esClient, config, created);
   });
 
   apiTest(
@@ -160,7 +66,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     async ({ apiClient, esClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const name = uniqueName('relay');
-      created.push(name);
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
         headers: { ...cookieHeader, ...REQUEST_HEADERS },
@@ -171,25 +77,25 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       expect(response.statusCode).toBe(200);
       // The long-lived credential never leaves the security plugin.
       expect(response.body).toStrictEqual({
-        id: `${NAMESPACE}/${name}`,
+        id: `${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
         name,
         roles: ['viewer', 'editor'],
       });
 
       const account = await esClient.transport.request<Record<string, { roles: string[] }>>({
         method: 'GET',
-        path: `/_security/service/${NAMESPACE}/${name}`,
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
       });
-      const { roles, ...rest } = account[`${NAMESPACE}/${name}`];
+      const { roles, ...rest } = account[`${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`];
       expect(rest).toMatchObject({ type: 'user_managed', enabled: true });
       // Elasticsearch does not keep the roles in the order they were sent.
       expect(sorted(roles)).toStrictEqual(['editor', 'viewer']);
 
       const credentials = await esClient.transport.request<{ tokens: Record<string, unknown> }>({
         method: 'GET',
-        path: `/_security/service/${NAMESPACE}/${name}/credential`,
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}/credential`,
       });
-      expect(Object.keys(credentials.tokens)).toContain(TOKEN_NAME);
+      expect(Object.keys(credentials.tokens)).toContain(ES_SERVICE_ACCOUNT_TOKEN_NAME);
     }
   );
 
@@ -198,7 +104,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
   apiTest('refuses a request that names no roles', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const name = uniqueName('no-roles');
-    created.push(name);
+    created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
     const headers = { ...cookieHeader, ...REQUEST_HEADERS };
 
     for (const body of [{ name }, { name, roles: [] }]) {
@@ -217,7 +123,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     async ({ apiClient, esClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const name = uniqueName('max-roles');
-      created.push(name);
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
       const roles = distinctRoles(ES_MAX_ROLES);
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
@@ -227,14 +133,20 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       });
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toMatchObject({ id: `${NAMESPACE}/${name}`, name, roles });
+      expect(response.body).toMatchObject({
+        id: `${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
+        name,
+        roles,
+      });
 
       // Elasticsearch itself has to accept that many, not just Kibana's validation.
       const account = await esClient.transport.request<Record<string, { roles: string[] }>>({
         method: 'GET',
-        path: `/_security/service/${NAMESPACE}/${name}`,
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
       });
-      expect(sorted(account[`${NAMESPACE}/${name}`].roles)).toStrictEqual(sorted(roles));
+      expect(sorted(account[`${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`].roles)).toStrictEqual(
+        sorted(roles)
+      );
     }
   );
 
@@ -245,7 +157,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       // Registered up front even though the request is expected to fail: if the limit ever
       // regresses, the account it creates has to be cleaned up like any other.
       const name = uniqueName('too-many-roles');
-      created.push(name);
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
         headers: { ...cookieHeader, ...REQUEST_HEADERS },
@@ -258,7 +170,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
 
       const account = await esClient.transport.request<Record<string, unknown>>({
         method: 'GET',
-        path: `/_security/service/${NAMESPACE}/${name}`,
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
       });
       expect(account).toStrictEqual({});
     }
@@ -269,7 +181,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     async ({ apiClient, esClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const name = uniqueName('max-role-name');
-      created.push(name);
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
       const roles = ['a'.repeat(ES_MAX_ROLE_NAME_LENGTH)];
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
@@ -282,9 +194,9 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
 
       const account = await esClient.transport.request<Record<string, { roles: string[] }>>({
         method: 'GET',
-        path: `/_security/service/${NAMESPACE}/${name}`,
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
       });
-      expect(account[`${NAMESPACE}/${name}`].roles).toStrictEqual(roles);
+      expect(account[`${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`].roles).toStrictEqual(roles);
     }
   );
 
@@ -295,7 +207,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       // Registered up front even though the request is expected to fail: if the limit ever
       // regresses, the account it creates has to be cleaned up like any other.
       const name = uniqueName('long-role-name');
-      created.push(name);
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
         headers: { ...cookieHeader, ...REQUEST_HEADERS },
@@ -308,7 +220,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
 
       const account = await esClient.transport.request<Record<string, unknown>>({
         method: 'GET',
-        path: `/_security/service/${NAMESPACE}/${name}`,
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
       });
       expect(account).toStrictEqual({});
     }
@@ -317,7 +229,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
   apiTest('refuses a name that is already taken', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const name = uniqueName('duplicate');
-    created.push(name);
+    created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
     const headers = { ...cookieHeader, ...REQUEST_HEADERS };
 
     const first = await apiClient.post(CREATE_ENDPOINT, {
@@ -370,7 +282,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
         elasticsearch: { cluster: ['manage_security'] },
       });
       const name = uniqueName('from-api-key-scoped');
-      created.push(name);
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
         headers: { ...apiKeyHeader, ...REQUEST_HEADERS },
@@ -380,18 +292,20 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
 
       expect(response.statusCode).toBe(200);
       expect(response.body).toStrictEqual({
-        id: `${NAMESPACE}/${name}`,
+        id: `${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
         name,
         roles: ['viewer'],
       });
 
       const account = await esClient.transport.request<Record<string, unknown>>({
         method: 'GET',
-        path: `/_security/service/${NAMESPACE}/${name}`,
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
       });
       // Exactly what was asked for. The key is owned by an admin, so anything wider here would
       // mean Kibana fell back to the owner's privileges.
-      expect(account[`${NAMESPACE}/${name}`]).toMatchObject({ roles: ['viewer'] });
+      expect(account[`${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`]).toMatchObject({
+        roles: ['viewer'],
+      });
     }
   );
 
@@ -408,7 +322,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       // Registered up front even though the request is expected to fail: if the authorization
       // check ever regresses, the account it creates has to be cleaned up like any other.
       const name = uniqueName('unauthorized-key');
-      created.push(name);
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
         headers: { ...apiKeyHeader, ...REQUEST_HEADERS },
@@ -423,7 +337,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
   apiTest('refuses a caller without `manage_security`', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
     const name = uniqueName('unauthorized');
-    created.push(name);
+    created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
 
     const response = await apiClient.post(CREATE_ENDPOINT, {
       headers: { ...cookieHeader, ...REQUEST_HEADERS },

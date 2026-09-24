@@ -10,7 +10,11 @@ import type {
   ConversationRoundStep,
   RoundModelUsageStats,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ZERO_MODEL_USAGE,
+} from '@kbn/agent-builder-common';
 import type { AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents/prompts';
 import { mergeRounds, applyResumeResolution } from './merge_rounds';
 
@@ -145,5 +149,62 @@ describe('applyResumeResolution', () => {
     ) as { results: unknown[] };
     expect(call1.results).toEqual([{ type: 'other', data: 'resolved' }]);
     expect(merged.steps[0]).toMatchObject({ tool_call_id: 'call-1' });
+  });
+});
+
+describe('mergeRounds — interruption and defaults', () => {
+  it('carries interruption from next and sums the interrupted partial defaults without NaN', () => {
+    const previous = baseRound({ id: 'r', time_to_first_token: 7, time_to_last_token: 10 });
+    const next = baseRound({
+      id: 'r',
+      time_to_first_token: 0,
+      time_to_last_token: 3,
+      model_usage: ZERO_MODEL_USAGE,
+      response: { message: '' },
+      interruption: { type: 'aborted' },
+    });
+    const merged = mergeRounds(previous, next);
+    expect(merged.interruption).toEqual({ type: 'aborted' });
+    expect(merged.time_to_first_token).toBe(7);
+    expect(merged.time_to_last_token).toBe(13);
+    expect(merged.model_usage.connector_id).toBe(previous.model_usage.connector_id);
+  });
+
+  it('clears interruption when next is a terminated partial', () => {
+    const previous = baseRound({ id: 'r', interruption: { type: 'aborted' } });
+    const merged = mergeRounds(previous, baseRound({ id: 'r' }));
+    expect(merged.interruption).toBeUndefined();
+  });
+});
+
+describe('applyResumeResolution — interrupted copies', () => {
+  it('carries the interrupted mark from the resolved copy onto the inherited pending call', () => {
+    const previous = baseRound({ id: 'r', steps: [toolCallStep('tc1', [])] });
+    const next = baseRound({
+      id: 'r',
+      steps: [{ ...toolCallStep('tc1', []), interrupted: true } as ConversationRoundStep],
+    });
+    const merged = applyResumeResolution(previous, next, new Map());
+    expect(merged.steps).toHaveLength(1);
+    expect((merged.steps[0] as { interrupted?: true }).interrupted).toBe(true);
+  });
+
+  it('clears an inherited mark when the resolving copy is unmarked (failed resume, then a successful retry)', () => {
+    const previous = baseRound({
+      id: 'r',
+      steps: [{ ...toolCallStep('tc1', []), interrupted: true } as ConversationRoundStep],
+    });
+    const next = baseRound({ id: 'r', steps: [toolCallStep('tc1', [{ ok: true }])] });
+    const merged = applyResumeResolution(previous, next, new Map());
+    expect(merged.steps).toHaveLength(1);
+    expect(merged.steps[0]).not.toHaveProperty('interrupted');
+    expect((merged.steps[0] as { results: unknown[] }).results).toEqual([{ ok: true }]);
+  });
+
+  it('does not mark when the copy is an unmarked empty return', () => {
+    const previous = baseRound({ id: 'r', steps: [toolCallStep('tc1', [])] });
+    const next = baseRound({ id: 'r', steps: [toolCallStep('tc1', [])] });
+    const merged = applyResumeResolution(previous, next, new Map());
+    expect((merged.steps[0] as { interrupted?: true }).interrupted).toBeUndefined();
   });
 });

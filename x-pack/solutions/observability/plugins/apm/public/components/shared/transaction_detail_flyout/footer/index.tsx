@@ -45,7 +45,7 @@ export function TransactionDetailFlyoutFooter() {
             {...discoverButtonProps}
             {...getEbtProps({
               action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
-              element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+              element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.FOOTER,
               detail: 'traces',
             })}
           >
