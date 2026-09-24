@@ -192,7 +192,7 @@ export class MapsPage {
   private async openSetViewPopover() {
     // timeout: 0 prevents waiting for the element to appear — the form only exists in
     // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
-    if (!(await this.setViewForm.isVisible({ timeout: 0 }))) {
+    if (!(await this.setViewForm.isVisible({ timeout: 1_000 }))) {
       await this.page.testSubj.click('toggleSetViewVisibilityButton');
       await this.setViewForm.waitFor({ state: 'visible' });
     }
@@ -201,10 +201,11 @@ export class MapsPage {
   private async closeSetViewPopover() {
     // timeout: 0 prevents waiting for the element to appear — the form only exists in
     // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
-    if (await this.setViewForm.isVisible({ timeout: 0 })) {
-      // In embedded contexts (e.g. dashboard), the toggle button does not reliably
-      // close the popover, so use Escape instead.
-      await this.setViewForm.press('Escape');
+    if (await this.setViewForm.isVisible({ timeout: 1_000 })) {
+      // page.keyboard.press is more robust than setViewForm.press in embedded contexts:
+      // during map panning the dashboard re-renders the panel, detaching the form element,
+      // which causes locator.press to retry until it times out.
+      await this.page.keyboard.press('Escape');
       await this.setViewForm.waitFor({ state: 'hidden', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     }
   }
