@@ -295,6 +295,13 @@ budget by trimming the longest candidates rather than dropping any.
 maximum, so the budget never binds and the trimming path never runs outside its unit tests. A corpus
 of JSON lines or stack traces would be needed to measure it, and none exists yet.
 
+**The budget is a target, not a bound.** `MIN_RERANK_INPUT_LENGTH` wins over it, so a large candidate
+set pushes past it: 500 candidates (the `DEFAULT_RANK_WINDOW` ceiling) at the 80-character floor is
+40,000 characters, about 32 s against one allocation, against the budget's 9.6 s. It bounds cost
+against log *verbosity*, not against the number of distinct patterns. A real latency target would
+mean lowering `DEFAULT_RANK_WINDOW`, which drops candidates and is therefore a product decision.
+Our corpus has 60 patterns, so it is nowhere near this.
+
 Three things that look like levers and are not, all measured so they do not get re-proposed:
 
 | Idea | Result |

@@ -14,6 +14,8 @@ Services are registered during plugin [start](./server/plugin.ts) phase and defi
 
 ## Semantic Log Search
 
+See [`server/services/semantic_log_search/TECHNICAL_FAQ.md`](server/services/semantic_log_search/TECHNICAL_FAQ.md) for answers to "why is that number X?" questions about every constant, timeout, and algorithmic choice in this service.
+
 The `semanticLogSearch` service provides natural language search for log patterns:
 
 ```typescript

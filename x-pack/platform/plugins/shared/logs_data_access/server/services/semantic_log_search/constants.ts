@@ -67,10 +67,14 @@ export const MAX_RERANK_INPUT_LENGTH = 1200;
 export const MIN_RERANK_INPUT_LENGTH = 80;
 
 /**
- * Target total characters across all candidates in one rerank call, which is what bounds the
- * call's latency: cost is roughly 0.8 ms per input character divided by the endpoint's allocation
- * count. Retune against a latency target with that arithmetic; measurements are in the eval suite's
- * SETUP.md.
+ * Target total characters across all candidates in one rerank call. Rerank cost is roughly 0.8 ms
+ * per input character divided by the endpoint's allocation count, so this is what keeps latency
+ * from scaling with how verbose the logs are. Retune against a latency target with that arithmetic;
+ * measurements are in the eval suite's SETUP.md.
+ *
+ * It is a target, not a bound. `MIN_RERANK_INPUT_LENGTH` takes precedence, so the real worst case is
+ * `DEFAULT_RANK_WINDOW × MIN_RERANK_INPUT_LENGTH` (40 000 characters, ~32 s against one allocation).
+ * Bounding latency for real would mean lowering `DEFAULT_RANK_WINDOW`, which drops candidates.
  */
 export const RERANK_INPUT_TOTAL_CHAR_BUDGET = 12_000;
 
