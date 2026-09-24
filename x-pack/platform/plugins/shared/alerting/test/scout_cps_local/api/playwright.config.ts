@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('remote clusters', () => {
-    loadTestFile(require.resolve('./remote_clusters'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

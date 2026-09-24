@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type { MappingField } from '../utils/mappings';
 import { isCcsTarget } from '../utils/ccs';
+import { excludeFrozenTierQuery, frozenTierClauses } from '../utils/data_tiers';
 import { MAX_ES_RESPONSE_SIZE_BYTES } from '../constants';
 import { extractSnippetsBatch, type TopSnippetsConfig } from './extract_snippets';
 
@@ -38,12 +39,14 @@ const buildSearchRequest = ({
   fields,
   size,
   useTopSnippets,
+  includeFrozen,
 }: {
   index: string;
   term: string;
   fields: MappingField[];
   size: number;
   useTopSnippets: boolean;
+  includeFrozen: boolean;
 }): Record<string, any> => {
   const highlightConfig = useTopSnippets
     ? {}
@@ -64,7 +67,7 @@ const buildSearchRequest = ({
     return {
       index,
       size,
-      query: buildCcsQuery({ term, fields }),
+      query: buildCcsQuery({ term, fields, includeFrozen }),
       ...highlightConfig,
     };
   }
@@ -81,6 +84,7 @@ const buildSearchRequest = ({
         rank_window_size: size * 2,
         query: term,
         fields: fields.map((field) => field.path),
+        ...(includeFrozen ? {} : { filter: excludeFrozenTierQuery() }),
       },
     },
     ...highlightConfig,
@@ -100,14 +104,17 @@ const buildSearchRequest = ({
 const buildCcsQuery = ({
   term,
   fields,
+  includeFrozen,
 }: {
   term: string;
   fields: MappingField[];
+  includeFrozen: boolean;
 }): Record<string, unknown> => {
   return {
     bool: {
       should: fields.map((f) => ({ match: { [f.path]: term } })),
       minimum_should_match: 1,
+      ...(includeFrozen ? {} : { must_not: frozenTierClauses() }),
     },
   };
 };
@@ -120,6 +127,7 @@ export const performMatchSearch = async ({
   esClient,
   logger,
   topSnippetsConfig,
+  includeFrozen = false,
 }: {
   term: string;
   fields: MappingField[];
@@ -129,9 +137,17 @@ export const performMatchSearch = async ({
   logger: Logger;
   /** When provided, snippets are extracted via ES|QL TOP_SNIPPETS instead of ES highlighting. */
   topSnippetsConfig?: TopSnippetsConfig;
+  includeFrozen?: boolean;
 }): Promise<PerformMatchSearchResponse> => {
   const useTopSnippets = topSnippetsConfig != null;
-  const searchRequest = buildSearchRequest({ index, term, fields, size, useTopSnippets });
+  const searchRequest = buildSearchRequest({
+    index,
+    term,
+    fields,
+    size,
+    useTopSnippets,
+    includeFrozen,
+  });
 
   logger.debug(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
 
@@ -178,6 +194,7 @@ export const performMatchSearch = async ({
     term,
     fields,
     config: topSnippetsConfig,
+    includeFrozen,
     esClient,
     logger,
   });
