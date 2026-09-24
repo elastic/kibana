@@ -6,6 +6,7 @@
  */
 
 import {
+  EPISODE_QUERY_LIMIT,
   ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES,
   chunkInClauseLiterals,
   getDispatchableAlertEventsQuery,
@@ -14,6 +15,10 @@ import {
   getEpisodeDataQueries,
 } from './queries';
 import { createAlertEpisode } from './fixtures/test_utils';
+
+// Without an explicit LIMIT, ES|QL truncates results to 1 000 rows.
+const endsWithRowLimit = (query: string) =>
+  query.trimEnd().endsWith(`| LIMIT ${EPISODE_QUERY_LIMIT}`);
 
 describe('getDispatchableAlertEventsQuery', () => {
   const SCAN_WINDOW = {
@@ -142,7 +147,7 @@ describe('getDispatchableAlertEventsQuery', () => {
     const query = queryOf();
 
     expect(query).toContain('SORT last_event_timestamp ASC');
-    expect(query).toContain('LIMIT 10000');
+    expect(endsWithRowLimit(query)).toBe(true);
   });
 });
 
@@ -234,6 +239,16 @@ describe('getEpisodeDataQueries', () => {
     const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
 
     expect(requests[0].query).toContain('KEEP episode_id, data_json');
+  });
+
+  it('ends every chunk with an explicit row limit', () => {
+    const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
+    const requests = getEpisodeDataQueries(longIds, { gte: GTE, lte: LTE });
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
   });
 
   it('splits into multiple requests when episode ids exceed the size budget', () => {
@@ -572,6 +587,20 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('WHERE subject IS NOT NULL');
   });
 
+  it('ends every chunk with an explicit row limit', () => {
+    const longSegment = 'l'.repeat(5_000);
+    const episodes = Array.from({ length: 200 }, (_, i) =>
+      createAlertEpisode({ rule_id: `${longSegment}-r${i}`, group_hash: `${longSegment}-g${i}` })
+    );
+
+    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
+  });
+
   it('uses episodeSubject for pair key construction (internal episode uses rule_id)', () => {
     const episodes = [
       createAlertEpisode({ source: 'internal', rule_id: 'rule-abc', group_hash: 'hash-abc' }),
@@ -748,6 +777,18 @@ describe('getLastNotifiedTimestampsQueries', () => {
     const requests = getLastNotifiedTimestampsQueries(['group-1']);
 
     expect(requests[0].query).toContain('BY action_group_id');
+  });
+
+  it('ends every chunk with an explicit row limit', () => {
+    const longSegment = 'z'.repeat(10_000);
+    const ids = Array.from({ length: 200 }, (_, i) => `${longSegment}-${i}`);
+
+    const requests = getLastNotifiedTimestampsQueries(ids);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
   });
 
   it('splits into multiple requests when ids exceed the size budget', () => {
