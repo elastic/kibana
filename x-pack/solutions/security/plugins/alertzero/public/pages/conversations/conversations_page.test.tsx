@@ -214,12 +214,12 @@ const renderPage = (initialEntry: string) => {
 
 const approveMutate = jest.fn();
 const dismissMutate = jest.fn();
-const assignInvestigationMutate = jest.fn();
+const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
   mockUseApproveProposal.mockReturnValue({ mutate: approveMutate });
   mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate });
-  mockUseAssignInvestigation.mockReturnValue({ mutate: assignInvestigationMutate });
+  mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockOpenCount(0);

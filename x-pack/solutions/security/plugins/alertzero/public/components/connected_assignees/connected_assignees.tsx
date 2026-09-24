@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { AssignToUsers } from '@kbn/agentic-investigations-common';
 import type { AssigneesSlotRenderProps } from '@kbn/agentic-investigations-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -32,6 +24,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { CONNECTED_ASSIGNEES_LABELS } from './translations';
 import { assigneeSignal } from './assignee_overrides';
+import { useAssigneeSignal } from './use_assignee_signal';
+import { indexProfiles, toSelectedProfiles } from './to_selected_profiles';
 
 /**
  * Connected assignee picker for the investigation and escalation flyout headers.
@@ -69,30 +63,16 @@ const ConnectedAssigneesInner = ({
       ? canManageEscalations && status !== 'closed'
       : canManageInvestigations;
 
-  // Subscribe to the cross-boundary signal so the flyout re-fetches its conversation
-  // when a queue row updates assignees for this conversation from the other side.
-  const signalSnapshot = useSyncExternalStore(assigneeSignal.subscribe, assigneeSignal.getSnapshot);
-  const currentVersion = signalSnapshot.get(conversationId) ?? 0;
-
-  // Stable ref so the effect closure always calls the latest refetchConversation without
-  // being listed as an effect dependency (its identity changes every render).
+  // Stable ref so the signal callback always reads the latest refetchConversation without
+  // needing it as a dependency (its identity changes every render from the Agent Builder).
   const refetchConversationRef = useRef(refetchConversation);
   refetchConversationRef.current = refetchConversation;
 
-  // Track the version we've already handled so we fire only on genuine bumps.
-  const prevVersionRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (prevVersionRef.current === null) {
-      prevVersionRef.current = currentVersion;
-      return;
-    }
-    if (currentVersion !== prevVersionRef.current) {
-      prevVersionRef.current = currentVersion;
-      refetchConversationRef.current?.();
-    }
-    // conversationId reset → reset the baseline so a stale version from a previous
-    // conversation doesn't immediately trigger a refetch for the new one.
-  }, [currentVersion, conversationId]);
+  // When a queue row bumps the signal for this conversation, the flyout refetches so its
+  // header reflects the new assignees without waiting for the 5 s poll.
+  useAssigneeSignal((changedIds) => {
+    if (changedIds.includes(conversationId)) refetchConversationRef.current?.();
+  });
 
   // Bulk-resolve the current assignee uids into full profile objects.
   const profilesQuery = useUserProfiles({
@@ -108,31 +88,13 @@ const ConnectedAssigneesInner = ({
   const assignInvestigation = useAssignInvestigation();
   const assignEscalation = useAssignEscalation();
 
-  // Optimistic state: maps → submitted but not yet server-confirmed selection.
+  // Optimistic state: submitted but not yet server-confirmed selection.
   const [pendingAssignees, setPendingAssignees] = useState<UserProfileWithAvatar[] | null>(null);
 
-  const profilesByUid = useMemo(() => {
-    const map = new Map<string, UserProfileWithAvatar>();
-    for (const profile of profilesQuery.data ?? []) {
-      map.set(profile.uid, profile);
-    }
-    return map;
-  }, [profilesQuery.data]);
+  const profilesByUid = useMemo(() => indexProfiles(profilesQuery.data), [profilesQuery.data]);
 
-  /** Build the displayed selection from resolved profiles + synthetic placeholders for unknowns. */
-  const resolvedSelected = useMemo<UserProfileWithAvatar[]>(
-    () =>
-      (assigneeUids as string[]).map((uid) => {
-        const resolved = profilesByUid.get(uid);
-        if (resolved) return resolved;
-        // Synthesise a minimal profile so unresolvable uids survive the replace-in-full payload.
-        return {
-          uid,
-          enabled: true,
-          user: { username: uid },
-          data: {},
-        } as UserProfileWithAvatar;
-      }),
+  const resolvedSelected = useMemo(
+    () => toSelectedProfiles(assigneeUids as string[], profilesByUid),
     [assigneeUids, profilesByUid]
   );
 
@@ -140,19 +102,17 @@ const ConnectedAssigneesInner = ({
 
   const handleChange = useCallback(
     (newSelected: UserProfileWithAvatar[]) => {
-      // Show the new selection immediately.
       setPendingAssignees(newSelected);
 
       const assignees = newSelected.map((p) => p.uid);
 
       const onSuccess = async () => {
         notifications?.toasts.addSuccess(CONNECTED_ASSIGNEES_LABELS.assignSuccess);
-        // Signal queue rows (on the other side of the React root boundary) to invalidate
-        // their React Query cache and refetch. The same bump also causes this component's
-        // useEffect to call refetchConversation, so we don't call it explicitly here.
+        // Bump the signal so queue rows (in the page's React root) invalidate their cache
+        // and reflect the new assignees without waiting for their next poll.
         assigneeSignal.bump(conversationId);
-        // Optimistic state stays visible until the refetch (triggered by the useEffect)
-        // delivers fresh assigneeUids from the server.
+        // Await the flyout's own refetch so pending state is cleared only after fresh
+        // assigneeUids arrive from the server, avoiding a flash of the old avatars.
         await refetchConversation?.();
         setPendingAssignees(null);
       };
@@ -163,10 +123,7 @@ const ConnectedAssigneesInner = ({
       };
 
       if (templateId === 'escalation') {
-        assignEscalation.mutate(
-          { escalationId: conversationId, assignees },
-          { onSuccess, onError }
-        );
+        assignEscalation.mutate({ escalationId: conversationId, assignees }, { onSuccess, onError });
       } else {
         assignInvestigation.mutate(
           { investigationId: conversationId, assignees },

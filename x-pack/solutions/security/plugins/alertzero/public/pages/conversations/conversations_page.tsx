@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import {
@@ -23,10 +16,9 @@ import {
   InvestigationActionModals,
   type EscalationModalRenderProps,
   Impact,
-  AssignToUsers,
 } from '@kbn/agentic-investigations-common';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -35,14 +27,8 @@ import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
 } from '@kbn/agentic-investigations-plugin/common';
-import {
-  useAssignInvestigation,
-  useUserProfiles,
-  useSuggestUserProfiles,
-} from '@kbn/agentic-investigations-plugin/public';
-import { useQueryClient } from '@kbn/react-query';
-import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
-import { assigneeSignal } from '../../components/connected_assignees/assignee_overrides';
+import { useAssignInvestigation } from '@kbn/agentic-investigations-plugin/public';
+import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
@@ -160,143 +146,22 @@ export const ConversationsPage: React.FC = () => {
   // Assignee picker — shared across all non-closed investigation cards
   // ---------------------------------------------------------------------------
 
-  const queryClient = useQueryClient();
-
-  // Subscribe to the cross-boundary signal. Any bump (from ConnectedAssignees on the other
-  // side of the React root boundary) invalidates the proposals cache and triggers a refetch,
-  // which delivers fresh assignee data to all queue rows.
-  const signalSnapshot = useSyncExternalStore(assigneeSignal.subscribe, assigneeSignal.getSnapshot);
-
-  const isFirstSignalRenderRef = useRef(true);
-  useEffect(() => {
-    if (isFirstSignalRenderRef.current) {
-      isFirstSignalRenderRef.current = false;
-      return;
-    }
-    void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
-    // queryClient identity is stable; signalSnapshot reference changes only on bump.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signalSnapshot]);
-
-  // Collect every assignee UID from all investigations for a single bulk profile fetch.
-  const allAssigneeUids = useMemo(() => {
-    const uids = new Set<string>();
-    for (const inv of conversations) {
-      for (const uid of inv.assignees ?? []) {
-        uids.add(uid);
-      }
-    }
-    return Array.from(uids);
-  }, [conversations]);
-
-  const profilesQuery = useUserProfiles({ uids: allAssigneeUids });
-  const profilesByUid = useMemo(() => {
-    const map = new Map<string, UserProfileWithAvatar>();
-    for (const profile of profilesQuery.data ?? []) {
-      map.set(profile.uid, profile);
-    }
-    return map;
-  }, [profilesQuery.data]);
-
-  // A single search term is sufficient: only one popover can be open at a time.
-  const [assigneeSearchTerm, setAssigneeSearchTerm] = useState('');
-  const suggestQuery = useSuggestUserProfiles(assigneeSearchTerm, {
-    size: 20,
-    enabled: canManageInvestigations,
-  });
-
   const assignInvestigation = useAssignInvestigation();
 
-  // Optimistic state: maps investigationId → submitted-but-not-yet-confirmed selection.
-  // Keyed by `investigation.id` (proposal id), which is unique per row.
-  const [pendingAssignees, setPendingAssignees] = useState<Map<string, UserProfileWithAvatar[]>>(
-    new Map()
-  );
-
-  const handleInvestigationAssigneesChange = useCallback(
-    (investigation: Investigation, selected: UserProfileWithAvatar[]) => {
-      const rowKey = investigation.id;
-      const investigationId = investigation.conversationId;
-      if (!investigationId) return;
-
-      // Optimistic: show the new selection immediately.
-      setPendingAssignees((prev) => new Map(prev).set(rowKey, selected));
-
-      const assignees = selected.map((p) => p.uid);
-      assignInvestigation.mutate(
-        { investigationId, assignees },
-        {
-          onSuccess: () => {
-            notifications?.toasts.addSuccess(QUEUE_PAGE_INFO.assignSuccess);
-            // Signal the flyout (ConnectedAssignees) across the React root boundary so it
-            // refetches its conversation immediately — without waiting for its 5 s poll.
-            assigneeSignal.bump(investigationId);
-            // Pending state stays until the next proposals refetch clears it.
-          },
-          onError: () => {
-            notifications?.toasts.addDanger(QUEUE_PAGE_INFO.assignError);
-            // On error the query won't refetch, so roll back the optimistic state.
-            setPendingAssignees((prev) => {
-              const next = new Map(prev);
-              next.delete(rowKey);
-              return next;
-            });
-          },
-        }
-      );
+  const renderAssignees = useQueueAssignees({
+    items: conversations,
+    getRowKey: (inv) => inv.id,
+    getTargetId: (inv) => inv.conversationId,
+    getAssigneeUids: (inv) => inv.assignees ?? [],
+    assign: (investigationId, assignees) =>
+      assignInvestigation.mutateAsync({ investigationId, assignees }),
+    queryKey: platformQueryKeys.proposals.all,
+    canManage: canManageInvestigations,
+    labels: {
+      assignSuccess: QUEUE_PAGE_INFO.assignSuccess,
+      assignError: QUEUE_PAGE_INFO.assignError,
     },
-    [assignInvestigation, notifications]
-  );
-
-  const renderAssignees = useCallback(
-    (investigation: Investigation) => {
-      const rowKey = investigation.id;
-      const isUpdating = pendingAssignees.has(rowKey);
-
-      // Prefer local pending state (optimistic) over server data while mutation is in flight.
-      const baseUids = investigation.assignees ?? [];
-
-      const selected: UserProfileWithAvatar[] = isUpdating
-        ? pendingAssignees.get(rowKey) ?? []
-        : baseUids.map((uid) => {
-            const resolved = profilesByUid.get(uid);
-            if (resolved) return resolved;
-            // Synthesise a minimal profile for an unresolvable UID so it survives the
-            // replace-in-full payload and can only be removed by an explicit action.
-            return {
-              uid,
-              enabled: true,
-              user: { username: uid },
-              data: {},
-            } as UserProfileWithAvatar;
-          });
-
-      return (
-        <AssignToUsers
-          conversationId={investigation.id}
-          selected={selected}
-          suggestions={suggestQuery.data ?? []}
-          isSuggestionsLoading={suggestQuery.isLoading}
-          // `isFetching` (not `isLoading`) avoids permanently disabling the button when
-          // there are no assignees (React Query sets isLoading:true for disabled queries).
-          isProfilesLoading={profilesQuery.isFetching}
-          isUpdating={isUpdating}
-          canManage={canManageInvestigations}
-          onSearchChange={setAssigneeSearchTerm}
-          onChange={(newSelected) => handleInvestigationAssigneesChange(investigation, newSelected)}
-        />
-      );
-    },
-    [
-      pendingAssignees,
-      profilesByUid,
-      profilesQuery.isFetching,
-      suggestQuery.data,
-      suggestQuery.isLoading,
-      canManageInvestigations,
-      handleInvestigationAssigneesChange,
-    ]
-  );
+  });
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
   // deadline or a proposal someone else already decided must not look like it landed.

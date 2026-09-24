@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
@@ -101,7 +101,7 @@ const closedEscalation = {
   metadata: { status: 'closed' },
 };
 
-const assignMutate = jest.fn();
+const assignMutate = jest.fn().mockResolvedValue({});
 
 const renderPage = (overrides: { capabilities?: object } = {}) => {
   const core = coreMock.createStart();
@@ -133,7 +133,7 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
 };
 
 beforeEach(() => {
-  mockUseAssignEscalation.mockReturnValue({ mutate: assignMutate });
+  mockUseAssignEscalation.mockReturnValue({ mutateAsync: assignMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
@@ -256,22 +256,20 @@ describe('EscalationsPage', () => {
       expect.objectContaining({
         escalationId: 'esc-open-1',
         assignees: ['user-uid-1'],
-      }),
-      expect.anything()
+      })
     );
   });
 
-  it('shows a success toast when the assignee update succeeds', () => {
+  it('shows a success toast when the assignee update succeeds', async () => {
     mockBothQueues([openEscalation], []);
     const { core } = renderPage();
 
     fireEvent.click(screen.getByTestId('mock-assign-esc-open-1'));
 
-    // Extract the callbacks object passed as the second arg to mutate and invoke onSuccess.
-    const [, callbacks] = assignMutate.mock.calls[0];
-    callbacks.onSuccess();
-
-    expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Assignees updated');
+    // mutateAsync resolves in the next microtask tick; wait for the toast.
+    await waitFor(() =>
+      expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Assignees updated')
+    );
   });
 
   it('renders the assignee widget as read-only for closed escalations regardless of canManage', () => {
