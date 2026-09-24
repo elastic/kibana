@@ -9,12 +9,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPageSection, EuiSpacer, EuiText } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
 import { DATASETS_PATH } from '../app_paths';
+import { buildDatasetMappings } from '../components/mapping_editor';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
 import {
@@ -31,6 +33,8 @@ import type { DatasetWizardContent, DatasetWizardSection } from './types';
 
 const { FormWizard, FormWizardStep } = Forms;
 
+const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
+const TIMESTAMP_FIELD_ID = '__timestamp__';
 const passthroughAdditionalSettingsKeys = [
   'target_split_size',
   'split_probe_window',
@@ -70,6 +74,7 @@ const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWi
     format: values.settings.format,
   },
   settings: values.settings,
+  mapping: values.mappings,
 });
 
 const MAX_WIDTH_NARROW_PX = 600;
@@ -119,10 +124,23 @@ export function CreateDatasetWizardPage({
       return;
     }
 
+    const timestampField = values.mappings.fields.find(
+      (f) => f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME
+    );
+    if (timestampField && timestampField.path.trim() === '') {
+      setSaveError(
+        i18n.translate('xpack.dataFederation.createDatasetWizard.timestampFieldPathRequiredSave', {
+          defaultMessage: 'When timeseries data is enabled, Field name is required.',
+        })
+      );
+      return;
+    }
+
     setIsSaving(true);
     try {
       const desc = values.description?.trim();
       const settings = buildDatasetSettingsFromFormValues(values.settings);
+      const mappings = buildDatasetMappings(values.mappings);
       const passthroughSettings = pickPassthroughAdditionalSettings(initialDataSet?.settings);
       const mergedSettings = { ...(settings ?? {}), ...passthroughSettings };
       const payload: DataSetWithName = {
@@ -130,6 +148,7 @@ export function CreateDatasetWizardPage({
         data_source: values.data_source.trim(),
         resource: values.resource.trim(),
         ...(desc ? { description: desc } : {}),
+        ...(mappings ? { mappings } : {}),
         ...(Object.keys(mergedSettings).length > 0 ? { settings: mergedSettings } : {}),
       };
       await datasetsClient.add(payload);

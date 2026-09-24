@@ -9,7 +9,10 @@ import type {
   DataSetWithName,
   DatasetSettings,
   DatasetSettingsFile,
+  DatasetMappings,
 } from '../../common/dataset_types';
+import type { MappingEditorValue } from '../components/mapping_editor';
+import { emptyMappingEditorValue } from '../components/mapping_editor';
 import {
   emptyCreateDatasetSettingsFormValues,
   type CreateDatasetFormValues,
@@ -22,12 +25,44 @@ import {
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_form_state';
 
+const mappingsToEditorValue = (mappings: DatasetMappings | undefined): MappingEditorValue => {
+  if (!mappings) return { ...emptyMappingEditorValue };
+
+  const fields = Object.entries(mappings.properties ?? {}).map(([name, prop], idx) => ({
+    id: String(idx),
+    name,
+    path: prop.path ?? '',
+    type: prop.type,
+    format: prop.format ?? '',
+  }));
+
+  return {
+    dynamic: mappings.dynamic !== 'false',
+    fields,
+  };
+};
+
+const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
+const TIMESTAMP_FIELD_ID = '__timestamp__';
+
 export const emptyDatasetFormValues = (): CreateDatasetFormValues => ({
   name: '',
   description: '',
   data_source: '',
   resource: '',
   settings: emptyCreateDatasetSettingsFormValues(),
+  mappings: {
+    ...emptyMappingEditorValue,
+    fields: [
+      {
+        id: TIMESTAMP_FIELD_ID,
+        name: TIMESTAMP_LOGICAL_FIELD_NAME,
+        path: '',
+        type: 'date',
+        format: '',
+      },
+    ],
+  },
 });
 
 /** Maps a list-table row to form initial state (no extra GET). */
@@ -89,4 +124,5 @@ export const dataSetToFormValues = (data: DataSetWithName): CreateDatasetFormVal
   data_source: data.data_source,
   resource: data.resource,
   settings: settingsToFormValues(data.settings),
+  mappings: mappingsToEditorValue(data.mappings),
 });

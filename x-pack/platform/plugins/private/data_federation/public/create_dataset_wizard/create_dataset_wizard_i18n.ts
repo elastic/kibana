@@ -44,6 +44,12 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Advanced settings (optional)',
     }
   ),
+  mappedFieldsSectionTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.mappedFieldsSectionTitle',
+    {
+      defaultMessage: 'Mapped fields (optional)',
+    }
+  ),
   byDefaultSuffix: i18n.translate('xpack.dataFederation.createDatasetWizard.byDefaultSuffix', {
     defaultMessage: 'by default.',
   }),
