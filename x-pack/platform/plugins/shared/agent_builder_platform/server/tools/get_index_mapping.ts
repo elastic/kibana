@@ -53,6 +53,19 @@ const FIELD_LIMIT = 500;
 const truncationNote = (totalFields: number): string =>
   `Truncated: showing ${FIELD_LIMIT} of ${totalFields} fields. Use a more specific index pattern to retrieve full mappings.`;
 
+const NO_FIELDS_NOTE =
+  'No fields found. Frozen tier indices are excluded from mappings, so this can happen when every backing index of a data stream is on the frozen tier.';
+
+const fieldsNote = (totalFields: number): string | undefined => {
+  if (totalFields > FIELD_LIMIT) {
+    return truncationNote(totalFields);
+  }
+  if (totalFields === 0) {
+    return NO_FIELDS_NOTE;
+  }
+  return undefined;
+};
+
 interface MappingNodeProps {
   properties?: Record<string, MappingNodeProps>;
   fields?: Record<string, MappingNodeProps>;
@@ -96,6 +109,7 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
           const totalFields = v.fields.length;
           const truncated = totalFields > FIELD_LIMIT;
           const cappedFields = truncated ? v.fields.slice(0, FIELD_LIMIT) : v.fields;
+          const note = fieldsNote(totalFields);
 
           if (raw) {
             if (v.rawMapping) {
@@ -122,14 +136,14 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
               {
                 type: v.type,
                 fields: cappedFields.map(toFlatField),
-                ...(truncated ? { warning: truncationNote(totalFields) } : {}),
+                ...(note ? { warning: note } : {}),
               },
             ];
           }
 
           const formatted = cappedFields.map(formatField).join('\n');
-          const fieldString = truncated
-            ? `${formatted}\n[${truncationNote(totalFields)}]`
+          const fieldString = note
+            ? [formatted, `[${note}]`].filter(Boolean).join('\n')
             : formatted;
           return [name, { type: v.type, fields: fieldString }];
         })

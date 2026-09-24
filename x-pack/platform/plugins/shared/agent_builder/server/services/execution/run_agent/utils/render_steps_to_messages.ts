@@ -151,6 +151,18 @@ const renderToolResult = async (
   { context, compactThisGroup }: { context: RenderContext; compactThisGroup: boolean }
 ): Promise<BaseMessage> => {
   if (context.type === 'history') {
+    if (call.interrupted) {
+      // Keeps the call/result pairing providers require; the payload says the call never returned.
+      return new ToolMessage({
+        tool_call_id: call.tool_call_id,
+        content: wrapToolResultContent(
+          JSON.stringify({
+            interrupted: true,
+            message: 'The tool call was interrupted before it returned a result.',
+          })
+        ),
+      });
+    }
     const results = context.resultTransformer
       ? await context.resultTransformer(call)
       : call.results;
