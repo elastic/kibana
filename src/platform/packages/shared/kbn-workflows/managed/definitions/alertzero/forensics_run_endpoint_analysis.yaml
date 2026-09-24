@@ -605,35 +605,6 @@ steps:
               data:
                 content: "{{ steps.forensic_analysis.output.structured_output.rationale }}"
 
-          # Containment is proposed on the investigation, not returned as run output.
-          # `executeAsync` so this run does not sit in the 72h approval gate; each
-          # proposal workflow parks on its own. `parallel` with `settled` keeps every
-          # dispatch's outcome: `foreach` would keep only the last one, and continuing
-          # on failure would clear a rejection. One rejection must not drop the rest,
-          # and must not be ignored when the indicator is retired.
-          - name: propose_actions
-            type: parallel
-            if: "${{ steps.forensic_analysis.error == null and steps.forensic_analysis.output.structured_output.propose == true }}"
-            foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | default: [] }}"
-            mode: settled
-            concurrency:
-              # Matches recommendedActions maxItems.
-              max: 8
-            steps:
-              - name: propose_action
-                type: workflow.executeAsync
-                with:
-                  workflow-id: system-create-investigation-proposal
-                  inputs:
-                    conversationId: "{{ steps.resolve_request.output.investigation_id }}"
-                    comment: "{{ foreach.item.comment | default: steps.forensic_analysis.output.structured_output.rationale }}"
-                    actionWorkflowId: "{{ foreach.item.actionId }}"
-                    actionInput: '${{ foreach.item.actionInput }}'
-                    # `impact` and `category` are deliberately not passed: both would override what
-                    # the action declares, and for containment they are intrinsic to the action
-                    # rather than to this run
-                    confidence: "{{ foreach.item.confidence | default: '' }}"
-
         else:
           - name: journal_no_host
             type: workflow.execute
@@ -758,13 +729,6 @@ steps:
     with:
       ids: "${{ steps.list_written_findings.output.attachments | map: 'id' }}"
 
-  # `0` when the step did not run: no host, the agent did not propose, or the
-  # list was empty. A later check treats only a real rejection as lost.
-  - name: resolve_proposal_dispatch
-    type: data.set
-    with:
-      failed: "${{ steps.propose_actions.output.failed | default: 0 }}"
-
   - name: resolve_run_outcome
     type: data.set
     with:
@@ -782,9 +746,55 @@ steps:
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.assessment)
           or steps.resolve_host.output.host_name == blank }}
-      # Findings can land while a proposal dispatch is rejected. That is not a
-      # finished run: the recommendation exists only in this agent output, so a
-      # later sweep would skip the agent and never queue it.
+
+  # Containment is proposed on the investigation, not returned as run output.
+  # Only after `attached` is true: the add steps continue on failure, so a
+  # proposal queued before this check can sit in the approval queue for an
+  # investigation that has no findings. `settled` is the wrong gate — it is
+  # also true when there was no host. `executeAsync` so this run does not sit
+  # in the 72h approval gate; each proposal workflow parks on its own.
+  # `parallel` with `settled` keeps every dispatch's outcome: `foreach` would
+  # keep only the last one, and continuing on failure would clear a rejection.
+  - name: propose_actions
+    type: parallel
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true }}
+    foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | default: [] }}"
+    mode: settled
+    concurrency:
+      # Matches recommendedActions maxItems.
+      max: 8
+    steps:
+      - name: propose_action
+        type: workflow.executeAsync
+        with:
+          workflow-id: system-create-investigation-proposal
+          inputs:
+            conversationId: "{{ steps.resolve_request.output.investigation_id }}"
+            comment: "{{ foreach.item.comment | default: steps.forensic_analysis.output.structured_output.rationale }}"
+            actionWorkflowId: "{{ foreach.item.actionId }}"
+            actionInput: '${{ foreach.item.actionInput }}'
+            # `impact` and `category` are deliberately not passed: both would override what
+            # the action declares, and for containment they are intrinsic to the action
+            # rather than to this run
+            confidence: "{{ foreach.item.confidence | default: '' }}"
+
+  # `0` when the step did not run: no host, findings did not land, the agent
+  # did not propose, or the list was empty. A later check treats only a real
+  # rejection as lost.
+  - name: resolve_proposal_dispatch
+    type: data.set
+    with:
+      failed: "${{ steps.propose_actions.output.failed | default: 0 }}"
+
+  # Counted after the dispatch. Putting this on `resolve_run_outcome` would
+  # always see zero failures, and a rejected proposal would still retire the
+  # indicator as processed. The recommendation exists only in this agent
+  # output, so a later sweep would skip the agent and never queue it.
+  - name: resolve_proposals
+    type: data.set
+    with:
       proposals_lost: >-
         ${{ steps.forensic_analysis.output.structured_output.propose == true
           and steps.resolve_proposal_dispatch.output.failed > 0 }}
@@ -805,7 +815,7 @@ steps:
         and steps.verify_investigation.output.metadata != null
         and steps.verify_investigation.output.can_attach == true
         and steps.resolve_run_outcome.output.settled == true
-        and steps.resolve_run_outcome.output.proposals_lost != true }}
+        and steps.resolve_proposals.output.proposals_lost != true }}
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
@@ -824,7 +834,7 @@ steps:
         and steps.verify_investigation.output.metadata != null
         and steps.verify_investigation.output.can_attach == true
         and steps.resolve_run_outcome.output.settled == true
-        and steps.resolve_run_outcome.output.proposals_lost == true }}
+        and steps.resolve_proposals.output.proposals_lost == true }}
     on-failure:
       continue: true
     with:
@@ -843,7 +853,7 @@ steps:
         and steps.verify_investigation.output.metadata != null
         and steps.verify_investigation.output.can_attach == true
         and steps.resolve_run_outcome.output.settled == true
-        and steps.resolve_run_outcome.output.proposals_lost == true }}
+        and steps.resolve_proposals.output.proposals_lost == true }}
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"

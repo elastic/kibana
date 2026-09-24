@@ -978,9 +978,31 @@ describe('Endpoint analysis run', () => {
       expect(inputs?.category).toBeUndefined();
     });
 
-    // Naming a process selector is fine — that is which action to pick, and the
-    // provenance of a value. Spelling out the object the action receives is the
-    // restatement, and `endpoint_ids` / `agentId` were how it was written.
+    // The add steps continue on failure, so "the agent proposed" is not "the
+    // findings are on the investigation". A card queued before that check is
+    // what an approver opens and finds empty. `settled` is also true when there
+    // was no host, which must not propose anything.
+    it('dispatches containment only after the findings are on the investigation', () => {
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('resolve_run_outcome')).toBeLessThan(names.indexOf('propose_actions'));
+      expect(names.indexOf('propose_actions')).toBeLessThan(names.indexOf('resolve_proposals'));
+      expect(names.indexOf('resolve_proposals')).toBeLessThan(names.indexOf('mark_processed'));
+
+      const gate = String(stepByName('propose_actions')?.if);
+      expect(gate).toContain('steps.resolve_run_outcome.output.attached == true');
+      expect(gate).not.toContain('settled');
+
+      const when = (attached: boolean, propose: boolean) => ({
+        steps: {
+          resolve_run_outcome: { output: { attached } },
+          forensic_analysis: { output: { structured_output: { propose } } },
+        },
+      });
+      expect(evaluate(gate, when(true, true))).toBe(true);
+      expect(evaluate(gate, when(false, true))).toBe(false);
+      expect(evaluate(gate, when(true, false))).toBe(false);
+    });
+
     // A rejected dispatch used to be swallowed, and the findings alone then closed
     // the indicator. The recommendation lives only in this run's agent output, so
     // the next sweep would skip the agent and never queue it.
@@ -992,7 +1014,7 @@ describe('Endpoint analysis run', () => {
       expect(dispatch?.['on-failure']).toBeUndefined();
       expect(stepByName('propose_action')?.['on-failure']).toBeUndefined();
 
-      const lost = String(stepByName('resolve_run_outcome')?.with?.proposals_lost);
+      const lost = String(stepByName('resolve_proposals')?.with?.proposals_lost);
       expect(
         evaluate(lost, {
           steps: {
@@ -1024,7 +1046,8 @@ describe('Endpoint analysis run', () => {
         steps: {
           resolve_request: { output: { has_request: true } },
           verify_investigation: { output: { metadata: { id: 'inv-1' }, can_attach: true } },
-          resolve_run_outcome: { output: { settled: true, proposals_lost: false } },
+          resolve_run_outcome: { output: { settled: true } },
+          resolve_proposals: { output: { proposals_lost: false } },
         },
       };
       expect(evaluate(processed, ready)).toBe(true);
@@ -1033,7 +1056,7 @@ describe('Endpoint analysis run', () => {
         evaluate(processed, {
           steps: {
             ...ready.steps,
-            resolve_run_outcome: { output: { settled: true, proposals_lost: true } },
+            resolve_proposals: { output: { proposals_lost: true } },
           },
         })
       ).toBe(false);
@@ -1041,7 +1064,7 @@ describe('Endpoint analysis run', () => {
         evaluate(retired, {
           steps: {
             ...ready.steps,
-            resolve_run_outcome: { output: { settled: true, proposals_lost: true } },
+            resolve_proposals: { output: { proposals_lost: true } },
           },
         })
       ).toBe(true);
