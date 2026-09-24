@@ -16,9 +16,9 @@ import { executeEsqlQuery } from './execute_esql_query';
 import { MetricsExecutionContextName } from './execution_context_enums';
 
 /**
- * Querying an exemplars stream or a metric that has no exemplars is an HTTP 400, not an
- * empty result, so every per-metric fetch is gated on this probe. It is a workaround until
- * `TS_EXEMPLARS` exists (elasticsearch#154786).
+ * Querying an exemplars stream or a metric that has no exemplars results in an HTTP 400, not an
+ * empty result, so every per-metric fetch requires this probe. It is a workaround until
+ * `TS_EXEMPLARS` is available (elasticsearch#154786).
  */
 export const EXEMPLARS_PROBE_QUERY = `FROM exemplars-*.otel-* | STATS BY ${EXEMPLARS_METRIC_NAME_FIELD}`;
 
@@ -36,8 +36,7 @@ export const fetchMetricsWithExemplars = async ({
   uiSettings,
   profileId,
 }: FetchMetricsWithExemplarsParams): Promise<ReadonlySet<string>> => {
-  // No signal (the request is shared across charts) and no time range or filters (this is
-  // a schema question, and a filter on an unmapped field would silently return nothing).
+  // Deliberately no signal, time range or filters: this is a schema question shared by every chart.
   const { rawResponse } = await executeEsqlQuery({
     esqlQuery: EXEMPLARS_PROBE_QUERY,
     search,
@@ -50,15 +49,16 @@ export const fetchMetricsWithExemplars = async ({
   return new Set(extractMetricNames(rawResponse));
 };
 
-// ES stores `http.server.duration`; Kibana's ES|QL field names carry a `metrics.` prefix.
+// ES stores `http.server.duration`; Kibana's ES|QL field names use a `metrics.` prefix.
 const extractMetricNames = ({ columns, values }: ESQLSearchResponse): string[] => {
   const columnIndex = columns.findIndex(({ name }) => name === EXEMPLARS_METRIC_NAME_FIELD);
   if (columnIndex === -1) {
     return [];
   }
 
-  return values
-    .map((row) => row[columnIndex])
-    .filter((name): name is string => typeof name === 'string')
-    .map((name) => `metrics.${name}`);
+  // Drops the null group STATS BY emits when a document has no metric_name.
+  return values.flatMap((row) => {
+    const name = row[columnIndex];
+    return typeof name === 'string' ? [`metrics.${name}`] : [];
+  });
 };
