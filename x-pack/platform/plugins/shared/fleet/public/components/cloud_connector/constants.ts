@@ -39,20 +39,6 @@ export type ElasticCloudEnvironment =
   | typeof ELASTIC_CLOUD_ENVIRONMENT_STAGING
   | typeof ELASTIC_CLOUD_ENVIRONMENT_QA;
 
-/** Quick-create URL of the Elastic Workload Identity CloudFormation template for the aws packages' Identity Federation option. */
-export const AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL =
-  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticCloudProvider=CLOUD_PROVIDER&param_ElasticCloudRegion=CLOUD_REGION&param_ElasticCloudEnvironment=CLOUD_ENVIRONMENT&param_ElasticResourceType=RESOURCE_TYPE&param_ElasticResourceId=RESOURCE_ID';
-
-/** Packages whose Identity Federation option launches the Workload Identity template, regardless of version. */
-export const AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES: readonly string[] = [
-  'aws',
-  'aws_bedrock',
-  'aws_logs',
-  'aws_mq',
-  'aws_securityhub',
-  'aws_bedrock_agentcore',
-];
-
 export const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS =
   'cloud_formation_cloud_connectors_template';
 export const ARM_TEMPLATE_URL_CLOUD_CONNECTORS = 'arm_template_cloud_connectors_url';

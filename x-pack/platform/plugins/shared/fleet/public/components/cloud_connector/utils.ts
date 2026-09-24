@@ -61,8 +61,6 @@ import {
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
   CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
-  AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL,
-  AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES,
 } from './constants';
 import type { ElasticCloudEnvironment, ElasticResourceType, TemplateUrlToken } from './constants';
 
@@ -373,28 +371,6 @@ export const getAnyCloudConnectorIacTemplateUrl = (
     if (cloudOption) selections[group.name] = cloudOption.name;
   }
   return getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
-};
-
-/** Whether the package's Identity Federation option launches the Workload Identity template. */
-export const isAwsWorkloadIdentityTemplatePackage = (packageName: string | undefined): boolean =>
-  !!packageName && AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES.includes(packageName);
-
-export interface GetAwsIdentityFederationTemplateUrlParams {
-  isWorkloadIdentityTemplateEnabled: boolean;
-  packageName: string | undefined;
-  iacTemplateUrl: string | undefined;
-}
-
-/** Returns the Workload Identity template URL when enabled for the package, otherwise the package's own URL. */
-export const getAwsIdentityFederationTemplateUrl = ({
-  isWorkloadIdentityTemplateEnabled,
-  packageName,
-  iacTemplateUrl,
-}: GetAwsIdentityFederationTemplateUrlParams): string | undefined => {
-  if (isWorkloadIdentityTemplateEnabled && isAwsWorkloadIdentityTemplatePackage(packageName)) {
-    return AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL;
-  }
-  return iacTemplateUrl;
 };
 
 export const getCloudConnectorRemoteRoleTemplate = ({

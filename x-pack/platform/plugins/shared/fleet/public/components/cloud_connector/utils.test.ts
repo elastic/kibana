@@ -33,16 +33,8 @@ import {
   getAwsStackConsoleUrl,
   hasTemplateUrlParam,
   isStackArnInvalid,
-  isAwsWorkloadIdentityTemplatePackage,
-  getAwsIdentityFederationTemplateUrl,
 } from './utils';
-import {
-  SINGLE_ACCOUNT,
-  ORGANIZATION_ACCOUNT,
-  TEMPLATE_URL_TOKENS,
-  AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL,
-  AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES,
-} from './constants';
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT, TEMPLATE_URL_TOKENS } from './constants';
 import type { CloudConnectorCredentials } from './types';
 import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
@@ -1568,91 +1560,5 @@ describe('isStackArnInvalid', () => {
 
   it('ignores leading and trailing whitespace around a valid ARN', () => {
     expect(isStackArnInvalid(`  ${STACK_ARN}\n`)).toBe(false);
-  });
-});
-
-describe('isAwsWorkloadIdentityTemplatePackage', () => {
-  it.each(AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES)('%s qualifies', (packageName) => {
-    expect(isAwsWorkloadIdentityTemplatePackage(packageName)).toBe(true);
-  });
-
-  it('rejects packages that are not in the list', () => {
-    expect(isAwsWorkloadIdentityTemplatePackage('cloud_security_posture')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws_billing')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('azure')).toBe(false);
-  });
-
-  it('rejects a missing package name', () => {
-    expect(isAwsWorkloadIdentityTemplatePackage(undefined)).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('')).toBe(false);
-  });
-});
-
-describe('getAwsIdentityFederationTemplateUrl', () => {
-  const packageUrl =
-    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://example.com/legacy.yml&param_ElasticResourceId=RESOURCE_ID';
-
-  it('returns the hardcoded Workload Identity URL when the flag is on and the package is listed', () => {
-    expect(
-      getAwsIdentityFederationTemplateUrl({
-        isWorkloadIdentityTemplateEnabled: true,
-        packageName: 'aws',
-        iacTemplateUrl: packageUrl,
-      })
-    ).toBe(AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL);
-  });
-
-  it('overrides even when the package declares no iac_template_url', () => {
-    expect(
-      getAwsIdentityFederationTemplateUrl({
-        isWorkloadIdentityTemplateEnabled: true,
-        packageName: 'aws_mq',
-        iacTemplateUrl: undefined,
-      })
-    ).toBe(AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL);
-  });
-
-  it('returns the package URL unchanged when the flag is off', () => {
-    expect(
-      getAwsIdentityFederationTemplateUrl({
-        isWorkloadIdentityTemplateEnabled: false,
-        packageName: 'aws',
-        iacTemplateUrl: packageUrl,
-      })
-    ).toBe(packageUrl);
-  });
-
-  it('returns the package URL unchanged for packages outside the list', () => {
-    expect(
-      getAwsIdentityFederationTemplateUrl({
-        isWorkloadIdentityTemplateEnabled: true,
-        packageName: 'cloud_security_posture',
-        iacTemplateUrl: packageUrl,
-      })
-    ).toBe(packageUrl);
-  });
-
-  it('produces a URL whose tokens are all resolvable by getCloudConnectorRemoteRoleTemplate', () => {
-    const url = getAwsIdentityFederationTemplateUrl({
-      isWorkloadIdentityTemplateEnabled: true,
-      packageName: 'aws',
-      iacTemplateUrl: undefined,
-    });
-    const result = getCloudConnectorRemoteRoleTemplate({
-      cloud: {
-        isCloudEnabled: false,
-        isServerlessEnabled: true,
-        serverless: { projectId: 'proj-123' },
-        organizationId: '2070044029',
-        csp: 'aws',
-        region: 'us-east-1',
-        cloudHost: 'us-east-1.aws.elastic.cloud',
-      } as any,
-      accountType: SINGLE_ACCOUNT,
-      iacTemplateUrl: url,
-    });
-    expect(result).toBe(
-      'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&param_ElasticOrganizationId=2070044029&param_ElasticCloudProvider=aws&param_ElasticCloudRegion=us-east-1&param_ElasticCloudEnvironment=production&param_ElasticResourceType=project&param_ElasticResourceId=proj-123'
-    );
   });
 });

@@ -12,7 +12,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../common';
 import type { AccountType, CloudProvider } from '../../types';
-import { useAwsIdentityFederationTemplateUrl } from '../../hooks/use_aws_workload_identity_template';
 
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
 import { ReusableCloudConnectorForm } from './form/reusable_cloud_connector_form';
@@ -20,7 +19,7 @@ import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
 import type { UpdatePolicy } from './types';
-import { TABS, SINGLE_ACCOUNT, AWS_PROVIDER } from './constants';
+import { TABS, SINGLE_ACCOUNT } from './constants';
 import { isCloudConnectorReusableEnabled } from './utils';
 
 export interface CloudConnectorSetupProps {
@@ -48,14 +47,8 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   cloudProvider,
   templateName,
   accountType = SINGLE_ACCOUNT,
-  iacTemplateUrl: packageIacTemplateUrl,
+  iacTemplateUrl,
 }) => {
-  const awsIacTemplateUrl = useAwsIdentityFederationTemplateUrl({
-    packageName: packageInfo.name,
-    iacTemplateUrl: packageIacTemplateUrl,
-  });
-  const iacTemplateUrl = cloudProvider === AWS_PROVIDER ? awsIacTemplateUrl : packageIacTemplateUrl;
-
   const reusableFeatureEnabled = isCloudConnectorReusableEnabled(
     cloudProvider || '',
     packageInfo.version,

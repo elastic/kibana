@@ -34,7 +34,6 @@ import {
   LazyAwsStaticKeysForm,
   useGetPackageInfoByKeyQuery,
   getAnyCloudConnectorIacTemplateUrl,
-  useAwsIdentityFederationTemplateUrl,
 } from '@kbn/fleet-plugin/public';
 import type {
   AwsStaticKeyCredentials,
@@ -131,14 +130,10 @@ export function ManagedIntegrationsSection({
     { full: true },
     { enabled: showIdentityFederation }
   );
-  const packageIacTemplateUrl = useMemo(
+  const iacTemplateUrl = useMemo(
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
   );
-  const iacTemplateUrl = useAwsIdentityFederationTemplateUrl({
-    packageName: awsPackageResponse?.item?.name,
-    iacTemplateUrl: packageIacTemplateUrl,
-  });
 
   const radioOptions = [
     {
