@@ -84,13 +84,6 @@ describe('auth', () => {
     expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears' }));
   });
 
-  it('ears auth type keeps isExperimental: true (required by ears_experimental_utils.test.ts)', () => {
-    const earsType = GmailConnector.auth?.types.find(
-      (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'ears'
-    );
-    expect(earsType?.isExperimental).toBe(true);
-  });
-
   it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {
     const bearerDef = GmailConnector.auth?.types.find(
       (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'

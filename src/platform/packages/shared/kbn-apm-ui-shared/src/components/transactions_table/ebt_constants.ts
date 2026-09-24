@@ -15,3 +15,9 @@ export const TRANSACTIONS_TABLE_EBT_ELEMENTS = {
   ROW_NAME: 'transactionsTableRowName',
   ROW_ALERTS_BADGE: 'transactionsTableRowAlertsBadge',
 } as const;
+
+/** `data-ebt-detail` when the name column toggles a nested transaction detail flyout. */
+export const TRANSACTIONS_TABLE_EBT_DETAILS = {
+  OPEN: 'open',
+  CLOSE: 'close',
+} as const;
