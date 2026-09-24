@@ -277,14 +277,24 @@ describe('bootstrapNonPriorityTask', () => {
     score: 0,
   });
 
+  const makeGlobalStateSo = (logsExtraction: Record<string, unknown> = {}) => ({
+    id: 'entity-store-global-state-default',
+    type: 'entity-store-global-state',
+    attributes: { logsExtraction },
+    references: [],
+    score: 0,
+  });
+
   const runPriorityTask = async ({
     engineStatus,
     mergedFrequency = '1m',
     logExtractionConfig,
+    globalStateOverrides = {},
   }: {
     engineStatus: string;
     mergedFrequency?: string;
     logExtractionConfig?: Record<string, unknown>;
+    globalStateOverrides?: Record<string, unknown>;
   }) => {
     jest.clearAllMocks();
     mockIsDualProcessEnabled.mockResolvedValue(true);
@@ -306,6 +316,7 @@ describe('bootstrapNonPriorityTask', () => {
       per_page: 10,
       page: 1,
     });
+    soClient.get.mockResolvedValue(makeGlobalStateSo(globalStateOverrides));
 
     const definitions: Record<string, { createTaskRunner: Function }> = {};
     registerExtractEntityTasks({
@@ -319,7 +330,12 @@ describe('bootstrapNonPriorityTask', () => {
         getStartServices: jest.fn().mockResolvedValue([
           {
             featureFlags: {},
-            savedObjects: { createInternalRepository: jest.fn().mockReturnValue(soClient) },
+            savedObjects: {
+              createInternalRepository: jest.fn().mockReturnValue(soClient),
+              getUnsafeInternalClient: jest.fn().mockReturnValue({
+                asScopedToNamespace: jest.fn().mockReturnValue(soClient),
+              }),
+            },
           },
           { taskManager: { ensureScheduled: mockEnsureScheduled } },
         ]),
@@ -376,9 +392,25 @@ describe('bootstrapNonPriorityTask', () => {
 
     expect(mockGetMergedConfig).toHaveBeenCalledWith(
       'user',
-      {},
+      expect.any(Object),
       logExtractionConfig,
-      EXTRACTION_MODE.nonPriority
+      EXTRACTION_MODE.nonPriority,
+      undefined
+    );
+  });
+
+  it('passes global overrides to getMergedConfig so frequency changes reschedule the non-priority task', async () => {
+    await runPriorityTask({
+      engineStatus: ENGINE_STATUS.STARTED,
+      globalStateOverrides: { frequency: '5m' },
+    });
+
+    expect(mockGetMergedConfig).toHaveBeenCalledWith(
+      'user',
+      expect.objectContaining({ frequency: '5m' }),
+      null,
+      EXTRACTION_MODE.nonPriority,
+      undefined
     );
   });
 });

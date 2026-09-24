@@ -259,7 +259,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_breach": Object {
               "additionalProperties": false,
-              "description": "Optional ES|QL clause appended to \`query.base\`. If omitted, every row from \`query.base\` is a match.",
+              "description": "Optional ES|QL clause appended to \`query.base\`. If omitted, every row from \`query.base\` is a match, and a \`no_data\` strategy other than \`ignore\` then requires \`no_data.query\`.",
               "properties": Object {
                 "segment": Object {
                   "description": "ES|QL clause appended to \`query.base\`, for example \`WHERE avg_cpu > 0.85\`. Don't include a \`FROM\` clause.",
@@ -336,7 +336,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "object",
             },
             "alerting_rule_no_data": Object {
-              "description": "What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
+              "description": "What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. Any strategy other than \`ignore\` requires either \`query.breach\` or \`no_data.query\`, so that a group with no data can be told apart from one that stopped breaching.",
               "oneOf": Array [
                 Object {
                   "$ref": "#/definitions/alerting_rule_no_data_ignore",
@@ -357,7 +357,7 @@ describe('rule template create-rule schema coupling', () => {
               "description": "Marks an existing alert episode \`active\` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.",
               "properties": Object {
                 "query": Object {
-                  "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used.",
+                  "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used, which then has to be a presence query in its own right — so \`query.breach\` is required.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -391,7 +391,7 @@ describe('rule template create-rule schema coupling', () => {
               "description": "Holds the alert episode's current status when the rule finds no data.",
               "properties": Object {
                 "query": Object {
-                  "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used.",
+                  "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used, which then has to be a presence query in its own right — so \`query.breach\` is required.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -411,7 +411,7 @@ describe('rule template create-rule schema coupling', () => {
               "description": "Closes the alert episode the first time the rule finds no data for a group.",
               "properties": Object {
                 "query": Object {
-                  "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used.",
+                  "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used, which then has to be a presence query in its own right — so \`query.breach\` is required.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",

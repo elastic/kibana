@@ -1612,7 +1612,7 @@ describe('updateRuleBodySchema', () => {
       no_data: json.definitions?.alerting_rule_no_data?.description,
     }).toMatchInlineSnapshot(`
       Object {
-        "no_data": "What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
+        "no_data": "What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. Any strategy other than \`ignore\` requires either \`query.breach\` or \`no_data.query\`, so that a group with no data can be told apart from one that stopped breaching.",
         "recovery": "When an alert episode recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
         "time_field": "Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`. If omitted, the existing value is kept.",
       }
