@@ -104,17 +104,14 @@ export const listPolicyExecutionHistoryRequestSchema = z
     path: ['page'],
   });
 
-type ParsedListRequest = z.infer<typeof listPolicyExecutionHistoryRequestSchema>;
-type DefaultedKeys = 'page' | 'per_page' | 'sort' | 'sort_order';
 /**
  * Request-side params for the list endpoint (snake_case API contract). All
  * fields are optional: `page`/`per_page` default server-side and the filters
  * are opt-in, so callers building query strings need not supply pagination.
  */
-export type ListPolicyExecutionHistoryRequest = Omit<ParsedListRequest, DefaultedKeys> &
-  Partial<Pick<ParsedListRequest, DefaultedKeys>>;
-// Explicitly setting these values as optional because z.infer assumes the .default() value is applied and therefore required.
-// Using .optional() on the schema along with .default() does not solve this
+export type ListPolicyExecutionHistoryRequest = z.infer<
+  typeof listPolicyExecutionHistoryRequestSchema
+>;
 
 export const namedRefSchema = z.object({
   id: z.string(),

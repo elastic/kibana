@@ -7,10 +7,10 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
-import type {
-  ListPolicyExecutionHistoryRequest,
-  ListPolicyExecutionHistoryResponse,
-  PolicyExecutionOutcomeFilter,
+import {
+  type ListPolicyExecutionHistoryRequest,
+  type ListPolicyExecutionHistoryResponse,
+  type PolicyExecutionOutcomeFilter,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
@@ -41,7 +41,7 @@ export const toListExecutionHistoryRequest = ({
   sort,
   sortOrder,
   ...rest
-}: ListExecutionHistoryUiParams): Complete<ListPolicyExecutionHistoryRequest> => {
+}: ListExecutionHistoryUiParams): Complete<Partial<ListPolicyExecutionHistoryRequest>> => {
   assertAllFieldsMapped(rest);
   return {
     page,
