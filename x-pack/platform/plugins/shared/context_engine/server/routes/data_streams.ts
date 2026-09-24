@@ -10,7 +10,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import {
   DATA_STREAMS_SEARCH_INTERNAL_API_VERSION,
-  dataStreamsSearchPath,
+  DATA_STREAMS_SEARCH_PATH,
   MAX_DATA_STREAM_SEARCH_LENGTH,
   MAX_DATA_STREAM_SEARCH_RESULTS,
 } from '../../common/constants';
@@ -29,7 +29,7 @@ const searchDataStreamsQuerySchema = schema.object({
 export const registerDataStreamsRoutes = ({ router }: { router: IRouter }): void => {
   router.versioned
     .get({
-      path: dataStreamsSearchPath,
+      path: DATA_STREAMS_SEARCH_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'Search data streams',

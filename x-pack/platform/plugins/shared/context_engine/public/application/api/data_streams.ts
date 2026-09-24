@@ -8,7 +8,7 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import {
   DATA_STREAMS_SEARCH_INTERNAL_API_VERSION,
-  dataStreamsSearchPath,
+  DATA_STREAMS_SEARCH_PATH,
 } from '../../../common/constants';
 import type { SearchDataStreamsResponse } from '../../../common/http_api/data_streams';
 
@@ -22,7 +22,7 @@ export const searchDataStreams = (
   http: HttpStart,
   { search, signal }: SearchDataStreamsArgs = {}
 ): Promise<SearchDataStreamsResponse> =>
-  http.get<SearchDataStreamsResponse>(dataStreamsSearchPath, {
+  http.get<SearchDataStreamsResponse>(DATA_STREAMS_SEARCH_PATH, {
     version: DATA_STREAMS_SEARCH_INTERNAL_API_VERSION,
     query: search ? { search } : {},
     ...(signal ? { signal } : {}),
