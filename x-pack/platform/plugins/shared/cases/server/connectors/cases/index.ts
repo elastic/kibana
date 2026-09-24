@@ -170,6 +170,7 @@ export const getCasesConnectorAdapter = ({
         maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
         templateVersion: params.subActionParams.templateVersion,
+        extractObservables: params.subActionParams.extractObservables,
         source,
       };
 

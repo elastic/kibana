@@ -127,6 +127,10 @@ export const bulkCreate = async (
       configurations.map((conf) => [conf.owner, conf.customFields])
     );
 
+    const extractObservablesMap: Map<string, boolean> = new Map(
+      configurations.map((conf) => [conf.owner, conf.extractObservables])
+    );
+
     const casesWithIds = getCaseWithIds(decodedData);
 
     if (
@@ -183,6 +187,7 @@ export const bulkCreate = async (
         globalFieldsByOwner,
         templatesEnabled: clientArgs.config.templates.enabled,
         relaxRequiredFields: options.relaxRequiredFields === true,
+        spaceExtractObservables: extractObservablesMap.get(theCase.owner),
       });
       bulkCreateRequest.push(request);
     }
@@ -489,6 +494,7 @@ const createBulkCreateCaseRequest = async ({
   globalFieldsByOwner,
   templatesEnabled,
   relaxRequiredFields,
+  spaceExtractObservables,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -504,10 +510,13 @@ const createBulkCreateCaseRequest = async ({
   templatesEnabled: boolean;
   /** See {@link BulkCreateCasesClientOptions.relaxRequiredFields}. */
   relaxRequiredFields: boolean;
+  /** Space-level extractObservables default from the configuration saved object. */
+  spaceExtractObservables?: boolean;
 }): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
 }> => {
-  const { id, ...caseWithoutId } = theCase;
+  const { id, ...caseWithoutIdRaw } = theCase;
+  let caseWithoutId = caseWithoutIdRaw;
 
   // Caller intent, captured before pairing/normalization can populate extended_fields from a
   // linked customFields value or a template default — mirrors create.ts's
@@ -534,11 +543,17 @@ const createBulkCreateCaseRequest = async ({
   // fields, one supplied via customFields and the other via extended_fields — a pre-pair check
   // only sees the latter and rejects the former as missing.
 
-  /**
-   * Trim title, category, description and tags
-   * and fill out missing custom fields
-   * before saving to ES
-   */
+  // Default extractObservables from the space configuration when the caller omitted it.
+  // Precedence: caller-explicit > space config default > false.
+  if (caseWithoutId.settings.extractObservables === undefined) {
+    caseWithoutId = {
+      ...caseWithoutId,
+      settings: {
+        ...caseWithoutId.settings,
+        extractObservables: spaceExtractObservables ?? false,
+      },
+    };
+  }
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 

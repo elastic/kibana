@@ -29,6 +29,11 @@ properties:
         - type
       properties:
         $ref: 'case_configure_customfields.yaml'
+  extractObservables:
+    type: boolean
+    description: >
+      Indicates whether observables are automatically extracted from alerts when
+      they are added to new cases.
   templates:
     $ref: 'templates.yaml'
   version:

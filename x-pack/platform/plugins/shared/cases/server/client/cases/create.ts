@@ -162,6 +162,19 @@ export const create = async (
       }
     }
 
+    // Default extractObservables from the space configuration when the caller omitted it
+    // and template expansion did not fill it. Precedence:
+    // caller-explicit > template definition > space config default > false.
+    if (query.settings.extractObservables === undefined) {
+      query = {
+        ...query,
+        settings: {
+          ...query.settings,
+          extractObservables: configurations[0]?.extractObservables ?? false,
+        },
+      };
+    }
+
     // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI
     // before submission, so UI-created cases persist them — but API and workflow-step callers
     // only send the fields they know about, which left every global field empty on non-UI cases.

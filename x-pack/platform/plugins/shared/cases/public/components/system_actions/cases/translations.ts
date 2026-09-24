@@ -147,3 +147,31 @@ export const MAX_CASES_TO_OPEN_HELP_TEXT = (maxCases: number) =>
     defaultMessage: 'Set the maximum amount of cases to be opened. (Max {maxCases})',
     values: { maxCases },
   });
+
+export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesLabel',
+  {
+    defaultMessage: 'Auto-extract observables',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_INHERIT = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesInherit',
+  {
+    defaultMessage: 'Use space default',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_ON = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_OFF = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesOff',
+  {
+    defaultMessage: 'Off',
+  }
+);

@@ -250,6 +250,35 @@ describe('CasesConnectorRunParamsSchema', () => {
     });
   });
 
+  describe('extractObservables', () => {
+    it('defaults to undefined when omitted', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams()).extractObservables
+      ).toBeUndefined();
+    });
+
+    it('accepts extractObservables as true', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ extractObservables: true }))
+          .extractObservables
+      ).toBe(true);
+    });
+
+    it('accepts extractObservables as false', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ extractObservables: false }))
+          .extractObservables
+      ).toBe(false);
+    });
+
+    it('accepts extractObservables as null', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ extractObservables: null }))
+          .extractObservables
+      ).toBe(null);
+    });
+  });
+
   describe('groupedAlerts', () => {
     it('defaults the groupedAlerts to null', () => {
       expect(CasesConnectorRunParamsSchema.validate(getParams()).groupedAlerts).toBe(null);
