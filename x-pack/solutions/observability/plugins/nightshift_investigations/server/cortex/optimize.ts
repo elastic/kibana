@@ -140,8 +140,8 @@ Rules:
 - Prefer corroborating an existing page over creating a near-duplicate.
 - New pages use action "upsert" with markdown content. Keep content short and reusable.
 - Use "corroborate" when the investigation confirms an existing page without changing it.
-- A new page's slug names a recurring condition, never one occurrence of it. Never put a date, region, cloud, availability zone, cluster, node, or host in a new slug — those belong in the page content. "constructor-plan-failed-capacity" is a slug; "constructor-plan-failed-capacity-aws-us-east-1-2026-09-22" is not.
-- When this investigation is another instance of a condition the catalog already documents, "corroborate" that page — and "upsert" the same slug when there is genuinely new detail to fold in — using its slug exactly as listed, even if that slug carries a date or region. Never open a second page for the same mechanism because the date, region, or cluster differs.
+- A slug names a recurring condition, never one occurrence of it. Never put a date, region, cloud, availability zone, cluster, node, or host in a slug — those belong in the page content. "constructor-plan-failed-capacity" is a slug; "constructor-plan-failed-capacity-aws-us-east-1-2026-09-22" is not.
+- When this investigation is another instance of a condition the catalog already documents, "corroborate" that page — and "upsert" the same slug when there is genuinely new detail to fold in. Never open a second page for the same mechanism because the date, region, or cluster differs.
 - Use "archive" only when the transcript shows a page is wrong or obsolete.
 - entity_type must be one of: ${CORTEX_ENTITY_TYPES.join(', ')}.
 - slug is a short kebab-case identifier. Reuse an existing page's slug exactly. Never prefix slug with "cortex", the entity type, or a document id.
