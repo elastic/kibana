@@ -9,7 +9,11 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { VIEWS_BULK_DELETE_ROUTE, VIEWS_ROUTE } from '@kbn/esql-types';
-import { createEsqlViewsManagementClient, EsqlViewsClientError } from './esql_views_client';
+import {
+  createEsqlViewsManagementClient,
+  ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
+  EsqlViewsClientError,
+} from './esql_views_client';
 
 const createHttpError = (status: number, message: string, errorType?: string) => {
   const error = new Error(message);
@@ -17,7 +21,10 @@ const createHttpError = (status: number, message: string, errorType?: string) =>
     name: 'HttpFetchError',
     request: {},
     response: { status },
-    body: { message, errorType },
+    body: {
+      message,
+      ...(errorType === undefined ? {} : { attributes: { errorType } }),
+    },
   });
   return error;
 };
@@ -103,7 +110,7 @@ describe('createEsqlViewsManagementClient', () => {
     ).rejects.toMatchObject({
       name: 'EsqlViewsClientError',
       statusCode: 409,
-      errorType: 'resource_already_exists_exception',
+      errorType: ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
     });
     expect(put).not.toHaveBeenCalled();
   });

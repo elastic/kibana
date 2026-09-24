@@ -10,7 +10,7 @@ import type { EditorError } from '@elastic/esql/types';
 
 export const MAX_ESQL_VIEW_NAME_LENGTH = 255;
 export const MAX_ESQL_VIEW_DESCRIPTION_LENGTH = 1_000;
-export const MAX_ESQL_VIEW_QUERY_LENGTH = 1_000_000;
+export const MAX_ESQL_VIEW_QUERY_LENGTH = 100_000;
 
 export type EsqlViewNameValidationError = 'required' | 'invalidFormat' | 'tooLong';
 

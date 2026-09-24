@@ -282,7 +282,9 @@ describe('ES|QL views routes', () => {
         status: 400,
         body: {
           message: 'Conflict with an existing index',
-          errorType: 'resource_already_exists_exception',
+          attributes: {
+            errorType: 'resource_already_exists_exception',
+          },
         },
       });
       expect(mocks.logger.error).toHaveBeenCalled();

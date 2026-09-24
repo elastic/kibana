@@ -20,7 +20,9 @@ import {
 } from '@kbn/esql-types';
 
 interface ErrorResponseBody {
-  errorType?: string;
+  attributes?: {
+    errorType?: string;
+  };
   message?: string;
   statusCode?: number;
 }
@@ -32,6 +34,8 @@ interface HttpFetchError extends Error {
 
 const isHttpFetchError = (error: unknown): error is HttpFetchError =>
   error instanceof Error && 'request' in error;
+
+export const ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE = 'esql_view_already_exists_exception';
 
 export class EsqlViewsClientError extends Error {
   constructor(
@@ -69,7 +73,7 @@ const normalizeError = (error: unknown): EsqlViewsClientError => {
     return new EsqlViewsClientError(
       body?.message ?? error.message,
       error.response?.status ?? body?.statusCode,
-      body?.errorType,
+      body?.attributes?.errorType,
       error
     );
   }
@@ -125,7 +129,7 @@ export const createEsqlViewsManagementClient = (http: HttpStart): EsqlViewsClien
     throw new EsqlViewsClientError(
       `An ES|QL view named "${request.name}" already exists`,
       409,
-      'resource_already_exists_exception'
+      ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE
     );
   };
 

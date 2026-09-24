@@ -93,18 +93,25 @@ export const translations = {
   editFlyoutTitle: i18n.translate('xpack.esqlViews.managementPage.editFlyoutTitle', {
     defaultMessage: 'Edit ES|QL view',
   }),
+  flyoutSubtitle: i18n.translate('xpack.esqlViews.managementPage.flyoutSubtitle', {
+    defaultMessage:
+      'Changes affect every dashboard, alert, and other saved object that uses this view.',
+  }),
   viewDetailsTitle: i18n.translate('xpack.esqlViews.managementPage.viewDetailsTitle', {
     defaultMessage: 'ES|QL view details',
+  }),
+  viewDetailsDescription: i18n.translate('xpack.esqlViews.managementPage.viewDetailsDescription', {
+    defaultMessage: 'Name and describe the view.',
   }),
   viewNameLabel: i18n.translate('xpack.esqlViews.managementPage.viewNameLabel', {
     defaultMessage: 'Name',
   }),
   viewNamePlaceholder: i18n.translate('xpack.esqlViews.managementPage.viewNamePlaceholder', {
-    defaultMessage: 'e.g. my-dataset',
+    defaultMessage: 'e.g. my-view',
   }),
   viewNameDescription: i18n.translate('xpack.esqlViews.managementPage.viewNameDescription', {
     defaultMessage:
-      'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported',
+      'Must not match an existing index, data stream, alias, external dataset, or view.',
   }),
   viewDescriptionLabel: i18n.translate('xpack.esqlViews.managementPage.viewDescriptionLabel', {
     defaultMessage: 'Description (optional)',
@@ -112,20 +119,20 @@ export const translations = {
   viewDescriptionPlaceholder: i18n.translate(
     'xpack.esqlViews.managementPage.viewDescriptionPlaceholder',
     {
-      defaultMessage: 'Type text',
+      defaultMessage: 'Describe this view',
     }
   ),
   viewDescriptionDescription: i18n.translate(
     'xpack.esqlViews.managementPage.viewDescriptionDescription',
     {
-      defaultMessage: 'A brief description to help identify this view.',
+      defaultMessage: 'Add a brief description to help identify this view.',
     }
   ),
   viewQueryTitle: i18n.translate('xpack.esqlViews.managementPage.viewQueryTitle', {
     defaultMessage: 'ES|QL query',
   }),
   viewQueryDescription: i18n.translate('xpack.esqlViews.managementPage.viewQueryDescription', {
-    defaultMessage: 'You can write a custom query, or use a recent or starred one.',
+    defaultMessage: 'Write a new query, or select a recently or starred query.',
   }),
   nameRequiredErrorMessage: i18n.translate(
     'xpack.esqlViews.managementPage.nameRequiredErrorMessage',
@@ -160,7 +167,7 @@ export const translations = {
   queryTooLongErrorMessage: i18n.translate(
     'xpack.esqlViews.managementPage.queryTooLongErrorMessage',
     {
-      defaultMessage: 'Query cannot be longer than 1,000,000 characters.',
+      defaultMessage: 'Query cannot be longer than 100,000 characters.',
     }
   ),
   querySyntaxErrorMessage: (details: string) =>
@@ -172,6 +179,12 @@ export const translations = {
     'xpack.esqlViews.managementPage.nameConflictErrorMessage',
     {
       defaultMessage: 'This name is already used by another Elasticsearch resource.',
+    }
+  ),
+  viewAlreadyExistsErrorMessage: i18n.translate(
+    'xpack.esqlViews.managementPage.viewAlreadyExistsErrorMessage',
+    {
+      defaultMessage: 'A view with this name already exists.',
     }
   ),
   errorDetailsAriaLabel: i18n.translate('xpack.esqlViews.managementPage.errorDetailsAriaLabel', {

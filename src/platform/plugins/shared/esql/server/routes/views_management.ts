@@ -13,7 +13,7 @@ import { VIEWS_BULK_DELETE_ROUTE, VIEWS_ROUTE } from '@kbn/esql-types';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const MAX_VIEW_NAME_LENGTH = 255;
-const MAX_VIEW_QUERY_LENGTH = 1_000_000;
+const MAX_VIEW_QUERY_LENGTH = 100_000;
 const MAX_VIEW_DESCRIPTION_LENGTH = 1_000;
 const MAX_VIEWS_PER_CLUSTER = 500;
 
@@ -53,7 +53,7 @@ const reportRouteError = (route: string, action: string, error: unknown, logger:
     statusCode,
     body: {
       message,
-      ...(typeof errorType === 'string' ? { errorType } : {}),
+      ...(typeof errorType === 'string' ? { attributes: { errorType } } : {}),
     },
   };
 };

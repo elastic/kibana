@@ -10,7 +10,11 @@ import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { EsqlViewsResult } from '@kbn/esql-types';
-import { EsqlViewsClientError, type EsqlViewsClient } from '@kbn/esql-utils';
+import {
+  ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
+  EsqlViewsClientError,
+  type EsqlViewsClient,
+} from '@kbn/esql-utils';
 import { getQueryPreview } from './esql_views_table';
 import { ManagementApp } from './management_app';
 
@@ -133,19 +137,27 @@ describe('ManagementApp', () => {
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
 
-    expect(screen.getByRole('heading', { name: 'ES|QL view details' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('e.g. my-dataset')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported'
+        'Changes affect every dashboard, alert, and other saved object that uses this view.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'ES|QL view details' })).toBeInTheDocument();
+    expect(screen.getByText('Name and describe the view.')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('e.g. my-view')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Must not match an existing index, data stream, alias, external dataset, or view.'
       )
     ).toBeInTheDocument();
     expect(screen.getByText('Description (optional)')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Type text')).toBeInTheDocument();
-    expect(screen.getByText('A brief description to help identify this view.')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Describe this view')).toBeInTheDocument();
+    expect(
+      screen.getByText('Add a brief description to help identify this view.')
+    ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ES|QL query' })).toBeInTheDocument();
     expect(
-      screen.getByText('You can write a custom query, or use a recent or starred one.')
+      screen.getByText('Write a new query, or select a recently or starred query.')
     ).toBeInTheDocument();
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(
       'FROM kibana_sample_data_ecommerce | WHERE KQL("term")'
@@ -258,6 +270,33 @@ describe('ManagementApp', () => {
     expect(
       await screen.findByText('an index or data stream exists with the same name')
     ).toBeInTheDocument();
+  });
+
+  it('shows an inline error without a tooltip when a view already exists', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({ views: [] });
+    client.createView.mockRejectedValue(
+      new EsqlViewsClientError(
+        'An ES|QL view named "sales-view" already exists',
+        409,
+        ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE
+      )
+    );
+
+    renderApp(client);
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+    fireEvent.change(screen.getByTestId('esqlViewNameInput'), {
+      target: { value: 'sales-view' },
+    });
+    fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
+      target: { value: 'ROW value = 1' },
+    });
+    fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+    expect(await screen.findByText('A view with this name already exists.')).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewNameConflictDetails')).not.toBeInTheDocument();
   });
 
   it('blocks saving a query with invalid ES|QL syntax', async () => {

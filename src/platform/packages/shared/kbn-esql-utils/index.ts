@@ -103,6 +103,7 @@ export {
   type ESQLSourceKind,
   ensureApproximationLicense,
   createEsqlViewsManagementClient,
+  ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
   type EsqlViewsClient,
   getESQLSourceInfo,

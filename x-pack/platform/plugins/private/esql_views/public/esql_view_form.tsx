@@ -28,7 +28,11 @@ import {
 } from '@elastic/eui';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import type { EsqlView } from '@kbn/esql-types';
-import { EsqlViewsClientError, type EsqlViewsClient } from '@kbn/esql-utils';
+import {
+  ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
+  EsqlViewsClientError,
+  type EsqlViewsClient,
+} from '@kbn/esql-utils';
 import {
   getEsqlViewQuerySyntaxError,
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
@@ -46,6 +50,8 @@ interface EsqlViewFormProps {
 }
 
 const DEFAULT_ESQL_VIEW_QUERY = 'FROM kibana_sample_data_ecommerce | WHERE KQL("term")';
+
+type NameConflict = { type: 'existingView' } | { type: 'otherResource'; details: string };
 
 const getNameValidationMessage = (
   validationError: EsqlViewNameValidationError | undefined
@@ -76,7 +82,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   const [query, setQuery] = useState(view?.query ?? DEFAULT_ESQL_VIEW_QUERY);
   const [isNameTouched, setIsNameTouched] = useState(false);
   const [queryError, setQueryError] = useState<string>();
-  const [nameConflictDetails, setNameConflictDetails] = useState<string>();
+  const [nameConflict, setNameConflict] = useState<NameConflict>();
   const [saveError, setSaveError] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -87,25 +93,28 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       ? translations.descriptionTooLongErrorMessage
       : undefined;
 
-  const nameError: ReactNode = nameConflictDetails ? (
-    <span>
-      {translations.nameConflictErrorMessage}{' '}
-      <span data-test-subj="esqlViewNameConflictDetails">
-        <EuiIconTip
-          aria-label={translations.errorDetailsAriaLabel}
-          content={nameConflictDetails}
-          type="question"
-        />
+  const nameError: ReactNode =
+    nameConflict?.type === 'existingView' ? (
+      translations.viewAlreadyExistsErrorMessage
+    ) : nameConflict?.type === 'otherResource' ? (
+      <span>
+        {translations.nameConflictErrorMessage}{' '}
+        <span data-test-subj="esqlViewNameConflictDetails">
+          <EuiIconTip
+            aria-label={translations.errorDetailsAriaLabel}
+            content={nameConflict.details}
+            type="question"
+          />
+        </span>
       </span>
-    </span>
-  ) : (
-    nameValidationError
-  );
+    ) : (
+      nameValidationError
+    );
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsNameTouched(true);
-    setNameConflictDetails(undefined);
+    setNameConflict(undefined);
     setSaveError(undefined);
     setQueryError(undefined);
 
@@ -147,11 +156,14 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
 
       await onSave();
     } catch (error) {
-      if (
-        error instanceof EsqlViewsClientError &&
-        error.errorType === 'resource_already_exists_exception'
-      ) {
-        setNameConflictDetails(error.message);
+      if (error instanceof EsqlViewsClientError) {
+        if (error.errorType === ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE) {
+          setNameConflict({ type: 'existingView' });
+        } else if (error.errorType === 'resource_already_exists_exception') {
+          setNameConflict({ type: 'otherResource', details: error.message });
+        } else {
+          setSaveError(error.message);
+        }
       } else {
         setSaveError(error instanceof Error ? error.message : String(error));
       }
@@ -166,7 +178,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       data-test-subj="esqlViewFormFlyout"
       onClose={onClose}
       ownFocus
-      size="m"
+      size="l"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
@@ -174,28 +186,20 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
             {isEditing ? translations.editFlyoutTitle : translations.createFlyoutTitle}
           </h2>
         </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" size="xs">
+          <p>{translations.flyoutSubtitle}</p>
+        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
         <EuiForm component="form" id={formId} onSubmit={handleSubmit}>
-          {saveError && (
-            <>
-              <EuiCallOut
-                announceOnMount
-                color="danger"
-                data-test-subj="esqlViewSaveError"
-                iconType="warning"
-                title={translations.saveErrorTitle}
-              >
-                <p>{saveError}</p>
-              </EuiCallOut>
-              <EuiSpacer size="m" />
-            </>
-          )}
-
           <EuiTitle size="s">
             <h3>{translations.viewDetailsTitle}</h3>
           </EuiTitle>
+          <EuiText color="subdued" size="s">
+            <p>{translations.viewDetailsDescription}</p>
+          </EuiText>
 
           <EuiSpacer size="m" />
 
@@ -213,7 +217,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
               onChange={({ target }) => {
                 setName(target.value);
                 setIsNameTouched(true);
-                setNameConflictDetails(undefined);
+                setNameConflict(undefined);
                 setSaveError(undefined);
               }}
               placeholder={translations.viewNamePlaceholder}
@@ -275,6 +279,21 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
               query={{ esql: query }}
             />
           </EuiFormRow>
+
+          {saveError && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                announceOnMount
+                color="danger"
+                data-test-subj="esqlViewSaveError"
+                iconType="warning"
+                title={translations.saveErrorTitle}
+              >
+                <p>{saveError}</p>
+              </EuiCallOut>
+            </>
+          )}
         </EuiForm>
       </EuiFlyoutBody>
 
