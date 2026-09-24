@@ -7,6 +7,7 @@
 
 import {
   createTaskRunError,
+  getUiamApiKeyId,
   getUiamApiKeySecret,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
@@ -32,7 +33,7 @@ import {
   type CredentialType,
 } from '../otel/uiam_telemetry';
 
-interface RuleData {
+export interface RuleData {
   rawRule: RawRule;
   version: string | undefined;
   references: SavedObjectReference[];
@@ -87,13 +88,23 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     );
   }
 
-  const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(context, spaceId, apiKey, {
-    uiamApiKey,
-    uiamApiKeyExternal,
-    apiKeyCreatedByUser,
-    apiKeyOwner,
-    ruleId,
-  });
+  const { fakeRequest, effectiveApiKey, credentialType } = getFakeKibanaRequest(
+    context,
+    spaceId,
+    apiKey,
+    {
+      uiamApiKey,
+      uiamApiKeyExternal,
+      apiKeyCreatedByUser,
+      apiKeyOwner,
+      ruleId,
+    }
+  );
+  // Only when the run actually authenticates with the UIAM key: the fallbacks in
+  // `getFakeKibanaRequest` can pick the ES key even though the rule stores a UIAM one, and
+  // recording an id for a credential the connector tasks do not present would keep an unused
+  // key alive.
+  const uiamApiKeyId = credentialType === 'uiam_api_key' ? getUiamApiKeyId(uiamApiKey) : undefined;
   const rule = getAlertFromRaw({
     id: ruleId,
     isSystemAction: (actionId: string) => context.actionsPlugin.isSystemActionConnector(actionId),
@@ -132,6 +143,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
 
   return {
     effectiveApiKey,
+    uiamApiKeyId,
     fakeRequest,
     rule: { ...rule, snoozedInstances: rawRule.snoozedInstances ?? [] },
     validatedParams,

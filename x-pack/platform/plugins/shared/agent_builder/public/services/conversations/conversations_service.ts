@@ -8,6 +8,7 @@
 import { type HttpSetup, buildPath } from '@kbn/core-http-browser';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
+  CreateConversationResponse,
   AddConversationEventsRequestBody,
   AddConversationEventsResponse,
   GetConversationResponse,
@@ -74,6 +75,13 @@ export class ConversationsService {
         },
       }
     );
+  }
+
+  /** Creates an empty conversation so it exists before the first message is sent. */
+  async create({ agentId }: { agentId: string }) {
+    return await this.http.post<CreateConversationResponse>(`${publicApiPath}/conversations`, {
+      body: JSON.stringify({ agent_id: agentId }),
+    });
   }
 
   async get({ conversationId }: ConversationGetOptions) {

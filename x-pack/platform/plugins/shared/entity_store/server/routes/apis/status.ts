@@ -43,7 +43,11 @@ interface LegacyEngineDescriptorV1 {
 
 type StatusEngine = Omit<
   GetStatusSuccessResult['engines'][number],
-  'versionState' | 'logExtractionState' | 'logExtractionConfig'
+  | 'versionState'
+  | 'logExtractionState'
+  | 'logExtractionConfig'
+  | 'nonPriorityLogExtractionConfig'
+  | 'nonPriorityLogExtractionState'
 > &
   LegacyEngineDescriptorV1;
 
@@ -63,7 +67,14 @@ function toPublicEngine(
   engine: GetStatusSuccessResult['engines'][number],
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
-  const { versionState, logExtractionState, logExtractionConfig, ...rest } = engine;
+  const {
+    versionState,
+    logExtractionState,
+    logExtractionConfig,
+    nonPriorityLogExtractionConfig,
+    nonPriorityLogExtractionState,
+    ...rest
+  } = engine;
   const {
     delay,
     timeout,
