@@ -99,11 +99,18 @@ export type AffectedAsset = z.infer<typeof AffectedAsset>;
 export const HuntForThreatHit = lazySchema(() =>
   z
     .object({
-      index: z.string(),
-      id: z.string(),
-      score: z.number().nullable(),
+      id: z.string().max(512),
+      index: z.string().max(512),
       /**
-       * Which IOC and/or ATT&CK technique produced this hit. Tier 1 fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope Tier 1 `events[]` onto technique-specific attachments.
+       * Document `@timestamp` when present on the hit.
+       */
+      timestamp: z
+        .string()
+        .max(64)
+        .optional()
+        .describe('Document `@timestamp` when present on the hit.'),
+      /**
+       * Which IOC and/or ATT&CK technique produced this hit. Tier 1 fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope Tier 1 `events[]` onto technique-specific attachments. Tier 2 behavior `hits` omit this (technique is implied by the parent behavior).
        */
       matched: z
         .object({
@@ -118,10 +125,10 @@ export const HuntForThreatHit = lazySchema(() =>
         })
         .optional()
         .describe(
-          'Which IOC and/or ATT&CK technique produced this hit. Tier 1 fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope Tier 1 `events[]` onto technique-specific attachments.'
+          'Which IOC and/or ATT&CK technique produced this hit. Tier 1 fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope Tier 1 `events[]` onto technique-specific attachments. Tier 2 behavior `hits` omit this (technique is implied by the parent behavior).'
         ),
     })
-    .catchall(z.unknown())
+    .strict()
 );
 export type HuntForThreatHit = z.infer<typeof HuntForThreatHit>;
 

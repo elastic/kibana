@@ -427,6 +427,39 @@ describe('huntCoordinator', () => {
         })
       );
     });
+
+    it('still fails the run when the report is not in the space although the caller supplied every input', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      mockLoad.mockResolvedValueOnce(null);
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        undefined,
+        logger,
+        {
+          report_id: 'rpt-elsewhere',
+          spaceId: 'hunt-b',
+          trigger: 'manual',
+          run_id: 'run-15',
+          iocs: [{ type: 'ip', value: '192.0.2.30' }],
+          techniques: ['T1078.004'],
+          text: 'caller text',
+        }
+      );
+      expect(mockLoad).toHaveBeenCalledWith({
+        esClient,
+        spaceId: 'hunt-b',
+        reportId: 'rpt-elsewhere',
+      });
+      expect(mockT1).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          tier2_skipped_reason: 'report_not_found',
+          has_confirmed_hit: false,
+          completed_successfully: false,
+        })
+      );
+    });
   });
 
   it('returns has_confirmed_hit true when Tier 2 alone hits', async () => {
@@ -545,7 +578,7 @@ describe('huntCoordinator', () => {
     );
   });
 
-  it('summarizes Tier 1 hits whose _source is nested, as raw telemetry returns it', async () => {
+  it('forwards Tier 1 sample_event_summaries into Tier 2 article_context', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT2.mockClear();
@@ -562,12 +595,15 @@ describe('huntCoordinator', () => {
         {
           index: '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
           id: 'evt-1',
-          score: null,
-          event: { action: 'AssumeRole', provider: 'sts.amazonaws.com', dataset: 'aws.cloudtrail' },
-          host: { name: 'WIN-ANALYST01' },
-          user: { name: 'dev-user' },
-          source: { ip: '192.0.2.30' },
+          timestamp: '2026-09-01T00:00:00.000Z',
+          matched: {
+            ioc: { type: 'ip', value: '192.0.2.30' },
+            field: 'source.ip',
+          },
         },
+      ],
+      sample_event_summaries: [
+        'dataset=aws.cloudtrail action=AssumeRole provider=sts.amazonaws.com host=WIN-ANALYST01 user=dev-user src=192.0.2.30',
       ],
       affected_assets: {
         hosts: [{ name: 'WIN-ANALYST01', hit_count: 1 }],
@@ -603,6 +639,77 @@ describe('huntCoordinator', () => {
       }),
       esClient
     );
+  });
+
+  describe('Tier 2 generation targets', () => {
+    const tier1WithBuckets = (perIndex: Array<{ index: string; required: boolean }>) => ({
+      status: 'environment_hits_found',
+      has_confirmed_hit: perIndex.some((entry) => entry.required),
+      searched_iocs: 1,
+      searched_techniques: 0,
+      resolved_iocs: [{ type: 'ip', value: '192.0.2.30' }],
+      resolved_techniques: [],
+      time_range: { from: 'now-7d', to: 'now' },
+      counts: { total_hits: 3, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+      hits: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: perIndex.map((entry) => ({ ...entry, hit_count: 1 })),
+    });
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    beforeEach(() => {
+      jest.requireMock('./tier2/hunt_behavior').huntBehavior.mockClear();
+    });
+
+    it('steers generation only at required-index buckets, never at the alerts index that also matched', async () => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+      mockT1.mockResolvedValueOnce(
+        tier1WithBuckets([
+          { index: '.internal.alerts-security.alerts-default-000001', required: false },
+          { index: '.ds-logs-aws.cloudtrail-default-2026.09.01-000001', required: true },
+        ])
+      );
+
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-required-buckets',
+        text: 'report text',
+      });
+
+      expect(mockT2).toHaveBeenCalledWith(
+        mockModel,
+        logger,
+        expect.objectContaining({
+          article_context: expect.objectContaining({
+            matched_indices: ['.ds-logs-aws.cloudtrail-default-2026.09.01-000001'],
+          }),
+        }),
+        esClient
+      );
+    });
+
+    it('omits matched_indices when Tier 1 matched only optional indices, so generation falls back to the required patterns', async () => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+      mockT1.mockResolvedValueOnce(
+        tier1WithBuckets([
+          { index: '.internal.alerts-security.alerts-default-000001', required: false },
+        ])
+      );
+
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-optional-only-buckets',
+        text: 'report text',
+      });
+
+      const [, , tier2Params] = mockT2.mock.calls[0];
+      expect(tier2Params.article_context).not.toHaveProperty('matched_indices');
+      expect(tier2Params.required_indices).toEqual(['logs-aws.cloudtrail-*']);
+    });
   });
 
   it('never writes feedback — completed_successfully is the caller signal', async () => {

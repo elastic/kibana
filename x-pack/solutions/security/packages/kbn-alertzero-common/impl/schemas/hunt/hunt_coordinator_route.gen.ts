@@ -16,7 +16,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntIoc, HuntTechnology, HuntForThreatResult } from '../components/hunt.gen';
+import {
+  HuntIoc,
+  HuntTechnology,
+  HuntForThreatResult,
+  HuntForThreatHit,
+} from '../components/hunt.gen';
 
 export const HuntCoordinatorStatus = lazySchema(() =>
   z.enum(['blocked', 'tier1_only', 'tier1_and_tier2', 'tier2_only_skipped'])
@@ -161,20 +166,14 @@ export const HuntCoordinatorResponse = lazySchema(() =>
               .optional()
               .describe('True when more than 20 distinct users were seen.'),
             /**
-             * Required-index execute rows as Discover refs for the SSE mapper (`events[]` / `alerts[]`).
+             * Required-index execute rows as Discover refs (`id` + `index` + optional `timestamp`). Same shape as Tier 1 `hits[]`. Consumed by the SSE mapper into `events[]` / `alerts[]`.
              */
-            hit_refs: z
-              .array(
-                z.object({
-                  event_id: z.string().max(512),
-                  source_index: z.string().max(512),
-                  timestamp: z.string().max(64).optional(),
-                })
-              )
+            hits: z
+              .array(HuntForThreatHit)
               .max(50)
               .optional()
               .describe(
-                'Required-index execute rows as Discover refs for the SSE mapper (`events[]` / `alerts[]`).'
+                'Required-index execute rows as Discover refs (`id` + `index` + optional `timestamp`). Same shape as Tier 1 `hits[]`. Consumed by the SSE mapper into `events[]` / `alerts[]`.'
               ),
           })
         ),

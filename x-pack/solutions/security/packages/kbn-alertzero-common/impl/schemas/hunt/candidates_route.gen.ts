@@ -17,7 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 export const CandidateSkipReason = lazySchema(() =>
-  z.enum(['open_proposal', 'already_hunted', 'not_found', 'other_space'])
+  z.enum(['open_proposal', 'already_hunted', 'not_found'])
 );
 export type CandidateSkipReason = z.infer<typeof CandidateSkipReason>;
 export type CandidateSkipReasonEnum = typeof CandidateSkipReason.enum;

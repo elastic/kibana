@@ -69,4 +69,4 @@ components:
   schemas:
     CandidateSkipReason:
       type: string
-      enum: [open_proposal, already_hunted, not_found, other_space]
+      enum: [open_proposal, already_hunted, not_found]

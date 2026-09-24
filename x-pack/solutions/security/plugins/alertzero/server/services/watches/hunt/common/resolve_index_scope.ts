@@ -75,7 +75,10 @@ export const resolveIndexScope = async ({
   // A wildcard that matches nothing resolves to an empty list, but a concrete
   // name that does not exist (the space-derived alerts index before any alert
   // is written there) is a 404 unless `ignore_unavailable` is set. Either way
-  // the answer is "absent", never an error.
+  // the answer is "absent", never an error. A name can resolve as an index, a
+  // data stream, or an alias: `.alerts-security.alerts-{space}` is an alias
+  // over the hidden `.internal.alerts-*` write index, so it only ever shows up
+  // under `aliases`.
   const checkPattern = async (pattern: string): Promise<[string, boolean]> => {
     try {
       const response = await esClient.indices.resolveIndex({
@@ -83,7 +86,12 @@ export const resolveIndexScope = async ({
         expand_wildcards: 'open',
         ignore_unavailable: true,
       });
-      return [pattern, response.indices.length > 0 || response.data_streams.length > 0];
+      return [
+        pattern,
+        response.indices.length > 0 ||
+          response.data_streams.length > 0 ||
+          response.aliases.length > 0,
+      ];
     } catch (err) {
       if ((err as { statusCode?: number }).statusCode === 404) return [pattern, false];
       throw err;
@@ -121,6 +129,18 @@ export const resolveIndexScope = async ({
 
 /** Every technology the hunt knows how to scope. Derived from the map so the two cannot drift. */
 export const HUNT_TECHNOLOGIES = Object.keys(TECHNOLOGY_INDEX_MAP) as HuntTechnology[];
+
+/**
+ * Required + optional patterns from every known technology (no space-derived
+ * alerts pattern). Used to allowlist caller-supplied Tier 2 generation targets
+ * when the hunt has no resolved required-index scope yet.
+ */
+export const getKnownHuntIndexPatterns = (): string[] =>
+  Array.from(
+    new Set(
+      Object.values(TECHNOLOGY_INDEX_MAP).flatMap((entry) => [...entry.required, ...entry.optional])
+    )
+  );
 
 /**
  * The scope a hunt actually runs against: one or more technologies' patterns

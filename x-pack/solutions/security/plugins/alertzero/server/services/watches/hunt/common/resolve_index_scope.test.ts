@@ -109,6 +109,26 @@ describe('resolveIndexScope', () => {
     );
   });
 
+  it('treats a name that resolves only as an alias as present, since the alerts pattern is an alias over a hidden index', async () => {
+    const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-endpoint.events.*']));
+    (esClient.indices.resolveIndex as jest.Mock).mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve(
+        name === alertsPattern
+          ? {
+              indices: [],
+              aliases: [{ name, indices: ['.internal.alerts-security.alerts-default-000001'] }],
+              data_streams: [],
+            }
+          : name === 'logs-aws.*' || name === 'logs-endpoint.events.*'
+          ? present
+          : absent
+      )
+    );
+    const result = await resolveIndexScope({ esClient, technology: 'aws_iam', spaceId: SPACE_ID });
+
+    expect(result).toEqual(expect.objectContaining({ status: 'ok', missing: [] }));
+  });
+
   it('defaults the row limit to 25 and the window to a 30-day lookback', async () => {
     const esClient = createMockEsClient(new Set());
     const before = Date.now();

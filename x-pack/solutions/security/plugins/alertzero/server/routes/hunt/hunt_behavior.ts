@@ -13,7 +13,7 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteDependencies } from '../register_routes';
@@ -36,11 +36,8 @@ export const registerHuntBehaviorRoute = ({
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
-          // Provisional. This route spends LLM tokens and executes LLM-generated
-          // ES|QL as the caller, so the read privilege is a placeholder until the
-          // hunt workflow child (the production caller) fixes the identity it
-          // runs under; revisit alongside that PR.
-          requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
+          // Spends LLM tokens and can execute LLM-generated ES|QL as the caller.
+          requiredPrivileges: [ALERTZERO_API_PRIVILEGE_WRITE],
         },
       },
       summary: 'Run Tier 2 behavioral corroboration against a threat report',
