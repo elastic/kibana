@@ -75,6 +75,7 @@ describe('runAutomationHandler', () => {
     expect(result.started).toBe(false);
     expect(result.reason).toContain('Unauthorized');
     expect(result.statusCheckHint).toBeUndefined();
+    expect(result.workflowUrl).toBeUndefined();
   });
 
   it('returns started=false when executeWorkflow fails', async () => {
@@ -89,6 +90,7 @@ describe('runAutomationHandler', () => {
     expect(result.started).toBe(false);
     expect(result.reason).toBe('Workflow step failed');
     expect(result.statusCheckHint).toBeUndefined();
+    expect(result.workflowUrl).toBeUndefined();
   });
 
   it('includes workflowUrl in non-default space', async () => {

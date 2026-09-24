@@ -61,7 +61,7 @@ export const runAutomationHandler = async ({
   )}`;
 
   if (!runResult.started) {
-    return { ...runResult, workflowUrl: workflowBaseUrl };
+    return runResult;
   }
 
   const workflowUrl = `${workflowBaseUrl}?tab=executions&executionId=${encodeURIComponent(
