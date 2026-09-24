@@ -35,7 +35,7 @@ export const createCaseStepDefinition = (
       const rawInput = input as GetInitialCaseValueArgs;
       let enrichedInput = getInitialCaseValue(rawInput);
       // Omit extractObservables when the caller did not provide it so the server can apply the
-      // space-config default (precedence: explicit → template → space config → true).
+      // space-config default (precedence: explicit → template → space config → autoExtractDefault → false).
       if (rawInput.settings?.extractObservables === undefined) {
         const { extractObservables: _omitted, ...settingsWithoutExtract } = enrichedInput.settings;
         enrichedInput = { ...enrichedInput, settings: settingsWithoutExtract };

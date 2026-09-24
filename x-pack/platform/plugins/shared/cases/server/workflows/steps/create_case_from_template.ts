@@ -153,7 +153,7 @@ export const createCaseFromTemplateStepDefinition = (
       } as GetInitialCaseValueArgs;
       const mergedBase = getInitialCaseValue(mergedInput);
       // Omit extractObservables when neither the legacy template nor overwrites supplied it so the
-      // server applies space-config → true precedence.
+      // server applies space-config → autoExtractDefault → false precedence.
       let mergedCreatePayload = mergedBase;
       if (mergedInput.settings?.extractObservables === undefined) {
         const { extractObservables: _omitted, ...settingsWithoutExtract } = mergedBase.settings;

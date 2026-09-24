@@ -143,6 +143,39 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
   });
 
+  it('omits extractObservables from the create payload when the legacy template settings are partial', async () => {
+    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const get = jest.fn().mockResolvedValue([
+      {
+        owner: 'securitySolution',
+        templates: [
+          {
+            key: 'triage_template',
+            name: 'Triage template',
+            caseFields: {
+              title: 'Template title',
+              description: 'Template description',
+              settings: { syncAlerts: false }, // extractObservables intentionally absent
+            },
+          },
+        ],
+      },
+    ]);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      configure: { get },
+      cases: { create },
+    } as unknown as CasesClient);
+
+    const definition = createCaseFromTemplateStepDefinition(getCasesClient, false);
+    await definition.handler(
+      createContext({ case_template_id: 'triage_template', owner: 'securitySolution' })
+    );
+
+    // extractObservables must be absent so the server-side create path applies the space
+    // configuration default instead of a value hard-coded from owner info.
+    expect(create.mock.calls[0][0].settings).not.toHaveProperty('extractObservables');
+  });
+
   it('finds template across multiple configurations', async () => {
     const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const get = jest.fn().mockResolvedValue([
