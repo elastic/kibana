@@ -340,17 +340,14 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async expectPanelExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectPanelExists', sectionId);
 
-        // Check for either side panel or nested panel
-        const sidePanelExists = await testSubjects.exists(`~kbnChromeNav-sidePanel_${sectionId}`);
-        const nestedPanelExists = await testSubjects.exists(
-          `~kbnChromeNav-nestedPanel-${sectionId}`
-        );
-
-        if (!sidePanelExists && !nestedPanelExists) {
-          throw new Error(
-            `Expected panel "${sectionId}" to exist as either sidePanel or nestedPanel, but neither was found`
-          );
-        }
+        // `testSubjects.exists()` is an immediate probe; bound the panel render wait
+        await retry.tryForTime(30000, async () => {
+          if (!(await this.isPanelOpen(sectionId))) {
+            throw new Error(
+              `Expected panel "${sectionId}" to exist as either sidePanel or nestedPanel, but neither was found`
+            );
+          }
+        });
       },
       async isPanelOpen(sectionId: NavigationId) {
         try {
