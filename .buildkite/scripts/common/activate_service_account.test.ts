@@ -109,7 +109,10 @@ describe('GCS service account activation', () => {
         'create-cred-config',
         PROVIDER,
         `--service-account=${PROXY_EMAIL}`,
-        `--executable-command="${Path.join(bin, 'buildkite-agent')}" oidc request-token --audience="${AUDIENCE}" --format=gcp --log-level=error --debug=false`,
+        `--executable-command="${Path.join(
+          bin,
+          'buildkite-agent'
+        )}" oidc request-token --audience="${AUDIENCE}" --format=gcp --log-level=error --debug=false`,
         `--output-file=${credentialsFile}`,
       ],
       ['auth', 'login', `--cred-file=${credentialsFile}`, '--quiet', '--no-user-output-enabled'],
@@ -161,7 +164,12 @@ describe('GCS service account activation', () => {
     const result = run('--logout-gcloud', { MOCK_ACTIVE_ACCOUNT: PROXY_EMAIL });
 
     expect(result.status).toBe(0);
-    expect(result.calls).toContainEqual(['auth', 'revoke', PROXY_EMAIL, '--no-user-output-enabled']);
+    expect(result.calls).toContainEqual([
+      'auth',
+      'revoke',
+      PROXY_EMAIL,
+      '--no-user-output-enabled',
+    ]);
     expect(Fs.existsSync(credentialsDir)).toBe(false);
   });
 });
