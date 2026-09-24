@@ -12,7 +12,8 @@ import { count, dateHistogram, metric, terms } from './columns';
 import { createEsqlConversionCaseContext } from './fixtures';
 
 export const buildTopNCases = (): EsqlConversionCase[] => {
-  const { logs, logsFrom, logsWhere } = createEsqlConversionCaseContext();
+  const { ecommerce, ecommerceFrom, ecommerceWhere, logs, logsFrom, logsWhere } =
+    createEsqlConversionCaseContext();
 
   // Restricts the query to the top values of an outer dimension, which `LIMIT n BY` cannot do.
   const outerTopNFilter = ({
@@ -47,6 +48,32 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         esql: `${logsFrom} | ${logsWhere} | STATS AVG(bytes) BY host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: ecommerce,
+      description:
+        'top values ordered by a dotted-field metric — SORT doubles backticks inside the quoted expression name',
+      columns: {
+        col1: terms('category.keyword', {
+          size: 9,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+        }),
+        col2: metric('median', 'products.base_price'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        // STATS quotes the dotted field; SORT quotes the whole MEDIAN(...) output name as one
+        // identifier, so inner backticks are escaped by doubling (``).
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS MEDIAN(\`products.base_price\`) BY category.keyword | SORT \`MEDIAN(\`\`products.base_price\`\`)\` DESC | LIMIT 9`,
+        columnNames: ['MEDIAN(`products.base_price`)', 'category.keyword'],
+        expectedSourceIds: {
+          'MEDIAN(`products.base_price`)': ['col2'],
+          'category.keyword': ['col1'],
+        },
       },
     },
     {
