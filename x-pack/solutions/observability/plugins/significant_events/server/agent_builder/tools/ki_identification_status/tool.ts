@@ -58,11 +58,10 @@ export const createKiIdentificationStatusTool = ({
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
       const [source] = resolveSourcesBySlug(catalog, [slug]);
-      const data = await getKiIdentificationStatusToolHandler({
+      const status = await getKiIdentificationStatusToolHandler({
         streamName: source.id,
         streamsKIsOnboardingClient,
       });
-      const { stream_name: _streamName, ...status } = data;
 
       return {
         results: [

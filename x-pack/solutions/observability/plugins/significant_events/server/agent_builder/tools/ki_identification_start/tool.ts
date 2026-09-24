@@ -83,14 +83,9 @@ export const createKiIdentificationStartTool = ({
       assertSourceEnabled(source);
       sourceId = source.id;
 
-      const resolvedSteps = steps ?? [
-        KIsOnboardingStep.FeaturesIdentification,
-        KIsOnboardingStep.QueriesGeneration,
-      ];
-
       const data = await startKiIdentificationToolHandler({
         streamName: source.id,
-        steps: resolvedSteps,
+        steps,
         connectors,
         streamsKIsOnboardingClient,
         maintenanceService,

@@ -18,7 +18,8 @@ import {
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients } from '../../routes/types';
-import { loadSourceCatalog, presentSlug } from '../utils/resolve_source_slugs';
+import { loadSourceCatalog } from '../utils/resolve_source_slugs';
+import { presentStoredSourceFields } from '../utils/stored_source_fields';
 
 interface CreateSignificantEventAttachmentTypeOptions {
   logger: Logger;
@@ -121,9 +122,9 @@ export const createSignificantEventAttachmentType = ({
       try {
         const { sourcesClient } = await getScopedClients({ request: context.request });
         const catalog = await loadSourceCatalog(sourcesClient);
-        sourceLabels = attachment.data.stream_names.map((storedId) =>
-          presentSlug(catalog, storedId)
-        );
+        sourceLabels = presentStoredSourceFields(catalog, {
+          stream_names: attachment.data.stream_names,
+        }).stream_names;
       } catch (error) {
         logger.warn(`Failed to resolve source slugs for event attachment: ${String(error)}`);
       }

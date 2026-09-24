@@ -53,12 +53,11 @@ export const createKiIdentificationCancelTool = ({
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
       const [source] = resolveSourcesBySlug(catalog, [slug]);
-      const data = await cancelKiIdentificationToolHandler({
+      const cancelled = await cancelKiIdentificationToolHandler({
         streamName: source.id,
         streamsKIsOnboardingClient,
         request,
       });
-      const { stream_name: _streamName, ...cancelled } = data;
 
       return {
         results: [

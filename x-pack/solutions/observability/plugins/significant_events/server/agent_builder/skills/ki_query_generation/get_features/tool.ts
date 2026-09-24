@@ -17,7 +17,6 @@ import {
 } from '@kbn/nightshift-ai';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
-import { sourceToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 import {
   loadSourceCatalog,
   resolveSourcesBySlug,
@@ -73,9 +72,8 @@ export const createGetFeaturesTool = ({
         const scopedClients = await getScopedClients({ request: context.request });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
         const [source] = resolveSourcesBySlug(catalog, [slug]);
-        const target = sourceToAnalysisTarget(source);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-        const { hits } = await kiClient.getFeatures(target.id, {
+        const { hits } = await kiClient.getFeatures(source.id, {
           type: featureTypes,
           minConfidence,
           limit,

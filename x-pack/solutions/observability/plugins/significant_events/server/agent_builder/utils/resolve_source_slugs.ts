@@ -47,17 +47,20 @@ export function resolveSourcesBySlug(
   catalog: SourceCatalog,
   slugs: readonly string[]
 ): NightshiftSource[] {
-  const missing = slugs.filter((slug) => !catalog.bySlug.has(slug));
+  const sources: NightshiftSource[] = [];
+  const missing: string[] = [];
+  for (const slug of slugs) {
+    const source = catalog.bySlug.get(slug);
+    if (source) {
+      sources.push(source);
+    } else {
+      missing.push(slug);
+    }
+  }
   if (missing.length > 0) {
     throw new UnknownSourceSlugError(missing);
   }
-  return slugs.map((slug) => {
-    const source = catalog.bySlug.get(slug);
-    if (!source) {
-      throw new UnknownSourceSlugError([slug]);
-    }
-    return source;
-  });
+  return sources;
 }
 
 /**
