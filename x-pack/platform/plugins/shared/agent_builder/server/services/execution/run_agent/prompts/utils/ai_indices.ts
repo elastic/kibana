@@ -30,7 +30,7 @@ export const getAiIndicesInstructions = ({
     .filter(({ esqlTarget }) => esqlTarget !== undefined)
     .map(
       ({ id, esqlTarget, description }) =>
-        `- \`${id}\` (FROM \`${esqlTarget}\`)${description ? ` — ${description}` : ''}`
+        `- \`${id}\` (FROM ${esqlTarget})${description ? ` — ${description}` : ''}`
     );
   const catalogSection =
     entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';

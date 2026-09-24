@@ -7,8 +7,8 @@
 
 const ALL_DATASETS = 'all';
 
-/** Returns `undefined` when every registered dataset should run. */
-const parseRequestedIds = (requested: string | undefined): string[] | undefined => {
+/** Parses `NIGHTSHIFT_DATASETS`; returns `undefined` when every registered dataset should run. */
+export const parseRequestedIds = (requested: string | undefined): string[] | undefined => {
   const normalized = requested?.trim();
 
   if (!normalized || normalized === ALL_DATASETS) {
@@ -27,17 +27,12 @@ const parseRequestedIds = (requested: string | undefined): string[] | undefined 
 };
 
 /**
- * Narrows a dataset registry to the datasets requested through `NIGHTSHIFT_DATASETS`.
- *
- * Leaving the variable unset, or setting it to `all`, runs everything. Otherwise it holds a
- * comma-separated list of dataset ids. Unknown ids throw, because silently running a subset of
- * what was asked for is the kind of thing that goes unnoticed for weeks in a weekly pipeline.
- * The result follows registry order, so a run is reproducible regardless of how the list was
- * written.
+ * Narrows a registry to the requested comma-separated ids (`undefined` means all), in registry
+ * order. Unknown ids throw rather than silently running a subset.
  */
 export const selectDatasets = <TDataset extends { id: string }>(
   registry: readonly TDataset[],
-  requested: string | undefined = process.env.NIGHTSHIFT_DATASETS
+  requested: string | undefined
 ): TDataset[] => {
   const requestedIds = parseRequestedIds(requested);
 
