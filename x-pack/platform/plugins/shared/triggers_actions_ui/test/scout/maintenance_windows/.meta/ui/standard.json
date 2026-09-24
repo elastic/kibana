@@ -1,37 +1,9 @@
 {
-  "sha1": "2218cf7cb31fc5ef8df72828efb5d8b2267befee",
+  "sha1": "1473531ee070a23f1f0d7eed0d8006672839706d",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "b20c875016d5102-ff8cac6bb86c5ab",
-      "title": "Maintenance window create form creates a maintenance window with a custom recurring schedule",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_create.spec.ts",
-        "line": 96,
-        "column": 8
-      }
-    },
-    {
-      "id": "b20c875016d5102-ce9f05d87274a3b",
-      "title": "Maintenance window create form shows a callout when filters toggle is on and scope query is set",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_create.spec.ts",
-        "line": 120,
-        "column": 5
-      }
-    },
     {
       "id": "8daf8b16089b617-21bd727162c6236",
       "title": "Maintenance window update form updates a maintenance window",
@@ -42,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
-        "line": 104,
+        "line": 116,
         "column": 22
       }
     },
@@ -56,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
-        "line": 133,
+        "line": 144,
         "column": 5
       }
     },
@@ -70,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
-        "line": 161,
+        "line": 172,
         "column": 18
       }
     },
