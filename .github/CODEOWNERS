@@ -3219,6 +3219,13 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @ela
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/threat_intel @elastic/security-investigations
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_threat_intel @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-investigations
+
+# AlertZero Hunt Watch services
+/x-pack/solutions/security/plugins/alertzero/server/routes/hunt @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/services/watches/hunt @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/hunt @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.schema.yaml @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.gen.ts @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 
