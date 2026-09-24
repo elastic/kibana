@@ -430,8 +430,28 @@ describe('huntCoordinator', () => {
       perIndex: [],
     });
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+    const search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: 'logs-aws.cloudtrail-default',
+            _id: 'evt-1',
+            _source: {
+              event: {
+                action: 'AssumeRole',
+                provider: 'sts.amazonaws.com',
+                dataset: 'aws.cloudtrail',
+              },
+              host: { name: 'WIN-ANALYST01' },
+              user: { name: 'dev-user' },
+            },
+          },
+        ],
+      },
+    });
+    const esWithSearch = { search } as unknown as ElasticsearchClient;
 
-    await huntCoordinator(esClient, mockModel, logger, {
+    await huntCoordinator(esWithSearch, mockModel, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
       runId: 'run-window-forward',
@@ -439,6 +459,7 @@ describe('huntCoordinator', () => {
       size: 40,
     });
 
+    expect(search).toHaveBeenCalled();
     expect(mockT2).toHaveBeenCalledWith(
       mockModel,
       logger,
@@ -447,8 +468,13 @@ describe('huntCoordinator', () => {
         size: 40,
         row_limit: 100,
         required_indices: ['logs-aws.cloudtrail-*'],
+        article_context: expect.objectContaining({
+          matched_indices: ['logs-aws.cloudtrail-*'],
+          sample_events: [expect.stringContaining('provider=sts.amazonaws.com')],
+          time_range: { from: 'now-7d', to: 'now' },
+        }),
       }),
-      esClient
+      esWithSearch
     );
   });
 

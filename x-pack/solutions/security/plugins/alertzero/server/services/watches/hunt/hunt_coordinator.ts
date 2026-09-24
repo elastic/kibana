@@ -96,12 +96,14 @@ const clampHuntReportText = (value: string | undefined): string | undefined => {
     : value;
 };
 
-const summarizeHit = (hit: HuntForThreatResult['hits'][number]): string => {
+const summarizeHit = (hit: { index: string; id: string; [key: string]: unknown }): string => {
   const parts: string[] = [];
   const src = hit as Record<string, unknown>;
   if (typeof src['kibana.alert.rule.name'] === 'string')
     parts.push(`rule="${src['kibana.alert.rule.name']}"`);
   if (typeof src['event.dataset'] === 'string') parts.push(`dataset=${src['event.dataset']}`);
+  if (typeof src['event.action'] === 'string') parts.push(`action=${src['event.action']}`);
+  if (typeof src['event.provider'] === 'string') parts.push(`provider=${src['event.provider']}`);
   if (typeof src['host.name'] === 'string') parts.push(`host=${src['host.name']}`);
   if (typeof src['user.name'] === 'string') parts.push(`user=${src['user.name']}`);
   if (typeof src['source.ip'] === 'string') parts.push(`src=${src['source.ip']}`);
@@ -109,21 +111,114 @@ const summarizeHit = (hit: HuntForThreatResult['hits'][number]): string => {
   return parts.length > 0 ? parts.join(' ') : `_index=${hit.index} _id=${hit.id}`;
 };
 
+const asNestedString = (src: Record<string, unknown>, path: string): string | undefined => {
+  const parts = path.split('.');
+  let cur: unknown = src;
+  for (const part of parts) {
+    if (cur == null || typeof cur !== 'object' || Array.isArray(cur)) return undefined;
+    cur = (cur as Record<string, unknown>)[part];
+  }
+  return typeof cur === 'string' ? cur : undefined;
+};
+
+/**
+ * When Tier 1 finds nothing, Tier 2 still needs index patterns and sample field
+ * names so the LLM can emit grounded ES|QL (independent-hit path). Pull a small
+ * recent sample from the required indices inside the hunt window.
+ */
+const sampleRequiredIndexEvents = async ({
+  esClient,
+  requiredIndices,
+  window,
+  maxSamples,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  requiredIndices: string[];
+  window: { from: string; to: string };
+  maxSamples: number;
+  logger: Logger;
+}): Promise<string[]> => {
+  if (requiredIndices.length === 0 || maxSamples <= 0) return [];
+  try {
+    const response = await esClient.search({
+      index: requiredIndices,
+      size: maxSamples,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: window.from,
+                  lte: window.to,
+                },
+              },
+            },
+          ],
+        },
+      },
+      sort: [{ '@timestamp': { order: 'desc' as const } }],
+      _source: true,
+    });
+    return (response.hits.hits ?? []).map((hit) => {
+      const src = (hit._source ?? {}) as Record<string, unknown>;
+      const flat: Record<string, unknown> = {
+        index: String(hit._index ?? ''),
+        id: String(hit._id ?? ''),
+        'event.dataset':
+          asNestedString(src, 'event.dataset') ?? asNestedString(src, 'data_stream.dataset'),
+        'event.action': asNestedString(src, 'event.action'),
+        'event.provider': asNestedString(src, 'event.provider'),
+        'host.name': asNestedString(src, 'host.name'),
+        'user.name': asNestedString(src, 'user.name'),
+        'source.ip': asNestedString(src, 'source.ip'),
+        'destination.ip': asNestedString(src, 'destination.ip'),
+      };
+      return summarizeHit(flat as { index: string; id: string; [key: string]: unknown });
+    });
+  } catch (err) {
+    logger.warn(
+      `hunt_coordinator: could not sample required indices for Tier 2 grounding — ${
+        (err as Error).message
+      }`
+    );
+    return [];
+  }
+};
+
 const buildArticleContext = (
   tier1: HuntForThreatResult,
-  maxSamples: number
+  maxSamples: number,
+  grounding?: { requiredIndices: string[]; sampleEvents: string[] }
 ): HuntBehaviorArticleContext | undefined => {
-  if (tier1.status !== 'environment_hits_found') return undefined;
-  const context: HuntBehaviorArticleContext = {};
-  const hosts = tier1.affectedAssets.hosts.map((h) => h.name).filter((n) => n.length > 0);
-  const users = tier1.affectedAssets.users.map((u) => u.name).filter((n) => n.length > 0);
-  if (hosts.length > 0) context.affected_hosts = hosts;
-  if (users.length > 0) context.affected_users = users;
-  if (tier1.perIndex.length > 0) {
-    context.matched_indices = tier1.perIndex.map((entry) => entry.index);
+  if (tier1.status === 'environment_hits_found') {
+    const context: HuntBehaviorArticleContext = {};
+    const hosts = tier1.affectedAssets.hosts.map((h) => h.name).filter((n) => n.length > 0);
+    const users = tier1.affectedAssets.users.map((u) => u.name).filter((n) => n.length > 0);
+    if (hosts.length > 0) context.affected_hosts = hosts;
+    if (users.length > 0) context.affected_users = users;
+    if (tier1.perIndex.length > 0) {
+      context.matched_indices = tier1.perIndex.map((entry) => entry.index);
+    }
+    if (tier1.hits.length > 0) {
+      context.sample_events = tier1.hits.slice(0, maxSamples).map(summarizeHit);
+    }
+    if (tier1.timeRange) context.time_range = tier1.timeRange;
+    return Object.keys(context).length === 0 ? undefined : context;
   }
-  if (tier1.hits.length > 0) {
-    context.sample_events = tier1.hits.slice(0, maxSamples).map(summarizeHit);
+
+  // Independent Tier 2: no Tier 1 hits, but still ground generation on the
+  // required index patterns and a recent sample inside the hunt window.
+  if (!grounding) return undefined;
+  const context: HuntBehaviorArticleContext = {};
+  if (grounding.requiredIndices.length > 0) {
+    context.matched_indices = grounding.requiredIndices;
+  }
+  if (grounding.sampleEvents.length > 0) {
+    context.sample_events = grounding.sampleEvents;
   }
   if (tier1.timeRange) context.time_range = tier1.timeRange;
   return Object.keys(context).length === 0 ? undefined : context;
@@ -347,7 +442,20 @@ export const huntCoordinator = async (
     };
   }
 
-  const articleContext = buildArticleContext(tier1Raw, maxSamples);
+  let articleContext = buildArticleContext(tier1Raw, maxSamples);
+  if (!articleContext && indexScope.required.length > 0 && tier1Raw.timeRange !== undefined) {
+    const sampleEvents = await sampleRequiredIndexEvents({
+      esClient,
+      requiredIndices: indexScope.required,
+      window: tier1Raw.timeRange,
+      maxSamples,
+      logger,
+    });
+    articleContext = buildArticleContext(tier1Raw, maxSamples, {
+      requiredIndices: indexScope.required,
+      sampleEvents,
+    });
+  }
   let tier2Raw: HuntBehaviorResult;
   try {
     tier2Raw = await huntBehavior(
