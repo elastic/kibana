@@ -93,7 +93,9 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
         if (isArrow) {
           // Clear the override rather than pinning `json`, so the shared stack is
           // left resolving the flag normally.
-          await apiServices.core.settings({ 'feature_flags.overrides': {} });
+          await apiServices.core.settings({
+            'feature_flags.overrides': { [ESQL_RESPONSE_FORMAT_FLAG]: null },
+          });
         }
       });
 
