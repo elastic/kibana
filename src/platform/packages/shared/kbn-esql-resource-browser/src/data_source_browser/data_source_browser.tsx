@@ -25,12 +25,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  createEsqlViewsClient,
-  getDatasets,
-  getESQLSources,
-  getTimeseriesIndices,
-} from '@kbn/esql-utils';
+import { getDatasets, getESQLSources, getTimeseriesIndices, getViews } from '@kbn/esql-utils';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
@@ -92,28 +87,21 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const getDatasetsCallback = useCallback(() => getDatasets(http), [http]);
 
-  const viewsClient = useMemo(() => createEsqlViewsClient(http), [http]);
-
-  // Read on every open rather than from the autocomplete cache, so that a view created in
-  // Stack Management shows up immediately.
-  const getViewsCallback = useCallback(
-    async (signal?: AbortSignal) => {
-      // The route is scoped to the current user, so this only returns views the user can read.
-      const result = await viewsClient.getViews(signal);
-      if (!enrichViews) {
-        return result;
-      }
-      try {
-        return { ...result, views: await enrichViews(result.views) };
-      } catch (error) {
-        // Metadata is optional: listing the views unenriched beats listing none of them.
-        // eslint-disable-next-line no-console
-        console.error('Failed to enrich the ES|QL views', error);
-        return result;
-      }
-    },
-    [enrichViews, viewsClient]
-  );
+  const getViewsCallback = useCallback(async () => {
+    // Refreshes the cache entry the editor reads, rather than reading it.
+    const result = await getViews.call({ forceRefresh: true }, http);
+    if (!enrichViews) {
+      return result;
+    }
+    try {
+      return { ...result, views: await enrichViews(result.views) };
+    } catch (error) {
+      // Metadata is optional: listing the views unenriched beats listing none of them.
+      // eslint-disable-next-line no-console
+      console.error('Failed to enrich the ES|QL views', error);
+      return result;
+    }
+  }, [enrichViews, http]);
 
   const { allSources, isLoading } = useAllSources({
     isOpen,

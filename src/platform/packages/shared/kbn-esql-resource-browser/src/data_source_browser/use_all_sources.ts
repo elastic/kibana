@@ -70,7 +70,7 @@ export interface UseAllSourcesParams {
   getSources: () => Promise<ESQLSourceResult[]>;
   getTimeseriesIndices: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getDatasets?: () => Promise<EsqlDatasetsResult>;
-  getViews?: (signal?: AbortSignal) => Promise<EsqlViewsResult>;
+  getViews?: () => Promise<EsqlViewsResult>;
 }
 
 export const useAllSources = ({
@@ -96,7 +96,6 @@ export const useAllSources = ({
   useEffect(() => {
     if (!isOpen) return;
     let isEffectActive = true;
-    const viewsAbortController = new AbortController();
 
     const fetchDatasets = async (): Promise<ESQLSourceResult[]> => {
       if (isTimeseries || !getDatasets) return [];
@@ -115,17 +114,15 @@ export const useAllSources = ({
     const fetchViews = async (): Promise<ESQLSourceResult[]> => {
       if (isTimeseries || !getViews) return [];
       try {
-        return normalizeViews(await getViews(viewsAbortController.signal));
+        return normalizeViews(await getViews());
       } catch (error) {
-        if (viewsAbortController.signal.aborted) return [];
         // eslint-disable-next-line no-console
         console.error('Failed to fetch the ES|QL views', error);
         return [];
       }
     };
 
-    // Datasets and views are supplementary source types, so they are merged in once they arrive
-    // rather than holding back the indices the user is most likely looking for.
+    // Merges datasets and views in once they arrive, rather than holding back the base sources.
     const appendOptionalSources = (base: ESQLSourceResult[]) => {
       Promise.all([fetchDatasets(), fetchViews()]).then(([datasets, views]) => {
         if (isMountedRef.current && isEffectActive) {
@@ -141,7 +138,6 @@ export const useAllSources = ({
       appendOptionalSources(preloadedSources);
       return () => {
         isEffectActive = false;
-        viewsAbortController.abort();
       };
     }
 
@@ -170,7 +166,6 @@ export const useAllSources = ({
 
     return () => {
       isEffectActive = false;
-      viewsAbortController.abort();
     };
   }, [
     getSources,

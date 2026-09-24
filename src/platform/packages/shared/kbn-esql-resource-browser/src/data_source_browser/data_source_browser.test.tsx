@@ -13,21 +13,20 @@ import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EsqlView, EsqlViewsResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
-import type { EsqlViewsClient } from '@kbn/esql-utils';
-import { createEsqlViewsClient, getDatasets, getESQLSources } from '@kbn/esql-utils';
+import { getDatasets, getESQLSources, getViews } from '@kbn/esql-utils';
 import { DataSourceBrowser } from './data_source_browser';
 import { DataSourceSelectionChange } from '../types';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
 
 jest.mock('@kbn/esql-utils', () => ({
-  createEsqlViewsClient: jest.fn(),
   getDatasets: jest.fn(),
   getESQLSources: jest.fn(),
   getTimeseriesIndices: jest.fn(),
+  getViews: jest.fn(),
 }));
 
-const createEsqlViewsClientMock = createEsqlViewsClient as jest.MockedFunction<
-  typeof createEsqlViewsClient
+const getViewsMock = getViews as unknown as jest.MockedFunction<
+  (http: unknown) => Promise<EsqlViewsResult>
 >;
 const getDatasetsMock = getDatasets as unknown as jest.MockedFunction<
   () => Promise<{ datasets: [] }>
@@ -39,19 +38,21 @@ const views: EsqlView[] = [
   { name: 'latency_view', query: 'FROM traces-*' },
 ];
 
-const mockViewsClient = (getViews: EsqlViewsClient['getViews']) => {
-  createEsqlViewsClientMock.mockReturnValue({
-    getViews,
-    getView: jest.fn(),
-    createView: jest.fn(),
-    updateView: jest.fn(),
-    deleteViews: jest.fn(),
+/** The `this` the browser invoked `getViews` with. */
+let viewsCallContext: unknown;
+
+const mockViews = (result: EsqlViewsResult) => {
+  getViewsMock.mockImplementation(function (this: unknown) {
+    viewsCallContext = this;
+    return Promise.resolve(result);
   });
 };
 
+const http = {};
+
 const renderBrowser = ({ onSelect = jest.fn() }: { onSelect?: jest.Mock } = {}) => {
   render(
-    <KibanaContextProvider services={{ core: { http: {}, application: { capabilities: {} } } }}>
+    <KibanaContextProvider services={{ core: { http, application: { capabilities: {} } } }}>
       <DataSourceBrowser
         isOpen
         isTimeseries={false}
@@ -80,11 +81,12 @@ const clickTypeFilterOption = async (label: string) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  viewsCallContext = undefined;
   getESQLSourcesMock.mockResolvedValue([
     { name: 'logs-*', hidden: false, type: SOURCES_TYPES.DATA_STREAM },
   ]);
   getDatasetsMock.mockResolvedValue({ datasets: [] });
-  mockViewsClient(jest.fn<Promise<EsqlViewsResult>, []>().mockResolvedValue({ views }));
+  mockViews({ views });
 });
 
 describe('DataSourceBrowser views', () => {
@@ -96,6 +98,15 @@ describe('DataSourceBrowser views', () => {
     ).toBeInTheDocument();
     expect(getResourceList().getByRole('option', { name: /latency_view/ })).toBeInTheDocument();
     expect(getResourceList().getByRole('option', { name: /logs-\*/ })).toBeInTheDocument();
+  });
+
+  it('refreshes the shared views cache the editor validates against', async () => {
+    renderBrowser();
+
+    await getResourceList().findByRole('option', { name: /errors_view/ });
+
+    expect(viewsCallContext).toEqual({ forceRefresh: true });
+    expect(getViewsMock).toHaveBeenCalledWith(http);
   });
 
   it('labels views with the dedicated view source type', async () => {

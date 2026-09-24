@@ -245,37 +245,26 @@ describe('useAllSources', () => {
       );
     });
 
-    it('hands each fetch its own signal and aborts it on cleanup', async () => {
-      const getViews = jest.fn((_signal?: AbortSignal) => Promise.resolve(mockViews));
+    it('re-reads views when the browser is reopened, so new views show up', async () => {
+      const getViews = jest
+        .fn()
+        .mockResolvedValueOnce(mockViews)
+        .mockResolvedValueOnce({
+          views: [...mockViews.views, { name: 'view-3', query: 'FROM a' }],
+        });
       const params = makeParams({ getViews });
-      const { result, unmount } = renderHook(() => useAllSources(params));
+      const { result, rerender } = renderHook(
+        (props: UseAllSourcesParams) => useAllSources(props),
+        { initialProps: params }
+      );
 
-      await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-      const [signal] = getViews.mock.calls[0];
-      expect(signal?.aborted).toBe(false);
-
-      unmount();
-      expect(signal?.aborted).toBe(true);
-    });
-
-    it('re-reads views with a fresh signal when the browser is reopened', async () => {
-      const getViews = jest.fn((_signal?: AbortSignal) => Promise.resolve(mockViews));
-      const params = makeParams({ getViews });
-      const { rerender } = renderHook((props: UseAllSourcesParams) => useAllSources(props), {
-        initialProps: params,
-      });
-
-      await waitFor(() => expect(getViews).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(result.current.allSources.map((s) => s.name)).toContain('view-1'));
+      expect(result.current.allSources.map((s) => s.name)).not.toContain('view-3');
 
       rerender({ ...params, isOpen: false });
       rerender(params);
 
-      await waitFor(() => expect(getViews).toHaveBeenCalledTimes(2));
-
-      const [[firstSignal], [secondSignal]] = getViews.mock.calls;
-      expect(firstSignal?.aborted).toBe(true);
-      expect(secondSignal?.aborted).toBe(false);
+      await waitFor(() => expect(result.current.allSources.map((s) => s.name)).toContain('view-3'));
     });
 
     it('works without getViews provided', async () => {
