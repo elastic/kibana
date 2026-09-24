@@ -349,6 +349,7 @@ export function useMiDeploy({
       // Update SO with deploy outcome (best-effort).
       // Only exclude deleted policy IDs; updated policies keep the same ID and remain active.
       const deletedPolicyIds = new Set(cleanupOps.toDelete);
+      let soWriteSucceeded = true;
       if (currentOnboardingDeploymentId) {
         const mergedPolicyIdsByInstance = Object.fromEntries(
           Object.entries({
@@ -356,7 +357,7 @@ export function useMiDeploy({
             ...newPolicyIdsByInstance,
           }).filter(([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedPolicyIds.has(pid))
         );
-        await updateDeployment(currentOnboardingDeploymentId, {
+        soWriteSucceeded = await updateDeployment(currentOnboardingDeploymentId, {
           services: selectedServiceIds,
           serviceVars: toSOServiceVars(
             serviceSettings?.serviceVars ?? {},
@@ -380,9 +381,12 @@ export function useMiDeploy({
         policyIdsByInstance: newPolicyIdsByInstance,
         failedInstances: mergedFailed,
         deployErrors: errorsByInstance,
-        // Clear succeeded cleanup entries after deploy completes. Only set when cleanup ran in
-        // this initial-deploy run; undefined leaves the retry path's mid-flight update intact.
-        ...(remainingPending !== undefined ? { pendingCleanupPolicyIds: remainingPending } : {}),
+        // Only clear succeeded cleanup entries if the SO write confirmed them — a transient SO
+        // failure must keep pendingCleanupPolicyIds populated for retry, matching the cleanup-only
+        // path. undefined leaves the retry path's mid-flight update intact.
+        ...(remainingPending !== undefined && soWriteSucceeded
+          ? { pendingCleanupPolicyIds: remainingPending }
+          : {}),
       });
       return { cleanupFailed: false };
     },

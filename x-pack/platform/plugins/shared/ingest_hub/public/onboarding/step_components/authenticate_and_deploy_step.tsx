@@ -58,6 +58,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     setDeploymentMethod,
     detectAndReviewStep,
     updateDetectAndReviewStep,
+    removeDeployInstances,
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
@@ -349,16 +350,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
       const staleFailedIds = new Set(failedInstances.filter((id) => !activeInstanceIds.has(id)));
       if (staleFailedIds.size > 0) {
-        const remainingFailed = failedInstances.filter((id) => !staleFailedIds.has(id));
-        updateDetectAndReviewStep({
-          failedInstances: remainingFailed,
-          serviceStatuses: Object.fromEntries(
-            Object.entries(detectAndReviewStep.serviceStatuses).filter(
-              ([id]) => !staleFailedIds.has(id)
-            )
-          ),
-        });
+        // removeDeployInstances replaces the full serviceStatuses map (vs updateDetectAndReviewStep
+        // which merges), so it actually deletes the stale error chip for the deselected service.
+        // It also removes from failedInstances and deployErrors in the same write.
+        removeDeployInstances([...staleFailedIds]);
         if (detectAndReviewStep.onboardingDeploymentId) {
+          const remainingFailed = failedInstances.filter((id) => !staleFailedIds.has(id));
           await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
             services: selectedServiceIds,
             status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
@@ -388,7 +385,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     detectAndReviewStep.ecfStacks,
     detectAndReviewStep.policyIdsByInstance,
     detectAndReviewStep.pendingCleanupPolicyIds,
-    detectAndReviewStep.serviceStatuses,
+    removeDeployInstances,
     createDeployment,
     updateDeployment,
     persistDeploymentId,
