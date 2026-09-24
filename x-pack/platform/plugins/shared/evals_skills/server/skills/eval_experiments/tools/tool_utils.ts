@@ -7,8 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import {
   APP_PATH,
@@ -21,20 +19,10 @@ import type {
   GenerateExperimentParams,
   GeneratedExperimentRun,
 } from '@kbn/evals-plugin/server';
+import { errorResult, toErrorResult as toGenericErrorResult } from '../../common/tool_results';
 
-export const EVALS_TOOLS_NAMESPACE = 'platform.evals';
-
-const evalsTool = (name: string) => `${EVALS_TOOLS_NAMESPACE}.${name}`;
-
-export const evalsTools = {
-  listDatasets: evalsTool('list_datasets'),
-  listEvaluators: evalsTool('list_evaluators'),
-  listTargets: evalsTool('list_targets'),
-  listConnectors: evalsTool('list_connectors'),
-  previewExperiment: evalsTool('preview_experiment'),
-  saveExperiment: evalsTool('save_experiment'),
-  runExperiment: evalsTool('run_experiment'),
-} as const;
+export { evalsExperimentTools } from '../../common/tool_ids';
+export { errorResult, otherResult } from '../../common/tool_results';
 
 /**
  * A configuration error caused by invalid tool input. Surfaced back to the agent
@@ -247,23 +235,6 @@ export const buildWorkflowLink = (
   return `${serverBasePath}${spaceSegment}/app/workflows/${encodeURIComponent(workflowId)}`;
 };
 
-export const otherResult = (data: Record<string, unknown>): ToolHandlerStandardReturn => ({
-  results: [{ type: ToolResultType.other, tool_result_id: getToolResultId(), data }],
-});
-
-export const errorResult = (
-  message: string,
-  metadata?: Record<string, unknown>
-): ToolHandlerStandardReturn => ({
-  results: [
-    {
-      type: ToolResultType.error,
-      tool_result_id: getToolResultId(),
-      data: { message, ...(metadata ? { metadata } : {}) },
-    },
-  ],
-});
-
 /**
  * Normalizes an unknown thrown value into a friendly error result. Config errors
  * keep their message verbatim; unexpected errors get a generic prefix.
@@ -273,9 +244,8 @@ export const toErrorResult = (
   genericPrefix: string,
   metadata?: Record<string, unknown>
 ): ToolHandlerStandardReturn => {
-  const message = error instanceof Error ? error.message : String(error);
   if (error instanceof EvalExperimentConfigError) {
-    return errorResult(message, metadata);
+    return errorResult(error.message, metadata);
   }
-  return errorResult(`${genericPrefix}: ${message}`, metadata);
+  return toGenericErrorResult(error, genericPrefix, metadata);
 };
