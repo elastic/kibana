@@ -53,6 +53,7 @@ import {
   ProfilingTab,
   DashboardsTab,
   DashboardsListTab,
+  SlosTab,
   ServicesTab,
   ProcessesTab,
   labThing,
@@ -104,6 +105,7 @@ type BuiltInTabId =
   | 'logs'
   | 'traces'
   | 'alerts'
+  | 'slos'
   | 'services'
   | 'processes'
   | 'relationships'
@@ -119,6 +121,7 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'logs',
   'traces',
   'alerts',
+  'slos',
   'services',
   'processes',
   'relationships',
@@ -199,6 +202,8 @@ const PageTabContent = ({
       return tabsData.traces ? <TracesTab traces={tabsData.traces} /> : placeholder;
     case 'alerts':
       return <AlertsTab alerts={tabsData.alerts} />;
+    case 'slos':
+      return <SlosTab slos={tabsData.slos} />;
     case 'services':
       return <ServicesTab entityName={entityName} />;
     case 'processes':
@@ -379,6 +384,16 @@ const EntityDetailPageInner = () => {
           return count && count > 0 ? count : undefined;
         })(),
       },
+      {
+        id: 'slos',
+        label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.slos', {
+          defaultMessage: 'SLOs',
+        }),
+        appendBadge: (() => {
+          const breaching = tabsData.slos.slos.filter((s) => s.status === 'Breaching').length;
+          return breaching > 0 ? breaching : undefined;
+        })(),
+      },
       ...(kind === 'host'
         ? [
             {
@@ -436,12 +451,16 @@ const EntityDetailPageInner = () => {
     }
 
     return overrideTabs;
-  }, [templateOverride, tabsData.traces, entity?.alerts?.active, kind]);
+  }, [templateOverride, tabsData.traces, tabsData.slos, entity?.alerts?.active, kind]);
 
   // Phase-1 exclusion: drop Custom and Relationships tabs.
   const visibleTabs = useMemo(
     () =>
-      isPhase1 ? tabs.filter((tab) => tab.id !== 'custom' && tab.id !== 'relationships') : tabs,
+      isPhase1
+        ? tabs.filter(
+            (tab) => tab.id !== 'custom' && tab.id !== 'relationships' && tab.id !== 'profiling'
+          )
+        : tabs,
     [tabs, isPhase1]
   );
 
@@ -943,7 +962,7 @@ const EntityDetailPageInner = () => {
           hideAiSummary={isPhase1}
           hideOwnership={isPhase1}
           hideEvents={isPhase1}
-          hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
+          hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
           dashboardStyle={dashboardStyleVariation}
         />
       ) : null}

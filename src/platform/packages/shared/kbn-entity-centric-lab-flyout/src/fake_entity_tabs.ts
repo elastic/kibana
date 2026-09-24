@@ -226,12 +226,36 @@ export interface TracesTabData {
   readonly spans: readonly TraceSpan[];
 }
 
+export type SloStatus = 'Met' | 'Breaching' | 'Degrading' | 'No data';
+
+export interface SloRow {
+  readonly id: string;
+  readonly name: string;
+  /** The type of SLI being measured (e.g. "Availability", "Latency"). */
+  readonly indicatorType: string;
+  /** Human-readable target (e.g. "99.9%", "< 1s"). */
+  readonly target: string;
+  /** Current SLI value (e.g. "99.97%", "0.8s"). */
+  readonly current: string;
+  readonly status: SloStatus;
+  /** Error budget remaining as a percentage (e.g. 72.3). */
+  readonly budgetRemaining: number;
+  /** Time window description (e.g. "30d rolling"). */
+  readonly timeWindow: string;
+}
+
+export interface SlosTabData {
+  readonly slos: readonly SloRow[];
+}
+
 export interface EntityTabsData {
   readonly metrics: MetricsTabData;
   readonly logs: readonly LogRow[];
   readonly alerts: AlertsTabData;
   readonly relationships: RelationshipsTabData;
   readonly security: SecurityTabData;
+  /** SLOs created against this entity. Empty array → empty-state prompt. */
+  readonly slos: SlosTabData;
   /**
    * Mock APM-style trace waterfall surfaced under the Traces tab. Optional
    * — only `kind === 'service'` builders populate it today, and the flyout
@@ -575,6 +599,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
       },
     ],
   },
+  slos: { slos: [] },
 });
 
 const buildFakeLogRows = (entityName: string): LogRow[] => {

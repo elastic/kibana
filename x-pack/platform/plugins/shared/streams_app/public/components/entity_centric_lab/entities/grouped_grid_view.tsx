@@ -131,18 +131,20 @@ import {
   type StepRule,
 } from './palette_coloring';
 import {
+  CATEGORY_RESOURCE_TYPE_ALL,
+  CategoryResourceTypeFilter,
   KUBERNETES_FILTER_ALL,
+  KUBERNETES_RESOURCE_TYPE_ALL,
   KubernetesClusterFilter,
-  KubernetesDeploymentFilter,
-  KubernetesNamespaceFilter,
-  KubernetesNodeFilter,
+  KubernetesResourceTypeFilter,
+  filterEntitiesByResourceType,
+  filterEntitiesByCategoryType,
+  getEntityTypeLabels,
   getKubernetesClusterNames,
-  getKubernetesDeploymentNames,
-  getKubernetesNamespaceNames,
-  getKubernetesNodeNames,
   filterKubernetesEntities,
   groupKubernetesEntities,
   type KubernetesGroupBy,
+  type KubernetesResourceType,
 } from './kubernetes_cluster_filter';
 import { getK8sPopoverLines } from './kubernetes_hierarchy';
 
@@ -2622,6 +2624,23 @@ const groupEntitiesByType = (
 };
 
 // ---------------------------------------------------------------------------
+// Type-group section divider (e.g. "Workload Management")
+// ---------------------------------------------------------------------------
+
+const TypeGroupDivider = ({ label }: { label: string }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued">
+        <strong>{label}</strong>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiHorizontalRule margin="none" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+// ---------------------------------------------------------------------------
 // Kubernetes card
 // ---------------------------------------------------------------------------
 
@@ -2643,66 +2662,31 @@ const KubernetesCard = ({
     padding-left: ${euiTheme.size.l};
   `;
 
-  // --- Cascading filter state ---
+  // On the All Resources page only resource type + cluster are shown.
+  // For deeper filtering (namespace, deployment, node) the user
+  // navigates to the dedicated Kubernetes section.
+  const [resourceType, setResourceType] = useState<KubernetesResourceType>(KUBERNETES_RESOURCE_TYPE_ALL);
   const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
-  const [namespaceFilter, setNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
-  const [deploymentFilter, setDeploymentFilter] = useState<string>(KUBERNETES_FILTER_ALL);
-  const [nodeFilter, setNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [groupBy, setGroupBy] = useState<KubernetesGroupBy>('subType');
 
   const clusterNames = useMemo(() => getKubernetesClusterNames(entities), [entities]);
 
-  // Namespace/node/deployment options cascade from the cluster selection.
-  const namespaceNames = useMemo(
-    () => getKubernetesNamespaceNames(entities, clusterFilter, clusterNames),
-    [entities, clusterFilter, clusterNames]
-  );
-  const deploymentNames = useMemo(
-    () => getKubernetesDeploymentNames(entities, clusterFilter, namespaceFilter, clusterNames),
-    [entities, clusterFilter, namespaceFilter, clusterNames]
-  );
-  const nodeNames = useMemo(
-    () => getKubernetesNodeNames(entities, clusterFilter, clusterNames),
-    [entities, clusterFilter, clusterNames]
-  );
-
-  // Reset downstream filters when their selected value is no longer
-  // in the available options (e.g. after changing cluster).
-  const effectiveNamespaceFilter =
-    namespaceFilter !== KUBERNETES_FILTER_ALL && !namespaceNames.includes(namespaceFilter)
-      ? KUBERNETES_FILTER_ALL
-      : namespaceFilter;
-  const effectiveDeploymentFilter =
-    deploymentFilter !== KUBERNETES_FILTER_ALL && !deploymentNames.includes(deploymentFilter)
-      ? KUBERNETES_FILTER_ALL
-      : deploymentFilter;
-  const effectiveNodeFilter =
-    nodeFilter !== KUBERNETES_FILTER_ALL && !nodeNames.includes(nodeFilter)
-      ? KUBERNETES_FILTER_ALL
-      : nodeFilter;
-
-  // Cluster change resets namespace + deployment + node.
-  const handleClusterChange = useCallback(
-    (next: string) => {
-      setClusterFilter(next);
-      setNamespaceFilter(KUBERNETES_FILTER_ALL);
-      setDeploymentFilter(KUBERNETES_FILTER_ALL);
-      setNodeFilter(KUBERNETES_FILTER_ALL);
-    },
-    []
+  const afterResourceType = useMemo(
+    () => filterEntitiesByResourceType(entities, resourceType),
+    [entities, resourceType]
   );
 
   const visibleEntities = useMemo(
     () =>
       filterKubernetesEntities(
-        entities,
+        afterResourceType,
         clusterFilter,
-        effectiveNamespaceFilter,
-        effectiveDeploymentFilter,
-        effectiveNodeFilter,
+        KUBERNETES_FILTER_ALL,
+        KUBERNETES_FILTER_ALL,
+        KUBERNETES_FILTER_ALL,
         clusterNames
       ),
-    [entities, clusterFilter, effectiveNamespaceFilter, effectiveDeploymentFilter, effectiveNodeFilter, clusterNames]
+    [afterResourceType, clusterFilter, clusterNames]
   );
 
   // Group entities by the selected dimension.
@@ -2729,6 +2713,13 @@ const KubernetesCard = ({
     ) : (
       orderedGroups.map((group, index) => (
         <div key={group.label} className={index === 0 ? undefined : subRowClass}>
+          {group.typeGroupLabel ? (
+            <>
+              <EuiSpacer size="m" />
+              <TypeGroupDivider label={group.typeGroupLabel} />
+              <EuiSpacer size="s" />
+            </>
+          ) : null}
           <SubTypeRow
             bucketKey={bucketKeyFor('kubernetes', group.label)}
             label={group.label}
@@ -2746,6 +2737,13 @@ const KubernetesCard = ({
         {orderedGroups.map((group, index) => (
           <React.Fragment key={group.label}>
             {index > 0 ? <EuiSpacer size="m" /> : null}
+            {group.typeGroupLabel ? (
+              <>
+                <EuiSpacer size="s" />
+                <TypeGroupDivider label={group.typeGroupLabel} />
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
             <EuiPanel hasBorder hasShadow={false} paddingSize="m">
               <SubTypeRow
                 bucketKey={bucketKeyFor('kubernetes', group.label)}
@@ -2766,39 +2764,18 @@ const KubernetesCard = ({
         <EuiFlexItem grow={false}>
           <CategoryHeader category="kubernetes" total={visibleEntities.length} />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <KubernetesResourceTypeFilter
+            value={resourceType}
+            onChange={setResourceType}
+          />
+        </EuiFlexItem>
         {clusterNames.length > 0 ? (
           <EuiFlexItem grow={false}>
             <KubernetesClusterFilter
               clusterNames={clusterNames}
               value={clusterFilter}
-              onChange={handleClusterChange}
-            />
-          </EuiFlexItem>
-        ) : null}
-        {nodeNames.length > 0 ? (
-          <EuiFlexItem grow={false}>
-            <KubernetesNodeFilter
-              nodeNames={nodeNames}
-              value={effectiveNodeFilter}
-              onChange={setNodeFilter}
-            />
-          </EuiFlexItem>
-        ) : null}
-        {namespaceNames.length > 0 ? (
-          <EuiFlexItem grow={false}>
-            <KubernetesNamespaceFilter
-              namespaceNames={namespaceNames}
-              value={effectiveNamespaceFilter}
-              onChange={setNamespaceFilter}
-            />
-          </EuiFlexItem>
-        ) : null}
-        {deploymentNames.length > 0 ? (
-          <EuiFlexItem grow={false}>
-            <KubernetesDeploymentFilter
-              deploymentNames={deploymentNames}
-              value={effectiveDeploymentFilter}
-              onChange={setDeploymentFilter}
+              onChange={setClusterFilter}
             />
           </EuiFlexItem>
         ) : null}
@@ -2842,7 +2819,13 @@ const MultiTypeCategoryCard = ({
     padding-left: ${euiTheme.size.l};
   `;
 
-  const orderedTypes = useMemo(() => groupEntitiesByType(entities), [entities]);
+  const [typeFilter, setTypeFilter] = useState<string>(CATEGORY_RESOURCE_TYPE_ALL);
+  const typeLabels = useMemo(() => getEntityTypeLabels(entities), [entities]);
+  const visibleEntities = useMemo(
+    () => filterEntitiesByCategoryType(entities, typeFilter),
+    [entities, typeFilter]
+  );
+  const orderedTypes = useMemo(() => groupEntitiesByType(visibleEntities), [visibleEntities]);
 
   if (hideHeader) {
     return (
@@ -2866,7 +2849,20 @@ const MultiTypeCategoryCard = ({
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <CategoryHeader category={category} total={entities.length} />
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <CategoryHeader category={category} total={visibleEntities.length} />
+        </EuiFlexItem>
+        {typeLabels.length > 1 ? (
+          <EuiFlexItem grow={false}>
+            <CategoryResourceTypeFilter
+              typeLabels={typeLabels}
+              value={typeFilter}
+              onChange={setTypeFilter}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div className={nestedContentClass}>
         {orderedTypes.map((group, index) => (

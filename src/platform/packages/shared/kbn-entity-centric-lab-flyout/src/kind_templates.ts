@@ -53,6 +53,9 @@ import type {
   RelationshipsTabData,
   SecurityIssue,
   SecurityTabData,
+  SloRow,
+  SloStatus,
+  SlosTabData,
   TraceSpan,
   TracesTabData,
 } from './fake_entity_tabs';
@@ -91,6 +94,10 @@ export const entityTypeToKind = (type: string | undefined): EntityKind | undefin
   if (normalized.includes('k8s pod') || normalized.includes('kubernetes pod')) return 'pod';
   if (normalized.includes('namespace')) return 'namespace';
   if (normalized.includes('deployment')) return 'deployment';
+  if (normalized.includes('replicaset')) return 'deployment';
+  if (normalized.includes('statefulset')) return 'deployment';
+  if (normalized.includes('daemonset')) return 'deployment';
+  if (normalized.includes('cronjob')) return 'deployment';
   if (normalized.includes('container')) return 'container';
   if (
     normalized.includes('postgres') ||
@@ -139,6 +146,10 @@ export const inferEntityKind = (name: string): EntityKind | undefined => {
   if (lower.startsWith('host-')) return 'host';
   if (lower.startsWith('container-')) return 'container';
   if (lower.startsWith('deployment-')) return 'deployment';
+  if (lower.startsWith('replicaset-')) return 'deployment';
+  if (lower.startsWith('statefulset-')) return 'deployment';
+  if (lower.startsWith('daemonset-')) return 'deployment';
+  if (lower.startsWith('cronjob-')) return 'deployment';
   if (lower.endsWith('-db') || /(^|-)db-/.test(lower)) return 'database';
   if (lower.startsWith('k8s-') || lower.startsWith('cluster-')) return 'cluster';
   if (lower.startsWith('ns-')) return 'namespace';
@@ -245,6 +256,10 @@ const kubernetesTagFromTypeLabel = (
   const lower = typeLabel.toLowerCase();
   if (lower.includes('container')) return 'kubernetes.container';
   if (lower.includes('deployment')) return 'kubernetes.deployment';
+  if (lower.includes('replicaset')) return 'kubernetes.replicaset';
+  if (lower.includes('statefulset')) return 'kubernetes.statefulset';
+  if (lower.includes('daemonset')) return 'kubernetes.daemonset';
+  if (lower.includes('cronjob')) return 'kubernetes.cronjob';
   if (lower.includes('pod')) return 'kubernetes.pod';
   return defaultLabel;
 };
@@ -670,22 +685,99 @@ const securityByHealth = (
   };
 };
 
+// ---------------------------------------------------------------------------
+// SLOs — per-kind + per-health mock SLO rows
+// ---------------------------------------------------------------------------
+
+const SLO_TEMPLATES: Record<string, ReadonlyArray<{
+  name: string;
+  indicatorType: string;
+  target: string;
+  metValue: string;
+  atRiskValue: string;
+  unhealthyValue: string;
+  timeWindow: string;
+}>> = {
+  service: [
+    { name: 'Availability', indicatorType: 'SLI: Availability', target: '99.9%', metValue: '99.97%', atRiskValue: '99.82%', unhealthyValue: '98.12%', timeWindow: '30d rolling' },
+    { name: 'Latency p99', indicatorType: 'SLI: Latency', target: '< 500ms', metValue: '320ms', atRiskValue: '480ms', unhealthyValue: '1.2s', timeWindow: '30d rolling' },
+    { name: 'Error rate', indicatorType: 'SLI: Error rate', target: '< 1%', metValue: '0.02%', atRiskValue: '0.8%', unhealthyValue: '3.4%', timeWindow: '7d rolling' },
+  ],
+  host: [
+    { name: 'Host uptime', indicatorType: 'SLI: Availability', target: '99.95%', metValue: '99.99%', atRiskValue: '99.91%', unhealthyValue: '99.2%', timeWindow: '30d rolling' },
+    { name: 'Disk I/O latency', indicatorType: 'SLI: Latency', target: '< 10ms', metValue: '4ms', atRiskValue: '8ms', unhealthyValue: '24ms', timeWindow: '7d rolling' },
+  ],
+  node: [
+    { name: 'Node availability', indicatorType: 'SLI: Availability', target: '99.95%', metValue: '99.99%', atRiskValue: '99.9%', unhealthyValue: '98.5%', timeWindow: '30d rolling' },
+    { name: 'Pod scheduling latency', indicatorType: 'SLI: Latency', target: '< 30s', metValue: '8s', atRiskValue: '22s', unhealthyValue: '48s', timeWindow: '30d rolling' },
+  ],
+  pod: [
+    { name: 'Pod availability', indicatorType: 'SLI: Availability', target: '99.9%', metValue: '99.98%', atRiskValue: '99.7%', unhealthyValue: '97.1%', timeWindow: '30d rolling' },
+  ],
+  cluster: [
+    { name: 'API server availability', indicatorType: 'SLI: Availability', target: '99.99%', metValue: '100%', atRiskValue: '99.98%', unhealthyValue: '99.8%', timeWindow: '30d rolling' },
+    { name: 'API server latency p99', indicatorType: 'SLI: Latency', target: '< 1s', metValue: '0.4s', atRiskValue: '0.8s', unhealthyValue: '2.1s', timeWindow: '30d rolling' },
+    { name: 'etcd leader elections', indicatorType: 'SLI: Availability', target: '< 2/day', metValue: '0', atRiskValue: '1', unhealthyValue: '5', timeWindow: '7d rolling' },
+  ],
+  database: [
+    { name: 'Query latency p99', indicatorType: 'SLI: Latency', target: '< 250ms', metValue: '120ms', atRiskValue: '210ms', unhealthyValue: '480ms', timeWindow: '30d rolling' },
+    { name: 'Connection availability', indicatorType: 'SLI: Availability', target: '99.9%', metValue: '99.98%', atRiskValue: '99.85%', unhealthyValue: '98.2%', timeWindow: '30d rolling' },
+  ],
+};
+
+const slosByHealth = (name: string, h: EntityHealthVariant, kind: string): SlosTabData => {
+  const templates = SLO_TEMPLATES[kind];
+  if (!templates || templates.length === 0) return { slos: [] };
+
+  const slos: SloRow[] = templates.map((t, i) => {
+    let status: SloStatus;
+    let current: string;
+    let budgetRemaining: number;
+    if (h === 'healthy') {
+      status = 'Met';
+      current = t.metValue;
+      budgetRemaining = 60 + Math.round(((i * 17) % 35));
+    } else if (h === 'atRisk') {
+      status = i === 0 ? 'Degrading' : 'Met';
+      current = i === 0 ? t.atRiskValue : t.metValue;
+      budgetRemaining = i === 0 ? 12 + (i * 3) : 45 + (i * 8);
+    } else {
+      status = i === 0 ? 'Breaching' : 'Degrading';
+      current = i === 0 ? t.unhealthyValue : t.atRiskValue;
+      budgetRemaining = i === 0 ? -8 : 5 + (i * 2);
+    }
+    return {
+      id: `slo-${kind}-${i}`,
+      name: `${t.name} — ${name}`,
+      indicatorType: t.indicatorType,
+      target: t.target,
+      current,
+      status,
+      budgetRemaining,
+      timeWindow: t.timeWindow,
+    };
+  });
+  return { slos };
+};
+
 const tabsOf = (
   metrics: MetricsTabData,
   logs: readonly LogRow[],
   alerts: AlertsTabData,
   relationships: RelationshipsTabData,
   security: SecurityTabData,
-  // Optional so the dozen non-service builders can keep their five-arg
-  // shape — only `kind === 'service'` populates this field today.
-  traces?: TracesTabData
+  opts?: {
+    traces?: TracesTabData;
+    slos?: SlosTabData;
+  }
 ): EntityTabsData => ({
   metrics,
   logs,
   alerts,
   relationships,
   security,
-  ...(traces ? { traces } : {}),
+  slos: opts?.slos ?? { slos: [] },
+  ...(opts?.traces ? { traces: opts.traces } : {}),
 });
 
 // ---------------------------------------------------------------------------
@@ -1179,7 +1271,7 @@ const buildServiceTemplate = (
       alertsByHealth(name, h, 'service'),
       relationships,
       security,
-      tracesByHealth(name, h)
+      { traces: tracesByHealth(name, h), slos: slosByHealth(name, h, 'service') }
     ),
   };
 };
@@ -1512,7 +1604,7 @@ const buildHostTemplate = (
   );
   return {
     overview,
-    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'host'), relationships, security),
+    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'host'), relationships, security, { slos: slosByHealth(name, h, 'host') }),
   };
 };
 
@@ -1820,7 +1912,7 @@ const buildNodeTemplate = (
   );
   return {
     overview,
-    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'node'), relationships, security),
+    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'node'), relationships, security, { slos: slosByHealth(name, h, 'node') }),
   };
 };
 
@@ -2147,7 +2239,7 @@ const buildPodTemplate = (
       alertsByHealth(name, h, 'pod'),
       relationships,
       security,
-      tracesByHealth(name, h)
+      { traces: tracesByHealth(name, h), slos: slosByHealth(name, h, 'pod') }
     ),
   };
 };
@@ -2476,7 +2568,7 @@ const buildClusterTemplate = (
   );
   return {
     overview,
-    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'cluster'), relationships, security),
+    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'cluster'), relationships, security, { slos: slosByHealth(name, h, 'cluster') }),
   };
 };
 
@@ -3061,7 +3153,7 @@ const buildDatabaseTemplate = (
   );
   return {
     overview,
-    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'database'), relationships, security),
+    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'database'), relationships, security, { slos: slosByHealth(name, h, 'database') }),
   };
 };
 

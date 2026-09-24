@@ -595,6 +595,11 @@ const paymentsServiceTabsData: EntityTabsData = {
   relationships: paymentsServiceRelationships,
   security: paymentsServiceSecurity,
   traces: paymentsServiceTraces,
+  slos: { slos: [
+    { id: 'slo-pay-1', name: 'Availability — payments-service', indicatorType: 'SLI: Availability', target: '99.9%', current: '98.12%', status: 'Breaching', budgetRemaining: -8, timeWindow: '30d rolling' },
+    { id: 'slo-pay-2', name: 'Latency p99 — payments-service', indicatorType: 'SLI: Latency', target: '< 500ms', current: '1.2s', status: 'Breaching', budgetRemaining: -42, timeWindow: '30d rolling' },
+    { id: 'slo-pay-3', name: 'Error rate — payments-service', indicatorType: 'SLI: Error rate', target: '< 1%', current: '3.4%', status: 'Degrading', budgetRemaining: 5, timeWindow: '7d rolling' },
+  ] },
 };
 
 // ---------------------------------------------------------------------------
@@ -879,6 +884,10 @@ const checkoutServiceTabsData: EntityTabsData = {
   relationships: checkoutServiceRelationships,
   security: checkoutServiceSecurity,
   traces: checkoutServiceTraces,
+  slos: { slos: [
+    { id: 'slo-checkout-1', name: 'Availability — checkout-service', indicatorType: 'SLI: Availability', target: '99.9%', current: '97.8%', status: 'Breaching', budgetRemaining: -18, timeWindow: '30d rolling' },
+    { id: 'slo-checkout-2', name: 'Latency p99 — checkout-service', indicatorType: 'SLI: Latency', target: '< 800ms', current: '2.4s', status: 'Breaching', budgetRemaining: -31, timeWindow: '30d rolling' },
+  ] },
 };
 
 // ---------------------------------------------------------------------------
@@ -1108,6 +1117,9 @@ const paymentsPodTabsData: EntityTabsData = {
   alerts: paymentsPodAlerts,
   relationships: paymentsPodRelationships,
   security: paymentsPodSecurity,
+  slos: { slos: [
+    { id: 'slo-pod-1', name: 'Pod availability — payments-pod-7f9b2', indicatorType: 'SLI: Availability', target: '99.9%', current: '97.1%', status: 'Breaching', budgetRemaining: -12, timeWindow: '30d rolling' },
+  ] },
 };
 
 // ---------------------------------------------------------------------------
@@ -1344,6 +1356,10 @@ const nodeTabsData: EntityTabsData = {
   alerts: nodeAlerts,
   relationships: nodeRelationships,
   security: nodeSecurity,
+  slos: { slos: [
+    { id: 'slo-node-1', name: 'Node availability — node-prod-eu-04', indicatorType: 'SLI: Availability', target: '99.95%', current: '98.5%', status: 'Breaching', budgetRemaining: -6, timeWindow: '30d rolling' },
+    { id: 'slo-node-2', name: 'Pod scheduling latency — node-prod-eu-04', indicatorType: 'SLI: Latency', target: '< 30s', current: '48s', status: 'Degrading', budgetRemaining: 8, timeWindow: '30d rolling' },
+  ] },
 };
 
 // ---------------------------------------------------------------------------

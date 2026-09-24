@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
@@ -39,17 +40,20 @@ import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers
 import { EntityDataGridSection } from './entities_data_grid';
 import { UNGROUPED_LABEL, groupEntities, type GroupByFieldDef } from './entity_group_by';
 import {
+  CATEGORY_RESOURCE_TYPE_ALL,
+  CategoryResourceTypeFilter,
   KUBERNETES_FILTER_ALL,
+  KUBERNETES_RESOURCE_TYPE_ALL,
   KUBERNETES_SUB_TYPE_ORDER,
   KubernetesClusterFilter,
-  KubernetesDeploymentFilter,
-  KubernetesNamespaceFilter,
-  KubernetesNodeFilter,
+  KubernetesResourceTypeFilter,
+  filterEntitiesByResourceType,
+  filterEntitiesByCategoryType,
   filterKubernetesEntities,
+  getEntityTypeLabels,
   getKubernetesClusterNames,
-  getKubernetesDeploymentNames,
-  getKubernetesNamespaceNames,
-  getKubernetesNodeNames,
+  getTypeGroupForSubType,
+  type KubernetesResourceType,
 } from './kubernetes_cluster_filter';
 
 interface Props {
@@ -250,26 +254,49 @@ const EntityNameLink = ({
 const CategorySectionHeader = ({
   category,
   total,
+  typeLabels,
+  typeFilter,
+  onTypeFilterChange,
 }: {
   category: EntityCategoryId;
   total: number;
+  typeLabels?: readonly string[];
+  typeFilter?: string;
+  onTypeFilterChange?: (next: string) => void;
 }) => {
   const descriptor = getCategoryDescriptor(category);
+  const showTypeFilter = typeLabels && typeLabels.length > 1 && typeFilter !== undefined && onTypeFilterChange;
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {descriptor?.icon ? (
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={descriptor.icon} size="m" aria-hidden />
-        </EuiFlexItem>
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          {descriptor?.icon ? (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={descriptor.icon} size="m" aria-hidden />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3>{descriptor?.label ?? category}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      {showTypeFilter ? (
+        <>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <CategoryResourceTypeFilter
+              typeLabels={typeLabels}
+              value={typeFilter}
+              onChange={onTypeFilterChange}
+            />
+          </EuiFlexItem>
+        </>
       ) : null}
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <h3>{descriptor?.label ?? category}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -455,7 +482,8 @@ type ListItem =
       rows: Entity[];
     }
   | { kind: 'kubernetes-header'; total: number }
-  | { kind: 'category-header'; category: EntityCategoryId; total: number }
+  | { kind: 'type-group-divider'; label: string }
+  | { kind: 'category-header'; category: EntityCategoryId; total: number; typeLabels?: readonly string[] }
   | { kind: 'cloud-provider-header'; provider: CloudProviderDescriptor; total: number }
   // Generic level-1 header for a custom "Group by" bucket (ElasticOn).
   | { kind: 'group-header'; label: string; total: number }
@@ -492,32 +520,18 @@ const SubGroupSectionHeader = ({ label, total }: { label: string; total: number 
 
 const KubernetesSectionHeader = ({
   total,
+  resourceType,
+  onResourceTypeChange,
   clusterNames,
   clusterFilter,
   onClusterFilterChange,
-  namespaceNames,
-  namespaceFilter,
-  onNamespaceFilterChange,
-  deploymentNames,
-  deploymentFilter,
-  onDeploymentFilterChange,
-  nodeNames,
-  nodeFilter,
-  onNodeFilterChange,
 }: {
   total: number;
+  resourceType: KubernetesResourceType;
+  onResourceTypeChange: (next: KubernetesResourceType) => void;
   clusterNames: readonly string[];
   clusterFilter: string;
   onClusterFilterChange: (next: string) => void;
-  namespaceNames: readonly string[];
-  namespaceFilter: string;
-  onNamespaceFilterChange: (next: string) => void;
-  deploymentNames: readonly string[];
-  deploymentFilter: string;
-  onDeploymentFilterChange: (next: string) => void;
-  nodeNames: readonly string[];
-  nodeFilter: string;
-  onNodeFilterChange: (next: string) => void;
 }) => {
   const descriptor = getCategoryDescriptor('kubernetes');
   return (
@@ -540,39 +554,18 @@ const KubernetesSectionHeader = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem />
+      <EuiFlexItem grow={false}>
+        <KubernetesResourceTypeFilter
+          value={resourceType}
+          onChange={onResourceTypeChange}
+        />
+      </EuiFlexItem>
       {clusterNames.length > 0 ? (
         <EuiFlexItem grow={false}>
           <KubernetesClusterFilter
             clusterNames={clusterNames}
             value={clusterFilter}
             onChange={onClusterFilterChange}
-          />
-        </EuiFlexItem>
-      ) : null}
-      {nodeNames.length > 0 ? (
-        <EuiFlexItem grow={false}>
-          <KubernetesNodeFilter
-            nodeNames={nodeNames}
-            value={nodeFilter}
-            onChange={onNodeFilterChange}
-          />
-        </EuiFlexItem>
-      ) : null}
-      {namespaceNames.length > 0 ? (
-        <EuiFlexItem grow={false}>
-          <KubernetesNamespaceFilter
-            namespaceNames={namespaceNames}
-            value={namespaceFilter}
-            onChange={onNamespaceFilterChange}
-          />
-        </EuiFlexItem>
-      ) : null}
-      {deploymentNames.length > 0 ? (
-        <EuiFlexItem grow={false}>
-          <KubernetesDeploymentFilter
-            deploymentNames={deploymentNames}
-            value={deploymentFilter}
-            onChange={onDeploymentFilterChange}
           />
         </EuiFlexItem>
       ) : null}
@@ -609,12 +602,34 @@ export const EntitiesListView = ({
     return withHealth.filter((entity) => !isCategoryHiddenInElasticOn(entity.category));
   }, [entities, chaosOn, enableColumnSettings]);
 
-  // Transient (not persisted) — matches the Grouped grid filter's
-  // semantics so the two views feel identical when toggled.
+  // Transient (not persisted) — on the All Resources page only resource
+  // type + cluster are shown. For deeper filtering (namespace, deployment,
+  // node) the user navigates to the dedicated Kubernetes section.
+  const [resourceType, setResourceType] = useState<KubernetesResourceType>(KUBERNETES_RESOURCE_TYPE_ALL);
   const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
-  const [namespaceFilter, setNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
-  const [deploymentFilter, setDeploymentFilter] = useState<string>(KUBERNETES_FILTER_ALL);
-  const [nodeFilter, setNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+
+  // Per-category type filter for non-K8s categories (Hosts, Databases, etc.)
+  const [categoryTypeFilters, setCategoryTypeFilters] = useState<Map<EntityCategoryId, string>>(
+    () => new Map()
+  );
+  const getCategoryTypeFilter = useCallback(
+    (cat: EntityCategoryId) => categoryTypeFilters.get(cat) ?? CATEGORY_RESOURCE_TYPE_ALL,
+    [categoryTypeFilters]
+  );
+  const setCategoryTypeFilter = useCallback(
+    (cat: EntityCategoryId, value: string) => {
+      setCategoryTypeFilters((prev) => {
+        const next = new Map(prev);
+        if (value === CATEGORY_RESOURCE_TYPE_ALL) {
+          next.delete(cat);
+        } else {
+          next.set(cat, value);
+        }
+        return next;
+      });
+    },
+    []
+  );
 
   const k8sEntities = useMemo(
     () => effectiveEntities.filter((entity) => entity.category === 'kubernetes'),
@@ -624,43 +639,6 @@ export const EntitiesListView = ({
   const clusterNames = useMemo(
     () => getKubernetesClusterNames(k8sEntities),
     [k8sEntities]
-  );
-  const namespaceNames = useMemo(
-    () => getKubernetesNamespaceNames(k8sEntities, clusterFilter, clusterNames),
-    [k8sEntities, clusterFilter, clusterNames]
-  );
-  const deploymentNames = useMemo(
-    () => getKubernetesDeploymentNames(k8sEntities, clusterFilter, namespaceFilter, clusterNames),
-    [k8sEntities, clusterFilter, namespaceFilter, clusterNames]
-  );
-  const nodeNames = useMemo(
-    () => getKubernetesNodeNames(k8sEntities, clusterFilter, clusterNames),
-    [k8sEntities, clusterFilter, clusterNames]
-  );
-
-  // Auto-reset downstream filters when their value is no longer in the
-  // available options (e.g. after changing the cluster).
-  const effectiveNamespaceFilter =
-    namespaceFilter !== KUBERNETES_FILTER_ALL && !namespaceNames.includes(namespaceFilter)
-      ? KUBERNETES_FILTER_ALL
-      : namespaceFilter;
-  const effectiveDeploymentFilter =
-    deploymentFilter !== KUBERNETES_FILTER_ALL && !deploymentNames.includes(deploymentFilter)
-      ? KUBERNETES_FILTER_ALL
-      : deploymentFilter;
-  const effectiveNodeFilter =
-    nodeFilter !== KUBERNETES_FILTER_ALL && !nodeNames.includes(nodeFilter)
-      ? KUBERNETES_FILTER_ALL
-      : nodeFilter;
-
-  const handleClusterChange = useCallback(
-    (next: string) => {
-      setClusterFilter(next);
-      setNamespaceFilter(KUBERNETES_FILTER_ALL);
-      setDeploymentFilter(KUBERNETES_FILTER_ALL);
-      setNodeFilter(KUBERNETES_FILTER_ALL);
-    },
-    []
   );
 
   const items = useMemo<ListItem[]>(() => {
@@ -749,7 +727,8 @@ export const EntitiesListView = ({
         // groups by `entity.subType` (Clusters / Nodes / Namespaces
         // / ...) using the curated reading order, instead of the
         // generic `.type`-based grouping used by other categories.
-        const filtered = filterKubernetesEntities(rows, clusterFilter, effectiveNamespaceFilter, effectiveDeploymentFilter, effectiveNodeFilter, clusterNames);
+        const afterResourceType = filterEntitiesByResourceType(rows, resourceType);
+        const filtered = filterKubernetesEntities(afterResourceType, clusterFilter, KUBERNETES_FILTER_ALL, KUBERNETES_FILTER_ALL, KUBERNETES_FILTER_ALL, clusterNames);
         result.push({ kind: 'kubernetes-header', total: filtered.length });
         const subTypeBuckets = new Map<string, Entity[]>();
         for (const entity of filtered) {
@@ -758,9 +737,15 @@ export const EntitiesListView = ({
           list.push(entity);
           subTypeBuckets.set(key, list);
         }
+        const seenTypeGroups = new Set<string>();
         for (const subTypeLabel of KUBERNETES_SUB_TYPE_ORDER) {
           const subRows = subTypeBuckets.get(subTypeLabel);
           if (subRows && subRows.length > 0) {
+            const typeGroup = getTypeGroupForSubType(subTypeLabel);
+            if (typeGroup && !seenTypeGroups.has(typeGroup.id)) {
+              seenTypeGroups.add(typeGroup.id);
+              result.push({ kind: 'type-group-divider', label: typeGroup.label });
+            }
             result.push({
               kind: 'panel',
               category: 'kubernetes',
@@ -795,15 +780,17 @@ export const EntitiesListView = ({
         }
         continue;
       }
-      // Non-K8s: group by `.type` so categories with more than one
-      // entity type (Hosts → Bare-metal + VM, Cloud → region + EC2 +
-      // Lambda + S3, Messaging → Kafka + RabbitMQ, AI/ML → OpenAI +
-      // Anthropic) render with a top-level category header and one
-      // panel per type — mirroring the Kubernetes layout without its
-      // cluster filter.
-      const typeGroups = groupEntitiesByType(rows);
-      if (typeGroups.length > 1) {
-        result.push({ kind: 'category-header', category: descriptor.id, total: rows.length });
+      // Non-K8s: apply per-category type filter, then group by `.type`
+      // so categories with more than one entity type (Hosts → Bare-metal
+      // + VM, Messaging → Kafka + RabbitMQ, AI/ML → OpenAI + Anthropic)
+      // render with a top-level category header (with an inline type
+      // filter when 2+ types) and one panel per type.
+      const typeLabels = getEntityTypeLabels(rows);
+      const catTypeFilter = getCategoryTypeFilter(descriptor.id);
+      const filteredRows = filterEntitiesByCategoryType(rows, catTypeFilter);
+      const typeGroups = groupEntitiesByType(filteredRows);
+      if (typeLabels.length > 1) {
+        result.push({ kind: 'category-header', category: descriptor.id, total: filteredRows.length, typeLabels });
         for (const group of typeGroups) {
           result.push({
             kind: 'panel',
@@ -840,11 +827,10 @@ export const EntitiesListView = ({
     return result;
   }, [
     effectiveEntities,
+    resourceType,
     clusterFilter,
-    effectiveNamespaceFilter,
-    effectiveDeploymentFilter,
-    effectiveNodeFilter,
     clusterNames,
+    getCategoryTypeFilter,
     groupCloudByProvider,
     useCustomGrouping,
     customGroupBy,
@@ -888,18 +874,11 @@ export const EntitiesListView = ({
             <EuiFlexItem key={`kubernetes-header-${index}`} grow={false} style={groupGap}>
               <KubernetesSectionHeader
                 total={item.total}
+                resourceType={resourceType}
+                onResourceTypeChange={setResourceType}
                 clusterNames={clusterNames}
                 clusterFilter={clusterFilter}
-                onClusterFilterChange={handleClusterChange}
-                namespaceNames={namespaceNames}
-                namespaceFilter={effectiveNamespaceFilter}
-                onNamespaceFilterChange={setNamespaceFilter}
-                deploymentNames={deploymentNames}
-                deploymentFilter={effectiveDeploymentFilter}
-                onDeploymentFilterChange={setDeploymentFilter}
-                nodeNames={nodeNames}
-                nodeFilter={effectiveNodeFilter}
-                onNodeFilterChange={setNodeFilter}
+                onClusterFilterChange={setClusterFilter}
               />
             </EuiFlexItem>
           );
@@ -908,7 +887,13 @@ export const EntitiesListView = ({
           if (hideCategoryHeader) return null;
           return (
             <EuiFlexItem key={`${item.category}-header-${index}`} grow={false} style={groupGap}>
-              <CategorySectionHeader category={item.category} total={item.total} />
+              <CategorySectionHeader
+                category={item.category}
+                total={item.total}
+                typeLabels={item.typeLabels}
+                typeFilter={item.typeLabels ? getCategoryTypeFilter(item.category) : undefined}
+                onTypeFilterChange={item.typeLabels ? (v) => setCategoryTypeFilter(item.category, v) : undefined}
+              />
             </EuiFlexItem>
           );
         }
@@ -916,6 +901,22 @@ export const EntitiesListView = ({
           return (
             <EuiFlexItem key={`cloud-${item.provider.id}-header-${index}`} grow={false} style={groupGap}>
               <CloudProviderSectionHeader provider={item.provider} total={item.total} />
+            </EuiFlexItem>
+          );
+        }
+        if (item.kind === 'type-group-divider') {
+          return (
+            <EuiFlexItem key={`type-group-${item.label}-${index}`} grow={false} style={{ marginTop: 12 }}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    <strong>{item.label}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiHorizontalRule margin="none" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           );
         }

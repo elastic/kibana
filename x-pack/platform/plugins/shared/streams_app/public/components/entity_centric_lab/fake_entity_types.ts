@@ -119,6 +119,43 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     subsetsCount: '1',
     lastUpdate: '2026-04-18',
   },
+  // --- Workload Management ---
+  {
+    id: 'k8s-replicaset',
+    name: 'K8s replicaset',
+    generatedBy: 'Elastic',
+    category: 'Kubernetes',
+    entitiesCount: '12',
+    subsetsCount: '1',
+    lastUpdate: '2026-04-18',
+  },
+  {
+    id: 'k8s-statefulset',
+    name: 'K8s statefulset',
+    generatedBy: 'Elastic',
+    category: 'Kubernetes',
+    entitiesCount: '4',
+    subsetsCount: '1',
+    lastUpdate: '2026-04-18',
+  },
+  {
+    id: 'k8s-daemonset',
+    name: 'K8s daemonset',
+    generatedBy: 'Elastic',
+    category: 'Kubernetes',
+    entitiesCount: '3',
+    subsetsCount: '1',
+    lastUpdate: '2026-04-18',
+  },
+  {
+    id: 'k8s-cronjob',
+    name: 'K8s cronjob',
+    generatedBy: 'Elastic',
+    category: 'Kubernetes',
+    entitiesCount: '5',
+    subsetsCount: '1',
+    lastUpdate: '2026-04-18',
+  },
   // ---------- Databases ----------
   {
     id: 'postgres',

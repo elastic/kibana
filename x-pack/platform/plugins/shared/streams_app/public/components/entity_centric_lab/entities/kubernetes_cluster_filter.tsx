@@ -30,17 +30,62 @@ export const KUBERNETES_FILTER_ALL = '__all__';
 export const KUBERNETES_CLUSTER_FILTER_ALL = KUBERNETES_FILTER_ALL;
 
 /**
- * Canonical sub-type ordering. Infra-first (Clusters → Nodes →
- * Namespaces → Deployments) then workloads (Pods → Containers).
+ * A type group clusters related K8s resource sub-types under a shared
+ * heading (e.g. "Workload Management" groups Deployments, ReplicaSets,
+ * StatefulSets, DaemonSets, CronJobs). Sub-types that don't belong to
+ * any group sit at the top level.
+ */
+export interface KubernetesTypeGroup {
+  /** Unique identifier used as a filter value (e.g. `'workloadManagement'`). */
+  readonly id: string;
+  /** Human-readable heading shown in the filter dropdown and section dividers. */
+  readonly label: string;
+  /** Sub-type labels that belong to this group, in display order. */
+  readonly members: readonly string[];
+}
+
+/**
+ * Registry of K8s type groups. Order here determines the visual
+ * ordering of the group sections in both hex-map and table views.
+ */
+export const KUBERNETES_TYPE_GROUPS: readonly KubernetesTypeGroup[] = [
+  {
+    id: 'workloadManagement',
+    label: 'Workload Management',
+    members: ['Deployments', 'ReplicaSets', 'StatefulSets', 'DaemonSets', 'CronJobs'],
+  },
+];
+
+/** Look up the type group a sub-type label belongs to (if any). */
+export const getTypeGroupForSubType = (
+  subTypeLabel: string
+): KubernetesTypeGroup | undefined =>
+  KUBERNETES_TYPE_GROUPS.find((g) => g.members.includes(subTypeLabel));
+
+/** All sub-type labels that belong to any type group. */
+const TYPE_GROUP_MEMBER_SET = new Set(
+  KUBERNETES_TYPE_GROUPS.flatMap((g) => g.members)
+);
+
+/** Whether a sub-type label belongs to a type group. */
+export const isTypeGroupMember = (subTypeLabel: string): boolean =>
+  TYPE_GROUP_MEMBER_SET.has(subTypeLabel);
+
+/**
+ * Canonical sub-type ordering. Infrastructure-first (Clusters → Nodes →
+ * Namespaces) then workloads (Pods → Containers), followed by type-group
+ * members in the group's own order (Workload Management: Deployments →
+ * ReplicaSets → StatefulSets → DaemonSets → CronJobs).
+ *
  * Shared so the Grouped grid and List view stay in lock-step.
  */
 export const KUBERNETES_SUB_TYPE_ORDER: readonly string[] = [
   'Clusters',
   'Nodes',
   'Namespaces',
-  'Deployments',
   'Pods',
   'Containers',
+  ...KUBERNETES_TYPE_GROUPS.flatMap((g) => g.members),
 ];
 
 /**
@@ -242,11 +287,25 @@ export const KUBERNETES_GROUP_BY_OPTIONS: ReadonlyArray<{
   { value: 'node', label: 'Node' },
 ];
 
+export interface KubernetesGroupEntry {
+  readonly label: string;
+  readonly rows: Entity[];
+  /**
+   * When grouping by subType, this field is set on the **first** member
+   * of a type group (e.g. "Deployments" gets `typeGroupLabel: 'Workload
+   * Management'`). Views use it to render a section divider before the
+   * group's first sub-type row. `undefined` for ungrouped sub-types and
+   * for non-subType grouping dimensions.
+   */
+  readonly typeGroupLabel?: string;
+}
+
 /**
  * Group K8s entities by the selected dimension. Returns an ordered array
- * of `{ label, rows }` groups.
+ * of `{ label, rows, typeGroupLabel? }` groups.
  *
- * - **subType**: canonical KUBERNETES_SUB_TYPE_ORDER
+ * - **subType**: canonical KUBERNETES_SUB_TYPE_ORDER, with type-group
+ *   divider metadata on first members
  * - **cluster**: one group per cluster (stable order)
  * - **namespace**: one group per namespace; entities without a namespace
  *   go into an "Other" group
@@ -255,7 +314,7 @@ export const KUBERNETES_GROUP_BY_OPTIONS: ReadonlyArray<{
 export const groupKubernetesEntities = (
   entities: readonly Entity[],
   groupBy: KubernetesGroupBy
-): ReadonlyArray<{ label: string; rows: Entity[] }> => {
+): readonly KubernetesGroupEntry[] => {
   if (groupBy === 'subType') {
     const groups = new Map<string, Entity[]>();
     for (const entity of entities) {
@@ -264,8 +323,18 @@ export const groupKubernetesEntities = (
       list.push(entity);
       groups.set(key, list);
     }
+    const seenGroups = new Set<string>();
     return KUBERNETES_SUB_TYPE_ORDER
-      .map((label) => ({ label, rows: groups.get(label) ?? [] }))
+      .map((label) => {
+        const rows = groups.get(label) ?? [];
+        const group = getTypeGroupForSubType(label);
+        let typeGroupLabel: string | undefined;
+        if (group && !seenGroups.has(group.id) && rows.length > 0) {
+          seenGroups.add(group.id);
+          typeGroupLabel = group.label;
+        }
+        return { label, rows, typeGroupLabel };
+      })
       .filter((g) => g.rows.length > 0);
   }
 
@@ -311,22 +380,35 @@ export const resourceTypeFilterVisibility = (
     case 'Namespaces':
       return { showCluster: true, showNamespace: false, showDeployment: false, showNode: false };
     case 'Deployments':
+    case 'ReplicaSets':
+    case 'StatefulSets':
+    case 'DaemonSets':
+    case 'CronJobs':
       return { showCluster: true, showNamespace: true, showDeployment: true, showNode: false };
     case 'Pods':
       return { showCluster: true, showNamespace: true, showDeployment: true, showNode: true };
     case 'Containers':
       return { showCluster: true, showNamespace: true, showDeployment: true, showNode: true };
     default:
+      // Type-group IDs (e.g. 'workloadManagement') show all filters.
       return { showCluster: true, showNamespace: true, showDeployment: true, showNode: true };
   }
 };
 
-/** Filter entities to a single sub-type (pass-through when "All"). */
+/**
+ * Filter entities to a single sub-type or all members of a type group.
+ * Pass-through when "All".
+ */
 export const filterEntitiesByResourceType = (
   entities: readonly Entity[],
   resourceType: KubernetesResourceType
 ): readonly Entity[] => {
   if (resourceType === KUBERNETES_RESOURCE_TYPE_ALL) return entities;
+  const group = KUBERNETES_TYPE_GROUPS.find((g) => g.id === resourceType);
+  if (group) {
+    const memberSet = new Set(group.members);
+    return entities.filter((e) => e.subType !== undefined && memberSet.has(e.subType));
+  }
   return entities.filter((e) => e.subType === resourceType);
 };
 
@@ -334,6 +416,27 @@ interface KubernetesResourceTypeFilterProps {
   readonly value: KubernetesResourceType;
   readonly onChange: (next: KubernetesResourceType) => void;
 }
+
+/**
+ * Build the grouped option list for the resource-type filter.
+ * Top-level sub-types (not belonging to any group) come first as flat
+ * options, then each type group appears as a labelled option group with
+ * a selectable group header (selects all members) + its individual
+ * member options.
+ */
+const buildResourceTypeOptions = (): EuiComboBoxOptionOption[] => {
+  const topLevel = KUBERNETES_SUB_TYPE_ORDER.filter((s) => !isTypeGroupMember(s));
+  const flat: EuiComboBoxOptionOption[] = topLevel.map((subType) => ({
+    label: subType,
+    value: subType,
+  }));
+  const groups: EuiComboBoxOptionOption[] = KUBERNETES_TYPE_GROUPS.map((group) => ({
+    label: group.label,
+    value: group.id,
+    options: group.members.map((member) => ({ label: member, value: member })),
+  }));
+  return [...flat, ...groups];
+};
 
 export const KubernetesResourceTypeFilter = ({
   value,
@@ -343,16 +446,25 @@ export const KubernetesResourceTypeFilter = ({
     'xpack.streams.entityCentricLab.entities.kubernetesResourceTypeFilter.allOption',
     { defaultMessage: 'All resource types' }
   );
-  const options = useMemo<EuiComboBoxOptionOption[]>(
-    () => KUBERNETES_SUB_TYPE_ORDER.map((subType) => ({ label: subType, value: subType })),
-    []
-  );
+  const options = useMemo<EuiComboBoxOptionOption[]>(() => buildResourceTypeOptions(), []);
+  const allFlat = useMemo<EuiComboBoxOptionOption[]>(() => {
+    const result: EuiComboBoxOptionOption[] = [];
+    for (const opt of options) {
+      if (opt.options) {
+        result.push(opt);
+        result.push(...opt.options);
+      } else {
+        result.push(opt);
+      }
+    }
+    return result;
+  }, [options]);
   const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(
     () =>
       value === KUBERNETES_RESOURCE_TYPE_ALL
         ? []
-        : options.filter((o) => o.value === value),
-    [value, options]
+        : allFlat.filter((o) => o.value === value),
+    [value, allFlat]
   );
   const handleChange = useCallback(
     (selected: EuiComboBoxOptionOption[]) => {

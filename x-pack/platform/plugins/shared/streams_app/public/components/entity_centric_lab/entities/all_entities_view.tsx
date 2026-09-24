@@ -2727,7 +2727,7 @@ const AllEntitiesViewInner = ({
             hideAiSummary={isPhase1}
             hideOwnership={isPhase1}
             hideEvents={isPhase1}
-            hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
+            hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
             dashboardStyle={dashboardStyleVariation}
             onAddToFilter={
               showK8sFilters && selectedEntity?.category === 'kubernetes'
@@ -2756,7 +2756,7 @@ const AllEntitiesViewInner = ({
               hideAiSummary={isPhase1}
               hideOwnership={isPhase1}
               hideEvents={isPhase1}
-              hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
+              hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
               dashboardStyle={dashboardStyleVariation}
             />
           ) : null}

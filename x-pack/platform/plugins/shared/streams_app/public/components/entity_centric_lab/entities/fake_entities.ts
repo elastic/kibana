@@ -656,6 +656,14 @@ const KUBERNETES_SUB_SPECS: readonly KubernetesSubSpec[] = [
     fallbackName: (index) => `pod-${padIndex(index, 3)}`,
   },
   {
+    label: 'Containers',
+    total: 320,
+    type: 'K8s container',
+    seedRows: [],
+    fallbackName: (index) => `container-${padIndex(index, 3)}`,
+  },
+  // --- Workload Management type group ---
+  {
     label: 'Deployments',
     total: 96,
     type: 'K8s deployment',
@@ -663,11 +671,32 @@ const KUBERNETES_SUB_SPECS: readonly KubernetesSubSpec[] = [
     fallbackName: (index) => `deployment-${padIndex(index, 3)}`,
   },
   {
-    label: 'Containers',
-    total: 320,
-    type: 'K8s container',
+    label: 'ReplicaSets',
+    total: 12,
+    type: 'K8s replicaset',
     seedRows: [],
-    fallbackName: (index) => `container-${padIndex(index, 3)}`,
+    fallbackName: (index) => `replicaset-${padIndex(index, 3)}`,
+  },
+  {
+    label: 'StatefulSets',
+    total: 4,
+    type: 'K8s statefulset',
+    seedRows: [],
+    fallbackName: (index) => `statefulset-${padIndex(index, 2)}`,
+  },
+  {
+    label: 'DaemonSets',
+    total: 3,
+    type: 'K8s daemonset',
+    seedRows: [],
+    fallbackName: (index) => `daemonset-${padIndex(index, 2)}`,
+  },
+  {
+    label: 'CronJobs',
+    total: 5,
+    type: 'K8s cronjob',
+    seedRows: [],
+    fallbackName: (index) => `cronjob-${padIndex(index, 2)}`,
   },
 ];
 
@@ -847,7 +876,9 @@ const buildK8sAttributes = (
     attrs.namespace = namespaceNames[stableHash(`k8s-ns-${entityName}`) % namespaceNames.length];
   }
   if (subType === 'Namespaces') return attrs;
-  if (deploymentNames.length > 0 && (subType === 'Pods' || subType === 'Containers')) {
+  // Workload-level subtypes get deployment + node attributes like Pods/Containers.
+  const workloadTypes = new Set(['Pods', 'Containers', 'Deployments', 'ReplicaSets', 'StatefulSets', 'DaemonSets', 'CronJobs']);
+  if (deploymentNames.length > 0 && workloadTypes.has(subType)) {
     attrs.deployment = deploymentNames[stableHash(`k8s-deploy-${entityName}`) % deploymentNames.length];
   }
   if (nodeNames.length > 0 && (subType === 'Pods' || subType === 'Containers')) {

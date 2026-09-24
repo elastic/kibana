@@ -57,6 +57,7 @@ import { TracesTab } from './traces_tab';
 import { ProfilingTab } from './profiling_tab';
 import { DashboardsTab } from './dashboards_tab';
 import { DashboardsListTab } from './dashboards_list_tab';
+import { SlosTab } from './slos_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
 import { buildFakeEntityTabsData } from './fake_entity_tabs';
 import type { OnSelectEntity } from './fake_entity_tabs';
@@ -220,6 +221,7 @@ type BuiltInTabId =
   | 'logs'
   | 'traces'
   | 'alerts'
+  | 'slos'
   | 'services'
   | 'processes'
   | 'relationships'
@@ -242,6 +244,7 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'logs',
   'traces',
   'alerts',
+  'slos',
   'services',
   'processes',
   'relationships',
@@ -267,6 +270,7 @@ const CORE_TAB_IDS: readonly string[] = [
   'logs',
   'traces',
   'alerts',
+  'slos',
   'services',
   'processes',
   'dashboards',
@@ -532,6 +536,13 @@ export const EntityFlyout = ({
       icon: 'bell' as const,
       testSubj: 'createAlertRule',
     },
+    createSlo: {
+      label: i18n.translate('entityCentricLabFlyout.flyout.actions.createSlo', {
+        defaultMessage: 'Create SLO',
+      }),
+      icon: 'visGauge' as const,
+      testSubj: 'createSlo',
+    },
   }), []);
 
   // Map each flyout tab to its most-relevant primary action, taking the
@@ -551,6 +562,7 @@ export const EntityFlyout = ({
       logs: allActions.viewLogsInDiscover,
       traces: isService ? allActions.viewInApm : allActions.viewTracesInDiscover,
       alerts: allActions.createAlertRule,
+      slos: allActions.createSlo,
       services: allActions.viewInApm,
       processes: null,
       relationships: null,
@@ -706,6 +718,16 @@ export const EntityFlyout = ({
           return count > 0 ? count : undefined;
         })(),
       },
+      {
+        id: 'slos',
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.slos', {
+          defaultMessage: 'SLOs',
+        }),
+        appendBadge: (() => {
+          const breaching = tabsData.slos.slos.filter((s) => s.status === 'Breaching').length;
+          return breaching > 0 ? breaching : undefined;
+        })(),
+      },
       ...(kind === 'host'
         ? [
             {
@@ -774,7 +796,7 @@ export const EntityFlyout = ({
     }
 
     return overrideTabs;
-  }, [templateOverride, tabsData.traces, tabsData.alerts.activeCount, alertsActiveCount, minimalTabs, kind]);
+  }, [templateOverride, tabsData.traces, tabsData.alerts.activeCount, tabsData.slos, alertsActiveCount, minimalTabs, kind]);
 
   // Phase-1 exclusion: drop tabs the caller explicitly hides.
   const visibleTabs = useMemo(
@@ -1159,6 +1181,8 @@ const TabContent = ({
       return tabsData.traces ? <TracesTab traces={tabsData.traces} /> : placeholder;
     case 'alerts':
       return <AlertsTab alerts={tabsData.alerts} />;
+    case 'slos':
+      return <SlosTab slos={tabsData.slos} />;
     case 'services':
       return <ServicesTab entityName={entityName} />;
     case 'processes':

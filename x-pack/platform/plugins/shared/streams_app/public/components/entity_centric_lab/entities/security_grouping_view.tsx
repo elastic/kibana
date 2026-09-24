@@ -121,9 +121,13 @@ const sortByK8sOrder = (buckets: GroupBucket[]): GroupBucket[] => {
     ['K8s cluster', 0],
     ['K8s node', 1],
     ['K8s namespace', 2],
-    ['K8s deployment', 3],
-    ['K8s pod', 4],
-    ['K8s container', 5],
+    ['K8s pod', 3],
+    ['K8s container', 4],
+    ['K8s deployment', 5],
+    ['K8s replicaset', 6],
+    ['K8s statefulset', 7],
+    ['K8s daemonset', 8],
+    ['K8s cronjob', 9],
   ]);
   const fallback = subTypeOrder.size;
   return [...buckets].sort((a, b) => {
