@@ -19660,7 +19660,12 @@ paths:
                 properties:
                   cases:
                     items:
-                      $ref: '#/components/schemas/Cases_case_response_properties'
+                      allOf:
+                        - $ref: '#/components/schemas/Cases_case_response_properties'
+                        - type: object
+                          properties:
+                            extended_fields_labels:
+                              $ref: '#/components/schemas/Cases_case_extended_fields_labels'
                     maxItems: 10000
                     type: array
                   count_closed_cases:
@@ -20383,7 +20388,7 @@ paths:
                     customFields:
                       deprecated: true
                       description: |
-                        Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.
+                        Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                       items:
                         type: object
                         properties:
@@ -20580,7 +20585,7 @@ paths:
                   customFields:
                     deprecated: true
                     description: |
-                      Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.
+                      Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                     items:
                       type: object
                       properties:
@@ -20778,7 +20783,7 @@ paths:
                   customFields:
                     deprecated: true
                     description: |
-                      Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.
+                      Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                     items:
                       type: object
                       properties:
@@ -137089,7 +137094,7 @@ components:
         maxLength: 30000
         type: string
       description: |
-        Case field values keyed by storage key. This replaces `customFields`. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields; any other key is rejected. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. Legacy custom fields are migrated into this map, so a migrated field's value is found under its `<key>_as_<storage_type>` key. Requires the `xpack.cases.templates.enabled` setting (enabled by default); when disabled, field-library fields and templates are unavailable. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`, or `GET /api/cases/{caseId}/fields` for an existing case).
+        Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Requires the `xpack.cases.templates.enabled` setting (enabled by default). Use the get case fields API to discover valid keys.
       example:
         escalated_as_boolean: 'true'
         priority_as_keyword: high
@@ -137102,7 +137107,7 @@ components:
       additionalProperties:
         type: string
       description: |
-        A read-only map from each `extended_fields` storage key to its human-readable label. Populated at response time from the field library and any applied template; it is not persisted and is ignored on write.
+        A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.
       example:
         priority_as_keyword: Priority
       type: object
@@ -137271,6 +137276,13 @@ components:
           example: 120
           nullable: true
           type: integer
+        extended_fields:
+          additionalProperties:
+            type: string
+          description: |
+            The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+          type: object
+          x-state: Technical preview; added in 9.5.0
         extended_fields_labels:
           $ref: '#/components/schemas/Cases_case_extended_fields_labels'
         external_service:
@@ -137457,8 +137469,6 @@ components:
             The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
           type: object
           x-state: Technical preview; added in 9.5.0
-        extended_fields_labels:
-          $ref: '#/components/schemas/Cases_case_extended_fields_labels'
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -138521,7 +138531,7 @@ components:
         customFields:
           deprecated: true
           description: |
-            Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.
+            Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
           items:
             type: object
             properties:
@@ -138911,7 +138921,7 @@ components:
         customFields:
           deprecated: true
           description: |
-            Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.
+            Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
           items:
             type: object
             properties:
@@ -139034,7 +139044,7 @@ components:
                 $ref: '#/components/schemas/Cases_case_tags'
               template:
                 description: |
-                  The case template. Requires the `xpack.cases.templates.enabled` setting. Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields; already-stored field values are not re-validated. After switching, use the get case fields API to see the fields the new template exposes.
+                  The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.
                 nullable: true
                 type: object
                 properties:
