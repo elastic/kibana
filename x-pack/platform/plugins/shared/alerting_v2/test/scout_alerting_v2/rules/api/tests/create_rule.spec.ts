@@ -92,16 +92,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
-  apiTest('validation: rejects body with the removed metadata.owner', async ({ apiClient }) => {
-    const body = buildCreateRuleData();
-    const response = await apiClient.post(testData.RULE_API_PATH, {
-      headers: writerHeaders,
-      body: { ...body, metadata: { ...body.metadata, owner: 'u_alice' } },
-    });
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
   apiTest(
     'validation: rejects body with unknown metadata keys (strict schema)',
     async ({ apiClient }) => {

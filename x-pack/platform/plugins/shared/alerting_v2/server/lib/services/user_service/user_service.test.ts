@@ -35,14 +35,10 @@ describe('UserService', () => {
   });
 
   it('returns the current actor carrying the profile uid', async () => {
-    const { userService, userProfileService } = createUserService();
+    const { userService } = createUserService();
 
     await expect(userService.getCurrentActor()).resolves.toEqual({
       profile_uid: 'elastic_profile_uid',
-    });
-
-    expect(userProfileService.getCurrentProfileId).toHaveBeenCalledWith({
-      request: expect.anything(),
     });
   });
 

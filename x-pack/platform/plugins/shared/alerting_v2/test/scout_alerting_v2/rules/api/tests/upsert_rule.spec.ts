@@ -203,19 +203,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'validation: should reject body with the removed metadata.owner',
-    async ({ apiClient }) => {
-      const body = buildCreateRuleData();
-      const response = await apiClient.put(getRuleUrl('any-id'), {
-        headers: writerHeaders,
-        body: { ...body, metadata: { ...body.metadata, owner: 'u_alice' } },
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
-
-  apiTest(
     'validation: should reject body with unknown metadata keys (strict schema)',
     async ({ apiClient }) => {
       const body = buildCreateRuleData();
