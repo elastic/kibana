@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable require-atomic-updates */
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   isToolHandlerStandardReturn,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable require-atomic-updates */
 import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
