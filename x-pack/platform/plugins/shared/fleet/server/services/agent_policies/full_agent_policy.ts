@@ -169,6 +169,11 @@ export async function getFullAgentPolicy(
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
 
+  // For cross-space callers (spaceId '*'), derive the actual SO namespace from the policy's
+  // own space_ids so that package-policy reads/writes are scoped to the right namespace.
+  const packagePoliciesNamespace =
+    options?.spaceId === '*' ? (agentPolicy.space_ids?.[0] ?? undefined) : options?.spaceId;
+
   const agentInputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
@@ -177,7 +182,8 @@ export async function getFullAgentPolicy(
     agentPolicy.global_data_tags,
     options?.agentVersion,
     soClient,
-    agentPolicy.has_agent_version_conditions
+    agentPolicy.has_agent_version_conditions,
+    packagePoliciesNamespace
   );
 
   let otelcolConfig;
