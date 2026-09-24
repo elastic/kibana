@@ -25,7 +25,7 @@ Kibana starts with `--serverless=oblt` on `5620`. To run on stateful instead:
 node scripts/evals start --suite nightshift-investigations --scout-arch stateful
 ```
 
-`EVALS_SCOUT_ARCH=stateful` does the same for `evals start` and for `run_suite.sh` in CI. Switching arch restarts Scout. Serverless Elasticsearch has no keystore, so `GCS_CREDENTIALS` cannot reach it and the smoke eval's snapshot seeding only works on stateful.
+Switching arch restarts Scout. Serverless Elasticsearch has no keystore, so `GCS_CREDENTIALS` cannot reach it; the smoke eval's snapshot seeding only works on stateful, so the smoke eval is skipped on serverless.
 
 Serverless Elasticsearch always binds transport ports `9300`–`9302`. A development Elasticsearch started with `yarn es snapshot` (as the `local` profile below needs) also takes `9300`, so give it another transport port: `yarn es snapshot --license trial -E transport.port=9400`.
 

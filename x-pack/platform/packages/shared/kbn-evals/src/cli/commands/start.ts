@@ -39,7 +39,7 @@ export const startCmd: Command<void> = {
     node scripts/evals stop
 
   The Scout arch/domain comes from the suite's scoutArch/scoutDomain in evals.suites.json
-  (stateful/classic by default). --scout-arch (or EVALS_SCOUT_ARCH) overrides the arch.
+  (stateful/classic by default). --scout-arch / --scout-domain override them.
   `,
   flags: evalRunFlags,
   run: async ({ log, flagsReader }) => {

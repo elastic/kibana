@@ -14,6 +14,7 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { resolveCcmApiKey } from '@kbn/es';
 import { scoutEvalsArgs } from './prompts';
 import { DEFAULT_SCOUT_TARGET, formatScoutTarget, type ScoutTarget } from './scout_target';
+import { assertServerlessPortsFree } from './scout_ports';
 import {
   isAlive,
   isServiceRunning,
@@ -253,6 +254,10 @@ export const ensureScout = async ({
     return;
   }
 
+  if (scoutTarget.arch === 'serverless') {
+    await assertServerlessPortsFree();
+  }
+
   const scoutConfigPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
   if (Fs.existsSync(scoutConfigPath)) {
     Fs.unlinkSync(scoutConfigPath);
@@ -297,12 +302,17 @@ export const ensureScout = async ({
 export interface EnsureEisCcmOptions {
   repoRoot: string;
   log: ToolingLog;
+  scoutTarget?: ScoutTarget;
 }
 
 /**
  * Enables EIS (Cloud Connected Mode).
  */
-export const ensureEisCcm = async ({ repoRoot, log }: EnsureEisCcmOptions): Promise<void> => {
+export const ensureEisCcm = async ({
+  repoRoot,
+  log,
+  scoutTarget = DEFAULT_SCOUT_TARGET,
+}: EnsureEisCcmOptions): Promise<void> => {
   log.info('[eis-ccm] Enabling EIS (Cloud Connected Mode)...');
   const ccmApiKey = await resolveCcmApiKey(log);
 
@@ -312,8 +322,12 @@ export const ensureEisCcm = async ({ repoRoot, log }: EnsureEisCcmOptions): Prom
     {
       cwd: repoRoot,
       stdio: 'inherit',
-      // Serverless Scout ES serves https with the dev CA.
-      env: { ...process.env, KIBANA_EIS_CCM_API_KEY: ccmApiKey, NODE_EXTRA_CA_CERTS: CA_CERT_PATH },
+      env: {
+        ...process.env,
+        KIBANA_EIS_CCM_API_KEY: ccmApiKey,
+        // Serverless Scout ES serves https with the dev CA.
+        ...(scoutTarget.arch === 'serverless' ? { NODE_EXTRA_CA_CERTS: CA_CERT_PATH } : {}),
+      },
     }
   );
 
@@ -367,7 +381,7 @@ export const ensureEvalStack = async ({
   });
 
   if (requiresEisCcm) {
-    await ensureEisCcm({ repoRoot, log });
+    await ensureEisCcm({ repoRoot, log, scoutTarget });
   } else {
     log.info('[eis-ccm] Skipping EIS CCM (no eis- judge/models selected)');
   }

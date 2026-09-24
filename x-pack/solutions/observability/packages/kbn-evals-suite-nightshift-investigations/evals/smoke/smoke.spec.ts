@@ -23,6 +23,12 @@ import { summarizeSeedData } from './task';
  * golden-cluster export is broken rather than that investigation quality regressed.
  */
 evaluate.describe('Nightshift investigations: smoke', { tag: tags.stateful.classic }, () => {
+  // kbn-evals ignores Scout tags, so the stateful tag alone does not keep this off serverless.
+  evaluate.skip(
+    ({ config }) => config.serverless,
+    'Snapshot seeding needs GCS credentials in the ES keystore, which serverless lacks'
+  );
+
   for (const dataset of getSmokeDatasets()) {
     evaluate.describe(dataset.id, () => {
       const seedData = withSeedData(dataset);

@@ -218,9 +218,7 @@ Run a suite on any branch without a PR:
 | `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
 | `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
 | `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
-| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
-| `EVALS_SCOUT_ARCH`                | no                 | Set to `stateful` to run a serverless suite on stateful/classic                                              |
-| `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
+| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     || `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
 | `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
@@ -296,7 +294,7 @@ Suites run on a stateful/classic Scout cluster unless their `evals.suites.json` 
 }
 ```
 
-`node scripts/evals start` and `run_suite.sh` then start Scout with `--arch serverless --domain observability_complete`, so the config set needs a matching `serverless/observability_complete.serverless.config.ts` (the serverless `evals_tracing` config is a starting point). Serverless Elasticsearch runs in Docker and has no keystore, so `GCS_CREDENTIALS` is not available to it. `--scout-arch stateful` (or `EVALS_SCOUT_ARCH=stateful`) runs such a suite on stateful/classic instead; switching arch restarts Scout.
+`node scripts/evals start` and `run_suite.sh` then start Scout with `--arch serverless --domain observability_complete`, so the config set needs a matching `serverless/observability_complete.serverless.config.ts` (the serverless `evals_tracing` config is a starting point). Serverless Elasticsearch runs in Docker and has no keystore, so `GCS_CREDENTIALS` is not available to it. `node scripts/evals start --scout-arch <arch> --scout-domain <domain>` overrides the suite's values for a local run (for example `--scout-arch stateful` runs such a suite on stateful/classic); switching arch or domain restarts Scout.
 
 ### Playwright config
 

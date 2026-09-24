@@ -288,7 +288,6 @@ EOF
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
           EVAL_SCOUT_ARCH: "${EVAL_SCOUT_ARCH:-}"
           EVAL_SCOUT_DOMAIN: "${EVAL_SCOUT_DOMAIN:-}"
-          EVALS_SCOUT_ARCH: "${EVALS_SCOUT_ARCH:-}"
           EVAL_GREP: "${EVAL_GREP:-}"
           EVAL_GREP_INVERT: "${EVAL_GREP_INVERT:-}"
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
@@ -437,7 +436,6 @@ EOF
         EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
         EVAL_SCOUT_ARCH: "${EVAL_SCOUT_ARCH:-}"
         EVAL_SCOUT_DOMAIN: "${EVAL_SCOUT_DOMAIN:-}"
-        EVALS_SCOUT_ARCH: "${EVALS_SCOUT_ARCH:-}"
 EOF
       elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
         # Fresh-baseline mode: emit the post-comparison step inside the fanout so
@@ -513,18 +511,9 @@ if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
 fi
 
 # Scout arch/domain come from the suite's scoutArch/scoutDomain (EVAL_SCOUT_ARCH/EVAL_SCOUT_DOMAIN),
-# stateful/classic by default. EVALS_SCOUT_ARCH=stateful opts a serverless suite back into stateful,
-# matching `node scripts/evals start --scout-arch`.
+# stateful/classic by default.
 SCOUT_ARCH="${EVAL_SCOUT_ARCH:-stateful}"
 SCOUT_DOMAIN="${EVAL_SCOUT_DOMAIN:-classic}"
-if [[ -n "${EVALS_SCOUT_ARCH:-}" && "${EVALS_SCOUT_ARCH}" != "$SCOUT_ARCH" ]]; then
-  if [[ "${EVALS_SCOUT_ARCH}" != "stateful" ]]; then
-    echo "EVALS_SCOUT_ARCH=${EVALS_SCOUT_ARCH} is not supported for suite ${EVAL_SUITE_ID}: only stateful can override its scoutArch (${SCOUT_ARCH})"
-    exit 1
-  fi
-  SCOUT_ARCH="stateful"
-  SCOUT_DOMAIN="classic"
-fi
 echo "Scout target: ${SCOUT_ARCH}/${SCOUT_DOMAIN}"
 
 # Serverless ES serves https with the dev CA and authenticates as elastic_serverless, so read the

@@ -18,51 +18,34 @@ export interface ScoutTarget {
 
 export const DEFAULT_SCOUT_TARGET: ScoutTarget = { arch: 'stateful', domain: 'classic' };
 
-/** Env var equivalent of `--scout-arch`, for runs that cannot pass CLI flags. */
-export const SCOUT_ARCH_OVERRIDE_ENV = 'EVALS_SCOUT_ARCH';
-
 const isScoutArch = (value: string): value is ScoutArch =>
   (SCOUT_ARCHES as readonly string[]).includes(value);
 
 /**
- * Resolves the Scout arch/domain for a suite. `override` (`--scout-arch` or `EVALS_SCOUT_ARCH`)
- * replaces the suite's arch; switching to stateful uses the `classic` domain, and switching to
- * serverless requires the suite to declare its serverless domain.
+ * Resolves the Scout arch/domain from `--scout-arch` / `--scout-domain`, falling back to the
+ * suite's `scoutArch` / `scoutDomain` and then stateful/classic. The suite's domain only applies
+ * while its arch is used; Scout itself rejects a domain the config set has no file for.
  */
 export const resolveScoutTarget = (
-  suite: { id?: string; scoutArch?: string; scoutDomain?: string } | undefined,
-  override?: string
+  suite: { scoutArch?: string; scoutDomain?: string } | undefined,
+  flags: { arch?: string; domain?: string } = {}
 ): ScoutTarget => {
-  const suiteArch = suite?.scoutArch ?? DEFAULT_SCOUT_TARGET.arch;
-  if (!isScoutArch(suiteArch)) {
-    throw new Error(
-      `Suite "${suite?.id}" has an invalid scoutArch "${suiteArch}" (expected ${SCOUT_ARCHES.join(
-        ' or '
-      )})`
-    );
+  const arch = flags.arch ?? suite?.scoutArch ?? DEFAULT_SCOUT_TARGET.arch;
+  if (!isScoutArch(arch)) {
+    throw createFlagError(`Invalid Scout arch "${arch}" (expected ${SCOUT_ARCHES.join(' or ')})`);
   }
-  if (suiteArch === 'serverless' && !suite?.scoutDomain) {
-    throw new Error(`Suite "${suite?.id}" sets scoutArch "serverless" without a scoutDomain`);
-  }
-  const suiteTarget: ScoutTarget = {
-    arch: suiteArch,
-    domain: suite?.scoutDomain ?? DEFAULT_SCOUT_TARGET.domain,
-  };
 
-  if (!override || override === suiteTarget.arch) {
-    return suiteTarget;
-  }
-  if (!isScoutArch(override)) {
+  const suiteDomain =
+    arch === (suite?.scoutArch ?? DEFAULT_SCOUT_TARGET.arch) ? suite?.scoutDomain : undefined;
+  const domain =
+    flags.domain ?? suiteDomain ?? (arch === 'stateful' ? DEFAULT_SCOUT_TARGET.domain : undefined);
+  if (!domain) {
     throw createFlagError(
-      `Invalid Scout arch "${override}" (expected ${SCOUT_ARCHES.join(' or ')})`
+      'Serverless needs a Scout domain: pass --scout-domain (e.g. observability_complete)'
     );
   }
-  if (override === 'stateful') {
-    return DEFAULT_SCOUT_TARGET;
-  }
-  throw createFlagError(
-    `Suite "${suite?.id ?? 'custom config'}" has no serverless scoutDomain in evals.suites.json`
-  );
+
+  return { arch, domain };
 };
 
 export const formatScoutTarget = ({ arch, domain }: ScoutTarget): string => `${arch}/${domain}`;

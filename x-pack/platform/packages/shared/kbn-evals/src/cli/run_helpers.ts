@@ -31,7 +31,7 @@ import {
   isExportProfileImplicitLocal,
 } from './profiles';
 import { runScoutHook } from './scout_hook';
-import { resolveScoutTarget, SCOUT_ARCH_OVERRIDE_ENV, type ScoutTarget } from './scout_target';
+import { resolveScoutTarget, type ScoutTarget } from './scout_target';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
 import {
@@ -52,7 +52,8 @@ const shellQuote = (value: string): string => {
 export const formatEvalCliCommand = (args: string[]): string =>
   ['node', 'scripts/evals', ...args.map((a) => (a.includes(' ') ? shellQuote(a) : a))].join(' ');
 
-const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
+/** Finds a suite by id, refreshing discovery once before failing with the available ids. */
+export const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
   const suites = resolveEvalSuites(repoRoot, log);
   const match = suites.find((suite) => suite.id === suiteId);
   if (match) return match;
@@ -482,9 +483,11 @@ export const buildEvalRunArgs = ({
     runArgs.push('--space-ids', spaceIds.join(','));
   }
 
-  const scoutArch = flagsReader.string('scout-arch');
-  if (scoutArch) {
-    runArgs.push('--scout-arch', scoutArch);
+  for (const flag of ['scout-arch', 'scout-domain']) {
+    const value = flagsReader.string(flag);
+    if (value) {
+      runArgs.push(`--${flag}`, value);
+    }
   }
 
   if (skipServer) {
@@ -494,15 +497,15 @@ export const buildEvalRunArgs = ({
   return runArgs;
 };
 
-/** The suite's Scout arch/domain, with `--scout-arch` (or `EVALS_SCOUT_ARCH`) applied. */
+/** The Scout arch/domain for a run: `--scout-arch` / `--scout-domain`, else the suite's. */
 export const resolveEvalScoutTarget = (
   flagsReader: FlagsReader,
   suite?: EvalSuiteDefinition
 ): ScoutTarget =>
-  resolveScoutTarget(
-    suite,
-    flagsReader.string('scout-arch') ?? process.env[SCOUT_ARCH_OVERRIDE_ENV]
-  );
+  resolveScoutTarget(suite, {
+    arch: flagsReader.string('scout-arch'),
+    domain: flagsReader.string('scout-domain'),
+  });
 
 export const evalRunFlags: FlagOptions = {
   string: [
@@ -519,6 +522,7 @@ export const evalRunFlags: FlagOptions = {
     'evaluations-kbn-url',
     'evaluations-kbn-api-key',
     'scout-arch',
+    'scout-domain',
   ],
   boolean: ['skip-server', 'dry-run', 'skip-init'],
   alias: { model: 'project', judge: 'evaluation-connector-id' },

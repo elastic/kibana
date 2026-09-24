@@ -8,15 +8,11 @@
 import { DEFAULT_SCOUT_TARGET, resolveScoutTarget } from './scout_target';
 
 describe('resolveScoutTarget', () => {
-  const serverlessSuite = {
-    id: 'nightshift-investigations',
-    scoutArch: 'serverless',
-    scoutDomain: 'observability_complete',
-  };
+  const serverlessSuite = { scoutArch: 'serverless', scoutDomain: 'observability_complete' };
 
   it('defaults to stateful/classic for suites without Scout settings', () => {
     expect(resolveScoutTarget(undefined)).toEqual(DEFAULT_SCOUT_TARGET);
-    expect(resolveScoutTarget({ id: 'agent-builder' })).toEqual(DEFAULT_SCOUT_TARGET);
+    expect(resolveScoutTarget({})).toEqual(DEFAULT_SCOUT_TARGET);
   });
 
   it("uses the suite's arch and domain", () => {
@@ -26,35 +22,33 @@ describe('resolveScoutTarget', () => {
     });
   });
 
-  it('keeps the suite target when the override matches its arch', () => {
-    expect(resolveScoutTarget(serverlessSuite, 'serverless')).toEqual({
+  it('opts a serverless suite into stateful/classic with --scout-arch stateful', () => {
+    expect(resolveScoutTarget(serverlessSuite, { arch: 'stateful' })).toEqual(DEFAULT_SCOUT_TARGET);
+  });
+
+  it('passes --scout-arch / --scout-domain through for any suite or custom config', () => {
+    expect(resolveScoutTarget(undefined, { arch: 'serverless', domain: 'search' })).toEqual({
       arch: 'serverless',
-      domain: 'observability_complete',
+      domain: 'search',
+    });
+    expect(resolveScoutTarget(serverlessSuite, { domain: 'security_complete' })).toEqual({
+      arch: 'serverless',
+      domain: 'security_complete',
     });
   });
 
-  it('opts a serverless suite back into stateful/classic', () => {
-    expect(resolveScoutTarget(serverlessSuite, 'stateful')).toEqual(DEFAULT_SCOUT_TARGET);
-  });
-
-  it('refuses to switch a stateful suite to serverless without a serverless domain', () => {
-    expect(() => resolveScoutTarget({ id: 'agent-builder' }, 'serverless')).toThrow(
-      'Suite "agent-builder" has no serverless scoutDomain in evals.suites.json'
+  it('asks for --scout-domain when serverless has no domain', () => {
+    expect(() => resolveScoutTarget(undefined, { arch: 'serverless' })).toThrow(
+      'Serverless needs a Scout domain: pass --scout-domain (e.g. observability_complete)'
     );
   });
 
-  it('rejects an unknown override', () => {
-    expect(() => resolveScoutTarget(serverlessSuite, 'cloud')).toThrow(
+  it('rejects an unknown arch', () => {
+    expect(() => resolveScoutTarget(serverlessSuite, { arch: 'cloud' })).toThrow(
       'Invalid Scout arch "cloud" (expected stateful or serverless)'
     );
-  });
-
-  it('rejects invalid suite metadata', () => {
-    expect(() => resolveScoutTarget({ id: 'x', scoutArch: 'cloud' })).toThrow(
-      'Suite "x" has an invalid scoutArch "cloud" (expected stateful or serverless)'
-    );
-    expect(() => resolveScoutTarget({ id: 'x', scoutArch: 'serverless' })).toThrow(
-      'Suite "x" sets scoutArch "serverless" without a scoutDomain'
+    expect(() => resolveScoutTarget({ scoutArch: 'cloud' })).toThrow(
+      'Invalid Scout arch "cloud" (expected stateful or serverless)'
     );
   });
 });
