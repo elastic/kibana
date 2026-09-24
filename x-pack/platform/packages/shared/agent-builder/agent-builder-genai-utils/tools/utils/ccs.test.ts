@@ -208,6 +208,7 @@ describe('getIndexFields', () => {
     expect(getIndexMappingsMock).toHaveBeenCalledWith({
       indices: ['my-index'],
       cleanup: true,
+      skipUnauthorized: false,
       esClient,
     });
     expect(result['my-index'].type).toBe('index');
@@ -327,6 +328,7 @@ describe('getIndexFields', () => {
     expect(getIndexMappingsMock).toHaveBeenCalledWith({
       indices: ['local-index'],
       cleanup: true,
+      skipUnauthorized: false,
       esClient,
     });
     expect(esClient.fieldCaps).toHaveBeenCalled();
