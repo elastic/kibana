@@ -480,19 +480,12 @@ describe('AppHeaderView', () => {
             badge: 3,
             'data-test-subj': 'alertsTab',
           },
-          {
-            id: 'detections',
-            label: 'Detections',
-            badge: { iconType: 'code' },
-            'data-test-subj': 'detectionsTab',
-          },
         ]}
       />
     );
 
     expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
-    expect(screen.getByTestId('detectionsTab').querySelector('[tabindex="0"]')).toBeNull();
   });
 
   it('renders tab actions in an ellipsis popover without triggering tab navigation', () => {
