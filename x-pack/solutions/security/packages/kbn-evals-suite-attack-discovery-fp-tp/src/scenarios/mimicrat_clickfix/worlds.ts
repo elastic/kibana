@@ -58,34 +58,48 @@ export const withManagementDestinations = (world: FpTpWorld): FpTpWorld =>
     { domain: 'sccm-dp-02.corp.local', ip: '10.50.10.20', port: 443 }
   );
 
+/** The raw events that carry the PowerShell one-liner, and with it the stage-2 domain. */
+const CRADLE_EVENT_KEYS = ['clickfix-powershell', 'stage2-download', 'loader-drop'] as const;
+
+/** Rewrites the one-liner on every raw event of the chain's PowerShell process. */
+export const withCradle = (world: FpTpWorld, runMarker: string, commandLine: string): FpTpWorld => {
+  const { eventId } = getChainIds(MIMICRAT_CHAIN, runMarker);
+  return CRADLE_EVENT_KEYS.reduce(
+    (acc, key) => withCommandLine(acc, eventId(key), commandLine),
+    world
+  );
+};
+
 const CCM_SCRIPT_DIR = 'C:\\Windows\\CCM\\SystemTemp';
 
 const CCM_PACKAGE_PATH = 'C:\\Windows\\ccmcache\\3f\\zbuild.exe';
+
+/** The raw events of `zbuild.exe`, each carrying its command line. */
+const LOADER_EVENT_KEYS = ['loader-start', 'c2-checkin', 'c2-exfil'] as const;
 
 /**
  * Replaces the replay's malicious raw-event content with Configuration Manager activity:
  * compliance scripts instead of the cradle and the AMSI patch, and a cached package
  * instead of the ProgramData loader. The alerts and the discovery keep their claims.
  */
-const withBenignActivity = (world: FpTpWorld, runMarker: string): FpTpWorld => {
+export const withBenignActivity = (world: FpTpWorld, runMarker: string): FpTpWorld => {
   const { eventId } = getChainIds(MIMICRAT_CHAIN, runMarker);
   const scripted = withCommandLine(
-    withCommandLine(
+    withCradle(
       world,
-      eventId('clickfix-powershell'),
+      runMarker,
       `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ${CCM_SCRIPT_DIR}\\a3f1c2d4.ps1`
     ),
     eventId('amsi-bypass'),
     `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ${CCM_SCRIPT_DIR}\\b7e9d0f2.ps1`
   );
-  return withCommandLine(
+  return LOADER_EVENT_KEYS.reduce(
+    (acc, key) => withCommandLine(acc, eventId(key), CCM_PACKAGE_PATH),
     withProcessExecutable(
       withFilePath(scripted, eventId('loader-drop'), CCM_PACKAGE_PATH),
       'zbuild.exe',
       CCM_PACKAGE_PATH
-    ),
-    eventId('loader-start'),
-    CCM_PACKAGE_PATH
+    )
   );
 };
 

