@@ -84,12 +84,13 @@ export const createSuggestAutomationProvider = ({
         {
           id: aiIndex.id,
           type: AI_INDEX_ATTACHMENT_TYPE,
-          description:
-            aiIndex.description ??
-            i18n.translate('xpack.contextEngine.aiIndexDetail.automations.suggestAttachmentLabel', {
+          description: i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.automations.suggestAttachmentLabel',
+            {
               defaultMessage: 'AI index {name}',
               values: { name: aiIndex.id },
-            }),
+            }
+          ),
           data: attachmentData,
         },
       ],

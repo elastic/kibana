@@ -29,6 +29,7 @@ export const relevanceSearch = async ({
   esClient,
   logger,
   topSnippetsConfig,
+  includeFrozen = false,
 }: {
   term: string;
   target: string;
@@ -38,8 +39,9 @@ export const relevanceSearch = async ({
   logger: Logger;
   /** When provided, uses ES|QL TOP_SNIPPETS instead of ES highlighting. */
   topSnippetsConfig?: TopSnippetsConfig;
+  includeFrozen?: boolean;
 }): Promise<RelevanceSearchResponse> => {
-  const { fields } = await resolveResource({ resourceName: target, esClient });
+  const { fields } = await resolveResource({ resourceName: target, esClient, includeFrozen });
 
   const selectedFields = fields.filter(
     (field) => SEARCHABLE_TEXT_FIELD_TYPES.has(field.type) && field.searchable !== false
@@ -57,5 +59,6 @@ export const relevanceSearch = async ({
     esClient,
     logger,
     topSnippetsConfig,
+    includeFrozen,
   });
 };
