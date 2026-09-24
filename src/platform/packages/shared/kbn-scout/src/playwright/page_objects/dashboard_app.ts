@@ -8,6 +8,7 @@
  */
 
 import type { Download } from 'playwright-core';
+import { euiSelectors } from '../eui_components';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
@@ -362,8 +363,8 @@ export class DashboardApp {
   async closeLibraryFlyout() {
     await expect(this.savedObjectsFinderTable).toBeVisible();
     await this.page
-      .locator('.euiFlyout', { has: this.savedObjectsFinderTable })
-      .locator('[data-test-subj="euiFlyoutCloseButton"]')
+      .locator(euiSelectors.flyout.ROOT_SELECTOR, { has: this.savedObjectsFinderTable })
+      .locator(`[data-test-subj="${euiSelectors.flyout.CLOSE_BUTTON_TEST_SUBJ}"]`)
       .click();
     await expect(this.savedObjectsFinderTable).toBeHidden();
   }

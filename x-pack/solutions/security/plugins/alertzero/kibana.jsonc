@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "alertzero"],
-    "requiredPlugins": ["agentBuilder", "agenticInvestigations", "features", "workflowsExtensions", "workflowsManagement"],
+    "requiredPlugins": ["agentBuilder", "agenticInvestigations", "features", "proposals", "workflowsExtensions", "workflowsManagement"],
     "optionalPlugins": ["searchInferenceEndpoints", "spaces"],
     "requiredBundles": ["kibanaReact"]
   }

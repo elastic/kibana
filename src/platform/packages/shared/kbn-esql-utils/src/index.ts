@@ -9,6 +9,12 @@
 
 export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
 export { getESQLTimeField } from './utils/get_time_field';
+export {
+  getESQLSourceInfo,
+  clearESQLSourceInfoCache,
+  buildEsqlSourceCacheKey,
+} from './utils/get_source_info';
+export type { ESQLSourceInfo, ESQLSourceInfoColumn } from './utils/get_source_info';
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
@@ -97,7 +103,7 @@ export {
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
 export {
-  createEsqlViewsClient,
+  createEsqlViewsManagementClient,
   EsqlViewsClientError,
   type EsqlViewsClient,
 } from './utils/esql_views_client';

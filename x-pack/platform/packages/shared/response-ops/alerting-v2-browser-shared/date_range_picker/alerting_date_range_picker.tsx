@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
+import { map } from 'rxjs';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -93,14 +93,10 @@ export const AlertingDateRangePicker = ({
   const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings>(DEFAULT_AUTO_REFRESH);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
-  const isDateRangePickerEnabled$ = useMemo(
-    () =>
-      featureFlags
-        .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
-        .pipe(distinctUntilChanged()),
-    [featureFlags]
+  const isDateRangePickerEnabled = featureFlags.useBooleanValue(
+    DATE_RANGE_PICKER_FEATURE_FLAG,
+    true
   );
-  const isDateRangePickerEnabled = useObservable(isDateRangePickerEnabled$, true);
 
   const dateRangePickerPresets = useDateRangePickerPresets({
     service: data.dateRangePickerPresets,

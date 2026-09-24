@@ -58,7 +58,7 @@ describe('LinkedActionPoliciesStep', () => {
       items: [
         {
           action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
-          category: 'catch-all',
+          category: 'catch_all',
         },
       ],
       total: 1,
@@ -114,7 +114,7 @@ describe('LinkedActionPoliciesStep', () => {
       items: [
         {
           action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
-          category: 'catch-all',
+          category: 'catch_all',
         },
       ],
       total: 1,
@@ -196,7 +196,7 @@ describe('LinkedActionPoliciesStep', () => {
       items: [
         {
           action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
-          category: 'catch-all',
+          category: 'catch_all',
         },
       ],
       total: 1,
@@ -233,7 +233,7 @@ describe('LinkedActionPoliciesStep', () => {
             matcher: null,
             destinations: [{ type: 'workflow', id: 'wf-1' }],
           } as any,
-          category: 'catch-all',
+          category: 'catch_all',
         },
       ],
       total: 1,
@@ -265,7 +265,7 @@ describe('LinkedActionPoliciesStep', () => {
             matcher: null,
             destinations: [],
           } as any,
-          category: 'catch-all',
+          category: 'catch_all',
         },
       ],
       total: 1,

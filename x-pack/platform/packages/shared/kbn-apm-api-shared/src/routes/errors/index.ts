@@ -13,6 +13,7 @@ import { errorGroupSamplesRoute } from './error_group_samples';
 import { errorSampleDetailsRoute } from './error_sample_details';
 import { errorDistributionRoute } from './error_distribution';
 import { topErroneousTransactionsRoute } from './top_erroneous_transactions';
+import { unprocessedOtelErrorsRoute } from './unprocessed_otel_errors';
 
 export const errorsRouteDefinitions = {
   mainStatistics: errorsMainStatisticsRoute,
@@ -22,6 +23,7 @@ export const errorsRouteDefinitions = {
   sampleDetails: errorSampleDetailsRoute,
   distribution: errorDistributionRoute,
   topErroneousTransactions: topErroneousTransactionsRoute,
+  unprocessedOtel: unprocessedOtelErrorsRoute,
 };
 
 export type { ErrorGroupMainStatisticsResponse } from './error_groups_main_statistics';
@@ -33,3 +35,4 @@ export type { ErrorGroupSampleIdsResponse } from './error_group_samples';
 export type { ErrorSampleDetailsResponse } from './error_sample_details';
 export type { ErrorDistributionResponse } from './error_distribution';
 export type { TopErroneousTransactionsResponse } from './top_erroneous_transactions';
+export type { UnprocessedOtelErrorsResponse } from './unprocessed_otel_errors';

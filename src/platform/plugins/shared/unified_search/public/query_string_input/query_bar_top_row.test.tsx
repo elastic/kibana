@@ -983,6 +983,30 @@ describe('QueryBarTopRowTopRow', () => {
       });
     });
 
+    it('Should keep the ES|QL date picker enabled when timeFieldName is set even if showDatePicker.disabled is true', async () => {
+      render(
+        wrapWithPicker({
+          query: esqlQuery,
+          isDirty: false,
+          screenTitle: 'ES|QL Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [stubIndexPattern],
+          showDatePicker: { disabled: true },
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        if (useNewPicker) {
+          expect(screen.getByTestId('dateRangePickerControlButton')).toBeEnabled();
+        } else {
+          expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
+        }
+        expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
+      });
+    });
+
     it('Should render disabled date picker for KQL when showDatePicker.disabled is true', async () => {
       const dataView = {
         ...stubIndexPattern,
