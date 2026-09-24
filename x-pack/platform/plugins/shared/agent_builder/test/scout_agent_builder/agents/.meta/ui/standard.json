@@ -1,0 +1,162 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e65520b227a3627-a575d75181b677a",
+      "title": "Agent Builder — agents list agents list journeys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agents_list.spec.ts",
+        "line": 54,
+        "column": 49
+      }
+    },
+    {
+      "id": "a0f5f6a509b4925-9efba35e786335a",
+      "title": "Agent Builder — create agent creates an agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/create_agent.spec.ts",
+        "line": 29,
+        "column": 11
+      }
+    },
+    {
+      "id": "6ee21523b0d5a0c-63bffa83f24f2ab",
+      "title": "Agent Builder — edit agent from overview page edits the prompt from the overview flyout without a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/edit_agent_overview.spec.ts",
+        "line": 40,
+        "column": 28
+      }
+    },
+    {
+      "id": "b40f1634a3356d9-f93503c6f8b3a5a",
+      "title": "Agent Builder — edit agent edit and clone agent journeys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/edit_agent.spec.ts",
+        "line": 48,
+        "column": 58
+      }
+    },
+    {
+      "id": "c7125a18b480800-7c8092363cca966",
+      "title": "Agent Builder — tools landing page renders tools page and table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/landing_page.spec.ts",
+        "line": 25,
+        "column": 39
+      }
+    },
+    {
+      "id": "c7125a18b480800-30bb73a4ec01951",
+      "title": "Agent Builder — tools landing page bulk deletes tools from the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/landing_page.spec.ts",
+        "line": 31,
+        "column": 25
+      }
+    },
+    {
+      "id": "a97492f49f128b2-f9e4705a5e88388",
+      "title": "Agent Builder — sidebar agent switch embeddable sidebar agent switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/sidebar_agent_switch.spec.ts",
+        "line": 44,
+        "column": 11
+      }
+    },
+    {
+      "id": "2d52d04cb082d78-45d6adf763ad160",
+      "title": "Agent Builder — per-space default agent admin sets and clears the space default from the agents list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/space_default_agent.spec.ts",
+        "line": 76,
+        "column": 11
+      }
+    },
+    {
+      "id": "2d52d04cb082d78-de662ae87232055",
+      "title": "Agent Builder — per-space default agent restricts a non-admin to the space default agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/space_default_agent.spec.ts",
+        "line": 100,
+        "column": 61
+      }
+    },
+    {
+      "id": "2d52d04cb082d78-b7847fbf70756d4",
+      "title": "Agent Builder — per-space default agent admin still sees all agents when a space default is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/space_default_agent.spec.ts",
+        "line": 130,
+        "column": 15
+      }
+    }
+  ]
+}
