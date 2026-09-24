@@ -105,7 +105,7 @@ describe('assignStoredInlineDataViewIds', () => {
     expect(assignStoredInlineDataViewIds(attributes, result)).toStrictEqual(result);
   });
 
-  it.each<{ source: string; searchSource: SerializedSearchSourceFields }>([
+  it.each([
     { source: 'inline without an ID', searchSource: { index: inlineSpec } },
     { source: 'saved Data View', searchSource: { indexRefName: 'saved-view-reference' } },
     {
