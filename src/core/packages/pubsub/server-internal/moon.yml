@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/core-base-server-mocks'
   - '@kbn/core-pubsub-server'
   - '@kbn/logging'
+  - '@kbn/logging-mocks'
 tags:
   - shared-server
   - package
