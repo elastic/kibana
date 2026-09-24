@@ -11,6 +11,26 @@ import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
 
+// EUI's test-env `EuiFlyout` omits the `.euiFlyout__content` wrapper the collapse hook scrolls
+// through, so without it the wheel tests could never reach an outer scroller.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const { createElement } = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: ({ children, ...props }: { children?: React.ReactNode }) =>
+      createElement(
+        actual.EuiFlyout,
+        props,
+        createElement(
+          'div',
+          { className: 'euiFlyout__content', 'data-test-subj': 'euiFlyoutContent' },
+          children
+        )
+      ),
+  };
+});
+
 const noop = () => {};
 
 describe('FlyoutTemplate header collapse on scroll', () => {
