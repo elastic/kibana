@@ -269,18 +269,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         globalRegion,
         dataFormat,
       }));
-    setIsSavingSO(false);
-    // Navigate first so onContinue uses the current history.location (not the stale closure
-    // location). persistDeploymentId then replaces the already-navigated URL to add ?deploymentId=,
-    // mirroring the order in useDeploy's handleDeploy for the managed-integration path.
-    onContinue();
     if (deploymentId) {
       // Always include mechanisms when updating — if reusing an existing MI deployment SO
       // (existingId), this transitions it from ['managed_integration'] to ['ecf'].
       // Clear connectorId and authMethod: those are MI-only fields and must not persist after
       // the transition, otherwise getByConnectorId still returns this deployment for the old
       // connector even though it no longer uses managed integrations.
-      await updateDeployment(deploymentId, {
+      // This write is load-bearing — failure leaves the SO advertising the wrong mechanism
+      // and an orphaned connector reference, so we must confirm it before navigating.
+      const writeSucceeded = await updateDeployment(deploymentId, {
         mechanisms: ['ecf'],
         connectorId: null,
         authMethod: null,
@@ -290,9 +287,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         status: 'succeeded',
         ...(!ecfStacksUnchanged ? { ecfStacks } : {}),
       });
+      setIsSavingSO(false);
+      if (!writeSucceeded) return;
       if (!ecfStacksUnchanged) updateDetectAndReviewStep({ ecfStacks });
       if (!existingId) persistDeploymentId(deploymentId);
+    } else {
+      setIsSavingSO(false);
     }
+    onContinue();
   }, [
     ecfStacks,
     ecfStacksUnchanged,
@@ -316,10 +318,29 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
       updateDetectAndReviewStep({ ecfStacks });
     }
+    // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
+    // so policyIdsByInstance has no stale entry — it can slip through isAlreadyDeployed and
+    // reach this ECF branch without being reconciled. Best-effort: navigation already happened.
+    const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+    const staleFailedIds = failedInstances.filter((id) => !activeInstanceIds.has(id));
+    if (staleFailedIds.length > 0) {
+      if (detectAndReviewStep.onboardingDeploymentId) {
+        const remainingFailed = failedInstances.filter((id) => !staleFailedIds.includes(id));
+        await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
+          services: selectedServiceIds,
+          status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
+        });
+      }
+      removeDeployInstances(staleFailedIds);
+    }
   }, [
     ecfStacks,
     ecfStacksUnchanged,
     detectAndReviewStep.onboardingDeploymentId,
+    deployGroups,
+    failedInstances,
+    selectedServiceIds,
+    removeDeployInstances,
     onContinue,
     updateDeployment,
     updateDetectAndReviewStep,
@@ -331,19 +352,22 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // reconciliation the SO services list and local failedInstances retain the removed service.
   const handleMiNext = useCallback(async () => {
     const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-    const staleFailedIds = new Set(failedInstances.filter((id) => !activeInstanceIds.has(id)));
-    if (staleFailedIds.size > 0) {
-      // removeDeployInstances replaces the full serviceStatuses map (vs updateDetectAndReviewStep
-      // which merges), so it actually deletes the stale error chip for the deselected service.
-      // It also removes from failedInstances and deployErrors in the same write.
-      removeDeployInstances([...staleFailedIds]);
+    const staleFailedIds = failedInstances.filter((id) => !activeInstanceIds.has(id));
+    if (staleFailedIds.length > 0) {
       if (detectAndReviewStep.onboardingDeploymentId) {
-        const remainingFailed = failedInstances.filter((id) => !staleFailedIds.has(id));
-        await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
+        const remainingFailed = failedInstances.filter((id) => !staleFailedIds.includes(id));
+        const writeSucceeded = await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
           services: selectedServiceIds,
           status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
         });
+        // Keep local state intact if the SO write failed — the step stays actionable for retry.
+        if (!writeSucceeded) return;
       }
+      // removeDeployInstances replaces the full serviceStatuses map (vs updateDetectAndReviewStep
+      // which merges), so it actually deletes the stale error chip for the deselected service.
+      // It also removes from failedInstances and deployErrors in the same write.
+      // Called after the SO write is confirmed so a failed write leaves state intact for retry.
+      removeDeployInstances(staleFailedIds);
     }
     onContinue();
   }, [
@@ -363,8 +387,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     // cleanup completes before the rest of handleNext continues.
     // !isAgentBased: agent-based policyIdsByInstance holds package policy IDs, not MI policies —
     // calling the MI deploy in agent-based mode would POST to /managed_integrations incorrectly.
+    // awsServicesMap must be loaded before comparing active instance IDs — on resume,
+    // policyIdsByInstance is hydrated before the matrix is available, so miServiceIds and
+    // deployGroups are temporarily empty; treating every mapped instance as stale while the
+    // matrix loads would delete still-selected Fleet policies.
     const hasStaleMiPolicies =
       !isAgentBased &&
+      awsServicesMap !== undefined &&
       (Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
         Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0);
     let miCleanupFailed = false;
@@ -415,6 +444,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     handleMiNext,
     handleAgentDeployForNext,
     handleDeploy,
+    awsServicesMap,
     detectAndReviewStep.policyIdsByInstance,
     detectAndReviewStep.pendingCleanupPolicyIds,
     detectAndReviewStep.onboardingDeploymentId,

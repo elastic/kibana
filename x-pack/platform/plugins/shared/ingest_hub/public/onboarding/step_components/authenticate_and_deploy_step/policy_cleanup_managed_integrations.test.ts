@@ -230,13 +230,24 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     expect(payload.vars?.secret_access_key).toBe('SECRET');
   });
 
-  it('includes cloud_connector block when connectorId is set', async () => {
+  it('preserves cloud_connector from the fetched policy (not from session connectorId)', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
     });
+    // Simulate a policy whose connector was reassigned by a Fleet operator since onboarding.
+    // The cleanup PUT must echo back the connector that is already on the policy, not rebuild
+    // it from the wizard's session connectorId — those two can differ after a reassignment.
+    mockGetAgentlessPolicy.mockResolvedValue({
+      item: {
+        name: 'existing-agentless-name',
+        package: { version: '2.5.0' },
+        cloud_connector: { enabled: true, cloud_connector_id: 'fleet-assigned-connector' },
+      },
+    });
     await cleanupManagedIntegrationsPolicies({
       ...BASE_OPTS,
-      authenticateAndDeployStep: { connectorId: 'conn-abc' } as never,
+      // Session still records the original connector — must NOT appear in the PUT body.
+      authenticateAndDeployStep: { connectorId: 'original-session-connector' } as never,
       instances: [instance],
       servicesMap: new Map([['vpcflow', vpcflow]]),
       pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
@@ -245,8 +256,8 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     const payload = mockUpdateAgentless.mock.calls[0][1];
     expect(payload.cloud_connector).toEqual({
       enabled: true,
-      cloud_connector_id: 'conn-abc',
-      target_csp: 'aws',
+      cloud_connector_id: 'fleet-assigned-connector',
     });
+    expect(payload.cloud_connector?.cloud_connector_id).not.toBe('original-session-connector');
   });
 });
