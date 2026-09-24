@@ -233,6 +233,10 @@ export class LogsExtractionClient {
     // lag. Stays undefined when the engine is stopped or the non-priority process is disabled,
     // because neither is stalled — they are idle, and an idle process must not report lag.
     let resumePointISO: string | undefined;
+    // Updated whenever a checkpoint is persisted mid-run; the error path uses the most-recent
+    // committed point rather than the pre-run start, so partial progress does not inflate the
+    // reported lag.
+    let lastPersistedCheckpointISO: string | undefined;
 
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
@@ -254,6 +258,9 @@ export class LogsExtractionClient {
         entityDefinition,
         onRemoteResolved: (r) => {
           isRemote = r;
+        },
+        onCheckpointPersisted: (ts) => {
+          lastPersistedCheckpointISO = ts;
         },
       });
 
@@ -298,7 +305,13 @@ export class LogsExtractionClient {
       // advances the scheduled cursor, so its outcome says nothing about how far behind the
       // engine is.
       if (!opts?.specificWindow) {
-        this.recordExtractionLag(resumePointISO, this.getExtractionAttributes(type, isRemote));
+        // Use the most-recently committed checkpoint if the run made partial progress: it is closer
+        // to where the next run will resume than the pre-run start and avoids inflating the lag
+        // alert when a long run fails after several completed slices.
+        this.recordExtractionLag(
+          lastPersistedCheckpointISO ?? resumePointISO,
+          this.getExtractionAttributes(type, isRemote)
+        );
       }
       return await this.handleError(error, type, isRemote);
     }
@@ -336,6 +349,7 @@ export class LogsExtractionClient {
     opts,
     entityDefinition,
     onRemoteResolved,
+    onCheckpointPersisted,
   }: {
     type: EntityType;
     config: LogExtractionConfig;
@@ -345,6 +359,8 @@ export class LogsExtractionClient {
     // Called once remote patterns are resolved and before any fallible work begins, so the caller
     // can propagate the flag even when runMainPath or a subsequent step throws.
     onRemoteResolved?: (isRemote: boolean) => void;
+    // Called after each checkpoint write so the caller tracks partial progress for lag reporting.
+    onCheckpointPersisted?: (ts: string) => void;
   }): Promise<{
     isRemote: boolean;
     count: number;
@@ -379,6 +395,7 @@ export class LogsExtractionClient {
       latestIndex: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
       indexPatterns: allIndexPatterns,
       metricAttributes: this.getExtractionAttributes(type, isRemote),
+      onCheckpointPersisted,
     });
 
     return {
@@ -406,6 +423,7 @@ export class LogsExtractionClient {
     indexPatterns,
     latestIndex,
     metricAttributes,
+    onCheckpointPersisted,
   }: {
     type: EntityType;
     config: LogExtractionConfig;
@@ -415,6 +433,7 @@ export class LogsExtractionClient {
     indexPatterns: string[];
     latestIndex: string;
     metricAttributes: ExtractionAttributes;
+    onCheckpointPersisted?: (ts: string) => void;
   }): Promise<{
     count: number;
     pages: number;
@@ -442,6 +461,7 @@ export class LogsExtractionClient {
         maxLogsPerWindow,
         entityDefinition,
         metricAttributes,
+        onCheckpointPersisted,
       });
       let { lastSearchTimestamp } = result;
       if (result.logsCapApplied) {
@@ -524,6 +544,7 @@ export class LogsExtractionClient {
         maxLogsPerWindow: remainingCap,
         entityDefinition,
         metricAttributes,
+        onCheckpointPersisted,
       });
 
       totalCount += subResult.count;
@@ -615,6 +636,7 @@ export class LogsExtractionClient {
     maxLogsPerWindow,
     entityDefinition,
     metricAttributes,
+    onCheckpointPersisted,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -628,6 +650,7 @@ export class LogsExtractionClient {
     maxLogsPerWindow: number;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
     metricAttributes: ExtractionAttributes;
+    onCheckpointPersisted?: (ts: string) => void;
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
@@ -748,6 +771,7 @@ export class LogsExtractionClient {
             entityPagination,
             state,
             metricAttributes,
+            onCheckpointPersisted,
           });
 
           totalCount += sliceIngestOutcome.addedToTotalCount;
@@ -757,6 +781,7 @@ export class LogsExtractionClient {
 
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd);
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
+        onCheckpointPersisted?.(state.checkpointTimestamp!);
         isFirstRunInThisCycle = false;
 
         const windowLogCapEnabled = maxLogsPerWindow > 0;
@@ -872,6 +897,7 @@ export class LogsExtractionClient {
     entityPagination,
     state: initialSliceState,
     metricAttributes,
+    onCheckpointPersisted,
   }: {
     type: EntityType;
     opts?: LogsExtractionOptions;
@@ -886,6 +912,7 @@ export class LogsExtractionClient {
     entityPagination: PaginationParams | undefined;
     state: EngineLogExtractionState;
     metricAttributes: ExtractionAttributes;
+    onCheckpointPersisted?: (ts: string) => void;
   }): Promise<{
     addedToTotalCount: number;
     addedToPageCount: number;
@@ -981,6 +1008,7 @@ export class LogsExtractionClient {
           sliceEndTimestamp: logsPageCursorEnd.timestampCursor,
         };
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
+        onCheckpointPersisted?.(state.checkpointTimestamp!);
       }
     } while (pagination);
 

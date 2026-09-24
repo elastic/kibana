@@ -2311,6 +2311,9 @@ describe('LogsExtractionClient extraction metrics', () => {
   let lagRecord: jest.SpyInstance;
   let utilizationRecord: jest.SpyInstance;
   let logsProcessedRecord: jest.SpyInstance;
+  let entitiesCreatedAdd: jest.SpyInstance;
+  let entitiesUpdatedAdd: jest.SpyInstance;
+  let entitiesNoopAdd: jest.SpyInstance;
 
   beforeEach(() => {
     jest.useFakeTimers({ now: fixedNow.getTime() });
@@ -2320,6 +2323,15 @@ describe('LogsExtractionClient extraction metrics', () => {
       .mockImplementation();
     logsProcessedRecord = jest
       .spyOn(entityStoreMetrics.extractionLogsProcessed, 'record')
+      .mockImplementation();
+    entitiesCreatedAdd = jest
+      .spyOn(entityStoreMetrics.extractionEntitiesCreated, 'add')
+      .mockImplementation();
+    entitiesUpdatedAdd = jest
+      .spyOn(entityStoreMetrics.extractionEntitiesUpdated, 'add')
+      .mockImplementation();
+    entitiesNoopAdd = jest
+      .spyOn(entityStoreMetrics.extractionEntitiesNoop, 'add')
       .mockImplementation();
   });
 
@@ -2476,6 +2488,80 @@ describe('LogsExtractionClient extraction metrics', () => {
 
     // There is no fraction to report. A recorded 0 would read as an idle process.
     expect(utilizationRecord).not.toHaveBeenCalled();
+  });
+
+  it('forwards ingest outcomes to the entities.created/updated/noop counters', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.single);
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    mockIngestEntities.mockResolvedValue({ created: 5, updated: 3, noop: 2 });
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [['user1']] });
+
+    await client.extractLogs('user');
+
+    expect(entitiesCreatedAdd).toHaveBeenCalledWith(
+      5,
+      expect.objectContaining({ extraction_mode: EXTRACTION_MODE.single })
+    );
+    expect(entitiesUpdatedAdd).toHaveBeenCalledWith(
+      3,
+      expect.objectContaining({ extraction_mode: EXTRACTION_MODE.single })
+    );
+    expect(entitiesNoopAdd).toHaveBeenCalledWith(
+      2,
+      expect.objectContaining({ extraction_mode: EXTRACTION_MODE.single })
+    );
+  });
+
+  it('records logs_cap.utilization proportional to logsProcessed / maxLogsPerWindow', async () => {
+    const { client, mockEngineDescriptorClient, mockGlobalStateClient } = createContextWithMode(
+      EXTRACTION_MODE.single
+    );
+    mockGlobalStateClient.findLogExtractionOverrides.mockResolvedValue(
+      LogExtractionConfig.parse({ maxLogsPerWindow: 1000, maxTimeWindowSize: '999d' })
+    );
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+    // 50 logs in the slice → logsProcessed ≈ 50 → utilization ≈ 50/1000 = 0.05
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] }, 50);
+
+    await client.extractLogs('user');
+
+    // Cross-check: logsProcessed (from the probe) and the utilization fraction must match.
+    const [logsProcessed] = logsProcessedRecord.mock.calls[0];
+    expect(logsProcessed).toBeGreaterThan(0);
+    const [fraction] = utilizationRecord.mock.calls[0];
+    expect(fraction).toBeCloseTo(Math.min(1, logsProcessed / 1000), 5);
+  });
+
+  it('records lag_ms from the last committed checkpoint after partial-progress failure', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.single);
+    // Pre-run start: one hour before fixedNow.
+    const runStart = '2025-01-15T11:00:00.000Z';
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      startedDescriptor({ checkpointTimestamp: runStart, lastExecutionTimestamp: runStart })
+    );
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+
+    const sliceOneEnd = '2025-01-15T11:30:00.000Z';
+    mockExecuteEsqlQuery
+      // Slice 1 probe: default (large) count → non-terminal, loop continues to slice 2.
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(sliceOneEnd))
+      // Slice 1 extraction: succeeds → checkpoint committed to sliceOneEnd.
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] })
+      // Slice 2 probe: succeeds.
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:45:00.000Z', 1))
+      // Slice 2 extraction: throws.
+      .mockRejectedValueOnce(new Error('es unavailable'));
+
+    await client.extractLogs('user');
+
+    // The first slice committed checkpoint = sliceOneEnd.
+    // Lag must be measured from that, not from runStart (pre-run start).
+    const [[lagMs]] = lagRecord.mock.calls;
+    const lagFromCommitted = fixedNow.getTime() - new Date(sliceOneEnd).getTime();
+    const lagFromRunStart = fixedNow.getTime() - new Date(runStart).getTime();
+    expect(lagMs).toBeCloseTo(lagFromCommitted, -2); // within 100ms
+    expect(lagMs).not.toBeCloseTo(lagFromRunStart, -2);
   });
 
   it('labels failure metrics remote:true when the query throws on a CCS/CPS run', async () => {
