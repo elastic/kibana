@@ -6,6 +6,7 @@
  */
 import path from 'path';
 import { z } from '@kbn/zod';
+import { i18n } from '@kbn/i18n';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
@@ -49,6 +50,7 @@ import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 import { isSecretConnectionsEnabled } from '../../config';
 import {
+  getUnrestorableMaskedParamKeys,
   maskMonitorParams,
   restoreMaskedMonitorParams,
 } from '../../../common/utils/mask_monitor_params';
@@ -117,6 +119,15 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       }
 
       const submittedParams = toParamJson(monitor[ConfigKey.PARAMS]);
+      const previousParams = toParamJson(normalizedPreviousMonitor[ConfigKey.PARAMS]);
+      const unrestorableParamKeys = getUnrestorableMaskedParamKeys({
+        previousParams,
+        submittedParams,
+      });
+      if (unrestorableParamKeys.length > 0) {
+        const message = getUnrestorableParamsMessage(unrestorableParamKeys);
+        return response.badRequest({ body: { message, attributes: { details: message } } });
+      }
       // A submitted ******** is the masked placeholder, so keep the stored secret.
       const monitorWithRestoredParams =
         submittedParams === undefined
@@ -124,7 +135,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
           : {
               ...monitor,
               [ConfigKey.PARAMS]: restoreMaskedMonitorParams({
-                previousParams: toParamJson(normalizedPreviousMonitor[ConfigKey.PARAMS]),
+                previousParams,
                 submittedParams,
               }),
             };
@@ -443,6 +454,13 @@ export const validateLocationPermissions = async ({ server, request }: RouteCont
     elasticManagedLocationsEnabled,
   };
 };
+
+const getUnrestorableParamsMessage = (keys: string[]) =>
+  i18n.translate('xpack.synthetics.editMonitor.unrestorableMaskedParams', {
+    defaultMessage:
+      'Enter a value for the following parameters. They have no stored value to keep: {keys}',
+    values: { keys: keys.join(', ') },
+  });
 
 const toParamJson = (params: unknown): string | undefined => {
   if (typeof params === 'string') {

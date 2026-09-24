@@ -7,6 +7,7 @@
 
 import {
   MASKED_PARAM_VALUE,
+  getUnrestorableMaskedParamKeys,
   maskMonitorParams,
   restoreMaskedMonitorParams,
 } from './mask_monitor_params';
@@ -56,5 +57,33 @@ describe('restoreMaskedMonitorParams', () => {
         submittedParams: '{"password":"********"}',
       })
     ).toBe('{"password":"********"}');
+  });
+});
+
+describe('getUnrestorableMaskedParamKeys', () => {
+  it('returns masked parameters that have no stored value', () => {
+    expect(
+      getUnrestorableMaskedParamKeys({
+        previousParams: '{"token":"secret","url":"https://example.com"}',
+        submittedParams: '{"token2":"********","url":"********","note":"plain"}',
+      })
+    ).toEqual(['token2']);
+  });
+
+  it('returns every masked parameter when nothing is stored', () => {
+    expect(
+      getUnrestorableMaskedParamKeys({
+        submittedParams: '{"token":"********"}',
+      })
+    ).toEqual(['token']);
+  });
+
+  it('ignores submissions that are not parameter objects', () => {
+    expect(
+      getUnrestorableMaskedParamKeys({
+        previousParams: '{"token":"secret"}',
+        submittedParams: MASKED_PARAM_VALUE,
+      })
+    ).toEqual([]);
   });
 });
