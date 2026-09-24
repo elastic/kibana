@@ -21,6 +21,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { Environment } from '../../../common/environment_rt';
@@ -138,6 +139,12 @@ export function getConnectionTransactions({
           aggs: {
             ...outcomes,
             ...getLatencyAggregation(latencyAggregationType, TRANSACTION_DURATION),
+            transaction_type: {
+              terms: {
+                field: TRANSACTION_TYPE,
+                size: 1,
+              },
+            },
           },
         },
       },
@@ -164,8 +171,13 @@ export function getConnectionTransactions({
         value: totalCount,
       });
 
+      const transactionType = String(
+        (bucket as any).transaction_type?.buckets?.[0]?.key ?? ''
+      );
+
       return {
         name: String(bucket.key),
+        transactionType,
         latency,
         throughput,
         errorRate,

@@ -8,7 +8,9 @@
 import { EuiFlyoutBody, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Environment } from '../../../../common/environment_rt';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
@@ -28,6 +30,8 @@ interface RequestFlyoutProps {
   deps: {
     core: CoreStart;
     share?: SharePublicStart;
+    lens?: LensPublicStart;
+    dataViews?: DataViewsPublicPluginStart;
   };
   connection: RequestFlyoutConnection;
   /** Initial environment — from the host page query params. */

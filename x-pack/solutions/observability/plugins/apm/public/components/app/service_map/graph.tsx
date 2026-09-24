@@ -988,7 +988,7 @@ function GraphInner({
           {edgeFlyoutConnection && (
             <RequestFlyout
               key={selectedEdgeForFlyout?.id}
-              deps={{ core, share }}
+              deps={{ core, share, lens, dataViews }}
               connection={edgeFlyoutConnection}
               initialEnvironment={environment}
               initialRangeFrom={rangeFrom ?? start}

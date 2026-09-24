@@ -48,6 +48,7 @@ export function useRequestFlyoutTransactions({
     () =>
       (data?.transactionGroups ?? []).map((group) => ({
         name: group.name,
+        transactionType: group.transactionType,
         latency: { value: group.latency },
         throughput: { value: group.throughput },
         errorRate: { value: group.errorRate },

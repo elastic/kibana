@@ -6,7 +6,9 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import React, { createContext, useContext } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import type { RequestFlyoutConnection } from './types';
@@ -25,6 +27,8 @@ export interface RequestFlyoutContextValue {
   deps: {
     core: CoreStart;
     share?: SharePublicStart;
+    lens?: LensPublicStart;
+    dataViews?: DataViewsPublicPluginStart;
   };
   connection: RequestFlyoutConnection;
   filters: RequestFlyoutFilters;

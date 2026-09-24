@@ -12,6 +12,8 @@ import { rangeSchema } from '../../default_api_types';
 /** A single transaction group in the source service that calls the target connection. */
 export interface ConnectionTransactionGroup {
   name: string;
+  /** Most frequent transaction type for this group — needed to open the detail flyout. */
+  transactionType: string;
   /** Avg/p95/p99 latency in microseconds, based on latencyAggregationType. */
   latency: number | null;
   /** Transactions per minute. */
