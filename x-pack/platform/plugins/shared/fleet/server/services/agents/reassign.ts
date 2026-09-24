@@ -142,7 +142,7 @@ export async function reassignAgents(
     // omits the filter and the query covers all spaces. Otherwise use the explicit spaceId if given,
     // falling back to the current namespace derived from soClient.
     const effectiveSpaceId =
-      options.spaceId === '*' ? undefined : (options.spaceId ?? currentSpaceId);
+      options.spaceId === '*' ? undefined : options.spaceId ?? currentSpaceId;
     const namespaceFilter = await agentsKueryNamespaceFilter(effectiveSpaceId);
     const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
     // cheap count — avoids hydrating up to batchSize agent documents just to read the total
