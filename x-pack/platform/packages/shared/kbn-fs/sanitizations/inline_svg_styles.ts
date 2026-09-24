@@ -7,35 +7,37 @@
 
 import type { DOMWindow } from 'jsdom';
 
-// Limits keep the synchronous pre-pass cheap on hostile input; registry icons stay far below each one.
+// Keep the synchronous pre-pass cheap on hostile input; registry icons stay far below each one.
 const MAX_STYLE_TEXT_LENGTH = 16_384;
 const MAX_STYLE_RULES = 256;
 const MAX_VALUE_LENGTH = 64;
 const MAX_DASH_ARRAY_ENTRIES = 16;
 const MAX_RESOLUTION_STEPS = 20_000;
 const MAX_ADDED_ATTRIBUTE_BYTES = 65_536;
+const MAX_COPIED_MARKUP_BYTES = 65_536;
+const MAX_REFERENCE_DEPTH = 8;
 
-// CSS numbers need a digit after the decimal point: `1.5` and `.5` are valid, `1.` is not.
 const NUMERIC = String.raw`(?:\d+(?:\.\d+)?|\.\d+)`;
 const NUMBER = new RegExp(`^${NUMERIC}$`);
 const PERCENTAGE = new RegExp(`^${NUMERIC}%$`);
 const LENGTH = new RegExp(`^${NUMERIC}(?:px|%)?$`, 'i');
 const HEX_COLOR = /^#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i;
 // Same-document references only, e.g. url(#GreenGradient); anything else could load a remote resource.
-const LOCAL_REFERENCE = /^url\(\s*#[\w-]+\s*\)$/;
+const LOCAL_REFERENCE = /^url\(\s*#([\w-]+)\s*\)$/;
+const LOCAL_HREF = /^#([\w-]+)$/;
+const LOCAL_URL = /url\(\s*['"]?#([^\s'")]+)/gi;
 const CLASS_SELECTOR = /^\.(-?[_a-zA-Z][\w-]*)$/;
 const SVG_TYPE_SELECTOR = 'svg';
 const STYLE_TAG = /<style[\s>]/i;
 const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
-// Strings and escapes can hide braces and semicolons from the parser below. Only printable ASCII and CSS
-// whitespace are allowed, so JavaScript's wider \s, trim() and toLowerCase() agree with CSS tokenization.
+// Quotes and escapes can hide `{`, `}` and `;` from the parser, and outside ASCII JavaScript's \s and
+// toLowerCase() disagree with CSS.
 const UNSUPPORTED_CSS_CHARACTERS = /["'\\]|[^\t\n\f\r -~]/;
 // CSS never reads comments, blocks or declaration ends inside url(), so its contents may not look like any.
 const URL_TOKEN = /url\([^;{}()[\]*]*\)/gi;
 const URL_FUNCTION = /url\(/i;
 // A `;` or `}` nested in parentheses or brackets does not end a declaration, but the parser below would split on it.
 const GROUPING = /[()[\]]/;
-// HTML splits class attributes on ASCII whitespace only.
 const ASCII_WHITESPACE = /[\t\n\f\r ]+/;
 const CSS_WHITESPACE_EDGES = /^[\t\n\f\r ]+|[\t\n\f\r ]+$/g;
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
@@ -47,10 +49,33 @@ const ANIMATION_ELEMENTS: ReadonlySet<string> = new Set([
   'animatetransform',
   'set',
 ]);
-// Statements that cannot style elements when the SVG is rendered as an image. `@namespace` is not one:
-// a default namespace changes which elements class selectors match.
+const GRADIENT_ELEMENTS: ReadonlySet<string> = new Set(['lineargradient', 'radialgradient']);
+const CONTAINER_REFERENCES: ReadonlySet<string> = new Set([
+  'clippath',
+  'mask',
+  'pattern',
+  'filter',
+]);
+// Geometry is only inherited from a gradient of the same type.
+const SHARED_GRADIENT_ATTRIBUTES = ['gradientUnits', 'gradientTransform', 'spreadMethod'] as const;
+const GRADIENT_GEOMETRY_ATTRIBUTES: Readonly<Record<string, readonly string[]>> = {
+  lineargradient: ['x1', 'y1', 'x2', 'y2'],
+  radialgradient: ['cx', 'cy', 'r', 'fx', 'fy', 'fr'],
+};
+const BASIC_SHAPES: ReadonlySet<string> = new Set([
+  'path',
+  'rect',
+  'circle',
+  'ellipse',
+  'line',
+  'polyline',
+  'polygon',
+]);
+// `overflow` has no effect on a basic shape, so Illustrator's `style="overflow:visible;"` on <use> can be dropped.
+const OVERFLOW_DECLARATION = /^overflow\s*:\s*[a-z]+$/i;
+// `@namespace` is deliberately absent: a default namespace changes which elements class selectors match.
 const IGNORED_STATEMENT_AT_RULES: ReadonlySet<string> = new Set(['import']);
-// Blocks that never style elements; conditional or cascade-changing blocks (@media, @supports, @layer, …) fall back.
+// Conditional or cascade-changing blocks (@media, @supports, @layer, …) fall back instead.
 const IGNORED_BLOCK_AT_RULES: ReadonlySet<string> = new Set([
   'page',
   'font-face',
@@ -99,12 +124,10 @@ interface StyleRule {
 interface Declaration {
   readonly property: string;
   readonly value: string;
-  // A class selector (1) beats the `svg` type selector (0); within the same specificity, later rules win.
   readonly specificity: number;
   readonly order: number;
 }
 
-// Winning declaration per selector key (`.name` or `svg`) and property.
 type DeclarationsBySelector = Map<string, Map<string, Declaration>>;
 
 const isDefined = (key: string | undefined): key is string => key !== undefined;
@@ -138,7 +161,6 @@ const classifyStyleElement = (styleElement: Element): 'css' | 'ignored' | 'unsup
   return media === 'print' ? 'ignored' : 'unsupported';
 };
 
-// Maps a selector to the key used to look up declarations: `.name` for classes, `svg` for the type selector.
 const toSelectorKey = (selector: string): string | undefined => {
   if (selector.toLowerCase() === SVG_TYPE_SELECTOR) {
     return SVG_TYPE_SELECTOR;
@@ -147,8 +169,7 @@ const toSelectorKey = (selector: string): string | undefined => {
   return match ? `.${match[1]}` : undefined;
 };
 
-// Returns the position after an ignorable `@import …;` statement or `@keyframes … { … }` block, or
-// undefined for any at-rule that could style elements.
+// Undefined for any at-rule that could style elements.
 const skipAtRule = (text: string, start: number): number | undefined => {
   AT_RULE_NAME.lastIndex = start;
   const name = AT_RULE_NAME.exec(text)?.[1].toLowerCase() ?? '';
@@ -195,9 +216,7 @@ const parseDeclarations = (body: string): StyleRule['declarations'] | undefined 
   return declarations;
 };
 
-// A strict parser for the supported subset. jsdom's CSSOM is not an option: attaching a <style> runs its
-// selector engine, which compiles selectors with `new Function`, and Kibana disallows code generation from strings.
-// At-rules are skipped; anything else unexpected returns undefined so the whole SVG falls back.
+// jsdom's CSSOM compiles selectors with `new Function`, which Kibana disallows, so this parses the subset by hand.
 const parseStyleRules = (cssText: string): StyleRule[] | undefined => {
   if (URL_FUNCTION.test(cssText.replace(URL_TOKEN, ' '))) {
     return undefined;
@@ -245,7 +264,6 @@ const parseStyleRules = (cssText: string): StyleRule[] | undefined => {
   return rules;
 };
 
-// Returns the winning declaration per selector and property, or undefined when the CSS is outside the supported subset.
 const collectDeclarations = (cssTexts: readonly string[]): DeclarationsBySelector | undefined => {
   const rules: StyleRule[] = [];
   for (const cssText of cssTexts) {
@@ -273,7 +291,6 @@ const collectDeclarations = (cssTexts: readonly string[]): DeclarationsBySelecto
         return undefined;
       }
       const grammar = PROPERTY_GRAMMARS.get(property);
-      // Other unsupported properties are never written, so skipping them cannot change another property's winner.
       if (!grammar) {
         continue;
       }
@@ -285,7 +302,6 @@ const collectDeclarations = (cssTexts: readonly string[]): DeclarationsBySelecto
         const specificity = selectorKey === SVG_TYPE_SELECTOR ? 0 : 1;
         const declarations =
           declarationsBySelector.get(selectorKey) ?? new Map<string, Declaration>();
-        // Rules are visited in source order, so a later declaration for the same selector always wins.
         declarations.set(property, { property, value, specificity, order });
         declarationsBySelector.set(selectorKey, declarations);
       }
@@ -294,8 +310,7 @@ const collectDeclarations = (cssTexts: readonly string[]): DeclarationsBySelecto
   return declarationsBySelector;
 };
 
-// A single linear pass. querySelectorAll compiles selectors with `new Function`, and iterating jsdom's live
-// getElementsByTagName collection is quadratic in the number of elements.
+// querySelectorAll uses `new Function`, and iterating jsdom's live getElementsByTagName is quadratic.
 const collectElements = (svgDocument: Document, window: DOMWindow): Element[] => {
   const walker = svgDocument.createTreeWalker(svgDocument, window.NodeFilter.SHOW_ELEMENT);
   const elements: Element[] = [];
@@ -308,8 +323,7 @@ const collectElements = (svgDocument: Document, window: DOMWindow): Element[] =>
 };
 
 // HTML parsing ignores xmlns, but in the XML file a foreign default namespace takes an element and its
-// descendants out of SVG (Illustrator's `<sfw xmlns="ns_sfw;">` metadata, for example). Elements arrive in
-// document order, so each parent is classified before its children.
+// descendants out of SVG (Illustrator's `<sfw xmlns="ns_sfw;">` metadata, for example).
 const collectForeignElements = (elements: readonly Element[]): ReadonlySet<Element> => {
   const foreignElements = new Set<Element>();
   for (const element of elements) {
@@ -326,7 +340,6 @@ const collectForeignElements = (elements: readonly Element[]): ReadonlySet<Eleme
   return foreignElements;
 };
 
-// Resolves winners against the untouched DOM before anything is written; undefined when the work budget runs out.
 const resolveAttributes = (
   elements: readonly Element[],
   declarationsBySelector: DeclarationsBySelector
@@ -375,7 +388,230 @@ const countAddedBytes = (
     .flatMap((winners) => Array.from(winners.values()))
     .reduce((total, { property, value }) => total + property.length + value.length + 4, 0);
 
-const inlineSupportedStyles = (svgContent: string, window: DOMWindow): string => {
+const kindOf = (element: Element): string => toAsciiLowerCase(element.localName);
+
+const indexById = (elements: readonly Element[]): ReadonlyMap<string, Element> => {
+  const elementsById = new Map<string, Element>();
+  for (const element of elements) {
+    const id = element.getAttribute('id');
+    if (id && !elementsById.has(id)) {
+      elementsById.set(id, element);
+    }
+  }
+  return elementsById;
+};
+
+const getHrefTarget = (
+  element: Element,
+  elementsById: ReadonlyMap<string, Element>
+): Element | undefined => {
+  const href = element.getAttribute('href') ?? element.getAttribute('xlink:href') ?? '';
+  const id = LOCAL_HREF.exec(href)?.[1];
+  return id === undefined ? undefined : elementsById.get(id);
+};
+
+const hasStops = (gradient: Element): boolean =>
+  Array.from(gradient.children).some((child) => kindOf(child) === 'stop');
+
+interface Copy {
+  readonly elements: readonly Element[];
+  readonly target: Element;
+  readonly mode: 'append' | 'replace';
+}
+
+interface ReferencePlan {
+  readonly copies: readonly Copy[];
+  readonly attributes: ReadonlyArray<readonly [element: Element, name: string, value: string]>;
+  // Gradients whose href can be stripped because everything they inherit is copied.
+  readonly resolvedGradients: ReadonlySet<Element>;
+}
+
+// Only flat elements are copied, so the markup measured while planning is exactly what gets written.
+const isFlat = (element: Element): boolean => element.children.length === 0;
+
+// DOMPurify strips href and drops <use>, so gradients inheriting through href would paint nothing and clip
+// paths built from <use> would hide their shape.
+const planReferences = (
+  elements: readonly Element[],
+  elementsById: ReadonlyMap<string, Element>
+): ReferencePlan | undefined => {
+  const copies: Copy[] = [];
+  const attributes: Array<readonly [Element, string, string]> = [];
+  const resolvedGradients = new Set<Element>();
+  let copiedBytes = 0;
+  const withinBudget = (bytes: number): boolean => {
+    copiedBytes += bytes;
+    return copiedBytes <= MAX_COPIED_MARKUP_BYTES;
+  };
+
+  for (const element of elements) {
+    const kind = kindOf(element);
+    if (GRADIENT_ELEMENTS.has(kind)) {
+      const chain: Element[] = [];
+      let next = getHrefTarget(element, elementsById);
+      while (
+        next &&
+        GRADIENT_ELEMENTS.has(kindOf(next)) &&
+        next !== element &&
+        !chain.includes(next) &&
+        chain.length < MAX_REFERENCE_DEPTH
+      ) {
+        chain.push(next);
+        next = getHrefTarget(next, elementsById);
+      }
+      // A cycle or a chain past the depth limit ends on another gradient and stays unresolved.
+      let isResolved = !next || !GRADIENT_ELEMENTS.has(kindOf(next));
+
+      const stopSource = hasStops(element) ? undefined : chain.find(hasStops);
+      if (stopSource) {
+        const stops = Array.from(stopSource.children).filter((child) => kindOf(child) === 'stop');
+        if (stops.every(isFlat)) {
+          if (!withinBudget(stops.reduce((total, stop) => total + stop.outerHTML.length, 0))) {
+            return undefined;
+          }
+          copies.push({ elements: stops, target: element, mode: 'append' });
+        } else {
+          isResolved = false;
+        }
+      }
+      for (const name of [...SHARED_GRADIENT_ATTRIBUTES, ...GRADIENT_GEOMETRY_ATTRIBUTES[kind]]) {
+        const isShared = (SHARED_GRADIENT_ATTRIBUTES as readonly string[]).includes(name);
+        const source = element.hasAttribute(name)
+          ? undefined
+          : chain.find(
+              (gradient) => (isShared || kindOf(gradient) === kind) && gradient.hasAttribute(name)
+            );
+        const value = source?.getAttribute(name);
+        if (value != null) {
+          if (!withinBudget(name.length + value.length + 4)) {
+            return undefined;
+          }
+          attributes.push([element, name, value]);
+        }
+      }
+      if (isResolved) {
+        resolvedGradients.add(element);
+      }
+    } else if (
+      kind === 'use' &&
+      element.parentElement &&
+      kindOf(element.parentElement) === 'clippath'
+    ) {
+      const shape = getHrefTarget(element, elementsById);
+      const onlyReferences = Array.from(element.attributes).every(
+        ({ name, value }) =>
+          name === 'href' ||
+          name === 'xlink:href' ||
+          (name === 'style' &&
+            value
+              .split(';')
+              .every(
+                (declaration) =>
+                  declaration.trim() === '' || OVERFLOW_DECLARATION.test(declaration.trim())
+              ))
+      );
+      if (shape && BASIC_SHAPES.has(kindOf(shape)) && isFlat(shape) && onlyReferences) {
+        if (!withinBudget(shape.outerHTML.length)) {
+          return undefined;
+        }
+        copies.push({ elements: [shape], target: element, mode: 'replace' });
+      }
+    }
+  }
+  return { copies, attributes, resolvedGradients };
+};
+
+const applyReferences = ({ copies, attributes }: ReferencePlan): void => {
+  for (const [element, name, value] of attributes) {
+    element.setAttribute(name, value);
+  }
+  for (const { elements, target, mode } of copies) {
+    const clones = elements.map((element) => {
+      const clone = element.cloneNode(false) as Element;
+      clone.removeAttribute('id');
+      return clone;
+    });
+    if (mode === 'replace') {
+      target.replaceWith(...clones);
+    } else {
+      target.append(...clones);
+    }
+  }
+};
+
+// Elements are in document order, so walking them backwards counts every child before its parent.
+const countDescendants = (elements: readonly Element[]): ReadonlyMap<Element, number> => {
+  const counts = new Map<Element, number>();
+  for (let index = elements.length - 1; index >= 0; index--) {
+    const element = elements[index];
+    const { parentElement } = element;
+    if (parentElement) {
+      counts.set(parentElement, (counts.get(parentElement) ?? 0) + (counts.get(element) ?? 0) + 1);
+    }
+  }
+  return counts;
+};
+
+interface InlinedReference {
+  readonly property: string;
+  readonly id: string;
+}
+
+interface InlinedSvg {
+  readonly svg: string;
+  readonly references: readonly InlinedReference[];
+  // Element count of everything the references reach; fewer after sanitization means content was removed.
+  readonly dependencies: ReadonlyMap<string, number>;
+}
+
+const hasHref = (element: Element): boolean =>
+  Array.from(element.attributes).some(({ localName }) => toAsciiLowerCase(localName) === 'href');
+
+// Undefined when anything reachable still needs an href that sanitization strips.
+const collectDependencies = (
+  ids: readonly string[],
+  elements: readonly Element[],
+  resolvedGradients: ReadonlySet<Element>
+): Map<string, number> | undefined => {
+  const elementsById = indexById(elements);
+  const descendants = countDescendants(elements);
+  const positions = new Map(elements.map((element, index) => [element, index]));
+  const dependencies = new Map<string, number>();
+  const pending = [...ids];
+  let steps = 0;
+  for (let next = 0; next < pending.length; next++) {
+    const id = pending[next];
+    if (dependencies.has(id)) {
+      continue;
+    }
+    const target = elementsById.get(id);
+    const count = (target && descendants.get(target)) ?? 0;
+    dependencies.set(id, count);
+    const start = target && positions.get(target);
+    if (start === undefined) {
+      continue;
+    }
+    // A subtree is contiguous in document order.
+    for (const element of elements.slice(start, start + count + 1)) {
+      steps += 1;
+      if (steps > MAX_RESOLUTION_STEPS || (hasHref(element) && !resolvedGradients.has(element))) {
+        return undefined;
+      }
+      for (const { value } of Array.from(element.attributes)) {
+        // CSS escapes can spell url() in a way LOCAL_URL doesn't see, e.g. `u\72l(#id)`.
+        if (value.includes('\\')) {
+          return undefined;
+        }
+        for (const [, referencedId] of value.matchAll(LOCAL_URL)) {
+          pending.push(referencedId);
+        }
+      }
+    }
+  }
+  return dependencies;
+};
+
+const inlineSupportedStyles = (svgContent: string, window: DOMWindow): InlinedSvg | undefined => {
   // Parse as HTML like DOMPurify does; XML parsing plus re-serialization makes DOMPurify drop Inkscape SVGs.
   const svgDocument = new window.DOMParser().parseFromString(svgContent, 'text/html');
   const elements = collectElements(svgDocument, window);
@@ -387,17 +623,16 @@ const inlineSupportedStyles = (svgContent: string, window: DOMWindow): string =>
     }
     const kind = foreignElements.has(element) ? 'unsupported' : classifyStyleElement(element);
     if (kind === 'unsupported') {
-      return svgContent;
+      return undefined;
     }
     if (kind === 'css') {
       cssTexts.push(element.textContent ?? '');
     }
   }
   const cssLength = cssTexts.reduce((total, cssText) => total + cssText.length, 0);
-  // `!important` can't be expressed as a presentation attribute, and it keeps an overridden duplicate
-  // (`fill:#f00!important;fill:#00f`) winning, so any `!` falls back.
+  // `!important` can't be expressed as a presentation attribute.
   if (cssLength > MAX_STYLE_TEXT_LENGTH || cssTexts.some((cssText) => cssText.includes('!'))) {
-    return svgContent;
+    return undefined;
   }
 
   const declarationsBySelector = collectDeclarations(cssTexts);
@@ -407,7 +642,7 @@ const inlineSupportedStyles = (svgContent: string, window: DOMWindow): string =>
   );
   const resolved = declarationsBySelector && resolveAttributes(targets, declarationsBySelector);
   if (!resolved || resolved.size === 0 || countAddedBytes(resolved) > MAX_ADDED_ATTRIBUTE_BYTES) {
-    return svgContent;
+    return undefined;
   }
 
   for (const [element, winners] of resolved) {
@@ -415,18 +650,95 @@ const inlineSupportedStyles = (svgContent: string, window: DOMWindow): string =>
       element.setAttribute(property, value);
     }
   }
-  return svgDocument.body.innerHTML;
+  const plan = planReferences(elements, indexById(elements));
+  if (!plan) {
+    return undefined;
+  }
+  applyReferences(plan);
+
+  const references = new Map<string, InlinedReference>();
+  for (const winners of resolved.values()) {
+    for (const { property, value } of winners.values()) {
+      const id = LOCAL_REFERENCE.exec(value)?.[1];
+      if (id !== undefined) {
+        references.set(`${property} ${id}`, { property, id });
+      }
+    }
+  }
+  const dependencies = collectDependencies(
+    Array.from(references.values(), ({ id }) => id),
+    collectElements(svgDocument, window),
+    plan.resolvedGradients
+  );
+  return dependencies
+    ? { svg: svgDocument.body.innerHTML, references: Array.from(references.values()), dependencies }
+    : undefined;
 };
 
-/** Copies supported `<style>` rules onto elements as presentation attributes, or returns the input unchanged. */
-export const inlineSvgStyles = (svgContent: string, window: DOMWindow): string => {
+const isRenderableTarget = (target: Element): boolean => {
+  const kind = kindOf(target);
+  if (GRADIENT_ELEMENTS.has(kind)) {
+    return hasStops(target);
+  }
+  return !CONTAINER_REFERENCES.has(kind) || target.children.length > 0;
+};
+
+const isRenderableReference = (property: string, target: Element): boolean => {
+  const kind = kindOf(target);
+  const fitsProperty =
+    property === 'clip-path'
+      ? kind === 'clippath'
+      : GRADIENT_ELEMENTS.has(kind) || kind === 'pattern';
+  return fitsProperty && isRenderableTarget(target);
+};
+
+// A clip path or pattern that loses only part of its content to sanitization still hides part of the artwork.
+const breaksReference = (
+  sanitizedSvg: string,
+  { references, dependencies }: InlinedSvg,
+  window: DOMWindow
+): boolean => {
+  if (references.length === 0) {
+    return false;
+  }
+  const svgDocument = new window.DOMParser().parseFromString(sanitizedSvg, 'text/html');
+  const elements = collectElements(svgDocument, window);
+  const elementsById = indexById(elements);
+  const descendants = countDescendants(elements);
+  const isIntact = (id: string, before: number): boolean => {
+    const target = elementsById.get(id);
+    return (
+      target !== undefined &&
+      isRenderableTarget(target) &&
+      (descendants.get(target) ?? 0) === before
+    );
+  };
+  return (
+    references.some(({ property, id }) => {
+      const target = elementsById.get(id);
+      return !target || !isRenderableReference(property, target);
+    }) || Array.from(dependencies).some(([id, before]) => !isIntact(id, before))
+  );
+};
+
+/** Sanitizes with supported `<style>` rules inlined, unless an inlined reference would not survive sanitization. */
+export const sanitizeWithInlinedStyles = (
+  svgContent: string,
+  window: DOMWindow,
+  sanitize: (svg: string) => string
+): string => {
   if (!STYLE_TAG.test(svgContent)) {
-    return svgContent;
+    return sanitize(svgContent);
   }
   try {
-    return inlineSupportedStyles(svgContent, window);
+    const inlined = inlineSupportedStyles(svgContent, window);
+    if (!inlined) {
+      return sanitize(svgContent);
+    }
+    const sanitized = sanitize(inlined.svg);
+    return breaksReference(sanitized, inlined, window) ? sanitize(svgContent) : sanitized;
   } catch {
-    // e.g. nesting deep enough to overflow jsdom's parser; keep today's output rather than failing the request.
-    return svgContent;
+    // e.g. nesting deep enough to overflow jsdom's parser.
+    return sanitize(svgContent);
   }
 };

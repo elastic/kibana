@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { inlineSvgStyles } from './inline_svg_styles';
+import { sanitizeWithInlinedStyles } from './inline_svg_styles';
 
 export function isBase64Encoded(str: unknown): boolean {
   if (typeof str !== 'string' || str.length === 0) {
@@ -80,7 +80,10 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
     });
 
     // Sanitize and convert the result back to a Buffer
-    return Buffer.from(purify.sanitize(inlineSvgStyles(contentToSanitize, window)), 'utf8');
+    return Buffer.from(
+      sanitizeWithInlinedStyles(contentToSanitize, window, (svg) => purify.sanitize(svg)),
+      'utf8'
+    );
   } catch (error) {
     throw new Error(`SVG sanitization failed: ${error.message}`);
   }

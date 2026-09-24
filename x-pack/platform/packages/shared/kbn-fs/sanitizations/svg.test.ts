@@ -291,7 +291,8 @@ describe('sanitizeSvg style inlining', () => {
     const result = sanitize(
       '<svg><style>.a{fill:none;stroke:#6C55FF;stroke-width:0.885;stroke-miterlimit:10;' +
         'stroke-dasharray:2,3;stroke-linejoin:round;fill-rule:evenodd;clip-rule:evenodd;' +
-        'clip-path:url(#clip);opacity:.5}</style><path class="a" d="M0 0"/></svg>'
+        'clip-path:url(#clip);opacity:.5}</style><clipPath id="clip"><rect width="1" height="1"/></clipPath>' +
+        '<path class="a" d="M0 0"/></svg>'
     );
 
     for (const attribute of [
@@ -559,9 +560,12 @@ describe('sanitizeSvg style inlining', () => {
     expect(
       sanitize('<svg><style>/* brand */.a{fill:#f00}/* end */</style><rect class="a"/></svg>')
     ).toMatch(/fill="#f00"/);
-    expect(sanitize('<svg><style>.a{fill:url(#p)/* x */}</style><rect class="a"/></svg>')).toMatch(
-      /fill="url\(#p\)"/
-    );
+    expect(
+      sanitize(
+        '<svg><style>.a{fill:url(#p)/* x */}</style><linearGradient id="p"><stop offset="0"/></linearGradient>' +
+          '<rect class="a"/></svg>'
+      )
+    ).toMatch(/fill="url\(#p\)"/);
   });
 
   it('falls back on comment markers inside url(), where CSS does not treat them as comments', () => {
@@ -681,5 +685,161 @@ describe('sanitizeSvg style inlining', () => {
     );
 
     expect(result).toMatch(/<rect[^>]*fill="#f00"/);
+  });
+
+  describe('references that sanitization would empty', () => {
+    const elementMarkup = (result: string, tag: string, id: string): string =>
+      new RegExp(`<${tag} id="${id}"[^>]*>[\\s\\S]*?</${tag}>`).exec(result)?.[0] ?? '';
+
+    it('copies stops and attributes into gradients that inherit them through href', () => {
+      const result = sanitize(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs>' +
+          '<style>.a{fill:url(#child)}.b{fill:url(#linear)}</style>' +
+          '<radialGradient id="base" cx="1" r="5" gradientUnits="userSpaceOnUse">' +
+          '<stop offset="0" stop-color="#f0f"/><stop offset="1" stop-color="#0ff"/></radialGradient>' +
+          '<radialGradient id="child" cx="9" xlink:href="#base"/>' +
+          '<linearGradient id="linear" xlink:href="#child"/>' +
+          '</defs><rect class="a" width="10" height="10"/><rect class="b" width="10" height="10"/></svg>'
+      );
+      const child = elementMarkup(result, 'radialGradient', 'child');
+      const linear = elementMarkup(result, 'linearGradient', 'linear');
+
+      expect(result).toMatch(/<rect class="a"[^>]*fill="url\(#child\)"/);
+      expect(child.match(/<stop /g)).toHaveLength(2);
+      expect(child).toMatch(/cx="9"/);
+      expect(child).toMatch(/r="5"/);
+      expect(child).toMatch(/gradientUnits="userSpaceOnUse"/);
+      expect(child).not.toContain('href');
+      expect(linear.match(/<stop /g)).toHaveLength(2);
+      expect(linear).toMatch(/gradientUnits="userSpaceOnUse"/);
+      expect(linear).not.toMatch(/\b(cx|r)=/);
+    });
+
+    it('replaces <use> in clip paths with the shape it references', () => {
+      const result = sanitize(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs>' +
+          '<style>.a{clip-path:url(#clip)}</style><path id="shape" d="M0 0h5v5z"/>' +
+          '<clipPath id="clip"><use xlink:href="#shape" style="overflow:visible;"/></clipPath>' +
+          '</defs><rect class="a" width="10" height="10"/></svg>'
+      );
+
+      expect(result).toMatch(/<rect class="a"[^>]*clip-path="url\(#clip\)"/);
+      expect(elementMarkup(result, 'clipPath', 'clip')).toMatch(/<path d="M0 0h5v5z"/);
+      expect(result.match(/id="shape"/g)).toHaveLength(1);
+    });
+
+    it('falls back when an inlined reference would render nothing after sanitization', () => {
+      for (const svg of [
+        '<svg><style>.a{fill:url(#missing)}.b{fill:#f00}</style><rect class="a"/><rect class="b"/></svg>',
+        '<svg><defs><style>.a{fill:url(#empty)}</style><linearGradient id="empty"/></defs><rect class="a"/></svg>',
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{clip-path:url(#clip)}</style>' +
+          '<path id="shape" d="M0 0h5v5z"/><clipPath id="clip"><use xlink:href="#shape" x="5"/></clipPath>' +
+          '</defs><rect class="a"/></svg>',
+      ]) {
+        expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+      }
+    });
+
+    it('falls back when resolving references would copy too much', () => {
+      const stops = Array.from({ length: 1000 }, (_, index) => `<stop offset="${index}"/>`).join(
+        ''
+      );
+      const children = Array.from(
+        { length: 4 },
+        (_, index) => `<linearGradient id="g${index}" xlink:href="#base"/>`
+      ).join('');
+      const svg =
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{fill:url(#g0)}</style>' +
+        `<linearGradient id="base">${stops}</linearGradient>${children}</defs><rect class="a"/></svg>`;
+
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    });
+
+    it('counts inherited attributes against the copy budget', () => {
+      const children = Array.from(
+        { length: 100 },
+        (_, index) => `<linearGradient id="g${index}" xlink:href="#base"><stop/></linearGradient>`
+      ).join('');
+      const svg =
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{fill:url(#g0)}</style>' +
+        `<linearGradient id="base" gradientTransform="${'translate(1)'.repeat(1000)}"><stop/>` +
+        `</linearGradient>${children}</defs><rect class="a"/></svg>`;
+
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    });
+
+    it('falls back when sanitization removes part of a referenced clip path', () => {
+      const svg =
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{clip-path:url(#clip)}</style>' +
+        '<rect id="shape" width="5" height="10"/><clipPath id="clip"><rect width="5" height="10"/>' +
+        '<use xlink:href="#shape" x="5"/></clipPath></defs><rect class="a" width="20" height="10"/></svg>';
+
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    });
+
+    it('falls back when inlining breaks one reference while repairing another', () => {
+      const svg =
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{fill:url(#empty)}</style>' +
+        '<linearGradient id="base"><stop stop-color="#0f0"/></linearGradient>' +
+        '<linearGradient id="child" xlink:href="#base"/><linearGradient id="empty"/></defs>' +
+        '<rect fill="url(#child)"/><rect class="a"/></svg>';
+
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    });
+
+    it('does not copy stops that contain other elements', () => {
+      const nested = Array.from(
+        { length: 10 },
+        (_, index) => `<linearGradient id="n${index}" xlink:href="#base"><stop/></linearGradient>`
+      ).join('');
+      const inheritors = Array.from(
+        { length: 15 },
+        (_, index) => `<linearGradient id="g${index}" xlink:href="#seed"/>`
+      ).join('');
+      const svg =
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{fill:url(#g0)}</style>' +
+        `<linearGradient id="base" gradientTransform="${'translate(0 0) '.repeat(300)}"/>` +
+        `<linearGradient id="seed"><stop>${nested}</stop></linearGradient>${inheritors}</defs>` +
+        '<rect class="a"/></svg>';
+
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    });
+
+    it('falls back when a referenced element depends on one that sanitization empties', () => {
+      const svg =
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{clip-path:url(#outer)}</style>' +
+        '<rect id="shape" width="20" height="20"/>' +
+        '<clipPath id="inner"><use xlink:href="#shape" x="1"/></clipPath>' +
+        '<clipPath id="outer"><rect width="20" height="20" clip-path="url(#inner)"/></clipPath>' +
+        '</defs><rect class="a" width="20" height="20"/></svg>';
+
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    });
+
+    it('falls back when a referenced element contains CSS escapes that could hide a dependency', () => {
+      for (const attribute of [
+        String.raw`clip-path="u\72l(#inner)"`,
+        String.raw`style="clip-path:u\72l(#inner)"`,
+      ]) {
+        const svg =
+          '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{clip-path:url(#outer)}</style>' +
+          '<rect id="shape" width="20" height="20"/>' +
+          '<clipPath id="inner"><use xlink:href="#shape" x="1"/></clipPath>' +
+          `<clipPath id="outer"><rect width="20" height="20" ${attribute}/></clipPath>` +
+          '</defs><rect class="a" width="20" height="20"/></svg>';
+
+        expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+      }
+    });
+
+    it('falls back when a referenced element inherits through an href that is not resolved', () => {
+      const svg =
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{fill:url(#paint)}</style>' +
+        '<pattern id="base" width="1" height="1"/>' +
+        '<pattern id="paint" xlink:href="#base"><rect width="20" height="20" fill="#f00"/></pattern>' +
+        '</defs><rect class="a" width="20" height="20"/></svg>';
+
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    });
   });
 });

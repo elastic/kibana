@@ -6,16 +6,18 @@
  */
 
 import { JSDOM } from 'jsdom';
-import { inlineSvgStyles } from './inline_svg_styles';
+import { sanitizeWithInlinedStyles } from './inline_svg_styles';
 
-describe('inlineSvgStyles', () => {
-  it('returns the input unchanged when the pre-pass throws', () => {
+describe('sanitizeWithInlinedStyles', () => {
+  it('sanitizes the input without inlining when the pre-pass throws', () => {
     const { window } = new JSDOM('');
     jest.spyOn(window.DOMParser.prototype, 'parseFromString').mockImplementation(() => {
       throw new RangeError('Maximum call stack size exceeded');
     });
+    const sanitize = jest.fn((svg: string) => `sanitized:${svg}`);
     const svg = '<svg><style>.a{fill:#f00}</style><rect class="a"/></svg>';
 
-    expect(inlineSvgStyles(svg, window)).toBe(svg);
+    expect(sanitizeWithInlinedStyles(svg, window, sanitize)).toBe(`sanitized:${svg}`);
+    expect(sanitize).toHaveBeenCalledTimes(1);
   });
 });
