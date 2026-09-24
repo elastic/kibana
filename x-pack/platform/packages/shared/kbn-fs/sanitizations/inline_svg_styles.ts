@@ -102,7 +102,8 @@ const isDashArray: Grammar = (value) => {
   return entries.length <= MAX_DASH_ARRAY_ENTRIES && entries.every((entry) => LENGTH.test(entry));
 };
 
-// Covers the value forms registry icons use; any other value for these properties makes the whole SVG fall back.
+// Covers the properties and value forms registry icons use; any other property or value makes the whole SVG
+// fall back, because dropping it would render something that is neither the original nor today's output.
 const PROPERTY_GRAMMARS: ReadonlyMap<string, Grammar> = new Map<string, Grammar>([
   ['fill', isPaint],
   ['stroke', isPaint],
@@ -115,6 +116,8 @@ const PROPERTY_GRAMMARS: ReadonlyMap<string, Grammar> = new Map<string, Grammar>
   ['clip-rule', isKeyword('nonzero', 'evenodd')],
   ['clip-path', (value) => isNone(value) || LOCAL_REFERENCE.test(value)],
 ]);
+// Illustrator writes `enable-background`, which no browser implements, so dropping it changes nothing.
+const IGNORED_PROPERTIES: ReadonlySet<string> = new Set(['enable-background']);
 
 interface StyleRule {
   readonly selectorText: string;
@@ -162,7 +165,7 @@ const classifyStyleElement = (styleElement: Element): 'css' | 'ignored' | 'unsup
 };
 
 const toSelectorKey = (selector: string): string | undefined => {
-  if (selector.toLowerCase() === SVG_TYPE_SELECTOR) {
+  if (selector === SVG_TYPE_SELECTOR) {
     return SVG_TYPE_SELECTOR;
   }
   const match = CLASS_SELECTOR.exec(selector);
@@ -286,13 +289,12 @@ const collectDeclarations = (cssTexts: readonly string[]): DeclarationsBySelecto
     const uniqueSelectorKeys = new Set(selectorKeys);
 
     for (const [property, value] of ruleDeclarations) {
-      // The `all` shorthand resets every supported property, so it cannot be skipped like the others.
-      if (property === 'all') {
-        return undefined;
+      if (IGNORED_PROPERTIES.has(property)) {
+        continue;
       }
       const grammar = PROPERTY_GRAMMARS.get(property);
       if (!grammar) {
-        continue;
+        return undefined;
       }
       // Skipping an unsupported value could let an earlier declaration win instead, so fall back entirely.
       if (value.length > MAX_VALUE_LENGTH || !grammar(value)) {

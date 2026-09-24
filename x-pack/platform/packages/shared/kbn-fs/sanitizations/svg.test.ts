@@ -332,6 +332,12 @@ describe('sanitizeSvg style inlining', () => {
     );
   });
 
+  it('matches the svg type selector case-sensitively, as XML does', () => {
+    const svg = '<svg><style>SVG{fill:#123456}</style><rect/></svg>';
+
+    expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+  });
+
   it('keeps cascade order across style elements', () => {
     expect(
       sanitize(
@@ -384,14 +390,26 @@ describe('sanitizeSvg style inlining', () => {
     }
   });
 
-  it('drops properties that are not supported', () => {
+  it('falls back on properties it cannot write', () => {
+    for (const declaration of [
+      'display:none',
+      'visibility:hidden',
+      'fill-opacity:.2',
+      'background:blue',
+    ]) {
+      const svg = `<svg><style>.a{fill:#f00;${declaration}}</style><rect class="a"/></svg>`;
+
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    }
+  });
+
+  it('drops enable-background, which browsers ignore', () => {
     const result = sanitize(
-      '<svg><style>.a{fill:#f00;background:blue;enable-background:new 0 0 1 1;display:none}</style>' +
-        '<rect class="a"/></svg>'
+      '<svg><style>.a{fill:#f00;enable-background:new 0 0 1 1}</style><rect class="a"/></svg>'
     );
 
     expect(result).toMatch(/fill="#f00"/);
-    expect(result).not.toMatch(/background|display/);
+    expect(result).not.toContain('background');
   });
 
   it('falls back on the all shorthand, which resets supported properties', () => {
