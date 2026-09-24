@@ -243,10 +243,7 @@ steps:
           EVAL_SUITE_ID: 'nightshift-investigations'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          # Scores are CODE-only (smoke plumbing + an ungraded investigation placeholder), so one
-          # cheap connector is enough; fanning out across the weekly tiers would cost budget for
-          # identical scores.
-          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-4.5-haiku'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
           # Enables the investigation engine and sandbox when the ci-prod config has a sandbox block.
           EVAL_SERVER_CONFIG_SET: 'evals_nightshift_investigations'
         timeout_in_minutes: 60

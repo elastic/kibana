@@ -335,11 +335,11 @@ as `nightshift-investigations`.
   hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
   `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the
   sandbox-api host.
-- **On a PR:** add the `evals:nightshift-investigations` label. Without a `models:` label the
-  suite uses its pinned `defaultModelGroups` connector; the investigations run the real agent, so
-  add a `models:` label to choose which model investigates.
+- **On a PR:** add the `evals:nightshift-investigations` label plus a `models:` label (for example
+  `models:eis/anthropic-claude-4.6-sonnet`) to choose which model investigates. Without a `models:`
+  label the suite is skipped, like other suites that run the real agent.
 - **Weekly:** a step in [`llm_evals.yml`](../../../../../.buildkite/pipelines/evals/llm_evals.yml)
-  runs it against that same connector.
+  runs it against the weekly core models (`weekly_eis_core_models`).
 - **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
 
