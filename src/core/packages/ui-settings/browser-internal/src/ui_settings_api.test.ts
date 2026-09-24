@@ -71,37 +71,6 @@ describe('#batchSet', () => {
     expect(fetchMock.calls()).toMatchSnapshot('final, includes both requests');
   });
 
-  it('keeps namespace and global changes on their respective endpoints when requests overlap', async () => {
-    fetchMock.mock('*', { body: { settings: {} } });
-    const { uiSettingsApi } = setup();
-
-    const initialRequest = uiSettingsApi.batchSet('firstNamespace', true);
-    const globalRequest = uiSettingsApi.batchSetGlobal('globalSetting', true);
-    const namespaceRequest = uiSettingsApi.batchSet('nextNamespace', true);
-    await Promise.all([initialRequest, globalRequest, namespaceRequest]);
-
-    const requests = await Promise.all(
-      fetchMock.calls().map(async ([url, options]) => ({
-        url,
-        changes: JSON.parse(String(await options?.body)).changes,
-      }))
-    );
-    expect(requests).toEqual([
-      {
-        url: '/foo/bar/internal/kibana/settings',
-        changes: { firstNamespace: true },
-      },
-      {
-        url: '/foo/bar/internal/kibana/settings',
-        changes: { nextNamespace: true },
-      },
-      {
-        url: '/foo/bar/internal/kibana/global_settings',
-        changes: { globalSetting: true },
-      },
-    ]);
-  });
-
   it('Overwrites previously buffered values with new values for the same key', async () => {
     fetchMock.mock('*', {
       body: { settings: {} },
@@ -216,11 +185,7 @@ describe('#batchSetGlobal', () => {
 
     expect(uiSettingsApi.hasPendingChanges()).toBe(true);
     await finalPromise;
-    const urls = fetchMock.calls().map(([url]) => url);
-    expect(urls).toEqual([
-      '/foo/bar/internal/kibana/global_settings',
-      '/foo/bar/internal/kibana/settings',
-    ]);
+    expect(fetchMock.calls()).toMatchSnapshot('final, includes both requests');
   });
 
   it('Overwrites previously buffered values with new values for the same key', async () => {

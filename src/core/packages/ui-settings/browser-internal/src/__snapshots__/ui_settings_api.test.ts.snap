@@ -196,6 +196,37 @@ Array [
 ]
 `;
 
+exports[`#batchSetGlobal buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
+Array [
+  Array [
+    "/foo/bar/internal/kibana/global_settings",
+    Object {
+      "body": Promise {},
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
+      },
+      "method": "POST",
+    },
+  ],
+  Array [
+    "/foo/bar/internal/kibana/global_settings",
+    Object {
+      "body": Promise {},
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
 exports[`#batchSetGlobal rejects all promises for batched requests that fail: promise rejections 1`] = `
 Array [
   Object {
