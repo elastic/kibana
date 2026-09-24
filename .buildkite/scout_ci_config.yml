@@ -61,6 +61,7 @@ plugins:
     - license_management
     - links
     - logstash
+    - maintenance_windows
     - management
     - maps
     - ml

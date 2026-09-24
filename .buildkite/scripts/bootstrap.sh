@@ -52,9 +52,7 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
     if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
       echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
-      mkdir -p ./.moon/cache
-      echo "Extracting moon-cache.tar.zst to ./.moon/cache"
-      tar -xf ~/moon-cache.tar.zst -I zstd -C ./
+      extract_moon_cache ~/moon-cache.tar.zst || true
     fi
     .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi

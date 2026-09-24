@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentBuilderServicesContext } from '../context/agent_builder_services_context';
 import { StreamingProvider } from '../context/streaming/streaming_context';
+import { CanvasProvider } from '../components/conversations/timeline/response/attachments/canvas_context';
 import { ConversationStreamService } from '../../services/events';
 import { FakeConversationProvider } from './fake_conversation_provider';
 import { createStorybookKibanaServices } from './kibana_services';
@@ -57,7 +58,7 @@ export const AgentBuilderStorybookProvider: React.FC<AgentBuilderStorybookProvid
               agentId={agentId}
               initialAttachments={initialAttachments}
             >
-              {children}
+              <CanvasProvider>{children}</CanvasProvider>
             </FakeConversationProvider>
           </StreamingProvider>
         </AgentBuilderServicesContext.Provider>

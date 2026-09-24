@@ -290,6 +290,31 @@ describe('validateConnectorIds', () => {
         'Unknown-type connector UUID "non-existent-connector" not found'
       );
     });
+
+    it('does not offer Create connector for waitForInput or waitForApproval step types', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: 'non-existent-connector',
+            connectorType: 'waitForInput',
+          }),
+          createConnectorIdItem({
+            id: 'test-id-2',
+            key: 'non-existent-connector',
+            connectorType: 'waitForApproval',
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toHaveLength(2);
+      for (const result of results) {
+        expect(result.hoverMessage).not.toContain('createConnector');
+        expect(result.hoverMessage).not.toContain('.waitForInput');
+        expect(result.hoverMessage).not.toContain('.waitForApproval');
+      }
+    });
   });
 
   describe('when connector key is a reference (template variable)', () => {

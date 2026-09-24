@@ -8,4 +8,15 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/evals-suite-nightshift-investigations/scripts/publish_synthetic_snapshot');
+
+var spawnSync = require('child_process').spawnSync;
+var resolve = require('path').resolve;
+
+var script = resolve(
+  __dirname,
+  '../x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scripts/publish_synthetic_snapshot'
+);
+var args = ['-r', '@kbn/setup-node-env', script].concat(process.argv.slice(2));
+var result = spawnSync(process.execPath, args, { stdio: 'inherit' });
+
+process.exit(result.status == null ? 1 : result.status);
