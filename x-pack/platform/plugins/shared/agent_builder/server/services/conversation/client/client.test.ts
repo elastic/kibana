@@ -191,6 +191,37 @@ describe('ConversationClient', () => {
     );
   };
 
+  const mockGetReturnsIndexedDocument = () => {
+    mockRawEsClient.get.mockImplementation(async ({ id }: { id: string }) => {
+      const { calls, results } = mockEsClient.index.mock;
+      let callIndex = -1;
+      for (let i = calls.length - 1; i >= 0; i--) {
+        if (calls[i][0].id === id) {
+          callIndex = i;
+          break;
+        }
+      }
+      if (callIndex === -1) {
+        throw Object.assign(new Error('not found'), { meta: { statusCode: 404 } });
+      }
+
+      const { document } = calls[callIndex][0] as { document: Document['_source'] };
+      const indexed = (await results[callIndex].value) as {
+        _seq_no?: number;
+        _primary_term?: number;
+      };
+
+      return {
+        _id: id,
+        _index: TEST_CONVERSATION_INDEX,
+        _source: document,
+        _seq_no: indexed._seq_no,
+        _primary_term: indexed._primary_term,
+        found: true,
+      };
+    });
+  };
+
   const expectNoReadBy = (conversation: unknown) => {
     expect(conversation).not.toHaveProperty('read_by');
     expect(conversation).not.toHaveProperty('pinned_by');
@@ -1116,6 +1147,7 @@ describe('ConversationClient', () => {
   describe('create', () => {
     beforeEach(() => {
       mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
@@ -1146,7 +1178,7 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).toHaveBeenCalledWith(expect.objectContaining({ refresh: true }));
     });
 
-    it('builds the response from the written document without reading it back', async () => {
+    it('reads the created conversation back by id through the converse access gate', async () => {
       const result = await client.create({
         id: 'conversation-1',
         title: 'Conversation 1',
@@ -1154,8 +1186,13 @@ describe('ConversationClient', () => {
         rounds: [],
       });
 
-      expect(mockRawEsClient.get).not.toHaveBeenCalled();
-      expect(agentRegistry.get).not.toHaveBeenCalled();
+      // The response is built from a read-after-write, not from the request payload, so it goes
+      // through the same raw `get` and agent `use` check as `client.get`.
+      expect(mockRawEsClient.get).toHaveBeenCalledWith({
+        index: TEST_CONVERSATION_INDEX,
+        id: 'conversation-1',
+      });
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
       expect(result).toMatchObject({
         id: 'conversation-1',
         title: 'Conversation 1',
@@ -2390,6 +2427,7 @@ describe('ConversationClient', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
     });
 
     it('seeds metadata from template fields that have a default value and stamps template_version', async () => {
@@ -2970,6 +3008,7 @@ describe('ConversationClient', () => {
 
     it('create fires with the attachment events of the initial batch', async () => {
       mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
       const added = attachmentAddedEvent('evt-att-3');
 
       await clientWithCb.create({
@@ -3029,6 +3068,8 @@ describe('ConversationClient', () => {
     });
 
     it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
+      mockGetReturnsIndexedDocument();
+
       await client.create({
         id: 'conversation-1',
         title: 'Conversation 1',
@@ -3054,6 +3095,7 @@ describe('ConversationClient', () => {
     });
 
     it('round-trips attachment_refs through the stored events projection', async () => {
+      mockGetReturnsIndexedDocument();
       const attachmentRefs = [
         { attachment_id: 'attachment-a', version: 1 },
         { attachment_id: 'attachment-b', version: 2 },
