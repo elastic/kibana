@@ -218,10 +218,10 @@ test.describe(
         await expect(app.childTrigger(form, session, 'A')).toBeVisible();
         const child = await app.openChildFlyout(form, session, 'A');
 
-        const result = await child.evaluate((el) => {
+        const result = await child.evaluate((el, headerSelector) => {
           const body = el.querySelector('[data-test-subj="euiFlyoutBodyOverflow"]') as HTMLElement;
           const content = el.querySelector('[data-test-subj="euiFlyoutContent"]') as HTMLElement;
-          const header = el.querySelector('.euiFlyoutHeader') as HTMLElement;
+          const header = el.querySelector(headerSelector) as HTMLElement;
           const event = new WheelEvent('wheel', { deltaY: 50, cancelable: true, bubbles: true });
           header.dispatchEvent(event);
           return {
@@ -229,7 +229,7 @@ test.describe(
             contentScrolls: content.scrollHeight > content.clientHeight,
             defaultPrevented: event.defaultPrevented,
           };
-        });
+        }, app.childHeaderSelector(form, session, 'A'));
 
         // The swallow path only exists when neither scroller has anywhere left to go.
         expect(result.bodyScrolls).toBe(false);

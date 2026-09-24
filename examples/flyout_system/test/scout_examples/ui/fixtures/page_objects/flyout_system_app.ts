@@ -48,11 +48,20 @@ export class FlyoutSystemApp {
 
   /** Raw CSS selector for the root element. Required for checkA11y and page.keyTo. */
   rootSelector(form: FlyoutForm, session: string): string {
-    return subj(`${ROOT_SUBJ_STEM[form]}${session.replace(/\s+/g, '')}`);
+    return subj(this.rootSubj(form, session));
   }
 
   childRootSelector(form: FlyoutForm, session: string, label: ChildLabel): string {
-    return subj(`${ROOT_SUBJ_STEM[form]}${session.replace(/\s+/g, '')}Child${label}`);
+    return subj(this.childRootSubj(form, session, label));
+  }
+
+  /** The template derives each zone's subject from the root, e.g. `<root>Header`. */
+  private rootSubj(form: FlyoutForm, session: string): string {
+    return `${ROOT_SUBJ_STEM[form]}${session.replace(/\s+/g, '')}`;
+  }
+
+  private childRootSubj(form: FlyoutForm, session: string, label: ChildLabel): string {
+    return `${this.rootSubj(form, session)}Child${label}`;
   }
 
   flyout(form: FlyoutForm, session: string): Locator {
@@ -108,7 +117,11 @@ export class FlyoutSystemApp {
   // Parts within a flyout.
 
   header(form: FlyoutForm, session: string): Locator {
-    return this.flyout(form, session).locator('.euiFlyoutHeader');
+    return this.flyout(form, session).locator(subj(`${this.rootSubj(form, session)}Header`));
+  }
+
+  childHeaderSelector(form: FlyoutForm, session: string, label: ChildLabel): string {
+    return subj(`${this.childRootSubj(form, session, label)}Header`);
   }
 
   collapsibleRegion(form: FlyoutForm, session: string): Locator {
