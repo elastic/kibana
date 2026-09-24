@@ -18,12 +18,14 @@ import {
 import type { EuiSelectableOption } from '@elastic/eui';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { ContextEngineConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
 import { noop } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DataConnector } from '../../hooks/use_data_connectors';
 import { contextEngineQueryKeys } from '../../hooks/query_keys';
@@ -182,6 +184,11 @@ export const ConnectorsTab = ({
         checked: selectedIds.has(connector.id) ? 'on' : undefined,
         prepend: <ConnectorTypeIcon actionTypeId={connector.actionTypeId} />,
         'data-test-subj': `contextConnectorOption-${connector.id}`,
+        ...getEbtProps({
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+          action: CONTEXT_ENGINE_UI_EBT.action.sources.TOGGLE_CONNECTOR,
+          detail: connector.actionTypeId,
+        }),
       })),
     [connectors, selectedIds]
   );
@@ -237,6 +244,10 @@ export const ConnectorsTab = ({
       iconType="plusCircle"
       onClick={openCreateFlyout}
       data-test-subj="contextCreateConnectorButton"
+      {...getEbtProps({
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+        action: CONTEXT_ENGINE_UI_EBT.action.sources.CREATE_CONNECTOR,
+      })}
     >
       <FormattedMessage
         id="xpack.contextEngine.sourcePicker.connectors.createButton"
