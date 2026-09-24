@@ -18,9 +18,6 @@ test.describe(
     const ruleIdsB: string[] = [];
 
     test.beforeAll(async ({ apiServices }) => {
-      // Reset to a clean state — rules linger across spec files in the same worker.
-      await apiServices.alertingV2.rules.cleanUp();
-
       for (let i = 0; i < 2; i++) {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({ metadata: { name: `scout-bulk-A-${i}`, tags: [tagA] } })
@@ -36,7 +33,7 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      await apiServices.alertingV2.rules.bulkDelete({ ids: [...ruleIdsA, ...ruleIdsB] });
     });
 
     test('bulk disable applies only to rules matching the list filter, not the full space', async ({

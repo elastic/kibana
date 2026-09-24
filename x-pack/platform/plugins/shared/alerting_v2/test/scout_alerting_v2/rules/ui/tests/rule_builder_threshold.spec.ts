@@ -17,8 +17,9 @@ test.describe(
   'Rule Builder — threshold create and edit flows',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    test.beforeAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+    const createdRuleIds: string[] = [];
+
+    test.beforeAll(async ({ esClient }) => {
       await esClient.indices.create(
         {
           index: TEST_INDEX,
@@ -52,7 +53,9 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      for (const id of createdRuleIds) {
+        await apiServices.alertingV2.rules.delete(id);
+      }
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
     });
 
@@ -119,6 +122,9 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: RULE_NAME,
               });
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
               return items[0]?.metadata?.builder_type;
             },
             { timeout: 30_000 }
@@ -147,6 +153,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh rules list', async () => {
@@ -222,6 +229,7 @@ test.describe(
           })
         );
         ruleId = created.id;
+        createdRuleIds.push(ruleId);
         await apiServices.alertingV2.rules.upsert(
           ruleId,
           buildCreateRuleData({
@@ -268,6 +276,7 @@ test.describe(
           })
         );
         ruleId = created.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('open rule for editing', async () => {
@@ -309,6 +318,7 @@ test.describe(
           })
         );
         ruleId = created.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('open rule for editing in builder mode', async () => {

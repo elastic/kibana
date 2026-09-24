@@ -24,15 +24,17 @@ test.describe(
   'Alerts page - read/write privileges',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
+    const RULE_ID = 'scout-alerts-privileges-rule';
+
     test.beforeAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.cleanUp();
+      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: RULE_ID });
       // Seed a single active episode so the episodes table renders a row whose
       // leading action controls we can assert against. The default list filter
       // is "Active" over "now-24h", so the event must be recent and active.
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
           '@timestamp': new Date().toISOString(),
-          rule: { id: 'scout-alerts-privileges-rule', version: 1 },
+          rule: { id: RULE_ID, version: 1 },
           group_hash: 'scout-alerts-privileges-group',
           episode: { id: 'scout-alerts-privileges-episode', status: 'active' },
         }),
@@ -40,7 +42,7 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.cleanUp();
+      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: RULE_ID });
     });
 
     test('editor sees the mutating episode actions menu', async ({ browserAuth, pageObjects }) => {

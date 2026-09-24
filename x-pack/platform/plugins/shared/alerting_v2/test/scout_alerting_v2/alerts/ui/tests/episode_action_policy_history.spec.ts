@@ -17,8 +17,8 @@ test.describe(
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.alertActionsEvents.cleanUp();
-      await apiServices.alertingV2.ruleEvents.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: RULE_ID });
+      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: RULE_ID });
 
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
@@ -36,8 +36,8 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.alertActionsEvents.cleanUp();
-      await apiServices.alertingV2.ruleEvents.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: RULE_ID });
+      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: RULE_ID });
     });
 
     test('mounts the episode-scoped policy history tab from the details route', async ({

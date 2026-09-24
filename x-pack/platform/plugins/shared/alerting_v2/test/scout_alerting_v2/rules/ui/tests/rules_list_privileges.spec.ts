@@ -25,7 +25,6 @@ test.describe(
     let ruleId: string;
 
     test.beforeAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'scout-rules-privileges' } })
       );
@@ -33,7 +32,7 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      await apiServices.alertingV2.rules.delete(ruleId);
     });
 
     test('editor can create rules and toggle enabled', async ({ browserAuth, pageObjects }) => {

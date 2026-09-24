@@ -29,9 +29,9 @@ test.describe(
       await pageObjects.discover.waitUntilSearchingHasFinished();
     });
 
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.sampleData.remove(SAMPLE_DATA_SET);
-    });
+    // Sample data is not removed in afterAll — other suites in the same
+    // serverless lane share the ecommerce dataset and removing it here
+    // races with their active queries.
 
     test('should show Alerts menu with the v2 ES|QL rule row and hide v1 entries', async ({
       pageObjects,

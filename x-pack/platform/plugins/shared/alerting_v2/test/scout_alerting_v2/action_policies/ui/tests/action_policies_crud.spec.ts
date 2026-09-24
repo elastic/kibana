@@ -33,9 +33,9 @@ test.describe(
 
     let workflowId: string;
     let workflowName: string;
+    const createdPolicyIds: string[] = [];
 
     test.beforeAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.actionPolicies.cleanUp();
       // Action policy destinations are workflow references, so the form's
       // workflows combo box needs a real workflow to offer.
       workflowName = `scout-action-policy-destination-${Date.now()}`;
@@ -46,7 +46,9 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.actionPolicies.cleanUp();
+      for (const id of createdPolicyIds) {
+        await apiServices.alertingV2.actionPolicies.delete(id);
+      }
       await apiServices.alertingV2.workflows.bulkDelete([workflowId]);
     });
 
@@ -86,6 +88,7 @@ test.describe(
         });
 
         expect(items).toHaveLength(1);
+        createdPolicyIds.push(items[0].id);
         expect(items[0]).toMatchObject({
           name: CREATED_POLICY_NAME,
           matcher: { expression: MATCHER },
@@ -108,6 +111,7 @@ test.describe(
           destinations: [{ type: 'workflow', id: workflowId }],
         })
       );
+      createdPolicyIds.push(seeded.id);
 
       await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
       const { actionPoliciesList, actionPolicyForm } = pageObjects;

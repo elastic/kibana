@@ -24,8 +24,9 @@ test.describe(
   'Rule tags — edit via ES|QL form',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    test.beforeAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+    const createdRuleIds: string[] = [];
+
+    test.beforeAll(async ({ esClient }) => {
       await esClient.indices.create(
         {
           index: TEST_INDEX,
@@ -52,7 +53,9 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      for (const id of createdRuleIds) {
+        await apiServices.alertingV2.rules.delete(id);
+      }
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
     });
 
@@ -77,6 +80,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
         expect(rule.metadata.tags).toStrictEqual(['prod', 'infra']);
       });
 

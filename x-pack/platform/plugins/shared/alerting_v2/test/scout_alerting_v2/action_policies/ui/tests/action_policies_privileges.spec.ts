@@ -28,7 +28,6 @@ test.describe(
     let policyName: string;
 
     test.beforeAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.actionPolicies.cleanUp();
       const policy = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'scout-action-policy-privileges' })
       );
@@ -37,7 +36,7 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.actionPolicies.cleanUp();
+      await apiServices.alertingV2.actionPolicies.delete(policyId);
     });
 
     test('editor sees every write affordance', async ({ browserAuth, pageObjects }) => {
