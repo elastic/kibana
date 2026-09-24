@@ -15,11 +15,9 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import { useInvestigationSections } from '../hooks/use_investigation_sections';
-import { useInvestigationAvailability } from '../hooks/use_investigation_availability';
 import { useKibana } from '../hooks/use_kibana';
 
 jest.mock('../hooks/use_investigation_sections');
-jest.mock('../hooks/use_investigation_availability');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 
@@ -53,7 +51,6 @@ jest.mock('../investigation/investigation_detail_flyout', () => ({
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
-const mockUseInvestigationAvailability = useInvestigationAvailability as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
 
 const investigation: ListInvestigationItem = {
@@ -179,7 +176,6 @@ describe('NightshiftApp', () => {
     refetchAll.mockClear();
     scrollIntoView.mockClear();
     mockUsePageReady.mockClear();
-    mockUseInvestigationAvailability.mockReturnValue({ canStartInvestigation: true });
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -416,17 +412,6 @@ describe('NightshiftApp', () => {
     expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
   });
 
-  it('hides the start investigation button when the user cannot start investigations', () => {
-    mockUseInvestigationAvailability.mockReturnValue({ canStartInvestigation: false });
-
-    renderApp();
-
-    expect(
-      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
-    ).not.toBeInTheDocument();
-    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toBeInTheDocument();
-  });
-
   it('hides the start investigation button without the Nightshift manage privilege', () => {
     mockUseKibana.mockReturnValue({
       services: {
@@ -443,5 +428,6 @@ describe('NightshiftApp', () => {
     expect(
       screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toBeInTheDocument();
   });
 });

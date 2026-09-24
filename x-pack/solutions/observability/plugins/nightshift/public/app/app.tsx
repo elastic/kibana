@@ -26,7 +26,6 @@ import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
-import { useInvestigationAvailability } from '../hooks/use_investigation_availability';
 import { useInvestigationSections } from '../hooks/use_investigation_sections';
 import {
   InvestigationList,
@@ -96,8 +95,6 @@ export function NightshiftApp(): React.ReactElement {
 
   const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
-  const { canStartInvestigation } = useInvestigationAvailability();
-  const showStartInvestigation = canManage && canStartInvestigation;
   const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
 
   const toggleStartInvestigation = useCallback(
@@ -229,7 +226,7 @@ export function NightshiftApp(): React.ReactElement {
         isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
         showAllEventsHref={showAllEventsHref}
-        onStartInvestigationClick={showStartInvestigation ? toggleStartInvestigation : undefined}
+        onStartInvestigationClick={canManage ? toggleStartInvestigation : undefined}
         isStartInvestigationOpen={isStartInvestigationOpen}
       />
 
