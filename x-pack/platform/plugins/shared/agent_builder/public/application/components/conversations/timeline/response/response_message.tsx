@@ -30,6 +30,7 @@ export interface ResponseMessageProps {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  roundId?: string;
   executionTerminatedEvent?: ExecutionTerminatedEvent;
 }
 
@@ -40,6 +41,7 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  roundId,
   executionTerminatedEvent,
 }) => {
   const hasMessage = Boolean(response.message);
@@ -93,6 +95,7 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
             isVisible
             executionTerminatedEvent={executionTerminatedEvent}
             steps={steps}
+            roundId={roundId}
           />
         </EuiFlexItem>
       )}

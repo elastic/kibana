@@ -185,8 +185,16 @@ const feedbackEventForRound = (
     data: { round_id: roundId, ...feedback },
   } as TimelineEvent);
 
-export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
-  conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
+export const roundsToEvents = (conversation: Conversation): TimelineEvent[] => {
+  const events: TimelineEvent[] = [];
+  for (const round of conversation.rounds) {
+    events.push(...roundToEvents(round, conversation));
+    if (round.feedback) {
+      events.push(feedbackEventForRound(round.id, round.feedback, conversation));
+    }
+  }
+  return events;
+};
 
 /**
  * Synthesizes feedback events for any rounds that have `round.feedback` stored directly on the

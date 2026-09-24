@@ -49,6 +49,7 @@ const renderContent = (
   conversationId: string | undefined,
   conversationAttachments?: VersionedAttachment[]
 ): React.ReactNode => {
+  const { roundId } = item;
   if (isFailedTurn(item) || isAbortedTurn(item)) {
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -99,6 +100,7 @@ const renderContent = (
           conversationAttachments={conversationAttachments}
           attachmentRefs={item.attachmentRefs}
           triggerAttachmentRefs={completed ? item.triggerAttachmentRefs : undefined}
+          roundId={roundId}
         />
       )}
       {isAwaiting && promptRequestedEventId && (
