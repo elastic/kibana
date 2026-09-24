@@ -123,12 +123,11 @@ export const useAllSources = ({
     };
 
     // Merges datasets and views in once they arrive, rather than holding back the base sources.
-    const appendOptionalSources = (base: ESQLSourceResult[]) => {
-      Promise.all([fetchDatasets(), fetchViews()]).then(([datasets, views]) => {
-        if (isMountedRef.current && isEffectActive) {
-          setAllSources(mergeSources(base, datasets, views));
-        }
-      });
+    const appendOptionalSources = async (base: ESQLSourceResult[]) => {
+      const [datasets, views] = await Promise.all([fetchDatasets(), fetchViews()]);
+      if (isMountedRef.current && isEffectActive) {
+        setAllSources(mergeSources(base, datasets, views));
+      }
     };
 
     if (preloadedSources !== undefined) {
@@ -152,7 +151,13 @@ export const useAllSources = ({
           const fetched = (await getSources?.()) ?? [];
           if (isMountedRef.current && isEffectActive) {
             setAllSources(fetched);
-            appendOptionalSources(fetched);
+            // With nothing to show yet, stay in the loading state until the optional sources
+            // land, so the empty message is not rendered over a list that is still filling.
+            if (fetched.length === 0) {
+              await appendOptionalSources(fetched);
+            } else {
+              appendOptionalSources(fetched);
+            }
           }
         }
       } catch {

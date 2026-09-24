@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { UseAllSourcesParams } from './use_all_sources';
 import { useAllSources } from './use_all_sources';
@@ -265,6 +265,28 @@ describe('useAllSources', () => {
       rerender(params);
 
       await waitFor(() => expect(result.current.allSources.map((s) => s.name)).toContain('view-3'));
+    });
+
+    it('keeps loading while views arrive for an empty base list', async () => {
+      let resolveViews: (result: EsqlViewsResult) => void = () => {};
+      const getViews = jest.fn(
+        () =>
+          new Promise<EsqlViewsResult>((resolve) => {
+            resolveViews = resolve;
+          })
+      );
+      const params = makeParams({ getSources: jest.fn().mockResolvedValue([]), getViews });
+      const { result } = renderHook(() => useAllSources(params));
+
+      await waitFor(() => expect(getViews).toHaveBeenCalled());
+      // Without this, the empty message would show over a list that is still filling.
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.allSources).toEqual([]);
+
+      await act(async () => resolveViews(mockViews));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.allSources.map((s) => s.name)).toContain('view-1');
     });
 
     it('works without getViews provided', async () => {
