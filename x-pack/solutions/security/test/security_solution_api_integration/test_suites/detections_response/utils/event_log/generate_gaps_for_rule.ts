@@ -172,7 +172,7 @@ const baseGapEventEnvelope = (rule: { id: string; name: string }) => ({
 /**
  * Indexes gap events that match the gap query but lack the `kibana.alert.rule.gap`
  * object the soft-delete script assigns into — one missing only `gap`, one missing
- * the whole `kibana` object. The script's null guard must skip both rather than
+ * `kibana.alert`. The script's null guard must skip both rather than
  * fail the batch, so well-formed gaps in the same operation still get flipped.
  * Returns the number of documents indexed.
  */
@@ -207,10 +207,17 @@ export const generateMalformedGapEventsForRule = async (
       rule: ruleFields,
       ecs,
     },
-    // No `kibana` object at all.
+    // `kibana.alert` is missing entirely. `kibana.saved_objects` stays so the
+    // query's nested namespace filter still matches and the script runs.
     {
       '@timestamp': timestamp,
       event,
+      kibana: {
+        saved_objects: savedObjects,
+        space_ids: ['default'],
+        server_uuid: '5d29f261-1b85-4d90-9088-53e0e0e87c7c',
+        version: '9.1.0',
+      },
       rule: ruleFields,
       ecs,
     },
