@@ -185,9 +185,9 @@ const renderTriageStarted = (alertCount: number): string =>
   });
 
 describe('floor_alert_triage — post_comment_triage_started', () => {
-  it('includes the alertzero_fast feature name for model routing', () => {
+  it('includes the alertzero_reasoning feature name for model routing', () => {
     const comment = renderTriageStarted(3);
-    expect(comment).toContain('alertzero_fast');
+    expect(comment).toContain('alertzero_reasoning');
   });
 
   it('lists up to 10 alert IDs for small batches', () => {
