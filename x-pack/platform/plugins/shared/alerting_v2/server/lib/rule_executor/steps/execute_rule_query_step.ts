@@ -46,10 +46,20 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   }
 
   /**
-   * Non-aggregating queries get `METADATA _id, _index, _version` so each row
-   * carries the source-document identity used to deduplicate rule events.
-   * A query the parser cannot transform runs unchanged; its rows then have no
-   * `_id` and are written without deduplication.
+   * Second stage of the query pipeline (`breach query -> dedup metadata ->
+   * row limit`): rewrites a non-aggregating query so each row carries
+   * `_id`, `_index` and `_version`, the identity `resolveRuleEventId` hashes
+   * downstream. See `injectDeduplicationMetadata` for the exact rewrite.
+   *
+   * This is the executor's only deviation from the stored rule query, and it
+   * lives here rather than in `getBreachEsqlQuery` because that helper is
+   * shared with the UI and agent-builder, which must show the query as the
+   * author wrote it.
+   *
+   * Failure is contained: if the AST rewrite throws, the original query runs
+   * and `RULE_EXECUTION_DEDUP_METADATA_INJECTION_FAILED` is logged. The run
+   * then behaves as it did before deduplication existed — every re-match is
+   * written — which is preferable to failing the rule execution.
    */
   private withDeduplicationMetadata(query: string, logger: LoggerServiceContract): string {
     try {
@@ -72,7 +82,8 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       const { input, rule } = state;
       const logger = state.logger.withLabels({ step: step.name });
 
-      const effectiveQuery = step.withDeduplicationMetadata(getBreachEsqlQuery(rule.query), logger);
+      const breachQuery = getBreachEsqlQuery(rule.query);
+      const effectiveQuery = step.withDeduplicationMetadata(breachQuery, logger);
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
       const timeField = rule.time_field;
 

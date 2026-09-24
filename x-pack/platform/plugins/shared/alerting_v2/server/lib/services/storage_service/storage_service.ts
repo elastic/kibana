@@ -19,9 +19,13 @@ export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> 
   /** When `'wait_for'`, the bulk call blocks until the indexed documents are visible to search. Defaults to `false`. */
   refresh?: boolean | 'wait_for';
   /**
-   * Optional per-document id resolver. When provided, the returned string is
-   * used as the document's `_id` in the bulk `create` operation, enabling
-   * deterministic deduplication via version-conflict (409) suppression.
+   * Optional per-document `_id` resolver for the bulk `create` op. A returned
+   * string becomes the document's `_id`, so a second `create` with the same
+   * id is rejected by Elasticsearch with a 409 instead of appending a
+   * duplicate; `undefined` lets Elasticsearch generate the id as before.
+   * `StoreAlertEventsStep` passes `resolveRuleEventId` here. Conflicts are
+   * still reported in `BulkIndexResult.errors` (with `details.statusCode`
+   * 409) so callers can count them, but are not logged as failures.
    */
   getDocumentId?: (doc: TDocument) => string | undefined;
 }
@@ -258,15 +262,20 @@ export class StorageService implements StorageServiceContract {
     this.logger.debug({ message });
   }
 
+  /**
+   * Logs the first genuine per-item failure at `error`. Version conflicts are
+   * skipped: with `getDocumentId` in use they are the expected signal that a
+   * document was already written, and a deduplicating rule would otherwise
+   * flood the log on every run. They remain visible in the returned
+   * `errors` and in the debug summary from {@link getBulkIndexDebugMessage}.
+   */
   private logFirstBulkIndexItemError(response: BulkResponse): void {
     if (!response.errors) {
       return;
     }
 
-    // Skip 409 version conflicts — these are expected when deterministic _id deduplication
-    // is active and the document was already written by a prior execution.
     const firstErrorItem = response.items.find(
-      (item) => item.create?.error && item.create.status !== 409
+      (item) => item.create?.error && !isVersionConflict(item)
     );
     if (!firstErrorItem) {
       return;
@@ -292,9 +301,9 @@ export class StorageService implements StorageServiceContract {
       return `StorageService: Successfully bulk created ${docsCount} documents to index: ${index}`;
     }
 
-    const conflictCount = response.items.filter((item) => item.create?.status === 409).length;
+    const conflictCount = response.items.filter(isVersionConflict).length;
     const otherFailCount = response.items.filter(
-      (item) => item.create?.error && item.create.status !== 409
+      (item) => item.create?.error && !isVersionConflict(item)
     ).length;
     const successCount = docsCount - conflictCount - otherFailCount;
 
@@ -305,3 +314,12 @@ export class StorageService implements StorageServiceContract {
     return `StorageService: Bulk create completed with errors for index: ${index} (successful: ${successCount}, deduplicated: ${conflictCount}, failed: ${otherFailCount}, total: ${docsCount})`;
   }
 }
+
+const HTTP_CONFLICT = 409;
+
+/**
+ * Whether a bulk `create` item was rejected because its `_id` already
+ * existed — the outcome rule-event deduplication relies on.
+ */
+const isVersionConflict = (item: BulkResponse['items'][number]): boolean =>
+  item.create?.status === HTTP_CONFLICT;

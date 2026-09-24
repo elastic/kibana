@@ -116,10 +116,21 @@ export interface BulkIndexObservation {
  * reference the emitting step passed to the storage service, so recorders
  * correlate failures by identity.
  */
+/**
+ * Open bag of transport-level detail for a rejected document. `statusCode`
+ * is the one key the executor reads: Elasticsearch's per-item HTTP status,
+ * which `PersistedRuleEventsRecorder` uses to tell a deduplication conflict
+ * (409) from a genuine failure.
+ */
+export interface BulkIndexObservationErrorDetails {
+  readonly statusCode?: number;
+  readonly [key: string]: unknown;
+}
+
 export interface BulkIndexObservationError {
   readonly code: string;
   readonly message: string;
-  readonly details?: Readonly<Record<string, unknown>>;
+  readonly details?: BulkIndexObservationErrorDetails;
   readonly index: string;
   readonly document: Record<string, unknown>;
 }

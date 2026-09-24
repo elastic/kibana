@@ -77,12 +77,19 @@ function sha256(value: string) {
 }
 
 /**
- * Deterministic `_id` for a rule event produced from a source document.
+ * Deterministic `.rule-events` `_id` for a rule event produced from a source
+ * document.
  *
- * Mirrors the detection engine's ES|QL rule identity: the source document's
- * `_id`, `_index` and `_version` plus the space and rule ids. A re-match of
- * the same source document on an overlapping lookback window collides on the
- * bulk `create` and is dropped; a re-indexed document (new `_version`) is not.
+ * Mirrors the detection engine's ES|QL alert identity: the source document's
+ * `_index`, `_id` and `_version` together with the space and rule ids. Two
+ * runs that match the same, unchanged source document therefore produce the
+ * same `_id`; `FilterDuplicateEventsStep` drops the second before the
+ * director sees it, and anything that slips past collides on the bulk
+ * `create` in `StoreAlertEventsStep`. A re-indexed document has a new
+ * `_version` and so a new `_id`, and alerts again.
+ *
+ * Pure; never throws. Callers decide *whether* an event qualifies via
+ * {@link resolveRuleEventId}; this function only encodes the identity.
  */
 export function buildRuleEventId({
   spaceId,
@@ -101,30 +108,37 @@ export function buildRuleEventId({
 }
 
 /**
- * Returns the deterministic `_id` for a breached rule event whose row carries
- * source-document metadata (`_id` injected via `METADATA`), or `undefined`
- * when Elasticsearch should generate the id.
+ * Resolves the deterministic `_id` for a rule event, or `undefined` when
+ * Elasticsearch should generate one.
  *
- * Only `breached` events built from ES|QL rows qualify. Rows from aggregating
- * queries have no `_id` column, and recovered / no_data / continued-breach
- * events must keep being written on every run.
+ * An event qualifies only when it is a `breached` event built from an ES|QL
+ * row that carries the source document's `_id` (injected by
+ * `injectDeduplicationMetadata` for non-aggregating queries). Everything else
+ * — rows from aggregating queries, `recovered`, `no_data` and continued-breach
+ * events — must keep being written on every run, so they get no id here.
+ *
+ * Used at both deduplication points: `FilterDuplicateEventsStep` resolves ids
+ * to pre-check `.rule-events`, and `StoreAlertEventsStep` passes it as
+ * `getDocumentId` for the bulk `create`. Computing from the event's own
+ * fields (rather than a side map) is what keeps the two in agreement across
+ * the director's object transformations.
+ *
+ * Pure; never throws. Returning `undefined` is not an error path — it is the
+ * normal outcome for every event that is not a source-document breach.
  */
 export function resolveRuleEventId(event: AlertEvent): string | undefined {
-  if (event.status !== 'breached') return undefined;
-
   const ruleId = event.rule?.id;
-  if (ruleId == null) return undefined;
-
   const sourceId = event.data?._id;
-  if (typeof sourceId !== 'string' || sourceId.length === 0) return undefined;
 
-  return buildRuleEventId({
-    spaceId: event.space_id,
-    ruleId,
-    sourceId,
-    sourceIndex: String(event.data._index ?? ''),
-    sourceVersion: String(event.data._version ?? ''),
-  });
+  return event.status === 'breached' && ruleId != null && typeof sourceId === 'string' && sourceId
+    ? buildRuleEventId({
+        spaceId: event.space_id,
+        ruleId,
+        sourceId,
+        sourceIndex: String(event.data._index ?? ''),
+        sourceVersion: String(event.data._version ?? ''),
+      })
+    : undefined;
 }
 
 export const buildExecutionUuid = ({
