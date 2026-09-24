@@ -8,15 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiSelect,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../common';
@@ -28,13 +20,11 @@ import type { DataFederationKibanaServices } from './types';
 export type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
 
 export interface DatasetsTableProps {
-  filteredItems: DataSetListRow[];
+  items: DataSetListRow[];
   selectedItems: DataSetListRow[];
-  dataSourceFilterOptions: Array<{ value: string; text: string }>;
-  dataSourceFilter: string;
+  dataSourceNames: string[];
   isCreateDisabled: boolean;
   onSelectionChange: (next: DataSetListRow[]) => void;
-  onDataSourceFilterChange: (next: string) => void;
   onCreate: () => void;
   onEdit: (item: DataSetListRow) => void;
   onDelete: (item: DataSetListRow) => void;
@@ -42,13 +32,11 @@ export interface DatasetsTableProps {
 }
 
 export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
-  filteredItems,
+  items,
   selectedItems,
-  dataSourceFilterOptions,
-  dataSourceFilter,
+  dataSourceNames,
   isCreateDisabled,
   onSelectionChange,
-  onDataSourceFilterChange,
   onCreate,
   onEdit,
   onDelete,
@@ -145,7 +133,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
     <>
       <EuiSpacer size="m" />
       <EuiInMemoryTable<DataSetListRow>
-        items={filteredItems}
+        items={items}
         itemId="name"
         columns={columns}
         search={{
@@ -163,6 +151,16 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
               },
             },
           },
+          filters: [
+            {
+              type: 'field_value_selection',
+              field: 'data_source',
+              name: mainTranslations.filters.allDataSources,
+              multiSelect: 'or',
+              operator: 'exact',
+              options: dataSourceNames.map((name) => ({ value: name })),
+            },
+          ],
           toolsLeft:
             selectedItems.length > 0 ? (
               <EuiButton
@@ -177,28 +175,15 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
               </EuiButton>
             ) : undefined,
           toolsRight: (
-            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  data-test-subj="dataSetsSetsDataSourceFilter"
-                  aria-label={mainTranslations.filters.dataSource}
-                  options={dataSourceFilterOptions}
-                  value={dataSourceFilter}
-                  onChange={(e) => onDataSourceFilterChange(e.target.value)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="primary"
-                  data-test-subj="dataSetsSetsCreateButton"
-                  onClick={onCreate}
-                  disabled={isCreateDisabled}
-                >
-                  {mainTranslations.columns.dataSets.addButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiButton
+              fill
+              color="primary"
+              data-test-subj="dataSetsSetsCreateButton"
+              onClick={onCreate}
+              disabled={isCreateDisabled}
+            >
+              {mainTranslations.columns.dataSets.addButtonLabel}
+            </EuiButton>
           ),
         }}
         rowHeader="name"

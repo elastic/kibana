@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
@@ -41,7 +41,6 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
 
   const [flyout, setFlyout] = useState<DataSetFlyoutState>({ mode: 'closed' });
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
-  const [dataSourceFilter, setDataSourceFilter] = useState<string>('');
   const [pendingDeleteDataSet, setPendingDeleteDataSet] = useState<DataSetListRow | null>(null);
   const [isDeletingDataSet, setIsDeletingDataSet] = useState(false);
   const [deleteDataSetError, setDeleteDataSetError] = useState<string | null>(null);
@@ -59,33 +58,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     }));
   }, [dataSets, dataSources]);
 
-  const dataSourceFilterOptions = useMemo(
-    () => [
-      { value: '', text: mainTranslations.filters.allDataSources },
-      ...dataSources
-        .map((ds) => ds.name)
-        .sort()
-        .map((name) => ({ value: name, text: name })),
-    ],
-    [dataSources]
-  );
-
-  useEffect(() => {
-    if (dataSourceFilter && !dataSources.some((ds) => ds.name === dataSourceFilter)) {
-      setDataSourceFilter('');
-    }
-  }, [dataSourceFilter, dataSources]);
-
-  useEffect(() => {
-    setSelectedDataSets([]);
-  }, [dataSourceFilter]);
-
-  const filteredDataSetItems = useMemo(() => {
-    if (!dataSourceFilter) {
-      return dataSetItems;
-    }
-    return dataSetItems.filter((ds) => ds.data_source === dataSourceFilter);
-  }, [dataSetItems, dataSourceFilter]);
+  const dataSourceNames = useMemo(() => dataSources.map((ds) => ds.name).sort(), [dataSources]);
 
   const existingDataSetNames = useMemo(() => dataSets.map((ds) => ds.name), [dataSets]);
 
@@ -203,13 +176,11 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   return (
     <>
       <DatasetsTable
-        filteredItems={filteredDataSetItems}
+        items={dataSetItems}
         selectedItems={selectedDataSets}
-        dataSourceFilterOptions={dataSourceFilterOptions}
-        dataSourceFilter={dataSourceFilter}
+        dataSourceNames={dataSourceNames}
         isCreateDisabled={dataSources.length === 0}
         onSelectionChange={setSelectedDataSets}
-        onDataSourceFilterChange={setDataSourceFilter}
         onCreate={() => setFlyout({ mode: 'create' })}
         onEdit={handleEdit}
         onDelete={handleDeleteDataSet}
