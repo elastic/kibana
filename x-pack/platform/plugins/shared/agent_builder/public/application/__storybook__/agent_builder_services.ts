@@ -145,8 +145,18 @@ export const storyNoteEventDefinition: ConversationEventUIDefinition = {
   },
 };
 
+/** Same as {@link STORY_CUSTOM_EVENT_TYPE}, with the framework header drawn from `getHeader`. */
+export const STORY_CUSTOM_EVENT_WITH_HEADER_TYPE = 'story_note_with_header';
+
+const storyNoteWithHeaderEventDefinition: ConversationEventUIDefinition = {
+  ...storyNoteEventDefinition,
+  type: STORY_CUSTOM_EVENT_WITH_HEADER_TYPE,
+  getHeader: () => ({ icon: 'document', iconTitle: 'Note', label: 'Note' }),
+};
+
 const storybookConversationEventsService = new ConversationEventsService();
 storybookConversationEventsService.register(storyNoteEventDefinition);
+storybookConversationEventsService.register(storyNoteWithHeaderEventDefinition);
 
 const defaultServices: AgentBuilderInternalService = {
   filesClient: storybookFilesClient,
