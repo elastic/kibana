@@ -59,7 +59,14 @@ const SUMMARY_CRITERIA = [
 interface FpTpDatasetExample extends Example {
   input: { exampleId: string };
   output: { outcome: string };
-  metadata: { exampleId: string; scenarioKey: string; situation: string; evidenceState: string };
+  metadata: {
+    exampleId: string;
+    scenarioKey: string;
+    situation: string;
+    evidenceState: string;
+    labelProvenance: string;
+    provisional: boolean;
+  };
 }
 
 evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classic }, () => {
@@ -119,11 +126,26 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
     'classifies seeded Attack Discoveries with the expected outcome',
     async ({ executorClient, evaluators, esClient, fetch, log, traceEsClient }) => {
       const examples: FpTpDatasetExample[] = FP_TP_EXAMPLES.map(
-        ({ id, scenarioKey, situation, evidenceState, expectedOutcome }) => ({
+        ({
+          id,
+          scenarioKey,
+          situation,
+          evidenceState,
+          expectedOutcome,
+          labelProvenance,
+          provisional = false,
+        }) => ({
           id,
           input: { exampleId: id },
           output: { outcome: expectedOutcome },
-          metadata: { exampleId: id, scenarioKey, situation, evidenceState },
+          metadata: {
+            exampleId: id,
+            scenarioKey,
+            situation,
+            evidenceState,
+            labelProvenance,
+            provisional,
+          },
         })
       );
 

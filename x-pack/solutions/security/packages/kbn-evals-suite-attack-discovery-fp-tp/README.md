@@ -10,7 +10,9 @@ The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and res
 
 ## Dataset
 
-The dataset is every example of every scenario registered in `src/scenarios/index.ts`. Today that is one scenario, `encoded-powershell` (encoded PowerShell on a workstation vs. an Intune/SCCM box; see [its README](src/scenarios/encoded_powershell/README.md)):
+The dataset is every example of every scenario registered in `src/scenarios/index.ts`. There are two scenarios.
+
+`encoded-powershell` is authored: encoded PowerShell on a workstation vs. an Intune/SCCM box (see [its README](src/scenarios/encoded_powershell/README.md)):
 
 | Example | Situation | World | Gold outcome |
 | --- | --- | --- | --- |
@@ -23,11 +25,15 @@ The dataset is every example of every scenario registered in `src/scenarios/inde
 | `encoded-powershell.failed-missing-ad` | U6 | No Attack Discovery document | `failed` |
 | `encoded-powershell.failed-missing-cited-alert` | U6 | The discovery cites an alert that is not seeded | `failed` |
 
+`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 15 examples are the replay, a benign mimic, and variants that each change one fact the world checks read, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
+
 A missing source is one-sided: it blocks `false_positive` (missing evidence cannot clear an alert) but not `true_positive`, which needs a supporting raw-event check (`process_parent` or `network_destination`). `entity_role` alone never escalates, so `tp-events-missing` stays `inconclusive`.
 
-Situations follow the contract: U1 lookalike, U2 benign alerts, U3 invented chain, U4 shared egress or jump box, U5 ambient, U6 true attack. U2–U5 have no scenario yet.
+Situations follow the contract: U1 lookalike, U2 benign alerts, U3 invented chain, U4 shared egress or jump box, U5 ambient, U6 true attack.
 
-Each example's metadata carries its scenario, situation, and evidence state, so reports can be sliced by any of them. Every task seeds its documents under a fresh run marker and suffix (`uniquify`), so repetitions and examples never share a document, and deletes them when it ends.
+Every example records its `labelProvenance`: `authored` (written by hand), `replay` (a published chain rendered as documents), or `adversarial-mutation` (a replay with one fact changed). Examples with `checks` state the result each world check should reach, and `registry.test.ts` requires the gold to follow from them under the workflow's verdict rules (`deriveFpTpOutcome`). A mutation must change at least one check result against its scenario's `.tp` example; one that changes none, such as reordering events, tests nothing new. `provisional` marks a gold that is not agreed yet.
+
+Each example's metadata carries its scenario, situation, evidence state, label provenance, and whether it is provisional, so reports can be sliced by any of them. Every task seeds its documents under a fresh run marker and suffix (`uniquify`), so repetitions and examples never share a document, and deletes them when it ends.
 
 Setup stops Entity Store log extraction (`PUT /api/security/entity_store/stop`) for the duration of the suite. Otherwise the store builds entities from the seeded raw events, and a world seeded without entities (`tp-entities-missing`) would gain them mid-run. Cleanup also deletes any entity on a seeded host. Teardown restarts extraction if it was running before the suite started. If a run is killed before teardown, run `PUT /api/security/entity_store/start` to resume it.
 
@@ -36,12 +42,14 @@ Setup stops Entity Store log extraction (`PUT /api/security/entity_store/stop`) 
 ```
 src/
   world/                  Scenario-agnostic: world and gold types, seeding and cleanup,
-                          uniquify, timestamp shifting, evidence-state helpers
+                          uniquify, timestamp shifting, evidence-state helpers,
+                          chain builder, mutations, verdict rules
   scenarios/
     index.ts              Registry: FP_TP_SCENARIOS, FP_TP_EXAMPLES, buildFpTpExampleWorld
     types.ts              FpTpScenario, FpTpExample, FpTpSituation, FpTpEvidenceState
     registry.test.ts      Invariants every scenario must hold
     encoded_powershell/   One authored scenario: ids, attack, entities, event overlays, gold, examples
+    mimicrat_clickfix/    One replayed chain, its benign mimic, and single-fact mutations
   sample_workflow/        The workflow under test until #19282 ships
   workflow_task.ts        Runs the workflow and reads its output
   evaluators.ts
@@ -49,14 +57,16 @@ src/
 
 ## Adding a scenario
 
-1. Create `src/scenarios/<scenario_key>/` modelled on `encoded_powershell/`. Build alerts and raw events from a registry scenario in `@kbn/evals-suite-attack-discovery-agent-builder` (`buildAd2SeedPlan`), then add the authored attack, entity documents, event overlays, and gold for each twin.
+1. Create `src/scenarios/<scenario_key>/`. Either:
+   - model it on `encoded_powershell/`: build alerts and raw events from a registry scenario in `@kbn/evals-suite-attack-discovery-agent-builder` (`buildAd2SeedPlan`), then add the authored attack, entity documents, event overlays, and gold for each twin; or
+   - model it on `mimicrat_clickfix/`: write the chain as an `FpTpChainDefinition` (events, alert stages, discovery text) and render it with `buildChainWorld`, then derive variants with the helpers in `src/world/mutations.ts`.
 2. Export an `FpTpScenario` from its `index.ts`:
    - `key`: the scenario key; every example id must start with `<key>.`.
    - `sharedNames`: every name the run marker does not make unique (attack id, host names, user names). `uniquify` suffixes them per run.
    - `twins`: the complete worlds a person can seed by hand, keyed by variant.
-   - `examples`: one entry per eval example, with its situation, evidence state, gold outcome, and `buildWorld(runMarker)`. Use the helpers in `src/world/evidence_states.ts` for the degraded-evidence and failure examples.
+   - `examples`: one entry per eval example, with its situation, evidence state, gold outcome, label provenance, `checks` where the gold follows from the verdict rules, and `buildWorld(runMarker)`. Use the helpers in `src/world/evidence_states.ts` for the degraded-evidence and failure examples.
 3. Add the scenario to `FP_TP_SCENARIOS` in `src/scenarios/index.ts`.
-4. Run the package's jest tests. `registry.test.ts` checks the new examples for unique ids, no unsuffixed shared names, disjoint documents across runs, and raw events inside the workflow's ±2h window.
+4. Run the package's jest tests. `registry.test.ts` checks the new examples for unique ids, no unsuffixed shared names, disjoint documents across runs, raw events inside the workflow's ±2h window, golds that follow from `checks`, and mutations that change a check result.
 
 ## Evaluators
 

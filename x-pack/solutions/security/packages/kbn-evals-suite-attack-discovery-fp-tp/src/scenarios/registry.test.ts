@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FP_TP_RAW_EVENT_WINDOW_MS } from '../world';
+import { deriveFpTpOutcome, FP_TP_RAW_EVENT_WINDOW_MS } from '../world';
 import { buildFpTpExampleWorld, FP_TP_EXAMPLES, FP_TP_SCENARIOS, getFpTpScenario } from '.';
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -28,6 +28,26 @@ describe('FP/TP scenario registry', () => {
       expect(id.startsWith(`${scenarioKey}.`)).toBe(true);
     }
   );
+
+  it.each(FP_TP_EXAMPLES.filter(({ checks }) => checks).map((example) => [example.id, example]))(
+    'returns a %s gold that follows from its checks',
+    (_id, { checks, expectedOutcome }) => {
+      expect(checks && deriveFpTpOutcome(checks)).toBe(expectedOutcome);
+    }
+  );
+
+  it.each(
+    FP_TP_EXAMPLES.filter(({ mutation }) => mutation).map((example) => [example.id, example])
+  )('returns %s checks that differ from its scenario tp checks', (_id, { checks, scenarioKey }) => {
+    const base = FP_TP_EXAMPLES.find(({ id }) => id === `${scenarioKey}.tp`);
+    expect(checks).not.toEqual(base?.checks);
+  });
+
+  it('returns checks for every mutation', () => {
+    expect(
+      FP_TP_EXAMPLES.filter(({ mutation, checks }) => mutation && !checks).map(({ id }) => id)
+    ).toEqual([]);
+  });
 
   it('throws for an unknown scenario key', () => {
     expect(() => getFpTpScenario('nope')).toThrow('Unknown FP/TP scenario "nope"');
