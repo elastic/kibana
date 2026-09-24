@@ -31,9 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const STALENESS_WAIT_MS = 40000;
     const ruleIds: string[] = [];
 
-    const indexDocsFor = async (
-      docs: Array<{ host: string; environment: string }>
-    ) => {
+    const indexDocsFor = async (docs: Array<{ host: string; environment: string }>) => {
       await esClient.bulk({
         refresh: true,
         operations: docs.flatMap((doc) => [
