@@ -136,10 +136,13 @@ export class TimePickerPageObject extends FtrService {
   }
 
   public async timePickerExists() {
-    if (await this.isNewDateRangePicker()) {
-      return await this.testSubjects.exists('dateRangePickerControlButton');
+    try {
+      await this.isNewDateRangePicker();
+      return true;
+    } catch (error) {
+      this.log.debug(`Time picker not found: ${error}`);
+      return false;
     }
-    return await this.testSubjects.exists('superDatePickerToggleQuickMenuButton');
   }
 
   /**

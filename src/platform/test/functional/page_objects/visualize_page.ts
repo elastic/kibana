@@ -410,7 +410,7 @@ export class VisualizePageObject extends FtrService {
   public async ensureSavePanelOpen() {
     this.log.debug('ensureSavePanelOpen');
     await this.header.waitUntilLoadingHasFinished();
-    const isOpen = await this.testSubjects.exists('savedObjectSaveModal');
+    const isOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', { timeout: 5000 });
     if (!isOpen) {
       await this.appMenu.clickMenuItem('visualizeSaveButton');
     }

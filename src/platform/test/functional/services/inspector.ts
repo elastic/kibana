@@ -251,8 +251,14 @@ export class InspectorService extends FtrService {
    * Opens inspector requests view
    */
   public async openInspectorRequestsView(): Promise<void> {
-    if (await this.testSubjects.exists('inspectorNoRequestsMessage')) return;
-    await this.testSubjects.existOrFail('inspectorViewChooser', { timeout: 5000 });
+    // A single-view inspector renders no view chooser, only the Requests view itself.
+    const hasViewChooser = await this.retry.tryForTime(5000, async () => {
+      if (await this.testSubjects.exists('inspectorViewChooser')) return true;
+      if (await this.testSubjects.exists('inspectorNoRequestsMessage')) return false;
+      if (await this.testSubjects.exists('inspectorRequestChooser')) return false;
+      throw new Error('Inspector view has not rendered');
+    });
+    if (!hasViewChooser) return;
     await this.openInspectorView('Requests');
   }
 

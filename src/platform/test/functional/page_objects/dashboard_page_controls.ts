@@ -429,11 +429,7 @@ export class DashboardPageControls extends FtrService {
         500,
         !ignoreTopOffsetOrOptions ? await this.panelActions.getContainerTopOffset() : undefined
       );
-      if (
-        !(await this.testSubjects.waitForExists(`control-popover-${controlId}`, {
-          timeout: 5000,
-        }))
-      ) {
+      if (!(await this.find.existsByCssSelector(`#control-popover-${controlId}`, 5000))) {
         throw new Error(`Options List popover ${controlId} has not opened`);
       }
     });
