@@ -1,0 +1,126 @@
+# Knowledge indicator document shape
+
+Shared by `analyze-and-improve`, `ai-index-sources` and `ai-index-automations`. This is the one
+description of what a KI document holds; the skills point here rather than restating it.
+
+## Base fields
+
+| Field | Type | Purpose |
+|---|---|---|
+| `type` | keyword | The **KI kind** — the discriminator agents filter on. Fixed vocabulary, listed below. |
+| `title` | text + semantic | Short display name; the primary semantic surface. |
+| `description` | text + semantic | Routing heuristic — what the source does *not* contain, key fields, joins. When sibling KIs share a similar title, this **must** carry the differentiator (sub-category, product, time window). Title alone will not separate near-duplicates for the retriever. |
+| `content` | text + semantic | Free text for semantic retrieval: purpose, questions answered, access patterns. |
+| `tags` | keyword[] | Filter facets. |
+| `attributes` | flattened | Structured, keyword-queryable metadata: the domain facts the retrieval prompt needs. |
+| `references` | object[] | What the KI was derived from: `{ uri, relation, description? }`, written by the workflow with `relation: derived_from`. URI schemes are under Provenance below. At most 100. |
+| `expires_at` | date | ISO date after which the KI is stale, ~30 days out. Omitted for durable immutable-fact KIs, which never age out. |
+| `id` | keyword | The KI id: the step's `ki_id`, or a generated one. Set by the `context-engine` steps — never supplied in the step input. |
+| `@timestamp` | date | When this document was written. Set by the `context-engine` steps — never supplied in the step input. |
+| `updated_at` | date | When the KI last changed. Set by the `context-engine` steps — never supplied in the step input. |
+| `governance` | object | `provenance.created_by` / `updated_by` (the writing workflow, as `workflow://<id>` with its version, run id and space) and `lifecycle.status` (`active` or `deleted`). Set by the `context-engine` steps — never supplied in the step input. |
+
+## `type` values
+
+Systemic kinds, one per strategy, produced by an automation over a corpus:
+
+| `type` | One KI per |
+|---|---|
+| `index_metadata` | index |
+| `document` | document |
+| `event` | significant document in a stream |
+| `fact` | discrete claim inside a document |
+| `entity` | recurring unit (customer, product, host, case) enriched from one or more indices |
+| `detection` | named runnable condition |
+| `feature` | inventory entry with a subtype and a stable slug |
+
+Targeted kinds, one KI each, written from a single counted finding rather than generated over a
+corpus:
+
+| `type` | What it carries |
+|---|---|
+| `constraint` | A rule the data imposes that queries keep violating: a field that must be backquoted, a type that must be cast, a join that only works one way. |
+| `workaround` | The path that worked when the obvious one did not, with the failed attempts named. |
+| `disambiguation` | Two things agents confuse, and how to tell which one a question means. |
+| `task_recipe` | The ordered queries that answer a recurring question class, with the join keys filled in. |
+
+Use these values and no others. A new value is a schema change, not a KI.
+
+## Domain facts live inside `attributes`
+
+`attributes` is `flattened`, so arbitrary nested keys are keyword-queryable with no declared
+mapping and can never cause a mapping conflict on a long-lived index. Values are strings, numbers,
+booleans or arrays of strings — never nested objects. A single value caps at 10,000 characters.
+
+Domain facts — what the retrieval prompt needs and nothing else in the schema models. Each is
+written by the template that owns the strategy:
+
+| Field | Purpose | Written by |
+|---|---|---|
+| `attributes.esql` | **The canonical location for any ES\|QL the KI carries** — a detection's materialized query, an index profile's runnable examples. String or array of strings. This is the field the verifiers read; a KI with no runnable query omits it (the templates write `\| default: nil`, which drops the attribute) and the verifiers skip it. Never an empty list. | every template, when the KI has a query |
+| `attributes.key_fields` | The fields an index profile says questions filter and join on. | `index-metadata-template` |
+| `attributes.when_to_use` | One line on which questions the profile answers. | `index-metadata-template` |
+| `attributes.unit_key` | The field that identifies one unit of a unit profile, so a re-run replaces the same KI. | `unit-profile-template` |
+| `attributes.unit` | The value of `unit_key` this KI is about. | `unit-profile-template` |
+| `attributes.doc_count` | How many source rows the unit profile aggregated. | `unit-profile-template` |
+| `attributes.distinct_breakdown` | How many distinct values of the breakdown field the unit has. | `unit-profile-template` |
+| `attributes.prevalence` | For a targeted KI, the count, denominator and window of the finding behind it, as one string. | `targeted-ki-writer` |
+| `attributes.topics` | The themes a document KI covers, for facet filtering. | `document-template` |
+
+No KI carries a self-reported quality number. Whether a KI is correct and complete is judged at
+the pilot inspection step in `ai-index-automations`, by reading what the pilot wrote against the
+source; a confidence or coverage score written by the model that wrote the KI is the same model
+grading itself. Do not add `confidence`, `coverage` or `evidence` attributes.
+
+## Provenance
+
+Two fields answer two different questions. `governance.provenance` is **who wrote the KI**: the
+`context-engine` steps stamp the workflow and run on every write, so never add a `workflow://`
+reference. `references` is **what the KI was derived from**, and the workflow writes it. Every id
+in a reference already exists on the platform; none is minted for the KI:
+
+| URI | Use it for |
+|---|---|
+| `index://<index>` | The raw index the KI describes or was grounded from. One entry per index. |
+| `doc://<index>/<_id>` | For per-document KIs, the source document. |
+| `trace://<trace_id>` | For KIs written from retrieval evidence, each trace behind the finding — the minimal covering set, at most 20. |
+| `conversation://<conversation_id>` | The conversation a targeted KI was derived from, when there was one. |
+
+Every entry carries `relation: derived_from`. Values that are not identifiers stay in `attributes`:
+
+| Field | Purpose |
+|---|---|
+| `attributes.error_text` | For a `constraint` or `disambiguation` KI written from a `query_error`, the error message as observed. |
+
+A targeted KI carries at least one `trace://` or `conversation://` reference, or an
+`attributes.error_text`. A systemic KI references its source index:
+every generated template writes `index://`, the unit profile adds its catalog index when that is
+a separate one, and the document template adds `doc://` because its unit is a document.
+
+## Structured values belong in both `content` and `attributes`
+
+As prose in `content` so they are semantically searchable, and repeated in `attributes` so they
+are exact-match and filter queryable. A value in only one of the two is invisible to half the
+retrieval paths, and that asymmetry is a common and easily missed cause of empty retrievals.
+
+Because `attributes` is `flattened`, numbers and dates inside it index as keywords. In ES|QL, cast
+before comparing: `TO_LONG(FIELD_EXTRACT(attributes, "doc_count"))`. The top-level `expires_at`
+is a real date and needs no cast.
+
+## Backing stores
+
+Backing stores match `ai-index-ds-*` for timeseries KIs (data stream destination) and
+`ai-index-idx-*` otherwise. Workflows write through the `context-engine` steps using the AI index
+id — never by indexing into the backing store directly.
+
+- **Index destination:** one KI is one document; writing the same `ki_id` overwrites it, and
+  `deleteKi` removes it.
+- **Data stream destination:** documents are append-only. Writing the same `ki_id` adds a new
+  document (a revision) carrying the same `id`, and `deleteKi` adds one more whose
+  `governance.lifecycle.status` is `deleted`. One KI can therefore be several documents.
+
+To read the current state, take the newest document per `id` and drop the KI when that newest
+document's `governance.lifecycle.status` is `deleted`. A plain `FROM ... | WHERE tags == ...` on a
+data stream returns every revision, deleted ones included. Read AI indices with
+`platform.context_engine.query_ai_indices`, which adds the space filter the backing store does not
+apply on its own.

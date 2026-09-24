@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   ConversationQueue,
+  investigationEntityIds,
   type BaseActionsProps,
   type ConversationsActionsGroupProps,
   type Investigation,
@@ -55,7 +56,9 @@ export const QueueSection = ({
   const briefingList = useMemo(
     () =>
       surfaceFilter
-        ? investigations.filter(({ affectedSurface }) => affectedSurface === surfaceFilter)
+        ? investigations.filter((investigation) =>
+            investigationEntityIds(investigation).includes(surfaceFilter)
+          )
         : investigations,
     [investigations, surfaceFilter]
   );

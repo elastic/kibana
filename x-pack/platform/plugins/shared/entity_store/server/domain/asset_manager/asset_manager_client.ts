@@ -475,7 +475,15 @@ export class AssetManagerClient {
       this.globalStateClient.findLogExtractionOverrides(),
       this.engineDescriptorClient.findOrThrow(type),
     ]);
-    return getMergedConfig(type, globalOverrides, engine.logExtractionConfig, extractionMode);
+    return getMergedConfig(
+      type,
+      globalOverrides,
+      engine.logExtractionConfig,
+      extractionMode,
+      extractionMode === EXTRACTION_MODE.nonPriority
+        ? engine.nonPriorityLogExtractionConfig
+        : undefined
+    );
   }
 
   private async initEntity(request: KibanaRequest, type: EntityType): Promise<boolean> {
