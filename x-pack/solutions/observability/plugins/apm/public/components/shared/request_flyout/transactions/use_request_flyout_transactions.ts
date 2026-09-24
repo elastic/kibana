@@ -17,7 +17,7 @@ export function useRequestFlyoutTransactions({
   latencyAggregationType: LatencyAggregationType;
 }) {
   const {
-    connection: { sourceServiceName, dependencies },
+    connection: { sourceServiceName, targetServiceName, dependencies },
     filters: { environment, start, end },
     refreshToken,
   } = useRequestFlyoutContext();
@@ -25,11 +25,16 @@ export function useRequestFlyoutTransactions({
   const { data, status } = useFetcher(
     (callApmApi) => {
       void refreshToken;
-      if (sourceServiceName && dependencies.length > 0 && start && end) {
+      // For service→service edges targetServiceName is the join key (trace-based).
+      // For service→dependency edges we join on resource names from dependencies[].
+      // We require at least one of the two to avoid querying all transactions.
+      const hasTarget = Boolean(targetServiceName) || dependencies.length > 0;
+      if (sourceServiceName && hasTarget && start && end) {
         return callApmApi('GET /internal/apm/service-map/connection/transactions', {
           params: {
             query: {
               sourceServiceName,
+              targetServiceName,
               dependencies,
               environment,
               start,
@@ -40,7 +45,16 @@ export function useRequestFlyoutTransactions({
         });
       }
     },
-    [sourceServiceName, dependencies, environment, start, end, latencyAggregationType, refreshToken]
+    [
+      sourceServiceName,
+      targetServiceName,
+      dependencies,
+      environment,
+      start,
+      end,
+      latencyAggregationType,
+      refreshToken,
+    ]
   );
 
   // Map the API response to the generic TransactionGroup shape the shared table expects.

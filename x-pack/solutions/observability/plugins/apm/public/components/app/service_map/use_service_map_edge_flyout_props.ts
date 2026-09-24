@@ -34,6 +34,14 @@ export function useServiceMapEdgeFlyoutProps({
     // Multi-resource edges (service→service) carry multiple resources.
     const dependencies = resources ?? [];
 
+    // For service→service edges the target node has SERVICE_NAME set (it was an instrumented
+    // service). The resources array contains the preserved SPAN_DESTINATION_SERVICE_RESOURCE
+    // from the exit span that was merged into this service node — that resource came from
+    // whichever caller happened to be merged first, which may differ from sourceServiceName's
+    // own resource name. A trace-level join is therefore more reliable than resource-matching.
+    const targetServiceName =
+      targetData && SERVICE_NAME in targetData ? targetData[SERVICE_NAME] : undefined;
+
     // Single-dependency name: the SPAN_DESTINATION_SERVICE_RESOURCE from the target node.
     const dependencyName =
       targetData && SPAN_DESTINATION_SERVICE_RESOURCE in targetData
@@ -51,6 +59,7 @@ export function useServiceMapEdgeFlyoutProps({
       sourceLabel: sourceLabel ?? sourceServiceName,
       targetLabel: targetLabel ?? dependencyName ?? selectedEdgeForFlyout.target,
       dependencies,
+      targetServiceName,
       dependencyName,
       isGrouped: isGrouped ?? false,
       isMessagingConsumer,

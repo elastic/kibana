@@ -18,6 +18,7 @@ import { ApmDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
@@ -30,15 +31,16 @@ import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latenc
 import { withApmSpan } from '../../utils/with_apm_span';
 
 /**
- * Maximum number of transaction IDs to collect from the exit-span phase.
+ * Maximum number of IDs collected from Phase 1.
  * This is an intentional PoC constraint — values are biased for high-volume connections.
  * See kibana#293244 concern #1 in the PR description.
  */
-const MAX_TRANSACTION_IDS = 1000;
+const MAX_IDS = 1000;
 
 export function getConnectionTransactions({
   apmEventClient,
   sourceServiceName,
+  targetServiceName,
   dependencies,
   environment,
   start,
@@ -47,6 +49,8 @@ export function getConnectionTransactions({
 }: {
   apmEventClient: APMEventClient;
   sourceServiceName: string;
+  /** Present for service→service edges. Triggers trace-level Phase 1 instead of resource-based. */
+  targetServiceName?: string;
   dependencies: string[];
   environment: Environment;
   start: number;
@@ -54,56 +58,133 @@ export function getConnectionTransactions({
   latencyAggregationType?: LatencyAggregationType;
 }): Promise<ConnectionTransactionsResponse> {
   return withApmSpan('get_connection_transactions', async () => {
-    //
-    // Phase 1: Find exit spans for this connection and collect transaction.id values.
-    //
-    // NOTE: Spans have `transaction.id` (the containing transaction) but NOT `transaction.name`.
-    // Transaction docs have `transaction.name` but NOT `span.destination.service.resource`.
-    // So we must do a two-phase join. We join on transaction.id — not trace.id — to avoid the
-    // attribution bug in get_top_dependency_spans.ts:126 (trace-id keying attributes the wrong
-    // transaction in multi-service traces).
-    //
-    // We query BOTH span and transaction documents in Phase 1. The service map's own exit span
-    // query (fetch_exit_span_samples.ts) does the same — in some cases (single-span transactions,
-    // certain agent types) `span.destination.service.resource` appears on a transaction document
-    // rather than a span document. If we only query spans we silently miss those connections.
-    //
-    // When the doc is a span: `transaction.id` = the containing transaction's ID.
-    // When the doc is a transaction: `transaction.id` = the doc's own ID (self-referential).
-    // Either way Phase 2 correctly resolves to a transaction document.
-    //
-    const spanAggResponse = await apmEventClient.search(
-      'get_connection_transactions_exit_span_ids',
-      {
-        apm: {
-          events: [ProcessorEvent.span, ProcessorEvent.transaction],
-        },
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { term: { [SERVICE_NAME]: sourceServiceName } },
-              { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencies } },
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-            ],
-          },
-        },
-        aggs: {
-          transaction_ids: {
-            terms: {
-              field: TRANSACTION_ID,
-              size: MAX_TRANSACTION_IDS,
+    let transactionIds: string[];
+    let isMaxTransactionsReached: boolean;
+
+    if (targetServiceName) {
+      //
+      // Service→service Phase 1: trace-level join.
+      //
+      // For service→service edges the resources array in the edge data comes from whichever
+      // exit span was merged into the target service node. That exit span may have originated
+      // from a different caller, so its span.destination.service.resource value may not match
+      // what sourceService actually uses when calling targetService. A trace-level join is
+      // semantically correct: find sourceService transactions that participate in traces that
+      // also contain targetService.
+      //
+      // Phase 1a: collect trace IDs containing targetService transactions.
+      const targetTraceResponse = await apmEventClient.search(
+        'get_connection_transactions_target_traces',
+        {
+          apm: { events: [ProcessorEvent.transaction] },
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { [SERVICE_NAME]: targetServiceName } },
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+              ],
             },
           },
-        },
-      }
-    );
+          aggs: {
+            trace_ids: {
+              terms: { field: TRACE_ID, size: MAX_IDS },
+            },
+          },
+        }
+      );
 
-    const transactionIdBuckets = spanAggResponse.aggregations?.transaction_ids.buckets ?? [];
-    const transactionIds = transactionIdBuckets.map((b) => String(b.key));
-    const isMaxTransactionsReached = transactionIds.length >= MAX_TRANSACTION_IDS;
+      const traceIds = (targetTraceResponse.aggregations?.trace_ids.buckets ?? []).map((b) =>
+        String(b.key)
+      );
+
+      if (traceIds.length === 0) {
+        return { transactionGroups: [], isMaxTransactionsReached: false };
+      }
+
+      // Phase 1b: collect sourceService transaction IDs in those traces.
+      const sourceTxResponse = await apmEventClient.search(
+        'get_connection_transactions_source_tx_ids',
+        {
+          apm: { events: [ProcessorEvent.transaction] },
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { [SERVICE_NAME]: sourceServiceName } },
+                { terms: { [TRACE_ID]: traceIds } },
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+              ],
+            },
+          },
+          aggs: {
+            transaction_ids: {
+              terms: { field: TRANSACTION_ID, size: MAX_IDS },
+            },
+          },
+        }
+      );
+
+      const sourceBuckets = sourceTxResponse.aggregations?.transaction_ids.buckets ?? [];
+      transactionIds = sourceBuckets.map((b) => String(b.key));
+      isMaxTransactionsReached =
+        traceIds.length >= MAX_IDS || transactionIds.length >= MAX_IDS;
+    } else {
+      //
+      // Service→dependency Phase 1: resource-based join.
+      //
+      // Spans have `transaction.id` (the containing transaction) but NOT `transaction.name`.
+      // Transaction docs have `transaction.name` but NOT `span.destination.service.resource`.
+      // So we must do a two-phase join. We join on transaction.id — not trace.id — to avoid
+      // the attribution bug in get_top_dependency_spans.ts:126 (trace-id keying attributes
+      // the wrong transaction in multi-service traces).
+      //
+      // We query BOTH span and transaction documents. The service map's own exit span query
+      // (fetch_exit_span_samples.ts) does the same — in some cases (single-span transactions,
+      // certain agent types) `span.destination.service.resource` appears on a transaction
+      // document rather than a span document.
+      //
+      // When the doc is a span: `transaction.id` = the containing transaction's ID.
+      // When the doc is a transaction: `transaction.id` = the doc's own ID (self-referential).
+      // Either way Phase 2 correctly resolves to a transaction document.
+      //
+      const spanAggResponse = await apmEventClient.search(
+        'get_connection_transactions_exit_span_ids',
+        {
+          apm: {
+            events: [ProcessorEvent.span, ProcessorEvent.transaction],
+          },
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { [SERVICE_NAME]: sourceServiceName } },
+                { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencies } },
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+              ],
+            },
+          },
+          aggs: {
+            transaction_ids: {
+              terms: {
+                field: TRANSACTION_ID,
+                size: MAX_IDS,
+              },
+            },
+          },
+        }
+      );
+
+      const buckets = spanAggResponse.aggregations?.transaction_ids.buckets ?? [];
+      transactionIds = buckets.map((b) => String(b.key));
+      isMaxTransactionsReached = transactionIds.length >= MAX_IDS;
+    }
 
     if (transactionIds.length === 0) {
       return { transactionGroups: [], isMaxTransactionsReached: false };

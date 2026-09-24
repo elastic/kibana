@@ -194,6 +194,7 @@ const serviceMapConnectionTransactionsRoute = createApmServerRoute({
     const {
       query: {
         sourceServiceName,
+        targetServiceName,
         dependencies,
         environment,
         start,
@@ -205,6 +206,7 @@ const serviceMapConnectionTransactionsRoute = createApmServerRoute({
     return getConnectionTransactions({
       apmEventClient,
       sourceServiceName,
+      targetServiceName,
       dependencies: Array.isArray(dependencies) ? dependencies : [dependencies],
       environment,
       start,

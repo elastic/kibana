@@ -22,6 +22,12 @@ export interface RequestFlyoutConnection {
    */
   dependencies: string[];
   /**
+   * For service→service edges: service.name of the target (callee) service.
+   * When present the transaction query uses a trace-level join instead of a
+   * resource-based join — see get_connection_transactions.ts for details.
+   */
+  targetServiceName?: string;
+  /**
    * The first dependency name, used for routes that accept a single value.
    * Undefined for service→service edges with no dependency name.
    */
