@@ -673,16 +673,7 @@ class ConversationClientImpl implements ConversationClient {
 
     this.notifyAttachmentEvents(id, conversation.events ?? []);
 
-    return toResponseConversation({
-      document: {
-        _id: id,
-        _source: attributes,
-        _seq_no: indexed._seq_no,
-        _primary_term: indexed._primary_term,
-      },
-      user: this.user,
-      resolveTemplate: getTemplate,
-    });
+    return this.get(id);
   }
 
   async update(

@@ -6,6 +6,7 @@
  */
 
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -232,11 +233,12 @@ describe('createWorkerSettingsRegistration', () => {
 
   describe('Worker-specific settings — detection rule tuning', () => {
     const registration = createWorkerSettingsRegistration(RULE_TUNING_WORKER_ID);
+    const defaultExtras = RULE_TUNING_DEFAULT_EXTRAS;
     const storedDefaults = {
       settingsVersion: 1,
       autonomyLevel: 'manual',
       scheduleInterval: '2h',
-      extras: { analysisWindowDays: 14 },
+      extras: defaultExtras,
     };
 
     it('stores extras nested and projects them under settings.extras', () => {
@@ -245,7 +247,7 @@ describe('createWorkerSettingsRegistration', () => {
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 14 },
+        extras: defaultExtras,
       });
     });
 
@@ -265,7 +267,7 @@ describe('createWorkerSettingsRegistration', () => {
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'assisted',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 14 },
+        extras: defaultExtras,
       });
     });
 
@@ -298,13 +300,13 @@ describe('createWorkerSettingsRegistration', () => {
       expect(
         registration.applyPatch(
           { ...storedDefaults, autonomyLevel: 'assisted' },
-          { extras: { analysisWindowDays: 7 } }
+          { extras: { ...defaultExtras, analysisWindowDays: 21 } }
         )
       ).toEqual({
         values: {
           ...storedDefaults,
           autonomyLevel: 'assisted',
-          extras: { analysisWindowDays: 7 },
+          extras: { ...defaultExtras, analysisWindowDays: 21 },
         },
       });
     });
@@ -319,7 +321,7 @@ describe('createWorkerSettingsRegistration', () => {
       expect(
         expectInvalid(
           registration.applyPatch(storedDefaults, {
-            extras: { analysisWindowDays: 14, previewDepth: 3 },
+            extras: { ...defaultExtras, previewDepth: 3 },
           })
         )
       ).toMatch(/extras.*previewDepth/);
@@ -327,9 +329,42 @@ describe('createWorkerSettingsRegistration', () => {
 
     it.each([7.5, 0, 31])('rejects a stored analysis window of %s', (analysisWindowDays) => {
       expect(() =>
-        registration.toSettings({ ...storedDefaults, extras: { analysisWindowDays } })
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, analysisWindowDays },
+        })
       ).toThrow(/extras\.analysisWindowDays/);
     });
+
+    it.each([1, 101, 10.5])('rejects a stored FP count threshold of %s', (fpCountThreshold) => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, fpCountThreshold },
+        })
+      ).toThrow(/extras\.fpCountThreshold/);
+    });
+
+    it.each([-1, 101, 50.5])('rejects a stored FP rate threshold of %s', (fpRateThresholdPct) => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, fpRateThresholdPct },
+        })
+      ).toThrow(/extras\.fpRateThresholdPct/);
+    });
+
+    it.each(['fpCountThreshold', 'fpRateThresholdPct'] as const)(
+      'rejects an extras replacement missing %s, naming it',
+      (missing) => {
+        const extras: Record<string, number> = { ...defaultExtras };
+        delete extras[missing];
+
+        expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(
+          `extras.${missing}`
+        );
+      }
+    );
   });
 
   describe('Workers that declare no extras', () => {

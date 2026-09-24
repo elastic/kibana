@@ -106,16 +106,20 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
 
-      plugin.setup(
+      const result = plugin.setup(
         coreSetup as never,
         {
           features,
           workflowsExtensions,
           workflowsManagement: { management: {} },
-          agentBuilder: { tools: { register: jest.fn() } },
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+          },
         } as never
       );
 
+      expect(result).toEqual({ enabled: true });
       expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
       expect(features.registerKibanaFeature).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -140,7 +144,11 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
-      const agentBuilder = { agents: { registerType: jest.fn() }, tools: { register: jest.fn() } };
+      const agentBuilder = {
+        agents: { registerType: jest.fn() },
+        tools: { register: jest.fn() },
+        attachments: { registerType: jest.fn() },
+      };
 
       plugin.setup(
         coreSetup as never,
@@ -153,6 +161,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
     });
 
     it('registers the inference tiers with the optional searchInferenceEndpoints setup contract', () => {
@@ -165,7 +174,10 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           features: { registerKibanaFeature: jest.fn() },
           workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
           workflowsManagement: { management: {} },
-          agentBuilder: { tools: { register: jest.fn() } },
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+          },
           searchInferenceEndpoints,
         } as never
       );

@@ -62,8 +62,13 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
       docId,
     });
 
+    // The section-level "Open in Discover" spans both APM errors and unprocessed OTel errors.
+    // Widen the index pattern to cover both: join the APM error pattern and the log sources (if
+    // configured) so that datasets outside `logs-apm*,apm-*,logs-*.otel-*` are also included.
+    const errorsIndexPattern = [indexes.apm.errors, indexes.logs].filter(Boolean).join(',');
+
     const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
-      indexPattern: indexes.apm.errors,
+      indexPattern: errorsIndexPattern,
       whereClause: createTraceContextWhereClauseForErrors({ traceId, spanId: docId }),
     });
 
@@ -83,10 +88,10 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
     );
 
     const { columns } = useMemo(() => {
-      const cols = getColumns({ traceId, docId, source: response.source });
+      const cols = getColumns({ traceId, docId });
 
       return { columns: cols };
-    }, [traceId, docId, response.source]);
+    }, [traceId, docId]);
 
     if (loading || (!error && response.traceErrors.length === 0)) {
       return null;

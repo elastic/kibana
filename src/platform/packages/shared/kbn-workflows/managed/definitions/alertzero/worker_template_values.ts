@@ -41,11 +41,14 @@ export const renderScheduledWorkerYaml = (
 
 /**
  * Worker-specific settings are stored under `extras`, mirroring the Worker settings API, so a
- * settings save re-renders YAML and the per-space Worker can pass them to the sweep.
+ * settings save re-renders YAML and the per-space Worker can pass them to the sweep. The shape is
+ * declared once, in `RuleTuningWorkerExtras` in `@kbn/alertzero-common`; this mirrors it for typing.
  */
 export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateValues {
   extras: {
     analysisWindowDays: number;
+    fpCountThreshold: number;
+    fpRateThresholdPct: number;
   };
 }
 
@@ -53,9 +56,10 @@ export const renderRuleTuningWorkerYaml = (
   yaml: string,
   values: RuleTuningWorkerTemplateValues
 ): string =>
+  // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution.
   renderScheduledWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_ANALYSIS_WINDOW_DAYS__',
-    String(values.extras.analysisWindowDays)
+    '__WORKER_EXTRAS__',
+    JSON.stringify(values.extras)
   );
 
 export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {

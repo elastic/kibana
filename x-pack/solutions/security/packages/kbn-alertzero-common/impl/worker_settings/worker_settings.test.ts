@@ -23,6 +23,7 @@ import {
   projectStoredAutonomyLevel,
 } from './contract';
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   WORKER_SETTINGS_DECLARATIONS,
   createDefaultWorkerSettings,
   getAllowedAutonomyLevels,
@@ -65,7 +66,7 @@ describe('Worker settings declarations', () => {
       workerId: RULE_TUNING,
       autonomy: 'manual',
       scheduleInterval: '2h',
-      extras: { analysisWindowDays: 14 },
+      extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     });
     expect(createDefaultWorkerSettings(TRIAGE)).toEqual({
       workerId: TRIAGE,
@@ -110,7 +111,12 @@ describe('Worker settings declarations', () => {
         workerId: RULE_TUNING,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 14, previewDepth: 3 },
+        extras: {
+          analysisWindowDays: 7,
+          fpCountThreshold: 10,
+          fpRateThresholdPct: 50,
+          previewDepth: 3,
+        },
       })
     ).toMatch(/extras.*previewDepth/);
   });
@@ -121,10 +127,49 @@ describe('Worker settings declarations', () => {
         workerId: RULE_TUNING,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays },
+        extras: { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays },
       })
     ).toContain('extras.analysisWindowDays');
   });
+
+  it.each([1, 101, 10.5])('rejects fpCountThreshold %s', (fpCountThreshold) => {
+    expect(
+      issuesOf(RULE_TUNING, {
+        workerId: RULE_TUNING,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { ...RULE_TUNING_DEFAULT_EXTRAS, fpCountThreshold },
+      })
+    ).toContain('extras.fpCountThreshold');
+  });
+
+  it.each([-1, 101, 50.5])('rejects fpRateThresholdPct %s', (fpRateThresholdPct) => {
+    expect(
+      issuesOf(RULE_TUNING, {
+        workerId: RULE_TUNING,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { ...RULE_TUNING_DEFAULT_EXTRAS, fpRateThresholdPct },
+      })
+    ).toContain('extras.fpRateThresholdPct');
+  });
+
+  it.each(['fpCountThreshold', 'fpRateThresholdPct'] as const)(
+    'rejects an extras replacement missing %s, naming it',
+    (missing) => {
+      const extras: Record<string, number> = { ...RULE_TUNING_DEFAULT_EXTRAS };
+      delete extras[missing];
+
+      expect(
+        issuesOf(RULE_TUNING, {
+          workerId: RULE_TUNING,
+          autonomy: 'manual',
+          scheduleInterval: '2h',
+          extras,
+        })
+      ).toContain(`extras.${missing}`);
+    }
+  );
 });
 
 describe('allowed autonomy levels', () => {

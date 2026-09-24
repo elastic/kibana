@@ -7,7 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { EntityType } from '../../../../common/domain/definitions/entity_schema';
-import { LogExtractionTypeOverride } from '../global_state/constants';
+import {
+  LogExtractionTypeOverride,
+  NonPriorityLogExtractionTypeOverride,
+} from '../global_state/constants';
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
 export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
@@ -45,6 +48,9 @@ export const EngineDescriptor = z.object({
   logExtractionState: EngineLogExtractionState,
   /** Per entity-type log extraction overrides. Optional: descriptors written before model version 8 do not have the field. */
   logExtractionConfig: LogExtractionTypeOverride.optional(),
+  /** Non-priority-specific per entity-type overrides. Not exposed via any API - populated only
+   * by internal server logic. Optional: descriptors written before model version 11 do not have the field. */
+  nonPriorityLogExtractionConfig: NonPriorityLogExtractionTypeOverride.optional(),
   /** Non-priority process cursor. Absent before model version 9, null when the non-priority process
    * is not running. Both mean no cursor: extraction starts from now - lookbackPeriod. */
   nonPriorityLogExtractionState: EngineLogExtractionState.nullish(),

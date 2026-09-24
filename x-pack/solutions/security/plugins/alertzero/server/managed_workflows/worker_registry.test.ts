@@ -68,7 +68,7 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
   'system-security-detection-rule-tuning': {
     settingsVersion: 1,
     scheduleInterval: '2h',
-    extras: { analysisWindowDays: 14 },
+    extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     triggerTypes: ['scheduled', 'manual'],
   },
   'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
