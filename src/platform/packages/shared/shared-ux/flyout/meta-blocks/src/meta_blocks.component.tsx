@@ -126,7 +126,7 @@ export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest 
         return (
           // `EuiText` renders a `div`, the one wrapper `dl` accepts around a `dt`/`dd` pair. It
           // keeps each pair a single flex item, which is what makes the row wrap pair by pair.
-          <EuiText key={id ?? index} {...itemProps} size="s" color="subdued" css={memoized.item}>
+          <EuiText key={id ?? index} {...itemProps} size="s" css={memoized.item}>
             <dt css={memoized.key}>{title}</dt>
             {truncatableText !== undefined ? (
               <dd css={memoized.truncatedValue}>
