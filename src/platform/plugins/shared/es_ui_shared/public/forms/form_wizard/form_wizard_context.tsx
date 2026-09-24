@@ -103,19 +103,15 @@ export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWiza
 
   const navigateToStep = useCallback(
     async (stepId: number | string) => {
-      const nextStepIndex = getStepIndex(stepId);
+      // Before navigating away we validate the active content in the DOM
+      const isValid = await validate();
 
-      // Allow navigating backwards without validating the current step.
-      // This lets users leave an invalid step to review/fix prior steps.
-      if (nextStepIndex >= state.activeStepIndex) {
-        // Before navigating away we validate the active content in the DOM
-        const isValid = await validate();
-
-        // If step is not valid do not go any further
-        if (!isValid) {
-          return;
-        }
+      // If step is not valid do not go any further
+      if (!isValid) {
+        return;
       }
+
+      const nextStepIndex = getStepIndex(stepId);
 
       if (nextStepIndex > lastStep) {
         // We are on the last step, save the data and don't go any further
@@ -147,16 +143,7 @@ export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWiza
         onStepChange(Object.values(state.steps)[getStepIndex(stepId)]?.id);
       }
     },
-    [
-      getStepIndex,
-      validate,
-      onSave,
-      onStepChange,
-      getData,
-      lastStep,
-      state.activeStepIndex,
-      state.steps,
-    ]
+    [getStepIndex, validate, onSave, onStepChange, getData, lastStep, state.steps]
   );
 
   const value: Context = {
