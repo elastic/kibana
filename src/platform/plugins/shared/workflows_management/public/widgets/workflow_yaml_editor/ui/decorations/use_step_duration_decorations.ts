@@ -16,8 +16,8 @@ import { monaco } from '@kbn/monaco';
 import {
   selectEditorWorkflowLookup,
   selectExecution,
-  selectHasChanges,
   selectHighlightedStepId,
+  selectIsEditorYamlExecutionSnapshot,
   selectStepDurationDenominator,
   selectStepDurations,
 } from '../../../../entities/workflows/store';
@@ -42,18 +42,25 @@ const MONACO_DEFAULT_LINE_DECORATIONS_WIDTH = 10;
 const sanitizeLabel = (label: string): string => label.replace(/["\\\n\r]/g, '');
 
 /**
- * Derives a stable CSS class name from a label string, suitable for use as a BEM modifier
+ * Derives a collision-free CSS class name from a label string, suitable for use as a BEM modifier
  * and as a key into the per-label `::before { content }` style rules.
+ *
+ * The label is hex-encoded rather than pattern-replaced so that distinct labels can never produce
+ * the same class (`<1ms` and `~1ms` both collapse to the same string under a naive replace, which
+ * makes one chip render the other step's text).
  */
 const labelClass = (label: string): string =>
-  `${BASE_CLASS}-l-${label.replace(/[^a-z0-9]/gi, '-')}`;
+  `${BASE_CLASS}-l-${Array.from(label, (c) => (c.codePointAt(0) ?? 0).toString(16)).join('')}`;
 
 /**
  * Shows a per-step duration chip in the Monaco lines-decorations gutter lane while an execution
  * is open (executions tab, or after running a test from the workflow tab while the YAML still
  * matches the snapshot). The chip text, colour, and lane width are all derived from the Redux
  * store and update automatically as the execution polls. Chips are hidden when the editor content
- * has diverged from the saved execution (selectHasChanges is true).
+ * has diverged from the execution snapshot (`selectIsEditorYamlExecutionSnapshot` is false).
+ * For terminal executions with more step docs than the UI page budget, `loadExecutionThunk`
+ * fetches up to `WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE` (5000) docs for duration computation
+ * only; chips therefore cover all steps for the vast majority of real executions.
  *
  * Returns `{ styles }` — an Emotion `css` object that must be applied to the editor wrapper so
  * that the decoration class names resolve correctly.
@@ -64,14 +71,14 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const execution = useSelector(selectExecution);
-  const hasChanges = useSelector(selectHasChanges);
+  const isExecutionSnapshot = useSelector(selectIsEditorYamlExecutionSnapshot);
 
   const { euiTheme } = useEuiTheme();
   const { colors, border } = euiTheme;
 
-  // When the YAML has been edited the chip positions may no longer match the execution snapshot.
-  // Suppress all decorations, width management, and tooltip until the snapshot is again consistent.
-  const isActive = stepDurations.size > 0 && !hasChanges;
+  // Chips are only meaningful when the editor content is the exact snapshot the execution ran,
+  // so that line positions from the execution's computed lookup still align with the editor.
+  const isActive = stepDurations.size > 0 && isExecutionSnapshot;
 
   // Memoize the decoration collection — re-created only when the editor instance changes.
   const decorationsCollection = useMemo(() => {
@@ -236,9 +243,19 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
           document.createElement('br'),
           document.createTextNode(minMaxLabel)
         );
-        tipEl.style.left = `${e.event.browserEvent.clientX + 12}px`;
-        tipEl.style.top = `${e.event.browserEvent.clientY + 12}px`;
         tipEl.style.display = 'block';
+        // Clamp position so the tooltip never escapes the viewport.
+        const { width: tipW, height: tipH } = tipEl.getBoundingClientRect();
+        const margin = 8;
+        const cx = e.event.browserEvent.clientX;
+        const cy = e.event.browserEvent.clientY;
+        const rawLeft = cx + 12;
+        const rawTop = cy + 12;
+        const clampedLeft = Math.min(rawLeft, window.innerWidth - tipW - margin);
+        // Flip above the cursor when there is not enough room below.
+        const clampedTop = rawTop + tipH + margin > window.innerHeight ? cy - tipH - 12 : rawTop;
+        tipEl.style.left = `${Math.max(margin, clampedLeft)}px`;
+        tipEl.style.top = `${Math.max(margin, clampedTop)}px`;
       } else {
         tipEl.style.display = 'none';
       }
@@ -248,9 +265,16 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
       tipEl.style.display = 'none';
     });
 
+    // Hide when the editor scrolls with a stationary pointer — `onMouseMove` does not fire in
+    // that case, so the fixed tooltip would otherwise stay pinned next to the wrong step.
+    const scrollDisposable = editor.onDidScrollChange(() => {
+      tipEl.style.display = 'none';
+    });
+
     return () => {
       moveDisposable.dispose();
       leaveDisposable.dispose();
+      scrollDisposable.dispose();
       if (document.body.contains(tipEl)) document.body.removeChild(tipEl);
     };
   }, [editor, isActive, stepDurations, workflowLookup, colors, border]);

@@ -10,11 +10,20 @@
 import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
+import {
+  WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
+  WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+} from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { _setComputedExecution, setExecution, setStepExecutionsTotal } from '../slice';
+import {
+  _setComputedExecution,
+  setDurationStepExecutions,
+  setExecution,
+  setStepExecutionsTotal,
+} from '../slice';
 import { performComputation } from '../utils/computation';
 
 export interface LoadExecutionParams {
@@ -51,6 +60,25 @@ export const loadExecutionThunk = createAsyncThunk<
       };
       dispatch(setExecution(response));
       dispatch(setStepExecutionsTotal(stepsPage.total));
+
+      // For terminal executions whose step count exceeds the UI page budget, fetch a larger page
+      // so that duration chips cover steps beyond the step-tree's 1000-doc window (e.g. final_step
+      // in a long foreach run). In-progress executions are skipped intentionally: their step data
+      // is still changing, and each poll already refreshes from page 1.
+      if (
+        stepsPage.total > WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE &&
+        isTerminalStatus(execution.status)
+      ) {
+        try {
+          const durationsPage = await api.getExecutionSteps(id, {
+            page: 1,
+            size: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
+          });
+          dispatch(setDurationStepExecutions(durationsPage.results));
+        } catch {
+          // Degrade gracefully — chips still show from page 1 data via the fallback selector.
+        }
+      }
 
       if (id !== previousExecution?.id) {
         // avoid recomputing derived data if the execution is the same

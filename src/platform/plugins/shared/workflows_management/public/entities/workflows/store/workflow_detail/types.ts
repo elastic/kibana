@@ -39,6 +39,16 @@ export interface WorkflowDetailState {
   execution?: WorkflowExecutionDto;
   /** `total` from the paginated execution-steps list; used for the truncation callout. */
   stepExecutionsTotal: number;
+  /**
+   * Full set of step execution docs fetched for duration chip computation.
+   * Populated only for terminal executions where `stepExecutionsTotal` exceeds
+   * `WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE`. When set it covers up to
+   * `WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE` (5000) docs, giving chips accurate
+   * data for steps beyond the step-tree's 1000-doc budget. `undefined` means the
+   * big fetch either wasn't needed or hasn't arrived yet; the duration selector
+   * falls back to `execution.stepExecutions` in that case.
+   */
+  durationStepExecutions?: WorkflowExecutionDto['stepExecutions'];
   /** The computed data derived from the selected execution, it is updated by the loadExecutionThunk */
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */
