@@ -6,20 +6,22 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
+import { Redirect, useHistory, useParams } from 'react-router-dom';
 
 import { useQuery } from '@kbn/react-query';
 
 import { useLastAgentId } from '../../hooks/use_last_agent_id';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
+import { useQueryState } from '../../hooks/use_query_state';
 import { appPaths } from '../../utils/app_paths';
+import { searchParamNames } from '../../search_param_names';
 import { RedirectLoading } from './redirect_loading';
 
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const history = useHistory();
-  const { search } = useLocation();
   const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
+  const [openConversationDetails] = useQueryState<string>(searchParamNames.openConversationDetails);
 
   const { conversationsService } = useAgentBuilderServices();
 
@@ -37,6 +39,10 @@ export const LegacyConversationRedirect: React.FC = () => {
   });
 
   useEffect(() => {
+    const search = openConversationDetails
+      ? `?${searchParamNames.openConversationDetails}=true`
+      : undefined;
+
     if (conversation?.agent_id && conversationId) {
       history.replace({
         pathname: appPaths.agent.conversations.byId({
@@ -51,7 +57,7 @@ export const LegacyConversationRedirect: React.FC = () => {
         search,
       });
     }
-  }, [conversation, conversationId, isError, lastAgentId, history, search]);
+  }, [conversation, conversationId, isError, lastAgentId, history, openConversationDetails]);
 
   if (isNewConversation) {
     return <Redirect to={appPaths.agent.root({ agentId: lastAgentId })} />;
