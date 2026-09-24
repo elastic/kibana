@@ -369,7 +369,7 @@ const failuresByBranch = (suite: FlakySuite): string | undefined => {
   return [
     '#### Failures by Branch',
     '',
-    table(['Branch', 'Failed builds', 'Last failure'], rows),
+    table(['Branch', 'Failed builds', 'Sample failure'], rows),
   ].join('\n');
 };
 
@@ -395,7 +395,7 @@ const failuresByTarget = (suite: FlakySuite): string | undefined => {
   return [
     '#### Failures by Target',
     '',
-    table(['Target', 'Failed builds', 'Last failure'], rows),
+    table(['Target', 'Failed builds', 'Sample failure'], rows),
   ].join('\n');
 };
 

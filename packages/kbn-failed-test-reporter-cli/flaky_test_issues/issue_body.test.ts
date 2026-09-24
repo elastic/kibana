@@ -223,7 +223,7 @@ describe('renderFlakySuiteIssueBody', () => {
       [
         '#### Failures by Branch',
         '',
-        '| Branch | Failed builds | Last failure |',
+        '| Branch | Failed builds | Sample failure |',
         '|---|---|---|',
         '| 🔴 `main` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
         '| 🔴 `9.2` | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
@@ -258,7 +258,7 @@ describe('renderFlakySuiteIssueBody', () => {
       [
         '#### Failures by Target',
         '',
-        '| Target | Failed builds | Last failure |',
+        '| Target | Failed builds | Sample failure |',
         '|---|---|---|',
         '| 🔴 `stateful-classic` · local | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
         '| 🔴 `serverless-security_complete` · cloud | 3 / 64 (**5%**) | 2026-09-07 11:40 UTC |',
