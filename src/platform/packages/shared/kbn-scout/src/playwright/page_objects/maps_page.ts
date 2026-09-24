@@ -131,10 +131,9 @@ export class MapsPage {
     // isVisible() snapshot after mapContainer can race with the TOC appearing.
     const mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
     const expandButton = this.page.testSubj.locator('mapExpandLayerControlButton');
-    await mapLayerToc.or(expandButton).first().waitFor({
-      state: 'visible',
-      timeout: DEFAULT_MAP_LOADING_TIMEOUT,
-    });
+    await this.page
+      .locator('[data-test-subj="mapLayerTOC"], [data-test-subj="mapExpandLayerControlButton"]')
+      .waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
 
     if (await mapLayerToc.isVisible()) {
       // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
