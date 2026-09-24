@@ -3027,7 +3027,7 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should omit spaceId from getByIds and getFullAgentPolicy when not provided', async () => {
+    it('should pass undefined spaceId to getByIds and getFullAgentPolicy when not provided', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
@@ -3046,14 +3046,12 @@ describe('Agent policy', () => {
       });
 
       const getByIdsSpy = jest.spyOn(agentPolicyService, 'getByIds');
+      const getFullAgentPolicySpy = jest.spyOn(agentPolicyService, 'getFullAgentPolicy');
 
       await agentPolicyService.deployPolicies(soClient, ['policy-1']);
 
-      expect(getByIdsSpy).toHaveBeenCalledWith(
-        soClient,
-        ['policy-1'],
-        expect.not.objectContaining({ spaceId: expect.any(String) })
-      );
+      expect(getByIdsSpy.mock.calls[0][2].spaceId).toBeUndefined();
+      expect(getFullAgentPolicySpy.mock.calls[0][2]?.spaceId).toBeUndefined();
     });
   });
 
