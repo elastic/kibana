@@ -26,6 +26,10 @@ import { inject, injectable } from 'inversify';
 
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { DatastreamInitializer } from '../lib/services/resource_service/datastream_initializer';
+import {
+  ResourceManager,
+  type ResourceManagerContract,
+} from '../lib/services/resource_service/resource_manager';
 import { getDataStreamResourceDefinitions } from '../resources/datastreams/register';
 import type { ResourceDefinition } from '../resources/datastreams/types';
 import { AlertingRouteContext } from './alerting_route_context';
@@ -60,7 +64,8 @@ export class ResetDataStreamsRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
-    @inject(CoreLogger) private readonly coreLogger: Logger
+    @inject(CoreLogger) private readonly coreLogger: Logger,
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
   ) {
     super(ctx);
   }
@@ -85,12 +90,18 @@ export class ResetDataStreamsRoute extends BaseAlertingRoute {
    * auto-creates the stream from the correct mappings rather than the old shape.
    * The template is not deleted: that would leave a window where a gap write could
    * auto-create with no template at all.
+   *
+   * After the data stream is rebuilt, `ResourceManager.retryResource` re-runs the
+   * registered initializer so the resource transitions from `failed` to `ready`.
+   * Without this, the ResourceManager would continue to reject requests until
+   * Kibana was restarted.
    */
   private async resetDefinition(definition: ResourceDefinition): Promise<void> {
     const initializer = new DatastreamInitializer(this.coreLogger, this.esClient, definition);
     await initializer.installTemplate();
     await this.deleteDataStreamIfExists(definition.dataStreamName);
     await initializer.initialize();
+    await this.resourceManager.retryResource(definition.key);
   }
 
   private async deleteDataStreamIfExists(name: string): Promise<void> {

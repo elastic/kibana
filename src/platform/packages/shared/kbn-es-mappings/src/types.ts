@@ -13,9 +13,11 @@ import type { UnionKeys, Exact, MissingKeysError, PartialWithArrayValues } from 
 
 export type StrictDynamic = false | 'strict';
 
-type ToStrictMappingProperty<P extends api.MappingProperty> = Omit<P, 'properties'> & {
-  dynamic?: StrictDynamic;
-};
+// Distributes over union members so alias-specific properties like `path` are
+// not lost when P is the full MappingProperty union.
+type ToStrictMappingProperty<P extends api.MappingProperty> = P extends any
+  ? Omit<P, 'properties'> & { dynamic?: StrictDynamic }
+  : never;
 
 export type Strict<P extends api.MappingProperty> = ToStrictMappingProperty<P>;
 
@@ -72,53 +74,63 @@ export type MappingProperty =
   | Extract<api.MappingProperty, { type: Exclude<SupportedMappingPropertyType, 'object'> }>
   | MappingPropertyObjectType;
 
+// Keys in a properties map whose type is 'alias'. Alias fields are query-time
+// projections; they do not appear in the document _source and must not be
+// included in ToPrimitives or EnsureSubsetOf checks.
+type AliasFields<P extends Record<string, MappingProperty>> = {
+  [K in keyof P]: P[K] extends { type: 'alias' } ? K : never;
+}[keyof P];
+
 export type ToPrimitives<O extends { properties: Record<string, MappingProperty> }> = {} extends O
   ? never
-  : {
-      [K in keyof O['properties']]: {} extends O['properties'][K]
-        ? never
-        : O['properties'][K] extends { type: infer T }
-        ? T extends 'keyword'
-          ? O['properties'][K] extends { enum: infer TEnums }
-            ? TEnums extends Array<infer TEnum>
-              ? TEnum
-              : never
-            : string
-          : T extends 'text'
-          ? string
-          : T extends 'match_only_text'
-          ? string
-          : T extends 'semantic_text'
-          ? string
-          : T extends 'integer'
-          ? number
-          : T extends 'long'
-          ? number
-          : T extends 'short'
-          ? number
-          : T extends 'float'
-          ? number
-          : T extends 'double'
-          ? number
-          : T extends 'byte'
-          ? number
-          : T extends 'boolean'
-          ? boolean
-          : T extends 'date'
-          ? O['properties'][K] extends { format: 'strict_date_optional_time' }
+  : Omit<
+      {
+        [K in keyof O['properties']]: {} extends O['properties'][K]
+          ? never
+          : O['properties'][K] extends { type: infer T }
+          ? T extends 'keyword'
+            ? O['properties'][K] extends { enum: infer TEnums }
+              ? TEnums extends Array<infer TEnum>
+                ? TEnum
+                : never
+              : string
+            : T extends 'text'
             ? string
-            : string | number
-          : T extends 'date_nanos'
-          ? string
-          : T extends 'flattened'
-          ? Record<string, unknown>
-          : T extends 'object'
-          ? O['properties'][K] extends AnyMappingDefinition
-            ? ToPrimitives<O['properties'][K]>
+            : T extends 'match_only_text'
+            ? string
+            : T extends 'semantic_text'
+            ? string
+            : T extends 'integer'
+            ? number
+            : T extends 'long'
+            ? number
+            : T extends 'short'
+            ? number
+            : T extends 'float'
+            ? number
+            : T extends 'double'
+            ? number
+            : T extends 'byte'
+            ? number
+            : T extends 'boolean'
+            ? boolean
+            : T extends 'date'
+            ? O['properties'][K] extends { format: 'strict_date_optional_time' }
+              ? string
+              : string | number
+            : T extends 'date_nanos'
+            ? string
+            : T extends 'flattened'
+            ? Record<string, unknown>
+            : T extends 'object'
+            ? O['properties'][K] extends AnyMappingDefinition
+              ? ToPrimitives<O['properties'][K]>
+              : never
             : never
-          : never
-        : never;
-    };
+          : never;
+      },
+      AliasFields<O['properties']>
+    >;
 
 export type AnyMappingDefinition = MappingsDefinition<MappingProperty>;
 

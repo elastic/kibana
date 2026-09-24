@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
