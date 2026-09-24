@@ -77,6 +77,49 @@ describe('loadReportHuntContext', () => {
     expect(context?.text).toHaveLength(200_000);
   });
 
+  it('clamps IOC and technique counts to the request-schema maxItems', async () => {
+    esClient.search.mockResolvedValue(
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            extracted: {
+              iocs: Array.from({ length: 150 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+              ttps: { techniques: Array.from({ length: 150 }, (_, i) => `T${1000 + i}`) },
+            },
+          },
+        },
+      ])
+    );
+    const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+    expect(context?.iocs).toHaveLength(100);
+    expect(context?.techniques).toHaveLength(100);
+  });
+
+  it('drops IOC values and technique ids longer than the request schema allows', async () => {
+    esClient.search.mockResolvedValue(
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            extracted: {
+              iocs: [
+                { type: 'url', value: 'https://example.test/' + 'a'.repeat(2048) },
+                { type: 'ip', value: '192.0.2.30' },
+              ],
+              ttps: { techniques: ['T1078.004', 'T'.repeat(33), 42] },
+            },
+          },
+        },
+      ])
+    );
+    const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+    expect(context?.iocs).toEqual([{ type: 'ip', value: '192.0.2.30' }]);
+    expect(context?.techniques).toEqual(['T1078.004']);
+  });
+
   it('scopes the lookup to the acting space', async () => {
     await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
     const query = (esClient.search as unknown as jest.Mock).mock.calls[0][0].query;

@@ -26,18 +26,36 @@ interface StoredReportSource {
   };
 }
 
-const isHuntIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc =>
-  typeof ioc.value === 'string' && ioc.value.length > 0 && HuntIocType.safeParse(ioc.type).success;
-
 /** Matches the OpenAPI `text` maxLength on hunt_behavior / hunt_coordinator. */
 export const MAX_HUNT_REPORT_TEXT_CHARS = 200_000;
+/** Matches the OpenAPI `iocs` maxItems and `HuntIoc.value` maxLength. */
+export const MAX_HUNT_REPORT_IOCS = 100;
+const MAX_HUNT_IOC_VALUE_CHARS = 2048;
+/** Matches the OpenAPI `techniques` maxItems and item maxLength. */
+export const MAX_HUNT_REPORT_TECHNIQUES = 100;
+const MAX_HUNT_TECHNIQUE_CHARS = 32;
+
+const isHuntIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc =>
+  typeof ioc.value === 'string' &&
+  ioc.value.length > 0 &&
+  ioc.value.length <= MAX_HUNT_IOC_VALUE_CHARS &&
+  HuntIocType.safeParse(ioc.type).success;
+
+const isHuntTechnique = (value: unknown): value is string =>
+  typeof value === 'string' && value.length > 0 && value.length <= MAX_HUNT_TECHNIQUE_CHARS;
 
 /**
  * Loads the hunt inputs for one report from `.kibana-threat-reports`, scoped to
  * the acting space. Returns null when the report is not visible there. IOC
  * kinds Tier 1 cannot map to an ECS field (for example `user`) are dropped.
- * Report body text is clamped to the same maxLength the HTTP schemas enforce,
- * so a large stored `content.body_text` cannot bypass the Tier 2 input bound.
+ * Every loaded field is clamped to the same bounds the HTTP schemas enforce on
+ * caller-supplied input (text length, IOC and technique counts and lengths), so
+ * a stored report cannot bypass the Tier 1 query or Tier 2 input bounds.
+ *
+ * `esClient` must be the internal user: the reports index is plugin-owned and
+ * hidden, and Kibana feature privileges grant no Elasticsearch access to it, so
+ * the calling user's client fails for every non-superuser. The `space_id`
+ * filter is the visibility boundary.
  */
 export const loadReportHuntContext = async ({
   esClient,
@@ -70,8 +88,11 @@ export const loadReportHuntContext = async ({
   return {
     iocs: (source.extracted?.iocs ?? [])
       .filter(isHuntIoc)
+      .slice(0, MAX_HUNT_REPORT_IOCS)
       .map(({ type, value }) => ({ type, value })),
-    techniques: source.extracted?.ttps?.techniques ?? [],
+    techniques: (source.extracted?.ttps?.techniques ?? [])
+      .filter(isHuntTechnique)
+      .slice(0, MAX_HUNT_REPORT_TECHNIQUES),
     ...(text !== undefined ? { text } : {}),
   };
 };

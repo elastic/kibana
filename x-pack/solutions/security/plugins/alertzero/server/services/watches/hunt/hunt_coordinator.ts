@@ -15,7 +15,7 @@ import type {
   HuntTechnology,
 } from '@kbn/alertzero-common';
 import { resolveHuntScope } from './common/resolve_index_scope';
-import { loadReportHuntContext } from './common/load_report_context';
+import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
 import type { HuntScope } from './common/resolve_index_scope';
 import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
 import { huntBehavior } from './tier2/hunt_behavior';
@@ -86,29 +86,22 @@ export interface HuntCoordinatorResult {
 
 const DEFAULT_TIER2_SAMPLE_EVENTS = 5;
 
-/** Matches the OpenAPI `text` maxLength on hunt_behavior / hunt_coordinator. */
-const MAX_HUNT_REPORT_TEXT_CHARS = 200_000;
+/**
+ * Elasticsearch clients the coordinator needs. Telemetry, alerts, and ES|QL run
+ * as the calling user so their index privileges apply; the reports index is a
+ * plugin-owned hidden index that Kibana feature privileges do not grant ES
+ * access to, so it is read with the internal user and scoped by `space_id`.
+ */
+export interface HuntCoordinatorClients {
+  esClient: ElasticsearchClient;
+  reportsEsClient: ElasticsearchClient;
+}
 
 const clampHuntReportText = (value: string | undefined): string | undefined => {
   if (value === undefined || value.length === 0) return undefined;
   return value.length > MAX_HUNT_REPORT_TEXT_CHARS
     ? value.slice(0, MAX_HUNT_REPORT_TEXT_CHARS)
     : value;
-};
-
-const summarizeHit = (hit: { index: string; id: string; [key: string]: unknown }): string => {
-  const parts: string[] = [];
-  const src = hit as Record<string, unknown>;
-  if (typeof src['kibana.alert.rule.name'] === 'string')
-    parts.push(`rule="${src['kibana.alert.rule.name']}"`);
-  if (typeof src['event.dataset'] === 'string') parts.push(`dataset=${src['event.dataset']}`);
-  if (typeof src['event.action'] === 'string') parts.push(`action=${src['event.action']}`);
-  if (typeof src['event.provider'] === 'string') parts.push(`provider=${src['event.provider']}`);
-  if (typeof src['host.name'] === 'string') parts.push(`host=${src['host.name']}`);
-  if (typeof src['user.name'] === 'string') parts.push(`user=${src['user.name']}`);
-  if (typeof src['source.ip'] === 'string') parts.push(`src=${src['source.ip']}`);
-  if (typeof src['destination.ip'] === 'string') parts.push(`dst=${src['destination.ip']}`);
-  return parts.length > 0 ? parts.join(' ') : `_index=${hit.index} _id=${hit.id}`;
 };
 
 const asNestedString = (src: Record<string, unknown>, path: string): string | undefined => {
@@ -119,6 +112,39 @@ const asNestedString = (src: Record<string, unknown>, path: string): string | un
     cur = (cur as Record<string, unknown>)[part];
   }
   return typeof cur === 'string' ? cur : undefined;
+};
+
+/**
+ * Reads a field from a hit whether `_source` came back flattened (alerts store
+ * `kibana.alert.*` as dotted keys) or nested (raw telemetry stores `host.name`
+ * as `{ host: { name } }`). Tier 1 hits spread `_source` verbatim, so both
+ * shapes reach the summarizer.
+ */
+const readField = (src: Record<string, unknown>, path: string): string | undefined => {
+  const flat = src[path];
+  return typeof flat === 'string' ? flat : asNestedString(src, path);
+};
+
+const summarizeHit = (hit: { index: string; id: string; [key: string]: unknown }): string => {
+  const parts: string[] = [];
+  const src = hit as Record<string, unknown>;
+  const ruleName = readField(src, 'kibana.alert.rule.name');
+  if (ruleName) parts.push(`rule="${ruleName}"`);
+  const dataset = readField(src, 'event.dataset') ?? readField(src, 'data_stream.dataset');
+  if (dataset) parts.push(`dataset=${dataset}`);
+  const action = readField(src, 'event.action');
+  if (action) parts.push(`action=${action}`);
+  const provider = readField(src, 'event.provider');
+  if (provider) parts.push(`provider=${provider}`);
+  const host = readField(src, 'host.name');
+  if (host) parts.push(`host=${host}`);
+  const user = readField(src, 'user.name');
+  if (user) parts.push(`user=${user}`);
+  const sourceIp = readField(src, 'source.ip');
+  if (sourceIp) parts.push(`src=${sourceIp}`);
+  const destinationIp = readField(src, 'destination.ip');
+  if (destinationIp) parts.push(`dst=${destinationIp}`);
+  return parts.length > 0 ? parts.join(' ') : `_index=${hit.index} _id=${hit.id}`;
 };
 
 /**
@@ -163,22 +189,15 @@ const sampleRequiredIndexEvents = async ({
       sort: [{ '@timestamp': { order: 'desc' as const } }],
       _source: true,
     });
-    return (response.hits.hits ?? []).map((hit) => {
-      const src = (hit._source ?? {}) as Record<string, unknown>;
-      const flat: Record<string, unknown> = {
+    // Envelope keys last so a document with its own top-level `id`/`index`
+    // field cannot clobber the hit's `_id`/`_index`.
+    return (response.hits.hits ?? []).map((hit) =>
+      summarizeHit({
+        ...((hit._source ?? {}) as Record<string, unknown>),
         index: String(hit._index ?? ''),
         id: String(hit._id ?? ''),
-        'event.dataset':
-          asNestedString(src, 'event.dataset') ?? asNestedString(src, 'data_stream.dataset'),
-        'event.action': asNestedString(src, 'event.action'),
-        'event.provider': asNestedString(src, 'event.provider'),
-        'host.name': asNestedString(src, 'host.name'),
-        'user.name': asNestedString(src, 'user.name'),
-        'source.ip': asNestedString(src, 'source.ip'),
-        'destination.ip': asNestedString(src, 'destination.ip'),
-      };
-      return summarizeHit(flat as { index: string; id: string; [key: string]: unknown });
-    });
+      })
+    );
   } catch (err) {
     logger.warn(
       `hunt_coordinator: could not sample required indices for Tier 2 grounding — ${
@@ -242,7 +261,7 @@ const decideTier2Skip = (
 };
 
 export const huntCoordinator = async (
-  esClient: ElasticsearchClient,
+  { esClient, reportsEsClient }: HuntCoordinatorClients,
   model: ScopedModel | undefined,
   logger: Logger,
   params: HuntCoordinatorParams
@@ -252,7 +271,7 @@ export const huntCoordinator = async (
     spaceId,
     iocs: callerIocs = [],
     techniques: callerTechniques = [],
-    time_range: time_range,
+    time_range: timeRange,
     size,
     max_assets: maxAssets,
     llm_confidence_threshold: llmThreshold,
@@ -270,7 +289,7 @@ export const huntCoordinator = async (
     reportId !== undefined &&
     (callerIocs.length === 0 || callerTechniques.length === 0 || callerText === undefined);
   const reportContext = needsReportContext
-    ? await loadReportHuntContext({ esClient, spaceId, reportId })
+    ? await loadReportHuntContext({ esClient: reportsEsClient, spaceId, reportId })
     : null;
   if (needsReportContext && reportContext === null) {
     const message = `Report ${reportId} was not found in space ${spaceId}.`;
@@ -285,14 +304,17 @@ export const huntCoordinator = async (
           'no_searchable_terms',
           [],
           [],
-          time_range ?? { from: 'now-24h', to: 'now' },
+          timeRange ?? { from: 'now-24h', to: 'now' },
           message
         ),
       },
       tier2_skipped_reason: 'report_not_found',
       message,
+      // Fail closed even when the caller supplied its own iocs/techniques/text: a
+      // report-driven run's evidence is written back to that report, so a report
+      // the space cannot see must not produce a successful run.
       next_step:
-        'Pass a report id that exists in this space, or pass iocs/techniques/text explicitly.',
+        'A report_id run requires the report to be visible in this space. Pass a report id that exists here, or omit report_id and pass iocs/techniques/text for an ad hoc hunt.',
       has_confirmed_hit: false,
       completed_successfully: false,
     };
@@ -318,7 +340,7 @@ export const huntCoordinator = async (
         'no_searchable_terms',
         [],
         [],
-        time_range ?? { from: 'now-24h', to: 'now' },
+        timeRange ?? { from: 'now-24h', to: 'now' },
         `Index scope resolution failed: ${(err as Error).message}`
       ),
     };
@@ -356,7 +378,7 @@ export const huntCoordinator = async (
           'scope_blocked',
           iocs,
           techniques,
-          time_range ?? indexScope.window,
+          timeRange ?? indexScope.window,
           message
         ),
       },
@@ -373,7 +395,7 @@ export const huntCoordinator = async (
     scope: indexScope,
     iocs,
     techniques,
-    time_range,
+    time_range: timeRange,
     size,
     maxAssets,
   });
@@ -485,7 +507,7 @@ export const huntCoordinator = async (
   }
 
   const tier2: HuntCoordinatorTier2 = { ...tier2Raw, tier: 2 };
-  const has_confirmed_hit = tier1Raw.has_confirmed_hit || tier2Raw.has_hit;
+  const hasConfirmedHit = tier1Raw.has_confirmed_hit || tier2Raw.has_hit;
 
   return {
     status: 'tier1_and_tier2',
@@ -497,11 +519,11 @@ export const huntCoordinator = async (
     message: `Tier 1: ${tier1Raw.status}. Tier 2: ${tier2Raw.status} (${tier2Raw.behaviors.length} proposed).`,
     next_step:
       tier2Raw.status === 'behaviors_proposed'
-        ? has_confirmed_hit
+        ? hasConfirmedHit
           ? 'Behaviors proposed; at least one tier confirmed an environment hit.'
           : 'Behaviors proposed for Investigation staging.'
         : 'No behavioral candidates survived catalog validation.',
-    has_confirmed_hit,
+    has_confirmed_hit: hasConfirmedHit,
     completed_successfully: true,
   };
 };

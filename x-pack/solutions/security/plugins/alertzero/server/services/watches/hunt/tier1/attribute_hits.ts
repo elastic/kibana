@@ -41,7 +41,10 @@ const asString = (value: unknown): string | undefined => {
   return undefined;
 };
 
-/** Flatten nested `_source`-shaped hit fields into dotted paths (one level deep arrays flattened). */
+/** Keys the hit envelope adds beside `_source`; skipped only at the top level, since nested `id`s are real data (`threat.technique[].id`). */
+const HIT_ENVELOPE_KEYS = new Set(['index', 'id', 'score', 'matched']);
+
+/** Flatten nested `_source`-shaped hit fields into dotted paths (arrays of objects flattened per item). */
 const collectFieldValues = (
   source: Record<string, unknown>,
   prefix = ''
@@ -56,7 +59,7 @@ const collectFieldValues = (
   };
 
   for (const [key, value] of Object.entries(source)) {
-    if (key === 'index' || key === 'id' || key === 'score' || key === 'matched') continue;
+    if (prefix === '' && HIT_ENVELOPE_KEYS.has(key)) continue;
     const path = prefix ? `${prefix}.${key}` : key;
     if (value == null) continue;
     if (Array.isArray(value)) {
@@ -106,44 +109,30 @@ const matchIoc = (
   return undefined;
 };
 
-const techniqueIdsFromHit = (hit: HuntForThreatHit): string[] => {
-  const raw = (hit as Record<string, unknown>)['kibana.alert.rule.threat.technique'];
-  const ids: string[] = [];
-  const push = (value: unknown) => {
-    if (typeof value === 'string' && value.length > 0) ids.push(value.toUpperCase());
-    if (value != null && typeof value === 'object' && !Array.isArray(value)) {
-      const id = (value as Record<string, unknown>).id;
-      if (typeof id === 'string' && id.length > 0) ids.push(id.toUpperCase());
-    }
-  };
-  if (Array.isArray(raw)) {
-    for (const entry of raw) push(entry);
-  } else {
-    push(raw);
-  }
-  // Flattened dotted form some responses use.
-  const flatId = (hit as Record<string, unknown>)['kibana.alert.rule.threat.technique.id'];
-  if (typeof flatId === 'string') ids.push(flatId.toUpperCase());
-  if (Array.isArray(flatId)) {
-    for (const entry of flatId) {
-      if (typeof entry === 'string') ids.push(entry.toUpperCase());
-    }
-  }
-  return [...new Set(ids)];
-};
+/**
+ * Where an alert carries its ATT&CK ids. Alerts store `kibana.alert.rule.threat`
+ * as a dotted top-level key whose value is `[{ tactic, technique: [{ id,
+ * subtechnique: [{ id }] }] }]`; `collectFieldValues` flattens that (and any
+ * already-dotted variant) to these paths. A sub-technique such as `T1078.004`
+ * lives on the `subtechnique.id` path, never on `technique.id`.
+ */
+export const ALERT_TECHNIQUE_ID_FIELDS = [
+  'kibana.alert.rule.threat.technique.id',
+  'kibana.alert.rule.threat.technique.subtechnique.id',
+] as const;
 
 const matchTechnique = (
-  hit: HuntForThreatHit,
+  fields: Map<string, string[]>,
   techniques: string[]
 ): { technique_id: string; field: string } | undefined => {
   if (techniques.length === 0) return undefined;
   const wanted = new Set(techniques.map((t) => t.toUpperCase()));
-  for (const id of techniqueIdsFromHit(hit)) {
-    if (wanted.has(id)) {
-      return {
-        technique_id: id,
-        field: 'kibana.alert.rule.threat.technique.id',
-      };
+  for (const field of ALERT_TECHNIQUE_ID_FIELDS) {
+    for (const value of fields.get(field) ?? []) {
+      const id = value.toUpperCase();
+      if (wanted.has(id)) {
+        return { technique_id: id, field };
+      }
     }
   }
   return undefined;
@@ -162,7 +151,7 @@ export const attributeHits = (
   hits.map((hit) => {
     const fields = collectFieldValues(hit as Record<string, unknown>);
     const iocMatch = matchIoc(fields, iocs);
-    const techniqueMatch = matchTechnique(hit, techniques);
+    const techniqueMatch = matchTechnique(fields, techniques);
     if (!iocMatch && !techniqueMatch) return hit;
 
     const matched: HitMatched = {

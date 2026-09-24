@@ -58,6 +58,16 @@ describe('injectMetadataIndex', () => {
       'FROM logs-* METADATA _id, _index\n| WHERE true\n// keep me\n| LIMIT 1'
     );
   });
+
+  it('returns a KEEP after STATS unchanged, since aggregate output has no METADATA columns', () => {
+    expect(
+      injectMetadataIndex(
+        'FROM logs-*\n| KEEP user.name, event.action\n| STATS c = COUNT(*) BY user.name\n| KEEP user.name, c\n| LIMIT 10'
+      )
+    ).toBe(
+      'FROM logs-* METADATA _id, _index\n| KEEP user.name, event.action, _id, _index\n| STATS c = COUNT(*) BY user.name\n| KEEP user.name, c\n| LIMIT 10'
+    );
+  });
 });
 
 describe('rewriteLimit', () => {

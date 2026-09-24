@@ -36,6 +36,10 @@ export const registerHuntBehaviorRoute = ({
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
+          // Provisional. This route spends LLM tokens and executes LLM-generated
+          // ES|QL as the caller, so the read privilege is a placeholder until the
+          // hunt workflow child (the production caller) fixes the identity it
+          // runs under; revisit alongside that PR.
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
         },
       },

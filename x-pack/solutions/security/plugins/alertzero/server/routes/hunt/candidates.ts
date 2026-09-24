@@ -92,7 +92,11 @@ export const registerCandidatesRoute = ({
       async (context, request, response) => {
         try {
           const spaceId = getSpaceId(request);
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          // Internal user: `.kibana-threat-reports` is a plugin-owned hidden index and
+          // Kibana feature privileges grant no Elasticsearch privileges on it, so
+          // asCurrentUser fails for every non-superuser. Access is gated by the route
+          // authz above and narrowed by the explicit space filter in the query.
+          const esClient = (await context.core).elasticsearch.client.asInternalUser;
           const { report_ids, limit } = request.body;
 
           const trigger =
