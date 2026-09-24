@@ -38,6 +38,7 @@
     "@kbn/human-readable-id",
     "@kbn/dag-layout",
     "@kbn/workflows-ui",
+    "@kbn/inference-connectors",
     "@kbn/workflows-yaml",
     "@kbn/zod",
     "@kbn/code-editor",

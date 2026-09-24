@@ -23,7 +23,8 @@ export const AiClassifyStepDefinition = createPublicStepDefinition({
     config: {
       'connector-id': {
         connectorIdSelection: {
-          connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
+          connectorTypes: ['inference.unified_completion'],
+          inferenceFeatureId: 'ai_classify',
           enableCreation: false,
         },
       },

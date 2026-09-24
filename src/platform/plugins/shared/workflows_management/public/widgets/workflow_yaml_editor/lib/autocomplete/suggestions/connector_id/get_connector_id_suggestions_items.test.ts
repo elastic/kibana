@@ -13,6 +13,7 @@ import {
   getConnectorIdSuggestionsItems,
   getConnectorInstancesForType,
 } from './get_connector_id_suggestions_items';
+import { stepSchemas } from '../../../../../../../common/step_schemas';
 
 jest.mock('../../../../../../shared/lib/action_type_utils', () => ({
   getActionTypeIdFromStepType: jest.fn((stepType: string) => `.${stepType.split('.')[0]}`),
@@ -122,6 +123,7 @@ describe('getConnectorIdSuggestionsItems', () => {
     isCreateConnectorEnabledForStepType.mockReturnValue(false);
     getCustomStepConnectorIdSelectionHandler.mockReturnValue(undefined);
     getInferenceConnectorTaskTypeFromSubAction.mockReturnValue(undefined);
+    stepSchemas.setInferenceConnectorInstances(new Map());
   });
 
   it('should return suggestions for available connector instances', () => {
@@ -267,6 +269,33 @@ describe('getConnectorInstancesForType', () => {
     expect(result).toHaveLength(3);
     expect(result[0].id).toBe('slack-001');
     expect(result[0].connectorType).toBe('.slack');
+  });
+
+  it('should return inference endpoints configured for the step feature', () => {
+    getCustomStepConnectorIdSelectionHandler.mockReturnValue({
+      connectorTypes: ['inference.unified_completion'],
+      inferenceFeatureId: 'ai_summarize',
+    });
+    stepSchemas.setInferenceConnectorInstances(
+      new Map([
+        [
+          'ai_summarize',
+          [
+            {
+              id: 'endpoint-id',
+              name: 'Inference endpoint',
+              isPreconfigured: false,
+              isDeprecated: false,
+              isInferenceEndpoint: true,
+            },
+          ],
+        ],
+      ])
+    );
+
+    expect(getConnectorInstancesForType('ai.summarize')).toEqual([
+      expect.objectContaining({ id: 'endpoint-id', isInferenceEndpoint: true }),
+    ]);
   });
 
   it('should return empty array when no matching connector type is found', () => {

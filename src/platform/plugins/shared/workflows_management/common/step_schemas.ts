@@ -9,6 +9,7 @@
 
 import type {
   ConnectorContractUnion,
+  ConnectorInstance,
   ConnectorTypeInfo,
   StepDeprecationInfo,
 } from '@kbn/workflows';
@@ -37,6 +38,7 @@ class StepSchemas {
   private allConnectorsMapCache: Map<string, ConnectorContractUnion> | null = null;
   private deprecatedStepMetadataCache: Readonly<Record<string, StepDeprecationInfo>> | null = null;
   private dynamicConnectorTypesCache: Record<string, ConnectorTypeInfo> | null = null;
+  private inferenceConnectorInstancesCache = new Map<string, ConnectorInstance[]>();
   private lastProcessedConnectorTypesHash: string | null = null;
 
   /**
@@ -95,6 +97,14 @@ class StepSchemas {
 
   public setDynamicConnectorTypesCache(cache: Record<string, ConnectorTypeInfo> | null): void {
     this.dynamicConnectorTypesCache = cache;
+  }
+
+  public getInferenceConnectorInstances(featureId: string): ConnectorInstance[] | undefined {
+    return this.inferenceConnectorInstancesCache.get(featureId);
+  }
+
+  public setInferenceConnectorInstances(instances: ReadonlyMap<string, ConnectorInstance[]>): void {
+    this.inferenceConnectorInstancesCache = new Map(instances);
   }
 
   public getLastProcessedConnectorTypesHash(): string | null {
