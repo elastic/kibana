@@ -55,8 +55,9 @@ export type MonitorSummaryState = SchemaOutput<typeof StateType>;
 
 export const HistogramPointType = z.looseObject({
   timestamp: z.number(),
-  up: z.union([z.number(), z.undefined()]),
-  down: z.union([z.number(), z.undefined()]),
+  // Missing key and explicit undefined both accepted (io-ts was union with undefined).
+  up: z.union([z.number(), z.undefined()]).optional(),
+  down: z.union([z.number(), z.undefined()]).optional(),
 });
 
 export type HistogramPoint = SchemaOutput<typeof HistogramPointType>;
