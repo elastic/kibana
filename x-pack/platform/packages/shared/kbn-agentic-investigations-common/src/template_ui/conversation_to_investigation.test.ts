@@ -309,9 +309,9 @@ describe('conversationToInvestigation', () => {
 });
 
 describe('conversationToEscalationHeader', () => {
-  it('returns undefined status and empty assigneeUids when metadata is absent', () => {
+  it('defaults to "open" when metadata is absent (matches server behaviour)', () => {
     const result = conversationToEscalationHeader(conversation());
-    expect(result.status).toBeUndefined();
+    expect(result.status).toBe('open');
     expect(result.assigneeUids).toEqual([]);
   });
 
@@ -320,9 +320,9 @@ describe('conversationToEscalationHeader', () => {
     expect(result.status).toBe('closed');
   });
 
-  it('returns undefined status for an empty string', () => {
+  it('defaults to "open" for an empty string status', () => {
     const result = conversationToEscalationHeader(conversation({ metadata: { status: '' } }));
-    expect(result.status).toBeUndefined();
+    expect(result.status).toBe('open');
   });
 
   it('reads assignee uids from the assignees array', () => {

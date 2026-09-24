@@ -47,6 +47,8 @@ interface EscalationQueueProps {
    * with the escalation id. Used to open the escalation details flyout.
    */
   onClickCard?: (id: string) => void;
+  /** Highlights the row whose id matches this value (e.g. the flyout is open for it). */
+  selectedConversationId?: string;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -70,7 +72,16 @@ const StyledAccordion = styled(EuiAccordion)`
  * server total while the list grows one page at a time.
  */
 export const EscalationQueue = memo<EscalationQueueProps>(
-  ({ status, escalations, renderAssignees, totalItemCount, onLoadMore, error, onClickCard }) => {
+  ({
+    status,
+    escalations,
+    renderAssignees,
+    totalItemCount,
+    onLoadMore,
+    error,
+    onClickCard,
+    selectedConversationId,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
     const remaining = serverTotal - escalations.length;
@@ -119,6 +130,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
                     hasBorder={i < escalations.length - 1 || showLoadMore}
                     renderAssignees={renderAssignees}
                     onClickCard={onClickCard}
+                    isSelected={escalation.id === selectedConversationId}
                   />
                 </EuiFlexItem>
               ))}

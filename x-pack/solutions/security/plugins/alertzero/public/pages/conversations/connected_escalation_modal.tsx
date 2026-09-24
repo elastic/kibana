@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {
   EuiCheckableCard,
   EuiFlexGroup,
@@ -36,6 +36,7 @@ import {
   ESCALATION_ERRORS,
   ESCALATION_SUCCESS,
 } from './escalation_modal_translations';
+import { SELECTED_CONVERSATION_ID_PARAM } from './conversations_url_params';
 import { AddToExistingEscalationForm } from './add_to_existing_escalation_form';
 import { CreateEscalationForm } from './create_escalation_form';
 
@@ -59,15 +60,18 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       services: { notifications, application },
     } = useKibana<CoreStart>();
 
-    const viewEscalationsPrimary = useMemo(
-      () => ({
-        children: ESCALATION_SUCCESS.linkText,
-        href: application.getUrlForApp(ALERTZERO_APP_ID, { path: '/escalations' }),
-        onClick: (e: React.MouseEvent) => {
-          e.preventDefault();
-          void application.navigateToApp(ALERTZERO_APP_ID, { path: '/escalations' });
-        },
-      }),
+    const makeViewEscalationPrimary = useCallback(
+      (escalationId: string) => {
+        const path = `/escalations?${SELECTED_CONVERSATION_ID_PARAM}=${escalationId}`;
+        return {
+          children: ESCALATION_SUCCESS.linkText,
+          href: application.getUrlForApp(ALERTZERO_APP_ID, { path }),
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            void application.navigateToApp(ALERTZERO_APP_ID, { path });
+          },
+        };
+      },
       [application]
     );
 
@@ -180,10 +184,10 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                         ),
                 },
                 {
-                  onSuccess: () => {
+                  onSuccess: (escalation) => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.createTitle,
-                      actionProps: { primary: viewEscalationsPrimary },
+                      actionProps: { primary: makeViewEscalationPrimary(escalation.id) },
                     });
                     onClose();
                   },
@@ -213,7 +217,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                   onSuccess: () => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.addToTitle,
-                      actionProps: { primary: viewEscalationsPrimary },
+                      actionProps: { primary: makeViewEscalationPrimary(escalationId) },
                     });
                     onClose();
                   },

@@ -121,7 +121,9 @@ beforeEach(() => {
     services: {
       notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
       application: {
-        getUrlForApp: jest.fn(() => '/base/app/alertzero/escalations'),
+        getUrlForApp: jest.fn((_appId: string, { path = '' }: { path?: string } = {}) =>
+          `/base/app/alertzero${path}`
+        ),
         navigateToApp: jest.fn(),
       },
     },
@@ -264,24 +266,27 @@ describe('ConnectedEscalationModal', () => {
     expect(screen.getByTestId('escalationModalLoadError')).toBeInTheDocument();
   });
 
-  it('success toast for create uses a basePath-aware href', () => {
+  it('success toast for create links to the newly created escalation', () => {
     renderModal({ mode: 'create' });
     fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
 
     const [, callbacks] = createMutate.mock.calls[0];
     const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
-    callbacks.onSuccess();
+    // onSuccess receives the created Conversation; its id is used to build the deep link.
+    callbacks.onSuccess({ id: 'new-esc-1' });
 
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({
         actionProps: expect.objectContaining({
-          primary: expect.objectContaining({ href: '/base/app/alertzero/escalations' }),
+          primary: expect.objectContaining({
+            href: '/base/app/alertzero/escalations?selectedConversationId=new-esc-1',
+          }),
         }),
       })
     );
   });
 
-  it('success toast for add-to uses a basePath-aware href', () => {
+  it('success toast for add-to links to the selected escalation', () => {
     mockUseListEscalations.mockReturnValue({
       data: {
         results: [
@@ -310,7 +315,9 @@ describe('ConnectedEscalationModal', () => {
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({
         actionProps: expect.objectContaining({
-          primary: expect.objectContaining({ href: '/base/app/alertzero/escalations' }),
+          primary: expect.objectContaining({
+            href: '/base/app/alertzero/escalations?selectedConversationId=esc-3',
+          }),
         }),
       })
     );

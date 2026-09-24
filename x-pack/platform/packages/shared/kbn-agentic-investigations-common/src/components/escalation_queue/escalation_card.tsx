@@ -33,13 +33,15 @@ interface EscalationCardProps {
    * flyout. The assignee widget captures pointer events so it does not trigger the card click.
    */
   onClickCard?: (id: string) => void;
+  /** Renders with a highlighted background when true (e.g. the flyout for this row is open). */
+  isSelected?: boolean;
 }
 
 /**
  * One row in the escalation queue.
  */
 export const EscalationCard = memo<EscalationCardProps>(
-  ({ escalation, hasBorder, renderAssignees, onClickCard }) => {
+  ({ escalation, hasBorder, renderAssignees, onClickCard, isSelected = false }) => {
     const { euiTheme } = useEuiTheme();
     const isClosed = escalation.status === 'closed';
     const isClickable = onClickCard !== undefined;
@@ -68,6 +70,7 @@ export const EscalationCard = memo<EscalationCardProps>(
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
         aria-label={isClickable ? escalation.title : undefined}
+        aria-current={isSelected || undefined}
         onClick={isClickable ? handleClick : undefined}
         onKeyDown={isClickable ? handleKeyDown : undefined}
         css={{
@@ -76,9 +79,14 @@ export const EscalationCard = memo<EscalationCardProps>(
           boxSizing: 'border-box',
           boxShadow: 'none',
           cursor: isClickable ? 'pointer' : undefined,
+          backgroundColor: isSelected
+            ? euiTheme.colors.backgroundBaseInteractiveSelect
+            : undefined,
           ...(isClickable && {
             '&:hover': {
-              backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+              backgroundColor: isSelected
+                ? euiTheme.colors.backgroundBaseInteractiveSelect
+                : euiTheme.colors.backgroundBaseSubdued,
             },
             '&:focus-visible': {
               outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,

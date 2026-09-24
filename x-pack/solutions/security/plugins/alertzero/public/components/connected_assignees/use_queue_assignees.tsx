@@ -17,8 +17,7 @@ export type { UseAssigneePickersOptions };
 export interface UseQueueAssigneesOptions<T> extends Omit<UseAssigneePickersOptions<T>, 'refresh'> {
   /**
    * Query key to invalidate (and await) after a successful mutation or an external signal
-   * bump for a visible item. `cancelRefetch: false` is applied so concurrent invalidations
-   * join the in-flight fetch rather than cancelling and restarting it.
+   * bump for a visible item.
    */
   queryKey: QueryKey;
 }
@@ -37,12 +36,8 @@ export function useQueueAssignees<T>({
   const queryKeyRef = useRef(queryKey);
   queryKeyRef.current = queryKey;
 
-  // cancelRefetch: false joins any in-flight fetch instead of cancelling it. This matters
-  // because the built-in onSuccess invalidation in useAssignEscalation / useAssignInvestigation
-  // may already be running a refetch of the same key when our own bump triggers here.
   const refresh = useCallback(
-    () =>
-      queryClient.invalidateQueries({ queryKey: queryKeyRef.current }, { cancelRefetch: false }),
+    () => queryClient.invalidateQueries({ queryKey: queryKeyRef.current }),
     [queryClient]
   );
 

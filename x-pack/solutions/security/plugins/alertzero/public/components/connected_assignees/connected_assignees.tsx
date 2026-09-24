@@ -11,8 +11,6 @@ import {
   useAssignEscalation,
   useAssignInvestigation,
 } from '@kbn/agentic-investigations-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 import { CONNECTED_ASSIGNEES_LABELS } from './translations';
 import { useAssigneePickers } from './use_assignee_pickers';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
@@ -34,11 +32,11 @@ const ConnectedAssigneesInner = ({
   status,
   refetchConversation,
 }: AssigneesSlotRenderProps) => {
-  useKibana<CoreStart>(); // ensure context; capabilities are read via the shared hook below
   const { manageEscalations, manageInvestigations } = useAgenticInvestigationsCapabilities();
 
   const canManage =
-    templateId === 'escalation' ? manageEscalations && status !== 'closed' : manageInvestigations;
+    (templateId === 'escalation' ? manageEscalations : manageInvestigations) &&
+    status !== 'closed';
 
   const assignInvestigation = useAssignInvestigation();
   const assignEscalation = useAssignEscalation();
@@ -51,18 +49,16 @@ const ConnectedAssigneesInner = ({
     [templateId, assignEscalation, assignInvestigation]
   );
 
-  // refetchConversation's identity changes every render from the Agent Builder; the pickers
-  // hook stores refresh in a ref so an unstable reference here is fine.
-  const refresh = useCallback(
-    () => (refetchConversation ? refetchConversation() : Promise.resolve()),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [refetchConversation]
-  );
+  // useAssigneePickers holds refresh in a ref, so an unstable reference here is fine.
+  const refresh = () => refetchConversation?.() ?? Promise.resolve();
 
-  // Wrap in a stable array so the bulk profile fetch doesn't retrigger on every render.
+  // Stable uid array by value so the bulk profile fetch doesn't retrigger on every render.
+  const uidsKey = (assigneeUids ?? []).join(',');
+  const stableUids = useMemo(() => (uidsKey ? uidsKey.split(',') : []), [uidsKey]);
+
   const items = useMemo(
-    () => [{ conversationId, assigneeUids: (assigneeUids ?? []) as string[] }],
-    [conversationId, assigneeUids]
+    () => [{ conversationId, assigneeUids: stableUids }],
+    [conversationId, stableUids]
   );
 
   const renderPicker = useAssigneePickers({

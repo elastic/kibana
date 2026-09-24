@@ -181,13 +181,17 @@ const proposal: ProposalItem = {
   conversationAssignees: [],
 };
 
-const renderPage = (initialEntry: string) => {
+const renderPage = (
+  initialEntry: string,
+  { capabilities = {} }: { capabilities?: Record<string, unknown> } = {}
+) => {
   const core = coreMock.createStart();
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
   core.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
+  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
   const agentBuilder = agentBuilderMocks.createStart();
   const closeFlyout = jest.fn();
   (agentBuilder.openConversationDetails as jest.Mock).mockResolvedValue(closeFlyout);
@@ -729,5 +733,47 @@ describe('ConversationsPage impact pills', () => {
 
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+  });
+});
+
+describe('ConversationsPage assignee picker', () => {
+  beforeEach(() => {
+    mockProposals({ investigate: [proposal] });
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('passes the conversationId (not the proposal id) to the assignment mutation', async () => {
+    renderPage('/', { capabilities: { manageInvestigations: true } });
+
+    // The stub AssignToUsers is keyed by getRowKey (proposal id), so the button test-id uses it.
+    fireEvent.click(screen.getByTestId('mock-assign-prop-1'));
+
+    await waitFor(() =>
+      expect(assignInvestigationMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ investigationId: 'inv-1' })
+      )
+    );
+    // The proposal id 'prop-1' must NOT appear as the investigation id.
+    expect(assignInvestigationMutate).not.toHaveBeenCalledWith(
+      expect.objectContaining({ investigationId: 'prop-1' })
+    );
+  });
+
+  it('does not open the conversation flyout when the assign button is clicked', async () => {
+    const { agentBuilder } = renderPage('/', { capabilities: { manageInvestigations: true } });
+
+    fireEvent.click(screen.getByTestId('mock-assign-prop-1'));
+
+    // Wait for any async handlers.
+    await waitFor(() => expect(assignInvestigationMutate).toHaveBeenCalled());
+    expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
+  });
+
+  it('renders the assignee picker as read-only when manageInvestigations is false', () => {
+    renderPage('/', { capabilities: { manageInvestigations: false } });
+
+    expect(screen.getByTestId('mock-assignees-readonly-prop-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-assign-prop-1')).not.toBeInTheDocument();
   });
 });

@@ -99,11 +99,10 @@ export function useAssigneePickers<T>({
   visibleTargetIdsRef.current = useMemo(() => {
     const ids = new Set<string>();
     for (const item of items) {
-      const id = getTargetId(item);
+      const id = getTargetIdRef.current(item);
       if (id) ids.add(id);
     }
     return ids;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   // When another hook (a queue row or the flyout) bumps the signal, refresh only if at
@@ -129,8 +128,6 @@ export function useAssigneePickers<T>({
       for (const uid of getAssigneeUidsRef.current(item)) uids.add(uid);
     }
     return Array.from(uids);
-    // getAssigneeUidsRef is stable; items is the true dependency.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   const profilesQuery = useUserProfiles({ uids: allAssigneeUids });
@@ -196,7 +193,7 @@ export function useAssigneePickers<T>({
           // there are no assignees (React Query sets isLoading: true for disabled queries).
           isProfilesLoading={profilesQuery.isFetching}
           isUpdating={isUpdating}
-          canManage={canManage && !readOnly}
+          canManage={canManage && !readOnly && targetId !== undefined}
           onSearchChange={setSearchTerm}
           onChange={
             targetId ? (newSelected) => void handleChange(rowKey, targetId, newSelected) : () => {}

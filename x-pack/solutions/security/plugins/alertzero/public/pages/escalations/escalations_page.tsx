@@ -69,29 +69,43 @@ export const EscalationsPage: React.FC = () => {
   const openQuery = useListEscalations({ status: 'open', page: openPage });
   const closedQuery = useListEscalations({ status: 'closed', page: closedPage });
 
-  // Accumulated items: each "Show more" appends the next page to the list.
-  // The response's `pagination.page` is used to detect a reset (page 1) vs. an append.
-  const [openItems, setOpenItems] = useState<EscalationQueueItem[]>([]);
-  const [closedItems, setClosedItems] = useState<EscalationQueueItem[]>([]);
+  // Items stored by page number so that a refetch of the same page replaces its rows
+  // in place rather than appending them (which would duplicate rows after "Show more").
+  // Only the active (last) page query is mounted, so earlier pages keep their cached
+  // items in this map until the component unmounts.
+  const [openPages, setOpenPages] = useState<Record<number, EscalationQueueItem[]>>({});
+  const [closedPages, setClosedPages] = useState<Record<number, EscalationQueueItem[]>>({});
 
   useEffect(() => {
     if (!openQuery.data) return;
+    const page = openQuery.data.pagination.page;
     const newItems = openQuery.data.results.map(escalationToQueueItem);
-    setOpenItems((prev) =>
-      openQuery.data!.pagination.page === 1 ? newItems : [...prev, ...newItems]
-    );
-    // openQuery.data is the only dep: fires when React Query delivers a new page.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setOpenPages((prev) => ({ ...prev, [page]: newItems }));
   }, [openQuery.data]);
 
   useEffect(() => {
     if (!closedQuery.data) return;
+    const page = closedQuery.data.pagination.page;
     const newItems = closedQuery.data.results.map(escalationToQueueItem);
-    setClosedItems((prev) =>
-      closedQuery.data!.pagination.page === 1 ? newItems : [...prev, ...newItems]
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setClosedPages((prev) => ({ ...prev, [page]: newItems }));
   }, [closedQuery.data]);
+
+  // Flatten pages in order, deduping by id (offset shifts can move a row between pages).
+  const openItems = useMemo(() => {
+    const seen = new Set<string>();
+    return Object.keys(openPages)
+      .sort((a, b) => Number(a) - Number(b))
+      .flatMap((p) => openPages[Number(p)])
+      .filter((item) => (seen.has(item.id) ? false : seen.add(item.id)));
+  }, [openPages]);
+
+  const closedItems = useMemo(() => {
+    const seen = new Set<string>();
+    return Object.keys(closedPages)
+      .sort((a, b) => Number(a) - Number(b))
+      .flatMap((p) => closedPages[Number(p)])
+      .filter((item) => (seen.has(item.id) ? false : seen.add(item.id)));
+  }, [closedPages]);
 
   const isLoading = openQuery.isLoading || closedQuery.isLoading;
   const hasAnyData = openQuery.data ?? closedQuery.data;
@@ -165,6 +179,7 @@ export const EscalationsPage: React.FC = () => {
                 error={openQuery.error as Error | null}
                 renderAssignees={renderAssignees}
                 onClickCard={selectConversation}
+                selectedConversationId={selectedConversationId}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -176,6 +191,7 @@ export const EscalationsPage: React.FC = () => {
                 error={closedQuery.error as Error | null}
                 renderAssignees={renderAssignees}
                 onClickCard={selectConversation}
+                selectedConversationId={selectedConversationId}
               />
             </EuiFlexItem>
           </>
