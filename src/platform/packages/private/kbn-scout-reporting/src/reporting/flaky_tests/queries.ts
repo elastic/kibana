@@ -463,11 +463,15 @@ export const fetchBranchCounts = async (
   return byTest;
 };
 
+/** What the reporters record when a run has no Scout target; a missing field is grouped with it. */
+const UNKNOWN_TARGET = 'unknown';
+
 /**
  * Per-target build counts for the given tests of one execution model, any branch in scope. The
  * target is the Scout deployment the test ran against (`stateful-classic`, `serverless-search`,
  * ...) and where it ran (`local` or `cloud`); frameworks without a Scout target record the mode
- * `unknown`. Over the same executions as the per-branch counts, plus the last failed build.
+ * `unknown`, and a document missing the fields is grouped with them. Over the same executions as
+ * the per-branch counts, plus the last failed build.
  */
 export const buildTargetStatsQuery = (
   scope: FlakyTestQueryScope,
@@ -483,20 +487,19 @@ export const buildTargetStatsQuery = (
       model.executionFilter,
       `test.id IN (${inList(testIds)})`,
     ].join(' AND ')}`,
-    `EVAL failed = ${model.failedExpression}`,
+    `EVAL failed = ${model.failedExpression},` +
+      ` target_mode = COALESCE(test_run.target.mode, "${UNKNOWN_TARGET}"),` +
+      ` target_type = COALESCE(test_run.target.type, "${UNKNOWN_TARGET}")`,
     'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
       ' last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1,' +
       ' last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1' +
-      ' BY test.id, test_run.target.mode, test_run.target.type',
-    'RENAME test.id AS test_id, test_run.target.mode AS target_mode, test_run.target.type AS target_type',
+      ' BY test.id, target_mode, target_type',
+    'RENAME test.id AS test_id',
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
 };
-
-/** What the reporters record when a run has no Scout target; a missing field is treated the same. */
-const UNKNOWN_TARGET = 'unknown';
 
 /** Per-target build counts keyed by test id, most failed builds first. */
 export const fetchTargetStats = async (
@@ -512,8 +515,8 @@ export const fetchTargetStats = async (
     groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
       runEsql<{
         test_id: string;
-        target_mode: string | null;
-        target_type: string | null;
+        target_mode: string;
+        target_type: string;
         builds: number;
         failed_builds: number;
         last_failed_at: string | null;
@@ -527,8 +530,8 @@ export const fetchTargetStats = async (
   for (const record of results.flat()) {
     const stats = byTest.get(record.test_id) ?? [];
     stats.push({
-      mode: record.target_mode ?? UNKNOWN_TARGET,
-      type: record.target_type ?? UNKNOWN_TARGET,
+      mode: record.target_mode,
+      type: record.target_type,
       builds: record.builds,
       failedBuilds: record.failed_builds,
       buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,

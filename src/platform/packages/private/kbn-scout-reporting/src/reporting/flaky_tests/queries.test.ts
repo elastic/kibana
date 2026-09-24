@@ -609,17 +609,20 @@ describe('buildTargetStatsQuery', () => {
     expect(query).toContain(
       '(event.action == "test-end" AND reporter.type IN ("jest", "ftr") AND test.status IN ("passed", "failed", "timedOut")) AND test.id IN ("t1", "t2")'
     );
+    // a document missing the target fields is grouped with the `unknown` target the reporters write
+    expect(query).toContain(
+      'target_mode = COALESCE(test_run.target.mode, "unknown"), ' +
+        'target_type = COALESCE(test_run.target.type, "unknown")'
+    );
     expect(query).toContain(
       'STATS builds = COUNT_DISTINCT(buildkite.build.id), ' +
         'failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)), ' +
         'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)), ' +
         'last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1, ' +
         'last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1 ' +
-        'BY test.id, test_run.target.mode, test_run.target.type'
+        'BY test.id, target_mode, target_type'
     );
-    expect(query).toContain(
-      'RENAME test.id AS test_id, test_run.target.mode AS target_mode, test_run.target.type AS target_type'
-    );
+    expect(query).toContain('RENAME test.id AS test_id');
   });
 });
 
@@ -644,15 +647,6 @@ describe('fetchTargetStats', () => {
               builds: 40,
               failed_builds: 2,
               last_failed_at: '2026-09-05T00:00:00.000Z',
-            },
-            // a document without the target fields counts as an unknown target, not nothing
-            {
-              test_id: 'j1',
-              target_mode: null,
-              target_type: null,
-              builds: 1,
-              failed_builds: 1,
-              last_failed_at: null,
             },
           ],
         }),
@@ -702,14 +696,6 @@ describe('fetchTargetStats', () => {
         failedBuilds: 2,
         buildFailRate: 0.05,
         lastFailedAt: new Date('2026-09-05T00:00:00.000Z'),
-      },
-      {
-        mode: 'unknown',
-        type: 'unknown',
-        builds: 1,
-        failedBuilds: 1,
-        buildFailRate: 1,
-        lastFailedAt: undefined,
       },
     ]);
     expect(stats.get('p1')).toEqual([
