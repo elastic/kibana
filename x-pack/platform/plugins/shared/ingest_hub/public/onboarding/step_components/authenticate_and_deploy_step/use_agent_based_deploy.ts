@@ -255,12 +255,24 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // it directly would clear previously-failed instances from `failedInstances`, causing
         // `isAgentDone` to evaluate as true and advancing Next even though B was never retried.
         setFailedInstances(mergedFailed);
+        // Merge errors: keep previous diagnostics for instances not included in this retry so
+        // the error callout still shows why B failed even when only A was retried.
+        const mergedErrors = isRetry
+          ? {
+              ...Object.fromEntries(
+                Object.entries(detectAndReviewStep.deployErrors ?? {}).filter(
+                  ([id]) => !allTargetIds.includes(id)
+                )
+              ),
+              ...errorsByInstance,
+            }
+          : errorsByInstance;
         updateDetectAndReviewStep({
           isDeploying: false,
           serviceStatuses: statuses,
           policyIdsByInstance,
           failedInstances: mergedFailed,
-          deployErrors: errorsByInstance,
+          deployErrors: mergedErrors,
         });
         return { failed: mergedFailed.length > 0 };
       } catch (err) {
@@ -276,11 +288,21 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           : allIds;
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, allIds);
         setFailedInstances(mergedCatchFailed);
+        const catchErrors = isRetry
+          ? {
+              ...Object.fromEntries(
+                Object.entries(detectAndReviewStep.deployErrors ?? {}).filter(
+                  ([id]) => !allIds.includes(id)
+                )
+              ),
+              ...Object.fromEntries(allIds.map((id) => [id, msg])),
+            }
+          : Object.fromEntries(allIds.map((id) => [id, msg]));
         updateDetectAndReviewStep({
           isDeploying: false,
           serviceStatuses: statuses,
           failedInstances: mergedCatchFailed,
-          deployErrors: Object.fromEntries(allIds.map((id) => [id, msg])),
+          deployErrors: catchErrors,
         });
         // Best-effort: mark the SO as failed so resume doesn't see a stale 'pending' record.
         // Include agent policy ids, services, serviceVars and authMethod known at failure time
