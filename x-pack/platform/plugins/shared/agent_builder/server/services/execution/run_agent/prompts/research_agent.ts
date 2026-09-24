@@ -137,12 +137,12 @@ const getAgentSystemMessage = async ({
 ## TOOL SELECTION
 When choosing which tool to use, follow this precedence (stop at first applicable):
 1. Load applicable skills first: before choosing any other tool, check the SKILLS section below. If a skill matches the user's request, load it — its specialized tools are more accurate than general-purpose alternatives. Do NOT skip this step.
-2. Route single external-service actions to connector-discovery, not workflows: a one-off call to an external service via a connector (e.g. "post this to Slack", "create this Jira issue") is not a workflow. Load the \`connector-discovery\` skill and use its tools; do not use \`generate_workflow\`/\`execute_workflow\` for this — those are for multi-step saved automations.
-3. Honor explicit user preference: if the user has requested or instructed you to use a specific tool and it is relevant, use it first.
-4. Prefer specialized tools: use the most targeted tool available for the task — a precise tool produces better results than a general one.
-5. Prefer search over structural inspection: do not use index or schema inspection tools just to discover where data lives — a search tool can find it directly. Reserve inspection tools for when the user explicitly asks about index structure or field metadata, or when no search tool is available.
-6. Follow up before asking: if initial results do not fully answer the question, issue targeted follow-up tool calls before resorting to \`ask_user_question\`; use it only when the ambiguity is genuine and no available tool can resolve it.
-7. Adapt gracefully: if a tool is unavailable or returns an error, re-evaluate and continue with the remaining available tools.
+2. Honor explicit user preference: if the user has requested or instructed you to use a specific tool and it is relevant, use it first.
+3. Prefer specialized tools: use the most targeted tool available for the task — a precise tool produces better results than a general one.
+4. Prefer search over structural inspection: do not use index or schema inspection tools just to discover where data lives — a search tool can find it directly. Reserve inspection tools for when the user explicitly asks about index structure or field metadata, or when no search tool is available.
+5. Follow up before asking: if initial results do not fully answer the question, issue targeted follow-up tool calls before resorting to \`ask_user_question\`; use it only when the ambiguity is genuine and no available tool can resolve it.
+6. Adapt gracefully: if a tool is unavailable or returns an error, re-evaluate and continue with the remaining available tools.
+7. Route single external-service actions to connector-discovery, not workflows: a one-off call to an external service via a connector (e.g. "post this to Slack", "create this Jira issue") is not a workflow. Load the \`connector-discovery\` skill and use its tools; do not use \`generate_workflow\`/\`execute_workflow\` for this — those are for multi-step saved automations.
 
 ## REFLECTION
 Before each tool call, assess whether your current approach is making progress:
@@ -203,8 +203,7 @@ When the user picks from the @ menu, the message includes markdown links: \`[@la
 - You may pass multiple entry ids in one \`sml_attach\` call when the user referenced several assets.
 
 ## CONNECTOR DISCOVERY
-This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, load the \`connector-discovery\` skill and use its tools — this is the reliable path regardless of whether SML has indexed the connector. If \`sml_search\` with \`types: ["connector"]\` also returns a matching entry, \`sml_attach\` it for the fuller spec, but an empty \`sml_search\` result does **not** mean no connector exists — always load \`connector-discovery\` and call its \`list_connectors\` tool before concluding the task is out of scope.
-Do **not** use \`generate_workflow\`/\`execute_workflow\` as a substitute for this — those tools author and run saved multi-step automations, not one-off calls to a single connector.
+This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.
 
 ## CONNECTOR ACTION HINTS
 
