@@ -25,13 +25,16 @@ import type { A2uiMessage } from '@kbn/a2ui-renderer';
 import { CustomAppServicesProvider } from '../catalog';
 import { SampleDataCallout } from './sample_data_callout';
 import type { CustomAppDefinition } from '../../common/app_definition';
-import { getPanelIds } from '../../common/app_definition';
+import { emptyAppDefinition, getPanelIds } from '../../common/app_definition';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constants';
 import type { CustomAppClient } from './custom_app_client';
-import { CustomAppGrid, getTabs } from './custom_app_grid';
+import { CustomAppGrid, getTabs, useAppSurfaces } from './custom_app_grid';
 import { PanelEditorFlyout } from './panel_editor_flyout';
 import { AppEditorFlyout } from './app_editor_flyout';
 import { createActionHandler } from './handle_action';
+
+/** Stands in before the app loads, so the surfaces hook keeps a stable identity. */
+const EMPTY_DEFINITION = emptyAppDefinition('');
 
 export interface CustomAppPageProps {
   core: CoreStart;
@@ -113,6 +116,9 @@ export function CustomAppPage({
   );
 
   const tabs = useMemo(() => (definition ? getTabs(definition) : []), [definition]);
+
+  // One processor, so both grids share a data model.
+  const processor = useAppSurfaces(definition ?? EMPTY_DEFINITION);
 
   // An app can gain or lose tabs through the editor, so fall back to the first
   // one rather than leaving the grid filtered to a tab that no longer exists.
@@ -281,19 +287,6 @@ export function CustomAppPage({
 
         <SampleDataCallout core={core} />
 
-        {tabs.length > 0 && (
-          <>
-            <EuiTabs>
-              {tabs.map((tab) => (
-                <EuiTab key={tab} isSelected={tab === activeTab} onClick={() => setActiveTab(tab)}>
-                  {tab}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-            <EuiSpacer size="m" />
-          </>
-        )}
-
         <CustomAppServicesProvider
           services={{
             timeRange,
@@ -303,9 +296,53 @@ export function CustomAppPage({
             uiSettings: core.uiSettings,
           }}
         >
+          {/*
+            Untabbed panels are drawn above the tab bar, not below it. They hold
+            the things that apply to every tab — the title, the time picker, the
+            filters — so putting them under the tabs implied they belonged to
+            whichever tab happened to be open.
+          */}
+          {/*
+            `flex: none` matters: the grid's own wrapper is `height: 100%`, so in
+            the page section's flex column it would otherwise stretch and push the
+            tab bar to the bottom of the viewport.
+          */}
+          <div css={{ flex: 'none' }}>
+            <CustomAppGrid
+              definition={definition}
+              processor={processor}
+              isEditing={isEditing}
+              scope="persistent"
+              onLayoutChange={onLayoutChange}
+              onAction={onAction}
+              onEditPanel={setEditingPanelId}
+              onRemovePanel={removePanel}
+            />
+          </div>
+
+          {tabs.length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiTabs>
+                {tabs.map((tab) => (
+                  <EuiTab
+                    key={tab}
+                    isSelected={tab === activeTab}
+                    onClick={() => setActiveTab(tab)}
+                  >
+                    {tab}
+                  </EuiTab>
+                ))}
+              </EuiTabs>
+              <EuiSpacer size="m" />
+            </>
+          )}
+
           <CustomAppGrid
             definition={definition}
+            processor={processor}
             isEditing={isEditing}
+            scope="tab"
             activeTab={activeTab}
             onLayoutChange={onLayoutChange}
             onAction={onAction}

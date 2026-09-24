@@ -19,13 +19,86 @@ import { useEsqlQueries } from './use_esql_queries';
 
 export interface CustomAppGridProps {
   definition: CustomAppDefinition;
+  /**
+   * Built once for the whole app, so every panel shares one data model. Two
+   * grids render an app — persistent and tabbed — and they must not each build
+   * their own, or a control above the tabs could not drive a panel below them.
+   */
+  processor: MessageProcessor;
   isEditing: boolean;
-  /** When set, only untabbed panels and panels on this tab are rendered. */
+  /**
+   * 'persistent' draws the untabbed panels, which sit above the tab bar because
+   * they apply to every tab; 'tab' draws the panels belonging to `activeTab`.
+   */
+  scope: 'persistent' | 'tab';
   activeTab?: string;
   onLayoutChange: (layout: GridLayoutData) => void;
   onAction: (event: ResolvedActionEvent) => void;
   onEditPanel: (panelId: string) => void;
   onRemovePanel: (panelId: string) => void;
+}
+
+/**
+ * Replays an app's stored A2UI messages into surfaces that share one data model.
+ * Lifted out of the grid so the page can own it: the two grids that draw an app
+ * have to read and write the same model.
+ */
+export function useAppSurfaces(definition: CustomAppDefinition): MessageProcessor {
+  // Rebuilt only when the stored messages change, so dragging a panel does not
+  // reset a data model the user has been typing into.
+  return useMemo(() => {
+    const next = new MessageProcessor({ sharedDataModel: new DataModel({}) });
+    for (const messages of Object.values(definition.surfaces)) {
+      next.applyAll(messages as A2uiMessage[]);
+    }
+    return next;
+  }, [definition.surfaces]);
+}
+
+/** The first row a tab's panels may occupy, just below the persistent ones. */
+export function persistentDepth(definition: CustomAppDefinition): number {
+  let depth = 0;
+  for (const [id, widget] of Object.entries(definition.layout)) {
+    if (definition.panels[id]?.tab) continue;
+    if (widget.type === 'panel') depth = Math.max(depth, widget.row + widget.height);
+  }
+  return depth;
+}
+
+/**
+ * The panels one grid draws, with their rows rebased to that grid's origin.
+ *
+ * Tabbed panels are stored below the persistent ones so the saved document reads
+ * as one page, but their own grid starts at row 0 — otherwise it would open with
+ * a band of empty rows where the header used to be.
+ */
+export function scopedLayout(
+  definition: CustomAppDefinition,
+  scope: 'persistent' | 'tab',
+  activeTab: string | undefined,
+  offset: number
+): GridLayoutData {
+  const filtered: GridLayoutData = {};
+  for (const [id, widget] of Object.entries(definition.layout)) {
+    const tab = definition.panels[id]?.tab;
+    const belongs = scope === 'persistent' ? !tab : Boolean(tab) && tab === activeTab;
+    if (!belongs) continue;
+    filtered[id] =
+      offset === 0
+        ? (widget as GridLayoutData[string])
+        : ({ ...widget, row: Math.max(0, widget.row - offset) } as GridLayoutData[string]);
+  }
+  return filtered;
+}
+
+/** Undoes `scopedLayout`'s rebasing, so the stored geometry stays absolute. */
+export function rebaseLayout(layout: GridLayoutData, offset: number): GridLayoutData {
+  if (offset === 0) return layout;
+  const restored: GridLayoutData = {};
+  for (const [id, widget] of Object.entries(layout)) {
+    restored[id] = { ...widget, row: widget.row + offset } as GridLayoutData[string];
+  }
+  return restored;
 }
 
 /** Distinct tab names, in the order the panels declare them. */
@@ -130,47 +203,32 @@ function PanelSurface({
  */
 export function CustomAppGrid({
   definition,
+  processor,
   isEditing,
+  scope,
   activeTab,
   onLayoutChange,
   onAction,
   onEditPanel,
   onRemovePanel,
 }: CustomAppGridProps) {
-  // Surfaces are rebuilt only when the stored A2UI messages change, so dragging
-  // a panel does not reset the data model a user has been typing into.
-  //
-  // One data model for the whole app, not one per panel: a filter panel has to be
-  // able to drive a query belonging to a chart panel, and a table row action has
-  // to be able to open an overlay declared somewhere else. The trade is a single
-  // pointer namespace — two panels must not both claim `/selected`.
-  const processor = useMemo(() => {
-    const next = new MessageProcessor({ sharedDataModel: new DataModel({}) });
-    for (const messages of Object.values(definition.surfaces)) {
-      next.applyAll(messages as A2uiMessage[]);
-    }
-    return next;
-  }, [definition.surfaces]);
+  // Tabbed panels are laid out below the persistent ones in the stored document,
+  // but their grid starts at row 0, so they are shifted up on the way in and back
+  // down on the way out. That keeps the saved geometry readable as one page.
+  const offset = useMemo(
+    () => (scope === 'tab' ? persistentDepth(definition) : 0),
+    [scope, definition]
+  );
+
+  const visibleLayout = useMemo(
+    () => scopedLayout(definition, scope, activeTab, offset),
+    [definition, scope, activeTab, offset]
+  );
 
   /**
-   * Hidden tabs are filtered out of the layout rather than the rendered output,
-   * so the grid never reserves space for them. Panels with no tab stay put —
-   * that is what keeps a header or filter panel visible across tabs.
-   */
-  const visibleLayout = useMemo(() => {
-    if (!activeTab) return definition.layout as GridLayoutData;
-    const filtered: GridLayoutData = {};
-    for (const [id, widget] of Object.entries(definition.layout)) {
-      const tab = definition.panels[id]?.tab;
-      if (!tab || tab === activeTab) filtered[id] = widget as GridLayoutData[string];
-    }
-    return filtered;
-  }, [definition.layout, definition.panels, activeTab]);
-
-  /**
-   * The grid only knows about the visible tab, so it echoes back a layout
-   * containing just those panels. Merging over the full layout keeps the
-   * hidden tabs' panels from being dropped on the next save.
+   * The grid only knows about the panels it was given, so it echoes back a layout
+   * containing just those. Merging over the full layout keeps the other tabs'
+   * panels — and the other grid's — from being dropped on the next save.
    *
    * Outside edit mode the echo is ignored entirely: nothing can have moved, and
    * accepting it would mark a freshly opened app as having unsaved changes.
@@ -179,10 +237,15 @@ export function CustomAppGrid({
   const mergeLayoutChange = useCallback(
     (next: GridLayoutData) => {
       if (!isEditing) return;
-      onLayoutChange({ ...(definition.layout as GridLayoutData), ...next });
+      onLayoutChange({
+        ...(definition.layout as GridLayoutData),
+        ...rebaseLayout(next, offset),
+      });
     },
-    [definition.layout, isEditing, onLayoutChange]
+    [definition.layout, isEditing, offset, onLayoutChange]
   );
+
+  if (Object.keys(visibleLayout).length === 0) return null;
 
   return (
     <GridLayout

@@ -76,36 +76,6 @@ const PODS_PARAMS = {
   health: '/filters/health',
 };
 
-/**
- * A visualization the catalog has no component for, rendered through Kibana's
- * Custom HTML panel instead. `.pct` is each value as a percentage of its column's
- * maximum, which is exactly what a bar width wants, and `--cc-vis-*` is EUI's
- * colourblind-safe palette, so this follows the theme with no work.
- */
-const NAMESPACE_TEMPLATE = `<!-- cc-height: 340 -->
-<style>
-  .hdr, .row { display: flex; align-items: center; gap: var(--cc-space-s); font-size: 12px; }
-  .hdr { color: var(--cc-color-text); opacity: .65; margin-bottom: var(--cc-space-s); }
-  .row { margin-bottom: var(--cc-space-xs); }
-  .name { width: 120px; flex: none; }
-  .track { flex: 1; height: 16px; background: var(--cc-color-surface);
-           border: 1px solid var(--cc-color-border); border-radius: var(--cc-radius-s); overflow: hidden; }
-  .hdr .track { background: none; border: none; }
-  .bar { display: block; height: 100%; }
-  .val { width: 62px; flex: none; text-align: right; font-variant-numeric: tabular-nums; }
-</style>
-{% if rows.size == 0 %}<p>No namespaces in this time range.</p>{% endif %}
-<div class="hdr"><span class="name">Namespace</span><span class="track"></span><span class="val">Pods</span><span class="track"></span><span class="val">CPU</span></div>
-{% for row in rows %}
-<div class="row">
-  <span class="name">{{ row["namespace"].value }}</span>
-  <span class="track"><span class="bar" style="width: {{ row["pods"].pct }}%; background: var(--cc-vis-0);"></span></span>
-  <span class="val">{{ row["pods"].value }}</span>
-  <span class="track"><span class="bar" style="width: {{ row["cpu"].pct }}%; background: var(--cc-vis-3);"></span></span>
-  <span class="val">{{ row["cpu"].value }}%</span>
-</div>
-{% endfor %}`;
-
 const kubernetes = (): CustomAppDefinition => ({
   version: 1,
   title: 'Kubernetes',
@@ -122,8 +92,9 @@ const kubernetes = (): CustomAppDefinition => ({
     grid: { type: 'panel', id: 'grid', row: 15, column: 0, width: 48, height: 30 },
     pods: { type: 'panel', id: 'pods', row: 45, column: 0, width: 48, height: 24 },
 
-    nsHelp: { type: 'panel', id: 'nsHelp', row: 5, column: 0, width: 48, height: 4 },
-    namespaces: { type: 'panel', id: 'namespaces', row: 9, column: 0, width: 48, height: 19 },
+    nsHelp: { type: 'panel', id: 'nsHelp', row: 5, column: 0, width: 48, height: 3 },
+    nsPods: { type: 'panel', id: 'nsPods', row: 8, column: 0, width: 24, height: 18 },
+    nsCpu: { type: 'panel', id: 'nsCpu', row: 8, column: 24, width: 24, height: 18 },
 
     logHelp: { type: 'panel', id: 'logHelp', row: 5, column: 0, width: 48, height: 4 },
     logs: { type: 'panel', id: 'logs', row: 9, column: 0, width: 48, height: 22 },
@@ -138,7 +109,8 @@ const kubernetes = (): CustomAppDefinition => ({
     grid: { hideBorder: true, tab: 'Resources' },
     pods: { title: 'Pods', tab: 'Resources' },
     nsHelp: { hideBorder: true, tab: 'Namespaces' },
-    namespaces: { title: 'Pods and CPU by namespace', tab: 'Namespaces' },
+    nsPods: { title: 'Pods per namespace', tab: 'Namespaces' },
+    nsCpu: { title: 'Mean CPU of limit', tab: 'Namespaces' },
     logHelp: { hideBorder: true, tab: 'Logs' },
     logs: { title: 'Noisiest containers', tab: 'Logs' },
   },
@@ -183,6 +155,16 @@ const kubernetes = (): CustomAppDefinition => ({
       },
     ],
     pods: [{ path: '/pods', shape: 'rows', query: PODS_QUERY, params: PODS_PARAMS }],
+    nsPods: [
+      {
+        path: '/namespaceRollup',
+        shape: 'rows',
+        // Grouped by cluster first so the filter has a column to match on, then
+        // rolled up to one row per namespace.
+        query: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid), cpu = AVG(metrics.k8s.pod.cpu_limit_utilization) * 100 BY namespace = resource.attributes.k8s.namespace.name, cluster = resource.attributes.k8s.cluster.name | WHERE namespace IS NOT NULL AND (?clusters == "" OR MV_CONTAINS(SPLIT(?clusters, ","), cluster)) | STATS pods = SUM(pods), cpu = ROUND(AVG(cpu), 1) BY namespace | SORT pods DESC`,
+        params: { clusters: '/filters/clusters' },
+      },
+    ],
     logs: [
       {
         path: '/logEvents',
@@ -461,21 +443,34 @@ const kubernetes = (): CustomAppDefinition => ({
       {
         id: 'root',
         component: 'Text',
-        text: "This panel is not an EUI component — it is Kibana's **Custom HTML** panel, so the agent can generate any visualization it can express as themed HTML and SVG. It renders in a sandboxed iframe, which is why it is a picture rather than something you can click.",
+        text: 'Both charts read the same ES|QL result from the data model, and follow the cluster filter above.',
         color: 'subdued',
       },
     ]),
-    namespaces: surface('namespaces', [
+    nsPods: surface('nsPods', [
       {
         id: 'root',
-        component: 'KbnCustomContentPanel',
-        template: NAMESPACE_TEMPLATE,
-        // Grouped by cluster first so the filter has a column to match on, then
-        // rolled up to one row per namespace.
-        esql: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid), cpu = AVG(metrics.k8s.pod.cpu_limit_utilization) * 100 BY namespace = resource.attributes.k8s.namespace.name, cluster = resource.attributes.k8s.cluster.name | WHERE namespace IS NOT NULL AND (?clusters == "" OR MV_CONTAINS(SPLIT(?clusters, ","), cluster)) | STATS pods = SUM(pods), cpu = ROUND(AVG(cpu), 1) BY namespace | SORT pods DESC`,
-        // The panel owns its query, so the page filters reach it as bound
-        // variables rather than through the data model like every other panel.
-        variables: [{ key: 'clusters', value: { path: '/filters/clusters' } }],
+        component: 'Chart',
+        chartType: 'bar',
+        horizontal: true,
+        rows: { path: '/namespaceRollup' },
+        x: 'namespace',
+        y: 'pods',
+        xTitle: 'Namespace',
+        yTitle: 'Pods',
+      },
+    ]),
+    nsCpu: surface('nsCpu', [
+      {
+        id: 'root',
+        component: 'Chart',
+        chartType: 'bar',
+        horizontal: true,
+        rows: { path: '/namespaceRollup' },
+        x: 'namespace',
+        y: 'cpu',
+        xTitle: 'Namespace',
+        yTitle: 'CPU % of limit',
       },
     ]),
     logHelp: surface('logHelp', [

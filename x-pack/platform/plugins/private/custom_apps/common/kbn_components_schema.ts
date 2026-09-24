@@ -56,6 +56,12 @@ export const CHART_SCHEMA = {
       type: 'string',
       description: 'Column name for the y axis, exactly as the ES|QL query names it.',
     },
+    horizontal: {
+      type: 'boolean',
+      default: false,
+      description:
+        'Draws bars horizontally. Prefer this when x holds names rather than times, since a dozen labels will not fit under a vertical axis.',
+    },
     breakdown: {
       type: 'string',
       description: 'Optional column name to split the series by.',
@@ -82,7 +88,7 @@ export const KBN_TIME_FILTER_SCHEMA = {
 export const KBN_CUSTOM_CONTENT_PANEL_SCHEMA = {
   type: 'object',
   description:
-    'Any visualization, as themed HTML/SVG with Liquid tags over an ES|QL result — a honeycomb, sankey or gauge. Sandboxed: no JavaScript, no links, no external resources, and it cannot call back, so hover effects must be CSS. Colour marks with var(--cc-vis-0)..9.',
+    'LAST RESORT for a visualization no other component can draw. Always prefer Chart, then KbnLensPanel, then StatusGrid. Themed HTML/SVG with Liquid over an ES|QL result; sandboxed, so no JavaScript, no links, and no way to call back into the app.',
   properties: {
     component: { const: 'KbnCustomContentPanel' },
     template: {

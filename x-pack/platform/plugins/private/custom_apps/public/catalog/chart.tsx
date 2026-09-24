@@ -72,18 +72,27 @@ function ChartRenderer({ props, accessibility }: ComponentRenderProps) {
   const data = xIsTime ? rows.map((row) => ({ ...row, [x]: Date.parse(String(row[x])) })) : rows;
 
   const Series = SERIES[chartType];
+  // Rotating the whole chart is how Elastic Charts does horizontal bars. It is
+  // the right default for comparing named things — a dozen namespace labels
+  // collide when they have to fit under a vertical axis.
+  const horizontal = props.horizontal === true && !xIsTime;
 
   return (
     <EuiChart size={{ height: '100%' }} aria-label={accessibility?.label ?? 'Chart'}>
-      <Settings baseTheme={theme} showLegend={Boolean(breakdown)} legendPosition={Position.Right} />
+      <Settings
+        baseTheme={theme}
+        showLegend={Boolean(breakdown)}
+        legendPosition={Position.Right}
+        rotation={horizontal ? 90 : 0}
+      />
       <Axis
         id="x"
-        position={Position.Bottom}
+        position={horizontal ? Position.Left : Position.Bottom}
         title={typeof props.xTitle === 'string' ? props.xTitle : x}
       />
       <Axis
         id="y"
-        position={Position.Left}
+        position={horizontal ? Position.Bottom : Position.Left}
         title={typeof props.yTitle === 'string' ? props.yTitle : y}
       />
       <Series
