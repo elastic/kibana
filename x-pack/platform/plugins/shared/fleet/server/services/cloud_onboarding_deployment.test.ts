@@ -248,6 +248,37 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('update — full-replace semantics', () => {
+    it('removed serviceVars and policyIdsByInstance keys are absent from the written SO', async () => {
+      // Initial record has stale keys that the update intentionally omits.
+      const initialAttrs = makeAttributes({
+        serviceVars: {
+          cloudtrail: { regions: ['us-east-1'] },
+          old_service: { regions: ['eu-west-1'] },
+        },
+        policyIdsByInstance: { elb: 'policy-1', removed_instance: 'policy-2' },
+      });
+      const updateInput = {
+        serviceVars: { cloudtrail: { regions: ['us-east-1'] } },
+        policyIdsByInstance: { elb: 'policy-1' },
+      };
+      const mergedAttrs = { ...initialAttrs, ...updateInput };
+
+      // get returns the stale initial record; create receives the merged replacement.
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', mergedAttrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', updateInput);
+
+      // Verify what was actually written, not what getById returned.
+      const writtenAttrs = soClient.create.mock.calls.find((c) => c[2]?.overwrite)?.[1];
+      expect(writtenAttrs?.serviceVars).not.toHaveProperty('old_service');
+      expect(writtenAttrs?.policyIdsByInstance).not.toHaveProperty('removed_instance');
+      expect(writtenAttrs?.serviceVars).toHaveProperty('cloudtrail');
+      expect(writtenAttrs?.policyIdsByInstance).toHaveProperty('elb');
+    });
+  });
+
   describe('update (status transitions)', () => {
     describe('status transitions', () => {
       function mockUpdateAndGet(id: string, attrs: CloudOnboardingDeploymentSOAttributes) {
