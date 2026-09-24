@@ -1,5 +1,5 @@
 {
-  "sha1": "7e75283ce930eb05762a81fef486da9013b3fa51",
+  "sha1": "0071c33e7444478b2aa9da0af0acaa740e93ba79",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2379,8 +2379,8 @@
       }
     },
     {
-      "id": "8b991b0ed7656e4-7187a78038f0967",
-      "title": "Agent Builder — interrupted executions are persisted on the conversation [local] persists a failed execution and surfaces it to the next round",
+      "id": "8b991b0ed7656e4-6bf2fc164afa18b",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [local] persists a failed execution as an interrupted round and surfaces it to the next round",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2390,13 +2390,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
-        "line": 188,
-        "column": 6
+        "line": 216,
+        "column": 32
       }
     },
     {
-      "id": "8b991b0ed7656e4-dcd3f2158684356",
-      "title": "Agent Builder — interrupted executions are persisted on the conversation [task_manager] persists a failed execution and surfaces it to the next round",
+      "id": "8b991b0ed7656e4-28aa7f06ae37c2d",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [local] an interrupted resume of a paused round completes that round and keeps the prompt response",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2406,13 +2406,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
-        "line": 188,
-        "column": 6
+        "line": 333,
+        "column": 35
       }
     },
     {
-      "id": "8b991b0ed7656e4-d37f24cd256eef5",
-      "title": "Agent Builder — interrupted executions are persisted on the conversation aborted execution (callback / task manager) is persisted, reports aborted, and is hidden from the next round",
+      "id": "8b991b0ed7656e4-34e4ab3a8d87fd4",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [task_manager] persists a failed execution as an interrupted round and surfaces it to the next round",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2422,8 +2422,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
-        "line": 300,
-        "column": 27
+        "line": 216,
+        "column": 32
+      }
+    },
+    {
+      "id": "8b991b0ed7656e4-08999c64efe49b2",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [task_manager] an interrupted resume of a paused round completes that round and keeps the prompt response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 333,
+        "column": 35
+      }
+    },
+    {
+      "id": "8b991b0ed7656e4-1e1897e3cbf7a78",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation aborted execution (callback / task manager) is persisted as an interrupted round and stays in the next round's context",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 476,
+        "column": 18
       }
     },
     {
