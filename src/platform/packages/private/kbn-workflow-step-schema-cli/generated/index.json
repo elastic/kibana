@@ -75,6 +75,7 @@
     ".tavily_mcp",
     ".teams",
     ".thehive",
+    ".threatq",
     ".tines",
     ".torq",
     ".unifi",
@@ -104,6 +105,7 @@
     "ai.attachment.read",
     "ai.attachment.update",
     "ai.classify",
+    "ai.conversation.add_event",
     "ai.conversation.create",
     "ai.conversation.metadata.patch",
     "ai.conversation.metadata.read",
@@ -842,6 +844,24 @@
     "teams",
     "thehive.createAlert",
     "thehive.pushToService",
+    "threatq.addAttribute",
+    "threatq.addTags",
+    "threatq.createAdversary",
+    "threatq.createEvent",
+    "threatq.createIndicator",
+    "threatq.createObject",
+    "threatq.executePlugin",
+    "threatq.getIndicator",
+    "threatq.getObject",
+    "threatq.getPlugin",
+    "threatq.getRelatedObjects",
+    "threatq.linkObjects",
+    "threatq.listIndicatorStatuses",
+    "threatq.listIndicatorTypes",
+    "threatq.listPlugins",
+    "threatq.searchIndicators",
+    "threatq.searchObjects",
+    "threatq.updateIndicatorStatus",
     "tines.run",
     "tines.stories",
     "tines.test",
@@ -960,11 +980,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "b8fe804691280f7a3f40794418b906ee5fde615a5683701445bad8cb11fdc14e"
+      "sha256": "cb4c27de859c508dab58edfd9179b8c22f3420a58b56a10e7e88bc2628bb67fc"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "db1742a9166e2d28bc10e8c4635266f50e689cf31d5cbbb4aa454e06b5c153af"
+      "sha256": "d80da032830c0b60ed6e609ef664879fc2a77fd2c9468c373e4eb0b0acff8874"
     }
   }
 }
