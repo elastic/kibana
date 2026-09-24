@@ -167,7 +167,7 @@ describe('aws-iam AssumeRole hunt (Phase 5 technique closure)', () => {
 describe('aws-iam AssumeRole host pin (DC2 entity join)', () => {
   const PINNED_HOST = 'WIN-ANALYST01';
 
-  it('pins the PINNED_HOST catalog host to the two AssumeRole events', async () => {
+  it('pins the PINNED_HOST catalog host to every AssumeRole event', async () => {
     expect(HOSTS[PINNED_HOST]).toBeDefined();
 
     const eventsPath = path.join(scriptsDataDir('packs', 'aws-iam'), 'events.ndjson');
@@ -175,7 +175,8 @@ describe('aws-iam AssumeRole host pin (DC2 entity join)', () => {
     const assumeRoleEvents = events.filter(
       (doc) => (doc.event as { action?: string } | undefined)?.action === 'AssumeRole'
     );
-    expect(assumeRoleEvents).toHaveLength(2);
+    // Two original DC2 events plus two behavior-only events (event.provider / event_name).
+    expect(assumeRoleEvents).toHaveLength(4);
     for (const doc of assumeRoleEvents) {
       expect((doc.host as { name?: string } | undefined)?.name).toEqual(PINNED_HOST);
       expect((doc.host as { id?: string } | undefined)?.id).toBeUndefined();
@@ -183,7 +184,23 @@ describe('aws-iam AssumeRole host pin (DC2 entity join)', () => {
 
     // No other aws-iam event carries a host, keeping CloudTrail lookup-only elsewhere.
     const hostBearing = events.filter((doc) => doc.host !== undefined);
-    expect(hostBearing).toHaveLength(2);
+    expect(hostBearing).toHaveLength(4);
+  });
+
+  it('adds event.provider and aws.cloudtrail.event_name only on the behavior-only AssumeRole rows', async () => {
+    const eventsPath = path.join(scriptsDataDir('packs', 'aws-iam'), 'events.ndjson');
+    const events = await readNdjson(eventsPath);
+    const withProvider = events.filter(
+      (doc) => (doc.event as { provider?: string } | undefined)?.provider === 'sts.amazonaws.com'
+    );
+    expect(withProvider).toHaveLength(2);
+    for (const doc of withProvider) {
+      expect((doc.event as { action?: string } | undefined)?.action).toEqual('AssumeRole');
+      expect(
+        (doc.aws as { cloudtrail?: { event_name?: string } } | undefined)?.cloudtrail?.event_name
+      ).toEqual('AssumeRole');
+      expect((doc.host as { name?: string } | undefined)?.name).toEqual(PINNED_HOST);
+    }
   });
 
   it('lets enrichDocForGraph populate related.hosts from the pinned host', async () => {

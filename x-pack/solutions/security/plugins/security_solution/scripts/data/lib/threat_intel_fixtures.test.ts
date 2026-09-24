@@ -40,8 +40,8 @@ describe('PACK_TI_SCENARIOS', () => {
     ]);
   });
 
-  it('gives aws-iam two scenarios and every other pack exactly one', () => {
-    expect(PACK_TI_SCENARIOS['aws-iam']).toHaveLength(2);
+  it('gives aws-iam three scenarios and every other pack exactly one', () => {
+    expect(PACK_TI_SCENARIOS['aws-iam']).toHaveLength(3);
     expect(PACK_TI_SCENARIOS.okta).toHaveLength(1);
     expect(PACK_TI_SCENARIOS.kubernetes).toHaveLength(1);
     expect(PACK_TI_SCENARIOS['github-actions']).toHaveLength(1);
@@ -50,6 +50,7 @@ describe('PACK_TI_SCENARIOS', () => {
   it('uses stable threat-intel source ids without data-generator branding', () => {
     expect(allThreatIntelSourceIds().sort()).toEqual([
       'aws-iam-assume-role',
+      'aws-iam-behavior-only',
       'ti-rss-aws-iam',
       'ti-rss-github-actions',
       'ti-rss-kubernetes',
@@ -399,7 +400,7 @@ describe('resolveHistoricSourceName', () => {
         else newer.add(name);
       }
     }
-    expect(older.size).toBe(5);
+    expect(older.size).toBe(6);
     expect(newer.size).toBeGreaterThan(older.size);
   });
 });
@@ -427,10 +428,11 @@ describe('resolveHistoricThreatIntelWindow', () => {
 });
 
 describe('pack TI join contract', () => {
-  it('places every join IOC on mustard hunt ECS fields after pack enrich', async () => {
+  it('places every env-bound join IOC on mustard hunt ECS fields after pack enrich', async () => {
     const missing: string[] = [];
 
     for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
+      if (scenario.joinIocsArticleOnly) continue;
       const eventsPath = path.join(scriptsDataDir('packs', scenario.packId), 'events.ndjson');
       const raw = await readNdjson(eventsPath);
       const docs = raw.map((doc) => {
@@ -449,6 +451,23 @@ describe('pack TI join contract', () => {
     }
 
     expect(missing).toEqual([]);
+  });
+
+  it('keeps article-only join IOCs off pack ECS so Tier 1 stays clean for behavior-only', async () => {
+    const scenario = PACK_TI_SCENARIOS['aws-iam'].find((s) => s.reportIdSlug === 'aws-iam-behavior-only');
+    expect(scenario?.joinIocsArticleOnly).toBe(true);
+    const eventsPath = path.join(scriptsDataDir('packs', 'aws-iam'), 'events.ndjson');
+    const raw = await readNdjson(eventsPath);
+    const docs = raw.map((doc) => {
+      const next = structuredClone(doc);
+      ensureEcsSourceIp(next);
+      enrichDocForGraph(next);
+      return next;
+    });
+    for (const ioc of scenario!.joinIocs) {
+      const fieldValues = collectPackJoinFieldValues(docs, ioc.type);
+      expect(fieldValues.has(ioc.value)).toBe(false);
+    }
   });
 });
 
@@ -503,14 +522,16 @@ describe('deterministic historic report ids', () => {
     const ids = docs.map((doc) => doc.lineage.source_doc_ref.id);
     expect(ids).toContain('ti-report-aws-iam-historic-01');
     expect(ids).toContain('ti-report-aws-iam-assume-role-historic-01');
+    expect(ids).toContain('ti-report-aws-iam-behavior-only-historic-01');
     for (const id of ids) {
       expect(id).toMatch(/^ti-report-[a-z0-9-]+-historic-\d{2}$/);
     }
   });
 
-  it('produces a unique id per report across all five scenarios (guards the packId collision)', () => {
+  it('produces a unique id per report across all six scenarios (guards the packId collision)', () => {
     const ids = buildAllHistoricDocs().map((doc) => doc.lineage.source_doc_ref.id);
     expect(new Set(ids).size).toBe(ids.length);
+    expect(ids).toHaveLength(72);
   });
 
   it('builds identical ids and docs from identical inputs (idempotent by construction)', () => {
@@ -639,7 +660,9 @@ describe('per-slot correlation anchors', () => {
     // attributed actor/campaign, not just carry a threat_actors field on the extracted
     // doc. historicAnchors.threatActors never reaches content.body_text, so the actor
     // name must be woven into the prose directly (mirrors the okta scenario's pattern).
-    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'];
+    // Behavior-only has no historicAnchors: it is a Tier 2 execute fixture, not a diamond demo.
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'].filter((s) => s.historicAnchors);
+    expect(awsIamScenarios.length).toBeGreaterThan(0);
     for (const scenario of awsIamScenarios) {
       expect(scenario.historicAnchors?.threatActors.length).toBeGreaterThan(0);
       const namedActor = scenario.historicAnchors!.threatActors[0];
@@ -653,7 +676,8 @@ describe('per-slot correlation anchors', () => {
     // ti-report-*-historic-01 docs (the ones the diamond-extraction demo actually reads) use
     // historicArticles[0], so the actor name must also be woven into that slot's prose, not
     // just scenario.body's live/RSS twin.
-    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'];
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'].filter((s) => s.historicAnchors);
+    expect(awsIamScenarios.length).toBeGreaterThan(0);
     for (const scenario of awsIamScenarios) {
       const namedActor = scenario.historicAnchors!.threatActors[0];
       expect(scenario.historicArticles[0]?.body).toContain(namedActor);
