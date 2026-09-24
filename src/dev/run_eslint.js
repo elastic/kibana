@@ -7,13 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createFailError } from '@kbn/dev-cli-errors';
+
 import { run } from '@kbn/dev-cli-runner';
 import { hasValidationRunFlags } from '@kbn/dev-validation-runner';
 
+import { File } from './file';
 import { eslintBinPath } from './eslint';
 import { runEslintContract } from './eslint/run_eslint_contract';
+import { lintFiles as lintOxlintFiles } from './oxlint/lint_files';
 
 process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
+
+const OXLINT_UNSUPPORTED_FLAGS = [
+  '--fix-dry-run',
+  '--fix-type',
+  '--print-config',
+  '--stdin',
+  '--stdin-filename',
+  '--watch',
+];
+
+const runLegacyOxlint = async (log, flags) => {
+  const unsupportedFlag = process.argv
+    .slice(2)
+    .find((arg) =>
+      OXLINT_UNSUPPORTED_FLAGS.some((flag) => arg === flag || arg.startsWith(`${flag}=`))
+    );
+  if (unsupportedFlag) {
+    throw createFailError(
+      `scripts/eslint ${unsupportedFlag} is not supported after Oxlint migration. Run node scripts/eslint and node scripts/lint separately.`
+    );
+  }
+
+  const paths = flags._.map((path) => new File(path));
+  const result = await lintOxlintFiles(log, paths, {
+    fix: flags.fix,
+    fullRepo: paths.length === 0,
+  });
+
+  if (result.failedFiles.length > 0) {
+    throw createFailError('Oxlint errors');
+  }
+};
 
 const runLegacyEslint = () => {
   if (process.argv.includes('--help') || process.argv.includes('-h')) {
@@ -25,8 +61,9 @@ const runLegacyEslint = () => {
   }
 
   run(
-    ({ flags }) => {
+    async ({ log, flags }) => {
       flags._ = flags._ || [];
+      await runLegacyOxlint(log, flags);
 
       // verbose is only a flag for our CLI runner, not for ESLint
       if (process.argv.includes('--verbose')) {

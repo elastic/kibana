@@ -48,7 +48,7 @@
     "es": "node scripts/es",
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
-    "lint": "node scripts/eslint_all_files && node scripts/stylelint",
+    "lint": "node scripts/eslint_all_files && node scripts/lint && node scripts/stylelint",
     "lint:es": "node scripts/eslint_all_files",
     "lint:oxc": "node scripts/lint",
     "lint:style": "node scripts/stylelint",
