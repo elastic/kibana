@@ -158,19 +158,6 @@ apiTest.describe(
       return { ruleId, dateStart };
     };
 
-    const getExecutionTotal = async (
-      apiServices: SyntheticsApiServicesFixture,
-      ruleId: string,
-      dateStart: Date
-    ) => {
-      const log = (await apiServices.alerting.rules.getExecutionLog(
-        ruleId,
-        undefined,
-        dateStart
-      )) as { total?: number };
-      return log.total ?? 0;
-    };
-
     // `enable()` schedules a Task Manager run. Wait for that before `_run_soon`:
     // on slow serverless the old 5s wait often timed out mid-flight, then
     // `_run_soon` raced a second evaluation and `pendingCount` jumped to 2 —
@@ -190,10 +177,21 @@ apiTest.describe(
         );
         return;
       } catch {
-        // Fall through and maybe nudge — but only if still at zero executions.
+        // Fall through — but only nudge if still at zero executions.
       }
-      if ((await getExecutionTotal(apiServices, ruleId, dateStart)) >= 1) {
+      // Brief re-check: the enable-triggered run may have landed in the gap
+      // after the long wait timed out.
+      try {
+        await apiServices.alerting.waiting.waitForExecutionCount(
+          ruleId,
+          1,
+          undefined,
+          2_000,
+          dateStart
+        );
         return;
+      } catch {
+        // Still none — safe to nudge.
       }
       await apiServices.alerting.rules.runSoon(ruleId);
       await apiServices.alerting.waiting.waitForExecutionCount(

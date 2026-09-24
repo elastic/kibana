@@ -101,7 +101,7 @@ export interface AlertingApiService {
     unsnooze: (ruleId: string, scheduleIds?: string[], spaceId?: string) => Promise<any>;
     runSoon: (ruleId: string, spaceId?: string) => Promise<void>;
     getRuleTypes: (spaceId?: string) => Promise<any>;
-    getExecutionLog: (ruleId: string, spaceId?: string, dateStart?: Date) => Promise<any>;
+    getExecutionLog: (ruleId: string, spaceId?: string) => Promise<any>;
     getHealth: () => Promise<any>;
   };
   connectors: {
