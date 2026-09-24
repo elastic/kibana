@@ -60,7 +60,7 @@ describe('getAiIndicesInstructions', () => {
 
     expect(instructions).toContain('Available to this agent:');
     expect(instructions).toContain(
-      '- `elastic` (FROM `sml-main`) — Summaries of Kibana resources such as dashboards and connectors.'
+      '- `elastic` (FROM sml-main) — Summaries of Kibana resources such as dashboards and connectors.'
     );
   });
 
@@ -72,15 +72,15 @@ describe('getAiIndicesInstructions', () => {
       ],
     });
 
-    expect(instructions).toContain('- `elastic` (FROM `sml-main`)');
-    expect(instructions).toContain('- `my-custom` (FROM `ai-index-idx-custom`) — Support tickets.');
+    expect(instructions).toContain('- `elastic` (FROM sml-main)');
+    expect(instructions).toContain('- `my-custom` (FROM ai-index-idx-custom) — Support tickets.');
   });
 
   it('omits entries with no ES|QL target from the available list, keeping the resolved ones', () => {
     const instructions = render({ catalog: [...defaultCatalog, { id: 'unresolved-custom' }] });
 
     expect(instructions).toContain('Available to this agent:');
-    expect(instructions).toContain('- `elastic` (FROM `sml-main`)');
+    expect(instructions).toContain('- `elastic` (FROM sml-main)');
     expect(instructions).not.toContain('unresolved-custom');
   });
 
@@ -96,8 +96,8 @@ describe('getAiIndicesInstructions', () => {
   it('renders an entry without a description with no trailing dash', () => {
     const instructions = render({ catalog: [{ id: 'bare-id', esqlTarget: 'bare-target' }] });
 
-    expect(instructions).toContain('- `bare-id` (FROM `bare-target`)');
-    expect(instructions).not.toContain('(FROM `bare-target`) —');
+    expect(instructions).toContain('- `bare-id` (FROM bare-target)');
+    expect(instructions).not.toContain('(FROM bare-target) —');
   });
 
   it('points at list -> describe -> query and away from execute_esql', () => {
