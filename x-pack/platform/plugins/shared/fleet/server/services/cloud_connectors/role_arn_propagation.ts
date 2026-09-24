@@ -23,7 +23,9 @@ import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
 import { CloudConnectorRoleArnPropagationError } from '../../errors';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { getAgentTemplateAssetsMap, getPackageInfo } from '../epm/packages/get';
 import {
+  _compilePackagePolicyInputs,
   getPackagePolicySavedObjectType,
   packagePolicyService,
   toPackagePolicyUpdate,
@@ -47,10 +49,13 @@ interface PropagateArgs {
 interface SnapshotPlan {
   id: string;
   version?: string;
+  package: PackagePolicySOAttributes['package'];
   previousVars: PackagePolicySOAttributes['vars'];
   previousInputs: PackagePolicySOAttributes['inputs'];
+  previousInputsForVersions: PackagePolicySOAttributes['inputs_for_versions'];
   updatedVars: PackagePolicySOAttributes['vars'];
   updatedInputs: PackagePolicySOAttributes['inputs'];
+  updatedInputsForVersions: PackagePolicySOAttributes['inputs_for_versions'];
   writeVersion?: string;
 }
 
@@ -228,10 +233,13 @@ export const propagateRoleArnToPackagePolicies = async ({
         plansForSnapshots.push({
           id: savedObject.id,
           version: savedObject.version,
+          package: attributes.package,
           previousVars: attributes.vars,
           previousInputs: attributes.inputs,
+          previousInputsForVersions: attributes.inputs_for_versions,
           updatedVars: vars,
           updatedInputs: inputs,
+          updatedInputsForVersions: attributes.inputs_for_versions,
         });
       }
       const total = response?.total ?? objects.length;
@@ -243,16 +251,82 @@ export const propagateRoleArnToPackagePolicies = async ({
     return plansForSnapshots;
   };
 
+  /**
+   * Rollback copies `compiled_input`, `compiled_stream` and `inputs_for_versions` onto the active
+   * policy without compiling again, so each rewritten snapshot is compiled against its own
+   * package version here.
+   */
+  const recompileSnapshot = async (plan: SnapshotPlan): Promise<SnapshotPlan> => {
+    if (!plan.package) {
+      throw new Error(`Rollback snapshot ${plan.id} has no package to compile against`);
+    }
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: plan.package.name,
+      pkgVersion: plan.package.version,
+      prerelease: true,
+    });
+    const assetsMap = await getAgentTemplateAssetsMap({
+      savedObjectsClient: soClient,
+      packageInfo,
+      logger,
+    });
+    const vars = plan.updatedVars ?? {};
+    const updatedInputs = _compilePackagePolicyInputs(
+      packageInfo,
+      vars,
+      plan.updatedInputs ?? [],
+      assetsMap
+    );
+    const updatedInputsForVersions = plan.previousInputsForVersions
+      ? Object.fromEntries(
+          Object.keys(plan.previousInputsForVersions).map((agentVersion) => [
+            agentVersion,
+            _compilePackagePolicyInputs(packageInfo, vars, updatedInputs, assetsMap, agentVersion),
+          ])
+        )
+      : undefined;
+    return { ...plan, updatedInputs, updatedInputsForVersions };
+  };
+
+  const recompileSnapshotPlans = async (
+    toRecompile: SnapshotPlan[]
+  ): Promise<{ recompiled: SnapshotPlan[]; failed: string[] }> => {
+    const failed: string[] = [];
+    const recompiled: SnapshotPlan[] = [];
+    await pMap(
+      toRecompile,
+      async (plan) => {
+        try {
+          recompiled.push(await recompileSnapshot(plan));
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          logger.error(
+            `Failed to compile package policy rollback snapshot ${plan.id} with new role ARN: ${message}`
+          );
+          failed.push(plan.id);
+        }
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, stopOnError: false }
+    );
+    return { recompiled, failed: failed.sort() };
+  };
+
   const writeSnapshot = (
     plan: SnapshotPlan,
     vars: PackagePolicySOAttributes['vars'],
     inputs: PackagePolicySOAttributes['inputs'],
+    inputsForVersions: PackagePolicySOAttributes['inputs_for_versions'],
     version?: string
   ) =>
     soClient.update<PackagePolicySOAttributes>(
       packagePolicySavedObjectType,
       plan.id,
-      { vars, inputs },
+      {
+        vars,
+        inputs,
+        ...(inputsForVersions !== undefined ? { inputs_for_versions: inputsForVersions } : {}),
+      },
       version !== undefined ? { version } : undefined
     );
 
@@ -269,6 +343,7 @@ export const propagateRoleArnToPackagePolicies = async ({
             plan,
             plan.updatedVars,
             plan.updatedInputs,
+            plan.updatedInputsForVersions,
             plan.version
           );
           succeeded.push({ ...plan, writeVersion: updated?.version });
@@ -291,7 +366,13 @@ export const propagateRoleArnToPackagePolicies = async ({
       toRevert,
       async (plan) => {
         try {
-          await writeSnapshot(plan, plan.previousVars, plan.previousInputs, plan.writeVersion);
+          await writeSnapshot(
+            plan,
+            plan.previousVars,
+            plan.previousInputs,
+            plan.previousInputsForVersions,
+            plan.writeVersion
+          );
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           logger.error(
@@ -305,11 +386,11 @@ export const propagateRoleArnToPackagePolicies = async ({
     return revertFailed;
   };
 
-  const snapshotPlans = await findPreviousRevisionSnapshots();
+  const foundSnapshotPlans = await findPreviousRevisionSnapshots();
 
   // A policy that moved off this connector can still have a `:prev` snapshot referencing it, so
   // the snapshot lookup runs even when no active policy references the connector.
-  if (plans.length === 0 && snapshotPlans.length === 0) {
+  if (plans.length === 0 && foundSnapshotPlans.length === 0) {
     logger.debug(
       `Connector ${connectorId} has ${policies.length} referencing package policies and no rollback snapshots with a role_arn to rewrite; nothing to fan out.`
     );
@@ -343,6 +424,21 @@ export const propagateRoleArnToPackagePolicies = async ({
         managedIds.length === 1 ? 'policy cannot' : 'policies cannot'
       } be updated (ids: ${renderPolicyIds(managedIds)}).`,
       { updateFailed: managedIds, revertFailed: [], bumpFailed: false }
+    );
+  }
+
+  const { recompiled: snapshotPlans, failed: uncompilableSnapshotIds } =
+    await recompileSnapshotPlans(foundSnapshotPlans);
+  if (uncompilableSnapshotIds.length > 0) {
+    throw new CloudConnectorRoleArnPropagationError(
+      `Cannot fan out role ARN for connector ${connectorId}: ${
+        uncompilableSnapshotIds.length
+      } package policy rollback ${
+        uncompilableSnapshotIds.length === 1 ? 'snapshot' : 'snapshots'
+      } could not be compiled with the new role ARN (ids: ${renderPolicyIds(
+        uncompilableSnapshotIds
+      )}).`,
+      { updateFailed: uncompilableSnapshotIds, revertFailed: [], bumpFailed: false }
     );
   }
 

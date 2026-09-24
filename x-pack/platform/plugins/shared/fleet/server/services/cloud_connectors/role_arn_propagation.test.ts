@@ -16,11 +16,21 @@ import {
 } from '../../../common/constants';
 import { CloudConnectorRoleArnPropagationError } from '../../errors';
 import { agentPolicyService } from '../agent_policy';
-import { getPackagePolicySavedObjectType, packagePolicyService } from '../package_policy';
+import { getAgentTemplateAssetsMap, getPackageInfo } from '../epm/packages/get';
+import {
+  _compilePackagePolicyInputs,
+  getPackagePolicySavedObjectType,
+  packagePolicyService,
+} from '../package_policy';
 
 import { propagateRoleArnToPackagePolicies } from './role_arn_propagation';
 
+jest.mock('../epm/packages/get', () => ({
+  getPackageInfo: jest.fn(),
+  getAgentTemplateAssetsMap: jest.fn(),
+}));
 jest.mock('../package_policy', () => ({
+  _compilePackagePolicyInputs: jest.fn(),
   packagePolicyService: {
     fetchAllItems: jest.fn(),
     get: jest.fn(),
@@ -63,6 +73,7 @@ const PACKAGE = {
   title: 'Security Posture Management',
   version: '1.9.0',
 };
+const PREVIOUS_PACKAGE = { ...PACKAGE, version: '1.8.0' };
 
 const makePolicy = (id: string, roleArn = OLD_ARN, spaceIds = ['default']) => ({
   id,
@@ -109,8 +120,21 @@ const makeSnapshotFindResult = (attributes: Record<string, unknown>) => ({
   version: 'Wz-prev',
   score: 1,
   references: [],
-  attributes: { latest_revision: false, ...attributes },
+  attributes: { latest_revision: false, package: PREVIOUS_PACKAGE, ...attributes },
 });
+
+/** Stands in for template compilation: records the role ARN and agent version it compiled with. */
+const compileInputs = (
+  _pkgInfo: unknown,
+  _vars: unknown,
+  inputs: Array<{ vars?: { role_arn?: { value?: string } } }>,
+  _assetsMap: unknown,
+  agentVersion?: string
+) =>
+  inputs.map((input) => ({
+    ...input,
+    compiled_input: { role_arn: input.vars?.role_arn?.value, agentVersion },
+  }));
 
 describe('propagateRoleArnToPackagePolicies', () => {
   const soClient = savedObjectsClientMock.create();
@@ -144,6 +168,14 @@ describe('propagateRoleArnToPackagePolicies', () => {
     soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 100 });
     soClient.update.mockReset();
     soClient.update.mockResolvedValue(snapshotUpdateResponse('snapshot', 'Wz-snapshot-after'));
+    (getPackageInfo as jest.Mock).mockImplementation(
+      async ({ pkgName, pkgVersion }: { pkgName: string; pkgVersion: string }) => ({
+        name: pkgName,
+        version: pkgVersion,
+      })
+    );
+    (getAgentTemplateAssetsMap as jest.Mock).mockResolvedValue(new Map());
+    (_compilePackagePolicyInputs as jest.Mock).mockImplementation(compileInputs);
   });
 
   it('updates every referencing package policy with the new ARN', async () => {
@@ -561,6 +593,101 @@ describe('propagateRoleArnToPackagePolicies', () => {
       inputs: [{ vars: { role_arn: { value: NEW_ARN } } }],
     });
     expect(rollback?.policyCount).toBe(1);
+  });
+
+  it('recompiles a rewritten rollback snapshot for its own package version', async () => {
+    // Package rollback copies the snapshot's compiled inputs onto the policy without compiling
+    // them again, so compiled output left on the old ARN would redeploy the old role.
+    mockListReturns([]);
+    const snapshotInputs = [
+      {
+        type: 'cloudbeat/cis_aws',
+        enabled: true,
+        vars: { role_arn: { type: 'text', value: OLD_ARN } },
+        streams: [],
+        compiled_input: { role_arn: OLD_ARN },
+      },
+    ];
+    const snapshotInputsForVersions = {
+      '9.1.0': [
+        { ...snapshotInputs[0], compiled_input: { role_arn: OLD_ARN, agentVersion: '9.1.0' } },
+      ],
+    };
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        makeSnapshotFindResult({
+          inputs: snapshotInputs,
+          inputs_for_versions: snapshotInputsForVersions,
+        }),
+      ],
+      total: 1,
+      page: 1,
+      per_page: 100,
+    });
+    soClient.update.mockResolvedValue(snapshotUpdateResponse('a:prev', 'Wz-prev-after'));
+
+    const rollback = await propagateRoleArnToPackagePolicies({
+      soClient,
+      esClient,
+      connectorId: CONNECTOR_ID,
+      newRoleArn: NEW_ARN,
+    });
+
+    expect(getPackageInfo).toHaveBeenCalledWith(
+      expect.objectContaining({ pkgName: PREVIOUS_PACKAGE.name, pkgVersion: '1.8.0' })
+    );
+    const snapshotWrite = soClient.update.mock.calls.find(([, id]) => id === 'a:prev');
+    expect(snapshotWrite?.[2]).toMatchObject({
+      inputs: [{ vars: { role_arn: { value: NEW_ARN } }, compiled_input: { role_arn: NEW_ARN } }],
+      inputs_for_versions: {
+        '9.1.0': [{ compiled_input: { role_arn: NEW_ARN, agentVersion: '9.1.0' } }],
+      },
+    });
+
+    soClient.update.mockClear();
+    await rollback!.revert();
+
+    const snapshotRevert = soClient.update.mock.calls.find(([, id]) => id === 'a:prev');
+    expect(snapshotRevert?.[2]).toEqual({
+      vars: undefined,
+      inputs: snapshotInputs,
+      inputs_for_versions: snapshotInputsForVersions,
+    });
+  });
+
+  it('refuses the change before any write when a rollback snapshot cannot be recompiled', async () => {
+    mockListReturns([makePolicy('a')]);
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        makeSnapshotFindResult({
+          inputs: [
+            {
+              type: 'cloudbeat/cis_aws',
+              enabled: true,
+              vars: { role_arn: { type: 'text', value: OLD_ARN } },
+              streams: [],
+            },
+          ],
+        }),
+      ],
+      total: 1,
+      page: 1,
+      per_page: 100,
+    });
+    (getPackageInfo as jest.Mock).mockRejectedValue(new Error('registry unavailable'));
+
+    await expect(
+      propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      })
+    ).rejects.toMatchObject({
+      detail: { updateFailed: ['a:prev'], revertFailed: [], bumpFailed: false },
+    });
+    expect(packagePolicyService.update).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
   });
 
   it('reads and writes rollback snapshots with the legacy type when space awareness is off', async () => {
