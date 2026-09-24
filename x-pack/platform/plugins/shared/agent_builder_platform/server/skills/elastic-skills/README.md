@@ -47,10 +47,10 @@ setup, alongside the skills this plugin defines in code, under the `skills/elast
 Adding a skill here is all the registration it needs. A skill the loader rejects is logged and
 skipped so it cannot stop the others from registering.
 
-`../register_skills.ts` also attaches runtime-only configuration that frontmatter cannot express
-(such as an `availability` handler) to specific synced skills by ID. For example, it gates
-`kibana-context-engine` on the `contextEngine:enabled` setting there, so a rename upstream must be
-mirrored in that file.
+A skill directory may also hold a `config.ts` exporting a `config` of type `ElasticSkillConfig`
+(see `../elastic_skills.ts`), which attaches runtime-only configuration that frontmatter cannot
+express — e.g. an `availability` handler or associated tools (`getRegistryTools`). 
+These files are maintained in Kibana, not synced, so the sync must leave them in place.
 
 Note that Kibana's distribution build strips files by name (`README.md`, `test.md`) and by parent
 directory (`docs/`, `tests/`), so a reference with one of those names loads from a development

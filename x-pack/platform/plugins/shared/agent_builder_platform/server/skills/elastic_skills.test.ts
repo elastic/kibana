@@ -79,6 +79,84 @@ describe('loadElasticSkills', () => {
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error.mock.calls[0][0]).toContain('broken-skill');
   });
+
+  describe('skill config loading', () => {
+    const writeConfig = (dirName: string, fileName: string, contents: string): void => {
+      writeFileSync(join(root, dirName, fileName), contents, 'utf8');
+    };
+
+    it("applies the fields exported by a skill's config.ts", async () => {
+      writeSkill(root, 'configured-skill', skillMarkdown('configured-skill'));
+      writeConfig(
+        'configured-skill',
+        'config.ts',
+        [
+          'export const config = {',
+          "  availability: { cacheMode: 'space', handler: async () => ({ status: 'available' }) },",
+          "  getRegistryTools: () => ['platform.core.search'],",
+          '};',
+        ].join('\n')
+      );
+
+      const skills = loadElasticSkills({ logger }, root);
+
+      expect(skills).toHaveLength(1);
+      expect(skills[0].availability).toMatchObject({ cacheMode: 'space' });
+      expect(await skills[0].getRegistryTools?.()).toEqual(['platform.core.search']);
+      // The markdown-derived fields are untouched.
+      expect(skills[0].content).toContain('Body content.');
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('loads a config.js module, the shape the distributable ships', async () => {
+      writeSkill(root, 'dist-skill', skillMarkdown('dist-skill'));
+      writeConfig(
+        'dist-skill',
+        'config.js',
+        "module.exports.config = { getRegistryTools: () => ['platform.core.search'] };\n"
+      );
+
+      const skills = loadElasticSkills({ logger }, root);
+
+      expect(skills).toHaveLength(1);
+      expect(await skills[0].getRegistryTools?.()).toEqual(['platform.core.search']);
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('skips a skill whose config does not export a config object', () => {
+      writeSkill(root, 'bad-config-skill', skillMarkdown('bad-config-skill'));
+      writeConfig('bad-config-skill', 'config.ts', "export const notConfig = 'oops';\n");
+      writeSkill(root, 'good-skill', skillMarkdown('good-skill'));
+
+      const skills = loadElasticSkills({ logger }, root);
+
+      expect(skills.map((skill) => skill.id)).toEqual(['good-skill']);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error.mock.calls[0][0]).toContain('bad-config-skill');
+    });
+
+    it('skips a skill whose config exports a non-object config', () => {
+      writeSkill(root, 'string-config-skill', skillMarkdown('string-config-skill'));
+      writeConfig('string-config-skill', 'config.ts', "export const config = 'not an object';\n");
+
+      expect(loadElasticSkills({ logger }, root)).toEqual([]);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error.mock.calls[0][0]).toContain('string-config-skill');
+    });
+
+    it('skips a skill whose config throws on load, so the rest still load', () => {
+      writeSkill(root, 'throwing-config-skill', skillMarkdown('throwing-config-skill'));
+      writeConfig('throwing-config-skill', 'config.ts', "throw new Error('boom');\n");
+      writeSkill(root, 'good-skill', skillMarkdown('good-skill'));
+
+      const skills = loadElasticSkills({ logger }, root);
+
+      expect(skills.map((skill) => skill.id)).toEqual(['good-skill']);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error.mock.calls[0][0]).toContain('throwing-config-skill');
+      expect(logger.error.mock.calls[0][0]).toContain('boom');
+    });
+  });
 });
 
 // Guards the skills copied in from `elastic/agent-skills`.

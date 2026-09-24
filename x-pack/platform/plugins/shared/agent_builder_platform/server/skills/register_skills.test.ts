@@ -33,8 +33,20 @@ describe('registerSkills', () => {
     expect(contextEngineSkill).toMatchObject({
       // From the skill's SKILL.md frontmatter; gates the `agentBuilder:experimental` flag.
       experimental: true,
-      // Wired in `register_skills.ts` because markdown frontmatter cannot express a runtime handler.
+      // Wired in the skill's `config.ts` because markdown frontmatter cannot express a runtime handler.
       availability: contextEngineSkillAvailability,
     });
+  });
+
+  it('exposes the AI-index registry tools on the synced Context Engine skill', async () => {
+    const contextEngineSkill = registerAllSkills().find(
+      (skill) => skill.id === 'kibana-context-engine'
+    );
+
+    expect(await contextEngineSkill?.getRegistryTools?.()).toEqual([
+      'platform.context_engine.list_ai_indices',
+      'platform.context_engine.describe_ai_index',
+      'platform.context_engine.query_ai_indices',
+    ]);
   });
 });
