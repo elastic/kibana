@@ -19,7 +19,7 @@ describe('getCaseSettings', () => {
   it('returns Stack owner flags from OWNER_INFO', () => {
     expect(getCaseSettings('cases')).toEqual({
       syncAlerts: false,
-      extractObservables: true,
+      extractObservables: false,
       observablesEnabled: true,
     });
   });

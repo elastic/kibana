@@ -1006,8 +1006,8 @@ describe('useTemplateFormSync', () => {
       renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      // extractObservables omitted by the template inherits the space configuration default (on).
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
+      // extractObservables omitted by the template inherits the space default; no owner → false.
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
 
     it('reverts settings to space defaults when a settings-bearing template is cleared', () => {
@@ -1023,7 +1023,8 @@ describe('useTemplateFormSync', () => {
       rerender();
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
+      // No owner → initialConfiguration → false.
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
 
     it('reverts extractObservables to the case owner space default when clearing a template', () => {
@@ -1177,7 +1178,8 @@ describe('useTemplateFormSync', () => {
       rerender();
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
+      // No owner in form data → initialConfiguration → false.
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
 
     it('forces extractObservables to false for a blocked owner when the template omits the key', () => {
@@ -1232,7 +1234,8 @@ describe('useTemplateFormSync', () => {
       rerender();
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
+      // No owner in form data → initialConfiguration → false.
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
   });
 });
