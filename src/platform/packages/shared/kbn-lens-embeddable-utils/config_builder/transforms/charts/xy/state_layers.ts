@@ -87,7 +87,9 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
     const onAxis = yMetric?.axis ?? 'y';
     const axisMode = onAxis === 'y2' ? 'right' : 'left';
     return {
-      ...(yMetric.color && !isAutoColor(yMetric.color) ? { color: yMetric.color?.color } : {}),
+      ...(yMetric.color && !isAutoColor(yMetric.color) && !layer.breakdown_by
+        ? { color: yMetric.color.color }
+        : {}),
       axisMode,
       forAccessor: getAccessorNameForXY(layer, i, METRIC_ACCESSOR_PREFIX, index),
     };
