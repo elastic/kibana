@@ -63,6 +63,8 @@ interface FpTpDatasetExample extends Example {
 
 evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classic }, () => {
   let workflowId: string = FP_TP_MANAGED_WORKFLOW_ID;
+  // Set only once the sample is installed, so teardown never deletes the managed workflow.
+  let installedSampleWorkflowId: string | undefined;
   let restoreInferenceSettings: (() => Promise<void>) | undefined;
   // Cleanups that failed inside a task; afterAll retries them.
   const pendingCleanups = new Set<() => Promise<void>>();
@@ -78,7 +80,8 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
       log: ToolingLog;
     }) => {
       if (FP_TP_WORKFLOW_SOURCE === 'sample') {
-        workflowId = await installSampleWorkflow(fetch);
+        installedSampleWorkflowId = await installSampleWorkflow(fetch);
+        workflowId = installedSampleWorkflowId;
         log.info(`Installed sample FP/TP analysis workflow ${workflowId}`);
       }
       restoreInferenceSettings = await overrideInferenceFeature({
@@ -96,10 +99,13 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
       log.info(`Retrying ${pendingCleanups.size} FP/TP fixture cleanups`);
       await Promise.allSettled([...pendingCleanups].map((cleanup) => cleanup()));
     }
-    await restoreInferenceSettings?.();
-    if (FP_TP_WORKFLOW_SOURCE === 'sample') {
-      await deleteSampleWorkflow(fetch, workflowId).catch((error: Error) =>
-        log.warning(`Could not delete sample workflow ${workflowId}: ${error.message}`)
+    await restoreInferenceSettings?.().catch((error: Error) =>
+      log.warning(`Could not restore inference settings: ${error.message}`)
+    );
+    if (installedSampleWorkflowId !== undefined) {
+      const sampleId = installedSampleWorkflowId;
+      await deleteSampleWorkflow(fetch, sampleId).catch((error: Error) =>
+        log.warning(`Could not delete sample workflow ${sampleId}: ${error.message}`)
       );
     }
   });
