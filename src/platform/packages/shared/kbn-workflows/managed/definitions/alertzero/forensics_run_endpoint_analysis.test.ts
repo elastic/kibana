@@ -206,7 +206,6 @@ describe('Endpoint analysis run', () => {
       };
       expect(evaluate(String(stepByName('mark_invalid')?.if), noHits)).toBe(false);
       expect(evaluate(String(stepByName('mark_unreachable')?.if), noHits)).toBe(false);
-      expect(evaluate(String(stepByName('mark_unwritable')?.if), noHits)).toBe(false);
     });
 
     // The dispatcher selects on the same type, space, and status. If either side changed
@@ -274,14 +273,12 @@ describe('Endpoint analysis run', () => {
         'mark_processed',
         'mark_failed',
         'mark_proposals_failed',
-        'mark_unwritable',
         'mark_invalid',
       ].map(
         (name) => (stepByName(name)?.with?.ki as { attributes?: { status?: string } })?.attributes
       );
       expect(statuses.map((attributes) => attributes?.status)).toEqual([
         'processed',
-        'failed',
         'failed',
         'failed',
         'invalid',
@@ -505,55 +502,6 @@ describe('Endpoint analysis run', () => {
     });
   });
 
-  // `metadata` is a converse-level read. Attachment writes require the owner, so a
-  // worker enabled by someone else passes the read, spends 15m, and then loses every
-  // finding. Ownership will not appear on a retry, so the indicator is retired first.
-  describe('an investigation this run can read but not write', () => {
-    const readable = {
-      steps: {
-        resolve_request: { output: { has_request: true, investigation_id: 'inv-1' } },
-        verify_investigation: { output: { metadata: { status: 'open' }, can_attach: false } },
-      },
-    };
-
-    it('is stopped before the agent, not after the attachments fail', () => {
-      expect(stepByName('when_ki_valid')?.condition).toContain(
-        'steps.verify_investigation.output.can_attach == true'
-      );
-      expect(evaluate(String(stepByName('when_ki_valid')?.condition), readable)).toBe(false);
-      expect(
-        evaluate(String(stepByName('when_ki_valid')?.condition), {
-          steps: {
-            ...readable.steps,
-            verify_investigation: { output: { metadata: { status: 'open' }, can_attach: true } },
-          },
-        })
-      ).toBe(true);
-
-      const names = allSteps.map(({ name }) => name);
-      expect(names.indexOf('verify_investigation')).toBeLessThan(
-        names.indexOf('forensic_analysis')
-      );
-      expect(names.indexOf('journal_unwritable')).toBeLessThan(names.indexOf('mark_unwritable'));
-      expect(stepByName('journal_unwritable')?.['on-failure']).toEqual({ continue: true });
-      expect(stepByName('journal_unwritable')?.if).toBe(stepByName('mark_unwritable')?.if);
-    });
-
-    it('retires the indicator as failed and does not mark it processed', () => {
-      const retired = String(stepByName('mark_unwritable')?.if);
-      const processed = String(stepByName('mark_processed')?.if);
-      const unread = String(stepByName('mark_unreachable')?.if);
-
-      expect(evaluate(retired, readable)).toBe(true);
-      expect(evaluate(processed, readable)).toBe(false);
-      expect(evaluate(unread, readable)).toBe(false);
-      expect(
-        (stepByName('mark_unwritable')?.with?.ki as { attributes?: { status?: string } })
-          ?.attributes?.status
-      ).toBe('failed');
-    });
-  });
-
   // A `type: text` attachment was how this run used to narrate itself, which put prose an
   // analyst scans in the same rail as the evidence they open. `trigger_mode: never` gives
   // it a place to go that does not wake the investigation's agent.
@@ -571,7 +519,6 @@ describe('Endpoint analysis run', () => {
         'journal_invalid_request',
         'journal_no_host',
         'journal_proposals_lost',
-        'journal_unwritable',
       ]);
       expect(definition.consts?.journal_note).toBe('system-alertzero-journal-note');
     });
@@ -769,7 +716,6 @@ describe('Endpoint analysis run', () => {
         'mark_processed',
         'mark_proposals_failed',
         'mark_unreachable',
-        'mark_unwritable',
       ]);
       for (const step of writes) {
         expect(step['on-failure']).toBeUndefined();
@@ -1060,7 +1006,7 @@ describe('Endpoint analysis run', () => {
       const ready = {
         steps: {
           resolve_request: { output: { has_request: true } },
-          verify_investigation: { output: { metadata: { id: 'inv-1' }, can_attach: true } },
+          verify_investigation: { output: { metadata: { id: 'inv-1' } } },
           resolve_run_outcome: { output: { settled: true } },
           resolve_proposals: { output: { proposals_lost: false } },
         },

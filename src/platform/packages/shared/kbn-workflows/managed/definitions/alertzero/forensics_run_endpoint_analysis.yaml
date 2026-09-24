@@ -119,7 +119,6 @@ steps:
   # Verify the investigation exists and is readable and writable by this run
   # before proceeding.
   # If the investigation does not exist, the indicator is retired by `mark_unreachable`.
-  # If the investigation exists but is not writable by this run, it is retired by `mark_unwritable`.
   - name: verify_investigation
     type: ai.conversation.metadata.read
     if: "${{ steps.resolve_request.output.investigation_id != blank }}"
@@ -141,8 +140,7 @@ steps:
     type: if
     condition: >-
       ${{ steps.resolve_request.output.has_request == true
-        and steps.verify_investigation.output.metadata != null
-        and steps.verify_investigation.output.can_attach == true }}
+        and steps.verify_investigation.output.metadata != null }}
     steps:
       # All three of this indicator's findings mean an earlier run finished the
       # analysis but could not retire the indicator. Finding them lets this run
@@ -660,43 +658,6 @@ steps:
               status: invalid
               invalid_reason: "Missing attack_discovery_alert_id or investigation_id"
 
-      # This run is not the owner of the investigation so attachment writes would be
-      # rejected. Retire the indicator re-dispatched every minute. The
-      # note uses converse access, which is why it can land when the attachments
-      # cannot. A rejected note must not block the retirement.
-      - name: journal_unwritable
-        type: workflow.execute
-        if: >-
-          ${{ steps.resolve_request.output.has_request == true
-            and steps.verify_investigation.output.metadata != null
-            and steps.verify_investigation.output.can_attach != true }}
-        on-failure:
-          continue: true
-        with:
-          workflow-id: "{{ consts.journal_note }}"
-          inputs:
-            conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-            message: >-
-              Endpoint analysis did not run. This worker can read investigation
-              `{{ steps.resolve_request.output.investigation_id }}` but does not own it,
-              so its findings could not be attached. The indicator was retired and will not be retried.
-
-      - name: mark_unwritable
-        type: context-engine.updateKi
-        if: >-
-          ${{ steps.resolve_request.output.has_request == true
-            and steps.verify_investigation.output.metadata != null
-            and steps.verify_investigation.output.can_attach != true }}
-        with:
-          ai_index_id: "{{ inputs.ai_index_id }}"
-          ki_id: "{{ inputs.ki_id }}"
-          ki:
-            attributes:
-              status: failed
-              failure_reason: >-
-                Worker cannot attach findings to investigation
-                {{ steps.resolve_request.output.investigation_id }} because it is not the owner
-
       # The other way into this branch: the indicator is well-formed, but its
       # investigation could not be read. `failed` rather than `invalid` since
       # the problem is on the investigation's end, not the indicator's. Still
@@ -705,8 +666,7 @@ steps:
       - name: mark_unreachable
         type: context-engine.updateKi
         if: >-
-          ${{ steps.resolve_request.output.has_request == true
-            and steps.verify_investigation.output.metadata == null }}
+          ${{ steps.resolve_request.output.has_request == true }}
         with:
           ai_index_id: "{{ inputs.ai_index_id }}"
           ki_id: "{{ inputs.ki_id }}"
@@ -810,7 +770,6 @@ steps:
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and steps.verify_investigation.output.can_attach == true
         and steps.resolve_run_outcome.output.settled == true
         and steps.resolve_proposals.output.proposals_lost != true }}
     with:
@@ -827,7 +786,6 @@ steps:
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and steps.verify_investigation.output.can_attach == true
         and steps.resolve_run_outcome.output.settled == true
         and steps.resolve_proposals.output.proposals_lost == true }}
     on-failure:
@@ -846,7 +804,6 @@ steps:
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and steps.verify_investigation.output.can_attach == true
         and steps.resolve_run_outcome.output.settled == true
         and steps.resolve_proposals.output.proposals_lost == true }}
     with:
@@ -868,7 +825,6 @@ steps:
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and steps.verify_investigation.output.can_attach == true
         and steps.resolve_run_outcome.output.settled != true }}
     on-failure:
       continue: true
@@ -890,7 +846,6 @@ steps:
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and steps.verify_investigation.output.can_attach == true
         and steps.resolve_run_outcome.output.settled != true }}
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"

@@ -37,10 +37,6 @@ export const getConversationMetadataStepDefinition = ({
         return {
           output: {
             metadata: (conversation.metadata ?? {}) as Record<string, unknown>,
-            // `get` succeeds for anyone who can converse. Attachment writes require
-            // the owner, and `update_access_control` is that check: an admin may
-            // rename a public conversation they do not own and still cannot attach.
-            can_attach: conversation.permissions?.update_access_control === true,
           },
         };
       } catch (error) {

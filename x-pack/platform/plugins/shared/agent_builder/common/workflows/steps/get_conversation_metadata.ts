@@ -23,10 +23,6 @@ const OutputSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).meta({
     description: 'The current metadata key/value pairs for this conversation.',
   }),
-  can_attach: z.boolean().meta({
-    description:
-      'True when the caller owns the conversation. Attachment writes require the owner; a caller who can only read still receives metadata with this set to false.',
-  }),
 });
 
 type GetConversationMetadataInputSchema = typeof InputSchema;
