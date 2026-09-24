@@ -292,6 +292,9 @@ describe('updateFailureIssue()', () => {
       'https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout'
     );
     expect(body).toContain('"test.failCount":3');
+    expect(api.addIssueComment.mock.calls[0][1]).toContain(
+      'https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout'
+    );
   });
 
   it('increments failure count and adds new comment to issue', async () => {
@@ -667,7 +670,9 @@ describe('updateFailureIssue()', () => {
         "calls": Array [
           Array [
             5678,
-            "New failure for \\"local-serverless-observability_complete\\" target: [kibana-on-merge - main](https://build-url)",
+            "New failure for \\"local-serverless-observability_complete\\" target: [kibana-on-merge - main](https://build-url)
+
+      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-123%22')))",
           ],
         ],
         "results": Array [
@@ -678,6 +683,44 @@ describe('updateFailureIssue()', () => {
         ],
       }
     `);
+  });
+
+  it('keeps the dashboard link out of non-main failure comments', async () => {
+    const api = createGithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        github: {
+          htmlUrl: 'https://github.com/issues/5678',
+          number: 5678,
+          nodeId: 'efgh',
+          body: '# existing issue body',
+        },
+      },
+      api,
+      '9.5',
+      'kibana-on-merge',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        failure: 'test failure',
+        time: '1',
+        likelyIrrelevant: false,
+        id: 'test-id-123',
+        target: 'local',
+        location: 'test.spec.ts',
+        duration: 1000,
+        owners: 'elastic/team',
+      }
+    );
+
+    expect(api.addIssueComment.mock.calls[0][1]).toBe(
+      'New failure for "local" target: [kibana-on-merge - 9.5](https://build-url)'
+    );
+    expect(api.editIssueBodyAndEnsureOpen.mock.calls[0][1]).toContain('Test history:');
   });
 
   it('does not include new error message when error.message is missing', async () => {
@@ -818,10 +861,12 @@ describe('updateFailureIssue()', () => {
       }
     );
 
-    // pin down the exact comment format: target line, blank line, message in a code block
+    // Pin down the order of the build link, history link, and new error message.
     expect(api.addIssueComment.mock.calls[0][1]).toBe(
       dedent`
         New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://build-url)
+
+        Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-1213%22')))
 
         New error message:
         \`\`\`

@@ -328,16 +328,18 @@ function createJUnitComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
-  errorMessage: ErrorMessageForComment
+  errorMessage: ErrorMessageForComment,
+  failure?: TestFailure
 ): string {
   /*
    * The error message is only included when it has not been reported on the
    * issue before (see getErrorMessageForComment), so repeat failures with a
    * known error stay compact while genuinely new errors surface immediately.
    */
-  return `New failure: [${
-    pipeline || 'CI Build'
-  } - ${branch}](${buildUrl})${renderErrorMessageSection(errorMessage)}`;
+  const buildLink = `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+  const prefix =
+    branch === 'main' && failure ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
+  return `${prefix}${renderErrorMessageSection(errorMessage)}`;
 }
 
 function createScoutComment(
@@ -372,9 +374,11 @@ function createScoutComment(
    * previous comment), a short note replaces the code block. When no message
    * was available to compare, only the link line is posted.
    */
-  return `New failure for "${failure.target}" target: [${
+  const buildLink = `New failure for "${failure.target}" target: [${
     pipeline || 'CI Build'
-  } - ${branch}](${buildUrl})${renderErrorMessageSection(errorMessage)}`;
+  } - ${branch}](${buildUrl})`;
+  const prefix = branch === 'main' ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
+  return `${prefix}${renderErrorMessageSection(errorMessage)}`;
 }
 
 async function updateJUnitFailureIssue(
@@ -405,7 +409,7 @@ async function updateJUnitFailureIssue(
     );
   }
 
-  const commentText = createJUnitComment(buildUrl, branch, pipeline, errorMessage);
+  const commentText = createJUnitComment(buildUrl, branch, pipeline, errorMessage, failure);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
