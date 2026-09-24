@@ -11,3 +11,9 @@ export type { AuthenticatedUser, UserRealm } from './authenticated_user';
 export { isUserAnonymous, canUserHaveProfile } from './authenticated_user';
 export type { User } from './user';
 export type { AuthenticationProvider } from './authentication_provider';
+export type { AuthenticatedPrincipal } from './authenticated_principal';
+export {
+  getAuthenticatedPrincipal,
+  SERVICE_ACCOUNT_REALM_TYPE,
+  CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+} from './authenticated_principal';
