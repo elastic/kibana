@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/scout'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod
