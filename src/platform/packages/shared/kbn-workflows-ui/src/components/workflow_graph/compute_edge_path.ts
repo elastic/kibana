@@ -17,10 +17,11 @@ const CORNER_RADIUS = 16;
 // split. Stubs must be at least CORNER_RADIUS so the rounded corners
 // have room to render instead of clamping to a short segment.
 const TRUNK_LENGTH_FROM_SOURCE = 24;
-// Final straight approach into the arrowhead. Must clear CORNER_RADIUS so the
-// last visible segment reads as a purposeful stub, not a curve dumping into
-// the marker (see WORKFLOW_RANK_SEP — fork bus + this length must fit).
-const TRUNK_LENGTH_TO_TARGET = 40;
+// Final straight approach into the arrowhead (and the shared merge trunk).
+// Long enough for the mid-wire Add-step control to sit on the line after a
+// fork/merge curve. Must clear CORNER_RADIUS; see WORKFLOW_RANK_SEP — fork
+// bus + this length must fit.
+export const TRUNK_LENGTH_TO_TARGET = 64;
 
 // Vertical offset from the source for branch labels (TB layout). Anchoring
 // labels at a fixed Y instead of the source/target midpoint keeps sibling

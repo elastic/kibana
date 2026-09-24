@@ -19,10 +19,10 @@ import { enforceTriggerLaneOrder } from './enforce_trigger_lane_order';
 // Exported so tests can import the real values instead of re-declaring them.
 export const WORKFLOW_COMPOUND_PADDING = { top: 70, right: 32, bottom: 32, left: 32 } as const;
 export const WORKFLOW_NODE_SEP = 50;
-// Must clear FORK_BUS_TRUNK (80) plus TRUNK_LENGTH_TO_TARGET (40) so fork
-// edges keep a straight lead-in before the arrowhead instead of curving
-// straight into the marker.
-export const WORKFLOW_RANK_SEP = 130;
+// Must clear FORK_BUS_TRUNK (80) plus TRUNK_LENGTH_TO_TARGET (64) so fork
+// edges keep a straight lead-in before the arrowhead (room for the Add-step
+// control) instead of curving straight into the marker.
+export const WORKFLOW_RANK_SEP = 150;
 
 export interface LayoutSnapshot {
   nodes: DagPositionedNode[];

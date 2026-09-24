@@ -8,7 +8,8 @@
  */
 
 import type { Edge, Node } from '@xyflow/react';
-import type { LayoutDirection } from '@kbn/workflows';
+import type { EdgeBranchType, LayoutDirection } from '@kbn/workflows';
+import { MERGE_BUS_TRUNK, TRUNK_LENGTH_TO_TARGET } from './compute_edge_path';
 import type { InsertionPoints, NodePortTargets, StepPortTarget } from './compute_insertion_points';
 import { errorHalfEligible } from './error_half_eligibility';
 import { WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
@@ -86,6 +87,22 @@ export function segmentMidpoint(
   };
 }
 
+/**
+ * Straight lead-in into the target handle — the post-curve stub used by fork
+ * drops and the shared merge trunk. Controls sit on this segment so the +
+ * lands on the drawn line rather than in empty space between nodes.
+ */
+export function approachTrunkSegment(
+  entry: WireSegmentPoint,
+  direction: LayoutDirection,
+  length: number
+): { readonly start: WireSegmentPoint; readonly end: WireSegmentPoint } {
+  if (direction === 'LR') {
+    return { start: { x: entry.x - length, y: entry.y }, end: entry };
+  }
+  return { start: { x: entry.x, y: entry.y - length }, end: entry };
+}
+
 const exitPoint = (bounds: AbsBounds, direction: LayoutDirection): WireSegmentPoint =>
   direction === 'LR'
     ? { x: bounds.x + bounds.width, y: bounds.y + bounds.height / 2 }
@@ -115,6 +132,17 @@ const isFailureEdge = (edge: Edge): boolean => {
   return data?.isFailure === true;
 };
 
+const isMergeEdge = (edge: Edge): boolean => {
+  const data = edge.data as { isMerge?: boolean } | undefined;
+  return data?.isMerge === true;
+};
+
+const isForkEdge = (edge: Edge): boolean => {
+  const data = edge.data as { branchType?: EdgeBranchType } | undefined;
+  const branchType = data?.branchType;
+  return branchType === 'switch' || branchType === 'then' || branchType === 'else';
+};
+
 const stepTypeOf = (node: Node | undefined): string | undefined => {
   if (!node || typeof node.data !== 'object' || node.data === null) return undefined;
   if (!('stepType' in node.data)) return undefined;
@@ -139,6 +167,8 @@ const errorStepIdFor = (
  * existing insertion-point map. Pure: safe to memoize.
  *
  * Never places both a wire control and a terminal on the same gap.
+ * Fork/merge edges anchor the control on the post-curve approach trunk so the
+ * + sits on the drawn line; fan-in merges share one control per target.
  */
 export function computeWireInsertionControls(args: {
   readonly nodes: readonly Node[];
@@ -151,6 +181,8 @@ export function computeWireInsertionControls(args: {
   const controls: WireInsertionControl[] = [];
   /** Keys `${sourceId}:${handle}` that already have a wire control. */
   const wiredExits = new Set<string>();
+  /** Merge targets that already have a shared-trunk control. */
+  const mergeTargetsSeen = new Set<string>();
 
   for (const edge of edges) {
     if (isFailureEdge(edge)) continue;
@@ -167,17 +199,32 @@ export function computeWireInsertionControls(args: {
     const targetBounds = absoluteNodeBounds(targetNode, byId);
     const start = exitPoint(sourceBounds, direction);
     const end = entryPoint(targetBounds, direction);
-    const centre = segmentMidpoint(start, end);
 
     const handleKey = edge.sourceHandle ?? 'step';
     wiredExits.add(`${edge.source}:${handleKey}`);
 
+    const merge = isMergeEdge(edge);
+    if (merge && mergeTargetsSeen.has(edge.target)) {
+      // Shared lower trunk already has a control from an earlier fan-in edge.
+      continue;
+    }
+    if (merge) mergeTargetsSeen.add(edge.target);
+
+    // Fork drops and merge trunks: sit on the post-curve approach stub.
+    // Plain sequential edges: midpoint of the full source→target segment.
+    const useApproachTrunk = merge || isForkEdge(edge);
+    const trunkLength = merge ? MERGE_BUS_TRUNK : TRUNK_LENGTH_TO_TARGET;
+    const segment = useApproachTrunk
+      ? approachTrunkSegment(end, direction, trunkLength)
+      : { start, end };
+    const centre = segmentMidpoint(segment.start, segment.end);
+
     controls.push({
-      id: `wire:${edge.id}`,
+      id: merge ? `wire:merge:${edge.target}` : `wire:${edge.id}`,
       kind: 'wire',
       centre,
-      segmentStart: start,
-      segmentEnd: end,
+      segmentStart: segment.start,
+      segmentEnd: segment.end,
       stepTarget,
       // on-failure is a property of the upstream step, not the edge.
       errorStepId: errorStepIdFor(ports, sourceNode),
@@ -199,14 +246,14 @@ export function computeWireInsertionControls(args: {
     ): void => {
       if (!stepTarget) return;
       if (wiredExits.has(`${nodeId}:${handleKey}`)) return;
-      const end = terminalTip(start, direction);
+      const tip = terminalTip(start, direction);
       controls.push({
         id: `terminal:${nodeId}:${handleKey}`,
         kind: 'terminal',
         // Dashed + sits at the tip of the half-height stub arrow.
-        centre: end,
+        centre: tip,
         segmentStart: start,
-        segmentEnd: end,
+        segmentEnd: tip,
         stepTarget,
         errorStepId,
         direction,

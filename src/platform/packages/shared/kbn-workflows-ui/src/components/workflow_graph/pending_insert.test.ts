@@ -52,10 +52,10 @@ describe('computePendingInsertOrigin', () => {
       { id: 'b', x: 0, y: 200 },
     ]);
     const origin = computePendingInsertOrigin({ mode: 'step', index: 1 }, nodes, points, 'TB');
-    // Midpoint between a (y=100..164) and b (y=200..264), centered on a.
+    // Midpoint between a (y=100..156) and b (y=200..256), centered on a.
     expect(origin).toEqual({
       x: (0 + PENDING_NODE_WIDTH) / 2 - PENDING_NODE_WIDTH / 2,
-      y: (164 + 200) / 2 - PENDING_NODE_HEIGHT / 2,
+      y: (100 + PENDING_NODE_HEIGHT + 200) / 2 - PENDING_NODE_HEIGHT / 2,
     });
   });
 

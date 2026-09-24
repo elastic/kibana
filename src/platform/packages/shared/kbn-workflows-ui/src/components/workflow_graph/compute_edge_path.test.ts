@@ -13,17 +13,17 @@ import {
   buildMergeBusPath,
   buildRoundedOrthogonalPath,
   computeEdgePath,
+  FORK_BUS_TRUNK,
+  MERGE_BUS_TRUNK,
+  TRUNK_LENGTH_TO_TARGET,
 } from './compute_edge_path';
 
-const TRUNK = 40;
+const TRUNK = MERGE_BUS_TRUNK;
 
 // Constants mirrored from compute_edge_path.ts so tests are self-documenting.
 const CORNER_RADIUS = 16;
-const FORK_BUS_TRUNK = 80;
 const FORK_BUS_LABEL_OFFSET = CORNER_RADIUS + 18;
-const MERGE_BUS_TRUNK = 40;
 const TB_LABEL_Y_OFFSET = 30;
-const TRUNK_LENGTH_TO_TARGET = 40;
 
 describe('buildRoundedOrthogonalPath', () => {
   it('uses a 16px quadratic corner when both segments are long enough', () => {
@@ -307,7 +307,7 @@ describe('computeEdgePath', () => {
           { x: 400, y: 400 },
         ],
       });
-      // trunkTargetY = targetY - TRUNK_LENGTH_TO_TARGET = 400 - 40 = 360
+      // trunkTargetY = targetY - TRUNK_LENGTH_TO_TARGET
       const trunkTargetY = 400 - TRUNK_LENGTH_TO_TARGET;
       expect(r.path).toContain(String(trunkTargetY));
       expect(r.labelX).toBe(400); // targetX
@@ -331,7 +331,7 @@ describe('computeEdgePath', () => {
           { x: 400, y: 400 },
         ],
       });
-      // trunkTargetX = targetX - TRUNK_LENGTH_TO_TARGET = 400 - 40 = 360
+      // trunkTargetX = targetX - TRUNK_LENGTH_TO_TARGET
       const trunkTargetX = 400 - TRUNK_LENGTH_TO_TARGET;
       expect(r.path).toContain(String(trunkTargetX));
       expect(r.labelX).toBe((100 + 400) / 2); // (sourceX + targetX) / 2

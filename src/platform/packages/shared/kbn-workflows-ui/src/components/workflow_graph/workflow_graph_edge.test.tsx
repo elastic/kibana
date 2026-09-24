@@ -163,7 +163,10 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
           id: 'e-caseA',
           ...sharedSource,
           targetX: 100,
-          targetY: 220,
+          // Gap must clear FORK_BUS_TRUNK + TRUNK_LENGTH_TO_TARGET so both
+          // branches keep the nominal bus (otherwise a nearer target pulls
+          // busY up and misaligns labels).
+          targetY: 280,
           targetPosition: Position.Top,
           data: { branchType: 'switch', label: 'caseA' },
         })
@@ -243,13 +246,16 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
 describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
   // Coordinates from the offline layout probe of the real if_only topology:
   // placeholder at centerX=200, centerY=300; switch top at y=402.
-  // busY = targetY_top − MERGE_BUS_TRUNK = 402 − 40 = 362.
-  const MERGE_BUS_TRUNK = 40;
+  // busY = targetY_top − MERGE_BUS_TRUNK.
+  // Import the live constant so trunk-length changes stay in sync.
+  const { MERGE_BUS_TRUNK } = jest.requireActual('./compute_edge_path') as {
+    MERGE_BUS_TRUNK: number;
+  };
 
   describe('TB — isMerge edge routes via merge bus', () => {
     it('routes an isMerge edge above gap threshold via merge bus, not smooth-step', () => {
-      // placeholder → switch: sourceY=300, targetY=402, gap=102 > MERGE_BUS_TRUNK(40).
-      // Merge bus busY = 402 − 40 = 362.  smooth-step midY = (300+402)/2 = 351.
+      // placeholder → switch: sourceY=300, targetY=402, gap=102 > MERGE_BUS_TRUNK.
+      // Merge bus busY = 402 − trunk. Smooth-step midY = (300+402)/2 = 351.
       // The rendered path should NOT land at the smooth-step midpoint.
       renderSingleEdge(
         makeEdgeProps({
@@ -263,7 +269,7 @@ describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
           data: { isMerge: true }, // no branchType — this is the merge flag
         })
       );
-      // The path element should contain the busY (362), not the smooth-step midpoint (351).
+      // The path element should contain the busY, not the smooth-step midpoint (351).
       const path = document.querySelector('path.react-flow__edge-path');
       expect(path).not.toBeNull();
       const d = path?.getAttribute('d') ?? '';
@@ -272,7 +278,7 @@ describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
     });
 
     it('falls back to smooth-step when isMerge gap is below MERGE_BUS_TRUNK', () => {
-      // Gap = 10 < MERGE_BUS_TRUNK (40) → smooth-step.
+      // Gap = 10 < MERGE_BUS_TRUNK → smooth-step.
       renderSingleEdge(
         makeEdgeProps({
           id: 'e-small-merge',
