@@ -211,10 +211,9 @@ EOF
 
 # Setup GCS Service Account Proxy for CI
 {
-  KIBANA_WIF_AUDIENCE="$(vault_get kibana-ci-sa-proxy-wif audience)"
-  export KIBANA_WIF_AUDIENCE
   KIBANA_WIF_CREDENTIALS_DIR="$(mktemp -d)"
   export KIBANA_WIF_CREDENTIALS_DIR
+  export GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1
 }
 
 # Acquire credentials for legacy vault if needed

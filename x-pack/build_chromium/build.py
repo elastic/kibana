@@ -123,7 +123,4 @@ print('Creating ' + path.join(src_path, sha256_filename))
 with open (sha256_filename, 'w') as f:
   f.write(sha256_file(zip_filename))
 
-if os.environ.get('KIBANA_CHECKOUT_DIR'):
-  runcmd(path.join(os.environ['KIBANA_CHECKOUT_DIR'], '.buildkite/scripts/common/activate_service_account.sh') + ' kibana-ci-access-chromium-blds')
-
 runcmd('gcloud storage cp ' + path.join(src_path, zip_filename) + ' ' + path.join(src_path, sha256_filename) + ' gs://headless_shell_staging')

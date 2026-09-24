@@ -5,9 +5,9 @@ set -euo pipefail
 CALL_ARGUMENT="${1:-}"
 GCLOUD_EMAIL_POSTFIX="elastic-kibana-ci.iam.gserviceaccount.com"
 GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
+GCLOUD_WIF_AUDIENCE="//iam.googleapis.com/projects/1003139005402/locations/global/workloadIdentityPools/buildkite/providers/buildkite"
 
 KIBANA_WIF_CREDENTIALS_DIR="${KIBANA_WIF_CREDENTIALS_DIR:-${TMPDIR:-/tmp}/kibana-wif-${BUILDKITE_JOB_ID:-local}}"
-WIF_TOKEN_FILE="$KIBANA_WIF_CREDENTIALS_DIR/token.jwt"
 WIF_CREDENTIALS_FILE="$KIBANA_WIF_CREDENTIALS_DIR/credentials.json"
 
 if [[ -z "$CALL_ARGUMENT" ]]; then
@@ -32,25 +32,18 @@ if [[ ! -x "$(command -v gcloud)" ]]; then
   echo "gcloud is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
   exit 1
 fi
-if [[ -z "${KIBANA_WIF_AUDIENCE:-}" ]]; then
-  echo "KIBANA_WIF_AUDIENCE is not set, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
+if ! BUILDKITE_AGENT_BIN="$(command -v buildkite-agent)"; then
+  echo "buildkite-agent is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
   exit 1
 fi
-mkdir -p "$KIBANA_WIF_CREDENTIALS_DIR"
-WIF_TOKEN_TMP="$(mktemp "$KIBANA_WIF_CREDENTIALS_DIR/token.XXXXXX")"
-if ! buildkite-agent oidc request-token --audience "$KIBANA_WIF_AUDIENCE" > "$WIF_TOKEN_TMP"; then
-  echo "Failed to request a Buildkite OIDC token, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
-  rm -f "$WIF_TOKEN_TMP"
-  exit 1
-fi
-mv "$WIF_TOKEN_TMP" "$WIF_TOKEN_FILE"
 
-# Rebind to this job's token file, even when the proxy is already active.
+mkdir -p "$KIBANA_WIF_CREDENTIALS_DIR"
+
+# Request a fresh Buildkite token whenever gcloud refreshes its credentials.
 gcloud iam workload-identity-pools create-cred-config \
-  "${KIBANA_WIF_AUDIENCE#//iam.googleapis.com/}" \
+  "${GCLOUD_WIF_AUDIENCE#//iam.googleapis.com/}" \
   --service-account="$GCLOUD_SA_PROXY_EMAIL" \
-  --credential-source-file="$WIF_TOKEN_FILE" \
-  --credential-source-type=text \
+  --executable-command="\"$BUILDKITE_AGENT_BIN\" oidc request-token --audience=\"$GCLOUD_WIF_AUDIENCE\" --format=gcp --log-level=error --debug=false" \
   --output-file="$WIF_CREDENTIALS_FILE"
 
 if ! gcloud auth login --cred-file="$WIF_CREDENTIALS_FILE" --quiet --no-user-output-enabled; then
