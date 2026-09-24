@@ -24,6 +24,13 @@ export function registerSetupRoute({
   services: { createProfilingEsClient },
   dependencies,
 }: RouteRegisterParameters) {
+  // Universal Profiling setup is not supported on serverless. Skipping registration keeps these
+  // routes out of serverless builds and out of the serverless OAS docs, whose generation
+  // force-enables every plugin regardless of `xpack.profiling.enabled`.
+  if (dependencies.buildFlavor === 'serverless') {
+    return;
+  }
+
   const paths = getRoutePaths();
   router.get(
     {
@@ -46,9 +53,6 @@ export function registerSetupRoute({
             description: 'Indicates a successful call.',
             body: setupStatusResponseSchema,
           },
-          400: {
-            description: 'Universal Profiling is not supported in serverless deployments.',
-          },
           403: {
             description:
               'The user does not have the privileges required to read the Universal Profiling setup status.',
@@ -62,6 +66,7 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
+        // Fallback: these routes are not registered on serverless builds anyway.
         if (dependencies.esCapabilities.serverless) {
           return response.badRequest({
             body: { message: 'Universal Profiling is not supported in serverless' },
@@ -116,9 +121,6 @@ export function registerSetupRoute({
             description:
               'Setup was accepted. Enabling resource management in Elasticsearch is asynchronous and may not have completed by the time this response is sent.',
           },
-          400: {
-            description: 'Universal Profiling is not supported in serverless deployments.',
-          },
           403: {
             description:
               'The user does not have the privileges required to set up Universal Profiling.',
@@ -150,7 +152,7 @@ export function registerSetupRoute({
           });
         }
 
-        // For now, we don't support serverless setup
+        // Fallback: these routes are not registered on serverless builds anyway.
         if (dependencies.esCapabilities.serverless) {
           return response.badRequest({
             body: { message: 'Universal Profiling is not supported in serverless' },
@@ -257,6 +259,13 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
+        // Fallback: these routes are not registered on serverless builds anyway.
+        if (dependencies.esCapabilities.serverless) {
+          return response.badRequest({
+            body: { message: 'Universal Profiling is not supported in serverless' },
+          });
+        }
+
         const stackVersion = dependencies.stackVersion;
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
         if (isCloudEnabled) {

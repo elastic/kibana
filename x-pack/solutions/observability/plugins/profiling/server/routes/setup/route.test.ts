@@ -49,6 +49,7 @@ function setup({
       setup: { cloud: { isCloudEnabled } },
       config: { enabled: true, elasticsearch },
       stackVersion: '9.0.0',
+      buildFlavor: 'traditional',
       esCapabilities: { serverless },
     },
   } as unknown as RouteRegisterParameters);
@@ -77,6 +78,37 @@ function setup({
     getSetupStatus: () => getHandler(context, httpServerMock.createKibanaRequest(), response),
   };
 }
+
+describe('registerSetupRoute', () => {
+  const register = (buildFlavor: RouteRegisterParameters['dependencies']['buildFlavor']) => {
+    const router = httpServiceMock.createRouter();
+    registerSetupRoute({
+      router,
+      logger: loggerMock.create(),
+      services: { createProfilingEsClient: jest.fn() },
+      dependencies: { buildFlavor },
+    } as unknown as RouteRegisterParameters);
+    return router;
+  };
+
+  it('does not register the setup routes on serverless builds', () => {
+    const router = register('serverless');
+
+    expect(router.get).not.toHaveBeenCalled();
+    expect(router.post).not.toHaveBeenCalled();
+  });
+
+  it('registers the setup routes on traditional builds', () => {
+    const router = register('traditional');
+    const paths = getRoutePaths();
+
+    expect(router.get.mock.calls.map(([{ path }]) => path)).toEqual([
+      paths.HasSetupESResources,
+      paths.SetupDataCollectionInstructions,
+    ]);
+    expect(router.post.mock.calls.map(([{ path }]) => path)).toEqual([paths.HasSetupESResources]);
+  });
+});
 
 describe('POST /api/profiling/setup/es_resources', () => {
   it('rejects setup when a remote profiling cluster is configured', async () => {
@@ -111,7 +143,7 @@ describe('POST /api/profiling/setup/es_resources', () => {
     await postSetup();
 
     expect(response.badRequest).toHaveBeenCalledWith({
-      body: { message: 'Serverless setup is not supported' },
+      body: { message: 'Universal Profiling is not supported in serverless' },
     });
     expect(getCloudSetupState).not.toHaveBeenCalled();
     expect(getSelfManagedSetupState).not.toHaveBeenCalled();
