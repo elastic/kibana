@@ -5,95 +5,65 @@
  * 2.0.
  */
 
-/**
- * Upserts `METADATA _id, _index` onto the first FROM source list and appends
- * those columns to any KEEP that would otherwise drop them. No-op for fields
- * already present.
- *
- * Only the FROM clause is rewritten. The rest of the pipeline (string literals,
- * comment lines, newlines) is left byte-identical aside from KEEP column lists.
- */
+import type { ESQLAstItem, ESQLAstQueryExpression } from '@elastic/esql/types';
+import { BasicPrettyPrinter, Builder, Parser, isColumn, mutate } from '@elastic/esql';
+
+/** Columns the execute path needs on every row to attribute a hit to a source document. */
 const METADATA_FIELDS = ['_id', '_index'] as const;
 
-export const injectMetadataIndex = (query: string): string => {
-  const trimmed = query.trim();
-  // First pipeline pipe, with or without surrounding whitespace (FROM logs-*| WHERE …).
-  const firstPipe = trimmed.search(/\|/);
-  const fromRaw = firstPipe === -1 ? trimmed : trimmed.slice(0, firstPipe);
-  const rest = firstPipe === -1 ? '' : trimmed.slice(firstPipe); // starts with |
+/** Commands whose output rows no longer carry source-document METADATA columns. */
+const AGGREGATING_COMMANDS = new Set(['stats', 'inlinestats', 'inline stats']);
 
-  const fromPart = fromRaw.trim();
-  if (!/^FROM\s+/i.test(fromPart)) {
-    return trimmed;
-  }
-
-  const afterFrom = fromPart.replace(/^FROM\s+/i, '');
-  const metadataMatch = afterFrom.match(/^(.*?)\s+METADATA\s+(.+)$/i);
-
-  let nextFrom: string;
-  if (metadataMatch) {
-    const sources = metadataMatch[1].trim();
-    const fields = metadataMatch[2]
-      .split(',')
-      .map((f) => f.trim())
-      .filter(Boolean);
-    const missing = METADATA_FIELDS.filter((f) => !fields.includes(f));
-    nextFrom =
-      missing.length === 0
-        ? `FROM ${afterFrom}`
-        : `FROM ${sources} METADATA ${[...fields, ...missing].join(', ')}`;
-  } else {
-    nextFrom = `FROM ${afterFrom} METADATA ${METADATA_FIELDS.join(', ')}`;
-  }
-
-  if (!rest) {
-    return nextFrom;
-  }
-
-  // METADATA columns only survive until the first aggregating command. A KEEP
-  // after `STATS` names aggregate output columns, and adding `_id, _index`
-  // there would fail the query with an unknown column, so only KEEPs before
-  // the first STATS are rewritten.
-  const statsAt = rest.search(/\|\s*STATS\b/i);
-  const rewritable = statsAt === -1 ? rest : rest.slice(0, statsAt);
-  const untouched = statsAt === -1 ? '' : rest.slice(statsAt);
-
-  const withKeep = rewritable.replace(
-    /(\|\s*KEEP\s+)([^|]+)/gi,
-    (full, prefix: string, cols: string) => {
-      const trailingWs = cols.match(/\s*$/)?.[0] ?? '';
-      const columns = cols
-        .split(',')
-        .map((c) => c.trim())
-        .filter(Boolean);
-      if (columns.some((c) => c === '*')) {
-        return full;
-      }
-      const missing = METADATA_FIELDS.filter((f) => !columns.includes(f));
-      if (missing.length === 0) {
-        return full;
-      }
-      return `${prefix}${[...columns, ...missing].join(', ')}${trailingWs}`;
-    }
+const hasWildcardOrMetadataColumn = (args: readonly ESQLAstItem[]): boolean =>
+  args.some(
+    (arg) =>
+      isColumn(arg) &&
+      (arg.name.includes('*') || (METADATA_FIELDS as readonly string[]).includes(arg.name))
   );
 
-  // Keep the original whitespace (or lack of it) between FROM and the first `|`.
-  const spacer = fromRaw.match(/\s*$/)?.[0] ?? '';
-  return `${nextFrom}${spacer}${withKeep}${untouched}`;
+/**
+ * Appends `_id, _index` to every KEEP that precedes the first aggregating
+ * command and would otherwise drop them. A KEEP after STATS names aggregate
+ * output columns, where the METADATA columns no longer exist.
+ *
+ * Stops early at a DROP that names a METADATA column or uses a wildcard, since
+ * the column is gone (or may be) from that point on.
+ */
+const addMetadataToKeepCommands = (root: ESQLAstQueryExpression): void => {
+  for (const cmd of root.commands) {
+    if (AGGREGATING_COMMANDS.has(cmd.name)) break;
+    if (cmd.name === 'drop' && hasWildcardOrMetadataColumn(cmd.args)) break;
+    if (cmd.name !== 'keep') continue;
+
+    if (cmd.args.some((arg) => isColumn(arg) && arg.name === '*')) continue;
+    for (const field of METADATA_FIELDS) {
+      if (!cmd.args.some((arg) => isColumn(arg) && arg.name === field)) {
+        cmd.args.push(Builder.expression.column(field));
+      }
+    }
+  }
 };
 
 /**
- * Rewrites an existing `| LIMIT N` to `limit`, or appends one when absent.
- * Never appends a second LIMIT on top of an existing one.
+ * Upserts `METADATA _id, _index` onto the FROM command and carries those
+ * columns through any KEEP that would drop them, via the ES|QL AST rather than
+ * string surgery, so pipes inside string literals and multiple KEEPs are safe.
+ *
+ * Queries that fail to parse, or that do not start with FROM, are returned
+ * unchanged so Elasticsearch reports the error against the exact query.
+ *
+ * The row LIMIT is not applied here: `executeEsql` binds it at execute time.
  */
-export const rewriteLimit = (query: string, limit: number): string => {
-  const limitRe = /(\|\s*LIMIT\s+)\d+/i;
-  if (limitRe.test(query)) {
-    return query.replace(limitRe, `$1${limit}`);
+export const prepareEsqlForExecute = (query: string): string => {
+  const { root, errors } = Parser.parse(query);
+  if (errors.length > 0 || root.commands[0]?.name !== 'from') {
+    return query;
   }
-  return `${query.trimEnd()}\n| LIMIT ${limit}`;
-};
 
-/** Inject METADATA _id,_index (when absent) and bind the row LIMIT for execute. */
-export const prepareEsqlForExecute = (query: string, row_limit: number): string =>
-  rewriteLimit(injectMetadataIndex(query), row_limit);
+  for (const field of METADATA_FIELDS) {
+    mutate.commands.from.metadata.upsert(root, field);
+  }
+  addMetadataToKeepCommands(root);
+
+  return BasicPrettyPrinter.multiline(root, { pipeTab: '' });
+};

@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-genai-utils'
   - '@kbn/core-spaces-common'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
