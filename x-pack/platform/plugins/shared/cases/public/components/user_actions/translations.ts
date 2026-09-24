@@ -246,12 +246,9 @@ export const EXPAND_ALL_ACTIVITIES = i18n.translate(
   { defaultMessage: 'Expand all' }
 );
 
-export const SHOW_MORE_ACTIVITY = i18n.translate(
-  'xpack.cases.casesRedesign.userActions.showMoreActivity',
-  {
-    defaultMessage: 'Show more',
-  }
-);
+export const SHOW_MORE_ACTIVITY = i18n.translate('xpack.cases.userActions.showMoreActivity', {
+  defaultMessage: 'Show more',
+});
 
 export const NOTHING_TO_COLLAPSE = i18n.translate(
   'xpack.cases.caseView.redesign.userActions.nothingToCollapse',

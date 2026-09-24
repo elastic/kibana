@@ -19,9 +19,11 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { useSaveAiIndexSources } from '../hooks/use_save_ai_index_sources';
 import { areSourceSelectionsEqual, toSelectedSources } from '../utils/sources';
@@ -93,6 +95,10 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
               onClick={onClose}
               flush="left"
               data-test-subj="contextEditSourcesCancelButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+                action: CONTEXT_ENGINE_UI_EBT.action.sources.CANCEL,
+              })}
             >
               <FormattedMessage
                 id="xpack.contextEngine.editSources.cancelButton"
@@ -107,6 +113,10 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
               isLoading={isSaving}
               isDisabled={!hasChanges}
               data-test-subj="contextEditSourcesDoneButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+                action: CONTEXT_ENGINE_UI_EBT.action.sources.SAVE,
+              })}
             >
               <FormattedMessage
                 id="xpack.contextEngine.editSources.doneButton"
