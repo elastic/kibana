@@ -160,9 +160,12 @@ describe('aiIndexAutomationsSkill', () => {
   });
 
   it('routes ai.prompt via the context-engine-prompt feature rather than a literal connector', () => {
-    for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
-      expect(reference.content).toContain('connector-id-by-feature: context_engine_prompt');
-      expect(reference.content).not.toMatch(/^.*connector-id: /m);
+    const blocks = templates().flatMap(({ content: yaml }) => aiPromptBlocks(yaml));
+
+    expect(blocks.length).toBeGreaterThan(0);
+    for (const block of blocks) {
+      expect(block).toContain('connector-id-by-feature: context_engine_prompt');
+      expect(block).not.toMatch(/connector-id: /);
     }
     // The feature ref belongs on the prompt steps only; nothing else in a template names one.
     for (const reference of templates()) {
