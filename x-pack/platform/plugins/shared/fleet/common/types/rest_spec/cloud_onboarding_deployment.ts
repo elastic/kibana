@@ -42,12 +42,19 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     statusMessage?: string;
     deploymentId?: string;
     deploymentName?: string;
+    services?: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
     attemptCount?: number;
     agentPolicyId?: string;
     packagePolicyIds?: string[];
+    policyIdsByInstance?: Record<string, string>;
     apiKeyId?: string;
+    mechanisms?: DeploymentMethod[];
     ecfStacks?: CloudOnboardingEcfStack[];
+    /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
+    connectorId?: string | null;
+    /** Set to null to clear the auth method (e.g. on MI→ECF transition). */
+    authMethod?: CloudOnboardingDeploymentAuthMethod | null;
   };
 }
 

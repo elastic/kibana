@@ -198,7 +198,7 @@ describe('cloudOnboardingDeploymentService', () => {
         'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb';
       const deploymentName = 'elastic-aws-onboarding';
       const updatedAttrs = makeAttributes({ deploymentId, deploymentName, status: 'deploying' });
-      soClient.update.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
       soClient.get.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
 
       const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
@@ -207,10 +207,10 @@ describe('cloudOnboardingDeploymentService', () => {
         status: 'deploying',
       });
 
-      expect(soClient.update).toHaveBeenCalledWith(
+      expect(soClient.create).toHaveBeenCalledWith(
         CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        'deploy-1',
-        expect.objectContaining({ deploymentId, deploymentName, status: 'deploying' })
+        expect.objectContaining({ deploymentId, deploymentName, status: 'deploying' }),
+        expect.objectContaining({ id: 'deploy-1', overwrite: true })
       );
       expect(result.deploymentId).toBe(deploymentId);
       expect(result.deploymentName).toBe(deploymentName);
@@ -230,17 +230,17 @@ describe('cloudOnboardingDeploymentService', () => {
         },
       };
       const updatedAttrs = makeAttributes({ serviceVars });
-      soClient.update.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
       soClient.get.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
 
       const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
         serviceVars,
       });
 
-      expect(soClient.update).toHaveBeenCalledWith(
+      expect(soClient.create).toHaveBeenCalledWith(
         CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        'deploy-1',
-        expect.objectContaining({ serviceVars })
+        expect.objectContaining({ serviceVars }),
+        expect.objectContaining({ id: 'deploy-1', overwrite: true })
       );
       expect(result.serviceVars).toEqual(serviceVars);
       expect(result.serviceVars?.cloudtrail).toHaveProperty('regions');
@@ -248,10 +248,43 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('update — full-replace semantics', () => {
+    it('removed serviceVars and policyIdsByInstance keys are absent from the written SO', async () => {
+      // Initial record has stale keys that the update intentionally omits.
+      const initialAttrs = makeAttributes({
+        serviceVars: {
+          cloudtrail: { regions: ['us-east-1'] },
+          old_service: { regions: ['eu-west-1'] },
+        },
+        policyIdsByInstance: { elb: 'policy-1', removed_instance: 'policy-2' },
+      });
+      const updateInput = {
+        serviceVars: { cloudtrail: { regions: ['us-east-1'] } },
+        policyIdsByInstance: { elb: 'policy-1' },
+      };
+      const mergedAttrs = { ...initialAttrs, ...updateInput };
+
+      // get returns the stale initial record; create receives the merged replacement.
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', mergedAttrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', updateInput);
+
+      // Verify what was actually written, not what getById returned.
+      const writtenAttrs = soClient.create.mock.calls.find((c) => c[2]?.overwrite)?.[1] as
+        | CloudOnboardingDeploymentSOAttributes
+        | undefined;
+      expect(writtenAttrs?.serviceVars).not.toHaveProperty('old_service');
+      expect(writtenAttrs?.policyIdsByInstance).not.toHaveProperty('removed_instance');
+      expect(writtenAttrs?.serviceVars).toHaveProperty('cloudtrail');
+      expect(writtenAttrs?.policyIdsByInstance).toHaveProperty('elb');
+    });
+  });
+
   describe('update (status transitions)', () => {
     describe('status transitions', () => {
       function mockUpdateAndGet(id: string, attrs: CloudOnboardingDeploymentSOAttributes) {
-        soClient.update.mockResolvedValue(makeSOResponse(id, attrs));
+        soClient.create.mockResolvedValue(makeSOResponse(id, attrs));
         soClient.get.mockResolvedValue(makeSOResponse(id, attrs));
       }
 
@@ -281,10 +314,10 @@ describe('cloudOnboardingDeploymentService', () => {
 
         expect(result.status).toBe('succeeded');
         expect(result.deploymentId).toBe(stackArn);
-        expect(soClient.update).toHaveBeenCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          'deploy-1',
-          expect.objectContaining({ status: 'succeeded', deploymentId: stackArn })
+          expect.objectContaining({ status: 'succeeded', deploymentId: stackArn }),
+          expect.objectContaining({ id: 'deploy-1', overwrite: true })
         );
       });
 
@@ -307,7 +340,6 @@ describe('cloudOnboardingDeploymentService', () => {
     describe('retry semantics', () => {
       it('resets status to pending and increments attemptCount', async () => {
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2 });
-        soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
@@ -317,17 +349,16 @@ describe('cloudOnboardingDeploymentService', () => {
 
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(2);
-        expect(soClient.update).toHaveBeenCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          'deploy-1',
-          expect.objectContaining({ status: 'pending', attemptCount: 2 })
+          expect.objectContaining({ status: 'pending', attemptCount: 2 }),
+          expect.objectContaining({ id: 'deploy-1', overwrite: true })
         );
       });
 
       it('does not modify serviceVars on retry', async () => {
         const serviceVars = { cloudtrail: { regions: ['us-east-1'] } };
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, serviceVars });
-        soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
@@ -336,11 +367,7 @@ describe('cloudOnboardingDeploymentService', () => {
         });
 
         expect(result.serviceVars).toEqual(serviceVars);
-        expect(soClient.update).not.toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({ serviceVars: expect.anything() })
-        );
+        expect(soClient.update).not.toHaveBeenCalled();
       });
     });
   });
@@ -467,17 +494,17 @@ describe('cloudOnboardingDeploymentService', () => {
           services: ['cloudfront_logs'],
           apiKeyId: 'es-key-abc123',
         });
-        soClient.update.mockResolvedValue(makeSOResponse('deploy-uc3', updatedAttrs));
+        soClient.create.mockResolvedValue(makeSOResponse('deploy-uc3', updatedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-uc3', updatedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-uc3', {
           apiKeyId: 'es-key-abc123',
         });
 
-        expect(soClient.update).toHaveBeenCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          'deploy-uc3',
-          expect.objectContaining({ apiKeyId: 'es-key-abc123' })
+          expect.objectContaining({ apiKeyId: 'es-key-abc123' }),
+          expect.objectContaining({ id: 'deploy-uc3', overwrite: true })
         );
         expect(result.apiKeyId).toBe('es-key-abc123');
         expect(result.packagePolicyIds).toBeUndefined();
@@ -521,7 +548,7 @@ describe('cloudOnboardingDeploymentService', () => {
           agentPolicyId: 'agent-policy-123',
           packagePolicyIds: ['pkg-policy-456'],
         });
-        soClient.update.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
+        soClient.create.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-uc6', {
@@ -529,13 +556,13 @@ describe('cloudOnboardingDeploymentService', () => {
           packagePolicyIds: ['pkg-policy-456'],
         });
 
-        expect(soClient.update).toHaveBeenCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          'deploy-uc6',
           expect.objectContaining({
             agentPolicyId: 'agent-policy-123',
             packagePolicyIds: ['pkg-policy-456'],
-          })
+          }),
+          expect.objectContaining({ id: 'deploy-uc6', overwrite: true })
         );
         expect(result.agentPolicyId).toBe('agent-policy-123');
         expect(result.packagePolicyIds).toEqual(['pkg-policy-456']);
