@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { getImportedSavedObjectId, spaceTest, testData } from '../fixtures';
 
@@ -13,7 +14,7 @@ const MAX_BYTES_VALUE = '19,986' as const;
 // Every chart switch passes an explicit `search` label: the switcher list is virtualized, and
 // its filter keeps whatever was typed last, so filtering makes the target option deterministic.
 
-spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Lens chart switching', { tag: tags.deploymentAgnostic }, () => {
   let artistMetricId: string;
   let xyVisId: string;
   let pieVisId: string;

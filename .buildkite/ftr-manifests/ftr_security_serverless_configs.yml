@@ -47,7 +47,6 @@ enabled:
   - x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.config_compat_mode.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group1.ts
-  - x-pack/platform/test/serverless/functional/configs/security/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group8.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group9.ts
