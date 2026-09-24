@@ -1947,10 +1947,16 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       })
     ).toBe(false);
 
-    const applied = evaluateExpression(engine, presenceGate.steps[0].with.auto_close_enabled, {
+    const appliedFalse = evaluateExpression(engine, presenceGate.steps[0].with.auto_close_enabled, {
       inputs: { autoCloseEnabled: false },
     });
-    expect(applied).toBe(false);
+    expect(appliedFalse).toBe(false);
+
+    // Caller can also override the Worker-mode default (false) back to true.
+    const appliedTrue = evaluateExpression(engine, presenceGate.steps[0].with.auto_close_enabled, {
+      inputs: { autoCloseEnabled: true },
+    });
+    expect(appliedTrue).toBe(true);
   });
 
   it('collapses max auto-close threshold to 1 only when min threshold input is provided', () => {
