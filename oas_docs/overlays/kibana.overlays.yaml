@@ -121,6 +121,9 @@ actions:
 
 
         In each space, these APIs return a 404 until the `contextEngine:enabled` advanced setting is turned on for that space.
+      externalDocs:
+        description: Context Engine documentation
+        url: https://www.elastic.co/docs/explore-analyze/ai-features/context-engine
       x-displayName: 'Context Engine'
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
