@@ -157,7 +157,7 @@ export const useHeaderCollapse = ({
     // Elements rendered outside this region using React portals won't be caught by this check,
     // so they should close automatically on collapse.
     if (next && collapsibleNodeRef.current?.contains(document.activeElement)) {
-      scroller.focus();
+      scroller.focus({ preventScroll: true });
     }
 
     isCollapsedRef.current = next;
@@ -273,7 +273,7 @@ export const useHeaderCollapse = ({
 
       // `preventDefault()` cancels scroll chaining along with the default scroll, so releasing the
       // event is the only way the outer container — and the footer inside it — stays reachable.
-      if (!outerScroller || canScrollBy(outerScroller, delta)) return;
+      if (outerScroller && canScrollBy(outerScroller, delta)) return;
 
       // Nothing inside the flyout can take the scroll, so releasing would only move the page.
       event.preventDefault();
