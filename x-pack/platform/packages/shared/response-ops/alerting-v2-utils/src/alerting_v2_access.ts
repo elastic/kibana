@@ -25,20 +25,6 @@ export const hasAlertingV2RulesReadCapability = (core: CoreStart): boolean => {
 };
 
 /**
- * Returns whether the `alertingVTwo` plugin loaded and registered its Kibana feature in this
- * deployment — not an RBAC check. A registered feature's capability namespace is always present,
- * even for a user with no privileges on it, so presence signals "the plugin is running here".
- * Notably `false` for Security Search AI Lake, which disables the `maintenanceWindows` dependency
- * Alerting v2 requires, and for any deployment with `xpack.alerting_v2.enabled: false`.
- *
- * A space that explicitly disables the Alerting v2 feature also keeps the namespace present (with
- * every flag `false`), so this can be `true` there too — pair it with
- * {@link hasAlertingV2RulesReadCapability} rather than relying on it alone for per-space gating.
- */
-export const isAlertingV2Available = (core: CoreStart): boolean =>
-  getAlertingV2RulesCapabilities(core) !== undefined;
-
-/**
  * Returns whether Alerting v2 create-rule UI should be shown for the current user. Absence of the
  * plugin already yields `false` here, so no separate availability check is needed.
  */

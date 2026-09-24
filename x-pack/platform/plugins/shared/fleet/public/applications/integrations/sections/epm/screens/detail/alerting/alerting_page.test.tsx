@@ -16,7 +16,6 @@ import { InstallStatus } from '../../../../../types';
 const mockUseAuthz = jest.fn();
 const mockExperimentalFeaturesGet = jest.fn();
 const mockUseAlertingAssets = jest.fn();
-const mockIsAlertingV2Available = jest.fn();
 const mockGetRuleLibraryRedirectUrl = jest.fn(
   ({ templateId }: { templateId?: string }) =>
     `/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=${templateId}`
@@ -26,10 +25,6 @@ jest.mock('../../../../../services', () => ({
   ExperimentalFeaturesService: {
     get: (...args: any[]) => mockExperimentalFeaturesGet(...args),
   },
-}));
-
-jest.mock('@kbn/alerting-v2-utils', () => ({
-  isAlertingV2Available: (...args: any[]) => mockIsAlertingV2Available(...args),
 }));
 
 jest.mock('../../../components/side_bar_column', () => ({
@@ -108,8 +103,6 @@ describe('AlertingPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockIsAlertingV2Available.mockReturnValue(false);
-
     mockUseGetPackageInstallStatus.mockReturnValue(() => ({
       status: InstallStatus.installed,
       version: '1.0.0',
@@ -173,8 +166,7 @@ describe('AlertingPage', () => {
     );
   };
 
-  it('should render engine tabs under the templates accordion when v2 templates exist and the feature flag is on', async () => {
-    mockIsAlertingV2Available.mockReturnValue(true);
+  it('renders engine tabs under the templates accordion when v2 templates exist', async () => {
     renderComponent();
 
     await waitFor(() => {
@@ -198,7 +190,6 @@ describe('AlertingPage', () => {
   });
 
   it('should show v1 templates on the Classic Alerting tab', async () => {
-    mockIsAlertingV2Available.mockReturnValue(true);
     renderComponent();
 
     await waitFor(() => {
@@ -249,25 +240,7 @@ describe('AlertingPage', () => {
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v2')).not.toBeInTheDocument();
   });
 
-  it('should not render engine tabs when v2 templates exist but the feature flag is off', async () => {
-    renderComponent();
-
-    await waitFor(() => {
-      expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
-    });
-
-    expect(screen.queryByText('[System] Metrics template')).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId('fleetAssetsAccordion.button.alerting_rule_template')
-    ).toHaveTextContent('1');
-    expect(screen.queryByTestId('fleetAlertingEngineTabs')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v2')).not.toBeInTheDocument();
-  });
-
-  it('should not render engine tabs when the feature flag is on but no v2 templates exist', async () => {
-    mockIsAlertingV2Available.mockReturnValue(true);
-
+  it('does not render engine tabs when no v2 templates exist', async () => {
     mockUseAlertingAssets.mockReturnValue({
       alertingAssets: [{ id: 'template-1', type: 'alerting_rule_template' }],
       alertingAssetsByType: {
@@ -378,7 +351,7 @@ describe('AlertingPage', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
+      expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
     });
 
     expect(screen.queryByTestId('fleetAlertingReinstallButton')).not.toBeInTheDocument();
@@ -447,7 +420,7 @@ describe('AlertingPage', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
+        expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
       });
 
       expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
@@ -607,7 +580,7 @@ describe('AlertingPage', () => {
     renderComponent(inputPackageInfo);
 
     await waitFor(() => {
-      expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
+      expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
     });
 
     expect(screen.getByTestId('fleetAlertingReinstallButton')).toBeInTheDocument();

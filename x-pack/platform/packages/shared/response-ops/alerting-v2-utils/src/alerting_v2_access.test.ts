@@ -9,44 +9,8 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   hasAlertingV2RulesReadCapability,
-  isAlertingV2Available,
   shouldShowAlertingV2CreateRuleFlyout,
 } from './alerting_v2_access';
-
-describe('isAlertingV2Available', () => {
-  let core: CoreStart;
-
-  beforeEach(() => {
-    core = coreMock.createStart();
-  });
-
-  it('returns true when the capability namespace is present, even with every flag false', () => {
-    core.application.capabilities = {
-      ...core.application.capabilities,
-      alerting_v2_rules: { all: false, read: false },
-    };
-
-    expect(isAlertingV2Available(core)).toBe(true);
-  });
-
-  it('returns true when the capability namespace is present but empty', () => {
-    core.application.capabilities = {
-      ...core.application.capabilities,
-      alerting_v2_rules: {},
-    };
-
-    expect(isAlertingV2Available(core)).toBe(true);
-  });
-
-  it('returns false when the capability namespace is absent', () => {
-    const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
-      core.application.capabilities;
-
-    core.application.capabilities = capabilitiesWithoutRules;
-
-    expect(isAlertingV2Available(core)).toBe(false);
-  });
-});
 
 describe('hasAlertingV2RulesReadCapability', () => {
   let core: CoreStart;

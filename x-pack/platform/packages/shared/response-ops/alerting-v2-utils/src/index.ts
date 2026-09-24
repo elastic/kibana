@@ -7,7 +7,6 @@
 
 export { getAlertingV2ManagementNavPanel } from './get_management_nav_panel';
 export {
-  isAlertingV2Available,
   shouldShowAlertingV2CreateRuleFlyout,
   hasAlertingV2RulesReadCapability,
 } from './alerting_v2_access';
