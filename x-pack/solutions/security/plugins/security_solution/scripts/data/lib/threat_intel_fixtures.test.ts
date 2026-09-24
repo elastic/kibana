@@ -40,8 +40,8 @@ describe('PACK_TI_SCENARIOS', () => {
     ]);
   });
 
-  it('gives aws-iam three scenarios and every other pack exactly one', () => {
-    expect(PACK_TI_SCENARIOS['aws-iam']).toHaveLength(3);
+  it('gives aws-iam four scenarios and every other pack exactly one', () => {
+    expect(PACK_TI_SCENARIOS['aws-iam']).toHaveLength(4);
     expect(PACK_TI_SCENARIOS.okta).toHaveLength(1);
     expect(PACK_TI_SCENARIOS.kubernetes).toHaveLength(1);
     expect(PACK_TI_SCENARIOS['github-actions']).toHaveLength(1);
@@ -51,6 +51,7 @@ describe('PACK_TI_SCENARIOS', () => {
     expect(allThreatIntelSourceIds().sort()).toEqual([
       'aws-iam-assume-role',
       'aws-iam-behavior-only',
+      'aws-iam-ioc-only',
       'ti-rss-aws-iam',
       'ti-rss-github-actions',
       'ti-rss-kubernetes',
@@ -400,7 +401,7 @@ describe('resolveHistoricSourceName', () => {
         else newer.add(name);
       }
     }
-    expect(older.size).toBe(6);
+    expect(older.size).toBe(7);
     expect(newer.size).toBeGreaterThan(older.size);
   });
 });
@@ -522,16 +523,17 @@ describe('deterministic historic report ids', () => {
     const ids = docs.map((doc) => doc.lineage.source_doc_ref.id);
     expect(ids).toContain('ti-report-aws-iam-historic-01');
     expect(ids).toContain('ti-report-aws-iam-assume-role-historic-01');
+    expect(ids).toContain('ti-report-aws-iam-ioc-only-historic-01');
     expect(ids).toContain('ti-report-aws-iam-behavior-only-historic-01');
     for (const id of ids) {
       expect(id).toMatch(/^ti-report-[a-z0-9-]+-historic-\d{2}$/);
     }
   });
 
-  it('produces a unique id per report across all six scenarios (guards the packId collision)', () => {
+  it('produces a unique id per report across all seven scenarios (guards the packId collision)', () => {
     const ids = buildAllHistoricDocs().map((doc) => doc.lineage.source_doc_ref.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(ids).toHaveLength(72);
+    expect(ids).toHaveLength(84);
   });
 
   it('builds identical ids and docs from identical inputs (idempotent by construction)', () => {

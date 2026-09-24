@@ -325,18 +325,21 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       name: 'AWS IAM privilege escalation feed',
       title: 'AWS IAM privilege escalation and credential theft in account 123456789012',
       body:
-        // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable
-        // true (generic "threat actors" alone has been gated false and skipped extract_diamond).
+        // Both-tiers fixture: pack IOCs hit Tier 1; narrative drives two CloudTrail-backed
+        // Tier 2 techniques (T1078.004 AssumeRole + T1562.008 StopLogging) for two SSEs.
+        // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable.
         'Security researchers attribute a confirmed privilege-escalation campaign in AWS account ' +
         '123456789012 to the TA-DEMO-SHADOW-ADMIN intrusion set. Operators tied to TA-DEMO-SHADOW-ADMIN ' +
         'compromised user dev-user@corp.example (source IP 192[.]0[.]2[.]30 / 192.0.2.30), ' +
-        'assumed escalated-role via AssumeRole, attached AdministratorAccess, and staged access toward S3 bucket ' +
-        'corp-prod-data. Follow-on activity from 192[.]0[.]2[.]31 (192.0.2.31) included GetSecretValue ' +
-        'on prod/db-credentials plus StopLogging and DeleteTrail for defense evasion, consistent with ' +
-        'TA-DEMO-SHADOW-ADMIN infrastructure and tradecraft seen in prior intrusions. The campaign ' +
-        'is well evidenced with reusable IOCs and ATT&CK mappings, so defenders should prioritize ' +
-        'hunts, but this write-up does not assert that customer production is currently offline. ' +
-        'Hunt ATT&CK T1098.001, T1078.004, and T1562.008 in aws.cloudtrail logs.',
+        'called sts.AssumeRole (event.provider sts.amazonaws.com, aws.cloudtrail.event_name AssumeRole) ' +
+        'into escalated-role (ATT&CK T1078.004), attached AdministratorAccess, and staged access toward S3 ' +
+        'bucket corp-prod-data. Follow-on activity from 192[.]0[.]2[.]31 (192.0.2.31) included GetSecretValue ' +
+        'on prod/db-credentials plus StopLogging (event.action StopLogging) and DeleteTrail for defense ' +
+        'evasion (ATT&CK T1562.008), consistent with TA-DEMO-SHADOW-ADMIN tradecraft. Prioritize two ' +
+        'independent CloudTrail hunts: (1) AssumeRole / sts.amazonaws.com toward escalated-role for ' +
+        'T1078.004, and (2) StopLogging against the account trail for T1562.008. Also note T1098.001 ' +
+        'for AdministratorAccess attach. Reusable IOCs are listed; this write-up does not assert that ' +
+        'customer production is currently offline.',
       historicArticles: [
         {
           title: 'CloudTrail retrospective: AdministratorAccess attach in account 123456789012',
@@ -345,49 +348,58 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             // enrich_taxonomy's diamond_suitable gate fires on the historic-01 doc, not just the live twin.
             'Retrospective for AWS account 123456789012 attributed to the TA-DEMO-SHADOW-ADMIN intrusion set, ' +
             'where user dev-user (dev-user@corp.example) from ' +
-            '192[.]0[.]2[.]30 (192.0.2.30) called AssumeRole into escalated-role, attached AdministratorAccess, ' +
-            'and later reached bucket corp-prod-data. Secondary IP 192[.]0[.]2[.]31 (192.0.2.31) called GetSecretValue on ' +
-            'prod/db-credentials and StopLogging, consistent with TA-DEMO-SHADOW-ADMIN tradecraft. Map to T1098.001, T1078.004, and T1562.008.',
+            '192[.]0[.]2[.]30 (192.0.2.30) called sts.AssumeRole (event.provider sts.amazonaws.com) into ' +
+            'escalated-role (T1078.004), attached AdministratorAccess, and later reached bucket corp-prod-data. ' +
+            'Secondary IP 192[.]0[.]2[.]31 (192.0.2.31) called GetSecretValue on prod/db-credentials and ' +
+            'StopLogging (T1562.008), consistent with TA-DEMO-SHADOW-ADMIN tradecraft. Hunt T1078.004 and ' +
+            'T1562.008 as separate CloudTrail queries; also map T1098.001.',
         },
         {
           title: 'Secrets Manager access after IAM escalation toward corp-prod-data',
           body:
             'After privilege escalation in 123456789012, analysts saw GetSecretValue on ' +
-            'prod/db-credentials from 192[.]0[.]2[.]31 (192.0.2.31) following AssumeRole activity by ' +
-            'dev-user@corp.example (dev-user) into escalated-role at 192[.]0[.]2[.]30 (192.0.2.30). AdministratorAccess ' +
-            'and StopLogging preceded S3 staging on corp-prod-data. Hunt T1098.001, T1078.004, T1562.008.',
+            'prod/db-credentials from 192[.]0[.]2[.]31 (192.0.2.31) following sts.AssumeRole ' +
+            '(sts.amazonaws.com / AssumeRole, T1078.004) by dev-user@corp.example (dev-user) into ' +
+            'escalated-role at 192[.]0[.]2[.]30 (192.0.2.30). AdministratorAccess and StopLogging ' +
+            '(T1562.008) preceded S3 staging on corp-prod-data. Run distinct hunts for T1078.004 and ' +
+            'T1562.008; note T1098.001.',
         },
         {
           title: 'Defense evasion note: StopLogging paired with DeleteTrail in AWS IAM abuse',
           body:
-            'Defense-evasion note for account 123456789012. Operators used StopLogging after ' +
-            'AssumeRole into escalated-role and AdministratorAccess attach by dev-user / dev-user@corp.example from 192[.]0[.]2[.]30 ' +
-            '(192.0.2.30), with follow-on 192[.]0[.]2[.]31 (192.0.2.31) against prod/db-credentials and ' +
-            'corp-prod-data. Techniques: T1098.001, T1078.004, T1562.008.',
+            'Defense-evasion note for account 123456789012. Operators used StopLogging (T1562.008, ' +
+            'event.action StopLogging) after sts.AssumeRole (T1078.004, event.provider sts.amazonaws.com) ' +
+            'into escalated-role and AdministratorAccess attach by dev-user / dev-user@corp.example from ' +
+            '192[.]0[.]2[.]30 (192.0.2.30), with follow-on 192[.]0[.]2[.]31 (192.0.2.31) against ' +
+            'prod/db-credentials and corp-prod-data. Prefer two ES|QL hunts: AssumeRole for T1078.004 and ' +
+            'StopLogging for T1562.008. Also T1098.001.',
         },
         {
           title: 'IAM role assumption playbook for escalated-role in production accounts',
           body:
-            'Playbook covering AssumeRole into escalated-role in 123456789012. Seed with ' +
+            'Playbook covering sts.AssumeRole (sts.amazonaws.com) into escalated-role in 123456789012 ' +
+            'for T1078.004, plus StopLogging (T1562.008) after escalation. Seed with ' +
             'dev-user@corp.example (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
             '192[.]0[.]2[.]31 (192.0.2.31), AdministratorAccess attach, corp-prod-data access, ' +
-            'prod/db-credentials reads, and StopLogging. ATT&CK: T1098.001, T1078.004, T1562.008.',
+            'prod/db-credentials reads. ATT&CK: T1078.004, T1562.008, T1098.001.',
         },
         {
           title: 'S3 staging indicators after credential theft in AWS account 123456789012',
           body:
             'S3 staging indicators for corp-prod-data in account 123456789012 following credential ' +
-            'theft by dev-user@corp.example (dev-user), who used AssumeRole to reach escalated-role. Ingress IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
-            '192[.]0[.]2[.]31 (192.0.2.31) align with AdministratorAccess, GetSecretValue on ' +
-            'prod/db-credentials, and StopLogging. Cover T1098.001, T1078.004, and T1562.008.',
+            'theft by dev-user@corp.example (dev-user), who used sts.AssumeRole (T1078.004) to reach ' +
+            'escalated-role. Ingress IPs 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) ' +
+            'align with AdministratorAccess, GetSecretValue on prod/db-credentials, and StopLogging ' +
+            '(T1562.008). Cover T1078.004 and T1562.008 as primary CloudTrail hunts; also T1098.001.',
         },
         {
           title: 'AWS privilege-escalation IOC refresh for CloudTrail monitoring teams',
           body:
             'IOC refresh for CloudTrail monitors in 123456789012: 192[.]0[.]2[.]30 (192.0.2.30), ' +
-            '192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example, short name dev-user, AssumeRole into escalated-role, ' +
-            'AdministratorAccess, corp-prod-data, prod/db-credentials, and StopLogging. Keep hunts ' +
-            'aligned to T1098.001, T1078.004, and T1562.008.',
+            '192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example, short name dev-user, sts.AssumeRole ' +
+            '(sts.amazonaws.com) into escalated-role for T1078.004, AdministratorAccess, corp-prod-data, ' +
+            'prod/db-credentials, and StopLogging for T1562.008. Keep hunts aligned to T1078.004, ' +
+            'T1562.008, and T1098.001.',
         },
       ],
       articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
@@ -500,6 +512,68 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         slots: [1],
         threatActors: ['TA-DEMO-SHADOW-ADMIN'],
         hashIoc: { value: 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789' },
+      },
+    },
+    {
+      packId: 'aws-iam',
+      reportIdSlug: 'aws-iam-ioc-only',
+      sourceId: 'aws-iam-ioc-only',
+      name: 'AWS IAM IOC digest feed',
+      title: 'IOC digest: observed infrastructure near AWS account 123456789012',
+      body:
+        // Tier 1-only fixture: pack-join IOCs hit environment telemetry, but the article is an
+        // IOC digest without CloudTrail API/behavior hunt language so Tier 2 should not execute-hit.
+        'This IOC digest lists infrastructure previously observed near AWS account 123456789012 for ' +
+        'monitoring coverage. Track source IPs 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 ' +
+        '(192.0.2.31), mailbox and short name for user dev-user@corp.example (dev-user), and related ' +
+        'account identifiers. Apply as watchlist / indicator matching guidance only. This write-up does ' +
+        'not describe API call sequences, role-assumption tradecraft, logging changes, or ATT&CK technique ' +
+        'hunts, and it does not assert that customer production is under active compromise.',
+      historicArticles: [
+        {
+          title: 'Watchlist refresh: ingress IPs for account 123456789012',
+          body:
+            'Watchlist refresh for AWS account 123456789012 covering ingress IPs 192[.]0[.]2[.]30 ' +
+            '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) plus mailbox dev-user@corp.example and ' +
+            'short name dev-user. Use for indicator matching and enrichment only.',
+        },
+        {
+          title: 'Indicator bulletin: mailbox and IP join keys near 123456789012',
+          body:
+            'Indicator bulletin listing join keys near account 123456789012: 192[.]0[.]2[.]30 (192.0.2.30), ' +
+            '192[.]0[.]2[.]31 (192.0.2.31), and dev-user@corp.example (dev-user). No behavioral playbook ' +
+            'is included in this digest.',
+        },
+        {
+          title: 'Network IOC note for CloudTrail enrichment teams',
+          body:
+            'Network IOC note for enrichment teams: associate 192[.]0[.]2[.]30 (192.0.2.30) and ' +
+            '192[.]0[.]2[.]31 (192.0.2.31) with identity context for 123456789012 and ' +
+            'dev-user@corp.example (dev-user) when pivoting historical telemetry.',
+        },
+        {
+          title: 'Identity indicator card: dev-user near account 123456789012',
+          body:
+            'Identity indicator card for short name dev-user / mailbox dev-user@corp.example near ' +
+            'AWS account 123456789012. Correlate with previously listed IPs 192[.]0[.]2[.]30 (192.0.2.30) ' +
+            'and 192[.]0[.]2[.]31 (192.0.2.31) for watchlisting.',
+        },
+      ],
+      articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
+      joinIocs: [
+        { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
+        { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
+        { type: 'email', value: 'dev-user@corp.example' },
+        { type: 'user', value: 'dev-user' },
+      ],
+      // Intentionally omit CloudTrail API / ATT&CK tokens so Tier 2 lacks executable evidence quotes.
+      narrative: ['123456789012', 'dev-user@corp.example', 'dev-user'],
+      tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security', 'ioc-only'],
+      mitre: [],
+      categories: ['cloud-security', 'insider-threat'],
+      regions: ['north-america', 'global'],
+      historicSourceAliases: {
+        emerging: 'AWS IAM IOC digest stream',
       },
     },
     {
