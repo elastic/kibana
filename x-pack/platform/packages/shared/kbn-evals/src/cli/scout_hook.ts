@@ -33,7 +33,8 @@ export const runScoutHook = (
     timeout: HOOK_TIMEOUT_MS,
   });
 
-  if (result.error) {
+  // EPIPE means the hook exited before Node wrote the config to its stdin, not that it failed.
+  if (result.error && (result.error as NodeJS.ErrnoException).code !== 'EPIPE') {
     throw new Error(`scoutHook ${hookPath} failed to run: ${result.error.message}`);
   }
   if (result.status !== 0) {

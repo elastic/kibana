@@ -38,6 +38,12 @@ describe('runScoutHook', () => {
     expect(runScoutHook(repoRoot, writeHook(`echo '{}'`), {})).toEqual({});
   });
 
+  it('returns the env of a hook that exits before the config is written to its stdin', () => {
+    const hook = writeHook(`echo '{"env":{"A":"1"}}'`);
+    const config = { pad: 'x'.repeat(1024 * 1024) };
+    expect(runScoutHook(repoRoot, hook, config)).toEqual({ A: '1' });
+  });
+
   it('fails when the hook exits non-zero', () => {
     expect(() => runScoutHook(repoRoot, writeHook('exit 3'), {})).toThrow('exited with code 3');
   });
