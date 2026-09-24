@@ -76,6 +76,13 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
       rule_name: 'AssumeRole into high-risk policy boundary',
       severity: 'high' as const,
       risk_score: 73,
+      hit_refs: [
+        {
+          event_id: 't2-evt-1',
+          source_index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+          timestamp: '2026-07-30T14:00:00.000Z',
+        },
+      ],
     },
     {
       technique_id: 'T1552.001',
@@ -89,10 +96,17 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
       rule_name: 'Credential file read on CI runner',
       severity: 'medium' as const,
       risk_score: 51,
+      hit_refs: [
+        {
+          event_id: 't2-evt-2',
+          source_index: '.ds-logs-endpoint.events.file-default-2026.07.30-000001',
+          timestamp: '2026-07-30T14:05:00.000Z',
+        },
+      ],
     },
   ],
   indexed_behaviors: [],
-  hasHit: false as const,
+  hasHit: true as const,
   next_step: 'Review the proposed rules.',
 };
 
@@ -205,13 +219,21 @@ describe('buildSseData', () => {
 
     // Hits from a hidden alerts index are alerts, not events: the attachment
     // schema rejects a hidden index as an event source and has `alerts[]` for them.
-    expect(entry.data.events).toEqual([
-      {
-        event_id: 'evt-1',
-        source_index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
-        timestamp: '2026-07-30T13:05:00.000Z',
-      },
-    ]);
+    expect(entry.data.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          event_id: 'evt-1',
+          source_index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+        }),
+        expect.objectContaining({
+          event_id: 't2-evt-1',
+          source_index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+          matched: { technique_id: 'T1078.004', field: '_id' },
+        }),
+      ])
+    );
+    // Sibling technique's Tier 2 ref stays off this entry.
+    expect(entry.data.events?.some((e) => e.event_id === 't2-evt-2')).toBe(false);
     expect(entry.data.alerts).toEqual([
       {
         alert_id: 'evt-2',
