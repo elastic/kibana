@@ -242,10 +242,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('expression typeahead', () => {
       it('should display function suggestions', async () => {
         await monacoEditor.setCodeEditorValue('');
-        await monacoEditor.typeCodeEditorValue('.e', 'timelionCodeEditor');
+        await monacoEditor.simulateTyping('timelionCodeEditor', '.e');
         // wait for monaco editor model will be updated with new value
         await common.sleep(300);
-        let value = await monacoEditor.getCodeEditorValue(0);
+        let value = await monacoEditor.getCodeEditorValueByTestSubj('timelionCodeEditor');
         expect(value).to.eql('.e');
         const suggestions = await timelion.getSuggestionItemsText();
         expect(suggestions.length).to.eql(2);
@@ -254,7 +254,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await timelion.clickSuggestion(1);
         // wait for monaco editor model will be updated with new value
         await common.sleep(300);
-        value = await monacoEditor.getCodeEditorValue(0);
+        value = await monacoEditor.getCodeEditorValueByTestSubj('timelionCodeEditor');
         expect(value).to.eql('.es()');
       });
 

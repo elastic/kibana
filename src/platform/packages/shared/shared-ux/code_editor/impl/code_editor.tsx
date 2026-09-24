@@ -746,7 +746,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               ...options,
               hover: {
                 sticky: true,
-                hidingDelay: 100,
                 ...options?.hover,
               },
               // Explicit links prop always takes precedence over any value passed in options
