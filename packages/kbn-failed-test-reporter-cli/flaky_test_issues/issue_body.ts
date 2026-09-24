@@ -290,12 +290,15 @@ interface BuildCounts {
   failedBuilds: number;
   buildFailRate: number;
   lastFailedAt?: Date;
+  lastFailedBuildUrl?: string;
+  lastFailedJobId?: string;
 }
 
-/** A row of a breakdown: the worst test's counts there and the newest failure across tests. */
+/** A row of a breakdown: the worst test's counts there and the test with the newest failure. */
 interface WorstFailures<T extends BuildCounts> {
   worst: T;
-  lastFailedAt?: Date;
+  /** Absent when no test failed there. */
+  latest?: T;
 }
 
 /**
@@ -319,10 +322,12 @@ const worstPerKey = <T extends BuildCounts>(
         (stats.failedBuilds === current.worst.failedBuilds && stats.builds > current.worst.builds)
           ? stats
           : current.worst;
-      const lastFailedAt = [current?.lastFailedAt, stats.lastFailedAt]
-        .filter((date): date is Date => date !== undefined)
-        .sort((a, b) => b.getTime() - a.getTime())[0];
-      byKey.set(key, { worst, lastFailedAt });
+      const latest =
+        stats.lastFailedAt &&
+        (!current?.latest?.lastFailedAt || stats.lastFailedAt > current.latest.lastFailedAt)
+          ? stats
+          : current?.latest;
+      byKey.set(key, { worst, latest });
     }
   }
   return [...byKey.entries()]
@@ -335,16 +340,21 @@ const worstPerKey = <T extends BuildCounts>(
     .map(([, row]) => row);
 };
 
-/** `🔴 \`main\` | 49 / 509 (10%) | 2026-09-09 06:12 UTC`, or `✅ \`9.1\` | 0 / 58 |` for a clean row. */
-const failuresRow = (
-  label: string,
-  { worst, lastFailedAt }: WorstFailures<BuildCounts>
-): string[] => [
+/**
+ * `🔴 \`main\` | 49 / 509 (10%) | [#12345](…#job) · 2026-09-09 06:12 UTC`, or `✅ \`9.1\` | 0 / 58 |`
+ * for a clean row. Reports written before the build was recorded get the time alone.
+ */
+const failuresRow = (label: string, { worst, latest }: WorstFailures<BuildCounts>): string[] => [
   `${worst.failedBuilds > 0 ? '🔴' : '✅'} ${label}`,
   worst.failedBuilds > 0
     ? `${worst.failedBuilds} / ${worst.builds} (${formatPercent(worst.buildFailRate)})`
     : `0 / ${worst.builds}`,
-  lastFailedAt ? formatDateTime(lastFailedAt) : '',
+  latest
+    ? formatBuildLink(
+        { buildUrl: latest.lastFailedBuildUrl, jobId: latest.lastFailedJobId },
+        latest.lastFailedAt
+      )
+    : '',
 ];
 
 /** Which branches the suite fails on and which it does not, at a glance. */

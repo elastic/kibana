@@ -47,6 +47,8 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       failedBuilds: 49,
       buildFailRate: 49 / 509,
       lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+      lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      lastFailedJobId: '0199-abcd',
       latestRun: {
         status: 'passed',
         timestamp: new Date('2026-09-09T06:04:41.000Z'),
@@ -62,6 +64,8 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       failedBuilds: 49,
       buildFailRate: 49 / 509,
       lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+      lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      lastFailedJobId: '0199-abcd',
     },
     {
       mode: 'serverless-observability_complete',

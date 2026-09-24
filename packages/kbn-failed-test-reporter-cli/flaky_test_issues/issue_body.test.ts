@@ -77,6 +77,8 @@ const multiTestReport = () => {
           failedBuilds: 3,
           buildFailRate: 3 / 64,
           lastFailedAt: new Date('2026-09-07T11:40:00.000Z'),
+          lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12290',
+          lastFailedJobId: '0199-9200',
         },
         { branch: '9.1', builds: 58, failedBuilds: 0, buildFailRate: 0 },
       ],
@@ -86,13 +88,14 @@ const multiTestReport = () => {
         timestamp: new Date('2026-09-09T06:04:41.000Z'),
       },
       byTarget: [
+        // an older failure without a recorded build; the newest one, from another test, gets linked
         {
           mode: 'stateful-classic',
           type: 'local',
           builds: 200,
           failedBuilds: 20,
           buildFailRate: 0.1,
-          lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+          lastFailedAt: new Date('2026-09-08T06:12:00.000Z'),
         },
         {
           mode: 'serverless-security_complete',
@@ -214,7 +217,7 @@ describe('renderFlakySuiteIssueBody', () => {
     );
   });
 
-  it("lists every branch of the suite, failing ones first with the worst test's counts", () => {
+  it("lists every branch of the suite, failing ones first with the worst test's counts and the newest failure's job", () => {
     const { suite, report } = multiTestReport();
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
       [
@@ -222,10 +225,30 @@ describe('renderFlakySuiteIssueBody', () => {
         '',
         '| Branch | Failed builds | Last failure |',
         '|---|---|---|',
-        '| 🔴 `main` | 49 / 509 (10%) | 2026-09-09 06:12 UTC |',
-        '| 🔴 `9.2` | 3 / 64 (5%) | 2026-09-07 11:40 UTC |',
+        '| 🔴 `main` | 49 / 509 (10%) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
+        '| 🔴 `9.2` | 3 / 64 (5%) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
         '| ✅ `9.1` | 0 / 58 |',
       ].join('\n')
+    );
+  });
+
+  it('dates a failure without a recorded build, for reports written before it was', () => {
+    const report = flakyReport([
+      flakyTest({
+        byBranch: [
+          {
+            branch: 'main',
+            builds: 10,
+            failedBuilds: 2,
+            buildFailRate: 0.2,
+            lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+          },
+        ],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+    expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
+      '| 🔴 `main` | 2 / 10 (20%) | 2026-09-09 06:12 UTC |'
     );
   });
 
@@ -237,7 +260,7 @@ describe('renderFlakySuiteIssueBody', () => {
         '',
         '| Target | Failed builds | Last failure |',
         '|---|---|---|',
-        '| 🔴 `stateful-classic` · local | 49 / 509 (10%) | 2026-09-09 06:12 UTC |',
+        '| 🔴 `stateful-classic` · local | 49 / 509 (10%) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
         '| 🔴 `serverless-security_complete` · cloud | 3 / 64 (5%) | 2026-09-07 11:40 UTC |',
         '| ✅ `serverless-observability_complete` · local | 0 / 426 |  |',
       ].join('\n')
