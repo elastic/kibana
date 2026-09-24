@@ -128,8 +128,23 @@ const FETCH_CONNECT_TIMEOUT_MS = 60_000;
 // legitimately run longer (e.g. an evaluation harness pointed at a slow model
 // endpoint) fail at the transport with `HeadersTimeoutError` before any
 // application-level budget is consulted. Env-configurable; defaults unchanged.
-const FETCH_HEADERS_TIMEOUT_MS = Number(process.env.KBN_CLIENT_HEADERS_TIMEOUT_MS ?? '') || 300_000;
-const FETCH_BODY_TIMEOUT_MS = Number(process.env.KBN_CLIENT_BODY_TIMEOUT_MS ?? '') || 300_000;
+//
+// `0` is a meaningful value rather than an absent one: undici accepts it
+// (`headersTimeout must be a positive integer or zero`) and skips the timer
+// entirely (client-h1 `setTimeout` only arms a timer `if (delay)`), so an
+// explicit `0` disables the transport timeout and leaves the budget to the
+// caller. Only an unset, empty, or unparsable value falls back to the default.
+const readTimeoutEnv = (raw: string | undefined, fallback: number): number => {
+  if (raw === undefined || raw.trim() === '') {
+    return fallback;
+  }
+
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
+};
+
+const FETCH_HEADERS_TIMEOUT_MS = readTimeoutEnv(process.env.KBN_CLIENT_HEADERS_TIMEOUT_MS, 300_000);
+const FETCH_BODY_TIMEOUT_MS = readTimeoutEnv(process.env.KBN_CLIENT_BODY_TIMEOUT_MS, 300_000);
 
 export class KbnClientRequester {
   // `url` retains any `user:pass@` from the original config - `resolveUrl()` is

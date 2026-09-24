@@ -205,8 +205,10 @@ describe('KbnClientRequester transport configuration', () => {
   // it is stored under a module-private `options` symbol. Read that symbol off the
   // dispatcher instance itself rather than off a separately imported `Agent`, since
   // module identity is not guaranteed to match (see `isolateModules` below).
-  const configurationOf = (requester: KbnClientRequester): AgentConfiguration => {
-    const { dispatcher } = requester as unknown as { dispatcher: object };
+  const dispatcherOf = (requester: KbnClientRequester): object =>
+    (requester as unknown as { dispatcher: object }).dispatcher;
+
+  const dispatcherConfiguration = (dispatcher: object): AgentConfiguration => {
     const optionsSymbol = Object.getOwnPropertySymbols(dispatcher).find(
       (symbol) => symbol.description === 'options'
     );
@@ -216,7 +218,32 @@ describe('KbnClientRequester transport configuration', () => {
     return (dispatcher as Record<symbol, AgentConfiguration>)[optionsSymbol];
   };
 
+  const configurationOf = (requester: KbnClientRequester): AgentConfiguration =>
+    dispatcherConfiguration(dispatcherOf(requester));
+
   const requesterFor = (url: string) => new KbnClientRequester(log, { url });
+
+  // The timeout constants are read at module load, so the environment has to be
+  // set before the module is (re)loaded. An `undefined` value unsets the
+  // variable rather than passing the string "undefined", which is what the
+  // defaulting tests need when the ambient environment already sets a timeout.
+  const loadRequesterWithEnv = (env: Record<string, string | undefined>) => {
+    const previousEnv = { ...process.env };
+    for (const [key, value] of Object.entries(env)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+    let loaded!: typeof import('./kbn_client_requester');
+    jest.isolateModules(() => {
+      loaded =
+        jest.requireActual<typeof import('./kbn_client_requester')>('./kbn_client_requester');
+    });
+    process.env = previousEnv;
+    return loaded.KbnClientRequester;
+  };
 
   // The dispatcher used to be created only for the `https:` protocol, which left
   // `http:` callers (a local Kibana) on undici's unconfigurable 300s default.
@@ -226,7 +253,16 @@ describe('KbnClientRequester transport configuration', () => {
   });
 
   it('applies undici-compatible defaults: 60s connect, 300s headers/body', () => {
-    expect(configurationOf(requesterFor('http://localhost:5620'))).toMatchObject({
+    // Load a fresh copy with both timeout variables explicitly unset: this
+    // suite may legitimately run where the ambient environment configures a
+    // different budget, and the file-level import would then be evaluated with
+    // that budget instead of the defaults under test.
+    const Requester = loadRequesterWithEnv({
+      KBN_CLIENT_HEADERS_TIMEOUT_MS: undefined,
+      KBN_CLIENT_BODY_TIMEOUT_MS: undefined,
+    });
+
+    expect(configurationOf(new Requester(log, { url: 'http://localhost:5620' }))).toMatchObject({
       headersTimeout: 300_000,
       bodyTimeout: 300_000,
       connect: { timeout: 60_000 },
@@ -242,20 +278,6 @@ describe('KbnClientRequester transport configuration', () => {
     );
   });
 
-  // The timeout constants are read at module load, so the environment has to be
-  // set before the module is (re)loaded.
-  const loadRequesterWithEnv = (env: Record<string, string>) => {
-    const previousEnv = { ...process.env };
-    process.env = { ...previousEnv, ...env };
-    let loaded!: typeof import('./kbn_client_requester');
-    jest.isolateModules(() => {
-      loaded =
-        jest.requireActual<typeof import('./kbn_client_requester')>('./kbn_client_requester');
-    });
-    process.env = previousEnv;
-    return loaded.KbnClientRequester;
-  };
-
   it('honours KBN_CLIENT_HEADERS_TIMEOUT_MS and KBN_CLIENT_BODY_TIMEOUT_MS', () => {
     const Requester = loadRequesterWithEnv({
       KBN_CLIENT_HEADERS_TIMEOUT_MS: '900000',
@@ -266,5 +288,66 @@ describe('KbnClientRequester transport configuration', () => {
       headersTimeout: 900_000,
       bodyTimeout: 900_000,
     });
+  });
+
+  // An explicit `0` is undici's documented way of disabling `headersTimeout` /
+  // `bodyTimeout`, so it must survive the env parsing rather than being
+  // collapsed into the 300s default by a falsy-check fallback.
+  it('lets an explicitly configured 0 disable the headers and body timeouts', () => {
+    const Requester = loadRequesterWithEnv({
+      KBN_CLIENT_HEADERS_TIMEOUT_MS: '0',
+      KBN_CLIENT_BODY_TIMEOUT_MS: '0',
+    });
+
+    expect(configurationOf(new Requester(log, { url: 'http://localhost:5620' }))).toMatchObject({
+      headersTimeout: 0,
+      bodyTimeout: 0,
+    });
+  });
+
+  it('falls back to the defaults for empty or unparsable timeout values', () => {
+    const Empty = loadRequesterWithEnv({
+      KBN_CLIENT_HEADERS_TIMEOUT_MS: '',
+      KBN_CLIENT_BODY_TIMEOUT_MS: '',
+    });
+    expect(configurationOf(new Empty(log, { url: 'http://localhost:5620' }))).toMatchObject({
+      headersTimeout: 300_000,
+      bodyTimeout: 300_000,
+    });
+
+    const Garbage = loadRequesterWithEnv({
+      KBN_CLIENT_HEADERS_TIMEOUT_MS: 'not-a-number',
+      KBN_CLIENT_BODY_TIMEOUT_MS: 'not-a-number',
+    });
+    expect(configurationOf(new Garbage(log, { url: 'http://localhost:5620' }))).toMatchObject({
+      headersTimeout: 300_000,
+      bodyTimeout: 300_000,
+    });
+  });
+
+  // The configuration assertions above read the dispatcher off the requester
+  // instance; none of them would notice `request()` failing to hand that
+  // dispatcher to `fetch`, which would silently put every HTTP request back on
+  // undici's global timeout defaults. Assert the request boundary itself.
+  it('passes the configured dispatcher to fetch for http requests', async () => {
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+    try {
+      const requester = requesterFor('http://localhost:5620');
+      await requester.request({ method: 'GET', path: '/api/foo', retries: 0 });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const init = fetchMock.mock.calls[0][1] as RequestInit & { dispatcher?: object };
+      expect(init.dispatcher).toBe(dispatcherOf(requester));
+      // ...and it is the configured Agent, not an arbitrary object: the connect
+      // timeout is the one value that is not env-overridable.
+      expect(dispatcherConfiguration(init.dispatcher!)).toMatchObject({
+        connect: { timeout: 60_000 },
+      });
+    } finally {
+      fetchMock.mockRestore();
+    }
   });
 });
