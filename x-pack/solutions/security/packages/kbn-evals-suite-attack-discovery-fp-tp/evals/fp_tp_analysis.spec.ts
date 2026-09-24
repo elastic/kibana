@@ -48,7 +48,7 @@ import { runFpTpAnalysisWorkflow } from '../src/workflow_task';
 import { ensureFpTpSeedPrerequisites, seedFixture, toSeededEvidence } from '../src/world';
 
 const SUMMARY_CRITERIA = [
-  'Every id the summary or rationale cites appears in output.seededIds (the attack discovery, alert, entity, or event ids seeded for this run)',
+  'Every id the summary or rationale cites (document ids, host.id, process.entity_id, or any other identifier) appears in output.seededIds or output.seededEvidence (the documents seeded for this run)',
   'The summary and rationale do not invent hosts, users, processes, domains, events, or entity roles that are not in output.seededEvidence (the documents this run seeded)',
   'The summary or rationale names the check or checks that decided the verdict (alert_linkage, entity_role, process_parent, network_destination)',
   'When the verdict is inconclusive, the summary or rationale says which evidence was missing or which checks conflicted',

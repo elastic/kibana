@@ -164,6 +164,7 @@ describe('sample FP/TP analysis workflow', () => {
         load_alerts: {
           output: {
             hits: {
+              total: { value: 150 },
               hits: [
                 { _source: { host: { id: 'h1' }, user: { name: 'u1' } } },
                 { _source: { host: { id: 'h1' } } },
@@ -177,6 +178,10 @@ describe('sample FP/TP analysis workflow', () => {
 
     it('returns the cited alert count', () => {
       expect(evaluate(stepIn('count_alerts')?.with?.cited, context)).toBe(3);
+    });
+
+    it('returns the returned alert count, not the total match count, as found', () => {
+      expect(evaluate(stepIn('count_alerts')?.with?.found, context)).toBe(3);
     });
 
     it('returns the unique cited host ids', () => {

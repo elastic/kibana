@@ -128,7 +128,9 @@ steps:
     with:
       conversation_id: '{{ inputs.investigation_id }}'
 
-  # Required source 2: every alert the discovery cites.
+  # Required source 2: every alert the discovery cites. `found` counts returned hits, not
+  # `hits.total`, so a discovery citing more than `size` alerts fails instead of being
+  # judged on a subset.
   - name: load_alerts
     type: elasticsearch.search
     with:
@@ -142,7 +144,7 @@ steps:
     type: data.set
     with:
       cited: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] | size }}"
-      found: '${{ steps.load_alerts.output.hits.total.value }}'
+      found: '${{ steps.load_alerts.output.hits.hits | size }}'
       host_ids: "${{ steps.load_alerts.output.hits.hits | map: '_source.host.id' | compact | uniq }}"
       user_names: "${{ steps.load_alerts.output.hits.hits | map: '_source.user.name' | compact | uniq }}"
       attack_timestamp: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}"
