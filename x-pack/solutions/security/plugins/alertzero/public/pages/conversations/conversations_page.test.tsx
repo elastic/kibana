@@ -17,6 +17,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
 import {
+  useAssignInvestigation,
+  useUserProfiles,
+  useSuggestUserProfiles,
+} from '@kbn/agentic-investigations-plugin/public';
+import {
   useProposalsByCategory,
   useProposalsByCategoryCount,
   useClosedProposals,
@@ -34,6 +39,42 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
 }));
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+  useAssignInvestigation: jest.fn(),
+  useUserProfiles: jest.fn(),
+  useSuggestUserProfiles: jest.fn(),
+}));
+jest.mock('@kbn/agentic-investigations-common', () => {
+  const actual = jest.requireActual('@kbn/agentic-investigations-common');
+  return {
+    ...actual,
+    // Replace AssignToUsers with a minimal stub so the queue renders without needing
+    // a full EUI/user-profile environment.
+    // eslint-disable-next-line react/display-name
+    AssignToUsers: ({
+      conversationId,
+      onChange,
+      canManage,
+    }: {
+      conversationId: string;
+      onChange: (s: unknown[]) => void;
+      canManage: boolean;
+    }) =>
+      canManage ? (
+        <button
+          data-test-subj={`mock-assign-${conversationId}`}
+          onClick={() =>
+            onChange([{ uid: 'user-uid-1', enabled: true, user: { username: 'alice' }, data: {} }])
+          }
+        >
+          Assign
+        </button>
+      ) : (
+        <span data-test-subj={`mock-assignees-readonly-${conversationId}`}>Read-only</span>
+      ),
+  };
+});
 jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
@@ -47,6 +88,9 @@ const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
+const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
+const mockUseUserProfiles = useUserProfiles as jest.Mock;
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 
 /** Records the fetchNextPage of each bucket, so a Show more click can be asserted. */
 const fetchNextPage: Record<string, jest.Mock> = {};
@@ -170,10 +214,14 @@ const renderPage = (initialEntry: string) => {
 
 const approveMutate = jest.fn();
 const dismissMutate = jest.fn();
+const assignInvestigationMutate = jest.fn();
 
 beforeEach(() => {
   mockUseApproveProposal.mockReturnValue({ mutate: approveMutate });
   mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate });
+  mockUseAssignInvestigation.mockReturnValue({ mutate: assignInvestigationMutate });
+  mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
+  mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockOpenCount(0);
 });
 

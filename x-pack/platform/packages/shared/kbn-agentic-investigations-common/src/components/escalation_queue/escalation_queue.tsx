@@ -42,6 +42,11 @@ interface EscalationQueueProps {
   onLoadMore?: () => void;
   /** If set, renders an inline error state in place of the item list. */
   error?: Error | null;
+  /**
+   * When provided, each escalation row becomes clickable and calls this callback
+   * with the escalation id. Used to open the escalation details flyout.
+   */
+  onClickCard?: (id: string) => void;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -65,7 +70,7 @@ const StyledAccordion = styled(EuiAccordion)`
  * server total while the list grows one page at a time.
  */
 export const EscalationQueue = memo<EscalationQueueProps>(
-  ({ status, escalations, renderAssignees, totalItemCount, onLoadMore, error }) => {
+  ({ status, escalations, renderAssignees, totalItemCount, onLoadMore, error, onClickCard }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
     const remaining = serverTotal - escalations.length;
@@ -113,6 +118,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
                     escalation={escalation}
                     hasBorder={i < escalations.length - 1 || showLoadMore}
                     renderAssignees={renderAssignees}
+                    onClickCard={onClickCard}
                   />
                 </EuiFlexItem>
               ))}

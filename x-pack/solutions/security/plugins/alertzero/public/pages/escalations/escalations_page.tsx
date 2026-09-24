@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiEmptyPrompt,
@@ -25,15 +25,20 @@ import {
   useListEscalations,
   useUserProfiles,
   useSuggestUserProfiles,
+  escalationQueryKeys,
 } from '@kbn/agentic-investigations-plugin/public';
+import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useConversationsUrlParams } from '../conversations/conversations_url_params';
+import { useInvestigationDetails } from '../conversations/use_investigation_details';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
+import { assigneeSignal } from '../../components/connected_assignees/assignee_overrides';
 
 export const EscalationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -46,7 +51,47 @@ export const EscalationsPage: React.FC = () => {
   // Capability check: only render the assignee picker when the user can manage escalations.
   const canManage = application.capabilities.agenticInvestigations?.manageEscalations === true;
 
+  // ---------------------------------------------------------------------------
+  // Flyout — reuse the conversation URL params / details hook, which is
+  // template-agnostic (it just calls agentBuilder.openConversationDetails).
+  // ---------------------------------------------------------------------------
+  const queryClient = useQueryClient();
+
+  // Subscribe to the cross-boundary signal. Any bump (from ConnectedAssignees on the
+  // other side of the React root boundary) triggers a React Query invalidation below,
+  // which causes this page to refetch and re-render with the latest assignee data.
+  const signalSnapshot = useSyncExternalStore(assigneeSignal.subscribe, assigneeSignal.getSnapshot);
+
+  // Skip invalidation on mount — fire only when the signal actually bumps.
+  const isFirstSignalRenderRef = useRef(true);
+  useEffect(() => {
+    if (isFirstSignalRenderRef.current) {
+      isFirstSignalRenderRef.current = false;
+      return;
+    }
+    void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
+  // queryClient identity is stable; signalSnapshot reference changes only on bump.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signalSnapshot]);
+
+  const { selectedConversationId, selectConversation, clearSelectedConversation } =
+    useConversationsUrlParams();
+
+  const handleFlyoutClose = useCallback(() => {
+    // Invalidate both open/closed pages so the list reflects any changes made in the flyout
+    // (e.g. assignees updated via the header picker).
+    void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
+    clearSelectedConversation();
+  }, [queryClient, clearSelectedConversation]);
+
+  useInvestigationDetails({
+    conversationId: selectedConversationId,
+    onClose: handleFlyoutClose,
+  });
+
+  // ---------------------------------------------------------------------------
   // Per-bucket current page (1-based). Incremented by "Show more"; never reset here.
+  // ---------------------------------------------------------------------------
   const [openPage, setOpenPage] = useState(1);
   const [closedPage, setClosedPage] = useState(1);
 
@@ -145,16 +190,16 @@ export const EscalationsPage: React.FC = () => {
       // Show the new selection immediately before the server responds.
       setPendingAssignees((prev) => new Map(prev).set(escalationId, selected));
 
+      const assignees = selected.map((p) => p.uid);
       assignEscalation.mutate(
-        {
-          escalationId,
-          assignees: selected.map((p) => p.uid),
-        },
+        { escalationId, assignees },
         {
           onSuccess: () => {
             notifications?.toasts.addSuccess(ESCALATIONS_PAGE_INFO.assignSuccess);
-            // Pending state is cleared by the useEffect when the refetched data arrives,
-            // so the optimistic UI stays visible right up until the server confirms.
+            // Signal the flyout (ConnectedAssignees) across the React root boundary so it
+            // refetches its conversation immediately — without waiting for its 5 s poll.
+            assigneeSignal.bump(escalationId);
+            // Pending state is cleared by the useEffect when the refetched data arrives.
           },
           onError: () => {
             notifications?.toasts.addDanger(ESCALATIONS_PAGE_INFO.assignError);
@@ -175,13 +220,16 @@ export const EscalationsPage: React.FC = () => {
     (escalation: EscalationQueueItem) => {
       const isUpdating = pendingAssignees.has(escalation.id);
 
+      // Prefer local pending state (optimistic) over server data while mutation is in flight.
+      const baseUids = escalation.assigneeUids;
+
       // While an update is in flight use the optimistically submitted profiles directly
       // (they carry full avatar data from the picker). Otherwise build the list from
       // resolved profiles, preserving unresolved UIDs as synthetic placeholders so they
       // round-trip through the replace-in-full payload and can only be removed explicitly.
       const selected: UserProfileWithAvatar[] = isUpdating
         ? pendingAssignees.get(escalation.id) ?? []
-        : escalation.assigneeUids.map((uid) => {
+        : baseUids.map((uid) => {
             const resolved = profilesByUid.get(uid);
             if (resolved) return resolved;
             // Synthesise a minimal profile for an unresolvable UID (e.g. deleted user).
@@ -268,6 +316,7 @@ export const EscalationsPage: React.FC = () => {
                 onLoadMore={() => setOpenPage((p) => p + 1)}
                 error={openQuery.error as Error | null}
                 renderAssignees={renderAssignees}
+                onClickCard={selectConversation}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -278,6 +327,7 @@ export const EscalationsPage: React.FC = () => {
                 onLoadMore={() => setClosedPage((p) => p + 1)}
                 error={closedQuery.error as Error | null}
                 renderAssignees={renderAssignees}
+                onClickCard={selectConversation}
               />
             </EuiFlexItem>
           </>

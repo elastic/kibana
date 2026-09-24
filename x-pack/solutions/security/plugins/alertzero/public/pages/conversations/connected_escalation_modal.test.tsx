@@ -68,6 +68,7 @@ const investigation: Investigation = {
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
   pendingProposalCount: 0,
+  assignees: [],
   events: [],
   recordId: 'inv-1',
   conversationId: 'conv-1',

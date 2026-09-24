@@ -34,6 +34,12 @@ const readFirstAssignee = (value: MetadataFieldValue | undefined): string | null
   return readString(value) ?? null;
 };
 
+/** Returns the full list of assignee uid strings from the metadata, defaulting to `[]`. */
+const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is string => typeof v === 'string' && v.length > 0);
+};
+
 /**
  * Step events are deliberately dropped: one agent run emits a step per tool call and per reasoning
  * block, which would bury the handful of events an analyst reads a timeline for.
@@ -127,6 +133,7 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
     status: readString(metadata.status),
     severity: readString(metadata.severity),
     assignee: readFirstAssignee(metadata.assignees),
+    assignees: readAssignees(metadata.assignees),
     // `summary` is the long form; `description` is the single-line one. Prefer the richer field and
     // fall back, because a template only requires `status`.
     summary: readString(metadata.summary) ?? readString(metadata.description),

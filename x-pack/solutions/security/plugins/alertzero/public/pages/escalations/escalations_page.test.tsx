@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   useAssignEscalation,
@@ -20,6 +21,18 @@ import {
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
 import { EscalationsPage } from './escalations_page';
+
+// These hooks open the Agent Builder flyout and manage the URL; stub them out here.
+jest.mock('../conversations/use_investigation_details', () => ({
+  useInvestigationDetails: jest.fn(),
+}));
+jest.mock('../conversations/conversations_url_params', () => ({
+  useConversationsUrlParams: jest.fn(() => ({
+    selectedConversationId: undefined,
+    selectConversation: jest.fn(),
+    clearSelectedConversation: jest.fn(),
+  })),
+}));
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
@@ -99,14 +112,18 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
     ...((overrides.capabilities as object | undefined) ?? {}),
   };
   const history = createMemoryHistory();
+  // A fresh client per test so cache from one test never bleeds into the next.
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={core}>
-          <Router history={history}>
-            <EscalationsPage />
-          </Router>
+          <QueryClientProvider client={queryClient}>
+            <Router history={history}>
+              <EscalationsPage />
+            </Router>
+          </QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>

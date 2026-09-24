@@ -91,12 +91,21 @@ describe('conversationToInvestigation', () => {
     );
 
     expect(result.assignee).toBe('first.analyst');
+    // The full list is preserved so the interactive picker can show all assignees.
+    expect(result.assignees).toEqual(['first.analyst', 'second.analyst']);
   });
 
   it('reports no assignee for an empty assignees list', () => {
     const result = conversationToInvestigation(conversation({ metadata: { assignees: [] } }));
 
     expect(result.assignee).toBeNull();
+    expect(result.assignees).toEqual([]);
+  });
+
+  it('returns an empty assignees array when no metadata assignees field is present', () => {
+    const result = conversationToInvestigation(conversation({ metadata: undefined }));
+
+    expect(result.assignees).toEqual([]);
   });
 
   it('leaves optional fields undefined rather than inventing them', () => {
