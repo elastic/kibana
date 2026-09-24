@@ -7,7 +7,6 @@
 
 import type { ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
-import type { z, ZodType } from '@kbn/zod/v4';
 import type { ConversationEvent, ValidConversationEventType } from '@kbn/agent-builder-common';
 
 /**
@@ -33,43 +32,37 @@ export interface ConversationEventHeaderData {
 /**
  * Browser-side UI definition for rendering a custom conversation event type.
  *
+ * The server validates `data` against the type's `payloadSchema` when the event is written. The
+ * timeline renders an event only when its type has a registered UI definition, and passes the
+ * stored event to `render` as-is.
+ *
  * @example
  * ```ts
- * const textNoteDefinition: ConversationEventUIDefinition<'text_note', typeof textNoteSchema> = {
+ * const textNoteDefinition: ConversationEventUIDefinition<'text_note', TextNoteEventData> = {
  *   type: 'text_note',
- *   payloadSchema: textNoteSchema,
- *   render: (event, { conversationId }) => <TextNoteRenderer event={event} />,
- *   getHeader: (event) => ({ icon: 'editorComment', title: event.data.title }),
+ *   render: (event, { conversationId }) => <TextNoteRenderer data={event.data} />,
+ *   getHeader: () => ({ icon: 'document', label: 'Note' }),
  * };
  * ```
  */
-export interface ConversationEventUIDefinition<
-  TType extends string = string,
-  TSchema extends ZodType = ZodType
-> {
+export interface ConversationEventUIDefinition<TType extends string = string, TData = unknown> {
   /** Unique discriminator — must match the server-side registration's `type`. */
   type: TType;
   /**
-   * Zod schema matching the server-side definition's `payloadSchema`.
-   * The containment component calls `payloadSchema.safeParse(event.data)` and shows a structured
-   * error if validation fails, so `render` always receives a type-safe payload.
-   */
-  payloadSchema: TSchema;
-  /**
    * Renders the event in the conversation timeline.
    *
-   * Registered definitions are plugin-owned code. The containment component wraps the output in
-   * an `EuiErrorBoundary` so a throwing renderer cannot take down the entire chat.
+   * Registered definitions are plugin-owned code. The timeline wraps the output in an error
+   * boundary so a throwing renderer cannot take down the entire chat.
    */
   render: (
-    event: ConversationEvent<TType, z.infer<TSchema>>,
+    event: ConversationEvent<TType, TData>,
     ctx: ConversationEventRenderContext
   ) => ReactNode;
   /**
    * Optional header metadata shown above the rendered content.
    */
   getHeader?: (
-    event: ConversationEvent<TType, z.infer<TSchema>>,
+    event: ConversationEvent<TType, TData>,
     ctx: ConversationEventRenderContext
   ) => ConversationEventHeaderData | undefined;
 }
@@ -80,8 +73,8 @@ export interface ConversationEventUIDefinition<
  */
 export type ValidatedConversationEventUIDefinition<
   TType extends string,
-  TSchema extends ZodType
-> = ConversationEventUIDefinition<TType, TSchema> & { type: ValidConversationEventType<TType> };
+  TData
+> = ConversationEventUIDefinition<TType, TData> & { type: ValidConversationEventType<TType> };
 
 /**
  * Public-facing contract for the browser-side conversation event type registry.
@@ -102,8 +95,8 @@ export interface ConversationEventsServiceStartContract {
    * Throws if the type name is already registered, contains the id delimiter (`::`), is a
    * reserved name (`execution`, `step`), or shadows a built-in timeline event type.
    */
-  register: <TType extends string, TSchema extends ZodType = ZodType>(
-    definition: ValidatedConversationEventUIDefinition<TType, TSchema>
+  register: <TType extends string, TData = unknown>(
+    definition: ValidatedConversationEventUIDefinition<TType, TData>
   ) => void;
   /** Returns the UI definition for a type, or `undefined` if none is registered. */
   getUiDefinition: (type: string) => ConversationEventUIDefinition | undefined;
