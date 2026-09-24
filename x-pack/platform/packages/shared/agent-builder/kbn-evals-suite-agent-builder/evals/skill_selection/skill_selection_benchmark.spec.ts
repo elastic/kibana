@@ -33,7 +33,6 @@ import {
   SERVICE_MAP_EXAMPLES,
   SIEM_READINESS_EXAMPLES,
   SIG_EVENTS_MANAGEMENT_EXAMPLES,
-  SIG_EVENTS_MEMORY_EXAMPLES,
   SKILL_AUTHORING_EXAMPLES,
   STREAMS_MANAGEMENT_EXAMPLES,
   THREAT_HUNTING_EXAMPLES,
@@ -131,13 +130,6 @@ evaluate.describe(
   'Skill Selection Benchmark — Streams',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate('sig-events-memory routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'significant-events-memory',
-        examples: SIG_EVENTS_MEMORY_EXAMPLES,
-      });
-    });
-
     evaluate('streams-management routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
         skillId: 'streams-management',

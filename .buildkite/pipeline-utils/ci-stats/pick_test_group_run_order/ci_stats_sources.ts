@@ -38,11 +38,10 @@ export function buildCiStatsSources(args: {
   ownBranch: string;
   pipelineSlug: string;
   prNumber: string | undefined;
-  prMergeBase: string | undefined;
-  mergeQueueMergeBase: string | undefined;
+  /** Reference commit for past test durations used to size and balance groups, not to select tests. */
+  timingBase: string | undefined;
 }): CiStatsSource[] {
-  const { trackedBranch, ownBranch, pipelineSlug, prNumber, prMergeBase, mergeQueueMergeBase } =
-    args;
+  const { trackedBranch, ownBranch, pipelineSlug, prNumber, timingBase } = args;
 
   const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
 
@@ -54,7 +53,7 @@ export function buildCiStatsSources(args: {
     // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
     // of too many ftr groups instead of potential timeouts.
     // merge-queue builds run on throwaway gh-readonly-queue/* branches, so their own
-    // branch has no history; they use merge-base and tracked-branch sources below.
+    // branch has no history; they use timingBase and tracked-branch sources below.
     ...(!prNumber &&
     !isMergeQueue &&
     pipelineSlug !== PIPELINES.ON_MERGE &&
@@ -64,19 +63,12 @@ export function buildCiStatsSources(args: {
           { branch: trackedBranch, jobName: pipelineSlug },
         ]
       : []),
-    // try to get times from the merge-queue group's merge-base commit
-    ...(mergeQueueMergeBase
+    // The timing-history base remains MERGE_QUEUE_MERGE_BASE on queue builds,
+    // and may have results only in kibana-merge-queue.
+    ...(timingBase
       ? [
-          { commit: mergeQueueMergeBase, jobName: PIPELINES.ON_MERGE },
-          { commit: mergeQueueMergeBase, jobName: PIPELINES.MERGE_QUEUE },
-        ]
-      : []),
-    // try to get times from the mergeBase commit; with a merge queue enabled the
-    // merge base may only have been built by the merge-queue pipeline
-    ...(prMergeBase
-      ? [
-          { commit: prMergeBase, jobName: PIPELINES.ON_MERGE },
-          { commit: prMergeBase, jobName: PIPELINES.MERGE_QUEUE },
+          { commit: timingBase, jobName: PIPELINES.ON_MERGE },
+          { commit: timingBase, jobName: PIPELINES.MERGE_QUEUE },
         ]
       : []),
     // merge-queue builds report the target branch as their branch, so recent queue

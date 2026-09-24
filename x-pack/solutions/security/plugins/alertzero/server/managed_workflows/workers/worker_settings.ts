@@ -11,10 +11,13 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   formatWorkerSettingsIssues,
   getCompleteWorkerSettingsSchema,
+  getWorkerSettingsDeclaration,
+  projectStoredAutonomyLevel,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
@@ -23,6 +26,7 @@ import type { WorkerSettingsRegistration } from './types';
 type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
   | typeof SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID
+  | typeof SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID
   | typeof SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
@@ -30,6 +34,7 @@ type RegisteredWorkerId =
 const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 1,
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 1,
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: 1,
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: 1,
@@ -52,9 +57,9 @@ const toTemplateValues = (
 });
 
 /**
- * Reads persisted template values back into complete settings, exactly as stored: nothing is
- * defaulted or merged in, and a document from an older development shape fails here so the
- * Worker projects as unavailable until that state is reset.
+ * Reads persisted template values back as stored — nothing defaulted or merged, so an older
+ * document fails here and the Worker projects as unavailable. Autonomy is the exception: a level
+ * the Worker no longer offers is projected rather than failing the read.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
@@ -78,7 +83,7 @@ const parseWorkerValues = (
 
   const candidate = {
     workerId,
-    autonomy: autonomyLevel,
+    autonomy: projectStoredAutonomyLevel(getWorkerSettingsDeclaration(workerId), autonomyLevel),
     ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
     ...(extras === undefined ? {} : { extras }),
   };

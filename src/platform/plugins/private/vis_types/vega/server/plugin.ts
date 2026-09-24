@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type {
   VisTypeVegaPluginSetupDependencies,
@@ -24,9 +25,8 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     core
       .getStartServices()
       .then(async ([{ featureFlags }]) => {
-        const standaloneEmbeddableEnabled = await featureFlags.getBooleanValue(
-          VEGA_STANDALONE_EMBEDDABLE_FLAG,
-          false
+        const standaloneEmbeddableEnabled = await firstValueFrom(
+          featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
         );
         embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
           title: 'Vega',

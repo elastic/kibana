@@ -10,6 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { AiIndexCard } from './ai_index_card';
 import { AI_INDEX_TYPE_LABEL } from './labels';
 
@@ -19,6 +20,7 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-07-17T00:00:00.000Z',
   date_modified: '2026-07-17T00:00:00.000Z',
   ...overrides,
@@ -46,6 +48,14 @@ describe('AiIndexCard', () => {
 
     const link = screen.getByRole('link', { name: /support-tickets/ });
     expect(link).toHaveAttribute('href', '/app/context_engine/ai_index/support-tickets');
+    expect(link).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard
+    );
+    expect(link).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_CARD
+    );
     expect(screen.getByTestId('contextAiIndexCard')).toBeInTheDocument();
   });
 
@@ -62,6 +72,27 @@ describe('AiIndexCard', () => {
 
     expect(screen.getByTestId('contextAiIndexCardType')).toHaveTextContent(
       AI_INDEX_TYPE_LABEL[destType]
+    );
+  });
+
+  // `1fr` grid tracks size to the card's min-content width, so an unbreakable id stretches the grid.
+  it('keeps a long id breakable and clamped to one line', () => {
+    const id = 'a'.repeat(256);
+
+    renderAiIndexCard(buildAiIndex({ id }));
+
+    const title = screen.getByTestId('contextAiIndexCardTitle');
+    expect(title).toHaveClass('euiTextBlockTruncate', 'eui-textBreakWord');
+    // The clamp hides most of a long id, so the full value stays reachable on hover.
+    expect(title).toHaveAttribute('title', id);
+  });
+
+  it('keeps a long description breakable', () => {
+    renderAiIndexCard(buildAiIndex({ description: `See https://example.com/${'x'.repeat(200)}` }));
+
+    expect(screen.getByTestId('contextAiIndexCardDescription').firstElementChild).toHaveClass(
+      'euiTextBlockTruncate',
+      'eui-textBreakWord'
     );
   });
 
@@ -133,8 +164,28 @@ describe('AiIndexCard', () => {
     const onDeleteClick = jest.fn();
     renderAiIndexCard(buildAiIndex({ managed: false }), undefined, onDeleteClick);
 
-    fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
-    fireEvent.click(screen.getByTestId('contextAiIndexCardDeleteAction'));
+    const actionsButton = screen.getByTestId('contextAiIndexCardActionsButton');
+    expect(actionsButton).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard
+    );
+    expect(actionsButton).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CARD_ACTIONS_MENU
+    );
+
+    fireEvent.click(actionsButton);
+
+    const deleteAction = screen.getByTestId('contextAiIndexCardDeleteAction');
+    expect(deleteAction).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard
+    );
+    expect(deleteAction).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE
+    );
+    fireEvent.click(deleteAction);
 
     expect(onDeleteClick).toHaveBeenCalledTimes(1);
   });

@@ -15,6 +15,7 @@ import type {
 import type { Entity } from '@kbn/entity-store/common';
 import type { MlPluginSetup, MlSummaryJob } from '@kbn/ml-plugin/server';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { getThreshold } from '../../../../../../common/utils/ml';
@@ -40,6 +41,7 @@ interface GetAnomalyDataOptions {
   fromDate: number;
   toDate: number;
   logger: Logger;
+  mitreDataClient?: MitreAttackDataClient;
   ml: Ml;
   request: KibanaRequest;
   soClient: SavedObjectsClientContract;
@@ -80,6 +82,7 @@ const getAnomalyDataFromApi = async ({
   esClient,
   fromDate,
   logger,
+  mitreDataClient,
   ml,
   request,
   soClient,
@@ -106,6 +109,7 @@ const getAnomalyDataFromApi = async ({
         esClient,
         logger,
         fromMs: fromDate,
+        mitreDataClient,
         ml,
         toMs: toDate,
         request,
@@ -183,6 +187,7 @@ export const getAnomalyData = async ({
   fromDate,
   toDate,
   logger,
+  mitreDataClient,
   ml,
   request,
   soClient,
@@ -199,6 +204,7 @@ export const getAnomalyData = async ({
           esClient,
           fromDate,
           logger,
+          mitreDataClient,
           ml,
           request,
           soClient,
