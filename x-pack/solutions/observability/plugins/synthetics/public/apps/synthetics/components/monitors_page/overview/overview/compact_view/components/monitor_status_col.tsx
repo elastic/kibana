@@ -40,7 +40,6 @@ export const MonitorStatusCol = ({
   openFlyout: (monitor: OverviewStatusMetaData) => void;
   previewMode?: boolean;
 }) => {
-
   const timestamp = monitor.timestamp ? parseTimestamp(monitor.timestamp) : null;
   // Per-user, per-space display preference set from the overview's display
   // options popover; controls whether the "Checked …" label (and its tooltip)
@@ -81,17 +80,12 @@ export const MonitorStatusCol = ({
             <BadgeStatus
               monitor={monitor}
               status={displayStatus}
-<<<<<<< HEAD
-              isBrowserType={monitor.type === MonitorTypeEnum.BROWSER}
-              onClickBadge={() => (previewMode ? null : openFlyout(monitor))}
-=======
               // API monitors are script-based like browser; the status badge needs
               // the same "script error" handling as browser monitors.
               isBrowserType={
                 monitor.type === MonitorTypeEnum.BROWSER || monitor.type === MonitorTypeEnum.API
               }
-              onClickBadge={() => openFlyout(monitor)}
->>>>>>> afcf307a563e05d79e9981dcb85dcef521367252
+              onClickBadge={() => (previewMode ? null : openFlyout(monitor))}
             />
           </EuiFlexItem>
           {isStaleLastRun ? (
@@ -107,7 +101,6 @@ export const MonitorStatusCol = ({
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-
       {showAuxLine ? (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
@@ -162,7 +155,7 @@ export const MonitorStatusCol = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       ) : null}
-
+      a
       <EuiFlexItem grow={false}>
         {timestamp ? (
           <EuiToolTip

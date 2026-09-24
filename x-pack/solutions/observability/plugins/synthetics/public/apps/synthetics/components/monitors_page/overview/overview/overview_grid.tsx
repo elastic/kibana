@@ -99,6 +99,7 @@ export const OverviewGrid = memo(
               <EuiFlexItem grow={false}>
                 <SortFields />
               </EuiFlexItem>
+              {view === 'compactView' ? <OverviewTableColumnSelector /> : null}
               <EuiFlexItem grow={false}>
                 <GroupFields />
               </EuiFlexItem>
@@ -109,7 +110,6 @@ export const OverviewGrid = memo(
                 </EuiFlexItem>
               ) : null}
 
-<<<<<<< HEAD
               <EuiFlexItem grow={false}>
                 <AutodiscoveredMonitorsTour>
                   <DisplayOptionsPopover />
@@ -117,25 +117,6 @@ export const OverviewGrid = memo(
               </EuiFlexItem>
             </>
           )}
-=======
-          <EuiFlexItem grow={false}>
-            <SortFields />
-          </EuiFlexItem>
-          {view === 'compactView' ? <OverviewTableColumnSelector /> : null}
-          <EuiFlexItem grow={false}>
-            <GroupFields />
-          </EuiFlexItem>
-          {!isEmbeddable ? (
-            <EuiFlexItem grow={false}>
-              <ViewButtons />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <AutodiscoveredMonitorsTour>
-              <DisplayOptionsPopover />
-            </AutodiscoveredMonitorsTour>
-          </EuiFlexItem>
->>>>>>> afcf307a563e05d79e9981dcb85dcef521367252
         </EuiFlexGroup>
         {/*
           Card view has no built-in refresh indicator, so we surface a thin

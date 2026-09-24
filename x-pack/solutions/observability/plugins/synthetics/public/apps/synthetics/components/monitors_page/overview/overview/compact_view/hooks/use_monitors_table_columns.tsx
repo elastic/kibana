@@ -369,18 +369,6 @@ export const useMonitorsTableColumns = ({
             },
           ]
         : []),
-<<<<<<< HEAD
-      ...(previewMode
-        ? []
-        : [
-            {
-              name: ACTIONS,
-              render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
-              align: 'right',
-              width: '40px',
-            },
-          ]),
-=======
       {
         id: OVERVIEW_TABLE_COLUMN_ID.createdAt,
         field: 'created_at',
@@ -401,13 +389,16 @@ export const useMonitorsTableColumns = ({
           <MonitorTimestamp timestamp={updatedAt} absolute={absoluteTimestamps} />
         ),
       },
-      {
-        name: ACTIONS,
-        render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
-        align: 'right',
-        width: '40px',
-      },
->>>>>>> afcf307a563e05d79e9981dcb85dcef521367252
+      ...(previewMode
+        ? []
+        : [
+            {
+              name: ACTIONS,
+              render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
+              align: 'right',
+              width: '40px',
+            } as EuiBasicTableColumn<OverviewStatusMetaData>,
+          ]),
     ];
 
     return allColumns
