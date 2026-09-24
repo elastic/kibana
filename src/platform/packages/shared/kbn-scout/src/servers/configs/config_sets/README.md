@@ -15,6 +15,6 @@ For when a custom set is justified, how Scout discovers one, and a worked exampl
 
 ## Ownership and review
 
-New config sets require Apps DX (`@elastic/appex-qa`) review. In the PR description, explain why the suite needs its own config set and why runtime settings or an existing set cannot cover it.
+New config sets require a review from the Apps DX team. If possible, explain in the PR description why the suite needs its own config set and why runtime settings or an existing set cannot cover it.
 
 Teams can own their config sets by adding an entry for the config set's directory in [`.github/CODEOWNERS`](../../../../../../../../../.github/CODEOWNERS). Include this entry in the PR that adds the set. Apps DX remains the default owner of this directory and reviews new sets; subsequent changes to a team-owned set only require the owning team's review.
