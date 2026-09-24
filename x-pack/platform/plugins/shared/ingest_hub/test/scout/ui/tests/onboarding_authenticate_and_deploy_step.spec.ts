@@ -169,12 +169,9 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
 
-    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId');
-    const secretKeyField = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
-    await expect(accessKeyField).toBeVisible();
-    await accessKeyField.fill('AKIATEST');
-    await secretKeyField.fill('secrettest');
-
+    // Deploy must be enabled WITHOUT credentials — this exercises the isCleanupOnly bypass
+    // (!isDeployReady && !isCleanupOnly → disabled). Filling credentials first would mask a
+    // regression where the button is only enabled because isDeployReady, not isCleanupOnly.
     const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
     await expect(deployButton).toBeEnabled();
 

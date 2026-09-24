@@ -186,7 +186,8 @@ export function useMiDeploy({
               ([, policyId]) => !succeededIds.has(policyId)
             )
           );
-          updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
+          // pendingCleanupPolicyIds is cleared below — after the SO write succeeds — so that a
+          // transient SO failure keeps the cleanup retryable in the same session.
           cleanupFailed = Object.keys(remainingPending).length > 0;
         }
 
@@ -197,7 +198,11 @@ export function useMiDeploy({
             updateDetectAndReviewStep({ isDeploying: false });
             return;
           }
-          // Cleanup-only success: prune deleted policies from the SO record.
+          // Cleanup-only success: prune deleted policies from the SO record, then clear local
+          // pendingCleanupPolicyIds only after the SO write is confirmed. A transient SO failure
+          // leaves the pending map populated so the next Deploy attempt retries the SO update
+          // rather than silently losing the cleanup state.
+          let soWriteSucceeded = true;
           if (
             onboardingDeploymentId &&
             (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0)
@@ -206,11 +211,14 @@ export function useMiDeploy({
             const survivingEntries = Object.entries(policyIdsByInstance).filter(
               ([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedIds.has(pid)
             );
-            await updateDeployment(onboardingDeploymentId, {
+            soWriteSucceeded = await updateDeployment(onboardingDeploymentId, {
               services: selectedServiceIds,
               packagePolicyIds: [...new Set(survivingEntries.map(([, pid]) => pid))],
               policyIdsByInstance: Object.fromEntries(survivingEntries),
             });
+          }
+          if (soWriteSucceeded) {
+            updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
           }
           await persistPendingIacTemplate();
           return;

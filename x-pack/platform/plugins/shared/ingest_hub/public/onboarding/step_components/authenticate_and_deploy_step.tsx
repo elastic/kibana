@@ -214,10 +214,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // pending. Changing the method would leave orphaned policies with no cleanup path. pendingCleanup
   // must be included: removeDeployInstance moves IDs out of policyIdsByInstance into
   // pendingCleanupPolicyIds, so after all instances are removed the lock would otherwise lift while
-  // stale policies still exist.
+  // stale policies still exist. ecfStacks covers ECF-only deployments which set neither policy map.
   const isMethodLocked =
     Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
-    Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+    Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0 ||
+    (detectAndReviewStep.ecfStacks?.length ?? 0) > 0;
 
   const handleNext = useCallback(async () => {
     const defaultNames: Record<string, string> = {
