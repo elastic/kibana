@@ -92,6 +92,7 @@ const buildItem = (
   episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
+  error: null,
   ...overrides,
 });
 
@@ -208,7 +209,7 @@ describe('PoliciesExecutionHistoryTable', () => {
         buildItem({
           outcome: 'dispatch_failed',
           failure_reason: 'workflow_not_found',
-          error: { message: 'Workflow not found' },
+          error: { message: 'Workflow not found', stack_trace: null },
         }),
       ],
     });

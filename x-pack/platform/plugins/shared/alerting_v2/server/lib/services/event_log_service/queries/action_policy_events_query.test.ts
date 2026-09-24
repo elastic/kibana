@@ -60,6 +60,14 @@ describe('action policy events queries', () => {
       );
     });
 
+    it('adds @timestamp <= endDate to the range filter when endDate is provided', () => {
+      const until = '2026-05-05T00:00:00Z';
+      const filters = filtersOf(buildShared({ endDate: until }));
+      expect(filters).toEqual(
+        expect.arrayContaining([{ range: { '@timestamp': { gte: SINCE, lte: until } } }])
+      );
+    });
+
     it('matches dispatched, throttled, and dispatch_failed when outcomes is omitted', () => {
       const filters = filtersOf(buildShared());
       expect(filters).toEqual(
@@ -292,9 +300,14 @@ describe('action policy events queries', () => {
       });
     });
 
-    it('sorts by @timestamp desc', () => {
+    it('sorts by @timestamp desc by default', () => {
       const body = buildShared();
       expect(body.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+    });
+
+    it('sorts by @timestamp asc when sortOrder=asc', () => {
+      const body = buildShared({ sortOrder: 'asc' });
+      expect(body.sort).toEqual([{ '@timestamp': { order: 'asc' } }]);
     });
 
     it('sets track_total_hits=true', () => {
