@@ -34,8 +34,12 @@ const getNonEcsFieldValue = (data: TimelineNonEcsData[], field: string): string[
  * for bulk selections, since only `_id`/`_index` are populated there by default.
  */
 const enrichEcsForBulkSend = (item: TimelineItem): Ecs => {
-  const ruleType = getNonEcsFieldValue(item.data, ALERT_RULE_TYPE);
-  const groupId = getNonEcsFieldValue(item.data, ALERT_GROUP_ID);
+  const ruleType =
+    getNonEcsFieldValue(item.data, ALERT_RULE_TYPE) ??
+    getNonEcsFieldValue(item.data, 'signal.rule.type');
+  const groupId =
+    getNonEcsFieldValue(item.data, ALERT_GROUP_ID) ??
+    getNonEcsFieldValue(item.data, 'signal.group.id');
   if (!ruleType && !groupId) {
     return item.ecs;
   }
