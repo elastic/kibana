@@ -9,10 +9,9 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createAgentViaKbn,
-  deleteAllAgentsFromEs,
+  deleteAgentsByIds,
 } from '../../../../scout_agent_builder_shared/lib/agents_kbn';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 const agents = [
   { id: 'test_agent_1', name: 'Test Agent 1', labels: ['first'] as const },
@@ -25,8 +24,7 @@ test.describe(
   'Agent Builder — edit agent',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    test.beforeAll(async ({ kbnClient, esClient }) => {
-      await deleteAllAgentsFromEs(esClient, testData.CHAT_AGENTS_INDEX);
+    test.beforeAll(async ({ kbnClient }) => {
       for (const agent of agents) {
         await createAgentViaKbn(kbnClient, {
           id: agent.id,
@@ -40,9 +38,11 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ esClient }) => {
-      await deleteAllAgentsFromEs(esClient, testData.CHAT_AGENTS_INDEX);
-      await deleteAllConversationsFromEs(esClient);
+    test.afterAll(async ({ kbnClient }) => {
+      await deleteAgentsByIds(
+        kbnClient,
+        agents.map((agent) => agent.id)
+      );
     });
 
     test('edit and clone agent journeys', async ({ page, pageObjects }) => {

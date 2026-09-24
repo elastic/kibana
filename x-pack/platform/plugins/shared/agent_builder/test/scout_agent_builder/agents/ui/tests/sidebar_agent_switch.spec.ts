@@ -12,7 +12,6 @@ import {
   createAgentViaKbn,
   deleteAgentViaKbn,
 } from '../../../../scout_agent_builder_shared/lib/agents_kbn';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import { setupAgentDirectAnswer } from '../../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { test } from '../fixtures';
 
@@ -40,13 +39,12 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
+    test.afterAll(async ({ kbnClient }) => {
       try {
         await deleteAgentViaKbn(kbnClient, CUSTOM_AGENT_ID);
       } catch {
         // ignore
       }
-      await deleteAllConversationsFromEs(esClient);
     });
 
     test('embeddable sidebar agent switch', async ({ page, pageObjects, llmProxy }) => {

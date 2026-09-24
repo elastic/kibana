@@ -7,7 +7,6 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import {
   setupAgentDirectAnswer,
   setupAgentDirectError,
@@ -20,10 +19,6 @@ test.describe(
   () => {
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ esClient }) => {
-      await deleteAllConversationsFromEs(esClient);
     });
 
     test('embeddable sidebar error handling', async ({ page, pageObjects, llmProxy }) => {

@@ -13,7 +13,6 @@ import {
   createAgentViaKbn,
   deleteAgentViaKbn,
 } from '../../../../scout_agent_builder_shared/lib/agents_kbn';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import {
   COMMON_HEADERS,
   INTERNAL_AGENT_BUILDER,
@@ -66,9 +65,9 @@ test.describe(
       await setSpaceDefaultAgentViaApi(kbnClient, null);
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
+    test.afterAll(async ({ kbnClient }) => {
       // afterEach already clears the space default; here we only remove this
-      // spec's own agents (by id) and conversations.
+      // spec's own agents.
       for (const id of [DEFAULT_AGENT.id, OTHER_AGENT.id]) {
         try {
           await deleteAgentViaKbn(kbnClient, id);
@@ -76,7 +75,6 @@ test.describe(
           // ignore — a test may have removed it already
         }
       }
-      await deleteAllConversationsFromEs(esClient);
     });
 
     test('admin sets and clears the space default from the agents list', async ({

@@ -17,6 +17,7 @@ import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
 } from '../../../../scout_agent_builder_shared/lib/connector_kbn';
+import { withOwnedResourceCleanup } from './owned_resource_cleanup';
 import { AgentBuilderApp } from './page_objects';
 
 interface AgentBuilderWorkerFixtures extends ScoutWorkerFixtures {
@@ -50,11 +51,11 @@ export const test = mergeTests(baseTest, apiClientFixture).extend<
     },
     { scope: 'worker', auto: true },
   ],
-  page: async ({ page }, use) => {
+  page: async ({ page, kbnClient }, use) => {
     await page.addInitScript(() => {
       window.localStorage.setItem('home:welcome:show', 'false');
     });
-    await use(page);
+    await withOwnedResourceCleanup(page, kbnClient, () => use(page));
   },
   pageObjects: async (
     {

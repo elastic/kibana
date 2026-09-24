@@ -9,9 +9,9 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createAgentViaKbn,
-  deleteAllAgentsFromEs,
+  deleteAgentsByIds,
 } from '../../../../scout_agent_builder_shared/lib/agents_kbn';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 const agent = { id: 'overview_edit_agent', name: 'Overview Edit Agent', labels: ['overview'] };
 
@@ -24,8 +24,7 @@ test.describe(
   'Agent Builder — edit agent from overview page',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    test.beforeAll(async ({ kbnClient, esClient }) => {
-      await deleteAllAgentsFromEs(esClient, testData.CHAT_AGENTS_INDEX);
+    test.beforeAll(async ({ kbnClient }) => {
       await createAgentViaKbn(kbnClient, {
         id: agent.id,
         name: agent.name,
@@ -37,8 +36,8 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ esClient }) => {
-      await deleteAllAgentsFromEs(esClient, testData.CHAT_AGENTS_INDEX);
+    test.afterAll(async ({ kbnClient }) => {
+      await deleteAgentsByIds(kbnClient, [agent.id]);
     });
 
     test('edits the prompt from the overview flyout without a 400', async ({

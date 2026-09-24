@@ -12,15 +12,11 @@ import {
   createMcpConnectorViaKbn,
   deleteConnectorById,
 } from '../../../../scout_agent_builder_shared/lib/connector_kbn';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import {
   createTestMcpServer,
   type McpServerSimulator,
 } from '../../../../scout_agent_builder_shared/lib/mcp_server_simulator';
-import {
-  createToolViaKbn,
-  deleteAllTools,
-} from '../../../../scout_agent_builder_shared/lib/tools_kbn';
+import { createToolViaKbn } from '../../../../scout_agent_builder_shared/lib/tools_kbn';
 import { test } from '../fixtures';
 
 test.describe(
@@ -32,9 +28,7 @@ test.describe(
     let connectorId: string;
     const ownedConnectorIds: string[] = [];
 
-    test.beforeAll(async ({ kbnClient }) => {
-      await deleteAllTools(kbnClient);
-
+    test.beforeAll(async () => {
       mcpServer = createTestMcpServer();
       mcpServerUrl = await mcpServer.start();
       const connector = await createMcpConnectorViaKbn(kbnClient, mcpServerUrl);
@@ -46,8 +40,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
-      await deleteAllTools(kbnClient);
+    test.afterAll(async ({ kbnClient }) => {
       for (const id of ownedConnectorIds) {
         await deleteConnectorById(kbnClient, id);
       }
@@ -56,7 +49,6 @@ test.describe(
       } catch {
         // ignore
       }
-      await deleteAllConversationsFromEs(esClient);
     });
 
     test('MCP tool flows', async ({ page, pageObjects, kbnClient }) => {

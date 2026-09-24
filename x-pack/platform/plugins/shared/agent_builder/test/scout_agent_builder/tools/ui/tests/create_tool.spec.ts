@@ -8,8 +8,6 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
-import { deleteAllTools } from '../../../../scout_agent_builder_shared/lib/tools_kbn';
 import { test } from '../fixtures';
 
 test.describe(
@@ -36,14 +34,12 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
-      await deleteAllTools(kbnClient);
+    test.afterAll(async ({ esClient }) => {
       try {
         await esClient.indices.delete({ index: testIndexName });
       } catch {
         // ignore
       }
-      await deleteAllConversationsFromEs(esClient);
     });
 
     test('should create an esql tool', async ({ page, pageObjects }) => {

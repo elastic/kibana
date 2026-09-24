@@ -7,7 +7,6 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import { test } from '../fixtures';
 
 const CONVERSATION_DATA = [
@@ -31,10 +30,6 @@ const CONVERSATION_DATA = [
 test.describe('Agent Builder — conversation history', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
-  });
-
-  test.afterAll(async ({ esClient }) => {
-    await deleteAllConversationsFromEs(esClient);
   });
 
   test('conversation history flows', async ({ page, pageObjects, llmProxy }) => {

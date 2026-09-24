@@ -8,7 +8,6 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { deleteAgentViaKbn } from '../../../../scout_agent_builder_shared/lib/agents_kbn';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import { test } from '../fixtures';
 
 test.describe(
@@ -21,7 +20,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
+    test.afterAll(async ({ kbnClient }) => {
       if (createdAgentId) {
         try {
           await deleteAgentViaKbn(kbnClient, createdAgentId);
@@ -29,7 +28,6 @@ test.describe(
           // ignore
         }
       }
-      await deleteAllConversationsFromEs(esClient);
     });
 
     test('creates an agent', async ({ pageObjects }) => {

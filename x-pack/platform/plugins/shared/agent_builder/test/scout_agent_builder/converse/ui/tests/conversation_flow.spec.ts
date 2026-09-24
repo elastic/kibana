@@ -7,7 +7,6 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import { test } from '../fixtures';
 
 test.describe(
@@ -16,10 +15,6 @@ test.describe(
   () => {
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ esClient }) => {
-      await deleteAllConversationsFromEs(esClient);
     });
 
     test('navigates to new conversation page and shows initial state', async ({
