@@ -696,17 +696,23 @@ export const bulkUpdate = async (
       )
     );
 
+    // Owner/existence check must complete before field validation: a foreign or deleted
+    // template can leak schema details through the field-validation error path.
     await Promise.all(
-      casesToUpdate.flatMap(({ updateReq, originalCase }) => [
-        validateTemplateInRequest({ updateReq, originalCase, templatesService }),
+      casesToUpdate.map(({ updateReq, originalCase }) =>
+        validateTemplateInRequest({ updateReq, originalCase, templatesService })
+      )
+    );
+    await Promise.all(
+      casesToUpdate.map(({ updateReq, originalCase }) =>
         validateExtendedFieldsInRequest({
           updateReq,
           originalCase,
           templatesService,
           fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
-        }),
-      ])
+        })
+      )
     );
 
     // Pre-resolve template fields for cases transitioning to closed.

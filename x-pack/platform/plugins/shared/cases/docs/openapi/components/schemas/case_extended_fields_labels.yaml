@@ -2,9 +2,11 @@ type: object
 additionalProperties:
   type: string
 description: >
-  A read-only, response-only map from each `extended_fields` storage key to its
-  human-readable label. Only populated by the get case and search cases endpoints; absent
-  on create, update, push, and comment responses. Not persisted. Including this field
-  in a write request returns a 400 error.
+  A read-only, response-only map from active field definition storage keys to their
+  human-readable labels. Entries reflect currently applicable global and template field
+  definitions — not every stored `extended_fields` key is guaranteed a label, because
+  values retained after switching templates may have no matching current definition.
+  Only populated by the get case and search cases endpoints; absent on create, update,
+  push, and comment responses. Including this field in a write request returns a 400 error.
 example:
   priority_as_keyword: Priority

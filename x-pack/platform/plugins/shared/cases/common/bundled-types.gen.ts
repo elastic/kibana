@@ -667,13 +667,6 @@ export const UserCommentResponseProperties = lazySchema(() =>
 );
 export type UserCommentResponseProperties = z.infer<typeof UserCommentResponseProperties>;
 
-/**
-  * A read-only, response-only map from each `extended_fields` storage key to its human-readable label. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Not persisted. Including this field in a write request returns a 400 error.
-
-  */
-export const CaseExtendedFieldsLabels = lazySchema(() => z.object({}).catchall(z.string()));
-export type CaseExtendedFieldsLabels = z.infer<typeof CaseExtendedFieldsLabels>;
-
 export const ExternalService = lazySchema(() =>
   z
     .object({
@@ -811,7 +804,6 @@ export const CaseResponseProperties = lazySchema(() =>
       )
       .optional()
       .describe('Deprecated. Use `extended_fields` instead. Custom field values for the case.'),
-    extended_fields_labels: CaseExtendedFieldsLabels.optional(),
     description: z.string(),
     /**
       * The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
@@ -1056,6 +1048,13 @@ export const SearchFieldsTypeEnum = SearchFieldsType.enum;
 
 export const SearchFieldsTypeArray = lazySchema(() => z.array(SearchFieldsType));
 export type SearchFieldsTypeArray = z.infer<typeof SearchFieldsTypeArray>;
+
+/**
+  * A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.
+
+  */
+export const CaseExtendedFieldsLabels = lazySchema(() => z.object({}).catchall(z.string()));
+export type CaseExtendedFieldsLabels = z.infer<typeof CaseExtendedFieldsLabels>;
 
 /**
  * Counts of alerts, events, and user comments attached to a case.

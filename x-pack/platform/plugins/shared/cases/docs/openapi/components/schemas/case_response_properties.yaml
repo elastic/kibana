@@ -87,8 +87,6 @@ properties:
       type: object
       properties:
         $ref: 'case_customfields.yaml'
-  extended_fields_labels:
-    $ref: 'case_extended_fields_labels.yaml'
   description:
     type: string
     example: A case description.
