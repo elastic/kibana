@@ -29,6 +29,9 @@ const OXLINT_UNSUPPORTED_FLAGS = [
   '--watch',
 ];
 
+const hasArg = (flag) =>
+  process.argv.slice(2).some((arg) => arg === flag || arg.startsWith(`${flag}=`));
+
 const runLegacyOxlint = async (log, flags) => {
   const unsupportedFlag = process.argv
     .slice(2)
@@ -49,18 +52,14 @@ const runLegacyOxlint = async (log, flags) => {
 };
 
 const runLegacyEslint = () => {
-  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  if (hasArg('--help') || hasArg('-h')) {
     console.log(
       "This is a wrapper around ESLint's CLI that sets some defaults - see Eslint's help for flags:"
     );
     require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
     return;
   }
-  if (
-    process.argv
-      .slice(2)
-      .some((arg) => arg === '--print-config' || arg.startsWith('--print-config='))
-  ) {
+  if (hasArg('--print-config') || hasArg('--version') || hasArg('-v')) {
     require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
     return;
   }
