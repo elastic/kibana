@@ -9,12 +9,12 @@ import { z } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import {
+  AddExamplesPayload,
   DatasetMaturity,
+  DatasetTags,
   MAX_DATASET_DESCRIPTION_LENGTH,
   MAX_DATASET_NAME_LENGTH,
   MAX_EXAMPLES_PER_DATASET,
-  MAX_TAG_LENGTH,
-  MAX_TAGS_PER_DATASET,
 } from '@kbn/evals-common';
 import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
 import type { EvalsPluginStart } from '@kbn/evals-plugin/server';
@@ -28,8 +28,6 @@ export { errorResult, otherResult, toErrorResult } from '../../common/tool_resul
 
 /** How many examples `get_dataset` returns. The rest are reported as omitted. */
 export const MAX_RETURNED_DATASET_EXAMPLES = 50;
-
-const TAG_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9:._-]*$/;
 
 export const datasetNameSchema = z
   .string()
@@ -50,27 +48,22 @@ export const datasetIdSchema = z
     `Dataset id, as returned by ${evalsDatasetTools.listDatasets} or ${evalsDatasetTools.getDataset}.`
   );
 
-export const datasetTagsSchema = z
-  .array(z.string().min(1).max(MAX_TAG_LENGTH).regex(TAG_PATTERN))
-  .max(MAX_TAGS_PER_DATASET)
-  .describe(
-    'Labels for what the dataset is about, for example "esql". Lowercased on write. Letters, numbers, and : . _ - only.'
-  );
+export const datasetTagsSchema = DatasetTags.describe(
+  'Labels for what the dataset is about, for example "esql". Lowercased on write. Letters, numbers, and : . _ - only.'
+);
 
 export const datasetMaturitySchema = DatasetMaturity.describe(
   'Curation level: "raw", "cleaned", or "golden".'
 );
 
-const exampleRecordSchema = z.record(z.string().max(MAX_ID_LENGTH), z.unknown());
+const { shape: examplePayloadShape } = AddExamplesPayload;
 
-export const datasetExampleSchema = z.object({
-  input: exampleRecordSchema
-    .optional()
-    .describe('The example input, such as the prompt or request sent to the target.'),
-  output: exampleRecordSchema.optional().describe('The expected output. Omit only when unknown.'),
-  metadata: exampleRecordSchema
-    .optional()
-    .describe('Optional extra fields stored with the example.'),
+export const datasetExampleSchema = AddExamplesPayload.extend({
+  input: examplePayloadShape.input.describe(
+    'The example input, such as the prompt or request sent to the target.'
+  ),
+  output: examplePayloadShape.output.describe('The expected output. Omit only when unknown.'),
+  metadata: examplePayloadShape.metadata.describe('Optional extra fields stored with the example.'),
 });
 
 export const datasetExamplesSchema = z
