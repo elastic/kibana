@@ -9,6 +9,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
@@ -115,6 +117,7 @@ describe('runCortexOptimize', () => {
       assistantMessage: 'redis',
       esClient,
       spaceId: 'default',
+      interactionId: 'execution-1',
       analytics: coreMock.createSetup().analytics,
       getInference,
       getSearchInferenceEndpoints,
@@ -140,6 +143,9 @@ describe('runCortexOptimize', () => {
           connectorTelemetry: {
             pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
             aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+            productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+            productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+            interactionId: 'execution-1',
           },
         },
       },

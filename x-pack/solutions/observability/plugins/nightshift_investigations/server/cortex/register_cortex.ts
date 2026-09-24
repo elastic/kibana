@@ -16,6 +16,8 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
@@ -108,6 +110,7 @@ export const runCortexOptimize = async ({
   assistantMessage,
   esClient,
   spaceId,
+  interactionId,
   signal,
   analytics,
   conversationId,
@@ -122,6 +125,7 @@ export const runCortexOptimize = async ({
   assistantMessage: string;
   esClient: ElasticsearchClient;
   spaceId: string;
+  interactionId: string;
   signal?: AbortSignal;
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
@@ -168,6 +172,9 @@ export const runCortexOptimize = async ({
         connectorTelemetry: {
           pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
           aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+          productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+          productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+          interactionId,
         },
       },
     },

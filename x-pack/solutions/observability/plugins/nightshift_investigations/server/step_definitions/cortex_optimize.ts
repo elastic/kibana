@@ -65,6 +65,7 @@ export const cortexOptimizeStepDefinition = ({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
     }),
     handler: async (context) => {
+      const { workflow, execution } = context.contextManager.getContext();
       await withTimeout(
         (signal) =>
           runCortexOptimize({
@@ -73,7 +74,8 @@ export const cortexOptimizeStepDefinition = ({
             userMessage: context.input.prompt,
             assistantMessage: context.input.response,
             esClient: context.contextManager.getScopedEsClient(),
-            spaceId: context.contextManager.getContext().workflow.spaceId,
+            spaceId: workflow.spaceId,
+            interactionId: execution.id,
             signal,
             analytics,
             conversationId: context.input.conversation_id,
