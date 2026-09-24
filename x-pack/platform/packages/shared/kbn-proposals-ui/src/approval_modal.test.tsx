@@ -129,7 +129,8 @@ describe('ApprovalModal', () => {
 
     fireEvent.click(screen.getByTestId('approvalModal-confirm'));
 
-    expect(screen.getByText('Applying')).toBeInTheDocument();
+    // The badge and the outcome banner's own title both say it.
+    expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
     expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
 
     await act(async () => {
@@ -163,7 +164,8 @@ describe('ApprovalModal', () => {
       },
     });
 
-    expect(screen.getByText('Declined')).toBeInTheDocument();
+    // The badge and the outcome banner's own title both say it.
+    expect(screen.getAllByText('Declined').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText(/Already reported elsewhere \(duplicate\)/)).toBeInTheDocument();
     expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
     expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();

@@ -29,6 +29,8 @@ export interface ApprovalOutcomeBanner {
   color: 'success' | 'primary' | 'danger';
   title: string;
   hint?: string;
+  /** Swaps the icon for a spinner, for a decision that is still being submitted. */
+  isLoading: boolean;
 }
 
 const IN_PROGRESS_HINT = APPROVAL_MODAL_TRANSLATIONS.inProgressHint;
@@ -74,20 +76,30 @@ export const getApprovalOutcomeBanner = (
 ): ApprovalOutcomeBanner | undefined => {
   switch (phase) {
     case 'applied':
-      return { color: 'success', title: APPROVAL_MODAL_TRANSLATIONS.appliedBannerTitle };
+      return {
+        color: 'success',
+        title: APPROVAL_MODAL_TRANSLATIONS.appliedBannerTitle,
+        isLoading: false,
+      };
     case 'declined':
-      return { color: 'primary', title: APPROVAL_MODAL_TRANSLATIONS.declinedBannerTitle };
+      return {
+        color: 'primary',
+        title: APPROVAL_MODAL_TRANSLATIONS.declinedBannerTitle,
+        isLoading: false,
+      };
     case 'applying':
       return {
         color: 'primary',
         title: APPROVAL_MODAL_TRANSLATIONS.applyingBannerTitle,
         hint: IN_PROGRESS_HINT,
+        isLoading: true,
       };
     case 'declining':
       return {
         color: 'primary',
         title: APPROVAL_MODAL_TRANSLATIONS.decliningBannerTitle,
         hint: IN_PROGRESS_HINT,
+        isLoading: true,
       };
     default:
       return undefined;

@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiLoadingSpinner,
   EuiMarkdownFormat,
   useEuiTheme,
   type EuiButtonColor,
@@ -180,6 +181,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
 
     const badge = getApprovalOutcomeBadge(approvalPhase);
     const banner = getApprovalOutcomeBanner(approvalPhase);
+    const bannerSuffix = effectiveDecision?.reason ?? banner?.hint;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
     const headerCaption = effectiveDecision ? (
@@ -233,13 +235,20 @@ export const ApprovalContent = memo<ApprovalContentProps>(
               announceOnMount
               size="s"
               color={banner.color}
-              iconType={bannerIconFor(banner.color)}
+              iconType={banner.isLoading ? EuiLoadingSpinner : bannerIconFor(banner.color)}
               title={
-                effectiveDecision?.reason
-                  ? `${banner.title} • ${effectiveDecision.reason}`
-                  : banner.hint
-                  ? `${banner.title} • ${banner.hint}`
-                  : banner.title
+                // The reason/hint suffix reads as detail, not part of the state word itself — the
+                // callout's own title styling would otherwise bold all of it.
+                bannerSuffix ? (
+                  <>
+                    {banner.title}
+                    <span css={css({ fontWeight: euiTheme.font.weight.regular })}>
+                      {` • ${bannerSuffix}`}
+                    </span>
+                  </>
+                ) : (
+                  banner.title
+                )
               }
               data-test-subj={dataTestSubj ? `${dataTestSubj}-outcome` : undefined}
             />
