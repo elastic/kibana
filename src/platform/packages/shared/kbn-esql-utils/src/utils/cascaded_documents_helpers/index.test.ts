@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EsqlQuery } from '@elastic/esql';
 import type { AggregateQuery } from '@kbn/es-query';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -149,7 +150,40 @@ describe('cascaded documents helpers utils', () => {
       ]);
     });
 
-    it('should return a single group by field if there is a where command following a STATS by command targeting a column specified as a grouping option in the operating stats command', () => {
+    it('should return metadata when a group field references a field that was declared as an aggregate by a preceding command', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs
+        | STATS x = MAX(bytes)
+        | STATS c = COUNT(*) BY x
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([{ field: 'x', type: 'column' }]);
+      expect(result.appliedFunctions).toEqual([{ identifier: 'c', aggregation: 'COUNT' }]);
+    });
+
+    it('should return empty metadata instead of throwing when query metadata computation fails unexpectedly', () => {
+      const fromSrcSpy = jest.spyOn(EsqlQuery, 'fromSrc').mockImplementation(() => {
+        throw new Error('unexpected parse failure');
+      });
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      try {
+        expect(
+          getESQLStatsQueryMeta('FROM kibana_sample_data_logs | STATS COUNT(*) BY host')
+        ).toEqual({
+          groupByFields: [],
+          appliedFunctions: [],
+        });
+        expect(consoleErrorSpy).toHaveBeenCalled();
+      } finally {
+        fromSrcSpy.mockRestore();
+        consoleErrorSpy.mockRestore();
+      }
+    });
+
+    it('should return a single group by field when a where command follows a single-group STATS', () => {
       const queryString = `
      FROM kibana_sample_data_logs
       | WHERE clientip == "177.120.218.48"
@@ -174,6 +208,38 @@ describe('cascaded documents helpers utils', () => {
         { identifier: 'count', aggregation: 'COUNT' },
         { identifier: 'average', aggregation: 'AVG' },
       ]);
+    });
+
+    it('should keep every STATS grouping field when a later WHERE mentions one of them', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs
+        | STATS count = COUNT(*) BY clientip, extension.keyword
+        | WHERE \`extension.keyword\` IS NOT NULL
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([
+        { field: 'clientip', type: 'column' },
+        { field: 'extension.keyword', type: 'column' },
+      ]);
+      expect(result.appliedFunctions).toEqual([{ identifier: 'count', aggregation: 'COUNT' }]);
+    });
+
+    it('should keep every STATS grouping field when a later WHERE filters an aggregate', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs
+        | STATS count = COUNT(*) BY clientip, extension.keyword
+        | WHERE count > 10
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([
+        { field: 'clientip', type: 'column' },
+        { field: 'extension.keyword', type: 'column' },
+      ]);
+      expect(result.appliedFunctions).toEqual([{ identifier: 'count', aggregation: 'COUNT' }]);
     });
 
     it('should return an empty array of group by fields and applied functions if the query has a keep command that does not specify the current group field', () => {
@@ -364,6 +430,33 @@ describe('cascaded documents helpers utils', () => {
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
             'FROM remote_cluster:traces* | EVAL event = CASE(span.duration.us > 100000, "Bad", "Good") | INLINE STATS COUNT(*) BY event | WHERE event == "Bad"'
+          );
+        });
+
+        it('should construct a cascade leaf query when a later STATS groups by a prior aggregate alias', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs
+              | STATS x = MAX(bytes)
+              | STATS c = COUNT(*) BY x
+            `,
+          };
+
+          const nodePath = ['x'];
+          const nodePathMap = { x: '33' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | INLINE STATS x = MAX(bytes) | INLINE STATS c = COUNT(*) BY x | WHERE x == 33'
           );
         });
 
@@ -914,6 +1007,22 @@ describe('cascaded documents helpers utils', () => {
           )
         ).toBe(
           'FROM kibana_sample_data_logs | WHERE `agent.keyword` == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | STATS count = COUNT(*) BY agent.keyword, extension.keyword | STATS avg = AVG(count) BY agent.keyword'
+        );
+      });
+
+      it('handles filtering on a group field that was declared as an aggregate by a preceding STATS', () => {
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            'FROM kibana_sample_data_logs | STATS x = MAX(bytes) | STATS c = COUNT(*) BY x',
+            [],
+            dataViewMock,
+            'x',
+            33,
+            '+',
+            'integer'
+          )
+        ).toBe(
+          'FROM kibana_sample_data_logs | STATS x = MAX(bytes) | WHERE x == 33 | STATS c = COUNT(*) BY x'
         );
       });
     });

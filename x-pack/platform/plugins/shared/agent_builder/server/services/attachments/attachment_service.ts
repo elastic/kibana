@@ -6,6 +6,9 @@
  */
 
 import type { SavedObjectsServiceStart } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { isAllowedBuiltinAttachment } from '@kbn/agent-builder-server/allow_lists';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -14,7 +17,8 @@ import {
   type AttachmentTypeRegistry,
 } from './attachment_type_registry';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
-import { validateAttachment } from './validate_attachment';
+import { validateAttachmentInputs } from './validate_attachment_inputs';
+import { mergeAttachmentInputs } from './merge_attachment_inputs';
 
 export interface AttachmentServiceStartDeps {
   spaces?: SpacesPluginStart;
@@ -52,19 +56,34 @@ export class AttachmentServiceImpl implements AttachmentService {
   }
 
   start(deps: AttachmentServiceStartDeps): AttachmentServiceStart {
+    const resolveContext = (request: KibanaRequest): AttachmentResolveContext => ({
+      request,
+      spaceId: getCurrentSpaceId({ request, spaces: deps.spaces }),
+      savedObjectsClient: deps.savedObjects.getScopedClient(request),
+    });
+
     return {
-      validate: (attachment, request) => {
-        const resolveContext = {
-          request,
-          spaceId: getCurrentSpaceId({ request, spaces: deps.spaces }),
-          savedObjectsClient: deps.savedObjects.getScopedClient(request),
-        };
-        return validateAttachment({
-          attachment,
+      validateAttachmentInputs: (attachments, request) => {
+        return validateAttachmentInputs({
+          attachments,
           registry: this.attachmentTypeRegistry,
-          resolveContext,
+          resolveContext: resolveContext(request),
+          validateContext: { request },
         });
       },
+      createStateManager: (attachments) =>
+        createAttachmentStateManager(attachments, {
+          getTypeDefinition: (type) => this.attachmentTypeRegistry.get(type),
+        }),
+      mergeAttachmentInputs: ({ stateManager, inputs, request, actor, updateOriginSnapshot }) =>
+        mergeAttachmentInputs({
+          stateManager,
+          inputs,
+          actor,
+          updateOriginSnapshot,
+          resolveContext: resolveContext(request),
+          validateContext: { request },
+        }),
       getTypeDefinition: (attachment) => {
         return this.attachmentTypeRegistry.get(attachment);
       },

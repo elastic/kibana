@@ -28,7 +28,6 @@ import {
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -45,6 +44,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useCreateDataset, useDatasetTagSuggestions, useDatasets } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
+import { CopyDatasetFlyout } from '../../components/copy_dataset_flyout';
 import { ImportDatasetFlyout } from '../../components/import_dataset_flyout';
 import {
   DatasetMaturityBadge,
@@ -68,7 +68,6 @@ type SortableField = Extract<
 
 export const DatasetsListPage: React.FC = () => {
   const history = useHistory();
-  const { euiTheme } = useEuiTheme();
   const { canManage } = useEvalsPermissions();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -79,6 +78,7 @@ export const DatasetsListPage: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedMaturity, setSelectedMaturity] = useState<DatasetMaturity[]>([]);
   const [datasetPendingDelete, setDatasetPendingDelete] = useState<DatasetSummary | null>(null);
+  const [datasetPendingCopy, setDatasetPendingCopy] = useState<DatasetSummary | null>(null);
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
   const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
   const [name, setName] = useState('');
@@ -186,21 +186,38 @@ export const DatasetsListPage: React.FC = () => {
     if (canManage) {
       baseColumns.push({
         name: i18n.COLUMN_ACTIONS,
-        width: '60px',
+        width: '96px',
         align: 'right',
         render: (item: DatasetSummary) => (
-          <EuiToolTip content={i18n.DELETE_DATASET_ACTION} disableScreenReaderOutput>
-            <EuiButtonIcon
-              aria-label={i18n.getDeleteDatasetAriaLabel(item.name)}
-              iconType="trash"
-              color="danger"
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                setDatasetPendingDelete(item);
-              }}
-              data-test-subj="deleteDatasetButton"
-            />
-          </EuiToolTip>
+          <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.COPY_DATASET_ACTION} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={i18n.getCopyDatasetAriaLabel(item.name)}
+                  iconType="copy"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    setDatasetPendingCopy(item);
+                  }}
+                  data-test-subj="copyDatasetButton"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.DELETE_DATASET_ACTION} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={i18n.getDeleteDatasetAriaLabel(item.name)}
+                  iconType="trash"
+                  color="danger"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    setDatasetPendingDelete(item);
+                  }}
+                  data-test-subj="deleteDatasetButton"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       });
     }
@@ -324,7 +341,7 @@ export const DatasetsListPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         {showSearchBar ? (
           <>
             <EuiFlexGroup
@@ -408,7 +425,7 @@ export const DatasetsListPage: React.FC = () => {
           />
         ) : showNoDatasetsYet ? (
           <EuiEmptyPrompt
-            iconType="indexOpen"
+            iconType="tablePlus"
             title={<h2>{i18n.NO_DATASETS_TITLE}</h2>}
             body={<p>{i18n.NO_DATASETS_BODY}</p>}
             actions={
@@ -468,6 +485,15 @@ export const DatasetsListPage: React.FC = () => {
           examplesCount={datasetPendingDelete.examples_count}
           spaceIds={datasetPendingDelete.space_ids}
           onClose={() => setDatasetPendingDelete(null)}
+        />
+      ) : null}
+      {datasetPendingCopy ? (
+        <CopyDatasetFlyout
+          datasetId={datasetPendingCopy.id}
+          datasetName={datasetPendingCopy.name}
+          datasetDescription={datasetPendingCopy.description}
+          onClose={() => setDatasetPendingCopy(null)}
+          onCopied={(newDatasetId) => history.push(`/datasets/${newDatasetId}`)}
         />
       ) : null}
       {isImportFlyoutOpen ? (

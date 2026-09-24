@@ -17,9 +17,14 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiText,
+  EuiTextColor,
+  EuiTextTruncate,
+  EuiTitle,
   EuiToolTip,
+  useEuiTheme,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -31,12 +36,6 @@ import {
 import { useKibana } from '../hooks/use_kibana';
 import { formatBytes, formatNumber } from '../utils/format';
 import type { NewIndexDetails } from '../../common/types';
-import {
-  newIndexName,
-  newIndexShrinkable,
-  newIndexStat,
-  newIndexValue,
-} from './new_index_panel_styles';
 
 interface NewIndexPanelProps {
   index: NewIndexDetails;
@@ -51,11 +50,16 @@ const openIndexLabel = i18n.translate('xpack.serverlessVectordb.home.newIndex.op
   defaultMessage: 'Open index',
 });
 
+const newIndexShrinkable = css`
+  min-inline-size: 0;
+`;
+
 export const NewIndexPanel = ({ index, onDismiss }: NewIndexPanelProps) => {
   const {
     services: { share },
   } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
   const showStats = useIsWithinMinBreakpoint('l');
   const showActions = useIsWithinMinBreakpoint('m');
 
@@ -147,28 +151,33 @@ export const NewIndexPanel = ({ index, onDismiss }: NewIndexPanelProps) => {
             </EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={newIndexShrinkable}>
-            <EuiText
-              size="s"
-              title={indexName}
-              css={[newIndexValue, newIndexName]}
-              data-test-subj="homePageDataCardNewIndexName"
-            >
-              {indexName}
-            </EuiText>
+            <EuiTitle size="xxs">
+              <EuiTextTruncate
+                text={indexName}
+                truncation={useIsWithinMinBreakpoint('s') ? 'middle' : 'end'}
+                width={euiTheme.base * 18}
+                css={{ textOverflow: 'ellipsis' }}
+                data-test-subj="homePageDataCardNewIndexName"
+              />
+            </EuiTitle>
           </EuiFlexItem>
           {showStats && (
             <EuiFlexItem grow={false}>
               <EuiText
                 size="s"
                 color="subdued"
-                css={newIndexStat}
+                className="eui-textNoWrap"
                 data-test-subj="homePageDataCardNewIndexDocuments"
               >
                 <FormattedMessage
                   id="xpack.serverlessVectordb.home.newIndex.documents"
                   defaultMessage="Documents: {count}"
                   values={{
-                    count: <strong css={newIndexValue}>{formatNumber(documentsCount)}</strong>,
+                    count: (
+                      <EuiTextColor color="default">
+                        <strong>{formatNumber(documentsCount)}</strong>
+                      </EuiTextColor>
+                    ),
                   }}
                 />
               </EuiText>
@@ -179,14 +188,18 @@ export const NewIndexPanel = ({ index, onDismiss }: NewIndexPanelProps) => {
               <EuiText
                 size="s"
                 color="subdued"
-                css={newIndexStat}
+                className="eui-textNoWrap"
                 data-test-subj="homePageDataCardNewIndexSize"
               >
                 <FormattedMessage
                   id="xpack.serverlessVectordb.home.newIndex.size"
                   defaultMessage="Size: {size}"
                   values={{
-                    size: <strong css={newIndexValue}>{formatBytes(sizeInBytes)}</strong>,
+                    size: (
+                      <EuiTextColor color="default">
+                        <strong>{formatBytes(sizeInBytes)}</strong>
+                      </EuiTextColor>
+                    ),
                   }}
                 />
               </EuiText>

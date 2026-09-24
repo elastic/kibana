@@ -27,7 +27,7 @@ export const dashboardDrilldown: DrilldownDefinition<
   displayName: i18n.translate('dashboard.drilldown.goToDashboard', {
     defaultMessage: 'Go to dashboard',
   }),
-  euiIcon: 'dashboardApp',
+  euiIcon: 'productDashboard',
   supportedTriggers: DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS,
   action: {
     execute: async (

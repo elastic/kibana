@@ -14,6 +14,7 @@ import {
   MAX_RECOMMENDATIONS,
   MAX_TRIGGER_FEEDBACK,
   MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
   SEVERITY_OPTIONS,
 } from '@kbn/significant-events-schema';
 import {
@@ -83,6 +84,10 @@ const investigationAttributesSchemaV1 = schema.object({
   ),
 });
 
+const investigationAttributesSchemaV2 = investigationAttributesSchemaV1.extends({
+  title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
+});
+
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
   name: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   hidden: true,
@@ -90,6 +95,7 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
   mappings: {
     dynamic: false,
     properties: {
+      title: { type: 'text' },
       status: { type: 'keyword', ignore_above: 1024 },
       subject_type: { type: 'keyword', ignore_above: 1024 },
       subject_id: { type: 'keyword', ignore_above: 1024 },
@@ -113,6 +119,13 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       schemas: {
         create: investigationAttributesSchemaV1,
         forwardCompatibility: investigationAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    2: {
+      changes: [{ type: 'mappings_addition', addedMappings: { title: { type: 'text' } } }],
+      schemas: {
+        create: investigationAttributesSchemaV2,
+        forwardCompatibility: investigationAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
       },
     },
   },

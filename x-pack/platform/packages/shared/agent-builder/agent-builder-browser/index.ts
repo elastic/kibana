@@ -7,6 +7,11 @@
 
 export { formatAgentBuilderErrorMessage } from './base/errors';
 export type {
+  AddConversationEventsParams,
+  AddConversationEventsResult,
+  ConversationsServiceStartContract,
+} from './conversations';
+export type {
   ToolServiceStartContract,
   ExecuteToolParams,
   ExecuteToolReturn,
@@ -29,10 +34,10 @@ export type {
 } from './attachments';
 export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
 export type {
-  ConversationTemplateTabRenderProps,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
   ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateDetailsFlyoutRenderProps,
   ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
 } from './templates';

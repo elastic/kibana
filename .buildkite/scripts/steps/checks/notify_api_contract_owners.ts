@@ -8,6 +8,7 @@
  */
 
 import { readFileSync, existsSync } from 'fs';
+import { basename } from 'node:path';
 import { upsertComment } from '#pipeline-utils';
 
 // Mirrors StabilityTier in @kbn/api-contracts. Kept as a local type because the
@@ -169,7 +170,7 @@ async function main() {
   console.log('PR comment posted successfully');
 }
 
-if (require.main === module) {
+if (basename(process.argv[1] ?? '') === 'notify_api_contract_owners.ts') {
   main().catch((error) => {
     console.error('Failed to post API contract notification:', error);
     process.exit(1);

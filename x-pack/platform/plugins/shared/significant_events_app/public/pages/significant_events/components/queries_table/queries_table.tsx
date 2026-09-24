@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
@@ -50,7 +51,7 @@ import { SparkPlot } from '../../../../components/spark_plot';
 import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { buildDiscoverParams } from '../../utils/discover_helpers';
+import { buildDiscoverParams } from '../../../../util/discover_helpers';
 import {
   ACTIONS_COLUMN_TITLE,
   CHART_SERIES_NAME,
@@ -98,9 +99,13 @@ export function QueriesTable() {
       start: { cps, share },
     },
     core: {
+      application: {
+        capabilities: { nightshift },
+      },
       notifications: { toasts },
     },
   } = useKibana();
+  const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { timeState } = useTimefilter();
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
   const [searchQuery, setSearchQuery] = useState('');
@@ -197,7 +202,7 @@ export function QueriesTable() {
 
   const deleteQueryMutation = useMutation<void, Error, { queryId: string; streamName: string }>({
     mutationFn: async ({ queryId, streamName }) => {
-      await removeQuery({ queryId, streamName });
+      await removeQuery({ queryId });
     },
     onSuccess: async (_, { queryId }) => {
       await invalidateQueriesData();
@@ -329,7 +334,9 @@ export function QueriesTable() {
             description: OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
             enabled: () => discoverLocator !== undefined,
             onClick: (item: SignificantEventQueryRow) => {
-              discoverLocator?.navigate(buildDiscoverParams(item.query, timeState));
+              discoverLocator?.navigate(
+                buildDiscoverParams(item.query.esql.query, timeState.timeRange)
+              );
             },
             isPrimary: true,
             'data-test-subj': 'significant_events_table_open_in_discover_action',
@@ -457,35 +464,39 @@ export function QueriesTable() {
           <EuiFlexItem grow={false}>
             <EuiText size="s">{getEventsCount(queriesData?.total ?? 0)}</EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="cross"
-              size="xs"
-              aria-label={CLEAR_SELECTION_LABEL}
-              isDisabled={isSelectionEmpty}
-              onClick={() => setSelectedItems([])}
-            >
-              {CLEAR_SELECTION_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="trash"
-              color="danger"
-              size="xs"
-              isDisabled={isSelectionEmpty || bulkDemoteMutation.isLoading}
-              isLoading={bulkDemoteMutation.isLoading}
-              onClick={() => setItemsToDelete(selectedItems)}
-            >
-              {DELETE_SELECTED_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          {!isSelectionEmpty && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {getSelectedCountLabel(selectedItems.length)}
-              </EuiText>
-            </EuiFlexItem>
+          {canManage && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="cross"
+                  size="xs"
+                  aria-label={CLEAR_SELECTION_LABEL}
+                  isDisabled={isSelectionEmpty}
+                  onClick={() => setSelectedItems([])}
+                >
+                  {CLEAR_SELECTION_LABEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="trash"
+                  color="danger"
+                  size="xs"
+                  isDisabled={isSelectionEmpty || bulkDemoteMutation.isLoading}
+                  isLoading={bulkDemoteMutation.isLoading}
+                  onClick={() => setItemsToDelete(selectedItems)}
+                >
+                  {DELETE_SELECTED_LABEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              {!isSelectionEmpty && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {getSelectedCountLabel(selectedItems.length)}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -512,10 +523,14 @@ export function QueriesTable() {
             pageSizeOptions: [...PAGE_SIZE_OPTIONS],
           }}
           onChange={onTableChange}
-          selection={{
-            selected: selectedItems,
-            onSelectionChange: setSelectedItems,
-          }}
+          selection={
+            canManage
+              ? {
+                  selected: selectedItems,
+                  onSelectionChange: setSelectedItems,
+                }
+              : undefined
+          }
         />
       </EuiFlexItem>
       {itemsToDelete.length > 0 && (

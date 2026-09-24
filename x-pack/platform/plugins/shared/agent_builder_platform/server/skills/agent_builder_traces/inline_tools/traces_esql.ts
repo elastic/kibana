@@ -76,6 +76,7 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
         esClient: esClient.asCurrentUser,
         index: tracesIndex,
         additionalContext,
+        execute: 'data',
       });
 
       if (esqlResponse.error) {

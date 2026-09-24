@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  NIGHTSHIFT_FEATURE_ID,
+  NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID,
+} from '@kbn/nightshift-shared';
 import type { KibanaRole, ScoutTestConfig } from '@kbn/scout';
 
 // Headers for internal APIs (version 1)
@@ -21,18 +25,40 @@ export const PUBLIC_API_HEADERS = {
   'elastic-api-version': '2023-10-31',
 } as const;
 
-/**
- * Returns streams user roles with privileges appropriate for the deployment type.
- * Some cluster privileges (manage_ilm, manage_data_stream_global_retention) are not
- * supported in serverless mode.
- */
-export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaRole> {
-  const isServerless = config.serverless;
-
+function getAdminElasticsearchPrivileges(isServerless: boolean): KibanaRole['elasticsearch'] {
   // Cluster privileges that are only available in stateful deployments
   const statefulOnlyClusterPrivileges = isServerless
     ? []
     : ['manage_ilm', 'manage_data_stream_global_retention'];
+
+  return {
+    cluster: [
+      'manage_index_templates',
+      'monitor',
+      'manage_pipeline',
+      ...statefulOnlyClusterPrivileges,
+    ],
+    indices: [
+      { names: ['logs*'], privileges: ['all'] },
+      { names: ['.ds-logs*'], privileges: ['all'] },
+      { names: ['.streams*'], privileges: ['all'] },
+      { names: ['.kibana_streams*'], privileges: ['all'] },
+      { names: ['.significant_events*'], privileges: ['all'] },
+    ],
+  };
+}
+
+/**
+ * Returns streams user roles with privileges appropriate for the deployment type.
+ * Some cluster privileges (manage_ilm, manage_data_stream_global_retention) are not
+ * supported in serverless mode.
+ *
+ * `base: ['all']` cannot be mixed with feature privileges in the same kibana
+ * entry. Manage engines is `includeIn: 'none'`, so a dedicated feature role is
+ * used for tests that pause activity or write run limits.
+ */
+export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaRole> {
+  const adminElasticsearch = getAdminElasticsearchPrivileges(Boolean(config.serverless));
 
   return {
     streamsAdmin: {
@@ -43,21 +69,20 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
           spaces: ['*'],
         },
       ],
-      elasticsearch: {
-        cluster: [
-          'manage_index_templates',
-          'monitor',
-          'manage_pipeline',
-          ...statefulOnlyClusterPrivileges,
-        ],
-        indices: [
-          { names: ['logs*'], privileges: ['all'] },
-          { names: ['.ds-logs*'], privileges: ['all'] },
-          { names: ['.streams*'], privileges: ['all'] },
-          { names: ['.kibana_streams*'], privileges: ['all'] },
-          { names: ['.significant_events*'], privileges: ['all'] },
-        ],
-      },
+      elasticsearch: adminElasticsearch,
+    },
+
+    nightshiftEngineAdmin: {
+      kibana: [
+        {
+          base: [],
+          feature: {
+            [NIGHTSHIFT_FEATURE_ID]: ['all', NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID],
+          },
+          spaces: ['*'],
+        },
+      ],
+      elasticsearch: adminElasticsearch,
     },
 
     streamsReadOnly: {

@@ -112,7 +112,7 @@ life-cycle of a PR looks like the following:
 6. **Merge**: Once CI is green and the reviewers are approve, PRs in the Kibana
    repo are "squash-merged" to `master` to keep the history clean.
 7. **Backport**: After merging to `master`, the PR is backported to the
-   branches that represent the versions indicated by the labels. The `yarn
+   branches that represent the versions indicated by the labels. The `pnpm exec
    backport` command can be used to automate most of the process.
 
 There are always exceptions to the rule, so seeking guidance about any of the

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { RoundInputText } from './round_input_text';
 
@@ -75,5 +75,38 @@ describe('RoundInputText', () => {
     );
 
     expect(screen.getByText('Screenshot (1).png')).toBeInTheDocument();
+  });
+
+  describe('onHoverImage', () => {
+    it('calls onHoverImage with the image name on mouse enter', () => {
+      const onHoverImage = jest.fn();
+      renderWithProvider(
+        <RoundInputText text="[photo.png](image://photo.png)" onHoverImage={onHoverImage} />
+      );
+
+      const badge = screen.getByText('photo.png').closest('span')!;
+      fireEvent.mouseEnter(badge);
+      expect(onHoverImage).toHaveBeenCalledWith('photo.png');
+    });
+
+    it('calls onHoverImage with null on mouse leave', () => {
+      const onHoverImage = jest.fn();
+      renderWithProvider(
+        <RoundInputText text="[photo.png](image://photo.png)" onHoverImage={onHoverImage} />
+      );
+
+      const badge = screen.getByText('photo.png').closest('span')!;
+      fireEvent.mouseLeave(badge);
+      expect(onHoverImage).toHaveBeenCalledWith(null);
+    });
+
+    it('does not crash when onHoverImage is not provided', () => {
+      renderWithProvider(<RoundInputText text="[photo.png](image://photo.png)" />);
+      const badge = screen.getByText('photo.png').closest('span')!;
+      expect(() => {
+        fireEvent.mouseEnter(badge);
+        fireEvent.mouseLeave(badge);
+      }).not.toThrow();
+    });
   });
 });

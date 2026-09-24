@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AttachmentEventSource, Conversation } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import {
@@ -17,10 +18,26 @@ import {
   createAttachmentInvalidError,
 } from '@kbn/agent-builder-common';
 import type { AttachmentPublicClient, ListAttachmentsResult } from '@kbn/agent-builder-server';
-import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { ConversationService } from '../conversation';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import {
+  attachmentChangesToEvents,
+  createAttachmentStateManager,
+} from '@kbn/agent-builder-server/attachments';
+import type { ConversationClient, ConversationService } from '../conversation';
+import { userMessageActor } from '../conversation/client/rounds_to_events';
 import type { AttachmentServiceStart } from './types';
 import { hasClientId, isAttachmentReferencedInRounds } from './attachment_guards';
+
+/**
+ * The `source` recorded on attachment events emitted from the public client. Bound once when the
+ * client is constructed (see {@link createAttachmentPublicClient}) so external callers reaching
+ * the client through `AttachmentsStart.getScopedClient` cannot misattribute their mutations —
+ * they never see this type and cannot override it per call.
+ */
+export type AttachmentPublicClientSource = Extract<
+  AttachmentEventSource,
+  'http_api' | 'workflow' | 'server_api'
+>;
 
 interface Deps {
   request: KibanaRequest;
@@ -28,6 +45,12 @@ interface Deps {
   attachmentsService: AttachmentServiceStart;
   coreStart: CoreStart;
   spaces?: SpacesPluginStart;
+  /**
+   * Bound at construction: recorded as `source` on every attachment event this client emits.
+   * Routes pass `'http_api'`, workflow steps pass `'workflow'`, `AttachmentsStart.getScopedClient`
+   * in `plugin.ts` passes `'server_api'` for external plugin callers.
+   */
+  source: AttachmentPublicClientSource;
 }
 
 export const createAttachmentPublicClient = ({
@@ -36,6 +59,7 @@ export const createAttachmentPublicClient = ({
   attachmentsService,
   coreStart,
   spaces,
+  source,
 }: Deps): AttachmentPublicClient => {
   const loadState = async (conversationId: string) => {
     const conversationClient = await conversationsService.getScopedClient({ request });
@@ -44,6 +68,48 @@ export const createAttachmentPublicClient = ({
       getTypeDefinition: attachmentsService.getTypeDefinition,
     });
     return { conversation, conversationClient, stateManager };
+  };
+
+  /**
+   * Persists the state manager's attachments and, when something was created, versioned or
+   * deleted, the matching attachment events in the same write. Metadata-only changes have no
+   * event but still go through `appendEvents` so `reconcileAttachments` runs (race-safe).
+   */
+  const persist = async ({
+    conversation,
+    conversationClient,
+    stateManager,
+    renderInline = false,
+  }: {
+    conversation: Conversation;
+    conversationClient: ConversationClient;
+    stateManager: AttachmentStateManager;
+    renderInline?: boolean;
+  }) => {
+    const changes = stateManager.drainChanges();
+    // The caller's identity: the authenticated Kibana user behind the HTTP request, or the user
+    // a workflow executes as (steps pass the workflow's fake request). When the caller has no
+    // profile id (some API-key callers), pass `undefined` as the conversation to
+    // `userMessageActor` so its owner fallback does NOT fire — we would rather stamp the honest
+    // `id: 'unknown'` than lie by attributing the mutation to the conversation owner.
+    const author = await conversationsService.getConversationRoundAuthor({ request });
+    const actor = userMessageActor(author ? conversation : undefined, { author });
+    const events =
+      changes.length > 0
+        ? attachmentChangesToEvents(changes, { source, actor, render_inline: renderInline })
+        : [];
+    // Route the write through `appendEvents` in both cases (with or without events): it's the only
+    // path that runs `reconcileAttachments` against the caller's snapshot, so a concurrent
+    // add/delete between `loadState` and this write can't be silently clobbered. `appendEvents`
+    // defaults to `converse` access; `owner` keeps the original permission check.
+    await conversationClient.appendEvents(
+      {
+        id: conversation.id,
+        events,
+        attachments: { snapshot: conversation.attachments ?? [], produced: stateManager.getAll() },
+      },
+      { access: 'owner' }
+    );
   };
 
   return {
@@ -65,8 +131,17 @@ export const createAttachmentPublicClient = ({
       return record;
     },
 
-    async create({ conversationId, id, type, data, origin, description, hidden }) {
-      const { conversationClient, stateManager } = await loadState(conversationId);
+    async create({
+      conversationId,
+      id,
+      type,
+      data,
+      origin,
+      description,
+      hidden,
+      render_inline: renderInline,
+    }) {
+      const { conversation, conversationClient, stateManager } = await loadState(conversationId);
 
       if (id && stateManager.getAttachmentRecord(id)) {
         throw createAttachmentAlreadyExistsError({ attachmentId: id });
@@ -84,22 +159,20 @@ export const createAttachmentPublicClient = ({
         attachment = await stateManager.add(
           { id, type, data, origin, description, hidden } as AttachmentInput,
           ATTACHMENT_REF_ACTOR.user,
-          resolveContext
+          resolveContext,
+          { request }
         );
       } catch (e) {
         throw createAttachmentInvalidError((e as Error).message);
       }
 
-      await conversationClient.update({
-        id: conversationId,
-        attachments: stateManager.getAll(),
-      });
+      await persist({ conversation, conversationClient, stateManager, renderInline });
 
       return attachment;
     },
 
-    async update({ conversationId, attachmentId, data, description }) {
-      const { conversationClient, stateManager } = await loadState(conversationId);
+    async update({ conversationId, attachmentId, data, description, render_inline: renderInline }) {
+      const { conversation, conversationClient, stateManager } = await loadState(conversationId);
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
       if (!existing) {
@@ -116,7 +189,8 @@ export const createAttachmentPublicClient = ({
         updated = await stateManager.update(
           attachmentId,
           { data, description },
-          ATTACHMENT_REF_ACTOR.user
+          ATTACHMENT_REF_ACTOR.user,
+          { request }
         );
       } catch (e) {
         throw createAttachmentInvalidError((e as Error).message);
@@ -126,10 +200,7 @@ export const createAttachmentPublicClient = ({
         throw createAttachmentInvalidError(`Failed to update attachment '${attachmentId}'`);
       }
 
-      await conversationClient.update({
-        id: conversationId,
-        attachments: stateManager.getAll(),
-      });
+      await persist({ conversation, conversationClient, stateManager, renderInline });
 
       return updated;
     },
@@ -175,10 +246,7 @@ export const createAttachmentPublicClient = ({
         }
       }
 
-      await conversationClient.update({
-        id: conversationId,
-        attachments: stateManager.getAll(),
-      });
+      await persist({ conversation, conversationClient, stateManager });
     },
   };
 };

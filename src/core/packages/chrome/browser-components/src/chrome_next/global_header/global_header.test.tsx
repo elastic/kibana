@@ -19,8 +19,8 @@ import { ChromeNextGlobalHeader } from './global_header';
 describe('ChromeNextGlobalHeader', () => {
   it('renders the project picker beside the context switcher', () => {
     const chrome = chromeServiceMock.createStartContract();
-    chrome.next.contextSwitcher.set(<span>Context switcher</span>);
-    chrome.next.projectPicker.set(<span>Project picker</span>);
+    chrome.controls.contextSwitcher.set(<span>Context switcher</span>);
+    chrome.controls.projectPicker.set(<span>Project picker</span>);
 
     renderWithI18n(
       <TestChromeProviders chrome={chrome}>
@@ -53,7 +53,7 @@ describe('ChromeNextGlobalHeader', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
-    chrome.next.getNewsfeedHandler$.mockReturnValue(
+    chrome.help.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
         open: jest.fn(),
         hasNew$: new BehaviorSubject(false),
@@ -75,7 +75,7 @@ describe('ChromeNextGlobalHeader', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
-    chrome.next.getNewsfeedHandler$.mockReturnValue(
+    chrome.help.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
         open: jest.fn(),
         hasNew$: new Subject<boolean>(),
@@ -98,7 +98,7 @@ describe('ChromeNextGlobalHeader', () => {
     const hasNew$ = new BehaviorSubject(true);
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
-    chrome.next.getNewsfeedHandler$.mockReturnValue(
+    chrome.help.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
         open: jest.fn(),
         hasNew$,
@@ -124,5 +124,21 @@ describe('ChromeNextGlobalHeader', () => {
     expect(screen.queryByTestId('headerActionButtonNotification')).not.toBeInTheDocument();
     expect(screen.queryByTestId('helpMenuWhatsNewUnreadIndicator')).not.toBeInTheDocument();
     expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
+  });
+
+  it('does not announce project breadcrumbs', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'Should not be announced' }]);
+    chrome.project.getBreadcrumbs$.mockReturnValue(breadcrumbs$);
+    chrome.inlineAppHeader.register('Dashboards');
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeNextGlobalHeader />
+      </TestChromeProviders>
+    );
+
+    const announcer = await screen.findByLabelText('Page change announcements');
+    expect(announcer).not.toHaveTextContent('Should not be announced');
   });
 });

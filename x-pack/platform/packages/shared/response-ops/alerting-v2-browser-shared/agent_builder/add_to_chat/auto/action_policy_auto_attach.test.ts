@@ -21,7 +21,7 @@ const createPolicy = (overrides?: Partial<ActionPolicyResponse>): ActionPolicyRe
     description: 'Routes critical alerts',
     enabled: true,
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
-    matcher: 'data.severity : "critical"',
+    matcher: { expression: 'data.severity : "critical"' },
     group_by: ['host.name'],
     tags: ['production'],
     grouping_mode: 'per_field',
@@ -101,7 +101,6 @@ describe('registerActionPolicyAutoAttach', () => {
     const policy = createPolicy({
       matcher: null,
       group_by: null,
-      tags: null,
       snoozed_until: null,
     });
 
@@ -119,7 +118,6 @@ describe('registerActionPolicyAutoAttach', () => {
         name: 'Critical production alerts',
         matcher: undefined,
         group_by: undefined,
-        tags: undefined,
         snoozed_until: undefined,
       }),
     });

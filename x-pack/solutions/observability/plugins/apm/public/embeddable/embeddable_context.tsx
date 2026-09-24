@@ -115,6 +115,7 @@ export function ApmEmbeddableContext({
             ...deps.coreStart,
             apmSourcesAccess: deps.pluginsStart.apmSourcesAccess,
             dataViews: deps.pluginsStart.dataViews,
+            logsDataAccess: deps.pluginsStart.logsDataAccess,
             slo: deps.pluginsStart.slo,
             telemetry: deps.telemetry,
           }}

@@ -14,8 +14,10 @@ export type MockUiSettingsClient = jest.Mocked<IUiSettingsClient>;
 export function createSettingsService(): {
   settingsService: SettingsService;
   mockUiSettingsClient: MockUiSettingsClient;
+  mockSpaceUiSettingsClient: MockUiSettingsClient;
 } {
   const mockUiSettingsClient = uiSettingsServiceMock.createClient();
-  const settingsService = new SettingsService(mockUiSettingsClient);
-  return { settingsService, mockUiSettingsClient };
+  const mockSpaceUiSettingsClient = uiSettingsServiceMock.createClient();
+  const settingsService = new SettingsService(mockUiSettingsClient, mockSpaceUiSettingsClient);
+  return { settingsService, mockUiSettingsClient, mockSpaceUiSettingsClient };
 }

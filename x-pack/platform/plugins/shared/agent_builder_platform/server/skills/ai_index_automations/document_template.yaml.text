@@ -1,0 +1,259 @@
+version: "1"
+# Bottom-Up strategy — one `document` KI per record in a bounded corpus.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands;
+# everything below `consts` is already correct and does not need to be rewritten to make it work.
+#
+# To adapt it:
+#   1. Set every value in `consts`. `corpus_filter` is the agreed bound on what gets indicated —
+#      it is a whole ES|QL line, so it can carry several conditions, and setting it to an empty
+#      string takes the whole index.
+#   2. Add any further fields the summary should draw on to the `KEEP` in `discover_documents`,
+#      remembering that `KEEP` fixes the column order the `foreach` reads by position.
+#   3. Tell the prompt what these documents are. "Support article" and "incident record" produce
+#      different summaries from the same text, and the model cannot tell which it is holding.
+#
+# One KI per document is the right granularity only for a bounded corpus of documents that each
+# answer something on their own. When a pass produces many near-identically-titled KIs, the corpus
+# wants a coarser strategy — see `analyze-and-improve`.
+name: Document KI automation
+description: >
+  Summarises each document in a bounded corpus into its own Knowledge Indicator, carrying verified
+  ES|QL access patterns that reach the live record.
+enabled: true
+
+consts:
+  # The Context Engine AI index the indicators are written into.
+  ai_index_id: my-ai-index
+  # The index the documents are read from.
+  source_index: my-source-index
+  # The field used as the document's title.
+  title_field: title
+  # The field holding the document body.
+  body_field: body
+  # The agreed corpus filter, as a complete ES|QL line. Set to "" to take the whole index.
+  corpus_filter: "| WHERE published_at >= NOW() - 365 days"
+  # Upper bound on documents summarised in one run. Each costs a model call.
+  max_documents: 50
+  # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
+  # context window and silently drop the rest of the batch.
+  body_max_chars: 12000
+
+tags:
+  - document-ki
+
+triggers:
+  - type: manual
+
+steps:
+  # Fetched once, outside the loop, and handed to every summary. Without it the model only ever
+  # sees one document's text, so the access patterns it writes name fields that do not exist and
+  # the KI fails verification — which costs the whole per-document model call.
+  - name: fetch_mapping
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /{{ consts.source_index }}/_mapping
+
+  - name: discover_documents
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM {{ consts.source_index }} METADATA _id
+        {{ consts.corpus_filter }}
+        | EVAL body = SUBSTRING({{ consts.body_field }}, 1, {{ consts.body_max_chars }})
+        | KEEP _id, {{ consts.title_field }}, body
+        | LIMIT {{ consts.max_documents }}
+
+  - name: loop_documents
+    type: foreach
+    foreach: "{{ steps.discover_documents.output.values | json }}"
+    # One document that fails to summarise should not cost the rest of the batch.
+    iteration-on-failure:
+      continue: true
+    steps:
+      # Column order comes from the `KEEP` above: _id, title, body. Changing that list moves
+      # these indices.
+      - name: document_context
+        type: data.set
+        with:
+          doc_id: "{{ foreach.item[0] }}"
+          title: "{{ foreach.item[1] }}"
+          body: "{{ foreach.item[2] }}"
+
+      - name: summarize_document
+        type: ai.prompt
+        with:
+          systemPrompt: |
+            You summarise source documents for a retrieval index. Ground every statement in the
+            document text you are given. Never add background knowledge, and never state that the
+            document says something it does not. Every ES|QL query you write must be
+            syntactically and semantically valid.
+          prompt: |
+            You are writing a Knowledge Indicator for one document from the
+            {{ consts.source_index }} index, so that an agent can find it and know what it covers
+            without reading it.
+
+            Document id: {{ steps.document_context.output.doc_id }}
+            Title: {{ steps.document_context.output.title }}
+
+            Body:
+            {{ steps.document_context.output.body }}
+
+            Mapping of {{ consts.source_index }} — the only fields that exist, and the only ones
+            your ES|QL may name:
+            {{ steps.fetch_mapping.output | json }}
+
+            Produce a structured summary of this document, using only its text above.
+
+            This KI sits alongside one per other document in the corpus, so `summary` has to say
+            what *this* document settles that its neighbours do not. A summary that would fit any
+            document in the corpus is worse than useless: it makes the whole set unrankable.
+
+            For `access_patterns` give at least 2 ways to reach this material as live data, each
+            with:
+            - question_type: a short label for the kind of question.
+            - esql_template: a parameterized ES|QL query using named `?param` placeholders.
+            - esql_example: the same query with real values substituted and a small LIMIT.
+            - params: the named parameters used, each with name/type/example.
+            - returns: a short description of what the query returns.
+
+            At least one pattern retrieves this exact document; the others reach the documents
+            around it — same topic, same period, whatever the corpus makes sensible.
+
+            ES|QL correctness rules — esql_template and esql_example are both executed by the
+            verifier, so both must be valid and runnable:
+            - Start with `FROM {{ consts.source_index }}`; use `|` between commands. Every field
+              you name must appear in the mapping above — a field inferred from the document's
+              subject matter rather than read off the mapping is the most common way this fails.
+              Reading `_id` requires `FROM {{ consts.source_index }} METADATA _id`.
+            - Quote string literals with double quotes; do not quote numbers or booleans.
+            - Date literals are strict ISO-8601, e.g. "2024-01-01T00:00:00.000Z"; for relative
+              ranges prefer `NOW() - 30 days`.
+            - Keep esql_example runnable and cheap: end it with a small `| LIMIT n`.
+          schema:
+            type: object
+            properties:
+              display_name:
+                type: string
+                description: "Short title for this KI, <= 10 words"
+              summary:
+                type: string
+                description: "What this document settles that its neighbours do not"
+              topics:
+                type: array
+                items:
+                  type: string
+              answers_questions:
+                type: array
+                items:
+                  type: string
+                description: "Questions this document answers on its own"
+              when_to_use:
+                type: string
+              access_patterns:
+                type: array
+                minItems: 2
+                items:
+                  type: object
+                  properties:
+                    question_type:
+                      type: string
+                    esql_template:
+                      type: string
+                    esql_example:
+                      type: string
+                    params:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          type:
+                            type: string
+                          example:
+                            type: string
+                        required: ["name", "type", "example"]
+                    returns:
+                      type: string
+                  required: ["question_type", "esql_template", "esql_example", "params", "returns"]
+            required:
+              ["display_name", "summary", "topics", "answers_questions", "when_to_use", "access_patterns"]
+
+      # Built once so verify_ki and create_ki see exactly the same document.
+      - name: assemble_ki
+        type: data.set
+        with:
+          ki:
+            type: document
+            title: "{{ steps.summarize_document.output.content.display_name }}"
+            # Carries the source document's own title and topics, which is what separates this KI
+            # from its neighbours when their summaries read alike.
+            description: >-
+              {{ steps.document_context.output.title }} —
+              {{ steps.summarize_document.output.content.summary }}
+            content: |
+              # {{ steps.document_context.output.title }}
+
+              Source: {{ consts.source_index }} document {{ steps.document_context.output.doc_id }}
+
+              ## Summary
+              {{ steps.summarize_document.output.content.summary }}
+
+              ## Topics
+              {% for topic in steps.summarize_document.output.content.topics -%}
+              - {{ topic }}
+              {% endfor %}
+              ## Answers questions
+              {% for q in steps.summarize_document.output.content.answers_questions -%}
+              - {{ q }}
+              {% endfor %}
+              ## When to use
+              {{ steps.summarize_document.output.content.when_to_use }}
+
+              ## Access patterns
+              {% for ap in steps.summarize_document.output.content.access_patterns -%}
+              - [{{ ap.question_type }}] {{ ap.returns }}
+                Template: `{{ ap.esql_template }}`
+                Example: `{{ ap.esql_example }}`
+              {% endfor %}
+            tags:
+              - "{{ consts.source_index }}"
+              - document
+            attributes:
+              # Every ES|QL the KI carries goes here, which is what the verifiers check.
+              esql: "${{ steps.summarize_document.output.content.access_patterns | map: 'esql_example' }}"
+              source_doc_id: "{{ steps.document_context.output.doc_id }}"
+              topics: "${{ steps.summarize_document.output.content.topics }}"
+
+      - name: verify_ki
+        type: context-engine.verifyKi
+        with:
+          verifiers:
+            - esql-valid-syntax
+            - esql-valid-runtime
+          ki: "${{ steps.assemble_ki.output.ki }}"
+
+      - name: check_verification
+        type: if
+        condition: "steps.verify_ki.output.passed : true"
+        steps:
+          # `ki_id` pairs the index with the source document id, so a re-run replaces that
+          # document's KI rather than appending a second copy, and two indices holding the same
+          # document id do not collide. Omit `ki_id` entirely on a data-stream destination, which
+          # rejects it.
+          - name: create_ki
+            type: context-engine.createKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ consts.source_index }}-{{ steps.document_context.output.doc_id }}"
+              ki: "${{ steps.assemble_ki.output.ki }}"
+        else:
+          - name: log_verification_failure
+            type: console
+            with:
+              message: |
+                KI verification failed for document
+                {{ steps.document_context.output.doc_id }}.
+                Results: {{ steps.verify_ki.output.results | json }}

@@ -68,9 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsLayerSettings');
       // annotations settings have only ignore filters
       await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
-      expect(
-        await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters');
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
     });
 
