@@ -41,14 +41,12 @@ const HIT_TIER1_RESULT = {
       // Data stream hits report the backing index, not the data stream name.
       index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
       id: 'evt-1',
-      score: 1.2,
-      '@timestamp': '2026-07-30T13:05:00.000Z',
+      timestamp: '2026-07-30T13:05:00.000Z',
     },
     {
       index: '.alerts-security.alerts-default',
       id: 'evt-2',
-      score: 0.9,
-      '@timestamp': '2026-07-30T13:06:00.000Z',
+      timestamp: '2026-07-30T13:06:00.000Z',
     },
   ],
   affected_assets: {
@@ -80,10 +78,10 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
       execution: { executed: true, row_count: 2, hit: true },
       affected_hosts: ['WIN-ANALYST01'],
       affected_users: ['svc-deploy-bot'],
-      hit_refs: [
+      hits: [
         {
-          event_id: 't2-evt-1',
-          source_index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+          id: 't2-evt-1',
+          index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
           timestamp: '2026-07-30T14:00:00.000Z',
         },
       ],
@@ -102,10 +100,10 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
       risk_score: 51,
       execution: { executed: true, row_count: 1, hit: true },
       affected_hosts: ['ci-deploy-runner-07'],
-      hit_refs: [
+      hits: [
         {
-          event_id: 't2-evt-2',
-          source_index: '.ds-logs-endpoint.events.file-default-2026.07.30-000001',
+          id: 't2-evt-2',
+          index: '.ds-logs-endpoint.events.file-default-2026.07.30-000001',
           timestamp: '2026-07-30T14:05:00.000Z',
         },
       ],
@@ -371,10 +369,10 @@ describe('buildSseData', () => {
           risk_score: 73,
           execution: { executed: true, row_count: 3, hit: true },
           affected_hosts: ['WIN-ANALYST01'],
-          hit_refs: [
+          hits: [
             {
-              event_id: 't2-only-1',
-              source_index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+              id: 't2-only-1',
+              index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
               timestamp: '2026-07-30T14:00:00.000Z',
             },
           ],
