@@ -292,10 +292,10 @@ export const DEPRECATED_BADGE = i18n.translate('xpack.cases.configureCases.depre
   defaultMessage: 'Deprecated',
 });
 
-export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.casesRedesign.settings.title', {
+export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.settings.title', {
   defaultMessage: 'Cases settings',
 });
 
-export const BACK_TO_CASES = i18n.translate('xpack.cases.casesRedesign.settings.backToCases', {
+export const BACK_TO_CASES = i18n.translate('xpack.cases.settings.backToCases', {
   defaultMessage: 'Cases',
 });
