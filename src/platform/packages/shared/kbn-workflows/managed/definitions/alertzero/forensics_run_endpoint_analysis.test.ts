@@ -14,6 +14,7 @@ import {
 } from '.';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { CREATE_PROPOSAL_WORKFLOW_ID } from '../proposals';
 
 interface YamlStep {
   name: string;
@@ -530,7 +531,9 @@ describe('Endpoint analysis run', () => {
       ).toBe(true);
 
       const names = allSteps.map(({ name }) => name);
-      expect(names.indexOf('verify_investigation')).toBeLessThan(names.indexOf('forensic_analysis'));
+      expect(names.indexOf('verify_investigation')).toBeLessThan(
+        names.indexOf('forensic_analysis')
+      );
       expect(names.indexOf('journal_unwritable')).toBeLessThan(names.indexOf('mark_unwritable'));
       expect(stepByName('journal_unwritable')?.['on-failure']).toEqual({ continue: true });
       expect(stepByName('journal_unwritable')?.if).toBe(stepByName('mark_unwritable')?.if);
@@ -545,8 +548,8 @@ describe('Endpoint analysis run', () => {
       expect(evaluate(processed, readable)).toBe(false);
       expect(evaluate(unread, readable)).toBe(false);
       expect(
-        (stepByName('mark_unwritable')?.with?.ki as { attributes?: { status?: string } })?.attributes
-          ?.status
+        (stepByName('mark_unwritable')?.with?.ki as { attributes?: { status?: string } })
+          ?.attributes?.status
       ).toBe('failed');
     });
   });
@@ -970,9 +973,13 @@ describe('Endpoint analysis run', () => {
     // nothing but the agent that weighed the evidence can supply it, so leaving it unset is
     // the one gap the caller has to fill.
     it('supplies confidence to the proposal and leaves impact to the action', () => {
-      const inputs = (stepByName('propose_action')?.with as { inputs?: Record<string, unknown> })
-        ?.inputs;
+      const proposeAction = stepByName('propose_action')?.with as {
+        'workflow-id'?: string;
+        inputs?: Record<string, unknown>;
+      };
+      const inputs = proposeAction?.inputs;
 
+      expect(proposeAction?.['workflow-id']).toBe(CREATE_PROPOSAL_WORKFLOW_ID);
       expect(inputs?.confidence).toBe("{{ foreach.item.confidence | default: '' }}");
       expect(inputs?.impact).toBeUndefined();
       expect(inputs?.category).toBeUndefined();
@@ -1074,7 +1081,9 @@ describe('Endpoint analysis run', () => {
         names.indexOf('mark_proposals_failed')
       );
       expect(stepByName('journal_proposals_lost')?.['on-failure']).toEqual({ continue: true });
-      expect(stepByName('journal_proposals_lost')?.if).toBe(stepByName('mark_proposals_failed')?.if);
+      expect(stepByName('journal_proposals_lost')?.if).toBe(
+        stepByName('mark_proposals_failed')?.if
+      );
     });
 
     it('points the agent at each entry inputSchema rather than a fixed shape', () => {
