@@ -44,7 +44,11 @@ describe('AiIndexDescriptionField', () => {
   it('shows help text for a short description', () => {
     renderField();
 
-    expect(screen.getByText(/Optional — describe what this AI index is for/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Important: This description shapes generated automation workflows and helps agents decide when the index is relevant/
+      )
+    ).toBeInTheDocument();
   });
 
   it('shows a warning when the description is within 5% of the max length', () => {
