@@ -228,9 +228,8 @@ export class EscalationsService {
       throw new NotAnEscalationError(escalationId);
     }
 
-    const linkedIds = (
-      current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []
-    ) as string[];
+    const linkedIds = (current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ??
+      []) as string[];
     if (linkedIds.length === 0) {
       return { open_investigations: [] };
     }
@@ -275,9 +274,8 @@ export class EscalationsService {
     const allFailedProposalIds: string[] = [];
 
     if (body.status === 'closed') {
-      const linkedIds = (
-        current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []
-      ) as string[];
+      const linkedIds = (current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ??
+        []) as string[];
       if (linkedIds.length > 0) {
         const resolved = await client.bulkGet(linkedIds);
         const openIds = linkedIds.filter((id) => {

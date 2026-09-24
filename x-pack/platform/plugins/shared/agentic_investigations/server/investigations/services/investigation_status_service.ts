@@ -16,13 +16,9 @@ import type {
   SetInvestigationStatusResponse,
   InvestigationClosePreviewResponse,
 } from '../../../common/investigations/status';
+import { MissingDismissReasonError } from './errors';
 
-export class MissingDismissReasonError extends Error {
-  constructor() {
-    super('dismiss_reason is required when closing an investigation that has pending proposals');
-    this.name = 'MissingDismissReasonError';
-  }
-}
+export { MissingDismissReasonError };
 
 /**
  * Determines whether an error from `releaseGate` means the proposal was already
@@ -162,9 +158,7 @@ export class InvestigationStatusService {
             if (result.status === 'fulfilled') {
               dismissedProposalIds.push(proposalId);
             } else if (isProposalAlreadyDecidedOrExpired(result.reason)) {
-              this.logger.debug(
-                `Proposal ${proposalId} was already decided or expired, skipping`
-              );
+              this.logger.debug(`Proposal ${proposalId} was already decided or expired, skipping`);
             } else {
               this.logger.error(
                 `Failed to dismiss proposal ${proposalId}: ${

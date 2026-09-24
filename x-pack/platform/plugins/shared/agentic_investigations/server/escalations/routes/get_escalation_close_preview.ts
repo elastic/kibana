@@ -36,10 +36,7 @@ export const registerGetEscalationClosePreviewRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const result = await getEscalationsService().getClosePreview(
-            request,
-            request.params.id
-          );
+          const result = await getEscalationsService().getClosePreview(request, request.params.id);
           return response.ok({ body: result });
         } catch (error) {
           return handleEscalationRouteError(error, response, logger);

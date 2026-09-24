@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DismissReason } from '@kbn/proposals-common';
 import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-plugin/public';
 import type { EscalationClosePreviewResponse } from '@kbn/agentic-investigations-plugin/common';
@@ -66,16 +67,20 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
     >
       {hasOpenInvestigations ? (
         <>
-          <EuiCallOut
-            announceOnMount={false}
-            color={hasProposals ? 'warning' : 'primary'}
-            size="s"
-            title={
-              hasProposals
-                ? i18n.CLOSE_ESCALATION_PROPOSALS_WARNING(totalPendingProposals)
-                : i18n.CLOSE_ESCALATION_NO_PROPOSALS_WARNING
-            }
-          />
+          {hasProposals ? (
+            <EuiCallOut
+              announceOnMount={false}
+              color="warning"
+              size="s"
+              title={i18n.CLOSE_ESCALATION_PROPOSALS_WARNING(totalPendingProposals)}
+            />
+          ) : (
+            <KbnInfoCallout
+              announceOnMount={false}
+              size="s"
+              title={i18n.CLOSE_ESCALATION_NO_PROPOSALS_WARNING}
+            />
+          )}
           <EuiSpacer size="m" />
           <EuiText size="s">
             <p>{i18n.CLOSE_ESCALATION_LINKED_INVESTIGATIONS_LABEL}</p>

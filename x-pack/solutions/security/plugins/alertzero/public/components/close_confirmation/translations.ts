@@ -33,10 +33,9 @@ export const DISMISS_REASON_LABEL = i18n.translate(
   { defaultMessage: 'Reason for dismissing proposals' }
 );
 
-export const RATIONALE_LABEL = i18n.translate(
-  'xpack.alertzero.closeConfirmation.rationale.label',
-  { defaultMessage: 'Notes (optional)' }
-);
+export const RATIONALE_LABEL = i18n.translate('xpack.alertzero.closeConfirmation.rationale.label', {
+  defaultMessage: 'Notes (optional)',
+});
 
 export const RATIONALE_PLACEHOLDER = i18n.translate(
   'xpack.alertzero.closeConfirmation.rationale.placeholder',
@@ -77,10 +76,9 @@ export const CLOSE_ESCALATION_NO_PROPOSALS_WARNING = i18n.translate(
   }
 );
 
-export const CANCEL_BUTTON = i18n.translate(
-  'xpack.alertzero.closeConfirmation.cancelButton',
-  { defaultMessage: 'Cancel' }
-);
+export const CANCEL_BUTTON = i18n.translate('xpack.alertzero.closeConfirmation.cancelButton', {
+  defaultMessage: 'Cancel',
+});
 
 // ---------------------------------------------------------------------------
 // Status toggle / reopening
@@ -114,7 +112,6 @@ export const PARTIAL_PROPOSAL_DISMISS_WARNING = i18n.translate(
   }
 );
 
-export const STATUS_CHANGE_ERROR = i18n.translate(
-  'xpack.alertzero.statusToggle.error',
-  { defaultMessage: 'Could not update the status. Please try again.' }
-);
+export const STATUS_CHANGE_ERROR = i18n.translate('xpack.alertzero.statusToggle.error', {
+  defaultMessage: 'Could not update the status. Please try again.',
+});
