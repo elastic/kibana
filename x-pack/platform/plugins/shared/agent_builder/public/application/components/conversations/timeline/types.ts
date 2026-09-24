@@ -6,6 +6,7 @@
  */
 
 import type {
+  ConversationEvent,
   UserMessageEvent,
   ExecutionTerminatedEvent,
   ExecutionFailedEvent,
@@ -20,6 +21,7 @@ import type {
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
+import type { ConversationEventUIDefinition } from '@kbn/agent-builder-browser';
 import type { ExecutionStreamingEventData } from '../../../../services/events';
 
 export type AgentTurnStatus = 'running' | 'awaiting_prompt' | 'completed' | 'failed' | 'aborted';
@@ -68,11 +70,30 @@ export interface AttachmentItem extends UnresolvedAttachmentItem {
   version: number;
 }
 
-/** What the grouping emits. Attachment items still need resolving against the registry. */
-export type GroupedItem = UserMessageItem | AgentTurnItem | UnresolvedAttachmentItem;
+/**
+ * An event of a type that is not built in, before the grouping's caller has checked that the type
+ * has a registered UI.
+ */
+export interface UnresolvedCustomEventItem {
+  kind: 'customEvent';
+  key: string;
+  event: ConversationEvent;
+}
+
+/** A custom event item that can draw: its type has a registered UI definition. */
+export interface CustomEventItem extends UnresolvedCustomEventItem {
+  definition: ConversationEventUIDefinition;
+}
+
+/** What the grouping emits. Attachment and custom event items still need resolving. */
+export type GroupedItem =
+  | UserMessageItem
+  | AgentTurnItem
+  | UnresolvedAttachmentItem
+  | UnresolvedCustomEventItem;
 
 /** What `Timeline` and the scroll anchor receive: every item here can draw. */
-export type TimelineItem = UserMessageItem | AgentTurnItem | AttachmentItem;
+export type TimelineItem = UserMessageItem | AgentTurnItem | AttachmentItem | CustomEventItem;
 
 /** A timeline item that speaks for a human, not for a run. */
 export type UserEntry = UserMessageItem;
