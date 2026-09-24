@@ -62,32 +62,31 @@ describe('createTraceContextWhereClause', () => {
 });
 
 describe('createTraceContextWhereClauseForErrors', () => {
+  // The last alternative mirrors the server-side getUnprocessedOtelErrors query: an unprocessed
+  // OTel exception is discriminated by any one of event_name, exception.type or exception.message,
+  // and must not carry processor.event.
+  const errorFilters = String.raw`KQL("processor.event: \"error\" OR error.log.level: \"error\" OR event_name: \"error\" OR ((event_name: \"exception\" or exception.type: * or exception.message: *) and not processor.event: *)")`;
+
   it('returns a where AST node with traceId and error filters', () => {
     const result = render(createTraceContextWhereClauseForErrors({ traceId: 'abc123' }));
-    expect(result).toEqual(
-      String.raw`FROM foo-*
-  | WHERE trace.id == "abc123" AND KQL("processor.event: \"error\" OR error.log.level: \"error\" OR event_name: \"exception\" OR event_name: \"error\" ")`
-    );
+    expect(result).toEqual(`FROM foo-*
+  | WHERE trace.id == "abc123" AND ${errorFilters}`);
   });
 
   it('returns a pipeline with traceId, spanId and error filters', () => {
     const result = render(
       createTraceContextWhereClauseForErrors({ traceId: 'abc123', spanId: 'span456' })
     );
-    expect(result).toEqual(
-      String.raw`FROM foo-*
-  | WHERE trace.id == "abc123" AND span.id == "span456" AND KQL("processor.event: \"error\" OR error.log.level: \"error\" OR event_name: \"exception\" OR event_name: \"error\" ")`
-    );
+    expect(result).toEqual(`FROM foo-*
+  | WHERE trace.id == "abc123" AND span.id == "span456" AND ${errorFilters}`);
   });
 
   it('returns a pipeline with traceId, transactionId and error filters', () => {
     const result = render(
       createTraceContextWhereClauseForErrors({ traceId: 'abc123', transactionId: 'txn789' })
     );
-    expect(result).toEqual(
-      String.raw`FROM foo-*
-  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND KQL("processor.event: \"error\" OR error.log.level: \"error\" OR event_name: \"exception\" OR event_name: \"error\" ")`
-    );
+    expect(result).toEqual(`FROM foo-*
+  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND ${errorFilters}`);
   });
 
   it('returns a pipeline with all fields and error filters', () => {
@@ -98,9 +97,16 @@ describe('createTraceContextWhereClauseForErrors', () => {
         transactionId: 'txn789',
       })
     );
-    expect(result).toEqual(
-      String.raw`FROM foo-*
-  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456") AND KQL("processor.event: \"error\" OR error.log.level: \"error\" OR event_name: \"exception\" OR event_name: \"error\" ")`
-    );
+    expect(result).toEqual(`FROM foo-*
+  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456") AND ${errorFilters}`);
+  });
+
+  it('matches unprocessed OTel exceptions that carry only exception.type or only exception.message', () => {
+    // Regression guard for rows the unified-errors endpoint returns but the Discover link used to
+    // miss, because the predicate only recognised event_name.
+    const result = render(createTraceContextWhereClauseForErrors({ traceId: 'abc123' }));
+    expect(result).toContain(String.raw`exception.type: *`);
+    expect(result).toContain(String.raw`exception.message: *`);
+    expect(result).toContain(String.raw`not processor.event: *`);
   });
 });
