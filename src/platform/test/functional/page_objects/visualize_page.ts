@@ -119,7 +119,18 @@ export class VisualizePageObject extends FtrService {
     const selector = '[data-test-subj="breadcrumb first"][title="Visualize library"]';
     const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
     if (visualizeLibraryBreadcrumb) {
-      await this.find.clickByCssSelector(selector);
+      try {
+        // The breadcrumb can be a transient leftover while the current app re-renders (for
+        // example after saving a map). Bound the click attempt and fall back to navigateToApp
+        // if the breadcrumb disappears before it can be clicked instead of retrying for the
+        // full try timeout.
+        await this.retry.tryForTime(5000, async () => {
+          await this.find.clickByCssSelector(selector, 1000);
+        });
+      } catch (error) {
+        this.log.debug(`Visualize library breadcrumb was not clickable: ${error}`);
+        return false;
+      }
       // Lens offers a last modal before leaving the page for unsaved charts
       // so close it as quick as possible
       if (await this.testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 1500 })) {
