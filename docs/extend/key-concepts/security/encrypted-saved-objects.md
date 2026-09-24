@@ -98,12 +98,12 @@ stored in plaintext and - because stripping uses the same names - would also be 
 `attributesToIncludeInAAD`, it would be dropped from AAD, weakening the integrity binding of the encrypted attributes while encryption and decryption both continued to
 succeed. In neither case is there an error, a failing test, or anything beyond a debug-level log.
 
-Because those failures are invisible, registration rejects dotted attribute keys outright. Registering a type with a dotted key in either set throws, reporting every
-offending key at once:
+Because those failures are invisible, registration rejects dotted attribute keys outright. Registering a type with a dotted key in either set throws. The message
+names the offending set and lists every key in it:
 
 ```
 Invalid EncryptedSavedObjectTypeRegistration for type 'my_type'. Attribute keys are matched as flat top-level attribute names,
-not as nested paths, so these keys would not encrypt the nested values they appear to name: auth.apiKey
+not as nested paths. These dotted attributesToEncrypt keys are not permitted to prevent misuse: auth.apiKey.
 ```
 
 This is a runtime check rather than a lint rule, and it runs on the fully resolved attribute sets. That means it sees keys that arrive through enum members, imported

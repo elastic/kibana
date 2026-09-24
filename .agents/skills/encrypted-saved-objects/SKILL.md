@@ -78,11 +78,10 @@ AAD attributes are **not encrypted** but are cryptographically bound to the encr
 
 **Nested attributes:** `attributesToEncrypt` and `attributesToIncludeInAAD` accept **top-level attribute names only**. Names are matched against the keys of `attributes` with an exact string comparison — a dot is never interpreted as a path, and nothing traverses into subfields. When an attribute is included in AAD, all of its subfields are inherently included, so cover nested data by naming the top-level attribute that contains it; if only part of an attribute belongs in AAD, restructure the object so that part becomes top-level.
 
-**Enforcement: registering a dotted attribute key throws.** `EncryptedSavedObjectAttributesDefinition` rejects dotted keys in both sets at registration time, reporting every offending key at once:
+**Enforcement: registering a dotted attribute key throws.** `EncryptedSavedObjectAttributesDefinition` rejects dotted keys in both sets at registration time. The message names the offending set and lists every key in it:
 
 ```
-Invalid EncryptedSavedObjectTypeRegistration for type 'my_type'. Attribute keys are matched as flat top-level
-attribute names, not as nested paths, so these keys would not encrypt the nested values they appear to name: auth.apiKey
+Invalid EncryptedSavedObjectTypeRegistration for type 'my_type'. Attribute keys are matched as flat top-level attribute names, not as nested paths. These dotted attributesToEncrypt keys are not permitted to prevent misuse: auth.apiKey.
 ```
 
 This is a runtime check, not a lint rule — there is no comment or config that disables it. Because it runs on the fully resolved sets, it catches keys arriving via enum members, imported constants and spreads. The one gap: a type behind a disabled config never registers, so it is never checked.
