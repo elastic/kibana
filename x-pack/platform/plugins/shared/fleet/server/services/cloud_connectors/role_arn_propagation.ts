@@ -556,6 +556,29 @@ export const propagateRoleArnToPackagePolicies = async ({
     return { reverted, revertFailed };
   };
 
+  /**
+   * `packagePolicyService.update` can write the policy again after reading the version it returns
+   * (version-specific policies store `inputs_for_versions` separately), so a revert with that
+   * version would conflict. Re-read and take the stored version while the policy still holds
+   * exactly this write; otherwise keep the returned one so a revert conflicts with the other edit
+   * instead of erasing it.
+   */
+  const readVersionAfterWrite = async (
+    plan: PolicyPlan,
+    updated: PackagePolicy
+  ): Promise<string | undefined> => {
+    try {
+      const current = await packagePolicyService.get(soClient, plan.policy.id);
+      return current && policyHoldsPlannedWrite(current, plan) ? current.version : updated.version;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logger.warn(
+        `Could not re-read package policy ${plan.policy.id} after its role ARN update; a revert will use the version the update returned: ${message}`
+      );
+      return updated.version;
+    }
+  };
+
   // ── Phase 1: forward writes (plans → new ARN) ──────────────────────────────────────────────
   // pMap swallows per-plan errors into `updateFailed` so control flow after the pMap can decide
   // between the happy exit and the revert phase; `stopOnError: false` guarantees every plan
@@ -587,7 +610,7 @@ export const propagateRoleArnToPackagePolicies = async ({
           plan.updatedInputs,
           plan.policy.version
         );
-        succeeded.push({ ...plan, writeVersion: updated.version });
+        succeeded.push({ ...plan, writeVersion: await readVersionAfterWrite(plan, updated) });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         logger.error(

@@ -1209,6 +1209,49 @@ describe('propagateRoleArnToPackagePolicies', () => {
     });
   });
 
+  describe('when update() wrote the policy again after returning its version', () => {
+    // With version-specific policies, update() stores `inputs_for_versions` in a second write
+    // but returns the version read before it.
+    const revertVersionOfA = async () => {
+      const rollback = await propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      });
+      (packagePolicyService.update as jest.Mock).mockClear();
+      await rollback!.revert();
+      const revertOfA = (packagePolicyService.update as jest.Mock).mock.calls.find(
+        ([, , id]) => id === 'a'
+      );
+      return revertOfA?.[3].version;
+    };
+
+    beforeEach(() => {
+      mockListReturns([makePolicy('a')]);
+    });
+
+    it('reverts with the version stored after that write', async () => {
+      (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) => ({
+        ...makePolicy(id, NEW_ARN),
+        version: `Wz${id}-compiled`,
+      }));
+
+      expect(await revertVersionOfA()).toBe('Wza-compiled');
+    });
+
+    it('keeps the returned version when another edit landed after the write', async () => {
+      // Reverting with that edit's version would erase it instead of hitting a conflict.
+      (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) => ({
+        ...makePolicy(id, NEW_ARN),
+        name: 'renamed-by-someone-else',
+        version: `Wz${id}-other`,
+      }));
+
+      expect(await revertVersionOfA()).toBe('Wza-after');
+    });
+  });
+
   it('does not revert when a failed update left the policy with no Role ARN fields', async () => {
     // `!rewrite(...).changed` is also true when every role_arn key was removed by a concurrent
     // edit; treating that as "persisted new ARN" would resurrect the stale snapshot on revert.
