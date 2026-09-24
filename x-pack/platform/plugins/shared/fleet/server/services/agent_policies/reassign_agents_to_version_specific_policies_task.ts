@@ -121,6 +121,7 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
     {
       kuery: kueryToReassignAgents,
       showInactive: false,
+      spaceId: '*',
     },
     versionedAgentPolicyId
   );
