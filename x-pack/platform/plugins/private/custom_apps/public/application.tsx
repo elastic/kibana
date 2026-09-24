@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -14,9 +14,24 @@ import { CustomAppClient } from './app/custom_app_client';
 import { CustomAppPage } from './app/custom_app_page';
 import { ListingPage } from './app/listing_page';
 
-function appIdFromPath(pathname: string): string | undefined {
+export function appIdFromPath(pathname: string): string | undefined {
   const match = pathname.match(/\/app\/([^/?#]+)/);
   return match?.[1];
+}
+
+/**
+ * Editing is offered only to a reader who arrived through the listing page,
+ * which is where apps are managed. The navigation link deliberately omits this,
+ * so opening an app from the side nav is a read-only view.
+ *
+ * This is an affordance, not a permission: the marker is in the URL and anyone
+ * can add it. What stops a reader without write access from saving is the saved
+ * objects client, which the API routes delegate to.
+ */
+const FROM_LISTING = 'from=list';
+
+export function canEditFrom(search: string): boolean {
+  return new URLSearchParams(search).get('from') === 'list';
 }
 
 function CustomAppsRouter({
@@ -31,19 +46,16 @@ function CustomAppsRouter({
   onAppsChanged: () => void;
 }) {
   const [client] = useState(() => new CustomAppClient(core.http));
-  const [appId, setAppId] = useState<string | undefined>(() =>
-    appIdFromPath(history.location.pathname)
-  );
 
-  const openApp = (id: string) => {
-    history.push(`/app/${id}`);
-    setAppId(id);
-  };
+  // Derived from the location rather than held separately, so the browser's back
+  // and forward buttons move between the listing and an app.
+  const [location, setLocation] = useState(history.location);
+  useEffect(() => history.listen(setLocation), [history]);
 
-  const openList = () => {
-    history.push('/');
-    setAppId(undefined);
-  };
+  const appId = appIdFromPath(location.pathname);
+
+  const openApp = (id: string) => history.push(`/app/${id}?${FROM_LISTING}`);
+  const openList = () => history.push('/');
 
   return appId ? (
     <CustomAppPage
@@ -51,6 +63,7 @@ function CustomAppsRouter({
       data={data}
       client={client}
       appId={appId}
+      canEdit={canEditFrom(location.search)}
       onNavigateToList={openList}
       onAppsChanged={onAppsChanged}
     />

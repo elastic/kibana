@@ -26,7 +26,7 @@ import { CustomAppServicesProvider } from '../catalog';
 import { SampleDataCallout } from './sample_data_callout';
 import type { CustomAppDefinition } from '../../common/app_definition';
 import { emptyAppDefinition, getPanelIds } from '../../common/app_definition';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constants';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH, PLUGIN_NAME } from '../../common/constants';
 import type { CustomAppClient } from './custom_app_client';
 import { CustomAppGrid, getTabs, useAppSurfaces } from './custom_app_grid';
 import { PanelEditorFlyout } from './panel_editor_flyout';
@@ -42,6 +42,12 @@ export interface CustomAppPageProps {
   data: DataPublicPluginStart;
   client: CustomAppClient;
   appId: string;
+  /**
+   * False when the reader opened the app from the side navigation, which is a
+   * read-only route. The edit affordances are hidden entirely rather than
+   * disabled, so a read-only view has no dead controls in it.
+   */
+  canEdit: boolean;
   onNavigateToList: () => void;
   /** Saving may change whether this app appears in the navigation. */
   onAppsChanged: () => void;
@@ -73,6 +79,7 @@ export function CustomAppPage({
   data,
   client,
   appId,
+  canEdit,
   onNavigateToList,
   onAppsChanged,
 }: CustomAppPageProps) {
@@ -102,10 +109,23 @@ export function CustomAppPage({
     };
   }, [client, appId]);
 
-  // The header no longer shows the title, so keep the breadcrumb honest.
+  // The header no longer shows the title, so the breadcrumb carries it — and
+  // doubles as the way back to the listing, which is why there is no longer an
+  // "All apps" button competing with it.
   useEffect(() => {
-    if (definition?.title) core.chrome.docTitle.change(definition.title);
-  }, [core, definition?.title]);
+    if (!definition?.title) return;
+    core.chrome.docTitle.change(definition.title);
+    core.chrome.setBreadcrumbs([
+      {
+        text: PLUGIN_NAME,
+        onClick: (event) => {
+          event.preventDefault();
+          onNavigateToList();
+        },
+      },
+      { text: definition.title },
+    ]);
+  }, [core, definition?.title, onNavigateToList]);
 
   const onAction = useMemo(
     () =>
@@ -235,51 +255,54 @@ export function CustomAppPage({
         app so they can be edited like any other content. The bar carries only
         the actions that operate *on* the app.
       */}
-      <EuiPageTemplate.Header
-        paddingSize="s"
-        rightSideItems={[
-          isEditing ? (
-            <EuiButton
-              key="save"
-              fill
-              iconType="save"
-              isLoading={isSaving}
-              isDisabled={!hasUnsavedChanges}
-              onClick={save}
-            >
-              Save
-            </EuiButton>
-          ) : (
-            <EuiButton key="edit" iconType="pencil" onClick={() => setIsEditing(true)}>
-              Edit
-            </EuiButton>
-          ),
-          isEditing ? (
-            <EuiButton key="add" iconType="plusInCircle" onClick={addPanel}>
-              Add panel
-            </EuiButton>
-          ) : null,
-          isEditing ? (
-            <EuiButtonEmpty key="settings" iconType="gear" onClick={() => setIsAppEditorOpen(true)}>
-              Settings
-            </EuiButtonEmpty>
-          ) : null,
-          isEditing ? (
-            <EuiButtonEmpty
-              key="done"
-              onClick={() => {
-                setDefinition(saved);
-                setIsEditing(false);
-              }}
-            >
-              Cancel
-            </EuiButtonEmpty>
-          ) : null,
-          <EuiButtonEmpty key="back" iconType="arrowLeft" onClick={onNavigateToList}>
-            All apps
-          </EuiButtonEmpty>,
-        ].filter(Boolean)}
-      />
+      {canEdit && (
+        <EuiPageTemplate.Header
+          paddingSize="s"
+          rightSideItems={[
+            isEditing ? (
+              <EuiButton
+                key="save"
+                fill
+                iconType="save"
+                isLoading={isSaving}
+                isDisabled={!hasUnsavedChanges}
+                onClick={save}
+              >
+                Save
+              </EuiButton>
+            ) : (
+              <EuiButton key="edit" iconType="pencil" onClick={() => setIsEditing(true)}>
+                Edit
+              </EuiButton>
+            ),
+            isEditing ? (
+              <EuiButton key="add" iconType="plusInCircle" onClick={addPanel}>
+                Add panel
+              </EuiButton>
+            ) : null,
+            isEditing ? (
+              <EuiButtonEmpty
+                key="settings"
+                iconType="gear"
+                onClick={() => setIsAppEditorOpen(true)}
+              >
+                Settings
+              </EuiButtonEmpty>
+            ) : null,
+            isEditing ? (
+              <EuiButtonEmpty
+                key="done"
+                onClick={() => {
+                  setDefinition(saved);
+                  setIsEditing(false);
+                }}
+              >
+                Cancel
+              </EuiButtonEmpty>
+            ) : null,
+          ].filter(Boolean)}
+        />
+      )}
 
       <EuiPageTemplate.Section grow>
         {hasUnsavedChanges && (

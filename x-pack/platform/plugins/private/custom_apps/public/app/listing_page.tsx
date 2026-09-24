@@ -7,20 +7,22 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  EuiBasicTable,
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiInMemoryTable,
   EuiLink,
   EuiPageTemplate,
   EuiPopover,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { formatDate } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { CustomAppListItem } from '../../common/app_definition';
 import type { CustomAppClient } from './custom_app_client';
 import { CUSTOM_APP_TEMPLATES } from '../templates';
+import { PLUGIN_NAME } from '../../common/constants';
 
 export interface ListingPageProps {
   core: CoreStart;
@@ -51,6 +53,12 @@ export function ListingPage({ core, client, onOpen, onAppsChanged }: ListingPage
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // The listing is the root of this app, so it owns the first breadcrumb; an
+  // app page appends its own title to it.
+  useEffect(() => {
+    core.chrome.setBreadcrumbs([{ text: PLUGIN_NAME }]);
+  }, [core]);
 
   const createFrom = useCallback(
     async (templateId: string) => {
@@ -128,20 +136,33 @@ export function ListingPage({ core, client, onOpen, onAppsChanged }: ListingPage
         ) : (
           <>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               loading={isLoading}
               items={items}
               tableCaption="Custom apps in this space"
+              // Most recently touched first: the app someone is working on is
+              // the one they are most likely to be coming back to.
+              sorting={{ sort: { field: 'updatedAt', direction: 'desc' } }}
+              search={items.length > 5 ? { box: { incremental: true } } : undefined}
+              pagination={items.length > 20 ? { initialPageSize: 20 } : undefined}
               columns={[
                 {
                   field: 'title',
                   name: 'Title',
+                  sortable: true,
                   render: (title: string, item: CustomAppListItem) => (
                     <EuiLink onClick={() => onOpen(item.id)}>{title}</EuiLink>
                   ),
                 },
                 { field: 'description', name: 'Description' },
-                { field: 'updatedAt', name: 'Last updated' },
+                {
+                  field: 'updatedAt',
+                  name: 'Last updated',
+                  dataType: 'date',
+                  sortable: true,
+                  width: '200px',
+                  render: (value: string) => (value ? formatDate(value, 'longDateTime') : '—'),
+                },
                 {
                   name: 'Actions',
                   actions: [
