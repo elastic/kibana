@@ -1,0 +1,77 @@
+# Strategy catalog
+
+Shared by `analyze-and-improve`, `ai-index-sources` and `ai-index-automations`. A strategy is the
+answer to three questions; the named strategies below are worked examples of those answers, not a
+menu to pick the nearest name from.
+
+## The three choices
+
+Every strategy answers:
+
+1. **The unit** — what one KI is about. An index, a document, a claim inside a document, a
+   recurring entity, a named condition. The unit is also what the KI's id is derived from, so a
+   re-run replaces rather than duplicates.
+2. **What one KI carries** for that unit — orientation (purpose, what it does not contain, joins,
+   when to use) and access patterns (the parameterized queries that reach the live data), plus
+   whatever grounded figures separate this unit from its siblings.
+3. **How units are found and refreshed** — the discovery query that lists the units, the corpus
+   filter that bounds it, and whether a unit is re-profiled on every run, or never for immutable
+   facts.
+
+State a strategy as those three answers. When findings fit one of the examples below, name it and
+the three answers are already known. When they do not — a support case with a root-cause structure
+and a cursor, a host profiled from three indices — derive the three answers from the findings
+instead of picking the nearest name and guessing the rest. The `unit-profile-template`'s `consts`
+are these same three choices, so an analysis stated this way is already the template input.
+
+## Worked examples
+
+| Strategy | Unit | `type` | What one KI carries | Refresh | When to use |
+|---|---|---|---|---|---|
+| **Index/Table Metadata** | One index | `index_metadata` | Purpose, what it does not contain, key fields, joins, when to use, parameterized access patterns with runnable examples | Every run, replacing | Always start here. Tells the agent which index to query, when, and how to reach it. |
+| **Bottom-Up** | One document | `document` | Summary, the questions the document answers, a query that reaches it by id | Every run over the filtered slice; new documents added | Dense, bounded corpora: knowledge bases, case records, articles, product docs. |
+| **Selective / Outlier** | One significant document in a stream | `event` | What happened, why it is notable, how to find the neighbours | Every run; only documents the significance verdict accepts | Log and event streams where most records are noise but outliers matter. |
+| **Atomic Facts** | One claim inside a document | `fact` | The claim, its source span, the query to the document | Immutable; no `expires_at` | Information-dense documents (contracts, papers) where one KI per document loses precision. |
+| **Cumulative / Wiki-style** | One recurring entity | `entity` | A profile grounded in aggregations over every document referencing it, from one or several indices, with the numbers that separate it from siblings | Every run, replacing each unit | Entities recurring across many documents: customers, products, hosts, cases. |
+| **Detection / Feature** | One named condition / one inventory entry | `detection`, `feature` | A complete runnable query with a severity, thresholds quoting the observed baseline / a subtype and a stable slug | Every run | Observability data needing runnable detection conditions and structured inventory. |
+
+Quick guide: logs and metrics → Index Metadata plus Selective/Outlier plus Detection/Feature;
+article corpus → Bottom-Up; dense documents → Atomic Facts; recurring entities → Cumulative;
+several indices → Metadata for all, then one deeper strategy for the most important; unsure →
+Index/Table Metadata, which is cheap, fast and always useful.
+
+## Targeted KIs
+
+A strategy can also name individual KIs authored from one counted finding rather than generated
+over a corpus: `constraint`, `workaround`, `disambiguation`, `task_recipe` (defined in
+`ki_shapes`). The unit is the finding; the KI carries the rule, path, distinction or recipe and
+the provenance that produced it; refresh is a re-run of the writer with the same content, so the
+KI survives re-runs of everything else. Propose these when a finding recurs but no systemic
+family would carry it — a field that must be backquoted, a join that only works one way.
+
+## Strategy is also a diagnosis
+
+An index generating one thin KI per document when its questions are categorical is not
+under-covered — it is at the wrong granularity, and generating *more* of the same will not fix it.
+Say which of the three answers is wrong.
+
+## The corpus filter
+
+Every automation runs over a filtered slice of its source, not the whole thing: a time window
+(last 90 days), a status condition (resolved cases only), or a numeric cap (at most 1,000 KIs).
+The filter is part of the third choice — how units are found — and it is agreed before an
+automation is drafted. Running without one risks cost and index bloat, and the Context Engine is a
+cache — generating over an entire corpus eagerly defeats the point.
+
+The filter is written into the ES|QL source query, so `ai-index-sources` is where it is authored
+and run. It shapes diagnosis too: when agents keep reaching for data no indicator covers, the most
+common cause is not that generation is failing — it is that the corpus filter excluded that data.
+Those are different fixes: widening a filter is cheap and reversible, redesigning a generation
+prompt is neither. A filter is also the natural first lever: when the evidence supports widening a
+window or relaxing a status condition, propose that before proposing a new automation.
+
+## Corpora larger than 10,000 documents
+
+ES|QL caps at 10,000 rows per query. A discovery query over a larger corpus needs paging (the
+`unit-profile-template` pages with a keyword cursor) or a parent workflow dispatching per-item
+children. Note the cap rather than proposing something that silently truncates.

@@ -401,6 +401,92 @@ describe('getUpdateKiStepDefinition', () => {
     expect(thrown.type).toBe('ConflictError');
   });
 
+  it('leaves a null attribute out of the patch and still clears a null expires_at', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { attributes: { esql: null, doc_count: 3 }, expires_at: null },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    const [{ doc }] = esClient.update.mock.calls[0];
+    expect(doc).toEqual({
+      attributes: { doc_count: 3 },
+      expires_at: null,
+      updated_at: expect.any(String),
+      governance: { provenance: { updated_by: mockKiWriter } },
+    });
+  });
+
+  it('returns noop when the only change was a null attribute, instead of writing an empty patch', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', ki: { attributes: { severity: null } } },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    const result = await handler(context);
+
+    expect(result).toEqual({ output: { id: 'ki-1', result: 'noop' } });
+    expect(esClient.update).not.toHaveBeenCalled();
+  });
+
+  it('appends a data stream revision without the null attribute', async () => {
+    const existing = { ...storedKi, attributes: { unit: 'sku-1' } };
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', existing)),
+      index: jest.fn().mockResolvedValue({ _id: 'new' }),
+      update: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { attributes: { esql: null, doc_count: 3 } },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'data_stream', value: 'ai-index-ds-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    const [{ document }] = esClient.index.mock.calls[0];
+    expect(document.attributes).toEqual({ unit: 'sku-1', doc_count: 3 });
+  });
+
   it('returns noop without writing when there is nothing to change', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
