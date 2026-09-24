@@ -546,6 +546,23 @@ steps:
             Alert Analysis Worker path requires a non-empty alerts input;
             inputs.alerts was missing or empty.
 
+  # The mirror of the gate above. Every alert read is selected by calledByWorker, not by which
+  # input happens to hold data, so a caller that supplies alerts without the flag would fall
+  # through to event.alerts — absent in a child run — and complete with an empty output as if
+  # there had been nothing to analyze. Fail instead of no-oping silently. An alert-trigger run
+  # leaves inputs.alerts empty and never reaches this.
+  - name: require_worker_flag_for_caller_alerts
+    type: if
+    condition: "${{ inputs.alerts.size > 0 and inputs.calledByWorker != true }}"
+    steps:
+      - name: fail_caller_alerts_without_worker_flag
+        type: workflow.fail
+        with:
+          message: >-
+            Alert Analysis received an alerts input without calledByWorker: true.
+            Caller-supplied alerts are only read on the Worker path; set calledByWorker
+            to true or omit alerts.
+
   # Duplicate _id entries would be analyzed/written multiple times while the model only
   # returns one verdict per id — select_alert_verdict would reuse the same match and
   # workflow.output.verdicts would double-count. Fail before batching rather than silently
@@ -1821,24 +1838,21 @@ steps:
 
                         ---
                         Error: the batch this alert was analyzed in returned no verdict for it.
+                        {% if variables.investigation_conversation_id != '' %}
+                        - Investigation: [{{ variables.investigation_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
+                        {%- endif %}
                   headers:
                     kbn-xsrf: string
                     Content-Type: application/json
 
-              # Expose the unreconciled id in workflow.output so a Worker can retry or
-              # surface a partial Investigation result instead of treating completed+empty
-              # as success. Prefer this over failing the whole run (matched verdicts would
-              # be discarded). Real alert id only — never the model's echo.
-              - name: accumulate_missing_alert_id
-                type: data.set
-                if: "${{ inputs.calledByWorker == true }}"
-                with:
-                  missing_alert_ids: "${{ variables.missing_alert_ids | push: foreach.item._id }}"
             else:
 
               # -------------------------------------------------------------------
               # Write the verdict note to the alert timeline
               # -------------------------------------------------------------------
+              # The Investigation line is what lets another worker reading this alert pick up
+              # the conversation that produced the verdict. Empty on the standalone path,
+              # where no Investigation exists.
               - name: add_verdict_note_to_alert
                 type: kibana.request
                 on-failure:
@@ -1871,6 +1885,9 @@ steps:
                         {%- endfor %}
 
                         ### Analysis Details
+                        {% if variables.investigation_conversation_id != '' -%}
+                        - Investigation: [{{ variables.investigation_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
+                        {% endif -%}
                         - Workflow version: {{ variables.normalized_version }}
                         - Tag prefix: {{ variables.tag_prefix }}
                         - Connector: {{ variables.resolved_connector_id | default: variables.connector_id }}
@@ -1951,6 +1968,28 @@ steps:
                     type: data.set
                     with:
                       auto_close_ids: "${{ variables.auto_close_ids | push: foreach.item._id }}"
+
+      # -----------------------------------------------------------------------
+      # Alert ids the agent never returned a verdict for (Worker path only)
+      # -----------------------------------------------------------------------
+      # Exposed in workflow.output so a Worker can retry or surface a partial Investigation
+      # result instead of treating completed+empty as success. Prefer this over failing the
+      # whole run, which would discard the verdicts that did match. Derived once from the
+      # analyzed set rather than pushed per alert: every data.set persists its full value, so
+      # a per-alert push would store the cumulative list once for each alert. Covers both an
+      # alert the agent skipped and a batch that returned nothing, since neither reaches
+      # all_verdicts. Real alert ids only — never the model's echo.
+      - name: collect_verdict_ids
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          all_verdict_ids: "${{ variables.all_verdicts | map: 'id' }}"
+
+      - name: set_missing_alert_ids
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          missing_alert_ids: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | map: '_id' }}"
 
       # -----------------------------------------------------------------------
       # Grouped verdict counts, per entity, as a ready-to-render sentence
@@ -2157,10 +2196,10 @@ steps:
   # well-formed — callers receive an empty verdict list rather than a missing output.
   #
   # STANDALONE PATH CAVEAT: output_verdicts / generated_summary / impacted_entities /
-  # missing_alert_ids / connector_id (resolved) are only accumulated when
-  # calledByWorker == true. On a standalone (alert-trigger) run those fields stay at
-  # their empty-init values even though tags/notes/auto-close may have run.
-  # auto_closed_ids IS populated on both paths. Do not treat standalone workflow.output
+  # missing_alert_ids are only accumulated when calledByWorker == true. On a standalone
+  # (alert-trigger) run those fields stay at their empty-init values even though
+  # tags/notes/auto-close may have run. auto_closed_ids, connector_id (resolved) and
+  # agent_id ARE populated on both paths. Do not treat standalone workflow.output
   # as a complete analysis summary — there is no Worker consumer of it today.
   - name: emit_workflow_output
     type: workflow.output

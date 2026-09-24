@@ -617,6 +617,14 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(skipFallback.if).toBe('${{ inputs.calledByWorker == true }}');
   });
 
+  // Derived once after the loops, not pushed per alert: every data.set persists its full value,
+  // so a per-alert push would store the cumulative list once for each alert analysed.
+  it('derives missing_alert_ids outside the per-alert loops', () => {
+    expect(enclosingLoops(workflow.steps, 'collect_verdict_ids')).toHaveLength(0);
+    expect(enclosingLoops(workflow.steps, 'set_missing_alert_ids')).toHaveLength(0);
+    expect(findStepByName(workflow.steps, 'accumulate_missing_alert_id')).toBeUndefined();
+  });
+
   it('formats the verdict note timestamp with a human-readable date filter', () => {
     const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
       with: { body: { note: { note: string } } };
@@ -981,6 +989,23 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
     expect(emptyGate.steps[0].type).toBe('workflow.fail');
     expect(emptyGate.steps[0].with.message).toContain('missing or empty');
+  });
+
+  // The mirror of the gate above. Which input holds the alerts is decided by calledByWorker,
+  // not by which one has data, so alerts passed without the flag are read from nowhere and the
+  // run would otherwise complete empty and look healthy.
+  it('fails when alerts are supplied without calledByWorker rather than completing empty', () => {
+    const flagGate = findStepByName(workflow.steps, 'require_worker_flag_for_caller_alerts') as {
+      type: string;
+      condition: string;
+      steps: Array<{ name: string; type: string; with: { message: string } }>;
+    };
+    expect(flagGate.type).toBe('if');
+    expect(flagGate.condition).toBe(
+      '${{ inputs.alerts.size > 0 and inputs.calledByWorker != true }}'
+    );
+    expect(flagGate.steps[0].type).toBe('workflow.fail');
+    expect(flagGate.steps[0].with.message).toContain('calledByWorker');
   });
 
   it('fails the Worker path when alerts contain duplicate _id values', () => {
@@ -1720,19 +1745,90 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     ).toBe(true);
   });
 
-  it('accumulates missing_alert_ids when the agent returns no verdict for an alert', () => {
-    const accumulateStep = findStepByName(workflow.steps, 'accumulate_missing_alert_id') as {
+  it('derives missing_alert_ids from the alerts that never matched a verdict', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_verdict_ids') as {
+      if: string;
+      with: { all_verdict_ids: string };
+    };
+    const missingStep = findStepByName(workflow.steps, 'set_missing_alert_ids') as {
       if: string;
       with: { missing_alert_ids: string };
     };
-    expect(accumulateStep.if).toBe('${{ inputs.calledByWorker == true }}');
+    expect(collectStep.if).toBe('${{ inputs.calledByWorker == true }}');
+    expect(missingStep.if).toBe('${{ inputs.calledByWorker == true }}');
 
-    const result = evaluateExpression(engine, accumulateStep.with.missing_alert_ids, {
-      variables: { missing_alert_ids: ['already-missing'] },
-      foreach: { item: { _id: 'no-verdict-id' } },
+    const alerts = [{ _id: 'a1' }, { _id: 'a2' }, { _id: 'a3' }];
+    // a1 got a verdict. a2 was skipped by the agent and a3's whole batch returned nothing —
+    // neither reaches all_verdicts, so one derivation covers both failure modes.
+    const allVerdictIds = evaluateExpression(engine, collectStep.with.all_verdict_ids, {
+      variables: { all_verdicts: [{ id: 'a1' }] },
     });
+    expect(allVerdictIds).toEqual(['a1']);
 
-    expect(result).toEqual(['already-missing', 'no-verdict-id']);
+    expect(
+      evaluateExpression(engine, missingStep.with.missing_alert_ids, {
+        inputs: { alerts },
+        variables: { pending_filter_expr: 'false', all_verdict_ids: allVerdictIds },
+      })
+    ).toEqual(['a2', 'a3']);
+
+    // Every alert reconciled: an empty list is the caller's signal that nothing is outstanding.
+    expect(
+      evaluateExpression(engine, missingStep.with.missing_alert_ids, {
+        inputs: { alerts },
+        variables: { pending_filter_expr: 'false', all_verdict_ids: ['a1', 'a2', 'a3'] },
+      })
+    ).toEqual([]);
+  });
+
+  it('fails a caller that supplies alerts without the Worker flag instead of analysing nothing', () => {
+    const gate = findStepByName(workflow.steps, 'require_worker_flag_for_caller_alerts') as {
+      condition: string;
+    };
+
+    expect(
+      evaluateExpression(engine, gate.condition, { inputs: { alerts: [{ _id: 'a1' }] } })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, gate.condition, {
+        inputs: { alerts: [{ _id: 'a1' }], calledByWorker: false },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, gate.condition, {
+        inputs: { alerts: [{ _id: 'a1' }], calledByWorker: true },
+      })
+    ).toBe(false);
+    // Standalone alert-trigger run: no caller alerts, so the gate never fires.
+    expect(evaluateExpression(engine, gate.condition, { inputs: { alerts: [] } })).toBe(false);
+    expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(false);
+  });
+
+  it('links the Investigation from both alert notes, and omits it on the standalone path', () => {
+    const verdictNote = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    const errorNote = findStepByName(workflow.steps, 'add_no_data_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+
+    for (const note of [verdictNote.with.body.note.note, errorNote.with.body.note.note]) {
+      const withInvestigation = engine.parseAndRenderSync(note, {
+        workflow: { spaceId: 'default' },
+        variables: { investigation_conversation_id: 'conv-1' },
+      });
+      expect(withInvestigation).toContain(
+        '- Investigation: [conv-1](/s/default/app/agent_builder/conversations/conv-1)'
+      );
+
+      // Standalone runs have no Investigation, so the line must not render as a dead link.
+      const standalone = engine.parseAndRenderSync(note, {
+        workflow: { spaceId: 'default' },
+        variables: { investigation_conversation_id: '' },
+      });
+      expect(standalone).not.toContain('Investigation:');
+      expect(standalone).not.toContain('agent_builder/conversations');
+    }
   });
 
   it('drops verdicts whose id belongs to another batch', () => {
@@ -1777,10 +1873,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
   });
 
   it('reads event.alerts on the standalone path and inputs.alerts on the Worker path', () => {
-    interface DataSetStep {
+    // Extend Step so the cast from its index signature stays comparable to tsc.
+    interface DataSetStep extends Step {
       with: Record<string, string>;
     }
-    interface GateStep {
+    interface GateStep extends Step {
       condition: string;
     }
     const countsStep = findStepByName(workflow.steps, 'set_alert_counts') as DataSetStep;
