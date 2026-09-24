@@ -702,10 +702,8 @@ export function AddCisIntegrationFormPageProvider({
 
     // Clicking Save Button updates and navigates to Integration Policies Tab Page
     await clickSaveIntegrationButton();
-    await PageObjects.header.waitUntilLoadingHasFinished();
-
-    // Check if the Direct Access Key is updated package policy api with successful toast
     await testSubjects.existOrFail(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST, { timeout: 5000 });
+    await PageObjects.header.waitUntilLoadingHasFinished();
 
     await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();

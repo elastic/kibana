@@ -26,7 +26,7 @@ export class ExportPageObject extends FtrService {
 
   async clickExportTopNavButton(): Promise<boolean> {
     // First check if export button is directly visible
-    if (await this.testSubjects.exists('exportTopNavButton')) {
+    if (await this.testSubjects.waitForExists('exportTopNavButton', { timeout: 5000 })) {
       await this.testSubjects.click('exportTopNavButton');
       return true;
     }
@@ -34,7 +34,12 @@ export class ExportPageObject extends FtrService {
     // If not visible, try the overflow menu
     if (await this.testSubjects.exists('app-menu-overflow-button')) {
       await this.testSubjects.click('app-menu-overflow-button');
-      if (await this.testSubjects.exists('exportTopNavButton')) {
+
+      if (await this.testSubjects.waitForExists('exportPopoverPanel', { timeout: 5000 })) {
+        return true;
+      }
+
+      if (await this.testSubjects.waitForExists('exportTopNavButton', { timeout: 5000 })) {
         await this.testSubjects.click('exportTopNavButton');
         return true;
       }

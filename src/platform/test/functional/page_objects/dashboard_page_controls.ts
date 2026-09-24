@@ -429,7 +429,11 @@ export class DashboardPageControls extends FtrService {
         500,
         !ignoreTopOffsetOrOptions ? await this.panelActions.getContainerTopOffset() : undefined
       );
-      if (!(await this.isOptionsListPopoverOpen(controlId))) {
+      if (
+        !(await this.testSubjects.waitForExists(`control-popover-${controlId}`, {
+          timeout: 5000,
+        }))
+      ) {
         throw new Error(`Options List popover ${controlId} has not opened`);
       }
     });
@@ -530,10 +534,8 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`searching for ${search} in options list`);
     await this.retry.tryForTime(10000, async () => {
       if (controlId) await this.optionsListOpenPopover(controlId);
-      if (!(await this.testSubjects.exists('optionsList-control-search-input'))) {
-        throw new Error('Options List search input has not rendered');
-      }
-      const input = await this.testSubjects.find('optionsList-control-search-input', 1000);
+      await this.testSubjects.existOrFail('optionsList-control-search-input', { timeout: 5000 });
+      const input = await this.testSubjects.find('optionsList-control-search-input');
       await input.click();
       const focusedInput = await this.find.activeElement();
       await focusedInput.clearValue();
