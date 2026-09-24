@@ -381,6 +381,8 @@ export const MonitorFieldsCodec = z.looseObject({
   ...browserSensitiveAdvanced,
   ...tlsFields,
   ...tlsSensitiveFields,
+  // Spread order leaves `urls` as `string | null`. The per-type codecs overlap on `string`.
+  [ConfigKey.URLS]: getNonEmptyStringCodec('url'),
 });
 
 export const MonitorFieldsResultCodec = MonitorFieldsCodec.extend({
