@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 import type { SyntheticEvent } from 'react';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -65,12 +65,16 @@ export const getHostsColumns = (
     {
       field: 'node.lastSeen',
       name: (
-        <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
-          <>
-            {i18n.LAST_SEEN}{' '}
-            <EuiIcon color="subdued" type="info" className="eui-alignTop" aria-hidden={true} />
-          </>
-        </EuiToolTip>
+        <>
+          {i18n.LAST_SEEN}{' '}
+          <EuiIconTip
+            content={i18n.FIRST_LAST_SEEN_TOOLTIP}
+            type="info"
+            color="subdued"
+            aria-label={i18n.LAST_SEEN_TOOLTIP_ARIA_LABEL}
+            anchorProps={{ className: 'eui-alignTop' }}
+          />
+        </>
       ),
       truncateText: false,
       mobileOptions: { show: true },
@@ -89,12 +93,16 @@ export const getHostsColumns = (
     {
       field: 'node.host.os.name',
       name: (
-        <EuiToolTip content={i18n.OS_LAST_SEEN_TOOLTIP}>
-          <>
-            {i18n.OS}{' '}
-            <EuiIcon color="subdued" type="info" className="eui-alignTop" aria-hidden={true} />
-          </>
-        </EuiToolTip>
+        <>
+          {i18n.OS}{' '}
+          <EuiIconTip
+            content={i18n.OS_LAST_SEEN_TOOLTIP}
+            type="info"
+            color="subdued"
+            aria-label={i18n.OS_TOOLTIP_ARIA_LABEL}
+            anchorProps={{ className: 'eui-alignTop' }}
+          />
+        </>
       ),
       truncateText: false,
       mobileOptions: { show: true },

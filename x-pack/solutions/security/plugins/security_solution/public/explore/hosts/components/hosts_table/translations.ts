@@ -63,3 +63,17 @@ export const ASSET_CRITICALITY = i18n.translate(
     defaultMessage: 'Asset criticality',
   }
 );
+
+export const LAST_SEEN_TOOLTIP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.hostsTable.lastSeenToolTipAriaLabel',
+  {
+    defaultMessage: 'More information about the last seen column',
+  }
+);
+
+export const OS_TOOLTIP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.hostsTable.osToolTipAriaLabel',
+  {
+    defaultMessage: 'More information about the operating system column',
+  }
+);
