@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { significantEventsPrompt } from './prompt';
+import { significantEventsAgentPrompt } from './prompt';
 
 describe('significant events system prompt', () => {
-  it('keeps the mustache variables the prompt template depends on', () => {
-    // createGenerateSignificantEventsPrompt declares these as required inputs
-    // (significant_events/prompt.ts). Losing one during an edit fails silently at runtime.
-    expect(significantEventsPrompt).toContain('{{{available_feature_types}}}');
-    expect(significantEventsPrompt).toContain('{{{computed_feature_instructions}}}');
-  });
-
   it('keeps the STATS metric-series contract that getStatsQueryHints enforces', () => {
     // Each of these is a warning the tool emits back to the model at generation time.
     // If the prompt stops saying them, prompt and tool disagree.
-    expect(significantEventsPrompt).toContain('BUCKET(@timestamp, 1 minute)');
-    expect(significantEventsPrompt).toContain('KEEP bucket, metric_value');
+    expect(significantEventsAgentPrompt).toContain('BUCKET(@timestamp, 1 minute)');
+    expect(significantEventsAgentPrompt).toContain('KEEP bucket, metric_value');
+  });
+
+  it('renders all placeholders', () => {
+    expect(significantEventsAgentPrompt).not.toContain('{{{');
+    expect(significantEventsAgentPrompt).not.toContain('}}}');
   });
 });
