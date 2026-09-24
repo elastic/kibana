@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
+import { NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE } from '../../saved_objects/automation_budget_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 
 export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
@@ -37,6 +38,22 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
     );
 
     await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
+
+    // Clean up all daily budget SOs for this automation (best-effort, don't fail the delete).
+    try {
+      const budgets = await soClient.find({
+        type: NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
+        filter: `${NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE}.attributes.automationId: "${params.path.id}"`,
+        perPage: 400,
+      });
+      await Promise.all(
+        budgets.saved_objects.map((b) =>
+          soClient.delete(NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE, b.id).catch(() => {})
+        )
+      );
+    } catch {
+      // Best-effort.
+    }
 
     if (workflowsManagement && existing.attributes.workflowId) {
       try {

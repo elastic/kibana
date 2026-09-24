@@ -33,6 +33,7 @@ import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { checkBudgetStepDefinition } from './step_definitions/check_budget';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
@@ -58,6 +59,8 @@ import {
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   nightshiftAutomationSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
+  nightshiftAutomationBudgetSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
 } from './saved_objects';
 import { SavedObjectInvestigationRepository } from './storage';
 import {
@@ -129,6 +132,7 @@ export class NightshiftInvestigationsPlugin
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
+    core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
 
     registerInvestigationReconciliationTask({
       core,
@@ -236,6 +240,9 @@ export class NightshiftInvestigationsPlugin
       if (plugins.workflowsExtensions) {
         plugins.workflowsExtensions.registerStepDefinition(
           triggerInvestigationStepDefinition(this.getInvestigationsClient)
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          checkBudgetStepDefinition(this.getBudgetSoClient)
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
         plugins.workflowsExtensions.registerStepDefinition(
@@ -472,8 +479,17 @@ export class NightshiftInvestigationsPlugin
     return this.savedObjects
       .getScopedClient(request, {
         excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE],
+        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE, NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE],
       })
+      .asScopedToNamespace(spaceId);
+  };
+
+  private getBudgetSoClient = (spaceId: string) => {
+    if (!this.savedObjects) {
+      throw new Error('savedObjects is not available — plugin start() has not been called');
+    }
+    return this.savedObjects
+      .createInternalRepository([NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE])
       .asScopedToNamespace(spaceId);
   };
 
