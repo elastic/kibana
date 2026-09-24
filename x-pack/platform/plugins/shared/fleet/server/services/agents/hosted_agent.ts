@@ -12,7 +12,8 @@ import { agentPolicyService } from '../agent_policy';
 
 export async function getHostedPolicies(
   soClient: SavedObjectsClientContract,
-  agents: Agent[]
+  agents: Agent[],
+  options?: { spaceId?: string }
 ): Promise<{ [key: string]: boolean }> {
   // get any policy ids from upgradable agents; `policy_base_id` is always the base id, so agents
   // on a version-specific variant (`my-policy#9.2`) are looked up by the base policy id.
@@ -24,6 +25,7 @@ export async function getHostedPolicies(
   const agentPolicies = await agentPolicyService.getByIds(soClient, Array.from(policyIdsToGet), {
     fields: ['is_managed'],
     ignoreMissing: true,
+    spaceId: options?.spaceId,
   });
   const hostedPolicies = agentPolicies.reduce<Record<string, boolean>>((acc, policy) => {
     acc[policy.id] = policy.is_managed;

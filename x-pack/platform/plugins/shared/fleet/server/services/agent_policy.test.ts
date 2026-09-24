@@ -3050,7 +3050,7 @@ describe('Agent policy', () => {
 
       await agentPolicyService.deployPolicies(soClient, ['policy-1']);
 
-      expect(getByIdsSpy.mock.calls[0][2].spaceId).toBeUndefined();
+      expect(getByIdsSpy.mock.calls[0][2]?.spaceId).toBeUndefined();
       expect(getFullAgentPolicySpy.mock.calls[0][2]?.spaceId).toBeUndefined();
     });
   });
