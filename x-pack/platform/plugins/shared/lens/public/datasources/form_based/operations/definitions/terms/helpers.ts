@@ -273,7 +273,7 @@ export function isCustomLastValueOrderAgg(
   return (
     orderBy.type === 'custom' &&
     !!orderAgg &&
-    isColumnOfType<LastValueIndexPatternColumn>('last_value', orderAgg)
+    isColumnOfType<LastValueOrderAggColumn>('last_value', orderAgg)
   );
 }
 
