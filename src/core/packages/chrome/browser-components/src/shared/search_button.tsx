@@ -20,13 +20,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac, useKeyboardShortcut } from '@kbn/shared-ux-utility';
-import { useGlobalSearch } from '../../shared/chrome_hooks';
+import { useGlobalSearch } from './chrome_hooks';
 import {
   HEADER_BUTTON_SQUARE_WIDTH_PX,
   headerButtonBaseStyles,
   headerButtonBorderedStyles,
   useHeaderButtonStyleVars,
 } from './header_action_button';
+import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 const COMPACT_PLACEHOLDER = i18n.translate('core.ui.chrome.globalHeader.searchButton.placeholder', {
   defaultMessage: 'Find content...',
@@ -121,7 +122,7 @@ export const SearchButton = React.memo(({ layout = 'compact' }: SearchButtonProp
     <button
       type="button"
       aria-label={ARIA_LABEL}
-      data-test-subj="chromeNextGlobalHeaderSearchButton"
+      data-test-subj={CHROME_HEADER_TEST_SUBJECTS.searchButton}
       css={[
         headerButtonBaseStyles,
         headerButtonBorderedStyles,

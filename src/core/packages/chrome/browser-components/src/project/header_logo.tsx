@@ -10,9 +10,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useBasePath, useCustomBranding, useProjectHome } from '../../shared/chrome_hooks';
-import { LoadingIndicator } from '../../shared/loading_indicator';
-import { headerButtonBaseStyles, useHeaderButtonStyleVars } from './header_action_button';
+import { useBasePath, useCustomBranding, useProjectHome } from '../shared/chrome_hooks';
+import { LoadingIndicator } from '../shared/loading_indicator';
+import { headerButtonBaseStyles, useHeaderButtonStyleVars } from '../shared/header_action_button';
 
 const LOGO_ARIA_LABEL = i18n.translate('core.ui.chrome.globalHeader.logoAriaLabel', {
   defaultMessage: 'Elastic home',
@@ -32,7 +32,7 @@ const logoLinkStyles = css`
   }
 `;
 
-export const ChromeNextGlobalHeaderLogo = React.memo(() => {
+export const ChromeHeaderLogo = React.memo(() => {
   const basePath = useBasePath();
   const homeHref = basePath.prepend(useProjectHome());
   const { logo: customLogo } = useCustomBranding();
@@ -51,4 +51,4 @@ export const ChromeNextGlobalHeaderLogo = React.memo(() => {
   );
 });
 
-ChromeNextGlobalHeaderLogo.displayName = 'ChromeNextGlobalHeaderLogo';
+ChromeHeaderLogo.displayName = 'ChromeHeaderLogo';

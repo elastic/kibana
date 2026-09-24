@@ -10,8 +10,9 @@
 import React, { useCallback } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HeaderHelpMenu, type HeaderHelpMenuButtonProps } from '../../shared/header_help_menu';
+import { HeaderHelpMenu, type HeaderHelpMenuButtonProps } from './header_help_menu';
 import { HeaderActionButton } from './header_action_button';
+import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 const HELP_ARIA_LABEL = i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel', {
   defaultMessage: 'Help menu',
@@ -26,7 +27,7 @@ export const HelpButton = React.memo(() => {
         aria-expanded={isOpen}
         aria-haspopup={true}
         aria-label={HELP_ARIA_LABEL}
-        data-test-subj="chromeNextGlobalHeaderHelpButton"
+        data-test-subj={CHROME_HEADER_TEST_SUBJECTS.helpButton}
         notification={hasUnreadNews}
       >
         <EuiIcon type="question" size="m" color="subdued" aria-hidden />

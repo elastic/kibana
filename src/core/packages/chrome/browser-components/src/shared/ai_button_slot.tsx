@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { HeaderExtension } from '../../shared/header_extension';
+import { HeaderExtension } from './header_extension';
 import { useAiButtons } from './use_ai_button';
 
 /**

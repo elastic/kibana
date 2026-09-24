@@ -248,7 +248,7 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
-    if (await this.globalNav.isNextProjectChrome()) {
+    if (await this.globalNav.isProjectChrome()) {
       await this.testSubjects.click('appHeaderBack');
     } else {
       const breadcrumbLink = this.config.get('serverless')

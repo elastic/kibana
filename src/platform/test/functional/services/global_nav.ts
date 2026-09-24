@@ -8,15 +8,16 @@
  */
 
 import expect from '@kbn/expect';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import { FtrService } from '../ftr_provider_context';
 
 /**
- * Capabilities that have no equivalent in next-project chrome yet. Callers that can run under project
- * chrome must branch on `globalNav.isNextProjectChrome()` before using them.
+ * Capabilities that have no equivalent in project chrome yet. Callers that can run under project
+ * chrome must branch on `globalNav.isProjectChrome()` before using them.
  */
-const unsupportedInNextChrome = (method: string): never => {
+const unsupportedInProjectChrome = (method: string): never => {
   throw new Error(
-    `globalNav.${method}() is not supported in next-project chrome. Branch on globalNav.isNextProjectChrome() in the caller.`
+    `globalNav.${method}() is not supported in project chrome. Branch on globalNav.isProjectChrome() in the caller.`
   );
 };
 
@@ -28,7 +29,7 @@ export class GlobalNavService extends FtrService {
   private readonly findTimeout = this.config.get('timeouts.find');
 
   /**
-   * Visible page title from chrome-next `appHeaderTitle` or legacy `EuiPageHeader` h1.
+   * Visible page title from project chrome `appHeaderTitle` or legacy `EuiPageHeader` h1.
    */
   public async getPageTitle(): Promise<string> {
     const legacyTitleSelector = '.euiPageHeader h1.euiTitle';
@@ -44,16 +45,16 @@ export class GlobalNavService extends FtrService {
   }
 
   /**
-   * True when next-project chrome is active (project chrome style). It renders the
-   * new global header and, unlike the classic header, no breadcrumb trail. Chrome style can
+   * True when project chrome is active. It renders the chrome header and, unlike the
+   * classic header, no breadcrumb trail. Chrome style can
    * flip mid-session (e.g. entering a solution view), so this is probed per call.
    *
    * The active header can be briefly absent while navigating, so we wait until a known header is
    * displayed before deciding. Pages without a recognized header retain classic behavior.
    */
-  public async isNextProjectChrome(): Promise<boolean> {
+  public async isProjectChrome(): Promise<boolean> {
     const detectHeader = async (): Promise<boolean | undefined> => {
-      if (await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) {
+      if (await this.testSubjects.exists(CHROME_HEADER_TEST_SUBJECTS.root, { timeout: 0 })) {
         return true;
       }
       if (await this.testSubjects.exists('headerGlobalNav', { timeout: 0 })) {
@@ -76,28 +77,28 @@ export class GlobalNavService extends FtrService {
   }
 
   public async moveMouseToLogo(): Promise<void> {
-    if (await this.isNextProjectChrome()) {
+    if (await this.isProjectChrome()) {
       return await this.testSubjects.moveMouseTo('nav-header-logo');
     }
     await this.testSubjects.moveMouseTo('headerGlobalNav > logo');
   }
 
   public async clickLogo(): Promise<void> {
-    if (await this.isNextProjectChrome()) {
+    if (await this.isProjectChrome()) {
       return await this.testSubjects.click('nav-header-logo');
     }
     return await this.testSubjects.click('headerGlobalNav > logo');
   }
 
   public async exists(): Promise<boolean> {
-    if (await this.isNextProjectChrome()) {
-      return await this.testSubjects.exists('chromeNextGlobalHeader');
+    if (await this.isProjectChrome()) {
+      return await this.testSubjects.exists(CHROME_HEADER_TEST_SUBJECTS.root);
     }
     return await this.testSubjects.exists('headerGlobalNav');
   }
 
   public async getLastBreadcrumb(): Promise<string> {
-    if (await this.isNextProjectChrome()) {
+    if (await this.isProjectChrome()) {
       return await this.getPageTitle();
     }
     return await this.testSubjects.getVisibleText(
@@ -107,14 +108,14 @@ export class GlobalNavService extends FtrService {
 
   public async clickNewsfeed(): Promise<void> {
     if (!(await this.testSubjects.exists('helpMenuWhatsNewButton', { timeout: 0 }))) {
-      await this.testSubjects.click('chromeNextGlobalHeaderHelpButton');
+      await this.testSubjects.click(CHROME_HEADER_TEST_SUBJECTS.helpButton);
     }
     await this.testSubjects.click('helpMenuWhatsNewButton');
   }
 
   public async getFirstBreadcrumb(): Promise<string> {
-    if (await this.isNextProjectChrome()) {
-      return unsupportedInNextChrome('getFirstBreadcrumb');
+    if (await this.isProjectChrome()) {
+      return unsupportedInProjectChrome('getFirstBreadcrumb');
     }
     return await this.testSubjects.getVisibleText(
       'headerGlobalNav > breadcrumbs > ~breadcrumb & ~first'
@@ -122,8 +123,8 @@ export class GlobalNavService extends FtrService {
   }
 
   public async badgeExistsOrFail(expectedLabel: string): Promise<void> {
-    if (await this.isNextProjectChrome()) {
-      return unsupportedInNextChrome('badgeExistsOrFail');
+    if (await this.isProjectChrome()) {
+      return unsupportedInProjectChrome('badgeExistsOrFail');
     }
     await this.testSubjects.existOrFail('headerBadge');
     const actualLabel =
@@ -132,8 +133,8 @@ export class GlobalNavService extends FtrService {
   }
 
   public async badgeMissingOrFail(): Promise<void> {
-    if (await this.isNextProjectChrome()) {
-      return unsupportedInNextChrome('badgeMissingOrFail');
+    if (await this.isProjectChrome()) {
+      return unsupportedInProjectChrome('badgeMissingOrFail');
     }
     await this.testSubjects.missingOrFail('headerBadge');
   }

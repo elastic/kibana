@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 
 type NavigationId = string;
 
@@ -111,9 +112,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     // check that chrome ui is in project/solution mode
     async expectExists() {
       await retry.try(async () => {
-        const exists = await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 });
+        const exists = await testSubjects.exists(CHROME_HEADER_TEST_SUBJECTS.root, { timeout: 0 });
         if (!exists) {
-          throw new Error('chromeNextGlobalHeader is not present');
+          throw new Error(`${CHROME_HEADER_TEST_SUBJECTS.root} is not present`);
         }
       });
     },

@@ -13,10 +13,11 @@ import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import { TestChromeProviders } from '../../test_helpers';
-import { ChromeNextGlobalHeader } from './global_header';
+import { TestChromeProviders } from '../test_helpers';
+import { ChromeHeader } from './header';
+import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
-describe('ChromeNextGlobalHeader', () => {
+describe('ChromeHeader', () => {
   it('renders the project picker beside the context switcher', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.controls.contextSwitcher.set(<span>Context switcher</span>);
@@ -24,14 +25,14 @@ describe('ChromeNextGlobalHeader', () => {
 
     renderWithI18n(
       <TestChromeProviders chrome={chrome}>
-        <ChromeNextGlobalHeader />
+        <ChromeHeader />
       </TestChromeProviders>
     );
 
-    expect(screen.getByTestId('chromeNextGlobalHeaderSwitcher')).toHaveTextContent(
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.switcher)).toHaveTextContent(
       'Context switcher'
     );
-    expect(screen.getByTestId('chromeNextGlobalHeaderProjectPicker')).toHaveTextContent(
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.projectPicker)).toHaveTextContent(
       'Project picker'
     );
   });
@@ -39,11 +40,11 @@ describe('ChromeNextGlobalHeader', () => {
   it('renders the help menu button', async () => {
     renderWithI18n(
       <TestChromeProviders>
-        <ChromeNextGlobalHeader />
+        <ChromeHeader />
       </TestChromeProviders>
     );
 
-    await userEvent.click(screen.getByTestId('chromeNextGlobalHeaderHelpButton'));
+    await userEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.helpButton));
 
     expect(screen.getByText('Help')).toBeInTheDocument();
     expect(screen.getByText('Kibana documentation')).toBeInTheDocument();
@@ -62,11 +63,11 @@ describe('ChromeNextGlobalHeader', () => {
 
     renderWithI18n(
       <TestChromeProviders chrome={chrome}>
-        <ChromeNextGlobalHeader />
+        <ChromeHeader />
       </TestChromeProviders>
     );
 
-    await userEvent.click(screen.getByTestId('chromeNextGlobalHeaderHelpButton'));
+    await userEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.helpButton));
 
     expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
   });
@@ -84,11 +85,11 @@ describe('ChromeNextGlobalHeader', () => {
 
     renderWithI18n(
       <TestChromeProviders chrome={chrome}>
-        <ChromeNextGlobalHeader />
+        <ChromeHeader />
       </TestChromeProviders>
     );
 
-    await userEvent.click(screen.getByTestId('chromeNextGlobalHeaderHelpButton'));
+    await userEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.helpButton));
 
     expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
   });
@@ -107,13 +108,13 @@ describe('ChromeNextGlobalHeader', () => {
 
     renderWithI18n(
       <TestChromeProviders chrome={chrome}>
-        <ChromeNextGlobalHeader />
+        <ChromeHeader />
       </TestChromeProviders>
     );
 
     expect(screen.getByTestId('headerActionButtonNotification')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('chromeNextGlobalHeaderHelpButton'));
+    await userEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.helpButton));
 
     expect(screen.getByTestId('helpMenuWhatsNewUnreadIndicator')).toBeInTheDocument();
 
@@ -134,7 +135,7 @@ describe('ChromeNextGlobalHeader', () => {
 
     renderWithI18n(
       <TestChromeProviders chrome={chrome}>
-        <ChromeNextGlobalHeader />
+        <ChromeHeader />
       </TestChromeProviders>
     );
 
