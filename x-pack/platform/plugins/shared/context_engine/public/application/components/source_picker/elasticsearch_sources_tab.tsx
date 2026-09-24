@@ -25,6 +25,8 @@ import React, { useEffect, useId, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useIndices } from '../../hooks/use_indices';
 import { useKibana } from '../../hooks/use_kibana';
+import { isIndexPickerSourceSelected } from '../../utils/sources';
+import type { SelectedSource } from './types';
 
 const EDITOR_INLINE_MIN_HEIGHT = 180;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -32,11 +34,13 @@ const SEARCH_DEBOUNCE_MS = 300;
 const getEsqlQuery = (query: AggregateQuery): string => ('esql' in query ? query.esql : '');
 
 interface ElasticsearchSourcesTabProps {
+  selectedSources: SelectedSource[];
   onAddIndex: (indexName: string) => void;
   onAddEsql: (query: string) => void;
 }
 
 export const ElasticsearchSourcesTab = ({
+  selectedSources,
   onAddIndex,
   onAddEsql,
 }: ElasticsearchSourcesTabProps) => {
@@ -56,8 +60,11 @@ export const ElasticsearchSourcesTab = ({
   });
 
   const indexOptions = useMemo<EuiComboBoxOptionOption<string>[]>(
-    () => indexNames.map((name) => ({ label: name, value: name })),
-    [indexNames]
+    () =>
+      indexNames
+        .filter((name) => !isIndexPickerSourceSelected(selectedSources, name))
+        .map((name) => ({ label: name, value: name })),
+    [indexNames, selectedSources]
   );
 
   useEffect(() => {

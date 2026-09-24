@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
-import { createIndexEsqlQuery } from '../../utils/sources';
+import { createIndexEsqlQuery, hasSelectedEsqlQuery } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
 import { ConnectorsTab } from './connectors_tab';
@@ -64,7 +64,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
   );
 
   const addEsqlSource = (query: string) => {
-    if (selectedSources.some((current) => current.type === 'esql' && current.id === query)) {
+    if (hasSelectedEsqlQuery(selectedSources, query)) {
       return;
     }
     onChange([...selectedSources, { type: 'esql', id: query, label: query, value: query }]);
@@ -145,7 +145,11 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
       <EuiSpacer size="m" />
 
       {selectedTab === 'esql' && (
-        <ElasticsearchSourcesTab onAddIndex={addIndexSource} onAddEsql={addEsqlSource} />
+        <ElasticsearchSourcesTab
+          selectedSources={selectedSources}
+          onAddIndex={addIndexSource}
+          onAddEsql={addEsqlSource}
+        />
       )}
       {selectedTab === 'connectors' && (
         <ConnectorsTab

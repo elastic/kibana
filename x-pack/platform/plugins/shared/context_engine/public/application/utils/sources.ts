@@ -48,3 +48,14 @@ export const toSelectedSources = (sources: AiIndexSource[]): SelectedSource[] =>
 
 /** Builds the ES|QL query used when an index or data stream is selected as a source. */
 export const createIndexEsqlQuery = (indexName: string): string => `FROM ${indexName}`;
+
+export const hasSelectedEsqlQuery = (
+  selectedSources: SelectedSource[],
+  esqlQuery: string
+): boolean => selectedSources.some((source) => source.type === 'esql' && source.id === esqlQuery);
+
+/** Whether a simple index-picker source (`FROM <index>`) is already in the selection. */
+export const isIndexPickerSourceSelected = (
+  selectedSources: SelectedSource[],
+  indexName: string
+): boolean => hasSelectedEsqlQuery(selectedSources, createIndexEsqlQuery(indexName));

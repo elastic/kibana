@@ -157,9 +157,16 @@ describe('SourcePicker', () => {
     renderWithProviders(<Harness />);
 
     await selectIndexSource('logs-*');
-    await selectIndexSource('logs-*');
-
     expect(screen.getAllByTestId('contextSelectedSource-esql-0')).toHaveLength(1);
+
+    const comboBox = screen.getByTestId('contextIndexComboBox');
+    const input = within(comboBox).getByRole('combobox');
+    fireEvent.focus(input);
+    fireEvent.click(input);
+
+    const listbox = await screen.findByRole('listbox');
+    expect(within(listbox).queryByText('logs-*')).not.toBeInTheDocument();
+    expect(within(listbox).getByText('metrics-*')).toBeInTheDocument();
   });
 
   it('shows a toast warning when the indices request fails', async () => {
