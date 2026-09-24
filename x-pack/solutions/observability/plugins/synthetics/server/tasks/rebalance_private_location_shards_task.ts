@@ -14,11 +14,7 @@ import type {
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
-import {
-  applyForcedAgentSharding,
-  isAgentShardingForced,
-} from '../synthetics_service/private_location/agent_sharding_forced';
+import { isAgentShardingLicensed } from '../synthetics_service/private_location/agent_sharding_license';
 import { getAgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import { getRecentlyActiveAgentIds } from '../synthetics_service/private_location/get_active_agent_ids';
 import {
@@ -67,10 +63,10 @@ interface RebalanceTaskState extends Record<string, unknown> {
 
 /**
  * Keeps monitor→agent assignment aligned with the set of healthy agents for
- * scalable (condition-sharded) private locations, by rewriting each moved
+ * every private location (Enterprise license only), by rewriting each moved
  * monitor's `${agent.id}` condition. Intentionally separate from the already
  * overloaded `Synthetics:Sync-Private-Location-Monitors` task: it runs on its
- * own tighter interval and only ever touches condition-sharded locations.
+ * own tighter interval and only ever touches agent conditions.
  */
 export class RebalancePrivateLocationShardsTask {
   constructor(
@@ -111,21 +107,19 @@ export class RebalancePrivateLocationShardsTask {
 
     try {
       signal.throwIfAborted();
-      if (!isRebalancePrivateLocationShardsEnabled(taskInstance)) {
+      const isSwitchOn = isRebalancePrivateLocationShardsEnabled(taskInstance);
+      if (!isSwitchOn || !(await isAgentShardingLicensed(this.serverSetup))) {
         return {
-          state: await this.runDisabledDrain(taskInstance),
+          state: await this.runDisabledDrain(taskInstance, isSwitchOn),
           schedule,
         };
       }
 
       const soClient = coreStart.savedObjects.createInternalRepository();
 
-      const scalableLocations = applyForcedAgentSharding(
-        await getPrivateLocations(soClient, ALL_SPACES_ID),
-        await isAgentShardingForced(this.serverSetup)
-      ).filter(isConditionShardedLocation);
+      const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
 
-      if (scalableLocations.length === 0) {
+      if (locations.length === 0) {
         return {
           state: await this.returnedState(taskInstance, PIN_DRAIN_RESET),
           schedule,
@@ -140,7 +134,7 @@ export class RebalancePrivateLocationShardsTask {
       const priorHealthySince = (taskInstance.state as RebalanceTaskState).healthySince ?? {};
       const nextHealthySince: Record<string, number> = {};
 
-      for (const location of scalableLocations) {
+      for (const location of locations) {
         signal.throwIfAborted();
         try {
           const agents = await getAgentInfo(this.serverSetup, location.agentPolicyId, signal);
@@ -262,12 +256,14 @@ export class RebalancePrivateLocationShardsTask {
   }
 
   /**
-   * While off: drain leftover pins once, then skip Fleet listing until the
-   * switch turns back on. Failed writes retry up to MAX_PIN_CLEAR_ATTEMPTS,
-   * then stop until the next on→off. A mid-run PUT true drops the latch.
+   * While off (switch off or no Enterprise license): drain leftover pins once,
+   * then skip Fleet listing until sharding is active again. Failed writes retry
+   * up to MAX_PIN_CLEAR_ATTEMPTS. A mid-run PUT true drops the latch, but only
+   * when the switch was off; unlicensed runs already see the switch on.
    */
   private async runDisabledDrain(
-    taskInstance: ConcreteTaskInstance
+    taskInstance: ConcreteTaskInstance,
+    wasSwitchOn: boolean
   ): Promise<Record<string, unknown>> {
     const attemptsSoFar =
       Number(taskInstance.state[REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]) || 0;
@@ -297,7 +293,7 @@ export class RebalancePrivateLocationShardsTask {
     }
 
     const live = await this.returnedState(taskInstance);
-    if (isRebalancePrivateLocationShardsEnabled({ state: live })) {
+    if (!wasSwitchOn && isRebalancePrivateLocationShardsEnabled({ state: live })) {
       return { ...live, ...PIN_DRAIN_RESET };
     }
     if (failed > 0) {

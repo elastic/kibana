@@ -52,7 +52,6 @@ export const privateLocationFixture = {
   geo: { lat: 52.52, lon: 13.4 },
   namespace: 'fixture_namespace',
   spaces: ['default'],
-  isAgentSharding: true,
 };
 
 const metadataFixture = {

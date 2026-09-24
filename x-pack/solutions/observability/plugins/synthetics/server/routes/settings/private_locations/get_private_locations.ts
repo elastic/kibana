@@ -70,9 +70,7 @@ export const getPrivateLocationsAndAgentPolicies = async (
         : syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(),
     ]);
     return {
-      locations: await syntheticsMonitorClient.privateLocationAPI.withEffectiveAgentSharding(
-        privateLocations || []
-      ),
+      locations: privateLocations || [],
       agentPolicies: agentPolicies || [],
     };
   } catch (error) {

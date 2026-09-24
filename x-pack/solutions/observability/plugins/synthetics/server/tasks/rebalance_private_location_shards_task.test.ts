@@ -54,11 +54,14 @@ const mockSyntheticsMonitorClient = {
 const coreStart = coreMock.createStart() as CoreStart;
 (coreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue(mockSoRepo);
 
+const enterpriseLicense = () => licenseMock.createLicense({ license: { type: 'enterprise' } });
+const mockGetLicense = jest.fn();
+
 const mockServerSetup = {
   coreStart,
   logger: mockLogger,
   config: { enabled: true },
-  pluginsStart: { taskManager: mockTaskManagerStart },
+  pluginsStart: { taskManager: mockTaskManagerStart, licensing: { getLicense: mockGetLicense } },
 } as unknown as SyntheticsServerSetup;
 
 const location = (over: Partial<Record<string, unknown>> = {}) =>
@@ -66,7 +69,6 @@ const location = (over: Partial<Record<string, unknown>> = {}) =>
     id: 'loc-1',
     label: 'Location 1',
     agentPolicyId: 'ap-1',
-    isAgentSharding: true,
     ...over,
   } as unknown as Awaited<
     ReturnType<typeof getPrivateLocationsModule.getPrivateLocations>
@@ -99,6 +101,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(NOW);
     mockTaskManagerStart.get.mockReset();
+    mockGetLicense.mockResolvedValue(enterpriseLicense());
     mockRebalanceShards.mockResolvedValue({ total: 0, moved: 0 });
     mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 0 });
   });
@@ -258,10 +261,8 @@ describe('RebalancePrivateLocationShardsTask', () => {
       });
     });
 
-    it('early-exits and does not read agents when there are no scalable locations', async () => {
-      jest
-        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
-        .mockResolvedValue([location({ isAgentSharding: false })]);
+    it('early-exits and does not read agents when there are no private locations', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
       const getAgentInfo = jest.spyOn(getAgentInfoModule, 'getAgentInfo');
 
       const result = await run({ foo: 1 });
@@ -275,36 +276,32 @@ describe('RebalancePrivateLocationShardsTask', () => {
       });
     });
 
-    it('rebalances classic locations when sharding is forced on Cloud with Enterprise', async () => {
-      jest
-        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
-        .mockResolvedValue([location({ isAgentSharding: false })]);
-      jest
-        .spyOn(getAgentInfoModule, 'getAgentInfo')
-        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
-      const forcedTask = new RebalancePrivateLocationShardsTask(
-        {
-          ...mockServerSetup,
-          cloud: { isCloudEnabled: true },
-          pluginsStart: {
-            ...mockServerSetup.pluginsStart,
-            licensing: {
-              getLicense: jest
-                .fn()
-                .mockResolvedValue(licenseMock.createLicense({ license: { type: 'enterprise' } })),
-            },
-          },
-        } as unknown as SyntheticsServerSetup,
-        mockSyntheticsMonitorClient
+    it('clears agent pins and skips rebalance without an Enterprise license', async () => {
+      mockGetLicense.mockResolvedValue(
+        licenseMock.createLicense({ license: { type: 'platinum' } })
       );
+      const getPrivateLocationsSpy = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
 
-      await forcedTask.runTask({ taskInstance: taskInstance(), signal: openSignal() });
+      const result = await run({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true });
 
-      expect(mockRebalanceShards).toHaveBeenCalledWith(
-        expect.objectContaining({
-          location: expect.objectContaining({ id: 'loc-1' }),
-        })
+      expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
+      expect(getPrivateLocationsSpy).not.toHaveBeenCalled();
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
+      expect(result.state).toEqual(
+        expect.objectContaining({ [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true })
       );
+    });
+
+    it('does not drain again on later unlicensed cycles once pins are cleared', async () => {
+      mockGetLicense.mockResolvedValue(licenseMock.createLicense({ license: { type: 'basic' } }));
+
+      await run({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true,
+        [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+      });
+
+      expect(mockClearShardConditions).not.toHaveBeenCalled();
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
     });
 
     it('rebalances a healthy location, passing healthy/recovery agents and capacities', async () => {

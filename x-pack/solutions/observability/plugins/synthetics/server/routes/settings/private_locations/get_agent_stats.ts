@@ -11,10 +11,8 @@ import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { AgentStat, LocationAgentStats } from '../../../../common/types';
-import {
-  countMonitorsByAssignedAgent,
-  isConditionShardedLocation,
-} from '../../../synthetics_service/private_location/assign_by_condition';
+import { countMonitorsByAssignedAgent } from '../../../synthetics_service/private_location/assign_by_condition';
+import { isAgentShardingLicensed } from '../../../synthetics_service/private_location/agent_sharding_license';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 
 const BYTES_PER_MIB = 1024 * 1024;
@@ -204,13 +202,13 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
     );
     const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
     const packagePolicyService = new PackagePolicyService(server);
+    const isAgentSharding = await isAgentShardingLicensed(server);
 
     const { elasticsearch } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
 
     return Promise.all(
       locations.map(async (location): Promise<LocationAgentStats> => {
-        const isAgentSharding = isConditionShardedLocation(location);
         const [enrolled, assignmentCounts] = await Promise.all([
           getEnrolledAgents(server, location.agentPolicyId).catch(
             () => new Map<string, EnrolledAgentMeta>()

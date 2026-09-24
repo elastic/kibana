@@ -68,7 +68,6 @@ apiTest.describe(
       const enableRes = await enableSynthetics(apiClient, mergeSyntheticsApiHeaders(cookieHeader));
       expect(enableRes.body).toMatchObject({ isEnabled: true, isValidApiKey: true });
       expect(agentStack.agents).toHaveLength(2);
-      expect(agentStack.privateLocation.isAgentSharding).toBe(true);
     });
 
     apiTest.afterEach(async ({ apiClient, agentStack }) => {

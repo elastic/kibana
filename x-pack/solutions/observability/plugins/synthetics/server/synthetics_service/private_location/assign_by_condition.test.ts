@@ -12,19 +12,10 @@ import {
   assignAgentById,
   balanceAgentsByCost,
   countMonitorsByAssignedAgent,
-  isConditionShardedLocation,
   isEqlSafeLiteral,
   UNASSIGNED_CONDITION,
 } from './assign_by_condition';
 import { assignShard, BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB } from './assign_shards';
-
-describe('isConditionShardedLocation', () => {
-  it('is true only when the flag is on', () => {
-    expect(isConditionShardedLocation({ isAgentSharding: true })).toBe(true);
-    expect(isConditionShardedLocation({ isAgentSharding: false })).toBe(false);
-    expect(isConditionShardedLocation({})).toBe(false);
-  });
-});
 
 describe('isEqlSafeLiteral', () => {
   it('accepts ordinary agent ids', () => {

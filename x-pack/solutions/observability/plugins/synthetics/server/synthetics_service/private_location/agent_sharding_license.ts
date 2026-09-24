@@ -16,27 +16,14 @@ export const hasAgentShardingLicense = (
     license?.isAvailable && license.isActive && license.hasAtLeast(AGENT_SHARDING_MIN_LICENSE)
   );
 
-/**
- * On Elastic Cloud and Serverless with an Enterprise license every private
- * location is scalable, regardless of the stored per-location `isAgentSharding`.
- */
-export const isAgentShardingForced = async (
-  server: Pick<SyntheticsServerSetup, 'cloud' | 'pluginsStart' | 'logger'>
+/** With an Enterprise license every private location shards monitors across its agents. */
+export const isAgentShardingLicensed = async (
+  server: Pick<SyntheticsServerSetup, 'pluginsStart' | 'logger'>
 ): Promise<boolean> => {
-  const { cloud, pluginsStart, logger } = server;
-  if (!cloud?.isCloudEnabled && !cloud?.isServerlessEnabled) {
-    return false;
-  }
   try {
-    return hasAgentShardingLicense(await pluginsStart.licensing.getLicense());
+    return hasAgentShardingLicense(await server.pluginsStart.licensing.getLicense());
   } catch (e) {
-    logger.error(e);
+    server.logger.error(e);
     return false;
   }
 };
-
-export const applyForcedAgentSharding = <T extends { isAgentSharding?: boolean }>(
-  locations: T[],
-  isForced: boolean
-): T[] =>
-  isForced ? locations.map((location) => ({ ...location, isAgentSharding: true })) : locations;

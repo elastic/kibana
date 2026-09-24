@@ -49,7 +49,6 @@ export interface StartAgentStackOptions {
    * image and is enough for HTTP/TCP/ICMP.
    */
   agentImage?: 'complete' | 'agent';
-  isAgentSharding?: boolean;
 }
 
 interface EnrollmentApiKeyItem {
@@ -131,7 +130,6 @@ export async function startAgentStack({
   runId,
   agentCount = 1,
   agentImage = 'complete',
-  isAgentSharding = false,
 }: {
   apiServices: SyntheticsApiServicesFixture;
   kbnClient: KbnClient;
@@ -336,11 +334,9 @@ export async function startAgentStack({
         fleet_server_host_id: dockerFleetHostId,
       },
     });
-    const [privateLocation] = await apiServices.syntheticsPrivateLocations.setTestLocations(
-      [createdSyntheticsPolicyId],
-      undefined,
-      { isAgentSharding }
-    );
+    const [privateLocation] = await apiServices.syntheticsPrivateLocations.setTestLocations([
+      createdSyntheticsPolicyId,
+    ]);
     privateLocationId = privateLocation.id;
 
     const { data: enrollmentKeys } = await kbnClient.request<{ items: EnrollmentApiKeyItem[] }>({

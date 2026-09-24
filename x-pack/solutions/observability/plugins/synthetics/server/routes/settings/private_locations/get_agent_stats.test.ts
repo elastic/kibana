@@ -71,13 +71,27 @@ const bucket = (
 const makeContext = ({
   listAgentsImpl,
   buckets = [],
+  hasEnterprise = false,
 }: {
   listAgentsImpl: jest.Mock;
   buckets?: ReturnType<typeof bucket>[];
+  hasEnterprise?: boolean;
 }) => {
   const search = jest.fn().mockResolvedValue({ aggregations: { by_host: { buckets } } });
   const routeContext = {
-    server: { fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } } },
+    server: {
+      fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } },
+      pluginsStart: {
+        licensing: {
+          getLicense: jest.fn().mockResolvedValue({
+            isAvailable: true,
+            isActive: true,
+            hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
+          }),
+        },
+      },
+      logger: { error: jest.fn() },
+    },
     context: {
       core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: { search } } } }),
     },
@@ -221,25 +235,14 @@ describe('getPrivateLocationAgentStats route', () => {
     expect(mockListByAgentPolicy).not.toHaveBeenCalled();
   });
 
-  it('counts assigned monitors from stamped conditions on a sharded location', async () => {
-    mockGetLocations.mockResolvedValue({
-      locations: [
-        {
-          id: 'loc-1',
-          label: 'Location 1',
-          agentPolicyId: 'policy-1',
-          isAgentSharding: true,
-        },
-      ],
-      agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
-    });
+  it('counts assigned monitors from stamped conditions with an Enterprise license', async () => {
     mockListByAgentPolicy.mockResolvedValue([
       { id: 'mon-a-loc-1', condition: agentIdCondition('agent-1') },
       { id: 'mon-b-loc-1', condition: agentIdCondition('agent-1') },
       { id: 'mon-c-loc-1', condition: agentIdCondition('other-agent') },
     ]);
     const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
-    const { routeContext } = makeContext({ listAgentsImpl: listAgents });
+    const { routeContext } = makeContext({ listAgentsImpl: listAgents, hasEnterprise: true });
 
     const result = await run(routeContext);
 
