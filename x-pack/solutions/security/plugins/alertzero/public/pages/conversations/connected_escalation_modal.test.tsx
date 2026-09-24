@@ -121,8 +121,8 @@ beforeEach(() => {
     services: {
       notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
       application: {
-        getUrlForApp: jest.fn((_appId: string, { path = '' }: { path?: string } = {}) =>
-          `/base/app/alertzero${path}`
+        getUrlForApp: jest.fn(
+          (_appId: string, { path = '' }: { path?: string } = {}) => `/base/app/alertzero${path}`
         ),
         navigateToApp: jest.fn(),
       },

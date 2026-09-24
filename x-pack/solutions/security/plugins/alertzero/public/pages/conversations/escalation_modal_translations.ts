@@ -123,7 +123,7 @@ export const ESCALATION_SUCCESS = Object.freeze({
     defaultMessage: 'Investigation added to escalation',
   }),
   linkText: i18n.translate('xpack.alertzero.escalation.success.openEscalation', {
-    defaultMessage: 'Open investigation',
+    defaultMessage: 'Open escalation',
   }),
 });
 

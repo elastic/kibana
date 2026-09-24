@@ -79,9 +79,7 @@ export const EscalationCard = memo<EscalationCardProps>(
           boxSizing: 'border-box',
           boxShadow: 'none',
           cursor: isClickable ? 'pointer' : undefined,
-          backgroundColor: isSelected
-            ? euiTheme.colors.backgroundBaseInteractiveSelect
-            : undefined,
+          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
           ...(isClickable && {
             '&:hover': {
               backgroundColor: isSelected

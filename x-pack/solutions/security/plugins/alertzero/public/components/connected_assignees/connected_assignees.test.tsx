@@ -173,8 +173,6 @@ describe('ConnectedAssignees', () => {
 
     fireEvent.click(screen.getByTestId('assign-conv-1'));
 
-    await waitFor(() =>
-      expect(screen.getByTestId('updating-conv-1')).toHaveTextContent('idle')
-    );
+    await waitFor(() => expect(screen.getByTestId('updating-conv-1')).toHaveTextContent('idle'));
   });
 });
