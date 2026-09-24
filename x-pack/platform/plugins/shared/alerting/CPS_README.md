@@ -82,7 +82,7 @@ Both keys are stored as encrypted attributes on the rule saved object:
 
 #### Missing UIAM API Key Tagging
 
-On serverless, rules that should have a UIAM key but don't (system-created key without a `uiamApiKey`) are tagged with `Missing Elastic Cloud API Key` (the `MISSING_UIAM_API_KEY_TAG`) on create, update, and enable.
+Before execution on serverless, rules that should have a UIAM key but don't are tagged with `Missing Elastic Cloud API Key` (the translated `MISSING_UIAM_API_KEY_TAG`). Once a UIAM key is present, the tag is removed. The legacy translated `Missing Universal Api Key` tag is replaced or removed during the same reconciliation.
 
 #### Invalidation
 

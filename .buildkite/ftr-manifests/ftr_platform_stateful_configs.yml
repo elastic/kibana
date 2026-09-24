@@ -216,7 +216,6 @@ enabled:
   - x-pack/platform/test/functional/apps/maps/group5/config.ts
   - x-pack/platform/test/functional/apps/maps/group6/config.ts
   - x-pack/platform/test/functional/apps/maps/group7/config.ts
-  - x-pack/platform/test/functional/apps/maps/group8/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group3/config.ts

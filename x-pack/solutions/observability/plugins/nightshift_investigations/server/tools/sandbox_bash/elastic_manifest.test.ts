@@ -26,11 +26,24 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('"$CONNECTOR_CONFIG_URL/_remote/info"');
     expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query"');
   });
+
+  it('uses operator-supplied remote index guidance and bounds telemetry queries', () => {
+    const content = renderElasticManifest('remote-telemetry', {
+      readableIndices: 'Read `logging-region:logs-service-*`; no local telemetry is available.',
+    });
+
+    expect(content).toContain('Read `logging-region:logs-service-*`');
+    expect(content).not.toContain('FROM *:logs-*');
+    expect(content).toContain('--max-time 120');
+    expect(content).toContain('@timestamp');
+    expect(content).toContain('Name each remote explicitly');
+    expect(content).toContain('never use wildcard remote names');
+  });
 });
 
 describe('writeElasticManifest', () => {
   it('writes the manifest to /workspace/elastic.md', async () => {
-    const writeFiles = jest.fn().mockResolvedValue(undefined);
+    const writeFiles = jest.fn().mockResolvedValue([{ bytes_written: 100, success: true }]);
     const session = { writeFiles } as unknown as SandboxSession;
 
     await writeElasticManifest({
@@ -45,4 +58,18 @@ describe('writeElasticManifest', () => {
     const [files] = writeFiles.mock.calls[0];
     expect(files[0].content.toString('utf8')).toContain('# Elasticsearch telemetry');
   });
+  it.each([{ results: [] }, { results: [{ bytes_written: 0, success: false }] }])(
+    'rejects an unsuccessful per-file response %j',
+    async ({ results }) => {
+      const writeFiles = jest.fn().mockResolvedValue(results);
+      const session = { writeFiles } as unknown as SandboxSession;
+      await expect(
+        writeElasticManifest({
+          session,
+          connectorId: 'telemetry',
+          logger: loggingSystemMock.createLogger(),
+        })
+      ).rejects.toThrow('Failed to write sandbox telemetry guidance');
+    }
+  );
 });

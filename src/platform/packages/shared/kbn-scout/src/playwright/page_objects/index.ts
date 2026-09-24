@@ -13,6 +13,7 @@ import type { ScoutTestConfig } from '../../types';
 import { AppMenu } from './app_menu';
 import { Chrome } from './chrome';
 import { CollapsibleNav } from './collapsible_nav';
+import { Controls } from './controls';
 import { DashboardApp } from './dashboard_app';
 import { DataGrid } from './data_grid';
 import { DataViewsManagementPage } from './data_views_management_page';
@@ -37,6 +38,7 @@ import type { KibanaUrl } from '../../common/services/kibana_url';
 export {
   AppMenu,
   ContentListWrapper,
+  Controls,
   DiscoverApp,
   FilterBar,
   DataGrid,
@@ -55,6 +57,7 @@ export interface PageObjectsFixtures {
 }
 
 export interface PageObjects {
+  controls: Controls;
   datePicker: DatePicker;
   dataGrid: DataGrid;
   dataViewsManagement: DataViewsManagementPage;
@@ -85,6 +88,7 @@ export interface PageObjects {
  */
 export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
+    controls: createLazyPageObject(Controls, fixtures.page),
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
     dataGrid: createLazyPageObject(DataGrid, fixtures.page),
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
