@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { errors } from '@elastic/elasticsearch';
 import type { MsearchRequestItem, MsearchResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { isResponseError } from '@kbn/es-errors';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 
@@ -25,6 +27,12 @@ const probe = (target: string): MsearchRequestItem[] => [
 /** Single expression only: `existing,missing` is also a 404 and says nothing about `existing`. */
 const isMissingIndex = (target: string, item: MsearchResponseItem): boolean =>
   !target.includes(',') && 'error' in item && item.error.type === 'index_not_found_exception';
+
+/** Not every 403 is an authorization failure: a cluster read block is also a 403 and must surface. */
+const isAuthorizationError = (error: unknown): error is errors.ResponseError =>
+  isResponseError(error) &&
+  error.statusCode === 403 &&
+  (error.body as ElasticsearchErrorDetails | undefined)?.error?.type === 'security_exception';
 
 /** Error, timeout, or failed shard; undefined when the probe can be trusted. */
 const failureReason = (item: MsearchResponseItem): string | undefined => {
@@ -58,7 +66,7 @@ export const filterReadableAiIndices = async ({
     .msearch({ searches: aiIndices.flatMap(({ dest }) => probe(dest.value)) })
     .catch((error) => {
       // A caller with no search privilege on any index is refused the whole msearch.
-      if (isResponseError(error) && error.statusCode === 403) {
+      if (isAuthorizationError(error)) {
         logger.debug(`No AI index is readable: ${error.message}`);
         return undefined;
       }
