@@ -64,9 +64,6 @@ export type { CorpusExample as Example };
 
 const CORPORA_DIR = join(__dirname, '..', 'corpora');
 
-/** Mutation corpora grouped under the `tp-chains` corpus family in the JSONL data. */
-const MUTATION_CORPORA: readonly CorpusName[] = ['adversarial-twins', 'perturbations'];
-
 const corpusPath = (name: CorpusName) => join(CORPORA_DIR, `${name.replaceAll('-', '_')}.jsonl`);
 
 const assertNonEmpty = (value: unknown, field: string, where: string): void => {
@@ -162,11 +159,12 @@ export const loadCorpus = (name: CorpusName): CorpusCase[] => {
     );
   }
 
-  // The mutation corpora are grouped by corpus-family (`corpus: 'tp-chains'` for all
-  // BOTSv3-derived sets — including adversarial-twins and perturbations), so family
-  // membership is validated rather than strict name equality for those files.
-  const family = MUTATION_CORPORA.includes(name) ? 'tp-chains' : name;
-  const foreign = cases.find((c) => c.corpus !== family);
+  // Every case in `<name>.jsonl` must declare that same corpus name. The mutation
+  // corpora used to be stamped `tp-chains` in the data, which folded 33 cases
+  // (3 tp-chains + 15 adversarial-twins + 15 perturbations) into a single
+  // reporting bucket. The data is corrected at the source; the loader fails
+  // loudly instead of compensating with a family remap.
+  const foreign = cases.find((c) => c.corpus !== name);
   if (foreign) {
     throw new Error(`${name}.jsonl: mixed corpus values in file (found '${foreign.corpus}')`);
   }
