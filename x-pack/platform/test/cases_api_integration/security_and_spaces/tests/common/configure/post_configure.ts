@@ -56,9 +56,9 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql(getConfigurationOutput());
     });
 
-    it('should default extractObservables to true when omitted', async () => {
+    it('should default extractObservables to false when omitted for unknown owners', async () => {
       const configuration = await createConfiguration(supertest);
-      expect(configuration.extractObservables).to.be(true);
+      expect(configuration.extractObservables).to.be(false);
     });
 
     it('should persist extractObservables when explicitly set to false', async () => {

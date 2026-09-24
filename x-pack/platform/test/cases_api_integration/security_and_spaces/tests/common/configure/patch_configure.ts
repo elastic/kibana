@@ -59,7 +59,10 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should patch extractObservables from true to false', async () => {
-      const configuration = await createConfiguration(supertest);
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { extractObservables: true } })
+      );
       expect(configuration.extractObservables).to.be(true);
 
       const updated = await updateConfiguration(supertest, configuration.id, {
