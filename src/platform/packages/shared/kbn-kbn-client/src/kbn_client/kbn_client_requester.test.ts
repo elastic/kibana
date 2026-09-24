@@ -249,9 +249,8 @@ describe('KbnClientRequester transport configuration', () => {
     process.env = { ...previousEnv, ...env };
     let loaded!: typeof import('./kbn_client_requester');
     jest.isolateModules(() => {
-      loaded = jest.requireActual<typeof import('./kbn_client_requester')>(
-        './kbn_client_requester'
-      );
+      loaded =
+        jest.requireActual<typeof import('./kbn_client_requester')>('./kbn_client_requester');
     });
     process.env = previousEnv;
     return loaded.KbnClientRequester;

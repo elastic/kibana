@@ -128,8 +128,7 @@ const FETCH_CONNECT_TIMEOUT_MS = 60_000;
 // legitimately run longer (e.g. an evaluation harness pointed at a slow model
 // endpoint) fail at the transport with `HeadersTimeoutError` before any
 // application-level budget is consulted. Env-configurable; defaults unchanged.
-const FETCH_HEADERS_TIMEOUT_MS =
-  Number(process.env.KBN_CLIENT_HEADERS_TIMEOUT_MS ?? '') || 300_000;
+const FETCH_HEADERS_TIMEOUT_MS = Number(process.env.KBN_CLIENT_HEADERS_TIMEOUT_MS ?? '') || 300_000;
 const FETCH_BODY_TIMEOUT_MS = Number(process.env.KBN_CLIENT_BODY_TIMEOUT_MS ?? '') || 300_000;
 
 export class KbnClientRequester {
