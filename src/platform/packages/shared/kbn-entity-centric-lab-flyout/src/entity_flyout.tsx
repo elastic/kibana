@@ -71,7 +71,7 @@ import { resolveEntityTypeIdForName } from './entity_type_id_mapping';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
 import type { FlyoutCustomLink, LinkedDashboardOverride } from './flyout_template_overrides';
 import { useEntityDisplayName } from './entity_display_name';
-import { getEffectiveEntityHealth, setChaosModeEnabled, useChaosModeEnabled } from './chaos_mode';
+import { getEffectiveEntityHealth, useChaosModeEnabled } from './chaos_mode';
 
 interface EntityFlyoutProps {
   readonly entityName: string;
@@ -389,11 +389,9 @@ export const EntityFlyout = ({
   // override is configured, preserving the default behavior.
   const displayName = useEntityDisplayName(entityName, entityType);
 
-  // Resolve the canonical kind once — used both for template selection
-  // upstream and for kind-gated entries in the actions menu (e.g.
-  // "Roll back to previous version" only shows up for services and
-  // K8s deployments, the two kinds where a one-click rollback is a
-  // credible action against the entity itself).
+  // Resolve the canonical kind once — used for template selection and
+  // kind-gated primary action mapping (e.g. "View in APM" only shows
+  // for services / deployments).
   const kind = useMemo(
     () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
     [entityType, entityName]
@@ -478,142 +476,124 @@ export const EntityFlyout = ({
     [closeActionMenu, notifications, entityName]
   );
 
-  // Rollback is a "real" lab action — it flips the global chaos-mode
-  // toggle off so the PayFlow storyline is replaced by the healthy
-  // kind templates everywhere it's read (this flyout, the entity
-  // list, the grouped grid tiles). A success toast hints at how to
-  // re-arm chaos from the Discover logs panel.
-  const handleRollbackClick = useCallback(() => {
-    closeActionMenu();
-    setChaosModeEnabled(false);
-    notifications.toasts.addSuccess({
-      title: i18n.translate('entityCentricLabFlyout.flyout.rollbackToastTitle', {
-        defaultMessage: 'Rolled back {entityName} to the previous version',
-        values: { entityName },
-      }),
-      text: i18n.translate('entityCentricLabFlyout.flyout.rollbackToastText', {
-        defaultMessage:
-          'PayFlow services are recovering. Toggle "Chaos mode" in the Discover logs panel to replay the incident.',
-      }),
-    });
-  }, [closeActionMenu, notifications, entityName]);
+  // Rollback was removed from the action menu. The chaos-mode toggle
+  // is still accessible from the Discover logs panel for the PayFlow
+  // storyline demo; `useChaosModeEnabled` is still imported for the
+  // effective-health resolution above.
 
   // ---- Context-aware primary action per flyout tab ----
-  const allActions = useMemo(() => {
-    const viewInApmLabel = i18n.translate('entityCentricLabFlyout.flyout.actions.viewInApm', {
-      defaultMessage: 'View in APM',
-    });
-    const viewInLogsExplorerLabel = i18n.translate(
-      'entityCentricLabFlyout.flyout.actions.viewInLogsExplorer',
-      { defaultMessage: 'View in Logs Explorer' }
-    );
-    const viewInInfrastructureLabel = i18n.translate(
-      'entityCentricLabFlyout.flyout.actions.viewInInfrastructure',
-      { defaultMessage: 'View in Infrastructure' }
-    );
-    const viewInDiscoverLabel = i18n.translate(
-      'entityCentricLabFlyout.flyout.actions.viewInDiscover',
-      { defaultMessage: 'View in Discover' }
-    );
-    const openRelatedDashboardLabel = i18n.translate(
-      'entityCentricLabFlyout.flyout.actions.openRelatedDashboard',
-      { defaultMessage: 'Open related dashboard' }
-    );
-    const addToCaseLabel = i18n.translate('entityCentricLabFlyout.flyout.actions.addToCase', {
-      defaultMessage: 'Add to case',
-    });
-    const createAlertRuleLabel = i18n.translate(
-      'entityCentricLabFlyout.flyout.actions.createAlertRule',
-      { defaultMessage: 'Create alert rule' }
-    );
-    const annotateDeploymentLabel = i18n.translate(
-      'entityCentricLabFlyout.flyout.actions.annotateDeployment',
-      { defaultMessage: 'Annotate deployment' }
-    );
-    const rollbackLabel = i18n.translate(
-      'entityCentricLabFlyout.flyout.actions.rollbackToPreviousVersion',
-      { defaultMessage: 'Roll back to previous version' }
-    );
-
-    return {
-      viewInApm: { label: viewInApmLabel, icon: 'apmApp' as const, testSubj: 'viewInApm' },
-      viewInLogs: {
-        label: viewInLogsExplorerLabel,
-        icon: 'logoLogging' as const,
-        testSubj: 'viewInLogs',
-      },
-      viewInInfra: {
-        label: viewInInfrastructureLabel,
-        icon: 'logoMetrics' as const,
-        testSubj: 'viewInInfrastructure',
-      },
-      viewInDiscover: {
-        label: viewInDiscoverLabel,
-        icon: 'discoverApp' as const,
-        testSubj: 'viewInDiscover',
-      },
-      openDashboard: {
-        label: openRelatedDashboardLabel,
-        icon: 'dashboardApp' as const,
-        testSubj: 'openDashboard',
-      },
-      addToCase: { label: addToCaseLabel, icon: 'casesApp' as const, testSubj: 'addToCase' },
-      createAlertRule: {
-        label: createAlertRuleLabel,
-        icon: 'bell' as const,
-        testSubj: 'createAlertRule',
-      },
-      annotateDeployment: {
-        label: annotateDeploymentLabel,
-        icon: 'tag' as const,
-        testSubj: 'annotateDeployment',
-      },
-      rollback: {
-        label: rollbackLabel,
-        icon: 'editorUndo' as const,
-        testSubj: 'rollbackToPreviousVersion',
-      },
-    };
-  }, []);
+  const allActions = useMemo(() => ({
+    viewInApm: {
+      label: i18n.translate('entityCentricLabFlyout.flyout.actions.viewInApm', {
+        defaultMessage: 'View in APM',
+      }),
+      icon: 'apmApp' as const,
+      testSubj: 'viewInApm',
+    },
+    viewLogsInDiscover: {
+      label: i18n.translate('entityCentricLabFlyout.flyout.actions.viewLogsInDiscover', {
+        defaultMessage: 'View logs in Discover',
+      }),
+      icon: 'discoverApp' as const,
+      testSubj: 'viewLogsInDiscover',
+    },
+    viewMetricsInDiscover: {
+      label: i18n.translate('entityCentricLabFlyout.flyout.actions.viewMetricsInDiscover', {
+        defaultMessage: 'View metrics in Discover',
+      }),
+      icon: 'discoverApp' as const,
+      testSubj: 'viewMetricsInDiscover',
+    },
+    viewTracesInDiscover: {
+      label: i18n.translate('entityCentricLabFlyout.flyout.actions.viewTracesInDiscover', {
+        defaultMessage: 'View traces in Discover',
+      }),
+      icon: 'discoverApp' as const,
+      testSubj: 'viewTracesInDiscover',
+    },
+    viewInIntegrations: {
+      label: i18n.translate('entityCentricLabFlyout.flyout.actions.viewInIntegrations', {
+        defaultMessage: 'View in Integrations',
+      }),
+      icon: 'package' as const,
+      testSubj: 'viewInIntegrations',
+    },
+    addToCase: {
+      label: i18n.translate('entityCentricLabFlyout.flyout.actions.addToCase', {
+        defaultMessage: 'Add to case',
+      }),
+      icon: 'casesApp' as const,
+      testSubj: 'addToCase',
+    },
+    createAlertRule: {
+      label: i18n.translate('entityCentricLabFlyout.flyout.actions.createAlertRule', {
+        defaultMessage: 'Create alert rule',
+      }),
+      icon: 'bell' as const,
+      testSubj: 'createAlertRule',
+    },
+  }), []);
 
   // Map each flyout tab to its most-relevant primary action, taking the
-  // entity kind into account so infra entities never show "View in APM"
-  // and service entities never show "View in Infrastructure".
+  // entity kind into account so infra entities never show "View in APM".
   // Tabs without a clear contextual action map to `null` — the
   // primary button is hidden and only the ellipsis menu remains.
   const primaryAction = useMemo(() => {
     type Action = (typeof allActions)[keyof typeof allActions];
     const serviceKinds = new Set(['service', 'deployment']);
+    const isService = serviceKinds.has(kind ?? '');
 
-    const kindDefault: Action | null = serviceKinds.has(kind ?? '')
-      ? allActions.viewInApm
-      : null;
+    const kindDefault: Action | null = isService ? allActions.viewInApm : null;
 
     const tabActionMap: Record<string, Action | null> = {
       overview: kindDefault,
-      metrics: allActions.viewInDiscover,
-      logs: allActions.viewInLogs,
-      traces: allActions.viewInApm,
+      metrics: allActions.viewMetricsInDiscover,
+      logs: allActions.viewLogsInDiscover,
+      traces: isService ? allActions.viewInApm : allActions.viewTracesInDiscover,
       alerts: allActions.createAlertRule,
       services: allActions.viewInApm,
       processes: null,
       relationships: null,
       dashboards: null,
-      profiling: allActions.viewInApm,
+      profiling: isService ? allActions.viewInApm : null,
     };
     return tabActionMap[activeTab] ?? kindDefault;
   }, [activeTab, allActions, kind]);
 
-  // Ellipsis menu: "Add to case" always, plus rollback for service/deployment,
-  // plus annotate deployment. Navigation deep-links that aren't the current
-  // primary action are also included so they remain accessible.
+  // Resolve the integration page path for the current entity kind.
+  // Kubernetes kinds deep-link to the Kubernetes OTel integration;
+  // other kinds fall back to a toast (lab prototype — wire more
+  // integrations as needed).
+  const integrationPath = useMemo((): string | null => {
+    const k8sKinds = new Set(['node', 'pod', 'container', 'deployment', 'cluster', 'namespace']);
+    if (k8sKinds.has(kind ?? '')) {
+      return '/app/integrations/detail/kubernetes_otel-2.6.0/overview';
+    }
+    return null;
+  }, [kind]);
+
+  const handleIntegrationsClick = useCallback(() => {
+    closeActionMenu();
+    if (integrationPath) {
+      const base = window.location.pathname.substring(
+        0,
+        window.location.pathname.indexOf('/app/')
+      );
+      window.location.assign(`${base}${integrationPath}`);
+    } else {
+      handleActionClick(allActions.viewInIntegrations.label);
+    }
+  }, [closeActionMenu, integrationPath, handleActionClick, allActions.viewInIntegrations.label]);
+
+  // Ellipsis menu: deep-link actions that aren't the current primary,
+  // then a separator, then "Add to case" (always) and "Create alert rule"
+  // (when it isn't the primary).
   const ellipsisMenuItems = useMemo<EuiContextMenuPanelItemDescriptor[]>(() => {
     const deepLinkActions = [
       allActions.viewInApm,
-      allActions.viewInDiscover,
-      allActions.viewInLogs,
-      allActions.viewInInfra,
-      ...(activeTab === 'dashboards' ? [] : [allActions.openDashboard]),
+      allActions.viewMetricsInDiscover,
+      allActions.viewLogsInDiscover,
+      allActions.viewTracesInDiscover,
     ];
 
     const items: EuiContextMenuPanelItemDescriptor[] = deepLinkActions
@@ -625,44 +605,33 @@ export const EntityFlyout = ({
         onClick: () => handleActionClick(a.label),
       }));
 
+    items.push({
+      name: allActions.viewInIntegrations.label,
+      icon: allActions.viewInIntegrations.icon,
+      'data-test-subj': `entityCentricLabFlyoutAction-${allActions.viewInIntegrations.testSubj}`,
+      onClick: handleIntegrationsClick,
+    });
+
     items.push({ isSeparator: true, key: 'sep-manage' });
 
-    if (kind === 'service' || kind === 'deployment') {
+    items.push({
+      name: allActions.addToCase.label,
+      icon: allActions.addToCase.icon,
+      'data-test-subj': `entityCentricLabFlyoutAction-${allActions.addToCase.testSubj}`,
+      onClick: () => handleActionClick(allActions.addToCase.label),
+    });
+
+    if (!primaryAction || primaryAction.testSubj !== allActions.createAlertRule.testSubj) {
       items.push({
-        name: allActions.rollback.label,
-        icon: allActions.rollback.icon,
-        'data-test-subj': `entityCentricLabFlyoutAction-${allActions.rollback.testSubj}`,
-        onClick: handleRollbackClick,
+        name: allActions.createAlertRule.label,
+        icon: allActions.createAlertRule.icon,
+        'data-test-subj': `entityCentricLabFlyoutAction-${allActions.createAlertRule.testSubj}`,
+        onClick: () => handleActionClick(allActions.createAlertRule.label),
       });
     }
 
-    items.push(
-      {
-        name: allActions.addToCase.label,
-        icon: allActions.addToCase.icon,
-        'data-test-subj': `entityCentricLabFlyoutAction-${allActions.addToCase.testSubj}`,
-        onClick: () => handleActionClick(allActions.addToCase.label),
-      },
-      ...(!primaryAction || primaryAction.testSubj !== allActions.createAlertRule.testSubj
-        ? [
-            {
-              name: allActions.createAlertRule.label,
-              icon: allActions.createAlertRule.icon,
-              'data-test-subj': `entityCentricLabFlyoutAction-${allActions.createAlertRule.testSubj}`,
-              onClick: () => handleActionClick(allActions.createAlertRule.label),
-            },
-          ]
-        : []),
-      {
-        name: allActions.annotateDeployment.label,
-        icon: allActions.annotateDeployment.icon,
-        'data-test-subj': `entityCentricLabFlyoutAction-${allActions.annotateDeployment.testSubj}`,
-        onClick: () => handleActionClick(allActions.annotateDeployment.label),
-      }
-    );
-
     return items;
-  }, [allActions, primaryAction, activeTab, kind, handleActionClick, handleRollbackClick]);
+  }, [allActions, primaryAction, handleActionClick, handleIntegrationsClick]);
 
   const ellipsisMenuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [{ id: 0, items: ellipsisMenuItems }],

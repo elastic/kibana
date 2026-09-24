@@ -34,7 +34,7 @@ import {
   isCategoryHiddenInElasticOn,
 } from './fake_entities';
 import { labThings } from '../lab_terminology';
-import { readPageSize, writePageSize } from './storage_keys';
+import { readPageSizeForTable, writePageSizeForTable } from './storage_keys';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import { EntityDataGridSection } from './entities_data_grid';
 import { UNGROUPED_LABEL, groupEntities, type GroupByFieldDef } from './entity_group_by';
@@ -42,10 +42,12 @@ import {
   KUBERNETES_FILTER_ALL,
   KUBERNETES_SUB_TYPE_ORDER,
   KubernetesClusterFilter,
+  KubernetesDeploymentFilter,
   KubernetesNamespaceFilter,
   KubernetesNodeFilter,
   filterKubernetesEntities,
   getKubernetesClusterNames,
+  getKubernetesDeploymentNames,
   getKubernetesNamespaceNames,
   getKubernetesNodeNames,
 } from './kubernetes_cluster_filter';
@@ -338,12 +340,15 @@ const TableSection = ({
   nested,
   rows,
   columns,
+  tableKey,
 }: {
   category: EntityCategoryId;
   subTypeLabel?: string;
   nested?: boolean;
   rows: readonly Entity[];
   columns: Array<EuiBasicTableColumn<Entity>>;
+  /** Stable key for per-table page-size persistence (e.g. `hosts:Linux Server`). */
+  tableKey: string;
 }) => {
   const descriptor = getCategoryDescriptor(category);
   const captionLabel = subTypeLabel
@@ -354,10 +359,10 @@ const TableSection = ({
   const handleTableChange = useCallback(
     (criteria: { page?: { size: number } }) => {
       if (criteria.page) {
-        writePageSize(criteria.page.size);
+        writePageSizeForTable(tableKey, criteria.page.size);
       }
     },
-    []
+    [tableKey]
   );
 
   return (
@@ -383,7 +388,7 @@ const TableSection = ({
         rowHeader="name"
         sorting={{ sort: { field: 'health', direction: 'asc' } }}
         pagination={{
-          initialPageSize: readPageSize(),
+          initialPageSize: readPageSizeForTable(tableKey),
           pageSizeOptions: [...PAGE_SIZE_OPTIONS],
         }}
         onTableChange={handleTableChange}
@@ -493,6 +498,9 @@ const KubernetesSectionHeader = ({
   namespaceNames,
   namespaceFilter,
   onNamespaceFilterChange,
+  deploymentNames,
+  deploymentFilter,
+  onDeploymentFilterChange,
   nodeNames,
   nodeFilter,
   onNodeFilterChange,
@@ -504,6 +512,9 @@ const KubernetesSectionHeader = ({
   namespaceNames: readonly string[];
   namespaceFilter: string;
   onNamespaceFilterChange: (next: string) => void;
+  deploymentNames: readonly string[];
+  deploymentFilter: string;
+  onDeploymentFilterChange: (next: string) => void;
   nodeNames: readonly string[];
   nodeFilter: string;
   onNodeFilterChange: (next: string) => void;
@@ -544,6 +555,15 @@ const KubernetesSectionHeader = ({
             namespaceNames={namespaceNames}
             value={namespaceFilter}
             onChange={onNamespaceFilterChange}
+          />
+        </EuiFlexItem>
+      ) : null}
+      {deploymentNames.length > 0 ? (
+        <EuiFlexItem grow={false}>
+          <KubernetesDeploymentFilter
+            deploymentNames={deploymentNames}
+            value={deploymentFilter}
+            onChange={onDeploymentFilterChange}
           />
         </EuiFlexItem>
       ) : null}
@@ -593,6 +613,7 @@ export const EntitiesListView = ({
   // semantics so the two views feel identical when toggled.
   const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [namespaceFilter, setNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [deploymentFilter, setDeploymentFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [nodeFilter, setNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
 
   const k8sEntities = useMemo(
@@ -608,6 +629,10 @@ export const EntitiesListView = ({
     () => getKubernetesNamespaceNames(k8sEntities, clusterFilter, clusterNames),
     [k8sEntities, clusterFilter, clusterNames]
   );
+  const deploymentNames = useMemo(
+    () => getKubernetesDeploymentNames(k8sEntities, clusterFilter, namespaceFilter, clusterNames),
+    [k8sEntities, clusterFilter, namespaceFilter, clusterNames]
+  );
   const nodeNames = useMemo(
     () => getKubernetesNodeNames(k8sEntities, clusterFilter, clusterNames),
     [k8sEntities, clusterFilter, clusterNames]
@@ -619,6 +644,10 @@ export const EntitiesListView = ({
     namespaceFilter !== KUBERNETES_FILTER_ALL && !namespaceNames.includes(namespaceFilter)
       ? KUBERNETES_FILTER_ALL
       : namespaceFilter;
+  const effectiveDeploymentFilter =
+    deploymentFilter !== KUBERNETES_FILTER_ALL && !deploymentNames.includes(deploymentFilter)
+      ? KUBERNETES_FILTER_ALL
+      : deploymentFilter;
   const effectiveNodeFilter =
     nodeFilter !== KUBERNETES_FILTER_ALL && !nodeNames.includes(nodeFilter)
       ? KUBERNETES_FILTER_ALL
@@ -628,6 +657,7 @@ export const EntitiesListView = ({
     (next: string) => {
       setClusterFilter(next);
       setNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setDeploymentFilter(KUBERNETES_FILTER_ALL);
       setNodeFilter(KUBERNETES_FILTER_ALL);
     },
     []
@@ -719,7 +749,7 @@ export const EntitiesListView = ({
         // groups by `entity.subType` (Clusters / Nodes / Namespaces
         // / ...) using the curated reading order, instead of the
         // generic `.type`-based grouping used by other categories.
-        const filtered = filterKubernetesEntities(rows, clusterFilter, effectiveNamespaceFilter, effectiveNodeFilter, clusterNames);
+        const filtered = filterKubernetesEntities(rows, clusterFilter, effectiveNamespaceFilter, effectiveDeploymentFilter, effectiveNodeFilter, clusterNames);
         result.push({ kind: 'kubernetes-header', total: filtered.length });
         const subTypeBuckets = new Map<string, Entity[]>();
         for (const entity of filtered) {
@@ -863,6 +893,9 @@ export const EntitiesListView = ({
                 namespaceNames={namespaceNames}
                 namespaceFilter={effectiveNamespaceFilter}
                 onNamespaceFilterChange={setNamespaceFilter}
+                deploymentNames={deploymentNames}
+                deploymentFilter={effectiveDeploymentFilter}
+                onDeploymentFilterChange={setDeploymentFilter}
                 nodeNames={nodeNames}
                 nodeFilter={effectiveNodeFilter}
                 onNodeFilterChange={setNodeFilter}
@@ -924,6 +957,7 @@ export const EntitiesListView = ({
                 nested={item.nested}
                 rows={item.rows}
                 columns={columns}
+                tableKey={item.subTypeLabel ? `${item.category}:${item.subTypeLabel}` : item.category}
               />
             )}
           </EuiFlexItem>

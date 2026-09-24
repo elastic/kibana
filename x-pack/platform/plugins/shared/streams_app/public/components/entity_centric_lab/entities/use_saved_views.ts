@@ -93,8 +93,15 @@ export interface SavedViewState {
   /**
    * Rows-per-page in the list/table view. Optional for backward
    * compatibility with views saved before this field existed.
+   * Legacy single value — applies uniformly to all tables.
    */
   readonly pageSize?: number;
+  /**
+   * Per-table rows-per-page map (`Record<tableKey, size>`). Takes
+   * precedence over {@link pageSize} when present. Keys are derived
+   * from the table's group bucket (e.g. `hosts`, `kubernetes:Pod`).
+   */
+  readonly pageSizes?: Record<string, number>;
 }
 
 export interface SavedView {
@@ -132,6 +139,7 @@ import {
   TAG_FILTERS_STORAGE_KEY,
   VIEW_MODE_STORAGE_KEY,
   writePageSize,
+  writePageSizes,
 } from './storage_keys';
 
 /**
@@ -186,6 +194,20 @@ const parseGroupBy = (value: unknown): readonly GroupByFieldId[] | undefined =>
     ? (value as readonly GroupByFieldId[])
     : undefined;
 
+const parsePageSizes = (value: unknown): Record<string, number> | undefined => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const result: Record<string, number> = {};
+  let hasAny = false;
+  for (const [key, entry] of Object.entries(source)) {
+    if (typeof entry === 'number' && [10, 25, 50].includes(entry)) {
+      result[key] = entry;
+      hasAny = true;
+    }
+  }
+  return hasAny ? result : undefined;
+};
+
 const parseTimeRange = (value: unknown): { from: string; to: string } | undefined => {
   if (!value || typeof value !== 'object') return undefined;
   const source = value as Record<string, unknown>;
@@ -227,6 +249,7 @@ const parseState = (value: unknown): SavedViewState | undefined => {
       typeof source.pageSize === 'number' && [10, 25, 50].includes(source.pageSize)
         ? source.pageSize
         : undefined,
+    pageSizes: parsePageSizes(source.pageSizes),
   };
 };
 
@@ -580,6 +603,11 @@ const canonicalState = (state: SavedViewState) => ({
   // Absent page-size == 10 (the default), so a legacy view without pageSize
   // and a page showing 10 rows compare equal.
   pageSize: state.pageSize ?? 10,
+  // Per-table page sizes — absent == empty map (all tables at default).
+  // Sort keys so `{ a: 10, b: 25 }` equals `{ b: 25, a: 10 }`.
+  pageSizes: Object.fromEntries(
+    Object.entries(state.pageSizes ?? {}).sort(([a], [b]) => a.localeCompare(b))
+  ),
 });
 
 export const areStatesEqual = (a: SavedViewState, b: SavedViewState): boolean => {
@@ -623,6 +651,7 @@ export const applyViewToStorage = (view: SavedView): void => {
       ])
     );
     writePageSize(view.state.pageSize ?? 10);
+    writePageSizes(view.state.pageSizes ?? {});
   } catch {
     // Same trade-off as the other write helpers: the in-memory copy
     // still works for the current session; the view just won't survive

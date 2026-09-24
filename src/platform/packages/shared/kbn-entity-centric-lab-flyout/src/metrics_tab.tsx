@@ -110,7 +110,7 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
           <EuiTitle size="xxs">
             <h3>
               {i18n.translate('entityCentricLabFlyout.flyout.metrics.otherSectionTitle', {
-                defaultMessage: 'Other section with more metrics',
+                defaultMessage: 'Infrastructure metrics',
               })}
             </h3>
           </EuiTitle>

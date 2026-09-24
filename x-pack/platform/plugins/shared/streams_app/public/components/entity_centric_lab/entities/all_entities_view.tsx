@@ -189,8 +189,8 @@ import {
   PAGE_SIZE_CHANGE_EVENT,
   TAG_FILTERS_STORAGE_KEY,
   VIEW_MODE_STORAGE_KEY,
-  readPageSize,
-  writePageSize,
+  readPageSizes,
+  writePageSizes,
 } from './storage_keys';
 import {
   applyViewToStorage,
@@ -255,16 +255,19 @@ const useEntitiesViewMode = (): [ViewMode, (next: ViewMode) => void] => {
 
 // --- Page-size persistence -------------------------------------------
 //
-// The rows-per-page choice (10 / 25 / 50) is persisted in localStorage.
-// Table components write directly via `writePageSize` (from storage_keys);
-// this hook re-reads on every custom event so the parent React state
-// (and `currentViewState`) stays in sync without prop threading.
+// Per-table rows-per-page choices are persisted in localStorage as a
+// `Record<tableKey, size>` map. Each table/grid section reads and writes
+// its own entry so changing one table doesn't affect others. The parent
+// tracks the map via `usePageSizes` for inclusion in `currentViewState`
+// (saved views) and re-reads it whenever any table fires a change event.
+// The legacy single-value `pageSize` is kept for backward compat with
+// older saved views.
 
-const usePageSize = (): [number, (next: number) => void] => {
-  const [pageSize, setPageSizeState] = useState<number>(readPageSize);
+const usePageSizes = (): [Record<string, number>, (next: Record<string, number>) => void] => {
+  const [pageSizes, setPageSizesState] = useState<Record<string, number>>(readPageSizes);
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
-    const listener = () => setPageSizeState(readPageSize());
+    const listener = () => setPageSizesState(readPageSizes());
     window.addEventListener(PAGE_SIZE_CHANGE_EVENT, listener);
     window.addEventListener('storage', listener);
     return () => {
@@ -272,11 +275,11 @@ const usePageSize = (): [number, (next: number) => void] => {
       window.removeEventListener('storage', listener);
     };
   }, []);
-  const setPageSize = useCallback((next: number) => {
-    setPageSizeState(next);
-    writePageSize(next);
+  const setPageSizesAndPersist = useCallback((next: Record<string, number>) => {
+    setPageSizesState(next);
+    writePageSizes(next);
   }, []);
-  return [pageSize, setPageSize];
+  return [pageSizes, setPageSizesAndPersist];
 };
 
 // --- Category-tab + tag-filter persistence ---------------------------
@@ -889,7 +892,7 @@ const AllEntitiesViewInner = ({
   // entity query is per-view, not a preference.
   const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
   const [viewMode, setViewMode] = useEntitiesViewMode();
-  const [pageSize, setPageSize] = usePageSize();
+  const [pageSizes, setPageSizes] = usePageSizes();
 
   // Some tour steps are anchored to DOM elements that only render in
   // specific view modes (e.g. step 3 "Color by" lives inside
@@ -1727,7 +1730,7 @@ const AllEntitiesViewInner = ({
       // ElasticOn "Group by" — tracked so the "Unsaved changes" badge lights on
       // change and Save/Update persists the grouping.
       groupBy,
-      pageSize,
+      pageSizes,
     }),
     [
       categoryScope,
@@ -1743,7 +1746,7 @@ const AllEntitiesViewInner = ({
       rangeFrom,
       rangeTo,
       groupBy,
-      pageSize,
+      pageSizes,
     ]
   );
 
@@ -1830,7 +1833,7 @@ const AllEntitiesViewInner = ({
         setActiveExtraFilters(view.state.extraFilters ?? EMPTY_EXTRA_FILTERS);
         setLabFilters(view.state.queryFilters ?? []);
         setGroupBy([...(view.state.groupBy ?? DEFAULT_GROUP_BY)]);
-        setPageSize(view.state.pageSize ?? 10);
+        setPageSizes(view.state.pageSizes ?? {});
         if (view.state.storeTime && view.state.timeRange) {
           updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
         }
@@ -1865,7 +1868,7 @@ const AllEntitiesViewInner = ({
       setCategoryTab,
       setViewMode,
       setGroupBy,
-      setPageSize,
+      setPageSizes,
       updateTimeRange,
     ]
   );
@@ -2286,21 +2289,21 @@ const AllEntitiesViewInner = ({
                             />
                           </EuiFlexItem>
                         ) : null}
-                        {k8sFilterVisibility.showNode && k8sNodeNames.length > 0 ? (
-                          <EuiFlexItem grow={false}>
-                            <KubernetesNodeFilter
-                              nodeNames={k8sNodeNames}
-                              value={effectiveK8sNodeFilter}
-                              onChange={setK8sNodeFilter}
-                            />
-                          </EuiFlexItem>
-                        ) : null}
                         {k8sFilterVisibility.showDeployment && k8sDeploymentNames.length > 0 ? (
                           <EuiFlexItem grow={false}>
                             <KubernetesDeploymentFilter
                               deploymentNames={k8sDeploymentNames}
                               value={effectiveK8sDeploymentFilter}
                               onChange={setK8sDeploymentFilter}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
+                        {k8sFilterVisibility.showNode && k8sNodeNames.length > 0 ? (
+                          <EuiFlexItem grow={false}>
+                            <KubernetesNodeFilter
+                              nodeNames={k8sNodeNames}
+                              value={effectiveK8sNodeFilter}
+                              onChange={setK8sNodeFilter}
                             />
                           </EuiFlexItem>
                         ) : null}

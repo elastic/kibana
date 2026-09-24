@@ -24,7 +24,7 @@ import {
 import { css } from '@emotion/react';
 
 import oldHostsPageUrl from './assets/old_hosts_page.jpg';
-import newExperiencePreviewUrl from './assets/new_experience_preview.jpg';
+import newExperiencePreviewUrl from './assets/new_experience_preview.png';
 
 const TOUR_FLAG_KEY = 'elasticOn_showTour';
 
@@ -153,8 +153,6 @@ const TransitionModal = ({ onSwitch, onDismiss }: TransitionModalProps) => {
               width: 280px;
               flex-shrink: 0;
               margin-top: 32px;
-              overflow: hidden;
-              border-radius: 6px;
               line-height: 0;
             `}
           >
@@ -164,6 +162,7 @@ const TransitionModal = ({ onSwitch, onDismiss }: TransitionModalProps) => {
               css={css`
                 width: 100%;
                 display: block;
+                border-radius: 6px;
               `}
             />
           </EuiFlexItem>

@@ -133,9 +133,11 @@ import {
 import {
   KUBERNETES_FILTER_ALL,
   KubernetesClusterFilter,
+  KubernetesDeploymentFilter,
   KubernetesNamespaceFilter,
   KubernetesNodeFilter,
   getKubernetesClusterNames,
+  getKubernetesDeploymentNames,
   getKubernetesNamespaceNames,
   getKubernetesNodeNames,
   filterKubernetesEntities,
@@ -2644,15 +2646,20 @@ const KubernetesCard = ({
   // --- Cascading filter state ---
   const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [namespaceFilter, setNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [deploymentFilter, setDeploymentFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [nodeFilter, setNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [groupBy, setGroupBy] = useState<KubernetesGroupBy>('subType');
 
   const clusterNames = useMemo(() => getKubernetesClusterNames(entities), [entities]);
 
-  // Namespace/node options cascade from the cluster selection.
+  // Namespace/node/deployment options cascade from the cluster selection.
   const namespaceNames = useMemo(
     () => getKubernetesNamespaceNames(entities, clusterFilter, clusterNames),
     [entities, clusterFilter, clusterNames]
+  );
+  const deploymentNames = useMemo(
+    () => getKubernetesDeploymentNames(entities, clusterFilter, namespaceFilter, clusterNames),
+    [entities, clusterFilter, namespaceFilter, clusterNames]
   );
   const nodeNames = useMemo(
     () => getKubernetesNodeNames(entities, clusterFilter, clusterNames),
@@ -2665,16 +2672,21 @@ const KubernetesCard = ({
     namespaceFilter !== KUBERNETES_FILTER_ALL && !namespaceNames.includes(namespaceFilter)
       ? KUBERNETES_FILTER_ALL
       : namespaceFilter;
+  const effectiveDeploymentFilter =
+    deploymentFilter !== KUBERNETES_FILTER_ALL && !deploymentNames.includes(deploymentFilter)
+      ? KUBERNETES_FILTER_ALL
+      : deploymentFilter;
   const effectiveNodeFilter =
     nodeFilter !== KUBERNETES_FILTER_ALL && !nodeNames.includes(nodeFilter)
       ? KUBERNETES_FILTER_ALL
       : nodeFilter;
 
-  // Cluster change resets namespace + node.
+  // Cluster change resets namespace + deployment + node.
   const handleClusterChange = useCallback(
     (next: string) => {
       setClusterFilter(next);
       setNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setDeploymentFilter(KUBERNETES_FILTER_ALL);
       setNodeFilter(KUBERNETES_FILTER_ALL);
     },
     []
@@ -2686,10 +2698,11 @@ const KubernetesCard = ({
         entities,
         clusterFilter,
         effectiveNamespaceFilter,
+        effectiveDeploymentFilter,
         effectiveNodeFilter,
         clusterNames
       ),
-    [entities, clusterFilter, effectiveNamespaceFilter, effectiveNodeFilter, clusterNames]
+    [entities, clusterFilter, effectiveNamespaceFilter, effectiveDeploymentFilter, effectiveNodeFilter, clusterNames]
   );
 
   // Group entities by the selected dimension.
@@ -2768,6 +2781,15 @@ const KubernetesCard = ({
               namespaceNames={namespaceNames}
               value={effectiveNamespaceFilter}
               onChange={setNamespaceFilter}
+            />
+          </EuiFlexItem>
+        ) : null}
+        {deploymentNames.length > 0 ? (
+          <EuiFlexItem grow={false}>
+            <KubernetesDeploymentFilter
+              deploymentNames={deploymentNames}
+              value={effectiveDeploymentFilter}
+              onChange={setDeploymentFilter}
             />
           </EuiFlexItem>
         ) : null}
@@ -3453,10 +3475,25 @@ const CustomGroupBucketContent = ({
 }) => {
   const key = useMemo(() => inferBucketKey(entities), [entities]);
 
+  // Fallback metric for mixed-category buckets — must match the metric
+  // used by `CustomGroupTiles` so the legend explains the actual colors.
+  const fallbackMetric = useMemo(() => {
+    try {
+      const raw = typeof window !== 'undefined'
+        ? window.localStorage.getItem('elasticOn_v_phase')
+        : null;
+      const phase = raw ?? 'phase1';
+      if (phase === 'phase1') return ENTITY_ALERTS_METRIC;
+    } catch { /* ignore */ }
+    return ENTITY_HEALTH_METRIC;
+  }, []);
+
   if (!key) {
     return (
       <>
         <GroupBucketHeader label={label} total={entities.length} size={isTopLevel ? 'xs' : 'xxs'} />
+        <EuiSpacer size="xs" />
+        <BucketMetricLegend metric={fallbackMetric} />
         <EuiSpacer size="s" />
         <CustomGroupTiles entities={entities} onSelectEntity={onSelectEntity} />
       </>
