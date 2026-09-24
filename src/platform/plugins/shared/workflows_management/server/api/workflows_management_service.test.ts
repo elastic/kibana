@@ -24,7 +24,7 @@
  */
 
 import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 
@@ -509,11 +509,33 @@ describe('WorkflowsService (facade)', () => {
       expect(managedSpies.installManagedWorkflow).toHaveBeenCalledWith(
         'wf.managed',
         { spaceId: 'default' },
-        'owner'
+        'owner',
+        undefined
       );
       expect(managedSpies.markInstallIncomplete).not.toHaveBeenCalled();
       expect(managedSpies.pluginReady).toHaveBeenCalledWith('owner');
       expect(managedSpies.cleanupUnregisteredOrphans).toHaveBeenCalledWith(['owner']);
+    });
+  });
+
+  describe('managed install request forwarding', () => {
+    it('forwards the caller request to the managed workflow service', async () => {
+      const service = await buildService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.installManagedWorkflow(
+        'system-example-greeting',
+        { spaceId: 'default' },
+        'owner',
+        request
+      );
+
+      expect(managedSpies.installManagedWorkflow).toHaveBeenCalledWith(
+        'system-example-greeting',
+        { spaceId: 'default' },
+        'owner',
+        request
+      );
     });
   });
 
