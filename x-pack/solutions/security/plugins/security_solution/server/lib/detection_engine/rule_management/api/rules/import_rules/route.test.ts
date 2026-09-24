@@ -118,6 +118,14 @@ describe('Import rules route', () => {
     expect(clients.detectionRulesClient.importRules).not.toHaveBeenCalled();
   });
 
+  it('returns 400 when the file field is missing', async () => {
+    const response = await inject(getImportRulesRequest());
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({ message: 'file is required', status_code: 400 });
+    expect(clients.detectionRulesClient.importRules).not.toHaveBeenCalled();
+  });
+
   it('returns 500 when a collaborator throws', async () => {
     stream.mockRejectedValue(new Error('parse failed'));
 
