@@ -18,6 +18,7 @@ import {
   TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
+  feedbackEventId,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
@@ -3439,6 +3440,61 @@ describe('ConversationClient', () => {
       expect(replacedUserMessage?.data?.message).toBe('processed input');
       const replacedStep0 = indexed.events?.find((event) => event.id === 'round-1::step::0');
       expect(replacedStep0?.created_at).toBe('CANONICAL_TS_0');
+    });
+
+    it('replaceRoundEvents preserves round_feedback events across regeneration, including legacy ::feedback IDs', async () => {
+      const uuidFeedbackEvent: TimelineEvent = {
+        id: 'uuid-feedback-abc-123',
+        type: TimelineEventType.roundFeedback,
+        created_at: '2025-08-04T07:43:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: {
+          round_id: 'round-1',
+          vote: 'up' as const,
+          submitted_at: '2025-08-04T07:43:00.000Z',
+        },
+      };
+      const legacyFeedbackEvent: TimelineEvent = {
+        id: feedbackEventId('round-1'), // 'round-1::feedback'
+        type: TimelineEventType.roundFeedback,
+        created_at: '2025-08-04T07:42:50.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: {
+          round_id: 'round-1',
+          vote: 'down' as const,
+          submitted_at: '2025-08-04T07:42:50.000Z',
+        },
+      };
+      const storedUserMessage: TimelineEvent = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'original input' },
+      };
+
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [storedUserMessage, legacyFeedbackEvent, uuidFeedbackEvent],
+        })
+      );
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      await client.replaceRoundEvents({
+        id: 'conversation-1',
+        roundId: 'round-1',
+        events: [{ ...storedUserMessage, data: { message: 'reprocessed input' } }],
+      });
+
+      const { events: indexed } = mockEsClient.index.mock.calls[0][0].document as {
+        events: Array<{ id: string }>;
+      };
+      const indexedIds = indexed.map((e) => e.id);
+
+      expect(indexedIds).toContain(uuidFeedbackEvent.id);
+      expect(indexedIds).toContain(legacyFeedbackEvent.id);
+      expect(indexedIds).toContain('round-1::user_message');
     });
 
     it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {

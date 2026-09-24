@@ -28,41 +28,46 @@ interface UpInviteProps {
   onDismiss: () => void;
 }
 
-export const UpInvite: React.FC<UpInviteProps> = ({ onTellUsMore, onDismiss }) => (
-  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs">
-        <span>{labels.prompt}</span>
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        size="xs"
-        onClick={onTellUsMore}
-        data-test-subj="roundFeedbackTellUsMore"
-        {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-          action: AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_INVITE_TELL_US_MORE,
-          detail: 'conversation',
-        })}
-      >
-        {labels.tellUsMore}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="cross"
-        size="xs"
-        color="text"
-        aria-label={labels.dismiss}
-        onClick={onDismiss}
-        data-test-subj="roundFeedbackDismissInvite"
-        {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-          action: AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_INVITE_DISMISSED,
-          detail: 'conversation',
-        })}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
+export const UpInvite = React.forwardRef<HTMLButtonElement, UpInviteProps>(
+  ({ onTellUsMore, onDismiss }, ref) => (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">
+          <span>{labels.prompt}</span>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          buttonRef={ref}
+          size="xs"
+          onClick={onTellUsMore}
+          data-test-subj="roundFeedbackTellUsMore"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_INVITE_TELL_US_MORE,
+            detail: 'conversation',
+          })}
+        >
+          {labels.tellUsMore}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="cross"
+          size="xs"
+          color="text"
+          aria-label={labels.dismiss}
+          onClick={onDismiss}
+          data-test-subj="roundFeedbackDismissInvite"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_INVITE_DISMISSED,
+            detail: 'conversation',
+          })}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  )
 );
+
+UpInvite.displayName = 'UpInvite';

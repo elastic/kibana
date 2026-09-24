@@ -303,7 +303,7 @@ export const useFeedback = (
       })
       .catch(() => {
         addErrorToast({ title: labels.submitError });
-        resetTo();
+        setModalOpen(true);
       })
       .finally(() => {
         isSubmitInFlightRef.current = false;

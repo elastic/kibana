@@ -45,6 +45,7 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
   executionTerminatedEvent,
 }) => {
   const hasMessage = Boolean(response.message);
+  const hasContent = hasMessage || Boolean(response.structured_output);
 
   const showStreamingText = isLoading && hasMessage && !response.structured_output;
   const showCompletedAnswer = !isLoading || Boolean(response.structured_output);
@@ -84,7 +85,7 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
           )
         ) : null}
       </EuiFlexItem>
-      {!isLoading && hasMessage && (
+      {!isLoading && hasContent && (
         <EuiFlexItem grow={false}>
           <ResponseActions
             content={

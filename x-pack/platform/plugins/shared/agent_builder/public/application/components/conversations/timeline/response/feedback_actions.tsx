@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { useConversation } from '../../../../hooks/use_conversation';
+import { useCurrentUser } from '../../../../hooks/use_current_user';
 import { ThumbButton } from './feedback_controls/thumb_button';
 import { FeedbackModal } from './feedback_controls/feedback_modal';
 import { UpInvite } from './feedback_controls/up_invite';
@@ -29,6 +30,8 @@ const fadingStyle = css`
 export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => {
   const conversationId = useConversationId();
   const { conversation } = useConversation();
+  const { currentUser } = useCurrentUser();
+  const inviteRef = useRef<HTMLButtonElement>(null);
 
   const serverVote = useMemo(() => {
     let vote: 'up' | 'down' | null = null;
@@ -61,7 +64,16 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => 
     submit,
   } = useFeedback(conversationId ?? '', roundId, serverVote);
 
-  if (!conversationId) return null;
+  useEffect(() => {
+    if (inviteVisible) inviteRef.current?.focus();
+  }, [inviteVisible]);
+
+  const isOwner =
+    Boolean(conversationId) &&
+    Boolean(conversation?.user?.id) &&
+    conversation?.user?.id === currentUser?.uid;
+
+  if (!isOwner) return null;
 
   return (
     <>
@@ -72,7 +84,7 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => 
           </EuiFlexItem>
         ) : inviteVisible ? (
           <EuiFlexItem grow={false}>
-            <UpInvite onTellUsMore={openModal} onDismiss={dismissInvite} />
+            <UpInvite ref={inviteRef} onTellUsMore={openModal} onDismiss={dismissInvite} />
           </EuiFlexItem>
         ) : (
           <>

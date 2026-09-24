@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTextArea } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiText,
+  EuiTextArea,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const MAX_CHARS = 500;
@@ -22,29 +30,29 @@ export const CommentBox: React.FC<CommentBoxProps> = ({ value, onChange }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiText size="s">
-          <strong>
-            {i18n.translate('xpack.agentBuilder.feedback.commentLabel', {
-              defaultMessage: 'Add comment',
-            })}
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTextArea
-          placeholder={i18n.translate('xpack.agentBuilder.feedback.commentPlaceholder', {
-            defaultMessage: 'Add a comment (optional)',
+        <EuiFormRow
+          label={i18n.translate('xpack.agentBuilder.feedback.commentLabel', {
+            defaultMessage: 'Add comment',
           })}
-          value={value}
-          onChange={(e) => onChange(e.target.value.slice(0, MAX_CHARS))}
-          rows={4}
-          resize="vertical"
+          helpText={
+            <EuiText size="xs" color={remaining < 50 ? 'warning' : 'subdued'} textAlign="right">
+              {remaining}
+            </EuiText>
+          }
           fullWidth
-          data-test-subj="roundFeedbackCommentInput"
-        />
-        <EuiText size="xs" color={remaining < 50 ? 'warning' : 'subdued'} textAlign="right">
-          {remaining}
-        </EuiText>
+        >
+          <EuiTextArea
+            placeholder={i18n.translate('xpack.agentBuilder.feedback.commentPlaceholder', {
+              defaultMessage: 'Add a comment (optional)',
+            })}
+            value={value}
+            onChange={(e) => onChange(e.target.value.slice(0, MAX_CHARS))}
+            rows={4}
+            resize="vertical"
+            fullWidth
+            data-test-subj="roundFeedbackCommentInput"
+          />
+        </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiCallOut size="s" color="primary" iconType="info">
