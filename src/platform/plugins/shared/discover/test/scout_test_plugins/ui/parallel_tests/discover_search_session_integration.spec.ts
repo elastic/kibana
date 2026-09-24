@@ -9,7 +9,28 @@
 
 import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import type { SessionObserver } from '@kbn/data-plugin/test/scout_test_plugins/ui/fixtures';
+import { spaceTest } from '@kbn/data-plugin/test/scout_test_plugins/ui/fixtures';
+
+// Returns the most recently started session ID, then clears the recorded IDs.
+const clearAfterCurrentSession = async (sessionObserver: SessionObserver): Promise<string> => {
+  await expect.poll(async () => (await sessionObserver.getSessionIds()).length).toBeGreaterThan(0);
+  const sessionId = (await sessionObserver.getSessionIds()).at(-1);
+  if (!sessionId) {
+    throw new Error('No search session was started before the action');
+  }
+  await sessionObserver.clear();
+  return sessionId;
+};
+
+const expectSingleNewSession = async (
+  sessionObserver: SessionObserver,
+  initialSessionId: string
+): Promise<void> => {
+  await expect.poll(() => sessionObserver.getSessionIds()).toHaveLength(1);
+  const [sessionId] = await sessionObserver.getSessionIds();
+  expect(sessionId).not.toBe(initialSessionId);
+};
 
 spaceTest.describe('Discover search session lifecycle', { tag: '@local-stateful-classic' }, () => {
   const sourceDataViewName = `Session source ${randomUUID()}`;
@@ -37,7 +58,6 @@ spaceTest.describe('Discover search session lifecycle', { tag: '@local-stateful-
     await pageObjects.discover.selectDataView('shakespeare', { createAdHocIfMissing: false });
     await pageObjects.discover.waitUntilTabIsLoaded();
     await expect.poll(() => sessionObserver.isAvailable()).toBe(true);
-    await sessionObserver.clear();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -52,31 +72,35 @@ spaceTest.describe('Discover search session lifecycle', { tag: '@local-stateful-
   spaceTest('Starts on index pattern select', async ({ pageObjects, sessionObserver }) => {
     await pageObjects.discover.selectDataView(sourceDataViewName, { createAdHocIfMissing: false });
     await pageObjects.discover.waitUntilTabIsLoaded();
-    await sessionObserver.clear();
+    const initialSessionId = await clearAfterCurrentSession(sessionObserver);
 
     await pageObjects.discover.selectDataView('shakespeare', { createAdHocIfMissing: false });
     await pageObjects.discover.waitUntilTabIsLoaded();
-    await expect.poll(() => sessionObserver.getSessionIds()).toHaveLength(1);
+    await expectSingleNewSession(sessionObserver, initialSessionId);
   });
 
   spaceTest('Starts on a refresh', async ({ pageObjects, sessionObserver }) => {
+    const initialSessionId = await clearAfterCurrentSession(sessionObserver);
+
     await pageObjects.discover.submitQueryAndWait();
-    await expect.poll(() => sessionObserver.getSessionIds()).toHaveLength(1);
+    await expectSingleNewSession(sessionObserver, initialSessionId);
   });
 
   spaceTest('Starts a new session on sort', async ({ pageObjects, sessionObserver }) => {
+    const initialSessionId = await clearAfterCurrentSession(sessionObserver);
+
     // Observe the entire add-column and sort sequence as one session.
     await pageObjects.dataGrid.addFieldFromSidebar('speaker');
     await pageObjects.dataGrid.sortColumn('speaker', 'Sort A-Z');
     await pageObjects.discover.waitUntilTabIsLoaded();
-    await expect.poll(() => sessionObserver.getSessionIds()).toHaveLength(1);
+    await expectSingleNewSession(sessionObserver, initialSessionId);
   });
 
   spaceTest('Starts a new session on filter change', async ({ pageObjects, sessionObserver }) => {
     await pageObjects.dataGrid.addFieldFromSidebar('speaker');
     await pageObjects.dataGrid.sortColumn('speaker', 'Sort A-Z');
     await pageObjects.discover.waitUntilTabIsLoaded();
-    await sessionObserver.clear();
+    const initialSessionId = await clearAfterCurrentSession(sessionObserver);
 
     await pageObjects.filterBar.addFilter({
       field: 'line_number',
@@ -84,6 +108,6 @@ spaceTest.describe('Discover search session lifecycle', { tag: '@local-stateful-
       value: '4.3.108',
     });
     await pageObjects.discover.waitUntilTabIsLoaded();
-    await expect.poll(() => sessionObserver.getSessionIds()).toHaveLength(1);
+    await expectSingleNewSession(sessionObserver, initialSessionId);
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '../fixtures/scope/test';
+import type { ScoutPage } from '@kbn/scout';
 
 interface SessionObserverWindow extends Window {
   __SESSION_NOTIFICATIONS_PLUGIN__?: {

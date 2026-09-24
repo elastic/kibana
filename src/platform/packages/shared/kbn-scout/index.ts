@@ -59,8 +59,6 @@ export {
   ListingTable,
 } from './src/playwright/page_objects';
 
-export { SessionObserver } from './src/playwright/utils/session_observer';
-
 // Scout core types
 export type {
   ScoutPlaywrightOptions,

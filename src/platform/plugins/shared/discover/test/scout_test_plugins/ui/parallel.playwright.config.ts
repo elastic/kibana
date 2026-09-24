@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest as baseSpaceTest } from '@kbn/scout';
-import { SessionObserver } from './session_observer';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export { SessionObserver };
-
-export const spaceTest = baseSpaceTest.extend<{ sessionObserver: SessionObserver }>({
-  sessionObserver: async ({ page }, use) => {
-    await use(new SessionObserver(page));
-  },
+/**
+ * The `scout_test_plugins` directory name is load-bearing: Scout derives the server config set
+ * from it, and that set is what loads the plugin_functional test plugins these specs rely on.
+ */
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+  runGlobalSetup: true,
 });

@@ -10,12 +10,9 @@
 import { globalSetupHook } from '@kbn/scout';
 
 globalSetupHook(
-  'Ingest ES data for test plugin UI tests',
+  'Ingest ES data for Dashboard search session tests',
   { tag: '@local-stateful-classic' },
   async ({ esArchiver }) => {
-    await esArchiver.loadIfNeeded(
-      'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
-    );
     await esArchiver.loadIfNeeded(
       'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
     );

@@ -8,14 +8,14 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { spaceTest } from '@kbn/data-plugin/test/scout_test_plugins/ui/fixtures';
 
 spaceTest.describe('Dashboard search session lifecycle', { tag: '@local-stateful-classic' }, () => {
   let dashboardId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const objects = await scoutSpace.savedObjects.load(
-      'src/platform/plugins/shared/data/test/scout_test_plugins/ui/fixtures/kbn_archives/dashboard_with_filter.json'
+      'src/platform/plugins/shared/dashboard/test/scout_test_plugins/ui/fixtures/kbn_archives/dashboard_with_filter.json'
     );
     const dashboard = objects.find(
       ({ type, title }) => type === 'dashboard' && title === 'dashboard with filter'
