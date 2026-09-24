@@ -51,6 +51,15 @@ describe('AiIndexDescriptionField', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows placeholder guidance for what to include', () => {
+    renderField();
+
+    expect(screen.getByTestId('contextAiIndexDescriptionInput')).toHaveAttribute(
+      'placeholder',
+      'Describe what this AI index is for and the information its Knowledge Indicators contain. Include example questions they should help answer and any known gaps in that information.'
+    );
+  });
+
   it('shows a warning when the description is within 5% of the max length', () => {
     renderField('a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH - 10));
 
