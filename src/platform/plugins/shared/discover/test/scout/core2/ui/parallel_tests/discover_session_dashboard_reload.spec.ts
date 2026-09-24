@@ -30,6 +30,85 @@ spaceTest.describe(
     });
 
     spaceTest(
+      'shares one inline data view across API-created tabs after saving in Discover and reloading the dashboard',
+      async ({ apiServices, page, pageObjects, scoutSpace }) => {
+        const { dashboard, discover, filterBar } = pageObjects;
+        const tabs = [
+          { id: 'original', label: 'Original' },
+          { id: 'copy', label: 'Copy' },
+        ];
+        const savedSearchName = `Shared inline view ${scoutSpace.id}`;
+        const session: DiscoverSessionApiDataInput = {
+          title: savedSearchName,
+          tabs: tabs.map((tab) => ({
+            ...tab,
+            data_source: {
+              type: 'data_view_spec',
+              index_pattern: 'logstash*',
+              time_field: '@timestamp',
+            },
+            column_order: ['extension'],
+          })),
+        };
+        const sessionId = await apiServices.discover.create(session, scoutSpace.id);
+        const panelHitCounts = page.testSubj.locator('savedSearchTotalDocuments');
+
+        const expectSharedFilterEditor = async () => {
+          await filterBar.clickEditFilter('extension.raw', 'css');
+          await expect
+            .poll(() => page.components.comboBox('filterFieldSuggestionList').getSelectedOptions())
+            .toStrictEqual(['extension.raw']);
+          await expect(page.testSubj.locator('filterIndexPatternsSelect')).toBeHidden();
+          await expect
+            .poll(() => filterBar.getFilterEditorSelectedPhrases())
+            .toStrictEqual(['css']);
+          await expect(page.testSubj.locator('saveFilter')).toBeEnabled();
+          await filterBar.closeFieldEditorModal();
+        };
+
+        await spaceTest.step('save a title change in Discover', async () => {
+          await discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
+          await discover.waitUntilTabIsLoaded();
+          await discover.saveSearch(`${savedSearchName} saved`);
+          await expect(discover.unsavedChangesIndicator()).toBeHidden();
+        });
+
+        await spaceTest.step('filter both tabs as linked dashboard panels', async () => {
+          const dashboardId = await apiServices.dashboard.create(
+            {
+              title: `Shared inline view dashboard ${scoutSpace.id}`,
+              panels: tabs.map(({ id, label }, index) => ({
+                id,
+                type: 'discover_session',
+                grid: { x: index * 24, y: 0, w: 24, h: 15 },
+                config: { ref_id: sessionId, selected_tab_id: id, title: label },
+              })),
+            },
+            scoutSpace.id
+          );
+          await dashboard.openDashboardWithIdInEditMode(dashboardId);
+          await dashboard.waitForPanelsToLoad(2);
+          await expect(panelHitCounts).toHaveText(['14,004 documents', '14,004 documents']);
+
+          await filterBar.addFilter({ field: 'extension.raw', operator: 'is', value: 'css' });
+          await expect(panelHitCounts).toHaveText(['2,159 documents', '2,159 documents']);
+          await expectSharedFilterEditor();
+        });
+
+        await spaceTest.step('save and reload the dashboard', async () => {
+          await dashboard.saveChangesToExistingDashboard();
+          await page.reload();
+          await dashboard.waitForPanelsToLoad(2);
+
+          await expect(panelHitCounts).toHaveText(['2,159 documents', '2,159 documents']);
+          await expectSharedFilterEditor();
+          await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+          await expect(dashboard.unsavedChangesIndicator).toBeHidden();
+        });
+      }
+    );
+
+    spaceTest(
       'renders linked and by-value panels after saving and reload',
       async ({ apiServices, discoverScoutSpace, page, pageObjects, scoutSpace }) => {
         const { dashboard, dataGrid } = pageObjects;

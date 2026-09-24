@@ -49,18 +49,92 @@ const readInlineId = (attributes: DiscoverSessionAttributes, tabIndex = 0) => {
 };
 
 describe('assignStoredInlineDataViewIds', () => {
-  it('gives independent tabs with identical definitions distinct IDs', () => {
-    const input = createAttributes(
-      ['first', 'second'].map((id) => ({ id, searchSource: { index: inlineSpec } }))
-    );
-    const result = assignStoredInlineDataViewIds(input);
-    const ids = result.tabs.map((_, tabIndex) => readInlineId(result, tabIndex));
+  it('shares IDs for equivalent new views while keeping different definitions separate', () => {
+    const metricsSpec = { title: 'metrics-*' };
+    const input = createAttributes([
+      { id: 'logs', searchSource: { index: inlineSpec } },
+      { id: 'metrics', searchSource: { index: metricsSpec } },
+      {
+        id: 'logs-copy',
+        searchSource: { index: { ...inlineSpec, name: 'logs-*', allowHidden: false } },
+      },
+      { id: 'metrics-copy', searchSource: { index: metricsSpec } },
+      { id: 'logs-second-copy', searchSource: { index: inlineSpec } },
+    ]);
+    const before = JSON.stringify(input);
 
-    expect(ids).toEqual([expect.any(String), expect.any(String)]);
-    expect(new Set(ids).size).toBe(2);
-    expect(readInlineId(input)).toBeUndefined();
-    expect(assignStoredInlineDataViewIds(result)).toEqual(result);
+    const result = assignStoredInlineDataViewIds(input);
+    const logsId = readInlineId(result);
+    const metricsId = readInlineId(result, 1);
+
+    expect(logsId).toStrictEqual(expect.any(String));
+    expect(metricsId).toStrictEqual(expect.any(String));
+    expect(metricsId).not.toBe(logsId);
+    expect(result.tabs.map((_, tabIndex) => readInlineId(result, tabIndex))).toStrictEqual([
+      logsId,
+      metricsId,
+      logsId,
+      metricsId,
+      logsId,
+    ]);
+    expect(result.tabs.map(({ id }) => id)).toStrictEqual(input.tabs.map(({ id }) => id));
+    expect(JSON.stringify(input)).toBe(before);
+    expect(assignStoredInlineDataViewIds(result)).toStrictEqual(result);
   });
+
+  it('shares matching stored views without IDs and keeps their assigned IDs on later updates', () => {
+    const attributes = createAttributes([
+      { id: 'first', searchSource: { index: inlineSpec } },
+      {
+        id: 'second',
+        searchSource: { index: { ...inlineSpec, name: 'logs-*', allowHidden: false } },
+      },
+      { id: 'different', searchSource: { index: { title: 'metrics-*' } } },
+    ]);
+    const before = JSON.stringify(attributes);
+
+    const result = assignStoredInlineDataViewIds(attributes, attributes);
+    const sharedId = readInlineId(result);
+    const differentId = readInlineId(result, 2);
+
+    expect(sharedId).toStrictEqual(expect.any(String));
+    expect(readInlineId(result, 1)).toBe(sharedId);
+    expect(differentId).toStrictEqual(expect.any(String));
+    expect(differentId).not.toBe(sharedId);
+    expect(JSON.stringify(attributes)).toBe(before);
+    expect(assignStoredInlineDataViewIds(attributes, result)).toStrictEqual(result);
+  });
+
+  it.each<{ source: string; searchSource: SerializedSearchSourceFields }>([
+    { source: 'inline without an ID', searchSource: { index: inlineSpec } },
+    { source: 'saved Data View', searchSource: { indexRefName: 'saved-view-reference' } },
+    {
+      source: 'ES|QL',
+      searchSource: {
+        query: { esql: 'FROM logs-*' },
+        index: { ...inlineSpec, id: 'esql-id' },
+      },
+    },
+  ])(
+    'reuses a matching inline ID for an existing tab previously using $source',
+    ({ searchSource }) => {
+      const existing = createAttributes([
+        { id: 'updated', searchSource },
+        { id: 'unchanged', searchSource: { index: { ...inlineSpec, id: 'shared-id' } } },
+      ]);
+      const input = createAttributes([
+        { id: 'updated', searchSource: { index: inlineSpec } },
+        { id: 'unchanged', searchSource: { index: inlineSpec } },
+      ]);
+      const before = JSON.stringify({ input, existing });
+
+      const result = assignStoredInlineDataViewIds(input, existing);
+
+      expect(readInlineId(result)).toBe('shared-id');
+      expect(readInlineId(result, 1)).toBe('shared-id');
+      expect(JSON.stringify({ input, existing })).toBe(before);
+    }
+  );
 
   it.each<Omit<SerializedSearchSourceFields, 'index'> & { index: DataViewSpec }>([
     { index: inlineSpec },
@@ -134,27 +208,79 @@ describe('assignStoredInlineDataViewIds', () => {
     expect(JSON.stringify({ input, existing })).toBe(before);
   });
 
-  it('matches by tab ID after reordering, preserving sharing but not borrowing IDs for new tabs', () => {
+  it.each([
+    {
+      tabIds: ['new', 'duplicate', 'second', 'first'],
+      expectedIds: ['shared-id', 'shared-id', 'independent-id', 'shared-id'],
+    },
+    {
+      tabIds: ['new', 'second', 'first', 'duplicate'],
+      expectedIds: ['independent-id', 'independent-id', 'shared-id', 'shared-id'],
+    },
+  ])(
+    'preserves existing IDs and reuses the first matching view for new tabs: $tabIds',
+    ({ tabIds, expectedIds }) => {
+      const existing = createAttributes([
+        { id: 'first', searchSource: { index: { ...inlineSpec, id: 'shared-id' } } },
+        { id: 'second', searchSource: { index: { ...inlineSpec, id: 'independent-id' } } },
+        { id: 'duplicate', searchSource: { index: { ...inlineSpec, id: 'shared-id' } } },
+      ]);
+      const input = createAttributes(
+        tabIds.map((id) => ({
+          id,
+          searchSource: { index: inlineSpec },
+        }))
+      );
+      const result = assignStoredInlineDataViewIds(input, existing);
+
+      expect(result.tabs.map((_, tabIndex) => readInlineId(result, tabIndex))).toStrictEqual(
+        expectedIds
+      );
+      expect(result.tabs.map(({ id }) => id)).toStrictEqual(tabIds);
+    }
+  );
+
+  it.each([{ tabIds: ['copy', 'original'] }, { tabIds: ['original', 'copy'] }])(
+    'shares an edited view with its new copy regardless of tab order: $tabIds',
+    ({ tabIds }) => {
+      const existing = createAttributes([
+        { id: 'original', searchSource: { index: { ...inlineSpec, id: 'previous-id' } } },
+      ]);
+      const input = createAttributes(
+        tabIds.map((id) => ({ id, searchSource: { index: { title: 'other-*' } } }))
+      );
+      const before = JSON.stringify({ input, existing });
+
+      const result = assignStoredInlineDataViewIds(input, existing);
+      const newId = readInlineId(result);
+
+      expect(newId).toStrictEqual(expect.any(String));
+      expect(newId).not.toBe('previous-id');
+      expect(result.tabs.map((_, tabIndex) => readInlineId(result, tabIndex))).toStrictEqual([
+        newId,
+        newId,
+      ]);
+      expect(result.tabs.map(({ id }) => id)).toStrictEqual(tabIds);
+      expect(JSON.stringify({ input, existing })).toBe(before);
+    }
+  );
+
+  it('gives an edited tab a new ID even when its new definition matches another tab', () => {
+    const otherSpec = { title: 'other-*' };
     const existing = createAttributes([
-      { id: 'first', searchSource: { index: { ...inlineSpec, id: 'shared-id' } } },
-      { id: 'second', searchSource: { index: { ...inlineSpec, id: 'independent-id' } } },
-      { id: 'duplicate', searchSource: { index: { ...inlineSpec, id: 'shared-id' } } },
+      { id: 'unchanged', searchSource: { index: { ...otherSpec, id: 'other-id' } } },
+      { id: 'edited', searchSource: { index: { ...inlineSpec, id: 'previous-id' } } },
     ]);
     const input = createAttributes(
-      ['duplicate', 'second', 'first', 'new'].map((id) => ({
-        id,
-        searchSource: { index: inlineSpec },
-      }))
+      ['unchanged', 'edited'].map((id) => ({ id, searchSource: { index: otherSpec } }))
     );
-    const result = assignStoredInlineDataViewIds(input, existing);
 
-    expect(result.tabs.map((_, tabIndex) => readInlineId(result, tabIndex))).toEqual([
-      'shared-id',
-      'independent-id',
-      'shared-id',
-      expect.any(String),
-    ]);
-    expect(['shared-id', 'independent-id']).not.toContain(readInlineId(result, 3));
+    const result = assignStoredInlineDataViewIds(input, existing);
+    const editedId = readInlineId(result, 1);
+
+    expect(readInlineId(result)).toBe('other-id');
+    expect(editedId).toStrictEqual(expect.any(String));
+    expect(['other-id', 'previous-id']).not.toContain(editedId);
   });
 
   it('binds implicit nested filters without changing their content or explicit references', () => {

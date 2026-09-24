@@ -20,7 +20,8 @@ import { assignStoredInlineDataViewIds } from './transforms/assign_stored_inline
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'generated-inline-id') }));
 
-const { attributes: apiAttributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
+const { attributes: apiAttributes, references } =
+  transformDiscoverSessionIn(discoverSessionApiData);
 const attributes = assignStoredInlineDataViewIds(apiAttributes);
 
 const createSavedObject = (
@@ -71,8 +72,16 @@ describe('upsertDiscoverSession', () => {
         mergeAttributes: false,
       }
     );
-    expect(coreContext.savedObjects.client.get).toHaveBeenNthCalledWith(1, SavedSearchType, requestId);
-    expect(coreContext.savedObjects.client.get).toHaveBeenNthCalledWith(2, SavedSearchType, requestId);
+    expect(coreContext.savedObjects.client.get).toHaveBeenNthCalledWith(
+      1,
+      SavedSearchType,
+      requestId
+    );
+    expect(coreContext.savedObjects.client.get).toHaveBeenNthCalledWith(
+      2,
+      SavedSearchType,
+      requestId
+    );
     expect(result.body.id).toBe(requestId);
     expect(result.operation).toBe('update');
   });
