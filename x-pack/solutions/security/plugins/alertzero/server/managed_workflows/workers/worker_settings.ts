@@ -19,6 +19,7 @@ import {
   getWorkerSettingsDeclaration,
   projectStoredAutonomyLevel,
   type WorkerSettings,
+  type WorkerSettingsDeclaration,
 } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 import type { WorkerSettingsRegistration } from './types';
@@ -56,16 +57,51 @@ const toTemplateValues = (
   ...(settings.extras === undefined ? {} : { extras: settings.extras }),
 });
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
 /**
- * Reads persisted template values back as stored — nothing defaulted or merged, so an older
- * document fails here and the Worker projects as unavailable. Autonomy is the exception: a level
- * the Worker no longer offers is projected rather than failing the read.
+ * Fills fields the current declaration has but the document lacks, from the declaration defaults.
+ * Stored keys and types are left alone so a removal, rename, or retype still fails the strict
+ * schema. Additive only — not a migration chain and not a version bump.
+ */
+const fillDeclaredDefaults = (
+  declaration: WorkerSettingsDeclaration,
+  scheduleInterval: unknown,
+  extras: unknown
+): { scheduleInterval?: unknown; extras?: unknown } => {
+  const filledScheduleInterval =
+    scheduleInterval === undefined && declaration.scheduleInterval
+      ? declaration.scheduleInterval.defaultValue
+      : scheduleInterval;
+
+  let filledExtras = extras;
+  if (declaration.extras) {
+    if (extras === undefined) {
+      filledExtras = declaration.extras.defaultValue;
+    } else if (isPlainObject(extras)) {
+      filledExtras = { ...declaration.extras.defaultValue, ...extras };
+    }
+  }
+
+  return {
+    ...(filledScheduleInterval === undefined ? {} : { scheduleInterval: filledScheduleInterval }),
+    ...(filledExtras === undefined ? {} : { extras: filledExtras }),
+  };
+};
+
+/**
+ * Reads persisted template values. A field the current declaration has but the document lacks is
+ * filled from the declaration default. A stored key the schema no longer knows, a wrong type, or a
+ * version mismatch still fails. Autonomy is the other exception: a level the Worker no longer
+ * offers is projected rather than failing the read.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
   raw: Record<string, unknown>
 ): WorkerSettings => {
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
+  const declaration = getWorkerSettingsDeclaration(workerId);
   const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
@@ -83,9 +119,8 @@ const parseWorkerValues = (
 
   const candidate = {
     workerId,
-    autonomy: projectStoredAutonomyLevel(getWorkerSettingsDeclaration(workerId), autonomyLevel),
-    ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
-    ...(extras === undefined ? {} : { extras }),
+    autonomy: projectStoredAutonomyLevel(declaration, autonomyLevel),
+    ...fillDeclaredDefaults(declaration, scheduleInterval, extras),
   };
   const parsed = getCompleteWorkerSettingsSchema(workerId).safeParse(candidate);
   if (!parsed.success) {
