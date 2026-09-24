@@ -7,15 +7,47 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { inventoryTitle } from '../../../translations';
+import type { MetricsDetailAppHeader } from '../../../pages/metrics/header/metrics_detail_app_header';
+import type { getHostHeaderBadges } from '../header/host_header_title';
 import { Page } from './page';
+
+type MetricsDetailAppHeaderProps = React.ComponentProps<typeof MetricsDetailAppHeader>;
+type GetHostHeaderBadgesArgs = Parameters<typeof getHostHeaderBadges>[0];
+
+const overviewTab = {
+  id: 'overview',
+  label: 'Overview',
+  isSelected: true,
+  onClick: jest.fn(),
+  'data-test-subj': 'infraAssetDetailsOverviewTab',
+};
+
+const hostBadges: AppHeaderBadge[] = [
+  {
+    label: 'Host details',
+    renderCustomBadge: () => <div data-test-subj="hostHeaderExtras" />,
+  },
+];
 
 const mockGetBreadcrumbOptions = jest.fn(() => ({
   text: inventoryTitle,
   link: { href: '/app/metrics/inventory' },
+}));
+
+const mockUseAssetDetailsRenderPropsContext = jest.fn();
+const mockGetHostHeaderBadges = jest.fn((_args: GetHostHeaderBadgesArgs) => hostBadges);
+
+// The Page composes the header; rendering the real `AppHeader` tree is covered by
+// `metrics_detail_app_header.test.tsx`, so capture the props here instead of mounting it.
+let lastMetricsDetailAppHeaderProps: MetricsDetailAppHeaderProps | undefined;
+
+jest.mock('../../../pages/metrics/header/metrics_detail_app_header', () => ({
+  MetricsDetailAppHeader: (props: MetricsDetailAppHeaderProps) => {
+    lastMetricsDetailAppHeaderProps = props;
+    return <div data-test-subj="metricsDetailAppHeader" />;
+  },
 }));
 
 jest.mock('../../../hooks/use_metrics_breadcrumbs', () => ({
@@ -44,11 +76,7 @@ jest.mock('../hooks/use_metadata_state', () => ({
 }));
 
 jest.mock('../hooks/use_asset_details_render_props', () => ({
-  useAssetDetailsRenderPropsContext: () => ({
-    entity: { id: 'web-01', name: 'web-01', type: 'host' },
-    loading: false,
-    schema: 'ecs',
-  }),
+  useAssetDetailsRenderPropsContext: () => mockUseAssetDetailsRenderPropsContext(),
 }));
 
 jest.mock('../hooks/use_host_attachment_config', () => ({
@@ -59,15 +87,7 @@ jest.mock('../hooks/use_page_header', () => ({
   usePageHeader: () => ({
     rightSideItems: [],
     tabEntries: [],
-    appHeaderTabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        isSelected: true,
-        onClick: jest.fn(),
-        'data-test-subj': 'infraAssetDetailsOverviewTab',
-      },
-    ],
+    appHeaderTabs: [overviewTab],
     breadcrumbs: [],
   }),
 }));
@@ -103,12 +123,7 @@ jest.mock('../content/content', () => ({
 }));
 
 jest.mock('../header/host_header_title', () => ({
-  getHostHeaderBadges: () => [
-    {
-      label: 'Host details',
-      renderCustomBadge: () => <div data-test-subj="hostHeaderExtras" data-include-title="false" />,
-    },
-  ],
+  getHostHeaderBadges: (args: GetHostHeaderBadgesArgs) => mockGetHostHeaderBadges(args),
 }));
 
 let lastInfraPageTemplateProps: {
@@ -139,40 +154,31 @@ jest.mock('../../shared/templates/infra_page_template', () => ({
   },
 }));
 
-jest.mock('../../../pages/metrics/header/use_metrics_app_header_menu', () => ({
-  useMetricsAppHeaderMenu: () => ({
-    menu: { items: [] },
-    flyouts: null,
-  }),
-}));
-
-const renderPage = () =>
-  render(
-    <EuiProvider>
-      <MockAppHeaderProvider>
-        <Page tabs={[]} />
-      </MockAppHeaderProvider>
-    </EuiProvider>
-  );
+const renderPage = () => render(<Page tabs={[]} />);
 
 describe('Asset details Page', () => {
   beforeEach(() => {
     lastInfraPageTemplateProps = {};
+    lastMetricsDetailAppHeaderProps = undefined;
+    mockGetHostHeaderBadges.mockClear();
     mockGetBreadcrumbOptions.mockReturnValue({
       text: inventoryTitle,
       link: { href: '/app/metrics/inventory' },
     });
+    mockUseAssetDetailsRenderPropsContext.mockReturnValue({
+      entity: { id: 'web-01', name: 'web-01', type: 'host' },
+      loading: false,
+      schema: 'ecs',
+    });
   });
 
-  it('renders AppHeader with the asset name, required back, and tabs', async () => {
+  it('renders the AppHeader with the asset name and tabs, without a page-local return button', () => {
     renderPage();
 
-    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('web-01');
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
-      'href',
-      '/app/metrics/inventory'
+    expect(screen.getByTestId('metricsDetailAppHeader')).toBeInTheDocument();
+    expect(lastMetricsDetailAppHeaderProps).toEqual(
+      expect.objectContaining({ title: 'web-01', tabs: [overviewTab] })
     );
-    expect(screen.getByTestId('infraAssetDetailsOverviewTab')).toBeInTheDocument();
     expect(screen.getByTestId('assetDetailsContent')).toBeInTheDocument();
     expect(screen.getByTestId('assetDetailsDatePicker')).toBeInTheDocument();
     expect(screen.queryByTestId('infraAssetDetailsReturnButton')).not.toBeInTheDocument();
@@ -180,13 +186,26 @@ describe('Asset details Page', () => {
     expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 
-  it('keeps host extras out of the AppHeader title string', async () => {
+  it('passes host extras to the AppHeader as badges instead of the title string', () => {
     renderPage();
 
-    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('web-01');
-    expect(screen.getByTestId('hostHeaderExtras')).toHaveAttribute('data-include-title', 'false');
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toContainElement(
-      screen.getByTestId('hostHeaderExtras')
+    expect(mockGetHostHeaderBadges).toHaveBeenCalledWith({ title: 'web-01', schema: 'ecs' });
+    expect(lastMetricsDetailAppHeaderProps?.title).toBe('web-01');
+    expect(lastMetricsDetailAppHeaderProps?.badges).toBe(hostBadges);
+  });
+
+  it('omits host badges for non-host entities', () => {
+    mockUseAssetDetailsRenderPropsContext.mockReturnValue({
+      entity: { id: 'pod-01', name: 'pod-01', type: 'pod' },
+      loading: false,
+      schema: 'ecs',
+    });
+
+    renderPage();
+
+    expect(mockGetHostHeaderBadges).not.toHaveBeenCalled();
+    expect(lastMetricsDetailAppHeaderProps).toEqual(
+      expect.objectContaining({ title: 'pod-01', badges: undefined })
     );
   });
 });
