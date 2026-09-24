@@ -40,6 +40,27 @@ certificate="$(resolve SANDBOX_CLIENT_CERT '.sandbox.ssl.certificate')"
 key="$(resolve SANDBOX_CLIENT_KEY '.sandbox.ssl.key')"
 ca="$(resolve SANDBOX_CA_CERT '.sandbox.ssl.certificateAuthorities')"
 
+# Existing local setups may provide PEM file paths rather than contents.
+[[ -n "$certificate" || -z "${SANDBOX_CLIENT_CERT_PATH:-}" ]] || certificate="$(cat "$SANDBOX_CLIENT_CERT_PATH")"
+[[ -n "$key" || -z "${SANDBOX_CLIENT_KEY_PATH:-}" ]] || key="$(cat "$SANDBOX_CLIENT_KEY_PATH")"
+[[ -n "$ca" || -z "${SANDBOX_CA_CERT_PATH:-}" ]] || ca="$(cat "$SANDBOX_CA_CERT_PATH")"
+
+telemetry_url="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL '.nightshift.telemetry.url')"
+telemetry_key="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY '.nightshift.telemetry.apiKey')"
+readable_indices="$(resolve NIGHTSHIFT_SANDBOX_READABLE_INDICES '.nightshift.telemetry.readableIndices')"
+telemetry_config=''
+if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
+  if [[ -z "$telemetry_url" || -z "$telemetry_key" ]]; then
+    echo "nightshift-investigations scout hook: remote telemetry requires both URL and API key" >&2
+    exit 1
+  fi
+  if [[ -z "$api_key" ]]; then
+    echo "nightshift-investigations scout hook: remote telemetry requires sandbox credentials" >&2
+    exit 1
+  fi
+  telemetry_config="$script_dir/kibana.telemetry.yml"
+fi
+
 if [[ -z "$api_key" ]]; then
   partial=()
   for name in host port certificate key ca; do
@@ -68,6 +89,10 @@ HOOK_HOST="$host" \
   HOOK_CERTIFICATE="$certificate" \
   HOOK_KEY="$key" \
   HOOK_CA="$ca" \
+  HOOK_TELEMETRY_URL="$telemetry_url" \
+  HOOK_TELEMETRY_KEY="$telemetry_key" \
+  HOOK_READABLE_INDICES="$readable_indices" \
+  HOOK_TELEMETRY_CONFIG="$telemetry_config" \
   HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
   jq -n '{
     env: (({
@@ -80,5 +105,10 @@ HOOK_HOST="$host" \
       # kibana.sandbox.yml always references the CA; an empty value means no custom CA.
       SANDBOX_CA_CERT: $ENV.HOOK_CA,
       SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
-    })
+    } + (if $ENV.HOOK_TELEMETRY_CONFIG != "" then {
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: $ENV.HOOK_TELEMETRY_URL,
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: $ENV.HOOK_TELEMETRY_KEY,
+      NIGHTSHIFT_SANDBOX_READABLE_INDICES: $ENV.HOOK_READABLE_INDICES,
+      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: $ENV.HOOK_TELEMETRY_CONFIG
+    } else {} end))
   }'
