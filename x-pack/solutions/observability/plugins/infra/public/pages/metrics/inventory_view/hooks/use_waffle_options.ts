@@ -125,7 +125,11 @@ export const useWaffleOptions = () => {
     writeDefaultState: true,
   });
 
-  const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(null);
+  // Seed from URL so a remount/reload does not treat the initial null local
+  // state as authoritative and wipe a persisted preferredSchema from the URL.
+  const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(
+    urlState.preferredSchema
+  );
 
   const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
@@ -135,7 +139,8 @@ export const useWaffleOptions = () => {
       setUrlState(state);
       previousViewId.current = currentView.id;
 
-      setPreferredSchema(currentView?.attributes.preferredSchema ?? null);
+      // Same mapping as URL state — do not seed from the raw saved-object field.
+      setPreferredSchema(state.preferredSchema ?? null);
     }
   }, [currentView, isPodSchemaSelectorEnabled, setUrlState, updateTopbarMenuVisibilityBySchema]);
 

@@ -104,6 +104,7 @@ test.describe(
       });
 
       await inventoryPage.selectSchema('Elastic System Integration');
+      await expect(page).toHaveURL(/preferredSchema:ecs/);
       // Selecting a schema can jump the waffle time to now. Pin the mixed window again.
       await inventoryPage.goToTime(DATE_WITH_MIXED_POD_DATA);
       await expect(inventoryPage.schemaSelect).toContainText('Elastic System Integration', {
@@ -195,7 +196,9 @@ test.describe(
         `View details for k8s.pod.uid ${SEMCONV_POD.uid}`
       );
 
-      await expect(inventoryPage.contextMenuLogsLink).toHaveAttribute('href', /k8s\.pod\.uid/);
+      // LOGS_LOCATOR compresses the kuery into `lz=`, so assert identity on the
+      // uncompressed APM link and that logs still targets the locator.
+      await expect(inventoryPage.contextMenuLogsLink).toHaveAttribute('href', /LOGS_LOCATOR/);
       await expect(inventoryPage.contextMenuApmLink).toHaveAttribute(
         'href',
         new RegExp(`k8s\\.pod\\.uid(%3A|:)(%22|")${SEMCONV_POD.uid}`)
@@ -225,7 +228,11 @@ test.describe(
 
       const tooltip = page.getByTestId(`conditionalTooltipContent-${SEMCONV_POD.name}`);
       await expect(tooltip).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-      await expect(tooltip.getByTestId('conditionalTooltipContent-value')).not.toHaveText('N/A');
+      const cpuValue = tooltip
+        .locator('[aria-label^="CPU usage"]')
+        .getByTestId('conditionalTooltipContent-value');
+      await expect(cpuValue).not.toHaveText('-');
+      await expect(cpuValue).not.toHaveText('N/A');
     });
 
     test('group by k8s.node.name splits OpenTelemetry pods into two groups', async ({
@@ -237,6 +244,8 @@ test.describe(
       await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
         timeout: EXTENDED_TIMEOUT,
       });
+      // Prefer hydrated preferredSchema over DEFAULT_SCHEMA display-only state.
+      await expect(page).toHaveURL(/preferredSchema:semconv/);
 
       await inventoryPage.selectGroupBy('k8s.node.name');
       await expect(page.getByTestId('groupNameButton')).toHaveCount(2);
