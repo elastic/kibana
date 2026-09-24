@@ -116,6 +116,12 @@ export const createAgentPolicyIfNeeded = async ({
   packageInfo?: PackageInfo;
 }): Promise<AgentPolicy | undefined> => {
   if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+    // Agentless policies are created by the managed integrations API below. Preinstalling
+    // packages here can race that request with Fleet package setup without creating an agent policy.
+    if (newAgentPolicy.supports_agentless) {
+      return;
+    }
+
     if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
       const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
       // skip preinstall of input package, to be able to rollback when package policy creation fails
@@ -132,11 +138,6 @@ export const createAgentPolicyIfNeeded = async ({
       if (packagesToPreinstall.length > 0) {
         await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
       }
-    }
-
-    // Skip policy creation for agentless as it's done through the managed integrations API
-    if (newAgentPolicy.supports_agentless) {
-      return;
     }
 
     return await createAgentPolicy({
