@@ -145,6 +145,18 @@ describe('yaml_form_utils', () => {
       });
     });
 
+    it('excludes recovering under manual recovery, which the save path drops', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        recovery: { strategy: 'manual' },
+        stateTransition: { pendingCount: 3, recoveringCount: 1 },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result.state_transition).toEqual({ pending: { count: 3 } });
+    });
+
     it('excludes state_transition when not present', () => {
       const formValues: FormValues = { ...defaultTestFormValues };
 
@@ -405,6 +417,59 @@ describe('yaml_form_utils', () => {
       expect(result.error).toBe(
         'Invalid recovery. Set strategy to one of no_breach, condition, query, manual, with the fields that strategy accepts.'
       );
+    });
+
+    it.each([
+      ['a retired lifecycle field', 'recovery_strategy'],
+      ['a misspelt block', 'recoverry'],
+      ['a response-only field', 'id'],
+    ])('reports %s at the top level instead of defaulting it', (_label, field) => {
+      const yaml = stringify({
+        kind: 'alert',
+        metadata: { name: 'Unsupported field' },
+        query: { base: 'FROM logs-*' },
+        [field]: 'whatever',
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.values).toBeNull();
+      expect(result.error).toBe(`Unsupported field: ${field}.`);
+    });
+
+    it.each([
+      ['a misspelt field', { pending: { counnt: 3 } }],
+      ['a count that is not a number', { pending: { count: '3' } }],
+      ['a phase that gates nothing', { pending: {} }],
+      ['a misspelt phase', { pendign: { count: 3 } }],
+    ])('reports state_transition with %s instead of erasing it', (_label, stateTransition) => {
+      const yaml = stringify({
+        kind: 'alert',
+        metadata: { name: 'Invalid state_transition' },
+        query: { base: 'FROM logs-*' },
+        state_transition: stateTransition,
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.values).toBeNull();
+      expect(result.error).toBe(
+        'Invalid state_transition. Set pending or recovering to a block with count and/or timeframe.'
+      );
+    });
+
+    it('accepts a null state_transition, which clears the delays', () => {
+      const yaml = stringify({
+        kind: 'alert',
+        metadata: { name: 'No delays' },
+        query: { base: 'FROM logs-*' },
+        state_transition: null,
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.stateTransition).toBeUndefined();
     });
 
     it('defaults noData to ignore for alert rules when absent from YAML', () => {

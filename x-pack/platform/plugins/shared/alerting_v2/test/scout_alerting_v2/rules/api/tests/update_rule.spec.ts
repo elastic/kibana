@@ -678,6 +678,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { recovery: { strategy: 'condition', segment: 'WHERE' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
       // The rejected update must not have persisted.
       const stored = await apiServices.alertingV2.rules.get(created.id);
       expect(stored.recovery).toStrictEqual({ strategy: 'condition', segment: 'WHERE count < 5' });

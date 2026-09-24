@@ -754,16 +754,7 @@ export const updateRuleDataSchema = z
     artifacts: artifactsSchema.optional().nullable(),
   })
   .strict()
-  .check((ctx) => {
-    if (!isNoDataStrategyWritable(ctx.value)) {
-      ctx.issues.push({
-        code: 'custom',
-        path: rejectAlertNoDataStrategy.path,
-        message: rejectAlertNoDataStrategy.message,
-        input: ctx.value.no_data,
-      });
-    }
-  });
+  .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy);
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 

@@ -20,10 +20,12 @@ import {
   recoverySchema,
   recoveryStrategy,
   recoveryStrategySchema,
+  stateTransitionSchema,
 } from '@kbn/alerting-v2-schemas';
 import { parse, stringify } from 'yaml';
 import type { FormValues, StateTransition, RuleQuery, RuleNoData, RuleRecovery } from '../types';
 import {
+  apiStateTransitionToFormStateTransition,
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from './state_transition_helpers';
@@ -33,6 +35,7 @@ import {
   apiRecoveryToFormRecovery,
   formNoDataToApiNoData,
   formRecoveryToApiRecovery,
+  isRecoveryEnabled,
 } from './lifecycle_mappers';
 import { mergeArtifactsByType, splitArtifactsByType } from './artifact_mappers';
 
@@ -70,16 +73,43 @@ interface YamlRuleObject {
   artifacts?: Array<{ id: string; type: string; data: Record<string, any> }>;
 }
 
-const serializeStateTransition = (st?: StateTransition): ApiStateTransition | undefined => {
+/**
+ * Typed against `YamlRuleObject` so a field added to the editor cannot be left
+ * out of the accepted set, and a retired one (`recovery_strategy`) or a typo is
+ * reported rather than read as an omitted block.
+ */
+const TOP_LEVEL_FIELDS = new Set(
+  Object.keys({
+    kind: true,
+    metadata: true,
+    time_field: true,
+    schedule: true,
+    query: true,
+    recovery: true,
+    no_data: true,
+    grouping: true,
+    state_transition: true,
+    artifacts: true,
+  } satisfies Record<keyof YamlRuleObject, true>)
+);
+
+const serializeStateTransition = (
+  st: StateTransition | undefined,
+  recoveryEnabled: boolean
+): ApiStateTransition | undefined => {
   if (!st) return undefined;
   const pending = {
     ...(st.pendingCount != null ? { count: st.pendingCount } : {}),
     ...(st.pendingTimeframe != null ? { timeframe: st.pendingTimeframe } : {}),
   };
-  const recovering = {
-    ...(st.recoveringCount != null ? { count: st.recoveringCount } : {}),
-    ...(st.recoveringTimeframe != null ? { timeframe: st.recoveringTimeframe } : {}),
-  };
+  // The request mapper drops these when the rule never recovers on its own, so
+  // emitting them here would preview a delay that the save silently discards.
+  const recovering = recoveryEnabled
+    ? {
+        ...(st.recoveringCount != null ? { count: st.recoveringCount } : {}),
+        ...(st.recoveringTimeframe != null ? { timeframe: st.recoveringTimeframe } : {}),
+      }
+    : {};
   const out: ApiStateTransition = {
     ...(Object.keys(pending).length ? { pending } : {}),
     ...(Object.keys(recovering).length ? { recovering } : {}),
@@ -96,7 +126,7 @@ const serializeStateTransition = (st?: StateTransition): ApiStateTransition | un
  * of the create payload at all.
  */
 export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
-  const st = serializeStateTransition(values.stateTransition);
+  const st = serializeStateTransition(values.stateTransition, isRecoveryEnabled(values));
   const allArtifacts = mergeArtifactsByType(values);
   const recovery = formRecoveryToApiRecovery(values);
   const noData = formNoDataToApiNoData(values);
@@ -143,9 +173,6 @@ const asRecord = (value: unknown): Record<string, unknown> | undefined =>
 
 const asOptionalString = (value: unknown): string | undefined =>
   typeof value === 'string' ? value : undefined;
-
-const asOptionalNumber = (value: unknown): number | undefined =>
-  typeof value === 'number' ? value : undefined;
 
 const invalidQueryField = (field: string): string =>
   i18n.translate('xpack.alertingV2.yamlRuleForm.invalidQueryFieldError', {
@@ -208,16 +235,8 @@ const parseNoData = (value: unknown): RuleNoData | undefined => {
 };
 
 const parseStateTransition = (value: unknown): StateTransition | undefined => {
-  const stateTransitionObj = asRecord(value);
-  if (!stateTransitionObj) return undefined;
-  const pending = asRecord(stateTransitionObj.pending);
-  const recovering = asRecord(stateTransitionObj.recovering);
-  return {
-    pendingCount: asOptionalNumber(pending?.count) ?? null,
-    pendingTimeframe: asOptionalString(pending?.timeframe) ?? null,
-    recoveringCount: asOptionalNumber(recovering?.count) ?? null,
-    recoveringTimeframe: asOptionalString(recovering?.timeframe) ?? null,
-  };
+  const parsed = stateTransitionSchema.safeParse(value);
+  return parsed.success ? apiStateTransitionToFormStateTransition(parsed.data) : undefined;
 };
 
 /**
@@ -251,13 +270,24 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   }
 
   const obj = parsed as Record<string, unknown>;
+
+  const unsupportedField = Object.keys(obj).find((key) => !TOP_LEVEL_FIELDS.has(key));
+  if (unsupportedField) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.unsupportedFieldError', {
+        defaultMessage: 'Unsupported field: {field}.',
+        values: { field: unsupportedField },
+      }),
+    };
+  }
+
   const metadata = obj.metadata as Record<string, unknown> | undefined;
   const schedule = obj.schedule as Record<string, unknown> | undefined;
   const queryObj = obj.query as Record<string, unknown> | undefined;
   const grouping = obj.grouping as Record<string, unknown> | undefined;
   const parsedArtifacts = parseArtifacts(obj.artifacts);
   const artifactSlices = splitArtifactsByType(parsedArtifacts);
-  const stateTransition = parseStateTransition(obj.state_transition);
 
   const kind = obj.kind;
   if (kind !== undefined && kind !== 'alert' && kind !== 'signal') {
@@ -311,6 +341,19 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         defaultMessage:
           'Invalid no_data. Set strategy to one of {strategies}, with the fields that strategy accepts.',
         values: { strategies: noDataStrategySchema.options.join(', ') },
+      }),
+    };
+  }
+
+  // `null` clears the delays, which the write API accepts, so only a malformed
+  // block is an error.
+  const stateTransition = parseStateTransition(obj.state_transition);
+  if (obj.state_transition != null && stateTransition === undefined) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidStateTransitionError', {
+        defaultMessage:
+          'Invalid state_transition. Set pending or recovering to a block with count and/or timeframe.',
       }),
     };
   }

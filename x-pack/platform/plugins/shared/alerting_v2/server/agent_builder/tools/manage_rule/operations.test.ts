@@ -756,6 +756,46 @@ describe('executeRuleOperations', () => {
       );
     });
 
+    it('clears a stored recovering delay when the query switches to manual recovery', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        kind: 'alert',
+        query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+        recovery: { strategy: 'no_breach' },
+        state_transition: { pending: { count: 3 }, recovering: { count: 0 } },
+      };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
+        },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.state_transition).toEqual({ pending: { count: 3 } });
+    });
+
+    it('drops state_transition when the recovering delay was its only phase', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        kind: 'alert',
+        query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+        recovery: { strategy: 'no_breach' },
+        state_transition: { recovering: { count: 2 } },
+      };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
+        },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.state_transition).toBeUndefined();
+    });
+
     it('allows a pending delay under manual recovery', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_kind', kind: 'alert' },

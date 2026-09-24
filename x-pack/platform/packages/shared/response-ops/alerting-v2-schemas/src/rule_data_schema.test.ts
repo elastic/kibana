@@ -1212,6 +1212,12 @@ describe('updateRuleDataSchema', () => {
   it('rejects a no_data update to "alert"', () => {
     const result = updateRuleDataSchema.safeParse({ no_data: { strategy: 'alert' } });
     expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({
+        path: ['no_data', 'strategy'],
+        message: 'no_data.strategy "alert" is not currently supported.',
+      }),
+    ]);
   });
 
   it('rejects recovery set to null (alert rules always store one)', () => {

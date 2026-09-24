@@ -26,6 +26,7 @@ import {
   scheduleSchema,
   querySchema,
   recoverySchema,
+  recoveryStrategy,
   noDataSchema,
   getRootEsqlQuery,
   groupingSchema,
@@ -406,6 +407,19 @@ export const executeRuleOperations = async (
           ...(op.recovery !== undefined ? { recovery: op.recovery } : {}),
           ...(op.no_data !== undefined ? { no_data: op.no_data } : {}),
         };
+
+        // A recovering delay is inert under `manual` and the write API rejects
+        // the pair, and no operation can remove a phase, so switching to manual
+        // has to clear it here.
+        if (
+          next.recovery?.strategy === recoveryStrategy.manual &&
+          next.state_transition?.recovering
+        ) {
+          const stateTransition = omit(next.state_transition, 'recovering');
+          next = Object.keys(stateTransition).length
+            ? { ...next, state_transition: stateTransition }
+            : omit(next, 'state_transition');
+        }
 
         if (!isRecoveryConditionUsableWithBreach(next)) {
           throw new RuleOperationValidationError(

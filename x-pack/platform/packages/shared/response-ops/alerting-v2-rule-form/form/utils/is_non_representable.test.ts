@@ -90,10 +90,36 @@ describe('isNonRepresentableRule', () => {
     ).toBe(false);
   });
 
-  it('returns false for every no_data strategy, including alert', () => {
-    for (const strategy of Object.values(noDataStrategy)) {
+  it.each([noDataStrategy.ignore, noDataStrategy.keep_last, noDataStrategy.resolve])(
+    'returns false for no_data.strategy: %s',
+    (strategy) => {
       expect(isNonRepresentableRule(createMockRule({ no_data: { strategy } }))).toBe(false);
     }
+  );
+
+  it('returns true for no_data.strategy: alert, which the strategy select omits', () => {
+    expect(
+      isNonRepresentableRule(createMockRule({ no_data: { strategy: noDataStrategy.alert } }))
+    ).toBe(true);
+  });
+
+  it('returns true for a no_data presence query, which the form cannot show', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          no_data: { strategy: noDataStrategy.keep_last, query: 'FROM heartbeat-* | LIMIT 1' },
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for a signal rule, whatever the alert-only blocks hold', () => {
+    expect(
+      isNonRepresentableRule({
+        ...createMockRule({ kind: 'signal' }),
+        no_data: { strategy: noDataStrategy.alert },
+      } as unknown as RuleResponse)
+    ).toBe(false);
   });
 });
 
@@ -143,12 +169,21 @@ describe('isNonRepresentableFormState', () => {
     expect(isNonRepresentableFormState(signalValues)).toBe(false);
   });
 
-  it('returns false for alert + noData.strategy: alert', () => {
+  it('returns true for alert + noData.strategy: alert', () => {
     const values: FormValues = {
       ...baseFormValues,
       noData: { strategy: noDataStrategy.alert },
     };
 
-    expect(isNonRepresentableFormState(values)).toBe(false);
+    expect(isNonRepresentableFormState(values)).toBe(true);
+  });
+
+  it('returns true for alert + a noData presence query', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      noData: { strategy: noDataStrategy.resolve, query: 'FROM heartbeat-* | LIMIT 1' },
+    };
+
+    expect(isNonRepresentableFormState(values)).toBe(true);
   });
 });

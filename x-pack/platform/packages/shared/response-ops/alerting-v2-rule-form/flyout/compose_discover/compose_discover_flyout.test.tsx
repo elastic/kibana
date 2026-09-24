@@ -1829,12 +1829,21 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readRecovery?.()).toEqual({ strategy: 'no_breach' });
     });
 
-    it('opens in GUI mode for no-data strategy alert, which the form can now author', () => {
+    it('opens in YAML mode for no-data strategy alert, which the strategy select omits', () => {
       const rule = { ...ruleWithRecovery, no_data: { strategy: 'alert' as const } };
       renderFlyout({ mode: 'edit', rule: rule as any });
 
-      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
-      expect(screen.queryByTestId('yamlRuleFormMock')).not.toBeInTheDocument();
+      expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+    });
+
+    it('opens in YAML mode for a no-data presence query, which the form cannot show', () => {
+      const rule = {
+        ...ruleWithRecovery,
+        no_data: { strategy: 'keep_last' as const, query: 'FROM heartbeat-* | LIMIT 1' },
+      };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
     });
 
     it('opens in YAML mode for an independent recovery query', () => {
