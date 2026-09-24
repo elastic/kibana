@@ -1163,17 +1163,17 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 /**
  * Only the EXPECTED not-yet-indexed failures are retryable. The Kibana http
  * layer surfaces an error response as an `IHttpFetchError` carrying the raw
- * `Response`; a 401/403/5xx can never succeed on retry, so burning the whole
+ * `Response`; a 401/403 can never succeed on retry, so burning the whole
  * budget on them only delays surfacing the authorization/configuration
  * failure (and masks it behind a misleading `never became trackable`).
  */
-const PERMANENT_TRACKING_HTTP_STATUSES = new Set([400, 401, 403, 404, 405, 410, 499, 501]);
+const PERMANENT_HTTP_STATUSES = new Set([400, 401, 403, 405, 410, 499, 501]);
 
-const isPermanentTrackingError = (error: unknown): boolean => {
+const isPermanentHttpError = (error: unknown): boolean => {
   if (error == null || typeof error !== 'object') return false;
   const response = (error as { response?: { status?: unknown } }).response;
   const status = response?.status;
-  return typeof status === 'number' && PERMANENT_TRACKING_HTTP_STATUSES.has(status);
+  return typeof status === 'number' && PERMANENT_HTTP_STATUSES.has(status);
 };
 
 /**
@@ -1227,7 +1227,7 @@ export const waitForValidationPhase = async ({
       // retry — surface it immediately instead of looping the full budget and
       // reporting `never became trackable`. An earlier usable snapshot is
       // still returned, same as the deadline path.
-      if (isPermanentTrackingError(error)) {
+      if (isPermanentHttpError(error)) {
         if (lastTracking) {
           return lastTracking;
         }
@@ -1254,9 +1254,21 @@ export const waitForValidationPhase = async ({
           if (run?.status && VALIDATION_TERMINAL_STATUSES.has(run.status)) {
             validationRunTerminal.set(runId, true);
           }
-        } catch {
+        } catch (probeError) {
           // Status probe is best-effort: a 404 (run not indexed yet) or a
           // transient failure just means "not terminal yet" — keep polling.
+          // A permanent failure (401/403/…) can never succeed on retry, so
+          // surface it as the tracking GET above does rather than burning
+          // the whole budget and scoring a possibly incomplete pipeline.
+          if (isPermanentHttpError(probeError)) {
+            if (lastTracking) {
+              return lastTracking;
+            }
+            throw new Error(
+              `Attack Discovery execution ${executionId} validation status probe failed permanently`,
+              { cause: probeError }
+            );
+          }
         }
       }
     }

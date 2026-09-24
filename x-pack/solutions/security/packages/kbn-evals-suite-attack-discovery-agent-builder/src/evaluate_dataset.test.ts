@@ -1474,7 +1474,7 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
     try {
       const fetch = jest
         .fn()
-        .mockRejectedValueOnce(new Error('404'))
+        .mockRejectedValueOnce(Object.assign(new Error('404'), { response: { status: 404 } }))
         .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val' }));
       const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch((e) => e);
       const settled = await jest.advanceTimersByTimeAsync(5_000).then(() => pending);
@@ -1568,6 +1568,65 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
       // loop's `sleep` between them only advances under fake timers.
       const settled = await jest.advanceTimersByTimeAsync(5_000).then(() => pending);
 
+      expect(settled).toMatchObject({ generation: { workflow_id: 'wf-gen' } });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // The status probe can fail permanently too (401/403): the tracking GET is
+  // still healthy, so no further poll can ever make the run look terminal.
+  // Surface it immediately, exactly as the tracking GET does, instead of
+  // looping the full budget and then scoring a possibly incomplete pipeline.
+  it('fails fast when the validation status probe fails permanently', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        // tracking poll: validation started, workflow run still in flight
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-probe-403' })
+        )
+        // status probe: permanent authorization failure
+        .mockRejectedValueOnce(Object.assign(new Error('Forbidden'), { response: { status: 403 } }))
+        // anything past this point is the budget-burning bug under guard
+        .mockImplementation(async () => {
+          throw new Error('poller kept going after a permanent status-probe failure');
+        });
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await pending;
+
+      // Exactly the tracking GET and the one failed probe — no sleep, no budget burn.
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(settled).toMatchObject({ generation: { workflow_id: 'wf-gen' } });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // A not-yet-indexed 404 from the status probe is the expected transient
+  // case and must keep polling (this is the classification the tracking-GET
+  // regression test above no longer covers vacuously).
+  it('keeps polling when the validation status probe returns the expected 404', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-probe-404' })
+        )
+        .mockRejectedValueOnce(Object.assign(new Error('Not Found'), { response: { status: 404 } }))
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-probe-404' })
+        )
+        .mockResolvedValueOnce({ status: 'completed' })
+        .mockResolvedValue(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-probe-404' })
+        );
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await jest.advanceTimersByTimeAsync(10_000).then(() => pending);
+
+      expect(fetch).toHaveBeenCalledTimes(5);
       expect(settled).toMatchObject({ generation: { workflow_id: 'wf-gen' } });
     } finally {
       jest.useRealTimers();
