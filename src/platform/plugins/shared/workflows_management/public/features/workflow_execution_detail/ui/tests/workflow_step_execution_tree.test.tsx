@@ -1818,8 +1818,8 @@ describe('WorkflowStepExecutionTree', () => {
     });
   });
 
-  describe('definition-merged Not run rows', () => {
-    it('ghosts subsequent definition steps after a halt, in definition order', () => {
+  describe('finished runs do not invent definition ghosts', () => {
+    it('does not add Not run rows for definition steps that never executed', () => {
       isTerminalStatus.mockReturnValue(true);
       isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
       buildStepExecutionsTree.mockReturnValue([
@@ -1907,22 +1907,12 @@ describe('WorkflowStepExecutionTree', () => {
       );
 
       const names = screen.getAllByTestId('workflowStepName').map((el) => el.textContent);
-      expect(names).toEqual([
-        'start',
-        'triage_overview',
-        'Attempt #1',
-        'Attempt #2',
-        'process_alerts',
-        'final_summary',
-        'done',
-      ]);
-      expect(screen.getAllByText('Not run')).toHaveLength(3);
-      const foreachRow = screen.getByText('process_alerts').closest('[data-is-expandable]');
-      expect(foreachRow).toHaveAttribute('data-is-expandable', 'false');
-      expect(foreachRow).toHaveAttribute('data-status', ExecutionStatus.SKIPPED);
+      expect(names).toEqual(['start', 'triage_overview', 'Attempt #1', 'Attempt #2']);
+      expect(screen.queryByText('Not run')).not.toBeInTheDocument();
+      expect(screen.queryByText('process_alerts')).not.toBeInTheDocument();
     });
 
-    it('does not ghost later steps that actually ran (on-failure: continue)', () => {
+    it('keeps later steps that actually ran (on-failure: continue)', () => {
       isTerminalStatus.mockReturnValue(true);
       isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
       buildStepExecutionsTree.mockReturnValue([
@@ -1981,11 +1971,8 @@ describe('WorkflowStepExecutionTree', () => {
         'data-status',
         ExecutionStatus.COMPLETED
       );
-      expect(screen.getByText('c').closest('[data-status]')).toHaveAttribute(
-        'data-status',
-        ExecutionStatus.SKIPPED
-      );
-      expect(screen.getAllByText('Not run')).toHaveLength(1);
+      expect(screen.queryByText('c')).not.toBeInTheDocument();
+      expect(screen.queryByText('Not run')).not.toBeInTheDocument();
     });
 
     it('renders zero Not run rows for a fully successful execution', () => {
