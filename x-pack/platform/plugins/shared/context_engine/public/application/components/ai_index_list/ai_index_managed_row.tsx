@@ -16,9 +16,11 @@ import {
   EuiTextBlockTruncate,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../../common/constants';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { useKiList } from '../../hooks/use_ki_list';
@@ -53,6 +55,10 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
       data-test-subj="contextAiIndexManagedRow"
       onClick={() => navigateToContextEngine(getAiIndexDetailPath(aiIndex.id))}
       aria-label={viewDetailsLabel}
+      {...getEbtProps({
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageManagedRow,
+        action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_MANAGED_ROW,
+      })}
     >
       <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
         <EuiFlexItem css={{ minWidth: 0 }}>
