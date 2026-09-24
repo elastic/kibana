@@ -40,7 +40,6 @@ const buildBaseSnapshot = ({
     version: 1,
     description: 'Alert when destination weather is thunder and lightning.',
     tags: ['flights', 'weather'],
-    owner: 'observability',
   },
   time_field: 'timestamp',
   schedule: { every: '1m', lookback: '5h' },
@@ -51,9 +50,9 @@ const buildBaseSnapshot = ({
         'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 1',
     },
   },
-  created_by: 'admin',
+  created_by: { profile_uid: 'user-admin' },
   created_at: '2026-07-22T14:00:00.000Z',
-  updated_by: 'admin',
+  updated_by: { profile_uid: 'user-admin' },
   updated_at: '2026-07-22T14:00:00.000Z',
 });
 
@@ -83,7 +82,7 @@ export const createRuleChangeHistoryFixtures = (
     },
     schedule: { every: '1m', lookback: '1h' },
     updated_at: '2026-07-25T09:15:00.000Z',
-    updated_by: 'bailey',
+    updated_by: { profile_uid: 'user-bailey' },
   };
 
   const v3: RuleSnapshot = {
@@ -100,7 +99,7 @@ export const createRuleChangeHistoryFixtures = (
       },
     },
     updated_at: '2026-07-30T16:42:00.000Z',
-    updated_by: 'admin',
+    updated_by: { profile_uid: 'user-admin' },
   };
 
   const v4: RuleSnapshot = {
@@ -111,7 +110,7 @@ export const createRuleChangeHistoryFixtures = (
     },
     enabled: false,
     updated_at: '2026-08-01T11:05:00.000Z',
-    updated_by: 'bailey',
+    updated_by: { profile_uid: 'user-bailey' },
   };
 
   const allVersions: ChangeHistoryDetail[] = [

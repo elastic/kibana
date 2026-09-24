@@ -22,14 +22,13 @@ export const DETECT_AND_REVIEW_SESSION_KEY = 'onboarding.aws.detectAndReviewStep
 const stepSubj = (step: string) => `onboardingStep-${step}`;
 
 export async function mockAwsPackage(page: ScoutPage, response: unknown): Promise<void> {
+  const body = JSON.stringify(response);
+  // Intercept both the unversioned path and any versioned path (e.g. /aws/7.1.1) so that
+  // cleanup flows calling sendGetPackageInfoByKey(name, existingVersion) don't hit the real
+  // package registry and get a different manifest or time out.
   await page.route(
-    (url) => /\/api\/fleet\/epm\/packages\/aws$/.test(url.pathname),
-    (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(response),
-      })
+    (url) => /\/api\/fleet\/epm\/packages\/aws(\/[^/]+)?$/.test(url.pathname),
+    (route) => route.fulfill({ status: 200, contentType: 'application/json', body })
   );
 }
 
@@ -44,15 +43,19 @@ export async function navigateToOnboardingStep(
     instances?: unknown[];
     /** Optional ECF launch step to seed — sets the post-launch state without clicking the button. */
     ecfLaunchStep?: PersistedEcfLaunchStep;
-    /** Optional authenticate-and-deploy step to seed (connector or static-keys auth). */
+    /** Optional authenticate-and-deploy step to seed (connector, static-keys auth, or agent-based). */
     authenticateAndDeployStep?: {
       connectorId?: string;
       authMethod?: 'identity_federation' | 'static_keys';
+      deploymentMethod?: 'managed_integration' | 'agent_based';
+      agentHostsMode?: 'new' | 'existing';
+      selectedAgentPolicyIds?: string[];
     };
     /** Seed detectAndReviewStep session state to simulate post-deploy conditions. */
     detectAndReviewStep?: {
       policyIdsByInstance?: Record<string, string>;
       serviceStatuses?: Record<string, string>;
+      onboardingDeploymentId?: string;
     };
   }
 ): Promise<void> {
@@ -89,7 +92,11 @@ export async function navigateToOnboardingStep(
       ecfStep: PersistedEcfLaunchStep | undefined;
       authStep: { connectorId?: string; authMethod?: string } | undefined;
       detectReview:
-        | { policyIdsByInstance?: Record<string, string>; serviceStatuses?: Record<string, string> }
+        | {
+            policyIdsByInstance?: Record<string, string>;
+            serviceStatuses?: Record<string, string>;
+            onboardingDeploymentId?: string;
+          }
         | undefined;
       servicesKey: string;
       settingsKey: string;
@@ -108,13 +115,14 @@ export async function navigateToOnboardingStep(
         sessionStorage.setItem(authStepKey, JSON.stringify(authStep));
       }
       if (detectReview !== undefined) {
-        sessionStorage.setItem(
-          detectReviewKey,
-          JSON.stringify({
-            policyIdsByInstance: detectReview.policyIdsByInstance ?? {},
-            serviceStatuses: detectReview.serviceStatuses ?? {},
-          })
-        );
+        const detectReviewPayload: Record<string, unknown> = {
+          policyIdsByInstance: detectReview.policyIdsByInstance ?? {},
+          serviceStatuses: detectReview.serviceStatuses ?? {},
+        };
+        if (detectReview.onboardingDeploymentId !== undefined) {
+          detectReviewPayload.onboardingDeploymentId = detectReview.onboardingDeploymentId;
+        }
+        sessionStorage.setItem(detectReviewKey, JSON.stringify(detectReviewPayload));
       }
     },
     {
