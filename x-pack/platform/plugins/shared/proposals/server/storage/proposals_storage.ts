@@ -18,6 +18,7 @@ const storageSettings = {
     properties: {
       spaceId: types.keyword({}),
       conversationId: types.keyword({}),
+      title: types.text({}),
       comment: types.text({}),
 
       actionWorkflowId: types.keyword({}),
@@ -43,8 +44,16 @@ const storageSettings = {
       // Numeric mirrors of the two ranked enums above, so the queue's ordering
       // is a sort clause rather than an in-memory pass. See `sort_ranks.ts`.
       // `category` has no rank: it is grouped and aggregated on, never sorted.
-      impactRank: types.byte({}),
-      confidenceRank: types.byte({}),
+      //
+      // A plain object, not `nested`: sorting on `ranks.impact` behaves exactly
+      // as the flat field did, and the nesting is what keeps "computed, not
+      // authored" visible in the document shape.
+      ranks: types.object({
+        properties: {
+          impact: types.byte({}),
+          confidence: types.byte({}),
+        },
+      }),
 
       // The profile uid is the stable identity; the name fields are stored
       // rather than looked up so attribution survives a missing profile.
@@ -60,6 +69,7 @@ const storageSettings = {
       dismissReason: types.keyword({}),
       rationale: types.text({}),
       executionError: types.text({}),
+      previousExecutionError: types.text({}),
 
       workflowExecutionId: types.keyword({}),
 

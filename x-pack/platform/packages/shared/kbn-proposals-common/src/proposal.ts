@@ -45,7 +45,30 @@ export type ProposalImpact = z.infer<typeof proposalImpactSchema>;
 export const proposalConfidenceSchema = z.enum(['low', 'medium', 'high']);
 export type ProposalConfidence = z.infer<typeof proposalConfidenceSchema>;
 
-export const proposalOriginSchema = z.enum(['worker', 'analyst']);
+/** Bounded like `category`, and for the same reason: the vocabulary is the caller's. */
+const MAX_ORIGIN_LENGTH = 64;
+
+/**
+ * Which system produced the proposal, so a queue can show its own and not
+ * another solution's. Deliberately not "machine or human" — `createdBy` already
+ * records the actor behind it.
+ *
+ * An opaque lowercase keyword rather than an enum, copying `category`: this
+ * plugin owns no vocabulary, because it serves callers beyond the two that
+ * exist today and cannot learn their names. Unlike `category` it is required,
+ * and it is fixed for the whole revision chain.
+ *
+ * An open vocabulary fails differently here than it does for `category`,
+ * though: a typo'd category still appears, as a group with a silly name, while
+ * a typo'd origin drops the proposal out of a filter with no error anywhere.
+ * Each consumer therefore exports its own constant and pins its workflow YAML
+ * to it, so a typo fails CI instead of failing quietly.
+ *
+ * Trimmed before it is bounded, so the `''` Liquid renders for an absent
+ * workflow input is rejected here rather than stored as an origin nothing
+ * matches.
+ */
+export const proposalOriginSchema = z.string().trim().min(1).max(MAX_ORIGIN_LENGTH);
 export type ProposalOrigin = z.infer<typeof proposalOriginSchema>;
 
 /**
@@ -73,6 +96,8 @@ export type DismissReason = z.infer<typeof dismissReasonSchema>;
  */
 const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
+/** One line in a queue row, and written by a worker's LLM, so it is kept short. */
+export const MAX_TITLE_LENGTH = 256;
 /** Markdown shown to a human, so it needs room without being unbounded. */
 export const MAX_COMMENT_LENGTH = 8192;
 const MAX_RATIONALE_LENGTH = 4096;
@@ -112,6 +137,12 @@ export const proposalSchema = z.object({
   spaceId: z.string().max(MAX_ID_LENGTH),
   /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
   conversationId: z.string().max(MAX_ID_LENGTH),
+  /**
+   * Short label naming what is proposed. Plain text, not markdown: `comment` is
+   * already the body. Optional, so the surfaces that render it keep the
+   * action-name fallback chain they had before it existed.
+   */
+  title: z.string().max(MAX_TITLE_LENGTH).optional(),
   /** Markdown explaining what is being proposed. Every proposal carries one. */
   comment: z.string().max(MAX_COMMENT_LENGTH),
 
@@ -156,6 +187,19 @@ export const proposalSchema = z.object({
   dismissReason: dismissReasonSchema.optional(),
   rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
   executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
+  /**
+   * The `executionError` of the proposal this one supersedes, copied once when
+   * the successor is created and never updated afterwards. Absent on a first
+   * attempt, and equally absent on a revision whose predecessor never ran — so
+   * a consumer must not read absence as "the previous attempt succeeded".
+   *
+   * A deliberate denormalisation of something `supersedes` can already derive.
+   * The queue answers "did the last attempt fail, and how" on every row it
+   * renders, and deriving it would cost one extra fetch per row. It holds the
+   * immediately preceding attempt only: "failed three times" is `revision` plus
+   * a chain query, not this field.
+   */
+  previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
 
   /** Gating execution to resume. Absent when no workflow is waiting. */
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
@@ -173,6 +217,12 @@ export interface ProposalWithMetadata extends Proposal {
 
 export const createProposalRequestSchema = z.object({
   conversationId: z.string().max(MAX_ID_LENGTH),
+  /**
+   * Short plain-text label. Same precedence as `category` — the caller wins,
+   * because it knows the situation the proposal came out of, which the action's
+   * own metadata cannot.
+   */
+  title: z.string().max(MAX_TITLE_LENGTH).optional(),
   comment: z.string().max(MAX_COMMENT_LENGTH),
   actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
   actionInput: boundedActionInput.optional(),
@@ -189,7 +239,12 @@ export const createProposalRequestSchema = z.object({
    */
   category: proposalCategorySchema.optional(),
   confidence: proposalConfidenceSchema.default('medium'),
-  origin: proposalOriginSchema.default('worker'),
+  /**
+   * Required, and undefaulted on purpose: a default would attribute every
+   * caller that forgot it to whichever system the default named, and the queue
+   * filtering on it would show another solution's proposals as its own.
+   */
+  origin: proposalOriginSchema,
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
 });
@@ -234,6 +289,12 @@ export const proposalFiltersSchema = z.object({
   status: proposalStatusSchema.optional(),
   decision: proposalDecisionSchema.optional(),
   conversationId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * Restricts the read to one producing system. A queue that serves a single
+   * solution passes its own constant, so another solution's proposals — which
+   * share the index — do not appear in it.
+   */
+  origin: proposalOriginSchema.optional(),
   /** Drops proposals that were replaced, so a chain shows only its live head. */
   excludeSuperseded: z.stringbool().default(false),
   /**

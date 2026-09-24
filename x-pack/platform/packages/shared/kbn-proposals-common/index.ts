@@ -38,6 +38,7 @@ export {
   isAwaitingDecision,
   isExpired,
   listProposalsQuerySchema,
+  MAX_TITLE_LENGTH,
   proposalFiltersSchema,
   proposalCategorySchema,
   proposalConfidenceSchema,

@@ -92,6 +92,12 @@ triggers:
         conversationId:
           type: string
           description: Conversation this proposal belongs to.
+        title:
+          type: string
+          description: >
+            Short plain-text label naming what is proposed — `comment` is
+            already the markdown body. Takes precedence over the action
+            workflow's own name wherever a title is rendered.
         comment:
           type: string
           description: >
@@ -126,6 +132,18 @@ triggers:
           type: string
           enum: ['low', 'medium', 'high', ''] # empty string is equivalent to undefined, adding it to prevent errors
           description: Confidence in the recommendation.
+        origin:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: >
+            Which system is producing this proposal, so a solution's queue can
+            show its own and not another's. Required and undefaulted: a default
+            would attribute every caller that forgot it to whichever system the
+            default named. This workflow is solution-agnostic and owns no
+            vocabulary — callers pass their own constant, and pin this literal
+            to it in their shape tests so a typo fails CI rather than silently
+            dropping the proposal out of a filter.
         autoApprove:
           type: boolean
           description: >
@@ -134,6 +152,7 @@ triggers:
       required:
         - conversationId
         - comment
+        - origin
       additionalProperties: false
 
 # The contract a caller gets back from `workflow.execute`. `workflow.execute`
@@ -152,13 +171,14 @@ steps:
     type: proposals.createProposal
     with:
       conversationId: '{{ inputs.conversationId }}'
+      title: '{{ inputs.title }}'
       comment: '{{ inputs.comment }}'
       actionWorkflowId: '{{ inputs.actionWorkflowId }}'
       actionInput: '${{ inputs.actionInput }}'
       impact: '{{ inputs.impact }}'
       category: '{{ inputs.category }}'
       confidence: '{{ inputs.confidence }}'
-      origin: worker
+      origin: '{{ inputs.origin }}'
       # Must stay equal to the gate timeout above, or the deadline the queue
       # shows an analyst is not the one the gate actually enforces.
       expiresIn: '72h'

@@ -193,7 +193,10 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
     }
 
     const actionName =
-      liveProposal.action?.name ?? liveProposal.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION_LABEL;
+      liveProposal.title ??
+      liveProposal.action?.name ??
+      liveProposal.actionWorkflowId ??
+      PROPOSAL_WITHOUT_ACTION_LABEL;
 
     const isPending = isAwaitingDecision(liveProposal);
     const isExpired = isProposalExpired(liveProposal);
@@ -269,6 +272,23 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}
         >
+          {/* Why this proposal is being offered again, when it is a retry. */}
+          {isPending && liveProposal.previousExecutionError && (
+            <>
+              <EuiSpacer size="m" />
+              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
+                <KbnWarningCallout
+                  size="s"
+                  title={i18n.translate('xpack.proposals.proposalCard.previousFailureCallout', {
+                    defaultMessage: 'A previous attempt at this action failed',
+                  })}
+                >
+                  {liveProposal.previousExecutionError}
+                </KbnWarningCallout>
+              </div>
+            </>
+          )}
+
           {/* Outcome callouts for decided/expired states */}
           {isExpired && !decision && (
             <>

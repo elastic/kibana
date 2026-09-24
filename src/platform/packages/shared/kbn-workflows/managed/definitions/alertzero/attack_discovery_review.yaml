@@ -644,6 +644,8 @@ steps:
       workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        origin: alertzero
+        title: Hand off to forensics
         comment: "{{ steps.resolve_escalation.output.comment }}"
         actionWorkflowId: "{{ consts.handoff_to_forensics_action }}"
         actionInput: "${{ steps.resolve_escalation.output.action_input }}"

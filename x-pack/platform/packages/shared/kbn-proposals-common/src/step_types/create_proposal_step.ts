@@ -21,6 +21,9 @@ export const CreateProposalStepId = 'proposals.createProposal' as const;
 
 export const createProposalStepInputSchema = z.object({
   conversationId: z.string().describe('Conversation this proposal belongs to.'),
+  title: optionalStepInput(z.string()).describe(
+    'Short plain-text label naming what is proposed \u2014 `comment` is already the markdown body. Takes precedence over the action workflow\u2019s own name wherever a title is rendered.'
+  ),
   comment: z
     .string()
     .describe(
@@ -41,8 +44,8 @@ export const createProposalStepInputSchema = z.object({
   confidence: optionalStepInput(proposalConfidenceSchema).describe(
     'Confidence in the recommendation.'
   ),
-  origin: optionalStepInput(proposalOriginSchema).describe(
-    'Whether a worker or an analyst proposed this.'
+  origin: proposalOriginSchema.describe(
+    'Which system is producing this proposal, so a solution\u2019s queue can show its own and not another\u2019s. Required and undefaulted: a default would attribute every caller that forgot it to whichever system the default named.'
   ),
   expiresIn: optionalStepInput(z.string()).describe(
     'How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation.'
@@ -101,9 +104,11 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
   type: proposals.createProposal
   with:
     conversationId: "{{ inputs.conversationId }}"
+    title: "Tune noisy rule"
     comment: "Tune the noisy rule that produced this alert"
     actionWorkflowId: "{{ inputs.actionWorkflowId }}"
     actionInput: "{{ inputs.actionInput }}"
+    origin: my-solution
     impact: low
     confidence: medium`,
     ],

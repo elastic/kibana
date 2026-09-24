@@ -430,6 +430,7 @@ steps:
       workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ variables.conversation_id }}"
+        origin: alertzero
         comment: "{{ variables.comment }}"
         actionWorkflowId: "{{ variables.action_workflow_id }}"
         actionInput: "${{ variables.action_input }}"

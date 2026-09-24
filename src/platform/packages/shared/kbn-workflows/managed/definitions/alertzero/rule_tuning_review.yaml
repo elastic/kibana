@@ -193,6 +193,8 @@ steps:
       workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+        origin: alertzero
+        title: "Review rule for tuning: {{ steps.fetch_rule.output.name }}"
         comment: |-
           **Review rule for tuning?**
 
@@ -652,6 +654,8 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
+                title: "Update query: {{ steps.fetch_rule.output.name }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -671,6 +675,8 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
+                title: "Re-rank rule: {{ steps.fetch_rule.output.name }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -691,6 +697,8 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
+                title: "Add exception: {{ steps.fetch_rule.output.name }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-add-rule-exception
                 actionInput:
@@ -716,6 +724,8 @@ steps:
           workflow-id: system-create-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            origin: alertzero
+            title: "Tune rule manually: {{ steps.fetch_rule.output.name }}"
             comment: "{{ steps.compose_proposal.output.comment }}"
             impact: low
             # No action, so no inherited category; see the entry gate.

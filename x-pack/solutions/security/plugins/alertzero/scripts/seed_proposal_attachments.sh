@@ -137,9 +137,8 @@ index_proposal "$P1_ID" "$(jq -n \
     impact: "low",
     confidence: "high",
     category: "configure",
-    origin: "worker",
-    impactRank: 3,
-    confidenceRank: 0,
+    origin: "alertzero",
+    ranks: { impact: 3, confidence: 0 },
     createdAt: $now
   }')" > /dev/null
 
@@ -184,10 +183,9 @@ index_proposal "$P2_ID" "$(jq -n \
     impact: "medium",
     confidence: "high",
     category: "configure",
-    origin: "worker",
+    origin: "alertzero",
     expiresAt: $expiry,
-    impactRank: 2,
-    confidenceRank: 0,
+    ranks: { impact: 2, confidence: 0 },
     createdAt: $now
   }')" > /dev/null
 
@@ -225,13 +223,12 @@ index_proposal "$P3_ID" "$(jq -n \
     decision: "dismissed",
     impact: "medium",
     confidence: "medium",
-    origin: "worker",
+    origin: "alertzero",
     decidedAt: $now,
     decidedBy: { username: "elastic", fullName: null, email: null },
     dismissReason: "already_handled",
     rationale: "We already have a rule covering this pattern from last sprint.",
-    impactRank: 2,
-    confidenceRank: 1,
+    ranks: { impact: 2, confidence: 1 },
     createdAt: $now
   }')" > /dev/null
 

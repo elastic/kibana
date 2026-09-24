@@ -18,6 +18,6 @@ export const CREATE_PROPOSAL_WORKFLOW = {
   id: CREATE_PROPOSAL_WORKFLOW_ID,
   management: PROPOSALS_WORKFLOW_MANAGEMENT,
   pluginId: PROPOSALS_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: CREATE_PROPOSAL_YAML,
 } as const satisfies ManagedWorkflowDefinition;

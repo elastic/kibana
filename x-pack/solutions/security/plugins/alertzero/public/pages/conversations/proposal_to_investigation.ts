@@ -110,7 +110,9 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     recordId: proposal.id,
     conversationId: proposal.conversationId,
     summary: proposal.comment,
-    primaryActionLabel: proposal.action?.name,
+    // The proposal's own title when it has one: the same precedence the card
+    // and the attachment use, so one proposal reads the same on every surface.
+    primaryActionLabel: proposal.title ?? proposal.action?.name,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.
