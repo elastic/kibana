@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Conversation } from '@kbn/agent-builder-common';
-import { isPublicConversation } from '@kbn/agent-builder-common';
+import { isPublicConversation, ConversationAccessControlRole } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { WrongTemplateError } from './errors';
 
@@ -54,7 +54,7 @@ export class AssignmentsService {
    * - The diff is computed from a read outside OCC, so concurrent reassigns can race (same
    *   as other multi-step writes in this plugin, e.g. linked_investigations).
    * - An assignee who was never an ACL member (escalation created before add-sync) makes
-   *   removeMembers a no-op, which is safe.
+   *   removeAccessControlEntries a no-op, which is safe.
    */
   async assign({
     request,
@@ -83,7 +83,11 @@ export class AssignmentsService {
     // For private conversations: add new assignees to the ACL first so they can see the
     // conversation even if the metadata write later fails.
     if (isPrivate && added.length > 0) {
-      await client.addMembers(conversationId, added, { access: 'converse' });
+      await client.addAccessControlEntries(
+        conversationId,
+        added.map((id) => ({ type: 'user', id, role: ConversationAccessControlRole.Member })),
+        { access: 'converse' }
+      );
     }
 
     const { conversation } = await client.patchMetadata(
@@ -94,7 +98,11 @@ export class AssignmentsService {
 
     // Revoke removed assignees last so a partial failure leaves extra access, not missing access.
     if (isPrivate && removed.length > 0) {
-      return client.removeMembers(conversationId, removed, { access: 'converse' });
+      return client.removeAccessControlEntries(
+        conversationId,
+        removed.map((id) => ({ type: 'user', id })),
+        { access: 'converse' }
+      );
     }
 
     return conversation;

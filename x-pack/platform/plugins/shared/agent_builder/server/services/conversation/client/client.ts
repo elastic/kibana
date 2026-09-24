@@ -24,13 +24,13 @@ import {
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAccessControlEntryInput,
   type ConversationAddEventInput,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
-  ConversationAccessControlRole,
   EventActorType,
   isConversationAccessControlRole,
   isPublicConversation,
@@ -162,24 +162,26 @@ export interface ConversationClient {
     update: UpdateConversationAccessControlRequestBody
   ): Promise<ConversationAccessControl>;
   /**
-   * Adds user members to a private conversation's ACL without removing existing entries
-   * or changing the access mode. A no-op for public conversations. Safe to call with
-   * `access: 'converse'` so collaborators can add new members when assigning.
+   * Adds entries to a private conversation's ACL without removing existing entries or
+   * changing the access mode. A no-op for public conversations. Existing entries are left
+   * unchanged — even when the requested role differs; role changes go through
+   * `updateAccessControl` (owner-only). Safe to call with `access: 'converse'` so
+   * collaborators can add new members when assigning.
    */
-  addMembers(
+  addAccessControlEntries(
     conversationId: string,
-    userIds: string[],
+    entries: ConversationAccessControlEntryInput[],
     options?: { access?: ConversationAccess }
   ): Promise<Conversation>;
   /**
-   * Removes user members from a private conversation's ACL. A no-op for public conversations,
-   * or when none of the requested ids are present. Never changes the access mode or removes
-   * the owner. Safe to call with `access: 'converse'` so assignees can revoke their own
-   * (or others') access when un-assigning.
+   * Removes principals from a private conversation's ACL. A no-op for public conversations,
+   * or when none of the requested principals are present. Never changes the access mode or
+   * removes the owner. Safe to call with `access: 'converse'` so assignees can revoke their
+   * own (or others') access when un-assigning.
    */
-  removeMembers(
+  removeAccessControlEntries(
     conversationId: string,
-    userIds: string[],
+    principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
     options?: { access?: ConversationAccess }
   ): Promise<Conversation>;
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
@@ -992,9 +994,9 @@ class ConversationClientImpl implements ConversationClient {
     return normalizeConversationAccessControl(conversation.access_control);
   }
 
-  async addMembers(
+  async addAccessControlEntries(
     conversationId: string,
-    userIds: string[],
+    entries: ConversationAccessControlEntryInput[],
     { access = 'converse' }: { access?: ConversationAccess } = {}
   ): Promise<Conversation> {
     return this.writeConversation({
@@ -1007,29 +1009,35 @@ class ConversationClientImpl implements ConversationClient {
         }
 
         const normalized = normalizeConversationAccessControl(current.access_control);
-        const existingIds = new Set(normalized.entries.map((e) => e.id));
-        const newIds = userIds.filter((id) => id !== current.user.id && !existingIds.has(id));
+        // Key format matches validateAccessControlEntries: `${type}:${id}`.
+        const existingKeys = new Set([
+          ...normalized.entries.map((e) => `${e.type}:${e.id}`),
+          // The owner is never stored as an entry; treat them as implicitly present.
+          `user:${current.user.id}`,
+        ]);
 
-        // If every requested uid is already a member (or the owner), skip the write.
-        if (newIds.length === 0) {
+        // Dedupe the request by key and drop entries that are already present.
+        const seenKeys = new Set<string>();
+        const newEntries = entries.filter((e) => {
+          const key = `${e.type}:${e.id}`;
+          if (existingKeys.has(key) || seenKeys.has(key)) return false;
+          seenKeys.add(key);
+          return true;
+        });
+
+        // If every requested principal is already a member (or the owner), skip the write.
+        if (newEntries.length === 0) {
           throw skipWrite(current);
         }
 
         const addedAtById = new Map(
-          normalized.entries.map((entry) => [`user:${entry.id}`, entry.added_at])
+          normalized.entries.map((entry) => [`${entry.type}:${entry.id}`, entry.added_at])
         );
 
-        const entries = [
-          ...normalized.entries,
-          ...newIds.map((id) => ({
-            type: 'user' as const,
-            id,
-            role: ConversationAccessControlRole.Member,
-          })),
-        ];
+        const allEntries = [...normalized.entries, ...newEntries];
 
         const validatedEntries = validateAccessControlEntries({
-          entries,
+          entries: allEntries,
           ownerId: current.user.id,
           addedAtById,
         });
@@ -1044,9 +1052,9 @@ class ConversationClientImpl implements ConversationClient {
     });
   }
 
-  async removeMembers(
+  async removeAccessControlEntries(
     conversationId: string,
-    userIds: string[],
+    principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
     { access = 'converse' }: { access?: ConversationAccess } = {}
   ): Promise<Conversation> {
     return this.writeConversation({
@@ -1059,18 +1067,18 @@ class ConversationClientImpl implements ConversationClient {
         }
 
         const normalized = normalizeConversationAccessControl(current.access_control);
-        const toRemove = new Set(userIds);
-        const hasAny = normalized.entries.some((e) => toRemove.has(e.id));
+        const toRemove = new Set(principals.map((p) => `${p.type}:${p.id}`));
+        const hasAny = normalized.entries.some((e) => toRemove.has(`${e.type}:${e.id}`));
 
-        // If none of the requested ids are present as members, skip the write.
+        // If none of the requested principals are present as members, skip the write.
         if (!hasAny) {
           throw skipWrite(current);
         }
 
-        const remaining = normalized.entries.filter((e) => !toRemove.has(e.id));
+        const remaining = normalized.entries.filter((e) => !toRemove.has(`${e.type}:${e.id}`));
 
         const addedAtById = new Map(
-          normalized.entries.map((entry) => [`user:${entry.id}`, entry.added_at])
+          normalized.entries.map((entry) => [`${entry.type}:${entry.id}`, entry.added_at])
         );
 
         const validatedEntries = validateAccessControlEntries({

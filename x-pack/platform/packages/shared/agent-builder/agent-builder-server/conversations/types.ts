@@ -7,6 +7,7 @@
 
 import type {
   ConversationAccessControlInput,
+  ConversationAccessControlEntryInput,
   ConversationEvent,
   Conversation,
   ConversationListOptions,
@@ -82,24 +83,25 @@ export interface ConversationPublicClient {
    */
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
   /**
-   * Adds user members to a private conversation's ACL without removing existing entries or
+   * Adds entries to a private conversation's ACL without removing existing entries or
    * changing the access mode. A no-op for public conversations; never removes entries.
-   * Safe to call with `access: 'converse'` so collaborators (e.g. existing assignees) can
-   * add new members.
+   * Existing entries are left unchanged — even if the requested role differs. Role changes
+   * go through `updateAccessControl` (owner-only). Safe to call with `access: 'converse'`
+   * so collaborators (e.g. existing assignees) can add new members.
    */
-  addMembers(
+  addAccessControlEntries(
     conversationId: string,
-    userIds: string[],
+    entries: ConversationAccessControlEntryInput[],
     options?: { access?: 'owner' | 'converse' }
   ): Promise<Conversation>;
   /**
-   * Removes user members from a private conversation's ACL. A no-op for public conversations
-   * or when none of the ids are present as members. Never changes the access mode or the owner.
+   * Removes principals from a private conversation's ACL. A no-op for public conversations
+   * or when none of the principals are present. Never changes the access mode or the owner.
    * Safe to call with `access: 'converse'` so assignees can revoke access when un-assigning.
    */
-  removeMembers(
+  removeAccessControlEntries(
     conversationId: string,
-    userIds: string[],
+    principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
     options?: { access?: 'owner' | 'converse' }
   ): Promise<Conversation>;
   /**

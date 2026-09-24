@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import { AssignmentsService, WrongTemplateError } from './assignments_service';
@@ -36,8 +37,8 @@ const withAssignees = (
 
 const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   get: jest.fn().mockResolvedValue(MOCK_CONVERSATION_PUBLIC),
-  addMembers: jest.fn().mockResolvedValue({}),
-  removeMembers: jest.fn().mockResolvedValue({}),
+  addAccessControlEntries: jest.fn().mockResolvedValue({}),
+  removeAccessControlEntries: jest.fn().mockResolvedValue({}),
   patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION_PUBLIC }),
   ...overrides,
 });
@@ -67,9 +68,9 @@ describe('AssignmentsService.assign', () => {
       })
     ).rejects.toBeInstanceOf(WrongTemplateError);
 
-    expect(client.addMembers).not.toHaveBeenCalled();
+    expect(client.addAccessControlEntries).not.toHaveBeenCalled();
     expect(client.patchMetadata).not.toHaveBeenCalled();
-    expect(client.removeMembers).not.toHaveBeenCalled();
+    expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
   });
 
   it('propagates an error from client.get without calling any writes', async () => {
@@ -88,9 +89,9 @@ describe('AssignmentsService.assign', () => {
       })
     ).rejects.toThrow();
 
-    expect(client.addMembers).not.toHaveBeenCalled();
+    expect(client.addAccessControlEntries).not.toHaveBeenCalled();
     expect(client.patchMetadata).not.toHaveBeenCalled();
-    expect(client.removeMembers).not.toHaveBeenCalled();
+    expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
   });
 
   it('public conversation: no ACL calls, patchMetadata called with converse access', async () => {
@@ -106,8 +107,8 @@ describe('AssignmentsService.assign', () => {
       expectedTemplate: 'escalation',
     });
 
-    expect(client.addMembers).not.toHaveBeenCalled();
-    expect(client.removeMembers).not.toHaveBeenCalled();
+    expect(client.addAccessControlEntries).not.toHaveBeenCalled();
+    expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
     expect(client.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
       { assignees: ['user-1'] },
@@ -115,22 +116,22 @@ describe('AssignmentsService.assign', () => {
     );
   });
 
-  it('private: add + remove → calls addMembers([added]), patchMetadata, removeMembers([removed]) in order', async () => {
+  it('private: add + remove → calls addAccessControlEntries([added]), patchMetadata, removeAccessControlEntries([removed]) in order', async () => {
     const callOrder: string[] = [];
     const client = makeClient({
       get: jest
         .fn()
         .mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a', 'user-b'])),
-      addMembers: jest.fn().mockImplementation(() => {
-        callOrder.push('addMembers');
+      addAccessControlEntries: jest.fn().mockImplementation(() => {
+        callOrder.push('addAccessControlEntries');
         return Promise.resolve({});
       }),
       patchMetadata: jest.fn().mockImplementation(() => {
         callOrder.push('patchMetadata');
         return Promise.resolve({ conversation: MOCK_CONVERSATION_PRIVATE });
       }),
-      removeMembers: jest.fn().mockImplementation(() => {
-        callOrder.push('removeMembers');
+      removeAccessControlEntries: jest.fn().mockImplementation(() => {
+        callOrder.push('removeAccessControlEntries');
         return Promise.resolve(MOCK_CONVERSATION_PRIVATE);
       }),
     });
@@ -144,22 +145,34 @@ describe('AssignmentsService.assign', () => {
       expectedTemplate: 'escalation',
     });
 
-    expect(client.addMembers).toHaveBeenCalledWith('conv-1', ['user-c'], { access: 'converse' });
+    expect(client.addAccessControlEntries).toHaveBeenCalledWith(
+      'conv-1',
+      [{ type: 'user', id: 'user-c', role: ConversationAccessControlRole.Member }],
+      { access: 'converse' }
+    );
     expect(client.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
       { assignees: ['user-b', 'user-c'] },
       { access: 'converse' }
     );
-    expect(client.removeMembers).toHaveBeenCalledWith('conv-1', ['user-a'], { access: 'converse' });
-    expect(callOrder).toEqual(['addMembers', 'patchMetadata', 'removeMembers']);
+    expect(client.removeAccessControlEntries).toHaveBeenCalledWith(
+      'conv-1',
+      [{ type: 'user', id: 'user-a' }],
+      { access: 'converse' }
+    );
+    expect(callOrder).toEqual([
+      'addAccessControlEntries',
+      'patchMetadata',
+      'removeAccessControlEntries',
+    ]);
   });
 
-  it('private, only removals: addMembers not called, removeMembers called', async () => {
+  it('private, only removals: addAccessControlEntries not called, removeAccessControlEntries called', async () => {
     const client = makeClient({
       get: jest
         .fn()
         .mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a', 'user-b'])),
-      removeMembers: jest.fn().mockResolvedValue(MOCK_CONVERSATION_PRIVATE),
+      removeAccessControlEntries: jest.fn().mockResolvedValue(MOCK_CONVERSATION_PRIVATE),
     });
     const service = makeService(client);
 
@@ -170,11 +183,15 @@ describe('AssignmentsService.assign', () => {
       expectedTemplate: 'escalation',
     });
 
-    expect(client.addMembers).not.toHaveBeenCalled();
-    expect(client.removeMembers).toHaveBeenCalledWith('conv-1', ['user-a'], { access: 'converse' });
+    expect(client.addAccessControlEntries).not.toHaveBeenCalled();
+    expect(client.removeAccessControlEntries).toHaveBeenCalledWith(
+      'conv-1',
+      [{ type: 'user', id: 'user-a' }],
+      { access: 'converse' }
+    );
   });
 
-  it('private, only additions: removeMembers not called, addMembers called', async () => {
+  it('private, only additions: removeAccessControlEntries not called, addAccessControlEntries called', async () => {
     const client = makeClient({
       get: jest.fn().mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a'])),
     });
@@ -187,8 +204,12 @@ describe('AssignmentsService.assign', () => {
       expectedTemplate: 'escalation',
     });
 
-    expect(client.addMembers).toHaveBeenCalledWith('conv-1', ['user-b'], { access: 'converse' });
-    expect(client.removeMembers).not.toHaveBeenCalled();
+    expect(client.addAccessControlEntries).toHaveBeenCalledWith(
+      'conv-1',
+      [{ type: 'user', id: 'user-b', role: ConversationAccessControlRole.Member }],
+      { access: 'converse' }
+    );
+    expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
   });
 
   it('private, no change: neither ACL call happens', async () => {
@@ -206,8 +227,8 @@ describe('AssignmentsService.assign', () => {
       expectedTemplate: 'escalation',
     });
 
-    expect(client.addMembers).not.toHaveBeenCalled();
-    expect(client.removeMembers).not.toHaveBeenCalled();
+    expect(client.addAccessControlEntries).not.toHaveBeenCalled();
+    expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
     expect(client.patchMetadata).toHaveBeenCalled();
   });
 
@@ -224,19 +245,24 @@ describe('AssignmentsService.assign', () => {
       expectedTemplate: 'escalation',
     });
 
-    expect(client.addMembers).toHaveBeenCalledWith('conv-1', ['user-1', 'user-2'], {
-      access: 'converse',
-    });
-    expect(client.removeMembers).not.toHaveBeenCalled();
+    expect(client.addAccessControlEntries).toHaveBeenCalledWith(
+      'conv-1',
+      [
+        { type: 'user', id: 'user-1', role: ConversationAccessControlRole.Member },
+        { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+      ],
+      { access: 'converse' }
+    );
+    expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
   });
 
-  it('returns the conversation from removeMembers when something was removed', async () => {
+  it('returns the conversation from removeAccessControlEntries when something was removed', async () => {
     const removedConv = { ...MOCK_CONVERSATION_PRIVATE, metadata: { assignees: ['user-b'] } };
     const client = makeClient({
       get: jest
         .fn()
         .mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a', 'user-b'])),
-      removeMembers: jest.fn().mockResolvedValue(removedConv),
+      removeAccessControlEntries: jest.fn().mockResolvedValue(removedConv),
     });
     const service = makeService(client);
 

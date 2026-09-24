@@ -161,8 +161,8 @@ describe('createConversationPublicClient', () => {
         'list',
         'search',
         'create',
-        'addMembers',
-        'removeMembers',
+        'addAccessControlEntries',
+        'removeAccessControlEntries',
         'patchMetadata',
         'update',
       ])

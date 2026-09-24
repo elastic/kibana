@@ -2789,7 +2789,7 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('addMembers', () => {
+  describe('addAccessControlEntries', () => {
     beforeEach(() => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
       jest.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
@@ -2799,7 +2799,7 @@ describe('ConversationClient', () => {
       jest.useRealTimers();
     });
 
-    it('adds new users as member entries on a private conversation, stamping added_at', async () => {
+    it('adds new entries on a private conversation, stamping added_at', async () => {
       mockGetDocumentResponse(
         createConversationDocument({
           accessMode: ConversationAccessControlMode.Private,
@@ -2807,7 +2807,9 @@ describe('ConversationClient', () => {
         })
       );
 
-      await client.addMembers('conversation-1', ['user-2']);
+      await client.addAccessControlEntries('conversation-1', [
+        { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+      ]);
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2828,6 +2830,23 @@ describe('ConversationClient', () => {
       );
     });
 
+    it("writes the role from the caller's entry, not a hardcoded Member", async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      // Add with the only currently valid role — but the role comes from the caller, not hardcoded
+      await client.addAccessControlEntries('conversation-1', [
+        { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+      ]);
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.entries[0].role).toBe(ConversationAccessControlRole.Member);
+    });
+
     it('is a no-op for a public conversation — does not index and returns the existing conversation', async () => {
       mockGetDocumentResponse(
         createConversationDocument({
@@ -2836,12 +2855,14 @@ describe('ConversationClient', () => {
         })
       );
 
-      await client.addMembers('conversation-1', ['user-2']);
+      await client.addAccessControlEntries('conversation-1', [
+        { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+      ]);
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('is a no-op when every uid is already a member', async () => {
+    it('is a no-op when every principal is already a member', async () => {
       const existing: ConversationAccessControlEntry = {
         type: 'user',
         id: 'user-2',
@@ -2850,12 +2871,14 @@ describe('ConversationClient', () => {
       };
       mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
 
-      await client.addMembers('conversation-1', ['user-2']);
+      await client.addAccessControlEntries('conversation-1', [
+        { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+      ]);
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('preserves added_at for uids that are already members when new uids are also given', async () => {
+    it('leaves an existing entry unchanged even when a different role is requested, and skips the write when nothing new remains', async () => {
       const existing: ConversationAccessControlEntry = {
         type: 'user',
         id: 'user-2',
@@ -2864,7 +2887,45 @@ describe('ConversationClient', () => {
       };
       mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
 
-      await client.addMembers('conversation-1', ['user-2', 'user-3']);
+      // Request the same principal again — entry already exists, so skip the write regardless of role
+      await client.addAccessControlEntries('conversation-1', [
+        { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+      ]);
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('deduplicates principals within the request — same principal twice becomes one entry', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      await client.addAccessControlEntries('conversation-1', [
+        { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+        { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+      ]);
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.entries).toHaveLength(1);
+      expect(access_control.entries[0].id).toBe('user-2');
+    });
+
+    it('preserves added_at for principals that are already members when new ones are also given', async () => {
+      const existing: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
+
+      await client.addAccessControlEntries('conversation-1', [
+        { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+        { type: 'user', id: 'user-3', role: ConversationAccessControlRole.Member },
+      ]);
 
       const { access_control } = mockEsClient.index.mock.calls[0][0].document;
       const entry2 = access_control.entries.find(
@@ -2879,12 +2940,14 @@ describe('ConversationClient', () => {
       expect(entry3.added_at).toBe('2026-08-11T10:00:00.000Z');
     });
 
-    it('silently skips the owner uid — adding the owner to entries would be inert', async () => {
+    it('silently skips the owner entry — adding the owner to entries would be inert', async () => {
       mockGetDocumentResponse(createConversationDocument({ userId: 'user-1', entries: [] }));
 
-      await client.addMembers('conversation-1', ['user-1']);
+      await client.addAccessControlEntries('conversation-1', [
+        { type: 'user', id: 'user-1', role: ConversationAccessControlRole.Member },
+      ]);
 
-      // no-op because the only uid is the owner
+      // no-op because the only entry is the owner
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
@@ -2900,9 +2963,11 @@ describe('ConversationClient', () => {
       );
       mockGetDocumentResponse(createConversationDocument({ entries: existing }));
 
-      await expect(client.addMembers('conversation-1', ['new-user-1'])).rejects.toThrow(
-        `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`
-      );
+      await expect(
+        client.addAccessControlEntries('conversation-1', [
+          { type: 'user', id: 'new-user-1', role: ConversationAccessControlRole.Member },
+        ])
+      ).rejects.toThrow(`ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`);
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
@@ -2916,9 +2981,11 @@ describe('ConversationClient', () => {
         })
       );
 
-      await expect(client.addMembers('conversation-1', ['user-2'])).rejects.toThrow(
-        'Conversation conversation-1 not found'
-      );
+      await expect(
+        client.addAccessControlEntries('conversation-1', [
+          { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+        ])
+      ).rejects.toThrow('Conversation conversation-1 not found');
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
@@ -2937,7 +3004,9 @@ describe('ConversationClient', () => {
         })
       );
 
-      await client.addMembers('conversation-1', ['user-3']);
+      await client.addAccessControlEntries('conversation-1', [
+        { type: 'user', id: 'user-3', role: ConversationAccessControlRole.Member },
+      ]);
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2951,7 +3020,7 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('removeMembers', () => {
+  describe('removeAccessControlEntries', () => {
     beforeEach(() => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
       jest.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
@@ -2961,7 +3030,7 @@ describe('ConversationClient', () => {
       jest.useRealTimers();
     });
 
-    it('removes the given member and keeps others with their original added_at', async () => {
+    it('removes the given principal and keeps others with their original added_at', async () => {
       const keep: ConversationAccessControlEntry = {
         type: 'user',
         id: 'user-2',
@@ -2976,7 +3045,7 @@ describe('ConversationClient', () => {
       };
       mockGetDocumentResponse(createConversationDocument({ entries: [keep, toRemove] }));
 
-      await client.removeMembers('conversation-1', ['user-3']);
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-3' }]);
 
       const { access_control } = mockEsClient.index.mock.calls[0][0].document;
       expect(access_control.entries).toHaveLength(1);
@@ -2992,12 +3061,12 @@ describe('ConversationClient', () => {
         })
       );
 
-      await client.removeMembers('conversation-1', ['user-2']);
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-2' }]);
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('is a no-op when none of the requested ids are members', async () => {
+    it('is a no-op when none of the requested principals are members', async () => {
       const existing: ConversationAccessControlEntry = {
         type: 'user',
         id: 'user-2',
@@ -3006,12 +3075,12 @@ describe('ConversationClient', () => {
       };
       mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
 
-      await client.removeMembers('conversation-1', ['user-99']);
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-99' }]);
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('ignores the owner id — owner cannot appear in entries', async () => {
+    it('ignores the owner principal — owner cannot appear in entries', async () => {
       const member: ConversationAccessControlEntry = {
         type: 'user',
         id: 'user-2',
@@ -3022,7 +3091,7 @@ describe('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument({ userId: 'user-1', entries: [member] }));
 
       // Trying to remove the owner — no entries match, so it's a no-op
-      await client.removeMembers('conversation-1', ['user-1']);
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-1' }]);
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
@@ -3036,7 +3105,7 @@ describe('ConversationClient', () => {
       };
       mockGetDocumentResponse(createConversationDocument({ entries: [entry] }));
 
-      await client.removeMembers('conversation-1', ['user-2']);
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-2' }]);
 
       const { access_control } = mockEsClient.index.mock.calls[0][0].document;
       expect(access_control.access_mode).toBe(ConversationAccessControlMode.Private);
@@ -3053,9 +3122,9 @@ describe('ConversationClient', () => {
         })
       );
 
-      await expect(client.removeMembers('conversation-1', ['user-2'])).rejects.toThrow(
-        'Conversation conversation-1 not found'
-      );
+      await expect(
+        client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-2' }])
+      ).rejects.toThrow('Conversation conversation-1 not found');
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
@@ -3080,7 +3149,7 @@ describe('ConversationClient', () => {
         })
       );
 
-      await client.removeMembers('conversation-1', ['user-3']);
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-3' }]);
 
       const { access_control } = mockEsClient.index.mock.calls[0][0].document;
       expect(access_control.entries.map((e: ConversationAccessControlEntry) => e.id)).toEqual([
