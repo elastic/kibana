@@ -30,7 +30,6 @@ import {
 import {
   generateAPIKeyName,
   apiKeyAsRuleDomainProperties,
-  addMissingUiamKeyTagIfNeeded,
   resolveRuleAPIKey,
 } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -235,13 +234,6 @@ export async function createRule<Params extends RuleParams = never>(
   const { systemActions, actions: actionToNotUse, ...restData } = data;
 
   const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
-  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
-    data.tags,
-    apiKeyProps.uiamApiKey,
-    context.isServerless,
-    context.shouldGrantUiam,
-    context.apiKeyType
-  );
 
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
@@ -249,7 +241,6 @@ export async function createRule<Params extends RuleParams = never>(
     artifactsWithRefs,
     rule: {
       ...restData,
-      tags: tagsWithUiamCheck,
       // TODO (http-versioning) create a rule domain version of this function
       // Right now this works because the 2 types can interop but it's not ideal
       ...apiKeyProps,

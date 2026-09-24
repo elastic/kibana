@@ -81,3 +81,8 @@ export const SERVICE_ACCOUNT_MAX_ROLES = 1000;
  * how the two should relate.
  */
 export const SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES = 64 * 1024;
+
+/**
+ * Cap on a single page of listed service accounts.
+ */
+export const SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE = 100;

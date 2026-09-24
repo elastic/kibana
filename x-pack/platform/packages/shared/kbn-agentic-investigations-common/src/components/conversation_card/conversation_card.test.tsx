@@ -20,6 +20,7 @@ const investigation: Investigation = {
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
   pendingProposalCount: 0,
+  assignees: [],
   events: [],
 };
 
@@ -33,6 +34,7 @@ const renderCard = (isSelected?: boolean, onClickCard = jest.fn()) => {
       onClickAction={jest.fn()}
       onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
+      renderAssignees={() => null}
     />
   );
   return { onClickCard };
@@ -74,6 +76,7 @@ describe('ConversationCard', () => {
         onClickAction={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
+        renderAssignees={() => null}
       />
     );
 
@@ -90,6 +93,7 @@ describe('ConversationCard', () => {
         onClickAction={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
+        renderAssignees={() => null}
       />
     );
 

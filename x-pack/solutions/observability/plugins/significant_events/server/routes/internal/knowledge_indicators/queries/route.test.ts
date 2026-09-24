@@ -255,6 +255,8 @@ describe('bulkDeleteQueriesRoute', () => {
   it('triggers stale event cleanup only for deleted backing rules', async () => {
     const eventClient = {};
     const rulesClient = {};
+    const alertEventsClient = {};
+    const sigEventsLogger = { error: jest.fn() };
     const deleteQueries = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { body: { queryIds: ['q1', 'q2'] } },
@@ -272,12 +274,13 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventClient: () => eventClient,
+        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
       logger: {
         warn: jest.fn(),
-        get: jest.fn().mockReturnValue({ error: jest.fn() }),
+        get: jest.fn().mockReturnValue(sigEventsLogger),
       },
     } as never;
 
@@ -291,12 +294,16 @@ describe('bulkDeleteQueriesRoute', () => {
       eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
+      alertEventsClient,
+      logger: sigEventsLogger,
     });
   });
 
   it('excludes backing rules from streams whose deletion failed', async () => {
     const eventClient = {};
     const rulesClient = {};
+    const alertEventsClient = {};
+    const sigEventsLogger = { error: jest.fn() };
     const deleteQueries = jest
       .fn()
       .mockResolvedValueOnce(undefined)
@@ -319,12 +326,13 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventClient: () => eventClient,
+        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
       logger: {
         warn: jest.fn(),
-        get: jest.fn().mockReturnValue({ error: jest.fn() }),
+        get: jest.fn().mockReturnValue(sigEventsLogger),
       },
     } as never;
 
@@ -337,6 +345,8 @@ describe('bulkDeleteQueriesRoute', () => {
       eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
+      alertEventsClient,
+      logger: sigEventsLogger,
     });
   });
 });
@@ -477,18 +487,13 @@ describe('generateQueriesRoute', () => {
     });
   });
 
-  it('passes a 300000 ms duration budget to query generation', async () => {
-    const handlerParams = {
+  const makeHandlerParams = ({ agentBuilder }: { agentBuilder: unknown }) =>
+    ({
       params: { path: { streamName: 'logs.test' }, body: { connectorId: 'test-connector' } },
       request: { events: { aborted$: { subscribe: jest.fn() } } },
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {},
-        inferenceClient: {},
-        soClient: {},
-        scopedClusterClient: { asCurrentUser: {} },
-        streamDataEsClient: {},
         licensing: {},
-        tuningConfig: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
       }),
       server: {
@@ -496,7 +501,7 @@ describe('generateQueriesRoute', () => {
           featureFlags: {},
         },
         searchInferenceEndpoints: undefined,
-        agentBuilder: undefined,
+        agentBuilder,
       },
       maintenanceService: makeMaintenanceService(),
       logger: {
@@ -504,15 +509,15 @@ describe('generateQueriesRoute', () => {
         get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
       },
       telemetry: {},
-    } as unknown as GenerateHandlerParams;
+    } as unknown as GenerateHandlerParams);
 
-    const result = await generateRoute.handler(handlerParams);
+  it('delegates to query generation and returns its result', async () => {
+    const result = await generateRoute.handler(makeHandlerParams({ agentBuilder: {} }));
 
     expect(mockGenerateKIQueries).toHaveBeenCalledWith(
       expect.objectContaining({
         streamName: 'logs.test',
         connectorId: 'test-connector',
-        maxDurationMs: 300000,
       }),
       expect.any(Object)
     );
@@ -521,6 +526,13 @@ describe('generateQueriesRoute', () => {
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
       connectorId: 'test-connector',
     });
+  });
+
+  it('fails when agent builder is unavailable', async () => {
+    await expect(
+      generateRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
+    ).rejects.toThrow('Agent Builder is required');
+    expect(mockGenerateKIQueries).not.toHaveBeenCalled();
   });
 });
 
