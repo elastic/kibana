@@ -30,6 +30,7 @@ import { licenseMock } from '../../common/licensing/index.mock';
 import {
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
+  SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
 } from '../../common/service_accounts';
 import type { UiamServiceAccount, UiamServicePublic } from '../uiam';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
@@ -757,6 +758,31 @@ describe('UiamServiceAccounts', () => {
 
       it('rejects when the exchange response contains an empty token', async () => {
         mockUiam.exchangeServiceAccountToken.mockResolvedValue({ token: '' });
+
+        await expect(
+          serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
+        ).rejects.toThrowError('Error occurred during service account token exchange');
+      });
+
+      // The token carries the account's roles, so an account that fills UIAM's role limits with
+      // long, incompressible names mints a token near UIAM's own ceiling. UIAM signs a JWT of up
+      // to 65,536 bytes, LZ4 can grow incompressible input by 273 bytes, and a 4-byte length and
+      // an 8-byte checksum are added before it is base64-encoded and prefixed.
+      it('accepts a token as long as the longest UIAM will mint', async () => {
+        const token = `essu_${'a'.repeat(4 * Math.ceil((65_536 + 273 + 4 + 8) / 3))}`;
+        mockUiam.exchangeServiceAccountToken.mockResolvedValue({ token });
+
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+
+        expect(request.headers.authorization).toBe(`Bearer ${token}`);
+      });
+
+      it(`rejects a token longer than ${SERVICE_ACCOUNT_TOKEN_MAX_LENGTH} characters`, async () => {
+        mockUiam.exchangeServiceAccountToken.mockResolvedValue({
+          token: 'a'.repeat(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH + 1),
+        });
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })

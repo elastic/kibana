@@ -17,12 +17,19 @@ export const SERVICE_ACCOUNT_NAME_MAX_LENGTH = 128;
 export const SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH = 1024;
 
 /**
- * Cap on the length of an ephemeral service account token returned by UIAM's token exchange.
- * Those tokens are self-described, so the cap is generous and only exists to bound the validated
- * payload. The long-lived Elasticsearch token is a different shape with its own bound, in
+ * Cap on the length of an ephemeral token UIAM mints, whether from a service account's token
+ * exchange or for Kibana's own system identity. Sized to hold the longest token UIAM will issue,
+ * so Kibana never rejects one UIAM was willing to mint.
+ *
+ * An exchanged token carries the account's role names and a snapshot of its creator's, so its
+ * length follows the roles. UIAM signs a JWT of up to 65,536 bytes, then
+ * compresses, checksums, base64-encodes and prefixes it. Incompressible input makes that ~88K
+ * characters, which this cap covers with room to spare.
+ *
+ * The long-lived Elasticsearch token is a different shape with its own bound, in
  * {@link ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH}.
  */
-export const SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 16384;
+export const SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 128 * 1024;
 
 /**
  * Character set a service account name must match, mirroring Elasticsearch's
