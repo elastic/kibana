@@ -82,4 +82,13 @@ export type ChatResponse = Omit<
   };
 };
 
+/**
+ * Minimal response of `POST /api/chat/message`: conversation id and the final assistant text.
+ */
+export interface ChatSimpleResponse {
+  conversation_id: string;
+  /** Final assistant text for the completed round. Empty when the round ended without a message. */
+  answer: string;
+}
+
 export type ChatConverseResponse = ConversationWithPermissions;

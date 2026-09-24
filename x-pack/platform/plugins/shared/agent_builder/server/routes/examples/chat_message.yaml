@@ -1,0 +1,45 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        chatMessageRequestExample:
+          description: "Example request that returns only conversation_id and the final answer"
+          value:
+            input: "What is Elasticsearch?"
+            agent_id: "elastic-ai-agent"
+        chatMessageContinueExample:
+          description: "Example request that continues an existing conversation"
+          value:
+            input: "Can you summarize that?"
+            agent_id: "elastic-ai-agent"
+            conversation_id: "696ccd6d-4bff-4b26-a62e-522ccf2dcd16"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          chatMessageResponseExample:
+            description: "Example response with only conversation_id and answer"
+            value:
+              conversation_id: "696ccd6d-4bff-4b26-a62e-522ccf2dcd16"
+              answer: "Elasticsearch is a distributed, RESTful search and analytics engine."
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/chat/message" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "input": "What is Elasticsearch?",
+        "agent_id": "elastic-ai-agent"
+      }'
+- lang: Console
+  source: |
+    POST kbn://api/chat/message
+    {
+      "input": "What is Elasticsearch?",
+      "agent_id": "elastic-ai-agent"
+    }
