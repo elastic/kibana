@@ -99,7 +99,7 @@ const buildSecurityKnowledgeIndicators = (
     ...result.technologies.map(
       (technology): SseSecurityKnowledgeIndicator => ({ type: 'technology', value: technology })
     ),
-    ...tier1.resolvedIocs.map(
+    ...tier1.resolved_iocs.map(
       (ioc): SseSecurityKnowledgeIndicator => ({
         type: 'ioc',
         value: ioc.value,
@@ -124,17 +124,17 @@ const buildSecurityKnowledgeIndicators = (
 };
 
 const buildEntities = (result: HuntCoordinatorResult): SseEntityRef[] => [
-  ...result.tier1.affectedAssets.hosts.map(
+  ...result.tier1.affected_assets.hosts.map(
     (host): SseEntityRef => ({ field: 'host.name', value: host.name })
   ),
-  ...result.tier1.affectedAssets.users.map(
+  ...result.tier1.affected_assets.users.map(
     (user): SseEntityRef => ({ field: 'user.name', value: user.name })
   ),
   // Assumed-role / service-principal identities (e.g. an AWS IAM role
   // reached via sts:AssumeRole) are not people, so they're kept out of
   // `user.name` and rendered as `service.name` instead (tier1's
   // `classifyIdentityType`, `hunt_for_threat.ts`).
-  ...result.tier1.affectedAssets.services.map(
+  ...result.tier1.affected_assets.services.map(
     (service): SseEntityRef => ({ field: 'service.name', value: service.name })
   ),
 ];
@@ -283,22 +283,22 @@ const buildHuntResult = (
 ): SseHuntResult => {
   const { tier1, tier2 } = result;
   return {
-    has_confirmed_hit: tier1.hasConfirmedHit,
-    time_range: tier1.timeRange,
+    has_confirmed_hit: tier1.has_confirmed_hit,
+    time_range: tier1.time_range,
     tier1: {
       status: tier1.status,
       counts: {
-        total_hits: tier1.counts.totalHits,
-        returned_hits: tier1.counts.returnedHits,
-        affected_hosts: tier1.counts.affectedHosts,
-        affected_users: tier1.counts.affectedUsers,
+        total_hits: tier1.counts.total_hits,
+        returned_hits: tier1.counts.returned_hits,
+        affected_hosts: tier1.counts.affected_hosts,
+        affected_users: tier1.counts.affected_users,
       },
-      per_index: tier1.perIndex.map((entry) => ({
+      per_index: tier1.per_index.map((entry) => ({
         index: entry.index,
-        hit_count: entry.hitCount,
+        hit_count: entry.hit_count,
         required: entry.required,
       })),
-      resolved_iocs: tier1.resolvedIocs.map((ioc) => ({ type: ioc.type, value: ioc.value })),
+      resolved_iocs: tier1.resolved_iocs.map((ioc) => ({ type: ioc.type, value: ioc.value })),
     },
     tier2: tier2
       ? {
@@ -348,7 +348,7 @@ export const buildSseData = (
         data: {
           source_watch: SOURCE_WATCH_MANAGED_ID,
           capability: CAPABILITY_ID,
-          run_id: result.runId,
+          run_id: result.run_id,
           report_id: reportId,
           security_knowledge_indicators: buildSecurityKnowledgeIndicators(result),
           entities,
@@ -371,7 +371,7 @@ export const buildSseData = (
       data: {
         source_watch: SOURCE_WATCH_MANAGED_ID,
         capability: CAPABILITY_ID,
-        run_id: result.runId,
+        run_id: result.run_id,
         report_id: reportId,
         security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, techniqueId),
         entities,
