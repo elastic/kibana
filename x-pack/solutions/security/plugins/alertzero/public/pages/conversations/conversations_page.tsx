@@ -65,7 +65,7 @@ export const ConversationsPage: React.FC = () => {
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
   const dropDecided = useDropDecidedProposal();
-  const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
+  const [entityFilter, setEntityFilter] = useState<string | null>(null);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
@@ -289,8 +289,8 @@ export const ConversationsPage: React.FC = () => {
         <EuiFlexItem>
           <Impact
             investigations={conversations}
-            surfaceFilter={surfaceFilter}
-            onSurfaceFilterChange={setSurfaceFilter}
+            entityFilter={entityFilter}
+            onEntityFilterChange={setEntityFilter}
           />
         </EuiFlexItem>
 
@@ -300,7 +300,7 @@ export const ConversationsPage: React.FC = () => {
           <EuiFlexItem key={section.id} grow={false}>
             <QueueSection
               section={section}
-              surfaceFilter={surfaceFilter}
+              entityFilter={entityFilter}
               selectedConversationId={selectedConversationId}
               onClickRecommendedAction={onClickRecommendedAction}
               onClickAction={onClickAction}
