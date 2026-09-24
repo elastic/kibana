@@ -92,12 +92,12 @@ export interface TabsStorageManager {
     persistedDiscoverSession?: DiscoverSession;
     shouldClearAllTabs?: boolean;
     defaultTabState: Omit<TabState, keyof TabItem>;
-    /** Prepares the returned session before mapping its tabs, using local tabs from the same session. */
+    /** Prepares the session and same-session local tabs before either is consumed. */
     prepareSession?: (
       session: DiscoverSession,
       localTabs: TabState[],
       selectedTabId: string | undefined
-    ) => DiscoverSession;
+    ) => { session: DiscoverSession; localTabs: TabState[] };
   }) => TabsInternalStatePayload & {
     updatedDiscoverSession: DiscoverSession | undefined;
   };
@@ -453,14 +453,28 @@ export const createTabsStorageManager = ({
       toTabState(tab, defaultTabState)
     );
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
+    let closedTabs = storedTabsState.closedTabs.map((tab) =>
+      toRecentlyClosedTabState(tab, defaultTabState)
+    );
     let updatedDiscoverSession = persistedDiscoverSession;
 
-    // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
-    // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
+    // Prepare before mapping tabs so the document and open or closed tabs share one identity.
+    // Return the prepared session below so restored tabs and the unsaved-changes baseline agree.
     if (persistedDiscoverSession && prepareSession) {
-      const localTabs =
-        persistedDiscoverSession.id === storedTabsState.discoverSessionId ? openTabs : [];
-      updatedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
+      const hasSameSession = persistedDiscoverSession.id === storedTabsState.discoverSessionId;
+      const localTabs = hasSameSession ? [...openTabs, ...closedTabs] : [];
+      const prepared = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
+      updatedDiscoverSession = prepared.session;
+
+      if (hasSameSession) {
+        const openTabsCount = openTabs.length;
+        const previousClosedTabs = closedTabs;
+
+        openTabs = prepared.localTabs.slice(0, openTabsCount);
+        closedTabs = prepared.localTabs
+          .slice(openTabsCount)
+          .map((tab, index) => ({ ...tab, closedAt: previousClosedTabs[index].closedAt }));
+      }
     }
 
     const persistedTabs = updatedDiscoverSession?.tabs.map((tab) =>
@@ -471,9 +485,6 @@ export const createTabsStorageManager = ({
       // if the discover session has changed, use the tabs from the session
       openTabs = persistedTabs ?? [];
     }
-    const closedTabs = storedTabsState.closedTabs.map((tab) =>
-      toRecentlyClosedTabState(tab, defaultTabState)
-    );
 
     // restore previously opened tabs
     if (enabled) {

@@ -19,6 +19,7 @@ import {
 } from '@kbn/discover-session-constants';
 import { BooleanRelation, FILTERS, FilterStateStore } from '@kbn/es-query';
 import type { CombinedFilter, Filter } from '@kbn/es-query';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -30,7 +31,8 @@ import type {
 } from '@kbn/as-code-discover-schema';
 import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
 import type { DiscoverSessionApiResponse } from '../../server';
-import { assignSessionDataViewIds } from '../application/main/state_management/utils/assign_session_data_view_ids';
+import { generateInlineDataViewId } from '../../common/session/inline_data_view';
+import { normalizeInlineDataViewIds } from '../application/main/state_management/utils/normalize_inline_data_view_ids';
 import {
   fromDiscoverSessionApiResponse,
   getDiscoverSessionReferences,
@@ -46,6 +48,23 @@ type ApiInlineDataView = Extract<
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'runtime-inline-id') }));
 
 const mockedUuidv4 = uuidv4 as jest.MockedFunction<() => string>;
+
+/** Prepares a converted session for the UI, as tab restoration does. */
+const prepareSessionForUi = (session: DiscoverSession): DiscoverSession => ({
+  ...session,
+  tabs: normalizeInlineDataViewIds({
+    sessionTabs: session.tabs,
+    localTabs: [],
+    navigationDataViewSpec: undefined,
+  }).sessionTabs,
+});
+
+const inlineDataViewId = generateInlineDataViewId({
+  title: 'logs-*',
+  name: 'Inline logs',
+  timeFieldName: '@timestamp',
+  sourceFilters: [{ value: 'secret.*' }],
+});
 
 const inlineApiDataView: ApiInlineDataView = {
   type: 'data_view_spec',
@@ -374,7 +393,7 @@ describe('Discover session conversion and UI preparation', () => {
       },
     };
 
-    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(apiResponse), []);
+    const session = prepareSessionForUi(fromDiscoverSessionApiResponse(apiResponse));
     const data = toDiscoverSessionApiData(session);
 
     const expectedInlineTab = {
@@ -436,25 +455,25 @@ describe('Discover session conversion and UI preparation', () => {
   });
 
   it('keeps inline IDs runtime-only and preserves filters for other data views', () => {
-    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
+    const session = prepareSessionForUi(fromDiscoverSessionApiResponse(response));
     const inlineTab = session.tabs[1];
     const pinnedFilter: Filter = {
-      meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'service.name' },
+      meta: { index: inlineDataViewId, type: FILTERS.PHRASE, key: 'service.name' },
       query: { match_phrase: { 'service.name': 'checkout' } },
       $state: { store: FilterStateStore.GLOBAL_STATE },
     };
     const combinedFilter: CombinedFilter = {
       meta: {
-        index: 'runtime-inline-id',
+        index: inlineDataViewId,
         type: FILTERS.COMBINED,
         relation: BooleanRelation.OR,
         params: [
           {
-            meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'service.name' },
+            meta: { index: inlineDataViewId, type: FILTERS.PHRASE, key: 'service.name' },
             query: { match_phrase: { 'service.name': 'api' } },
           },
           {
-            meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'host.name' },
+            meta: { index: inlineDataViewId, type: FILTERS.PHRASE, key: 'host.name' },
             query: { match_phrase: { 'host.name': 'web-1' } },
           },
         ],
@@ -466,12 +485,12 @@ describe('Discover session conversion and UI preparation', () => {
 
     expect(inlineTab.serializedSearchSource.index).toEqual(
       expect.objectContaining({
-        id: 'runtime-inline-id',
+        id: inlineDataViewId,
         title: 'logs-*',
         sourceFilters: [{ value: 'secret.*' }],
       })
     );
-    expect(inlineTab.serializedSearchSource.filter?.[0].meta.index).toBe('runtime-inline-id');
+    expect(inlineTab.serializedSearchSource.filter?.[0].meta.index).toBe(inlineDataViewId);
     expect(inlineTab.serializedSearchSource.filter?.[1].meta.index).toBe('foreign-data-view-id');
 
     const beforeSave = cloneDeep(session);
@@ -501,26 +520,26 @@ describe('Discover session conversion and UI preparation', () => {
     // Saving must not unpin filters or drop the runtime IDs from the tab.
     expect(session).toStrictEqual(beforeSave);
     expect(pinnedFilter.$state).toStrictEqual({ store: FilterStateStore.GLOBAL_STATE });
-    expect(pinnedFilter.meta.index).toBe('runtime-inline-id');
-    expect(combinedFilter.meta.index).toBe('runtime-inline-id');
+    expect(pinnedFilter.meta.index).toBe(inlineDataViewId);
+    expect(combinedFilter.meta.index).toBe(inlineDataViewId);
     expect(combinedFilter.meta.params.map(({ meta }) => meta.index)).toStrictEqual([
-      'runtime-inline-id',
-      'runtime-inline-id',
+      inlineDataViewId,
+      inlineDataViewId,
     ]);
   });
 
   it('skips session filter policies when the text-based flag is true despite a classic query', () => {
-    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
+    const session = prepareSessionForUi(fromDiscoverSessionApiResponse(response));
     const inlineTab = session.tabs[1];
     inlineTab.isTextBasedQuery = true;
     inlineTab.serializedSearchSource.filter = [
       {
-        meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'service.name' },
+        meta: { index: inlineDataViewId, type: FILTERS.PHRASE, key: 'service.name' },
         query: { match_phrase: { 'service.name': 'checkout' } },
         $state: { store: FilterStateStore.GLOBAL_STATE },
       },
       {
-        meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'host.name' },
+        meta: { index: inlineDataViewId, type: FILTERS.PHRASE, key: 'host.name' },
         query: { match_phrase: { 'host.name': 'web-1' } },
       },
     ];
@@ -533,7 +552,7 @@ describe('Discover session conversion and UI preparation', () => {
       {
         type: 'condition',
         condition: { field: 'host.name', operator: 'is', value: 'web-1' },
-        data_view_id: 'runtime-inline-id',
+        data_view_id: inlineDataViewId,
       },
     ]);
     expect(session).toStrictEqual(beforeSave);
@@ -599,7 +618,7 @@ describe('Discover session conversion and UI preparation', () => {
   });
 
   it('builds references for preserved filter conditions without including inline IDs', () => {
-    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
+    const session = prepareSessionForUi(fromDiscoverSessionApiResponse(response));
     const inlineTab = session.tabs[1];
     inlineTab.serializedSearchSource.filter = [
       {

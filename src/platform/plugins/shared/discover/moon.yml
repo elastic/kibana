@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/i18n'
   - '@kbn/std'
+  - '@kbn/crypto-browser'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/i18n-react'
   - '@kbn/datemath'

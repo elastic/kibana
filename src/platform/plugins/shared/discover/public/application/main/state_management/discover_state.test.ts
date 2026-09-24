@@ -80,8 +80,9 @@ import type {
   DiscoverSessionClient,
   DiscoverSessionClientRequestData,
 } from '../../../session/api_client';
-import { TABS_LOCAL_STORAGE_KEY } from './tabs_storage_manager';
+import { TABS_LOCAL_STORAGE_KEY, type TabStateInLocalStorage } from './tabs_storage_manager';
 import { appLocatorGetLocationCommon } from '../../../../common/app_locator_get_location';
+import { generateInlineDataViewId } from '../../../../common/session/inline_data_view';
 
 interface MultiUrlProfileState extends SerializableRecord {
   firstUrlValue: string;
@@ -361,6 +362,7 @@ describe('Discover state', () => {
   });
 
   describe('Loading a session with an inline data view', () => {
+    const apiDataViewId = generateInlineDataViewId({ title: 'logs-*' });
     const storedFilters: Filter[] = [
       {
         query: { match_phrase: { 'service.name': 'checkout' } },
@@ -527,7 +529,7 @@ describe('Discover state', () => {
         firstLoad.runtimeStateManager,
         tabId
       ).currentDataView$.getValue();
-      expect(dataViewBeforeRefresh?.id).toBeDefined();
+      expect(dataViewBeforeRefresh?.id).toBe(apiDataViewId);
       expectLoadedFilters(services, dataViewBeforeRefresh?.id);
 
       // Wait for the real storage listener to persist the loaded Data View, including its ID.
@@ -667,7 +669,7 @@ describe('Discover state', () => {
     it.each([
       { action: 'Save', copyOnSave: false, savedId: response.id, method: 'upsert' as const },
       { action: 'Save As', copyOnSave: true, savedId: 'copied-session', method: 'create' as const },
-    ])('keeps inline IDs after $action and refresh', async ({ copyOnSave, savedId, method }) => {
+    ])('keeps the spec ID after $action and refresh', async ({ copyOnSave, savedId, method }) => {
       const services = createDiscoverServicesMock();
       services.storage = new Storage(localStorage);
       services.history = createMemoryHistory();
@@ -714,12 +716,11 @@ describe('Discover state', () => {
       const savedTab = savedSession?.tabs[0];
       const savedDataViewId = savedTab?.serializedSearchSource.filter?.[0].meta.index;
       expect(savedSession?.id).toBe(savedId);
-      expect(savedDataViewId).toEqual(expect.any(String));
+      expect(savedDataViewId).toEqual(copyOnSave ? expect.any(String) : apiDataViewId);
       expect(savedTab?.serializedSearchSource.index).toEqual(
         expect.objectContaining({ id: savedDataViewId })
       );
       expect(savedTab?.id === tabId).toBe(!copyOnSave);
-      expect(savedDataViewId === 'stored-inline-id').toBe(!copyOnSave);
       expect(
         selectHasUnsavedChanges(firstLoad.internalState.getState(), {
           runtimeStateManager: firstLoad.runtimeStateManager,
@@ -760,8 +761,8 @@ describe('Discover state', () => {
           reloaded.runtimeStateManager,
           reloadedTabId
         ).currentDataView$.getValue()?.id
-      ).toBe(savedDataViewId);
-      expectLoadedFilters(reloadedServices, savedDataViewId);
+      ).toBe(apiDataViewId);
+      expectLoadedFilters(reloadedServices, apiDataViewId);
       expect(
         selectHasUnsavedChanges(reloaded.internalState.getState(), {
           runtimeStateManager: reloaded.runtimeStateManager,
@@ -773,7 +774,7 @@ describe('Discover state', () => {
     it.each([
       { source: 'legacy', loadSession: () => cloneDeep(legacySession) },
       { source: 'HTTP', loadSession: () => fromDiscoverSessionApiResponse(cloneDeep(response)) },
-    ])('keeps $source locator loads unchanged without local tabs', async ({ loadSession }) => {
+    ])('normalizes $source locator loads without local tabs', async ({ loadSession }) => {
       const services = createDiscoverServicesMock();
       const dataViewSpec = { id: 'stored-inline-id', title: 'logs-*' };
       const location = await appLocatorGetLocationCommon(
@@ -798,13 +799,183 @@ describe('Discover state', () => {
 
       // Pass on the captured location state as SingleTabView does when initializing the tab.
       const initialTabState = services.initialTabStateService.consume();
-      expect(initialTabState?.dataViewSpec).toEqual(dataViewSpec);
+      expect(initialTabState?.dataViewSpec).toEqual({ ...dataViewSpec, id: apiDataViewId });
       await state.initializeSingleTab({ tabId, dataViewSpec: initialTabState?.dataViewSpec });
 
       expect(
         selectTabRuntimeState(state.runtimeStateManager, tabId).currentDataView$.getValue()?.id
-      ).toBe(dataViewSpec.id);
-      expectLoadedFilters(services, dataViewSpec.id);
+      ).toBe(apiDataViewId);
+      expectLoadedFilters(services, apiDataViewId);
+      expect(
+        selectHasUnsavedChanges(state.internalState.getState(), {
+          runtimeStateManager: state.runtimeStateManager,
+          services,
+        }).hasUnsavedChanges
+      ).toBe(false);
+    });
+
+    describe('with filters stored without a reference', () => {
+      const hasUnsavedChanges = (state: InternalStateMockToolkit, services: DiscoverServices) =>
+        selectHasUnsavedChanges(state.internalState.getState(), {
+          runtimeStateManager: state.runtimeStateManager,
+          services,
+        }).hasUnsavedChanges;
+
+      const removeInlineReference = (filters: Filter[] | undefined) =>
+        filters?.map((filter) =>
+          filter.meta.index === apiDataViewId
+            ? { ...filter, meta: omit(filter.meta, 'index') }
+            : filter
+        );
+
+      const loadApiSession = async () => {
+        const services = createDiscoverServicesMock();
+        services.storage = new Storage(localStorage);
+        services.history = createMemoryHistory();
+        const firstLoad = createState(services);
+
+        await firstLoad.initializeTabs({
+          persistedDiscoverSession: fromDiscoverSessionApiResponse(cloneDeep(response)),
+        });
+        const tabId = firstLoad.getCurrentTab().id;
+        await firstLoad.initializeSingleTab({ tabId });
+        await waitFor(() => {
+          expect(services.storage.get(TABS_LOCAL_STORAGE_KEY)).toMatchObject({
+            discoverSessionId: response.id,
+            openTabs: [
+              { id: tabId, appState: { filters: [{ meta: { index: apiDataViewId } }, {}] } },
+            ],
+          });
+        });
+        firstLoad.internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+
+        return { services, tabId };
+      };
+
+      const updateStoredTabs = (
+        services: DiscoverServices,
+        updateTab: (tab: TabStateInLocalStorage) => TabStateInLocalStorage
+      ) => {
+        const storedTabs: { openTabs: TabStateInLocalStorage[] } =
+          services.storage.get(TABS_LOCAL_STORAGE_KEY);
+        services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+          ...storedTabs,
+          openTabs: storedTabs.openTabs.map(updateTab),
+        });
+      };
+
+      const reloadApiSession = async (services: DiscoverServices, tabId: string) => {
+        const { path } = await appLocatorGetLocationCommon(
+          { useHash: false, setStateToKbnUrl, profileStateRegistry: services.profileStateRegistry },
+          { savedSearchId: response.id, tab: { id: tabId } }
+        );
+        const reloadedServices = createDiscoverServicesMock();
+        reloadedServices.storage = services.storage;
+        reloadedServices.history = createMemoryHistory({ initialEntries: [path] });
+        const reloaded = createState(reloadedServices);
+
+        await reloaded.initializeTabs({
+          persistedDiscoverSession: fromDiscoverSessionApiResponse(cloneDeep(response)),
+        });
+        await reloaded.initializeSingleTab({ tabId });
+
+        return { reloaded, reloadedServices };
+      };
+
+      it('does not mark local API filters without a reference as unsaved changes', async () => {
+        const { services, tabId } = await loadApiSession();
+        updateStoredTabs(services, (tab) => ({
+          ...tab,
+          appState: tab.appState && {
+            ...tab.appState,
+            filters: removeInlineReference(tab.appState.filters),
+          },
+          internalState: tab.internalState && {
+            ...tab.internalState,
+            serializedSearchSource: tab.internalState.serializedSearchSource && {
+              ...tab.internalState.serializedSearchSource,
+              filter: removeInlineReference(tab.internalState.serializedSearchSource.filter),
+            },
+          },
+        }));
+
+        const { reloaded, reloadedServices } = await reloadApiSession(services, tabId);
+
+        expectLoadedFilters(reloadedServices, apiDataViewId);
+        expect(hasUnsavedChanges(reloaded, reloadedServices)).toBe(false);
+      });
+
+      it('keeps a local view change as an unsaved change', async () => {
+        const { services, tabId } = await loadApiSession();
+        const editedSpec = { id: 'edited-id', title: 'other-logs-*' };
+        const editedDataViewId = generateInlineDataViewId(editedSpec);
+        updateStoredTabs(services, (tab) => ({
+          ...tab,
+          appState: tab.appState && {
+            ...tab.appState,
+            dataSource: createDataViewDataSource({ dataViewId: editedSpec.id }),
+            filters: removeInlineReference(tab.appState.filters),
+          },
+          internalState: tab.internalState && {
+            ...tab.internalState,
+            serializedSearchSource: {
+              ...tab.internalState.serializedSearchSource,
+              index: editedSpec,
+              filter: removeInlineReference(tab.internalState.serializedSearchSource?.filter),
+            },
+          },
+        }));
+
+        const { reloaded, reloadedServices } = await reloadApiSession(services, tabId);
+
+        expect(
+          selectTabRuntimeState(reloaded.runtimeStateManager, tabId).currentDataView$.getValue()?.id
+        ).toBe(editedDataViewId);
+        expectLoadedFilters(reloadedServices, editedDataViewId);
+        expect(hasUnsavedChanges(reloaded, reloadedServices)).toBe(true);
+      });
+
+      it('keeps filters without a reference for a saved view with an ID', async () => {
+        const services = createDiscoverServicesMock();
+        services.storage = new Storage(localStorage);
+        services.history = createMemoryHistory();
+        const state = createState(services);
+        const [inlineFilter, otherFilter] = cloneDeep(storedFilters);
+        const session = cloneDeep(legacySession);
+        session.tabs[0].serializedSearchSource.filter = [
+          { ...inlineFilter, meta: omit(inlineFilter.meta, 'index') },
+          otherFilter,
+        ];
+
+        await state.initializeTabs({ persistedDiscoverSession: session });
+        await state.initializeSingleTab({ tabId: state.getCurrentTab().id });
+
+        expect(services.filterManager.getFilters()[0].meta.index).toBeUndefined();
+        expect(hasUnsavedChanges(state, services)).toBe(false);
+      });
+    });
+
+    it('does not mark API filters without a reference in a link as unsaved changes', async () => {
+      const services = createDiscoverServicesMock();
+      const [inlineFilter, otherFilter] = cloneDeep(storedFilters);
+      const location = await appLocatorGetLocationCommon(
+        { useHash: false, setStateToKbnUrl, profileStateRegistry: services.profileStateRegistry },
+        {
+          savedSearchId: response.id,
+          tab: { id: 'inline-tab' },
+          filters: [{ ...inlineFilter, meta: omit(inlineFilter.meta, 'index') }, otherFilter],
+        }
+      );
+      services.storage = new Storage(localStorage);
+      services.history = createMemoryHistory({ initialEntries: [location.path] });
+      const state = createState(services);
+
+      await state.initializeTabs({
+        persistedDiscoverSession: fromDiscoverSessionApiResponse(cloneDeep(response)),
+      });
+      await state.initializeSingleTab({ tabId: state.getCurrentTab().id });
+
+      expectLoadedFilters(services, apiDataViewId);
       expect(
         selectHasUnsavedChanges(state.internalState.getState(), {
           runtimeStateManager: state.runtimeStateManager,
@@ -1145,8 +1316,12 @@ describe('Discover state', () => {
           services,
         });
         const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
-        expect(initialState.dataViewSpec).toEqual(dataViewAdHoc.toMinimalSpec());
-        expect(restoreState.dataViewSpec).toEqual(dataViewAdHoc.toMinimalSpec());
+        const expectedDataViewSpec = {
+          ...dataViewAdHoc.toMinimalSpec(),
+          id: generateInlineDataViewId(dataViewAdHoc.toSpec()),
+        };
+        expect(initialState.dataViewSpec).toEqual(expectedDataViewSpec);
+        expect(restoreState.dataViewSpec).toEqual(expectedDataViewSpec);
       });
     });
   });

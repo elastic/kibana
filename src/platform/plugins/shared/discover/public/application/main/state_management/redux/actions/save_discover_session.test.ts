@@ -24,6 +24,7 @@ import * as tabStateDataViewActions from './tab_state_data_view';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
+import { generateInlineDataViewId } from '../../../../../../common/session/inline_data_view';
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'test-uuid') }));
 
@@ -456,7 +457,9 @@ describe('saveDiscoverSession', () => {
 
     expect(saveDiscoverSessionSpy).toHaveBeenCalled();
     expect(dataViewCreateSpy).toHaveBeenCalled();
-    expect(dataViewsClearCacheSpy).toHaveBeenCalledWith(oldId);
+    expect(dataViewsClearCacheSpy).toHaveBeenCalledWith(
+      generateInlineDataViewId({ title: 'Adhoc', name: 'Adhoc Name' })
+    );
 
     const createdSpec = dataViewCreateSpy.mock.calls[0][0];
     expect(createdSpec.id).toBe('test-uuid');
@@ -483,7 +486,12 @@ describe('saveDiscoverSession', () => {
               id: 'adhoc-copy-tab',
               initialInternalState: {
                 serializedSearchSource: {
-                  index: { id: defaultProfileId, title: 'Adhoc', name: 'Adhoc Name' },
+                  index: {
+                    id: defaultProfileId,
+                    title: 'Adhoc',
+                    name: 'Adhoc Name',
+                    managed: true,
+                  },
                   filter: filters,
                 },
               },
