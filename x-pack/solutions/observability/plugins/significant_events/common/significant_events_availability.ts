@@ -7,7 +7,7 @@
 
 /**
  * Plugins that must simply be present for significant events to work. The
- * values match `StreamsServer` plugin contract keys (enforced server-side).
+ * values match `SignificantEventsServer` keys (enforced server-side).
  * To require a new plugin, add its name here.
  *
  * Note: workflowsManagement requires workflowsExtensions, so the latter is

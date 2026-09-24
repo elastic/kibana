@@ -50525,7 +50525,6 @@
     "xpack.sharedComponents.trialUsageBadge.trialPeriodTooltip": "無料トライアル期間です。有効期限が切れた後は、サービスを引き続き利用する際に登録が必要です。",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.cancel": "キャンセル",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.confirm": "作成",
-    "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.message": "ストリーム {streams} のために重要なイベント「{title}」を作成しますか？",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.title": "重要なイベントを作成",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.description": "1つ以上のストリームに重要なイベントを作成してください。",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.errorMessage": "重要なイベントを作成できませんでした：{message}",

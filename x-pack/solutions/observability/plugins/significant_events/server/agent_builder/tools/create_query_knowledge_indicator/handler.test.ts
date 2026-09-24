@@ -6,6 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { sourceWithSlug } from '../../utils/test_helpers';
+import { validateEsqlQueryForSourceOrThrow } from '../../../lib/significant_events/validate_esql_query';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 
 jest.mock('uuid', () => ({
@@ -14,20 +16,12 @@ jest.mock('uuid', () => ({
 
 jest.mock('../../../lib/significant_events/validate_esql_query', () => ({
   ...jest.requireActual('../../../lib/significant_events/validate_esql_query'),
-  validateEsqlQueryForStreamOrThrow: jest.fn(),
+  validateEsqlQueryForSourceOrThrow: jest.fn(),
 }));
 
 describe('createQueryKnowledgeIndicatorToolHandler', () => {
   const logger = loggingSystemMock.createLogger();
-  const definition = {
-    name: 'logs.test',
-    ingest: {
-      classic: { field_overrides: {} },
-      processing: [],
-      lifecycle: { inherit: {} },
-      failure_store: { inherit: {} },
-    },
-  };
+  const source = sourceWithSlug('logs.test', { view_name: 'logs.test' });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,7 +34,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
     const result = await createQueryKnowledgeIndicatorToolHandler({
       kiClient: kiClient as never,
-      definition: definition as never,
+      source,
       queryInput: {
         id: 'provided-id',
         title: 'Suspicious query',
@@ -52,8 +46,12 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     });
 
     expect(result).toEqual({ id: 'provided-id' });
+    expect(validateEsqlQueryForSourceOrThrow).toHaveBeenCalledWith({
+      esqlQuery: 'FROM logs.test, logs.test.* | stats c = count()',
+      viewName: source.view_name,
+    });
     expect(kiClient.upsertQuery).toHaveBeenCalledWith(
-      definition.name,
+      source.id,
       expect.objectContaining({
         id: 'provided-id',
         type: 'stats',
@@ -72,7 +70,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
     const result = await createQueryKnowledgeIndicatorToolHandler({
       kiClient: kiClient as never,
-      definition: definition as never,
+      source,
       queryInput: {
         title: 'Suspicious query',
         description: 'Find suspicious events',
@@ -83,11 +81,39 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
     expect(result).toEqual({ id: 'generated-query-id' });
     expect(kiClient.upsertQuery).toHaveBeenCalledWith(
-      definition.name,
+      source.id,
       expect.objectContaining({
         id: 'generated-query-id',
       })
     );
+  });
+
+  it('rejects a FROM clause that is not the source view name', async () => {
+    const actual = jest.requireActual<
+      typeof import('../../../lib/significant_events/validate_esql_query')
+    >('../../../lib/significant_events/validate_esql_query');
+    jest
+      .mocked(validateEsqlQueryForSourceOrThrow)
+      .mockImplementationOnce(actual.validateEsqlQueryForSourceOrThrow);
+
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await expect(
+      createQueryKnowledgeIndicatorToolHandler({
+        kiClient: kiClient as never,
+        source,
+        queryInput: {
+          title: 'Wrong source',
+          description: 'FROM does not match the view',
+          esql: { query: 'FROM logs.other | STATS c = COUNT()' },
+        },
+        logger,
+      })
+    ).rejects.toThrow(`ES|QL query must use FROM ${source.view_name}`);
+
+    expect(kiClient.upsertQuery).not.toHaveBeenCalled();
   });
 
   it('rejects an over-broad multi-word full-text predicate', async () => {
@@ -98,7 +124,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     await expect(
       createQueryKnowledgeIndicatorToolHandler({
         kiClient: kiClient as never,
-        definition: definition as never,
+        source,
         queryInput: {
           title: 'Over-broad',
           description: 'ORed terms',
@@ -119,7 +145,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     await expect(
       createQueryKnowledgeIndicatorToolHandler({
         kiClient: kiClient as never,
-        definition: definition as never,
+        source,
         queryInput: {
           title: 'Suspicious query',
           description: 'Find suspicious events',

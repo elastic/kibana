@@ -12,8 +12,8 @@ import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { significantEventSchema } from '@kbn/significant-events-schema';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -29,16 +29,26 @@ import {
   normalizeEventSearchQuery,
   searchEventsToolHandler,
 } from './handler';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlug,
+  toSourceRef,
+} from '../../utils/resolve_source_slugs';
+import { presentStoredSourceFields, sourceSlugsSchema } from '../../utils/stored_source_fields';
 
 export const SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID = platformSignificantEventsTools.searchEvent;
 
 const searchEventsSchema = significantEventSchema
   .pick({
     status: true,
-    stream_names: true,
   })
-  .partial({ stream_names: true })
   .extend({
+    slugs: sourceSlugsSchema.optional().describe(
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.slugs', {
+        defaultMessage:
+          'Optional Nightshift source slugs. Omit to search events for every source. Not titles and not view names. Disabled sources are accepted. An event stored against a stream name is not found by its slug.',
+      })
+    ),
     status: significantEventSchema.shape.status.default('open').describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
         defaultMessage:
@@ -54,7 +64,7 @@ const searchEventsSchema = significantEventSchema
           defaultMessage:
             'Optional substring search over the event title, summary, and symptom hypothesis fields. ' +
             'Defaults to no text filter. Use it to narrow results to a known incident. ' +
-            'Matching is case-insensitive and not semantic — omit it when you want all events for a stream or state.',
+            'Matching is case-insensitive and not semantic — omit it when you want all events for a source or state.',
         })
       ),
     rule_uuids: z
@@ -65,7 +75,7 @@ const searchEventsSchema = significantEventSchema
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.ruleUuids', {
           defaultMessage:
-            'Optional rule UUIDs to match against event signals. Defaults to no rule filter. When combined with stream names, only events matching both filters are returned.',
+            'Optional rule UUIDs to match against event signals. Defaults to no rule filter. When combined with source slugs, only events matching both filters are returned.',
         })
       ),
     event_ids: z
@@ -172,7 +182,7 @@ export function createSearchEventsTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof searchEventsSchema> {
@@ -182,7 +192,7 @@ export function createSearchEventsTool({
     description: dedent`
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line1', {
         defaultMessage:
-          'Search latest significant events per event_id across all streams or a filtered set.',
+          'Search latest significant events per event_id across all sources or a filtered set.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
@@ -192,7 +202,7 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
         defaultMessage:
-          'Filters are optional for bounded broad searches: omitted values default to "open" events from "now-7d" to "now", "compact" view, page 1, and 20 events per page. Use rule, topology, event, stream, or query filters to narrow results. When has_more is true, increment page with all other compact-search parameters unchanged. For "full", use signals_page to continue only the known event’s signals.',
+          'Filters are optional for bounded broad searches: omitted values default to "open" events from "now-7d" to "now", "compact" view, page 1, and 20 events per page. Use rule, topology, event, source, or query filters to narrow results. When has_more is true, increment page with all other compact-search parameters unchanged. For "full", use signals_page to continue only the known event’s signals.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line4', {
@@ -215,19 +225,26 @@ export function createSearchEventsTool({
       const query = normalizeEventSearchQuery(toolParams.query);
 
       try {
-        const { getEventClient, licensing } = await getScopedClients({ request });
+        const { getEventClient, licensing, sourcesClient } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
+        const { slugs, ...searchParams } = toolParams;
+        const catalog = await loadSourceCatalog(sourcesClient);
+        const sources = slugs ? resolveSourcesBySlug(catalog, slugs) : undefined;
 
         const data = await searchEventsToolHandler({
           eventClient: await getEventClient(),
-          params: { ...toolParams, query },
+          params: {
+            ...searchParams,
+            stream_names: sources?.map((source) => source.id),
+            query,
+          },
         });
 
         telemetry.trackAgentToolEventSearch({
           success: true,
           result_count: data.total,
           has_query: query !== undefined,
-          has_stream_filter: (toolParams.stream_names?.length ?? 0) > 0,
+          has_stream_filter: (slugs?.length ?? 0) > 0,
           status_filter: toolParams.status,
           view: data.view,
           page: data.page,
@@ -237,7 +254,16 @@ export function createSearchEventsTool({
           results: [
             {
               type: ToolResultType.other,
-              data,
+              data: {
+                ...data,
+                ...(sources ? { sources: sources.map(toSourceRef) } : {}),
+                events: data.events.map((event) =>
+                  presentStoredSourceFields(catalog, {
+                    ...event,
+                    stream_names: event.stream_names ?? [],
+                  })
+                ),
+              },
             },
           ],
         };
@@ -249,7 +275,7 @@ export function createSearchEventsTool({
           success: false,
           result_count: 0,
           has_query: query !== undefined,
-          has_stream_filter: (toolParams.stream_names?.length ?? 0) > 0,
+          has_stream_filter: (toolParams.slugs?.length ?? 0) > 0,
           status_filter: toolParams.status,
           view: toolParams.view,
           page: toolParams.page,

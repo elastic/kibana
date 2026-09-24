@@ -12,24 +12,27 @@ import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { significantEventSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { createEventToolHandler } from './handler';
+import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
+import { assignStoredSourceIds, sourceSlugsSchema } from '../../utils/stored_source_fields';
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
-const createEventSchema = significantEventSchema.pick({
-  status: true,
-  title: true,
-  symptom_hypothesis: true,
-  summary: true,
-  stream_names: true,
-  severity: true,
-  confidence: true,
-});
+const createEventSchema = significantEventSchema
+  .pick({
+    status: true,
+    title: true,
+    symptom_hypothesis: true,
+    summary: true,
+    severity: true,
+    confidence: true,
+  })
+  .extend({ slugs: sourceSlugsSchema });
 
 export function createEventTool({
   getScopedClients,
@@ -38,7 +41,7 @@ export function createEventTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof createEventSchema> {
@@ -47,7 +50,7 @@ export function createEventTool({
     type: ToolType.builtin,
     description: dedent`
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventCreate.description', {
-        defaultMessage: 'Create a significant event for one or more streams.',
+        defaultMessage: 'Create a significant event for one or more sources.',
       })}
     `,
     annotations: {
@@ -71,10 +74,10 @@ export function createEventTool({
         message: i18n.translate(
           'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.message',
           {
-            defaultMessage: 'Create significant event "{title}" for streams: {streams}?',
+            defaultMessage: 'Create significant event "{title}" for sources: {sources}?',
             values: {
               title: toolParams.title,
-              streams: toolParams.stream_names.join(', '),
+              sources: toolParams.slugs.join(', '),
             },
           }
         ),
@@ -96,26 +99,42 @@ export function createEventTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing } = await getScopedClients({ request });
+        const { getEventClient, licensing, sourcesClient } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
+        const catalog = await loadSourceCatalog(sourcesClient);
+        const eventInput = assignStoredSourceIds(catalog, toolParams);
+        const sources = eventInput.stream_names;
 
         const data = await createEventToolHandler({
           eventClient: await getEventClient(),
-          eventInput: toolParams,
+          eventInput,
         });
 
         telemetry.trackAgentToolEventCreate({
           success: true,
-          stream_names: toolParams.stream_names,
+          stream_names: sources,
         });
 
-        return { results: [{ type: ToolResultType.other, data }] };
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                ...data,
+                sources: eventInput.stream_names.flatMap((sourceId) => {
+                  const source = catalog.byId.get(sourceId);
+                  return source ? [toSourceRef(source)] : [];
+                }),
+              },
+            },
+          ],
+        };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running event_create: ${message}`);
         telemetry.trackAgentToolEventCreate({
           success: false,
-          stream_names: toolParams.stream_names,
+          stream_names: toolParams.slugs,
           error_message: message,
         });
         return {

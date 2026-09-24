@@ -50362,7 +50362,6 @@
     "xpack.sharedComponents.trialUsageBadge.trialPeriodTooltip": "Ihre kostenlose Testphase. Nach Ablauf der Gültigkeitsdauer müssen Sie ein Abonnement abschließen, um den Dienst weiterhin nutzen zu können.",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.cancel": "Abbrechen",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.confirm": "Erstellen",
-    "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.message": "Erstellen Sie ein signifikantes Ereignis „{title}“ für Streams: {streams}?",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.title": "Bedeutendes Ereignis erstellen",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.description": "Erstellen Sie ein signifikantes Ereignis für einen oder mehrere Streams.",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.errorMessage": "Fehler beim Erstellen eines wichtigen Ereignisses: {message}",

@@ -26,7 +26,7 @@ When something is related to the Knowledge Indicator (KI) system, it should be i
 KI feature extraction, query generation, KI search, token helpers, and diverse
 sampling live in `@kbn/nightshift-ai`
 (`x-pack/platform/packages/shared/kbn-nightshift-ai`), owned by `@elastic/nightshift-sre-agent-team`. This
-plugin adapts stream definitions through `streamToAnalysisTarget` before calling
+plugin adapts Nightshift sources through `sourceToAnalysisTarget` before calling
 into that package.
 
 ## Keeping this file current

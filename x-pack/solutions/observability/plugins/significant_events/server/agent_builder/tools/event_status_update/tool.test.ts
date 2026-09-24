@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -30,7 +30,7 @@ describe('event_status_update tool', () => {
   it('uses expected tool id', () => {
     const tool = createEventStatusUpdateTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -55,7 +55,7 @@ describe('event_status_update tool', () => {
 
     const tool = createEventStatusUpdateTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });

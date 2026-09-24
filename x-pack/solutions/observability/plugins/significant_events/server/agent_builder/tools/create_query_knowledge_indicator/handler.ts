@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   deriveQueryType,
   findOverBroadMatchPredicates,
   renderOverBroadMatchError,
-  type Streams,
 } from '@kbn/streams-schema';
 import { type StreamQuery } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import {
   EsqlQueryValidationError,
-  validateEsqlQueryForStreamOrThrow,
+  validateEsqlQueryForSourceOrThrow,
 } from '../../../lib/significant_events/validate_esql_query';
 
 export interface QueryInput {
@@ -32,22 +32,22 @@ export interface QueryInput {
 
 export async function createQueryKnowledgeIndicatorToolHandler({
   kiClient,
-  definition,
+  source,
   queryInput,
   logger,
 }: {
   kiClient: KnowledgeIndicatorClient;
-  definition: Streams.all.Definition;
+  source: NightshiftSource;
   queryInput: QueryInput;
   logger: Logger;
 }): Promise<{ id: string }> {
   logger.debug(
-    `ki_query_create: creating query KI for stream "${definition.name}" with title "${queryInput.title}"`
+    `ki_query_create: creating query KI for source "${source.slug}" with title "${queryInput.title}"`
   );
 
-  validateEsqlQueryForStreamOrThrow({
+  validateEsqlQueryForSourceOrThrow({
     esqlQuery: queryInput.esql.query,
-    stream: definition,
+    viewName: source.view_name,
   });
 
   const overBroad = findOverBroadMatchPredicates(queryInput.esql.query);
@@ -66,10 +66,10 @@ export async function createQueryKnowledgeIndicatorToolHandler({
     expires_at: queryInput.expires_at,
   };
 
-  await kiClient.upsertQuery(definition.name, query);
+  await kiClient.upsertQuery(source.id, query);
 
   logger.debug(
-    `ki_query_create: created query KI for stream "${definition.name}" with id "${query.id}"`
+    `ki_query_create: created query KI for source "${source.slug}" with id "${query.id}"`
   );
 
   return {

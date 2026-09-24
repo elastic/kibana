@@ -14,7 +14,6 @@ Example: platform_sig_events_ki_search call (kind: query, followed by kind: feat
 {
    "view": "compact",
    "kind": ["query"],
-   "stream_names": [...],
    "query_types": [...],
    "query_ids": ["..."],
    "rule_ids": ["..."],
@@ -28,7 +27,6 @@ Example: platform_sig_events_ki_search call (kind: query, followed by kind: feat
 {
    "view": "compact",
    "kind": ["feature"],
-   "stream_names": [...],
    "feature_ids": [...],
    "feature_types": ["..."],
    "page": 1,
@@ -69,12 +67,12 @@ First apply any explicit platform_sig_events_ki_search skip gate defined by the 
 
 Call budget: up to three calls per batch — query search, feature search, and one optional feature pagination call for missing requested IDs.
 
-1. Search queries first with `kind: ["query"]`, all distinct `stream_names` and `rule_ids`, `query_types: ["match"]`, `rule_backed: true`, `page: 1`, `per_page: 50`.
+1. Search queries first with `kind: ["query"]`, `rule_ids`, `query_types: ["match"]`, `rule_backed: true`, `page: 1`, `per_page: 50`. Omit `slugs`. The detection batch identifier is not a source slug.
 2. Match results to detections by exact `rule.id`:
 3. Collect and deduplicate each matched query's `query.features[].id`. These are the referenced feature IDs.
 4. Spend the second call on feature page 1:
-   - Referenced feature IDs exist → use `kind: ["feature"]`, pass them as `feature_ids`, and set `feature_types` to exactly `["dependency", "entity", "infrastructure"]`; use the matched queries' streams, `page: 1`, and `per_page: 50`.
-   - No referenced feature IDs, including when no query matched → use `kind: ["feature"]`, omit `feature_ids`, and set `feature_types` to exactly `["dependency", "entity", "infrastructure"]`; search all batch streams with `page: 1` and `per_page: 50`.
+   - Referenced feature IDs exist → use `kind: ["feature"]`, pass them as `feature_ids`, and set `feature_types` to exactly `["dependency", "entity", "infrastructure"]`; omit `slugs`, `page: 1`, and `per_page: 50`.
+   - No referenced feature IDs, including when no query matched → use `kind: ["feature"]`, omit `feature_ids` and `slugs`, and set `feature_types` to exactly `["dependency", "entity", "infrastructure"]`; `page: 1` and `per_page: 50`.
    - Stop after page 1, unless `feature_ids` parameter was passed, the response returned `has_more: true`, and one or more requested IDs are missing from response. Only then request `next_page` once with identical filters. Never paginate the fallback search or request another page to discover more context.
 
 `per_page` is a cap. Referenced feature IDs seed the topology search; dependency source/target endpoints and their matching entity identity fields are expanded from the returned topology features in Step 5. If the optional second feature page still omits requested IDs, use the returned items; never make another call just to discover related topology.
@@ -105,7 +103,7 @@ Dispatch primary checks in **mandatory parallel waves of up to 10 calls**. In on
    - **Executed form vs. stored form**: ordering and limit are executed only and must not be stored in `evidence.esql_query`. Preserve any original KI projection in the stored query, with `METADATA` removed and the required `?_tstart`/`?_tend` predicate; never copy the tool result's rewritten query.
 3. **Mandatory time scope:** insert `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend` immediately after `FROM` and pass a matching `time_range`. Placeholders bind only that argument; omitting it falls back to screen context or the last 24 hours. Let `t` be the detection `@timestamp`. Discovery runs at or just after the change point: there is no future data, so `to` is always `now`, never `t+15m` or `t+60m`. Primary sample: `{ "from": "t-15m", "to": "now" }` so `ASC LIMIT 5` is the onset of the elapsed neighborhood. Rate aggregate: `{ "from": "t-60m", "to": "now" }`. Absent, mismatched, or unapplied range → `inconclusive`. Skip `ROW`/`SHOW`/`METRICS`.
 4. **Never** modify `WHERE` clauses, field names, or `FROM`. This can lead to unnecessary errors. Skip the query on execution failure.
-5. If the KI's `query.esql.query` starts with `FROM $.<name>`, the `$.` is a required, literal part of the Streams-backed view reference — copy it verbatim, never strip or "correct" it.
+5. If the KI's `query.esql.query` starts with `FROM $.<name>`, copy that `FROM` verbatim. Otherwise copy `view_name` from the tool result into `FROM`. Do not assemble the view name, and do not strip a `$.` prefix.
 
 KI query (original):
   FROM <source> METADATA _id, _source | WHERE <KI predicate> | LIMIT <existing lower cap>
@@ -226,7 +224,7 @@ Build one topology graph for the batch. `query.features[]` seeds the graph; it n
 
 Each entry:
 - `type`: always `"detection"`
-- `stream_name`: the detection rule's stream
+- `stream_name`: the source slug from the KI result (`slug` or the presented `stream_name`). Not the detection batch identifier, not the title, and not the view name.
 - `description`: Signal Verdict narrative; never include raw sensitive values from the query row
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`
 - `collected_at`: ISO-8601 query timestamp; omit for quiet-rule entries

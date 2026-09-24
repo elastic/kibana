@@ -13,24 +13,27 @@ import type {
   ToolAvailabilityResult,
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
+import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
-import { baseFeatureSchema, MAX_ID_LENGTH } from '@kbn/significant-events-schema';
+import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlug,
+  toSourceRef,
+} from '../../utils/resolve_source_slugs';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
   platformSignificantEventsTools.createFeatureKnowledgeIndicator;
 
-// `stream_name` routes the feature to its source; it is not part of the stored feature payload.
+// `slug` routes the feature to its source; the stored feature key stays `stream_name`.
 const createFeatureKISchema = baseFeatureSchema.extend({
-  stream_name: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe('Stream the feature belongs to, e.g. "logs.ecs.nginx".'),
+  slug: nightshiftSourceSlugField('The feature belongs to this source.'),
   expires_at: z.iso
     .datetime()
     .optional()
@@ -47,7 +50,7 @@ export function createFeatureKnowledgeIndicatorTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof createFeatureKISchema> {
@@ -55,11 +58,11 @@ export function createFeatureKnowledgeIndicatorTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Create a feature Knowledge Indicator (KI) for a stream and persist it to significant events
-      feature storage.
+      Create a feature Knowledge Indicator (KI) for a Nightshift source and persist it to
+      significant events feature storage.
 
-      Use this tool when the conversation discovers a new stream behavior pattern and it should be
-      saved as a feature KI for future investigations.
+      Use this tool when the conversation discovers a new source behavior pattern and it should be
+      saved as a feature KI for future investigations. Pass the source slug, not its id.
     `,
     annotations: {
       title: 'Create Feature Knowledge Indicator',
@@ -73,7 +76,7 @@ export function createFeatureKnowledgeIndicatorTool({
     confirmation: {
       askUser: 'always',
       getConfirmation: async ({ toolParams }) => {
-        const streamName = String(toolParams.stream_name ?? 'unknown stream');
+        const slug = String(toolParams.slug ?? 'unknown source');
         const id = String(toolParams.id ?? 'unknown-id');
         const type = String(toolParams.type ?? 'unknown-type');
         const subtype = toolParams.subtype ? String(toolParams.subtype) : undefined;
@@ -83,7 +86,7 @@ export function createFeatureKnowledgeIndicatorTool({
 
         return {
           title: 'Save Feature KI',
-          message: `Save Feature KI for stream "${streamName}" (id: "${id}", type: "${typeLabel}"${titlePart})?`,
+          message: `Save Feature KI for source "${slug}" (id: "${id}", type: "${typeLabel}"${titlePart})?`,
           confirm_text: 'Save',
           cancel_text: 'Cancel',
         };
@@ -114,8 +117,9 @@ export function createFeatureKnowledgeIndicatorTool({
         }
       },
     },
-    handler: async ({ stream_name: streamName, expires_at, ...featureInput }, context) => {
+    handler: async ({ slug, expires_at, ...featureInput }, context) => {
       const { request } = context;
+      let sourceId = '';
       try {
         const scopedClients = await getScopedClients({
           request,
@@ -125,12 +129,14 @@ export function createFeatureKnowledgeIndicatorTool({
           server,
           licensing: scopedClients.licensing,
         });
-        await scopedClients.streamsClient.getStream(streamName);
+        const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        sourceId = source.id;
 
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const { id } = await createFeatureKnowledgeIndicatorToolHandler({
           kiClient,
-          streamName,
+          streamName: source.id,
           featureInput,
           expiresAt: expires_at,
           logger,
@@ -140,7 +146,7 @@ export function createFeatureKnowledgeIndicatorTool({
           ki_kind: 'feature',
           tool_id: 'ki_feature_create',
           success: true,
-          source_id: streamName,
+          source_id: source.id,
         });
 
         return {
@@ -148,7 +154,7 @@ export function createFeatureKnowledgeIndicatorTool({
             {
               type: ToolResultType.other,
               data: {
-                stream_name: streamName,
+                ...toSourceRef(source),
                 feature: {
                   id,
                 },
@@ -170,7 +176,7 @@ export function createFeatureKnowledgeIndicatorTool({
           ki_kind: 'feature',
           tool_id: 'ki_feature_create',
           success: false,
-          source_id: streamName,
+          source_id: sourceId,
           error_message: message,
         });
 

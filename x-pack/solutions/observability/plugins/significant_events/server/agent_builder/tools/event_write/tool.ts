@@ -17,9 +17,10 @@ import {
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
   significantEventSchema,
 } from '@kbn/significant-events-schema';
+import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
@@ -30,7 +31,9 @@ import {
   MAX_BULK_WRITE_ITEMS,
   trackTelemetryBestEffort,
 } from '../bulk_write';
-import { eventsWriteBulkHandler } from './handler';
+import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
+import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
+import { assignStoredSourceIds } from '../../utils/stored_source_fields';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
@@ -38,7 +41,6 @@ export const eventsWriteItemSchema = significantEventSchema
   .pick({
     event_id: true,
     status: true,
-    stream_names: true,
     title: true,
     symptom_hypothesis: true,
     summary: true,
@@ -52,6 +54,9 @@ export const eventsWriteItemSchema = significantEventSchema
     conversation_id: true,
   })
   .extend({
+    slugs: nightshiftSourceSlugsField(
+      'This event covers these sources. Nested signal, causal feature, and blast radius `stream_name` values are slugs too. Disabled sources are accepted.'
+    ),
     event_id: z
       .string()
       .optional()
@@ -62,7 +67,7 @@ export const eventsWriteItemSchema = significantEventSchema
 
           Omit to trigger find-or-create: the handler scans all currently-active events for one
           whose rule set contains the submitted rules (subset match) and shares at least one
-          stream name. If found, the write is skipped and the existing event_id is returned
+          source. If found, the write is skipped and the existing event_id is returned
           (written: false, reason: existing_active_event). Otherwise a new event is created with
           a generated event_id.
           Otherwise a new event is created with a generated event_id.
@@ -175,10 +180,10 @@ export const eventsWriteSchema = z
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
 
 const enrichCausalFeatures = async (
-  items: EventsWriteParams['items'],
+  items: EventsWriteInput[],
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>,
   logger: Logger
-): Promise<EventsWriteParams['items']> => {
+): Promise<EventsWriteInput[]> => {
   const causalFeatures = items.flatMap(({ causal_features: features = [] }) => features);
   const blastRadiusEntries = items.flatMap(({ blast_radius: entries = [] }) => entries);
   if (causalFeatures.length === 0 && blastRadiusEntries.length === 0) {
@@ -269,7 +274,7 @@ export function createEventsWriteTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof eventsWriteSchema> {
@@ -294,7 +299,7 @@ export function createEventsWriteTool({
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
-      set contains the submitted rules and shares at least one stream name. If found, returns it
+      set contains the submitted rules and shares at least one source. If found, returns it
       without writing (written: false, reason: existing_active_event). Otherwise creates a new
       event with a generated event_id.
     `,
@@ -310,16 +315,19 @@ export function createEventsWriteTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      let storedItems: EventsWriteInput[] = toolParams.items.map((item) => ({
+        ...item,
+        stream_names: [...item.slugs],
+      }));
       try {
-        const { getEventClient, getKnowledgeIndicatorClient, licensing } = await getScopedClients({
-          request,
-        });
+        const { getEventClient, getKnowledgeIndicatorClient, licensing, sourcesClient } =
+          await getScopedClients({
+            request,
+          });
         await assertSignificantEventsAccess({ server, licensing });
-        const items = await enrichCausalFeatures(
-          toolParams.items,
-          getKnowledgeIndicatorClient,
-          logger
-        );
+        const catalog = await loadSourceCatalog(sourcesClient);
+        storedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
+        const items = await enrichCausalFeatures(storedItems, getKnowledgeIndicatorClient, logger);
 
         const data = await eventsWriteBulkHandler({
           eventClient: await getEventClient(),
@@ -328,7 +336,7 @@ export function createEventsWriteTool({
         });
 
         data.forEach((result) => {
-          const input = toolParams.items[result.index];
+          const input = storedItems[result.index];
           if (input === undefined) return;
           const isSkipped = !result.written && 'skipped' in result;
           const isBulkError = !result.written && 'error' in result;
@@ -348,12 +356,31 @@ export function createEventsWriteTool({
         });
 
         return {
-          results: [{ type: ToolResultType.other, data: { results: data } }],
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                results: data.map((result) => {
+                  const input = storedItems[result.index];
+                  if (!input) {
+                    return result;
+                  }
+                  return {
+                    ...result,
+                    sources: input.stream_names.flatMap((sourceId) => {
+                      const source = catalog.byId.get(sourceId);
+                      return source ? [toSourceRef(source)] : [];
+                    }),
+                  };
+                }),
+              },
+            },
+          ],
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running events_write: ${message}`);
-        toolParams.items.forEach((input) => {
+        storedItems.forEach((input) => {
           trackTelemetryBestEffort({
             logger,
             description: 'failed events_write telemetry',

@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod/v4';
 import { badGateway, conflict, forbidden, notFound } from '@hapi/boom';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
-import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import type {
   SlackAppBindChannelResponse,
@@ -20,6 +19,12 @@ import type {
 } from '../../../../../common/slack_app/types';
 import { SlackAppService } from '../../../../lib/slack_app/service';
 
+/** Kibana feature privileges shared with Streams. The ids stay so existing roles keep working. */
+const API_PRIVILEGES = {
+  read: 'read_stream',
+  manage: 'manage_stream',
+} as const;
+
 const connectSlackAppRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/apps/slack/connect',
   options: {
@@ -30,7 +35,7 @@ const connectSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -59,7 +64,7 @@ const statusSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
@@ -78,7 +83,7 @@ const disconnectSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -102,7 +107,7 @@ const bindingsSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -139,7 +144,7 @@ const bindChannelSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -166,7 +171,7 @@ const unbindChannelSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [API_PRIVILEGES.manage],
     },
   },
   params: z.object({

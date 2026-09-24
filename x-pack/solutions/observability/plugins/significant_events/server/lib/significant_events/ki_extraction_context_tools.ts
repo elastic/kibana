@@ -31,14 +31,14 @@ const EVENT_SEARCH_SPEC: BridgedToolSpec = {
   sourceToolId: platformSignificantEventsTools.searchEvent,
   name: 'significant_event_search',
   description:
-    'Search existing Significant Events for the target stream (and related filters). ' +
+    'Search existing Significant Events for the target source (and related filters). ' +
     'Use view "full" when you need assessment notes, demotion justifications, or linked investigation outcomes. ' +
     'Prefer status filters (e.g. dismissed) when looking for known-noisy / demoted patterns to avoid regenerating.',
 };
 
 const PROMPT_SNIPPET = `
-You also have access to prior Significant Events and investigation outcomes for this stream. Before proposing new or refreshed KI queries, consult that history so you do not blindly reintroduce patterns the system has already classified:
-- **significant_event_search** — Search Significant Events (open, dismissed, closed). Use \`view: "full"\` to include assessment notes and linked investigations. Filter by \`stream_names\` for the current stream; use status \`dismissed\` when checking for known noise / demotions.
+You also have access to prior Significant Events and investigation outcomes for this source. Before proposing new or refreshed KI queries, consult that history so you do not blindly reintroduce patterns the system has already classified:
+- **significant_event_search** — Search Significant Events (open, dismissed, closed). Use \`view: "full"\` to include assessment notes and linked investigations. Filter by \`slugs\` for the current source; use status \`dismissed\` when checking for known noise / demotions.
 
 When prior findings show a query path was noisy, single-tenant, known-benign, or already investigated as non-actionable, prefer refining/avoiding that path over regenerating an equivalent rule. Prefer and annotate high-value patterns that previously produced useful detections.`;
 

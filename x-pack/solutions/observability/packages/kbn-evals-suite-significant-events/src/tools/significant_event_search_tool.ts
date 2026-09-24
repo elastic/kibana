@@ -106,7 +106,7 @@ export const createEvalSignificantEventSearchTool = ({
       };
       try {
         const { results } = await executeTool(SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID, {
-          stream_names: [streamName],
+          slugs: [streamName],
           ...(query !== undefined ? { query } : {}),
           ...(status !== undefined ? { status } : {}),
           ...(view !== undefined ? { view } : {}),

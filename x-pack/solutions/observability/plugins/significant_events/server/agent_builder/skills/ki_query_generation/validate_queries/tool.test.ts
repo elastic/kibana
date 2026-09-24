@@ -6,14 +6,17 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { Streams } from '@kbn/streams-schema';
 import {
   createQueryValidationContext,
   validateKIQueries,
   type ValidatedKIQuery,
 } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
+import {
+  createMockToolContext,
+  invokeHandler,
+  mockSourcesClient,
+} from '../../../utils/test_helpers';
 import { createValidateQueriesTool } from './tool';
 
 jest.mock('@kbn/nightshift-ai', () => ({
@@ -29,23 +32,12 @@ const validateKIQueriesMock = validateKIQueries as jest.MockedFunction<typeof va
 
 describe('ki_queries_validate tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const stream: Streams.QueryStream.Definition = {
-    name: 'logs.test',
-    description: 'Test logs',
-    type: 'query',
-    updated_at: new Date().toISOString(),
-    query: {
-      view: '$.logs.test',
-      esql: 'FROM $.logs.test',
-    },
-  };
   const streamDataEsClient = { esql: { query: jest.fn() } };
-  const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
   const getStreamToQueryLinksMap = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
-      streamsClient: { getStream },
+      sourcesClient: mockSourcesClient(['logs.test']),
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
         getFeatures,
         getStreamToQueryLinksMap,
@@ -119,30 +111,27 @@ describe('ki_queries_validate tool', () => {
       throw new Error('Expected a schema-backed tool registration');
     }
 
-    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [candidate] }).success).toBe(
-      true
-    );
-    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [] }).success).toBe(false);
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [candidate] }).success).toBe(true);
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [] }).success).toBe(false);
   });
 
   it('resolves an analysis target, queries KI state, and returns validated results', async () => {
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [candidate] },
+      { slug: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {
       throw new Error('Expected a standard tool result');
     }
 
-    expect(getStream).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).toHaveBeenCalledWith('logs.test', {
       id: ['feature-1'],
       excludedType: ['log_samples'],
     });
     expect(createQueryValidationContextMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        sources: ['$.logs.test'],
+        sources: ['$.nightshift.sources.default.logs.test'],
         esClient: streamDataEsClient,
         existingQueries: [
           expect.objectContaining({
@@ -165,6 +154,9 @@ describe('ki_queries_validate tool', () => {
         type: 'other',
         data: {
           queries: [{ query: candidate, valid: true, status: 'Added' }],
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
           accepted_queries: [
             {
               type: 'match',
@@ -185,7 +177,7 @@ describe('ki_queries_validate tool', () => {
 
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [candidate] },
+      { slug: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {

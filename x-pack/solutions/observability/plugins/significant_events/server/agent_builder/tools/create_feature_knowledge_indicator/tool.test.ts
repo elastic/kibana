@@ -8,10 +8,10 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
 import {
   createFeatureKnowledgeIndicatorTool,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
@@ -24,7 +24,7 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
 
 describe('ki_feature_create tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as unknown as StreamsServer;
+  const server = {} as unknown as SignificantEventsServer;
   const request = {} as unknown as KibanaRequest;
   const uiSettings = {} as unknown as IUiSettingsClient;
   const telemetry = {
@@ -61,7 +61,7 @@ describe('ki_feature_create tool', () => {
 
     const confirmation = await tool.confirmation?.getConfirmation?.({
       toolParams: {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         id: 'feature-1',
         type: 'error_pattern',
         description: 'Recurring timeout pattern',
@@ -78,7 +78,7 @@ describe('ki_feature_create tool', () => {
         cancel_text: 'Cancel',
       })
     );
-    expect(confirmation?.message).toContain('stream "logs.test"');
+    expect(confirmation?.message).toContain('source "logs.test"');
     expect(confirmation?.message).toContain('id: "feature-1"');
     expect(confirmation?.message).toContain('type: "error_pattern"');
   });
@@ -128,17 +128,7 @@ describe('ki_feature_create tool', () => {
 
     const getScopedClients = jest.fn(async () => {
       return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
-          }),
-        },
+        sourcesClient: mockSourcesClient(['logs.test']),
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
         licensing: {},
         uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
@@ -156,7 +146,7 @@ describe('ki_feature_create tool', () => {
     await invokeHandler(
       tool as never,
       {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         id: 'feature-1',
         type: 'custom',
         description: 'desc',
@@ -185,17 +175,7 @@ describe('ki_feature_create tool', () => {
 
     const getScopedClients = jest.fn(async () => {
       return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
-          }),
-        },
+        sourcesClient: mockSourcesClient(['logs.test']),
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
         licensing: {},
         uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
@@ -213,7 +193,7 @@ describe('ki_feature_create tool', () => {
     await invokeHandler(
       tool as never,
       {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         id: 'feature-1',
         type: 'custom',
         description: 'desc',
@@ -232,5 +212,51 @@ describe('ki_feature_create tool', () => {
         error_message: 'write failed',
       })
     );
+  });
+
+  it('returns a tool error for an unknown slug and does not call the knowledge indicator client', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+
+    const getKnowledgeIndicatorClient = jest.fn();
+    const getScopedClients = jest.fn(async () => {
+      return {
+        sourcesClient: mockSourcesClient(['logs.test']),
+        getKnowledgeIndicatorClient,
+        licensing: {},
+        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
+      } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
+
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients,
+      server,
+      logger,
+      telemetry,
+    });
+
+    const result = await invokeHandler(
+      tool as never,
+      {
+        slug: 'missing',
+        id: 'feature-1',
+        type: 'custom',
+        description: 'desc',
+        properties: {},
+        confidence: 80,
+      },
+      createMockToolContext()
+    );
+
+    expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+    expect(result.results[0]).toEqual({
+      type: 'error',
+      data: {
+        message:
+          'Failed to create feature knowledge indicator: Source not found in this space: missing',
+      },
+    });
   });
 });

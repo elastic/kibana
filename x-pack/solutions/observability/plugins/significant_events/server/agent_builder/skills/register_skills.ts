@@ -88,6 +88,7 @@ export const registerSignificantEventsSkills = async ({
             telemetry,
             streamsKIsOnboardingClient,
             maintenanceService,
+            getScopedClients,
           }),
         ]
       : []),

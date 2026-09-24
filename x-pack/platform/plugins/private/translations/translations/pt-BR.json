@@ -50502,7 +50502,6 @@
     "xpack.sharedComponents.trialUsageBadge.trialPeriodTooltip": "Seu período de teste gratuito. Depois que ele expirar, você precisará assinar para continuar usando o serviço.",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.cancel": "Cancelar",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.confirm": "Criar",
-    "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.message": "Criar um evento significativo \"{title}\" para os fluxos: {streams}?",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.title": "Criar Evento Significativo",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.description": "Crie um evento significativo para uma ou mais fluxos.",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.errorMessage": "Falha ao criar evento significativo: {message}",

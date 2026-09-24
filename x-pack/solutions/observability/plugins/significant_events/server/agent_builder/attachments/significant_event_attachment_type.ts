@@ -18,6 +18,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients } from '../../routes/types';
+import { loadSourceCatalog, presentSlug } from '../utils/resolve_source_slugs';
 
 interface CreateSignificantEventAttachmentTypeOptions {
   logger: Logger;
@@ -31,7 +32,10 @@ const formatList = (values: string[] | undefined): string => {
   return values.join(', ');
 };
 
-export const formatSignificantEventAsText = (event: SignificantEvent): string => {
+export const formatSignificantEventAsText = (
+  event: SignificantEvent,
+  sourceLabels: readonly string[] = event.stream_names
+): string => {
   return [
     `Significant Event "${event.title}"`,
     `Event ID: ${event.event_id}`,
@@ -39,7 +43,7 @@ export const formatSignificantEventAsText = (event: SignificantEvent): string =>
     `Status: ${event.status}`,
     `Severity: ${getSeverityLabel(event.severity)}`,
     `Confidence: ${event.confidence}`,
-    `Streams: ${formatList(event.stream_names)}`,
+    `Sources: ${formatList([...sourceLabels])}`,
     event.symptom_hypothesis ? `Symptom hypothesis: ${event.symptom_hypothesis}` : undefined,
     `Summary: ${event.summary}`,
   ]
@@ -112,14 +116,27 @@ export const createSignificantEventAttachmentType = ({
         return false;
       }
     },
-    format: (attachment) => ({
-      getRepresentation: () => ({
-        type: 'text',
-        value: formatSignificantEventAsText(attachment.data),
-      }),
-    }),
+    format: async (attachment, context) => {
+      let sourceLabels = attachment.data.stream_names;
+      try {
+        const { sourcesClient } = await getScopedClients({ request: context.request });
+        const catalog = await loadSourceCatalog(sourcesClient);
+        sourceLabels = attachment.data.stream_names.map((storedId) =>
+          presentSlug(catalog, storedId)
+        );
+      } catch (error) {
+        logger.warn(`Failed to resolve source slugs for event attachment: ${String(error)}`);
+      }
+
+      return {
+        getRepresentation: () => ({
+          type: 'text',
+          value: formatSignificantEventAsText(attachment.data, sourceLabels),
+        }),
+      };
+    },
     getAgentDescription: () =>
-      'A significant event attachment represents a durable incident-level Streams event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident and affected streams.',
+      'A significant event attachment represents a durable incident-level event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident and affected sources.',
     getTools: () => [],
   };
 };

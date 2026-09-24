@@ -6,8 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { searchEventsToolHandler } from './handler';
@@ -30,7 +30,7 @@ describe('event_search tool', () => {
   it('uses expected tool id', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -41,7 +41,7 @@ describe('event_search tool', () => {
   it('validates bounded filters and normalizes query', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -97,12 +97,13 @@ describe('event_search tool', () => {
       getEventClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
+      sourcesClient: mockSourcesClient(['logs.checkout']),
     });
     const telemetry = createMockTelemetry();
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -111,7 +112,7 @@ describe('event_search tool', () => {
       tool as never,
       {
         query: '   ',
-        stream_names: ['logs.checkout'],
+        slugs: ['logs.checkout'],
         rule_uuids: ['rule-uuid-1'],
         status: 'open',
       },
@@ -140,7 +141,7 @@ describe('event_search tool', () => {
     );
   });
 
-  it('accepts cross-stream searches without stream_names', async () => {
+  it('accepts searches that omit slugs', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
       events: [{ event_uuid: 'e2' }],
@@ -153,11 +154,12 @@ describe('event_search tool', () => {
       getEventClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
+      sourcesClient: mockSourcesClient(['logs.checkout']),
     });
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });

@@ -6,9 +6,9 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { eventsWriteHandler } from '../event_write/handler';
 import { createEventTool, SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID } from './tool';
@@ -27,7 +27,7 @@ describe('event_create tool', () => {
   it('uses expected tool id', () => {
     const tool = createEventTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -48,11 +48,12 @@ describe('event_create tool', () => {
       getEventClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
+      sourcesClient: mockSourcesClient(['logs.a']),
     });
 
     const tool = createEventTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -63,7 +64,7 @@ describe('event_create tool', () => {
         title: 'T',
         symptom_hypothesis: 'Requests fail because the upstream dependency is unavailable.',
         summary: 'S',
-        stream_names: ['logs.a'],
+        slugs: ['logs.a'],
         severity: '60-high',
         confidence: 0.8,
       },

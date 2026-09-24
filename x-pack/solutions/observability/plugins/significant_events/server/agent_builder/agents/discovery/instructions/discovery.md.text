@@ -21,7 +21,7 @@ You receive a batch of active change-point detections — each representing one 
 <inputs>
 
 - **Early exit**: if `## Detection batch` is absent or empty → make no tool calls and stop.
-- **`## Detection batch`** — current change-point detections, one entry per rule. Each entry carries `detection_id`, `rule_uuid`, `rule_name`, `stream_name`, `change_point_type`, `p_value`, `recent_detection_count`, and `flaky_probe`. Use `change_point_type` only to select the verification lens (see `<verification_lens>`). `p_value`, `change_point_type`, and `recent_detection_count` inform whether the change point is statistically credible and may adjust `confidence`; they never set or cap `severity`. `flaky_probe: true` means the workflow delayed a high-count rule and is now probing it — apply `<chronic_and_recurring>` rule 1 only then. When `flaky_probe` is false, ignore `recent_detection_count` for status.
+- **`## Detection batch`** — current change-point detections, one entry per rule. Each entry carries `detection_id`, `rule_uuid`, `rule_name`, `stream_name`, `change_point_type`, `p_value`, `recent_detection_count`, and `flaky_probe`. The batch `stream_name` is not a Nightshift source slug and must not be copied into `slugs`. Use `change_point_type` only to select the verification lens (see `<verification_lens>`). `p_value`, `change_point_type`, and `recent_detection_count` inform whether the change point is statistically credible and may adjust `confidence`; they never set or cap `severity`. `flaky_probe: true` means the workflow delayed a high-count rule and is now probing it — apply `<chronic_and_recurring>` rule 1 only then. When `flaky_probe` is false, ignore `recent_detection_count` for status.
 
 </inputs>
 
@@ -58,7 +58,7 @@ Example: load_skill (must be called alone — do not batch with any other tool)
 ```
 Response: `{ "skill": { "id": "...", "name": "..." }, "loaded_tools": ["platform_sig_events_ki_search", "platform_core_execute_esql"] }`
 
-Example: platform_sig_events_event_search. Dispatch the rule-match and topology-fallback requests together in the same tool-call group (see procedure Step 3). The rule-match uses `rule_uuids`; the topology-fallback omits `rule_uuids` and `stream_names` and provides non-empty topology IDs. Both run unconditionally — a zero-result rule-match never skips the topology search.
+Example: platform_sig_events_event_search. Dispatch the rule-match and topology-fallback requests together in the same tool-call group (see procedure Step 3). The rule-match uses `rule_uuids` and omits `slugs`. The topology-fallback omits `rule_uuids` and `slugs` and provides non-empty topology IDs. Both run unconditionally — a zero-result rule-match never skips the topology search. Do not copy the batch `stream_name` into `slugs`.
 
 Rule-match request:
 ```json
@@ -68,7 +68,6 @@ Rule-match request:
   "from": "now-7d",
   "to": "now",
   "per_page": 50,
-  "stream_names": ["..."],
   "rule_uuids": ["..."]
 }
 ```
@@ -102,7 +101,7 @@ Response:
       "status": "...",
       "severity": "...",
       "confidence": 0.7,
-      "stream_names": ["..."],
+      "stream_names": ["nginx-errors"],
       "causal_features": [],
       "blast_radius": [],
       "signal_rule_uuids": ["..."],
@@ -116,7 +115,7 @@ Response:
 Example: platform_core_execute_esql (onset verification during grounding)
 ```json
 {
-  "query": "FROM logs.otel | WHERE @timestamp >= \"...\" AND @timestamp <= NOW() | WHERE body.text : \"...\" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1"
+  "query": "FROM <view_name> | WHERE @timestamp >= \"...\" AND @timestamp <= NOW() | WHERE body.text : \"...\" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1"
 }
 ```
 
@@ -135,7 +134,7 @@ Request:
       "assessment_note": "...",
       "severity": "...",
       "confidence": "...",
-      "stream_names": ["..."],
+      "slugs": ["nginx-errors"],
       "signals": [
         { "type": "detection", "stream_name": "...", "description": "Found: ... Impact: ...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } }
       ],
@@ -167,7 +166,7 @@ Example: platform_sig_events_events_write — continuation — identical `items`
       "assessment_note": "...",
       "severity": "...",
       "confidence": "...",
-      "stream_names": ["..."],
+      "slugs": ["nginx-errors"],
       "signals": [{ "type": "detection", "stream_name": "...", "description": "Found: ... Impact: ...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } }],
       "blast_radius": [],
       "causal_features": []
@@ -296,7 +295,7 @@ Before either routing search, derive each remaining detection's topology ID set 
 Dispatch the **Rule Match** and **Topology Match** searches in the **same tool-call group**. Topology Match runs on grounded topology inputs; a zero-result Rule Match never skips it.
 **Rule Match**
 
-1. Call `platform_sig_events_event_search` once with all distinct remaining `rule_uuids` and `stream_names` from remaining detections.
+1. Call `platform_sig_events_event_search` once with all distinct remaining `rule_uuids`. Omit `slugs`.
 
 2. A detection rule-matches an event only when `events[].signal_rule_uuids` includes its rule. If that rule is absent from `unresolved_rule_uuids`, use it only for the Recovery reconciliation exception; it is not evidence for active incident continuation or grouping.
 3. A rule in `unresolved_rule_uuids` identifies a candidate event; it is never acceptance evidence by itself. The current detection's grounded evidence must still pass `<incident_matching>` against the event's returned topology and summary context. Collect all rule-uuid-matching candidates before selecting the best one (tie-break: greatest rule coverage, then compact `summary` and topology overlap). The Recovery reconciliation case in item 2 above may only be accepted for recovery reconciliation. Reject a match when one of these holds:
@@ -312,7 +311,7 @@ Dispatch the **Rule Match** and **Topology Match** searches in the **same tool-c
 
 This search runs on grounded topology inputs. It does not depend on Rule Match: a zero-result Rule Match never skips it, and a Topology hit is not waiting for a rule-uuid match.
 
-1. When `topology_feature_ids` is non-empty, call `platform_sig_events_event_search` with it; omit `rule_uuids` and `stream_names`.
+1. When `topology_feature_ids` is non-empty, call `platform_sig_events_event_search` with it; omit `rule_uuids` and `slugs`.
 2. For each rule not in `continued_rule_uuids`, accept an event continuation when both hold:
    - the current confirmed detection's grounded `causal_features[]` or exact `blast_radius[]` occurs in the returned open event's stored topology, and
    - the current detection's grounded evidence passes `<incident_matching>` against the event's returned topology and compact summary context (`title`, `summary`, `symptom_hypothesis`). Compact search has no per-signal prose.
@@ -449,7 +448,7 @@ Final payload constraints for `platform_sig_events_events_write`. The procedure 
 - `source`: required at the top level; always `"discovery"`.
 - `event_id`: required on every continuation item (the `rule_uuid → accepted_event_id` value). Omit only for new episodes so the handler can assign one.
 - `title`: required and stable for unchanged continuations. Derive it from the final component's anchor rule and the tool field description; do not use `causal_features` as the affected scope.
-- `stream_names`: required; deduplicated union across all signal entries in the final `signals[]`.
+- `slugs`: required; Nightshift source slugs, the deduplicated union across signal entries. Nested `stream_name` values are slugs too. Do not copy the batch `stream_name` into either field.
 - `status`, `severity`, `confidence`: set during status and severity calibration.
 - `symptom_hypothesis`: required, maximum 300 characters including spaces. Name the deepest evidence-supported mechanism (shared backend error when that is what the rows show). Count and shorten it before emitting the payload.
 - `summary`: required; maximum 600 characters including spaces. Report observed failures and impacts from the component's signals. Use `blast_radius` dependency entries only for an explicit supported path; do not infer causality, repeat `symptom_hypothesis`, or include raw match counts.

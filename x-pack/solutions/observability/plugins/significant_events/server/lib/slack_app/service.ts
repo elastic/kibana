@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 import {
   RelayRequestError,
   type InMemoryConnector,
@@ -73,7 +73,7 @@ export class SlackAppService {
    */
   private idTakenWarned = false;
 
-  constructor(private readonly server: StreamsServer) {
+  constructor(private readonly server: SignificantEventsServer) {
     this.logger = server.logger.get('slack-app');
   }
 
