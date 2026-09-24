@@ -356,8 +356,8 @@ steps:
       # confidence_score, rationale, contributing_factors }. `id` is the model's echo of the
       # alert id, so this list is for internal pairing only — never export it to a caller.
       all_verdicts: []
-      # The caller-facing verdict list emitted by workflow.output, accumulated in
-      # apply_verdicts and keyed on the real alert id rather than the model's echo:
+      # The caller-facing verdict list emitted by workflow.output, merged once per batch in
+      # classify_alert_batches and keyed on the real alert id rather than the model's echo:
       # { alert_id, classification, confidence_score, rationale, contributing_factors,
       #   host_name, user_name }.
       output_verdicts: []
@@ -1652,6 +1652,71 @@ steps:
                   resolved_connector_id: >-
                     {% if variables.resolved_connector_id == '' %}{{ steps.runAgent_step.output.metadata.usage.connectorId }}{% else %}{{ variables.resolved_connector_id }}{% endif %}
 
+              # -------------------------------------------------------------------
+              # Accumulate the verdicts a caller receives via workflow.output
+              # (Worker path only — gated on calledByWorker so standalone runs skip this)
+              # -------------------------------------------------------------------
+              # Built per batch into a list reset each iteration, then merged once: every
+              # data.set persists its full value, so pushing each alert onto the run-wide list
+              # would store it O(n²) times across the execution.
+              - name: accumulate_batch_output_verdicts_gate
+                type: if
+                condition: "${{ inputs.calledByWorker == true }}"
+                steps:
+                  - name: reset_batch_output_verdicts
+                    type: data.set
+                    with:
+                      batch_output_verdicts: []
+
+                  - name: build_batch_output_verdicts
+                    type: foreach
+                    foreach: "{{ foreach.item | json }}"
+                    steps:
+                      # Count, not emptiness, decides the branch (see select_alert_verdict).
+                      - name: select_batch_alert_verdict
+                        type: data.set
+                        with:
+                          batch_alert_verdict: "${{ variables.batch_verdicts | where: 'id', foreach.item._id | first }}"
+                          batch_alert_verdict_count: "${{ variables.batch_verdicts | where: 'id', foreach.item._id | size }}"
+
+                      # Keyed on foreach.item._id — the real alert id — never on the model's
+                      # echoed `id`. A caller acts on these: the Alert Triage Worker tags, notes
+                      # and closes by this field, so passing the raw model output through would
+                      # let a fabricated id close an unrelated alert. An alert with no verdict is
+                      # skipped here and reported via missing_alert_ids by apply_verdicts.
+                      - name: accumulate_worker_output_verdict
+                        type: if
+                        condition: "${{ variables.batch_alert_verdict_count > 0 }}"
+                        steps:
+                          - name: build_output_verdict
+                            type: data.set
+                            with:
+                              output_verdict:
+                                alert_id: "{{ foreach.item._id }}"
+                                classification: "{{ variables.batch_alert_verdict.classification }}"
+                                confidence_score: "${{ variables.batch_alert_verdict.confidence_score }}"
+                                rationale: "{{ variables.batch_alert_verdict.rationale }}"
+                                contributing_factors: "${{ variables.batch_alert_verdict.contributing_factors }}"
+                                # Entity the alert belongs to, carried so a caller can group verdicts by
+                                # host/user without re-reading the alerts. Read from the alert document,
+                                # never from the model's reply. `__missing__` keeps grouping total (an
+                                # alert with no host still belongs in exactly one group) and cannot
+                                # collide with a real ECS host/user named "unknown". Truncate to the
+                                # workflow.output / Zod maxLength (512) so a long caller-supplied name
+                                # cannot fail emit after tags/notes are already written.
+                                host_name: "{{ foreach.item.host.name | default: '__missing__' | truncate: 512, '' }}"
+                                user_name: "{{ foreach.item.user.name | default: '__missing__' | truncate: 512, '' }}"
+
+                          - name: accumulate_output_verdict
+                            type: data.set
+                            with:
+                              batch_output_verdicts: "${{ variables.batch_output_verdicts | push: variables.output_verdict }}"
+
+                  - name: merge_batch_output_verdicts
+                    type: data.set
+                    with:
+                      output_verdicts: "${{ variables.output_verdicts | concat: variables.batch_output_verdicts }}"
+
               # Keep the model's batch_summary (Worker path only) when at least one of its
               # verdicts matched this batch, and say so when it covers only part of the batch;
               # a summary with no matched verdicts would describe results the caller never sees.
@@ -1770,43 +1835,6 @@ steps:
                 with:
                   missing_alert_ids: "${{ variables.missing_alert_ids | push: foreach.item._id }}"
             else:
-
-              # -------------------------------------------------------------------
-              # Accumulate the verdict a caller receives via workflow.output
-              # (Worker path only — gated on calledByWorker so standalone runs skip this)
-              # -------------------------------------------------------------------
-              # Keyed on foreach.item._id — the real alert id — never on the model's echoed
-              # `id`. A caller acts on these: the Alert Triage Worker tags, notes and closes
-              # by this field, so passing the raw model output through would let a fabricated
-              # id close an unrelated alert. Reached only from this else branch, so a verdict
-              # matching no real alert is dropped rather than exported.
-              - name: accumulate_worker_output_verdict
-                type: if
-                condition: "${{ inputs.calledByWorker == true }}"
-                steps:
-                  - name: build_output_verdict
-                    type: data.set
-                    with:
-                      output_verdict:
-                        alert_id: "{{ foreach.item._id }}"
-                        classification: "{{ variables.alert_verdict.classification }}"
-                        confidence_score: "${{ variables.alert_verdict.confidence_score }}"
-                        rationale: "{{ variables.alert_verdict.rationale }}"
-                        contributing_factors: "${{ variables.alert_verdict.contributing_factors }}"
-                        # Entity the alert belongs to, carried so a caller can group verdicts by
-                        # host/user without re-reading the alerts. Read from the alert document,
-                        # never from the model's reply. `__missing__` keeps grouping total (an
-                        # alert with no host still belongs in exactly one group) and cannot
-                        # collide with a real ECS host/user named "unknown". Truncate to the
-                        # workflow.output / Zod maxLength (512) so a long caller-supplied name
-                        # cannot fail emit after tags/notes are already written.
-                        host_name: "{{ foreach.item.host.name | default: '__missing__' | truncate: 512, '' }}"
-                        user_name: "{{ foreach.item.user.name | default: '__missing__' | truncate: 512, '' }}"
-
-                  - name: accumulate_output_verdict
-                    type: data.set
-                    with:
-                      output_verdicts: "${{ variables.output_verdicts | push: variables.output_verdict }}"
 
               # -------------------------------------------------------------------
               # Write the verdict note to the alert timeline
