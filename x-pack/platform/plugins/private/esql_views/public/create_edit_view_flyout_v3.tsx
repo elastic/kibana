@@ -301,7 +301,7 @@ export const CreateEditEsqlViewFlyoutV3: React.FunctionComponent<CreateEditEsqlV
                 <p>
                   {i18n.translate('esqlViews.flyout.editDescription', {
                     defaultMessage:
-                      'Changes to this view apply wherever it is used, including dashboards, alerts, and other saved objects.',
+                      'Changes affect every dashboard, alert, and other saved object that uses this view.',
                   })}
                 </p>
               </EuiText>
@@ -316,20 +316,22 @@ export const CreateEditEsqlViewFlyoutV3: React.FunctionComponent<CreateEditEsqlV
               })}
             </h3>
           </EuiTitle>
-          <EuiSpacer size="m" />
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('esqlViews.flyout.detailsSectionHelpText', {
+                defaultMessage: 'Name and describe the view.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
           <EuiFormRow
             label={i18n.translate('esqlViews.flyout.nameLabel', { defaultMessage: 'Name' })}
             helpText={
               !nameError &&
-              (name.trim()
-                ? i18n.translate('esqlViews.flyout.nameEsqlHelpText', {
-                    defaultMessage: 'Used in ES|QL queries as {query}',
-                    values: { query: `FROM ${name.trim()}` },
-                  })
-                : i18n.translate('esqlViews.flyout.nameHelpText', {
-                    defaultMessage:
-                      'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported',
-                  }))
+              i18n.translate('esqlViews.flyout.nameHelpText', {
+                defaultMessage:
+                  'Must not match an existing index, data stream, alias, external dataset, or view.',
+              })
             }
             isInvalid={Boolean(nameError)}
             error={nameError}
@@ -340,7 +342,7 @@ export const CreateEditEsqlViewFlyoutV3: React.FunctionComponent<CreateEditEsqlV
               onChange={handleNameChange}
               onBlur={handleNameBlur}
               placeholder={i18n.translate('esqlViews.flyout.namePlaceholder', {
-                defaultMessage: 'e.g. my-dataset',
+                defaultMessage: 'e.g. my-view',
               })}
               disabled={mode === 'edit'}
               isInvalid={Boolean(nameError)}
@@ -353,7 +355,7 @@ export const CreateEditEsqlViewFlyoutV3: React.FunctionComponent<CreateEditEsqlV
               defaultMessage: 'Description (optional)',
             })}
             helpText={i18n.translate('esqlViews.flyout.descriptionHelpText', {
-              defaultMessage: 'A brief description to help identify this view.',
+              defaultMessage: 'Add a brief description to help identify this view.',
             })}
             fullWidth
           >
@@ -361,7 +363,7 @@ export const CreateEditEsqlViewFlyoutV3: React.FunctionComponent<CreateEditEsqlV
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               placeholder={i18n.translate('esqlViews.flyout.textPlaceholder', {
-                defaultMessage: 'Type text',
+                defaultMessage: 'Describe this view',
               })}
               fullWidth
               data-test-subj="esqlViewsDescriptionInput"
@@ -378,7 +380,7 @@ export const CreateEditEsqlViewFlyoutV3: React.FunctionComponent<CreateEditEsqlV
           <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('esqlViews.flyout.querySectionHelpText', {
-                defaultMessage: 'You can write a custom query, or use a recent or starred one.',
+                defaultMessage: 'Write a new query, or select a recently or starred query.',
               })}
             </p>
           </EuiText>

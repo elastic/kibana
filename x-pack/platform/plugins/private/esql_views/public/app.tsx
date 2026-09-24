@@ -386,7 +386,7 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
       views.length === 0
         ? i18n.translate('esqlViews.table.emptyState', {
             defaultMessage:
-              'You do not have any ES|QL Views yet. Create one to save an ES|QL query as a reusable data source.',
+              'You don’t have any ES|QL views yet. Create one to define a named query you can reuse.',
           })
         : i18n.translate('esqlViews.table.noSearchResults', {
             defaultMessage: 'No ES|QL Views match your search.',
@@ -401,7 +401,7 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
         description={{
           text: i18n.translate('esqlViews.pageDescription', {
             defaultMessage:
-              'ES|QL queries saved as data sources.',
+              'Define named, reusable queries and reference them like an index.',
           }),
           learnMoreUrl: docLinks.links.query.queryESQLViews,
         }}
@@ -492,11 +492,11 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
             {viewsPendingDelete.length === 1
               ? i18n.translate('esqlViews.deleteModal.body', {
                   defaultMessage:
-                    'This permanently deletes the view from Elasticsearch and cannot be undone. Dashboards, alerts, and other saved objects that still query this view will start returning errors.',
+                    'This permanently deletes the view from Elasticsearch. Any query that references this view will fail, including queries in dashboards, alerts, and other saved objects.',
                 })
               : i18n.translate('esqlViews.deleteModal.bulkBody', {
                   defaultMessage:
-                    'This permanently deletes {count} views from Elasticsearch and cannot be undone. Dashboards, alerts, and other saved objects that still query these views will start returning errors.',
+                    'This permanently deletes {count} views from Elasticsearch. Any query that references these views will fail, including queries in dashboards, alerts, and other saved objects.',
                   values: { count: viewsPendingDelete.length },
                 })}
           </p>
