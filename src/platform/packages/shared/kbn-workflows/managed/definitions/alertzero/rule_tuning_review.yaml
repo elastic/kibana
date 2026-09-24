@@ -107,7 +107,7 @@ outputs:
 consts:
   # Fallbacks for the optional operational inputs; keep in sync with the sweep's
   # consts in rule_tuning_worker.yaml.
-  analysis_window_days: 14
+  analysis_window_days: 7
   preview_invocation_count: 2
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
