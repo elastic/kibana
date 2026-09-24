@@ -10,6 +10,7 @@
 import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
 import type { monaco } from '@kbn/monaco';
+import { createWorkflowContextRegistry } from '../../../../../common/lib/create_workflow_context_registry';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';
 import { useGetPropertyHandler } from '../../../../features/validate_workflow_yaml/lib/property_handlers/use_get_property_handler';
@@ -39,6 +40,11 @@ export const useWorkflowYamlCompletionProvider = (): monaco.languages.Completion
   const esqlCallbacksRef = useRef(esqlCallbacks);
   esqlCallbacksRef.current = esqlCallbacks;
 
+  const registry = useMemo(
+    () => createWorkflowContextRegistry(services.workflowsExtensions),
+    [services.workflowsExtensions]
+  );
+
   const completionProvider = useMemo(() => {
     const getKqlServices = (): WorkflowKqlCompletionServices => ({
       kql: services.kql,
@@ -48,12 +54,13 @@ export const useWorkflowYamlCompletionProvider = (): monaco.languages.Completion
       callbacks: esqlCallbacksRef.current,
     });
     return getCompletionItemProvider(
+      registry,
       () => editorStateRef.current,
       getKqlServices,
       getPropertyHandler,
       getEsqlServices
     );
-  }, [getPropertyHandler, services.fieldFormats, services.kql]);
+  }, [getPropertyHandler, registry, services.fieldFormats, services.kql]);
 
   return completionProvider;
 };
