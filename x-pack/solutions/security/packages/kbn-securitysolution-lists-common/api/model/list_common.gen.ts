@@ -92,8 +92,22 @@ export const ListStorage = lazySchema(() =>
     type: z.enum(['data_stream', 'lookup_index', 'regular_index']),
     locator: z
       .object({
-        index: z.string().optional(),
-        alias: z.string().optional(),
+        /**
+         * The concrete lookup index that holds the items.
+         */
+        index: z.string().optional().describe('The concrete lookup index that holds the items.'),
+        /**
+      * The alias every read and write uses while the list is shared. It sits
+under the `.items*` wildcard that existing roles grant. Absent once the
+list is restricted to explicit grants on the concrete index.
+
+      */
+        alias: z
+          .string()
+          .optional()
+          .describe(
+            'The alias every read and write uses while the list is shared. It sits\nunder the `.items*` wildcard that existing roles grant. Absent once the\nlist is restricted to explicit grants on the concrete index.\n'
+          ),
       })
       .optional(),
   })
