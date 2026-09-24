@@ -13,6 +13,7 @@
   "include": [
     "common/**/*",
     "public/**/*",
+    "scripts/**/*",
     "server/**/*"
   ],
   "exclude": [
@@ -38,6 +39,9 @@
     "@kbn/datemath",
     "@kbn/charts-theme",
     "@kbn/code-editor",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/dev-cli-runner",
+    "@kbn/tooling-log",
+    "@kbn/setup-node-env"
   ]
 }
