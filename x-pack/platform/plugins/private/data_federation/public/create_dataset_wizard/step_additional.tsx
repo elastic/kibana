@@ -16,7 +16,7 @@ import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { DatasetWizardContent } from './types';
 
 export function StepAdditional() {
-  const { control, getValues } = useFormContext<CreateDatasetFormValues>();
+  const { control, getValues, trigger } = useFormContext<CreateDatasetFormValues>();
   const { updateContent } = Forms.useContent<DatasetWizardContent, 'settings'>('settings');
 
   useEffect(() => {
@@ -24,10 +24,14 @@ export function StepAdditional() {
       // No required fields in this step today, but we still need a boolean
       // so wizard navigation isn't blocked by "missing content" semantics.
       isValid: true,
-      validate: async () => true,
+      validate: async () => {
+        // Block navigation when any advanced setting is invalid.
+        // max_error_ratio is one of the key settings that must be in range.
+        return await trigger(['settings.max_errors', 'settings.max_error_ratio']);
+      },
       getData: () => getValues().settings,
     });
-  }, [getValues, updateContent]);
+  }, [getValues, trigger, updateContent]);
 
   return (
     <div data-test-subj="createDatasetWizardAdditionalStep">

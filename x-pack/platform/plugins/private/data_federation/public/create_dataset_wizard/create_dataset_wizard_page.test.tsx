@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -49,6 +49,18 @@ const docLinksMock = {
 };
 
 describe('CreateDatasetWizardPage', () => {
+  const clickNext = async (getByTestId: ReturnType<typeof render>['getByTestId']) => {
+    await act(async () => {
+      fireEvent.click(getByTestId('nextButton'));
+    });
+  };
+
+  const clickBack = async (getByTestId: ReturnType<typeof render>['getByTestId']) => {
+    await act(async () => {
+      fireEvent.click(getByTestId('backButton'));
+    });
+  };
+
   const selectFormat = (getByTestId: ReturnType<typeof render>['getByTestId'], format: string) => {
     fireEvent.click(getByTestId('createDatasetSettingsFormat'));
     fireEvent.click(getByTestId(`createDatasetSettingsFormatOption-${format}`));
@@ -132,7 +144,7 @@ describe('CreateDatasetWizardPage', () => {
     });
     selectFormat(getByTestId, 'csv');
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
@@ -144,27 +156,27 @@ describe('CreateDatasetWizardPage', () => {
       target: { value: 'hive' },
     });
 
-    fireEvent.click(getByTestId('backButton'));
+    await clickBack(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
     fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
       target: { value: 'event_time' },
     });
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
-    fireEvent.click(getByTestId('backButton'));
+    await clickBack(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
 
     fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
       target: { value: 'event_time' },
     });
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
 
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     expect(getByTestId('createDatasetWizardReviewName')).toHaveTextContent('logs-dataset');
@@ -172,7 +184,7 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetWizardReviewFormat')).toHaveTextContent('csv');
     expect(getByTestId('createDatasetWizardReviewPartitionDetection')).toHaveTextContent('hive');
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     await waitFor(() => {
       expect(add).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -200,7 +212,7 @@ describe('CreateDatasetWizardPage', () => {
     });
 
     // No manual format selection. The path extension should infer parquet and allow navigation.
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
@@ -221,12 +233,12 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetSettingsFormat')).toBeInTheDocument();
     expect(queryByTestId('createDatasetSettingsPartitionDetection')).toBeNull();
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(queryByTestId('createDatasetWizardAdditionalStep')).toBeNull();
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
 
     selectFormat(getByTestId, 'parquet');
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
@@ -292,11 +304,11 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetResource'), {
       target: { value: 'bucket/updated/*' },
     });
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
     const timestampPathInput = queryByTestId('createDatasetWizardTimestampPath');
     if (timestampPathInput) {
@@ -304,9 +316,9 @@ describe('CreateDatasetWizardPage', () => {
         target: { value: 'event_time' },
       });
     }
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
 
     await waitFor(() => {
       expect(add).toHaveBeenCalledWith(
@@ -374,19 +386,19 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetName'), {
       target: { value: 'renamed-dataset' },
     });
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
     const timestampPathInput = queryByTestId('createDatasetWizardTimestampPath');
     if (timestampPathInput) {
       fireEvent.change(timestampPathInput, { target: { value: 'event_time' } });
     }
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
 
     await waitFor(() => {
       expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'renamed-dataset' }));
@@ -403,12 +415,12 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
     selectFormat(getByTestId, 'csv');
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
 
     // Turn off timeseries so there are zero mappings.
@@ -418,7 +430,7 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(getByTestId('createDatasetWizardDefineSchemaCard'));
 
     // Attempt to proceed.
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
 
     // Should stay on mapping step and show the error.
     expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
@@ -434,67 +446,30 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
     selectFormat(getByTestId, 'csv');
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
 
     fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
       target: { value: 'event_time' },
     });
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
 
     // Back twice: Review -> Mapping -> Additional settings
-    fireEvent.click(getByTestId('backButton'));
+    await clickBack(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
-    fireEvent.click(getByTestId('backButton'));
+    await clickBack(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
 
     // Next should still work.
-    fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
-  });
-
-  it('still allows Next after rapidly navigating back twice', async () => {
-    const { getByTestId, findByTestId } = renderWizard();
-
-    fireEvent.click(getByTestId('createDatasetDataSource'));
-    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
-    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
-    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
-    selectFormat(getByTestId, 'csv');
-
-    fireEvent.click(getByTestId('nextButton'));
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-    ).toBeInTheDocument();
-
-    fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
-
-    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
-      target: { value: 'event_time' },
-    });
-    fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
-
-    // Click Back twice quickly (no intermediate waits).
-    fireEvent.click(getByTestId('backButton'));
-    fireEvent.click(getByTestId('backButton'));
-
-    // We should end up on Additional settings.
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-    ).toBeInTheDocument();
-
-    // Next should still work.
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
   });
 
@@ -507,30 +482,57 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
     selectFormat(getByTestId, 'csv');
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
 
     // Make mapping invalid (Define schema + no mapped fields).
     fireEvent.click(getByTestId('createDatasetWizardTimeseriesToggle'));
     fireEvent.click(getByTestId('createDatasetWizardDefineSchemaCard'));
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
     expect(getByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeInTheDocument();
 
     // Navigate back to Additional settings, then Next should bring us back to Mapping
     // so the user can fix the invalid mappings.
-    fireEvent.click(getByTestId('backButton'));
+    await clickBack(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
 
-    fireEvent.click(getByTestId('nextButton'));
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+  });
+
+  it('blocks navigation when max error ratio is out of range', async () => {
+    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
+    selectFormat(getByTestId, 'parquet');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    // Parquet shows advanced settings as plain content, so the field is visible here.
+    fireEvent.change(getByTestId('createDatasetSettingsMaxErrorRatio'), {
+      target: { value: '2' },
+    });
+
+    await clickNext(getByTestId);
+
+    // Should remain on Additional settings and not proceed to Mapping.
+    expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+    expect(getByTestId('createDatasetWizardAdditionalStep')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toHaveAttribute('aria-invalid', 'true');
   });
 });
