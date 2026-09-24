@@ -18,9 +18,9 @@ import type { LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { LearningStore } from '../../decision_trees/learning_store';
 import { getScopedConversationId } from '../sandbox_bash/tool_utils';
 
-export const RECORD_SYSTEM_LEARNING_TOOL_ID = 'record_system_learning';
-export const RECORD_TOOL_LEARNING_TOOL_ID = 'record_tool_learning';
-export const RECORD_REMEDIATION_TOOL_ID = 'record_remediation';
+export const RECORD_SYSTEM_LEARNING_TOOL_ID = 'nightshift_record_system_learning';
+export const RECORD_TOOL_LEARNING_TOOL_ID = 'nightshift_record_tool_learning';
+export const RECORD_REMEDIATION_TOOL_ID = 'nightshift_record_remediation';
 
 const MAX_LEARNING_LENGTH = 2048;
 
