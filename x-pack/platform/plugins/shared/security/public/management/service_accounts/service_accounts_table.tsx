@@ -125,6 +125,29 @@ export const ServiceAccountsTable = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
+        render: (name: string, { enabled }: ServiceAccountTableItem) =>
+          enabled ? (
+            name
+          ) : (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.security.management.serviceAccounts.table.disabledTooltip',
+                    { defaultMessage: 'This account is disabled and cannot authenticate.' }
+                  )}
+                >
+                  <EuiBadge tabIndex={0} data-test-subj="serviceAccountDisabledBadge">
+                    {i18n.translate(
+                      'xpack.security.management.serviceAccounts.table.disabledBadge',
+                      { defaultMessage: 'Disabled' }
+                    )}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
       },
       {
         field: 'description',

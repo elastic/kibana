@@ -33,7 +33,7 @@ describe('ServiceAccountsTable', () => {
     id: 'second-id',
     name: 'incident-responder',
     roles: ['editor'],
-    enabled: true,
+    enabled: false,
     assumable: true,
   };
 
@@ -70,6 +70,14 @@ describe('ServiceAccountsTable', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     expect(screen.queryByText('Actions')).not.toBeInTheDocument();
+  });
+
+  it('marks only disabled accounts', () => {
+    renderTable();
+
+    const disabledBadges = screen.getAllByTestId('serviceAccountDisabledBadge');
+    expect(disabledBadges).toHaveLength(1);
+    expect(disabledBadges[0].closest('tr')).toHaveTextContent('incident-responder');
   });
 
   it('filters accounts by free text', async () => {
