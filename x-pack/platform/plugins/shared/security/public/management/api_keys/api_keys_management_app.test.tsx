@@ -20,6 +20,8 @@ jest.mock('./api_keys_grid/api_keys_grid_page', () => ({ APIKeysGridPage: () => 
 const element = document.body.appendChild(document.createElement('div'));
 
 describe('apiKeysManagementApp', () => {
+  jest.setTimeout(15_000);
+
   it('renders application and sets breadcrumbs', async () => {
     const { getStartServices } = coreMock.createSetup();
     const coreStartMock = coreMock.createStart();

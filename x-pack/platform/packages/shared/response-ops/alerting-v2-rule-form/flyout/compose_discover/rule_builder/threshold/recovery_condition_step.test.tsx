@@ -12,7 +12,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BuilderRecoveryForm } from './recovery_condition_step';
 import { BuilderStateProvider } from '../builder_state_context';
 import type { ThresholdFormValues } from './form_types';
-import { Comparator, DEFAULT_THRESHOLD_FORM_VALUES } from './form_types';
+import { Aggregation, Comparator, DEFAULT_THRESHOLD_FORM_VALUES } from './form_types';
 import type { FormValues } from '../../../../form/types';
 import type { ComposeDiscoverAction } from '../../types';
 import { createInitialState } from '../../use_compose_discover_state';
@@ -192,6 +192,32 @@ describe('BuilderRecoveryForm', () => {
     expect(setBuilderState).toHaveBeenCalled();
     const lastCall = setBuilderState.mock.calls[setBuilderState.mock.calls.length - 1][0];
     expect(lastCall.recovery.conditions.length).toBe(1);
+  });
+
+  it('seeds a newly added recovery condition with a currently valid metric after a stat rename', () => {
+    const setBuilderState = jest.fn();
+    const builderState = makeBuilderState({
+      stats: [{ id: 'stat-1', label: 'my_metric', aggregation: Aggregation.COUNT }],
+      recovery: {
+        conditions: [
+          { id: '1', metric: 'my_metric', comparator: Comparator.LTE, threshold: [100] },
+        ],
+        conditionOperator: 'AND',
+      },
+    });
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={setBuilderState}>
+        {renderRecoveryForm()}
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('ruleBuilderAddRecoveryCondition'));
+
+    expect(setBuilderState).toHaveBeenCalled();
+    const lastCall = setBuilderState.mock.calls[setBuilderState.mock.calls.length - 1][0];
+    expect(lastCall.recovery.conditions).toHaveLength(2);
+    expect(lastCall.recovery.conditions[1].metric).toBe('my_metric');
   });
 
   it('derives recovery conditions from alert conditions on init', () => {
