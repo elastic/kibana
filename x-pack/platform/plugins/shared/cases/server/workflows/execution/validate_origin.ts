@@ -98,10 +98,10 @@ export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): Docume
  * Rejects `inputs.event.documentIds` on a case workflow run.
  *
  * Case membership is only validated for `inputs.event.documents` (see
- * `parseSelectedDocumentPairs`), while the server expands `documentIds` into documents itself.
- * Accepting them would let a case-scoped run pull in documents never checked against the case
- * while the audit trail still reads "ran workflow from case X". No Cases caller has ever sent
- * `documentIds`, so rejecting breaks nothing.
+ * `parseSelectedDocumentPairs`), and case runs do not let the workflows server expand
+ * `documentIds` (see `expandSelections` in the run service). Accepting them would forward an
+ * unchecked selection into a run whose audit trail reads "ran workflow from case X", so the shape
+ * is rejected outright. No Cases caller has ever sent `documentIds`, so rejecting breaks nothing.
  *
  * Pre-expanded `inputs.event.documents` are deliberately not rejected here: they are validated
  * against the case's attached documents and forwarded verbatim to the workflow engine.
