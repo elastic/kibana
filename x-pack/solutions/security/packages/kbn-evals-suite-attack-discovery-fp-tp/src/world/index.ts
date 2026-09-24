@@ -35,10 +35,13 @@ export {
 export { asRecord, withFieldMessage } from './event_message';
 export { joinKibanaUrl } from './join_kibana_url';
 export {
+  withCommandLine,
+  withFilePath,
   withNetworkDestination,
   withoutEventCategory,
   withoutEventIds,
   withoutProcessParent,
+  withProcessExecutable,
   withProcessParent,
 } from './mutations';
 export {

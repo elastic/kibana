@@ -31,7 +31,7 @@ A missing source is one-sided: it blocks `false_positive` (missing evidence cann
 
 Situations follow the contract: U1 lookalike, U2 benign alerts, U3 invented chain, U4 shared egress or jump box, U5 ambient, U6 true attack.
 
-Every example records its `labelProvenance`: `authored` (written by hand), `replay` (a published chain rendered as documents), or `adversarial-mutation` (a replay with one fact changed). Examples with `checks` state the result each world check should reach, and `registry.test.ts` requires the gold to follow from them under the workflow's verdict rules (`deriveFpTpOutcome`). A mutation must change at least one check result against its scenario's `.tp` example; one that changes none, such as reordering events, tests nothing new. `provisional` marks a gold that is not agreed yet.
+Every example records its `labelProvenance`: `authored` (written by hand), `replay` (a published chain rendered as documents), or `adversarial-mutation` (a replay with one fact changed). Examples with `checks` state the result each world check should reach, and `registry.test.ts` requires the gold to follow from them under the workflow's verdict rules (`deriveFpTpOutcome`). A `mutation` must change at least one check result against its scenario's `.tp` example; one that changes none, such as reordering events, tests nothing new. A `perturbation` must change none, so its gold stays that of `.tp`; every `adversarial-mutation` example is exactly one of the two. `provisional` marks a gold that is not agreed yet.
 
 Each example's metadata carries its scenario, situation, evidence state, label provenance, and whether it is provisional, so reports can be sliced by any of them. Every task seeds its documents under a fresh run marker and suffix (`uniquify`), so repetitions and examples never share a document, and deletes them when it ends.
 
@@ -66,7 +66,7 @@ src/
    - `twins`: the complete worlds a person can seed by hand, keyed by variant.
    - `examples`: one entry per eval example, with its situation, evidence state, gold outcome, label provenance, `checks` where the gold follows from the verdict rules, and `buildWorld(runMarker)`. Use the helpers in `src/world/evidence_states.ts` for the degraded-evidence and failure examples.
 3. Add the scenario to `FP_TP_SCENARIOS` in `src/scenarios/index.ts`.
-4. Run the package's jest tests. `registry.test.ts` checks the new examples for unique ids, no unsuffixed shared names, disjoint documents across runs, raw events inside the workflow's ±2h window, golds that follow from `checks`, and mutations that change a check result.
+4. Run the package's jest tests. `registry.test.ts` checks the new examples for unique ids, no unsuffixed shared names, disjoint documents across runs, raw events inside the workflow's ±2h window, golds that follow from `checks`, mutations that change a check result, and perturbations that change none.
 
 ## Evaluators
 

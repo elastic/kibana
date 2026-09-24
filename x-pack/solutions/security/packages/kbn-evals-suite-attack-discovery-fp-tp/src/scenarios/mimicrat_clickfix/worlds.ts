@@ -7,8 +7,12 @@
 
 import {
   buildChainWorld,
+  getChainIds,
+  withCommandLine,
+  withFilePath,
   withNetworkDestination,
   withoutProcessParent,
+  withProcessExecutable,
   withProcessParent,
   type FpTpChainParentProcess,
   type FpTpEntityRoleKey,
@@ -54,14 +58,46 @@ export const withManagementDestinations = (world: FpTpWorld): FpTpWorld =>
     { domain: 'sccm-dp-02.corp.local', ip: '10.50.10.20', port: 443 }
   );
 
+const CCM_SCRIPT_DIR = 'C:\\Windows\\CCM\\SystemTemp';
+
+const CCM_PACKAGE_PATH = 'C:\\Windows\\ccmcache\\3f\\zbuild.exe';
+
 /**
- * The benign mimic: the same chain on an SCCM distribution point, run by the
- * Configuration Manager client, talking only to Microsoft management services.
+ * Replaces the replay's malicious raw-event content with Configuration Manager activity:
+ * compliance scripts instead of the cradle and the AMSI patch, and a cached package
+ * instead of the ProgramData loader. The alerts and the discovery keep their claims.
+ */
+const withBenignActivity = (world: FpTpWorld, runMarker: string): FpTpWorld => {
+  const { eventId } = getChainIds(MIMICRAT_CHAIN, runMarker);
+  const scripted = withCommandLine(
+    withCommandLine(
+      world,
+      eventId('clickfix-powershell'),
+      `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ${CCM_SCRIPT_DIR}\\a3f1c2d4.ps1`
+    ),
+    eventId('amsi-bypass'),
+    `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ${CCM_SCRIPT_DIR}\\b7e9d0f2.ps1`
+  );
+  return withCommandLine(
+    withProcessExecutable(
+      withFilePath(scripted, eventId('loader-drop'), CCM_PACKAGE_PATH),
+      'zbuild.exe',
+      CCM_PACKAGE_PATH
+    ),
+    eventId('loader-start'),
+    CCM_PACKAGE_PATH
+  );
+};
+
+/**
+ * The benign mimic: the same alerts and discovery on an SCCM distribution point, where
+ * the Configuration Manager client runs compliance scripts and a cached package that
+ * talk only to Microsoft management services.
  */
 export const fpWorld = (runMarker: string): FpTpWorld =>
   withManagementDestinations(
     withProcessParent(
-      tpWorld(runMarker, 'sccm_distribution_point'),
+      withBenignActivity(tpWorld(runMarker, 'sccm_distribution_point'), runMarker),
       'powershell.exe',
       CCMEXEC_PARENT
     )

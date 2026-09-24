@@ -43,9 +43,30 @@ describe('FP/TP scenario registry', () => {
     expect(checks).not.toEqual(base?.checks);
   });
 
-  it('returns checks for every mutation', () => {
+  it.each(
+    FP_TP_EXAMPLES.filter(({ perturbation }) => perturbation).map((example) => [
+      example.id,
+      example,
+    ])
+  )('returns %s checks equal to its scenario tp checks', (_id, { checks, scenarioKey }) => {
+    const base = FP_TP_EXAMPLES.find(({ id }) => id === `${scenarioKey}.tp`);
+    expect(checks).toEqual(base?.checks);
+  });
+
+  it('returns checks for every mutation and perturbation', () => {
     expect(
-      FP_TP_EXAMPLES.filter(({ mutation, checks }) => mutation && !checks).map(({ id }) => id)
+      FP_TP_EXAMPLES.filter(
+        ({ mutation, perturbation, checks }) => (mutation || perturbation) && !checks
+      ).map(({ id }) => id)
+    ).toEqual([]);
+  });
+
+  it('returns exactly one of mutation or perturbation for every adversarial mutation', () => {
+    expect(
+      FP_TP_EXAMPLES.filter(
+        ({ labelProvenance, mutation, perturbation }) =>
+          labelProvenance === 'adversarial-mutation' && !mutation === !perturbation
+      ).map(({ id }) => id)
     ).toEqual([]);
   });
 

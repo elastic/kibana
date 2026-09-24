@@ -15,7 +15,7 @@ import {
   withProcessParent,
 } from '../../world';
 import type { FpTpExample } from '../types';
-import { MIMICRAT_C2_DOMAIN, MIMICRAT_CHAIN } from './chain';
+import { MIMICRAT_C2_DOMAIN, MIMICRAT_CHAIN, MIMICRAT_STAGE2_DOMAIN } from './chain';
 import {
   fpWorld,
   INTUNE_AGENT_PARENT,
@@ -28,11 +28,11 @@ const eventId = (runMarker: string, eventKey: string): string =>
   getChainIds(MIMICRAT_CHAIN, runMarker).eventId(eventKey);
 
 /**
- * The replayed chain (`tp`), its benign mimic (`fp-benign-mimic`), and variants that
- * each change one fact the world checks read. Every gold follows from `checks` under
- * the workflow's verdict rules. `explorer.exe`, the Run dialog's parent, is the user's
- * shell, so `processParent` supports; a variant that needs it neutral removes the
- * parent instead of guessing at a neutral process.
+ * The replayed chain (`tp`), its benign mimic (`fp-benign-mimic`), variants that each
+ * change one fact the world checks read, and perturbations that change none. Every
+ * gold follows from `checks` under the workflow's verdict rules. `explorer.exe`, the
+ * Run dialog's parent, is the user's shell, so `processParent` supports; a variant
+ * that needs it neutral removes the parent instead of guessing at a neutral process.
  */
 export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
   {
@@ -68,6 +68,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     evidenceState: 'complete',
     expectedOutcome: 'true_positive',
     labelProvenance: 'adversarial-mutation',
+    perturbation: 'exfil POST dropped; the check-in still shows the C2',
     checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
     buildWorld: (runMarker) =>
       withoutEventIds(tpWorld(runMarker), [eventId(runMarker, 'c2-exfil')]),
@@ -78,6 +79,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     evidenceState: 'complete',
     expectedOutcome: 'true_positive',
     labelProvenance: 'adversarial-mutation',
+    perturbation: "AMSI-bypass event, its stage's only evidence, dropped",
     provisional: true,
     checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
     buildWorld: (runMarker) =>
@@ -148,14 +150,22 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     evidenceState: 'complete',
     expectedOutcome: 'inconclusive',
     labelProvenance: 'adversarial-mutation',
-    mutation: 'C2 hop moved to api.dropbox.com',
-    checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'mixed' },
+    mutation: 'stage-2 download and C2 moved to Dropbox',
+    checks: {
+      entityRole: 'supports',
+      processParent: 'supports',
+      networkDestination: 'contradicts',
+    },
     buildWorld: (runMarker) =>
-      withNetworkDestination(tpWorld(runMarker), MIMICRAT_C2_DOMAIN, {
-        domain: 'api.dropbox.com',
-        ip: '162.125.1.18',
-        port: 443,
-      }),
+      withNetworkDestination(
+        withNetworkDestination(tpWorld(runMarker), MIMICRAT_STAGE2_DOMAIN, {
+          domain: 'dl.dropboxusercontent.com',
+          ip: '162.125.1.15',
+          port: 443,
+        }),
+        MIMICRAT_C2_DOMAIN,
+        { domain: 'api.dropbox.com', ip: '162.125.1.18', port: 443 }
+      ),
   },
   {
     id: 'mimicrat-clickfix.role-swap-sccm',

@@ -10,7 +10,6 @@ import { deriveFpTpOutcome, type FpTpCheckResult } from './verdict_rules';
 describe('deriveFpTpOutcome', () => {
   it.each<[FpTpCheckResult, FpTpCheckResult, FpTpCheckResult, string]>([
     ['supports', 'neutral', 'contradicts', 'inconclusive'],
-    ['supports', 'neutral', 'mixed', 'inconclusive'],
     ['contradicts', 'contradicts', 'contradicts', 'false_positive'],
     ['neutral', 'neutral', 'contradicts', 'false_positive'],
     ['skipped', 'contradicts', 'contradicts', 'inconclusive'],

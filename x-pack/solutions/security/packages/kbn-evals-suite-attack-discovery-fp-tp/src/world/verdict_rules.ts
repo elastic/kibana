@@ -8,10 +8,10 @@
 import type { FpTpVerdict } from '../constants';
 
 /**
- * What one world check found. `mixed` means the check's own evidence both supports and
- * contradicts the alert; `skipped` means the source it reads was empty or unavailable.
+ * What one world check found, as the workflow reports it: a completed check's result,
+ * or `skipped` when the source it reads was empty or unavailable.
  */
-export type FpTpCheckResult = 'supports' | 'contradicts' | 'neutral' | 'mixed' | 'skipped';
+export type FpTpCheckResult = 'supports' | 'contradicts' | 'neutral' | 'skipped';
 
 /** The world checks an example's world is authored to produce. */
 export interface FpTpWorldChecks {
@@ -30,8 +30,8 @@ export const deriveFpTpOutcome = ({
   networkDestination,
 }: FpTpWorldChecks): FpTpVerdict => {
   const results = [entityRole, processParent, networkDestination];
-  const supports = results.some((result) => result === 'supports' || result === 'mixed');
-  const contradicts = results.some((result) => result === 'contradicts' || result === 'mixed');
+  const supports = results.includes('supports');
+  const contradicts = results.includes('contradicts');
   const entitiesFound = entityRole !== 'skipped';
   const eventsFound = processParent !== 'skipped' || networkDestination !== 'skipped';
 

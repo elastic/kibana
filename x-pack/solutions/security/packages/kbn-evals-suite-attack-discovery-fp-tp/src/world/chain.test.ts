@@ -8,10 +8,13 @@
 import { buildChainWorld, getChainIds, type FpTpChainDefinition } from './chain';
 import { FP_TP_BASE_TIME, FP_TP_RAW_EVENT_WINDOW_MS } from './constants';
 import {
+  withCommandLine,
+  withFilePath,
   withNetworkDestination,
   withoutEventCategory,
   withoutEventIds,
   withoutProcessParent,
+  withProcessExecutable,
   withProcessParent,
 } from './mutations';
 
@@ -160,6 +163,32 @@ describe('chain mutations', () => {
   it('returns a message without a parent after withoutProcessParent', () => {
     const [event] = withoutProcessParent(world, 'powershell.exe').events;
     expect(event.source.message).toBe('powershell.exe started');
+  });
+
+  it('returns the new command line and its args after withCommandLine', () => {
+    const [event] = withCommandLine(
+      world,
+      ids.eventId('start'),
+      'powershell.exe -File a.ps1'
+    ).events;
+    expect(event.source.process).toMatchObject({
+      command_line: 'powershell.exe -File a.ps1',
+      args: ['powershell.exe', '-File', 'a.ps1'],
+      args_count: 3,
+    });
+  });
+
+  it('returns the new file path and name after withFilePath', () => {
+    const [event] = withFilePath(world, ids.eventId('start'), 'C:\\dir\\tool.exe').events;
+    expect(event.source.file).toEqual({ path: 'C:\\dir\\tool.exe', name: 'tool.exe' });
+  });
+
+  it('returns the new executable on every event of the process after withProcessExecutable', () => {
+    expect(
+      withProcessExecutable(world, 'powershell.exe', 'C:\\other.exe').events.map(
+        ({ source }) => (source.process as { executable: string }).executable
+      )
+    ).toEqual(['C:\\other.exe', 'C:\\other.exe']);
   });
 
   it('returns the remaining events after withoutEventIds', () => {

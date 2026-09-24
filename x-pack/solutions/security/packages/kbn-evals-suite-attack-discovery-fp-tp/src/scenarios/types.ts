@@ -43,6 +43,12 @@ export interface FpTpExample {
    */
   readonly mutation?: string;
   /**
+   * Set when the world drops or changes evidence the world checks do not read. A
+   * perturbation must leave every check result of the scenario's `.tp` world unchanged,
+   * so the gold does not move either.
+   */
+  readonly perturbation?: string;
+  /**
    * Builds the world one run seeds. Every id in it must be a digest of `runMarker`
    * or contain one of the scenario's `sharedNames`, so runs never share a document.
    */

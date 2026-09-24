@@ -47,6 +47,60 @@ export const withoutProcessParent = (world: FpTpWorld, childName: string): FpTpW
     }
   );
 
+/** Rewrites the command line of the raw event with id `eventId`. */
+export const withCommandLine = (
+  world: FpTpWorld,
+  eventId: string,
+  commandLine: string
+): FpTpWorld => {
+  const args = commandLine.split(/\s+/).filter(Boolean);
+  return mapEvents(
+    world,
+    ({ id }) => id === eventId,
+    (event) => ({
+      ...event,
+      source: {
+        ...event.source,
+        process: {
+          ...asRecord(event.source.process),
+          command_line: commandLine,
+          args,
+          args_count: args.length,
+        },
+      },
+    })
+  );
+};
+
+/** Rewrites the file path of the raw event with id `eventId`. */
+export const withFilePath = (world: FpTpWorld, eventId: string, path: string): FpTpWorld =>
+  mapEvents(
+    world,
+    ({ id }) => id === eventId,
+    (event) => ({
+      ...event,
+      source: { ...event.source, file: { path, name: path.split('\\').pop() } },
+    })
+  );
+
+/** Rewrites the executable of every raw event whose process is `name`. */
+export const withProcessExecutable = (
+  world: FpTpWorld,
+  name: string,
+  executable: string
+): FpTpWorld =>
+  mapEvents(
+    world,
+    (event) => processName(event) === name,
+    (event) => ({
+      ...event,
+      source: {
+        ...event.source,
+        process: { ...asRecord(event.source.process), executable },
+      },
+    })
+  );
+
 /** Rewrites the destination of every raw event that connects to `fromDomain`. */
 export const withNetworkDestination = (
   world: FpTpWorld,
