@@ -218,3 +218,96 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     expect(new Set(ids).size).toBe(ids.length); // all unique
   });
 });
+
+// ─── lazy serviceVars prune effect ───────────────────────────────────────────
+
+describe('useServiceSettings — lazy serviceVars prune', () => {
+  it('removes serviceVars entries whose instanceId is not in the current instance list', async () => {
+    // Simulate a session where guardduty and a stale entry 'old_service' exist in serviceVars.
+    // After mount the effect should prune 'old_service' because it has no matching instance.
+    let storedState: unknown = {
+      globalRegion: 'us-east-1',
+      instances: [
+        { instanceId: 'guardduty', serviceId: 'guardduty', name: 'GuardDuty', isDuplicate: false },
+      ],
+      serviceVars: {
+        guardduty: { enabledDataStreams: ['guardduty'], varsByDataStream: {} },
+        old_service: { enabledDataStreams: ['old_service'], varsByDataStream: {} },
+      },
+    };
+    const setPersisted = jest.fn((updater: unknown) => {
+      if (typeof updater === 'function') {
+        storedState = (updater as Function)(storedState);
+      } else {
+        storedState = updater;
+      }
+    });
+    mockUseSessionStorage.mockReturnValue([storedState, setPersisted]);
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['guardduty'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: AWS_SERVICES_MAP,
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    // setPersisted must have been called to prune the stale key.
+    expect(setPersisted).toHaveBeenCalled();
+    const written = (storedState as any).serviceVars;
+    expect(written).toHaveProperty('guardduty');
+    expect(written).not.toHaveProperty('old_service');
+  });
+
+  it('does not call setPersisted when there are no stale keys', () => {
+    const storedState = {
+      globalRegion: 'us-east-1',
+      instances: [
+        { instanceId: 'guardduty', serviceId: 'guardduty', name: 'GuardDuty', isDuplicate: false },
+      ],
+      serviceVars: {
+        guardduty: { enabledDataStreams: ['guardduty'], varsByDataStream: {} },
+      },
+    };
+    const setPersisted = jest.fn();
+    mockUseSessionStorage.mockReturnValue([storedState, setPersisted]);
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['guardduty'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: AWS_SERVICES_MAP,
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(setPersisted).not.toHaveBeenCalled();
+  });
+
+  it('preserves all valid entries and removes only stale ones', () => {
+    const storedState = {
+      globalRegion: '',
+      instances: [
+        { instanceId: 'svc_a', serviceId: 'svc_a', name: 'A', isDuplicate: false },
+        { instanceId: 'svc_b', serviceId: 'svc_b', name: 'B', isDuplicate: false },
+      ],
+      serviceVars: {
+        svc_a: { enabledDataStreams: [], varsByDataStream: {} },
+        svc_b: { enabledDataStreams: [], varsByDataStream: {} },
+        svc_stale: { enabledDataStreams: [], varsByDataStream: {} },
+      },
+    };
+    const setPersisted = jest.fn();
+    mockUseSessionStorage.mockReturnValue([storedState, setPersisted]);
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svc_a', 'svc_b'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: AWS_SERVICES_MAP,
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(setPersisted).toHaveBeenCalled();
+    const call = setPersisted.mock.calls[0][0];
+    expect(call.serviceVars).toHaveProperty('svc_a');
+    expect(call.serviceVars).toHaveProperty('svc_b');
+    expect(call.serviceVars).not.toHaveProperty('svc_stale');
+  });
+});

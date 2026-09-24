@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')]),
-  connectorId: schema.maybe(schema.string({ minLength: 1 })),
+  connectorId: schema.maybe(schema.nullable(schema.string({ minLength: 1 }))),
   mechanisms: schema.arrayOf(
     schema.oneOf([
       schema.literal('managed_integration'),
@@ -38,9 +38,12 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   globalRegion: schema.maybe(schema.string()),
   dataFormat: schema.maybe(schema.oneOf([schema.literal('ecs'), schema.literal('otel')])),
   authMethod: schema.maybe(
-    schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
+    schema.nullable(
+      schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
+    )
   ),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  policyIdsByInstance: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   agentPolicyId: schema.maybe(schema.string()),
   apiKeyId: schema.maybe(schema.string()),
   /** ECF CloudFormation stacks launched for this deployment, one entry per template family. */

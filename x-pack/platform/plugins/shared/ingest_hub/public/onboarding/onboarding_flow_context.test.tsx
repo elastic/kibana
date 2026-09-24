@@ -180,6 +180,228 @@ describe('OnboardingFlowProvider', () => {
 
       expect(result.current.detectAndReviewStep.onboardingDeploymentId).toBe('dep-xyz');
     });
+
+    it('stages removed policy ID into pendingCleanupPolicyIds before clearing from policyIdsByInstance', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A', inst_b: 'policy-B' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstance('inst_a');
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({
+        inst_a: 'policy-A',
+      });
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).not.toHaveProperty('inst_a');
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toHaveProperty('inst_b');
+    });
+
+    it('accumulates pending cleanup entries across multiple removals', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A', inst_b: 'policy-B' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstance('inst_a');
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstance('inst_b');
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({
+        inst_a: 'policy-A',
+        inst_b: 'policy-B',
+      });
+    });
+
+    it('does not add to pendingCleanupPolicyIds when removed instance has no deployed policy', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: {},
+          serviceStatuses: { inst_no_policy: 'instantiating' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstance('inst_no_policy');
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds ?? {}).toEqual({});
+    });
+  });
+
+  describe('removeDeployInstances', () => {
+    it('removes multiple instances in one same-tick call without losing removals', () => {
+      // This covers the lost-update race: if removal were a loop of removeDeployInstance calls,
+      // all calls would read the same pre-update ref snapshot and later writes would overwrite
+      // earlier ones. removeDeployInstances batches all deletions into one state write.
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A', inst_b: 'policy-B' },
+          serviceStatuses: { inst_a: 'receiving', inst_b: 'receiving' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstances(['inst_a', 'inst_b']);
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({});
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({
+        inst_a: 'policy-A',
+        inst_b: 'policy-B',
+      });
+      expect(result.current.detectAndReviewStep.serviceStatuses).toEqual({});
+    });
+
+    it('single-element array delegates to removeDeployInstance (same observable result)', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstances(['inst_a']);
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({});
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({
+        inst_a: 'policy-A',
+      });
+    });
+
+    it('no-op for empty array', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstances([]);
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({
+        inst_a: 'policy-A',
+      });
+    });
+
+    it('removeDeployInstances + updateDetectAndReviewStep in the same tick: removal is not overwritten', () => {
+      // Production sequence from use_deploy / use_agent_based_deploy cleanup path:
+      //   removeDeployInstances(stalIds)          ← advances ref eagerly
+      //   updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} })  ← reads ref; must see post-removal state
+      //
+      // Without the ref-advance fix, updateDetectAndReviewStep would read the stale snapshot
+      // (still containing 'old-svc') and its setState call (which React applies last) would
+      // reintroduce the removed instance.
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { elb: 'policy-ELB', 'old-svc': 'policy-OLD' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        // Same tick: exactly the sequence used by deploy hooks after cleanup.
+        result.current.removeDeployInstances(['old-svc']);
+        result.current.updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
+      });
+      rerender();
+
+      // old-svc must be gone despite the follow-up state write.
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({ elb: 'policy-ELB' });
+      // pendingCleanupPolicyIds must be cleared (the updateDetectAndReviewStep took effect).
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({});
+    });
+  });
+
+  describe('updateDetectAndReviewStep — pendingCleanupPolicyIds merge semantics', () => {
+    it('explicit empty object clears pendingCleanupPolicyIds', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A' },
+        });
+      });
+      rerender();
+      act(() => {
+        result.current.removeDeployInstance('inst_a');
+      });
+      rerender();
+
+      // Verify pending was set.
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({
+        inst_a: 'policy-A',
+      });
+
+      // Now clear it (simulating post-cleanup call).
+      act(() => {
+        result.current.updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({});
+    });
+
+    it('absent pendingCleanupPolicyIds in update preserves the existing map', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { inst_a: 'policy-A' },
+        });
+      });
+      rerender();
+      act(() => {
+        result.current.removeDeployInstance('inst_a');
+      });
+      rerender();
+
+      // An unrelated update must not clear the pending map.
+      act(() => {
+        result.current.updateDetectAndReviewStep({ isDeploying: false });
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({
+        inst_a: 'policy-A',
+      });
+    });
   });
 
   describe('getLatestFailedInstances', () => {
@@ -401,6 +623,29 @@ describe('OnboardingFlowProvider', () => {
       rerender();
 
       expect(result.current.detectAndReviewStep.failedInstances).toEqual(['inst_x']);
+    });
+
+    // Regression: policyIdsByInstance populated by MI deploy was preserved on method switch,
+    // causing isAlreadyDeployed to return true on the agent-based path for the same service.
+    it('clears policyIdsByInstance so MI-deployed IDs cannot falsely satisfy agent-based isAlreadyDeployed', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { 'inst-a': 'mi-policy-1' },
+        });
+      });
+      rerender();
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({
+        'inst-a': 'mi-policy-1',
+      });
+
+      act(() => {
+        result.current.setDeploymentMethod('agent_based');
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({});
     });
   });
 
