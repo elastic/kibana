@@ -10,7 +10,7 @@ import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { RecurringSchedule } from '@kbn/response-ops-recurring-schedule-form/types';
 import { getRecurringScheduleFormSchema } from '@kbn/response-ops-recurring-schedule-form/schemas/recurring_schedule_form_schema';
-import type { ScopedQueryAttributes } from '../../common';
+import type { AlertingV2ScopeAttributes, ScopedQueryAttributes } from '../../common';
 import * as i18n from '../translations';
 
 const { emptyField } = fieldValidators;
@@ -22,7 +22,12 @@ export interface FormProps {
   timezone?: string[];
   recurring: boolean;
   recurringSchedule?: RecurringSchedule;
-  scopedQuery?: ScopedQueryAttributes | null;
+  // Scope is managed by local state in the form component, not by useForm.
+  // Carried here so initialValue can seed the state on mount.
+  scope?: {
+    alerting?: ScopedQueryAttributes | null;
+    alertingV2?: AlertingV2ScopeAttributes;
+  };
 }
 
 export const schema: FormSchema<FormProps> = {
@@ -34,12 +39,6 @@ export const schema: FormSchema<FormProps> = {
         validator: emptyField(i18n.CREATE_FORM_NAME_REQUIRED),
       },
     ],
-  },
-  scopedQuery: {
-    defaultValue: {
-      kql: '',
-      filters: [],
-    },
   },
   startDate: {},
   endDate: {},

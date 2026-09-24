@@ -235,6 +235,8 @@ export {
   type CompactionStepData,
   type CompactionStep,
   type RoundModelUsageStats,
+  ZERO_MODEL_USAGE,
+  isZeroModelUsage,
   type CompactionSummary,
   type CompactionStructuredData,
   type CompactionToolCallSummary,
@@ -395,6 +397,10 @@ export {
   type ExecutionAbortedEvent,
   type ExecutionTerminalEvent,
   isExecutionTerminalEvent,
+  answeredPromptRequestIds,
+  lastExecutionTerminal,
+  pendingPromptRequest,
+  interruptionOfTerminal,
   type AttachmentEventSource,
   type AttachmentAddedEventData,
   type AttachmentAddedEvent,
@@ -421,6 +427,7 @@ export {
   isBuiltInConversationEventType,
   isTimelineEvent,
   type ValidConversationEventType,
+  assertValidConversationEventType,
   type ConversationAddEventInput,
 } from './chat';
 export {
