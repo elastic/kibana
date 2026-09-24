@@ -73,7 +73,7 @@ export const createQueryAiIndicesTool = (
 
     The server adds the space filter and a row limit (at most ${MAX_AI_INDEX_QUERY_LIMIT}). Do not write a space condition in the query.
     The space comes from the request. Over MCP that is the URL: /api/agent_builder/mcp is the default space, /s/{spaceId}/api/agent_builder/mcp is another space.
-    The query's FROM decides which indices are read. It can read more than one AI Index, and only indices you have Elasticsearch read access to.
+    The query's FROM decides which indices are read. It can read more than one AI Index, but only the indices you have Elasticsearch read access to.
     Put time constraints in the ES|QL itself (for example WHERE @timestamp >= NOW() - 24 hours) or in params.
   `,
   schema: queryAiIndicesSchema,
