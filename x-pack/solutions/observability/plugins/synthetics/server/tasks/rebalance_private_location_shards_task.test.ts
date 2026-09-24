@@ -16,12 +16,14 @@ import {
   REBALANCE_SHARDS_TASK_ID,
   DEFAULT_REBALANCE_SCHEDULE,
   MAX_PIN_CLEAR_ATTEMPTS,
+  LICENSE_PIN_CLEAR_BACKOFF_MS,
   runRebalanceShardsTaskSoon,
 } from './rebalance_private_location_shards_task';
 import {
   REBALANCE_SHARDS_ENABLED_STATE_KEY,
   REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
+  REBALANCE_SHARDS_LAST_PIN_CLEAR_ATTEMPT_STATE_KEY,
 } from './rebalance_shards_enabled';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -313,6 +315,33 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(getPrivateLocationsSpy).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
       expect(result.state).toEqual({ keep: 1, [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true });
+    });
+
+    it('retries an exhausted unlicensed drain only after the backoff', async () => {
+      mockGetLicense.mockResolvedValue(licenseMock.createLicense({ license: { type: 'basic' } }));
+      mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 1 });
+      const exhaustedState = {
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: MAX_PIN_CLEAR_ATTEMPTS,
+      };
+
+      await run({
+        ...exhaustedState,
+        [REBALANCE_SHARDS_LAST_PIN_CLEAR_ATTEMPT_STATE_KEY]: Date.now() - 1000,
+      });
+      expect(mockClearShardConditions).not.toHaveBeenCalled();
+
+      const retried = await run({
+        ...exhaustedState,
+        [REBALANCE_SHARDS_LAST_PIN_CLEAR_ATTEMPT_STATE_KEY]:
+          Date.now() - LICENSE_PIN_CLEAR_BACKOFF_MS,
+      });
+      expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
+      expect(retried.state).toEqual({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: MAX_PIN_CLEAR_ATTEMPTS + 1,
+        [REBALANCE_SHARDS_LAST_PIN_CLEAR_ATTEMPT_STATE_KEY]: Date.now(),
+      });
     });
 
     it('does not drain again on later unlicensed cycles once pins are cleared', async () => {

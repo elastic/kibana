@@ -28,6 +28,7 @@ import {
   isRebalancePrivateLocationShardsEnabled,
   REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
+  REBALANCE_SHARDS_LAST_PIN_CLEAR_ATTEMPT_STATE_KEY,
   REBALANCE_SHARDS_TASK_ID,
   REBALANCE_SHARDS_TASK_TYPE,
 } from './rebalance_shards_enabled';
@@ -35,6 +36,7 @@ import {
 export { REBALANCE_SHARDS_TASK_ID };
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
 export const MAX_PIN_CLEAR_ATTEMPTS = 3;
+export const LICENSE_PIN_CLEAR_BACKOFF_MS = 15 * 60 * 1000;
 
 const PIN_DRAIN_RESET = {
   [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
@@ -59,6 +61,11 @@ interface RebalanceTaskState extends Record<string, unknown> {
    * after MAX_PIN_CLEAR_ATTEMPTS; reset when the switch turns back on.
    */
   pinClearAttempts?: number;
+  /**
+   * Epoch ms of the last failed license-driven drain. Nothing turns the switch
+   * back on after a license downgrade, so exhausted drains retry on a backoff.
+   */
+  lastPinClearAttemptAt?: number;
 }
 
 /**
@@ -265,7 +272,8 @@ export class RebalancePrivateLocationShardsTask {
   /**
    * While off (switch off or no Enterprise license): drain leftover pins once,
    * then skip Fleet listing until sharding is active again. Failed writes retry
-   * up to MAX_PIN_CLEAR_ATTEMPTS. A mid-run PUT true drops the latch, but only
+   * up to MAX_PIN_CLEAR_ATTEMPTS, then (unlicensed only) every
+   * LICENSE_PIN_CLEAR_BACKOFF_MS. A mid-run PUT true drops the latch, but only
    * when the switch was off; unlicensed runs already see the switch on.
    */
   private async runDisabledDrain(
@@ -280,8 +288,12 @@ export class RebalancePrivateLocationShardsTask {
       return this.returnedState(taskInstance);
     }
     if (attemptsSoFar >= MAX_PIN_CLEAR_ATTEMPTS) {
-      this.debugLog('disabled; pin drain retries exhausted');
-      return this.returnedState(taskInstance);
+      const lastAttemptAt =
+        Number(taskInstance.state[REBALANCE_SHARDS_LAST_PIN_CLEAR_ATTEMPT_STATE_KEY]) || 0;
+      if (!wasSwitchOn || Date.now() - lastAttemptAt < LICENSE_PIN_CLEAR_BACKOFF_MS) {
+        this.debugLog('disabled; pin drain retries exhausted');
+        return this.returnedState(taskInstance);
+      }
     }
 
     let cleared = 0;
@@ -305,12 +317,20 @@ export class RebalancePrivateLocationShardsTask {
     }
     if (failed > 0) {
       const attempts = attemptsSoFar + 1;
-      if (attempts >= MAX_PIN_CLEAR_ATTEMPTS) {
+      if (attempts === MAX_PIN_CLEAR_ATTEMPTS) {
         this.serverSetup.logger.warn(
-          `[RebalancePrivateLocationShardsTask] disabled; pin drain failed after ${MAX_PIN_CLEAR_ATTEMPTS} attempts, giving up until the setting is turned back on`
+          wasSwitchOn
+            ? `[RebalancePrivateLocationShardsTask] unlicensed; pin drain failed after ${MAX_PIN_CLEAR_ATTEMPTS} attempts, retrying every ${
+                LICENSE_PIN_CLEAR_BACKOFF_MS / 60_000
+              } minutes`
+            : `[RebalancePrivateLocationShardsTask] disabled; pin drain failed after ${MAX_PIN_CLEAR_ATTEMPTS} attempts, giving up until the setting is turned back on`
         );
       }
-      return { ...live, [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: attempts };
+      return {
+        ...live,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: attempts,
+        ...(wasSwitchOn && { [REBALANCE_SHARDS_LAST_PIN_CLEAR_ATTEMPT_STATE_KEY]: Date.now() }),
+      };
     }
     return {
       ...live,

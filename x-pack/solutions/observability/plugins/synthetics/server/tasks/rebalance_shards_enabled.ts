@@ -12,6 +12,7 @@ export const REBALANCE_SHARDS_TASK_ID = `${REBALANCE_SHARDS_TASK_TYPE}-single-in
 export const REBALANCE_SHARDS_ENABLED_STATE_KEY = 'rebalancePrivateLocationShardsEnabled';
 export const REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY = 'pinsCleared';
 export const REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY = 'pinClearAttempts';
+export const REBALANCE_SHARDS_LAST_PIN_CLEAR_ATTEMPT_STATE_KEY = 'lastPinClearAttemptAt';
 
 /**
  * Cluster-wide kill-switch, stored on the singleton rebalance task's state —

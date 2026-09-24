@@ -10,10 +10,11 @@ import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { apiService } from '../../../../../utils/api_service';
 
 export const useCanManageClusterSettings = (): { canManage: boolean; loading: boolean } => {
-  const { data, loading } = useFetcher(
+  const { data, loading, error } = useFetcher(
     () => apiService.get<{ canManage: boolean }>(SYNTHETICS_API_URLS.CLUSTER_SETTINGS_PRIVILEGES),
     []
   );
 
-  return { canManage: data?.canManage === true, loading: Boolean(loading) };
+  // The PUT route enforces the privilege, so a failed check must not lock out admins.
+  return { canManage: error ? true : data?.canManage === true, loading: Boolean(loading) };
 };

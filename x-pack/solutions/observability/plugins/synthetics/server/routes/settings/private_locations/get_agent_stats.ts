@@ -11,7 +11,12 @@ import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { AgentStat, LocationAgentStats } from '../../../../common/types';
-import { countMonitorsByAssignedAgent } from '../../../synthetics_service/private_location/assign_by_condition';
+import {
+  configIdOf,
+  countMonitorsByAssignedAgent,
+} from '../../../synthetics_service/private_location/assign_by_condition';
+import type { MonitorConfigRepository } from '../../../services/monitor_config_repository';
+import { getSavedObjectKqlFilter } from '../../common';
 import { isAgentShardingActive } from '../../../synthetics_service/private_location/agent_sharding_license';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 
@@ -185,6 +190,25 @@ const getHostMetricsFromSystem = async (
 };
 
 /**
+ * Package policies are listed across all spaces; counts are limited to monitors
+ * in spaces the caller can read so a shared location doesn't leak other spaces.
+ */
+const getVisibleMonitorConfigIds = async (
+  monitorConfigRepository: MonitorConfigRepository,
+  locationIds: string[]
+): Promise<Set<string>> => {
+  if (locationIds.length === 0) {
+    return new Set();
+  }
+  const monitors = await monitorConfigRepository.getAll({
+    filter: getSavedObjectKqlFilter({ field: 'locations.id', values: locationIds }),
+    fields: ['config_id'],
+    showFromAllSpaces: true,
+  });
+  return new Set(monitors.map(({ id, attributes }) => attributes.config_id || id));
+};
+
+/**
  * Per-agent health and host metrics for every private location's agent policy —
  * one row per Fleet `agent.id`. Identity/health from Fleet; RAM/CPU from System
  * integration when available (else "N/A").
@@ -195,7 +219,13 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATION_AGENT_STATS,
   validate: {},
-  handler: async ({ server, context, savedObjectsClient, syntheticsMonitorClient }) => {
+  handler: async ({
+    server,
+    context,
+    savedObjectsClient,
+    syntheticsMonitorClient,
+    monitorConfigRepository,
+  }) => {
     const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,
       syntheticsMonitorClient
@@ -203,6 +233,12 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
     const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
     const packagePolicyService = new PackagePolicyService(server);
     const isAgentSharding = await isAgentShardingActive(server);
+    const visibleConfigIds = isAgentSharding
+      ? await getVisibleMonitorConfigIds(
+          monitorConfigRepository,
+          locations.map(({ id }) => id)
+        ).catch(() => new Set<string>())
+      : new Set<string>();
 
     const { elasticsearch } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
@@ -216,7 +252,14 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           isAgentSharding
             ? packagePolicyService
                 .listByAgentPolicy({ agentPolicyId: location.agentPolicyId })
-                .then((policies) => countMonitorsByAssignedAgent(policies, location.id))
+                .then((policies) =>
+                  countMonitorsByAssignedAgent(
+                    policies.filter(({ id }) =>
+                      visibleConfigIds.has(configIdOf(id, location.id) ?? '')
+                    ),
+                    location.id
+                  )
+                )
                 .catch(() => new Map<string, number>())
             : Promise.resolve(new Map<string, number>()),
         ]);

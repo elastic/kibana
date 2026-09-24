@@ -73,11 +73,13 @@ const makeContext = ({
   buckets = [],
   hasEnterprise = false,
   rebalanceEnabled = true,
+  visibleConfigIds = ['mon-a', 'mon-b', 'mon-c'],
 }: {
   listAgentsImpl: jest.Mock;
   buckets?: ReturnType<typeof bucket>[];
   hasEnterprise?: boolean;
   rebalanceEnabled?: boolean;
+  visibleConfigIds?: string[];
 }) => {
   const search = jest.fn().mockResolvedValue({ aggregations: { by_host: { buckets } } });
   const routeContext = {
@@ -104,6 +106,11 @@ const makeContext = ({
     },
     savedObjectsClient: {},
     syntheticsMonitorClient: {},
+    monitorConfigRepository: {
+      getAll: jest
+        .fn()
+        .mockResolvedValue(visibleConfigIds.map((id) => ({ id, attributes: { config_id: id } }))),
+    },
   } as any;
   return { routeContext, search };
 };
@@ -256,6 +263,26 @@ describe('getPrivateLocationAgentStats route', () => {
     expect(result[0].isAgentSharding).toBe(true);
     expect(result[0].agents[0].monitorsAssigned).toBe(2);
     expect(mockListByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'policy-1' });
+  });
+
+  it('only counts monitors in spaces the caller can read', async () => {
+    mockListByAgentPolicy.mockResolvedValue([
+      { id: 'mon-a-loc-1', condition: agentIdCondition('agent-1') },
+      { id: 'other-space-mon-loc-1', condition: agentIdCondition('agent-1') },
+    ]);
+    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const { routeContext } = makeContext({
+      listAgentsImpl: listAgents,
+      hasEnterprise: true,
+      visibleConfigIds: ['mon-a'],
+    });
+
+    const result = await run(routeContext);
+
+    expect(result[0].agents[0].monitorsAssigned).toBe(1);
+    expect(routeContext.monitorConfigRepository.getAll).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: ['config_id'], showFromAllSpaces: true })
+    );
   });
 
   it('reports no sharding when shard rebalancing is off, even with an Enterprise license', async () => {
