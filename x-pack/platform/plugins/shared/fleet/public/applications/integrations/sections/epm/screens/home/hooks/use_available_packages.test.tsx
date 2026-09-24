@@ -968,6 +968,78 @@ describe('useAvailablePackages', () => {
       expect(result.current.filteredCards).toHaveLength(0);
     });
 
+    it('re-sorts after singleton degradation so the promoted card appears at its own title position', () => {
+      // Apache collection (title A) has two members: "Apache ECS" (web only) and "Tomcat" (observability).
+      // Neighboring ungrouped "Nginx" (title N) sits between A and T alphabetically.
+      // After filtering to observability, Apache ECS is dropped and the collection degrades
+      // to "Tomcat". Without re-sort the result would still be [Apache..., Nginx], but with
+      // re-sort it should be [Nginx, Tomcat] because T > N.
+      mockApplyGrouping.mockReturnValue({
+        collectionCards: [
+          {
+            id: 'collection:apache',
+            name: 'apache',
+            title: 'Apache',
+            description: 'Apache collection',
+            icons: [],
+            url: '/integrations',
+            integration: '',
+            version: '',
+            categories: ['web', 'observability'],
+            isCollectionCard: true,
+            groupMembers: [
+              {
+                id: 'epr:apache_ecs',
+                name: 'apache_ecs',
+                title: 'Apache ECS',
+                categories: ['web'],
+                url: '/detail/apache_ecs',
+                isCollectionCard: false,
+              },
+              {
+                id: 'epr:tomcat',
+                name: 'tomcat',
+                title: 'Tomcat',
+                categories: ['observability'],
+                url: '/detail/tomcat',
+                isCollectionCard: false,
+              },
+            ],
+          },
+        ],
+        ungroupedItems: [
+          {
+            id: 'epr:nginx',
+            name: 'nginx',
+            title: 'Nginx',
+            categories: ['observability'],
+            url: '/detail/nginx',
+            isCollectionCard: false,
+          },
+        ],
+      });
+      mockUseBuildIntegrationsUrl.mockReturnValue({
+        initialSelectedCategory: 'observability',
+        initialSubcategory: undefined,
+        initialOnlyAgentless: false,
+        setUrlandPushHistory: jest.fn(),
+        setUrlandReplaceHistory: jest.fn(),
+        getHref: jest.fn(),
+        getAbsolutePath: jest.fn((p: string) => p),
+        searchParam: '',
+        addBasePath: jest.fn((p: string) => p),
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          enableCollectionGrouping: true,
+        })
+      );
+
+      expect(result.current.filteredCards.map((c) => c.title)).toEqual(['Nginx', 'Tomcat']);
+    });
+
     it('filters collection members by subcategory when a subcategory is active', () => {
       mockUseBuildIntegrationsUrl.mockReturnValue({
         initialSelectedCategory: 'web',
@@ -1111,6 +1183,69 @@ describe('useAvailablePackages', () => {
       );
 
       expect(result.current.filteredCards).toHaveLength(0);
+    });
+
+    it('re-sorts after singleton degradation so the promoted card appears at its own title position', () => {
+      // Apache collection (title A) has two members: "Apache ECS" (not agentless) and
+      // "Tomcat" (agentless). Neighboring ungrouped "Nginx" (title N, agentless) sits between
+      // A and T. After the agentless filter, Apache ECS is dropped and the collection degrades
+      // to "Tomcat". Without re-sort the order would be [Apache..., Nginx]; with re-sort: [Nginx, Tomcat].
+      mockApplyGrouping.mockReturnValue({
+        collectionCards: [
+          {
+            id: 'collection:apache',
+            name: 'apache',
+            title: 'Apache',
+            description: 'Apache collection',
+            icons: [],
+            url: '/integrations',
+            integration: '',
+            version: '',
+            categories: ['web'],
+            isCollectionCard: true,
+            groupMembers: [
+              {
+                id: 'epr:apache_ecs',
+                name: 'apache_ecs',
+                title: 'Apache ECS',
+                categories: ['web'],
+                url: '/detail/apache_ecs',
+                isCollectionCard: false,
+                supportsAgentless: false,
+              },
+              {
+                id: 'epr:tomcat',
+                name: 'tomcat',
+                title: 'Tomcat',
+                categories: ['web'],
+                url: '/detail/tomcat',
+                isCollectionCard: false,
+                supportsAgentless: true,
+              },
+            ],
+          },
+        ],
+        ungroupedItems: [
+          {
+            id: 'epr:nginx',
+            name: 'nginx',
+            title: 'Nginx',
+            categories: ['web'],
+            url: '/detail/nginx',
+            isCollectionCard: false,
+            supportsAgentless: true,
+          },
+        ],
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          enableCollectionGrouping: true,
+        })
+      );
+
+      expect(result.current.filteredCards.map((c) => c.title)).toEqual(['Nginx', 'Tomcat']);
     });
   });
 

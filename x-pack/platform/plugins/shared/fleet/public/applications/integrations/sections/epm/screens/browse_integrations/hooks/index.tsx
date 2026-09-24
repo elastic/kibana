@@ -197,7 +197,9 @@ export function useBrowseIntegrationHook({
     //      the singleton itself must still match the query.
     // Original ungrouped cards (id IS in searchResults) are kept unconditionally.
     if (searchTerm) {
-      const tokens = searchTerm.trim().toLowerCase().split(/\s+/);
+      // Split on whitespace and hyphens to match js-search's PrefixIndexStrategy tokenization,
+      // which treats "nginx-otel" as two tokens ["nginx", "otel"].
+      const tokens = searchTerm.trim().toLowerCase().split(/[\s-]+/);
       const matchesSearch = (card: IntegrationCardItem) => {
         const fields = [card.searchableContent ?? '', card.title, card.name, card.description ?? '']
           .join(' ')
@@ -252,7 +254,7 @@ export function useBrowseIntegrationHook({
       // a singleton from a member that didn't match the search. Apply the same check as
       // nonCategoryFilteredCards, using searchResults to keep original-index cards intact.
       if (searchTerm) {
-        const tokens = searchTerm.trim().toLowerCase().split(/\s+/);
+        const tokens = searchTerm.trim().toLowerCase().split(/[\s-]+/);
         const matchesSearch = (card: IntegrationCardItem) => {
           const fields = [
             card.searchableContent ?? '',
