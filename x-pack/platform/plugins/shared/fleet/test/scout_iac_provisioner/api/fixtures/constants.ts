@@ -7,6 +7,8 @@
 
 import type { KibanaRole } from '@kbn/scout';
 
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
+
 /** Internal, versioned (v1) render route — needs the api-version header. */
 export const RENDER_TEMPLATE_PATH = 'internal/fleet/iac_provisioner/render_template';
 
@@ -18,7 +20,7 @@ export const RENDER_TEMPLATE_PATH = 'internal/fleet/iac_provisioner/render_templ
 export const VALID_RENDER_BODY = {
   provider: 'aws',
   flow: 'cloud_connector',
-  workflow: 'workload_identity_federation',
+  workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
   integrations: [
     {
       name: 'this_package_does_not_exist',

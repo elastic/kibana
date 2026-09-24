@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { MAX_IAC_RENDER_INTEGRATIONS } from '@kbn/fleet-plugin/common/types/rest_spec/iac_provisioner';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  MAX_IAC_RENDER_INTEGRATIONS,
+} from '@kbn/fleet-plugin/common/types/rest_spec/iac_provisioner';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -184,7 +187,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(requests[0].url).to.be(IAC_PROVISIONER_RENDER_PATH);
         expect(requests[0].body).to.eql({
           provider: 'aws',
-          workflow: 'workload_identity_federation',
+          workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
           integrations: TEST_PACKAGE_PROVISIONER_INTEGRATIONS,
           templateSha: STORED_IAC_KEY,
         });

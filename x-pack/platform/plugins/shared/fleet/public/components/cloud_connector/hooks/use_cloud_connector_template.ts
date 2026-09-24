@@ -17,7 +17,7 @@ import {
   IAC_PROVISIONER_RENDER_FALLBACK_EVENT,
 } from '../../../../common/telemetry/iac_provisioner_events';
 import type { CloudConnectorIacState } from '../../../../common/types/models/cloud_connector';
-import { IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
 import type {
   IacPolicyTemplateSelection,
@@ -253,7 +253,7 @@ export const useCloudConnectorTemplate = ({
     try {
       const { data, error } = await sendRenderIacTemplate({
         provider,
-        workflow: IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW,
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: CLOUD_CONNECTOR_RENDER_FLOW,
         integrations: renderIntegrations,
         ...(templateSha ? { templateSha } : {}),

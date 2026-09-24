@@ -14,7 +14,7 @@ import {
   IacProvisionerUnavailableError,
 } from '../errors';
 
-import { IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW } from '../../common/types/rest_spec/iac_provisioner';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../common/types/rest_spec/iac_provisioner';
 
 import { appContextService } from './app_context';
 import {
@@ -49,7 +49,7 @@ const ARTIFACT_URL = 'https://s3.example/rendered/xyz?X-Amz-Signature=SECRET';
 
 const RENDER_REQUEST: IacProvisionerRenderRequest = {
   provider: 'aws',
-  workflow: IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW,
+  workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
   integrations: [
     {
       name: 'cloud_security_posture',

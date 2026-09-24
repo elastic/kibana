@@ -16,6 +16,7 @@ import { appContextService } from '../../services/app_context';
 import { iacProvisionerService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
@@ -84,7 +85,7 @@ const cspmSelection = {
 const renderBody = (overrides: Record<string, unknown> = {}) => ({
   provider: 'aws',
   flow: 'cloud_connector',
-  workflow: 'workload_identity_federation',
+  workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
   integrations: [cspmSelection],
   ...overrides,
 });
@@ -137,7 +138,7 @@ describe('renderIacTemplateHandler', () => {
 
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
-      workflow: 'workload_identity_federation',
+      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
       integrations: [
         {
           name: 'cloud_security_posture',
@@ -289,7 +290,7 @@ describe('renderIacTemplateHandler', () => {
     expect(mockedGetPackageInfo).toHaveBeenCalledTimes(3);
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
-      workflow: 'workload_identity_federation',
+      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
       integrations: [
         {
           name: 'aws',

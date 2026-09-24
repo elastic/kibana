@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { MAX_IAC_RENDER_INTEGRATIONS } from '@kbn/fleet-plugin/common/types/rest_spec/iac_provisioner';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  MAX_IAC_RENDER_INTEGRATIONS,
+} from '@kbn/fleet-plugin/common/types/rest_spec/iac_provisioner';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -39,7 +42,7 @@ export default function (providerContext: FtrProviderContext) {
 
   const VALID_RENDER_BODY = {
     provider: 'aws',
-    workflow: 'workload_identity_federation',
+    workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
     flow: 'cloud_connector',
     integrations: TEST_PACKAGE_INTEGRATION_SET,
   };
@@ -88,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
       // no templateSha on a first render.
       expect(requests[0].body).to.eql({
         provider: 'aws',
-        workflow: 'workload_identity_federation',
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         integrations: TEST_PACKAGE_PROVISIONER_INTEGRATIONS,
       });
     });

@@ -9,6 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 
 import { useIacProvisioner, useStartServices } from '../../../hooks';
 import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
 
 import { useCloudConnectorTemplate } from './use_cloud_connector_template';
 
@@ -145,7 +146,7 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        workflow: 'workload_identity_federation',
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: 'cloud_connector',
         integrations: [{ name: 'cloud_security_posture', policyTemplates: POLICY_TEMPLATES }],
       });
@@ -173,7 +174,7 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        workflow: 'workload_identity_federation',
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: 'cloud_connector',
         integrations: [{ name: 'aws', policyTemplates }],
       });
@@ -599,7 +600,7 @@ describe('useCloudConnectorTemplate', () => {
 
         expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
           provider: 'aws',
-          workflow: 'workload_identity_federation',
+          workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
           flow: 'cloud_connector',
           integrations,
         });

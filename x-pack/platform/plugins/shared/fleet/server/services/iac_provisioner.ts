@@ -14,7 +14,7 @@ import apm from 'elastic-apm-node';
 import type { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
 import type {
   IacPolicyTemplateSelection,
-  IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW,
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
 } from '../../common/types/rest_spec/iac_provisioner';
 
 import {
@@ -52,7 +52,7 @@ export interface IacProvisionerRenderRequest {
   // Only AWS is supported today; typed off the shared constant so the value
   // and type can't drift and adding a provider is a one-line change.
   provider: typeof AWS_CLOUD_PROVIDER;
-  workflow: typeof IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW;
+  workflow: typeof IAC_FEDERATED_IDENTITY_WORKFLOW;
   integrations: IacProvisionerRenderIntegration[];
   templateSha?: string;
 }

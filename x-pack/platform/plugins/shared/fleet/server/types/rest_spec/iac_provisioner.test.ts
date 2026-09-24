@@ -6,14 +6,14 @@
  */
 
 import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
-import { IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 
 import { RenderIacTemplateRequestSchema, RenderIacTemplateResponseSchema } from './iac_provisioner';
 
 describe('RenderIacTemplateRequestSchema', () => {
   const body = (integrations: unknown) => ({
     provider: 'aws',
-    workflow: IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW,
+    workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
     flow: CLOUD_CONNECTOR_RENDER_FLOW,
     integrations,
   });

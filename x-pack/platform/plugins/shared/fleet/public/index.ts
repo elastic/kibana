@@ -163,7 +163,7 @@ export type {
   RenderIacTemplateRequest,
   RenderIacTemplateResponse,
 } from '../common/types/rest_spec/iac_provisioner';
-export { IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
+export { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
 

@@ -22,6 +22,7 @@ import {
   reportIacProvisionerRenderRequested,
 } from '../telemetry/iac_provisioner_telemetry';
 import { isIacProvisionerSupportedFor } from '../utils/iac_provisioner';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import { buildIacProvisionerIntegrations } from '../iac_provisioner_integrations';
 
 import { IAC_UPGRADE_TASK_FLOW } from '../../../common/telemetry/iac_provisioner_events';
@@ -186,7 +187,7 @@ describe('getIacKeyOutcome', () => {
     expect(result).toBe('matches');
     expect(mockedRender).toHaveBeenCalledWith({
       provider: 'aws',
-      workflow: 'workload_identity_federation',
+      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
       integrations: RESOLVED_AWS.integrations,
       templateSha: 'sha256:stored',
     });

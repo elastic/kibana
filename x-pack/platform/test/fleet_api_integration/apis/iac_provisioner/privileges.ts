@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '@kbn/fleet-plugin/common/types/rest_spec/iac_provisioner';
+
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
@@ -64,7 +66,7 @@ export default function (providerContext: FtrProviderContext) {
       scenarios: READ_SCENARIOS,
       send: {
         provider: 'aws',
-        workflow: 'workload_identity_federation',
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: 'cloud_connector',
         integrations: TEST_PACKAGE_INTEGRATION_SET,
       },

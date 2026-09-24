@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
 import {
-  IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW,
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
   MAX_IAC_RENDER_INTEGRATIONS,
 } from '../../../common/types/rest_spec/iac_provisioner';
 import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
@@ -67,7 +67,7 @@ export const RenderIacTemplateRequestSchema = {
     provider: schema.oneOf([schema.literal(AWS_CLOUD_PROVIDER)], {
       meta: { description: 'The cloud provider the template targets. Only AWS is supported.' },
     }),
-    workflow: schema.oneOf([schema.literal(IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW)], {
+    workflow: schema.oneOf([schema.literal(IAC_FEDERATED_IDENTITY_WORKFLOW)], {
       meta: {
         description:
           'Identity mechanism. Kibana name for the connector type; IaCP looks up the matching blueprint lineage.',

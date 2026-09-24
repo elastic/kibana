@@ -19,7 +19,7 @@ import {
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
 import type { IacUpgradeStatus } from '../../../common/types/models/cloud_connector';
 import {
-  IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW,
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
   MAX_IAC_RENDER_INTEGRATIONS,
 } from '../../../common/types/rest_spec/iac_provisioner';
 import type { CloudConnectorSOAttributes } from '../../types/so_attributes';
@@ -185,7 +185,7 @@ export const getIacKeyOutcome = async (
     // so a resolved response always carries the verdict.
     const { render, templateSha } = await iacProvisionerService.renderTemplate({
       provider: cloudProvider,
-      workflow: IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW,
+      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
       integrations,
       templateSha: storedSha,
     });
