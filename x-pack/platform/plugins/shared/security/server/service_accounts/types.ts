@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
   CreateServiceAccountParams,
   ServiceAccount,
@@ -83,6 +84,14 @@ export interface ServiceAccountsBackend {
    * and a no-op for requests this backend did not mint.
    */
   releaseFakeRequest(request: KibanaRequest): void;
+
+  /**
+   * Describes the service account a fake request minted by this backend is bound to, as an
+   * {@link AuthenticatedPrincipal}, without contacting Elasticsearch. `null` for every other
+   * request: real requests (classified from their authenticated user instead), fake requests this
+   * backend did not mint, and released ones.
+   */
+  getFakeRequestPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null;
 }
 
 /**

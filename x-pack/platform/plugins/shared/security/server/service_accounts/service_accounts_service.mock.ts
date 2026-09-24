@@ -32,6 +32,7 @@ export const serviceAccountsServiceMock = {
       ),
       reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
       releaseFakeRequest: jest.fn(),
+      getFakeRequestPrincipal: jest.fn().mockReturnValue(null),
     },
     workloads: {
       bindWorkload: jest.fn().mockResolvedValue({

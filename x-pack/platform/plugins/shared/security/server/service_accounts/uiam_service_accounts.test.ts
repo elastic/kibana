@@ -854,5 +854,37 @@ describe('UiamServiceAccounts', () => {
         ).not.toThrow();
       });
     });
+
+    describe('#getFakeRequestPrincipal', () => {
+      it('describes a request this backend minted as a UIAM service account', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+
+        expect(serviceAccounts.getFakeRequestPrincipal(request)).toEqual({
+          type: 'service_account',
+          serviceAccountId: 'service-account-id',
+          variant: 'uiam',
+        });
+      });
+
+      it('returns null for requests this backend did not mint', () => {
+        expect(
+          serviceAccounts.getFakeRequestPrincipal(httpServerMock.createFakeKibanaRequest({}))
+        ).toBeNull();
+        expect(
+          serviceAccounts.getFakeRequestPrincipal(httpServerMock.createKibanaRequest())
+        ).toBeNull();
+      });
+
+      it('returns null once the request has been released', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        serviceAccounts.releaseFakeRequest(request);
+
+        expect(serviceAccounts.getFakeRequestPrincipal(request)).toBeNull();
+      });
+    });
   });
 });

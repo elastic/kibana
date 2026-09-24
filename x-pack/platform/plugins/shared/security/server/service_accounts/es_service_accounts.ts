@@ -15,6 +15,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
@@ -475,6 +476,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   releaseFakeRequest(request: KibanaRequest): void {
     this.fakeRequests.release(request);
+  }
+
+  getFakeRequestPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null {
+    const serviceAccountId = this.fakeRequests.getServiceAccountId(request);
+    return serviceAccountId
+      ? { type: 'service_account', serviceAccountId, variant: 'elasticsearch' }
+      : null;
   }
 
   private async exchangeToken(serviceAccountId: string): Promise<string> {
