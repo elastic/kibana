@@ -52,7 +52,9 @@ export async function reassignBatch(
   const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents, { spaceId: options.spaceId });
+  const hostedPolicies = await getHostedPolicies(soClient, givenAgents, {
+    spaceId: options.spaceId,
+  });
 
   const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
     if (agent.policy_id === options.newAgentPolicyId) {
@@ -100,8 +102,7 @@ export async function reassignBatch(
   const now = new Date().toISOString();
   // For cross-space task calls (spaceId === '*'), scope the action to the target policy's actual
   // spaces rather than the wildcard, so the action is not exposed across all spaces.
-  const namespaces =
-    spaceId && spaceId !== '*' ? [spaceId] : (newAgentPolicy?.space_ids ?? []);
+  const namespaces = spaceId && spaceId !== '*' ? [spaceId] : newAgentPolicy?.space_ids ?? [];
 
   await createAgentAction(esClient, soClient, {
     id: actionId,
