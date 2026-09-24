@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/discoveries'
   - '@kbn/security-plugin'
   - '@kbn/scout-security'
+  - '@kbn/security-solution-test-api-clients'
   - '@kbn/securitysolution-es-utils'
   - '@kbn/securitysolution-utils'
   - '@kbn/spaces-plugin'
