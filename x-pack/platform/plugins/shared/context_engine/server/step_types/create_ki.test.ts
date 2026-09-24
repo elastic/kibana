@@ -583,6 +583,32 @@ describe('getCreateKiStepDefinition', () => {
       expect(service.get).not.toHaveBeenCalled();
       expect(esClient.index).not.toHaveBeenCalled();
       expect(telemetry.analyticsService.reportKiWrite).not.toHaveBeenCalled();
+      expect(telemetry.logger.debug).toHaveBeenCalledWith(
+        "KI create skipped in AI index 'my-ai-index'"
+      );
+    });
+
+    it('checks the write privilege before running verifiers', async () => {
+      const esClient = { index: jest.fn() };
+      const context = createMockStepContext({
+        input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
+        esClient,
+      });
+      const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+      const { handler } = getCreateKiStepDefinition({
+        getAiIndexService: () => service,
+        isContextEngineEnabled: enabled,
+        checkWritePrivilege: jest.fn().mockResolvedValue(false),
+        runKiVerifiers,
+        ...mockKiStepTelemetry(),
+      });
+      const thrown = await handler(context).catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(ExecutionError);
+      expect(thrown.type).toBe('PermissionError');
+      expect(runKiVerifiers).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
     });
 
     it('does not run verifiers when none are given', async () => {
@@ -618,18 +644,25 @@ describe('getCreateKiStepDefinition', () => {
         esClient,
       });
       const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+      const telemetry = mockKiStepTelemetry();
 
       const { handler } = getCreateKiStepDefinition({
         getAiIndexService: () => service,
         isContextEngineEnabled: enabled,
         checkWritePrivilege: allowed,
         runKiVerifiers,
-        ...mockKiStepTelemetry(),
+        ...telemetry,
       });
       const thrown = await handler(context).catch((e) => e);
 
       expect(thrown).toBe(cause);
       expect(esClient.index).not.toHaveBeenCalled();
+      expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledWith({
+        action: 'create',
+        aiIndexId: 'my-ai-index',
+        outcome: 'failure',
+        errorType: 'InputValidationError',
+      });
     });
   });
 });

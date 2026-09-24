@@ -15,8 +15,6 @@ import { isContextEngineEnabledInSpace } from '../utils/is_context_engine_enable
 import { createKiVerifierRunner } from './ki_verifier_runner';
 import type { WorkflowVerifierStepDependencies } from './ki_verifier_runner';
 
-export type { WorkflowVerifierStepDependencies } from './ki_verifier_runner';
-
 export const createVerifyKiStepDefinition = (
   coreSetup: CoreSetup,
   logger: Logger,
