@@ -1074,6 +1074,31 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     }
   });
 
+  // Every data.set persists its full value, so pushing each verdict onto the run-wide
+  // output_verdicts would store the list once per alert — O(n²) entries across a run. The push
+  // belongs to a per-batch list that is reset each iteration and merged onto output_verdicts once.
+  it('accumulates output verdicts per batch rather than per alert', () => {
+    const resetStep = findStepByName(workflow.steps, 'reset_batch_output_verdicts') as {
+      with: { batch_output_verdicts: unknown[] };
+    };
+    expect(resetStep.with.batch_output_verdicts).toEqual([]);
+    expect(
+      enclosingLoops(workflow.steps, 'reset_batch_output_verdicts').map((l) => l.name)
+    ).toEqual(['classify_alert_batches']);
+
+    // Inside the batch loop and its own per-alert loop, never inside apply_verdicts (which
+    // iterates the whole alert set).
+    expect(enclosingLoops(workflow.steps, 'accumulate_output_verdict').map((l) => l.name)).toEqual([
+      'classify_alert_batches',
+      'build_batch_output_verdicts',
+    ]);
+
+    // The merge runs once per batch, outside the per-alert loop.
+    expect(
+      enclosingLoops(workflow.steps, 'merge_batch_output_verdicts').map((l) => l.name)
+    ).toEqual(['classify_alert_batches']);
+  });
+
   // The engine's Liquid dialect has no ternary operator. A `cond ? a : b` parses as valid YAML
   // and installs cleanly, then fails mid-run with "The provided expression is invalid" — so it
   // survives review and schema validation and only shows up as a failed execution.
@@ -1455,12 +1480,16 @@ const createMockOutputVerdict = (
 
 describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () => {
   const workflow = parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml) as {
+    consts: Record<string, unknown>;
     steps: unknown[];
   };
   const engine = createWorkflowLiquidEngine();
 
   it('evaluates calledByWorker gates as booleans for Worker vs standalone', () => {
-    const accumulateGate = findStepByName(workflow.steps, 'accumulate_worker_output_verdict') as {
+    const accumulateGate = findStepByName(
+      workflow.steps,
+      'accumulate_batch_output_verdicts_gate'
+    ) as {
       condition: string;
     };
     const summaryGate = findStepByName(workflow.steps, 'build_grouped_counts_summary_gate') as {
@@ -1581,7 +1610,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const rendered = renderValueRecursively(engine, buildStep.with.output_verdict, {
       foreach: { item: { _id: 'real-alert-id', host: {}, user: {} } },
       variables: {
-        alert_verdict: {
+        batch_alert_verdict: {
           classification: 'false_positive',
           confidence_score: 0.82,
           rationale: 'signed installer',
@@ -1618,7 +1647,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
         },
       },
       variables: {
-        alert_verdict: {
+        batch_alert_verdict: {
           classification: 'true_positive',
           confidence_score: 0.9,
           rationale: 'c2',
@@ -1631,22 +1660,64 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(rendered.user_name).toBe('n'.repeat(512));
   });
 
-  it('pushes the built verdict onto output_verdicts for the caller', () => {
+  it('pushes the built verdict onto the batch list and merges it once per batch', () => {
     const accumulateStep = findStepByName(workflow.steps, 'accumulate_output_verdict') as {
+      with: { batch_output_verdicts: string };
+    };
+    const mergeStep = findStepByName(workflow.steps, 'merge_batch_output_verdicts') as {
       with: { output_verdicts: string };
     };
-    const existing = [createMockOutputVerdict({ alert_id: 'alert-0' })];
+    const alreadyBatched = [createMockOutputVerdict({ alert_id: 'alert-0' })];
     const next = createMockOutputVerdict({
       alert_id: 'alert-1',
       classification: 'false_positive',
       host_name: 'host-b',
     });
 
-    const result = evaluateExpression(engine, accumulateStep.with.output_verdicts, {
-      variables: { output_verdicts: existing, output_verdict: next },
+    const batchList = evaluateExpression(engine, accumulateStep.with.batch_output_verdicts, {
+      variables: { batch_output_verdicts: alreadyBatched, output_verdict: next },
     });
+    expect(batchList).toEqual([...alreadyBatched, next]);
 
-    expect(result).toEqual([...existing, next]);
+    // The run-wide list grows once per batch, not once per alert.
+    const previousBatch = [createMockOutputVerdict({ alert_id: 'alert-from-earlier-batch' })];
+    expect(
+      evaluateExpression(engine, mergeStep.with.output_verdicts, {
+        variables: { output_verdicts: previousBatch, batch_output_verdicts: batchList },
+      })
+    ).toEqual([...previousBatch, ...alreadyBatched, next]);
+  });
+
+  it('skips an alert the batch returned no verdict for', () => {
+    const selectStep = findStepByName(workflow.steps, 'select_batch_alert_verdict') as {
+      with: { batch_alert_verdict_count: string };
+    };
+    const accumulateGate = findStepByName(workflow.steps, 'accumulate_worker_output_verdict') as {
+      condition: string;
+    };
+    const batchVerdicts = [{ id: 'alert-1', classification: 'true_positive' }];
+
+    const missingCount = evaluateExpression(engine, selectStep.with.batch_alert_verdict_count, {
+      variables: { batch_verdicts: batchVerdicts },
+      foreach: { item: { _id: 'alert-2' } },
+    });
+    expect(missingCount).toBe(0);
+    expect(
+      evaluateExpression(engine, accumulateGate.condition, {
+        variables: { batch_alert_verdict_count: missingCount },
+      })
+    ).toBe(false);
+
+    const matchedCount = evaluateExpression(engine, selectStep.with.batch_alert_verdict_count, {
+      variables: { batch_verdicts: batchVerdicts },
+      foreach: { item: { _id: 'alert-1' } },
+    });
+    expect(matchedCount).toBe(1);
+    expect(
+      evaluateExpression(engine, accumulateGate.condition, {
+        variables: { batch_alert_verdict_count: matchedCount },
+      })
+    ).toBe(true);
   });
 
   it('accumulates missing_alert_ids when the agent returns no verdict for an alert', () => {
