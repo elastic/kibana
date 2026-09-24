@@ -130,7 +130,10 @@ export function CasesTableServiceProvider(
     },
 
     async bulkDeleteAllCases() {
-      await this.selectAllCasesAndOpenBulkActions();
+      const hasSelectedCases = await this.selectAllCasesAndOpenBulkActions();
+      if (!hasSelectedCases) {
+        return false;
+      }
 
       await testSubjects.existOrFail('cases-bulk-action-delete');
       await testSubjects.click('cases-bulk-action-delete');
@@ -138,6 +141,7 @@ export function CasesTableServiceProvider(
         timeout: config.get('timeouts.waitFor'),
       });
       await testSubjects.click('confirmModalConfirmButton');
+      return true;
     },
 
     async selectAndDeleteAllCases() {
@@ -149,7 +153,10 @@ export function CasesTableServiceProvider(
         await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
         rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         if (rows.length > 0) {
-          await this.bulkDeleteAllCases();
+          const hasDeletedCases = await this.bulkDeleteAllCases();
+          if (!hasDeletedCases) {
+            continue;
+          }
         }
       } while (rows.length > 0);
     },
@@ -336,11 +343,16 @@ export function CasesTableServiceProvider(
 
     async selectAllCasesAndOpenBulkActions() {
       await this.ensureTableView();
-      await retry.tryForTime(30000, async () => {
+      const hasCasesToSelect = await retry.tryForTime(30000, async () => {
+        const rows = await find.allByCssSelector(CASE_ROWS_SELECTOR);
+        if (rows.length === 0) {
+          return false;
+        }
+
         const selectAllCheckbox = await testSubjects.find('checkboxSelectAll');
 
         if (await selectAllCheckbox.isSelected()) {
-          return;
+          return true;
         }
 
         if (!(await selectAllCheckbox.isEnabled())) {
@@ -352,8 +364,16 @@ export function CasesTableServiceProvider(
         if (!(await selectAllCheckbox.isSelected())) {
           throw new Error('Select all cases checkbox is not selected');
         }
+
+        return true;
       });
+
+      if (!hasCasesToSelect) {
+        return false;
+      }
+
       await this.openBulkActions();
+      return true;
     },
 
     async changeStatus(status: CaseStatuses, index: number) {
