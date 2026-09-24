@@ -34,6 +34,7 @@ const firstResult = (ret: unknown): FirstResult => (ret as { results: FirstResul
 interface DatasetClientMock {
   get: jest.Mock;
   getMetadata: jest.Mock;
+  getExamplesPage: jest.Mock;
   datasetExists: jest.Mock;
   create: jest.Mock;
   upsert: jest.Mock;
@@ -63,6 +64,7 @@ const createDeps = (
   const datasetClient: DatasetClientMock = {
     get: jest.fn(),
     getMetadata: jest.fn(),
+    getExamplesPage: jest.fn(),
     datasetExists: jest.fn().mockResolvedValue(true),
     create: jest.fn(),
     upsert: jest.fn(),
@@ -118,9 +120,25 @@ const confirmationOf = async <Schema extends ZodObject>(
 ) => tool.confirmation?.getConfirmation?.({ toolParams, context: createContext() });
 
 describe('getDatasetTool', () => {
+  const mockStoredDataset = (
+    datasetClient: DatasetClientMock,
+    {
+      examples,
+      ...metadata
+    }: Omit<typeof datasetDocument, 'examples'> & { examples: Array<{ id: string }> }
+  ) => {
+    datasetClient.getMetadata.mockResolvedValue(metadata);
+    datasetClient.getExamplesPage.mockImplementation(
+      async (_datasetId: string, { from, size }: { from: number; size: number }) => ({
+        examples: examples.slice(from, from + size),
+        total: examples.length,
+      })
+    );
+  };
+
   it('returns dataset metadata and its examples', async () => {
     const { deps, datasetClient } = createDeps();
-    datasetClient.get.mockResolvedValue(datasetDocument);
+    mockStoredDataset(datasetClient, datasetDocument);
 
     const result = firstResult(
       await getDatasetTool(deps).handler({ dataset_id: 'd1' }, createContext())
@@ -145,7 +163,7 @@ describe('getDatasetTool', () => {
 
   it('lists the counts before the examples so they survive truncation', async () => {
     const { deps, datasetClient } = createDeps();
-    datasetClient.get.mockResolvedValue(datasetDocument);
+    mockStoredDataset(datasetClient, datasetDocument);
 
     const result = firstResult(
       await getDatasetTool(deps).handler({ dataset_id: 'd1' }, createContext())
@@ -161,7 +179,7 @@ describe('getDatasetTool', () => {
       id: `e${index}`,
       input: { q: index },
     }));
-    datasetClient.get.mockResolvedValue({
+    mockStoredDataset(datasetClient, {
       ...datasetDocument,
       examples_count: examples.length,
       examples,
@@ -174,6 +192,10 @@ describe('getDatasetTool', () => {
       )
     );
 
+    expect(datasetClient.getExamplesPage).toHaveBeenCalledWith('d1', {
+      from: MAX_RETURNED_DATASET_EXAMPLES,
+      size: MAX_RETURNED_DATASET_EXAMPLES,
+    });
     expect(result.data.offset).toBe(MAX_RETURNED_DATASET_EXAMPLES);
     expect(result.data.examples).toHaveLength(10);
     expect((result.data.examples as Array<{ id: string }>)[0].id).toBe(
@@ -188,7 +210,7 @@ describe('getDatasetTool', () => {
       id: `e${index}`,
       input: { q: index },
     }));
-    datasetClient.get.mockResolvedValue({
+    mockStoredDataset(datasetClient, {
       ...datasetDocument,
       examples_count: examples.length,
       examples,
@@ -204,7 +226,7 @@ describe('getDatasetTool', () => {
 
   it('reports a dataset shared with another space', async () => {
     const { deps, datasetClient } = createDeps();
-    datasetClient.get.mockResolvedValue({
+    mockStoredDataset(datasetClient, {
       ...datasetDocument,
       space_ids: ['default', 'marketing'],
     });
@@ -218,7 +240,8 @@ describe('getDatasetTool', () => {
 
   it('returns an error when the dataset does not exist', async () => {
     const { deps, datasetClient } = createDeps();
-    datasetClient.get.mockResolvedValue(undefined);
+    datasetClient.getMetadata.mockResolvedValue(undefined);
+    datasetClient.getExamplesPage.mockResolvedValue(undefined);
 
     const result = firstResult(
       await getDatasetTool(deps).handler({ dataset_id: 'missing' }, createContext())

@@ -350,8 +350,9 @@ const createExamplesStorageClient = () => {
       });
     }
 
+    const from = (params.from as number | undefined) ?? 0;
     const size = (params.size as number | undefined) ?? rows.length;
-    const hits = rows.slice(0, size).map((row) => ({
+    const hits = rows.slice(from, from + size).map((row) => ({
       _id: row._id,
       _source: projectSource(row._source, params._source),
     }));
@@ -571,6 +572,54 @@ describe('DatasetClient', () => {
       description: 'A dataset',
       examples_count: 2,
     });
+  });
+
+  it('reads one page of examples in the order get returns them, with the total', async () => {
+    const { client, examplesStorage } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB, baseExampleC],
+    });
+
+    const page = await client.getExamplesPage(created.id, { from: 1, size: 1 });
+
+    expect(page).toEqual({ examples: [created.examples[1]], total: 3 });
+    expect(examplesStorage.client.search).toHaveBeenLastCalledWith(
+      expect.objectContaining({ from: 1, size: 1 })
+    );
+  });
+
+  it('keeps an example page inside the dataset limit', async () => {
+    const { client, examplesStorage } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
+
+    const page = await client.getExamplesPage(created.id, {
+      from: MAX_EXAMPLES_PER_DATASET,
+      size: 50,
+    });
+
+    expect(page).toEqual({ examples: [], total: 1 });
+    expect(examplesStorage.client.search).toHaveBeenLastCalledWith(
+      expect.objectContaining({ from: MAX_EXAMPLES_PER_DATASET, size: 0 })
+    );
+  });
+
+  it('returns no example page for a dataset outside the space', async () => {
+    const [ownClient, otherClient] = createClientsInSpaces(['default', 'marketing']);
+    const created = await ownClient.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
+
+    await expect(otherClient.getExamplesPage(created.id, { from: 0, size: 10 })).resolves.toBe(
+      undefined
+    );
   });
 
   it('updates dataset description without changing the ID', async () => {

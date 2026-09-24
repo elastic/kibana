@@ -55,14 +55,23 @@ export const getDatasetTool = (
         return loaded.error;
       }
 
-      const dataset = await loaded.client.get(datasetId);
-      if (!dataset) {
+      const [dataset, page] = await Promise.all([
+        loaded.client.getMetadata(datasetId),
+        loaded.client.getExamplesPage(datasetId, {
+          from: offset,
+          size: MAX_RETURNED_DATASET_EXAMPLES,
+        }),
+      ]);
+      if (!dataset || !page) {
         return datasetNotFoundResult(datasetId);
       }
 
-      const examples = dataset.examples
-        .slice(offset, offset + MAX_RETURNED_DATASET_EXAMPLES)
-        .map(({ id, input, output, metadata }) => ({ id, input, output, metadata }));
+      const examples = page.examples.map(({ id, input, output, metadata }) => ({
+        id,
+        input,
+        output,
+        metadata,
+      }));
 
       return otherResult({
         id: dataset.id,
@@ -71,9 +80,9 @@ export const getDatasetTool = (
         tags: dataset.tags ?? [],
         maturity: dataset.maturity,
         shared_with_other_spaces: dataset.space_ids.some((id) => id !== spaceId),
-        examples_count: dataset.examples_count,
+        examples_count: page.total,
         offset,
-        examples_omitted: dataset.examples.length - examples.length,
+        examples_omitted: page.total - examples.length,
         examples,
       });
     } catch (error) {

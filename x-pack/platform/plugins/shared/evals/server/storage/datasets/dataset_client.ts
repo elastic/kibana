@@ -1165,10 +1165,49 @@ export class DatasetClient {
     };
   }
 
+  /**
+   * One page of a dataset's examples, in the order `get` returns them, with the
+   * dataset's total example count. Undefined when the dataset isn't in this space.
+   */
+  async getExamplesPage(
+    datasetId: string,
+    { from, size }: { from: number; size: number }
+  ): Promise<{ examples: ExampleDocument[]; total: number } | undefined> {
+    if (!(await this.datasetExists(datasetId))) {
+      return undefined;
+    }
+
+    // A dataset never holds more than the search window, so a page past it is empty.
+    const start = Math.min(Math.max(0, from), MAX_EXAMPLES_PER_DATASET);
+    return this.searchExamples(datasetId, {
+      from: start,
+      size: Math.min(Math.max(0, size), MAX_EXAMPLES_PER_DATASET - start),
+    });
+  }
+
   private async getExamplesByDatasetId(datasetId: string): Promise<ExampleDocument[]> {
+    const { examples, total } = await this.searchExamples(datasetId, {
+      from: 0,
+      size: MAX_EXAMPLES_PER_DATASET,
+    });
+
+    if (total > MAX_EXAMPLES_PER_DATASET) {
+      throw new Error(
+        `Dataset "${datasetId}" has ${total} examples, exceeding the maximum of ${MAX_EXAMPLES_PER_DATASET}`
+      );
+    }
+
+    return examples;
+  }
+
+  private async searchExamples(
+    datasetId: string,
+    { from, size }: { from: number; size: number }
+  ): Promise<{ examples: ExampleDocument[]; total: number }> {
     const response = await this.examplesStorage.search({
       track_total_hits: true,
-      size: MAX_EXAMPLES_PER_DATASET,
+      from,
+      size,
       sort: [
         {
           created_at: {
@@ -1187,13 +1226,8 @@ export class DatasetClient {
       typeof response.hits.total === 'number'
         ? response.hits.total
         : response.hits.total?.value ?? 0;
-    if (total > MAX_EXAMPLES_PER_DATASET) {
-      throw new Error(
-        `Dataset "${datasetId}" has ${total} examples, exceeding the maximum of ${MAX_EXAMPLES_PER_DATASET}`
-      );
-    }
 
-    return response.hits.hits
+    const examples = response.hits.hits
       .filter(
         (hit): hit is typeof hit & { _source: DatasetExampleStorageDocument; _id: string } =>
           Boolean(hit._source) && typeof hit._id === 'string'
@@ -1202,6 +1236,8 @@ export class DatasetClient {
         id: hit._id,
         ...hit._source,
       }));
+
+    return { examples, total };
   }
 
   private async getExampleById(exampleId: string): Promise<ExampleDocument | undefined> {
