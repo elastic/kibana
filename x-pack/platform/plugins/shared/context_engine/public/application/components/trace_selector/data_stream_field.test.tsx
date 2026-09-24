@@ -13,19 +13,20 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { DataStreamField } from './data_stream_field';
 
-interface UseSearchDataStreamsArgs {
+interface UseIndicesArgs {
   search: string;
   enabled: boolean;
+  types: string[];
 }
 
-const mockUseSearchDataStreams = jest.fn();
+const mockUseIndices = jest.fn();
 
-jest.mock('../../hooks/use_search_data_streams', () => ({
-  useSearchDataStreams: (args: UseSearchDataStreamsArgs) => mockUseSearchDataStreams(args),
+jest.mock('../../hooks/use_indices', () => ({
+  useIndices: (args: UseIndicesArgs) => mockUseIndices(args),
 }));
 
 const defaultHookResult = {
-  dataStreams: ['logs-genai-default'],
+  indexNames: ['logs-genai-default'],
   isLoading: false,
   isError: false,
 };
@@ -44,14 +45,14 @@ const renderField = (props: React.ComponentProps<typeof DataStreamField>) => {
   return { ...view, services };
 };
 
-const lastHookArgs = (): UseSearchDataStreamsArgs | undefined => {
-  const calls = mockUseSearchDataStreams.mock.calls;
+const lastHookArgs = (): UseIndicesArgs | undefined => {
+  const calls = mockUseIndices.mock.calls;
   return calls[calls.length - 1]?.[0];
 };
 
 describe('DataStreamField', () => {
   beforeEach(() => {
-    mockUseSearchDataStreams.mockReturnValue(defaultHookResult);
+    mockUseIndices.mockReturnValue(defaultHookResult);
   });
 
   afterEach(() => {
@@ -62,7 +63,11 @@ describe('DataStreamField', () => {
   it('does not enable the search hook before first focus', () => {
     renderField({ value: undefined, onChange: jest.fn() });
 
-    expect(mockUseSearchDataStreams.mock.calls[0]?.[0]).toEqual({ search: '', enabled: false });
+    expect(mockUseIndices.mock.calls[0]?.[0]).toEqual({
+      search: '',
+      enabled: false,
+      types: ['data_stream'],
+    });
   });
 
   it('enables the search hook with an empty search on first focus', () => {
@@ -74,7 +79,7 @@ describe('DataStreamField', () => {
     }
     fireEvent.focus(input);
 
-    expect(lastHookArgs()).toEqual({ search: '', enabled: true });
+    expect(lastHookArgs()).toEqual({ search: '', enabled: true, types: ['data_stream'] });
   });
 
   it('updates search passed to the hook only after the debounce delay', async () => {
@@ -88,23 +93,23 @@ describe('DataStreamField', () => {
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: 'lo' } });
 
-    expect(lastHookArgs()).toEqual({ search: '', enabled: true });
+    expect(lastHookArgs()).toEqual({ search: '', enabled: true, types: ['data_stream'] });
 
     await act(() => {
       jest.advanceTimersByTime(299);
     });
-    expect(lastHookArgs()).toEqual({ search: '', enabled: true });
+    expect(lastHookArgs()).toEqual({ search: '', enabled: true, types: ['data_stream'] });
 
     await act(() => {
       jest.advanceTimersByTime(1);
     });
-    expect(lastHookArgs()).toEqual({ search: 'lo', enabled: true });
+    expect(lastHookArgs()).toEqual({ search: 'lo', enabled: true, types: ['data_stream'] });
   });
 
-  it('renders options that match the hook dataStreams', () => {
-    mockUseSearchDataStreams.mockReturnValue({
+  it('renders options that match the hook indexNames', () => {
+    mockUseIndices.mockReturnValue({
       ...defaultHookResult,
-      dataStreams: ['logs-genai-default', 'logs-other'],
+      indexNames: ['logs-genai-default', 'logs-other'],
     });
     renderField({ value: undefined, onChange: jest.fn() });
 
@@ -120,9 +125,9 @@ describe('DataStreamField', () => {
   });
 
   it('shows a toast warning on load error instead of rendering the raw error message', () => {
-    mockUseSearchDataStreams.mockReturnValue({
+    mockUseIndices.mockReturnValue({
       ...defaultHookResult,
-      dataStreams: [],
+      indexNames: [],
       isError: true,
     });
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { MatchedItem } from '@kbn/data-views-plugin/public';
+import type { IndexKind, MatchedItem } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useIndices } from './use_indices';
 
-const buildMatchedItem = (name: string): MatchedItem => ({
+const buildMatchedItem = (name: string, kind: IndexKind = 'index'): MatchedItem => ({
   name,
-  tags: [],
+  tags: [{ key: kind, name: kind, color: 'default' }],
   item: { name },
 });
 
@@ -69,13 +69,9 @@ describe('useIndices', () => {
     );
   });
 
-  it('uses the debounced search text in the indices pattern', async () => {
+  it('uses the search text in the indices pattern', async () => {
     const getIndices = jest.fn().mockResolvedValue([buildMatchedItem('logs-*')]);
     renderUseIndices({ search: 'log' }, getIndices);
-
-    await act(async () => {
-      jest.advanceTimersByTime(250);
-    });
 
     await waitFor(() =>
       expect(getIndices).toHaveBeenCalledWith({
@@ -115,5 +111,35 @@ describe('useIndices', () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.isError).toBe(false);
     expect(result.current.indexNames).toEqual([]);
+  });
+
+  it('returns all resource kinds when types is omitted', async () => {
+    const getIndices = jest
+      .fn()
+      .mockResolvedValue([
+        buildMatchedItem('logs-index', 'index'),
+        buildMatchedItem('logs-alias', 'alias'),
+        buildMatchedItem('logs-ds', 'data_stream'),
+      ]);
+    const { result } = renderUseIndices({ search: '' }, getIndices);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.indexNames).toEqual(['logs-index', 'logs-alias', 'logs-ds']);
+  });
+
+  it('filters results down to the given types', async () => {
+    const getIndices = jest
+      .fn()
+      .mockResolvedValue([
+        buildMatchedItem('logs-index', 'index'),
+        buildMatchedItem('logs-alias', 'alias'),
+        buildMatchedItem('logs-ds', 'data_stream'),
+      ]);
+    const { result } = renderUseIndices({ search: '', types: ['data_stream'] }, getIndices);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.indexNames).toEqual(['logs-ds']);
   });
 });

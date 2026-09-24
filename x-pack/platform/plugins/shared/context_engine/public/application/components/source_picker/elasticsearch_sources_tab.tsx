@@ -9,7 +9,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiComboBox,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -21,11 +20,14 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useId, useMemo, useState } from 'react';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import React, { useEffect, useId, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useIndices } from '../../hooks/use_indices';
+import { useKibana } from '../../hooks/use_kibana';
 
 const EDITOR_INLINE_MIN_HEIGHT = 180;
+const SEARCH_DEBOUNCE_MS = 300;
 
 const getEsqlQuery = (query: AggregateQuery): string => ('esql' in query ? query.esql : '');
 
@@ -40,17 +42,36 @@ export const ElasticsearchSourcesTab = ({
   onAddIndex,
   onAddEsql,
 }: ElasticsearchSourcesTabProps) => {
+  const {
+    services: { notifications },
+  } = useKibana();
   const accordionId = useId();
-  const [search, setSearch] = useState('');
+  const [searchValue, setSearchValue] = useState('');
+  const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+  const [hasFocused, setHasFocused] = useState(false);
   const [esqlQuery, setEsqlQuery] = useState('');
   const trimmedEsqlQuery = esqlQuery.trim();
 
-  const { indexNames, isLoading, isError } = useIndices({ search, enabled });
+  const { indexNames, isLoading, isError } = useIndices({
+    search: debouncedSearch.trim(),
+    enabled: enabled && hasFocused,
+  });
 
   const indexOptions = useMemo<EuiComboBoxOptionOption<string>[]>(
     () => indexNames.map((name) => ({ label: name, value: name })),
     [indexNames]
   );
+
+  useEffect(() => {
+    if (!isError) {
+      return;
+    }
+    notifications.toasts.addWarning({
+      title: i18n.translate('xpack.contextEngine.sourcePicker.index.loadError', {
+        defaultMessage: 'Unable to load indices.',
+      }),
+    });
+  }, [isError, notifications]);
 
   const addIndexFromCombo = (indexName: string) => {
     const trimmed = indexName.trim();
@@ -58,7 +79,7 @@ export const ElasticsearchSourcesTab = ({
       return;
     }
     onAddIndex(trimmed);
-    setSearch('');
+    setSearchValue('');
   };
 
   const handleIndexChange = (nextSelectedOptions: EuiComboBoxOptionOption<string>[]) => {
@@ -68,6 +89,10 @@ export const ElasticsearchSourcesTab = ({
     }
   };
 
+  const handleFocus = () => {
+    setHasFocused(true);
+  };
+
   const handleAddEsql = () => {
     if (!trimmedEsqlQuery) {
       return;
@@ -75,32 +100,6 @@ export const ElasticsearchSourcesTab = ({
     onAddEsql(trimmedEsqlQuery);
     setEsqlQuery('');
   };
-
-  if (isError) {
-    return (
-      <EuiEmptyPrompt
-        color="danger"
-        iconType="error"
-        data-test-subj="contextIndexTabError"
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.contextEngine.sourcePicker.index.errorTitle"
-              defaultMessage="Unable to load indices"
-            />
-          </h3>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.contextEngine.sourcePicker.index.errorBody"
-              defaultMessage="Indices and data streams could not be loaded. Try again or check your permissions."
-            />
-          </p>
-        }
-      />
-    );
-  }
 
   return (
     <div data-test-subj="contextElasticsearchSourcesTab">
@@ -115,7 +114,7 @@ export const ElasticsearchSourcesTab = ({
         helpText={
           <FormattedMessage
             id="xpack.contextEngine.sourcePicker.index.fieldHelp"
-            defaultMessage="Start typing to search. Press Enter to add a wildcard pattern such as logs-*."
+            defaultMessage="Start typing to search, then select a match from the list."
           />
         }
       >
@@ -123,6 +122,7 @@ export const ElasticsearchSourcesTab = ({
           async
           fullWidth
           singleSelection={{ asPlainText: true }}
+          sortMatchesBy="startsWith"
           selectedOptions={[]}
           isClearable={false}
           aria-label={i18n.translate('xpack.contextEngine.sourcePicker.index.comboAriaLabel', {
@@ -133,8 +133,8 @@ export const ElasticsearchSourcesTab = ({
           })}
           options={indexOptions}
           onChange={handleIndexChange}
-          onCreateOption={addIndexFromCombo}
-          onSearchChange={setSearch}
+          onSearchChange={setSearchValue}
+          onFocus={handleFocus}
           isLoading={isLoading}
           data-test-subj="contextIndexComboBox"
         />

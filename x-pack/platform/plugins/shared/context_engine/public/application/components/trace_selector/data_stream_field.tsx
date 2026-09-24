@@ -9,8 +9,8 @@ import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useIndices } from '../../hooks/use_indices';
 import { useKibana } from '../../hooks/use_kibana';
-import { useSearchDataStreams } from '../../hooks/use_search_data_streams';
 import type { EditableAiIndexTrace } from './types';
 
 interface DataStreamFieldProps {
@@ -28,9 +28,10 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
   const [hasFocused, setHasFocused] = useState(false);
 
-  const { dataStreams, isLoading, isError } = useSearchDataStreams({
+  const { indexNames, isLoading, isError } = useIndices({
     search: debouncedSearch.trim(),
     enabled: hasFocused,
+    types: ['data_stream'],
   });
 
   const selectedValue = value?.type === 'index' ? value.value : undefined;
@@ -43,8 +44,8 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
   }, [selectedValue]);
 
   const options = useMemo(
-    () => dataStreams.map((name) => ({ label: name, value: name })),
-    [dataStreams]
+    () => indexNames.map((name) => ({ label: name, value: name })),
+    [indexNames]
   );
 
   useEffect(() => {

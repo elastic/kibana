@@ -145,9 +145,7 @@ describe('SourcePicker', () => {
   });
 
   it('adds an index selection as an ES|QL source from the index picker', async () => {
-    const { services } = renderWithProviders(<Harness />);
-
-    await waitFor(() => expect(services.data.dataViews.getIndices).toHaveBeenCalled());
+    renderWithProviders(<Harness />);
 
     await selectIndexSource('logs-*');
 
@@ -164,23 +162,21 @@ describe('SourcePicker', () => {
     expect(screen.getAllByTestId('contextSelectedSource-esql-0')).toHaveLength(1);
   });
 
-  it('adds a custom index pattern when created in the combo box', async () => {
-    renderWithProviders(<Harness />);
+  it('shows a toast warning when the indices request fails', async () => {
+    const { services } = renderWithProviders(
+      <Harness />,
+      createServices({ indicesError: new Error('Network error') })
+    );
 
-    const comboBox = screen.getByTestId('contextIndexComboBox');
-    const input = within(comboBox).getByRole('combobox');
+    const input = within(screen.getByTestId('contextIndexComboBox')).getByRole('combobox');
+    fireEvent.focus(input);
 
-    fireEvent.change(input, { target: { value: 'custom-*' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-
-    const row = screen.getByTestId('contextSelectedSource-esql-0');
-    expect(row).toHaveTextContent('FROM custom-*');
-  });
-
-  it('shows an error prompt when the indices request fails', async () => {
-    renderWithProviders(<Harness />, createServices({ indicesError: new Error('Network error') }));
-
-    expect(await screen.findByTestId('contextIndexTabError')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith({
+        title: 'Unable to load indices.',
+      })
+    );
+    expect(screen.queryByTestId('contextIndexTabError')).not.toBeInTheDocument();
   });
 
   it('adds a raw ES|QL query as a source from the advanced accordion', async () => {
@@ -215,10 +211,11 @@ describe('SourcePicker', () => {
     expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
   });
 
-  it('does not fetch connectors on mount when only the Elasticsearch data tab is shown', () => {
+  it('does not fetch connectors or indices on mount when only the Elasticsearch data tab is shown', () => {
     const { services } = renderWithProviders(<Harness />);
 
     expect(services.http.get).not.toHaveBeenCalled();
+    expect(services.data.dataViews.getIndices).not.toHaveBeenCalled();
   });
 
   it('lists only the data-retrieval connectors in the connectors tab', async () => {
