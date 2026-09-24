@@ -44,7 +44,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
 import { AiStepSection } from './ai_step_section';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { ForeachIterationsSection } from './foreach_iterations_section';
@@ -56,6 +56,7 @@ import {
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
+import { areStepExecutionsUnavailable } from '../../../../common';
 import {
   useAvailableConnectors,
   useFetchConnector,
@@ -465,12 +466,21 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
 
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
+    const stepExecutionsUnavailable = areStepExecutionsUnavailable({
+      stepExecutionsTotal,
+      loadedCount: workflowExecution?.stepExecutions.length ?? 0,
+      isInProgress: workflowExecution ? isInProgressStatus(workflowExecution.status) : false,
+    });
+    const showStepExecutionTree =
+      activeTab === 'table' || error !== null || stepExecutionsUnavailable;
     // Monaco renders only the visible lines, so a run with thousands of loaded steps stays usable.
     // Only stringify while the JSON tab is showing; the Table tab re-renders on every poll.
     const executionJson = useMemo(
       () =>
-        activeTab === 'json' && workflowExecution ? JSON.stringify(workflowExecution, null, 2) : '',
-      [activeTab, workflowExecution]
+        !showStepExecutionTree && workflowExecution
+          ? JSON.stringify(workflowExecution, null, 2)
+          : '',
+      [showStepExecutionTree, workflowExecution]
     );
 
     const workflowName =
@@ -1321,7 +1331,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       executionId={executionId}
                       loadedCount={workflowExecution?.stepExecutions.length ?? 0}
                     />
-                    {activeTab === 'table' && (
+                    {showStepExecutionTree && (
                       <WorkflowStepExecutionTree
                         definition={workflowDefinition}
                         execution={workflowExecution ?? null}
@@ -1337,7 +1347,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
                       />
                     )}
-                    {activeTab === 'json' && (
+                    {!showStepExecutionTree && (
                       <div css={{ height: '70vh' }}>
                         <JSONCodeEditorCommonMemoized
                           data-test-subj="workflowExecutionJsonEditor"
