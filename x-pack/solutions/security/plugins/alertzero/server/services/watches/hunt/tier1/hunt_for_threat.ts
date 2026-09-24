@@ -13,7 +13,7 @@ import type {
   HuntIoc,
 } from '@kbn/alertzero-common';
 import { buildMatchesRequired } from '../common/matches_required';
-import { attributeHits } from './attribute_hits';
+import { ALERT_TECHNIQUE_ID_FIELDS, attributeHits } from './attribute_hits';
 import type { HuntForThreatParams } from './types';
 
 const termClause = (field: string, value: string): Record<string, unknown> => ({
@@ -88,10 +88,25 @@ const buildIocShould = (iocs: HuntIoc[]): Array<Record<string, unknown>> => {
   return clauses;
 };
 
+/**
+ * Alerts tag a sub-technique such as `T1078.004` on
+ * `kibana.alert.rule.threat.technique.subtechnique.id`, with only the parent
+ * `T1078` on `technique.id`, so both paths are searched. The same two paths
+ * drive Tier 1 hit attribution (`ALERT_TECHNIQUE_ID_FIELDS`).
+ */
 const buildTechniqueShould = (techniques: string[]): Array<Record<string, unknown>> =>
   techniques.length === 0
     ? []
-    : [{ terms: { 'kibana.alert.rule.threat.technique.id': techniques } }];
+    : ALERT_TECHNIQUE_ID_FIELDS.map((field) => ({ terms: { [field]: techniques } }));
+
+/**
+ * Bucket cap for the `_index` terms aggregation that sets the hit bar. Every
+ * data-stream generation is its own `_index` value, so a 30-day window over a
+ * handful of patterns can span far more concrete indices than patterns; a cap
+ * derived from the pattern count could drop the required bucket and read a
+ * real hit as clean.
+ */
+const PER_INDEX_MAX_BUCKETS = 500;
 
 export const emptyHuntForThreatResult = (
   status: HuntForThreatResult['status'],
@@ -121,7 +136,7 @@ interface HuntAggregations {
     buckets: Array<{
       key: string;
       doc_count: number;
-      identity_types?: { buckets: Array<{ key: string; doc_count: number }> };
+      non_human_identity?: { doc_count: number };
     }>;
   };
 }
@@ -135,25 +150,45 @@ interface HuntAggregations {
  * it will never resolve on the Users page, human or not. See
  * `classifyIdentityType` below.
  */
-const NON_HUMAN_AWS_IDENTITY_TYPES = new Set(['AssumedRole', 'Role', 'AWSAccount', 'AWSService']);
+const NON_HUMAN_AWS_IDENTITY_TYPES = ['AssumedRole', 'Role', 'AWSAccount', 'AWSService'] as const;
+
+const AWS_IDENTITY_TYPE_FIELD = 'aws.cloudtrail.user_identity.type';
 
 /**
- * Classifies a `user.name` bucket as a person or a role/service identity from
- * its most common `aws.cloudtrail.user_identity.type` value (majority vote,
- * since a handful of demo/edge-case docs could carry a stray type). Buckets
- * with no identity-type sub-aggregation data (non-CloudTrail sources, or an
- * index pattern that doesn't map the field) default to 'user': the
- * conservative choice, since misclassifying a real user as a service is worse
- * than the reverse for the entity-chip's Security-page link.
+ * Counts the documents in a `user.name` bucket whose CloudTrail identity type
+ * is non-human. Built from `match` queries rather than a `terms` aggregation
+ * on purpose: the AWS integration maps the field as plain `keyword` (no
+ * `.keyword` sub-field), while dynamically mapped data (the demo generator)
+ * gets `text` plus `.keyword`. A terms agg needs one exact field name and
+ * 400s the whole search on a `text` field; `match` runs against either
+ * mapping and is a no-op when the field is absent.
+ */
+const nonHumanIdentityFilter = (): Record<string, unknown> => ({
+  filter: {
+    bool: {
+      should: NON_HUMAN_AWS_IDENTITY_TYPES.map((type) => ({
+        match: { [AWS_IDENTITY_TYPE_FIELD]: type },
+      })),
+      minimum_should_match: 1,
+    },
+  },
+});
+
+/**
+ * Classifies a `user.name` bucket as a person or a role/service identity by
+ * majority vote over its documents' CloudTrail identity type (a handful of
+ * demo/edge-case docs could carry a stray type). Buckets with no non-human
+ * documents (non-CloudTrail sources, or an index pattern that doesn't map the
+ * field) default to 'user': the conservative choice, since misclassifying a
+ * real user as a service is worse than the reverse for the entity-chip's
+ * Security-page link.
  */
 const classifyIdentityType = (
-  identityTypeBuckets: Array<{ key: string; doc_count: number }> | undefined
+  bucketDocCount: number,
+  nonHumanDocCount: number | undefined
 ): 'user' | 'service' => {
-  if (!identityTypeBuckets || identityTypeBuckets.length === 0) return 'user';
-  const topBucket = identityTypeBuckets.reduce((max, bucket) =>
-    bucket.doc_count > max.doc_count ? bucket : max
-  );
-  return NON_HUMAN_AWS_IDENTITY_TYPES.has(topBucket.key) ? 'service' : 'user';
+  if (!nonHumanDocCount || bucketDocCount <= 0) return 'user';
+  return nonHumanDocCount * 2 > bucketDocCount ? 'service' : 'user';
 };
 
 /**
@@ -175,7 +210,7 @@ export const huntForThreat = async (
 
   const from = time_range?.from ?? scope.window.from;
   const to = time_range?.to ?? scope.window.to;
-  const row_limit = size ?? scope.row_limit;
+  const rowLimit = size ?? scope.row_limit;
 
   const iocShould = buildIocShould(iocs);
   const techniqueShould = buildTechniqueShould(techniques);
@@ -208,13 +243,15 @@ export const huntForThreat = async (
     index: searchIndices,
     ignore_unavailable: true,
     allow_no_indices: true,
-    size: row_limit,
+    size: rowLimit,
     track_total_hits: true,
     sort: [{ '@timestamp': { order: 'desc' } }],
     _source: [
       '@timestamp',
       'event.dataset',
       'event.module',
+      'event.action',
+      'event.provider',
       'host.name',
       'host.os.family',
       'user.name',
@@ -222,7 +259,10 @@ export const huntForThreat = async (
       'destination.ip',
       'url.full',
       'kibana.alert.rule.name',
-      'kibana.alert.rule.threat.technique',
+      // Alerts store this as a dotted top-level key whose value is the threat
+      // array (`[{ tactic, technique: [{ id, subtechnique: [{ id }] }] }]`), so
+      // the filter names the key as stored, not a path inside it.
+      'kibana.alert.rule.threat',
     ],
     query: {
       bool: {
@@ -233,7 +273,7 @@ export const huntForThreat = async (
     },
     aggs: {
       per_index: {
-        terms: { field: '_index', size: searchIndices.length * 4 },
+        terms: { field: '_index', size: PER_INDEX_MAX_BUCKETS },
       },
       affected_hosts: {
         terms: { field: 'host.name', size: maxAssets },
@@ -241,9 +281,7 @@ export const huntForThreat = async (
       affected_users: {
         terms: { field: 'user.name', size: maxAssets },
         aggs: {
-          identity_types: {
-            terms: { field: 'aws.cloudtrail.user_identity.type.keyword', size: 5 },
-          },
+          non_human_identity: nonHumanIdentityFilter(),
         },
       },
     },
@@ -255,11 +293,13 @@ export const huntForThreat = async (
     typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
   const hits = attributeHits(
     (response.hits.hits ?? []).map(
+      // Envelope keys last so a document with its own top-level `id`/`index`/`score`
+      // field cannot clobber the hit's `_id`/`_index`/`_score`.
       (hit): HuntForThreatHit => ({
+        ...(hit._source as Record<string, unknown>),
         index: hit._index,
         id: hit._id ?? '',
         score: hit._score ?? null,
-        ...(hit._source as Record<string, unknown>),
       })
     ),
     iocs,
@@ -275,23 +315,25 @@ export const huntForThreat = async (
   const services: AffectedAsset[] = [];
   for (const bucket of userBuckets) {
     const asset: AffectedAsset = { name: bucket.key, hit_count: bucket.doc_count };
-    if (classifyIdentityType(bucket.identity_types?.buckets) === 'service') {
+    if (
+      classifyIdentityType(bucket.doc_count, bucket.non_human_identity?.doc_count) === 'service'
+    ) {
       services.push(asset);
     } else {
       users.push(asset);
     }
   }
-  const per_index = (aggs?.per_index?.buckets ?? []).map((b) => ({
+  const perIndex = (aggs?.per_index?.buckets ?? []).map((b) => ({
     index: b.key,
     hit_count: b.doc_count,
     required: matchesRequired(b.key),
   }));
 
-  const has_confirmed_hit = per_index.some((bucket) => bucket.required && bucket.hit_count > 0);
+  const hasConfirmedHit = perIndex.some((bucket) => bucket.required && bucket.hit_count > 0);
 
   return {
     status: total === 0 ? 'no_environment_hits' : 'environment_hits_found',
-    has_confirmed_hit,
+    has_confirmed_hit: hasConfirmedHit,
     searched_iocs: iocs.length,
     searched_techniques: techniques.length,
     resolved_iocs: iocs,
@@ -305,6 +347,6 @@ export const huntForThreat = async (
     },
     hits,
     affected_assets: { hosts, users, services },
-    per_index,
+    per_index: perIndex,
   };
 };

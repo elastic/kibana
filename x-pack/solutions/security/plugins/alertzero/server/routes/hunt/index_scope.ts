@@ -9,17 +9,17 @@ import type { HuntIndexScopeResponse } from '@kbn/alertzero-common';
 import {
   API_VERSIONS,
   HuntIndexScopeRequestQuery,
-  HuntTechnology,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
-import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
+import {
+  HUNT_TECHNOLOGIES,
+  resolveIndexScope,
+} from '../../services/watches/hunt/common/resolve_index_scope';
 import type { RouteDependencies } from '../register_routes';
 
 export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
-
-const HUNT_TECHNOLOGIES: HuntTechnology[] = HuntTechnology.options;
 
 /**
  * Index-scope projection over `resolveIndexScope`, one entry per technology

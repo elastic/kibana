@@ -168,7 +168,7 @@ const validateEsqlAgainstEnvironment = async (
       const repaired = unknownColumn ? pruneKeepColumn(candidate, unknownColumn[1]) : undefined;
       if (!repaired) {
         logger.warn(
-          `[ti:esql] generated ES|QL for ${techniqueId} failed environment validation — ` +
+          `[hunt:esql] generated ES|QL for ${techniqueId} failed environment validation — ` +
             `falling back to the skeleton template. ${message.slice(0, 300)}`
         );
         return undefined;
@@ -177,7 +177,7 @@ const validateEsqlAgainstEnvironment = async (
     }
   }
   logger.warn(
-    `[ti:esql] generated ES|QL for ${techniqueId} still failing after ` +
+    `[hunt:esql] generated ES|QL for ${techniqueId} still failing after ` +
       `${MAX_ESQL_REPAIR_ATTEMPTS} repair attempts — falling back to the skeleton template.`
   );
   return undefined;
@@ -258,7 +258,7 @@ const executeValidatedEsql = async ({
       // Aggregating pipelines (STATS, etc.) drop METADATA columns. Rows existed
       // but the required-index hit bar cannot evaluate them.
       logger.warn(
-        `[ti:esql] execute for ${techniqueId} returned ${values.length} row(s) with no _index ` +
+        `[hunt:esql] execute for ${techniqueId} returned ${values.length} row(s) with no _index ` +
           `column (query may aggregate away METADATA). Treating as hit: false.`
       );
     }
@@ -326,7 +326,7 @@ const executeValidatedEsql = async ({
     };
   } catch (err) {
     logger.warn(
-      `[ti:esql] execute for ${techniqueId} failed — recording executed:false and continuing. ` +
+      `[hunt:esql] execute for ${techniqueId} failed — recording executed:false and continuing. ` +
         `${((err as Error).message ?? '').slice(0, 300)}`
     );
     return { execution: NO_EXECUTION };
@@ -412,13 +412,13 @@ const generateGroundedEsql = async (
     }
     if (generated.size < behaviors.length) {
       logger.warn(
-        `[ti:esql] grounded ES|QL generation covered ${generated.size}/${behaviors.length} ` +
+        `[hunt:esql] grounded ES|QL generation covered ${generated.size}/${behaviors.length} ` +
           `behaviors — uncovered behaviors fall back to the skeleton template.`
       );
     }
   } catch (err) {
     logger.warn(
-      `[ti:esql] grounded ES|QL generation failed — all behaviors fall back to the ` +
+      `[hunt:esql] grounded ES|QL generation failed — all behaviors fall back to the ` +
         `skeleton template. ${(err as Error).message}`
     );
   }
@@ -481,10 +481,10 @@ export const huntBehavior = async (
     required_indices: requiredIndices = [],
   } = params;
 
-  const row_limit = size ?? rowLimitFromParams;
+  const rowLimit = size ?? rowLimitFromParams;
   const canExecute =
     window !== undefined &&
-    row_limit !== undefined &&
+    rowLimit !== undefined &&
     requiredIndices.length > 0 &&
     esClient !== undefined;
 
@@ -582,7 +582,7 @@ export const huntBehavior = async (
             techniqueId: behavior.technique_id,
             esql,
             window: window!,
-            row_limit: row_limit!,
+            row_limit: rowLimit!,
             requiredIndices,
           });
           behavior.execution = executed.execution;
@@ -600,11 +600,11 @@ export const huntBehavior = async (
     }
   }
 
-  const has_hit = validated.some((b) => b.execution?.hit === true);
+  const hasHit = validated.some((b) => b.execution?.hit === true);
 
   logger.debug(
     `hunt_behavior validated=${validated.length} dropped=${droppedIds.length} ` +
-      `has_hit=${has_hit} report_id=${reportId}`
+      `has_hit=${hasHit} report_id=${reportId}`
   );
 
   return {
@@ -612,14 +612,14 @@ export const huntBehavior = async (
     report_id: reportId,
     behaviors: validated,
     indexed_behaviors: toIndexedBehaviors(validated, reportId),
-    has_hit,
+    has_hit: hasHit,
     ...(droppedIds.length > 0 && { dropped_unknown_ids: droppedIds }),
     next_step:
       validated.length === 0
         ? 'No candidates matched the canonical ATT&CK catalog. The LLM may have ' +
           'hallucinated technique IDs; consider lowering the LLM threshold or falling ' +
           'back to IOC matching for this report.'
-        : has_hit
+        : hasHit
         ? 'Behaviors proposed; at least one grounded query hit a required index.'
         : 'Behaviors proposed for Investigation staging.',
   };

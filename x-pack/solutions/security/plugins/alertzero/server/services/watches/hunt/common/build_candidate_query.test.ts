@@ -183,19 +183,21 @@ describe('buildCandidateQuery', () => {
       expect(result.ids).toEqual([]);
     });
 
-    it('selects nothing when the proposal store cannot be read', async () => {
-      // Failing open would re-hunt a report whose containment is parked at a gate.
+    it('throws when the proposal store cannot be read so callers do not treat it as an empty pool', async () => {
+      // Failing open would re-hunt a report whose containment is parked at a gate, and an
+      // empty page would hide the broken store behind "nothing to hunt".
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.search.mockResolvedValue(searchResponseOf([free]));
-      const result = await buildCandidateQuery(
-        esClient,
-        logger,
-        { trigger: 'scheduled', spaceId: 'default' },
-        async () => {
-          throw new Error('proposals index unavailable');
-        }
-      );
-      expect(result.ids).toEqual([]);
+      await expect(
+        buildCandidateQuery(
+          esClient,
+          logger,
+          { trigger: 'scheduled', spaceId: 'default' },
+          async () => {
+            throw new Error('proposals index unavailable');
+          }
+        )
+      ).rejects.toThrow('proposals index unavailable');
     });
   });
 

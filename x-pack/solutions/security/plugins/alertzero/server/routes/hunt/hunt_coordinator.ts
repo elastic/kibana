@@ -39,6 +39,10 @@ export const registerHuntCoordinatorRoute = ({
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
+          // Provisional. Tier 2 spends LLM tokens and executes LLM-generated ES|QL
+          // as the caller, so the read privilege is a placeholder until the hunt
+          // workflow child (the production caller) fixes the identity it runs
+          // under; revisit alongside that PR.
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
         },
       },
@@ -57,22 +61,13 @@ export const registerHuntCoordinatorRoute = ({
         try {
           const core = await context.core;
           const spaceId = getSpaceId(request);
+          // Telemetry, alerts, and ES|QL run as the calling user so their index
+          // privileges apply. The reports index is plugin-owned and hidden, and Kibana
+          // feature privileges grant no Elasticsearch privileges on it, so it is read
+          // with the internal user and scoped by the explicit space filter.
           const esClient = core.elasticsearch.client.asCurrentUser;
+          const reportsEsClient = core.elasticsearch.client.asInternalUser;
           const { getInference, getSearchInferenceEndpoints } = getHuntServices();
-
-          // Same Reasoning tier as the standalone Tier 2 route: this is the path that
-          // actually runs Tier 2 in production, so it must not resolve a different
-          // model than a direct hunt_behavior call would.
-          const modelOutcome = await resolveScopedModel({
-            inference: getInference(),
-            searchInferenceEndpoints: getSearchInferenceEndpoints(),
-            featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
-            request,
-            uiSettingsClient: core.uiSettings.client,
-            logger,
-          });
-
-          const model = modelOutcome.ok ? modelOutcome.model : undefined;
 
           const technologyInput = parseTechnologyInput(request.body.technology);
           if ('invalid' in technologyInput) {
@@ -96,7 +91,24 @@ export const registerHuntCoordinatorRoute = ({
             run_id,
           } = request.body;
 
-          const result = await huntCoordinator(esClient, model, logger, {
+          // Same Reasoning tier as the standalone Tier 2 route: this is the path that
+          // actually runs Tier 2 in production, so it must not resolve a different
+          // model than a direct hunt_behavior call would. A `never` run has no use for
+          // a model, so it skips the connector chain entirely.
+          const modelOutcome =
+            tier2_when === 'never'
+              ? undefined
+              : await resolveScopedModel({
+                  inference: getInference(),
+                  searchInferenceEndpoints: getSearchInferenceEndpoints(),
+                  featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+                  request,
+                  uiSettingsClient: core.uiSettings.client,
+                  logger,
+                });
+          const model = modelOutcome?.ok ? modelOutcome.model : undefined;
+
+          const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
             report_id,
             spaceId,
             text,

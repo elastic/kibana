@@ -50,25 +50,36 @@ export const injectMetadataIndex = (query: string): string => {
     return nextFrom;
   }
 
-  const withKeep = rest.replace(/(\|\s*KEEP\s+)([^|]+)/gi, (full, prefix: string, cols: string) => {
-    const trailingWs = cols.match(/\s*$/)?.[0] ?? '';
-    const columns = cols
-      .split(',')
-      .map((c) => c.trim())
-      .filter(Boolean);
-    if (columns.some((c) => c === '*')) {
-      return full;
+  // METADATA columns only survive until the first aggregating command. A KEEP
+  // after `STATS` names aggregate output columns, and adding `_id, _index`
+  // there would fail the query with an unknown column, so only KEEPs before
+  // the first STATS are rewritten.
+  const statsAt = rest.search(/\|\s*STATS\b/i);
+  const rewritable = statsAt === -1 ? rest : rest.slice(0, statsAt);
+  const untouched = statsAt === -1 ? '' : rest.slice(statsAt);
+
+  const withKeep = rewritable.replace(
+    /(\|\s*KEEP\s+)([^|]+)/gi,
+    (full, prefix: string, cols: string) => {
+      const trailingWs = cols.match(/\s*$/)?.[0] ?? '';
+      const columns = cols
+        .split(',')
+        .map((c) => c.trim())
+        .filter(Boolean);
+      if (columns.some((c) => c === '*')) {
+        return full;
+      }
+      const missing = METADATA_FIELDS.filter((f) => !columns.includes(f));
+      if (missing.length === 0) {
+        return full;
+      }
+      return `${prefix}${[...columns, ...missing].join(', ')}${trailingWs}`;
     }
-    const missing = METADATA_FIELDS.filter((f) => !columns.includes(f));
-    if (missing.length === 0) {
-      return full;
-    }
-    return `${prefix}${[...columns, ...missing].join(', ')}${trailingWs}`;
-  });
+  );
 
   // Keep the original whitespace (or lack of it) between FROM and the first `|`.
   const spacer = fromRaw.match(/\s*$/)?.[0] ?? '';
-  return `${nextFrom}${spacer}${withKeep}`;
+  return `${nextFrom}${spacer}${withKeep}${untouched}`;
 };
 
 /**

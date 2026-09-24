@@ -154,13 +154,15 @@ export const buildCandidateQuery = async (
       openProposalConversationIds = await readOpenProposalConversationIds(spaceId);
     } catch (err) {
       // Failing open here would re-hunt a report whose containment is still parked
-      // at a gate, so an unreadable proposal store stops selection instead.
+      // at a gate. Throw rather than return an empty page: an empty 200 reads as
+      // "nothing to hunt" and hides the broken proposals store, the same way the
+      // reports search above refuses to.
       logger.error(
         `build_candidate_query: could not read open proposals, refusing to select candidates. ${
           (err as Error).message
         }`
       );
-      return { ids: [], skipped: [], total, truncated: false };
+      throw err;
     }
   }
 

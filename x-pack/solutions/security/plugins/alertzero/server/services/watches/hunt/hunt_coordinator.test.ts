@@ -62,12 +62,17 @@ const esClient = {} as ElasticsearchClient;
 
 describe('huntCoordinator', () => {
   it('returns tier1_only with skip reason when no hits and tier2_when=on_hits', async () => {
-    const result = await huntCoordinator(esClient, undefined, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-1',
-      tier2_when: 'on_hits',
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-1',
+        tier2_when: 'on_hits',
+      }
+    );
     expect(result.status).toBe('tier1_only');
     expect(result.tier2_skipped_reason).toBe('no_environment_hits');
     expect(result.has_confirmed_hit).toBe(false);
@@ -75,12 +80,17 @@ describe('huntCoordinator', () => {
   });
 
   it('defaults tier2_when to always so a no-hit run still attempts Tier 2', async () => {
-    const result = await huntCoordinator(esClient, undefined, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-default-always',
-      text: 'report text',
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-default-always',
+        text: 'report text',
+      }
+    );
     expect(result.tier2_skipped_reason).toBe('no_inference');
     expect(result.has_confirmed_hit).toBe(false);
   });
@@ -101,12 +111,17 @@ describe('huntCoordinator', () => {
       per_index: [],
     });
 
-    const result = await huntCoordinator(esClient, undefined, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-2',
-      text: 'some report text',
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-2',
+        text: 'some report text',
+      }
+    );
     expect(result.status).toBe('tier1_only');
     expect(result.tier2_skipped_reason).toBe('no_inference');
     expect(result.completed_successfully).toBe(true);
@@ -129,18 +144,23 @@ describe('huntCoordinator', () => {
     });
 
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
-    const result = await huntCoordinator(esClient, mockModel, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-3',
-      // no text
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      mockModel,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-3',
+        // no text
+      }
+    );
     expect(result.tier2_skipped_reason).toBe('no_report_text');
   });
 
   it('forwards an explicit technology to scope resolution', async () => {
     const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
-    await huntCoordinator(esClient, undefined, logger, {
+    await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
       run_id: 'run-5',
@@ -152,20 +172,30 @@ describe('huntCoordinator', () => {
   });
 
   it('reports the technologies the scope resolved to', async () => {
-    const result = await huntCoordinator(esClient, undefined, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-6',
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-6',
+      }
+    );
     expect(result.technologies).toEqual(['aws_iam']);
   });
 
   it('echoes the caller-supplied run_id', async () => {
-    const result = await huntCoordinator(esClient, undefined, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-from-worker',
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-from-worker',
+      }
+    );
     expect(result.run_id).toBe('run-from-worker');
   });
 
@@ -185,7 +215,7 @@ describe('huntCoordinator', () => {
         window: { from: 'now-24h', to: 'now' },
         row_limit: 100,
       });
-      result = await huntCoordinator(esClient, undefined, logger, {
+      result = await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
         spaceId: 'default',
         trigger: 'scheduled',
         run_id: 'run-7',
@@ -215,12 +245,17 @@ describe('huntCoordinator', () => {
   });
 
   it('skips Tier 2 with configured_never and still completes', async () => {
-    const result = await huntCoordinator(esClient, undefined, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-8',
-      tier2_when: 'never',
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-8',
+        tier2_when: 'never',
+      }
+    );
     expect(result).toEqual(
       expect.objectContaining({
         tier2_skipped_reason: 'configured_never',
@@ -248,13 +283,18 @@ describe('huntCoordinator', () => {
     });
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
 
-    const result = await huntCoordinator(esClient, mockModel, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-optional-only',
-      text: 'report text',
-      tier2_when: 'on_hits',
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      mockModel,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-optional-only',
+        text: 'report text',
+        tier2_when: 'on_hits',
+      }
+    );
 
     expect(result.tier2_skipped_reason).toBe('no_environment_hits');
     expect(mockT2).not.toHaveBeenCalled();
@@ -279,12 +319,17 @@ describe('huntCoordinator', () => {
     mockT2.mockRejectedValueOnce(new Error('connector down'));
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
 
-    const result = await huntCoordinator(esClient, mockModel, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-9',
-      text: 'report text',
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      mockModel,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-9',
+        text: 'report text',
+      }
+    );
     expect(result).toEqual(
       expect.objectContaining({
         tier2_skipped_reason: 'tier2_failed',
@@ -303,7 +348,7 @@ describe('huntCoordinator', () => {
 
     it("hunts the report's own IOCs and techniques when the caller passes only report_id", async () => {
       const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
-      await huntCoordinator(esClient, undefined, logger, {
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
         report_id: 'rpt-1',
         spaceId: 'hunt-a',
         trigger: 'scheduled',
@@ -318,20 +363,27 @@ describe('huntCoordinator', () => {
       );
     });
 
-    it('loads the report from the acting space', async () => {
+    it('loads the report from the acting space through the reports client, not the hunting client', async () => {
       const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
-      await huntCoordinator(esClient, undefined, logger, {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      const reportsEsClient = { tag: 'internal' } as unknown as ElasticsearchClient;
+      await huntCoordinator({ esClient, reportsEsClient }, undefined, logger, {
         report_id: 'rpt-1',
         spaceId: 'hunt-a',
         trigger: 'scheduled',
         run_id: 'run-11',
       });
-      expect(mockLoad).toHaveBeenCalledWith({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+      expect(mockLoad).toHaveBeenCalledWith({
+        esClient: reportsEsClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(mockT1).toHaveBeenCalledWith(esClient, expect.anything());
     });
 
     it('lets caller-supplied IOCs win over the report', async () => {
       const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
-      await huntCoordinator(esClient, undefined, logger, {
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
         report_id: 'rpt-1',
         spaceId: 'hunt-a',
         trigger: 'manual',
@@ -346,7 +398,7 @@ describe('huntCoordinator', () => {
 
     it('does not read the report when no report_id is given', async () => {
       const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
-      await huntCoordinator(esClient, undefined, logger, {
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
         spaceId: 'hunt-a',
         trigger: 'scheduled',
         run_id: 'run-13',
@@ -357,12 +409,17 @@ describe('huntCoordinator', () => {
     it('fails the run, never clean, when the report is not in the space', async () => {
       const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
       mockLoad.mockResolvedValueOnce(null);
-      const result = await huntCoordinator(esClient, undefined, logger, {
-        report_id: 'rpt-elsewhere',
-        spaceId: 'hunt-a',
-        trigger: 'scheduled',
-        run_id: 'run-14',
-      });
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        undefined,
+        logger,
+        {
+          report_id: 'rpt-elsewhere',
+          spaceId: 'hunt-a',
+          trigger: 'scheduled',
+          run_id: 'run-14',
+        }
+      );
       expect(result).toEqual(
         expect.objectContaining({
           tier2_skipped_reason: 'report_not_found',
@@ -402,12 +459,17 @@ describe('huntCoordinator', () => {
     });
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
 
-    const result = await huntCoordinator(esClient, mockModel, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-t2-only-hit',
-      text: 'report text',
-    });
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      mockModel,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-t2-only-hit',
+        text: 'report text',
+      }
+    );
 
     expect(result.has_confirmed_hit).toBe(true);
   });
@@ -451,13 +513,18 @@ describe('huntCoordinator', () => {
     });
     const esWithSearch = { search } as unknown as ElasticsearchClient;
 
-    await huntCoordinator(esWithSearch, mockModel, logger, {
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-window-forward',
-      text: 'report text',
-      size: 40,
-    });
+    await huntCoordinator(
+      { esClient: esWithSearch, reportsEsClient: esClient },
+      mockModel,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-window-forward',
+        text: 'report text',
+        size: 40,
+      }
+    );
 
     expect(search).toHaveBeenCalled();
     expect(mockT2).toHaveBeenCalledWith(
@@ -478,12 +545,77 @@ describe('huntCoordinator', () => {
     );
   });
 
-  it('never writes feedback — completed_successfully is the caller signal', async () => {
-    const result = await huntCoordinator(esClient, undefined, logger, {
+  it('summarizes Tier 1 hits whose _source is nested, as raw telemetry returns it', async () => {
+    const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    mockT2.mockClear();
+    mockT1.mockResolvedValueOnce({
+      status: 'environment_hits_found',
+      has_confirmed_hit: true,
+      searched_iocs: 1,
+      searched_techniques: 0,
+      resolved_iocs: [{ type: 'ip', value: '192.0.2.30' }],
+      resolved_techniques: [],
+      time_range: { from: 'now-7d', to: 'now' },
+      counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 1 },
+      hits: [
+        {
+          index: '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
+          id: 'evt-1',
+          score: null,
+          event: { action: 'AssumeRole', provider: 'sts.amazonaws.com', dataset: 'aws.cloudtrail' },
+          host: { name: 'WIN-ANALYST01' },
+          user: { name: 'dev-user' },
+          source: { ip: '192.0.2.30' },
+        },
+      ],
+      affected_assets: {
+        hosts: [{ name: 'WIN-ANALYST01', hit_count: 1 }],
+        users: [{ name: 'dev-user', hit_count: 1 }],
+        services: [],
+      },
+      per_index: [
+        {
+          index: '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
+          hit_count: 1,
+          required: true,
+        },
+      ],
+    });
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    await huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      run_id: 'run-4',
+      run_id: 'run-nested-hits',
+      text: 'report text',
     });
+
+    expect(mockT2).toHaveBeenCalledWith(
+      mockModel,
+      logger,
+      expect.objectContaining({
+        article_context: expect.objectContaining({
+          sample_events: [
+            'dataset=aws.cloudtrail action=AssumeRole provider=sts.amazonaws.com host=WIN-ANALYST01 user=dev-user src=192.0.2.30',
+          ],
+        }),
+      }),
+      esClient
+    );
+  });
+
+  it('never writes feedback — completed_successfully is the caller signal', async () => {
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-4',
+      }
+    );
     expect(result).toHaveProperty('completed_successfully');
   });
 });

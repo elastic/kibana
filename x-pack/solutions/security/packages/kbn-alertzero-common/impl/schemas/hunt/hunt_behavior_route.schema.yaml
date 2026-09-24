@@ -10,7 +10,8 @@ paths:
       operationId: HuntBehavior
       description: >-
         Runs Tier 2's LLM-backed behavioral extraction against a threat report's
-        text. Requires a GenAI connector; returns 503 when none is configured.
+        text. Requires the inference plugin (503 when absent) and a GenAI
+        connector (400 when none is configured).
       summary: Run Tier 2 behavioral corroboration
       tags:
         - AlertZero API
@@ -25,6 +26,7 @@ paths:
               properties:
                 text:
                   type: string
+                  minLength: 1
                   maxLength: 200000
                 report_id:
                   type: string
@@ -199,8 +201,10 @@ paths:
                     description: >-
                       True when any behavior's execute path found at least one
                       row in a required index. Independent of Tier 1.
-        '503':
+        '400':
           description: No GenAI connector configured
+        '503':
+          description: The inference plugin is not available in this deployment
 components:
   schemas:
     HuntBehaviorStatus:

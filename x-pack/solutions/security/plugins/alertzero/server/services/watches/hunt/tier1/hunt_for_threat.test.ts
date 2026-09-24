@@ -165,30 +165,31 @@ describe('huntForThreat', () => {
 
   it('honors a caller-supplied time_range and size override', async () => {
     const esClient = buildEsClient(emptySearchResponse);
-    const time_range = { from: '2026-09-17T00:00:00.000Z', to: '2026-09-18T00:00:00.000Z' };
+    const timeRange = { from: '2026-09-17T00:00:00.000Z', to: '2026-09-18T00:00:00.000Z' };
 
     const result = await huntForThreat(esClient, {
       scope,
       iocs: [{ type: 'ip', value: '10.0.0.1' }],
-      time_range,
+      time_range: timeRange,
       size: 100,
     });
 
-    expect(result.time_range).toEqual(time_range);
+    expect(result.time_range).toEqual(timeRange);
     expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 100 }));
   });
 
-  it('maps technique IDs to the threat.technique.id terms clause', async () => {
+  it('maps technique IDs to both the technique.id and subtechnique.id terms clauses', async () => {
     const esClient = buildEsClient(emptySearchResponse);
 
-    await huntForThreat(esClient, { scope, techniques: ['T1078'] });
+    await huntForThreat(esClient, { scope, techniques: ['T1078.004'] });
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
           bool: expect.objectContaining({
             should: expect.arrayContaining([
-              { terms: { 'kibana.alert.rule.threat.technique.id': ['T1078'] } },
+              { terms: { 'kibana.alert.rule.threat.technique.id': ['T1078.004'] } },
+              { terms: { 'kibana.alert.rule.threat.technique.subtechnique.id': ['T1078.004'] } },
             ]),
           }),
         }),
@@ -196,7 +197,19 @@ describe('huntForThreat', () => {
     );
   });
 
-  it('classifies affected_users buckets into users vs. services by AWS identity type', async () => {
+  it('requests the stored threat key, not a path inside it, so alert hits carry their ATT&CK ids', async () => {
+    const esClient = buildEsClient(emptySearchResponse);
+
+    await huntForThreat(esClient, { scope, techniques: ['T1078'] });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source: expect.arrayContaining(['kibana.alert.rule.threat', 'event.action']),
+      })
+    );
+  });
+
+  it('classifies affected_users buckets into users vs. services by majority non-human identity type', async () => {
     const esClient = buildEsClient({
       hits: { total: { value: 0 }, hits: [] },
       aggregations: {
@@ -204,21 +217,12 @@ describe('huntForThreat', () => {
         affected_hosts: { buckets: [] },
         affected_users: {
           buckets: [
-            {
-              key: 'dev-user',
-              doc_count: 4,
-              identity_types: { buckets: [{ key: 'IAMUser', doc_count: 4 }] },
-            },
-            {
-              key: 'escalated-role',
-              doc_count: 6,
-              identity_types: { buckets: [{ key: 'AssumedRole', doc_count: 6 }] },
-            },
-            {
-              key: 'legacy-service-account',
-              doc_count: 2,
-              identity_types: { buckets: [] },
-            },
+            { key: 'dev-user', doc_count: 4, non_human_identity: { doc_count: 0 } },
+            { key: 'escalated-role', doc_count: 6, non_human_identity: { doc_count: 6 } },
+            // A stray non-human doc does not flip a mostly-human identity.
+            { key: 'mixed-user', doc_count: 5, non_human_identity: { doc_count: 2 } },
+            // No sub-aggregation at all (field unmapped for this source) stays a user.
+            { key: 'legacy-service-account', doc_count: 2 },
           ],
         },
       },
@@ -231,8 +235,29 @@ describe('huntForThreat', () => {
 
     expect(result.affected_assets.users).toEqual([
       { name: 'dev-user', hit_count: 4 },
+      { name: 'mixed-user', hit_count: 5 },
       { name: 'legacy-service-account', hit_count: 2 },
     ]);
     expect(result.affected_assets.services).toEqual([{ name: 'escalated-role', hit_count: 6 }]);
+  });
+
+  it('counts non-human identities with match queries on the base field, so it works on keyword and dynamic text mappings alike', async () => {
+    const esClient = buildEsClient(emptySearchResponse);
+
+    await huntForThreat(esClient, { scope, iocs: [{ type: 'ip', value: '10.0.0.1' }] });
+
+    const [{ aggs }] = (esClient.search as jest.Mock).mock.calls[0];
+    expect(aggs.affected_users.aggs.non_human_identity).toEqual({
+      filter: {
+        bool: {
+          should: expect.arrayContaining([
+            { match: { 'aws.cloudtrail.user_identity.type': 'AssumedRole' } },
+            { match: { 'aws.cloudtrail.user_identity.type': 'AWSService' } },
+          ]),
+          minimum_should_match: 1,
+        },
+      },
+    });
+    expect(JSON.stringify(aggs)).not.toContain('.keyword');
   });
 });

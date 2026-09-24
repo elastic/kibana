@@ -63,7 +63,7 @@ export type HuntBehaviorArticleContext = z.infer<typeof HuntBehaviorArticleConte
 export const HuntBehaviorRequestBody = lazySchema(() =>
   z
     .object({
-      text: z.string().max(200000),
+      text: z.string().min(1).max(200000),
       report_id: z.string().min(1).max(512).optional(),
       llm_confidence_threshold: z.number().min(0).max(1).optional(),
       iocs: z.array(HuntBehaviorIoc).max(100).optional(),
