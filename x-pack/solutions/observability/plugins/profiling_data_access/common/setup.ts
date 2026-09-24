@@ -17,11 +17,6 @@ export interface ProfilingSetupOptions {
   spaceId: string;
 }
 
-export interface SetupStateType {
-  type: 'self-managed';
-  setupState: SetupState;
-}
-
 export interface SetupState {
   data: {
     available: boolean;

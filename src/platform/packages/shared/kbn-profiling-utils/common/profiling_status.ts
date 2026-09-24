@@ -8,7 +8,6 @@
  */
 
 export interface ProfilingStatus {
-  type: 'cloud' | 'self-managed' | 'serverless';
   profiling_enabled: boolean;
   has_setup: boolean;
   has_data: boolean;
