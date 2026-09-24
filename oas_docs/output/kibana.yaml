@@ -44937,6 +44937,7 @@ paths:
                         type: array
                       policyIdsByInstance:
                         additionalProperties:
+                          maxLength: 255
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
@@ -45258,6 +45259,7 @@ paths:
                         type: array
                       policyIdsByInstance:
                         additionalProperties:
+                          maxLength: 255
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
@@ -45617,6 +45619,7 @@ paths:
                         type: array
                       policyIdsByInstance:
                         additionalProperties:
+                          maxLength: 255
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
@@ -45864,6 +45867,7 @@ paths:
                           type: array
                         policyIdsByInstance:
                           additionalProperties:
+                            maxLength: 255
                             type: string
                           description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                           type: object
