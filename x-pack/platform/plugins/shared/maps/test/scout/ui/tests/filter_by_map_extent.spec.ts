@@ -22,7 +22,10 @@ test.describe(
     tag: tags.stateful.classic,
   },
   () => {
+    let prevDefaultIndex: string | number | boolean | undefined;
+
     test.beforeAll(async ({ kbnClient, esArchiver, uiSettings }) => {
+      prevDefaultIndex = await kbnClient.uiSettings.get('defaultIndex');
       await esArchiver.loadIfNeeded(ES_ARCHIVE_LOGSTASH);
       await esArchiver.loadIfNeeded(ES_ARCHIVE_MAPS_DATA);
       await kbnClient.importExport.load(KBN_ARCHIVE);
@@ -35,7 +38,11 @@ test.describe(
 
     test.afterAll(async ({ kbnClient, uiSettings }) => {
       await kbnClient.savedObjects.cleanStandardList();
-      await uiSettings.unset('defaultIndex');
+      if (prevDefaultIndex !== undefined) {
+        await uiSettings.set({ defaultIndex: prevDefaultIndex });
+      } else {
+        await uiSettings.unset('defaultIndex');
+      }
     });
 
     test('filter by map extent lifecycle', async ({ page, pageObjects }) => {
