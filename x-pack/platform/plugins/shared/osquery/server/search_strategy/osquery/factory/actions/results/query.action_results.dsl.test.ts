@@ -7,6 +7,18 @@
 
 import moment from 'moment';
 import { buildActionResultsQuery } from './query.action_results.dsl';
+
+// The agent-carried space only speaks for documents Kibana never stamped, so the
+// fallback pairs its term with the absence of the trusted top-level field.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
+
+const collectShouldClauses = (clauses: unknown[]): unknown[] =>
+  clauses.flatMap((clause) => (clause as { bool?: { should?: unknown[] } })?.bool?.should ?? []);
 import {
   Direction,
   type ActionResultsRequestOptions,
@@ -665,7 +677,7 @@ describe('buildActionResultsQuery', () => {
                 ],
               },
             },
-            { term: { 'action_data.space_id': 'default' } },
+            actionDataFallback('default'),
           ],
         },
       };
@@ -682,10 +694,7 @@ describe('buildActionResultsQuery', () => {
       // Id-bound read: also matches the agent-carried action_data.space_id.
       expect(getAggFilterMust(result)).toContainEqual({
         bool: {
-          should: [
-            { term: { space_id: 'my-space' } },
-            { term: { 'action_data.space_id': 'my-space' } },
-          ],
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
         },
       });
     });
@@ -703,13 +712,14 @@ describe('buildActionResultsQuery', () => {
       // allowance is dropped.
       expect(getAggFilterMust(result)).toContainEqual({
         bool: {
-          should: [
-            { term: { space_id: 'default' } },
-            { term: { 'action_data.space_id': 'default' } },
-          ],
+          should: [{ term: { space_id: 'default' } }, actionDataFallback('default')],
         },
       });
-      expect(JSON.stringify(getAggFilterMust(result))).not.toContain('exists');
+      // The dropped allowance is the one that admits unstamped documents outright;
+      // the fallback's own `must_not` is paired with a required action_data term.
+      expect(collectShouldClauses(getAggFilterMust(result))).not.toContainEqual({
+        bool: { must_not: { exists: { field: 'space_id' } } },
+      });
     });
 
     it('omits action_data.space_id from aggregations when matchActionDataSpaceId is omitted', () => {
@@ -721,10 +731,7 @@ describe('buildActionResultsQuery', () => {
       expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
       expect(getAggFilterMust(result)).not.toContainEqual({
         bool: {
-          should: [
-            { term: { space_id: 'my-space' } },
-            { term: { 'action_data.space_id': 'my-space' } },
-          ],
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
         },
       });
     });
@@ -739,10 +746,7 @@ describe('buildActionResultsQuery', () => {
       expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
       expect(getAggFilterMust(result)).not.toContainEqual({
         bool: {
-          should: [
-            { term: { space_id: 'my-space' } },
-            { term: { 'action_data.space_id': 'my-space' } },
-          ],
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
         },
       });
     });

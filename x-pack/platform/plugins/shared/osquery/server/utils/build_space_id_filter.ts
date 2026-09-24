@@ -46,10 +46,17 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
  *
  * SECURITY: `action_data` is the query payload round-tripped through the agent,
  * so it is less trustworthy than the Kibana-written top-level field. Only pass
- * `true` from a read already bound to an `action_id` or `schedule_id` — that id
- * can only have been learned from a space-stamped, Kibana-written action
- * document, and that binding is the authorization gate. Never enable it on a
- * read that enumerates across actions.
+ * `true` from a read already bound to an `action_id`, and never on a read that
+ * enumerates across actions.
+ *
+ * That id binding narrows the read to documents the caller named; it is not by
+ * itself an authorization gate, because route-level ownership checks are uneven
+ * (`get_action_results_route.ts` verifies the action document only when CPS is
+ * active). What contains the blast radius is this clause: it matches only
+ * documents whose surviving provenance already names the caller's active space,
+ * so possessing another space's id yields nothing. The residual exposure is an
+ * agent that forges `action_data.space_id`, which the top-level `must_not` below
+ * limits to documents Kibana never stamped.
  *
  * This flag is orthogonal to `matchMissingSpaceId` and stays valid when it is
  * `false`: `action_data.space_id` is a present, exact-valued term carrying real
@@ -83,7 +90,16 @@ export const buildSpaceIdFilter = (
   }
 
   if (matchActionDataSpaceId) {
-    shouldClauses.push({ term: { 'action_data.space_id': spaceId } });
+    // The Kibana-written top-level field wins where it exists: this fallback only
+    // speaks for documents it never reached. Without the `must_not`, a document
+    // stamped `space_id: 'space-b'` and `action_data.space_id: 'space-a'` would
+    // match a space-A read even though the trusted field assigns it to B.
+    shouldClauses.push({
+      bool: {
+        filter: { term: { 'action_data.space_id': spaceId } },
+        must_not: { exists: { field: 'space_id' } },
+      },
+    });
   }
 
   // Keep the single-clause shape bare rather than wrapping it in a redundant

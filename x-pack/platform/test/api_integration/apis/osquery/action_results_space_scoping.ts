@@ -23,6 +23,7 @@ interface ActionResultsRows {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const spaces = getService('spaces');
   const osqueryPublicApiVersion = '2023-10-31';
 
   // Live-query action responses are written by osquerybeat to the
@@ -134,9 +135,12 @@ export default function ({ getService }: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: indexTemplateName }, { ignore: [404] });
   };
 
-  const fetchActionResults = async () => {
+  // `spaceId` omitted reads from the default space; passing one exercises the
+  // named-space path the fallback exists to restore.
+  const fetchActionResults = async (spaceId?: string) => {
+    const basePath = spaceId ? `/s/${spaceId}` : '';
     const { body } = await supertest
-      .get(`/api/osquery/action_results/${actionId}?page=0&pageSize=100&kuery=`)
+      .get(`${basePath}/api/osquery/action_results/${actionId}?page=0&pageSize=100&kuery=`)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', osqueryPublicApiVersion)
       .expect(200);
@@ -146,10 +150,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Action results space scoping', () => {
     before(async () => {
+      await spaces.create({ id: otherSpaceId, name: otherSpaceId, disabledFeatures: [] });
       await recreateResponsesIndex();
       await seedResponses();
     });
-    after(deleteResponses);
+    after(async () => {
+      await deleteResponses();
+      await spaces.delete(otherSpaceId);
+    });
 
     it('returns only active-space responses (hits + aggregation)', async () => {
       const body = await fetchActionResults();
@@ -184,6 +192,24 @@ export default function ({ getService }: FtrProviderContext) {
       const body = await fetchActionResults();
 
       expect(JSON.stringify(body)).not.to.contain(actionDataOtherSpaceAgent);
+    });
+
+    // The regression this PR fixes: read from the named space itself. A named space
+    // has no missing-field allowance, so the action_data term is the only clause
+    // that can return this response — unlike the default-space assertions above,
+    // this one cannot pass with the fallback disabled.
+    it('returns action_data-stamped responses when read from their own named space', async () => {
+      const { edges, aggregations } = await fetchActionResults(otherSpaceId);
+      const serialized = JSON.stringify(edges);
+
+      expect(serialized).to.contain(actionDataOtherSpaceAgent);
+      // The top-level-stamped response for this space is returned too.
+      expect(serialized).to.contain(spaceBAgent);
+      // Default-space responses stay out, on either field.
+      expect(serialized).not.to.contain(spaceAAgent);
+      expect(serialized).not.to.contain(actionDataDefaultAgent);
+
+      expect(aggregations?.totalResponded).to.eql(2);
     });
   });
 }

@@ -81,9 +81,18 @@ const baseRequest = (
   }
 };
 
+// The agent-carried space only speaks for documents Kibana never stamped, so the
+// fallback pairs its term with the absence of the trusted top-level field.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
+
 const namedSpaceActionDataFilter = {
   bool: {
-    should: [{ term: { space_id: 'my-space' } }, { term: { 'action_data.space_id': 'my-space' } }],
+    should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
   },
 };
 
@@ -314,10 +323,7 @@ describe('osquery search strategy space scoping invariant', () => {
 
       expect(getFilterClauses(scoped)).toContainEqual({
         bool: {
-          should: [
-            { term: { space_id: 'default' } },
-            { term: { 'action_data.space_id': 'default' } },
-          ],
+          should: [{ term: { space_id: 'default' } }, actionDataFallback('default')],
         },
       });
     });

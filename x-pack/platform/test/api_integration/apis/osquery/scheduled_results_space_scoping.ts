@@ -20,6 +20,7 @@ interface ScheduledResultsRows {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const spaces = getService('spaces');
   const osqueryPublicApiVersion = '2023-10-31';
 
   const probeIndex = 'logs-osquery_manager.result_space_scoping_it';
@@ -31,14 +32,12 @@ export default function ({ getService }: FtrProviderContext) {
   const otherMarker = 'SPACE_B_MARKER';
   const otherSpaceId = 'space-scoping-it-b';
 
-  // Documents whose space survived only inside `action_data`, kept under their own
-  // schedule id so they stay out of the export assertions below: `exportResults` is
-  // not on the action_data allowlist, so its scoping of these rows is governed by
-  // the pre-existing missing-field allowance rather than by this fallback.
-  const actionDataScheduleId = `space-scoping-it-action-data-${Date.now()}`;
-  const actionDataDefaultMarker = 'ACTION_DATA_DEFAULT_MARKER';
-  const actionDataOtherMarker = 'ACTION_DATA_OTHER_MARKER';
-
+  // No `action_data` documents here. Scheduled executions are delivered by the
+  // agent policy rather than a Fleet action, so they never produce an `action_data`
+  // blob and always carry the top-level `space_id`; the search strategy withholds
+  // the fallback from schedule-bound reads for that reason. Seeding one would
+  // assert a shape that cannot occur. Fleet-action coverage lives in
+  // action_results_space_scoping.ts.
   const recreateProbeIndex = async () => {
     await es.indices.delete({ index: probeIndex }, { ignore: [404] });
     await es.indices.putIndexTemplate({
@@ -54,10 +53,6 @@ export default function ({ getService }: FtrProviderContext) {
             'event.ingested': { type: 'date' },
             schedule_id: { type: 'keyword' },
             space_id: { type: 'keyword' },
-            // The results index is package-managed (elastic/integrations#21368), so
-            // in production this field currently resolves through dynamic mapping.
-            // Pin it here so the query is exercised against a keyword field.
-            action_data: { properties: { space_id: { type: 'keyword' } } },
             elastic_agent: { properties: { id: { type: 'keyword' } } },
             agent: { properties: { id: { type: 'keyword' } } },
             osquery_meta: { properties: { schedule_execution_count: { type: 'long' } } },
@@ -93,22 +88,6 @@ export default function ({ getService }: FtrProviderContext) {
         agent: { id: 'space-scoping-it-agent-b' },
         osquery: { result: { marker: otherMarker } },
       },
-      {
-        ...base,
-        schedule_id: actionDataScheduleId,
-        action_data: { space_id: 'default' },
-        elastic_agent: { id: 'space-scoping-it-agent-c' },
-        agent: { id: 'space-scoping-it-agent-c' },
-        osquery: { result: { marker: actionDataDefaultMarker } },
-      },
-      {
-        ...base,
-        schedule_id: actionDataScheduleId,
-        action_data: { space_id: otherSpaceId },
-        elastic_agent: { id: 'space-scoping-it-agent-d' },
-        agent: { id: 'space-scoping-it-agent-d' },
-        osquery: { result: { marker: actionDataOtherMarker } },
-      },
     ];
 
     for (const document of documents) {
@@ -123,10 +102,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Scheduled query results space scoping', () => {
     before(async () => {
+      await spaces.create({ id: otherSpaceId, name: otherSpaceId, disabledFeatures: [] });
       await recreateProbeIndex();
       await seedResults();
     });
-    after(deleteResults);
+    after(async () => {
+      await deleteResults();
+      await spaces.delete(otherSpaceId);
+    });
 
     it('results endpoint returns only rows from the active space', async () => {
       const { body } = await supertest
@@ -167,14 +150,13 @@ export default function ({ getService }: FtrProviderContext) {
       expect(exported).not.to.contain(otherSpaceId);
     });
 
-    // The results endpoint reads `logs-osquery_manager.result*` through the
-    // `results` factory, which is id-bound and therefore honours the space carried
-    // in `action_data`. Asserted against real Elasticsearch because a DSL-shape test
-    // cannot show that the field is actually queryable as a term.
-    it('reads rows whose space survived only in action_data, and only in that space', async () => {
+    // Read from the named space itself rather than only asserting the default space
+    // does not leak. A named space has no missing-field allowance, so this proves the
+    // row is matched on its own `space_id` term.
+    it('results endpoint returns named-space rows when read from that space', async () => {
       const { body } = await supertest
         .get(
-          `/api/osquery/scheduled_results/${actionDataScheduleId}/${executionCount}/results?page=0&pageSize=100`
+          `/s/${otherSpaceId}/api/osquery/scheduled_results/${scheduleId}/${executionCount}/results?page=0&pageSize=100`
         )
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', osqueryPublicApiVersion)
@@ -182,10 +164,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const serialized = JSON.stringify(body);
 
-      expect(serialized).to.contain(actionDataDefaultMarker);
-      // The default space also matches documents with no space_id at all; a row
-      // stamped in action_data is not unstamped, so that allowance must not pull it in.
-      expect(serialized).not.to.contain(actionDataOtherMarker);
+      expect(serialized).to.contain(otherMarker);
+      expect(serialized).not.to.contain(defaultMarker);
     });
   });
 }

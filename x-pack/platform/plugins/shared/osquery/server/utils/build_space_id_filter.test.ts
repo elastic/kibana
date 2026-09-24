@@ -17,10 +17,29 @@ interface SpaceIdFilterShape {
   bool?: {
     should?: Array<{
       term?: Record<string, string>;
-      bool?: { must_not?: ExistsClause | ExistsClause[] };
+      bool?: {
+        filter?: { term: Record<string, string> };
+        must_not?: ExistsClause | ExistsClause[];
+      };
     }>;
   };
 }
+
+// The `action_data.space_id` fallback only speaks for documents Kibana never
+// stamped, so the trusted top-level field keeps precedence.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
+
+// The allowance that admits unstamped documents outright, as opposed to the
+// fallback above, whose `must_not` is paired with a required `action_data` term.
+const hasMissingFieldAllowance = (filter: SpaceIdFilterShape): boolean =>
+  (filter.bool?.should ?? []).some(
+    (clause) => clause.bool?.must_not != null && clause.bool?.filter == null
+  );
 
 describe('buildSpaceIdFilter', () => {
   it('always returns a filter clause', () => {
@@ -71,12 +90,21 @@ describe('buildSpaceIdFilter', () => {
     it('also matches action_data.space_id in a named space when enabled', () => {
       expect(buildSpaceIdFilter('my-space', { matchActionDataSpaceId: true })).toEqual({
         bool: {
-          should: [
-            { term: { space_id: 'my-space' } },
-            { term: { 'action_data.space_id': 'my-space' } },
-          ],
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
         },
       });
+    });
+
+    // The agent-carried field must never override a Kibana-written one: a document
+    // assigned to space-b by the trusted field is not readable from space-a just
+    // because its round-tripped payload claims space-a.
+    it('never lets action_data.space_id override an existing top-level space_id', () => {
+      const filter = buildSpaceIdFilter('space-a', {
+        matchActionDataSpaceId: true,
+      }) as SpaceIdFilterShape;
+      const fallbackClause = filter.bool?.should?.find((clause) => clause.bool?.filter != null);
+
+      expect(fallbackClause?.bool?.must_not).toEqual({ exists: { field: 'space_id' } });
     });
 
     it('matches the top-level field, the missing field, and action_data in the default space', () => {
@@ -92,7 +120,7 @@ describe('buildSpaceIdFilter', () => {
                 ],
               },
             },
-            { term: { 'action_data.space_id': 'default' } },
+            actionDataFallback('default'),
           ],
         },
       });
@@ -143,22 +171,19 @@ describe('buildSpaceIdFilter', () => {
 
       expect(filter).toEqual({
         bool: {
-          should: [
-            { term: { space_id: 'default' } },
-            { term: { 'action_data.space_id': 'default' } },
-          ],
+          should: [{ term: { space_id: 'default' } }, actionDataFallback('default')],
         },
       });
-      expect(JSON.stringify(filter)).not.toContain('must_not');
+      expect(hasMissingFieldAllowance(filter as SpaceIdFilterShape)).toBe(false);
     });
 
     it('never matches field-less documents in a named space', () => {
       const filter = buildSpaceIdFilter('my-space', {
         matchMissingSpaceId: true,
         matchActionDataSpaceId: true,
-      });
+      }) as SpaceIdFilterShape;
 
-      expect(JSON.stringify(filter)).not.toContain('must_not');
+      expect(hasMissingFieldAllowance(filter)).toBe(false);
     });
   });
 

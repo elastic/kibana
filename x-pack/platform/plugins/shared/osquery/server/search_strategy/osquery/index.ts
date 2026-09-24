@@ -33,10 +33,12 @@ import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
  * can actually carry `action_data`, and which may therefore also match the
  * agent-carried `action_data.space_id` (see {@link buildSpaceIdFilter}).
  *
- * SECURITY: that id binding is the authorization gate — a caller can only supply
- * such an id if they obtained it from a space-stamped, Kibana-written action
- * document. Do not add a query type here unless its builder unconditionally
- * filters on one of those ids.
+ * SECURITY: the id binding narrows the read to documents the caller named, but it
+ * is not an authorization gate on its own — route-level ownership checks are
+ * uneven (`get_action_results_route.ts` verifies the action document only when CPS
+ * is active). Isolation rests on the clause itself matching only documents whose
+ * surviving provenance already names the active space. Do not add a query type
+ * here unless its builder unconditionally filters on an `action_id`.
  *
  * Types not allowlisted for `action_data.space_id`: `actions` enumerates across
  * actions; `exportResults` is not unconditionally id-bound in the factory
@@ -51,11 +53,32 @@ import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
  * per-field action whitelist, so those documents already carry the top-level
  * field. Allowlisting it would widen a space-isolation decision to an
  * agent-writable field in exchange for a clause that can never match.
+ *
+ * Membership here is necessary but not sufficient: `results` serves scheduled
+ * reads too, because `get_scheduled_query_results_route.ts` passes a
+ * `scheduleId`/`executionCount` pair that selects the `schedule_id` branch of
+ * `buildResultsQuery`. `schedule_id` is minted per pack query
+ * (`create_pack_route.ts`) and delivered by the policy, so that branch matches
+ * the same action-less documents as `scheduledActionResults`. See
+ * {@link isScheduleBoundRequest}, which withholds the flag there for the same
+ * reason.
  */
 export const ID_BOUND_FACTORY_QUERY_TYPES: readonly FactoryQueryTypes[] = [
   OsqueryQueries.results,
   OsqueryQueries.actionResults,
 ];
+
+/**
+ * True when the request selects a builder's `schedule_id` branch rather than its
+ * `action_id` one, mirroring the condition in `buildResultsQuery`.
+ */
+const isScheduleBoundRequest = <T extends FactoryQueryTypes>(
+  request: StrategyRequestType<T>
+): boolean =>
+  'scheduleId' in request &&
+  request.scheduleId != null &&
+  'executionCount' in request &&
+  request.executionCount != null;
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
@@ -106,7 +129,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           }) => {
             // Single decision for hit-level enforceSpaceScope and for any
             // global-agg builder that cannot inherit the top-level query.
-            const matchActionDataSpaceId = ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType);
+            const matchActionDataSpaceId =
+              ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType) &&
+              !isScheduleBoundRequest(request);
 
             const strictRequest = {
               factoryQueryType,

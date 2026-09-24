@@ -8,6 +8,15 @@
 import { of, lastValueFrom } from 'rxjs';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
+
+// The agent-carried space only speaks for documents Kibana never stamped, so the
+// fallback pairs its term with the absence of the trusted top-level field.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
 import type {
   FactoryQueryTypes,
   StrategyRequestType,
@@ -125,11 +134,12 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     };
   };
 
+  // Action-bound, as the live-query results route sends it. A `scheduleId` /
+  // `executionCount` pair would select a different branch of `buildResultsQuery`
+  // and withhold the action_data fallback; that case is covered separately below.
   const resultsRequest = {
     factoryQueryType: OsqueryQueries.results,
     actionId: 'action-1',
-    scheduleId: 'sched-1',
-    executionCount: 1,
     kuery: '',
     pagination: { activePage: 0, cursorStart: 0, querySize: 10 },
     sort: [{ field: '@timestamp', direction: Direction.desc }],
@@ -225,14 +235,18 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     // action_data.space_id (see ID_BOUND_FACTORY_QUERY_TYPES).
     expect(filter).toContainEqual({
       bool: {
-        should: [
-          { term: { space_id: 'my-space' } },
-          { term: { 'action_data.space_id': 'my-space' } },
-        ],
+        should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
       },
     });
-    // Named space must NOT include the default-space missing-field fallback.
-    expect(JSON.stringify(filter)).not.toContain('exists');
+    // Named space must not admit unstamped documents: the only `must_not` here is
+    // the fallback's own guard, paired with a required action_data term.
+    const shouldClauses = filter.flatMap(
+      (clause) => (clause as { bool?: { should?: unknown[] } })?.bool?.should ?? []
+    );
+
+    expect(shouldClauses).not.toContainEqual({
+      bool: { must_not: { exists: { field: 'space_id' } } },
+    });
   });
 
   it('injects the default-space clause (term OR missing field) when spaceId is "default"', async () => {
@@ -252,7 +266,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
               ],
             },
           },
-          { term: { 'action_data.space_id': 'default' } },
+          actionDataFallback('default'),
         ],
       },
     });
@@ -263,10 +277,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
 
     expect(filter).toContainEqual({
       bool: {
-        should: [
-          { term: { space_id: 'active-space' } },
-          { term: { 'action_data.space_id': 'active-space' } },
-        ],
+        should: [{ term: { space_id: 'active-space' } }, actionDataFallback('active-space')],
       },
     });
     expect(JSON.stringify(filter)).not.toContain('request-space');
@@ -289,7 +300,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
               ],
             },
           },
-          { term: { 'action_data.space_id': 'default' } },
+          actionDataFallback('default'),
         ],
       },
     });
@@ -510,10 +521,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
   describe('action_data.space_id enablement is driven by the provider', () => {
     const namedSpaceActionDataFilter = {
       bool: {
-        should: [
-          { term: { space_id: 'my-space' } },
-          { term: { 'action_data.space_id': 'my-space' } },
-        ],
+        should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
       },
     };
 
@@ -649,6 +657,33 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       }
     );
 
+    // Allowlist membership is necessary but not sufficient: `results` also serves
+    // the scheduled route, which supplies a scheduleId/executionCount pair. Those
+    // documents come from the agent policy and carry no `action_data`, so the
+    // fallback must be withheld even though the factory type is allowlisted.
+    it('withholds the fallback from an allowlisted type on a schedule-bound request', async () => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'my-space' });
+
+      await lastValueFrom(
+        provider.search(
+          {
+            ...resultsRequest,
+            actionId: 'schedule-1',
+            scheduleId: 'schedule-1',
+            executionCount: 1,
+          } as StrategyRequestType<OsqueryQueries.results>,
+          {} as never,
+          { request: {} } as never
+        )
+      );
+
+      const filter = searchMock.mock.calls[0][0].params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(filter).not.toContainEqual(namedSpaceActionDataFilter);
+      expect(JSON.stringify(filter)).not.toContain('action_data');
+    });
+
     // Scheduled executions come from the agent policy, not a Fleet action, so their
     // responses have no `action_data` and already carry the top-level `space_id`.
     // Both scopes must stay on the trusted field only.
@@ -713,10 +748,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
 
       expect(filter).toContainEqual({
         bool: {
-          should: [
-            { term: { space_id: 'default' } },
-            { term: { 'action_data.space_id': 'default' } },
-          ],
+          should: [{ term: { space_id: 'default' } }, actionDataFallback('default')],
         },
       });
     });

@@ -8,6 +8,15 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getResultCountsForActions } from './get_result_counts_for_actions';
 
+// The agent-carried space only speaks for documents Kibana never stamped, so the
+// fallback pairs its term with the absence of the trusted top-level field.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
+
 const createMockEsClient = (searchResponse: object): ElasticsearchClient =>
   ({
     search: jest.fn().mockResolvedValue(searchResponse),
@@ -280,10 +289,7 @@ describe('getResultCountsForActions', () => {
       expect(query.bool.filter).toContainEqual({ terms: { action_id: ['action-1'] } });
       expect(query.bool.filter).toContainEqual({
         bool: {
-          should: [
-            { term: { space_id: 'my-space' } },
-            { term: { 'action_data.space_id': 'my-space' } },
-          ],
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
         },
       });
     });
@@ -310,7 +316,7 @@ describe('getResultCountsForActions', () => {
                 ],
               },
             },
-            { term: { 'action_data.space_id': 'default' } },
+            actionDataFallback('default'),
           ],
         },
       });
