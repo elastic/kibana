@@ -266,19 +266,7 @@
                       "type": "array",
                       "maxItems": 10000,
                       "items": {
-                        "allOf": [
-                          {
-                            "$ref": "#/components/schemas/case_response_properties"
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "extended_fields_labels": {
-                                "$ref": "#/components/schemas/case_extended_fields_labels"
-                              }
-                            }
-                          }
-                        ]
+                        "$ref": "#/components/schemas/case_response_properties"
                       }
                     },
                     "count_closed_cases": {
@@ -4094,6 +4082,16 @@
           }
         }
       },
+      "case_extended_fields_labels": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.\n",
+        "example": {
+          "priority_as_keyword": "Priority"
+        }
+      },
       "external_service": {
         "type": "object",
         "nullable": true,
@@ -4355,6 +4353,9 @@
                 }
               }
             }
+          },
+          "extended_fields_labels": {
+            "$ref": "#/components/schemas/case_extended_fields_labels"
           },
           "description": {
             "type": "string",
@@ -4676,16 +4677,6 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/searchFieldsType"
-        }
-      },
-      "case_extended_fields_labels": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "string"
-        },
-        "description": "A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.\n",
-        "example": {
-          "priority_as_keyword": "Priority"
         }
       },
       "attachment_totals": {
