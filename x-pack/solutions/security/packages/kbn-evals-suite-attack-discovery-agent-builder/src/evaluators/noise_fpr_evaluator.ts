@@ -19,6 +19,26 @@ const collectInsightAlertIds = (insights: AttackDiscovery[] | null | undefined):
   return insights.flatMap((insight) => insight.alertIds ?? []);
 };
 
+// A forbidden noise ID is user-visible wherever the insight cites it: the
+// structured alertIds list AND the rendered Markdown fields. An insight with
+// `alertIds: []` but a noise citation in `detailsMarkdown` still fails.
+const escapeRegExp = (value: string): string => value.replace(/[$()*+?.^[\]\\{|}]/g, '\\$&');
+
+const citedIn = (field: string, alertId: string): boolean =>
+  new RegExp(`(?<![\\w-])${escapeRegExp(alertId)}(?![\\w-])`).test(field);
+
+const forbiddenIdsCitedInMarkdown = (
+  insights: AttackDiscovery[] | null | undefined,
+  forbiddenAlertIds: string[]
+): string[] =>
+  forbiddenAlertIds.filter((alertId) =>
+    (insights ?? []).some((insight) =>
+      [insight.summaryMarkdown, insight.detailsMarkdown]
+        .filter((field): field is string => typeof field === 'string')
+        .some((field) => citedIn(field, alertId))
+    )
+  );
+
 export const createNoiseFalsePositiveEvaluator = (): Evaluator<
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput
@@ -37,7 +57,11 @@ export const createNoiseFalsePositiveEvaluator = (): Evaluator<
     }
 
     const citedAlertIds = collectInsightAlertIds(output.insights);
-    const violations = citedAlertIds.filter((alertId) => forbiddenAlertIds.includes(alertId));
+    const markdownViolations = forbiddenIdsCitedInMarkdown(output.insights, forbiddenAlertIds);
+    const violations = [
+      ...citedAlertIds.filter((alertId) => forbiddenAlertIds.includes(alertId)),
+      ...markdownViolations,
+    ];
 
     if (violations.length > 0) {
       return {
