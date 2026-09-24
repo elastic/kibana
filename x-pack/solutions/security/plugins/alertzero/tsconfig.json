@@ -46,5 +46,7 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/proposals-common",
     "@kbn/proposals-plugin",
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/core-chrome-browser-mocks",
   ]
 }
