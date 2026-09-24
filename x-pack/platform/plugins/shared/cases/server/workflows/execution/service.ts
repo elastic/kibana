@@ -304,12 +304,16 @@ export class CasesWorkflowRunService {
     // eventOverrides injects the server-owned caseIds into `event` *after* trigger preprocessing
     // runs. Preprocessing replaces the whole `event` object with the alert-event shape, so
     // pre-merging caseIds into event (before the call) would silently drop them on alert runs.
+    //
+    // expandSelections lists only alertIds: they are the only compact selection checked against
+    // case membership above, so no other kind may be expanded on a case's behalf.
     const { workflowExecutionId } = await this.management.runWorkflowWithAlertPreprocessing({
       workflow: toWorkflowExecutionEngineModel(workflow),
       spaceId,
       inputs: sanitizedInputs,
       request,
       preprocessingContext: context,
+      expandSelections: ['alertIds'],
       metadata,
       eventOverrides: {
         caseIds,

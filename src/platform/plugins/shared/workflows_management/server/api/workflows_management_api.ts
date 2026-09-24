@@ -76,7 +76,11 @@ import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
+import {
+  ALL_TRIGGER_SELECTION_KINDS,
+  preprocessTriggerInputs,
+} from './routes/executions/utils/preprocess_trigger_inputs';
+import type { TriggerSelectionKind } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type { WorkflowsManagementClient } from './workflows_management_client';
 import { createWorkflowsManagementClient } from './workflows_management_client';
@@ -252,6 +256,11 @@ export interface RunWorkflowWithAlertPreprocessingParams {
    * its expanded shape.
    */
   eventOverrides?: Record<string, unknown>;
+  /**
+   * Which compact selections in `event` the server may expand. Defaults to every kind it
+   * supports; a caller that validates selections itself should list only the kinds it checked.
+   */
+  expandSelections?: readonly TriggerSelectionKind[];
 }
 
 export interface RunWorkflowWithAlertPreprocessingResult {
@@ -750,12 +759,14 @@ export class WorkflowsManagementApi {
     preprocessingContext,
     metadata,
     eventOverrides,
+    expandSelections = ALL_TRIGGER_SELECTION_KINDS,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
     const processedInputs = await preprocessTriggerInputs(
       inputs,
       preprocessingContext,
       spaceId,
-      this.logger
+      this.logger,
+      expandSelections
     );
 
     const finalInputs =

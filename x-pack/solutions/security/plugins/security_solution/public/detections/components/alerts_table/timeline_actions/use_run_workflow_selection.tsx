@@ -9,7 +9,8 @@ import { EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import React, { useEffect, useState } from 'react';
-import type { TimelineItem } from '../../../../../common/search_strategy';
+import type { TimelineItem, TimelineRequestSortField } from '../../../../../common/search_strategy';
+import { Direction } from '../../../../../common/search_strategy';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import * as i18n from '../translations';
@@ -25,7 +26,18 @@ export interface HitSelection {
  */
 const ID_ONLY_FIELDS = ['_id'];
 
-export type SelectionIdSearchHandler = (onResponse: (response: TimelineArgs) => void) => void;
+/**
+ * Newest first, so a selection trimmed to the cap keeps the most recent hits. The timeline
+ * search otherwise defaults to oldest first.
+ */
+export const NEWEST_FIRST_SORT: TimelineRequestSortField[] = [
+  { field: '@timestamp', direction: Direction.desc, type: 'date', esTypes: ['date'] },
+];
+
+export type SelectionIdSearchHandler = (
+  onResponse: (response: TimelineArgs) => void,
+  onError: (error: unknown) => void
+) => void;
 
 export const toHitSelections = (items: TimelineItem[]): HitSelection[] =>
   items.map(({ _id, _index }) => ({ _id, _index: _index ?? '' }));
@@ -70,6 +82,7 @@ export const useRunWorkflowSelectionSearch = ({
     filterQuery,
     runtimeMappings,
     limit: MAX_RUN_WORKFLOW_DOCS,
+    sort: NEWEST_FIRST_SORT,
     timerangeKind: 'absolute',
   });
 
@@ -97,48 +110,43 @@ export const useResolvedRunWorkflowSelection = ({
   pageSelections: HitSelection[];
   searchSelectionIds: SelectionIdSearchHandler;
 }): ResolvedSelection => {
-  const [resolved, setResolved] = useState<{
-    selections: HitSelection[];
-    wasTrimmed: boolean;
-  } | null>(null);
-  const [hasFailed, setHasFailed] = useState(false);
+  const [resolved, setResolved] = useState<ResolvedSelection>({ status: 'loading' });
 
   useEffect(() => {
     if (!isAllSelected) {
       return;
     }
+    // A new search replaces whatever an earlier one resolved to, so the panel never offers a
+    // selection computed for a query or time range that no longer applies.
     let isStale = false;
-    try {
-      searchSelectionIds((response) => {
+    setResolved({ status: 'loading' });
+    searchSelectionIds(
+      (response) => {
         if (isStale) {
           return;
         }
         setResolved({
+          status: 'ready',
           selections: toHitSelections(response.events),
           wasTrimmed: response.totalCount > response.events.length,
         });
-      });
-    } catch {
-      setHasFailed(true);
-    }
+      },
+      () => {
+        if (!isStale) {
+          setResolved({ status: 'error' });
+        }
+      }
+    );
     return () => {
       isStale = true;
     };
   }, [isAllSelected, searchSelectionIds]);
 
-  if (hasFailed) {
-    return { status: 'error' };
-  }
-
   if (!isAllSelected) {
     return { status: 'ready', selections: pageSelections, wasTrimmed: false };
   }
 
-  if (resolved === null) {
-    return { status: 'loading' };
-  }
-
-  return { status: 'ready', selections: resolved.selections, wasTrimmed: resolved.wasTrimmed };
+  return resolved;
 };
 
 /** Renders the loading, error, and trimmed-selection states shared by the bulk run panels. */

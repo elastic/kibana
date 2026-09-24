@@ -10,6 +10,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import { preprocessDocumentInputs } from './preprocess_document_inputs';
+import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
 const searchHits = (hits: Array<{ _id: string; _index: string; fields: object }>) => ({
@@ -116,7 +117,68 @@ describe('preprocessDocumentInputs', () => {
           size: 2,
           _source: false,
           fields: ['*'],
-          query: { ids: { values: ['doc-1', 'doc-2'] } },
+          query: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      { term: { _index: 'logs-default' } },
+                      { ids: { values: ['doc-1', 'doc-2'] } },
+                    ],
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        })
+      );
+    });
+
+    // A single `ids` query over every selected index would also match (doc-1, logs-b) and
+    // (doc-2, logs-a); those extra hits would compete with the requested pairs for `size`.
+    it('scopes each id to the index it was selected from', async () => {
+      mockEsClient.search.mockResolvedValue(
+        searchHits([{ _id: 'doc-1', _index: 'logs-a', fields: {} }])
+      );
+
+      await preprocessDocumentInputs(
+        {
+          event: {
+            triggerType: 'document',
+            documentIds: [
+              { _id: 'doc-1', _index: 'logs-a' },
+              { _id: 'doc-2', _index: 'logs-b' },
+              { _id: 'doc-1', _index: 'logs-a' },
+            ],
+          },
+        },
+        mockContext,
+        mockLogger
+      );
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['logs-a', 'logs-b'],
+          size: 2,
+          query: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    filter: [{ term: { _index: 'logs-a' } }, { ids: { values: ['doc-1'] } }],
+                  },
+                },
+                {
+                  bool: {
+                    filter: [{ term: { _index: 'logs-b' } }, { ids: { values: ['doc-2'] } }],
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
         })
       );
     });
@@ -196,7 +258,7 @@ describe('preprocessDocumentInputs', () => {
       );
     });
 
-    it('throws when none of the selected documents are found', async () => {
+    it('throws an input error when none of the selected documents are found', async () => {
       mockEsClient.search.mockResolvedValue(searchHits([]));
 
       await expect(
@@ -205,7 +267,7 @@ describe('preprocessDocumentInputs', () => {
           mockContext,
           mockLogger
         )
-      ).rejects.toThrow('No documents found with the provided IDs');
+      ).rejects.toThrow(new WorkflowTriggerInputError('No documents found with the provided IDs'));
     });
 
     it('rejects a selection larger than the supported maximum without querying', async () => {
@@ -214,14 +276,55 @@ describe('preprocessDocumentInputs', () => {
         _index: 'logs-default',
       }));
 
+      const result = preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds: tooMany } },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.toThrow(
+        `Cannot run a workflow on more than ${MAX_RUN_WORKFLOW_DOCS} documents`
+      );
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a non-array', 'doc-1', 'inputs.event.documentIds must be an array.'],
+      ['an entry without _index', [{ _id: 'doc-1' }], 'non-empty string "_id" and "_index"'],
+      ['an entry with an empty _id', [{ _id: '', _index: 'logs' }], 'non-empty string "_id"'],
+      ['a non-object entry', ['doc-1'], 'non-empty string "_id" and "_index"'],
+      [
+        'an over-long _index',
+        [{ _id: 'doc-1', _index: 'i'.repeat(256) }],
+        'non-empty string "_id" and "_index"',
+      ],
+    ])('rejects %s without querying', async (_name, badDocumentIds, message) => {
+      const result = preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds: badDocumentIds } },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.toThrow(message);
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('rejects documents and documentIds sent together rather than overwriting documents', async () => {
       await expect(
         preprocessDocumentInputs(
-          { event: { triggerType: 'document', documentIds: tooMany } },
+          {
+            event: {
+              triggerType: 'document',
+              documents: [{ _id: 'doc-9', _index: 'logs' }],
+              documentIds,
+            },
+          },
           mockContext,
           mockLogger
         )
-      ).rejects.toThrow(`Cannot run a workflow on more than ${MAX_RUN_WORKFLOW_DOCS} documents`);
-
+      ).rejects.toThrow('cannot be sent together');
       expect(mockEsClient.search).not.toHaveBeenCalled();
     });
 
