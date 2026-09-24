@@ -83,7 +83,7 @@ export class AlertZeroPlugin
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('AlertZero plugin is disabled');
-      return {};
+      return { enabled: false };
     }
 
     this.logger.info('Setting up AlertZero plugin');
@@ -138,7 +138,7 @@ export class AlertZeroPlugin
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
     });
 
-    return {};
+    return { enabled: true };
   }
 
   start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {

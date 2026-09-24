@@ -8,8 +8,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ExperimentalFeatures } from '../../common';
-import { registerThreatIntelInferenceFeatures } from './inference_features';
 import { registerRoutes as registerThreatIntelRoutes } from './routes';
 import { ensureThreatIntelBootstrap } from './setup/bootstrap_threat_intel';
 import { ensureIndicatorAliasForSpace } from './setup/indicator_alias';
@@ -24,9 +22,6 @@ import { createThreatIntelRuntime, setupThreatIntel, startThreatIntel } from './
 
 // Explicit factories rather than automock: these are barrels, and automock does not
 // reliably produce callables for their re-exports.
-jest.mock('./inference_features', () => ({
-  registerThreatIntelInferenceFeatures: jest.fn(),
-}));
 jest.mock('./routes', () => ({ registerRoutes: jest.fn() }));
 jest.mock('./setup/bootstrap_threat_intel', () => ({ ensureThreatIntelBootstrap: jest.fn() }));
 jest.mock('./tasks', () => ({
@@ -46,14 +41,13 @@ jest.mock('../workflows/security_managed_workflows', () => ({
 }));
 
 /**
- * Everything the pipeline registers. The flag-off case asserts every one of these is
+ * Everything the pipeline registers. The alertzero-off case asserts every one of these is
  * untouched, which is the guarantee that makes the whole feature safe to ship
- * disabled: no routes, no workflow step, no inference feature, no index template, no
- * task definition, and no schedule. Managed-workflow install lives in plugin.ts
- * via `installSecurityManagedWorkflowsAndMarkReady`, not here.
+ * disabled: no routes, no workflow step, no index template, no task definition,
+ * and no schedule. Managed-workflow install lives in plugin.ts via
+ * `installSecurityManagedWorkflowsAndMarkReady`, not here.
  */
 const ALL_REGISTRATIONS = [
-  ['inference features', registerThreatIntelInferenceFeatures],
   ['routes', registerThreatIntelRoutes],
   ['workflow steps', registerThreatIntelWorkflowSteps],
   ['promote task definition', registerPromoteThreatIndicatorsTask],
@@ -63,9 +57,6 @@ const ALL_REGISTRATIONS = [
   ['promote task schedule', schedulePromoteThreatIndicatorsTask],
   ['scrub task schedule', scheduleScrubReportContentTask],
 ] as const;
-
-const features = (threatIntelSupplyEnabled: boolean) =>
-  ({ threatIntelSupplyEnabled } as unknown as ExperimentalFeatures);
 
 const taskManager = () =>
   ({
@@ -84,19 +75,19 @@ describe('threat intel wiring', () => {
     (scheduleScrubReportContentTask as jest.Mock).mockResolvedValue(undefined);
   });
 
-  describe('flag off', () => {
+  describe('alertzero off', () => {
     const runBoth = () => {
       const runtime = createThreatIntelRuntime();
       const logger = loggingSystemMock.createLogger();
       setupThreatIntel({
-        experimentalFeatures: features(false),
+        alertZeroEnabled: false,
         plugins: setupDeps(),
         core: coreMock.createSetup() as never,
         logger,
         runtime,
       });
       startThreatIntel({
-        experimentalFeatures: features(false),
+        alertZeroEnabled: false,
         plugins: startDeps(),
         core: coreMock.createStart() as never,
         logger,
@@ -113,7 +104,7 @@ describe('threat intel wiring', () => {
     it('creates no router', () => {
       const core = coreMock.createSetup();
       setupThreatIntel({
-        experimentalFeatures: features(false),
+        alertZeroEnabled: false,
         plugins: setupDeps(),
         core: core as never,
         logger: loggingSystemMock.createLogger(),
@@ -127,16 +118,16 @@ describe('threat intel wiring', () => {
       await expect(runtime.bootstrapReady).resolves.toBeUndefined();
     });
 
-    // A task scheduled during an earlier flag-on boot would otherwise sit in the Task
+    // A task scheduled during an earlier alertzero-on boot would otherwise sit in the Task
     // Manager index un-runnable, because its definition is only registered when the
     // flag is on.
-    it('removes any task left behind by a previous flag-on boot', () => {
+    it('removes any task left behind by a previous alertzero-on boot', () => {
       const runtime = createThreatIntelRuntime();
       const plugins = startDeps() as unknown as {
         taskManager: { removeIfExists: jest.Mock };
       };
       startThreatIntel({
-        experimentalFeatures: features(false),
+        alertZeroEnabled: false,
         plugins: plugins as never,
         core: coreMock.createStart() as never,
         logger: loggingSystemMock.createLogger(),
@@ -150,10 +141,10 @@ describe('threat intel wiring', () => {
   // "already resolved" would let anything reaching a handler before start sail through
   // the readiness gate and touch the indices before templates and migrations ran.
   describe('readiness gate defaults', () => {
-    const setupOnly = (flagEnabled: boolean) => {
+    const setupOnly = (alertZeroEnabled: boolean) => {
       const runtime = createThreatIntelRuntime();
       setupThreatIntel({
-        experimentalFeatures: features(flagEnabled),
+        alertZeroEnabled,
         plugins: setupDeps(),
         core: coreMock.createSetup() as never,
         logger: loggingSystemMock.createLogger(),
@@ -162,18 +153,18 @@ describe('threat intel wiring', () => {
       return runtime;
     };
 
-    it('rejects between setup and start when the flag is on', async () => {
+    it('rejects between setup and start when alertzero is on', async () => {
       await expect(setupOnly(true).bootstrapReady).rejects.toThrow(/bootstrap has not started/);
     });
 
-    it('stays resolved when the flag is off, so nothing awaits forever', async () => {
+    it('stays resolved when alertzero is off, so nothing awaits forever', async () => {
       await expect(setupOnly(false).bootstrapReady).resolves.toBeUndefined();
     });
 
     it('is replaced by the real promise once start runs', async () => {
       const runtime = setupOnly(true);
       startThreatIntel({
-        experimentalFeatures: features(true),
+        alertZeroEnabled: true,
         plugins: startDeps(),
         core: coreMock.createStart() as never,
         logger: loggingSystemMock.createLogger(),
@@ -184,18 +175,17 @@ describe('threat intel wiring', () => {
     });
   });
 
-  describe('flag on', () => {
-    // The mirror of the flag-off case: if these stopped being called the flag-off
+  describe('alertzero on', () => {
+    // The mirror of the alertzero-off case: if these stopped being called the alertzero-off
     // assertions above would pass trivially and prove nothing.
     it.each([
-      ['inference features', registerThreatIntelInferenceFeatures],
       ['routes', registerThreatIntelRoutes],
       ['workflow steps', registerThreatIntelWorkflowSteps],
       ['promote task definition', registerPromoteThreatIndicatorsTask],
       ['scrub task definition', registerScrubReportContentTask],
     ] as const)('registers %s', (_label, collaborator) => {
       setupThreatIntel({
-        experimentalFeatures: features(true),
+        alertZeroEnabled: true,
         plugins: setupDeps(),
         core: coreMock.createSetup() as never,
         logger: loggingSystemMock.createLogger(),
@@ -207,7 +197,7 @@ describe('threat intel wiring', () => {
     it('runs bootstrap and schedules both tasks on start', async () => {
       const runtime = createThreatIntelRuntime();
       startThreatIntel({
-        experimentalFeatures: features(true),
+        alertZeroEnabled: true,
         plugins: { taskManager: taskManager(), workflowsExtensions: {} } as never,
         core: coreMock.createStart() as never,
         logger: loggingSystemMock.createLogger(),
@@ -225,7 +215,7 @@ describe('threat intel wiring', () => {
     it('passes a reconcile callback into the promote task registration', () => {
       const runtime = createThreatIntelRuntime();
       setupThreatIntel({
-        experimentalFeatures: features(true),
+        alertZeroEnabled: true,
         plugins: setupDeps(),
         core: coreMock.createSetup() as never,
         logger: loggingSystemMock.createLogger(),
@@ -245,7 +235,7 @@ describe('threat intel wiring', () => {
       const runtime = createThreatIntelRuntime();
 
       startThreatIntel({
-        experimentalFeatures: features(true),
+        alertZeroEnabled: true,
         plugins: startDeps(),
         core: coreMock.createStart() as never,
         logger: loggingSystemMock.createLogger(),
@@ -261,9 +251,9 @@ describe('threat intel wiring', () => {
 
   // ALL_REGISTRATIONS is hand-written, so it drifts the moment wiring.ts gains a
   // registration and nobody adds the row. That failure is silent and it lands on the
-  // one guarantee the whole flag-off design rests on, so derive the expected set from
+  // one guarantee the whole alertzero-off design rests on, so derive the expected set from
   // wiring.ts itself rather than trusting the list to stay in step.
-  describe('the flag-off list stays in step with wiring.ts', () => {
+  describe('the alertzero-off list stays in step with wiring.ts', () => {
     it('covers every registration wiring.ts actually performs', () => {
       const wiringSrc = readFileSync(join(__dirname, 'wiring.ts'), 'utf8');
       const testSrc = readFileSync(join(__dirname, 'wiring.test.ts'), 'utf8');

@@ -48,19 +48,10 @@ export const READINESS_API_PATH = `${THREAT_INTEL_API_BASE}/readiness` as const;
 
 /**
  * Text-embedding endpoint backing the `semantic_text` Diamond summary fields in
- * the reports mapping. This is not the model that performs Diamond extraction —
- * that one is resolved per request through
- * `THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID`.
+ * the reports mapping. This is not the chat model that performs Diamond
+ * extraction (that one resolves through the AlertZero Reasoning tier).
  */
 export const DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID = '.jina-embeddings-v5-text-small' as const;
-
-/**
- * Inference feature registry ids. Operators pick the model for each of these in
- * Stack Management > Model Settings; the enrich routes resolve through them
- * instead of naming an endpoint themselves.
- */
-export const THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID = 'threat_intel_enrich' as const;
-export const THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID = 'threat_intel_diamond' as const;
 
 /** Visible from every space (seed catalog). */
 export const GLOBAL_SPACE_ID = '*' as const;

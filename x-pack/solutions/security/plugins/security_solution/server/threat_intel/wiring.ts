@@ -10,14 +10,12 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { ExperimentalFeatures } from '../../common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginCoreStartDependencies,
   SecuritySolutionPluginSetupDependencies,
   SecuritySolutionPluginStartDependencies,
 } from '../plugin_contract';
-import { registerThreatIntelInferenceFeatures } from './inference_features';
 import { registerRoutes as registerThreatIntelRoutes } from './routes';
 import { ensureThreatIntelBootstrap } from './setup/bootstrap_threat_intel';
 import { ensureIndicatorAliasForSpace } from './setup/indicator_alias';
@@ -44,7 +42,7 @@ export interface ThreatIntelRuntime {
   taskManager?: TaskManagerStartContract;
   bootstrapReady: Promise<void>;
   /**
-   * Set in start when the flag is on. The promote task calls this every run to
+   * Set in start when AlertZero is on. The promote task calls this every run to
    * install `attribute_alerts_to_reports` into spaces created since boot.
    */
   reconcileAttributeWorkflows?: () => Promise<void>;
@@ -54,22 +52,29 @@ export const createThreatIntelRuntime = (): ThreatIntelRuntime => ({
   bootstrapReady: Promise.resolve(),
 });
 
+/**
+ * Threat-intel supply shares AlertZero's soft-enable switch
+ * (`xpack.alertzero.enabled`). Missing or disabled AlertZero means supply stays off.
+ */
+export const isThreatIntelSupplyEnabled = (alertzero?: { enabled: boolean }): boolean =>
+  alertzero?.enabled === true;
+
 export const setupThreatIntel = ({
-  experimentalFeatures,
+  alertZeroEnabled,
   plugins,
   core,
   logger,
   runtime,
 }: {
-  experimentalFeatures: ExperimentalFeatures;
+  alertZeroEnabled: boolean;
   plugins: SecuritySolutionPluginSetupDependencies;
   core: SecuritySolutionPluginCoreSetupDependencies;
   logger: Logger;
   runtime: ThreatIntelRuntime;
 }): void => {
-  if (!experimentalFeatures.threatIntelSupplyEnabled) {
+  if (!alertZeroEnabled) {
     logger.debug(
-      'Threat Intelligence supply not registered. Enable via xpack.securitySolution.enableExperimental: ["threatIntelSupplyEnabled"]'
+      'Threat Intelligence supply not registered. Enable via xpack.alertzero.enabled: true'
     );
     return;
   }
@@ -92,8 +97,6 @@ export const setupThreatIntel = ({
   );
   runtime.bootstrapReady.catch(() => {});
 
-  registerThreatIntelInferenceFeatures(plugins.searchInferenceEndpoints, logger.get('threatIntel'));
-
   const router = core.http.createRouter();
   registerThreatIntelRoutes({
     router,
@@ -104,7 +107,7 @@ export const setupThreatIntel = ({
     getTaskManager: () => runtime.taskManager,
     getBootstrapReady: () => runtime.bootstrapReady,
   });
-  logger.info('Threat Intelligence supply routes registered (threatIntelSupplyEnabled is on)');
+  logger.info('Threat Intelligence supply routes registered (xpack.alertzero.enabled is on)');
 
   if (plugins.workflowsExtensions) {
     registerThreatIntelWorkflowSteps({
@@ -135,23 +138,23 @@ export const setupThreatIntel = ({
       logger: logger.get('threatIntel', 'contentRetention'),
     });
     logger.info(
-      'Threat Intelligence IOC indicator-sync and content-retention tasks registered (threatIntelSupplyEnabled is on)'
+      'Threat Intelligence IOC indicator-sync and content-retention tasks registered (xpack.alertzero.enabled is on)'
     );
   } else {
     logger.warn(
-      'threatIntelSupplyEnabled is set but the optional `taskManager` plugin is not available, skipping promote task registration.'
+      'xpack.alertzero.enabled is set but the optional `taskManager` plugin is not available, skipping promote task registration.'
     );
   }
 };
 
 export const startThreatIntel = ({
-  experimentalFeatures,
+  alertZeroEnabled,
   plugins,
   core,
   logger,
   runtime,
 }: {
-  experimentalFeatures: ExperimentalFeatures;
+  alertZeroEnabled: boolean;
   plugins: SecuritySolutionPluginStartDependencies;
   core: SecuritySolutionPluginCoreStartDependencies;
   logger: Logger;
@@ -162,9 +165,9 @@ export const startThreatIntel = ({
   runtime.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
   runtime.taskManager = plugins.taskManager;
 
-  if (!experimentalFeatures.threatIntelSupplyEnabled) {
-    // The task definition is only registered when the flag is on, so a task
-    // scheduled during an earlier flag-on boot would otherwise sit in the
+  if (!alertZeroEnabled) {
+    // The task definition is only registered when AlertZero is on, so a task
+    // scheduled during an earlier enabled boot would otherwise sit in the
     // Task Manager index forever, un-runnable and invisible.
     if (plugins.taskManager) {
       for (const taskId of [PROMOTE_THREAT_INDICATORS_TASK_ID, SCRUB_REPORT_CONTENT_TASK_ID]) {
