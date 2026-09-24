@@ -167,10 +167,12 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(getByTestId('nextButton'));
 
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
-    expect(getByTestId('createDatasetWizardReviewName')).toHaveTextContent('logs-dataset');
-    expect(getByTestId('createDatasetWizardReviewDataSource')).toHaveTextContent('source-1');
-    expect(getByTestId('createDatasetWizardReviewFormat')).toHaveTextContent('csv');
-    expect(getByTestId('createDatasetWizardReviewPartitionDetection')).toHaveTextContent('hive');
+    expect(getByText('Review configuration for logs-dataset')).toBeInTheDocument();
+    expect(getByTestId('createDatasetWizardReview-name')).toHaveTextContent('logs-dataset');
+    expect(getByTestId('createDatasetWizardReview-partition_detection')).toHaveTextContent('Hive');
+    expect(getByTestId('nextButton')).toHaveTextContent(
+      createDatasetWizardStrings.saveDatasetButton
+    );
 
     fireEvent.click(getByTestId('nextButton'));
     await waitFor(() => {
