@@ -87,7 +87,37 @@ const emptyAiIndex = (destValue: string, traces: AiIndexTrace[] = []) => ({
   traces,
 });
 
-apiTest.describe('AI-index memory toggle', { tag: tags.stateful.classic }, () => {
+apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }, () => {
+  let adminApiCredentials: RoleApiCredentials;
+  let viewerApiCredentials: RoleApiCredentials;
+
+  apiTest.beforeAll(async ({ requestAuth, esClient, apiServices }) => {
+    adminApiCredentials = await requestAuth.getApiKey('admin');
+    viewerApiCredentials = await requestAuth.getApiKey('viewer');
+    await apiServices.spaces.create({ id: OTHER_SPACE, name: OTHER_SPACE });
+    for (const name of DATA_STREAMS) {
+      await esClient.indices.createDataStream({ name }, { ignore: [400] });
+    }
+    await esClient.indices.create({ index: DEST.index }, { ignore: [400] });
+    await esClient.indices.putAlias({ index: DEST.index, name: DEST.alias });
+  });
+
+  apiTest.afterAll(async ({ apiClient, esClient, apiServices }) => {
+    for (const spaceId of SPACES) {
+      for (const id of Object.values(AI_INDEX)) {
+        await apiClient.delete(spacePath(aiIndexPath(id), spaceId), {
+          headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+        });
+      }
+    }
+    await apiServices.spaces.delete(OTHER_SPACE);
+    await esClient.indices.delete({ index: DEST.index }, { ignore: [404] });
+    for (const name of DATA_STREAMS) {
+      await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+    }
+  });
+
   apiTest('round-trips the toggle', async ({ apiClient, esClient, requestAuth }) => {
     const id = 'scout_memory_toggle_ai_index';
     const path = aiIndexPath(id);
@@ -135,38 +165,6 @@ apiTest.describe('AI-index memory toggle', { tag: tags.stateful.classic }, () =>
     } finally {
       await apiClient.delete(path, { headers, responseType: 'json' });
       await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });
-    }
-  });
-});
-
-apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }, () => {
-  let adminApiCredentials: RoleApiCredentials;
-  let viewerApiCredentials: RoleApiCredentials;
-
-  apiTest.beforeAll(async ({ requestAuth, esClient, apiServices }) => {
-    adminApiCredentials = await requestAuth.getApiKey('admin');
-    viewerApiCredentials = await requestAuth.getApiKey('viewer');
-    await apiServices.spaces.create({ id: OTHER_SPACE, name: OTHER_SPACE });
-    for (const name of DATA_STREAMS) {
-      await esClient.indices.createDataStream({ name }, { ignore: [400] });
-    }
-    await esClient.indices.create({ index: DEST.index }, { ignore: [400] });
-    await esClient.indices.putAlias({ index: DEST.index, name: DEST.alias });
-  });
-
-  apiTest.afterAll(async ({ apiClient, esClient, apiServices }) => {
-    for (const spaceId of SPACES) {
-      for (const id of Object.values(AI_INDEX)) {
-        await apiClient.delete(spacePath(aiIndexPath(id), spaceId), {
-          headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
-          responseType: 'json',
-        });
-      }
-    }
-    await apiServices.spaces.delete(OTHER_SPACE);
-    await esClient.indices.delete({ index: DEST.index }, { ignore: [404] });
-    for (const name of DATA_STREAMS) {
-      await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
     }
   });
 
