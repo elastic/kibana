@@ -13,32 +13,26 @@ import {
   CRITICAL_FILES_JEST_UNIT_TESTS,
   filterFilesByPackages,
   getAffectedPackages,
-  listChangedFiles,
-  touchedCriticalFiles,
+  createScopeMatcher,
 } from '../../affected-packages/index.ts';
 
 import { expandJestImplicitConsumers } from './jest_implicit_consumers.ts';
 import { SHARD_ANNOTATION_SEP } from './jest_configs.ts';
 
-/**
- * The shared inputs both per-variant filters need: which packages the PR
- * affects and which files it changed. Returned as `null` when affected-packages
- * detection failed or yielded nothing — callers then skip filtering entirely.
- */
+const MAX_LOGGED_CRITICAL_FILES = 20;
+
+/** Inputs shared by Jest package filtering and critical-file checks. */
 export interface SelectiveTestingContext {
   affectedPackages: Set<string>;
-  prChangedFiles: string[];
+  changedFiles: string[];
 }
 
-/**
- * Resolve the affected-packages context once for a PR's mergeBase.
- * Returns `null` when detection failed, signaling that selective testing should be skipped.
- * An empty set means that no packages are affected, so no tests should be run.
- */
+/** Returns null on detection failure; an empty affectedPackages set is a valid result. */
 export async function resolveSelectiveTestingContext(
-  mergeBase: string
+  changedFiles: string[]
 ): Promise<SelectiveTestingContext | null> {
-  const affectedPackages = await getAffectedPackages(mergeBase, {
+  const affectedPackages = await getAffectedPackages(undefined, {
+    changedFiles,
     strategy: 'git',
     includeDownstream: true,
     ignorePatterns: [], // might want to exclude metadata/text changes in the future
@@ -53,13 +47,12 @@ export async function resolveSelectiveTestingContext(
     return null;
   }
 
-  const prChangedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
-  const expandedAffectedPackages = expandJestImplicitConsumers(affectedPackages, prChangedFiles);
+  const expandedAffectedPackages = expandJestImplicitConsumers(affectedPackages, changedFiles);
   console.log(
     'Filtering Jest unit/integration tests for affected packages:',
     expandedAffectedPackages
   );
-  return { affectedPackages: expandedAffectedPackages, prChangedFiles };
+  return { affectedPackages: expandedAffectedPackages, changedFiles };
 }
 
 /** Narrow Jest unit configs to those owned by affected packages, unless a critical file changed. */
@@ -98,8 +91,16 @@ function filterByAffected(args: {
 }): string[] {
   const { label, configs, criticalFiles, alwaysRun = [], context } = args;
 
-  if (touchedCriticalFiles(context.prChangedFiles, criticalFiles)) {
-    console.log(`Not filtering Jest ${label} tests because critical files changed`);
+  const matchedCriticalFiles = context.changedFiles.filter(createScopeMatcher(criticalFiles));
+  if (matchedCriticalFiles.length > 0) {
+    const displayedFiles = matchedCriticalFiles.slice(0, MAX_LOGGED_CRITICAL_FILES);
+    const omittedCount = matchedCriticalFiles.length - displayedFiles.length;
+    const suffix = omittedCount > 0 ? `, and ${omittedCount} more` : '';
+    console.log(
+      `Not filtering Jest ${label} tests because critical files changed: ${displayedFiles.join(
+        ', '
+      )}${suffix}`
+    );
     return configs;
   }
 
