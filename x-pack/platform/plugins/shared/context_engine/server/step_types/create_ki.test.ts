@@ -65,6 +65,43 @@ describe('getCreateKiStepDefinition', () => {
     );
   });
 
+  it('omits attributes rendered as null, since the engine hands the handler unparsed input', async () => {
+    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        // What `esql: "${{ patterns | map: 'esql_example' | default: nil }}"` renders to when the
+        // list is empty. The schema's transform would drop it, but the engine never runs it.
+        ki: {
+          ...kiInput,
+          references: [{ uri: 'index://logs-*', relation: 'derived_from' }],
+          attributes: { esql: null, key_fields: 'host.name' },
+        },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    const [{ document }] = esClient.index.mock.calls[0];
+    expect(document).toEqual({
+      ...kiInput,
+      references: [{ uri: 'index://logs-*', relation: 'derived_from' }],
+      attributes: { key_fields: 'host.name' },
+      '@timestamp': expect.any(String),
+      id: expect.any(String),
+      updated_at: expect.any(String),
+      governance: { provenance: { created_by: mockKiWriter, updated_by: mockKiWriter } },
+    });
+  });
+
   it('uses the workflow space for the feature flag and AI index lookup', async () => {
     const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
@@ -233,6 +270,7 @@ describe('getCreateKiStepDefinition', () => {
       dest: { type: 'index', value: 'ai-index-idx-new-ai-index' },
       automations: [],
       sources: [],
+      traces: [],
     });
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({ index: 'ai-index-idx-new-ai-index' }),

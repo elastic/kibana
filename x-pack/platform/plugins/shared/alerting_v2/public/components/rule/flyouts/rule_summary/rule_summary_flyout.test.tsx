@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { EuiHealthProps } from '@elastic/eui';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../../services/rules_api';
@@ -16,6 +17,21 @@ import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/
 import { AlertingV2RulesLocatorDefinition } from '../../../../locators';
 
 const mockLocators = createMockLocators();
+
+// Real `EuiHealth` renders its `color` prop as an icon fill with no queryable text or
+// data-test-subj of its own, so the color mapping (e.g. success vs. danger) has no way to be
+// asserted through the public DOM without this. Forwards every other prop untouched.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiHealth: ({ color, children, ...rest }: EuiHealthProps) => (
+      <div {...rest} data-health-color={color}>
+        {children}
+      </div>
+    ),
+  };
+});
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
   useRuleAutoAttach: jest.fn(),
@@ -28,6 +44,11 @@ jest.mock('../../../../hooks/use_rule_audit_metadata', () => ({
     updatedByDisplay: 'Bob',
     updatedAtFormatted: 'Mar 4, 2026',
   }),
+}));
+
+const mockUseFetchRuleExecutions = jest.fn();
+jest.mock('../../../../hooks/use_fetch_rule_executions', () => ({
+  useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
 }));
 
 jest.mock('../../../../services/user_capabilities', () => ({
@@ -85,9 +106,9 @@ const baseRule: RuleApiResponse = {
     format: 'standalone',
     breach: { query: 'FROM logs-* | LIMIT 1' },
   },
-  created_by: 'alice@example.com',
+  created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
-  updated_by: 'bob@example.com',
+  updated_by: { profile_uid: 'bob@example.com' },
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
@@ -120,6 +141,11 @@ const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
 describe('RuleSummaryFlyout', () => {
   beforeEach(() => {
     mockCanRead.mockImplementation(() => true);
+    mockUseFetchRuleExecutions.mockReturnValue({
+      data: { items: [], total: 0, page: 1, per_page: 1 },
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it('renders the template flyout with header, accordion sections, and take action', () => {
@@ -157,6 +183,90 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByText('Mar 4, 2026')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryFlyoutCreatedByBlock')).toHaveTextContent('Alice');
     expect(screen.getByTestId('ruleSummaryFlyoutUpdatedByBlock')).toHaveTextContent('Bob');
+  });
+
+  describe('Last execution info block', () => {
+    it('requests the single most recent execution for the rule', () => {
+      renderFlyout();
+
+      expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith({
+        ruleIds: ['rule-1'],
+        perPage: 1,
+        sort: 'startedAt',
+        sortOrder: 'desc',
+        enabled: true,
+      });
+    });
+
+    it('omits the block and disables the fetch when the user cannot read execution history', () => {
+      mockCanRead.mockImplementation((capability: string) => capability !== 'executionHistory');
+      renderFlyout();
+
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionBlock')).not.toBeInTheDocument();
+      expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
+
+    it('shows a success health dot when the last execution succeeded', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: { items: [{ outcome: 'success' }], total: 1, page: 1, per_page: 1 },
+        isLoading: false,
+        isError: false,
+      });
+      renderFlyout();
+
+      const status = screen.getByTestId('ruleSummaryFlyoutLastExecutionStatus');
+      expect(status).toHaveTextContent('Succeeded');
+      expect(status).toHaveAttribute('data-health-color', 'success');
+    });
+
+    it('shows a danger health dot when the last execution failed', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: { items: [{ outcome: 'failure' }], total: 1, page: 1, per_page: 1 },
+        isLoading: false,
+        isError: false,
+      });
+      renderFlyout();
+
+      const status = screen.getByTestId('ruleSummaryFlyoutLastExecutionStatus');
+      expect(status).toHaveTextContent('Failed');
+      expect(status).toHaveAttribute('data-health-color', 'danger');
+    });
+
+    it('shows a placeholder when the rule has no executions yet', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionBlock')).toHaveTextContent('-');
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionStatus')).not.toBeInTheDocument();
+    });
+
+    it('shows an unavailable indicator when the request fails, distinct from no executions', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+      });
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionError')).toHaveTextContent(
+        'Unavailable'
+      );
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionStatus')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionBlock')).not.toHaveTextContent('-');
+    });
+
+    it('shows a spinner while the fetch is in flight', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+      });
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionSpinner')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionStatus')).not.toBeInTheDocument();
+    });
   });
 
   it('calls onClose when the flyout close button is clicked', () => {

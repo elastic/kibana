@@ -39,9 +39,7 @@ describe('buildConstraintsFilter', () => {
     expect(filter).toEqual({
       bool: {
         should: [
-          {
-            terms: { 'attributes.origin.uri': ['connector://conn-1', 'connector://conn-2'] },
-          },
+          { terms: { id: ['connector:conn-1', 'connector:conn-2'] } },
           {
             bool: {
               must_not: [{ term: { type: 'connector' } }],

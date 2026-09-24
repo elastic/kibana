@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ACTION_POLICY_MANAGEMENT_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
+import {
+  ACTION_POLICY_MANAGEMENT_SKILL_ID,
+  ALERTING_TOOL_IDS,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
@@ -45,6 +49,16 @@ describe('createActionPolicyManagementSkill', () => {
     const skill = createActionPolicyManagementSkill(createDeps());
 
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
+  });
+
+  it('is unavailable when the current space has not enabled Alerting V2 experimental features', async () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+    const uiSettings = { get: jest.fn().mockResolvedValue(false) };
+
+    await expect(skill.availability?.handler({ uiSettings } as never)).resolves.toEqual({
+      status: 'unavailable',
+    });
+    expect(uiSettings.get).toHaveBeenCalledWith(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
   });
 
   it('exposes only the manage action policy inline tool', async () => {
@@ -103,9 +117,12 @@ describe('createActionPolicyManagementSkill', () => {
       (skill.referencedContent ?? []).map((entry) => [entry.name, entry.content])
     );
 
-    expect(byName['action-policy-matchers']).toContain('# Matcher Context Fields');
+    expect(byName['action-policy-matchers']).toContain('# Action Policy Matchers');
     expect(byName['action-policy-matchers']).toContain('`episode_status`');
-    expect(byName['action-policy-matchers']).toContain('`rule.id`');
+    expect(byName['action-policy-matchers']).toContain('matcher.tags');
+    // rule.id/rule.tags appear in an exclusion note, not as usable KQL field:value syntax
+    expect(byName['action-policy-matchers']).not.toContain('rule.id:');
+    expect(byName['action-policy-matchers']).not.toContain('rule.tags:');
 
     expect(byName['action-policy-grouping-modes']).toContain('`per_episode`');
     expect(byName['action-policy-throttle-strategies']).toContain('`on_status_change`');

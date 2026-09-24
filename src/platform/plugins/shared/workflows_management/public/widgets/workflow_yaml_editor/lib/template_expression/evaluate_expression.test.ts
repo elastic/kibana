@@ -101,6 +101,36 @@ describe('evaluateExpression', () => {
     });
   });
 
+  describe('liquid literals', () => {
+    it('should evaluate nil to null rather than a Drop instance', async () => {
+      expect(await evaluateExpression({ expression: 'nil', context: mockContext })).toBeNull();
+    });
+
+    it('should evaluate a default of nil to null when the value is an empty array', async () => {
+      expect(
+        await evaluateExpression({
+          expression: 'consts.items | default: nil',
+          context: { ...mockContext, consts: { ...mockContext.consts, items: [] } },
+        })
+      ).toBeNull();
+    });
+
+    it('should keep a non-empty value ahead of a default of nil', async () => {
+      expect(
+        await evaluateExpression({
+          expression:
+            'steps.search_data.output.hits.hits | map: "_source" | map: "name" | default: nil',
+          context: mockContext,
+        })
+      ).toEqual(['Item 1', 'Item 2', 'Item 3']);
+    });
+
+    it('should evaluate empty and blank to empty strings', async () => {
+      expect(await evaluateExpression({ expression: 'empty', context: mockContext })).toBe('');
+      expect(await evaluateExpression({ expression: 'blank', context: mockContext })).toBe('');
+    });
+  });
+
   describe('filter support', () => {
     it('should apply string filters', async () => {
       expect(

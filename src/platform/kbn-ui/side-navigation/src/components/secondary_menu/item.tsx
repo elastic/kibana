@@ -129,7 +129,6 @@ export const SecondaryMenuItemComponent = ({
   `;
 
   const submenuIconStyles = css`
-    color: ${euiTheme.colors.textDisabled};
     flex-shrink: 0;
     margin-left: auto;
     opacity: 0.6;

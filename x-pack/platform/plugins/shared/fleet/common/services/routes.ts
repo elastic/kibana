@@ -408,6 +408,8 @@ export const outputRoutesService = {
   getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
   getOutputHealthPath: (outputId: string) =>
     OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN.replace('{outputId}', outputId),
+  getOutputAgentPolicyCountPath: (outputId: string) =>
+    OUTPUT_API_ROUTES.GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN.replace('{outputId}', outputId),
   getRemoteSyncedIntegrationsStatusPath: (outputId: string) =>
     REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.INFO_PATTERN.replace('{outputId}', outputId),
 };

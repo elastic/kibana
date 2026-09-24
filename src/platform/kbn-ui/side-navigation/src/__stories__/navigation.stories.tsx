@@ -209,8 +209,7 @@ export const WithLongSecondaryMenuTitle: StoryObj<PropsAndArgs> = {
   render: (args) => <ControlledNavigation {...args} />,
 };
 
-const longLabel =
-  '[Metrics Kubernetes] Pods CPU and memory usage dashboard with namespace filter';
+const longLabel = '[Metrics Kubernetes] Pods CPU and memory usage dashboard with namespace filter';
 
 export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
   name: 'Navigation with Long Secondary Item Labels',

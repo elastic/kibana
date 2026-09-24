@@ -21,7 +21,7 @@ jest.mock('../../../../hooks/use_is_context_engine_enabled', () => ({
 jest.mock('../../../../hooks/ai_indices/use_list_ai_indices', () => ({
   useListAiIndices: () => ({
     aiIndices: mockAvailableAiIndices,
-    isLoading: false,
+    isLoading: mockListLoading,
     error: mockListError,
   }),
 }));
@@ -34,12 +34,18 @@ jest.mock('../../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => ({
 }));
 
 const AGENT_ID = 'my-agent';
+const LONG_ID =
+  'sales-outreach-emails-call-notes-and-meeting-summaries-for-every-account-owned-by-field-sales';
+const LONG_DESCRIPTION =
+  'Outreach emails, call notes and meeting summaries for every account owned by the field sales ' +
+  'organisation, refreshed nightly and enriched with opportunity stage, renewal date and owner.';
 
 let mockIsContextEngineEnabled = true;
 let mockAgentAiIndices: Array<{ id: string; is_default: boolean }> = [];
 let mockAgentAiIndicesError: Error | undefined;
 let mockAvailableAiIndices: Array<{ id: string; description?: string; managed: boolean }> = [];
 let mockListError: Error | undefined;
+let mockListLoading = false;
 
 const onSubmit = jest.fn();
 
@@ -87,6 +93,7 @@ describe('AiIndicesSection', () => {
     mockAgentAiIndices = [];
     mockAgentAiIndicesError = undefined;
     mockListError = undefined;
+    mockListLoading = false;
     mockAvailableAiIndices = [
       { id: 'elastic-ai-index', description: 'Ready', managed: false },
       { id: 'sales-outreach', description: 'Ready', managed: false },
@@ -99,16 +106,16 @@ describe('AiIndicesSection', () => {
 
     renderSection();
 
-    expect(screen.queryByText('AI indices')).not.toBeInTheDocument();
+    expect(screen.queryByText('AI Indices')).not.toBeInTheDocument();
   });
 
   it('renders the section when the Context Engine is on', () => {
     renderSection();
 
-    expect(screen.getByText('AI indices')).toBeInTheDocument();
+    expect(screen.getByText('AI Indices')).toBeInTheDocument();
   });
 
-  it('shows a callout when the AI indices list failed to load', () => {
+  it('shows a callout when the AI Indices list failed to load', () => {
     mockListError = new Error('boom');
 
     renderSection();
@@ -116,7 +123,7 @@ describe('AiIndicesSection', () => {
     expect(screen.getByTestId('agentBuilderAiIndicesLoadError')).toBeInTheDocument();
   });
 
-  it('shows a callout when the default AI indices failed to load', () => {
+  it('shows a callout when the default AI Indices failed to load', () => {
     mockAgentAiIndicesError = new Error('boom');
 
     renderSection();
@@ -139,6 +146,32 @@ describe('AiIndicesSection', () => {
       renderSection();
 
       expect(screen.queryByTestId('agentBuilderDefaultAiIndices')).not.toBeInTheDocument();
+    });
+
+    // The runtime prompt omits a default the user cannot see, so the badge alone would mislead.
+    it('are flagged when not listed for this user', () => {
+      mockAgentAiIndices = [
+        { id: 'sig-events', is_default: true },
+        { id: 'elastic-ai-index', is_default: true },
+      ];
+
+      renderSection();
+
+      expect(screen.getByTestId('agentBuilderDefaultAiIndex-sig-events')).toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderUnavailableDefaultAiIndices')).toHaveTextContent(
+        'Not available to you in this space: sig-events'
+      );
+    });
+
+    it('are not flagged while the list is loading', () => {
+      mockAgentAiIndices = [{ id: 'sig-events', is_default: true }];
+      mockListLoading = true;
+
+      renderSection();
+
+      expect(
+        screen.queryByTestId('agentBuilderUnavailableDefaultAiIndices')
+      ).not.toBeInTheDocument();
     });
 
     // They already apply, so offering them again would let the user store a redundant id whose
@@ -215,6 +248,44 @@ describe('AiIndicesSection', () => {
       expect(screen.getAllByText('Ready').length).toBe(2);
     });
 
+    // A description rendered beside the name squeezes it out of the row once it grows long enough,
+    // so both must live in the same stacked block.
+    it('keeps the name readable next to a long description', async () => {
+      mockAvailableAiIndices = [
+        { id: 'sales-outreach', description: LONG_DESCRIPTION, managed: false },
+      ];
+
+      renderSection();
+      await openList();
+
+      const option = within(optionFor('sales-outreach'));
+      expect(option.getByTestId('agentBuilderAiIndexOptionName-sales-outreach')).toHaveTextContent(
+        'sales-outreach'
+      );
+      expect(
+        option.getByTestId('agentBuilderAiIndexOptionDescription-sales-outreach')
+      ).toHaveTextContent(LONG_DESCRIPTION);
+    });
+
+    // Rows size to their content and the list is capped at 200px, so without a clamp one verbose
+    // index fills the dropdown. jsdom drops `-webkit-line-clamp`; the wrapper is the only proxy.
+    it('clamps a long name and description so one option cannot fill the dropdown', async () => {
+      mockAvailableAiIndices = [{ id: LONG_ID, description: LONG_DESCRIPTION, managed: false }];
+
+      renderSection();
+      await openList();
+
+      const option = within(optionFor(LONG_ID));
+      const name = option.getByTestId(`agentBuilderAiIndexOptionName-${LONG_ID}`);
+      const description = option.getByTestId(`agentBuilderAiIndexOptionDescription-${LONG_ID}`);
+
+      expect(name).toHaveClass('euiTextBlockTruncate');
+      expect(description).toHaveClass('euiTextBlockTruncate');
+      // What the clamp hides stays reachable on hover.
+      expect(name).toHaveAttribute('title', LONG_ID);
+      expect(description).toHaveAttribute('title', LONG_DESCRIPTION);
+    });
+
     it('is disabled when the user cannot edit the agent', () => {
       renderSection({ isFormDisabled: true });
 
@@ -223,14 +294,24 @@ describe('AiIndicesSection', () => {
 
     // The API does not validate stored ids, so an agent can reference an index that was deleted.
     // Dropping those on save would lose configuration.
-    it('keeps assigned ids the Context Engine does not know about', async () => {
-      renderSection({ assignedIds: ['deleted-index'] });
+    it('keeps assigned ids the Context Engine does not know about and flags them', async () => {
+      renderSection({ assignedIds: ['deleted-index', 'sales-outreach'] });
 
       expect(screen.getByTestId('agentBuilderSelectedAiIndex-deleted-index')).toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderUnavailableAiIndices')).toHaveTextContent(
+        'Not available to you in this space: deleted-index'
+      );
 
       await userEvent.click(screen.getByText('submit'));
 
-      expect(submittedAiIndices()).toEqual(['deleted-index']);
+      expect(submittedAiIndices()).toEqual(['deleted-index', 'sales-outreach']);
+    });
+
+    it('does not flag anything while the list is loading', () => {
+      mockListLoading = true;
+      renderSection({ assignedIds: ['sales-outreach'] });
+
+      expect(screen.queryByTestId('agentBuilderUnavailableAiIndices')).not.toBeInTheDocument();
     });
   });
 });
