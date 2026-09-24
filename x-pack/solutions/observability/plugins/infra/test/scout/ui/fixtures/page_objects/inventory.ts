@@ -291,7 +291,10 @@ export class InventoryPage {
   public async selectGroupBy(field: string) {
     await this.waffleGroupByDropdown.click();
     await this.groupByContextMenu.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await this.groupByContextMenu.getByRole('button', { name: field, exact: true }).click();
+    // EuiContextMenu assigns role="menuitem" to panel items (not button).
+    await this.groupByContextMenu
+      .getByRole('menuitem', { name: field, exact: true })
+      .click({ timeout: EXTENDED_TIMEOUT });
     await this.waitForNodesToLoad();
   }
 
