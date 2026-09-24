@@ -62,6 +62,7 @@ export class AlertZeroPlugin
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
   private proposals?: AlertZeroStartDependencies['proposals'];
+  private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -132,6 +133,7 @@ export class AlertZeroPlugin
       getWorkersService: () => this.requireWorkersService(),
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
+      getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
     });
 
     return {};
@@ -140,6 +142,7 @@ export class AlertZeroPlugin
   start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
     this.proposals = plugins.proposals;
+    this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
     if (!this.config.enabled) {
       return {};
@@ -172,7 +175,8 @@ export class AlertZeroPlugin
     this.conversationProposalsService = new ConversationProposalsService(
       plugins.proposals.getProposalsService(),
       plugins.agentBuilder,
-      this.logger
+      this.logger,
+      plugins.agenticInvestigations.getImpactClient
     );
 
     this.watchesService = new WatchesService();
@@ -230,6 +234,15 @@ export class AlertZeroPlugin
       );
     }
     return this.conversationProposalsService;
+  }
+
+  private requireAgentBuilderConversations(): AlertZeroStartDependencies['agentBuilder']['conversations'] {
+    if (!this.agentBuilderConversations) {
+      throw new Error(
+        'agentBuilder.conversations is not available until the AlertZero plugin has started'
+      );
+    }
+    return this.agentBuilderConversations;
   }
 
   private getSpaceId(request: KibanaRequest): string {

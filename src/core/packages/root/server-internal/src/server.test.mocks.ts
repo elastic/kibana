@@ -141,6 +141,7 @@ jest.doMock('@kbn/core-doc-links-server-internal', () => ({
 
 export const mockSecurityService = securityServiceMock.create();
 jest.doMock('@kbn/core-security-server-internal', () => ({
+  ...jest.requireActual('@kbn/core-security-server-internal'),
   SecurityService: jest.fn(() => mockSecurityService),
 }));
 
