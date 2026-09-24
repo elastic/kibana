@@ -190,80 +190,77 @@ const cases: FieldsCase[] = [
   ),
 ];
 
-describe.each(cases)(
-  '$label',
-  ({ codec, exactCodec, valid, requiredKeys, violations }) => {
-    it('decodes a fully-populated monitor of its type', () => {
-      expect(decode(codec, valid).success).toBe(true);
-    });
+describe.each(cases)('$label', ({ codec, exactCodec, valid, requiredKeys, violations }) => {
+  it('decodes a fully-populated monitor of its type', () => {
+    expect(decode(codec, valid).success).toBe(true);
+  });
 
-    it('preserves every field value through decode', () => {
-      const result = decode(codec, valid);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value).toEqual(valid);
-      }
-    });
+  it('preserves every field value through decode', () => {
+    const result = decode(codec, valid);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value).toEqual(valid);
+    }
+  });
 
-    it('retains every known field through the exact codec', () => {
-      const result = decode(exactCodec, valid);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value).toEqual(valid);
-      }
-    });
+  it('retains every known field through the exact codec', () => {
+    const result = decode(exactCodec, valid);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value).toEqual(valid);
+    }
+  });
 
-    it('pins exactly which fields are required', () => {
-      const actual = Object.keys(valid)
-        .filter((key) => !decode(codec, omit(valid, key)).success)
-        .sort();
-      expect(actual).toEqual(requiredKeys);
-    });
+  it('pins exactly which fields are required', () => {
+    const actual = Object.keys(valid)
+      .filter((key) => !decode(codec, omit(valid, key)).success)
+      .sort();
+    expect(actual).toEqual(requiredKeys);
+  });
 
-    it('accepts a payload with every optional field removed', () => {
-      const minimal = Object.fromEntries(
-        Object.entries(valid).filter(([key]) => requiredKeys.includes(key))
-      );
-      expect(decode(codec, minimal).success).toBe(true);
-    });
+  it('accepts a payload with every optional field removed', () => {
+    const minimal = Object.fromEntries(
+      Object.entries(valid).filter(([key]) => requiredKeys.includes(key))
+    );
+    expect(decode(codec, minimal).success).toBe(true);
+  });
 
-    it.each(violations)('rejects %s = %p', (key, badValue) => {
-      expect(decode(codec, { ...valid, [key]: badValue }).success).toBe(false);
-    });
+  it.each(violations)('rejects %s = %p', (key, badValue) => {
+    expect(decode(codec, { ...valid, [key]: badValue }).success).toBe(false);
+  });
 
-    it('keeps unknown top-level keys on a plain decode', () => {
-      const result = decode(codec, { ...valid, someUnknownKey: 'kept' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value).toHaveProperty('someUnknownKey');
-      }
-    });
+  it('keeps unknown top-level keys on a plain decode', () => {
+    const result = decode(codec, { ...valid, someUnknownKey: 'kept' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value).toHaveProperty('someUnknownKey');
+    }
+  });
 
-    it('strips unknown top-level keys through the exact codec', () => {
-      const result = decode(exactCodec, { ...valid, someUnknownKey: 'stripped' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value).not.toHaveProperty('someUnknownKey');
-      }
-    });
+  it('strips unknown top-level keys through the exact codec', () => {
+    const result = decode(exactCodec, { ...valid, someUnknownKey: 'stripped' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value).not.toHaveProperty('someUnknownKey');
+    }
+  });
 
-    it('keeps unknown nested keys even through the exact codec', () => {
-      const nested = {
-        ...valid,
-        [ConfigKey.SCHEDULE]: {
-          ...(valid[ConfigKey.SCHEDULE] as Record<string, unknown>),
-          unknownNested: 'kept',
-        },
-      };
-      const result = decode(exactCodec, nested);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        const schedule = (result.value as Record<string, unknown>)[ConfigKey.SCHEDULE];
-        expect(schedule).toHaveProperty('unknownNested');
-      }
-    });
-  }
-);
+  it('keeps unknown nested keys even through the exact codec', () => {
+    const nested = {
+      ...valid,
+      [ConfigKey.SCHEDULE]: {
+        ...(valid[ConfigKey.SCHEDULE] as Record<string, unknown>),
+        unknownNested: 'kept',
+      },
+    };
+    const result = decode(exactCodec, nested);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const schedule = (result.value as Record<string, unknown>)[ConfigKey.SCHEDULE];
+      expect(schedule).toHaveProperty('unknownNested');
+    }
+  });
+});
 
 /**
  * The `Encrypted*` codecs are the shape persisted on the saved object: running

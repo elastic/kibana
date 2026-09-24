@@ -130,12 +130,7 @@ describeCodecCases({
     { description: 'body is ok', expression: '$.ok == true' },
     { description: 'extra keys survive', expression: '$.ok', extraKey: 'kept' },
   ],
-  invalid: [
-    { description: 'missing expression' },
-    { expression: '$.ok' },
-    'not an object',
-    null,
-  ],
+  invalid: [{ description: 'missing expression' }, { expression: '$.ok' }, 'not an object', null],
 });
 
 describeCodecCases({

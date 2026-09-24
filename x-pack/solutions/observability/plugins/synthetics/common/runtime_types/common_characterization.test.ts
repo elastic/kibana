@@ -22,10 +22,7 @@ import {
   nonEmptyArray,
   TimeoutString,
 } from './zod/common';
-import {
-  inlineScriptIsFullJourneyMessage,
-  nonEmptyFieldMessage,
-} from './validation_messages';
+import { inlineScriptIsFullJourneyMessage, nonEmptyFieldMessage } from './validation_messages';
 
 const namespaceCorpus = {
   valid: ['default', 'testnamespace'],
