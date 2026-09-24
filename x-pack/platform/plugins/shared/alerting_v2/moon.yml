@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
   - '@kbn/core-di-server'
+  - '@kbn/esql'
   - '@kbn/esql-utils'
   - '@kbn/response-ops-retry-service'
   - '@kbn/core-application-browser'
@@ -152,6 +153,7 @@ dependsOn:
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/content-list-common'
+  - '@kbn/core-ui-settings-server'
 tags:
   - plugin
   - prod

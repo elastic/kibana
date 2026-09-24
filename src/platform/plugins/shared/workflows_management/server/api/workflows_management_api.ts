@@ -642,7 +642,9 @@ export class WorkflowsManagementApi {
     const validation = await this.workflowsService.validateWorkflow(
       params.yaml,
       params.spaceId,
-      params.request
+      params.request,
+      // This throws on an invalid result, so it must not apply the variable rules.
+      { includeVariableRules: false }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, params.yaml);
@@ -803,7 +805,14 @@ export class WorkflowsManagementApi {
       throw new Error('Either workflowId or workflowYaml must be provided');
     }
 
-    const validation = await this.workflowsService.validateWorkflow(resolvedYaml, spaceId, request);
+    const validation = await this.workflowsService.validateWorkflow(
+      resolvedYaml,
+      spaceId,
+      request,
+      {
+        includeVariableRules: false,
+      }
+    );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, resolvedYaml);
     }
@@ -847,7 +856,14 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
-    const validation = await this.workflowsService.validateWorkflow(workflowYaml, spaceId, request);
+    const validation = await this.workflowsService.validateWorkflow(
+      workflowYaml,
+      spaceId,
+      request,
+      {
+        includeVariableRules: false,
+      }
+    );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, workflowYaml);
     }
@@ -1217,12 +1233,15 @@ export class WorkflowsManagementApi {
     return getWorkflowJsonSchema(zodSchema);
   }
 
+  /** Backs `POST /api/workflows/validate`, which reports and does not gate. */
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
     request: KibanaRequest
   ): Promise<ValidateWorkflowResponseDto> {
-    return this.workflowsService.validateWorkflow(yaml, spaceId, request);
+    return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
+      includeVariableRules: true,
+    });
   }
 
   private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {

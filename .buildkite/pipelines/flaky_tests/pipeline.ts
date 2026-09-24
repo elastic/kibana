@@ -284,7 +284,9 @@ steps.push({
   label: 'Build Kibana Distribution',
   agents: expandAgentQueue('c2-8'),
   key: 'build',
-  if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
+  // Keep this step when KIBANA_BUILD_ID is set: FTR/Scout/Cypress jobs
+  // depends_on: build, so skipping it skips those jobs. build_kibana.sh
+  // no-ops when the cached dist type matches.
 });
 
 if (hasScoutSuites) {

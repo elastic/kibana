@@ -18,13 +18,13 @@ describe('getAggregationLabel', () => {
   it('returns the gauge aggregation label for gauge metrics', () => {
     expect(
       getAggregationLabel({ instrument: 'gauge', gridSettings: METRICS_GRID_SETTINGS_DEFAULTS })
-    ).toBe('Avg');
+    ).toBe('avg');
   });
 
   it('returns the counter aggregation label for counter metrics', () => {
     expect(
       getAggregationLabel({ instrument: 'counter', gridSettings: METRICS_GRID_SETTINGS_DEFAULTS })
-    ).toBe('Sum');
+    ).toBe('sum');
   });
 
   it('reflects a tab-specific gauge aggregation from grid settings', () => {
@@ -33,7 +33,7 @@ describe('getAggregationLabel', () => {
         instrument: 'gauge',
         gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, gaugeAggregation: 'max' },
       })
-    ).toBe('Max');
+    ).toBe('max');
   });
 
   it('reflects a tab-specific counter aggregation from grid settings', () => {
@@ -42,13 +42,13 @@ describe('getAggregationLabel', () => {
         instrument: 'counter',
         gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, counterAggregation: 'min' },
       })
-    ).toBe('Min');
+    ).toBe('min');
   });
 
   it('returns the percentile label for histogram metrics', () => {
     expect(
       getAggregationLabel({ instrument: 'histogram', gridSettings: METRICS_GRID_SETTINGS_DEFAULTS })
-    ).toBe('95th percentile');
+    ).toBe('p95');
   });
 
   it('reflects a tab-specific histogram percentile from grid settings', () => {
@@ -57,7 +57,7 @@ describe('getAggregationLabel', () => {
         instrument: 'histogram',
         gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramPercentile: 'p99' },
       })
-    ).toBe('99th percentile');
+    ).toBe('p99');
   });
 
   it('returns the custom function name when a custom function is used', () => {

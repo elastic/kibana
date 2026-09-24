@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { nodeBuilder } from '@kbn/es-query';
+import { z } from '@kbn/zod/v4';
 import {
   CONVERSATION_SCHEMA_VERSION,
   ConversationParentRelation,
@@ -39,6 +40,7 @@ import { createRound } from '../../../test_utils';
 import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
 
 jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -69,6 +71,11 @@ const mockRawEsClient: MockRawEsClient = {
 };
 
 const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
+
+const mockConversationEvents: ConversationEventsServiceStart = {
+  getDefinition: jest.fn(),
+  list: jest.fn().mockReturnValue([]),
+};
 
 jest.mock('./storage', () => ({
   createStorage: jest.fn(() => ({
@@ -184,6 +191,37 @@ describe('ConversationClient', () => {
     );
   };
 
+  const mockGetReturnsIndexedDocument = () => {
+    mockRawEsClient.get.mockImplementation(async ({ id }: { id: string }) => {
+      const { calls, results } = mockEsClient.index.mock;
+      let callIndex = -1;
+      for (let i = calls.length - 1; i >= 0; i--) {
+        if (calls[i][0].id === id) {
+          callIndex = i;
+          break;
+        }
+      }
+      if (callIndex === -1) {
+        throw Object.assign(new Error('not found'), { meta: { statusCode: 404 } });
+      }
+
+      const { document } = calls[callIndex][0] as { document: Document['_source'] };
+      const indexed = (await results[callIndex].value) as {
+        _seq_no?: number;
+        _primary_term?: number;
+      };
+
+      return {
+        _id: id,
+        _index: TEST_CONVERSATION_INDEX,
+        _source: document,
+        _seq_no: indexed._seq_no,
+        _primary_term: indexed._primary_term,
+        found: true,
+      };
+    });
+  };
+
   const expectNoReadBy = (conversation: unknown) => {
     expect(conversation).not.toHaveProperty('read_by');
     expect(conversation).not.toHaveProperty('pinned_by');
@@ -243,6 +281,7 @@ describe('ConversationClient', () => {
       logger: loggerMock.create(),
       esClient: mockRawEsClient as unknown as ElasticsearchClient,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
       user: {
         id: 'user-1',
         username: 'test-user',
@@ -1065,6 +1104,7 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
       });
 
@@ -1106,8 +1146,8 @@ describe('ConversationClient', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
@@ -1125,6 +1165,83 @@ describe('ConversationClient', () => {
         })
       );
       expectNoReadBy(result);
+    });
+
+    it('forces an immediate refresh instead of waiting for the scheduled one', async () => {
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(expect.objectContaining({ refresh: true }));
+    });
+
+    it('reads the created conversation back by id through the converse access gate', async () => {
+      const result = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      // The response is built from a read-after-write, not from the request payload, so it goes
+      // through the same raw `get` and agent `use` check as `client.get`.
+      expect(mockRawEsClient.get).toHaveBeenCalledWith({
+        index: TEST_CONVERSATION_INDEX,
+        id: 'conversation-1',
+      });
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(result).toMatchObject({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        user: { id: 'user-1', username: 'test-user' },
+        rounds: [],
+        events: [],
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        read: false,
+        pinned: false,
+        read_only: false,
+      });
+      expect(result.created_at).toBe(result.updated_at);
+      expectOwnerPermissions(result);
+      expectNoReadBy(result);
+    });
+
+    it('returns the same shape as get for the created conversation', async () => {
+      const created = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      const { document: indexedDoc } = mockEsClient.index.mock.calls[0][0] as {
+        document: Document['_source'];
+      };
+      mockGetDocumentResponse({
+        _id: 'conversation-1',
+        _seq_no: 0,
+        _primary_term: 1,
+        _source: indexedDoc,
+      });
+
+      await expect(client.get('conversation-1')).resolves.toEqual(created);
+    });
+
+    it('fails when the index response carries no version metadata', async () => {
+      mockEsClient.index.mockResolvedValueOnce({ result: 'created' });
+
+      await expect(
+        client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        })
+      ).rejects.toThrow('Conversation conversation-1 was indexed without version metadata');
     });
 
     it('throws an already-exists error when the id already exists', async () => {
@@ -1487,6 +1604,7 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
       });
 
@@ -1564,6 +1682,7 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
       });
 
@@ -2126,6 +2245,53 @@ describe('ConversationClient', () => {
       });
     });
 
+    it('default (owner) denies a non-owner on a public conversation', async () => {
+      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user',
+          username: 'other',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
+
+      await expect(client.patchMetadata('conversation-1', { x: 'value' })).rejects.toMatchObject({
+        message: expect.stringContaining('conversation-1'),
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('explicit { access: converse } allows a non-owner on a public conversation', async () => {
+      const template = makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } });
+      getTemplateMock.mockReturnValue(template);
+      // The document must carry a template_id so patchMetadata can resolve the template.
+      const doc = createConversationDocumentWithTemplate({
+        templateId: 'tmpl-a',
+        // Override user and access_mode to simulate a public conversation owned by someone else.
+      });
+      // Patch the access_control to be Public and userId to be a different user.
+      const publicOtherDoc = {
+        ...doc,
+        _source: {
+          ...doc._source,
+          user_id: 'other-user',
+          user_name: 'other',
+          access_control: { access_mode: ConversationAccessControlMode.Public },
+        },
+      };
+      mockGetDocumentResponse(publicOtherDoc as Document);
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+      mockGetDocumentResponseOnce(publicOtherDoc as Document);
+
+      const { changedFields } = await client.patchMetadata(
+        'conversation-1',
+        { x: 'value' },
+        { access: 'converse' }
+      );
+      expect(changedFields).toEqual(['x']);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
     describe('emitMetadataPatched via event emitter', () => {
       const template = makeTemplate('tmpl-cb', {
         status: {
@@ -2153,6 +2319,7 @@ describe('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           eventEmitter,
         });
@@ -2181,6 +2348,7 @@ describe('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           eventEmitter,
         });
@@ -2211,6 +2379,7 @@ describe('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           eventEmitter,
         });
@@ -2235,6 +2404,7 @@ describe('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           eventEmitter,
         });
@@ -2256,8 +2426,8 @@ describe('ConversationClient', () => {
   describe('create with template', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocumentWithTemplate());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
     });
 
     it('seeds metadata from template fields that have a default value and stamps template_version', async () => {
@@ -2673,6 +2843,7 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
         user: {
           id: 'admin-user-id',
           username: 'admin-user',
@@ -2776,6 +2947,7 @@ describe('ConversationClient', () => {
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        conversationEvents: mockConversationEvents,
         eventEmitter: { emitMetadataPatched: jest.fn(), emitAttachmentEvents },
       });
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
@@ -2835,8 +3007,8 @@ describe('ConversationClient', () => {
     });
 
     it('create fires with the attachment events of the initial batch', async () => {
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
       const added = attachmentAddedEvent('evt-att-3');
 
       await clientWithCb.create({
@@ -2896,7 +3068,7 @@ describe('ConversationClient', () => {
     });
 
     it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
-      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1 }));
+      mockGetReturnsIndexedDocument();
 
       await client.create({
         id: 'conversation-1',
@@ -2923,21 +3095,11 @@ describe('ConversationClient', () => {
     });
 
     it('round-trips attachment_refs through the stored events projection', async () => {
+      mockGetReturnsIndexedDocument();
       const attachmentRefs = [
         { attachment_id: 'attachment-a', version: 1 },
         { attachment_id: 'attachment-b', version: 2 },
       ];
-
-      const written = createConversationDocument({
-        schemaVersion: 1,
-        rounds: [
-          {
-            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
-            input: { message: 'hi', attachment_refs: attachmentRefs },
-          },
-        ],
-      });
-      mockGetDocumentResponse(written);
 
       const created = await client.create({
         id: 'conversation-1',
@@ -3121,6 +3283,7 @@ describe('ConversationClient', () => {
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          conversationEvents: mockConversationEvents,
           eventEmitter: {
             emitMetadataPatched: jest.fn(),
             emitAttachmentEvents: onAttachmentEvents,
@@ -3320,6 +3483,34 @@ describe('ConversationClient', () => {
       };
       expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
       expect(indexed.events).toEqual(storedEvents);
+    });
+  });
+
+  describe('addCustomEvents', () => {
+    const mockEventType = {
+      type: 'text_note',
+      payloadSchema: z.object({
+        title: z.string().min(1).max(256).optional(),
+        text: z.string().min(1).max(1000),
+      }),
+    };
+    beforeEach(() => {
+      (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(mockEventType);
+    });
+
+    it('calls appendEvents with access converse and returns materialized events', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      const result = await client.addCustomEvents({
+        id: 'conversation-1',
+        events: [{ type: 'text_note', data: { text: 'hello' } }],
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe('text_note');
+      expect(result[0].actor.type).toBe(EventActorType.user);
+      expect(result[0].actor.id).toBe('user-1');
     });
   });
 });

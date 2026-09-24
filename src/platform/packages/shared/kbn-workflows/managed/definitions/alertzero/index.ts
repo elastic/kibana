@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID } from './actions/action_add_rule_exception';
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
 import { ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID } from './actions/action_edit_detection_rule';
+import { ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID } from './actions/action_handoff_to_forensics';
 import {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
@@ -23,6 +25,8 @@ import { ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detectio
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
 import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_triage';
 import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_attack_discovery';
+import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_endpoint_analysis';
+import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_run_endpoint_analysis';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './hunt_continuous_threat_hunt';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID } from './journal_note';
 import {
@@ -56,6 +60,15 @@ export {
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
 } from './actions/action_edit_detection_rule';
+
+export {
+  ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW,
+  ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
+} from './actions/action_add_rule_exception';
+export {
+  ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW,
+  ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
+} from './actions/action_handoff_to_forensics';
 export {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
@@ -96,6 +109,14 @@ export {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
 } from './floor_attack_discovery';
+export {
+  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW,
+  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+} from './forensics_endpoint_analysis';
+export {
+  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
+  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+} from './forensics_run_endpoint_analysis';
 
 export const ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS = [
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
@@ -103,6 +124,7 @@ export const ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS = [
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 ] as const;
 
 export const ALERTZERO_RULE_WORKFLOW_IDS = [
@@ -128,13 +150,24 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
 ] as const;
 
 /**
+ * The forensic pass the per-space Endpoint analysis worker dispatches. Installed
+ * globally so every space's worker shares one copy; it inherits the dispatching
+ * worker's space at run time.
+ */
+export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
+  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+] as const;
+
+/**
  * Action workflows AlertZero may propose. Discovery is normally by the generic
  * `action` tag; this list is the install set and the fallback.
  */
 export const ALERTZERO_ACTION_WORKFLOW_IDS = [
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
 ] as const;

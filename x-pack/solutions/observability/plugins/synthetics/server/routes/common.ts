@@ -28,6 +28,7 @@ import {
   MAX_ROUTE_STRING_LENGTH,
   queryBoolean,
   queryNumber,
+  queryNumberFrom,
 } from './zod_query';
 
 const MAX_MONITOR_QUERY_IDS_IN_BODY = 10000;
@@ -41,7 +42,8 @@ const stringOrArray = z
     z.string().max(MAX_FILTER_ITEM_LENGTH),
     z.array(z.string().max(MAX_FILTER_ITEM_LENGTH)).max(MAX_FILTER_ARRAY_SIZE),
   ])
-  .optional();
+  .optional()
+  .describe('A string or an array of strings.');
 
 const CommonQuerySchema = {
   query: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
@@ -65,7 +67,8 @@ const CommonQuerySchema = {
       z.string().max(MAX_FILTER_ITEM_LENGTH),
       z.array(z.enum(useLogicalAndFields)).max(MAX_FILTER_ARRAY_SIZE),
     ])
-    .optional(),
+    .optional()
+    .describe('Apply logical AND for `tags` and/or `locations`. Accepts a string or an array.'),
   // Date-range window for the overview list (see runtime type docs). The
   // overview page always sends these; their presence scopes each monitor's
   // status to the window instead of the default "current status" look-back.
@@ -100,8 +103,8 @@ export const OverviewStatusSchema = z.strictObject({
   // monitors (no saved object, `origin: 'heartbeat'`) are excluded from the
   // overview. Defaults to showing them; remote (CCS) monitors are unaffected.
   includeHeartbeatMonitors: queryBoolean.optional(),
-  page: queryNumber.min(1).optional(),
-  perPage: queryNumber.min(1).max(OVERVIEW_STATUS_MAX_PER_PAGE).optional(),
+  page: queryNumberFrom(1).optional(),
+  perPage: queryNumberFrom(1, OVERVIEW_STATUS_MAX_PER_PAGE).optional(),
   sortField: OverviewStatusSortFieldSchema,
   sortOrder: z.enum(['asc', 'desc']).optional(),
   statusFilter: z

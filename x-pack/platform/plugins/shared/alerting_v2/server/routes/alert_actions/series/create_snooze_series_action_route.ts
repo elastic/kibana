@@ -18,5 +18,5 @@ export const CreateSnoozeSeriesActionRoute = createSeriesActionRouteForType({
   summary: 'Snooze an alert episode series',
   bodySchema: createSnoozeSeriesActionBodySchema,
   oasOperationObject: createSnoozeSeriesActionOasExamples,
-  access: 'public' as const,
+  access: 'internal' as const,
 });

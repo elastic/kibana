@@ -11,18 +11,11 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Scout server config for the threat intel API tests
- * (`security_solution/test/scout_threat_intel`).
+ * Scout server config for `security_solution/test/scout_threat_intel`.
  *
- * `threatIntelSupplyEnabled` gates route registration in the Security Solution
- * plugin's `setup()`, so without it every threat intel route 404s and the suite
- * fails against Kibana's generic route-not-found rather than the handlers under
- * test. The flag belongs here and not in the default set: it also arms the
- * plugin's `start()` bootstrap (index templates, catalog seeding), which every
- * other stateful suite would otherwise pay for and none of them need.
- *
- * Scout selects this set because the Playwright config lives under
- * `test/scout_threat_intel/`.
+ * Threat-intel supply gates on `xpack.alertzero.enabled`. `agenticInvestigations`
+ * and `proposals` are required by alertzero and default off; without them Kibana
+ * cascade-disables alertzero and the TI routes never register.
  *
  * Usage:
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet threat_intel
@@ -33,7 +26,9 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      `--xpack.securitySolution.enableExperimental=${JSON.stringify(['threatIntelSupplyEnabled'])}`,
+      '--xpack.alertzero.enabled=true',
+      '--xpack.agenticInvestigations.enabled=true',
+      '--xpack.proposals.enabled=true',
     ],
   },
 };

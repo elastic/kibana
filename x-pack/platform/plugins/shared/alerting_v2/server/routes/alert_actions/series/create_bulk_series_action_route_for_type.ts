@@ -22,7 +22,7 @@ import { inject, injectable } from 'inversify';
 import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../../lib/security/privileges';
-import { ALERTING_V2_SERIES_API_PATH } from '../../constants';
+import { ALERTING_V2_INTERNAL_SERIES_API_PATH } from '../../constants';
 import { BaseAlertingRoute } from '../../base_alerting_route';
 import { AlertingRouteContext } from '../../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../../route_descriptions';
@@ -64,7 +64,7 @@ export const createBulkSeriesActionRouteForType = <
   @injectable()
   class BulkTypedSeriesActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_SERIES_API_PATH}/${pathSuffix}`;
+    static path = `${ALERTING_V2_INTERNAL_SERIES_API_PATH}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],

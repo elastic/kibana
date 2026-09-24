@@ -58,6 +58,17 @@ function renderPackageCard(props: PackageCardProps) {
   return { utils };
 }
 
+describe('package card layout', () => {
+  it('uses an EUI-derived default minimum height', () => {
+    const {
+      utils: { queryByTestId },
+    } = renderPackageCard(cardProps());
+
+    const card = queryByTestId('integration-card:card-1');
+    expect(card).toHaveStyle('min-height: 128px');
+  });
+});
+
 // FLAKY: https://github.com/elastic/kibana/issues/200848
 describe.skip('package card', () => {
   let mockNavigateToApp: jest.Mock;

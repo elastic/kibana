@@ -21,10 +21,7 @@ import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
-import {
-  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
-  ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
-} from './action_policy_route_descriptions';
+import { ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION } from './action_policy_route_descriptions';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { actionPolicyIdParamsSchema } from './route_schemas';
 
@@ -65,10 +62,6 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
       400: {
         body: () => errorResponseSchema,
         description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-      },
-      404: {
-        body: () => errorResponseSchema,
-        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
