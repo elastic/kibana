@@ -253,8 +253,7 @@ function getCustomRankByFromOrderAgg(
       operation: 'last_value',
       field: sourceField,
       direction: orderDirection,
-      // Real persisted order-aggs always carry `sortField`; guard for the malformed case so the round
-      // trip stays lossless (omit `time_field` rather than emit `undefined`).
+      // Real persisted order-aggs always carry `sortField`. Only API persisted ones may omit it.
       ...(orderAgg.params?.sortField ? { time_field: orderAgg.params.sortField } : {}),
     };
     return rankBy;
