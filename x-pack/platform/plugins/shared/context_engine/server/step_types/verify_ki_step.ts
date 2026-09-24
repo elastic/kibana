@@ -5,33 +5,19 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
-import type { ContextEngineAnalyticsService } from '../telemetry';
 import { isContextEngineEnabledInSpace } from '../utils/is_context_engine_enabled_in_space';
-import { createKiVerifierRunner } from './ki_verifier_runner';
-import type { WorkflowVerifierStepDependencies } from './ki_verifier_runner';
+import type { KiVerifierRunner } from './ki_verifier_runner';
 
 export const createVerifyKiStepDefinition = (
   coreSetup: CoreSetup,
-  logger: Logger,
-  analyticsService: ContextEngineAnalyticsService,
-  workflowVerifierDeps?: WorkflowVerifierStepDependencies
-) => {
-  const runKiVerifiers = createKiVerifierRunner({
-    getAuditLogger: async (request) => {
-      const [coreStart] = await coreSetup.getStartServices();
-      return coreStart.security.audit.asScoped(request);
-    },
-    workflowVerifierDeps,
-    analyticsService,
-    logger,
-  });
-
-  return createServerStepDefinition({
+  runKiVerifiers: KiVerifierRunner
+) =>
+  createServerStepDefinition({
     ...VerifyKiStepCommonDefinition,
     handler: async (context) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -58,4 +44,3 @@ export const createVerifyKiStepDefinition = (
       return { output: summary };
     },
   });
-};

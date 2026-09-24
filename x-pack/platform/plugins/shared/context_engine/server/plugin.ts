@@ -124,28 +124,22 @@ export class ContextEnginePlugin
       return hasAllRequested;
     };
 
-    const kiVerifierWorkflowDeps = {
-      getWorkflowsManagement: () => this.workflowsManagementApiPromise,
-      checkExecutePrivilege: (request: KibanaRequest, spaceId: string) =>
-        checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
-    };
-    setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(
-        coreSetup,
-        this.logger.get('context_steps'),
-        analyticsService,
-        kiVerifierWorkflowDeps
-      )
-    );
     const runKiVerifiers = createKiVerifierRunner({
       getAuditLogger: async (request) => {
         const [coreStart] = await coreSetup.getStartServices();
         return coreStart.security.audit.asScoped(request);
       },
-      workflowVerifierDeps: kiVerifierWorkflowDeps,
+      workflowVerifierDeps: {
+        getWorkflowsManagement: () => this.workflowsManagementApiPromise,
+        checkExecutePrivilege: (request, spaceId) =>
+          checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
+      },
       analyticsService,
       logger: this.logger.get('context_steps'),
     });
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      createVerifyKiStepDefinition(coreSetup, runKiVerifiers)
+    );
 
     coreSetup.uiSettings.registerGlobal({
       [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: {
