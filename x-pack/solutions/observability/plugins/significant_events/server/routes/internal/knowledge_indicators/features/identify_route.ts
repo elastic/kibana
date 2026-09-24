@@ -7,7 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
-import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import type { InferenceDocument } from '@kbn/nightshift-ai';
 import {
   MAX_ID_LENGTH,
@@ -37,6 +36,7 @@ import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
+import { sourceToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -127,7 +127,7 @@ const prepareInferredSamplingRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, streamsClient, tuningConfig, licensing } = scopedClients;
+    const { streamDataEsClient, sourcesClient, tuningConfig, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -147,16 +147,16 @@ const prepareInferredSamplingRoute = createServerRoute({
       samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
     } = params.body ?? {};
 
-    const [kiClient, stream] = await Promise.all([
+    const [{ source }, kiClient] = await Promise.all([
+      sourcesClient.get(streamName),
       scopedClients.getKnowledgeIndicatorClient(),
-      streamsClient.getStream(streamName),
     ]);
 
     return prepareInferredSampling({
       esClient: streamDataEsClient,
       kiClient,
-      streamName,
-      samplingSource: getStreamSamplingSource(stream),
+      streamName: source.id,
+      samplingSource: source.view_name,
       start,
       end,
       runId,
@@ -210,7 +210,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, streamsClient, inferenceClient, tuningConfig, licensing } =
+    const { scopedClusterClient, sourcesClient, inferenceClient, tuningConfig, licensing } =
       scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
@@ -230,7 +230,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     } = params.body;
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
-    const [connectorId, stream, kiClient] = await Promise.all([
+    const [connectorId, { source }, kiClient] = await Promise.all([
       connectorIdOverride
         ? Promise.resolve(connectorIdOverride)
         : resolveConnectorForFeature({
@@ -239,11 +239,9 @@ const identifyInferredFeaturesRoute = createServerRoute({
             featureName: 'knowledge indicator extraction',
             request,
           }),
-      streamsClient.getStream(streamName),
+      sourcesClient.get(streamName),
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
-
-    const streamType = getStreamTypeFromDefinition(stream);
 
     try {
       const result = await identifyInferredFeatures({
@@ -254,9 +252,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         connectorId,
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
-        streamName,
-        streamType,
-        definition: stream,
+        streamName: source.id,
         runId,
         documents,
         totalFilters,
@@ -291,8 +287,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
             run_id: runId,
             connector_id: connectorId,
             iteration: iteration ?? 1,
-            stream_name: streamName,
-            stream_type: streamType,
+            source_id: source.id,
             docs_count: documents.length,
             excluded_features_count: 0,
             total_filters: totalFilters,
@@ -352,7 +347,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, streamsClient, licensing, tuningConfig } = scopedClients;
+    const { streamDataEsClient, sourcesClient, licensing, tuningConfig } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -367,9 +362,9 @@ const identifyComputedFeaturesRoute = createServerRoute({
       computedFeaturesTimeoutMs = tuningConfig.computed_features_timeout_ms,
     } = params.body ?? {};
 
-    const [kiClient, stream] = await Promise.all([
+    const [kiClient, { source }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
-      streamsClient.getStream(streamName),
+      sourcesClient.get(streamName),
     ]);
 
     // Enable code_analysis grounding only when the feature flag is on and Agent
@@ -381,8 +376,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
 
     try {
       const { features: computedFeatures, errors } = await identifyComputedFeatures({
-        stream,
-        streamName,
+        target: sourceToAnalysisTarget(source),
+        sourceId: source.id,
         start,
         end,
         esClient: streamDataEsClient,
@@ -438,10 +433,11 @@ const shouldIdentifyRoute = createServerRoute({
     // calls this route to decide whether to skip a stream, and a 409 here
     // would turn a clean skip into a workflow failure.
 
+    const { source } = await scopedClients.sourcesClient.get(params.path.streamName);
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     return shouldIdentifyFeatures({
       kiClient,
-      streamName: params.path.streamName,
+      streamName: source.id,
       thresholdHours: params.query.thresholdHours,
     });
   },

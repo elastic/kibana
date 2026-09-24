@@ -221,7 +221,10 @@ export class SignificantEventsPlugin
         getSignificantEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
 
-      const streamsClient = await streamsSetup.getStreamsClient({ request, rulesClientOptions });
+      const [streamsClient, sourcesClient] = await Promise.all([
+        streamsSetup.getStreamsClient({ request, rulesClientOptions }),
+        pluginsStart.nightshiftSources.getSourcesClient({ request }),
+      ]);
 
       // Core always populates `request.spaceId` (default space when the URL has no prefix), so
       // no fallback is needed. Knowledge indicators and their rules are scoped to this space.
@@ -294,6 +297,7 @@ export class SignificantEventsPlugin
         inferenceClient,
         fieldsMetadataClient,
         streamsClient,
+        sourcesClient,
         licensing,
         uiSettingsClient,
         globalUiSettingsClient,

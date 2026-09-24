@@ -12,6 +12,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { bulkQueries, getQueries } from '../significant_events/helpers/requests';
+import { createTestSource, deleteTestSource } from '../significant_events/helpers/test_source';
 import {
   disableStreams,
   enableStreams,
@@ -47,6 +48,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Full workflow with snapshot and restore', () => {
+      let snapshotSourceId: string | undefined;
+
       before(async () => {
         // Create snapshot repository
         await esClient.snapshot.createRepository({
@@ -79,6 +82,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
         } catch (e) {
           // Ignore errors if repository doesn't exist
+        }
+
+        if (snapshotSourceId) {
+          try {
+            await deleteTestSource(roleScopedSupertest, snapshotSourceId);
+          } catch (e) {
+            // Ignore errors if the source was already removed
+          }
         }
 
         // Disable streams to clean up
@@ -172,23 +183,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         expect(configResponse.status).to.eql(200);
 
-        // Add a significant event query that should survive snapshot/restore
-        await bulkQueries(apiClient, 'logs.otel.web-app', [
+        // Add a significant event query that should survive snapshot/restore.
+        // The query is stored on a source id; the snapshot covers the KI data stream.
+        const source = await createTestSource(
+          roleScopedSupertest,
+          'Snapshot query source',
+          'FROM logs.otel.web-app'
+        );
+        snapshotSourceId = source.id;
+        const queryEsql = `FROM ${source.viewName} | WHERE KQL("attributes.response_time_ms > 100")`;
+        await bulkQueries(apiClient, source.id, [
           {
             index: {
               id: 'slow-requests',
               title: 'Slow Requests',
               description: '',
-              esql: {
-                query:
-                  'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")',
-              },
+              esql: { query: queryEsql },
             },
           },
         ]);
 
         // Verify query was created
-        const streamWithQuery = await getQueries(apiClient, 'logs.otel.web-app');
+        const streamWithQuery = await getQueries(apiClient, source.id);
         expect(streamWithQuery.queries).to.have.length(1);
         expect(streamWithQuery.queries[0].title).to.eql('Slow Requests');
 
@@ -348,12 +364,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // Verify significant event query survived the restore
-        const restoredQueries = await getQueries(apiClient, 'logs.otel.web-app');
+        const restoredQueries = await getQueries(apiClient, source.id);
         expect(restoredQueries.queries).to.have.length(1);
         expect(restoredQueries.queries[0].title).to.eql('Slow Requests');
-        expect(restoredQueries.queries[0].esql.query).to.eql(
-          'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")'
-        );
+        expect(restoredQueries.queries[0].esql.query).to.eql(queryEsql);
 
         // Verify the underlying alerting rule also survived and is still enabled
         const rulesAfterRestore = await alertingApi.searchRulesV2(roleAuthc, {

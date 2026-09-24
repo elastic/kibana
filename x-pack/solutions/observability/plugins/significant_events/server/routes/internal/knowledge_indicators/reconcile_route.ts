@@ -27,16 +27,16 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
     path: z.object({ streamName: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({ params, request, getScopedClients, server, maintenanceService }) => {
-    const { getKnowledgeIndicatorClient, licensing, streamsClient } = await getScopedClients({
+    const { getKnowledgeIndicatorClient, licensing, sourcesClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    await streamsClient.getStream(params.path.streamName);
+    const { source } = await sourcesClient.get(params.path.streamName);
     const kiClient = await getKnowledgeIndicatorClient();
-    return kiClient.reconcileStream(params.path.streamName);
+    return kiClient.reconcileStream(source.id);
   },
 });
 

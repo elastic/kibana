@@ -14,7 +14,6 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
-import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
 import { baseFeatureSchema, MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -117,8 +116,6 @@ export function createFeatureKnowledgeIndicatorTool({
     },
     handler: async ({ stream_name: streamName, expires_at, ...featureInput }, context) => {
       const { request } = context;
-      let streamType: StreamType | 'unknown' = 'unknown';
-
       try {
         const scopedClients = await getScopedClients({
           request,
@@ -128,8 +125,7 @@ export function createFeatureKnowledgeIndicatorTool({
           server,
           licensing: scopedClients.licensing,
         });
-        const definition = await scopedClients.streamsClient.getStream(streamName);
-        streamType = getStreamTypeFromDefinition(definition);
+        await scopedClients.streamsClient.getStream(streamName);
 
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const { id } = await createFeatureKnowledgeIndicatorToolHandler({
@@ -144,8 +140,7 @@ export function createFeatureKnowledgeIndicatorTool({
           ki_kind: 'feature',
           tool_id: 'ki_feature_create',
           success: true,
-          stream_name: streamName,
-          stream_type: streamType,
+          source_id: streamName,
         });
 
         return {
@@ -175,8 +170,7 @@ export function createFeatureKnowledgeIndicatorTool({
           ki_kind: 'feature',
           tool_id: 'ki_feature_create',
           success: false,
-          stream_name: streamName,
-          stream_type: streamType,
+          source_id: streamName,
           error_message: message,
         });
 

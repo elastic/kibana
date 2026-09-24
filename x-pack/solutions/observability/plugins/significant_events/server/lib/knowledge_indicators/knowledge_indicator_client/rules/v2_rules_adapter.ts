@@ -46,6 +46,8 @@ export interface RulesAdapterV2Params {
     | 'bulkCreateRules'
     | 'updateRule'
     | 'bulkDeleteRules'
+    | 'bulkEnableRules'
+    | 'bulkDisableRules'
     | 'findRules'
     | 'getTags'
     | 'ruleExists'
@@ -137,6 +139,19 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     if (fatal.length > 0) {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);
+    }
+  }
+
+  async setRulesEnabled(ids: string[], enabled: boolean): Promise<void> {
+    if (ids.length === 0) return;
+    const { errors } = enabled
+      ? await this.rulesClient.bulkEnableRules({ ids })
+      : await this.rulesClient.bulkDisableRules({ ids });
+    const fatal = errors.filter((e) => e.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND);
+    if (fatal.length > 0) {
+      const action = enabled ? 'enable' : 'disable';
+      const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
+      throw new Error(`V2 bulk ${action} failed for ${fatal.length} rule(s): ${detail}`);
     }
   }
 

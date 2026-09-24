@@ -13,14 +13,13 @@ import type {
 } from '@kbn/core/server';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { InferenceClient } from '@kbn/inference-common';
-import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   type SignificantEventsQueriesGenerationResult,
 } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import type { StreamsClient } from '@kbn/streams-plugin/server';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
@@ -29,10 +28,11 @@ import type { EbtTelemetryClient } from '../telemetry/ebt';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
 import { identifyKIQueries } from './identify_ki_queries';
+import { sourceToAnalysisTarget } from './stream_to_analysis_target';
 import { createKiExtractionContextTools } from './ki_extraction_context_tools';
 
 export interface GenerateKIQueriesParams {
-  streamName: string;
+  source: NightshiftSource;
   connectorId?: string;
   maxExistingQueriesForContext?: number;
   maxDurationMs?: number;
@@ -40,7 +40,6 @@ export interface GenerateKIQueriesParams {
 }
 
 export interface GenerateKIQueriesDependencies {
-  streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
   kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
@@ -64,14 +63,13 @@ export async function generateKIQueries(
   deps: GenerateKIQueriesDependencies
 ): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
   const {
-    streamName,
+    source,
     connectorId: connectorIdOverride,
     maxExistingQueriesForContext,
     maxDurationMs,
     queryValidationTimeoutMs,
   } = params;
   const {
-    streamsClient,
     inferenceClient,
     kiClient,
     esClient,
@@ -96,12 +94,10 @@ export async function generateKIQueries(
 
   logger.debug(`Using connector ${connectorId} for query generation`);
 
-  const [definition, significantEventsAvailable, useSemanticCodeSearchGrounding] =
-    await Promise.all([
-      streamsClient.getStream(streamName),
-      isSignificantEventsFeatureFlagEnabled(featureFlags),
-      isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
-    ]);
+  const [significantEventsAvailable, useSemanticCodeSearchGrounding] = await Promise.all([
+    isSignificantEventsFeatureFlagEnabled(featureFlags),
+    isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
+  ]);
 
   const semanticCodeSearchLogger = logger.get('semantic_code_search_grounding');
 
@@ -119,7 +115,7 @@ export async function generateKIQueries(
 
   if (useSemanticCodeSearchGrounding && !semanticCodeSearchTools) {
     semanticCodeSearchLogger.debug(
-      `Semantic code search grounding enabled but inactive for stream "${streamName}" (agentBuilder unavailable or SCS tools not installed).`
+      `Semantic code search grounding enabled but inactive for source "${source.id}" (agentBuilder unavailable or SCS tools not installed).`
     );
   }
 
@@ -135,7 +131,8 @@ export async function generateKIQueries(
   const startedAt = Date.now();
   const result = await identifyKIQueries(
     {
-      definition,
+      sourceId: source.id,
+      target: sourceToAnalysisTarget(source),
       connectorId,
       maxExistingQueriesForContext,
       maxDurationMs,
@@ -166,8 +163,7 @@ export async function generateKIQueries(
   telemetry.trackSignificantEventsQueriesGenerated({
     count: queries.length,
     connector_id: connectorId,
-    stream_name: definition.name,
-    stream_type: getStreamTypeFromDefinition(definition),
+    source_id: source.id,
     input_tokens_used: tokensUsed.prompt,
     output_tokens_used: tokensUsed.completion,
     cached_tokens_used: tokensUsed.cached ?? 0,

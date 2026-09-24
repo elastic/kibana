@@ -9,7 +9,6 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamType, Streams } from '@kbn/streams-schema';
 import {
   type Feature,
   type FeatureUpsert,
@@ -163,8 +162,7 @@ export interface FeaturesIdentifiedTelemetry {
   run_id: string;
   connector_id: string;
   iteration: number;
-  stream_name: string;
-  stream_type: StreamType;
+  source_id: string;
   docs_count: number;
   excluded_features_count: number;
   total_filters: number;
@@ -187,8 +185,7 @@ export interface TelemetryContext {
   run_id: string;
   connector_id: string;
   iteration: number;
-  stream_name: string;
-  stream_type: StreamType;
+  source_id: string;
   docs_count: number;
   excluded_features_count: number;
   total_filters: number;
@@ -409,8 +406,6 @@ export interface IdentifyInferredFeaturesOptions {
   logger: Logger;
   signal: AbortSignal;
   streamName: string;
-  streamType: StreamType;
-  definition: Streams.all.Definition;
   runId: string;
   documents: InferenceDocument[];
   totalFilters: number;
@@ -438,7 +433,6 @@ export async function identifyInferredFeatures({
   logger,
   signal,
   streamName,
-  streamType,
   runId,
   documents,
   totalFilters,
@@ -491,8 +485,7 @@ export async function identifyInferredFeatures({
     run_id: runId,
     connector_id: connectorId,
     iteration,
-    stream_name: streamName,
-    stream_type: streamType,
+    source_id: streamName,
     docs_count: docsCount,
     excluded_features_count: excludedFeatures.length,
     total_filters: totalFilters,

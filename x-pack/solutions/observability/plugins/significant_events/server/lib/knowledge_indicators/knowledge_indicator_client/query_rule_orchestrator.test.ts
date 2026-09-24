@@ -515,6 +515,7 @@ describe('QueryRuleOrchestrator', () => {
           ),
         updateRule: jest.fn().mockResolvedValue(undefined),
         bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+        setRulesEnabled: jest.fn().mockResolvedValue(undefined),
         findExistingRuleIds: jest.fn().mockResolvedValue([]),
         findOwnedRuleIds: jest.fn().mockResolvedValue([]),
         findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
