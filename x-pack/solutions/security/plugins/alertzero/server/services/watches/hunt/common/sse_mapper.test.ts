@@ -22,19 +22,19 @@ jest.mock('./resolve_index_scope', () => ({
     optional: ['.alerts-security.alerts-default'],
     missing: [],
     window: { from: 'now-24h', to: 'now' },
-    rowLimit: 100,
+    row_limit: 100,
   }),
 }));
 
 const HIT_TIER1_RESULT = {
   status: 'environment_hits_found' as const,
-  hasConfirmedHit: true,
-  searchedIocs: 1,
-  searchedTechniques: 0,
-  resolvedIocs: [{ type: 'hash' as const, value: '9f2b1e7c4a6d8e0f1b3c5d7e9f0a1b2c' }],
-  resolvedTechniques: [],
-  timeRange: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
-  counts: { totalHits: 4, returnedHits: 4, affectedHosts: 1, affectedUsers: 1 },
+  has_confirmed_hit: true,
+  searched_iocs: 1,
+  searched_techniques: 0,
+  resolved_iocs: [{ type: 'hash' as const, value: '9f2b1e7c4a6d8e0f1b3c5d7e9f0a1b2c' }],
+  resolved_techniques: [],
+  time_range: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
+  counts: { total_hits: 4, returned_hits: 4, affected_hosts: 1, affected_users: 1 },
   hits: [
     {
       // Data stream hits report the backing index, not the data stream name.
@@ -50,14 +50,14 @@ const HIT_TIER1_RESULT = {
       '@timestamp': '2026-07-30T13:06:00.000Z',
     },
   ],
-  affectedAssets: {
-    hosts: [{ name: 'ci-deploy-runner-07', hitCount: 1 }],
-    users: [{ name: 'svc-deploy-bot', hitCount: 3 }],
-    services: [{ name: 'ci-deploy-role', hitCount: 2 }],
+  affected_assets: {
+    hosts: [{ name: 'ci-deploy-runner-07', hit_count: 1 }],
+    users: [{ name: 'svc-deploy-bot', hit_count: 3 }],
+    services: [{ name: 'ci-deploy-role', hit_count: 2 }],
   },
-  perIndex: [
-    { index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001', hitCount: 3, required: true },
-    { index: '.alerts-security.alerts-default', hitCount: 1, required: false },
+  per_index: [
+    { index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001', hit_count: 3, required: true },
+    { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
   ],
 };
 
@@ -106,7 +106,7 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
     },
   ],
   indexed_behaviors: [],
-  hasHit: true as const,
+  has_hit: true as const,
   next_step: 'Review the proposed rules.',
 };
 
@@ -163,7 +163,7 @@ describe('buildSseData', () => {
       spaceId: 'default',
       text: 'AssumeRole chain from a rarely used identity',
       trigger: 'scheduled',
-      runId: 'run-hunt-20260730T160000Z',
+      run_id: 'run-hunt-20260730T160000Z',
       tier2_when: 'on_hits',
     });
 
@@ -283,7 +283,7 @@ describe('buildSseData', () => {
       status: 'no_behaviors_found',
       behaviors: [],
       indexed_behaviors: [],
-      hasHit: false,
+      has_hit: false,
       next_step: 'Lower threshold.',
     });
 
@@ -292,7 +292,7 @@ describe('buildSseData', () => {
       spaceId: 'default',
       text: 'AssumeRole chain',
       trigger: 'scheduled',
-      runId: 'run-hunt-no-behaviors',
+      run_id: 'run-hunt-no-behaviors',
       tier2_when: 'on_hits',
     });
 
@@ -311,22 +311,22 @@ describe('buildSseData', () => {
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue({
       status: 'no_environment_hits',
-      hasConfirmedHit: false,
-      searchedIocs: 0,
-      searchedTechniques: 0,
-      resolvedIocs: [],
-      resolvedTechniques: [],
-      timeRange: { from: 'now-24h', to: 'now' },
-      counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
+      has_confirmed_hit: false,
+      searched_iocs: 0,
+      searched_techniques: 0,
+      resolved_iocs: [],
+      resolved_techniques: [],
+      time_range: { from: 'now-24h', to: 'now' },
+      counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
       hits: [],
-      affectedAssets: { hosts: [], users: [], services: [] },
-      perIndex: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
     });
     huntBehavior.mockResolvedValue({
       status: 'no_behaviors_found',
       behaviors: [],
       indexed_behaviors: [],
-      hasHit: false,
+      has_hit: false,
       next_step: 'n/a',
     });
 
@@ -334,7 +334,7 @@ describe('buildSseData', () => {
       report_id: 'tr-clean-2026-07-28',
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-hunt-clean',
+      run_id: 'run-hunt-clean',
       tier2_when: 'on_hits',
     });
 
@@ -361,7 +361,7 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
       spaceId: 'default',
       text: 'AssumeRole chain from a rarely used identity',
       trigger: 'scheduled',
-      runId: 'run-hunt-20260730T160000Z',
+      run_id: 'run-hunt-20260730T160000Z',
       tier2_when: 'on_hits',
     });
 
