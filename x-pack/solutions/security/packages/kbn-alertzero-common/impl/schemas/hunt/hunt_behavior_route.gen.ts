@@ -142,6 +142,22 @@ export const HuntBehaviorResponse = lazySchema(() =>
           .boolean()
           .optional()
           .describe('True when more than 20 distinct users were seen.'),
+        /**
+         * Required-index execute rows as Discover refs (`event_id` + `source_index`). Empty when METADATA `_id`/`_index` were not projected (e.g. aggregating pipelines). Consumed by the SSE mapper into `events[]` / `alerts[]`.
+         */
+        hit_refs: z
+          .array(
+            z.object({
+              event_id: z.string().max(512),
+              source_index: z.string().max(512),
+              timestamp: z.string().max(64).optional(),
+            })
+          )
+          .max(50)
+          .optional()
+          .describe(
+            'Required-index execute rows as Discover refs (`event_id` + `source_index`). Empty when METADATA `_id`/`_index` were not projected (e.g. aggregating pipelines). Consumed by the SSE mapper into `events[]` / `alerts[]`.'
+          ),
       })
     ),
     indexed_behaviors: z.array(

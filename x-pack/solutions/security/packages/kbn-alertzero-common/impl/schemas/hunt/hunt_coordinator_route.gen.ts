@@ -160,6 +160,22 @@ export const HuntCoordinatorResponse = lazySchema(() =>
               .boolean()
               .optional()
               .describe('True when more than 20 distinct users were seen.'),
+            /**
+             * Required-index execute rows as Discover refs for the SSE mapper (`events[]` / `alerts[]`).
+             */
+            hit_refs: z
+              .array(
+                z.object({
+                  event_id: z.string().max(512),
+                  source_index: z.string().max(512),
+                  timestamp: z.string().max(64).optional(),
+                })
+              )
+              .max(50)
+              .optional()
+              .describe(
+                'Required-index execute rows as Discover refs for the SSE mapper (`events[]` / `alerts[]`).'
+              ),
           })
         ),
         indexed_behaviors: z.array(

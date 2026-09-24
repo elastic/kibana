@@ -12,45 +12,50 @@ import {
 } from './prepare_esql_for_execute';
 
 describe('injectMetadataIndex', () => {
-  it('returns injection when METADATA is absent', () => {
+  it('returns injection of _id and _index when METADATA is absent', () => {
     expect(
       injectMetadataIndex('FROM logs-aws.*\n| WHERE event.action == "AssumeRole"\n| LIMIT 10')
-    ).toBe('FROM logs-aws.* METADATA _index\n| WHERE event.action == "AssumeRole"\n| LIMIT 10');
-  });
-
-  it('returns no double-injection when _index is already present', () => {
-    expect(injectMetadataIndex('FROM logs-aws.* METADATA _index | WHERE true | LIMIT 5')).toBe(
-      'FROM logs-aws.* METADATA _index | WHERE true | LIMIT 5'
+    ).toBe(
+      'FROM logs-aws.* METADATA _id, _index\n| WHERE event.action == "AssumeRole"\n| LIMIT 10'
     );
   });
 
-  it('returns _index appended to an existing METADATA list', () => {
+  it('returns no double-injection when both fields are already present', () => {
+    expect(injectMetadataIndex('FROM logs-aws.* METADATA _id, _index | WHERE true | LIMIT 5')).toBe(
+      'FROM logs-aws.* METADATA _id, _index | WHERE true | LIMIT 5'
+    );
+  });
+
+  it('returns missing METADATA fields appended to an existing list', () => {
     expect(injectMetadataIndex('FROM logs-* METADATA _id | LIMIT 1')).toBe(
       'FROM logs-* METADATA _id, _index | LIMIT 1'
     );
+    expect(injectMetadataIndex('FROM logs-* METADATA _index | LIMIT 1')).toBe(
+      'FROM logs-* METADATA _index, _id | LIMIT 1'
+    );
   });
 
-  it('returns _index appended to KEEP when KEEP would drop it', () => {
+  it('returns _id and _index appended to KEEP when KEEP would drop them', () => {
     expect(injectMetadataIndex('FROM logs-* | KEEP host.name | LIMIT 5')).toBe(
-      'FROM logs-* METADATA _index | KEEP host.name, _index | LIMIT 5'
+      'FROM logs-* METADATA _id, _index | KEEP host.name, _id, _index | LIMIT 5'
     );
   });
 
   it('returns METADATA injection when the first pipe has no leading whitespace', () => {
     expect(injectMetadataIndex('FROM logs-*| WHERE true | LIMIT 1')).toBe(
-      'FROM logs-* METADATA _index| WHERE true | LIMIT 1'
+      'FROM logs-* METADATA _id, _index| WHERE true | LIMIT 1'
     );
   });
 
   it('returns string literals in the pipeline unchanged', () => {
     expect(injectMetadataIndex('FROM logs-*\n| WHERE message == "hello  world"\n| LIMIT 1')).toBe(
-      'FROM logs-* METADATA _index\n| WHERE message == "hello  world"\n| LIMIT 1'
+      'FROM logs-* METADATA _id, _index\n| WHERE message == "hello  world"\n| LIMIT 1'
     );
   });
 
   it('returns comment lines in the pipeline unchanged', () => {
     expect(injectMetadataIndex('FROM logs-*\n| WHERE true\n// keep me\n| LIMIT 1')).toBe(
-      'FROM logs-* METADATA _index\n| WHERE true\n// keep me\n| LIMIT 1'
+      'FROM logs-* METADATA _id, _index\n| WHERE true\n// keep me\n| LIMIT 1'
     );
   });
 });
@@ -81,7 +86,7 @@ describe('prepareEsqlForExecute', () => {
         25
       )
     ).toBe(
-      'FROM logs-aws.cloudtrail-* METADATA _index\n| WHERE aws.cloudtrail.event_name == "AssumeRole"\n| KEEP host.name, user.name, _index\n| LIMIT 25'
+      'FROM logs-aws.cloudtrail-* METADATA _id, _index\n| WHERE aws.cloudtrail.event_name == "AssumeRole"\n| KEEP host.name, user.name, _id, _index\n| LIMIT 25'
     );
   });
 });

@@ -238,6 +238,25 @@ paths:
                               type: boolean
                               description: >-
                                 True when more than 20 distinct users were seen.
+                            hit_refs:
+                              type: array
+                              maxItems: 50
+                              description: >-
+                                Required-index execute rows as Discover refs
+                                for the SSE mapper (`events[]` / `alerts[]`).
+                              items:
+                                type: object
+                                required: [event_id, source_index]
+                                properties:
+                                  event_id:
+                                    type: string
+                                    maxLength: 512
+                                  source_index:
+                                    type: string
+                                    maxLength: 512
+                                  timestamp:
+                                    type: string
+                                    maxLength: 64
                       indexed_behaviors:
                         type: array
                         items:
