@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { Observable } from 'rxjs';
 import { map, skip } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
+import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -120,17 +121,26 @@ export function registerInternalExecutionRoutes({
     },
     wrapHandler(async (context, request, response) => {
       const [, { cloud }] = await coreSetup.getStartServices();
-      const { execution: executionService } = getInternalServices();
+      const { execution: executionService, conversations: conversationsService } =
+        getInternalServices();
       const { executionId } = request.params;
       const { offset } = request.query;
 
       const spaceId = (await context.agentBuilder).spaces.getSpaceId();
       const execution = await executionService.getExecution(executionId);
-      if (!execution || execution.spaceId !== spaceId) {
+      const conversationId =
+        execution?.executionMode === AgentExecutionMode.conversation
+          ? execution.agentParams.conversationId
+          : undefined;
+      if (!execution || execution.spaceId !== spaceId || !conversationId) {
         return response.notFound({
           body: { message: `Execution not found: ${executionId}` },
         });
       }
+
+      // Throws when the user may not converse in the execution's conversation.
+      const conversationClient = await conversationsService.getScopedClient({ request });
+      await conversationClient.get(conversationId);
 
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => {

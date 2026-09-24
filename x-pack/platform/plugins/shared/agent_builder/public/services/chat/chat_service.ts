@@ -8,6 +8,7 @@
 import type { Observable, OperatorFunction } from 'rxjs';
 import { defer, pipe } from 'rxjs';
 import type { HttpResponse, HttpSetup } from '@kbn/core-http-browser';
+import { buildPath } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { type PromptResponse } from '@kbn/agent-builder-common/agents';
@@ -148,12 +149,17 @@ export class ChatService {
           body: JSON.stringify(payload),
         }),
       reattach: (offset) =>
-        this.http.get(`${internalApiPath}/executions/${payload.execution_id}/reattach`, {
-          signal,
-          asResponse: true,
-          rawResponse: true,
-          query: { offset },
-        }),
+        this.http.get(
+          buildPath(`${internalApiPath}/executions/{executionId}/reattach`, {
+            executionId: payload.execution_id,
+          }),
+          {
+            signal,
+            asResponse: true,
+            rawResponse: true,
+            query: { offset },
+          }
+        ),
       parse: parseChatEvents(),
       signal,
     }).pipe(

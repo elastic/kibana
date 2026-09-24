@@ -10,7 +10,7 @@ import { defer, Observable, tap } from 'rxjs';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { isSSEError } from '@kbn/sse-utils';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { isExecutionTerminalEvent } from '@kbn/agent-builder-common';
+import { isConversationCreatedEvent, isConversationUpdatedEvent } from '@kbn/agent-builder-common';
 
 const GATEWAY_ERROR_STATUSES: ReadonlySet<number> = new Set([502, 503, 504]);
 
@@ -55,7 +55,7 @@ export const streamWithReattach = <TResponse>({
 }: StreamWithReattachParams<TResponse>): Observable<ChatEvent> =>
   new Observable<ChatEvent>((subscriber) => {
     let offset = 0;
-    let terminated = false;
+    let finished = false;
     let canReattach = true;
     let disconnectError: unknown;
     let connection: Subscription | undefined;
@@ -63,7 +63,6 @@ export const streamWithReattach = <TResponse>({
     const shouldReattach = () => canReattach && !signal?.aborted;
 
     const open = (request: () => Promise<TResponse>, isReattach: boolean) => {
-      let receivedOnConnection = 0;
       connection = defer(request)
         .pipe(
           tap(() => {
@@ -76,23 +75,23 @@ export const streamWithReattach = <TResponse>({
         .subscribe({
           next: (event) => {
             offset++;
-            receivedOnConnection++;
-            if (isExecutionTerminalEvent(event)) {
-              terminated = true;
+            if (isConversationCreatedEvent(event) || isConversationUpdatedEvent(event)) {
+              finished = true;
             }
             subscriber.next(event);
           },
           error: (error) => {
             if (shouldReattach() && isDisconnectError(error)) {
-              disconnectError = error;
-              reconnect();
+              reconnect(error);
               return;
             }
-            subscriber.error(isReattach && isNotFoundError(error) ? disconnectError : error);
+            subscriber.error(
+              isReattach && isNotFoundError(error) ? disconnectError ?? error : error
+            );
           },
           complete: () => {
-            if (shouldReattach() && !terminated && receivedOnConnection > 0) {
-              reconnect();
+            if (shouldReattach() && !finished) {
+              reconnect(undefined);
               return;
             }
             subscriber.complete();
@@ -100,8 +99,9 @@ export const streamWithReattach = <TResponse>({
         });
     };
 
-    const reconnect = () => {
+    const reconnect = (cause: unknown) => {
       canReattach = false;
+      disconnectError = cause;
       open(() => reattach(offset), true);
     };
 

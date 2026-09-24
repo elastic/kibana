@@ -8,7 +8,12 @@
 import type { Observable } from 'rxjs';
 import { firstValueFrom, of, Subject, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  ChatEventType,
+  TimelineEventType,
+  createConversationNotFoundError,
+} from '@kbn/agent-builder-common';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_SOCKET_TIMEOUT_MS } from '../utils';
 import { registerInternalExecutionRoutes } from './executions';
@@ -36,7 +41,14 @@ interface RouteConfig {
 const setup = ({
   cloudEnabled = false,
   executionSpaceId = 'default',
-}: { cloudEnabled?: boolean; executionSpaceId?: string | null } = {}) => {
+  executionMode = AgentExecutionMode.conversation,
+  conversationAccessError,
+}: {
+  cloudEnabled?: boolean;
+  executionSpaceId?: string | null;
+  executionMode?: AgentExecutionMode;
+  conversationAccessError?: Error;
+} = {}) => {
   const routes: Record<string, { config: RouteConfig; handler: Function }> = {};
   const register = (config: RouteConfig, handler: Function) => {
     routes[config.path] = { config, handler };
@@ -46,15 +58,27 @@ const setup = ({
     .mockReturnValue(
       of(executionStarted, messageChunk, roundComplete, executionTerminated, conversationUpdated)
     );
-  const getExecution = jest
-    .fn()
-    .mockResolvedValue(
-      executionSpaceId === null ? undefined : { executionId: 'exec-1', spaceId: executionSpaceId }
-    );
+  const getExecution = jest.fn().mockResolvedValue(
+    executionSpaceId === null
+      ? undefined
+      : {
+          executionId: 'exec-1',
+          spaceId: executionSpaceId,
+          executionMode,
+          agentParams: { conversationId: 'conv-1' },
+        }
+  );
+  const getConversation = conversationAccessError
+    ? jest.fn().mockRejectedValue(conversationAccessError)
+    : jest.fn().mockResolvedValue({ id: 'conv-1' });
+  const getScopedClient = jest.fn().mockResolvedValue({ get: getConversation });
 
   registerInternalExecutionRoutes({
     router: { get: register, post: register },
-    getInternalServices: () => ({ execution: { followExecution, getExecution } }),
+    getInternalServices: () => ({
+      execution: { followExecution, getExecution },
+      conversations: { getScopedClient },
+    }),
     coreSetup: {
       getStartServices: async () => [{}, { cloud: { isCloudEnabled: cloudEnabled } }],
     },
@@ -77,6 +101,10 @@ const setup = ({
       {
         ok: ({ body }: { body: unknown }) => ({ status: 200, payload: body }),
         notFound: ({ body }: { body: unknown }) => ({ status: 404, payload: body }),
+        customError: ({ statusCode, body }: { statusCode: number; body: unknown }) => ({
+          status: statusCode,
+          payload: body,
+        }),
       }
     );
 
@@ -89,7 +117,7 @@ const setup = ({
     return { result, emitted: await firstValueFrom(streamed.pipe(toArray())), options };
   };
 
-  return { routes, followExecution, callHandler, callReattach };
+  return { routes, followExecution, getConversation, callHandler, callReattach };
 };
 
 describe('GET /internal/agent_builder/executions/{executionId}/reattach', () => {
@@ -133,6 +161,36 @@ describe('GET /internal/agent_builder/executions/{executionId}/reattach', () => 
 
   it('returns 404 without streaming when the execution belongs to another space', async () => {
     const { followExecution, callHandler } = setup({ executionSpaceId: 'other-space' });
+
+    const result = await callHandler(0);
+
+    expect(result.status).toBe(404);
+    expect(followExecution).not.toHaveBeenCalled();
+  });
+
+  it('checks that the user may converse in the conversation of the execution', async () => {
+    const { getConversation, callReattach } = setup();
+
+    await callReattach(0);
+
+    expect(getConversation).toHaveBeenCalledWith('conv-1');
+  });
+
+  it('returns 404 without streaming when the user cannot access the conversation', async () => {
+    const { followExecution, callHandler } = setup({
+      conversationAccessError: createConversationNotFoundError({ conversationId: 'conv-1' }),
+    });
+
+    const result = await callHandler(0);
+
+    expect(result.status).toBe(404);
+    expect(followExecution).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 without streaming for a standalone execution', async () => {
+    const { followExecution, callHandler } = setup({
+      executionMode: AgentExecutionMode.standalone,
+    });
 
     const result = await callHandler(0);
 

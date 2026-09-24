@@ -19,6 +19,8 @@ const chunk = (text: string) =>
   ({ type: ChatEventType.messageChunk, data: { text_chunk: text } } as ChatEvent);
 
 const terminated = { type: TimelineEventType.executionTerminated, data: {} } as ChatEvent;
+const conversationUpdated = { type: ChatEventType.conversationUpdated, data: {} } as ChatEvent;
+const conversationCreated = { type: ChatEventType.conversationCreated, data: {} } as ChatEvent;
 
 /** A stand-in for core's `HttpFetchError`: `isHttpFetchError` keys off the `request` property. */
 const httpFetchError = (status?: number) =>
@@ -53,7 +55,9 @@ describe('isDisconnectError', () => {
 
 describe('streamWithReattach', () => {
   it('reattaches after a network error, resuming after the events already received', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(chunk('c'), terminated));
+    const reattach = jest.fn(async (_offset: number) =>
+      of(chunk('c'), terminated, conversationUpdated)
+    );
 
     const received = await lastValueFrom(
       streamWithReattach({
@@ -69,11 +73,11 @@ describe('streamWithReattach', () => {
 
     expect(reattach).toHaveBeenCalledTimes(1);
     expect(reattach).toHaveBeenCalledWith(2);
-    expect(received).toEqual([chunk('a'), chunk('b'), chunk('c'), terminated]);
+    expect(received).toEqual([chunk('a'), chunk('b'), chunk('c'), terminated, conversationUpdated]);
   });
 
   it('reattaches after a gateway timeout on the initial request', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(terminated));
+    const reattach = jest.fn(async (_offset: number) => of(terminated, conversationUpdated));
 
     const received = await lastValueFrom(
       streamWithReattach({
@@ -84,12 +88,12 @@ describe('streamWithReattach', () => {
     );
 
     expect(reattach).toHaveBeenCalledWith(0);
-    expect(received).toEqual([terminated]);
+    expect(received).toEqual([terminated, conversationUpdated]);
   });
 
   it('does not reattach after an error sent by Kibana', async () => {
     const error = createAgentBuilderError(AgentBuilderErrorCode.internalError, 'boom');
-    const reattach = jest.fn(async (_offset: number) => of(terminated));
+    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
 
     await expect(
       lastValueFrom(
@@ -109,7 +113,7 @@ describe('streamWithReattach', () => {
 
   it('does not reattach after an HTTP error answered by Kibana', async () => {
     const error = httpFetchError(400);
-    const reattach = jest.fn(async (_offset: number) => of(terminated));
+    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
 
     await expect(
       lastValueFrom(
@@ -127,7 +131,7 @@ describe('streamWithReattach', () => {
     const controller = new AbortController();
     controller.abort();
     const error = new TypeError('network error');
-    const reattach = jest.fn(async (_offset: number) => of(terminated));
+    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
 
     await expect(
       lastValueFrom(
@@ -172,7 +176,7 @@ describe('streamWithReattach', () => {
         )
       )
       .mockImplementationOnce(async () => throwError(() => new TypeError('network error')))
-      .mockImplementationOnce(async () => of(terminated));
+      .mockImplementationOnce(async () => of(terminated, conversationUpdated));
 
     const received = await lastValueFrom(
       streamWithReattach({
@@ -187,14 +191,10 @@ describe('streamWithReattach', () => {
     );
 
     expect(reattach.mock.calls).toEqual([[1], [2], [2]]);
-    expect(received).toEqual([chunk('a'), chunk('b'), terminated]);
+    expect(received).toEqual([chunk('a'), chunk('b'), terminated, conversationUpdated]);
   });
 
-  it('reattaches after a network error following the terminal event, to receive the events after it', async () => {
-    const conversationUpdated = {
-      type: ChatEventType.conversationUpdated,
-      data: {},
-    } as ChatEvent;
+  it('reattaches after a network error following the terminal event', async () => {
     const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
 
     const received = await lastValueFrom(
@@ -213,10 +213,10 @@ describe('streamWithReattach', () => {
     expect(received).toEqual([chunk('a'), terminated, conversationUpdated]);
   });
 
-  it('does not reattach when the stream completes after the terminal event', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(terminated));
+  it('reattaches when the stream closes between the terminal and the conversation event', async () => {
+    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
 
-    await lastValueFrom(
+    const received = await lastValueFrom(
       streamWithReattach({
         connect: async () => of(chunk('a'), terminated),
         reattach,
@@ -224,7 +224,71 @@ describe('streamWithReattach', () => {
       }).pipe(toArray())
     );
 
+    expect(reattach).toHaveBeenCalledWith(2);
+    expect(received).toEqual([chunk('a'), terminated, conversationUpdated]);
+  });
+
+  it('reattaches when the stream closes before the end of the execution', async () => {
+    const reattach = jest.fn(async (_offset: number) => of(terminated, conversationUpdated));
+
+    const received = await lastValueFrom(
+      streamWithReattach({
+        connect: async () => of(chunk('a')),
+        reattach,
+        parse: switchAll(),
+      }).pipe(toArray())
+    );
+
+    expect(reattach).toHaveBeenCalledWith(1);
+    expect(received).toEqual([chunk('a'), terminated, conversationUpdated]);
+  });
+
+  it('reattaches when the initial response closes before its first event', async () => {
+    const reattach = jest.fn(async (_offset: number) => of(chunk('a'), conversationCreated));
+
+    const received = await lastValueFrom(
+      streamWithReattach({
+        connect: async () => EMPTY,
+        reattach,
+        parse: switchAll(),
+      }).pipe(toArray())
+    );
+
+    expect(reattach).toHaveBeenCalledWith(0);
+    expect(received).toEqual([chunk('a'), conversationCreated]);
+  });
+
+  it('reattaches again when a reattach closes before delivering any event', async () => {
+    const reattach = jest
+      .fn<Promise<Observable<ChatEvent>>, [number]>()
+      .mockImplementationOnce(async () => EMPTY)
+      .mockImplementationOnce(async () => of(chunk('b'), conversationUpdated));
+
+    const received = await lastValueFrom(
+      streamWithReattach({
+        connect: async () => of(chunk('a')),
+        reattach,
+        parse: switchAll(),
+      }).pipe(toArray())
+    );
+
+    expect(reattach.mock.calls).toEqual([[1], [1]]);
+    expect(received).toEqual([chunk('a'), chunk('b'), conversationUpdated]);
+  });
+
+  it('does not reattach once the conversation event was received', async () => {
+    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
+
+    const received = await lastValueFrom(
+      streamWithReattach({
+        connect: async () => of(chunk('a'), terminated, conversationUpdated),
+        reattach,
+        parse: switchAll(),
+      }).pipe(toArray())
+    );
+
     expect(reattach).not.toHaveBeenCalled();
+    expect(received).toEqual([chunk('a'), terminated, conversationUpdated]);
   });
 
   it('surfaces the original error when the execution to reattach to does not exist', async () => {
@@ -243,34 +307,19 @@ describe('streamWithReattach', () => {
     expect(reattach).toHaveBeenCalledTimes(1);
   });
 
-  it('reattaches when the stream completes before the terminal event', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(terminated));
+  it('surfaces the not found error when the reattach followed a closed stream', async () => {
+    const error = httpFetchError(404);
+    const reattach = jest.fn((_offset: number) => Promise.reject(error));
 
-    const received = await lastValueFrom(
-      streamWithReattach({
-        connect: async () => of(chunk('a')),
-        reattach,
-        parse: switchAll(),
-      }).pipe(toArray())
-    );
-
-    expect(reattach).toHaveBeenCalledWith(1);
-    expect(received).toEqual([chunk('a'), terminated]);
-  });
-
-  it('completes without reattaching again when a reattach ends before delivering any event', async () => {
-    const reattach = jest.fn(async (_offset: number) => EMPTY);
-
-    const received = await lastValueFrom(
-      streamWithReattach({
-        connect: async () => of(chunk('a')),
-        reattach,
-        parse: switchAll(),
-      }).pipe(toArray())
-    );
-
-    expect(reattach).toHaveBeenCalledTimes(1);
-    expect(received).toEqual([chunk('a')]);
+    await expect(
+      lastValueFrom(
+        streamWithReattach({
+          connect: async () => EMPTY,
+          reattach,
+          parse: switchAll(),
+        })
+      )
+    ).rejects.toBe(error);
   });
 
   it('closes the reattached connection on unsubscribe', async () => {
