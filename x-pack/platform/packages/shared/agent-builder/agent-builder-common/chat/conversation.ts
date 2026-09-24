@@ -726,9 +726,9 @@ export interface ConversationInternalState {
    */
   dynamic_tool_ids?: string[];
   /**
-   * Summary of compacted older conversation rounds.
-   * Generated when the conversation approaches the model's context window limit.
-   * Reused across rounds until regeneration is needed.
+   * Summary of the context up to its `summarized_up_to` cursor, rendered in place of it.
+   * Generated when the context approaches the model's context window limit, possibly mid-round.
+   * Reused across rounds until the next compaction replaces it.
    */
   compaction_summary?: CompactionSummary;
   /** Background sub-agent executions keyed by execution ID. */
@@ -839,16 +839,31 @@ export interface CompactionStructuredData {
 }
 
 /**
- * Summary of compacted conversation rounds.
+ * Anchor of a compaction cursor: the summary covers the context timeline up to the end of the
+ * cycle this anchor belongs to. Only ids that are stable across timeline re-serialization are
+ * used: a tool call id for a cycle with tool calls, the id of a non-step event (`user_message`,
+ * execution terminal) otherwise.
+ */
+export type CompactionCursor = { tool_call_id: string } | { event_id: string };
+
+/**
+ * Summary of the compacted part of the conversation.
  * Stored at the conversation level and reused across rounds
  * until the context window fills up again and regeneration is needed.
  */
 export interface CompactionSummary {
   /**
-   * Cursor into the conversation's event timeline. The summary covers every event up to and
-   * INCLUDING this id; later events are visible verbatim.
+   * What the summary covers: every cycle of the context timeline up to and including the one
+   * holding the anchor; later cycles are visible verbatim. Absent on summaries written before
+   * cycle-based compaction, which are translated on read from `covered_round_ids` /
+   * `summarized_round_count`.
    */
-  summarized_up_to_event_id: string;
+  summarized_up_to?: CompactionCursor;
+  /**
+   * Number of rounds fully covered by the summary. Derived from `summarized_up_to` on write, for
+   * readers that predate it.
+   */
+  summarized_round_count: number;
   /** When the summary was generated */
   created_at: string;
   /** Estimated token count of the serialized summary */
@@ -856,9 +871,8 @@ export interface CompactionSummary {
   /** Structured summary data */
   structured_data: CompactionStructuredData;
   /**
-   * Ids of the rounds this summary covers, in round order. Absent on summaries written before
-   * coverage became a set; those are interpreted through `summarized_round_count` with the
-   * pre-change fold's membership rule (see `coveredRoundIds`).
+   * Ids of the rounds fully covered by the summary, in round order. Derived from
+   * `summarized_up_to` on write, for readers that predate it.
    */
   covered_round_ids?: string[];
 }

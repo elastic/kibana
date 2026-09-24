@@ -7,11 +7,10 @@
 
 import type { ChatCompleteCacheControl, InferenceConnector } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { SubstitutionStepData, ToolCallWithResult } from '@kbn/agent-builder-common';
-import { ChatEventType, TimelineEventType, isToolCallStep } from '@kbn/agent-builder-common';
+import type { SubstitutionStepData, ToolCallStep } from '@kbn/agent-builder-common';
+import { ConversationRoundStepType, createSubstitutionStep } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import {
   COMPACTION_TAIL_HARD_CAP_TOKENS,
   COMPACTION_TAIL_HARD_CAP_TOKENS_REACTIVE,
@@ -23,15 +22,16 @@ import {
   SUBST_ROUND_START_THRESHOLD_COLD,
   SUBST_ROUND_START_THRESHOLD_HOT,
 } from '../constants';
-import { isContextLengthErrorAction, substitutionAction } from '../actions';
-import type { CompactionCoverage, StateType } from '../state';
+import type { StateType, StateUpdate } from '../state';
+import { toCurrentRun } from '../state';
+import { stepUpdates } from '../step_state';
 import type { ProcessedConversation } from './prepare_conversation';
-import { sliceTimelineAfterEvent, type ProcessedTimelineEvent } from './context_timeline';
 import { computeCacheState } from './cache_state';
-import { getContextWindow } from './context_budget';
+import { computeContextBudget } from './context_budget';
+import { listVisibleUnits, unitToolCalls } from './context_coverage';
 import { compactContext } from './conversation_compactor';
-import { collectSubstitutionMarks, selectSubstitutionCandidates } from './filestore_substitution';
-import { reconstructInFlightToolCalls, type VisibleContextDeps } from './visible_context';
+import { selectSubstitutionCandidates } from './filestore_substitution';
+import { buildContextView, type VisibleContextDeps } from './visible_context';
 
 export interface PreviousRoundInfo {
   terminatedAt?: string;
@@ -41,119 +41,49 @@ export interface PreviousRoundInfo {
 
 export interface ContextManagementDeps extends VisibleContextDeps {
   conversation: ProcessedConversation;
-  cycleLimit: number;
   chatModel: InferenceChatModel;
   connector: InferenceConnector;
   cacheControl?: ChatCompleteCacheControl;
-  events: AgentEventEmitter;
   abortSignal?: AbortSignal;
   previousRound?: PreviousRoundInfo;
 }
 
-const visibleTimelineToolCalls = (
-  timeline: ProcessedTimelineEvent[],
-  coverage?: CompactionCoverage
-): ToolCallWithResult[] => {
-  const visible =
-    coverage === undefined
-      ? timeline
-      : 'eventId' in coverage
-      ? sliceTimelineAfterEvent(timeline, coverage.eventId)
-      : [];
-  return visible.flatMap((event) =>
-    event.type === TimelineEventType.executionStep && isToolCallStep(event.data.step)
-      ? [event.data.step]
-      : []
-  );
-};
-
 /**
- * Runs at the top of every cycle. Three modes:
- * - forced (last action is a context-length error): compact with the reactive tail cap;
+ * The two context-management nodes. `contextManagement` runs at the top of every cycle and either
+ * applies a substitution or requests a compaction, executed by `compactContext`. Three modes:
+ * - forced (the last research call exceeded the context window): compact with the reactive tail cap;
  * - round start (cycle 0): compact from the previous round's last-call usage, else cache-aware
- *   substitution over previous rounds;
- * - proactive (cycle N > 0): every cycle, unless in cooldown after an action, compare the last
- *   call's input tokens to the window-relative thresholds; compaction wins over substitution.
+ *   substitution over the visible history;
+ * - proactive (cycle N > 0): unless in cooldown after an action, compare the last call's input
+ *   tokens to the window-relative thresholds; compaction wins over substitution.
  */
-export const createContextManagementNode = (deps: ContextManagementDeps) => {
-  const contextWindow = getContextWindow(deps.connector);
-  const compactionThreshold = INTRA_ROUND_COMPACTION_FRACTION * contextWindow;
+export const createContextManagementNodes = (deps: ContextManagementDeps) => {
+  const budget = computeContextBudget(deps.connector);
+  const compactionThreshold = INTRA_ROUND_COMPACTION_FRACTION * budget.totalBudget;
   const substitutionThreshold = Math.min(
-    INTRA_ROUND_SUBSTITUTION_FRACTION * contextWindow,
+    INTRA_ROUND_SUBSTITUTION_FRACTION * budget.totalBudget,
     INTRA_ROUND_SUBSTITUTION_MAX_TOKENS
   );
 
-  deps.logger.debug(
-    `[contextManagement] configured contextWindow=${contextWindow} compactionThreshold=${compactionThreshold} substitutionThreshold=${substitutionThreshold}`
-  );
-
-  const compact = async (
-    state: StateType,
-    tailCapTokens: number,
-    trigger: 'forced' | 'roundStart' | 'proactive'
-  ): Promise<Partial<StateType> | undefined> => {
-    const tokensBefore = state.lastCallUsage?.inputTokens ?? 0;
-    deps.logger.info(
-      `[contextManagement] compaction starting cycle=${state.currentCycle} trigger=${trigger} inputTokens=${tokensBefore} tailCap=${tailCapTokens}`
-    );
-    deps.events.emit({
-      type: ChatEventType.compactionStarted,
-      data: { token_count_before: tokensBefore },
-    });
-    const result = await compactContext(
-      {
-        conversation: deps.conversation,
-        actions: state.mainActions,
-        cycleLimit: deps.cycleLimit,
-        existingSummary: state.compactionSummary,
-        existingCoverage: state.compactionCoverage,
-        tailCapTokens,
-      },
-      deps
-    );
-    if (!result) {
-      deps.logger.info(
-        `[contextManagement] compaction skipped cycle=${state.currentCycle} reason=nothing_to_compact`
-      );
-      return undefined;
-    }
-    deps.logger.info(
-      `[contextManagement] compaction completed cycle=${state.currentCycle} covered=${result.summarizedCycleCount} tokensBefore=${result.tokensBefore} tokensAfter=${result.tokensAfter}`
-    );
-    deps.events.emit({
-      type: ChatEventType.compactionCompleted,
-      data: {
-        token_count_before: result.tokensBefore,
-        token_count_after: result.tokensAfter,
-        summarized_cycle_count: result.summarizedCycleCount,
-      },
-    });
-    return {
-      compactionSummary: result.summary,
-      compactionCoverage: result.coverage,
-      lastContextActionCycle: state.currentCycle,
-    };
-  };
-
   const substitute = async (
     state: StateType,
-    toolCalls: ToolCallWithResult[],
+    toolCalls: ToolCallStep[],
     thresholdTokens: number,
     data: Omit<SubstitutionStepData, 'substituted_tool_call_ids'>
-  ): Promise<Partial<StateType>> => {
-    const alreadyMarked = collectSubstitutionMarks({
-      timeline: deps.conversation.timeline,
-      actions: state.mainActions,
-    });
+  ): Promise<StateUpdate> => {
+    const { marks } = buildContextView(
+      { conversation: deps.conversation, run: toCurrentRun(state) },
+      deps
+    );
     const ids = await selectSubstitutionCandidates({
       toolCalls,
       resultStore: deps.resultStore,
       thresholdTokens,
-      alreadyMarked,
+      alreadyMarked: marks,
     });
     if (ids.length === 0) {
       deps.logger.debug(
-        `[contextManagement] substitution skipped cycle=${state.currentCycle} trigger=${data.trigger} reason=no_candidates candidates_considered=${toolCalls.length} already_marked=${alreadyMarked.size}`
+        `[contextManagement] substitution skipped cycle=${state.currentCycle} trigger=${data.trigger} candidates=${toolCalls.length} already_marked=${marks.size}`
       );
       return {};
     }
@@ -161,30 +91,43 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
       `[contextManagement] substitution applied cycle=${state.currentCycle} trigger=${data.trigger} reason=${data.reason} threshold=${thresholdTokens} substituted=${ids.length}`
     );
     return {
-      mainActions: [substitutionAction({ ...data, substituted_tool_call_ids: ids })],
+      steps: [
+        stepUpdates.append(createSubstitutionStep({ ...data, substituted_tool_call_ids: ids })),
+      ],
       lastContextActionCycle: state.currentCycle,
     };
   };
 
-  return async (state: StateType): Promise<Partial<StateType>> => {
-    const lastAction = state.mainActions[state.mainActions.length - 1];
-
-    if (lastAction && isContextLengthErrorAction(lastAction)) {
-      deps.logger.info(
-        `[contextManagement] cycle=${state.currentCycle} mode=forced reason=contextLengthError`
+  /** Tool calls the model currently sees in full: history ones for round start, else the run's. */
+  const visibleToolCalls = (state: StateType, scope: 'history' | 'current'): ToolCallStep[] => {
+    const run = toCurrentRun(state);
+    const view = buildContextView({ conversation: deps.conversation, run }, deps);
+    const pending = new Set(state.pendingToolCallIds);
+    return listVisibleUnits({
+      entries: view.history.entries,
+      steps: run.steps,
+      visibility: view.visibility,
+    })
+      .filter((unit) => (unit.kind === 'current_cycle') === (scope === 'current'))
+      .flatMap((unit) => unitToolCalls(unit, run.steps))
+      .filter(
+        ({ tool_call_id: id }) =>
+          !pending.has(id) && (state.toolRenderState[id]?.kind ?? 'server') === 'server'
       );
-      const update = await compact(state, COMPACTION_TAIL_HARD_CAP_TOKENS_REACTIVE, 'forced');
-      if (!update) {
-        deps.logger.error(
-          `[contextManagement] cycle=${state.currentCycle} mode=forced abort=nothing_to_compact`
-        );
-        throw createAgentExecutionError(
-          'Context length exceeded and no history is left to compact',
-          ErrCodes.contextLengthExceeded,
-          {}
-        );
-      }
-      return update;
+  };
+
+  const contextManagement = async (state: StateType): Promise<StateUpdate> => {
+    const lastCallTokens = state.lastCallUsage?.inputTokens;
+
+    if (state.researchOutcome?.type === 'context_length_error') {
+      deps.logger.info(`[contextManagement] cycle=${state.currentCycle} mode=forced`);
+      return {
+        compactionRequest: {
+          trigger: 'forced',
+          tailCapTokens: COMPACTION_TAIL_HARD_CAP_TOKENS_REACTIVE,
+          tokensBefore: lastCallTokens ?? 0,
+        },
+      };
     }
 
     if (state.currentCycle === 0) {
@@ -193,7 +136,13 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
         deps.logger.debug(
           `[contextManagement] cycle=0 mode=roundStart decision=compact previousLastCall=${hint} threshold=${compactionThreshold}`
         );
-        return (await compact(state, COMPACTION_TAIL_HARD_CAP_TOKENS, 'roundStart')) ?? {};
+        return {
+          compactionRequest: {
+            trigger: 'round_start',
+            tailCapTokens: COMPACTION_TAIL_HARD_CAP_TOKENS,
+            tokensBefore: hint,
+          },
+        };
       }
       const cacheState = computeCacheState({
         lastTerminatedAt: deps.previousRound?.terminatedAt,
@@ -208,45 +157,92 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
       );
       return substitute(
         state,
-        visibleTimelineToolCalls(deps.conversation.timeline, state.compactionCoverage),
+        visibleToolCalls(state, 'history'),
         cacheState === 'cold' ? SUBST_ROUND_START_THRESHOLD_COLD : SUBST_ROUND_START_THRESHOLD_HOT,
         { trigger: 'round_start', reason: cacheState === 'cold' ? 'cache_cold' : 'cache_hot' }
       );
     }
 
     if (state.currentCycle - state.lastContextActionCycle < CONTEXT_MANAGEMENT_COOLDOWN_CYCLES) {
-      deps.logger.debug(
-        `[contextManagement] cycle=${state.currentCycle} mode=proactive skipped=cooldown lastActionCycle=${state.lastContextActionCycle}`
-      );
       return {};
     }
-    const inputTokens = state.lastCallUsage?.inputTokens;
-    if (inputTokens === undefined) {
-      deps.logger.debug(
-        `[contextManagement] cycle=${state.currentCycle} mode=proactive skipped=no_usage`
-      );
+    if (lastCallTokens === undefined) {
       return {};
     }
-    if (inputTokens > compactionThreshold) {
+    if (lastCallTokens > compactionThreshold) {
       deps.logger.debug(
-        `[contextManagement] cycle=${state.currentCycle} mode=proactive inputTokens=${inputTokens} decision=compact reason=inputTokens_over_compactionThreshold(${compactionThreshold})`
+        `[contextManagement] cycle=${state.currentCycle} mode=proactive inputTokens=${lastCallTokens} decision=compact threshold=${compactionThreshold}`
       );
-      return (await compact(state, COMPACTION_TAIL_HARD_CAP_TOKENS, 'proactive')) ?? {};
+      return {
+        compactionRequest: {
+          trigger: 'proactive',
+          tailCapTokens: COMPACTION_TAIL_HARD_CAP_TOKENS,
+          tokensBefore: lastCallTokens,
+        },
+      };
     }
-    if (inputTokens > substitutionThreshold) {
+    if (lastCallTokens > substitutionThreshold) {
       deps.logger.debug(
-        `[contextManagement] cycle=${state.currentCycle} mode=proactive inputTokens=${inputTokens} decision=substitute reason=inputTokens_over_substitutionThreshold(${substitutionThreshold})`
+        `[contextManagement] cycle=${state.currentCycle} mode=proactive inputTokens=${lastCallTokens} decision=substitute threshold=${substitutionThreshold}`
       );
-      return substitute(
-        state,
-        reconstructInFlightToolCalls(state.mainActions, deps.toolManager.getToolIdMapping()),
-        SUBST_INTRA_ROUND_THRESHOLD,
-        { trigger: 'intra_round', reason: 'input_tokens_threshold' }
-      );
+      return substitute(state, visibleToolCalls(state, 'current'), SUBST_INTRA_ROUND_THRESHOLD, {
+        trigger: 'intra_round',
+        reason: 'input_tokens_threshold',
+      });
     }
-    deps.logger.debug(
-      `[contextManagement] cycle=${state.currentCycle} mode=proactive inputTokens=${inputTokens} decision=none thresholds={compact:${compactionThreshold},substitute:${substitutionThreshold}}`
-    );
     return {};
   };
+
+  const compactContextNode = async (state: StateType): Promise<StateUpdate> => {
+    const request = state.compactionRequest;
+    if (!request) {
+      throw createAgentExecutionError(
+        '[compactContext] missing compaction request',
+        ErrCodes.invalidState,
+        {}
+      );
+    }
+    deps.logger.info(
+      `[contextManagement] compaction starting cycle=${state.currentCycle} trigger=${request.trigger} inputTokens=${request.tokensBefore} tailCap=${request.tailCapTokens}`
+    );
+    const result = await compactContext(
+      {
+        conversation: deps.conversation,
+        run: toCurrentRun(state),
+        tailCapTokens: request.tailCapTokens,
+      },
+      { ...deps, budget }
+    );
+    if (!result) {
+      if (request.trigger === 'forced') {
+        throw createAgentExecutionError(
+          'Context length exceeded and no history is left to compact',
+          ErrCodes.contextLengthExceeded,
+          {}
+        );
+      }
+      deps.logger.info(
+        `[contextManagement] compaction skipped cycle=${state.currentCycle} trigger=${request.trigger}`
+      );
+      return { compactionRequest: undefined, lastContextActionCycle: state.currentCycle };
+    }
+    deps.logger.info(
+      `[contextManagement] compaction completed cycle=${state.currentCycle} covered=${result.summarizedCycleCount} tokensBefore=${result.tokensBefore} tokensAfter=${result.tokensAfter}`
+    );
+    return {
+      steps: [
+        stepUpdates.append({
+          type: ConversationRoundStepType.compaction,
+          summarized_cycle_count: result.summarizedCycleCount,
+          token_count_before: result.tokensBefore,
+          token_count_after: result.tokensAfter,
+        }),
+      ],
+      compactionSummary: result.summary,
+      compactionRequest: undefined,
+      lastContextActionCycle: state.currentCycle,
+    };
+  };
+
+  return { contextManagement, compactContext: compactContextNode };
 };

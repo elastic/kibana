@@ -23,7 +23,6 @@ import {
   timelineFromRounds,
 } from '../../../../test_utils/timeline';
 import {
-  dropTimelineRounds,
   eventsForContext,
   groupTimelineEntries,
   groupTimelineRounds,
@@ -182,29 +181,6 @@ describe('groupTimelineRounds — interrupted rounds', () => {
       'r2',
     ]);
     expect(isTimelineStandaloneUserMessage(entries[1])).toBe(true);
-  });
-});
-
-describe('dropTimelineRounds', () => {
-  const timeline = [...timelineFromRounds([{ id: 'a' }, { id: 'b' }]), ...independentIdsRound()];
-
-  it('removes exactly the events of the given rounds and keeps stored order', () => {
-    const dropped = dropTimelineRounds(timeline, new Set(['b']));
-
-    expect(groupTimelineRounds(dropped).map((round) => round.id)).toEqual(['a', 'exec-abc']);
-    expect(dropped.map((event) => event.id)).toEqual(
-      timeline.filter((event) => !event.id.startsWith('b::')).map((event) => event.id)
-    );
-  });
-
-  it('drops rounds whose ids follow no scheme through the trigger link', () => {
-    expect(dropTimelineRounds(timeline, new Set(['exec-abc'])).map((event) => event.id)).toEqual(
-      timeline.filter((event) => !['um', 'ec'].includes(event.id)).map((event) => event.id)
-    );
-  });
-
-  it('returns the timeline unchanged for an empty set', () => {
-    expect(dropTimelineRounds(timeline, new Set())).toBe(timeline);
   });
 });
 

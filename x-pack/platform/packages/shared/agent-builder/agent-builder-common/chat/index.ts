@@ -76,6 +76,7 @@ export {
   ZERO_MODEL_USAGE,
   isZeroModelUsage,
   type CompactionSummary,
+  type CompactionCursor,
   type CompactionStructuredData,
   type CompactionToolCallSummary,
   type CompactionEntity,

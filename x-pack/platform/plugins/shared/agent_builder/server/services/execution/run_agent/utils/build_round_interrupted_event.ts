@@ -124,6 +124,7 @@ export const buildRoundInterruptedEvent = ({
     createdAt: endTime.toISOString(),
   });
   const workspaceId = getWorkspaceId?.();
+  const { compactionSummary } = tracker.latestState();
 
   return {
     type: ChatEventType.roundInterrupted,
@@ -137,6 +138,7 @@ export const buildRoundInterruptedEvent = ({
       ...(attachmentEvents.length > 0 ? { attachment_events: attachmentEvents } : {}),
       ...(workspaceId ? { workspace_id: workspaceId } : {}),
       ...(pendingRound ? { resumed: true } : {}),
+      ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     },
   };
 };

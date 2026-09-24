@@ -6,168 +6,161 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { BaseMessage, BaseMessageLike } from '@langchain/core/messages';
-import type { ToolCallWithResult } from '@kbn/agent-builder-common';
-import { TimelineEventType } from '@kbn/agent-builder-common';
-import type { ToolManager, ToolResultStore } from '@kbn/agent-builder-server/runner';
-import { createAIMessage, createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
-import type { ResearchAgentAction, ToolCallAction } from '../actions';
-import { isExecuteToolAction, isToolCallAction } from '../actions';
-import type { CompactionCoverage, CompactionSummaryData } from '../state';
-import type { PromptImageResolver } from '../prompts/types';
-import { formatResearcherActionHistory, reconstructToolCall } from '../prompts/utils/actions';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
+import type { HandoverParams, PromptImageResolver } from '../prompts/types';
+import type { CurrentRun } from '../transient_state';
 import type { ProcessedConversation } from './prepare_conversation';
-import type { ProcessedTimelineEvent, TimelineCycle } from './context_timeline';
-import { prepareMessages, stepsToMessages } from './to_langchain_messages';
 import type { ToolCallResultTransformer } from './tool_summarization';
-import { collectSubstitutionMarks, createMarkedResultTransformer } from './filestore_substitution';
+import {
+  historyView,
+  resolveVisibility,
+  unitSteps,
+  type ContextUnit,
+  type ContextVisibility,
+  type HistoryView,
+} from './context_coverage';
+import {
+  collectSubstitutionMarks,
+  createMarkedResultTransformer,
+  substituteToolCallResults,
+} from './filestore_substitution';
+import { formatUserInput, prepareMessages, roundOutcomeMessage } from './to_langchain_messages';
+import {
+  renderCurrentRun,
+  renderHistorySteps,
+  type CurrentRunPhase,
+  type CurrentRunSubstitution,
+} from './render_steps_to_messages';
 
 export interface VisibleContextDeps {
   resultStore: ToolResultStore;
-  toolManager: ToolManager;
   /** Base transformer (tool-specific summarization); substitution marks are layered on top. */
   resultTransformer: ToolCallResultTransformer;
   logger: Logger;
 }
 
-export interface VisibleContextInput {
-  conversation: ProcessedConversation;
-  actions: ResearchAgentAction[];
-  cycleLimit: number;
-  compactionSummary?: CompactionSummaryData;
-  compactionCoverage?: CompactionCoverage;
-  conversationTimestamp?: string;
-  imageResolver?: PromptImageResolver;
+/** The context as the summary and the substitution marks leave it. */
+export interface ContextView {
+  history: HistoryView;
+  visibility: ContextVisibility;
+  /** Tool calls rendered as file references. */
+  marks: Set<string>;
+  /** Transformer for history tool results: the base one, then the marks. */
+  historyTransformer: ToolCallResultTransformer;
+  substitution: CurrentRunSubstitution;
 }
 
-export interface VisibleContext {
-  /** Summary exchange + visible previous rounds + the current round's user input. */
-  history: BaseMessage[];
-  /** The in-flight round's visible actions. */
-  inFlight: BaseMessageLike[];
-}
-
-/** The transformer every renderer must use so marks apply uniformly to history and in-flight results. */
-export const createContextTransformer = (
-  { conversation, actions }: Pick<VisibleContextInput, 'conversation' | 'actions'>,
-  { resultStore, resultTransformer, logger }: VisibleContextDeps
-): ToolCallResultTransformer =>
-  createMarkedResultTransformer({
-    marks: collectSubstitutionMarks({ timeline: conversation.timeline, actions }),
-    resultStore,
-    base: resultTransformer,
-    logger,
-  });
-
-export const firstVisibleActionIndex = (coverage?: CompactionCoverage): number =>
-  coverage && 'actionIndex' in coverage ? coverage.actionIndex + 1 : 0;
-
-export const buildVisibleContext = async (
-  input: VisibleContextInput,
-  deps: VisibleContextDeps
-): Promise<VisibleContext> => {
-  const transformer = createContextTransformer(input, deps);
-
-  const history = await prepareMessages({
-    conversation: input.conversation,
-    resultTransformer: transformer,
-    compactionSummary: input.compactionSummary,
-    compactionCoverage: input.compactionCoverage,
-    conversationTimestamp: input.conversationTimestamp,
-  });
-
-  const inFlight = await formatResearcherActionHistory({
-    actions: input.actions,
-    cycleLimit: input.cycleLimit,
-    resultTransformer: transformer,
-    toolManager: deps.toolManager,
-    imageResolver: input.imageResolver,
-    fromActionIndex: firstVisibleActionIndex(input.compactionCoverage),
-  });
-
-  return { history, inFlight };
-};
-
-/** Inclusive index range into the actions array. */
-export interface ActionCycle {
-  start: number;
-  end: number;
-}
-
-/**
- * A new cycle starts at every `ToolCallAction` (except when it is the very first action);
- * whatever precedes the first tool call belongs to cycle 0, trailing actions join the last cycle.
- */
-export const groupActionCycles = (actions: ResearchAgentAction[]): ActionCycle[] => {
-  if (actions.length === 0) {
-    return [];
-  }
-  const starts = [0];
-  for (let i = 1; i < actions.length; i++) {
-    if (isToolCallAction(actions[i])) {
-      starts.push(i);
-    }
-  }
-  return starts.map((start, k) => ({ start, end: (starts[k + 1] ?? actions.length) - 1 }));
-};
-
-/** Structured tool calls of the in-flight actions in `[start, end]` (defaults to all). */
-export const reconstructInFlightToolCalls = (
-  actions: ResearchAgentAction[],
-  toolIdMapping: Map<string, string>,
-  range: ActionCycle = { start: 0, end: actions.length - 1 }
-): ToolCallWithResult[] => {
-  const toolCalls: ToolCallWithResult[] = [];
-  let lastToolCall: ToolCallAction | undefined;
-  for (let i = range.start; i <= range.end; i++) {
-    const action = actions[i];
-    if (isToolCallAction(action)) {
-      lastToolCall = action;
-    } else if (isExecuteToolAction(action)) {
-      for (const result of action.tool_results) {
-        const toolCall = reconstructToolCall(result, lastToolCall, toolIdMapping);
-        if (toolCall) toolCalls.push(toolCall);
-      }
-    }
-  }
-  return toolCalls;
-};
-
-export const renderTimelineCycle = async (
-  cycle: TimelineCycle<ProcessedTimelineEvent>,
-  { resultTransformer }: { resultTransformer: ToolCallResultTransformer }
-): Promise<BaseMessage[]> => {
-  const messages: BaseMessage[] = [];
-  for (const event of cycle.events) {
-    if (event.type === TimelineEventType.userMessage) {
-      messages.push(createUserMessage(event.data.message ?? ''));
-    }
-  }
-  messages.push(...(await stepsToMessages(cycle.steps, { resultTransformer })));
-  for (const event of cycle.events) {
-    if (
-      event.type === TimelineEventType.executionTerminated &&
-      event.data.outcome.type === 'responded'
-    ) {
-      messages.push(createAIMessage(event.data.outcome.response.message));
-    }
-  }
-  return messages;
-};
-
-export const renderActionCycle = (
-  actions: ResearchAgentAction[],
-  cycle: ActionCycle,
+export const buildContextView = (
   {
-    cycleLimit,
-    resultTransformer,
-    toolManager,
-  }: { cycleLimit: number; resultTransformer: ToolCallResultTransformer; toolManager: ToolManager }
-): Promise<BaseMessageLike[]> =>
-  formatResearcherActionHistory({
-    actions: actions.slice(0, cycle.end + 1),
-    cycleLimit,
-    resultTransformer,
-    toolManager,
-    fromActionIndex: cycle.start,
+    conversation,
+    run,
+    conversationTimestamp,
+  }: { conversation: ProcessedConversation; run: CurrentRun; conversationTimestamp?: string },
+  { resultStore, resultTransformer, logger }: VisibleContextDeps
+): ContextView => {
+  const history = historyView(conversation, conversationTimestamp);
+  const marks = collectSubstitutionMarks({ timeline: conversation.timeline, steps: run.steps });
+  return {
+    history,
+    visibility: resolveVisibility({
+      entries: history.entries,
+      steps: run.steps,
+      cursor: run.compactionSummary?.summarized_up_to,
+    }),
+    marks,
+    historyTransformer: createMarkedResultTransformer({
+      marks,
+      resultStore,
+      base: resultTransformer,
+      logger,
+    }),
+    substitution: {
+      marks,
+      substitute: (toolCall) => substituteToolCallResults({ toolCall, resultStore, logger }),
+    },
+  };
+};
+
+/** The messages the agent sees after its system prompt: history, then the current run. */
+export const renderVisibleContext = async (
+  {
+    conversation,
+    run,
+    phase,
+    handover,
+    imageResolver,
+    conversationTimestamp,
+  }: {
+    conversation: ProcessedConversation;
+    run: CurrentRun;
+    phase: CurrentRunPhase;
+    handover?: HandoverParams;
+    imageResolver?: PromptImageResolver;
+    conversationTimestamp?: string;
+  },
+  deps: VisibleContextDeps
+): Promise<BaseMessage[]> => {
+  const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
+  const history = await prepareMessages({
+    conversation,
+    resultTransformer: view.historyTransformer,
+    compactionSummary: run.compactionSummary,
+    visibility: view.visibility,
+    conversationTimestamp,
   });
+  const current = await renderCurrentRun({
+    run,
+    phase,
+    handover,
+    imageResolver,
+    range: { start: view.visibility.currentFromStep },
+    substitution: view.substitution,
+  });
+  return [...history, ...current];
+};
+
+/** One unit of the visible context, rendered as it is sent (images aside). */
+export const renderUnit = async (
+  unit: ContextUnit,
+  {
+    view,
+    run,
+    conversation,
+  }: { view: ContextView; run: CurrentRun; conversation: ProcessedConversation }
+): Promise<BaseMessage[]> => {
+  if (unit.kind === 'message') {
+    return [
+      formatUserInput({
+        input: unit.entry.userMessage.data,
+        timestamp: unit.entry.userMessage.created_at,
+        attachmentTypes: conversation.attachmentTypes,
+      }),
+    ];
+  }
+  if (unit.kind === 'current_cycle') {
+    return renderCurrentRun({
+      run,
+      phase: 'research',
+      range: unit.range,
+      substitution: view.substitution,
+    });
+  }
+  const { round } = unit;
+  return [
+    ...(unit.first
+      ? [
+          formatUserInput({
+            input: round.userMessage.data,
+            timestamp: round.userMessage.created_at,
+            attachmentTypes: conversation.attachmentTypes,
+          }),
+        ]
+      : []),
+    ...(await renderHistorySteps({
+      steps: unitSteps(unit, run.steps),
+      resultTransformer: view.historyTransformer,
+    })),
+    ...(unit.last ? [roundOutcomeMessage(round)] : []),
+  ];
+};

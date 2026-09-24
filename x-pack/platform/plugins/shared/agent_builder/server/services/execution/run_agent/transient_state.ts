@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { CompactionSummary, ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
@@ -14,7 +14,18 @@ import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langc
 export type ResearchOutcome =
   | { type: 'tool_calls'; toolCalls: ToolCallWithReasoning[]; toolCallGroupId: string }
   | { type: 'handover'; message: string; forceful: boolean }
-  | { type: 'retry_error'; error: AgentBuilderAgentExecutionError };
+  | { type: 'retry_error'; error: AgentBuilderAgentExecutionError }
+  /** The prompt exceeded the context window; routes to a forced compaction before retrying. */
+  | { type: 'context_length_error'; error: AgentBuilderAgentExecutionError };
+
+/** A compaction decided by `contextManagement`, executed by `compactContext`. */
+export interface CompactionRequest {
+  trigger: 'forced' | 'round_start' | 'proactive';
+  /** Max tokens of completed cycles kept verbatim before the current one. */
+  tailCapTokens: number;
+  /** Input tokens that motivated the compaction, when known. */
+  tokensBefore: number;
+}
 
 /** What the structured answer model produced on its last turn. */
 export type AnswerOutcome =
@@ -83,4 +94,6 @@ export interface CurrentRun {
   renderState: ToolRenderStateMap;
   pendingToolCallIds: string[];
   retryNotices: RetryNotice[];
+  /** The summary the context is currently rendered with; its cursor decides what stays verbatim. */
+  compactionSummary?: CompactionSummary;
 }

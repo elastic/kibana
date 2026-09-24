@@ -7,10 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ToolResult } from '@kbn/agent-builder-common';
-import { ToolResultType, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  ToolResultType,
+  ConversationRoundStepType,
+  createSubstitutionStep,
+} from '@kbn/agent-builder-common';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import { timelineFromRounds } from '../../../../test_utils/timeline';
-import { AgentActionType } from '../actions';
 import {
   collectSubstitutionMarks,
   createMarkedResultTransformer,
@@ -57,7 +60,7 @@ describe('isSubstitutionCandidate', () => {
 });
 
 describe('collectSubstitutionMarks', () => {
-  it('unions marks from timeline substitution steps and in-flight substitution actions', () => {
+  it('unions marks from timeline substitution steps and the current run substitution steps', () => {
     const timeline = timelineFromRounds([
       {
         id: 'a',
@@ -71,15 +74,14 @@ describe('collectSubstitutionMarks', () => {
         ],
       },
     ]);
-    const actions = [
-      {
-        type: AgentActionType.Substitution,
+    const steps = [
+      createSubstitutionStep({
         substituted_tool_call_ids: ['c3'],
         trigger: 'intra_round',
         reason: 'input_tokens_threshold',
-      } as any,
+      }),
     ];
-    expect([...collectSubstitutionMarks({ timeline, actions })].sort()).toEqual(['c1', 'c2', 'c3']);
+    expect([...collectSubstitutionMarks({ timeline, steps })].sort()).toEqual(['c1', 'c2', 'c3']);
   });
 });
 

@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { InferenceConnector } from '@kbn/inference-common';
+import type { ConversationRoundStep, ToolCallStep } from '@kbn/agent-builder-common';
+import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import { AgentActionType, contextLengthErrorAction } from '../actions';
-import type { StateType } from '../state';
+import { createToolResultStoreMock } from '../../../../test_utils/runner';
+import { timelineFromRounds } from '../../../../test_utils/timeline';
+import type { StateType, StateUpdate } from '../state';
+import { applyStepUpdates, type RunStepUpdate } from '../step_state';
+import type { CompactionRequest } from '../transient_state';
+import type { ProcessedTimelineEvent } from './context_timeline';
 import { compactContext } from './conversation_compactor';
 import { selectSubstitutionCandidates } from './filestore_substitution';
-import { createContextManagementNode, type ContextManagementDeps } from './context_management';
+import { createContextManagementNodes, type ContextManagementDeps } from './context_management';
 
 jest.mock('./conversation_compactor', () => ({ compactContext: jest.fn() }));
 jest.mock('./filestore_substitution', () => ({
@@ -23,247 +31,333 @@ jest.mock('./filestore_substitution', () => ({
 const compactContextMock = compactContext as jest.Mock;
 const selectCandidatesMock = selectSubstitutionCandidates as jest.Mock;
 
+const call = (id: string): ToolCallStep => ({
+  type: ConversationRoundStepType.toolCall,
+  tool_call_id: id,
+  tool_id: 'my.tool',
+  tool_call_group_id: `g-${id}`,
+  params: {},
+  results: [{ type: ToolResultType.other, tool_result_id: `r-${id}`, data: {} }],
+  progression: [],
+});
+
 const baseState = (over: Partial<StateType> = {}): StateType =>
   ({
     cycleLimit: 30,
     currentCycle: 0,
     errorCount: 0,
-    mainActions: [],
-    answerActions: [],
-    prompts: [],
+    steps: [],
+    pendingToolCallIds: [],
+    toolRenderState: {},
+    retryNotices: [],
     lastContextActionCycle: Number.NEGATIVE_INFINITY,
     contextRetryCount: 0,
     ...over,
   } as StateType);
 
-const deps = (over: Partial<ContextManagementDeps> = {}): ContextManagementDeps => ({
+const deps = (
+  over: Partial<ContextManagementDeps> = {},
+  timeline: ProcessedTimelineEvent[] = []
+): ContextManagementDeps => ({
   conversation: {
-    timeline: [],
+    timeline,
     nextInput: { message: 'q', attachments: [] },
     attachmentTypes: [],
-    attachmentStateManager: {} as any,
+    attachmentStateManager: {} as ContextManagementDeps['conversation']['attachmentStateManager'],
   },
-  cycleLimit: 30,
-  chatModel: {} as any,
-  connector: { connectorId: 'c', config: { contextWindowLength: 100_000 } } as any,
-  events: { emit: jest.fn() } as any,
-  resultStore: {} as any,
-  toolManager: { getToolIdMapping: () => new Map() } as any,
-  resultTransformer: async (tc) => tc.results,
-  logger: { info: jest.fn(), debug: jest.fn(), error: jest.fn(), warn: jest.fn() } as any,
+  chatModel: {} as InferenceChatModel,
+  connector: {
+    connectorId: 'c',
+    config: { contextWindowLength: 100_000 },
+  } as unknown as InferenceConnector,
+  cacheControl: { type: 'ephemeral', ttl: '5m' },
+  resultStore: createToolResultStoreMock(),
+  resultTransformer: async (toolCall) => toolCall.results,
+  logger: loggerMock.create(),
   ...over,
 });
 
-const compactionResult = (coverage: any) => ({
-  summary: { created_at: 't', token_count: 1, structured_data: {} },
-  coverage,
+const historyWithCall = () =>
+  timelineFromRounds([
+    { id: 'a', input: { message: 'earlier', attachments: [] }, steps: [call('old')] },
+  ]);
+
+const appendedSteps = (update: StateUpdate): ConversationRoundStep[] =>
+  applyStepUpdates([], (update.steps as RunStepUpdate[] | undefined) ?? []);
+
+const compactionResult = () => ({
+  summary: {
+    summarized_up_to: { tool_call_id: 'x1' },
+    summarized_round_count: 0,
+    created_at: 't',
+    token_count: 1,
+    structured_data: {},
+  },
   tokensBefore: 90_000,
   tokensAfter: 30_000,
   summarizedCycleCount: 4,
 });
 
-describe('contextManagement node', () => {
+describe('contextManagement', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     selectCandidatesMock.mockResolvedValue([]);
   });
 
-  describe('Mode C — proactive', () => {
-    it('compacts when inputTokens exceed 80% of the window and emits the compaction events', async () => {
-      compactContextMock.mockResolvedValue(compactionResult({ actionIndex: 3 }));
-      const d = deps();
-      const node = createContextManagementNode(d);
+  describe('proactive (cycle > 0)', () => {
+    it('requests a compaction when the last call exceeds 80% of the window', async () => {
+      const { contextManagement } = createContextManagementNodes(deps());
 
-      const update = await node(
+      const update = await contextManagement(
         baseState({ currentCycle: 7, lastCallUsage: { inputTokens: 85_000 } })
       );
 
-      expect(compactContextMock).toHaveBeenCalledWith(
-        expect.objectContaining({ tailCapTokens: 40_000 }),
-        expect.anything()
-      );
-      expect(update).toMatchObject({
-        compactionCoverage: { actionIndex: 3 },
-        lastContextActionCycle: 7,
+      expect(update).toEqual({
+        compactionRequest: { trigger: 'proactive', tailCapTokens: 40_000, tokensBefore: 85_000 },
       });
       expect(selectCandidatesMock).not.toHaveBeenCalled();
-      expect(d.events.emit).toHaveBeenCalledWith(
-        expect.objectContaining({ type: ChatEventType.compactionStarted })
-      );
-      expect(d.events.emit).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: ChatEventType.compactionCompleted,
-          data: {
-            token_count_before: 90_000,
-            token_count_after: 30_000,
-            summarized_cycle_count: 4,
-          },
-        })
-      );
     });
 
-    it('substitutes (not compacts) between 50% and 80%', async () => {
-      selectCandidatesMock.mockResolvedValue(['c1']);
-      const node = createContextManagementNode(deps());
+    it('substitutes the visible current-run calls between 50% and 80%', async () => {
+      selectCandidatesMock.mockResolvedValue(['x1']);
+      const { contextManagement } = createContextManagementNodes(deps({}, historyWithCall()));
 
-      const update = await node(
-        baseState({ currentCycle: 7, lastCallUsage: { inputTokens: 60_000 } })
+      const update = await contextManagement(
+        baseState({
+          currentCycle: 7,
+          lastCallUsage: { inputTokens: 60_000 },
+          steps: [call('x1'), call('x2')],
+          pendingToolCallIds: ['x2'],
+        })
       );
 
-      expect(compactContextMock).not.toHaveBeenCalled();
       expect(selectCandidatesMock).toHaveBeenCalledWith(
-        expect.objectContaining({ thresholdTokens: 1_000 })
+        expect.objectContaining({
+          thresholdTokens: 1_000,
+          toolCalls: [expect.objectContaining({ tool_call_id: 'x1' })],
+        })
       );
-      expect(update.mainActions?.[0]).toMatchObject({
-        type: AgentActionType.Substitution,
-        trigger: 'intra_round',
-        reason: 'input_tokens_threshold',
-        substituted_tool_call_ids: ['c1'],
-      });
+      expect(appendedSteps(update)).toEqual([
+        {
+          type: ConversationRoundStepType.substitution,
+          substituted_tool_call_ids: ['x1'],
+          trigger: 'intra_round',
+          reason: 'input_tokens_threshold',
+        },
+      ]);
       expect(update.lastContextActionCycle).toBe(7);
     });
 
     it('does nothing below the substitution threshold or without usage', async () => {
-      const node = createContextManagementNode(deps());
+      const { contextManagement } = createContextManagementNodes(deps());
 
       expect(
-        await node(baseState({ currentCycle: 7, lastCallUsage: { inputTokens: 10_000 } }))
+        await contextManagement(
+          baseState({ currentCycle: 7, lastCallUsage: { inputTokens: 10_000 } })
+        )
       ).toEqual({});
-      expect(await node(baseState({ currentCycle: 7 }))).toEqual({});
-      expect(compactContextMock).not.toHaveBeenCalled();
+      expect(await contextManagement(baseState({ currentCycle: 7 }))).toEqual({});
       expect(selectCandidatesMock).not.toHaveBeenCalled();
     });
 
     it('respects the cooldown after an action', async () => {
-      const node = createContextManagementNode(deps());
+      const { contextManagement } = createContextManagementNodes(deps());
+      const usage = { inputTokens: 95_000 };
 
       expect(
-        await node(
-          baseState({
-            currentCycle: 7,
-            lastContextActionCycle: 4,
-            lastCallUsage: { inputTokens: 95_000 },
-          })
+        await contextManagement(
+          baseState({ currentCycle: 7, lastContextActionCycle: 4, lastCallUsage: usage })
         )
       ).toEqual({});
-      expect(compactContextMock).not.toHaveBeenCalled();
-
-      compactContextMock.mockResolvedValue(compactionResult({ actionIndex: 1 }));
-      await node(
-        baseState({
-          currentCycle: 9,
-          lastContextActionCycle: 4,
-          lastCallUsage: { inputTokens: 95_000 },
-        })
-      );
-      expect(compactContextMock).toHaveBeenCalledTimes(1);
+      expect(
+        await contextManagement(
+          baseState({ currentCycle: 9, lastContextActionCycle: 4, lastCallUsage: usage })
+        )
+      ).toHaveProperty('compactionRequest');
     });
 
     it('caps the substitution threshold at 100k on very large windows', async () => {
-      const node = createContextManagementNode(
-        deps({ connector: { connectorId: 'c', config: { contextWindowLength: 1_000_000 } } as any })
-      );
-      selectCandidatesMock.mockResolvedValue(['c1']);
-
-      const update = await node(
-        baseState({ currentCycle: 7, lastCallUsage: { inputTokens: 150_000 } })
-      );
-
-      expect(update.mainActions?.[0]).toMatchObject({ type: AgentActionType.Substitution });
-    });
-  });
-
-  describe('Mode A — forced', () => {
-    const error = createAgentExecutionError('x', AgentExecutionErrorCode.contextLengthExceeded, {});
-
-    it('compacts with the reactive cap regardless of thresholds and cooldown', async () => {
-      compactContextMock.mockResolvedValue(compactionResult({ actionIndex: 1 }));
-      const node = createContextManagementNode(deps());
-
-      const update = await node(
-        baseState({
-          currentCycle: 3,
-          lastContextActionCycle: 2,
-          mainActions: [contextLengthErrorAction(error)],
+      selectCandidatesMock.mockResolvedValue(['x1']);
+      const { contextManagement } = createContextManagementNodes(
+        deps({
+          connector: {
+            connectorId: 'c',
+            config: { contextWindowLength: 1_000_000 },
+          } as unknown as InferenceConnector,
         })
       );
 
-      expect(compactContextMock).toHaveBeenCalledWith(
-        expect.objectContaining({ tailCapTokens: 20_000 }),
-        expect.anything()
+      const update = await contextManagement(
+        baseState({ currentCycle: 7, lastCallUsage: { inputTokens: 150_000 }, steps: [call('x1')] })
       );
-      expect(update).toMatchObject({
-        compactionCoverage: { actionIndex: 1 },
-        lastContextActionCycle: 3,
-      });
+
+      expect(appendedSteps(update)).toEqual([
+        expect.objectContaining({ substituted_tool_call_ids: ['x1'] }),
+      ]);
     });
+  });
 
-    it('throws a context-length error when nothing is left to compact', async () => {
-      compactContextMock.mockResolvedValue(undefined);
-      const node = createContextManagementNode(deps());
+  describe('forced', () => {
+    const error = createAgentExecutionError('x', AgentExecutionErrorCode.contextLengthExceeded, {});
 
-      await expect(
-        node(baseState({ mainActions: [contextLengthErrorAction(error)] }))
-      ).rejects.toMatchObject({
-        meta: { errCode: AgentExecutionErrorCode.contextLengthExceeded },
+    it('requests a compaction with the reactive cap regardless of thresholds and cooldown', async () => {
+      const { contextManagement } = createContextManagementNodes(deps());
+
+      const update = await contextManagement(
+        baseState({
+          currentCycle: 3,
+          lastContextActionCycle: 2,
+          lastCallUsage: { inputTokens: 1_000 },
+          researchOutcome: { type: 'context_length_error', error },
+        })
+      );
+
+      expect(update).toEqual({
+        compactionRequest: { trigger: 'forced', tailCapTokens: 20_000, tokensBefore: 1_000 },
       });
     });
   });
 
-  describe('Mode B — round start', () => {
-    it('compacts at cycle 0 from the previous round last-call usage', async () => {
-      compactContextMock.mockResolvedValue(compactionResult({ eventId: 'e' }));
-      const node = createContextManagementNode(
+  describe('round start (cycle 0)', () => {
+    it('requests a compaction from the previous round last-call usage', async () => {
+      const { contextManagement } = createContextManagementNodes(
         deps({ previousRound: { lastCallInputTokens: 90_000, connectorId: 'c' } })
       );
 
-      const update = await node(baseState());
-
-      expect(compactContextMock).toHaveBeenCalledWith(
-        expect.objectContaining({ tailCapTokens: 40_000 }),
-        expect.anything()
-      );
-      expect(update).toMatchObject({ compactionCoverage: { eventId: 'e' } });
+      expect(await contextManagement(baseState())).toEqual({
+        compactionRequest: { trigger: 'round_start', tailCapTokens: 40_000, tokensBefore: 90_000 },
+      });
       expect(selectCandidatesMock).not.toHaveBeenCalled();
     });
 
-    it('uses the cold threshold for round-start substitution when the cache is stale', async () => {
+    it('substitutes visible history calls with the cold threshold when the cache is stale', async () => {
       selectCandidatesMock.mockResolvedValue(['old']);
-      const node = createContextManagementNode(
-        deps({ previousRound: { terminatedAt: '2000-01-01T00:00:00.000Z', connectorId: 'c' } })
+      const { contextManagement } = createContextManagementNodes(
+        deps(
+          { previousRound: { terminatedAt: '2000-01-01T00:00:00.000Z', connectorId: 'c' } },
+          historyWithCall()
+        )
       );
 
-      const update = await node(baseState());
+      const update = await contextManagement(baseState());
 
       expect(selectCandidatesMock).toHaveBeenCalledWith(
-        expect.objectContaining({ thresholdTokens: 1_000 })
+        expect.objectContaining({
+          thresholdTokens: 1_000,
+          toolCalls: [expect.objectContaining({ tool_call_id: 'old' })],
+        })
       );
-      expect(update.mainActions?.[0]).toMatchObject({
-        trigger: 'round_start',
-        reason: 'cache_cold',
-      });
+      expect(appendedSteps(update)).toEqual([
+        expect.objectContaining({ trigger: 'round_start', reason: 'cache_cold' }),
+      ]);
     });
 
     it('uses the hot threshold when the previous round ended within the ttl', async () => {
       selectCandidatesMock.mockResolvedValue(['old']);
-      const node = createContextManagementNode(
-        deps({ previousRound: { terminatedAt: new Date().toISOString(), connectorId: 'c' } })
+      const { contextManagement } = createContextManagementNodes(
+        deps(
+          { previousRound: { terminatedAt: new Date().toISOString(), connectorId: 'c' } },
+          historyWithCall()
+        )
       );
 
-      const update = await node(baseState());
+      const update = await contextManagement(baseState());
 
       expect(selectCandidatesMock).toHaveBeenCalledWith(
         expect.objectContaining({ thresholdTokens: 10_000 })
       );
-      expect(update.mainActions?.[0]).toMatchObject({
-        trigger: 'round_start',
-        reason: 'cache_hot',
-      });
+      expect(appendedSteps(update)).toEqual([
+        expect.objectContaining({ trigger: 'round_start', reason: 'cache_hot' }),
+      ]);
+    });
+
+    it('skips history calls the summary already covers', async () => {
+      const { contextManagement } = createContextManagementNodes(deps({}, historyWithCall()));
+
+      await contextManagement(
+        baseState({
+          compactionSummary: {
+            summarized_up_to: { tool_call_id: 'old' },
+            summarized_round_count: 1,
+            created_at: 't',
+            token_count: 1,
+            structured_data: {} as never,
+          },
+        })
+      );
+
+      expect(selectCandidatesMock).toHaveBeenCalledWith(expect.objectContaining({ toolCalls: [] }));
     });
 
     it('returns no update when nothing qualifies for substitution', async () => {
-      const node = createContextManagementNode(deps());
-      expect(await node(baseState())).toEqual({});
+      const { contextManagement } = createContextManagementNodes(deps());
+      expect(await contextManagement(baseState())).toEqual({});
+    });
+  });
+});
+
+describe('compactContext node', () => {
+  const request = (over: Partial<CompactionRequest> = {}): CompactionRequest => ({
+    trigger: 'proactive',
+    tailCapTokens: 40_000,
+    tokensBefore: 85_000,
+    ...over,
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('runs the compactor and appends the compaction step and summary', async () => {
+    compactContextMock.mockResolvedValue(compactionResult());
+    const { compactContext: node } = createContextManagementNodes(deps());
+
+    const update = await node(baseState({ currentCycle: 7, compactionRequest: request() }));
+
+    expect(compactContextMock).toHaveBeenCalledWith(
+      expect.objectContaining({ tailCapTokens: 40_000 }),
+      expect.objectContaining({ budget: expect.any(Object) })
+    );
+    expect(appendedSteps(update)).toEqual([
+      {
+        type: ConversationRoundStepType.compaction,
+        summarized_cycle_count: 4,
+        token_count_before: 90_000,
+        token_count_after: 30_000,
+      },
+    ]);
+    expect(update).toMatchObject({
+      compactionSummary: compactionResult().summary,
+      compactionRequest: undefined,
+      lastContextActionCycle: 7,
+    });
+  });
+
+  it('clears the request and starts the cooldown when the compaction is skipped', async () => {
+    compactContextMock.mockResolvedValue(undefined);
+    const { compactContext: node } = createContextManagementNodes(deps());
+
+    expect(await node(baseState({ currentCycle: 7, compactionRequest: request() }))).toEqual({
+      compactionRequest: undefined,
+      lastContextActionCycle: 7,
+    });
+  });
+
+  it('throws a context-length error when a forced compaction has nothing to compact', async () => {
+    compactContextMock.mockResolvedValue(undefined);
+    const { compactContext: node } = createContextManagementNodes(deps());
+
+    await expect(
+      node(baseState({ compactionRequest: request({ trigger: 'forced', tailCapTokens: 20_000 }) }))
+    ).rejects.toMatchObject({
+      meta: { errCode: AgentExecutionErrorCode.contextLengthExceeded },
+    });
+  });
+
+  it('throws without a compaction request', async () => {
+    const { compactContext: node } = createContextManagementNodes(deps());
+    await expect(node(baseState())).rejects.toMatchObject({
+      meta: { errCode: AgentExecutionErrorCode.invalidState },
     });
   });
 });

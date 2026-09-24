@@ -6,13 +6,15 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
+import type {
+  ConversationRoundStep,
+  ToolCallWithResult,
+  ToolResult,
+} from '@kbn/agent-builder-common';
 import { ToolResultType, TimelineEventType, isSubstitutionStep } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import { getToolCallEntryAbsolutePath } from '../../runner/store/volumes/tool_results/utils';
-import type { ResearchAgentAction } from '../actions';
-import { isSubstitutionAction } from '../actions';
 import type { ProcessedTimelineEvent } from './context_timeline';
 import type { ToolCallResultTransformer } from './tool_summarization';
 
@@ -26,29 +28,25 @@ export const isSubstitutionCandidate = ({
 }): boolean => result.type !== ToolResultType.fileReference && !isExcludedFromFilestore(toolId);
 
 /**
- * Every tool call marked as substituted, from persisted `SubstitutionStep`s and in-flight
- * `SubstitutionAction`s. Collected before rendering because a round-start step marks tool calls
- * of earlier rounds.
+ * Every tool call marked as substituted, by the `SubstitutionStep`s of previous rounds and of the
+ * current run. Collected before rendering because a round-start step marks tool calls of earlier
+ * rounds.
  */
 export const collectSubstitutionMarks = ({
   timeline,
-  actions,
+  steps,
 }: {
   timeline: ProcessedTimelineEvent[];
-  actions: ResearchAgentAction[];
+  steps: ConversationRoundStep[];
 }): Set<string> => {
-  const marks = new Set<string>();
-  for (const event of timeline) {
-    if (event.type === TimelineEventType.executionStep && isSubstitutionStep(event.data.step)) {
-      event.data.step.substituted_tool_call_ids.forEach((id) => marks.add(id));
-    }
-  }
-  for (const action of actions) {
-    if (isSubstitutionAction(action)) {
-      action.substituted_tool_call_ids.forEach((id) => marks.add(id));
-    }
-  }
-  return marks;
+  const timelineSteps = timeline.flatMap((event) =>
+    event.type === TimelineEventType.executionStep ? [event.data.step] : []
+  );
+  return new Set(
+    [...timelineSteps, ...steps]
+      .filter(isSubstitutionStep)
+      .flatMap((step) => step.substituted_tool_call_ids)
+  );
 };
 
 const toFileReference = (result: ToolResult, path: string): ToolResult => ({

@@ -19,6 +19,7 @@ import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/e
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
+  CompactionSummary,
   ConversationInternalState,
   ConversationRound,
   ConversationRoundAuthor,
@@ -414,6 +415,8 @@ export interface RoundInterruptedEventData {
   workspace_id?: string;
   /** True when the interrupted run was a HITL resume of a paused round. */
   resumed?: boolean;
+  /** Compaction summary at interruption time, when the run compacted its context. */
+  compaction_summary?: CompactionSummary;
 }
 
 export type RoundInterruptedEvent = ChatEventBase<

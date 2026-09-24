@@ -22,7 +22,7 @@ export const SubstitutionStep: React.FC<SubstitutionStepProps> = ({ step }) => {
         <EuiText color="inherit">
           <p role="status">
             <FormattedMessage
-              id="xpack.agentBuilder.roundEvents.steps.substitution.applied"
+              id="xpack.agentBuilder.eventSteps.steps.substitution.applied"
               defaultMessage="Moved {count, plural, one {# tool result} other {# tool results}} to the filesystem to free context"
               values={{ count: step.substituted_tool_call_ids.length }}
             />
