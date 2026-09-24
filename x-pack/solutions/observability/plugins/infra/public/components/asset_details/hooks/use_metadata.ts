@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { InventoryItemType, InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  InventoryItemType,
+  InventoryTsvbType,
+  DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
@@ -21,6 +25,9 @@ interface UseMetadataProps {
     from: number;
     to: number;
   };
+  schema?: DataSchemaFormat;
+  /** When false, wait for schema detection before posting metadata. */
+  enabled?: boolean;
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
 }
 export function useMetadata({
@@ -29,6 +36,8 @@ export function useMetadata({
   sourceId,
   timeRange,
   requiredTsvb = [],
+  schema,
+  enabled = true,
   request$,
 }: UseMetadataProps) {
   const { data, status, error, refetch } = useFetcher(
@@ -40,20 +49,24 @@ export function useMetadata({
           nodeType: entityType,
           sourceId,
           timeRange,
+          ...(schema === 'semconv' ? { schema } : {}),
         }),
       });
       return decodeOrThrow(InfraMetadataRT)(response);
     },
-    [entityId, entityType, sourceId, timeRange],
+    [entityId, entityType, schema, sourceId, timeRange],
     {
       requestObservable$: request$,
+      autoFetch: enabled,
     }
   );
 
   return {
     name: (data && data.name) || '',
     filteredRequiredMetrics:
-      data && requiredTsvb.length > 0 ? getFilteredMetrics(requiredTsvb, data.features) : [],
+      data && requiredTsvb.length > 0
+        ? getFilteredMetrics(requiredTsvb, data.features, schema)
+        : [],
     error: (error && error.message) || null,
     loading: isPending(status),
     metadata: data,

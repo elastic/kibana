@@ -20,6 +20,7 @@ import type { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { MetricsDetailAppHeader } from '../header/metrics_detail_app_header';
+import { useDetailSchema } from './lib/detail_schema_context';
 
 export const MetricDetailPage = () => {
   const {
@@ -39,6 +40,7 @@ export const MetricDetailPage = () => {
     setAutoReload,
     triggerRefresh,
   } = useMetricsTimeContext();
+  const { schema, pending: schemaPending } = useDetailSchema();
   const {
     name,
     filteredRequiredMetrics,
@@ -51,6 +53,8 @@ export const MetricDetailPage = () => {
     requiredTsvb: inventoryModel.metrics.requiredTsvb,
     sourceId,
     timeRange: parsedTimeRange,
+    schema,
+    enabled: !schemaPending,
   });
 
   const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions();
@@ -81,7 +85,7 @@ export const MetricDetailPage = () => {
 
   const header = <MetricsDetailAppHeader title={title} />;
 
-  if (metadataLoading && !filteredRequiredMetrics.length) {
+  if ((metadataLoading || schemaPending) && !filteredRequiredMetrics.length) {
     return (
       <InfraPageTemplate header={header} hasDataOverride={true}>
         <InfraLoadingPanel
@@ -106,6 +110,7 @@ export const MetricDetailPage = () => {
           nodeType={nodeType}
           nodeId={nodeId}
           cloudId={cloudId}
+          schema={schema}
           metadataLoading={metadataLoading}
           isAutoReloading={isAutoReloading}
           refreshInterval={refreshInterval}

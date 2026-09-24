@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryTsvbType, DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { metrics } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraMetadataFeature } from '../../../../../common/http_api/metadata_api';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
 export const getFilteredMetrics = (
   requiredTsvb: InventoryTsvbType[],
-  metadata: Array<InfraMetadataFeature | null | undefined>
+  metadata: Array<InfraMetadataFeature | null | undefined>,
+  schema?: DataSchemaFormat
 ) => {
   const metricMetadata = metadata
     .filter((data) => data && data.source === 'metrics')
@@ -23,7 +24,7 @@ export const getFilteredMetrics = (
     // We just need to get a dummy version of the model so we can filter
     // using the `requires` attribute.
     const metricModel = metricModelCreator
-      ? metricModelCreator(TIMESTAMP_FIELD, 'test', '>=1m')
+      ? metricModelCreator(TIMESTAMP_FIELD, 'test', '>=1m', { schema })
       : { requires: [''] }; // when tsvb is not defined (host & container)
     return metricMetadata.some((m) => m && metricModel?.requires?.includes(m));
   });
