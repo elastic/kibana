@@ -759,6 +759,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         }
       }
 
+      // Only a role-only payload is rebuilt from the connector read under the lock. Anything else
+      // in this update was prepared from the opening read and must not overwrite a newer edit.
+      const changesOnlyRoleArn =
+        isRoleOnlyPayload &&
+        Object.keys(updateAttributes).every((key) => key === 'updated_at' || key === 'vars');
+
       const updatedSavedObject = roleArnChanged
         ? await pRetry(
             () =>
@@ -772,7 +778,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
                   // Another request may have rotated `external_id` or shared the connector into
                   // another space since the opening read; the write and the fan-out follow the
                   // connector as it is now.
-                  connectorVersion = locked.version ?? connectorVersion;
+                  if (locked.version !== existingCloudConnector.version) {
+                    if (!changesOnlyRoleArn) {
+                      throw SavedObjectsErrorHelpers.createConflictError(
+                        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                        cloudConnectorId
+                      );
+                    }
+                    connectorVersion = locked.version ?? connectorVersion;
+                  }
                   if (incomingVars) {
                     updateAttributes.vars = mergeIncomingVars(locked.attributes.vars);
                   }

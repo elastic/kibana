@@ -1638,6 +1638,67 @@ describe('CloudConnectorService', () => {
         );
       });
 
+      describe('when the connector changed while waiting for the lock', () => {
+        const connectorAt = (version: string, name: string) =>
+          ({
+            id: connectorId,
+            version,
+            attributes: {
+              name,
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+
+        beforeEach(() => {
+          mockSoClient.get
+            .mockResolvedValueOnce(connectorAt('Wz-opening', 'Test'))
+            .mockResolvedValueOnce(connectorAt('Wz-locked', 'Renamed by someone else'));
+          mockSoClient.find.mockResolvedValue({
+            saved_objects: [],
+            total: 0,
+            page: 1,
+            per_page: 10,
+          });
+        });
+
+        it.each([
+          [
+            'the name also changes',
+            {
+              name: 'My rename',
+              vars: { role_arn: { type: 'text' as const, value: newArn } },
+            },
+          ],
+          [
+            'the other vars are sent too',
+            {
+              vars: {
+                role_arn: { type: 'text' as const, value: newArn },
+                external_id: {
+                  type: 'password' as const,
+                  value: { id: 'EXTERNALID1234567890', isSecretRef: true },
+                },
+              },
+            },
+          ],
+        ])('returns a conflict before fanning out when %s', async (_label, update) => {
+          const caught = await service
+            .update(mockSoClient, connectorId, update, { esClient: mockEsClient })
+            .then(
+              () => new Error('expected a conflict'),
+              (err: Error) => err
+            );
+
+          expect(SavedObjectsErrorHelpers.isConflictError(caught)).toBe(true);
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+      });
+
       it('passes the connector OCC version on the post-fan-out write', async () => {
         await service.update(
           mockSoClient,
