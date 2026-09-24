@@ -37,7 +37,8 @@ const generateNonOverlappingGapEvents = (
   ruleId: string,
   ruleName: string,
   fromHours: number,
-  gapCount: number
+  gapCount: number,
+  spaceId?: string
 ) => {
   const totalMinutes = fromHours * 60;
   // Calculate maximum duration for each gap including spacing
@@ -119,9 +120,11 @@ const generateNonOverlappingGapEvents = (
             type: 'alert',
             id: ruleId,
             type_id: 'siem.queryRule',
+            // The event log omits `namespace` for the default space.
+            ...(spaceId ? { namespace: spaceId } : {}),
           },
         ],
-        space_ids: ['default'],
+        space_ids: [spaceId ?? 'default'],
         server_uuid: '5d29f261-1b85-4d90-9088-53e0e0e87c7c',
         version: '9.1.0',
       },
@@ -233,7 +236,8 @@ export const generateMalformedGapEventsForRule = async (
 export const generateGapsForRule = async (
   esClient: Client,
   rule: { id: string; name: string },
-  gapsCount: number
+  gapsCount: number,
+  spaceId?: string
 ) => {
   let gapEvents: GapEvent[] = [];
   if (gapsCount > 0) {
@@ -242,7 +246,8 @@ export const generateGapsForRule = async (
       rule.id,
       rule.name || 'Unknown Rule',
       24 * 90,
-      gapsCount
+      gapsCount,
+      spaceId
     );
   }
 
