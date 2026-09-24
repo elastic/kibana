@@ -88,6 +88,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
   missing_service_environment:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/missing_service_environment.ts',
   mobile: 'x-pack/solutions/observability/plugins/apm/test/scenarios/mobile.ts',
+  otel_exception_logs_missing_fields:
+    'x-pack/solutions/observability/plugins/apm/test/scenarios/otel_exception_logs_missing_fields.ts',
   otel_exit_span_missing_destination:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/otel_exit_span_missing_destination.ts',
   otel_logs_and_metrics_only:

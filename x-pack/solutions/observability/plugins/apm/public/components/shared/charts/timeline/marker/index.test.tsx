@@ -41,6 +41,7 @@ describe('Marker', () => {
       verticalLine: true,
       error: {
         id: '123',
+        source: 'apm',
         trace: { id: '123' },
         transaction: { id: '456' },
         error: { grouping_key: '123', id: '123test' },
