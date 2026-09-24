@@ -104,11 +104,7 @@ spaceTest.describe(
           scoutSpace.id
         );
         const [createdRule] = createdRules;
-        if (!createdRule) {
-          throw new Error(
-            `Could not find the rule created by the Discover alert user: ${ruleName}`
-          );
-        }
+        expect(createdRule).toBeDefined();
         ruleId = createdRule.id;
         await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
         const rulesList = page.testSubj.locator('rulesList');

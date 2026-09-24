@@ -369,11 +369,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
           scoutSpace.id
         );
         const [createdRule] = createdRules;
-        if (!createdRule) {
-          throw new Error(
-            `Could not find the rule created through the Discover flyout: ${alertName}`
-          );
-        }
+        expect(createdRule).toBeDefined();
         createdRuleIds.push(createdRule.id);
         await getGeneratedContextLink(esClient, outputIndex, createdRule.id);
       });
