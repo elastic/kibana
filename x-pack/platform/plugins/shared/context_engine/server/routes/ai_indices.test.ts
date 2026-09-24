@@ -595,6 +595,23 @@ describe('ai indices routes', () => {
       });
     });
 
+    it('allows preserving enabled memory while updating another field with the feature flag disabled', async () => {
+      memoryFlagEnabled = false;
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, memory_enabled: true });
+      aiIndexService.put.mockResolvedValue('updated');
+      const body = {
+        ...putRequest.body,
+        description: 'Updated description',
+        memory_enabled: true,
+      };
+
+      await callRoute('PUT', aiIndexByIdPath, { ...putRequest, body });
+
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
+      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', defaultSpaceId, body);
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
+    });
+
     it('returns 400 when the dest is invalid', async () => {
       aiIndexService.put.mockRejectedValue(
         new InvalidAiIndexDestError(

@@ -433,6 +433,21 @@ const queryAiIndicesBodySchema = schema.object({
 
 class MemoryFeatureDisabledError extends Error {}
 
+const isMemoryEnabledOnExistingAiIndex = async (
+  aiIndexService: AiIndexService,
+  aiIndexId: string,
+  spaceId: string
+): Promise<boolean> => {
+  try {
+    return (await aiIndexService.get(aiIndexId, spaceId)).memory_enabled;
+  } catch (error) {
+    if (error instanceof AiIndexNotFoundError) {
+      return false;
+    }
+    throw error;
+  }
+};
+
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
   if (
     error instanceof MemoryFeatureDisabledError ||
@@ -623,7 +638,13 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { aiIndexId } = request.params;
         try {
-          if (request.body.memory_enabled === true && !(await isMemoryEnabled(request))) {
+          const spaceId = resolveSpaceId(await getSpaces(), request);
+          const aiIndexService = getAiIndexService();
+          if (
+            request.body.memory_enabled === true &&
+            !(await isMemoryEnabled(request)) &&
+            !(await isMemoryEnabledOnExistingAiIndex(aiIndexService, aiIndexId, spaceId))
+          ) {
             throw new MemoryFeatureDisabledError(
               'Context Engine memory is disabled. Enable the global memory feature flag before setting memory_enabled to true.'
             );
@@ -640,8 +661,7 @@ export const registerAiIndexRoutes = ({
             agents: (await getAgentBuilder())?.agents,
             request,
           });
-          const spaceId = resolveSpaceId(await getSpaces(), request);
-          const status = await getAiIndexService().put(aiIndexId, spaceId, request.body);
+          const status = await aiIndexService.put(aiIndexId, spaceId, request.body);
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
