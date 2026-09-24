@@ -12,7 +12,6 @@ import type {
   UpdateTransformsProjectScopeRequestSchema,
   UpdateTransformsProjectScopeResponseSchema,
 } from '../../../server/routes/api_schemas/update_transforms_project_scope';
-import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
@@ -29,7 +28,7 @@ export const useUpdateTransformsProjectScope = () => {
   const mutation = useMutation({
     mutationFn: (reqBody: UpdateTransformsProjectScopeRequestSchema) =>
       http.post<UpdateTransformsProjectScopeResponseSchema>(
-        addInternalBasePath('update_transforms_project_scope'),
+        '/internal/transform/update_transforms_project_scope',
         {
           body: JSON.stringify(reqBody),
           version: '1',
