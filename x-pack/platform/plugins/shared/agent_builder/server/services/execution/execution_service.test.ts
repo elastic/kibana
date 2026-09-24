@@ -16,6 +16,7 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   ChatEventType,
   ChatTriggerMode,
+  ConversationOriginType,
   ConversationRoundStatus,
   ExecutionStatus,
   createRequestAbortedError,
@@ -1199,6 +1200,30 @@ describe('AgentExecutionService', () => {
 
       expect(isBadRequestError(error)).toBe(true);
       expect(error.message).toContain('input or attachments');
+      expect(conversationClient.exists).not.toHaveBeenCalled();
+      expect(conversationClient.get).not.toHaveBeenCalled();
+    });
+
+    it('attributes a relayed message to its origin author, as a run would', async () => {
+      const author = { id: 'U123', username: 'slack-bob' };
+      conversationClient.getAuthor.mockImplementationOnce((originAuthor) => originAuthor);
+
+      await append({
+        origin: {
+          type: ConversationOriginType.Slack,
+          external_conversation_id: 'T1/C1/1700000000.000',
+          author,
+        },
+      });
+
+      expect(conversationClient.getAuthor).toHaveBeenCalledWith(author);
+      const [{ events }] = conversationClient.appendEvents.mock.calls[0];
+      expect(events[0].actor).toMatchObject({
+        type: 'external',
+        id: 'U123',
+        username: 'slack-bob',
+        origin: { type: ConversationOriginType.Slack },
+      });
     });
   });
 });

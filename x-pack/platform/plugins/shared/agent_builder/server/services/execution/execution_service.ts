@@ -37,6 +37,7 @@ import type {
   AbortExecutionResult,
   AgentExecutionService,
   AgentExecution,
+  ConversationExecutionParams,
   ExecuteAgentParams,
   ExecuteAgentResult,
   MaybeExecuteAgentResult,
@@ -59,10 +60,12 @@ import { serializeExecutionError } from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
+import type { ConversationClient } from '../conversation';
 import {
   getConversation,
   isPendingResumeConversation,
   persistUserMessage,
+  type ConversationWithOperation,
 } from './utils/conversations';
 import {
   createConversationCreatedEvent,
@@ -121,30 +124,20 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const conversationClient = await this.deps.conversationService.getScopedClient({ request });
     const owner = conversationClient.getUser();
 
-    const conversationParams =
-      args.mode === AgentExecutionMode.conversation
-        ? await this.validateAttachments(args.params, request)
-        : undefined;
-    const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
-
-    const receivedAt = new Date();
-
     // Resolving up front keeps conversation creation and the message write on the request node,
     // before a Task Manager run is scheduled.
-    const conversation = conversationParams
-      ? await getConversation({
-          agentId,
-          conversationId: conversationParams.conversationId,
-          autoCreateConversationWithId: conversationParams.autoCreateConversationWithId,
-          conversationClient,
-          accessControl: conversationParams.accessControl,
-          readOnly: conversationParams.readOnly,
-          origin: conversationParams.origin
-            ? { external_conversation_id: conversationParams.origin.external_conversation_id }
-            : undefined,
-          subagentCreation: conversationParams.subagentCreation,
-        })
-      : undefined;
+    const resolvedConversation =
+      args.mode === AgentExecutionMode.conversation
+        ? await this.resolveConversationRequest({
+            params: args.params,
+            request,
+            conversationClient,
+          })
+        : undefined;
+    const conversationParams = resolvedConversation?.validatedParams;
+    const conversation = resolvedConversation?.conversation;
+    const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
+    const receivedAt = resolvedConversation?.receivedAt ?? new Date();
 
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
@@ -214,16 +207,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       !isPendingResumeConversation(conversation)
     ) {
       try {
-        await persistUserMessage({
+        await this.writeUserMessage({
           conversation,
           conversationClient,
+          params: conversationParams,
+          request,
           receivedAt,
           eventId: roundUserMessageEventId(roundId),
-          input: conversationParams.nextInput,
-          author: conversationClient.getAuthor(conversationParams.origin?.author),
-          ...(conversationParams.origin
-            ? { origin: { type: conversationParams.origin.type } }
-            : {}),
+          mergeAttachments: false,
         });
       } catch (err) {
         try {
@@ -305,66 +296,35 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw createInternalError('A user message without execution needs a conversation request');
     }
 
-    const { request } = args;
-    const validatedParams = await this.validateAttachments(args.params, request);
-    const receivedAt = new Date();
+    const { request, params } = args;
 
-    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
-    const conversation = await getConversation({
-      agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      conversationId: validatedParams.conversationId,
-      autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
-      conversationClient,
-      accessControl: validatedParams.accessControl,
-      readOnly: validatedParams.readOnly,
-      origin: validatedParams.origin
-        ? { external_conversation_id: validatedParams.origin.external_conversation_id }
-        : undefined,
-      subagentCreation: validatedParams.subagentCreation,
-    });
-
-    if (validatedParams.storeConversation === false) {
+    if (params.storeConversation === false) {
       throw createInternalError('A user message without execution has to be stored');
     }
 
-    const created = conversation.operation === 'CREATE';
-
-    const message = validatedParams.nextInput.message?.trim() ?? '';
-    const attachments = validatedParams.nextInput.attachments ?? [];
-
-    if (!message && attachments.length === 0) {
+    if (!params.nextInput.message?.trim() && !params.nextInput.attachments?.length) {
       throw createBadRequestError('User message requests require input or attachments');
     }
 
-    // With no run to merge them later, the attachments become conversation-level versions here.
-    const snapshot = conversation.attachments ?? [];
-    const stateManager = this.deps.attachmentsService.createStateManager(snapshot);
-
-    await this.deps.attachmentsService.mergeAttachmentInputs({
-      stateManager,
-      inputs: attachments,
+    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
+    const { validatedParams, conversation, receivedAt } = await this.resolveConversationRequest({
+      params,
       request,
-      actor: ATTACHMENT_REF_ACTOR.user,
+      conversationClient,
     });
 
-    const user = conversationClient.getUser();
-    const author = conversationClient.getAuthor();
+    const created = conversation.operation === 'CREATE';
 
-    await persistUserMessage({
+    await this.writeUserMessage({
       conversation,
       conversationClient,
+      params: validatedParams,
+      request,
       receivedAt,
       // A uuid, so no round write can claim this message as its own.
       eventId: uuidv4(),
-      input: { message, attachment_refs: stateManager.getAccessedRefs() },
-      author,
-      user,
-      additionalEvents: attachmentChangesToEvents(stateManager.drainChanges(), {
-        source: 'chat_input',
-        actor: userMessageActor({ ...conversation, user }, { author }),
-        created_at: receivedAt.toISOString(),
-      }),
-      attachments: { snapshot, produced: stateManager.getAll() },
+      // With no run to merge them later, the attachments become conversation-level versions here.
+      mergeAttachments: true,
     });
 
     // The conversation events a run would emit, so a caller reads its id the one way whether or
@@ -675,6 +635,95 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     return executionClient.find({
       ...options,
       spaceId: options?.spaceId || defaultSpaceId,
+    });
+  }
+
+  private async resolveConversationRequest({
+    params,
+    request,
+    conversationClient,
+  }: {
+    params: ConversationExecutionParams;
+    request: KibanaRequest;
+    conversationClient: ConversationClient;
+  }): Promise<{
+    validatedParams: ConversationExecutionParams;
+    conversation: ConversationWithOperation;
+    receivedAt: Date;
+  }> {
+    const validatedParams = await this.validateAttachments(params, request);
+    const receivedAt = new Date();
+
+    const conversation = await getConversation({
+      agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
+      conversationId: validatedParams.conversationId,
+      autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
+      conversationClient,
+      accessControl: validatedParams.accessControl,
+      readOnly: validatedParams.readOnly,
+      origin: validatedParams.origin
+        ? { external_conversation_id: validatedParams.origin.external_conversation_id }
+        : undefined,
+      subagentCreation: validatedParams.subagentCreation,
+    });
+
+    return { validatedParams, conversation, receivedAt };
+  }
+
+  private async writeUserMessage({
+    conversation,
+    conversationClient,
+    params,
+    request,
+    receivedAt,
+    eventId,
+    mergeAttachments,
+  }: {
+    conversation: ConversationWithOperation;
+    conversationClient: ConversationClient;
+    params: ConversationExecutionParams;
+    request: KibanaRequest;
+    receivedAt: Date;
+    eventId: string;
+    mergeAttachments: boolean;
+  }): Promise<string> {
+    const { nextInput, origin: requestOrigin } = params;
+    const author = conversationClient.getAuthor(requestOrigin?.author);
+    const origin = requestOrigin ? { type: requestOrigin.type } : undefined;
+    const user = conversationClient.getUser();
+    const base = {
+      conversation,
+      conversationClient,
+      receivedAt,
+      eventId,
+      author,
+      user,
+      ...(origin ? { origin } : {}),
+    };
+
+    if (!mergeAttachments) {
+      return persistUserMessage({ ...base, input: nextInput });
+    }
+
+    const snapshot = conversation.attachments ?? [];
+    const stateManager = this.deps.attachmentsService.createStateManager(snapshot);
+
+    await this.deps.attachmentsService.mergeAttachmentInputs({
+      stateManager,
+      inputs: nextInput.attachments ?? [],
+      request,
+      actor: ATTACHMENT_REF_ACTOR.user,
+    });
+
+    return persistUserMessage({
+      ...base,
+      input: { message: nextInput.message, attachment_refs: stateManager.getAccessedRefs() },
+      additionalEvents: attachmentChangesToEvents(stateManager.drainChanges(), {
+        source: 'chat_input',
+        actor: userMessageActor({ ...conversation, user }, { author, origin }),
+        created_at: receivedAt.toISOString(),
+      }),
+      attachments: { snapshot, produced: stateManager.getAll() },
     });
   }
 
