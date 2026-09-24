@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatasetMappingFieldType } from '../../../common/dataset_types';
+import { DatetimeFormatComboBox } from '../datetime_format_combo_box';
 
 export interface FieldMappingFormValue<TType extends string = string> {
   type: '' | TType;
@@ -218,12 +219,20 @@ export function FieldMappingForm({
                 error={errors?.format}
                 fullWidth
               >
-                <EuiFieldText
-                  isInvalid={Boolean(errors?.format)}
-                  fullWidth
+                <DatetimeFormatComboBox
                   value={value.format}
-                  onChange={(e) => onChange({ format: e.target.value })}
+                  onChange={(next) => onChange({ format: next })}
+                  onBlur={() => {}}
+                  placeholder={i18n.translate(
+                    'xpack.dataFederation.mappingEditor.formatPlaceholder',
+                    {
+                      defaultMessage: 'Select or enter a format',
+                    }
+                  )}
                   data-test-subj="dataFederationMappingEditorFieldFormat"
+                  aria-label={i18n.translate('xpack.dataFederation.mappingEditor.formatAriaLabel', {
+                    defaultMessage: 'Select or enter a format',
+                  })}
                 />
               </EuiFormRow>
             </EuiFlexItem>
