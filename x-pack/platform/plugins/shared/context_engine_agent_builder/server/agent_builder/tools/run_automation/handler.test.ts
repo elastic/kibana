@@ -15,8 +15,16 @@ jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   executeWorkflow: jest.fn(),
 }));
 
+jest.mock('../../assert_context_engine_write_access', () => ({
+  assertContextEngineWriteAccess: jest.fn().mockResolvedValue(undefined),
+}));
+
 const { hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege, executeWorkflow } =
   jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+
+const { assertContextEngineWriteAccess } = jest.requireMock(
+  '../../assert_context_engine_write_access'
+);
 
 describe('runAutomationHandler', () => {
   const request = httpServerMock.createKibanaRequest();
@@ -49,6 +57,17 @@ describe('runAutomationHandler', () => {
     jest.clearAllMocks();
     hasWorkflowExecutePrivilege.mockResolvedValue(true);
     hasWorkflowUpdatePrivilege.mockResolvedValue(true);
+    assertContextEngineWriteAccess.mockResolvedValue(undefined);
+  });
+
+  it('throws when the CE write access check fails', async () => {
+    assertContextEngineWriteAccess.mockRejectedValue(
+      new Error('Insufficient privileges to update Context Engine AI indices.')
+    );
+
+    await expect(runAutomationHandler(buildDeps())).rejects.toThrow(
+      'Insufficient privileges to update Context Engine AI indices.'
+    );
   });
 
   it('returns started=true with executionId and statusCheckHint when run succeeds', async () => {

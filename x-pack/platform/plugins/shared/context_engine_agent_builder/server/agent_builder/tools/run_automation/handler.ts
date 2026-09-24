@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { runSavedAutomation, type RunAutomationResult } from '../save_automation/handler';
+import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
 export type { RunAutomationResult };
 
@@ -43,6 +44,8 @@ export const runAutomationHandler = async ({
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
 }): Promise<RunAutomationHandlerResult> => {
+  await assertContextEngineWriteAccess({ request, spaceId, getCoreStart, getSecurityStart });
+
   const workflowsManagement = getWorkflowsManagement();
 
   const runResult = await runSavedAutomation({
