@@ -97,6 +97,9 @@ async function unsnoozeInstanceWithOCC(
     return;
   }
 
+  const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
+
   // Only the rule saved object is updated here. The `kibana.alert.snoozed` field
   // in alert-as-data documents is eventually consistent and will reflect the
   // unsnooze only after the next rule execution.
@@ -106,7 +109,8 @@ async function unsnoozeInstanceWithOCC(
     id: ruleId,
     updateRuleAttributes: updateMeta(context, {
       snoozedInstances,
-      updatedBy: await context.getUserName(),
+      updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: new Date().toISOString(),
     }),
   });

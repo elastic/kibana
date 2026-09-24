@@ -23,6 +23,7 @@ import { ApiKeyType } from '../../task_runner/types';
 export const API_KEY_ATTRIBUTES_TO_STRIP = [
   'apiKey',
   'apiKeyOwner',
+  'apiKeyOwnerProfileUid',
   'apiKeyCreatedByUser',
   'uiamApiKey',
   'uiamApiKeyExternal',
@@ -31,6 +32,7 @@ export const API_KEY_ATTRIBUTES_TO_STRIP = [
 interface ApiKeyRuleProperties {
   apiKey: string | null;
   apiKeyOwner: string | null;
+  apiKeyOwnerProfileUid: string | null;
   apiKeyCreatedByUser: boolean | null;
   uiamApiKey?: string | null;
   uiamApiKeyExternal?: boolean | null;
@@ -43,11 +45,13 @@ const encodeApiKey = (id?: string, key?: string): string | null => {
 const getApiKeyRuleProperties = (
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
-  createdByUser: boolean
+  createdByUser: boolean,
+  profileUid: string | null
 ): ApiKeyRuleProperties => {
   if (!apiKey || !apiKey.apiKeysEnabled) {
     return {
       apiKeyOwner: null,
+      apiKeyOwnerProfileUid: null,
       apiKey: null,
       apiKeyCreatedByUser: null,
     };
@@ -73,6 +77,7 @@ const getApiKeyRuleProperties = (
 
   return {
     apiKeyOwner: username,
+    apiKeyOwnerProfileUid: profileUid,
     apiKey: encodedApiKey,
     apiKeyCreatedByUser: createdByUser,
     ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
@@ -92,23 +97,35 @@ const getApiKeyRuleProperties = (
 export function apiKeyAsAlertAttributes(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
-  createdByUser: boolean
+  createdByUser: boolean,
+  profileUid: string | null
 ): Pick<
   RawRule,
-  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+  | 'apiKey'
+  | 'apiKeyOwner'
+  | 'apiKeyOwnerProfileUid'
+  | 'apiKeyCreatedByUser'
+  | 'uiamApiKey'
+  | 'uiamApiKeyExternal'
 > {
-  return getApiKeyRuleProperties(apiKey, username, createdByUser);
+  return getApiKeyRuleProperties(apiKey, username, createdByUser, profileUid);
 }
 
 export function apiKeyAsRuleDomainProperties(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
-  createdByUser: boolean
+  createdByUser: boolean,
+  profileUid: string | null
 ): Pick<
   RuleDomain,
-  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+  | 'apiKey'
+  | 'apiKeyOwner'
+  | 'apiKeyOwnerProfileUid'
+  | 'apiKeyCreatedByUser'
+  | 'uiamApiKey'
+  | 'uiamApiKeyExternal'
 > {
-  return getApiKeyRuleProperties(apiKey, username, createdByUser);
+  return getApiKeyRuleProperties(apiKey, username, createdByUser, profileUid);
 }
 
 /**

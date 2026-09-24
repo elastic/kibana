@@ -43,6 +43,15 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.scheduledTaskId !== undefined ? { scheduledTaskId: rule.scheduledTaskId } : {}),
     createdBy: rule.createdBy,
     updatedBy: rule.updatedBy,
+    ...(rule.createdByProfileUid !== undefined
+      ? { createdByProfileUid: rule.createdByProfileUid }
+      : {}),
+    ...(rule.updatedByProfileUid !== undefined
+      ? { updatedByProfileUid: rule.updatedByProfileUid }
+      : {}),
+    ...(rule.apiKeyOwnerProfileUid !== undefined
+      ? { apiKeyOwnerProfileUid: rule.apiKeyOwnerProfileUid }
+      : {}),
     createdAt: rule.createdAt.toISOString(),
     updatedAt: rule.updatedAt.toISOString(),
     apiKey: rule.apiKey,

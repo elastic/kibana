@@ -144,6 +144,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     await bulkMigrateLegacyActions({ context, rules: [alert] });
 
     const username = await context.getUserName();
+    const profileUid = await context.getProfileUid();
     const now = new Date();
     const nowIso = now.toISOString();
 
@@ -154,6 +155,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
           id: attributes.alertTypeId,
           ruleName: attributes.name,
           username,
+          profileUid,
           shouldUpdateApiKey: true,
           apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
         })
@@ -177,6 +179,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
       updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: nowIso,
       lastEnabledAt: nowIso,
       executionStatus: {

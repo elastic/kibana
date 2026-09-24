@@ -371,6 +371,7 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
                 ],
               },
               revision: 1,
+              updatedByProfileUid: null,
             }),
           }),
         ],
@@ -691,6 +692,71 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
               params: expect.objectContaining({
                 index: ['test-index-*'],
               }),
+              updatedByProfileUid: null,
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('stamps updatedByProfileUid when the actor has a profile uid', async () => {
+      rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: { index: ['test-index-*'] },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEditRuleParamsWithReadAuth({
+        operations: [
+          {
+            field: 'exceptionsList',
+            operation: 'set',
+            value: [
+              {
+                id: 'exception-list-id',
+                list_id: 'exception-list',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          },
+        ],
+        paramsModifier: async (rule) => ({
+          modifiedParams: rule.params,
+          isParamsUpdateSkipped: false,
+          skipReasons: [],
+        }),
+      });
+
+      expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              updatedByProfileUid: 'u_profile_1',
             }),
           }),
         ],

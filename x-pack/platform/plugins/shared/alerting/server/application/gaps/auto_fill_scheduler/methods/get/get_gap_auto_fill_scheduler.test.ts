@@ -54,6 +54,7 @@ describe('getGapFillAutoScheduler()', () => {
       spaceId: 'default',
       namespace: 'default',
       getUserName: jest.fn(),
+      getProfileUid: jest.fn(),
       createAPIKey: jest.fn(),
       cloneAPIKey: jest.fn(),
       logger,

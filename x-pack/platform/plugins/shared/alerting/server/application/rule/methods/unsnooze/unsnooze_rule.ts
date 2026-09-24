@@ -79,6 +79,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
   const newAttrs = getUnsnoozeAttributes(attributes, scheduleIds);
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
 
   const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -87,6 +88,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
     updateRuleAttributes: updateMetaAttributes(context, {
       ...newAttrs,
       updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: new Date().toISOString(),
     }),
   });

@@ -32,7 +32,7 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
       all: {
         app: ['infra', 'metrics', 'kibana'],
         catalogue: ['infraops', 'metrics'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         savedObject: {
           all: ['infrastructure-ui-source', metricsDataSourceSavedObjectName],
           read: ['index-pattern'],
@@ -56,7 +56,7 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
       read: {
         app: ['infra', 'metrics', 'kibana'],
         catalogue: ['infraops', 'metrics'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         savedObject: {
           all: [],
           read: ['infrastructure-ui-source', 'index-pattern', metricsDataSourceSavedObjectName],

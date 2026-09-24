@@ -66,9 +66,12 @@ export interface Rule<Params extends RuleParams = never> {
   scheduledTaskId?: RuleSchemaType['scheduledTaskId'];
   createdBy: RuleSchemaType['createdBy'];
   updatedBy: RuleSchemaType['updatedBy'];
+  createdByProfileUid?: RuleSchemaType['createdByProfileUid'];
+  updatedByProfileUid?: RuleSchemaType['updatedByProfileUid'];
   createdAt: Date;
   updatedAt: Date;
   apiKeyOwner: RuleSchemaType['apiKeyOwner'];
+  apiKeyOwnerProfileUid?: RuleSchemaType['apiKeyOwnerProfileUid'];
   apiKeyCreatedByUser?: RuleSchemaType['apiKeyCreatedByUser'];
   throttle?: RuleSchemaType['throttle'];
   muteAll: RuleSchemaType['muteAll'];
@@ -107,10 +110,13 @@ export interface RuleDomain<Params extends RuleParams = never> {
   scheduledTaskId?: RuleDomainSchemaType['scheduledTaskId'];
   createdBy: RuleDomainSchemaType['createdBy'];
   updatedBy: RuleDomainSchemaType['updatedBy'];
+  createdByProfileUid?: RuleDomainSchemaType['createdByProfileUid'];
+  updatedByProfileUid?: RuleDomainSchemaType['updatedByProfileUid'];
   createdAt: Date;
   updatedAt: Date;
   apiKey: RuleDomainSchemaType['apiKey'];
   apiKeyOwner: RuleDomainSchemaType['apiKeyOwner'];
+  apiKeyOwnerProfileUid?: RuleDomainSchemaType['apiKeyOwnerProfileUid'];
   apiKeyCreatedByUser?: RuleDomainSchemaType['apiKeyCreatedByUser'];
   uiamApiKey?: RuleDomainSchemaType['uiamApiKey'];
   uiamApiKeyExternal?: RuleDomainSchemaType['uiamApiKeyExternal'];

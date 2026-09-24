@@ -330,11 +330,12 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     : originalRule.revision;
 
   const username = await context.getUserName();
-
+  const profileUid = await context.getProfileUid();
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: ruleType.id,
     ruleName: updateRuleData.name,
     username,
+    profileUid,
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
@@ -363,6 +364,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     notifyWhen,
     revision,
     updatedBy: username,
+    updatedByProfileUid: profileUid,
     updatedAt: new Date().toISOString(),
     artifacts: artifactsWithRefs,
     ...(originalRule.lastRun

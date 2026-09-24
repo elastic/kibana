@@ -175,6 +175,7 @@ export async function createRule<Params extends RuleParams = never>(
     request: context.request,
   });
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
 
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
@@ -234,7 +235,12 @@ export async function createRule<Params extends RuleParams = never>(
 
   const { systemActions, actions: actionToNotUse, ...restData } = data;
 
-  const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
+  const apiKeyProps = apiKeyAsRuleDomainProperties(
+    createdAPIKey,
+    username,
+    isAuthTypeApiKey,
+    profileUid
+  );
   const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
     data.tags,
     apiKeyProps.uiamApiKey,
@@ -256,6 +262,8 @@ export async function createRule<Params extends RuleParams = never>(
       id,
       createdBy: username,
       updatedBy: username,
+      createdByProfileUid: profileUid,
+      updatedByProfileUid: profileUid,
       createdAt: new Date(createTime),
       updatedAt: new Date(createTime),
       snoozeSchedule: [],

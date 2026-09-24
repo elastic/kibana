@@ -42,6 +42,7 @@ describe('mute alert instance', () => {
     ruleTypeRegistry: ruleTypeRegistryMock,
     getAlertIndicesAlias: getAlertIndicesAliasMock,
     getUserName: async () => {},
+    getProfileUid: async () => null,
     alertsService: alertsServiceMock,
   } as unknown as RulesClientContext;
 
@@ -102,6 +103,8 @@ describe('mute alert instance', () => {
       {
         mutedInstanceIds: ['instance1'],
         updatedAt: expect.any(String),
+        updatedBy: undefined,
+        updatedByProfileUid: null,
       },
       { version: 'v1' }
     );
@@ -166,6 +169,8 @@ describe('mute alert instance', () => {
       {
         mutedInstanceIds: ['instance1'],
         updatedAt: expect.any(String),
+        updatedBy: undefined,
+        updatedByProfileUid: null,
       },
       { version: 'v1' }
     );
