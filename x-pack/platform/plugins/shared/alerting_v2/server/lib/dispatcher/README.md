@@ -401,6 +401,8 @@ If you are not adding a new pipeline phase, but instead want to support a new de
 
 Current production delivery is workflow-based. `DispatchStep` uses the policy API key to craft a fake request, prefetches workflows with `getWorkflowsByIds`, and schedules them through `bulkScheduleWorkflow` on the workflows management plugin.
 
+Workflow delivery requires an active Enterprise (or trial) license. When the license does not allow action policies, `DispatchStep` schedules no workflow and records one `license_not_supported` failure per (group, workflow destination), which `StoreExecutionHistoryStep` emits as `dispatch_failed` events. Every other step runs unchanged, so `.alert-actions` still receives the same `fire` / `suppress` / `notified` / `unmatched` docs and throttling, deduplication, and watermark behavior match a licensed cluster.
+
 ## Testing
 
 Useful coverage points:
