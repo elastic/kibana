@@ -154,10 +154,12 @@ describe('getResolutionGroupTool', () => {
     });
 
     it('returns the not-resolved results as-is when the entity cannot be resolved', async () => {
-      const notFoundResult = [
-        { tool_result_id: 'x', type: ToolResultType.error, data: { message: 'No entity found' } },
-      ];
-      mockRequireResolvedEntity.mockResolvedValueOnce({ ok: false, results: notFoundResult });
+      const notFoundResult = {
+        tool_result_id: 'x',
+        type: ToolResultType.error,
+        data: { message: 'No entity found' },
+      };
+      mockRequireResolvedEntity.mockResolvedValueOnce({ ok: false, result: notFoundResult });
 
       const result = (await tool.handler(
         { entityId: 'ghost' },
@@ -165,7 +167,7 @@ describe('getResolutionGroupTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(mockGetResolutionGroup).not.toHaveBeenCalled();
-      expect(result.results).toEqual(notFoundResult);
+      expect(result.results).toEqual([notFoundResult]);
     });
 
     it('returns an error result when the user lacks permission to view resolution groups', async () => {
@@ -221,10 +223,10 @@ describe('getResolutionGroupTool', () => {
       );
     });
 
-    it('reports success=true with resultCount 0 when the entity cannot be resolved', async () => {
+    it('reports the failure with resultCount 0 when the entity cannot be resolved', async () => {
       mockRequireResolvedEntity.mockResolvedValueOnce({
         ok: false,
-        results: [{ tool_result_id: 'x', type: ToolResultType.error, data: { message: 'nope' } }],
+        result: { tool_result_id: 'x', type: ToolResultType.error, data: { message: 'nope' } },
       });
 
       await tool.handler(
@@ -234,7 +236,7 @@ describe('getResolutionGroupTool', () => {
 
       expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
         ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
-        expect.objectContaining({ success: true, resultCount: 0 })
+        expect.objectContaining({ success: false, errorMessage: 'nope', resultCount: 0 })
       );
     });
   });

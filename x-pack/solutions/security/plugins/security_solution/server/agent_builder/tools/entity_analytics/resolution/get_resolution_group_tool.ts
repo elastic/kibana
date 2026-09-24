@@ -99,7 +99,10 @@ When the reference is ambiguous or not found, the result explains why and (when 
           entityType,
         });
         if (!resolved.ok) {
-          return { results: resolved.results };
+          if (resolved.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolved.result.data.message);
+          }
+          return { results: [resolved.result] };
         }
 
         const resolutionClient = entityStore.createResolutionClient(client, spaceId);

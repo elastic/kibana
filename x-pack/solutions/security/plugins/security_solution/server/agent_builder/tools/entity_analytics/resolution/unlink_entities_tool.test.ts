@@ -20,9 +20,14 @@ import {
 } from '../../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
+import { requireResolvedEntity } from '../entity_resolution';
 import { resolveEntityIdsForResolution } from './resolve_entity_ids';
 import { getResolutionToolAvailability } from './resolution_availability';
 import { unlinkEntitiesTool, SECURITY_UNLINK_ENTITIES_TOOL_ID } from './unlink_entities_tool';
+
+jest.mock('../entity_resolution', () => ({
+  requireResolvedEntity: jest.fn(),
+}));
 
 jest.mock('./resolve_entity_ids', () => ({
   resolveEntityIdsForResolution: jest.fn(),
@@ -32,6 +37,7 @@ jest.mock('./resolution_availability', () => ({
   getResolutionToolAvailability: jest.fn(),
 }));
 
+const mockRequireResolvedEntity = requireResolvedEntity as jest.Mock;
 const mockResolveEntityIdsForResolution = resolveEntityIdsForResolution as jest.Mock;
 const mockGetResolutionToolAvailability = getResolutionToolAvailability as jest.Mock;
 
@@ -69,10 +75,10 @@ const buildHandlerContextWithPrompts = (
 const seedApprovedUnlink = (
   ctx: ReturnType<typeof buildHandlerContextWithPrompts>,
   state: {
-    euids: string[];
+    resolved: Array<{ euid: string; resolvedTo?: string }>;
     unresolved: Array<{ entityId: string; status: string }>;
   } = {
-    euids: ['host:server2'],
+    resolved: [{ euid: 'host:server2', resolvedTo: 'host:server1' }],
     unresolved: [],
   }
 ) => {
@@ -101,8 +107,12 @@ describe('unlinkEntitiesTool', () => {
     ]);
     mockGetResolutionToolAvailability.mockResolvedValue({ status: 'available' });
     mockResolveEntityIdsForResolution.mockResolvedValue({
-      euids: ['host:server2'],
+      resolved: [{ euid: 'host:server2', resolvedTo: 'host:server1' }],
       unresolved: [],
+    });
+    mockRequireResolvedEntity.mockResolvedValue({
+      ok: true,
+      identity: { identifierType: 'host', identifier: 'server1', entityStoreId: 'host:server1' },
     });
   });
 
@@ -123,6 +133,15 @@ describe('unlinkEntitiesTool', () => {
       expect(tool.schema.safeParse({ entityIds: ['host:server2'] }).success).toBe(true);
     });
 
+    it('accepts a payload naming the group to unlink from', () => {
+      expect(
+        tool.schema.safeParse({
+          entityIds: ['bob.temp', 'bob.old'],
+          groupEntityId: 'bob.admin',
+        }).success
+      ).toBe(true);
+    });
+
     it('rejects an empty entityIds array', () => {
       expect(tool.schema.safeParse({ entityIds: [] }).success).toBe(false);
     });
@@ -130,7 +149,7 @@ describe('unlinkEntitiesTool', () => {
 
   describe('handler', () => {
     describe('HITL', () => {
-      it('on unprompted: confirmation message previews the resolved entity ids', async () => {
+      it('on unprompted: confirmation message names the group each entity is linked to', async () => {
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.unprompted,
         });
@@ -146,9 +165,54 @@ describe('unlinkEntitiesTool', () => {
           cancel_text: 'Cancel',
         });
         expect(askArgs.message).toContain('host:server2');
+        expect(askArgs.message).toContain('currently linked to `host:server1`');
         expect(ctx.stateManager.setState).toHaveBeenCalledWith({
-          euids: ['host:server2'],
+          resolved: [{ euid: 'host:server2', resolvedTo: 'host:server1' }],
           unresolved: [],
+        });
+      });
+
+      it('on unprompted: flags entities in the batch that are not linked to anything', async () => {
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [
+            { euid: 'host:server2', resolvedTo: 'host:server1' },
+            { euid: 'host:server3' },
+          ],
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ entityIds: ['server2', 'server3'] }, ctx);
+
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        expect(askArgs.message).toContain('currently linked to `host:server1`');
+        expect(askArgs.message).toContain('not currently linked to anything');
+      });
+
+      it('on unprompted: does not ask for confirmation when no entity is linked to anything', async () => {
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [{ euid: 'host:server2' }, { euid: 'host:server3' }],
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { entityIds: ['server2', 'server3'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(mockUnlinkEntities).not.toHaveBeenCalled();
+        const other = result.results[0] as OtherResult;
+        expect(other.type).toBe(ToolResultType.other);
+        expect(other.data).toEqual({
+          message: expect.stringContaining('nothing to unlink'),
+          unlinked: [],
+          skipped: ['host:server2', 'host:server3'],
         });
       });
 
@@ -217,6 +281,206 @@ describe('unlinkEntitiesTool', () => {
       });
     });
 
+    describe('groupEntityId', () => {
+      const seedNamedGroup = (identity: { entityStoreId: string; resolvedTo?: string }) => {
+        mockRequireResolvedEntity.mockResolvedValueOnce({
+          ok: true,
+          identity: { identifierType: 'user', identifier: 'bob.admin', ...identity },
+        });
+      };
+
+      it('prompts as usual when the named entity is the group target', async () => {
+        seedNamedGroup({ entityStoreId: 'user:bob.admin' });
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [{ euid: 'user:bob.temp', resolvedTo: 'user:bob.admin' }],
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ entityIds: ['bob.temp'], groupEntityId: 'bob.admin' }, ctx);
+
+        expect(ctx.prompts.askForConfirmation).toHaveBeenCalled();
+      });
+
+      it('prompts as usual when the named entity is a sibling alias in the same group', async () => {
+        // The named entity is itself an alias, so it normalizes to its own target.
+        seedNamedGroup({ entityStoreId: 'user:bob.admin', resolvedTo: 'user:bob.real' });
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [{ euid: 'user:bob.temp', resolvedTo: 'user:bob.real' }],
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ entityIds: ['bob.temp'], groupEntityId: 'bob.admin' }, ctx);
+
+        expect(ctx.prompts.askForConfirmation).toHaveBeenCalled();
+      });
+
+      it('reports the actual group without prompting when an entity is in a different group', async () => {
+        seedNamedGroup({ entityStoreId: 'user:bob.admin' });
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [{ euid: 'user:bob.temp', resolvedTo: 'user:bob.other' }],
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { entityIds: ['bob.temp'], groupEntityId: 'bob.admin' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(mockUnlinkEntities).not.toHaveBeenCalled();
+        const other = result.results[0] as OtherResult;
+        expect(other.type).toBe(ToolResultType.other);
+        expect(other.data.message).toContain('user:bob.admin');
+        expect(other.data.groupMismatches).toEqual([
+          { euid: 'user:bob.temp', resolvedTo: 'user:bob.other', reason: 'different_group' },
+        ]);
+      });
+
+      it('reports an unlinked entity alongside one in a different group, tagged by reason', async () => {
+        seedNamedGroup({ entityStoreId: 'user:bob.admin' });
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [
+            { euid: 'user:bob.temp', resolvedTo: 'user:bob.other' },
+            { euid: 'user:bob.solo' },
+          ],
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { entityIds: ['bob.temp', 'bob.solo'], groupEntityId: 'bob.admin' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(mockUnlinkEntities).not.toHaveBeenCalled();
+        const other = result.results[0] as OtherResult;
+        expect(other.data.groupMismatches).toEqual([
+          { euid: 'user:bob.temp', resolvedTo: 'user:bob.other', reason: 'different_group' },
+          { euid: 'user:bob.solo', reason: 'not_linked' },
+        ]);
+      });
+
+      it('falls back to the no-op report when no entity in the batch is linked to anything', async () => {
+        seedNamedGroup({ entityStoreId: 'user:bob.admin' });
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [{ euid: 'user:bob.solo' }, { euid: 'user:bob.other.solo' }],
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { entityIds: ['bob.solo', 'bob.other.solo'], groupEntityId: 'bob.admin' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(mockUnlinkEntities).not.toHaveBeenCalled();
+        const other = result.results[0] as OtherResult;
+        expect(other.data.groupMismatches).toBeUndefined();
+        expect(other.data.skipped).toEqual(['user:bob.solo', 'user:bob.other.solo']);
+      });
+
+      it('reports an entity that is not linked to anything even when every other entity matches', async () => {
+        seedNamedGroup({ entityStoreId: 'user:bob.admin' });
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [
+            { euid: 'user:bob.temp', resolvedTo: 'user:bob.admin' },
+            { euid: 'user:bob.solo' },
+          ],
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { entityIds: ['bob.temp', 'bob.solo'], groupEntityId: 'bob.admin' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(mockUnlinkEntities).not.toHaveBeenCalled();
+        const other = result.results[0] as OtherResult;
+        expect(other.data.groupMismatches).toEqual([
+          { euid: 'user:bob.solo', reason: 'not_linked' },
+        ]);
+      });
+
+      it('rejects the whole batch when at least one entity is in a different group', async () => {
+        seedNamedGroup({ entityStoreId: 'user:bob.admin' });
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [
+            { euid: 'user:bob.temp', resolvedTo: 'user:bob.admin' },
+            { euid: 'user:bob.old', resolvedTo: 'user:bob.other' },
+          ],
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { entityIds: ['bob.temp', 'bob.old'], groupEntityId: 'bob.admin' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        const other = result.results[0] as OtherResult;
+        expect(other.data.groupMismatches).toEqual([
+          { euid: 'user:bob.old', resolvedTo: 'user:bob.other', reason: 'different_group' },
+        ]);
+      });
+
+      it('returns the resolution failure when the named group cannot be resolved', async () => {
+        mockRequireResolvedEntity.mockResolvedValueOnce({
+          ok: false,
+          result: {
+            tool_result_id: 'result-1',
+            type: ToolResultType.error,
+            data: { message: 'No entity found for id: ghost-group' },
+          },
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { entityIds: ['bob.temp'], groupEntityId: 'ghost-group' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(mockUnlinkEntities).not.toHaveBeenCalled();
+        expect(mockResolveEntityIdsForResolution).not.toHaveBeenCalled();
+        const error = result.results[0] as ErrorResult;
+        expect(error.data.message).toContain('ghost-group');
+      });
+
+      it('does not resolve a group when none was supplied', async () => {
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ entityIds: ['server2'] }, ctx);
+
+        expect(mockRequireResolvedEntity).not.toHaveBeenCalled();
+      });
+    });
+
     it('unlinks only the resolved euids, surfacing the rest as unresolved', async () => {
       mockUnlinkEntities.mockResolvedValueOnce({
         entity_type: 'host',
@@ -228,7 +492,7 @@ describe('unlinkEntitiesTool', () => {
           checkStatus: ConfirmationStatus.accepted,
         }),
         {
-          euids: ['host:server2'],
+          resolved: [{ euid: 'host:server2', resolvedTo: 'host:server1' }],
           unresolved: [{ entityId: 'ghost-entity', status: 'not_found' }],
         }
       );
@@ -252,7 +516,7 @@ describe('unlinkEntitiesTool', () => {
 
     it('when nothing resolves: returns an error with unresolved references, without prompting or calling the client', async () => {
       mockResolveEntityIdsForResolution.mockResolvedValueOnce({
-        euids: [],
+        resolved: [],
         unresolved: [{ entityId: 'ghost-entity', status: 'not_found' }],
       });
       const ctx = buildHandlerContextWithPrompts(mocks, {
@@ -275,7 +539,7 @@ describe('unlinkEntitiesTool', () => {
 
     it('when a reference is ambiguous: returns the candidates without prompting or unlinking', async () => {
       mockResolveEntityIdsForResolution.mockResolvedValueOnce({
-        euids: [],
+        resolved: [],
         unresolved: [
           {
             entityId: 'server',

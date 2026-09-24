@@ -77,11 +77,11 @@ const seedApprovedLink = (
   ctx: ReturnType<typeof buildHandlerContextWithPrompts>,
   state: {
     targetEuid: string;
-    euids: string[];
+    resolved: string[];
     unresolved: Array<{ entityId: string; status: string }>;
   } = {
     targetEuid: 'host:server1',
-    euids: ['host:server2'],
+    resolved: ['host:server2'],
     unresolved: [],
   }
 ) => {
@@ -114,7 +114,7 @@ describe('linkEntitiesTool', () => {
       identity: { identifierType: 'host', identifier: 'server1', entityStoreId: 'host:server1' },
     });
     mockResolveEntityIdsForResolution.mockResolvedValue({
-      euids: ['host:server2'],
+      resolved: [{ euid: 'host:server2' }],
       unresolved: [],
     });
   });
@@ -152,10 +152,12 @@ describe('linkEntitiesTool', () => {
 
   describe('handler', () => {
     it('returns the not-resolved results as-is when the target cannot be resolved', async () => {
-      const notFoundResult = [
-        { tool_result_id: 'x', type: ToolResultType.error, data: { message: 'No entity found' } },
-      ];
-      mockRequireResolvedEntity.mockResolvedValueOnce({ ok: false, results: notFoundResult });
+      const notFoundResult = {
+        tool_result_id: 'x',
+        type: ToolResultType.error,
+        data: { message: 'No entity found' },
+      };
+      mockRequireResolvedEntity.mockResolvedValueOnce({ ok: false, result: notFoundResult });
 
       const result = (await tool.handler(
         { targetId: 'ghost', entityIds: ['host:server2'] },
@@ -163,7 +165,7 @@ describe('linkEntitiesTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(mockLinkEntities).not.toHaveBeenCalled();
-      expect(result.results).toEqual(notFoundResult);
+      expect(result.results).toEqual([notFoundResult]);
     });
 
     describe('HITL', () => {
@@ -186,7 +188,7 @@ describe('linkEntitiesTool', () => {
         expect(askArgs.message).toContain('host:server2');
         expect(ctx.stateManager.setState).toHaveBeenCalledWith({
           targetEuid: 'host:server1',
-          euids: ['host:server2'],
+          resolved: ['host:server2'],
           unresolved: [],
         });
       });
@@ -237,7 +239,7 @@ describe('linkEntitiesTool', () => {
           }),
           {
             targetEuid: 'host:server1',
-            euids: ['host:server2'],
+            resolved: ['host:server2'],
             unresolved: [{ entityId: 'ghost-entity', status: 'not_found' }],
           }
         );
@@ -261,7 +263,7 @@ describe('linkEntitiesTool', () => {
 
       it('when nothing resolves: returns an error with unresolved references, without prompting or calling the client', async () => {
         mockResolveEntityIdsForResolution.mockResolvedValueOnce({
-          euids: [],
+          resolved: [],
           unresolved: [{ entityId: 'ghost-entity', status: 'not_found' }],
         });
         const ctx = buildHandlerContextWithPrompts(mocks, {
@@ -284,7 +286,7 @@ describe('linkEntitiesTool', () => {
 
       it('when a reference is ambiguous: returns the candidates without prompting or linking', async () => {
         mockResolveEntityIdsForResolution.mockResolvedValueOnce({
-          euids: [],
+          resolved: [],
           unresolved: [
             {
               entityId: 'server',

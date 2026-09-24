@@ -70,7 +70,7 @@ evaluate.describe(
         entityIds: [UNLINK_ALIAS_EUID],
       });
 
-      // Pin rule state so the enable/disable evals always flip in the expected direction,
+      // Pin rule state so the enable/disable questions are unambiguous for the agent
       // regardless of what a prior run left behind.
       await setResolutionRuleEnabled({ supertest, ruleId: DISABLE_TEST_RULE_ID, enabled: true });
       await setResolutionRuleEnabled({ supertest, ruleId: ENABLE_TEST_RULE_ID, enabled: false });
@@ -78,7 +78,7 @@ evaluate.describe(
 
     evaluate.afterAll(async ({ log, supertest }) => {
       try {
-        // Restore default-enabled state for both managed rules touched by this suite.
+        // Restore default-enabled state for both managed rules pinned in beforeAll.
         await setResolutionRuleEnabled({ supertest, ruleId: DISABLE_TEST_RULE_ID, enabled: true });
         await setResolutionRuleEnabled({ supertest, ruleId: ENABLE_TEST_RULE_ID, enabled: true });
       } catch (err) {
@@ -129,13 +129,12 @@ evaluate.describe(
           examples: [
             {
               input: {
-                question: `These two are the same user, ${LINK_TARGET_EUID} and ${LINK_ALIAS_EUID} — merge them.`,
+                question: `These two are the same user — merge ${LINK_ALIAS_EUID} into ${LINK_TARGET_EUID}.`,
               },
               output: {
                 criteria: [
                   `Call security.link_entities with ${LINK_TARGET_EUID} as the target and ${LINK_ALIAS_EUID} as the entity to link.`,
                   'Surface the confirmation step (the tool is HITL-gated) rather than claiming the merge already happened.',
-                  'On accept, report which entities were linked (or skipped, if already linked).',
                 ],
                 toolCalls: [
                   {
@@ -168,7 +167,6 @@ evaluate.describe(
                 criteria: [
                   `Call security.unlink_entities with ${UNLINK_ALIAS_EUID} in entityIds.`,
                   'Surface the confirmation step rather than claiming the unlink already happened.',
-                  'On accept, report the entity as unlinked.',
                 ],
                 toolCalls: [
                   {

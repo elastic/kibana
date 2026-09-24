@@ -247,7 +247,10 @@ First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with 
           entityType,
         });
         if (!resolvedSubject.ok) {
-          return { results: resolvedSubject.results };
+          if (resolvedSubject.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolvedSubject.result.data.message);
+          }
+          return { results: [resolvedSubject.result] };
         }
 
         const resolvedTarget =
@@ -260,7 +263,10 @@ First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with 
               })
             : undefined;
         if (resolvedTarget !== undefined && !resolvedTarget.ok) {
-          return { results: resolvedTarget.results };
+          if (resolvedTarget.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolvedTarget.result.data.message);
+          }
+          return { results: [resolvedTarget.result] };
         }
 
         const { entityStoreId } = resolvedSubject.identity;

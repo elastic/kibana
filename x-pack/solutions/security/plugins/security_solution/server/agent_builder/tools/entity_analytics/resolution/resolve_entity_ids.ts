@@ -12,6 +12,10 @@ import { resolveSingleEntity } from '../entity_resolution';
 
 const ENTITY_RESOLUTION_CONCURRENCY = 10;
 
+export interface ResolvedEntityResult {
+  euid: string;
+  resolvedTo?: string;
+}
 export type UnresolvedEntityResult = {
   entityId: string;
   status: ResolveSingleEntityResult['status'];
@@ -21,8 +25,9 @@ export type UnresolvedEntityResult = {
  * Resolves a batch of user-supplied entity references (EUIDs, bare names, or display
  * names) to canonical `entity.id` values.
  *
- * References that resolve with high confidence are returned in `euids`; everything else
- * (not found, ambiguous, or already resolved-with-no-identity) is reported in `unresolved`.
+ * References that resolve with high confidence are returned in `resolved`, each with the
+ * group target it is currently an alias of; everything else (not found, ambiguous, or
+ * resolved-with-no-identity) is reported in `unresolved`.
  */
 export const resolveEntityIdsForResolution = async ({
   esClient,
@@ -33,21 +38,25 @@ export const resolveEntityIdsForResolution = async ({
   spaceId: string;
   entityIds: string[];
 }) => {
-  const euids: string[] = [];
+  const resolved: ResolvedEntityResult[] = [];
   const unresolved: UnresolvedEntityResult[] = [];
 
   await pMap(
     entityIds,
     async (entityId) => {
-      const resolved = await resolveSingleEntity({ esClient, spaceId, entityId });
-      if (resolved.status === 'resolved' && resolved.identity.entityStoreId) {
-        euids.push(resolved.identity.entityStoreId);
+      const resolveResults = await resolveSingleEntity({ esClient, spaceId, entityId });
+      if (resolveResults.status === 'resolved' && resolveResults.identity.entityStoreId) {
+        const { entityStoreId, resolvedTo } = resolveResults.identity;
+        resolved.push({ euid: entityStoreId, resolvedTo });
       } else {
         unresolved.push({
           entityId,
-          status: resolved.status,
-          ...(resolved.status === 'ambiguous'
-            ? { matchCount: resolved.matchCount, candidateEntityIds: resolved.candidateEntityIds }
+          status: resolveResults.status,
+          ...(resolveResults.status === 'ambiguous'
+            ? {
+                matchCount: resolveResults.matchCount,
+                candidateEntityIds: resolveResults.candidateEntityIds,
+              }
             : {}),
         });
       }
@@ -55,5 +64,5 @@ export const resolveEntityIdsForResolution = async ({
     { concurrency: ENTITY_RESOLUTION_CONCURRENCY }
   );
 
-  return { euids, unresolved };
+  return { resolved, unresolved };
 };

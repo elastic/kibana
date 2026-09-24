@@ -26,7 +26,7 @@ const MAX_ENTITIES_PER_CALL = 100;
 
 interface ResolvedEntitiesState {
   targetEuid: string;
-  euids: string[];
+  resolved: string[];
   unresolved: UnresolvedEntityResult[];
 }
 
@@ -139,7 +139,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           }
 
           const resolutionClient = entityStore.createResolutionClient(client, spaceId);
-          const result = await resolutionClient.linkEntities(saved.targetEuid, saved.euids, {
+          const result = await resolutionClient.linkEntities(saved.targetEuid, saved.resolved, {
             awaitVisibility: true,
           });
           const unresolved = saved.unresolved ?? [];
@@ -169,16 +169,19 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           entityType: params.targetType,
         });
         if (!resolvedTarget.ok) {
-          return { results: resolvedTarget.results };
+          if (resolvedTarget.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolvedTarget.result.data.message);
+          }
+          return { results: [resolvedTarget.result] };
         }
 
-        const { euids, unresolved } = await resolveEntityIdsForResolution({
+        const { resolved, unresolved } = await resolveEntityIdsForResolution({
           esClient: client,
           spaceId,
           entityIds: params.entityIds,
         });
 
-        if (euids.length === 0) {
+        if (resolved.length === 0) {
           // If any of the unresolved entities are ambiguous, return a ToolResultType.other so that the agent might prompt the user for resolving the ambiguity.
           if (unresolved.some((entry) => entry.status === 'ambiguous')) {
             return {
@@ -213,18 +216,23 @@ Entity references that don't resolve to a canonical id are excluded from the bat
         }
 
         const targetEuid = resolvedTarget.identity.entityStoreId;
-        stateManager.setState<ResolvedEntitiesState>({ targetEuid, euids, unresolved });
+        const resolvedEuids = resolved.map((entry) => entry.euid);
+        stateManager.setState<ResolvedEntitiesState>({
+          targetEuid,
+          resolved: resolvedEuids,
+          unresolved,
+        });
 
         // HITL confirmation prompt
-        const noun = euids.length === 1 ? 'entity' : 'entities';
+        const noun = resolvedEuids.length === 1 ? 'entity' : 'entities';
         telemetryTracker.recordAwaitingConfirmation();
         return prompts.askForConfirmation({
           id: promptId,
           title: 'Link entities',
           message: [
-            `Link ${euids.length} ${noun} to "${targetEuid}" as aliases?`,
+            `Link ${resolvedEuids.length} ${noun} to "${targetEuid}" as aliases?`,
             '',
-            formatEntityIdsForPrompt(euids),
+            formatEntityIdsForPrompt(resolvedEuids),
           ].join('\n'),
           confirm_text: 'Link',
           cancel_text: 'Cancel',
