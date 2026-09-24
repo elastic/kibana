@@ -8,5 +8,7 @@
  */
 
 import { KibanaCodeEditorWrapper } from './monaco_editor';
+import { EsqlEditor } from './esql_editor';
 
-export { KibanaCodeEditorWrapper };
+export { KibanaCodeEditorWrapper, EsqlEditor };
+export type { EsqlControlOptions, LookupIndexEditor } from './esql_editor';

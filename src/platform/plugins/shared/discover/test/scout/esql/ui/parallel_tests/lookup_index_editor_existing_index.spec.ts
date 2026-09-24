@@ -75,7 +75,8 @@ spaceTest.describe(
     });
 
     spaceTest('edits an existing lookup index', async ({ pageObjects, esClient, scoutSpace }) => {
-      const { discover, lookupIndexEditor } = pageObjects;
+      const { discover, esqlEditor } = pageObjects;
+      const { lookupIndexEditor } = esqlEditor;
       const indexName = getIndexName(scoutSpace.id);
 
       await discover.codeEditor.setCodeEditorValue(`from logstash-* | LOOKUP JOIN ${indexName}`);

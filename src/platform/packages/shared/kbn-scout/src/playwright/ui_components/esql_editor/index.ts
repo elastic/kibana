@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LookupIndexEditor } from './lookup_index_editor';
+export { EsqlEditor } from './esql_editor';
+export type { EsqlControlOptions } from './esql_editor';
+export type { LookupIndexEditor } from './lookup_index_editor';

@@ -182,42 +182,42 @@ spaceTest.describe(
     );
 
     spaceTest('restores ES editor panel state per tab', async ({ pageObjects }) => {
-      const { discover, unifiedTabs } = pageObjects;
-      const historyPanel = discover.getEsqlHistoryPanel();
+      const { discover, unifiedTabs, esqlEditor } = pageObjects;
+      const historyPanel = esqlEditor.historyPanel;
       const distance = 100;
 
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
 
-      const initialHeight = await discover.getEsqlEditorHeight();
+      const initialHeight = await esqlEditor.getHeight();
       await expect(historyPanel).toBeHidden();
 
-      await discover.toggleEsqlHistoryPanel();
+      await esqlEditor.toggleHistoryPanel();
       await expect(historyPanel).toBeVisible();
-      expect(await discover.getEsqlEditorHeight()).toBe(initialHeight);
+      expect(await esqlEditor.getHeight()).toBe(initialHeight);
 
       await unifiedTabs.createNewTab();
       await expect(historyPanel).toBeVisible();
-      await discover.toggleEsqlHistoryPanel();
+      await esqlEditor.toggleHistoryPanel();
       await expect(historyPanel).toBeHidden();
       await discover.codeEditor.setCodeEditorValue(DEFAULT_ESQL_QUERY);
       await discover.submitQueryAndWait();
       await expect(historyPanel).toBeHidden();
-      expect(await discover.getEsqlEditorHeight()).toBe(initialHeight);
+      expect(await esqlEditor.getHeight()).toBe(initialHeight);
 
-      await discover.resizeEsqlEditorBy(distance);
-      const updatedHeight = await discover.getEsqlEditorHeight();
+      await esqlEditor.resizeBy(distance);
+      const updatedHeight = await esqlEditor.getHeight();
       expect(updatedHeight).toBeGreaterThan(initialHeight);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
       await expect(historyPanel).toBeVisible();
-      expect(await discover.getEsqlEditorHeight()).toBe(initialHeight);
+      expect(await esqlEditor.getHeight()).toBe(initialHeight);
 
       await unifiedTabs.selectTab(1);
       await discover.waitUntilTabIsLoaded();
       await expect(historyPanel).toBeHidden();
-      expect(await discover.getEsqlEditorHeight()).toBe(updatedHeight);
+      expect(await esqlEditor.getHeight()).toBe(updatedHeight);
     });
   }
 );

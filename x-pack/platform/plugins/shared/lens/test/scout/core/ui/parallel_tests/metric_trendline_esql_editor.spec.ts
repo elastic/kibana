@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -118,7 +117,7 @@ spaceTest.describe(
     spaceTest(
       'changing ES|QL query updates the trendline background chart',
       async ({ browserAuth, page, pageObjects }) => {
-        const { dashboard, lens } = pageObjects;
+        const { dashboard, lens, esqlEditor } = pageObjects;
 
         await browserAuth.loginAsPrivilegedUser();
         await dashboard.openDashboardWithId(dashboardId);
@@ -138,13 +137,12 @@ spaceTest.describe(
         await spaceTest.step(
           'change the ES|QL query and verify trendline still renders',
           async () => {
-            const codeEditor = new KibanaCodeEditorWrapper(page);
-            await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-            await codeEditor.setCodeEditorValue(
+            await esqlEditor.waitReady();
+            await esqlEditor.setQuery(
               'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_bytes = MAX(bytes)'
             );
 
-            await page.getByTestId('ESQLEditor-run-query-button').click();
+            await esqlEditor.runQuery();
 
             // Wait for the trendline to re-render with the new data
             await expect(lens.metric.trendline).toBeVisible({ timeout: 30000 });

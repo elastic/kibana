@@ -52,7 +52,7 @@ spaceTest.describe('Discover ES|QL starred queries', { tag: '@local-stateful-cla
   // Migrated from x-pack/platform/test/functional/apps/discover/group3/esql_starred.ts.
   spaceTest(
     'stars a query, persists it across reload, and runs it from Starred',
-    async ({ page, pageObjects: { discover } }) => {
+    async ({ page, pageObjects: { discover, esqlEditor } }) => {
       const starredQuery = page.testSubj
         .locator('ESQLEditor-starredQueries')
         .getByRole('row')
@@ -60,7 +60,7 @@ spaceTest.describe('Discover ES|QL starred queries', { tag: '@local-stateful-cla
 
       await spaceTest.step('star a query from history', async () => {
         await discover.writeAndSubmitEsqlQuery(query);
-        await discover.toggleEsqlHistoryPanel();
+        await esqlEditor.toggleHistoryPanel();
         const historyQuery = page.testSubj
           .locator('ESQLEditor-queryHistory')
           .getByRole('row')
@@ -80,7 +80,7 @@ spaceTest.describe('Discover ES|QL starred queries', { tag: '@local-stateful-cla
       await spaceTest.step('persist across reload', async () => {
         await page.reload();
         await discover.waitUntilTabIsLoaded();
-        await discover.toggleEsqlHistoryPanel();
+        await esqlEditor.toggleHistoryPanel();
         await page.testSubj.locator('starred-queries-tab').click();
         await expect(starredQuery).toBeVisible();
       });
@@ -89,7 +89,7 @@ spaceTest.describe('Discover ES|QL starred queries', { tag: '@local-stateful-cla
         await page.gotoApp('discover');
         await discover.waitUntilTabIsLoaded();
         await discover.writeAndSubmitEsqlQuery('FROM logstash-* | LIMIT 1');
-        await discover.toggleEsqlHistoryPanel();
+        await esqlEditor.toggleHistoryPanel();
         await page.testSubj.locator('starred-queries-tab').click();
         await starredQuery.getByRole('button', { name: 'Run query', exact: true }).click();
         await expect.poll(() => discover.getEsqlQueryValue()).toBe(query);

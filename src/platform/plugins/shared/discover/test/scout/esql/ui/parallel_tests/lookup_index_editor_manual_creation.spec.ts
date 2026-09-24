@@ -51,7 +51,8 @@ spaceTest.describe(
     spaceTest(
       'creates a lookup index by manually adding fields and rows',
       async ({ pageObjects, esClient, scoutSpace }) => {
-        const { discover, lookupIndexEditor } = pageObjects;
+        const { discover, esqlEditor } = pageObjects;
+        const { lookupIndexEditor } = esqlEditor;
         const indexName = getIndexName(scoutSpace.id);
 
         const setRowValues = async (rowIndex: number, rowNumber: number) => {
@@ -65,7 +66,6 @@ spaceTest.describe(
         };
 
         await lookupIndexEditor.openFromSuggestion(
-          discover.codeEditor,
           'from logstash-* | LOOKUP JOIN ',
           'Create lookup index'
         );

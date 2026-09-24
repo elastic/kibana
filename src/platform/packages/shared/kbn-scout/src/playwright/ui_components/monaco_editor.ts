@@ -103,14 +103,40 @@ export class KibanaCodeEditorWrapper {
    * across mode/tab transitions.
    */
   private async getEditorUriByTestSubj(dataTestSubjId: string): Promise<string> {
-    const uri = await this.page
-      .getByTestId(dataTestSubjId)
-      .locator('.monaco-editor[data-uri]')
-      .getAttribute('data-uri');
+    return this.getEditorUri(this.page.getByTestId(dataTestSubjId), `"${dataTestSubjId}"`);
+  }
+
+  private async getEditorUri(container: Locator, description: string): Promise<string> {
+    const uri = await container.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
     if (!uri) {
-      throw new Error(`Editor data-uri not found for container "${dataTestSubjId}"`);
+      throw new Error(`Editor data-uri not found for container ${description}`);
     }
     return uri;
+  }
+
+  /**
+   * Returns the index of the Monaco text model backing the editor rendered inside
+   * `container`, for use with the index-based methods of this class. Resolve it right
+   * before use: indexes shift as other editors mount and unmount.
+   */
+  async getModelIndexByContainer(container: Locator): Promise<number> {
+    const uri = await this.getEditorUri(container, container.toString());
+    const index = await this.page.evaluate((modelUri) => {
+      const monacoEnv = (window as any).MonacoEnvironment;
+
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      return (monacoEnv.monaco.editor.getModels() as MonacoModel[]).findIndex(
+        (model) => model.uri.toString() === modelUri
+      );
+    }, uri);
+
+    if (index === -1) {
+      throw new Error(`No Monaco editor model found for uri "${uri}"`);
+    }
+    return index;
   }
 
   /**

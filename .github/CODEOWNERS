@@ -1556,6 +1556,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/watchlist-entity-source @elastic/security-entity-analytics
 
 # Data Discovery
+/src/platform/packages/shared/kbn-scout/src/playwright/ui_components/esql_editor @elastic/kibana-discover @elastic/appex-qa
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_field_list.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_tabs.ts @elastic/kibana-discover

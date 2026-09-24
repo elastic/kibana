@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -58,7 +57,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     pageObjects,
     page,
   }) => {
-    const { dashboard, lens } = pageObjects;
+    const { dashboard, lens, esqlEditor } = pageObjects;
     // Scope reads to this embeddable — the dashboard also has a library metric with the same title.
     const inlineMetricPanel = dashboard.getPanelByEmbeddableId(
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
@@ -72,12 +71,9 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     await convertToEsqlViaModal({ pageObjects, page });
 
     await test.step('assert converted query and panel after convert', async () => {
-      const codeEditor = new KibanaCodeEditorWrapper(page);
-      await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-      await expect
-        .poll(() => codeEditor.getCodeEditorValue())
-        .toContain('static_max_value = 10000');
-      const query = await codeEditor.getCodeEditorValue();
+      await esqlEditor.waitReady();
+      await expect.poll(() => esqlEditor.getQuery()).toContain('static_max_value = 10000');
+      const query = await esqlEditor.getQuery();
       expect(query).toContain('FROM logstash-*');
       expect(query).toContain('AVG(bytes)');
       expect(query).toContain('?_tstart');
@@ -115,12 +111,8 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       );
       await expect(page.getByText('ES|QL Query Results')).toBeVisible();
       await expect(lens.applyFlyoutButton).toBeDisabled();
-
-      const codeEditor = new KibanaCodeEditorWrapper(page);
-      await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-      await expect
-        .poll(() => codeEditor.getCodeEditorValue())
-        .toContain('static_max_value = 10000');
+      await esqlEditor.waitReady();
+      await expect.poll(() => esqlEditor.getQuery()).toContain('static_max_value = 10000');
     });
   });
 
@@ -167,7 +159,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     pageObjects,
     page,
   }) => {
-    const { lens } = pageObjects;
+    const { lens, esqlEditor } = pageObjects;
 
     await openInlineEditorAndWaitVisible(
       pageObjects,
@@ -184,7 +176,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
     await expect(lens.workspace.convertToEsqlButton).toBeEnabled();
-    await expect(page.getByTestId('ESQLEditor')).toBeHidden();
+    await expect(esqlEditor.editor).toBeHidden();
   });
 
   test('should disable Convert to ES|QL button for visualizations saved to library', async ({
