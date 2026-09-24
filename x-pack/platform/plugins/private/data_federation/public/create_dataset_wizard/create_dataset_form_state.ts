@@ -69,7 +69,7 @@ export interface CreateDatasetFormValues {
 
 export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFormValues => ({
   format: '',
-  file_exclusions: [...DEFAULT_FILE_EXCLUSIONS],
+  file_exclusions: [],
   partition_detection: '',
   schema_resolution: '',
   partition_path: '',
@@ -85,7 +85,7 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   encoding: '',
   quote: '',
   escape: '',
-  column_prefix: DEFAULT_COLUMN_PREFIX,
+  column_prefix: '',
   trim_spaces: false,
   error_mode: '',
   max_errors: '',
@@ -113,10 +113,6 @@ const parseBooleanFormValue = (value: DatasetBooleanFormValue): boolean | undefi
   if (value === 'false') return false;
   return undefined;
 };
-
-const fileExclusionsEqualDefault = (value: readonly string[]): boolean =>
-  value.length === DEFAULT_FILE_EXCLUSIONS.length &&
-  DEFAULT_FILE_EXCLUSIONS.every((pattern, index) => value[index] === pattern);
 
 export const validateMaxErrors = (value: string): true | string => {
   if (!value?.trim()) return true;
@@ -177,10 +173,7 @@ export const buildDatasetSettingsFromFormValues = (
   if (settings.format) applied.format = settings.format;
 
   // Universal — applies under every format
-  if (
-    settings.file_exclusions.length > 0 &&
-    !fileExclusionsEqualDefault(settings.file_exclusions)
-  ) {
+  if (settings.file_exclusions.length > 0) {
     applied.file_exclusions = settings.file_exclusions;
   }
   if (settings.partition_detection) applied.partition_detection = settings.partition_detection;

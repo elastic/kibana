@@ -892,7 +892,10 @@ export const createDatasetWizardStrings = {
   ),
   settingsFileExclusionsDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.fileExclusions.description',
-    { defaultMessage: 'placeholder' }
+    {
+      defaultMessage:
+        'Patterns naming objects to drop from wildcard discovery. Default skips files starting with _ or . and _temporary/ and _delta_log/ directories. Setting replaces the default list entirely.',
+    }
   ),
   settingsPartitionDetectionDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.partitionDetection.description',

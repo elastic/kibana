@@ -12,8 +12,6 @@ import type {
 } from '../../common/dataset_types';
 import {
   emptyCreateDatasetSettingsFormValues,
-  DEFAULT_COLUMN_PREFIX,
-  DEFAULT_FILE_EXCLUSIONS,
   type CreateDatasetFormValues,
   type CreateDatasetSettingsFormValues,
   type DatasetBooleanFormValue,
@@ -58,7 +56,7 @@ const settingsToFormValues = (
     ...defaults,
     format: (s.format ?? '') as DatasetFormatFormValue,
     // Universal
-    file_exclusions: s.file_exclusions ? [...s.file_exclusions] : [...DEFAULT_FILE_EXCLUSIONS],
+    file_exclusions: s.file_exclusions ? [...s.file_exclusions] : [...defaults.file_exclusions],
     partition_detection: (s.partition_detection ?? '') as DatasetPartitionDetectionFormValue,
     schema_resolution: (s.schema_resolution ?? '') as DatasetSchemaResolutionFormValue,
     partition_path: s.partition_path ?? '',
@@ -73,7 +71,7 @@ const settingsToFormValues = (
     datetime_format: s.datetime_format ?? '',
     null_value: s.null_value ?? '',
     encoding: s.encoding ?? defaults.encoding,
-    column_prefix: s.column_prefix ?? DEFAULT_COLUMN_PREFIX,
+    column_prefix: s.column_prefix ?? defaults.column_prefix,
     quote: s.quote ?? '',
     escape: s.escape ?? '',
     trim_spaces: s.trim_spaces ?? false,

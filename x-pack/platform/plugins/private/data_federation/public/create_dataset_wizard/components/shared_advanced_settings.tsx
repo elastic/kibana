@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiCode, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
@@ -28,18 +28,10 @@ const helpTextDefault = (valueLabel: string) => (
   </EuiText>
 );
 
-const fileExclusionsDefaultHelp = (
-  <EuiText size="xs" color="subdued">
-    {createDatasetWizardStrings.settingsFileExclusionsHelp}{' '}
-    {DEFAULT_FILE_EXCLUSIONS.map((pattern, index) => (
-      <Fragment key={pattern}>
-        {index > 0 ? ', ' : null}
-        <EuiCode>{pattern}</EuiCode>
-      </Fragment>
-    ))}{' '}
-    {createDatasetWizardStrings.byDefaultSuffix}
-  </EuiText>
-);
+const fileExclusionsDefaultValueLabel = `[${DEFAULT_FILE_EXCLUSIONS.map((pattern) =>
+  JSON.stringify(pattern)
+).join(', ')}]`;
+const fileExclusionsDefaultHelp = helpTextDefault(fileExclusionsDefaultValueLabel);
 
 export function SharedAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const { field: partitionPathField } = useController({
