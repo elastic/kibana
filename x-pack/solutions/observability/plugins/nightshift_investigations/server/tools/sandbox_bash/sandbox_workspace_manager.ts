@@ -50,7 +50,13 @@ export const createSandboxWorkspaceManager = ({
         : undefined;
 
       try {
-        await writeConnectorManifest({ session, callContext, getActionsClient, logger });
+        await writeConnectorManifest({
+          session,
+          callContext,
+          getActionsClient,
+          getSandboxEnvVarDefinitions: actions?.getSandboxEnvVarDefinitions,
+          logger,
+        });
         lastConnectorIds.set(session, currentKey);
       } catch (err) {
         logger.warn(`Connector manifest write failed: ${(err as Error).message}`);

@@ -55,6 +55,7 @@ const createStartMock = () => {
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
     getAllTypes: jest.fn(),
+    getSandboxEnvVarDefinitions: jest.fn(),
     listTypes: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
     getActionsClientWithRequestInSpace: jest.fn().mockResolvedValue(actionsClientMock.create()),

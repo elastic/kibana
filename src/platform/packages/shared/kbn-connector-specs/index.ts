@@ -38,7 +38,11 @@ export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
   MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './src/specs/inbound_webhook/constants';
-export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
+export {
+  isToolAction,
+  TEST_CONNECTOR_SUB_ACTION,
+  getSandboxEnvVarDeclarationErrors,
+} from './src/connector_spec';
 export type {
   ConnectorIngressContext,
   EventDefinition,

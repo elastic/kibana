@@ -192,8 +192,65 @@ describe('createConnectorCredentialResolver', () => {
 
     expect(result).toEqual({
       errorMessage: expect.stringContaining(
-        `Connector '${CONNECTOR_ID}' is not a preconfigured connector`
+        `Connector '${CONNECTOR_ID}' cannot be used from the sandbox`
       ),
+    });
+  });
+
+  describe('sandbox-enabled connector types', () => {
+    const sandboxEnvVars = {
+      env: { GH_TOKEN: TOKEN, GITHUB_API_URL: 'https://api.github.com' },
+      sensitiveValues: [TOKEN, 'short'],
+    };
+
+    const setupSandboxConnector = () => {
+      const context = setup({
+        connector: createConnector({ isPreconfigured: false }),
+        inMemory: false,
+      });
+      context.actions.getSandboxEnvVarDefinitions.mockReturnValue({
+        GH_TOKEN: { description: 'token', sensitive: true },
+        GITHUB_API_URL: { description: 'url', sensitive: false },
+      });
+      context.actionsClient.getSandboxEnvVars.mockResolvedValue(sandboxEnvVars);
+      return context;
+    };
+
+    it('injects the env vars the connector type declares, for saved connectors too', async () => {
+      const { resolve, actionsClient } = setupSandboxConnector();
+
+      const result = await resolve(CONNECTOR_ID, createCallContext());
+
+      expect(result).toEqual({
+        env: {
+          CONNECTOR_ID,
+          CONNECTOR_TYPE: '.github',
+          GH_TOKEN: TOKEN,
+          GITHUB_API_URL: 'https://api.github.com',
+        },
+        // Very short values are not redacted: they would produce false positives in output.
+        secretValues: [TOKEN],
+      });
+      expect(actionsClient.getSandboxEnvVars).toHaveBeenCalledWith(CONNECTOR_ID);
+    });
+
+    it('does not request env vars for connectors outside the agent allow-list', async () => {
+      const { resolve, actionsClient } = setupSandboxConnector();
+
+      await resolve(CONNECTOR_ID, createCallContext(['other-connector']));
+
+      expect(actionsClient.getSandboxEnvVars).not.toHaveBeenCalled();
+    });
+
+    it('surfaces failures from the actions plugin', async () => {
+      const { resolve, actionsClient } = setupSandboxConnector();
+      actionsClient.getSandboxEnvVars.mockRejectedValue(new Error('Unauthorized to execute'));
+
+      const result = await resolve(CONNECTOR_ID, createCallContext());
+
+      expect(result).toEqual({
+        errorMessage: expect.stringContaining('Unauthorized to execute'),
+      });
     });
   });
 

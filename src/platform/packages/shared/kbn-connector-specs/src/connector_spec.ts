@@ -78,6 +78,7 @@ export interface ConnectorMetadata {
     | 'workflows'
     | 'agentBuilder'
     | 'contextEngine'
+    | 'sandbox'
   >;
 }
 
@@ -363,6 +364,76 @@ export interface ConnectorTest {
 }
 
 // ============================================================================
+// SANDBOX
+// ============================================================================
+
+/** Env var names must be valid POSIX shell identifiers in upper case. */
+export const SANDBOX_ENV_VAR_NAME_PATTERN = /^[A-Z_][A-Z0-9_]*$/;
+
+/** Env var names a connector must not declare: the sandbox tooling owns them. */
+export const RESERVED_SANDBOX_ENV_VAR_NAMES: readonly string[] = [
+  'PATH',
+  'HOME',
+  'SHELL',
+  'USER',
+  'PWD',
+  'CONNECTOR_ID',
+  'CONNECTOR_TYPE',
+];
+
+const RESERVED_SANDBOX_ENV_VAR_PREFIXES: readonly string[] = ['LD_', 'CONNECTOR_'];
+
+export interface SandboxEnvVarDefinition {
+  /** Shown to the agent in the sandbox connector manifest. */
+  description: string;
+  /** Sensitive values are redacted from sandbox command output. */
+  sensitive: boolean;
+}
+
+export interface ConnectorSandboxContext<
+  Config = Record<string, unknown>,
+  Secrets = Record<string, unknown>
+> {
+  config: Config;
+  secrets: Secrets;
+  log: Logger;
+}
+
+/**
+ * Exposes a connector to agent sandboxes as environment variables. Names and sensitivity are
+ * declared statically so they can be described without decrypting the connector; `getEnvVars`
+ * must return exactly the declared names.
+ */
+export interface ConnectorSandboxSpec<
+  Config = Record<string, unknown>,
+  Secrets = Record<string, unknown>
+> {
+  envVars: Record<string, SandboxEnvVarDefinition>;
+  getEnvVars: (ctx: ConnectorSandboxContext<Config, Secrets>) => Promise<Record<string, string>>;
+}
+
+/** Returns the problems with a sandbox env var declaration; empty when it is valid. */
+export const getSandboxEnvVarDeclarationErrors = (
+  envVars: Record<string, SandboxEnvVarDefinition>
+): string[] => {
+  const names = Object.keys(envVars);
+  if (names.length === 0) return ['at least one env var must be declared'];
+
+  return names.flatMap((name) => {
+    if (!SANDBOX_ENV_VAR_NAME_PATTERN.test(name)) {
+      return [`"${name}" must match ${SANDBOX_ENV_VAR_NAME_PATTERN}`];
+    }
+    if (
+      RESERVED_SANDBOX_ENV_VAR_NAMES.includes(name) ||
+      RESERVED_SANDBOX_ENV_VAR_PREFIXES.some((prefix) => name.startsWith(prefix))
+    ) {
+      return [`"${name}" is reserved`];
+    }
+    return [];
+  });
+};
+
+// ============================================================================
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
@@ -415,6 +486,9 @@ export interface ConnectorSpec {
   // included in the connector's agent attachment representation so the LLM
   // has richer context about how to use the connector's sub-actions.
   skill?: string;
+
+  // Required when `metadata.supportedFeatureIds` includes 'sandbox', forbidden otherwise.
+  sandbox?: ConnectorSandboxSpec;
 }
 
 // ============================================================================

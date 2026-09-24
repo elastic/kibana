@@ -42,6 +42,7 @@ export type {
 } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { SandboxEnvVars } from './application/connector/methods/get_sandbox_env_vars';
 export { RelayRequestError } from './lib/relay';
 export type {
   RelayBinding,

@@ -14,6 +14,7 @@ const createActionTypeRegistryMock = () => {
     get: jest.fn(),
     list: jest.fn(),
     getAllTypes: jest.fn(),
+    getSandboxEnvVarDefinitions: jest.fn(),
     ensureActionTypeEnabled: jest.fn(),
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),

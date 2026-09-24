@@ -100,7 +100,37 @@ export const GithubConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine', 'sandbox'],
+  },
+
+  sandbox: {
+    envVars: {
+      GH_TOKEN: {
+        description: 'GitHub token, picked up automatically by the `gh` CLI.',
+        sensitive: true,
+      },
+      GITHUB_TOKEN: {
+        description: 'Same token as GH_TOKEN, for tools that read GITHUB_TOKEN.',
+        sensitive: true,
+      },
+      GITHUB_API_URL: {
+        description: 'GitHub REST API base URL.',
+        sensitive: false,
+      },
+    },
+    getEnvVars: async ({ secrets }) => {
+      // OAuth access tokens live in the connector token store, not in the connector secrets.
+      if (secrets.authType !== 'bearer' || typeof secrets.token !== 'string') {
+        throw new Error(
+          'Only GitHub connectors using a Personal Access Token can be used from the sandbox.'
+        );
+      }
+      return {
+        GH_TOKEN: secrets.token,
+        GITHUB_TOKEN: secrets.token,
+        GITHUB_API_URL: GITHUB_API_BASE,
+      };
+    },
   },
 
   auth: {

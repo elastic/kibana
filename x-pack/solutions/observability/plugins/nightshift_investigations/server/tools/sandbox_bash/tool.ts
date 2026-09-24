@@ -38,7 +38,7 @@ const sandboxBashSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and secrets are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_SECRET_<KEY> environment variables, and are gone when the command exits.'
+      'Connector whose credentials this command needs. Its environment variables (listed per connector in /workspace/connectors.md) are exposed to this command only, and are gone when the command exits.'
     ),
 });
 
@@ -56,7 +56,7 @@ export const createSandboxBashTool = ({
   id: SANDBOX_BASH_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."`).',
+    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the environment variables listed there for that connector are then available to that single command (e.g. `gh api /user` with a GitHub connector, which reads $GH_TOKEN).',
   tags: ['sandbox', 'bash'],
   schema: sandboxBashSchema,
   annotations: {
