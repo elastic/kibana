@@ -19,10 +19,13 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { isMac } from '@kbn/shared-ux-utility';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { useStartInvestigation } from '../hooks/use_start_investigation';
 
 export const START_INVESTIGATION_PANEL_ID = 'nightshiftStartInvestigationPanel';
+
+const SUBMIT_SHORTCUT_LABEL = isMac ? '⌘ + Enter' : 'Ctrl + Enter';
 
 export interface StartInvestigationPanelProps {
   onClose: () => void;
@@ -73,7 +76,8 @@ export function StartInvestigationPanel({
           defaultMessage: 'What should be investigated?',
         })}
         helpText={i18n.translate('xpack.nightshift.startInvestigation.inputHelpText', {
-          defaultMessage: 'Press Cmd/Ctrl + Enter to start the investigation.',
+          defaultMessage: 'Press {keyboardShortcut} to start the investigation.',
+          values: { keyboardShortcut: SUBMIT_SHORTCUT_LABEL },
         })}
       >
         <EuiTextArea
