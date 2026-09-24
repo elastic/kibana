@@ -9,13 +9,11 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
-import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
-import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
@@ -114,20 +112,14 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('grants the impact capabilities from the top-level all privilege', () => {
+    it('leaves impact off the base privileges until it needs its own', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
-      expect(privileges.all.api).toEqual([IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE]);
-      expect(privileges.all.ui).toEqual([IMPACT_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_MANAGE]);
-    });
-
-    it('withholds manage from read, so a reader cannot attach impact', () => {
-      const { features } = setupPlugin();
-      const { privileges } = registeredFeature(features);
-
-      expect(privileges.read.api).toEqual([IMPACT_API_PRIVILEGE_READ]);
-      expect(privileges.read.ui).toEqual([IMPACT_UI_CAPABILITY_SHOW]);
+      expect(privileges.all.api).toEqual([]);
+      expect(privileges.all.ui).toEqual([]);
+      expect(privileges.read.api).toEqual([]);
+      expect(privileges.read.ui).toEqual([]);
     });
 
     it('keeps escalations in a sub-feature, joined to the base levels by includeIn', () => {

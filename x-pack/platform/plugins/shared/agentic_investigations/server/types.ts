@@ -48,8 +48,9 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   /**
-   * Request-scoped impact reads. Checks `read_impact` and derives the space
-   * from the request, because in-process callers bypass route `security.authz`.
+   * Request-scoped impact reads. Checks the investigations manage privilege and
+   * derives the space from the request, because in-process callers bypass
+   * route `security.authz`.
    */
   getImpactClient: (request: KibanaRequest) => ImpactReadClient;
   getEscalationsService: () => EscalationsService;

@@ -7,14 +7,16 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from '../constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
 import { ImpactForbiddenError } from './errors/impact_forbidden_error';
 
 /**
- * The same privileges the Impact routes require, checked against a principal
+ * The same privilege the Impact routes require, checked against a principal
  * that did not arrive through a route — a workflow execution or an in-process
- * caller. The feature declares the bare operation name, so it has to be turned
- * into its `api:` action before `checkPrivileges` will recognise it.
+ * caller. Impact has no privilege of its own yet, so reads and writes both use
+ * investigations manage. The feature declares the bare operation name, so it
+ * has to be turned into its `api:` action before `checkPrivileges` will
+ * recognise it.
  */
 export interface ImpactPrivilegesDeps {
   getSecurity: () => Promise<SecurityPluginStart | undefined>;
@@ -60,7 +62,9 @@ export const createImpactPrivilegesChecker = ({
   };
 
   return {
-    assertCanManage: (request) => assertPrivilege(request, IMPACT_API_PRIVILEGE_MANAGE, 'write'),
-    assertCanRead: (request) => assertPrivilege(request, IMPACT_API_PRIVILEGE_READ, 'read'),
+    assertCanManage: (request) =>
+      assertPrivilege(request, INVESTIGATIONS_API_PRIVILEGE_MANAGE, 'write'),
+    assertCanRead: (request) =>
+      assertPrivilege(request, INVESTIGATIONS_API_PRIVILEGE_MANAGE, 'read'),
   };
 };

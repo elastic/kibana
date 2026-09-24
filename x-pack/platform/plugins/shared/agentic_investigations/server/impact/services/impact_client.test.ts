@@ -46,7 +46,7 @@ describe('createImpactClient', () => {
     expect(listByConversationIds).toHaveBeenCalledWith(['c1', 'c2'], 'space-from-request');
   });
 
-  it('should refuse before searching when the principal lacks read_impact', async () => {
+  it('should refuse before searching when the principal cannot manage investigations', async () => {
     const { client, listByConversationIds, getSpaceId } = createClient({
       assertCanRead: jest.fn().mockRejectedValue(new ImpactForbiddenError('nope')),
     });
