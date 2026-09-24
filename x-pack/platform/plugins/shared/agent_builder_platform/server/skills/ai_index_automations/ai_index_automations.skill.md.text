@@ -74,9 +74,8 @@ same registries. Nothing will correct a mistake in one of these except a failing
 written out here — this skill is the only place they exist.
 
 **`context-engine.createKi`** writes a new indicator and outputs `id`, the document id it wrote.
-Given `verifiers`, it runs them first and outputs `verification` (`passed` plus a per-verifier
-`results` array of `{ verifier, passed, reason }`); when any fails, nothing is written and `id` is
-absent.
+Given `verifiers`, it runs them first and outputs `verification` (`passed` plus per-verifier
+`results`); when any fails, nothing is written and `id` is absent.
 
 ```yaml
 - name: write_ki
@@ -87,7 +86,6 @@ absent.
     verifiers: # optional; the write is skipped when any fails
       - esql-valid-syntax
       - esql-valid-runtime
-    refresh: false # optional; true waits until the KI is searchable, for a same-run update/delete
     ki: # required
       type: 'index_metadata' # required
       title: 'logs-* index profile' # required
@@ -110,9 +108,9 @@ for `createKi`.
 **`context-engine.deleteKi`** takes `ai_index_id` and `ki_id` and outputs `id`. It fails when the
 indicator does not exist. This is what pilot cleanup runs.
 
-Both look the indicator up by search, so they only see writes that have been refreshed. They wait
-for their own refresh by default (`refresh: true`); `createKi` does not, so a workflow that creates
-an indicator and then updates or deletes it in the same run must pass `refresh: true` to the create.
+Both find the indicator by search, so they only see refreshed writes. `createKi` does not refresh
+by default; a workflow that creates and then updates or deletes an indicator in the same run must
+pass `refresh: true` to the create.
 
 **`context-engine.verifyKi`** takes a partial `ki` and a non-empty, duplicate-free `verifiers` list,
 and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }` without
@@ -227,8 +225,9 @@ The three that come up most ship as templates. **Start from the nearest template
 never write one of these from nothing. A template is a complete workflow that runs as it stands
 once its `consts` block is filled in, and it already carries the parts a fresh draft gets wrong:
 the grounding, the prompt's output schema, the single `data.set` that builds the indicator so
-verification and the write see the same document, the `verifiers` on `createKi`, the `ki_id` scheme that
-makes a re-run replace rather than duplicate, and the `attributes.esql` wiring the verifiers read.
+verification and the write see the same document, the `verifiers` on `createKi`, the `ki_id`
+scheme that makes a re-run replace rather than duplicate, and the `attributes.esql` wiring the
+verifiers read.
 
 Each template opens with a comment saying what to change and what to leave, and declares what
 varies in `consts` at the top — the AI Index id, the source index, the fields the strategy turns
@@ -349,9 +348,9 @@ automation that has been run. Read it, fill in its `consts` block, and add the g
 strategy needs. That is the draft. Authoring one from nothing is a long generate-and-repair loop
 that arrives somewhere worse, because the template already encodes the things a fresh draft gets
 wrong and a run does not catch: the single `data.set` that builds the indicator so verification and
-the write see the same document, the `verifiers` on `createKi`, the `ki_id` scheme that makes a re-run
-replace rather than duplicate, and the `attributes.esql` wiring that decides what the verifiers
-actually check.
+the write see the same document, the `verifiers` on `createKi`, the `ki_id` scheme that makes a
+re-run replace rather than duplicate, and the `attributes.esql` wiring that decides what the
+verifiers actually check.
 
 Each template opens with a comment saying what to change and what to leave. Take it literally.
 Rewriting the parts it tells you to leave is how a draft acquires faults the template does not

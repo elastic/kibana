@@ -248,8 +248,7 @@ steps:
           when_to_use: "{{ steps.generate_index_profile.output.content.when_to_use }}"
 
   # `ki_id` is the index name, so a re-run replaces this profile rather than appending a
-  # second copy. On a data-stream destination a re-run appends a new revision instead. The
-  # verifiers run before the write; a KI that fails them is not written.
+  # second copy. On a data-stream destination a re-run appends a new revision instead.
   - name: create_ki
     type: context-engine.createKi
     with:

@@ -230,7 +230,7 @@ steps:
       # `ki_id` pairs the index with the source document id, so a re-run replaces that
       # document's KI rather than appending a second copy, and two indices holding the same
       # document id do not collide. On a data-stream destination a re-run appends a new revision
-      # instead. The verifiers run before the write; a KI that fails them is not written.
+      # instead.
       - name: create_ki
         type: context-engine.createKi
         with:
