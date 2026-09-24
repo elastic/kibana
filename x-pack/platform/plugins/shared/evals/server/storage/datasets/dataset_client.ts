@@ -941,6 +941,71 @@ export class DatasetClient {
     }
   }
 
+  /**
+   * Deletes the given examples from a dataset in one bulk request, reporting ids
+   * that aren't in it as not found. Undefined when the dataset isn't in this space.
+   */
+  async deleteExamples(
+    datasetId: string,
+    exampleIds: string[]
+  ): Promise<{ deleted: string[]; notFound: string[] } | undefined> {
+    if (!(await this.datasetExists(datasetId))) {
+      return undefined;
+    }
+
+    const requestedIds = dedupe(exampleIds);
+    if (requestedIds.length === 0) {
+      return { deleted: [], notFound: [] };
+    }
+
+    const searchResponse = await this.examplesStorage.search({
+      track_total_hits: false,
+      size: requestedIds.length,
+      _source: ['dataset_id'],
+      query: {
+        bool: {
+          filter: [{ term: { dataset_id: datasetId } }, { terms: { _id: requestedIds } }],
+        },
+      },
+    });
+
+    const ownedIds = searchResponse.hits.hits
+      .filter((hit): hit is typeof hit & { _id: string } => typeof hit._id === 'string')
+      .map((hit) => hit._id);
+
+    const deleted: string[] = [];
+    const notFound = requestedIds.filter((id) => !ownedIds.includes(id));
+
+    if (ownedIds.length > 0) {
+      const bulkResponse = await this.examplesStorage.bulk({
+        operations: ownedIds.map((id) => ({ delete: { _id: id } })),
+        throwOnFail: false,
+      });
+
+      let failed = 0;
+      bulkResponse.items.forEach((item, index) => {
+        const status = item.delete?.status ?? 200;
+        if (status === 404) {
+          notFound.push(ownedIds[index]);
+        } else if (status >= 400) {
+          failed += 1;
+        } else {
+          deleted.push(ownedIds[index]);
+        }
+      });
+
+      if (deleted.length > 0) {
+        await this.touchDataset(datasetId);
+      }
+
+      if (failed > 0) {
+        throw new Error(`Failed to delete ${failed} examples from dataset "${datasetId}"`);
+      }
+    }
+
+    return { deleted, notFound };
+  }
+
   async deleteExamplesByDatasetId(datasetId: string): Promise<{ deleted: number }> {
     const searchResponse = await this.examplesStorage.search({
       track_total_hits: true,

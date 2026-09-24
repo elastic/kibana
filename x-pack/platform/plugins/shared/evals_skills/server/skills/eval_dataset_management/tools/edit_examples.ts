@@ -19,7 +19,6 @@ import {
   formatExamplesPreview,
   inlineCode,
   isDatasetExamplesLimitExceededError,
-  isExampleNotFoundError,
   loadDatasetClient,
   otherResult,
   toConfirmationMessage,
@@ -27,7 +26,6 @@ import {
   withDatasetLookup,
 } from './tool_utils';
 
-/** Each removed id is a separate delete, so a single call stays small. */
 const MAX_REMOVED_EXAMPLES = 100;
 
 const schema = z
@@ -101,8 +99,7 @@ export const editExamplesTool = (
     { dataset_id: datasetId, add = [], remove_ids: removeIds = [] },
     { request, spaceId }
   ) => {
-    const removed: string[] = [];
-    const notFound: string[] = [];
+    let removed: string[] = [];
 
     try {
       const loaded = await loadDatasetClient(
@@ -115,21 +112,11 @@ export const editExamplesTool = (
         return loaded.error;
       }
 
-      if (!(await loaded.client.datasetExists(datasetId))) {
+      const removal = await loaded.client.deleteExamples(datasetId, removeIds);
+      if (!removal) {
         return datasetNotFoundResult(datasetId);
       }
-
-      for (const exampleId of new Set(removeIds)) {
-        try {
-          await loaded.client.deleteExample(exampleId, datasetId);
-          removed.push(exampleId);
-        } catch (error) {
-          if (!isExampleNotFoundError(error)) {
-            throw error;
-          }
-          notFound.push(exampleId);
-        }
-      }
+      removed = removal.deleted;
 
       const { added, conflicts } = await loaded.client.addExamples(datasetId, add, {
         rejectDuplicates: false,
@@ -138,7 +125,7 @@ export const editExamplesTool = (
       return otherResult({
         dataset_id: datasetId,
         removed,
-        not_found: notFound,
+        not_found: removal.notFound,
         added,
         skipped_duplicates: conflicts,
       });

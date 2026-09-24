@@ -39,7 +39,7 @@ interface DatasetClientMock {
   create: jest.Mock;
   upsert: jest.Mock;
   addExamples: jest.Mock;
-  deleteExample: jest.Mock;
+  deleteExamples: jest.Mock;
   resolveByName: jest.Mock;
   copy: jest.Mock;
   delete: jest.Mock;
@@ -69,7 +69,7 @@ const createDeps = (
     create: jest.fn(),
     upsert: jest.fn(),
     addExamples: jest.fn(),
-    deleteExample: jest.fn(),
+    deleteExamples: jest.fn().mockResolvedValue({ deleted: [], notFound: [] }),
     resolveByName: jest.fn(),
     copy: jest.fn(),
     delete: jest.fn(),
@@ -105,12 +105,6 @@ const securityWith = (hasAllRequested: boolean, datasetClient?: DatasetClientMoc
 const alreadyExistsError = (name: string) => {
   const error = new Error(`Dataset with name "${name}" already exists`);
   error.name = 'DatasetAlreadyExistsError';
-  return error;
-};
-
-const notFoundError = (exampleId: string) => {
-  const error = new Error(`Example not found: ${exampleId}`);
-  error.name = 'ExampleNotFoundError';
   return error;
 };
 
@@ -475,11 +469,9 @@ describe('editExamplesTool', () => {
   it('removes examples first, then adds, and reports both', async () => {
     const { deps, datasetClient } = createDeps();
     const calls: string[] = [];
-    datasetClient.deleteExample.mockImplementation(async (exampleId: string) => {
-      calls.push(`delete:${exampleId}`);
-      if (exampleId === 'missing') {
-        throw notFoundError(exampleId);
-      }
+    datasetClient.deleteExamples.mockImplementation(async () => {
+      calls.push('delete');
+      return { deleted: ['e1'], notFound: ['missing'] };
     });
     datasetClient.addExamples.mockImplementation(async () => {
       calls.push('add');
@@ -493,7 +485,8 @@ describe('editExamplesTool', () => {
       )
     );
 
-    expect(calls).toEqual(['delete:e1', 'delete:missing', 'add']);
+    expect(calls).toEqual(['delete', 'add']);
+    expect(datasetClient.deleteExamples).toHaveBeenCalledWith('d1', ['e1', 'missing', 'e1']);
     expect(datasetClient.addExamples).toHaveBeenCalledWith('d1', examples, {
       rejectDuplicates: false,
     });
@@ -507,20 +500,18 @@ describe('editExamplesTool', () => {
     });
   });
 
-  it('reports what was already removed when an unexpected error stops it', async () => {
+  it('reports what was already removed when adding fails', async () => {
     const { deps, datasetClient } = createDeps();
-    datasetClient.deleteExample
-      .mockResolvedValueOnce(undefined)
-      .mockRejectedValueOnce(new Error('boom'));
+    datasetClient.deleteExamples.mockResolvedValue({ deleted: ['e1'], notFound: [] });
+    datasetClient.addExamples.mockRejectedValue(new Error('boom'));
 
     const result = firstResult(
       await editExamplesTool(deps).handler(
-        { dataset_id: 'd1', add: examples, remove_ids: ['e1', 'e2'] },
+        { dataset_id: 'd1', add: examples, remove_ids: ['e1'] },
         createContext()
       )
     );
 
-    expect(datasetClient.addExamples).not.toHaveBeenCalled();
     expect(result.type).toBe(ToolResultType.error);
     expect(result.data).toEqual({
       message: 'Failed to edit the examples of an evaluation dataset: boom',
@@ -546,7 +537,7 @@ describe('editExamplesTool', () => {
 
   it('refuses a dataset this space cannot see', async () => {
     const { deps, datasetClient } = createDeps();
-    datasetClient.datasetExists.mockResolvedValue(false);
+    datasetClient.deleteExamples.mockResolvedValue(undefined);
 
     const result = firstResult(
       await editExamplesTool(deps).handler(
@@ -555,7 +546,6 @@ describe('editExamplesTool', () => {
       )
     );
 
-    expect(datasetClient.deleteExample).not.toHaveBeenCalled();
     expect(datasetClient.addExamples).not.toHaveBeenCalled();
     expect(result.data.message).toBe('Evaluation dataset not found: d1');
   });

@@ -146,9 +146,6 @@ export const isDatasetAlreadyExistsError = (error: unknown): error is Error =>
 export const isDatasetExamplesLimitExceededError = (error: unknown): error is Error =>
   isEvalsError(error, 'DatasetExamplesLimitExceededError');
 
-export const isExampleNotFoundError = (error: unknown): error is Error =>
-  isEvalsError(error, 'ExampleNotFoundError');
-
 export const datasetNotFoundResult = (datasetId: string): ToolHandlerStandardReturn =>
   errorResult(`Evaluation dataset not found: ${datasetId}`);
 
