@@ -211,7 +211,7 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: { dashboardAttachmentId: previousAttachmentId },
               },
             },
           ],
