@@ -18,6 +18,8 @@ export const CLOUD_SERVICE_ACCOUNT_REALM_TYPE = '_cloud_service_account';
 /**
  * The kind of principal a request was authenticated as, with the backend variant where there is
  * one. Computed from an {@link AuthenticatedUser}; never persisted, so it is free to grow.
+ * `variant` uses one vocabulary on every arm: `stack` for credentials Elasticsearch issues itself,
+ * `uiam` for credentials issued by UIAM.
  *
  * Shares its vocabulary with the persisted `ServiceAccountWorkloadBinder` on purpose, but is a
  * distinct type: the binder is stored and must stay stable.
@@ -26,7 +28,7 @@ export type AuthenticatedPrincipal =
   | { type: 'user'; username: string; userProfileId?: string }
   | { type: 'anonymous'; username: string }
   | { type: 'api_key'; apiKeyId: string; variant: 'stack' | 'uiam' }
-  | { type: 'service_account'; serviceAccountId: string; variant: 'elasticsearch' | 'uiam' };
+  | { type: 'service_account'; serviceAccountId: string; variant: 'stack' | 'uiam' };
 
 const toUserPrincipal = (user: AuthenticatedUser): AuthenticatedPrincipal => ({
   type: 'user',
@@ -57,7 +59,7 @@ export function getAuthenticatedPrincipal(user: AuthenticatedUser): Authenticate
   const realmType = user.authentication_realm?.type;
 
   if (realmType === SERVICE_ACCOUNT_REALM_TYPE) {
-    return { type: 'service_account', serviceAccountId: user.username, variant: 'elasticsearch' };
+    return { type: 'service_account', serviceAccountId: user.username, variant: 'stack' };
   }
 
   if (realmType === CLOUD_SERVICE_ACCOUNT_REALM_TYPE) {

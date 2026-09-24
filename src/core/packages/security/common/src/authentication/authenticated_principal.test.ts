@@ -113,7 +113,7 @@ describe('getAuthenticatedPrincipal', () => {
     ).toEqual({
       type: 'service_account',
       serviceAccountId: 'kibana/nightshift-relay',
-      variant: 'elasticsearch',
+      variant: 'stack',
     });
   });
 
@@ -166,7 +166,7 @@ describe('getAuthenticatedPrincipal', () => {
     ).toEqual({
       type: 'service_account',
       serviceAccountId: 'elastic/kibana',
-      variant: 'elasticsearch',
+      variant: 'stack',
     });
   });
 

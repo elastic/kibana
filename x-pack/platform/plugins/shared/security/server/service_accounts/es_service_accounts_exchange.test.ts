@@ -405,7 +405,7 @@ describe('Elasticsearch service account token exchange', () => {
       expect(backend.getFakeRequestPrincipal(request)).toEqual({
         type: 'service_account',
         serviceAccountId: ACCOUNT_ID,
-        variant: 'elasticsearch',
+        variant: 'stack',
       });
     });
 

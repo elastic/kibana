@@ -114,7 +114,7 @@ apiTest.describe(
         tokenChanged: false,
         principal: {
           type: 'service_account',
-          variant: 'elasticsearch',
+          variant: 'stack',
           serviceAccountId: accountId,
         },
       });
@@ -141,12 +141,12 @@ apiTest.describe(
           tokenChanged: true,
           principal: {
             type: 'service_account',
-            variant: 'elasticsearch',
+            variant: 'stack',
             serviceAccountId: accountId,
           },
           renewedPrincipal: {
             type: 'service_account',
-            variant: 'elasticsearch',
+            variant: 'stack',
             serviceAccountId: accountId,
           },
         });

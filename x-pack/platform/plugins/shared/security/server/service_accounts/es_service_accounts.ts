@@ -481,7 +481,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   getFakeRequestPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null {
     const serviceAccountId = this.fakeRequests.getServiceAccountId(request);
     return serviceAccountId
-      ? { type: 'service_account', serviceAccountId, variant: 'elasticsearch' }
+      ? { type: 'service_account', serviceAccountId, variant: 'stack' }
       : null;
   }
 
