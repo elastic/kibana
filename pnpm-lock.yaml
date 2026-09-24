@@ -3226,6 +3226,9 @@ importers:
       '@kbn/saved-search-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/saved_search
+      '@kbn/schema-string-helpers':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-schema-string-helpers
       '@kbn/screenshot-mode-example-plugin':
         specifier: workspace:*
         version: link:examples/screenshot_mode_example
@@ -5375,6 +5378,12 @@ importers:
       '@kbn/dev-cli-runner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-cli-runner
+      '@kbn/dev-comments':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-dev-comments
+      '@kbn/dev-comments-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/private/dev_comments
       '@kbn/dev-proc-runner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-proc-runner
@@ -7606,6 +7615,8 @@ importers:
 
   src/platform/packages/private/kbn-data-streams: {}
 
+  src/platform/packages/private/kbn-dev-comments: {}
+
   src/platform/packages/private/kbn-discover-session-constants: {}
 
   src/platform/packages/private/kbn-dot-text: {}
@@ -8196,6 +8207,8 @@ importers:
 
   src/platform/packages/shared/kbn-saved-search-component: {}
 
+  src/platform/packages/shared/kbn-schema-string-helpers: {}
+
   src/platform/packages/shared/kbn-scout: {}
 
   src/platform/packages/shared/kbn-scout-synthtrace: {}
@@ -8511,6 +8524,8 @@ importers:
   src/platform/packages/shared/shared-ux/toolbar_selector: {}
 
   src/platform/plugins/private/advanced_settings: {}
+
+  src/platform/plugins/private/dev_comments: {}
 
   src/platform/plugins/private/event_annotation: {}
 
