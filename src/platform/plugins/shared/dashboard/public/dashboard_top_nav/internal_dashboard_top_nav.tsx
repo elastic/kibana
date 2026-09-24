@@ -376,7 +376,10 @@ export function InternalDashboardTopNav({
       return false;
     }
     const disabled =
-      (allDataViews?.length ?? 0) > 0 && !allDataViews?.some((dv) => dv.isTimeBased());
+      (allDataViews?.length ?? 0) > 0 &&
+      !allDataViews?.some(
+        (dv) => (dv.type !== 'esql' && dv.isTimeBased()) || (dv.type === 'esql' && dv.timeFieldName)
+      );
     return { disabled };
   }, [visibilityProps.showDatePicker, allDataViews]);
 
