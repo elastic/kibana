@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import type { FlyoutForm, FlyoutSystemApp } from '../fixtures';
@@ -17,7 +16,7 @@ const FORMS: FlyoutForm[] = ['component', 'service'];
 /** Both widgets hang the menu off child flyout B, the only footer that carries one. */
 test.describe(
   'Flyout System - footer action menu accessibility',
-  { tag: tags.stateful.classic },
+  { tag: ['@local-stateful-classic'] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import type { FlyoutForm } from '../fixtures';
@@ -25,7 +24,7 @@ const MAX_TAB_STOPS = 10;
 
 test.describe(
   'Flyout System - resizable flyout accessibility',
-  { tag: tags.stateful.classic },
+  { tag: ['@local-stateful-classic'] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
