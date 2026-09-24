@@ -55,9 +55,14 @@ apiTest.describe(
       if (config.isCloud) {
         return;
       }
-      await apiServices.spaces.delete(SPACE_ID);
-      await apiServices.spaces.delete(OTHER_SPACE_ID);
-      await setNightshiftEnabled(apiServices, null);
+      try {
+        await Promise.all([
+          apiServices.spaces.delete(SPACE_ID),
+          apiServices.spaces.delete(OTHER_SPACE_ID),
+        ]);
+      } finally {
+        await setNightshiftEnabled(apiServices, null);
+      }
     });
 
     apiTest('stores secrets and only ever returns their keys', async ({ apiClient }) => {
