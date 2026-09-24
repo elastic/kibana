@@ -48,4 +48,11 @@ describe('runScoutHook', () => {
       'must print'
     );
   });
+
+  it.each(['[]', '5', '"ok"', 'null', '{"env":[]}', '{"env":null}', '{"unexpected":{}}'])(
+    'rejects %s instead of treating it as "no env"',
+    (output) => {
+      expect(() => runScoutHook(repoRoot, writeHook(`echo '${output}'`), {})).toThrow('must print');
+    }
+  );
 });

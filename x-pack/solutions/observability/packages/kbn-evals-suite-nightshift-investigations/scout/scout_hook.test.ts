@@ -6,6 +6,8 @@
  */
 
 import { spawnSync } from 'child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import Path from 'path';
 
 const HOOK = Path.join(__dirname, 'scout_hook.sh');
@@ -96,5 +98,35 @@ describe('nightshift-investigations scout hook', () => {
 
   it('rejects input that is not a JSON object', () => {
     expect(runHook('not json').status).toBe(1);
+  });
+
+  it('never passes the API key or private key to jq as command-line arguments', () => {
+    // A jq shim records every argv it receives, then defers to the real jq.
+    const shimDir = mkdtempSync(Path.join(tmpdir(), 'scout-hook-jq-'));
+    const argvLog = Path.join(shimDir, 'argv.log');
+    const realJq = spawnSync('bash', ['-c', 'command -v jq'], { encoding: 'utf8' }).stdout.trim();
+    writeFileSync(
+      Path.join(shimDir, 'jq'),
+      `#!/usr/bin/env bash\nprintf '%s\\n' "$*" >> "${argvLog}"\nexec "${realJq}" "$@"\n`,
+      { mode: 0o755 }
+    );
+    try {
+      const { status } = runHook(
+        {
+          sandbox: {
+            ...SANDBOX,
+            apiKey: 'SECRET_API_KEY',
+            ssl: { ...SANDBOX.ssl, key: 'SECRET_PEM' },
+          },
+        },
+        { PATH: `${shimDir}:${process.env.PATH}` }
+      );
+      expect(status).toBe(0);
+      const argv = readFileSync(argvLog, 'utf8');
+      expect(argv).not.toContain('SECRET_API_KEY');
+      expect(argv).not.toContain('SECRET_PEM');
+    } finally {
+      rmSync(shimDir, { recursive: true, force: true });
+    }
   });
 });

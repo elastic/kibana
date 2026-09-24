@@ -58,24 +58,25 @@ if [[ -z "$certificate" || -z "$key" ]]; then
   exit 1
 fi
 
-jq -n \
-  --arg host "$host" \
-  --arg port "$port" \
-  --arg api_key "$api_key" \
-  --arg certificate "$certificate" \
-  --arg key "$key" \
-  --arg ca "$ca" \
-  --arg kibana_config "$script_dir/kibana.sandbox.yml" \
-  '{
+# Values reach jq through its environment, not `--arg`: argv is visible to any process listing,
+# while a process's environment is readable only by its owner.
+HOOK_HOST="$host" \
+  HOOK_PORT="$port" \
+  HOOK_API_KEY="$api_key" \
+  HOOK_CERTIFICATE="$certificate" \
+  HOOK_KEY="$key" \
+  HOOK_CA="$ca" \
+  HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
+  jq -n '{
     env: (({
-      SANDBOX_API_HOST: $host,
-      SANDBOX_API_PORT: $port,
-      SANDBOX_API_KEY: $api_key,
-      SANDBOX_CLIENT_CERT: $certificate,
-      SANDBOX_CLIENT_KEY: $key
+      SANDBOX_API_HOST: $ENV.HOOK_HOST,
+      SANDBOX_API_PORT: $ENV.HOOK_PORT,
+      SANDBOX_API_KEY: $ENV.HOOK_API_KEY,
+      SANDBOX_CLIENT_CERT: $ENV.HOOK_CERTIFICATE,
+      SANDBOX_CLIENT_KEY: $ENV.HOOK_KEY
     } | with_entries(select(.value != ""))) + {
       # kibana.sandbox.yml always references the CA; an empty value means no custom CA.
-      SANDBOX_CA_CERT: $ca,
-      SANDBOX_KIBANA_CONFIG: $kibana_config
+      SANDBOX_CA_CERT: $ENV.HOOK_CA,
+      SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
     })
   }'

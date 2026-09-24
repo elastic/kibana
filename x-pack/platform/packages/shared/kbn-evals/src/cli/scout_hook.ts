@@ -7,14 +7,14 @@
 
 import Path from 'path';
 import { spawnSync } from 'child_process';
+import { z } from '@kbn/zod/v4';
 
 const HOOK_TIMEOUT_MS = 60_000;
 
-const isStringRecord = (value: unknown): value is Record<string, string> =>
-  typeof value === 'object' &&
-  value !== null &&
-  !Array.isArray(value) &&
-  Object.values(value).every((entry) => typeof entry === 'string');
+// The whole output must be an object: `[]`, `5` or `"ok"` must not pass as "no env".
+const scoutHookOutputSchema = z.strictObject({
+  env: z.record(z.string(), z.string()).optional(),
+});
 
 /**
  * Runs a suite's `scoutHook` (a bash script) with the evals config JSON on stdin and returns the
@@ -23,11 +23,11 @@ const isStringRecord = (value: unknown): value is Record<string, string> =>
 export const runScoutHook = (
   repoRoot: string,
   hookPath: string,
-  config: unknown
+  config: object
 ): Record<string, string> => {
   const result = spawnSync('bash', [Path.resolve(repoRoot, hookPath)], {
     cwd: repoRoot,
-    input: JSON.stringify(config ?? {}),
+    input: JSON.stringify(config),
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'inherit'],
     timeout: HOOK_TIMEOUT_MS,
@@ -42,17 +42,15 @@ export const runScoutHook = (
     );
   }
 
-  let output: unknown;
+  let parsed: ReturnType<typeof scoutHookOutputSchema.safeParse>;
   try {
-    output = JSON.parse(result.stdout || '{}');
+    parsed = scoutHookOutputSchema.safeParse(JSON.parse(result.stdout || '{}'));
   } catch {
     throw new Error(`scoutHook ${hookPath} did not print JSON`);
   }
-
-  const { env = {} } = (output ?? {}) as Record<string, unknown>;
-  if (!isStringRecord(env)) {
+  if (!parsed.success) {
     throw new Error(`scoutHook ${hookPath} must print { "env"?: Record<string, string> }`);
   }
 
-  return env;
+  return parsed.data.env ?? {};
 };
