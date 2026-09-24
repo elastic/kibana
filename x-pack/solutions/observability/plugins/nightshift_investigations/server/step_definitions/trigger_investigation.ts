@@ -43,6 +43,13 @@ const inputSchema = z.object({
     .describe(
       'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
     ),
+  message: z
+    .string()
+    .max(MAX_TEXT_LENGTH)
+    .optional()
+    .describe(
+      'Prompt for the investigation agent. Falls back to a generic message derived from the subject when omitted.'
+    ),
 });
 
 export const triggerInvestigationStepDefinition = (
@@ -77,6 +84,7 @@ export const triggerInvestigationStepDefinition = (
         trigger_type: input.trigger_type ?? 'automatic',
         concurrency_key: input.concurrency_key,
         context: input.context,
+        message: input.message,
       });
       return { output: result };
     },
