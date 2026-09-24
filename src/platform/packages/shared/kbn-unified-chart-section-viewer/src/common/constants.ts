@@ -85,13 +85,12 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
 // OTel exemplars live in a parallel `exemplars-*` stream with the same dataset and namespace.
 export const METRICS_INDEX_PREFIX = 'metrics-';
 export const EXEMPLARS_INDEX_PREFIX = 'exemplars-';
-// Only `exemplars-*.otel-*` has a backing template; any other derived name is an HTTP 400.
+// Only `exemplars-*.otel-*` has a backing template; any other derived name results in an error.
 export const EXEMPLARS_OTEL_DATASET_MARKER = '.otel';
-// Shared exemplar document fields (elasticsearch#159849). `metric_name` holds the OTel name
-// without the `metrics.` prefix Kibana field names carry.
+// Shared exemplar document fields (elasticsearch#159849).
 export const EXEMPLARS_METRIC_NAME_FIELD = 'metric_name';
 export const EXEMPLARS_VALUE_FIELD = 'value';
-// Interim cap, replaced by per-bucket sampling in observability-dev#6205.
+// Temp cap, remove when fixing observability-dev#6205.
 export const EXEMPLARS_MAX_ROWS = 500;
 
 // Metrics grid sort options
