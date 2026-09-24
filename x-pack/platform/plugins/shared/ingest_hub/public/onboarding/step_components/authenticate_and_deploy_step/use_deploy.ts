@@ -21,6 +21,7 @@ import type { DeployGroup } from './deploy_groups';
 import { buildIacIntegrations } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
 import { useMiDeploy } from './use_mi_deploy';
+import { buildLiveStalePolicyIds, buildEffectivePendingCleanup } from './cleanup_reconciliation';
 
 export {
   getRegionFieldName,
@@ -162,16 +163,15 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
   const isAlreadyDeployed = useMemo(() => {
     if (deployGroups.length === 0) return false;
-    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
-
-    // Live-stale: policyIdsByInstance has entries for services no longer in deployGroups
-    // (e.g. user deselected from Step 1). Cleanup must run on the next Deploy click.
     const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-    if (Object.keys(policyIdsByInstance).some((id) => !activeInstanceIds.has(id))) return false;
-
+    // Live-stale: policyIdsByInstance has entries for services no longer in deployGroups.
+    const liveStalePolicyIds = buildLiveStalePolicyIds(
+      detectAndReviewStep.policyIdsByInstance ?? {},
+      activeInstanceIds
+    );
+    if (Object.keys(liveStalePolicyIds).length > 0) return false;
     // Explicit cleanup staged by removeDeployInstance (Step 4 deselection).
     if (Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0) return false;
-
     return deployGroups.every((group) =>
       group.members.every(({ instance }) => {
         const status = detectAndReviewStep.serviceStatuses[instance.instanceId];
@@ -186,12 +186,17 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   ]);
 
   const isCleanupOnly = useMemo(() => {
-    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
     const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-    const hasLiveStale = Object.keys(policyIdsByInstance).some((id) => !activeInstanceIds.has(id));
-    const hasPendingCleanup =
-      hasLiveStale || Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
-    if (!hasPendingCleanup) return false;
+    const liveStalePolicyIds = buildLiveStalePolicyIds(
+      detectAndReviewStep.policyIdsByInstance ?? {},
+      activeInstanceIds
+    );
+    const effectivePending = buildEffectivePendingCleanup(
+      liveStalePolicyIds,
+      detectAndReviewStep.pendingCleanupPolicyIds
+    );
+    if (Object.keys(effectivePending).length === 0) return false;
+    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
     return !deployGroups.some((group) =>
       group.members.some(
         ({ instance }) =>

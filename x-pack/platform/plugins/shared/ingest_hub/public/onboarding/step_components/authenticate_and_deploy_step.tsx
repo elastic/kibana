@@ -221,13 +221,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0 ||
     (detectAndReviewStep.ecfStacks?.length ?? 0) > 0;
 
-  const handleNext = useCallback(async () => {
+  // ── ECF stack metadata helpers ────────────────────────────────────────────────
+  const ecfStacks = useMemo(() => {
     const defaultNames: Record<string, string> = {
       unified: ECF_UNIFIED_STACK_NAME,
       otel: ECF_OTEL_STACK_NAME,
       crowdstrike: ECF_CROWDSTRIKE_STACK_NAME,
     };
-    const ecfStacks = ecfSectionProps.launchedFamilies
+    return ecfSectionProps.launchedFamilies
       .map((family) => {
         const version = ecfSectionProps.stackVersions[family];
         if (!version) return null;
@@ -238,11 +239,124 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
+  }, [ecfSectionProps.launchedFamilies, ecfSectionProps.stackVersions, ecfSectionProps.stackNames]);
 
-    const ecfStacksUnchanged =
+  const ecfStacksUnchanged = useMemo(
+    () =>
       detectAndReviewStep.ecfStacks !== undefined &&
-      JSON.stringify(ecfStacks) === JSON.stringify(detectAndReviewStep.ecfStacks);
+      JSON.stringify(ecfStacks) === JSON.stringify(detectAndReviewStep.ecfStacks),
+    [ecfStacks, detectAndReviewStep.ecfStacks]
+  );
 
+  // ── handleNext sub-handlers ───────────────────────────────────────────────────
+
+  // ECF-only: handleDeploy never runs for new deploys; create the SO here then navigate.
+  const handleEcfOnlyNext = useCallback(async () => {
+    setIsSavingSO(true);
+    // Reuse an existing deployment id (user clicked Back then Next again) rather than creating
+    // a second SO and orphaning the first.
+    const existingId = detectAndReviewStep.onboardingDeploymentId;
+    const deploymentId =
+      existingId ??
+      (await createDeployment({
+        provider: 'aws',
+        mechanisms: ['ecf'],
+        services: selectedServiceIds,
+        serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
+          string,
+          Record<string, unknown>
+        >,
+        globalRegion,
+        dataFormat,
+      }));
+    setIsSavingSO(false);
+    // Navigate first so onContinue uses the current history.location (not the stale closure
+    // location). persistDeploymentId then replaces the already-navigated URL to add ?deploymentId=,
+    // mirroring the order in useDeploy's handleDeploy for the managed-integration path.
+    onContinue();
+    if (deploymentId) {
+      // Always include mechanisms when updating — if reusing an existing MI deployment SO
+      // (existingId), this transitions it from ['managed_integration'] to ['ecf'].
+      // Clear connectorId and authMethod: those are MI-only fields and must not persist after
+      // the transition, otherwise getByConnectorId still returns this deployment for the old
+      // connector even though it no longer uses managed integrations.
+      await updateDeployment(deploymentId, {
+        mechanisms: ['ecf'],
+        connectorId: null,
+        authMethod: null,
+        // Always mark succeeded — the deployment is ECF-only now regardless of whether the
+        // stack metadata changed. Without this, a formerly-failed MI+ECF SO that had MI removed
+        // would remain 'failed' even though ECF stacks are in place.
+        status: 'succeeded',
+        ...(!ecfStacksUnchanged ? { ecfStacks } : {}),
+      });
+      if (!ecfStacksUnchanged) updateDetectAndReviewStep({ ecfStacks });
+      if (!existingId) persistDeploymentId(deploymentId);
+    }
+  }, [
+    ecfStacks,
+    ecfStacksUnchanged,
+    detectAndReviewStep.onboardingDeploymentId,
+    selectedServiceIds,
+    serviceVars,
+    awsServicesMap,
+    globalRegion,
+    dataFormat,
+    onContinue,
+    createDeployment,
+    updateDeployment,
+    updateDetectAndReviewStep,
+    persistDeploymentId,
+  ]);
+
+  // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
+  const handleMixedEcfNext = useCallback(async () => {
+    onContinue();
+    if (!ecfStacksUnchanged && detectAndReviewStep.onboardingDeploymentId) {
+      await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
+      updateDetectAndReviewStep({ ecfStacks });
+    }
+  }, [
+    ecfStacks,
+    ecfStacksUnchanged,
+    detectAndReviewStep.onboardingDeploymentId,
+    onContinue,
+    updateDeployment,
+    updateDetectAndReviewStep,
+  ]);
+
+  // MI / MI+ECF fallthrough: reconcile stale failed instances then navigate.
+  // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
+  // so policyIdsByInstance has no stale entry and isAlreadyDeployed returns true. Without this
+  // reconciliation the SO services list and local failedInstances retain the removed service.
+  const handleMiNext = useCallback(async () => {
+    const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+    const staleFailedIds = new Set(failedInstances.filter((id) => !activeInstanceIds.has(id)));
+    if (staleFailedIds.size > 0) {
+      // removeDeployInstances replaces the full serviceStatuses map (vs updateDetectAndReviewStep
+      // which merges), so it actually deletes the stale error chip for the deselected service.
+      // It also removes from failedInstances and deployErrors in the same write.
+      removeDeployInstances([...staleFailedIds]);
+      if (detectAndReviewStep.onboardingDeploymentId) {
+        const remainingFailed = failedInstances.filter((id) => !staleFailedIds.has(id));
+        await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
+          services: selectedServiceIds,
+          status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
+        });
+      }
+    }
+    onContinue();
+  }, [
+    deployGroups,
+    failedInstances,
+    removeDeployInstances,
+    detectAndReviewStep.onboardingDeploymentId,
+    selectedServiceIds,
+    updateDeployment,
+    onContinue,
+  ]);
+
+  const handleNext = useCallback(async () => {
     // If MI services were previously deployed but are no longer selected (e.g. user switched to
     // ECF-only), stale MI policies need cleanup. handleDeploy detects live-stale entries and runs
     // cleanup even when no new MI targets exist. onContinue is a no-op here so it won't navigate —
@@ -269,62 +383,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     // cleanup would still navigate and write mechanisms: ['ecf'], leaving active MI policies behind.
     if (miCleanupFailed) return;
 
-    // ECF-only: handleDeploy never runs for new deploys, so create the SO here then navigate.
-    if (miServiceIds.length === 0 && hasAnyEcf) {
-      setIsSavingSO(true);
-      // Reuse an existing deployment id (user clicked Back then Next again) rather
-      // than creating a second SO and orphaning the first.
-      const existingId = detectAndReviewStep.onboardingDeploymentId;
-      const deploymentId =
-        existingId ??
-        (await createDeployment({
-          provider: 'aws',
-          mechanisms: ['ecf'],
-          services: selectedServiceIds,
-          serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
-            string,
-            Record<string, unknown>
-          >,
-          globalRegion,
-          dataFormat,
-        }));
-
-      setIsSavingSO(false);
-      // Navigate first so onContinue uses the current history.location (not the stale closure
-      // location). persistDeploymentId then replaces the already-navigated URL to add ?deploymentId=,
-      // mirroring the order in useDeploy's handleDeploy for the managed-integration path.
-      onContinue();
-      if (deploymentId) {
-        // Always include mechanisms when updating — if reusing an existing MI deployment SO
-        // (existingId), this transitions it from ['managed_integration'] to ['ecf'].
-        // Clear connectorId and authMethod: those are MI-only fields and must not persist after
-        // the transition, otherwise getByConnectorId still returns this deployment for the old
-        // connector even though it no longer uses managed integrations.
-        await updateDeployment(deploymentId, {
-          mechanisms: ['ecf'],
-          connectorId: null,
-          authMethod: null,
-          // Always mark succeeded — the deployment is ECF-only now regardless of whether
-          // the stack metadata changed. Without this, a formerly-failed MI+ECF SO that had
-          // MI removed would remain 'failed' even though ECF stacks are in place.
-          status: 'succeeded',
-          ...(!ecfStacksUnchanged ? { ecfStacks } : {}),
-        });
-        if (!ecfStacksUnchanged) updateDetectAndReviewStep({ ecfStacks });
-        if (!existingId) persistDeploymentId(deploymentId);
-      }
-      return;
-    }
-
-    // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
-    if (hasAnyEcf && detectAndReviewStep.onboardingDeploymentId) {
-      onContinue();
-      if (!ecfStacksUnchanged) {
-        await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
-        updateDetectAndReviewStep({ ecfStacks });
-      }
-      return;
-    }
+    if (miServiceIds.length === 0 && hasAnyEcf) return handleEcfOnlyNext();
+    if (hasAnyEcf && detectAndReviewStep.onboardingDeploymentId) return handleMixedEcfNext();
 
     // Agent-based: deploy on Next, then navigate only if succeeded.
     if (showAgentSection) {
@@ -343,53 +403,21 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       return;
     }
 
-    // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
-    // so policyIdsByInstance has no stale entry and isAlreadyDeployed returns true. Without this
-    // reconciliation the SO services list and local failedInstances retain the removed service.
-    if (!isAgentBased) {
-      const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-      const staleFailedIds = new Set(failedInstances.filter((id) => !activeInstanceIds.has(id)));
-      if (staleFailedIds.size > 0) {
-        // removeDeployInstances replaces the full serviceStatuses map (vs updateDetectAndReviewStep
-        // which merges), so it actually deletes the stale error chip for the deselected service.
-        // It also removes from failedInstances and deployErrors in the same write.
-        removeDeployInstances([...staleFailedIds]);
-        if (detectAndReviewStep.onboardingDeploymentId) {
-          const remainingFailed = failedInstances.filter((id) => !staleFailedIds.has(id));
-          await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
-            services: selectedServiceIds,
-            status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
-          });
-        }
-      }
-    }
-
-    onContinue();
+    return handleMiNext();
   }, [
+    isAgentBased,
     miServiceIds.length,
     hasAnyEcf,
     showAgentSection,
     isAgentDone,
-    isAgentBased,
+    handleEcfOnlyNext,
+    handleMixedEcfNext,
+    handleMiNext,
     handleAgentDeployForNext,
     handleDeploy,
-    failedInstances,
-    deployGroups,
-    ecfSectionProps,
-    selectedServiceIds,
-    serviceVars,
-    awsServicesMap,
-    globalRegion,
-    dataFormat,
-    detectAndReviewStep.onboardingDeploymentId,
-    detectAndReviewStep.ecfStacks,
     detectAndReviewStep.policyIdsByInstance,
     detectAndReviewStep.pendingCleanupPolicyIds,
-    removeDeployInstances,
-    createDeployment,
-    updateDeployment,
-    persistDeploymentId,
-    updateDetectAndReviewStep,
+    detectAndReviewStep.onboardingDeploymentId,
     onContinue,
   ]);
 

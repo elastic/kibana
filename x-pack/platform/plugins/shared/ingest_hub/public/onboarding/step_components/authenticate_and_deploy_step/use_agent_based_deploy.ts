@@ -100,15 +100,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
   const isAlreadyDeployed = useMemo(() => {
     if (targets.length === 0) return false;
     const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
-
+    const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
     // Live-stale: policyIdsByInstance has entries for services no longer in targets (e.g. user
     // deselected from Step 1). The shared package policy must be updated to drop removed inputs.
-    const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
-    if (Object.keys(policyIdsByInstance).some((id) => !activeInstanceIds.has(id))) return false;
-
+    const liveStalePolicyIds = buildLiveStalePolicyIds(policyIdsByInstance, activeInstanceIds);
+    if (Object.keys(liveStalePolicyIds).length > 0) return false;
     // Explicit cleanup staged by removeDeployInstance (Step 4 deselection).
     if (Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0) return false;
-
     return targets.every((group) =>
       group.instanceIds.every((instanceId) => !!policyIdsByInstance[instanceId])
     );
