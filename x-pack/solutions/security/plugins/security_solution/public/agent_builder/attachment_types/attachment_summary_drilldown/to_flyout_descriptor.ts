@@ -80,12 +80,6 @@ const toEntityDescriptor = ({
   identifier,
   entityStoreId,
 }: EntityAttachmentIdentifier): FlyoutDescriptor | null => {
-  // Every entity flyout resolves the entity by its canonical `entity.id`; payloads written before
-  // Entity Store v2 do not carry one, and the display name alone is not enough to look one up.
-  if (!entityStoreId) {
-    return null;
-  }
-
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
 
   switch (identifierType) {
@@ -111,7 +105,11 @@ const toEntityDescriptor = ({
         scopeId,
       };
     default:
-      return { kind: FLYOUT_DESCRIPTOR_KIND.genericEntity, entityId: entityStoreId, scopeId };
+      // Unlike the named types, the generic entity flyout has no display-name lookup: it resolves
+      // by `entity.id` (or a raw document id) alone, so without one there is nothing to open.
+      return entityStoreId
+        ? { kind: FLYOUT_DESCRIPTOR_KIND.genericEntity, entityId: entityStoreId, scopeId }
+        : null;
   }
 };
 
@@ -119,6 +117,21 @@ const toEntityDescriptor = ({
  * Maps an attachment shown in the investigation flyout's attachment summary onto the flyout it
  * should open. Returns `null` when the payload cannot identify one, which leaves the row
  * read-only rather than opening an empty flyout.
+ *
+ * Where each identifier comes from, and why it is not simply a field read:
+ *
+ * | Type                       | Flyout needs        | Source                                     |
+ * | -------------------------- | ------------------- | ------------------------------------------ |
+ * | `security.alert`           | `_id` + `_index`    | parsed out of the `alert` JSON string       |
+ * | `security.attack_discovery`| `_id` + index       | `origin` + the attacks data view            |
+ * | `security.rule`            | saved object id     | the serialised rule, else `origin`          |
+ * | `security.entity`          | name, or `entity.id`| typed fields on the payload                 |
+ *
+ * Only `security.entity` states its identity in the schema. The alert and rule schemas declare
+ * their payload as `z.string()`, so a producer that writes prose instead of JSON validates
+ * cleanly and simply cannot be drilled into — the row stays read-only. Giving those types
+ * structured identity fields is the fix, and it belongs with the attachment types rather than
+ * here.
  */
 export const toFlyoutDescriptor = (
   attachment: UnknownAttachment,
@@ -143,9 +156,13 @@ export const toFlyoutDescriptor = (
         : null;
 
     case SecurityAgentBuilderAttachments.rule: {
-      // The rule flyout fetches by saved object id, which only the serialised rule carries —
-      // `origin` holds the `rule_id` signature instead.
-      const ruleId = parseRuleFromAttachment(attachment as RuleAttachment)?.id;
+      // The flyout fetches by saved object id, and producers disagree on where that lives. Most
+      // serialise the whole rule, so the id is in the payload; the rule-creation flows strip ids
+      // out of it and keep identity on `origin` instead. Reading the payload first matters
+      // because the one producer that puts a `rule_id` signature on `origin` — by-reference
+      // creation — has its rule resolved server-side, so the payload already carries the id and
+      // the fallback is never reached.
+      const ruleId = parseRuleFromAttachment(attachment as RuleAttachment)?.id ?? attachment.origin;
       return ruleId ? { kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId } : null;
     }
 

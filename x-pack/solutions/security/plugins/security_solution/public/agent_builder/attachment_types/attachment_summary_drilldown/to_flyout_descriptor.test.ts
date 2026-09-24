@@ -127,6 +127,33 @@ describe('toFlyoutDescriptor', () => {
       expect(descriptor).toEqual({ kind: 'rule', ruleId: 'rule-so-id' });
     });
 
+    it('falls back to the origin when the producer stripped ids out of the payload', () => {
+      // The rule-creation flows serialise the rule without its ids and keep identity on `origin`.
+      const descriptor = toFlyoutDescriptor(
+        attachmentOf(
+          SecurityAgentBuilderAttachments.rule,
+          { text: JSON.stringify({ name: 'A rule', type: 'query' }) },
+          { origin: 'rule-so-id' }
+        ),
+        INDICES
+      );
+
+      expect(descriptor).toEqual({ kind: 'rule', ruleId: 'rule-so-id' });
+    });
+
+    it('prefers the serialised rule id over the origin, which may hold a signature', () => {
+      const descriptor = toFlyoutDescriptor(
+        attachmentOf(
+          SecurityAgentBuilderAttachments.rule,
+          { text: JSON.stringify({ id: 'rule-so-id', rule_id: 'rule-signature' }) },
+          { origin: 'rule-signature' }
+        ),
+        INDICES
+      );
+
+      expect(descriptor).toEqual({ kind: 'rule', ruleId: 'rule-so-id' });
+    });
+
     it('stays read-only for a rule that has not been saved yet', () => {
       const descriptor = toFlyoutDescriptor(
         attachmentOf(SecurityAgentBuilderAttachments.rule, {
@@ -178,9 +205,25 @@ describe('toFlyoutDescriptor', () => {
       });
     });
 
-    it('stays read-only without a canonical entity id, which every entity flyout needs', () => {
+    it('opens a named entity by name alone, resolving the canonical id itself', () => {
+      // `entityId` is optional on the host/user/service flyouts: they resolve it through the EUID
+      // API, so a payload predating Entity Store v2 is still openable.
       const descriptor = toFlyoutDescriptor(
         entityAttachment({ identifierType: 'host', identifier: 'srv-file01' }),
+        INDICES
+      );
+
+      expect(descriptor).toEqual({
+        kind: 'host',
+        hostName: 'srv-file01',
+        entityId: undefined,
+        scopeId: expect.any(String),
+      });
+    });
+
+    it('stays read-only for a generic entity with no id, which has no name lookup', () => {
+      const descriptor = toFlyoutDescriptor(
+        entityAttachment({ identifierType: 'generic', identifier: 'some-asset' }),
         INDICES
       );
 
