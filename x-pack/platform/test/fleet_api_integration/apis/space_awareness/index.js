@@ -12,6 +12,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./agent_policies'));
     loadTestFile(require.resolve('./agent_policies_side_effects'));
     loadTestFile(require.resolve('./agents'));
+    loadTestFile(require.resolve('./agentless_cross_space'));
     loadTestFile(require.resolve('./enrollment_settings'));
     loadTestFile(require.resolve('./package_install'));
     loadTestFile(require.resolve('./space_settings'));
