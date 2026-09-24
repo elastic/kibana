@@ -288,13 +288,22 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         ...(!ecfStacksUnchanged ? { ecfStacks } : {}),
       });
       setIsSavingSO(false);
-      if (!writeSucceeded) return;
+      if (!writeSucceeded) {
+        // Persist the new SO's ID before returning so a retry can update the same record
+        // instead of creating another orphaned deployment. For MI→ECF (existingId set) the ID
+        // is already in the URL from the previous deploy, so only fresh ECF needs this.
+        if (!existingId) persistDeploymentId(deploymentId);
+        return;
+      }
       if (!ecfStacksUnchanged) updateDetectAndReviewStep({ ecfStacks });
-      if (!existingId) persistDeploymentId(deploymentId);
     } else {
       setIsSavingSO(false);
     }
     onContinue();
+    // persistDeploymentId after navigate: onContinue pushes a stale location snapshot, so
+    // calling persistDeploymentId before it would replace step 3's URL. Calling it after
+    // replaces the already-navigated step 4 URL instead, matching the MI deploy path.
+    if (deploymentId && !existingId) persistDeploymentId(deploymentId);
   }, [
     ecfStacks,
     ecfStacksUnchanged,
