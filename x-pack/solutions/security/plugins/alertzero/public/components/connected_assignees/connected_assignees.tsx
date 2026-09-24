@@ -38,9 +38,7 @@ const ConnectedAssigneesInner = ({
   const { manageEscalations, manageInvestigations } = useAgenticInvestigationsCapabilities();
 
   const canManage =
-    templateId === 'escalation'
-      ? manageEscalations && status !== 'closed'
-      : manageInvestigations;
+    templateId === 'escalation' ? manageEscalations && status !== 'closed' : manageInvestigations;
 
   const assignInvestigation = useAssignInvestigation();
   const assignEscalation = useAssignEscalation();

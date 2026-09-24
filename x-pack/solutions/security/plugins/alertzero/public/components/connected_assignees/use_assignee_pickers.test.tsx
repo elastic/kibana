@@ -40,7 +40,9 @@ jest.mock('@kbn/agentic-investigations-common', () => {
       isUpdating: boolean;
     }) => (
       <div>
-        <span data-test-subj={`updating-${conversationId}`}>{isUpdating ? 'updating' : 'idle'}</span>
+        <span data-test-subj={`updating-${conversationId}`}>
+          {isUpdating ? 'updating' : 'idle'}
+        </span>
         {canManage && (
           <button
             data-test-subj={`assign-${conversationId}`}
@@ -71,13 +73,25 @@ const makeItem = (id: string, targetId = id): TestItem => ({
   assigneeUids: [],
 });
 
-const renderHookInProviders = (hook: () => React.ReactNode, items: TestItem[]) => {
-  const core = coreMock.createStart();
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+// ---------------------------------------------------------------------------
+// Provider wrapper helpers
+// ---------------------------------------------------------------------------
 
-  // A thin wrapper component that calls the hook and renders the picker for each item.
+const makeProviders = () => ({
+  core: coreMock.createStart(),
+  queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+});
+
+type RenderPicker = (item: TestItem) => React.ReactNode;
+
+const renderWithProviders = (
+  core: ReturnType<typeof coreMock.createStart>,
+  queryClient: QueryClient,
+  hook: () => RenderPicker,
+  items: TestItem[]
+) => {
   const Wrapper: React.FC<{ items: TestItem[] }> = ({ items: currentItems }) => {
-    const renderPicker = hook() as (item: TestItem) => React.ReactNode;
+    const renderPicker = hook();
     return (
       <>
         {currentItems.map((item) => (
@@ -87,8 +101,6 @@ const renderHookInProviders = (hook: () => React.ReactNode, items: TestItem[]) =
     );
   };
 
-  // Capture the rerender function so tests can update items.
-  let rerender: (newItems: TestItem[]) => void;
   const { rerender: rtlRerender } = render(
     <I18nProvider>
       <EuiProvider>
@@ -100,7 +112,8 @@ const renderHookInProviders = (hook: () => React.ReactNode, items: TestItem[]) =
       </EuiProvider>
     </I18nProvider>
   );
-  rerender = (newItems: TestItem[]) =>
+
+  const rerender = (newItems: TestItem[]) =>
     rtlRerender(
       <I18nProvider>
         <EuiProvider>
@@ -113,7 +126,7 @@ const renderHookInProviders = (hook: () => React.ReactNode, items: TestItem[]) =
       </I18nProvider>
     );
 
-  return { core, rerender };
+  return { rerender };
 };
 
 // ---------------------------------------------------------------------------
@@ -134,25 +147,31 @@ const makeHook = (
     isReadOnly?: (item: TestItem) => boolean;
   } = {}
 ) => {
-  // We need a stable hook identity per test; use a closure.
   const opts = { items, assign, refresh, canManage, isReadOnly };
-  return {
-    assignMock: assign,
-    refreshMock: refresh,
-    hook: () =>
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useAssigneePickers({
-        items: opts.items,
-        getRowKey: (item) => item.id,
-        getTargetId: (item) => item.targetId,
-        getAssigneeUids: (item) => item.assigneeUids,
-        assign: opts.assign,
-        refresh: opts.refresh,
-        canManage: opts.canManage,
-        isReadOnly: opts.isReadOnly,
-        labels: { assignSuccess: 'Assignees updated', assignError: 'Failed to update assignees' },
-      }),
-  };
+  const hook = (): RenderPicker =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAssigneePickers({
+      items: opts.items,
+      getRowKey: (item) => item.id,
+      getTargetId: (item) => item.targetId,
+      getAssigneeUids: (item) => item.assigneeUids,
+      assign: opts.assign,
+      refresh: opts.refresh,
+      canManage: opts.canManage,
+      isReadOnly: opts.isReadOnly,
+      labels: { assignSuccess: 'Assignees updated', assignError: 'Failed to update assignees' },
+    });
+  return { hook, assign, refresh };
+};
+
+const setup = (
+  items: TestItem[],
+  overrides: Parameters<typeof makeHook>[1] = {}
+) => {
+  const { core, queryClient } = makeProviders();
+  const { hook, assign, refresh } = makeHook(items, overrides);
+  const { rerender } = renderWithProviders(core, queryClient, hook, items);
+  return { core, rerender, assign, refresh };
 };
 
 // ---------------------------------------------------------------------------
@@ -167,8 +186,7 @@ afterEach(() => jest.clearAllMocks());
 describe('useAssigneePickers', () => {
   it('renders as idle before any interaction', () => {
     const items = [makeItem('item-1')];
-    const { hook } = makeHook(items);
-    renderHookInProviders(hook, items);
+    setup(items);
     expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle');
   });
 
@@ -178,28 +196,21 @@ describe('useAssigneePickers', () => {
       () => new Promise<{}>((res) => { resolveAssign = () => res({}); })
     );
     const items = [makeItem('item-1')];
-    const { hook } = makeHook(items, { assign });
-    renderHookInProviders(hook, items);
+    setup(items, { assign });
 
     fireEvent.click(screen.getByTestId('assign-item-1'));
-
     expect(screen.getByTestId('updating-item-1')).toHaveTextContent('updating');
 
     await act(async () => { resolveAssign(); });
-    await waitFor(() =>
-      expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle')
-    );
+    await waitFor(() => expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle'));
   });
 
   it('clears pending and shows idle after a successful mutation', async () => {
     const items = [makeItem('item-1')];
-    const { hook } = makeHook(items);
-    renderHookInProviders(hook, items);
+    setup(items);
 
     fireEvent.click(screen.getByTestId('assign-item-1'));
-    await waitFor(() =>
-      expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle')
-    );
+    await waitFor(() => expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle'));
   });
 
   it('awaits refresh before clearing pending (regression: stuck picker)', async () => {
@@ -208,8 +219,7 @@ describe('useAssigneePickers', () => {
       () => new Promise<void>((res) => { resolveRefresh = () => res(); })
     );
     const items = [makeItem('item-1')];
-    const { hook } = makeHook(items, { refresh });
-    renderHookInProviders(hook, items);
+    setup(items, { refresh });
 
     fireEvent.click(screen.getByTestId('assign-item-1'));
 
@@ -218,71 +228,36 @@ describe('useAssigneePickers', () => {
     expect(screen.getByTestId('updating-item-1')).toHaveTextContent('updating');
 
     await act(async () => { resolveRefresh(); });
-    await waitFor(() =>
-      expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle')
-    );
+    await waitFor(() => expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle'));
   });
 
-  it('shows a success toast and calls refresh exactly once on success', async () => {
+  it('shows a success toast after a successful mutation', async () => {
     const items = [makeItem('item-1')];
-    const refresh = jest.fn().mockResolvedValue(undefined);
-    const { hook, core } = (() => {
-      // Capture core for toast assertions.
-      const c = coreMock.createStart();
-      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      const opts = {
-        items,
-        assign: jest.fn().mockResolvedValue({}),
-        refresh,
-        canManage: true,
-        isReadOnly: undefined as undefined,
-      };
-      const Wrapper: React.FC = () => {
-        const renderPicker = useAssigneePickers({
-          items: opts.items,
-          getRowKey: (item) => (item as TestItem).id,
-          getTargetId: (item) => (item as TestItem).targetId,
-          getAssigneeUids: (item) => (item as TestItem).assigneeUids,
-          assign: opts.assign,
-          refresh: opts.refresh,
-          canManage: opts.canManage,
-          labels: { assignSuccess: 'Assignees updated', assignError: 'Failed' },
-        });
-        return (
-          <>
-            {items.map((item) => (
-              <React.Fragment key={item.id}>{renderPicker(item)}</React.Fragment>
-            ))}
-          </>
-        );
-      };
-      render(
-        <I18nProvider>
-          <EuiProvider>
-            <KibanaContextProvider services={c}>
-              <QueryClientProvider client={queryClient}>
-                <Wrapper />
-              </QueryClientProvider>
-            </KibanaContextProvider>
-          </EuiProvider>
-        </I18nProvider>
-      );
-      return { hook: null, core: c };
-    })();
+    const { core } = setup(items);
 
     fireEvent.click(screen.getByTestId('assign-item-1'));
 
     await waitFor(() =>
       expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Assignees updated')
     );
+  });
+
+  it('calls refresh exactly once on success (not twice via self-bump)', async () => {
+    const refresh = jest.fn().mockResolvedValue(undefined);
+    const items = [makeItem('item-1', 'target-1')];
+    setup(items, { refresh });
+
+    fireEvent.click(screen.getByTestId('assign-item-1'));
+
+    await waitFor(() => expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle'));
+    // refresh called once from handleChange; the self-bump suppresses the signal handler.
     expect(refresh).toHaveBeenCalledTimes(1);
   });
 
   it('rolls back pending and shows a danger toast on error', async () => {
     const assign = jest.fn().mockRejectedValue(new Error('Network error'));
     const items = [makeItem('item-1')];
-    const { hook } = makeHook(items, { assign });
-    const { core } = renderHookInProviders(hook, items);
+    const { core } = setup(items, { assign });
 
     fireEvent.click(screen.getByTestId('assign-item-1'));
 
@@ -292,30 +267,12 @@ describe('useAssigneePickers', () => {
     expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle');
   });
 
-  it('does not call refresh for a self-bump (no double-refresh)', async () => {
-    const refresh = jest.fn().mockResolvedValue(undefined);
-    const items = [makeItem('item-1', 'target-1')];
-    const { hook } = makeHook(items, { refresh });
-    renderHookInProviders(hook, items);
-
-    fireEvent.click(screen.getByTestId('assign-item-1'));
-
-    await waitFor(() =>
-      expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle')
-    );
-    // refresh called exactly once (from handleChange), not twice (not again from the signal).
-    expect(refresh).toHaveBeenCalledTimes(1);
-  });
-
   it('calls refresh when an external bump targets a visible item', async () => {
     const refresh = jest.fn().mockResolvedValue(undefined);
     const items = [makeItem('item-1', 'target-1')];
-    const { hook } = makeHook(items, { refresh });
-    renderHookInProviders(hook, items);
+    setup(items, { refresh });
 
-    act(() => {
-      assigneeSignal.bump('target-1');
-    });
+    act(() => { assigneeSignal.bump('target-1'); });
 
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
   });
@@ -323,12 +280,9 @@ describe('useAssigneePickers', () => {
   it('does not call refresh when an external bump targets a non-visible item', async () => {
     const refresh = jest.fn().mockResolvedValue(undefined);
     const items = [makeItem('item-1', 'target-1')];
-    const { hook } = makeHook(items, { refresh });
-    renderHookInProviders(hook, items);
+    setup(items, { refresh });
 
-    act(() => {
-      assigneeSignal.bump('target-OTHER');
-    });
+    act(() => { assigneeSignal.bump('target-OTHER'); });
 
     // Give React time to process the signal.
     await new Promise((r) => setTimeout(r, 50));
@@ -337,15 +291,13 @@ describe('useAssigneePickers', () => {
 
   it('renders read-only when isReadOnly returns true', () => {
     const items = [makeItem('item-1')];
-    const { hook } = makeHook(items, { isReadOnly: () => true });
-    renderHookInProviders(hook, items);
+    setup(items, { isReadOnly: () => true });
     expect(screen.queryByTestId('assign-item-1')).not.toBeInTheDocument();
   });
 
   it('renders read-only when canManage is false', () => {
     const items = [makeItem('item-1')];
-    const { hook } = makeHook(items, { canManage: false });
-    renderHookInProviders(hook, items);
+    setup(items, { canManage: false });
     expect(screen.queryByTestId('assign-item-1')).not.toBeInTheDocument();
   });
 });

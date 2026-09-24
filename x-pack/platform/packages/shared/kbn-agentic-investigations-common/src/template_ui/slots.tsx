@@ -15,7 +15,10 @@ import {
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
-import { conversationToInvestigation, conversationToEscalationHeader } from './conversation_to_investigation';
+import {
+  conversationToInvestigation,
+  conversationToEscalationHeader,
+} from './conversation_to_investigation';
 import type { RenderAssignees } from './types';
 
 /**

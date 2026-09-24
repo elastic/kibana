@@ -10,10 +10,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { AssignToUsers } from '@kbn/agentic-investigations-common';
-import {
-  useUserProfiles,
-  useSuggestUserProfiles,
-} from '@kbn/agentic-investigations-plugin/public';
+import { useUserProfiles, useSuggestUserProfiles } from '@kbn/agentic-investigations-plugin/public';
 import { assigneeSignal } from './assignee_overrides';
 import { useAssigneeSignal } from './use_assignee_signal';
 import { indexProfiles, toSelectedProfiles } from './to_selected_profiles';
@@ -186,7 +183,7 @@ export function useAssigneePickers<T>({
       const readOnly = isReadOnlyRef.current?.(item) ?? false;
 
       const selected: UserProfileWithAvatar[] = isUpdating
-        ? (pendingAssignees.get(rowKey) ?? [])
+        ? pendingAssignees.get(rowKey) ?? []
         : toSelectedProfiles(getAssigneeUidsRef.current(item), profilesByUid);
 
       return (
@@ -202,9 +199,7 @@ export function useAssigneePickers<T>({
           canManage={canManage && !readOnly}
           onSearchChange={setSearchTerm}
           onChange={
-            targetId
-              ? (newSelected) => void handleChange(rowKey, targetId, newSelected)
-              : () => {}
+            targetId ? (newSelected) => void handleChange(rowKey, targetId, newSelected) : () => {}
           }
         />
       );

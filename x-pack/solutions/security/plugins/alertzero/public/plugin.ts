@@ -22,13 +22,13 @@ import {
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_ESCALATION,
 } from '@kbn/alertzero-common';
-import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import React from 'react';
 import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
   type RenderAssignees,
 } from '@kbn/agentic-investigations-common';
+import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import type {

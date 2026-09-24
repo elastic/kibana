@@ -316,16 +316,12 @@ describe('conversationToEscalationHeader', () => {
   });
 
   it('reads the status string from metadata', () => {
-    const result = conversationToEscalationHeader(
-      conversation({ metadata: { status: 'closed' } })
-    );
+    const result = conversationToEscalationHeader(conversation({ metadata: { status: 'closed' } }));
     expect(result.status).toBe('closed');
   });
 
   it('returns undefined status for an empty string', () => {
-    const result = conversationToEscalationHeader(
-      conversation({ metadata: { status: '' } })
-    );
+    const result = conversationToEscalationHeader(conversation({ metadata: { status: '' } }));
     expect(result.status).toBeUndefined();
   });
 
@@ -339,7 +335,11 @@ describe('conversationToEscalationHeader', () => {
   it('drops non-string entries from the assignees array', () => {
     const result = conversationToEscalationHeader(
       // Cast to bypass strict typing: the runtime value can be any MetadataFieldValue.
-      conversation({ metadata: { assignees: ['uid-1', 42 as unknown as string, null as unknown as string, 'uid-2'] } })
+      conversation({
+        metadata: {
+          assignees: ['uid-1', 42 as unknown as string, null as unknown as string, 'uid-2'],
+        },
+      })
     );
     expect(result.assigneeUids).toEqual(['uid-1', 'uid-2']);
   });

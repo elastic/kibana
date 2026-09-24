@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
+import type React from 'react';
+import { useCallback, useRef } from 'react';
 import type { QueryKey } from '@kbn/react-query';
 import { useQueryClient } from '@kbn/react-query';
 import type { UseAssigneePickersOptions } from './use_assignee_pickers';
@@ -13,8 +14,7 @@ import { useAssigneePickers } from './use_assignee_pickers';
 
 export type { UseAssigneePickersOptions };
 
-export interface UseQueueAssigneesOptions<T>
-  extends Omit<UseAssigneePickersOptions<T>, 'refresh'> {
+export interface UseQueueAssigneesOptions<T> extends Omit<UseAssigneePickersOptions<T>, 'refresh'> {
   /**
    * Query key to invalidate (and await) after a successful mutation or an external signal
    * bump for a visible item. `cancelRefetch: false` is applied so concurrent invalidations

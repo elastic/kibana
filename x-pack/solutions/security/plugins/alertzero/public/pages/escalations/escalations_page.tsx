@@ -102,18 +102,14 @@ export const EscalationsPage: React.FC = () => {
 
   const assignEscalation = useAssignEscalation();
 
-  const allItems = useMemo(
-    () => [...openItems, ...closedItems],
-    [openItems, closedItems]
-  );
+  const allItems = useMemo(() => [...openItems, ...closedItems], [openItems, closedItems]);
 
   const renderAssignees = useQueueAssignees({
     items: allItems,
     getRowKey: (e) => e.id,
     getTargetId: (e) => e.id,
     getAssigneeUids: (e) => e.assigneeUids,
-    assign: (escalationId, assignees) =>
-      assignEscalation.mutateAsync({ escalationId, assignees }),
+    assign: (escalationId, assignees) => assignEscalation.mutateAsync({ escalationId, assignees }),
     queryKey: escalationQueryKeys.all,
     canManage,
     isReadOnly: (e) => e.status === 'closed',
