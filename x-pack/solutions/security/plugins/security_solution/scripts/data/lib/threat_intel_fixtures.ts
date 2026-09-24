@@ -97,10 +97,18 @@ export interface PackTiScenario {
   articleUrl: string;
   /**
    * Environment join keys. Must appear in the RSS body (value + optional
-   * defanged) AND on pack docs after `ensureEcsSourceIp` + `enrichDocForGraph`
-   * in the ECS fields mustard hunt searches.
+   * defanged). Unless `joinIocsArticleOnly` is true, they must also appear on
+   * pack docs after `ensureEcsSourceIp` + `enrichDocForGraph` in the ECS fields
+   * mustard hunt searches.
    */
   joinIocs: PackTiJoinIoc[];
+  /**
+   * When true, `joinIocs` are narrative/article-only: they must still appear in
+   * RSS/historic bodies (fixture article tests), but they deliberately do not
+   * appear on pack telemetry so Tier 1 IOC hunts stay clean while Tier 2 can
+   * still hit on technique/behavior ES|QL. Used by `aws-iam-behavior-only`.
+   */
+  joinIocsArticleOnly?: boolean;
   /**
    * Narrative anchors for RSS flavor / hunt-rule pairing (MITRE, event.action,
    * ARNs, short nicknames). Must appear in RSS; not required on pack ECS.
@@ -492,6 +500,86 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         slots: [1],
         threatActors: ['TA-DEMO-SHADOW-ADMIN'],
         hashIoc: { value: 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789' },
+      },
+    },
+    {
+      packId: 'aws-iam',
+      reportIdSlug: 'aws-iam-behavior-only',
+      sourceId: 'aws-iam-behavior-only',
+      name: 'AWS IAM behavior-led AssumeRole feed',
+      title:
+        'Behavior-led advisory: sts.AssumeRole into escalated-role without reusable hunting IOCs',
+      body:
+        // Technique/behavior-led: join IOCs are TEST-NET decoys that are not in pack
+        // telemetry, so Tier 1 IOC hunts stay clean while Tier 2 can still execute
+        // AssumeRole ES|QL against the shared aws-iam CloudTrail window.
+        'This behavior-led advisory describes sts.AssumeRole chaining into escalated-role ' +
+        'within AWS account 123456789012 (ATT&CK T1078.004) without publishing the production ' +
+        'ingress IPs used in the live environment. The write-up cites placeholder research ' +
+        'indicators 198[.]51[.]100[.]40 (198.51.100.40) and 198[.]51[.]100[.]41 (198.51.100.41) ' +
+        'plus analyst mailbox research-analyst@lab.example so article parsers still see IP join ' +
+        'IOCs, but those values are not present in seeded CloudTrail. Hunt the AssumeRole ' +
+        'behavior itself (event.action / aws.cloudtrail.event_name AssumeRole, event.provider ' +
+        'sts.amazonaws.com) toward escalated-role and host WIN-ANALYST01 rather than matching ' +
+        'the placeholder IPs. Map to T1078.004.',
+      historicArticles: [
+        {
+          title: 'Behavior note: AssumeRole into escalated-role without env-join IOCs',
+          body:
+            'Behavior note for account 123456789012 covering sts.AssumeRole into escalated-role ' +
+            '(T1078.004). Placeholder research IPs 198[.]51[.]100[.]40 (198.51.100.40) and ' +
+            '198[.]51[.]100[.]41 (198.51.100.41) plus research-analyst@lab.example appear for ' +
+            'article parsing only. Prefer hunting event.provider sts.amazonaws.com and ' +
+            'aws.cloudtrail.event_name AssumeRole toward WIN-ANALYST01 over matching those IPs.',
+        },
+        {
+          title: 'CloudTrail behavior brief: T1078.004 role assumption without live IOCs',
+          body:
+            'Brief on T1078.004 AssumeRole into escalated-role in 123456789012. Research ' +
+            'indicators 198[.]51[.]100[.]40 (198.51.100.40), 198[.]51[.]100[.]41 (198.51.100.41), ' +
+            'and research-analyst@lab.example are narrative-only. Detect via AssumeRole ' +
+            'behavior fields (event.provider sts.amazonaws.com) and host WIN-ANALYST01.',
+        },
+        {
+          title: 'Playbook: behavior-first AssumeRole hunts when join IOCs are absent',
+          body:
+            'Playbook for behavior-first AssumeRole hunts in account 123456789012 when reusable ' +
+            'join IOCs are absent. Seed articles may cite 198[.]51[.]100[.]40 (198.51.100.40), ' +
+            '198[.]51[.]100[.]41 (198.51.100.41), and research-analyst@lab.example. Execute ES|QL ' +
+            'for AssumeRole / escalated-role / WIN-ANALYST01 via event.provider sts.amazonaws.com ' +
+            '(T1078.004) instead of those IPs.',
+        },
+        {
+          title: 'Telemetry refresh: AssumeRole event.provider fields for Tier 2 execute',
+          body:
+            'Telemetry refresh for account 123456789012 reminding hunters that sts.amazonaws.com ' +
+            'AssumeRole events (aws.cloudtrail.event_name) toward escalated-role on WIN-ANALYST01 ' +
+            'prove T1078.004 even when article IOCs are placeholders 198[.]51[.]100[.]40 ' +
+            '(198.51.100.40), 198[.]51[.]100[.]41 (198.51.100.41), and research-analyst@lab.example.',
+        },
+      ],
+      articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
+      joinIocsArticleOnly: true,
+      joinIocs: [
+        // TEST-NET-2 decoys: required in article bodies, deliberately absent from pack ECS.
+        { type: 'ip', value: '198.51.100.40', defanged: '198[.]51[.]100[.]40' },
+        { type: 'ip', value: '198.51.100.41', defanged: '198[.]51[.]100[.]41' },
+        { type: 'email', value: 'research-analyst@lab.example' },
+      ],
+      narrative: [
+        '123456789012',
+        'escalated-role',
+        'AssumeRole',
+        'sts.amazonaws.com',
+        'WIN-ANALYST01',
+        'T1078.004',
+      ],
+      tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security', 'behavior-only'],
+      mitre: ['T1078.004'],
+      categories: ['cloud-security', 'insider-threat'],
+      regions: ['north-america', 'global'],
+      historicSourceAliases: {
+        emerging: 'AWS IAM behavior-led AssumeRole stream',
       },
     },
   ],
