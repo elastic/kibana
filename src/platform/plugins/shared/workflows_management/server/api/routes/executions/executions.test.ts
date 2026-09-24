@@ -929,6 +929,10 @@ describe('Execution Routes', () => {
   });
 
   describe('executionStepsQuerySchema', () => {
+    it('keeps the public API default at 1000 steps when size is omitted', () => {
+      expect(executionStepsQuerySchema.validate({})).toEqual({ page: 1, size: 1000 });
+    });
+
     it('accepts integer page and size values', () => {
       expect(executionStepsQuerySchema.validate({ page: 2, size: 50 })).toEqual({
         page: 2,

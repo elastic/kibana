@@ -11,7 +11,11 @@ import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux-v7';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
-import { WORKFLOW_EXECUTION_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../common';
+import {
+  LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+  WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+} from '../../../hooks/polling_constants';
 import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import type { AppDispatch } from '../store/store';
 import type { RootState } from '../store/types';
@@ -48,7 +52,13 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string): Pollin
       await dispatch(loadExecutionThunk({ id: workflowExecutionId }));
     },
     pollKey: workflowExecutionId,
-    intervalMs: WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+    intervalMs: () => {
+      const { execution: currentExecution, stepExecutionsTotal } = store.getState().detail;
+      return currentExecution?.id === workflowExecutionId &&
+        stepExecutionsTotal > WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE
+        ? LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS
+        : WORKFLOW_EXECUTION_POLL_INTERVAL_MS;
+    },
     shouldStop: () => {
       const { execution: currentExecution, executionRequest } = store.getState().detail;
       return (

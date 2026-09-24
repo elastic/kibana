@@ -22,6 +22,8 @@ import type { RootState } from '../../types';
 import type { ComputedData } from '../types';
 import { performComputation } from '../utils/computation';
 
+const PAGE_REQUEST_CONCURRENCY = 3;
+
 export interface LoadExecutionParams {
   id: string;
   loadMore?: boolean;
@@ -65,22 +67,55 @@ export const loadExecutionThunk = createAsyncThunk<
               includeOutput: true,
               omitStepExecutions: true,
             });
-      const pageCount = Math.max(1, loadedPages.length + (loadMore ? 1 : 0));
-      const keptPages = keepLoadedPages ? loadedPages : [];
-      const fetchedPages = await Promise.all(
-        Array.from({ length: pageCount - keptPages.length }, (_, index) =>
-          api.getExecutionSteps(id, {
-            page: keptPages.length + index + 1,
-            size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-          })
-        )
-      );
-      const pages = [...keptPages, ...fetchedPages.map(({ results }) => results)];
+      const isCurrentRequest = () =>
+        !signal.aborted && getState().detail.executionRequest?.requestId === requestId;
+      if (!isCurrentRequest()) {
+        return rejectWithValue('Execution load was superseded');
+      }
+
+      const pages = keepLoadedPages ? [...loadedPages] : [];
+      let total = previousTotal;
+      if (pages.length === 0) {
+        const firstPage = await api.getExecutionSteps(id, {
+          page: 1,
+          size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+        });
+        pages.push(firstPage.results);
+        total = firstPage.total;
+      }
+      const pageCount = loadMore
+        ? loadedPages.length + 1
+        : Math.max(
+            loadedPages.length,
+            Math.min(
+              Math.ceil(total / WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE),
+              WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT
+            )
+          );
+
+      // Bound concurrency even when the user has manually loaded beyond the automatic budget.
+      for (let offset = pages.length; offset < pageCount; offset += PAGE_REQUEST_CONCURRENCY) {
+        if (!isCurrentRequest()) {
+          return rejectWithValue('Execution load was superseded');
+        }
+        const batch = await Promise.all(
+          Array.from(
+            { length: Math.min(PAGE_REQUEST_CONCURRENCY, pageCount - offset) },
+            (_, index) =>
+              api.getExecutionSteps(id, {
+                page: offset + index + 1,
+                size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+              })
+          )
+        );
+        pages.push(...batch.map(({ results }) => results));
+        total = batch[0].total;
+      }
 
       return {
         execution: { ...execution, stepExecutions: pages.flat() },
         stepExecutionPages: pages,
-        stepExecutionsTotal: fetchedPages[0]?.total ?? previousTotal,
+        stepExecutionsTotal: total,
         computedExecution:
           computedExecution ?? performComputation(execution.yaml, execution.workflowDefinition),
       };
@@ -110,7 +145,8 @@ export const loadExecutionThunk = createAsyncThunk<
       return (
         !loadMore ||
         (execution?.id === id &&
-          stepExecutionPages.length < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT &&
+          (execution.stepExecutionIds !== undefined ||
+            stepExecutionPages.length < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT) &&
           getOmittedStepExecutionsCount(stepExecutionsTotal, stepExecutionPages.length) > 0)
       );
     },

@@ -9,10 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import {
-  WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
-  WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-} from '../../../../common';
+import { WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE } from '../../../../common';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -33,7 +30,7 @@ export const executionStepsQuerySchema = schema.object({
   size: schema.number({
     min: 1,
     max: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
-    defaultValue: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+    defaultValue: 1000,
     meta: { description: 'Number of step executions per page.' },
     validate: (value) => (Number.isInteger(value) ? undefined : 'size must be an integer'),
   }),

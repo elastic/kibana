@@ -71,7 +71,7 @@ describe('loadExecutionThunk pagination', () => {
     mockServices = getMockServices(store);
     store.dispatch(setExecution(mockExecution));
     store.dispatch(setStepExecutionPages([firstPage]));
-    store.dispatch(setStepExecutionsTotal(1500));
+    store.dispatch(setStepExecutionsTotal(5500));
   });
 
   it('should append the next page and update the total', async () => {
@@ -114,7 +114,7 @@ describe('loadExecutionThunk pagination', () => {
     store.dispatch(setStepExecutionPages([runningRows]));
     mockGetExecutionSteps.mockImplementation(async (_id: string, { page }: { page: number }) => ({
       results: page === 1 ? firstPage : secondPage,
-      total: 1500,
+      total: 5500,
       page,
       size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
     }));
@@ -147,7 +147,7 @@ describe('loadExecutionThunk pagination', () => {
     store.dispatch(setExecution({ ...mockExecution, status: ExecutionStatus.RUNNING }));
     const response = Promise.withResolvers<typeof mockExecution>();
     mockGetExecution.mockReturnValue(response.promise);
-    mockGetExecutionSteps.mockResolvedValue({ results: firstPage, total: 1500 });
+    mockGetExecutionSteps.mockResolvedValue({ results: firstPage, total: 5500 });
     const polling = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
     const loadMore = await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
     response.resolve(mockExecution);
@@ -155,8 +155,8 @@ describe('loadExecutionThunk pagination', () => {
 
     expect(loadMore.meta.requestStatus).toBe('rejected');
     expect(mockGetExecution).toHaveBeenCalledTimes(1);
-    expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
-    expect(store.getState().detail.stepExecutionPages).toEqual([firstPage]);
+    expect(mockGetExecutionSteps.mock.calls.map(([, params]) => params.page)).toEqual([1, 2]);
+    expect(store.getState().detail.stepExecutionPages).toEqual([firstPage, firstPage]);
   });
 
   it('ignores polling and double clicks while a page is loading', async () => {
@@ -165,7 +165,7 @@ describe('loadExecutionThunk pagination', () => {
     const first = store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
     await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
     await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
-    response.resolve({ results: secondPage, total: 1500 });
+    response.resolve({ results: secondPage, total: 5500 });
     await first;
 
     expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
@@ -175,10 +175,10 @@ describe('loadExecutionThunk pagination', () => {
   it('retries the same page after a failed Show more without hiding loaded data', async () => {
     mockGetExecutionSteps
       .mockRejectedValueOnce(new Error('Page failed'))
-      .mockResolvedValue({ results: secondPage, total: 1500 });
+      .mockResolvedValue({ results: secondPage, total: 5500 });
     await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
     expect(store.getState().detail.stepExecutionPages).toEqual([firstPage]);
-    expect(store.getState().detail.stepExecutionsTotal).toBe(1500);
+    expect(store.getState().detail.stepExecutionsTotal).toBe(5500);
     expect(store.getState().detail.executionError).toBeUndefined();
     await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
 
@@ -187,9 +187,10 @@ describe('loadExecutionThunk pagination', () => {
   });
 
   it('keeps page boundaries when an earlier page has missing documents', async () => {
+    store.dispatch(setExecution({ ...mockExecution, stepExecutionIds: ['s1'] }));
     store.dispatch(setStepExecutionPages([[], firstPage]));
-    store.dispatch(setStepExecutionsTotal(2500));
-    mockGetExecutionSteps.mockResolvedValue({ results: secondPage, total: 2500 });
+    store.dispatch(setStepExecutionsTotal(11000));
+    mockGetExecutionSteps.mockResolvedValue({ results: secondPage, total: 11000 });
     await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
 
     expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {

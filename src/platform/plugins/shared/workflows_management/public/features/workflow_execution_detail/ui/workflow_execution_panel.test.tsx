@@ -195,7 +195,7 @@ describe('WorkflowExecutionPanel', () => {
           },
         },
         createStartServicesMock(),
-        1842
+        WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 842
       );
       expect(
         screen.getByTestId('workflowExecutionStepExecutionsTruncatedCallout')
@@ -311,11 +311,11 @@ describe('WorkflowExecutionPanel', () => {
       ).toBeInTheDocument();
     });
 
-    it('disables Show more during polling and enables it after the response', async () => {
+    it('disables Show more during polling and removes it after all pages arrive', async () => {
       const response = Promise.withResolvers<WorkflowExecutionDto>();
       mockGetExecution.mockReturnValueOnce(response.promise);
-      mockGetExecutionSteps.mockResolvedValue({ results: [loadedStep], total: 1500 });
-      const store = renderWithLoadedPages(1, 1500, ExecutionStatus.RUNNING);
+      mockGetExecutionSteps.mockResolvedValue({ results: [loadedStep], total: 5500 });
+      const store = renderWithLoadedPages(1, 5500, ExecutionStatus.RUNNING);
       act(() => {
         void store.dispatch(loadExecutionThunk({ id: 'exec-123' }));
       });
@@ -323,7 +323,28 @@ describe('WorkflowExecutionPanel', () => {
       await act(async () => {
         response.resolve(mockExecution);
       });
-      expect(screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton')).toBeEnabled();
+      expect(store.getState().detail.stepExecutionPages).toHaveLength(2);
+      expect(
+        screen.queryByTestId('workflowExecutionShowMoreStepExecutionsButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('allows manual continuation after the automatic budget for modern runs', async () => {
+      const store = renderWithLoadedPages(WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT, 10500);
+      act(() => {
+        store.dispatch(setExecution({ ...mockExecution, stepExecutionIds: ['step-1'] }));
+      });
+      mockGetExecutionSteps.mockResolvedValue({ results: [loadedStep], total: 10500 });
+
+      fireEvent.click(screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton'));
+
+      await waitFor(() => {
+        expect(store.getState().detail.stepExecutionPages).toHaveLength(3);
+      });
+      expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-123', { page: 3, size: 5000 });
+      expect(
+        screen.queryByTestId('workflowExecutionStepExecutionsTruncatedCallout')
+      ).not.toBeInTheDocument();
     });
 
     it('should hide Show more once the page ceiling is reached', () => {

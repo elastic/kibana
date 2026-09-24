@@ -38,7 +38,7 @@ describe('useWorkflowExecutionPolling', () => {
     jest.useFakeTimers();
     mockGetExecution.mockReset();
     mockGetExecutionSteps.mockReset();
-    mockGetExecutionSteps.mockResolvedValue({ results: [], total: 0, page: 1, size: 1000 });
+    mockGetExecutionSteps.mockResolvedValue({ results: [], total: 0, page: 1, size: 5000 });
     store = createMockStore();
   });
 
@@ -118,6 +118,55 @@ describe('useWorkflowExecutionPolling', () => {
     await act(async () => response.resolve(createMockWorkflowExecution(ExecutionStatus.RUNNING)));
     await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS);
     expect(mockGetExecution).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    { total: 5000, interval: 1000 },
+    { total: 5001, interval: 5000 },
+  ])('waits $interval ms between polls for $total steps', async ({ total, interval }) => {
+    mockGetExecution.mockResolvedValue(createMockWorkflowExecution(ExecutionStatus.RUNNING));
+    mockGetExecutionSteps.mockResolvedValue({ results: [], total });
+    renderPolling();
+    await advance();
+
+    await advance(interval - 1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(1);
+    await advance(1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(2);
+  });
+
+  it('slows down immediately after a poll discovers more than 5000 steps', async () => {
+    mockGetExecution.mockResolvedValue(createMockWorkflowExecution(ExecutionStatus.RUNNING));
+    mockGetExecutionSteps.mockResolvedValue({ results: [], total: 5000 });
+    renderPolling();
+    await advance();
+    mockGetExecutionSteps.mockResolvedValue({ results: [], total: 5001 });
+    await advance(1000);
+    expect(mockGetExecution).toHaveBeenCalledTimes(2);
+
+    await advance(4999);
+    expect(mockGetExecution).toHaveBeenCalledTimes(2);
+    await advance(1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(3);
+  });
+
+  it('loads a newly selected small run immediately and restores the one-second interval', async () => {
+    mockGetExecution.mockImplementation(async (id: string) => ({
+      ...createMockWorkflowExecution(ExecutionStatus.RUNNING),
+      id,
+    }));
+    mockGetExecutionSteps.mockResolvedValue({ results: [], total: 10000 });
+    const { rerender } = renderPolling();
+    await advance();
+    mockGetExecutionSteps.mockResolvedValue({ results: [], total: 1 });
+
+    rerender({ executionId: 'exec-b' });
+    await advance();
+    expect(mockGetExecution).toHaveBeenCalledTimes(2);
+    await advance(999);
+    expect(mockGetExecution).toHaveBeenCalledTimes(2);
+    await advance(1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(3);
   });
 
   it.each([

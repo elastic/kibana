@@ -20,6 +20,7 @@ import {
 } from '../../../../common';
 import type { AppDispatch } from '../../../entities/workflows/store/store';
 import {
+  selectExecution,
   selectExecutionRequest,
   selectStepExecutionPages,
   selectStepExecutionsTotal,
@@ -39,11 +40,12 @@ export interface StepExecutionsTruncatedCalloutProps {
 
 /**
  * Warns that the run has more step executions than the detail view loaded, and lets the user
- * pull the next page into the tree until WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT is reached.
+ * pull the next page into the tree when the execution supports further pagination.
  */
 export const StepExecutionsTruncatedCallout = React.memo<StepExecutionsTruncatedCalloutProps>(
   ({ executionId, loadedCount }) => {
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
+    const execution = useSelector(selectExecution);
     const loadedPageCount = useSelector(selectStepExecutionPages).length;
     const dispatch = useDispatch<AppDispatch>();
     const request = useSelector(selectExecutionRequest);
@@ -51,7 +53,9 @@ export const StepExecutionsTruncatedCallout = React.memo<StepExecutionsTruncated
     const isDisabled = request !== undefined;
 
     const omittedCount = getOmittedStepExecutionsCount(stepExecutionsTotal, loadedPageCount);
-    const canShowMore = loadedPageCount < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT;
+    const canShowMore =
+      execution?.stepExecutionIds !== undefined ||
+      loadedPageCount < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT;
     const nextBatchCount = Math.min(WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE, omittedCount);
 
     const onShowMore = useCallback(() => {
