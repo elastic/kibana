@@ -77,9 +77,10 @@ const rememberSchema = z.object({
     .describe('Optional lowercase index names, feature areas, or tools associated with the memory'),
   expires_at: z.iso
     .datetime()
+    .nullable()
     .optional()
     .describe(
-      'Optional timestamp after which the memory must not be recalled. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory.'
+      'Timestamp after which the memory must not be recalled. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory. Set to null to make the memory non-expiring.'
     ),
 });
 
@@ -120,7 +121,8 @@ export const createRememberTool = ({
     deliberately revising that memory. This tool handles session metadata, conversation references,
     and provenance server-side. For external calls, omit sessionId unless continuing with the
     sessionId returned by an earlier remember call. Agent Builder calls ignore sessionId and use
-    the current conversation ID.
+    the current conversation ID. Memory expires 90 days after each write by default; provide
+    expires_at to choose another time, or null to make it non-expiring.
   `,
   schema: rememberSchema,
   handler: async (params, context) => {
@@ -240,7 +242,9 @@ export const createRememberTool = ({
           : existingDocument?.tags !== undefined
           ? { tags: existingDocument.tags }
           : {}),
-        expires_at: params.expires_at ?? defaultExpiresAt,
+        ...(params.expires_at === null
+          ? {}
+          : { expires_at: params.expires_at ?? defaultExpiresAt }),
         updated_at: now,
         references: addConversationReference(existingDocument?.references, conversationId),
         attributes: {

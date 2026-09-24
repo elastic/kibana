@@ -103,6 +103,8 @@ describe('remember tool', () => {
     expect(tool.availability).toBe(aiIndexToolsAvailability);
     expect(tool.confirmation).toBeUndefined();
     expect(tool.schema.safeParse(params).success).toBe(true);
+    expect(tool.schema.safeParse({ ...params, expires_at: null }).success).toBe(true);
+    expect(tool.schema.safeParse({ ...params, expires_at: '' }).success).toBe(false);
     expect(tool.schema.safeParse({ ...params, type: 'document' }).success).toBe(false);
     expect(tool.schema.shape.aiIndexId.description).toContain(
       'not the backing Elasticsearch index or data stream name'
@@ -261,6 +263,13 @@ describe('remember tool', () => {
         }),
       })
     );
+  });
+
+  it('omits expiration when the caller explicitly requests a non-expiring memory', async () => {
+    await run({ ...params, expires_at: null }, 'conversation-1');
+
+    const document = index.mock.calls[0][0].document;
+    expect(document).not.toHaveProperty('expires_at');
   });
 
   it('does not treat a caller-supplied id as a new memory id', async () => {
