@@ -27,6 +27,11 @@ const fadingStyle = css`
   transition: opacity 0.5s ease-out;
 `;
 
+const hiddenStyle = css`
+  visibility: hidden;
+  pointer-events: none;
+`;
+
 export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => {
   const conversationId = useConversationId();
   const { conversation } = useConversation();
@@ -73,6 +78,8 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => 
     Boolean(conversation?.user?.id) &&
     conversation?.user?.id === currentUser?.uid;
 
+  const showInvite = inviteVisible || (modalOpen && vote === 'up');
+
   if (!isOwner) return null;
 
   return (
@@ -82,8 +89,8 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => 
           <EuiFlexItem grow={false} css={submittedFading ? fadingStyle : undefined}>
             <FeedbackSubmitted />
           </EuiFlexItem>
-        ) : inviteVisible ? (
-          <EuiFlexItem grow={false}>
+        ) : showInvite ? (
+          <EuiFlexItem grow={false} css={!inviteVisible ? hiddenStyle : undefined}>
             <UpInvite ref={inviteRef} onTellUsMore={openModal} onDismiss={dismissInvite} />
           </EuiFlexItem>
         ) : (

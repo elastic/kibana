@@ -81,7 +81,8 @@ const renderContent = (
   const steps = completed?.steps ?? item.steps;
   const response = completed?.response ?? { message: item.response?.message ?? '' };
   const isAwaiting = isAwaitingPromptTurn(item);
-  const hasContent = steps.length > 0 || response.message !== '';
+  const hasContent =
+    steps.length > 0 || response.message !== '' || Boolean(completed?.response?.structured_output);
 
   if (!isAwaiting && !hasContent) {
     return null;
