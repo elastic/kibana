@@ -28,6 +28,7 @@ import {
   type CloudConnectorSecretReference,
   type AwsCloudConnectorVars,
   type AzureCloudConnectorVars,
+  type CloudConnectorVars,
   type GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
@@ -181,6 +182,21 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     return name.trim().replace(/\s+/g, ' ');
   }
 
+  /** Trims an AWS Role ARN, which is often pasted with surrounding whitespace. */
+  private static normalizeRoleArn(
+    cloudProvider: string,
+    vars: CloudConnectorVars
+  ): CloudConnectorVars {
+    if (cloudProvider !== 'aws' || !('role_arn' in vars)) {
+      return vars;
+    }
+    const { role_arn: roleArn } = vars;
+    if (typeof roleArn?.value !== 'string') {
+      return vars;
+    }
+    return { ...vars, role_arn: { ...roleArn, value: roleArn.value.trim() } };
+  }
+
   /**
    * Queries package policies to get a map of cloud connector IDs to their
    * user-visible package policy counts. Hidden internal packages (e.g. verifier_otel)
@@ -304,12 +320,21 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
   async create(
     soClient: SavedObjectsClientContract,
-    cloudConnector: CreateCloudConnectorRequest
+    cloudConnectorRequest: CreateCloudConnectorRequest
   ): Promise<CloudConnector> {
     const logger = this.getLogger('create');
 
     try {
       logger.info('Creating cloud connector');
+      const cloudConnector: CreateCloudConnectorRequest = {
+        ...cloudConnectorRequest,
+        vars:
+          cloudConnectorRequest.vars &&
+          CloudConnectorService.normalizeRoleArn(
+            cloudConnectorRequest.cloudProvider,
+            cloudConnectorRequest.vars
+          ),
+      };
       this.validateCloudConnectorDetails(cloudConnector);
 
       const { vars, cloudProvider } = cloudConnector;
@@ -513,10 +538,16 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         | AwsCloudConnectorVars
         | undefined;
       const storedRoleArnVar = existingAwsVars?.role_arn;
+      const requestedVars =
+        cloudConnectorUpdate.vars &&
+        CloudConnectorService.normalizeRoleArn(
+          existingCloudConnector.attributes.cloudProvider,
+          cloudConnectorUpdate.vars
+        );
       const incomingVars =
-        options?.keepStoredRoleArn && isAws && storedRoleArnVar && cloudConnectorUpdate.vars
-          ? { ...cloudConnectorUpdate.vars, role_arn: storedRoleArnVar }
-          : cloudConnectorUpdate.vars;
+        options?.keepStoredRoleArn && isAws && storedRoleArnVar && requestedVars
+          ? { ...requestedVars, role_arn: storedRoleArnVar }
+          : requestedVars;
 
       // Validate the vars that will be written, after any stored Role ARN replaced the incoming one
       if (incomingVars) {

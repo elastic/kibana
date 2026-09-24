@@ -117,6 +117,33 @@ describe('CloudConnectorService', () => {
       },
     };
 
+    it('stores the Role ARN without the whitespace it was pasted with', async () => {
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+      await service.create(mockSoClient, {
+        ...mockCreateRequest,
+        vars: {
+          ...mockCreateRequest.vars,
+          role_arn: { type: 'text', value: ' arn:aws:iam::123456789012:role/TestRole\n' },
+        },
+      });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          vars: expect.objectContaining({
+            role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/TestRole' },
+          }),
+        })
+      );
+    });
+
     it('should create a cloud connector successfully with space awareness enabled', async () => {
       jest
         .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
@@ -1415,6 +1442,36 @@ describe('CloudConnectorService', () => {
           `fleet-cloud-connector-role-arn-${connectorId}`,
           expect.any(Function)
         );
+      });
+
+      it('saves and fans out the Role ARN without the whitespace it was pasted with', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: ` ${newArn}\n` } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledWith(
+          expect.objectContaining({ newRoleArn: newArn })
+        );
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({ vars: { role_arn: { type: 'text', value: newArn } } }),
+          expect.anything()
+        );
+      });
+
+      it('does not treat the stored Role ARN with surrounding whitespace as a change', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: `${oldArn} ` } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
       });
 
       it('does not fan out when the connector already stores this Role ARN once the lock is held', async () => {
