@@ -40,7 +40,6 @@ export const ALERTZERO_ATTACHMENT_TYPES = {
   threat: 'security.threat',
 } as const;
 
-
 // --- Hunt services ---
 
 /** Internal route namespace for the hunt services. */
