@@ -46,6 +46,9 @@ export function registerSetupRoute({
             description: 'Indicates a successful call.',
             body: setupStatusResponseSchema,
           },
+          400: {
+            description: 'Universal Profiling is not supported in serverless deployments.',
+          },
           403: {
             description:
               'The user does not have the privileges required to read the Universal Profiling setup status.',
@@ -59,6 +62,12 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
+        if (dependencies.esCapabilities.serverless) {
+          return response.badRequest({
+            body: { message: 'Universal Profiling is not supported in serverless' },
+          });
+        }
+
         const hasRequiredRole = dependencies.start.security
           ? await getHasSetupPrivileges({
               securityPluginStart: dependencies.start.security,
@@ -72,7 +81,6 @@ export function registerSetupRoute({
           esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
-          isServerless: dependencies.esCapabilities.serverless,
         });
 
         return response.ok({ body: { ...profilingStatus, has_required_role: hasRequiredRole } });
@@ -109,8 +117,7 @@ export function registerSetupRoute({
               'Setup was accepted. Enabling resource management in Elasticsearch is asynchronous and may not have completed by the time this response is sent.',
           },
           400: {
-            description:
-              'Setup is not supported for this deployment: either "xpack.profiling.elasticsearch" points Universal Profiling at a remote cluster, or the deployment is serverless.',
+            description: 'Universal Profiling is not supported in serverless deployments.',
           },
           403: {
             description:
@@ -145,7 +152,9 @@ export function registerSetupRoute({
 
         // For now, we don't support serverless setup
         if (dependencies.esCapabilities.serverless) {
-          return response.badRequest({ body: { message: 'Serverless setup is not supported' } });
+          return response.badRequest({
+            body: { message: 'Universal Profiling is not supported in serverless' },
+          });
         }
 
         const esClient = await getClient(context);
@@ -162,17 +171,15 @@ export function registerSetupRoute({
             dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
         };
 
-        const scopedESClient = core.elasticsearch.client;
-        const { type, setupState } =
-          await dependencies.start.profilingDataAccess.services.getSetupState({
-            esClient: scopedESClient,
-            soClient: core.savedObjects.client,
-            spaceId:
-              dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
-          });
+        const { services } = dependencies.start.profilingDataAccess;
+        const setupStateParams = {
+          esClient: core.elasticsearch.client,
+          soClient: core.savedObjects.client,
+          spaceId: commonSetupParams.spaceId,
+        };
 
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
-        if (isCloudEnabled && type === 'cloud') {
+        if (isCloudEnabled) {
           if (!dependencies.start.fleet) {
             const msg = `Elastic Fleet is required to set up Universal Profiling on Cloud`;
             logger.error(msg);
@@ -183,6 +190,7 @@ export function registerSetupRoute({
           }
           logger.debug('Setting up Universal Profiling on Cloud');
 
+          const setupState = await services.getCloudSetupState(setupStateParams);
           await setupCloud({
             setupState,
             setupParams: {
@@ -197,6 +205,7 @@ export function registerSetupRoute({
         } else {
           logger.debug('Setting up self-managed Universal Profiling');
 
+          const setupState = await services.getSelfManagedSetupState(setupStateParams);
           await setupSelfManaged({
             setupState,
             setupParams: commonSetupParams,

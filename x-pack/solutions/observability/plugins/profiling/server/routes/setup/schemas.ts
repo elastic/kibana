@@ -17,10 +17,6 @@ import { schema } from '@kbn/config-schema';
 export const setupStatusResponseSchema = () =>
   schema.object(
     {
-      type: schema.oneOf(
-        [schema.literal('cloud'), schema.literal('self-managed'), schema.literal('serverless')],
-        { meta: { description: 'The kind of deployment Universal Profiling is running on.' } }
-      ),
       profiling_enabled: schema.boolean({
         meta: {
           description:

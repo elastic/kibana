@@ -8,54 +8,38 @@
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ProfilingStatus } from '@kbn/profiling-utils';
 import { areCloudResourcesSetup } from '../../../common/cloud_setup';
+import type { SetupState } from '../../../common/setup';
 import { areResourcesSetup } from '../../../common/setup';
 import type { RegisterServicesParams } from '../register_services';
-import { getSetupState } from '../setup_state';
-import { areServerlessResourcesSetup } from '../../../common/serverless_setup';
+import { getCloudSetupState, getSelfManagedSetupState } from '../setup_state';
 
 export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
-  isServerless?: boolean;
+}
+
+function toProfilingStatus(setupState: SetupState, hasSetup: boolean): ProfilingStatus {
+  return {
+    profiling_enabled: setupState.profiling.enabled,
+    has_setup: hasSetup,
+    has_data: setupState.data.available,
+    pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
+  };
 }
 
 export function createGetStatusService(params: RegisterServicesParams) {
-  return async ({
-    esClient,
-    soClient,
-    spaceId,
-    isServerless,
-  }: HasSetupParams): Promise<ProfilingStatus> => {
-    const { type, setupState } = await getSetupState({
-      ...params,
-      esClient,
-      soClient,
-      spaceId,
-      isServerless,
-    });
+  return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatus> => {
+    const setupStateParams = { ...params, esClient, soClient, spaceId };
 
-    params.logger.debug(() => `Set up state for: ${type}: ${JSON.stringify(setupState, null, 2)}`);
-
-    let hasSetup = false;
-    switch (type) {
-      case 'cloud':
-        hasSetup = areCloudResourcesSetup(setupState);
-        break;
-      case 'self-managed':
-        hasSetup = areResourcesSetup(setupState);
-        break;
-      case 'serverless':
-        hasSetup = areServerlessResourcesSetup(setupState);
-        break;
+    if (params.deps.cloud?.isCloudEnabled) {
+      const setupState = await getCloudSetupState(setupStateParams);
+      params.logger.debug(() => `Cloud set up state: ${JSON.stringify(setupState, null, 2)}`);
+      return toProfilingStatus(setupState, areCloudResourcesSetup(setupState));
     }
 
-    return {
-      type,
-      profiling_enabled: setupState.profiling.enabled,
-      has_setup: hasSetup,
-      has_data: setupState.data.available,
-      pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
-    };
+    const setupState = await getSelfManagedSetupState(setupStateParams);
+    params.logger.debug(() => `Self-managed set up state: ${JSON.stringify(setupState, null, 2)}`);
+    return toProfilingStatus(setupState, areResourcesSetup(setupState));
   };
 }
