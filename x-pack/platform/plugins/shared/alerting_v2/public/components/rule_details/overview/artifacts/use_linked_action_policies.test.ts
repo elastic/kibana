@@ -34,18 +34,16 @@ const buildItem = (
     enabled: true,
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
     matcher: null,
-    groupBy: null,
-    tags: null,
-    groupingMode: 'per_episode',
+    group_by: null,
+    grouping_mode: 'per_episode',
     throttle: null,
-    snoozedUntil: null,
-    auth: { owner: 'user', createdByUser: true },
-    createdBy: 'user',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'user',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    snoozed_until: null,
+    created_by: { profile_uid: 'u_user' },
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: { profile_uid: 'u_user' },
+    updated_at: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  } as MatchedActionPolicy['action_policy'],
+  },
   category,
 });
 
@@ -68,12 +66,12 @@ describe('useLinkedActionPolicies', () => {
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({ http: mockHttp, tags: RULE_TAGS });
   });
 
-  it('counts items with category "catch-all" as catch-all and "tags" as matching criteria', () => {
+  it('counts items with category "catch_all" as catch-all and "tags" as matching criteria', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
       items: [
-        buildItem('catch-all', { id: 'catch-all-1' }),
+        buildItem('catch_all', { id: 'catch-all-1' }),
         buildItem('tags', { id: 'filtered-1' }),
         buildItem('tags', { id: 'filtered-2' }),
       ],

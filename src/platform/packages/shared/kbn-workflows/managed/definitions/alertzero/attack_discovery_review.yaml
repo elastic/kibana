@@ -641,7 +641,7 @@ steps:
     type: workflow.execute
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
     with:
-      workflow-id: system-create-investigation-proposal
+      workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         comment: "{{ steps.resolve_escalation.output.comment }}"
@@ -661,7 +661,7 @@ steps:
     with:
       request:
         method: GET
-        path: "/internal/investigations/proposals/{{ steps.escalation_gate.output.proposalId }}"
+        path: "/internal/proposals/{{ steps.escalation_gate.output.proposalId }}"
         headers:
           elastic-api-version: "1"
     on-failure:
@@ -705,7 +705,23 @@ steps:
   # Both objects stay OPEN on approval. Forensics Watch writes its report into this
   # Investigation, so closing it would delete the thing the handoff exists to
   # produce, and closing the attack would contradict a run that is about to start.
-  # #19396 records that handoff on the Investigation after the action writes a KI.
+  #
+  # `decidedBy` is absent when the gate auto-approved under `supervised` autonomy,
+  # which is what the `| default:` covers.
+  - name: record_forensics_handoff
+    type: ai.conversation.metadata.patch
+    if: "${{ steps.record_decision.output.approved == true }}"
+    with:
+      conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      updates:
+        status: open
+        verdict: >-
+          Handed off to Forensics Watch, approved by
+          {{ steps.read_proposal_decision.output.decidedBy.username | default: 'the worker' }}.
+          Knowledge indicator analyze-endpoint-{{ inputs.attack_discovery_id }}.
+          This Investigation stays open for the forensics report.
+    on-failure:
+      continue: true
 
   # A decline says the escalation is not worth taking, so it closes both objects
   # whatever the verdict that proposed it was.

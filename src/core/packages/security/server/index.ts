@@ -28,8 +28,6 @@ export {
 } from './src/service_account_workloads';
 export type {
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
@@ -71,6 +69,7 @@ export {
   isMissingApiKey,
   isRevokedApiKey,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
   deriveInternalCallerAttestation,
   markExternalUiamCredential,
   isExternalUiamCredential,

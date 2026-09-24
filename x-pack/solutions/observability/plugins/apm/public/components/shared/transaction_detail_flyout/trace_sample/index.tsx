@@ -21,19 +21,18 @@ import {
 } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { isFailure, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { useUnifiedWaterfallFetcher } from '../../../app/transaction_details/use_unified_waterfall_fetcher';
 import { MaybeViewTraceLink } from '../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link';
 import { TransactionSummary } from '../../summary/transaction_summary';
+import { TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
 import { TransactionDetailFlyoutTraceSampleTimeline } from './trace_sample_timeline';
 import { useTransactionDetailFlyoutTraceSamplesFetcher } from './use_transaction_detail_flyout_trace_samples_fetcher';
 
 export function TransactionDetailFlyoutTraceSample() {
-  const { filters, openFullTraceFlyout } = useTransactionDetailFlyoutContext();
-  const { serviceName, rangeFrom, rangeTo } = filters;
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { filters, openFullTraceFlyout, refreshToken } = useTransactionDetailFlyoutContext();
+  const { serviceName, start, end } = filters;
 
   const traceSamplesFetchResult = useTransactionDetailFlyoutTraceSamplesFetcher(filters);
   const traceSamples = traceSamplesFetchResult.data?.traceSamples;
@@ -53,6 +52,8 @@ export function TransactionDetailFlyoutTraceSample() {
     end,
     traceId,
     entryTransactionId,
+    serviceName,
+    refreshToken,
   });
 
   const isLoading =
@@ -171,6 +172,7 @@ export function TransactionDetailFlyoutTraceSample() {
                 transaction={entryTransaction}
                 traceItems={unifiedWaterfallFetchResult.traceItems}
                 onViewFullTrace={openSelectedFullTrace}
+                ebtElement={TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.VIEW_FULL_TRACE}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

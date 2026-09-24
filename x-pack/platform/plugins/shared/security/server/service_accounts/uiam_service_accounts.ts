@@ -13,47 +13,91 @@ import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-serv
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
+import { ensureClusterPrivilege } from './cluster_privilege';
+import { parseCreateServiceAccountParams } from './create_params';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
-import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
-import type { CloudProjectContext, ServiceAccountsBackend } from './types';
+import type {
+  CloudProjectContext,
+  ListServiceAccountsParams,
+  ServiceAccountsBackend,
+} from './types';
 import type { SecurityLicense } from '../../common';
+import type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryCreator,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
 import {
+  SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   serviceAccountIdSchema,
   serviceAccountNameSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 import {
   getUiamAuthorizationHeaderFromRequest,
   isExternalApiKey,
+  type UiamServiceAccount,
+  type UiamServiceAccountCreator,
+  type UiamServiceAccountDetails,
   type UiamServicePublic,
 } from '../uiam';
 
-/** Checks UIAM response compatibility without failing an already successful creation. */
+/**
+ * The fields of UIAM's response that cross the contract boundary. The rest of the payload is
+ * deliberately unvalidated: Kibana neither consumes nor reports it, so a shape change there is
+ * not Kibana's to detect.
+ */
 const serviceAccountSchema = z.object({
   id: serviceAccountIdSchema,
-  type: z.literal('project'),
   name: serviceAccountNameSchema,
-  organization_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-  role_assignments: z.record(z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH), z.unknown()),
-  assumable_by: z.array(
-    z.discriminatedUnion('type', [
-      z.object({
-        type: z.literal('project-service-account'),
-        organization_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-        project_type: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-        project_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-      }),
-      z.object({
-        type: z.literal('platform-service-account'),
-        service_account_id: serviceAccountIdSchema,
-      }),
-    ])
-  ),
+});
+
+/**
+ * UIAM identifies a user by the numeric id that is also their Kibana username on serverless, so
+ * the id maps straight onto the binder's `username`. That id is all the binder can say, which is
+ * why the creator's own name comes along as `displayName`: nothing downstream could resolve it
+ * from the id.
+ */
+const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirectoryCreator => {
+  if (creator.type === 'user') {
+    const displayName = [creator.first_name, creator.last_name].filter(Boolean).join(' ');
+    return { type: 'user', username: creator.id, ...(displayName ? { displayName } : {}) };
+  }
+
+  return {
+    type: 'api_key',
+    apiKeyId: creator.id,
+    variant: 'uiam',
+    ...(creator.description ? { displayName: creator.description } : {}),
+  };
+};
+
+/**
+ * Narrows a UIAM account to the directory entry. UIAM has no disabled state and reports no role
+ * names yet, so those two answers are constants.
+ *
+ * So is `assumable`, for a different reason: UIAM authorizes both reads against the account's
+ * `assumable_by` policy and will not report an account this project cannot assume. Anything that
+ * reaches this function is assumable by definition, which is why the policy itself is left
+ * unparsed rather than re-checked here.
+ */
+const toDirectoryEntry = ({
+  id,
+  name,
+  creator,
+}: UiamServiceAccountDetails): ServiceAccountDirectoryEntry => ({
+  id,
+  name,
+  roles: [],
+  enabled: true,
+  assumable: true,
+  createdBy: toCreatedBy(creator),
 });
 
 /**
@@ -120,29 +164,63 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     request: KibanaRequest,
     params: CreateServiceAccountParams
   ): Promise<ServiceAccount> {
+    try {
+      const account = await this.createAccount(request, params);
+      securityTelemetry.recordServiceAccountCreationAttempt({
+        outcome: 'success',
+        serviceAccountBackend: 'uiam',
+      });
+      return account;
+    } catch (e) {
+      securityTelemetry.recordServiceAccountCreationAttempt({
+        outcome: 'failure',
+        serviceAccountBackend: 'uiam',
+      });
+      throw e;
+    }
+  }
+
+  private async createAccount(
+    request: KibanaRequest,
+    params: CreateServiceAccountParams
+  ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot create a service account: security features are disabled in Elasticsearch'
       );
     }
 
+    const { name, roles } = parseCreateServiceAccountParams(params);
+
+    // UIAM's first iteration grants the account its creator's privileges and offers no way to
+    // narrow them, so a caller-supplied role list cannot be honoured. Rejected rather than
+    // ignored, so the asymmetry with the Elasticsearch backend is discoverable.
+    if (roles) {
+      throw Boom.badRequest(
+        'Cannot create a service account: `roles` is not supported on this deployment; the ' +
+          "service account is granted the creator's privileges"
+      );
+    }
+
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
+      privilege: 'manage_security',
       action: 'create a service account',
     });
 
     this.logger.debug('Attempting to create a service account');
 
+    let result: UiamServiceAccount;
     try {
-      const result = await this.uiam.createServiceAccount(
+      result = await this.uiam.createServiceAccount(
         authorization,
         {
           organization_id: this.cloudProjectContext.organizationId,
-          name: params.name,
+          name,
           role_assignments: SERVICE_ACCOUNT_ROLE_ASSIGNMENTS,
           assumable_by: buildAssumableBy(this.cloudProjectContext),
         },
@@ -150,18 +228,92 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         // vouched for with Kibana's own shared secret.
         isExternalApiKey(this.getCurrentUser(request)) ? null : undefined
       );
-
-      const parsed = serviceAccountSchema.safeParse(result);
-      if (!parsed.success) {
-        this.logger.error(
-          `Service account payload from UIAM failed validation: ${parsed.error.message}`
-        );
-        return result;
-      }
-
-      return parsed.data;
     } catch (e) {
-      this.logger.error(`Failed to create service account: ${getDetailedErrorMessage(e)}`);
+      this.logger.error(
+        `Failed to create service account [${name}]: ${getDetailedErrorMessage(e)}`
+      );
+      throw e;
+    }
+
+    // Validated outside the block above, so a refusal to report the account is not logged a
+    // second time as a failure to create it. By this point the account does exist.
+    const parsed = serviceAccountSchema.safeParse(result);
+    if (!parsed.success) {
+      // Returning an id or a name Kibana just rejected would be worse than failing, so name the
+      // account in the log: nothing else can find it now.
+      this.logger.error(
+        `UIAM reported the created service account [${name}] in an unrecognized shape. It may ` +
+          `need to be removed manually: ${parsed.error.message}`
+      );
+      throw Boom.badGateway('The service account was created but could not be reported back.');
+    }
+
+    return parsed.data;
+  }
+
+  async list(
+    request: KibanaRequest,
+    { limit = SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE, after }: ListServiceAccountsParams = {}
+  ): Promise<ListServiceAccountsResponse> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot list service accounts: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'read_security',
+      action: 'list service accounts',
+    });
+
+    this.logger.debug('Attempting to list service accounts');
+
+    try {
+      const { service_accounts: accounts, next_page: nextPage } =
+        await this.uiam.listServiceAccounts({
+          limit,
+          // Forwarded unchecked: the cursor's shape is UIAM's, not Kibana's. UIAM validates it as
+          // an id of 1 to 100 characters and answers a bad one with its own 400, which
+          // `#parseUiamResponse` turns into the Boom this method propagates.
+          ...(after !== undefined ? { after } : {}),
+        });
+
+      const serviceAccounts = accounts.map(toDirectoryEntry);
+
+      return {
+        serviceAccounts,
+        ...(nextPage !== undefined ? { nextPage } : {}),
+      };
+    } catch (e) {
+      this.logger.error(`Failed to list service accounts: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'read_security',
+      action: 'get a service account',
+    });
+
+    this.logger.debug(`Attempting to get service account ${id}`);
+
+    try {
+      return toDirectoryEntry(await this.uiam.getServiceAccount(id));
+    } catch (e) {
+      this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
   }

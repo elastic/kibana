@@ -23,7 +23,6 @@ describe('yaml_form_utils', () => {
           name: 'Test Rule',
           enabled: true,
           description: 'A test rule',
-          owner: 'test-owner',
           tags: ['label1', 'label2'],
         },
         timeField: '@timestamp',
@@ -50,7 +49,6 @@ describe('yaml_form_utils', () => {
         metadata: {
           name: 'Test Rule',
           description: 'A test rule',
-          owner: 'test-owner',
           tags: ['label1', 'label2'],
         },
         time_field: '@timestamp',
@@ -247,7 +245,6 @@ describe('yaml_form_utils', () => {
             name: 'Test Rule',
             enabled: true,
             description: 'A description',
-            owner: undefined,
             tags: undefined,
           },
           timeField: '@timestamp',
