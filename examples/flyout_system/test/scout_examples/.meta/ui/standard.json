@@ -1,5 +1,5 @@
 {
-  "sha1": "9021a35942563dfb649ca62e0282f49e82b1b6c3",
+  "sha1": "89fc89b396c1214a62ec77eb2f97df959b3225d7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -19,6 +19,20 @@
       }
     },
     {
+      "id": "103ba36e67340e1-ef76d2745b150e3",
+      "title": "Flyout System - dialog focus accessibility closing a component flyout returns focus to its trigger with ownFocus false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
+        "line": 39,
+        "column": 17
+      }
+    },
+    {
       "id": "103ba36e67340e1-38ce465d188d030",
       "title": "Flyout System - dialog focus accessibility opening a component flyout moves focus into the dialog with ownFocus true",
       "expectedStatus": "passed",
@@ -33,8 +47,8 @@
       }
     },
     {
-      "id": "103ba36e67340e1-decd9439a79380c",
-      "title": "Flyout System - dialog focus accessibility closing a component flyout returns focus to its trigger",
+      "id": "103ba36e67340e1-59076e9318028e5",
+      "title": "Flyout System - dialog focus accessibility closing a component flyout returns focus to its trigger with ownFocus true",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -42,8 +56,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 40,
-        "column": 22
+        "line": 39,
+        "column": 17
       }
     },
     {
@@ -56,8 +70,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 65,
-        "column": 18
+        "line": 72,
+        "column": 26
       }
     },
     {
@@ -75,6 +89,20 @@
       }
     },
     {
+      "id": "103ba36e67340e1-dcab13e11357ec6",
+      "title": "Flyout System - dialog focus accessibility closing a service flyout returns focus to its trigger with ownFocus false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
+        "line": 39,
+        "column": 17
+      }
+    },
+    {
       "id": "103ba36e67340e1-354b70edb33e2d5",
       "title": "Flyout System - dialog focus accessibility opening a service flyout moves focus into the dialog with ownFocus true",
       "expectedStatus": "passed",
@@ -89,8 +117,8 @@
       }
     },
     {
-      "id": "103ba36e67340e1-a88c475a2ccc329",
-      "title": "Flyout System - dialog focus accessibility closing a service flyout returns focus to its trigger",
+      "id": "103ba36e67340e1-541d91683a1ed5a",
+      "title": "Flyout System - dialog focus accessibility closing a service flyout returns focus to its trigger with ownFocus true",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -98,8 +126,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 40,
-        "column": 22
+        "line": 39,
+        "column": 17
       }
     },
     {
@@ -112,8 +140,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 65,
-        "column": 18
+        "line": 72,
+        "column": 26
       }
     },
     {
@@ -194,8 +222,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
-        "line": 75,
-        "column": 28
+        "line": 73,
+        "column": 9
       }
     },
     {
@@ -208,7 +236,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
-        "line": 95,
+        "line": 100,
         "column": 28
       }
     },
@@ -264,8 +292,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
-        "line": 75,
-        "column": 28
+        "line": 73,
+        "column": 9
       }
     },
     {
@@ -278,7 +306,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
-        "line": 95,
+        "line": 100,
         "column": 28
       }
     },
@@ -838,7 +866,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
-        "line": 78,
+        "line": 85,
         "column": 21
       }
     },
@@ -894,7 +922,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
-        "line": 78,
+        "line": 85,
         "column": 21
       }
     }
