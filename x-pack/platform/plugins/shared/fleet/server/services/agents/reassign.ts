@@ -138,7 +138,12 @@ export async function reassignAgents(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
+    // When spaceId is '*' the caller is space-agnostic; pass undefined so agentsKueryNamespaceFilter
+    // omits the filter and the query covers all spaces. Otherwise use the explicit spaceId if given,
+    // falling back to the current namespace derived from soClient.
+    const effectiveSpaceId =
+      options.spaceId === '*' ? undefined : (options.spaceId ?? currentSpaceId);
+    const namespaceFilter = await agentsKueryNamespaceFilter(effectiveSpaceId);
     const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
     // cheap count — avoids hydrating up to batchSize agent documents just to read the total
     const { total } = await getAgentsByKuery(esClient, soClient, {
@@ -167,7 +172,7 @@ export async function reassignAgents(
         soClient,
         {
           ...options,
-          spaceId: currentSpaceId,
+          spaceId: options.spaceId ?? currentSpaceId,
           batchSize,
           total,
           newAgentPolicyId,
