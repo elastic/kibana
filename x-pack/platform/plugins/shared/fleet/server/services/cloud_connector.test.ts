@@ -1486,6 +1486,23 @@ describe('CloudConnectorService', () => {
         expect(mockSoClient.update.mock.calls[0][2]).not.toHaveProperty('verification_status');
       });
 
+      it('accepts an invalid incoming Role ARN it replaces with the stored one', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: 'not-an-arn' } } },
+          { esClient: mockEsClient, keepStoredRoleArn: true }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({ vars: { role_arn: { type: 'text', value: oldArn } } }),
+          { version: 'Wz-cc-version' }
+        );
+      });
+
       describe('permission verifier', () => {
         let runSoon: jest.Mock;
 

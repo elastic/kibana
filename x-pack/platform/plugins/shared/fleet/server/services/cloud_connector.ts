@@ -508,11 +508,21 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         cloudConnectorId
       );
 
-      // Validate updates if vars are provided
-      if (cloudConnectorUpdate.vars) {
+      const isAws = existingCloudConnector.attributes.cloudProvider === 'aws';
+      const existingAwsVars = existingCloudConnector.attributes.vars as
+        | AwsCloudConnectorVars
+        | undefined;
+      const storedRoleArnVar = existingAwsVars?.role_arn;
+      const incomingVars =
+        options?.keepStoredRoleArn && isAws && storedRoleArnVar && cloudConnectorUpdate.vars
+          ? { ...cloudConnectorUpdate.vars, role_arn: storedRoleArnVar }
+          : cloudConnectorUpdate.vars;
+
+      // Validate the vars that will be written, after any stored Role ARN replaced the incoming one
+      if (incomingVars) {
         const tempCloudConnector = {
           name: cloudConnectorUpdate.name || existingCloudConnector.attributes.name,
-          vars: cloudConnectorUpdate.vars,
+          vars: incomingVars,
           cloudProvider: existingCloudConnector.attributes.cloudProvider,
         };
         this.validateCloudConnectorDetails(tempCloudConnector);
@@ -538,15 +548,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
 
-      const isAws = existingCloudConnector.attributes.cloudProvider === 'aws';
-      const existingAwsVars = existingCloudConnector.attributes.vars as
-        | AwsCloudConnectorVars
-        | undefined;
-      const storedRoleArnVar = existingAwsVars?.role_arn;
-      const incomingVars =
-        options?.keepStoredRoleArn && isAws && storedRoleArnVar && cloudConnectorUpdate.vars
-          ? { ...cloudConnectorUpdate.vars, role_arn: storedRoleArnVar }
-          : cloudConnectorUpdate.vars;
       const incomingAwsVars = incomingVars as AwsCloudConnectorVars | undefined;
       const oldRoleArn = existingAwsVars?.role_arn?.value;
       const newRoleArn = incomingAwsVars?.role_arn?.value;
