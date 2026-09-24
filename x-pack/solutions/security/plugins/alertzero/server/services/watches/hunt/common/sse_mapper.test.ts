@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { huntCoordinator } from '../hunt_coordinator';
@@ -76,6 +77,9 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
       rule_name: 'AssumeRole into high-risk policy boundary',
       severity: 'high' as const,
       risk_score: 73,
+      execution: { executed: true, row_count: 2, hit: true },
+      affected_hosts: ['WIN-ANALYST01'],
+      affected_users: ['svc-deploy-bot'],
       hit_refs: [
         {
           event_id: 't2-evt-1',
@@ -96,6 +100,8 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
       rule_name: 'Credential file read on CI runner',
       severity: 'medium' as const,
       risk_score: 51,
+      execution: { executed: true, row_count: 1, hit: true },
+      affected_hosts: ['ci-deploy-runner-07'],
       hit_refs: [
         {
           event_id: 't2-evt-2',
@@ -128,6 +134,13 @@ jest.mock('../tier2/hunt_behavior', () => ({
 const logger = loggingSystemMock.createLogger();
 
 const esClient = {} as ElasticsearchClient;
+/** Truthy stand-in so the coordinator does not skip Tier 2 with `no_inference`. */
+const mockModel = {} as ScopedModel;
+
+const runCoordinator = (
+  params: Parameters<typeof huntCoordinator>[3]
+): ReturnType<typeof huntCoordinator> =>
+  huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, params);
 
 describe('buildSseAttachmentId', () => {
   it('is deterministic and technique-scoped', () => {
@@ -158,19 +171,14 @@ describe('buildSseData', () => {
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
     huntBehavior.mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
 
-    const coordinatorResult = await huntCoordinator(
-      { esClient, reportsEsClient: esClient },
-      undefined,
-      logger,
-      {
-        report_id: 'tr-aws-iam-assumerole-2026-07-28',
-        spaceId: 'default',
-        text: 'AssumeRole chain from a rarely used identity',
-        trigger: 'scheduled',
-        run_id: 'run-hunt-20260730T160000Z',
-        tier2_when: 'on_hits',
-      }
-    );
+    const coordinatorResult = await runCoordinator({
+      report_id: 'tr-aws-iam-assumerole-2026-07-28',
+      spaceId: 'default',
+      text: 'AssumeRole chain from a rarely used identity',
+      trigger: 'scheduled',
+      run_id: 'run-hunt-20260730T160000Z',
+      tier2_when: 'on_hits',
+    });
 
     expect(coordinatorResult.status).toBe('tier1_and_tier2');
 
@@ -201,6 +209,9 @@ describe('buildSseData', () => {
     expect(entry.data.source_watch).toBe('system-security-hunt-continuous-threat-hunt');
 
     expect(entry.data.hunt_result.has_confirmed_hit).toBe(true);
+    expect(entry.data.hunt_result.hit_sources).toEqual(
+      expect.arrayContaining(['tier1', 'tier2'])
+    );
     expect(entry.data.hunt_result.tier1.status).toBe('environment_hits_found');
     expect(entry.data.hunt_result.tier1.counts.total_hits).toBe(4);
     expect(entry.data.hunt_result.tier1.per_index).toEqual([
@@ -213,10 +224,25 @@ describe('buildSseData', () => {
     expect(entry.data.hunt_result.tier2).toBeDefined();
     expect(entry.data.hunt_result.tier2?.status).toBe('behaviors_proposed');
     expect(entry.data.hunt_result.tier2?.behaviors[0].technique_id).toBe('T1078.004');
+    expect(entry.data.hunt_result.tier2?.behaviors[0].proposed_esql_rule).toContain(
+      'FROM logs-aws.cloudtrail-default'
+    );
+    expect(entry.data.hunt_result.tier2?.behaviors[0].execution).toEqual({
+      executed: true,
+      row_count: 2,
+      hit: true,
+    });
+    expect(entry.data.title).toBe('AssumeRole into high-risk policy boundary');
+    expect(entry.data.severity).toBe('high');
+    expect(entry.data.status).toBe('open');
+    expect(entry.data.evaluation_record_ref).toContain('eval:hunt:');
+    // Packaging fills maps_to_proposal after mint; mapper must leave it unset.
+    expect('maps_to_proposal' in entry.data).toBe(false);
 
     expect(entry.data.entities).toEqual(
       expect.arrayContaining([
         { field: 'host.name', value: 'ci-deploy-runner-07' },
+        { field: 'host.name', value: 'WIN-ANALYST01' },
         { field: 'user.name', value: 'svc-deploy-bot' },
         { field: 'service.name', value: 'ci-deploy-role' },
       ])
@@ -292,19 +318,14 @@ describe('buildSseData', () => {
       next_step: 'Lower threshold.',
     });
 
-    const coordinatorResult = await huntCoordinator(
-      { esClient, reportsEsClient: esClient },
-      undefined,
-      logger,
-      {
-        report_id: 'tr-hit-no-behaviors',
-        spaceId: 'default',
-        text: 'AssumeRole chain',
-        trigger: 'scheduled',
-        run_id: 'run-hunt-no-behaviors',
-        tier2_when: 'on_hits',
-      }
-    );
+    const coordinatorResult = await runCoordinator({
+      report_id: 'tr-hit-no-behaviors',
+      spaceId: 'default',
+      text: 'AssumeRole chain',
+      trigger: 'scheduled',
+      run_id: 'run-hunt-no-behaviors',
+      tier2_when: 'on_hits',
+    });
 
     const entries = buildSseData(coordinatorResult, 'tr-hit-no-behaviors', { spaceId: 'default' });
 
@@ -313,7 +334,81 @@ describe('buildSseData', () => {
       buildSseAttachmentId({ spaceId: 'default', reportId: 'tr-hit-no-behaviors' })
     );
     expect(entries[0].data.hunt_result.has_confirmed_hit).toBe(true);
+    expect(entries[0].data.hunt_result.hit_sources).toEqual(['tier1']);
     expect(entries[0].data.hunt_result.tier2?.status).toBe('no_behaviors_found');
+  });
+
+  it('emits a Tier 2-only hit with tier2 hit_sources and Tier 2 entities', async () => {
+    const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
+    const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
+    huntForThreat.mockResolvedValue({
+      status: 'no_environment_hits',
+      has_confirmed_hit: false,
+      searched_iocs: 0,
+      searched_techniques: 0,
+      resolved_iocs: [],
+      resolved_techniques: [],
+      time_range: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
+      counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+      hits: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
+    });
+    huntBehavior.mockResolvedValue({
+      status: 'behaviors_proposed',
+      behaviors: [
+        {
+          technique_id: 'T1078.004',
+          evidence_quote: 'AssumeRole into OrgAdminBoundary',
+          llm_confidence: 0.9,
+          confidence: 0.9,
+          technique_name: 'Valid Accounts: Cloud Accounts',
+          reference: 'https://attack.mitre.org/techniques/T1078/004/',
+          tactic_ids: ['TA0001'],
+          proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE true',
+          rule_name: 'AssumeRole into high-risk policy boundary',
+          severity: 'high' as const,
+          risk_score: 73,
+          execution: { executed: true, row_count: 3, hit: true },
+          affected_hosts: ['WIN-ANALYST01'],
+          hit_refs: [
+            {
+              event_id: 't2-only-1',
+              source_index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+              timestamp: '2026-07-30T14:00:00.000Z',
+            },
+          ],
+        },
+      ],
+      indexed_behaviors: [],
+      has_hit: true,
+      next_step: 'Review.',
+    });
+
+    const coordinatorResult = await runCoordinator({
+      report_id: 'tr-behavior-only',
+      spaceId: 'default',
+      text: 'behavior only',
+      trigger: 'manual',
+      run_id: 'run-tier2-only',
+      tier2_when: 'always',
+    });
+
+    expect(coordinatorResult.has_confirmed_hit).toBe(true);
+    const entries = buildSseData(coordinatorResult, 'tr-behavior-only', { spaceId: 'default' });
+    expect(entries).toHaveLength(1);
+    expect(entries[0].data.hunt_result.has_confirmed_hit).toBe(true);
+    expect(entries[0].data.hunt_result.hit_sources).toEqual(['tier2']);
+    expect(entries[0].data.entities).toEqual([{ field: 'host.name', value: 'WIN-ANALYST01' }]);
+    expect(entries[0].data.events).toEqual([
+      expect.objectContaining({
+        event_id: 't2-only-1',
+        matched: { technique_id: 'T1078.004', field: '_id' },
+      }),
+    ]);
+
+    const parsed = significantSecurityEventAttachmentDataSchema.safeParse(entries[0].data);
+    expect(parsed.success).toBe(true);
   });
 
   it('returns a single report-scoped entry for a tier1_only clean result', async () => {
@@ -326,7 +421,7 @@ describe('buildSseData', () => {
       searched_techniques: 0,
       resolved_iocs: [],
       resolved_techniques: [],
-      time_range: { from: 'now-24h', to: 'now' },
+      time_range: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
       counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
       hits: [],
       affected_assets: { hosts: [], users: [], services: [] },
@@ -340,23 +435,21 @@ describe('buildSseData', () => {
       next_step: 'n/a',
     });
 
-    const coordinatorResult = await huntCoordinator(
-      { esClient, reportsEsClient: esClient },
-      undefined,
-      logger,
-      {
-        report_id: 'tr-clean-2026-07-28',
-        spaceId: 'default',
-        trigger: 'scheduled',
-        run_id: 'run-hunt-clean',
-        tier2_when: 'on_hits',
-      }
-    );
+    const coordinatorResult = await runCoordinator({
+      report_id: 'tr-clean-2026-07-28',
+      spaceId: 'default',
+      text: 'clean report',
+      trigger: 'scheduled',
+      run_id: 'run-hunt-clean',
+      // Skip Tier 2 so the result stays tier1_only with no tier2 block.
+      tier2_when: 'never',
+    });
 
     const entries = buildSseData(coordinatorResult, 'tr-clean-2026-07-28', { spaceId: 'default' });
 
     expect(entries).toHaveLength(1);
     expect(entries[0].data.hunt_result.has_confirmed_hit).toBe(false);
+    expect(entries[0].data.hunt_result.hit_sources).toEqual([]);
     expect(entries[0].data.hunt_result.tier2).toBeUndefined();
     expect(entries[0].data.entities).toEqual([]);
     expect(entries[0].data.events).toEqual([]);
@@ -365,61 +458,38 @@ describe('buildSseData', () => {
 });
 
 describe('buildSseData output parses against the SSE attachment schema', () => {
-  it('validates a full hit-with-behaviors entry against significantSecurityEventAttachmentDataSchema', async () => {
+  it('validates mapper output as-is (schema-complete, no caller fill)', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
     huntBehavior.mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
 
-    const coordinatorResult = await huntCoordinator(
-      { esClient, reportsEsClient: esClient },
-      undefined,
-      logger,
-      {
-        report_id: 'tr-aws-iam-assumerole-2026-07-28',
-        spaceId: 'default',
-        text: 'AssumeRole chain from a rarely used identity',
-        trigger: 'scheduled',
-        run_id: 'run-hunt-20260730T160000Z',
-        tier2_when: 'on_hits',
-      }
-    );
+    const coordinatorResult = await runCoordinator({
+      report_id: 'tr-aws-iam-assumerole-2026-07-28',
+      spaceId: 'default',
+      text: 'AssumeRole chain from a rarely used identity',
+      trigger: 'scheduled',
+      run_id: 'run-hunt-20260730T160000Z',
+      tier2_when: 'on_hits',
+    });
 
     const [entry] = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', {
       spaceId: 'default',
     });
 
-    // The caller fills in title/severity/status/hypothesis_tested/evidence_for/
-    // evidence_against/evaluation_record_ref before writing the attachment. Schema
-    // lock: buildSseData's own fields (report_id, run_id, source_watch, capability,
-    // security_knowledge_indicators, entities, events, hunt_result) must parse
-    // as-is against the real SSE schema with no cast.
-    const candidateAttachment = {
-      ...entry.data,
-      title: 'AssumeRole into OrgAdminBoundary from ci-deploy-runner-07',
-      severity: 'high' as const,
-      confidence: 0.82,
-      status: 'open' as const,
-      timeline: [
-        { at: '2026-07-30T13:05:00.000Z', what: 'AssumeRole into OrgAdminBoundary observed.' },
-      ],
-      hypothesis_tested:
-        'A rarely used identity assumed a high-privilege role outside business hours.',
-      evidence_for: ["AssumeRole event outside the identity's normal access pattern."],
-      evidence_against: [] as string[],
-      evaluation_record_ref: 'eval-run-hunt-20260730T160000Z',
-    };
-
-    const parsed = significantSecurityEventAttachmentDataSchema.safeParse(candidateAttachment);
+    const parsed = significantSecurityEventAttachmentDataSchema.safeParse(entry.data);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data.report_id).toBe('tr-aws-iam-assumerole-2026-07-28');
       expect(parsed.data.hunt_result?.has_confirmed_hit).toBe(true);
-      // `entry` is the first of two technique-scoped SSEs (HIT_TIER2_RESULT_TWO_BEHAVIORS
-      // confirms T1078.004 and T1552.001). hunt_result.tier2.behaviors is filtered to this
-      // entry's own technique alone, so length 1, not 2.
+      expect(parsed.data.hunt_result?.hit_sources).toEqual(
+        expect.arrayContaining(['tier1', 'tier2'])
+      );
+      // `entry` is the first of two technique-scoped SSEs. hunt_result.tier2.behaviors
+      // is filtered to this entry's own technique alone, so length 1, not 2.
       expect(parsed.data.hunt_result?.tier2?.behaviors).toHaveLength(1);
       expect(parsed.data.hunt_result?.tier2?.behaviors?.[0]?.technique_id).toBe('T1078.004');
+      expect(parsed.data.maps_to_proposal).toBeUndefined();
     }
   });
 });
