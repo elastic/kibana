@@ -1,5 +1,5 @@
 {
-  "sha1": "9d65cb41eb477cf647ada0a9398fb6cf5a66d4b7",
+  "sha1": "2ded519fcf96516b378055cd2ecc31bd7ba77b3b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,7 +30,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 143,
+        "line": 183,
         "column": 2
       }
     },
@@ -44,7 +44,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 153,
+        "line": 193,
         "column": 45
       }
     },

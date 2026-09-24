@@ -1,5 +1,5 @@
 {
-  "sha1": "f3d41557efeea824bc7f37158f7ce7d5cbce2f30",
+  "sha1": "52c53977285cce49042a26b1e58be799605dbd73",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -33,8 +33,8 @@
       }
     },
     {
-      "id": "d7094cddc0c6f94-5c58b0d8e5bb2ed",
-      "title": "Escalation access control — private escalations and collaborators PATCH from a collaborator returns 404 — current limitation: only owner can mutate (tracked in follow-up)",
+      "id": "d7094cddc0c6f94-a1846c3e5b72580",
+      "title": "Escalation access control — private escalations and collaborators PATCH title from a collaborator returns 404 — title update requires owner access",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
