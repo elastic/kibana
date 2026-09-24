@@ -7,9 +7,11 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 
 interface EsqlTabProps {
   onAdd: (query: string) => void;
@@ -62,6 +64,10 @@ export const EsqlTab = ({ onAdd }: EsqlTabProps) => {
             onClick={handleAdd}
             isDisabled={!trimmedQuery}
             data-test-subj="contextAddEsqlSourceButton"
+            {...getEbtProps({
+              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+              action: CONTEXT_ENGINE_UI_EBT.action.sources.ADD_ESQL,
+            })}
           >
             <FormattedMessage
               id="xpack.contextEngine.sourcePicker.esql.addButton"
