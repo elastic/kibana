@@ -68,6 +68,24 @@ export const formatPercent = (rate: number): string => {
   return percent === 0 && rate > 0 ? '<1%' : `${percent}%`;
 };
 
+/**
+ * Where a Scout target ran, from its location and the architecture its mode starts with:
+ * `Local deployment` or `Local serverless simulation`, `ECH` (cloud stateful) or `MKI` (cloud
+ * serverless). The bare location when either is unknown.
+ */
+export const targetEnvironment = ({ mode, type }: { mode: string; type: string }): string => {
+  const arch = mode.split('-')[0];
+  if (type === 'local') {
+    if (arch === 'stateful') return 'Local deployment';
+    if (arch === 'serverless') return 'Local serverless simulation';
+  }
+  if (type === 'cloud') {
+    if (arch === 'stateful') return 'ECH';
+    if (arch === 'serverless') return 'MKI';
+  }
+  return type;
+};
+
 /** `98 / 505 (**19%**)`, the rate in bold so it stands out in a table. */
 export const formatFailedBuilds = ({
   builds,

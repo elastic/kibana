@@ -13,6 +13,7 @@ import {
   formatDateRange,
   formatFailedBranches,
   formatFailedBuilds,
+  targetEnvironment,
   formatFailureMessage,
   formatBranchRates,
   formatPercent,
@@ -128,6 +129,20 @@ describe('formatFailureMessage', () => {
     const cut = formatFailureMessage(long);
     expect(cut.split('\n')).toHaveLength(13);
     expect(cut.endsWith('line 11\n…')).toBe(true);
+  });
+});
+
+describe('targetEnvironment', () => {
+  it('names where the target ran from its location and architecture', () => {
+    expect(targetEnvironment({ mode: 'stateful-classic', type: 'local' })).toBe('Local deployment');
+    expect(targetEnvironment({ mode: 'serverless-search', type: 'local' })).toBe(
+      'Local serverless simulation'
+    );
+    expect(targetEnvironment({ mode: 'stateful-classic', type: 'cloud' })).toBe('ECH');
+    expect(targetEnvironment({ mode: 'serverless-security_complete', type: 'cloud' })).toBe('MKI');
+    // falls back to the location when either part is unknown
+    expect(targetEnvironment({ mode: 'stateful-classic', type: 'unknown' })).toBe('unknown');
+    expect(targetEnvironment({ mode: 'unknown', type: 'local' })).toBe('local');
   });
 });
 

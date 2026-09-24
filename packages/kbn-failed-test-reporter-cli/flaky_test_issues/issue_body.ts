@@ -26,6 +26,7 @@ import {
   plural,
   shortTitle,
   table,
+  targetEnvironment,
   testsTable,
 } from './markdown';
 import type { FlakySuite } from './suites';
@@ -377,8 +378,9 @@ const failuresByBranch = (suite: FlakySuite): string | undefined => {
 const UNKNOWN_TARGET_MODE = 'unknown';
 
 /**
- * Which Scout targets (deployment mode and location) the suite fails on and which it does not.
- * Runs that recorded no target are left out, so the table only appears for suites that have one.
+ * Which Scout targets the suite fails on and which it does not, with where each ran (local
+ * deployment or serverless simulation, ECH, MKI). Runs that recorded no target are left out, so
+ * the table only appears for suites that have one.
  */
 const failuresByTarget = (suite: FlakySuite): string | undefined => {
   const targets = worstPerKey(
@@ -389,13 +391,14 @@ const failuresByTarget = (suite: FlakySuite): string | undefined => {
   if (targets.length === 0) {
     return undefined;
   }
-  const rows = targets.map((row) =>
-    failuresRow(`${inlineCode(row.worst.mode)} · ${row.worst.type}`, row)
-  );
+  const rows = targets.map((row) => {
+    const [target, ...rest] = failuresRow(inlineCode(row.worst.mode), row);
+    return [target, targetEnvironment(row.worst), ...rest];
+  });
   return [
     '#### Failures by Target',
     '',
-    table(['Target', 'Failed builds', 'Sample failure'], rows),
+    table(['Target', 'Environment', 'Failed builds', 'Sample failure'], rows),
   ].join('\n');
 };
 

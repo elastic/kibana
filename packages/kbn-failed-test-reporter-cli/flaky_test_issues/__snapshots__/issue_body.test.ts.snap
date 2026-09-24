@@ -51,11 +51,11 @@ Last seen in [#12200](https://buildkite.com/elastic/kibana-on-merge/builds/12200
 
 #### Failures by Target
 
-| Target | Failed builds | Sample failure |
-|---|---|---|
-| 🔴 \`stateful-classic\` · local | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| 🔴 \`serverless-security_complete\` · cloud | 3 / 64 (**5%**) | 2026-09-07 11:40 UTC |
-| ✅ \`serverless-observability_complete\` · local | 0 / 426 |  |
+| Target | Environment | Failed builds | Sample failure |
+|---|---|---|---|
+| 🔴 \`stateful-classic\` | Local deployment | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| 🔴 \`serverless-security_complete\` | MKI | 3 / 64 (**5%**) | 2026-09-07 11:40 UTC |
+| ✅ \`serverless-observability_complete\` | Local serverless simulation | 0 / 426 |  |
 
 Possibly related: #7, #8.
 
@@ -97,10 +97,10 @@ Last seen in [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345
 
 #### Failures by Target
 
-| Target | Failed builds | Sample failure |
-|---|---|---|
-| 🔴 \`stateful-classic\` · local | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| ✅ \`serverless-observability_complete\` · local | 0 / 426 |  |
+| Target | Environment | Failed builds | Sample failure |
+|---|---|---|---|
+| 🔴 \`stateful-classic\` | Local deployment | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| ✅ \`serverless-observability_complete\` | Local serverless simulation | 0 / 426 |  |
 
 #### Failures by Pipeline
 
