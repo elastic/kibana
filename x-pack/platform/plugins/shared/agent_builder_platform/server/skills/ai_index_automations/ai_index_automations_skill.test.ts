@@ -300,7 +300,9 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('says the templates use connector-id-by-feature deliberately, so no literal connector is added', () => {
-      expect(content).toMatch(/connector-id-by-feature: context_engine_prompt.*on their `ai\.prompt` steps/s);
+      expect(content).toMatch(
+        /connector-id-by-feature: context_engine_prompt.*on their `ai\.prompt` steps/s
+      );
       expect(content).toMatch(/do not add a `connector-id`/);
     });
 
