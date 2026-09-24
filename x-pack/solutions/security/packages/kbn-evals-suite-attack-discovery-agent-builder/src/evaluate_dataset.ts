@@ -1205,9 +1205,16 @@ const isValidationFinished = (validation: unknown): boolean => {
 export const waitForValidationPhase = async ({
   fetch,
   executionId,
+  executionFailed = false,
 }: {
   fetch: HttpHandler;
   executionId: string;
+  /**
+   * The AD tool reported a terminal failure for this execution (`adToolResult.status`).
+   * Validation runs after generation in the same pipeline, so a failed run never
+   * reaches it and `tracking.validation` stays null — there is nothing to wait for.
+   */
+  executionFailed?: boolean;
 }): Promise<ExecutionTrackingResponse> => {
   const deadline = Date.now() + WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS;
   let lastError: unknown;
@@ -1272,6 +1279,19 @@ export const waitForValidationPhase = async ({
         }
       }
     }
+    // The execution terminally failed before the validation phase, so
+    // `tracking.validation` can never become non-null. Return the snapshot we
+    // have rather than poll for the rest of the budget on a predicate that can
+    // no longer be satisfied — a wedged run must not stall the suite.
+    if (executionFailed && tracking?.validation == null) {
+      if (lastTracking) {
+        return lastTracking;
+      }
+      throw new Error(
+        `Attack Discovery execution ${executionId} failed before reaching the validation phase`,
+        { cause: lastError }
+      );
+    }
     if (Date.now() >= deadline) {
       if (lastTracking) {
         // Timed out still waiting: return the LAST SUCCESSFUL snapshot rather
@@ -1310,7 +1330,11 @@ const inspectWorkflow = async ({
   workflow: AttackDiscoveryAgentBuilderTaskOutput['workflow'];
   pipeline: AttackDiscoveryPipelineResponse | null;
 }> => {
-  const tracking = await waitForValidationPhase({ fetch, executionId });
+  const tracking = await waitForValidationPhase({
+    fetch,
+    executionId,
+    executionFailed: adToolResult?.status === 'error',
+  });
   const workflowId = tracking.generation?.workflow_id;
   const pipeline = workflowId
     ? ((await fetch(`/internal/attack_discovery/workflow/${workflowId}/execution/${executionId}`, {

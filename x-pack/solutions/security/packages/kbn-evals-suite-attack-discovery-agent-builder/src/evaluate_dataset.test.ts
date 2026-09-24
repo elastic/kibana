@@ -1398,6 +1398,60 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
     validation,
   });
 
+  // A failed execution never reaches the validation phase, so waiting for it
+  // burns the whole budget on a predicate that can never be satisfied.
+  it('stops polling once the AD tool reported a terminal failure', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        // Tracking is available (generation only); validation never started.
+        .mockResolvedValueOnce({ generation: { workflow_id: 'wf-gen' }, validation: null })
+        // Any further poll is the stall this guards against.
+        .mockImplementation(async () => {
+          throw new Error('polled again after a terminal execution failure');
+        });
+
+      const settled = await waitForValidationPhase({
+        fetch,
+        executionId: 'exec-1',
+        executionFailed: true,
+      });
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(settled.generation?.workflow_id).toBe('wf-gen');
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // The validation phase takes precedence: if it actually started, the run did
+  // reach it and the AD tool's error status must not short-circuit the wait.
+  it('still waits for validation when it already started despite a terminal failure', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-failed-exec' }))
+        // validation run probe: terminal
+        .mockResolvedValueOnce({ status: 'completed' })
+        // tracking poll again: now reportable as finished
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-failed-exec' }));
+
+      const pending = waitForValidationPhase({
+        fetch,
+        executionId: 'exec-1',
+        executionFailed: true,
+      });
+      const settled = await jest.advanceTimersByTimeAsync(10_000).then(() => pending);
+
+      expect(settled.validation?.workflow_run_id).toBe('run-failed-exec');
+      expect(fetch).toHaveBeenCalledTimes(3);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('returns immediately when validation is already tracked', async () => {
     const fetch = jest.fn().mockResolvedValue(trackingWith({ workflow_id: 'wf-val' }));
     const tracking = await waitForValidationPhase({ fetch, executionId: 'exec-1' });
