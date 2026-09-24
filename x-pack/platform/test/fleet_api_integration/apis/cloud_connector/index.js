@@ -10,5 +10,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./cloud_connector'));
     loadTestFile(require.resolve('./edit_role_arn'));
     loadTestFile(require.resolve('./privileges'));
+    // Enables space awareness, which cannot be turned off again, so it runs last.
+    loadTestFile(require.resolve('./edit_role_arn_shared_spaces'));
   });
 }
