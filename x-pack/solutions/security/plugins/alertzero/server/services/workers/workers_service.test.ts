@@ -192,7 +192,7 @@ describe('WorkersService', () => {
       .createService()
       .update(
         TRIAGE,
-        { settings: { autonomy: 'assisted' }, settingsRevision: null },
+        { settings: { autonomy: 'supervised' }, settingsRevision: null },
         SPACE,
         request
       );
@@ -201,7 +201,7 @@ describe('WorkersService', () => {
     if (result.outcome !== 'updated')
       throw new Error('Expected configure-before-enable to succeed');
     expect(result.response.worker.enabled).toBe(false);
-    expect(result.response.worker.settings.autonomy).toBe('assisted');
+    expect(result.response.worker.settings.autonomy).toBe('supervised');
     expect(result.response.worker.workflowId).toBe(reportedWorkflowId(TRIAGE, SPACE));
     expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.enabled).toBe(false);
   });
@@ -221,7 +221,7 @@ describe('WorkersService', () => {
       .createService()
       .update(
         TRIAGE,
-        { settings: { autonomy: 'assisted' }, settingsRevision: null },
+        { settings: { autonomy: 'manual' }, settingsRevision: null },
         'space-b',
         request
       );
@@ -230,7 +230,7 @@ describe('WorkersService', () => {
       'supervised'
     );
     expect((await harness.createService().get(TRIAGE, request, 'space-b'))?.settings.autonomy).toBe(
-      'assisted'
+      'manual'
     );
   });
 
@@ -239,7 +239,7 @@ describe('WorkersService', () => {
     const service = harness.createService();
     await service.update(
       TRIAGE,
-      { settings: { autonomy: 'assisted' }, settingsRevision: null },
+      { settings: { autonomy: 'supervised' }, settingsRevision: null },
       SPACE,
       request
     );
@@ -247,7 +247,7 @@ describe('WorkersService', () => {
     await expect(
       service.update(
         TRIAGE,
-        { settings: { autonomy: 'supervised' }, settingsRevision: null },
+        { settings: { autonomy: 'manual' }, settingsRevision: null },
         SPACE,
         request
       )
@@ -259,7 +259,7 @@ describe('WorkersService', () => {
     const service = harness.createService();
     const first = await service.update(
       TRIAGE,
-      { settings: { autonomy: 'assisted' }, settingsRevision: null },
+      { settings: { autonomy: 'supervised' }, settingsRevision: null },
       SPACE,
       request
     );
@@ -270,7 +270,7 @@ describe('WorkersService', () => {
       service.update(
         TRIAGE,
         {
-          settings: { autonomy: 'supervised' },
+          settings: { autonomy: 'manual' },
           settingsRevision: first.response.worker.settingsRevision,
         },
         SPACE,
@@ -290,7 +290,7 @@ describe('WorkersService', () => {
     const result = await service.update(
       TRIAGE,
       {
-        settings: { autonomy: 'assisted' },
+        settings: { autonomy: 'supervised' },
         settingsRevision: enabled.response.worker.settingsRevision,
       },
       SPACE,
@@ -701,7 +701,6 @@ describe('WorkersService', () => {
     const makeService = (
       harness: ReturnType<typeof createPersistentHarness>,
       attachment: ReturnType<typeof makeAttachmentService> | null,
-      alertTriageWorkerEnabled = true,
       isAlertAnalysisRuntimeEnabled?: () => Promise<boolean>
     ) => {
       const getAttachmentServiceMock = attachment
@@ -713,24 +712,12 @@ describe('WorkersService', () => {
         loggingSystemMock.createLogger() as Logger,
         {},
         {
-          alertTriageWorkerEnabled,
           getAttachmentService: getAttachmentServiceMock,
           isAlertAnalysisRuntimeEnabled,
         }
       );
       return { service, getAttachmentServiceMock };
     };
-
-    it('flag off: enable does not attach rules to any detection rule', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment, false);
-
-      await service.update(TRIAGE, { enabled: true }, SPACE, request);
-
-      expect(attachment.getRuleAttachmentSelection).not.toHaveBeenCalled();
-      expect(attachment.updateRuleAttachments).not.toHaveBeenCalled();
-    });
 
     it('preflight fail: rejects with named message and does not enable the Worker', async () => {
       const harness = createPersistentHarness();
@@ -752,7 +739,7 @@ describe('WorkersService', () => {
     // is undefined, but the runtime config guard must still block the enable.
     it('runtime config off: rejects even when attachment service is absent', async () => {
       const harness = createPersistentHarness();
-      const { service } = makeService(harness, undefined, true, async () => false);
+      const { service } = makeService(harness, null, async () => false);
 
       const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
 
@@ -771,7 +758,7 @@ describe('WorkersService', () => {
     it('runtime config off: rejects even though the workflow itself is enabled', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment, true, async () => false);
+      const { service } = makeService(harness, attachment, async () => false);
 
       const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
 
@@ -788,7 +775,7 @@ describe('WorkersService', () => {
     it('runtime config unreadable: falls through to the remaining checks', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment, true, async () => {
+      const { service } = makeService(harness, attachment, async () => {
         throw new Error('uiSettings unavailable');
       });
 
@@ -805,15 +792,19 @@ describe('WorkersService', () => {
       const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
 
       expect(result.outcome).toBe('updated');
-      // The attachment service must receive the installed workflow ID (base ID + space suffix),
-      // not the bare registration constant — the workflow executor looks up by exact ID.
-      expect(getAttachmentServiceMock).toHaveBeenCalledWith(request, `${TRIAGE}-${SPACE}`);
+      // The attachment service must receive the ID the install reported, not the bare
+      // registration constant and not a rebuilt `<worker>-<space>` — the workflow executor
+      // looks up by exact ID, and the harness reports an opaque one to prove we pass it through.
+      expect(getAttachmentServiceMock).toHaveBeenCalledWith(
+        request,
+        reportedWorkflowId(TRIAGE, SPACE)
+      );
       expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
         attachRuleIds: ['rule-1', 'rule-2'],
         detachRuleIds: [],
       });
       expect(harness.updateWorkflow).toHaveBeenCalledWith(
-        `${TRIAGE}-${SPACE}`,
+        reportedWorkflowId(TRIAGE, SPACE),
         { enabled: true },
         SPACE,
         request
