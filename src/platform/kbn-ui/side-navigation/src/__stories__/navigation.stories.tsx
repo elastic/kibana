@@ -374,6 +374,7 @@ export const WithLongPopoverListTitles: StoryObj<PropsAndArgs> = {
                   id: 'ecommerce-revenue-analytics',
                   label: '[eCommerce] Revenue Analytics',
                   href: '/dashboards/revenue-analytics',
+                  badgeType: 'beta',
                 },
                 {
                   id: 'short-logs',
@@ -390,6 +391,7 @@ export const WithLongPopoverListTitles: StoryObj<PropsAndArgs> = {
                   id: 'conv-latency',
                   label: 'Why is checkout latency spiking for the acme production cluster?',
                   href: '/agent/latency',
+                  badgeType: 'techPreview',
                 },
                 {
                   id: 'conv-errors',

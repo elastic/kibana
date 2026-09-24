@@ -99,10 +99,13 @@ export const SecondaryMenuItemComponent = ({
     min-width: 0;
   `;
 
-  // Without a `width`, EuiTextTruncate measures its own box, so it has to fill the row.
+  // Without a `width`, EuiTextTruncate measures its own box, so it has to fill the row. The
+  // wrapper is the flex item because EuiTextTruncate wraps itself in a tooltip anchor once it
+  // truncates, and a content-sized anchor would collapse the measured width to 0.
   const truncatedLabelStyles = css`
     flex: 1;
     min-width: 0;
+    text-align: start;
   `;
 
   const submenuIconStyles = css`
@@ -121,7 +124,9 @@ export const SecondaryMenuItemComponent = ({
 
   const label =
     truncation === 'middle' && typeof children === 'string' ? (
-      <EuiTextTruncate text={children} truncation="middle" css={truncatedLabelStyles} />
+      <div css={truncatedLabelStyles}>
+        <EuiTextTruncate text={children} truncation="middle" />
+      </div>
     ) : (
       <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
         {children}
