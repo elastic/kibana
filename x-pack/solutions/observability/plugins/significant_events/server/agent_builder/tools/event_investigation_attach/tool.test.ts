@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -43,7 +43,7 @@ describe('event_investigation_attach tool', () => {
         getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
         licensing: {},
       }) as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger,
       telemetry: { trackAgentToolEventInvestigationAttach: jest.fn() } as never,
     });
