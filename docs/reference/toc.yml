@@ -100,6 +100,7 @@ toc:
           - file: connectors-kibana/gcp-iam-action-type.md
           - file: connectors-kibana/gcp-secret-manager-action-type.md
           - file: connectors-kibana/github-action-type.md
+          - file: connectors-kibana/gitlab-action-type.md
           - file: connectors-kibana/gmail-action-type.md
           - file: connectors-kibana/google-calendar-action-type.md
           - file: connectors-kibana/google-cloud-monitoring-action-type.md
