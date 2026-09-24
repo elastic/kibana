@@ -15,6 +15,8 @@ import {
   MAX_TRIGGER_EVENT_BYTES,
   MAX_TRIGGER_EVENT_DOCS,
 } from './fetch_event_documents';
+import { TriggerEventDocumentsForbiddenError } from '../../../trigger_event_documents_forbidden_error';
+import { WorkflowForbiddenError } from '../../../workflow_forbidden_error';
 
 describe('fetch_event_documents', () => {
   let mockEsClient: {
@@ -72,6 +74,81 @@ describe('fetch_event_documents', () => {
       );
       expect(hits).toEqual([{ _id: 'a', _index: 'idx', _source: { foo: 'bar' } }]);
       expect(logger.warn).toHaveBeenCalledWith('Document not found: b in index idx');
+    });
+
+    it('warns and skips documents whose index does not exist', async () => {
+      mockEsClient.mget.mockResolvedValue({
+        docs: [
+          { found: true, _id: 'a', _index: 'idx', _source: { foo: 'bar' } },
+          {
+            _id: 'b',
+            _index: 'missing',
+            error: { type: 'index_not_found_exception', reason: 'no such index [missing]' },
+          },
+        ],
+      });
+
+      const hits = await fetchDocumentsByIds(
+        [
+          { _id: 'a', _index: 'idx' },
+          { _id: 'b', _index: 'missing' },
+        ],
+        asEsClient(),
+        logger
+      );
+
+      expect(hits).toEqual([{ _id: 'a', _index: 'idx', _source: { foo: 'bar' } }]);
+      expect(logger.warn).toHaveBeenCalledWith('Document not found: b in index missing');
+    });
+
+    it('rejects with a forbidden error when any selected document is unreadable', async () => {
+      mockEsClient.mget.mockResolvedValue({
+        docs: [
+          { found: true, _id: 'a', _index: 'readable', _source: { foo: 'bar' } },
+          {
+            _id: 'b',
+            _index: 'secret',
+            error: { type: 'security_exception', reason: 'action is unauthorized' },
+          },
+          {
+            _id: 'c',
+            _index: 'secret',
+            error: { type: 'security_exception', reason: 'action is unauthorized' },
+          },
+        ],
+      });
+
+      const result = fetchDocumentsByIds(
+        [
+          { _id: 'a', _index: 'readable' },
+          { _id: 'b', _index: 'secret' },
+          { _id: 'c', _index: 'secret' },
+        ],
+        asEsClient(),
+        logger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(TriggerEventDocumentsForbiddenError);
+      await expect(result).rejects.toBeInstanceOf(WorkflowForbiddenError);
+      await expect(result).rejects.toThrow(
+        'Not authorized to read the selected documents in: secret'
+      );
+    });
+
+    it('rejects when a selected document fails with any other error', async () => {
+      mockEsClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _id: 'a',
+            _index: 'idx',
+            error: { type: 'shard_not_available_exception', reason: 'shard unavailable' },
+          },
+        ],
+      });
+
+      await expect(
+        fetchDocumentsByIds([{ _id: 'a', _index: 'idx' }], asEsClient(), logger)
+      ).rejects.toThrow('Failed to fetch document a in index idx: shard unavailable');
     });
 
     it('rejects an explicit selection larger than MAX_TRIGGER_EVENT_DOCS', async () => {

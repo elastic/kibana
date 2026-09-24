@@ -15,6 +15,7 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import type { DocumentSelection } from '../../../../../common/types/document_types';
+import { TriggerEventDocumentsForbiddenError } from '../../../trigger_event_documents_forbidden_error';
 
 /** A raw document hit shared by both the id-based and query-based fetch paths. */
 export interface RawDocumentHit {
@@ -62,6 +63,7 @@ const createSizeLimitError = (maxBytes: number): Error =>
 /**
  * Fetches full document sources for an explicit id selection via a single `mget`.
  * Not-found ids are skipped (and logged); the caller decides how to handle an empty result.
+ * Ids the current user cannot read reject with `TriggerEventDocumentsForbiddenError`.
  */
 export async function fetchDocumentsByIds(
   ids: DocumentSelection[],
@@ -87,17 +89,30 @@ export async function fetchDocumentsByIds(
     );
 
     const hits: RawDocumentHit[] = [];
+    const unauthorizedIndices = new Set<string>();
     for (let i = 0; i < response.docs.length; i++) {
       const doc = response.docs[i];
-      if ('found' in doc && doc.found && '_source' in doc && doc._source) {
-        hits.push({
-          _id: doc._id,
-          _index: doc._index,
-          _source: doc._source as Record<string, unknown>,
-        });
+      const { _id, _index } = ids[i];
+      // mget authorizes each item separately and reports failures as per-item errors, so an
+      // unreadable document must fail the run instead of silently shrinking the selection.
+      if ('error' in doc) {
+        const { type, reason } = doc.error;
+        if (type === 'security_exception') {
+          unauthorizedIndices.add(_index);
+        } else if (type === 'index_not_found_exception') {
+          logger.warn(`Document not found: ${_id} in index ${_index}`);
+        } else {
+          throw new Error(`Failed to fetch document ${_id} in index ${_index}: ${reason ?? type}`);
+        }
+      } else if (doc.found && doc._source) {
+        hits.push({ _id: doc._id, _index: doc._index, _source: doc._source });
       } else {
-        logger.warn(`Document not found: ${ids[i]._id} in index ${ids[i]._index}`);
+        logger.warn(`Document not found: ${_id} in index ${_index}`);
       }
+    }
+
+    if (unauthorizedIndices.size > 0) {
+      throw new TriggerEventDocumentsForbiddenError([...unauthorizedIndices]);
     }
     return hits;
   } catch (error) {
