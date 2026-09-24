@@ -7,7 +7,7 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getImpactStepCommonDefinition } from '../../../common/impact/step_types/get_impact_step';
-import { parseStepInput } from '../../proposals/step_types/parse_step_input';
+import { parseStepInput } from './parse_step_input';
 import type { ImpactService } from '../services/impact_service';
 import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
 import { toStepError } from './to_step_error';
@@ -34,7 +34,7 @@ export const getGetImpactStepDefinition = ({
         return {
           output: {
             id: impact.id,
-            entityIds: impact.entityIds,
+            entities: impact.entities,
           },
         };
       } catch (error) {

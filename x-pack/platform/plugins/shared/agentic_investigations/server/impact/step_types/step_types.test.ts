@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { attachImpactStepInputSchema } from '../../../common/impact/step_types/attach_impact_step';
 import type { ImpactService } from '../services/impact_service';
 import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
-import { ImpactForbiddenError, ImpactNotFoundError } from '../services/errors';
+import { ImpactConflictError, ImpactForbiddenError, ImpactNotFoundError } from '../services/errors';
 import { getAttachImpactStepDefinition } from './attach_impact_step';
 import { getGetImpactStepDefinition } from './get_impact_step';
 
@@ -52,9 +52,9 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
   } as unknown as StepHandlerContext<never, never>);
 
 describe('investigations.attachImpact input schema', () => {
-  it('should require at least one entity id', () => {
+  it('should require at least one entity', () => {
     expect(
-      attachImpactStepInputSchema.safeParse({ conversationId: 'conv-1', entityIds: [] }).success
+      attachImpactStepInputSchema.safeParse({ conversationId: 'conv-1', entities: [] }).success
     ).toBe(false);
   });
 
@@ -68,7 +68,7 @@ describe('investigations.attachImpact input schema', () => {
     expect(Object.keys(jsonSchema.properties)).toEqual(
       Object.keys(attachImpactStepInputSchema.shape)
     );
-    expect(jsonSchema.required).toEqual(['conversationId', 'entityIds']);
+    expect(jsonSchema.required).toEqual(['conversationId', 'entities']);
   });
 });
 
@@ -80,37 +80,38 @@ describe('investigations.attachImpact step', () => {
   const createDefinition = (
     attach: jest.Mock,
     privileges = allowAll(),
-    getAttachmentClient: () => Promise<{ create: jest.Mock } | undefined> = async () => undefined
+    getAttachmentClient: () => Promise<{ create: jest.Mock } | undefined> = async () => ({
+      create: jest.fn().mockResolvedValue({ id: 'impact-1' }),
+    })
   ) => ({
     definition: getAttachImpactStepDefinition({
       getImpactService: () => ({ attach } as unknown as ImpactService),
       resolveUser,
       privileges,
-      getAttachmentClient,
+      getAttachmentClient: getAttachmentClient as never,
     }),
     privileges,
   });
 
   it('should attach through the service with the space and the resolved user', async () => {
+    const entities = [{ id: 'user-1' }, { id: 'host-1', name: 'fin-dc-01' }];
     const attach = jest.fn().mockResolvedValue({
       id: 'impact-1',
       conversationId: 'conv-1',
-      entityIds: ['user-1', 'host-1'],
+      entities,
     });
     const { definition } = createDefinition(attach);
 
-    const result = await definition.handler(
-      createContext({ conversationId: 'conv-1', entityIds: ['user-1', 'host-1'] })
-    );
+    const result = await definition.handler(createContext({ conversationId: 'conv-1', entities }));
 
     expect(attach).toHaveBeenCalledWith(
-      { conversationId: 'conv-1', entityIds: ['user-1', 'host-1'] },
+      { conversationId: 'conv-1', entities },
       { spaceId: SPACE_ID, user: resolvedUser }
     );
     expect(resolveUser).toHaveBeenCalledWith(FAKE_REQUEST);
     expect(result.output).toEqual({
       id: 'impact-1',
-      entityIds: ['user-1', 'host-1'],
+      entities,
     });
   });
 
@@ -121,7 +122,7 @@ describe('investigations.attachImpact step', () => {
     const { definition } = createDefinition(attach, privileges);
 
     await expect(
-      definition.handler(createContext({ conversationId: 'conv-1', entityIds: ['user-1'] }))
+      definition.handler(createContext({ conversationId: 'conv-1', entities: [{ id: 'user-1' }] }))
     ).rejects.toMatchObject({ type: 'PermissionError' });
     expect(attach).not.toHaveBeenCalled();
   });
@@ -131,8 +132,17 @@ describe('investigations.attachImpact step', () => {
     const { definition } = createDefinition(attach);
 
     await expect(
-      definition.handler(createContext({ conversationId: 'conv-1', entityIds: ['user-1'] }))
+      definition.handler(createContext({ conversationId: 'conv-1', entities: [{ id: 'user-1' }] }))
     ).rejects.toMatchObject({ type: 'ApiError', message: 'index unavailable' });
+  });
+
+  it('should fail the step with ConflictError when concurrent attaches exhaust retries', async () => {
+    const attach = jest.fn().mockRejectedValue(new ImpactConflictError('conv-1'));
+    const { definition } = createDefinition(attach);
+
+    await expect(
+      definition.handler(createContext({ conversationId: 'conv-1', entities: [{ id: 'user-1' }] }))
+    ).rejects.toMatchObject({ type: 'ConflictError' });
   });
 
   it('should reject a malformed input as a ValidationError rather than calling the service', async () => {
@@ -149,12 +159,14 @@ describe('investigations.attachImpact step', () => {
     const attach = jest.fn().mockResolvedValue({
       id: 'impact-1',
       conversationId: 'conv-1',
-      entityIds: ['user-1'],
+      entities: [{ id: 'user-1' }],
     });
     const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
     const { definition } = createDefinition(attach, allowAll(), async () => ({ create }));
 
-    await definition.handler(createContext({ conversationId: 'conv-1', entityIds: ['user-1'] }));
+    await definition.handler(
+      createContext({ conversationId: 'conv-1', entities: [{ id: 'user-1' }] })
+    );
 
     expect(create).toHaveBeenCalledWith({
       conversationId: 'conv-1',
@@ -177,10 +189,11 @@ describe('investigations.getImpact step', () => {
     });
 
   it('should return the fields a workflow can branch on', async () => {
+    const entities = [{ id: 'host-1', name: 'fin-dc-01' }];
     const getByConversationId = jest.fn().mockResolvedValue({
       id: 'impact-1',
       conversationId: 'conv-1',
-      entityIds: ['host-1'],
+      entities,
       createdAt: 'not part of the contract',
     });
 
@@ -191,14 +204,14 @@ describe('investigations.getImpact step', () => {
     expect(getByConversationId).toHaveBeenCalledWith('conv-1', SPACE_ID);
     expect(result.output).toEqual({
       id: 'impact-1',
-      entityIds: ['host-1'],
+      entities,
     });
   });
 
   it('should assert read rather than manage', async () => {
     const getByConversationId = jest.fn().mockResolvedValue({
       id: 'impact-1',
-      entityIds: ['host-1'],
+      entities: [{ id: 'host-1' }],
     });
     const privileges = allowAll();
 

@@ -18,9 +18,6 @@ import {
 } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
-  ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
@@ -39,6 +36,13 @@ import {
   type UiamClientAuthentication,
 } from './get_client_authentication';
 import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import type {
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
+  UiamListServiceAccountsResponse,
+  UiamServiceAccount,
+  UiamServiceAccountDetails,
+} from './service_account_types';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
@@ -276,7 +280,22 @@ export interface UiamServicePublic {
     authorization: HTTPAuthorizationHeader,
     body: CreateServiceAccountRequestBody,
     clientAuthentication?: UiamClientAuthentication | null
-  ): Promise<ServiceAccount>;
+  ): Promise<UiamServiceAccount>;
+
+  /**
+   * Lists service accounts via the UIAM service, one page at a time. Only returns the accounts
+   * whose `assumable_by` policy names this Kibana's project.
+   */
+  listServiceAccounts(params?: {
+    limit?: number;
+    after?: string;
+  }): Promise<UiamListServiceAccountsResponse>;
+
+  /**
+   * Fetches one service account via the UIAM service. Only returns the account when its
+   * `assumable_by` policy names this Kibana's project.
+   */
+  getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
 
   /**
    * Exchanges a service account ID for an ephemeral access token via the UIAM service.
@@ -286,6 +305,17 @@ export interface UiamServicePublic {
    * @param serviceAccountId The ID of the service account to exchange a token for.
    */
   exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }>;
+
+  /**
+   * Authenticates to UIAM as Kibana itself, using only the mTLS client certificate, and returns
+   * the resulting principal details together with a short-lived, non-refreshable token that
+   * identifies this Kibana on cross-region requests to other Elastic services.
+   *
+   * The response is UIAM's raw `_authenticate` payload; callers validate the shape they need.
+   *
+   * @param signal Aborts the in-flight request.
+   */
+  authenticateAsKibana(signal?: AbortSignal): Promise<unknown>;
 
   /**
    * Creates an OAuth client via the UIAM service.
@@ -757,7 +787,7 @@ export class UiamService implements UiamServicePublic {
     authorization: HTTPAuthorizationHeader,
     body: CreateServiceAccountRequestBody,
     clientAuthentication?: UiamClientAuthentication | null
-  ): Promise<ServiceAccount> {
+  ): Promise<UiamServiceAccount> {
     try {
       this.#logger.debug('Attempting to create service account.');
 
@@ -780,6 +810,75 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to create service account: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.listServiceAccounts}.
+   */
+  async listServiceAccounts(params?: {
+    limit?: number;
+    after?: string;
+  }): Promise<UiamListServiceAccountsResponse> {
+    try {
+      this.#logger.debug('Attempting to list service accounts.');
+
+      const url = new URL(`${this.#config.url}/uiam/api/v1/service-accounts`);
+      if (params?.limit != null) {
+        url.searchParams.set('limit', String(params.limit));
+      }
+      if (params?.after) {
+        url.searchParams.set('after', params.after);
+      }
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(url.toString(), {
+          method: 'GET',
+          // No credential headers on purpose: the certificate identifies Kibana's project for the
+          // `assumable_by` policy, and any `Authorization` header would switch that off.
+          headers: { 'User-Agent': this.#userAgentHeader },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug('Successfully listed service accounts.');
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to list service accounts: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.getServiceAccount}.
+   */
+  async getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails> {
+    try {
+      this.#logger.debug(`Attempting to get service account ${serviceAccountId}.`);
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/service-accounts/${encodeURIComponent(
+            serviceAccountId
+          )}`,
+          {
+            method: 'GET',
+            // No credential headers on purpose, for the same reason as `listServiceAccounts`.
+            headers: { 'User-Agent': this.#userAgentHeader },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully got service account ${serviceAccountId}.`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to get service account: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }
@@ -820,6 +919,46 @@ export class UiamService implements UiamServicePublic {
     this.#logger.debug(
       `Successfully exchanged service account [id=${serviceAccountId}] for an ephemeral token.`
     );
+    return response;
+  }
+
+  /**
+   * See {@link UiamServicePublic.authenticateAsKibana}.
+   */
+  async authenticateAsKibana(signal?: AbortSignal): Promise<unknown> {
+    this.#logger.debug('Attempting to authenticate as Kibana and obtain an ephemeral token.');
+
+    const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
+    url.searchParams.set('include_token', 'true');
+
+    const requestOptions: RequestInit & { dispatcher: Agent | undefined } = {
+      method: 'POST',
+      // No `Authorization` or shared-secret header: the mTLS client certificate presented by the
+      // dispatcher is the sole credential, and UIAM resolves Kibana's project service account from it.
+      headers: { 'User-Agent': this.#userAgentHeader },
+      dispatcher: this.#dispatcher,
+      signal,
+    };
+    let response: unknown;
+    try {
+      response = await UiamService.#parseUiamResponse(await fetch(url.toString(), requestOptions));
+    } catch (err) {
+      // A caller cancelling its own request is routine, not a failure to report.
+      if (signal?.aborted) {
+        this.#logger.debug('Authenticating as Kibana was aborted by the caller.');
+        throw err;
+      }
+
+      // The failure may carry a credential in its message; log only the status.
+      this.#logger.error(
+        `Failed to authenticate as Kibana (HTTP status: ${
+          Boom.isBoom(err) ? err.output.statusCode : 'unavailable'
+        }).`
+      );
+      throw err;
+    }
+
+    this.#logger.debug('Successfully authenticated as Kibana and obtained an ephemeral token.');
     return response;
   }
 

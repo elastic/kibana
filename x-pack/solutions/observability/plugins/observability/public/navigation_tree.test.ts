@@ -15,7 +15,7 @@ import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const getAlertsAndInsightsLinks = async (): Promise<Array<string | undefined>> => {
   const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue = jest.fn().mockReturnValue(false);
+  coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
   coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
   coreStart.settings.globalClient.get.mockReturnValue(false);
 

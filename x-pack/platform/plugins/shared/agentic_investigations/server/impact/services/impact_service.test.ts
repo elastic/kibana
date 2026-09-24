@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { MAX_ENTITY_IDS, MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
+import {
+  MAX_ENTITY_IDS,
+  MAX_IMPACT_CONVERSATION_IDS,
+  MAX_IMPACT_ID_LENGTH,
+} from '../../../common/impact/constants';
 import type { ImpactDocument, ImpactStorageClient } from '../storage/impact_storage';
-import { ImpactInvalidRequestError, ImpactNotFoundError } from './errors';
-import { ImpactService } from './impact_service';
+import { ImpactConflictError, ImpactInvalidRequestError, ImpactNotFoundError } from './errors';
+import { impactDocumentId, ImpactService } from './impact_service';
 
 const SPACE_ID = 'default';
 const CONVERSATION_ID = 'conv-1';
@@ -23,26 +27,43 @@ const analyst = {
 const baseDocument = (overrides: Partial<ImpactDocument> = {}): ImpactDocument => ({
   spaceId: SPACE_ID,
   conversationId: CONVERSATION_ID,
-  entityIds: ['user-1'],
+  entities: [{ id: 'user-1' }],
   createdAt: '2026-09-01T00:00:00.000Z',
   createdBy: analyst,
   ...overrides,
 });
 
-const searchHit = (document: ImpactDocument, id = 'impact-1') => ({
+const documentId = (document: ImpactDocument) =>
+  impactDocumentId(document.spaceId, document.conversationId);
+
+const searchHit = (document: ImpactDocument, id = documentId(document)) => ({
   _id: id,
   _source: document,
 });
 
+const versionedSearchResponse = (hit: ReturnType<typeof versionedHit> | undefined) => ({
+  hits: { hits: hit ? [hit] : [], total: { value: hit ? 1 : 0 } },
+});
+
+const versionedHit = (document: ImpactDocument, seqNo = 3, primaryTerm = 1) => ({
+  _id: documentId(document),
+  _source: document,
+  _seq_no: seqNo,
+  _primary_term: primaryTerm,
+});
+
+const conflictError = () => Object.assign(new Error('conflict'), { statusCode: 409 });
+
 const createStorage = (document?: ImpactDocument) => {
-  const hits = document ? [searchHit(document)] : [];
   return {
-    index: jest.fn().mockResolvedValue({ _id: document ? 'impact-1' : 'impact-new' }),
-    search: jest.fn().mockResolvedValue({
-      hits: { hits, total: { value: hits.length } },
-    }),
+    index: jest.fn().mockResolvedValue({ _id: document ? documentId(document) : 'impact-new' }),
+    get: jest.fn(),
+    search: jest
+      .fn()
+      .mockResolvedValue(versionedSearchResponse(document ? versionedHit(document) : undefined)),
   } as unknown as jest.Mocked<ImpactStorageClient> & {
     index: jest.Mock;
+    get: jest.Mock;
     search: jest.Mock;
   };
 };
@@ -60,59 +81,192 @@ describe('ImpactService', () => {
       const service = createService(storage);
 
       const impact = await service.attach(
-        { conversationId: CONVERSATION_ID, entityIds: ['user-1', 'host-1'] },
+        { conversationId: CONVERSATION_ID, entities: [{ id: 'user-1' }, { id: 'host-1' }] },
         { spaceId: SPACE_ID, user: analyst }
       );
 
+      const id = impactDocumentId(SPACE_ID, CONVERSATION_ID);
+      expect(storage.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          seq_no_primary_term: true,
+          query: { bool: { filter: [{ term: { _id: id } }] } },
+        })
+      );
       expect(storage.index).toHaveBeenCalledWith(
         expect.objectContaining({
+          id,
           op_type: 'create',
           document: expect.objectContaining({
             spaceId: SPACE_ID,
             conversationId: CONVERSATION_ID,
-            entityIds: ['user-1', 'host-1'],
+            entities: [{ id: 'user-1' }, { id: 'host-1' }],
             createdBy: analyst,
           }),
         })
       );
-      expect(impact.entityIds).toEqual(['user-1', 'host-1']);
-      expect(impact.id).toEqual(expect.any(String));
+      expect(impact.entities).toEqual([{ id: 'user-1' }, { id: 'host-1' }]);
+      expect(impact.id).toBe(id);
+      expect(impactDocumentId('other-space', CONVERSATION_ID)).not.toBe(id);
     });
 
-    it('unions entity ids onto the existing document instead of appending another', async () => {
-      const storage = createStorage(baseDocument({ entityIds: ['user-1'] }));
+    it('unions entities onto the existing document and fills fields a later attach adds', async () => {
+      const storage = createStorage(
+        baseDocument({ entities: [{ id: 'checkout-api', name: 'checkout-api' }] })
+      );
       const service = createService(storage);
 
       const impact = await service.attach(
-        { conversationId: CONVERSATION_ID, entityIds: ['host-1', 'user-1'] },
+        {
+          conversationId: CONVERSATION_ID,
+          entities: [
+            { id: 'host-1' },
+            {
+              id: 'checkout-api',
+              type: 'service',
+              featureId: 'feat-checkout',
+              streamName: 'logs.checkout-api',
+            },
+          ],
+        },
         { spaceId: SPACE_ID, user: analyst }
       );
 
       expect(storage.index).toHaveBeenCalledWith({
-        id: 'impact-1',
+        id: impactDocumentId(SPACE_ID, CONVERSATION_ID),
+        if_seq_no: 3,
+        if_primary_term: 1,
         document: expect.objectContaining({
-          entityIds: ['user-1', 'host-1'],
+          entities: [
+            {
+              id: 'checkout-api',
+              name: 'checkout-api',
+              type: 'service',
+              featureId: 'feat-checkout',
+              streamName: 'logs.checkout-api',
+            },
+            { id: 'host-1' },
+          ],
           createdAt: '2026-09-01T00:00:00.000Z',
           createdBy: analyst,
         }),
       });
       expect(storage.index.mock.calls[0][0]).not.toHaveProperty('op_type');
-      expect(impact.id).toBe('impact-1');
-      expect(impact.entityIds).toEqual(['user-1', 'host-1']);
+      expect(impact.id).toBe(impactDocumentId(SPACE_ID, CONVERSATION_ID));
+      expect(impact.entities).toEqual([
+        {
+          id: 'checkout-api',
+          name: 'checkout-api',
+          type: 'service',
+          featureId: 'feat-checkout',
+          streamName: 'logs.checkout-api',
+        },
+        { id: 'host-1' },
+      ]);
+    });
+
+    it('refuses a create that exceeds the entity id ceiling', async () => {
+      const storage = createStorage();
+      const service = createService(storage);
+      const entities = Array.from({ length: MAX_ENTITY_IDS + 1 }, (_, i) => ({
+        id: `entity-${i}`,
+      }));
+
+      await expect(
+        service.attach({ conversationId: CONVERSATION_ID, entities }, { spaceId: SPACE_ID })
+      ).rejects.toBeInstanceOf(ImpactInvalidRequestError);
+      expect(storage.search).not.toHaveBeenCalled();
+      expect(storage.index).not.toHaveBeenCalled();
     });
 
     it('refuses a merge that would exceed the entity id ceiling', async () => {
-      const existing = Array.from({ length: MAX_ENTITY_IDS }, (_, i) => `entity-${i}`);
-      const storage = createStorage(baseDocument({ entityIds: existing }));
+      const existing = Array.from({ length: MAX_ENTITY_IDS }, (_, i) => ({ id: `entity-${i}` }));
+      const storage = createStorage(baseDocument({ entities: existing }));
       const service = createService(storage);
 
       await expect(
         service.attach(
-          { conversationId: CONVERSATION_ID, entityIds: ['extra'] },
+          { conversationId: CONVERSATION_ID, entities: [{ id: 'extra' }] },
           { spaceId: SPACE_ID }
         )
       ).rejects.toBeInstanceOf(ImpactInvalidRequestError);
       expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('retries a lost create and unions onto the document the other writer created', async () => {
+      const storage = createStorage();
+      const winner = baseDocument({ entities: [{ id: 'service-1' }] });
+      storage.search
+        .mockResolvedValueOnce(versionedSearchResponse(undefined))
+        .mockResolvedValueOnce(versionedSearchResponse(versionedHit(winner, 1)));
+      storage.index.mockRejectedValueOnce(conflictError()).mockResolvedValueOnce({});
+      const service = createService(storage);
+
+      const impact = await service.attach(
+        { conversationId: CONVERSATION_ID, entities: [{ id: 'host-1' }] },
+        { spaceId: SPACE_ID, user: analyst }
+      );
+
+      expect(storage.index).toHaveBeenCalledTimes(2);
+      expect(storage.index.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ op_type: 'create' })
+      );
+      expect(storage.index.mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          id: impactDocumentId(SPACE_ID, CONVERSATION_ID),
+          if_seq_no: 1,
+          if_primary_term: 1,
+          document: expect.objectContaining({
+            entities: [{ id: 'service-1' }, { id: 'host-1' }],
+            createdAt: winner.createdAt,
+            createdBy: analyst,
+          }),
+        })
+      );
+      expect(impact.entities).toEqual([{ id: 'service-1' }, { id: 'host-1' }]);
+    });
+
+    it('retries a lost update and keeps entities both writers added', async () => {
+      const storage = createStorage(baseDocument({ entities: [{ id: 'user-1' }] }));
+      storage.search
+        .mockResolvedValueOnce(
+          versionedSearchResponse(versionedHit(baseDocument({ entities: [{ id: 'user-1' }] }), 3))
+        )
+        .mockResolvedValueOnce(
+          versionedSearchResponse(
+            versionedHit(baseDocument({ entities: [{ id: 'user-1' }, { id: 'service-1' }] }), 4)
+          )
+        );
+      storage.index.mockRejectedValueOnce(conflictError()).mockResolvedValueOnce({});
+      const service = createService(storage);
+
+      const impact = await service.attach(
+        { conversationId: CONVERSATION_ID, entities: [{ id: 'host-1' }] },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(storage.index.mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          if_seq_no: 4,
+          document: expect.objectContaining({
+            entities: [{ id: 'user-1' }, { id: 'service-1' }, { id: 'host-1' }],
+          }),
+        })
+      );
+      expect(impact.entities).toEqual([{ id: 'user-1' }, { id: 'service-1' }, { id: 'host-1' }]);
+    });
+
+    it('gives up when every attempt loses the version check', async () => {
+      const storage = createStorage();
+      storage.index.mockRejectedValue(conflictError());
+      const service = createService(storage);
+
+      await expect(
+        service.attach(
+          { conversationId: CONVERSATION_ID, entities: [{ id: 'host-1' }] },
+          { spaceId: SPACE_ID }
+        )
+      ).rejects.toBeInstanceOf(ImpactConflictError);
+      expect(storage.index).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -123,15 +277,16 @@ describe('ImpactService', () => {
 
       const impact = await service.getByConversationId(CONVERSATION_ID, SPACE_ID);
 
-      expect(impact).toEqual({ id: 'impact-1', ...baseDocument() });
+      expect(impact).toEqual({
+        id: impactDocumentId(SPACE_ID, CONVERSATION_ID),
+        ...baseDocument(),
+      });
       expect(storage.search).toHaveBeenCalledWith(
         expect.objectContaining({
+          seq_no_primary_term: true,
           query: {
             bool: {
-              filter: [
-                { term: { spaceId: SPACE_ID } },
-                { term: { conversationId: CONVERSATION_ID } },
-              ],
+              filter: [{ term: { _id: impactDocumentId(SPACE_ID, CONVERSATION_ID) } }],
             },
           },
         })
@@ -152,15 +307,17 @@ describe('ImpactService', () => {
     it('returns the document by id in the caller space', async () => {
       const storage = createStorage(baseDocument());
       const service = createService(storage);
+      const id = impactDocumentId(SPACE_ID, CONVERSATION_ID);
 
-      const impact = await service.get('impact-1', SPACE_ID);
+      const impact = await service.get(id, SPACE_ID);
 
-      expect(impact).toEqual({ id: 'impact-1', ...baseDocument() });
+      expect(impact).toEqual({ id, ...baseDocument() });
       expect(storage.search).toHaveBeenCalledWith(
         expect.objectContaining({
+          seq_no_primary_term: true,
           query: {
             bool: {
-              filter: [{ ids: { values: ['impact-1'] } }, { term: { spaceId: SPACE_ID } }],
+              filter: [{ term: { _id: id } }],
             },
           },
         })
@@ -175,12 +332,21 @@ describe('ImpactService', () => {
         ImpactNotFoundError
       );
     });
+
+    it('throws when the document belongs to another space', async () => {
+      const storage = createStorage(baseDocument());
+      const service = createService(storage);
+
+      await expect(
+        service.get(impactDocumentId(SPACE_ID, CONVERSATION_ID), 'other-space')
+      ).rejects.toBeInstanceOf(ImpactNotFoundError);
+    });
   });
 
   describe('listByConversationIds', () => {
     it('returns one document per conversation and omits missing ones', async () => {
       const first = baseDocument();
-      const second = baseDocument({ conversationId: 'conv-2', entityIds: ['host-9'] });
+      const second = baseDocument({ conversationId: 'conv-2', entities: [{ id: 'host-9' }] });
       const storage = createStorage();
       storage.search.mockResolvedValue({
         hits: { hits: [searchHit(first, 'impact-1'), searchHit(second, 'impact-2')] },
@@ -227,6 +393,36 @@ describe('ImpactService', () => {
       await expect(service.listByConversationIds(ids, SPACE_ID)).rejects.toBeInstanceOf(
         ImpactInvalidRequestError
       );
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('refuses a conversation id longer than the id bound', async () => {
+      const storage = createStorage();
+      const service = createService(storage);
+
+      await expect(
+        service.listByConversationIds(['a'.repeat(MAX_IMPACT_ID_LENGTH + 1)], SPACE_ID)
+      ).rejects.toBeInstanceOf(ImpactInvalidRequestError);
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('refuses an empty conversation id', async () => {
+      const storage = createStorage();
+      const service = createService(storage);
+
+      await expect(service.listByConversationIds([''], SPACE_ID)).rejects.toBeInstanceOf(
+        ImpactInvalidRequestError
+      );
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('refuses a space id longer than the id bound', async () => {
+      const storage = createStorage();
+      const service = createService(storage);
+
+      await expect(
+        service.listByConversationIds([CONVERSATION_ID], 's'.repeat(MAX_IMPACT_ID_LENGTH + 1))
+      ).rejects.toBeInstanceOf(ImpactInvalidRequestError);
       expect(storage.search).not.toHaveBeenCalled();
     });
   });

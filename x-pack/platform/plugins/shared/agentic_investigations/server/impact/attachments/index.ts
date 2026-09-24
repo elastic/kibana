@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ImpactService } from '../services/impact_service';
 import { createImpactAttachmentType } from './impact_attachment_type';
 
@@ -18,7 +18,12 @@ export const registerImpactAttachment = (
     logger: Logger;
   }
 ): void => {
-  agentBuilder.attachments.registerType(createImpactAttachmentType(deps));
+  agentBuilder.attachments.registerType(
+    // The registry is typed for the erased `AttachmentTypeDefinition`, so a
+    // definition narrowed to its own data shape needs the cast every other
+    // attachment-owning plugin also makes here.
+    createImpactAttachmentType(deps) as Parameters<typeof agentBuilder.attachments.registerType>[0]
+  );
 };
 
 export { stampImpactAttachment } from './stamp_impact_attachment';

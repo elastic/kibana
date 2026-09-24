@@ -16,7 +16,10 @@ describe('isAllowedBuiltinAttachment', () => {
     expect(isAllowedBuiltinAttachment('security.alert')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.entity_graph')).toBe(true);
     expect(isAllowedBuiltinAttachment('observability.service-map')).toBe(true);
-    expect(isAllowedBuiltinAttachment('investigation_proposal')).toBe(true);
+    expect(isAllowedBuiltinAttachment('ml.anomaly_swimlane')).toBe(true);
+    expect(isAllowedBuiltinAttachment('ml.anomaly_charts')).toBe(true);
+    expect(isAllowedBuiltinAttachment('ml.single_metric_viewer')).toBe(true);
+    expect(isAllowedBuiltinAttachment('platform.proposal')).toBe(true);
     expect(isAllowedBuiltinAttachment('investigation_impact')).toBe(true);
   });
 

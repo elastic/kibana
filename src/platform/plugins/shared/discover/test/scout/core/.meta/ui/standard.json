@@ -1,5 +1,5 @@
 {
-  "sha1": "984fb6fd5e1ef817addbbdd187e968cb6608c3cb",
+  "sha1": "b3e364e4c193c9610b64fe042a1c13d8316b3bfb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -97,8 +97,68 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts",
-        "line": 62,
-        "column": 21
+        "line": 106,
+        "column": 9
+      }
+    },
+    {
+      "id": "25ac42be44ba990-6fa084b019106a6",
+      "title": "Discover app - saved search embeddable should support URL drilldown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts",
+        "line": 134,
+        "column": 11
+      }
+    },
+    {
+      "id": "25ac42be44ba990-78fdfa89f81e7b2",
+      "title": "Discover app - saved search embeddable should apply data, columns and sorting from selected Discover tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts",
+        "line": 173,
+        "column": 11
+      }
+    },
+    {
+      "id": "25ac42be44ba990-150bb2a091fee78",
+      "title": "Discover app - saved search embeddable should recover a deleted selected tab through inline editing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts",
+        "line": 210,
+        "column": 12
       }
     }
   ]

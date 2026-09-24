@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { errorResponseSchema, ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -20,16 +20,7 @@ import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
-
-const updateActionPolicyApiKeyParamsSchema = z.object({
-  id: z
-    .string()
-    .min(1)
-    .max(ID_MAX_LENGTH)
-    .describe(
-      'The ID of the action policy of the API key to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.'
-    ),
-});
+import { actionPolicyIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class UpdateActionPolicyApiKeyRoute extends BaseAlertingRoute {
@@ -48,11 +39,11 @@ export class UpdateActionPolicyApiKeyRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      params: updateActionPolicyApiKeyParamsSchema,
+      params: actionPolicyIdParamsSchema,
     },
     response: {
       204: {
-        description: 'Returns the action policy with the updated API key.',
+        description: 'The API key of the action policy was updated successfully.',
       },
       404: {
         body: () => errorResponseSchema,
@@ -71,7 +62,7 @@ export class UpdateActionPolicyApiKeyRoute extends BaseAlertingRoute {
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
-      z.infer<typeof updateActionPolicyApiKeyParamsSchema>,
+      z.infer<typeof actionPolicyIdParamsSchema>,
       unknown,
       unknown
     >,

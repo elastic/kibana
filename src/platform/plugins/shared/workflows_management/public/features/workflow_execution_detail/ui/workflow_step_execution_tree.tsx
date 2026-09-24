@@ -22,6 +22,8 @@ import {
   isFailedBeforeSteps,
   isInProgressStatus,
   isTerminalStatus,
+  isValidDuration,
+  parseDuration,
 } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree, injectChildWorkflowSteps } from './build_step_executions_tree';
@@ -57,9 +59,7 @@ import {
   type IterationPinKind,
   planIterationCollapse,
 } from '../lib/iteration_pins';
-import { mergeDefinitionStepsIntoTree } from '../lib/merge_definition_steps_into_tree';
 import { normalizeStepAi, stepAiToTokenUsage } from '../lib/normalize_step_ai';
-import { parseWorkflowDurationMs } from '../lib/parse_workflow_duration';
 import { rollupTokenUsage, type TokenRollupNode, tokenRollupToUsage } from '../lib/token_rollup';
 import { useErrorPanelDiagnoseAvailability } from '../lib/use_error_panel_diagnose_availability';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
@@ -617,9 +617,8 @@ function convertTreeToOpenNodes(
         // Wait annotations between attempts. Attempt lists that exceed the
         // iteration collapse threshold can reuse pin-and-gap unchanged later —
         // do not special-case attempts out of that model.
-        const configuredDelayMs = parseWorkflowDurationMs(
-          findStepRetryConfig(options?.definition, stepId)?.delay
-        );
+        const delay = findStepRetryConfig(options?.definition, stepId)?.delay?.trim();
+        const configuredDelayMs = isValidDuration(delay) ? parseDuration(delay) : null;
         const nodes: OpenTreeNode[] = [];
         for (let i = 0; i < item.children.length; i++) {
           if (i > 0) {
@@ -1273,7 +1272,6 @@ export const WorkflowStepExecutionTree = ({
       execution.status,
       execution.triggeredBy
     );
-    stepExecutionsTree = mergeDefinitionStepsIntoTree(stepExecutionsTree, definition);
 
     const { tree: treeWithChildren, childStepExecutions } = injectChildWorkflowSteps(
       stepExecutionsTree,

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/alertzero-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -21,8 +24,21 @@ import { WorkersService } from './workers_service';
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const FORENSICS = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
+const WORKERS_WITHOUT_FORENSIC_SKILL = SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== FORENSICS);
+
+const agentBuilderWithSkill = (present: boolean): AgentBuilderPluginStart =>
+  ({
+    skills: {
+      getRegistry: jest.fn(async () => ({
+        has: jest.fn(
+          async (skillId: string) => present && skillId === 'endpoint-forensic-analysis'
+        ),
+      })),
+    },
+  } as unknown as AgentBuilderPluginStart);
 
 interface PersistentWorkerDocument {
   id: string;
@@ -42,9 +58,17 @@ const renderManagedWorkflowYaml = (id: string, values: Record<string, unknown> |
   throw new Error(`Managed workflow "${id}" cannot be rendered`);
 };
 
+/** Not `<workerId>-<spaceId>`, so a projection that rebuilds that convention fails. */
+const reportedWorkflowId = (workerId: string, spaceId: string) => `opaque:${workerId}:${spaceId}`;
+const storedIdFromReport = (workflowId: string) =>
+  workflowId.startsWith('opaque:')
+    ? workflowId.slice('opaque:'.length).replace(':', '-')
+    : workflowId;
+
 const createPersistentHarness = () => {
   const documents = new Map<string, PersistentWorkerDocument>();
   const documentId = (id: string, spaceId: string) => `${id}-${spaceId}`;
+  const findDocument = (workflowId: string) => documents.get(storedIdFromReport(workflowId));
   const install = jest.fn(
     async (
       id: string,
@@ -72,7 +96,7 @@ const createPersistentHarness = () => {
     const document = documents.get(idWithSuffix);
     return {
       status: document ? (document.enabled ? 'intact' : 'disabled') : 'missing',
-      workflowId: idWithSuffix,
+      workflowId: reportedWorkflowId(id, options.spaceId),
       definitionId: id,
       spaceId: options.spaceId,
       installed: Boolean(document),
@@ -92,12 +116,12 @@ const createPersistentHarness = () => {
     ready: jest.fn(),
     getWorkflowStatus,
     getInstalledWorkflowState: jest.fn(async (id: string, spaceId: string) => {
-      const document = documents.get(id);
+      const document = findDocument(id);
       if (!document) return null;
       return {
         workflowId: id,
         spaceId,
-        definitionId: id.replace(`-${spaceId}`, ''),
+        definitionId: storedIdFromReport(id).replace(`-${spaceId}`, ''),
         templateValues: document.values,
         documentVersion: document.version,
       };
@@ -108,7 +132,7 @@ const createPersistentHarness = () => {
   const scheduledTasks = new Map<string, { apiKeyId: string; interval: string | null }>();
   const updateWorkflow = jest.fn(
     async (id: string, { enabled }: { enabled: boolean }, _spaceId: string) => {
-      const document = documents.get(id);
+      const document = findDocument(id);
       if (!document) throw new Error('not found');
       document.enabled = enabled;
       document.version += 1;
@@ -138,11 +162,12 @@ const createPersistentHarness = () => {
     managedWorkflows,
     scheduledTasks,
     updateWorkflow,
-    createService: () =>
+    createService: (agentBuilder?: AgentBuilderPluginStart) =>
       new WorkersService(
         management,
         Promise.resolve(managedWorkflows),
-        loggingSystemMock.createLogger() as Logger
+        loggingSystemMock.createLogger() as Logger,
+        { agentBuilder }
       ),
   };
 };
@@ -151,10 +176,12 @@ describe('WorkersService', () => {
   it('lists every registered Worker with default settings before install', async () => {
     const response = await createPersistentHarness().createService().list(request, SPACE);
 
-    expect(response.workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
+    // Endpoint analysis stays hidden until its skill is registered.
+    expect(response.workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
     expect(
       response.workers.every(
-        ({ enabled, settingsRevision }) => !enabled && settingsRevision === null
+        ({ enabled, settingsRevision, workflowId }) =>
+          !enabled && settingsRevision === null && workflowId === null
       )
     ).toBe(true);
   });
@@ -175,6 +202,7 @@ describe('WorkersService', () => {
       throw new Error('Expected configure-before-enable to succeed');
     expect(result.response.worker.enabled).toBe(false);
     expect(result.response.worker.settings.autonomy).toBe('assisted');
+    expect(result.response.worker.workflowId).toBe(reportedWorkflowId(TRIAGE, SPACE));
     expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.enabled).toBe(false);
   });
 
@@ -271,12 +299,14 @@ describe('WorkersService', () => {
 
     expect(result.outcome).toBe('updated');
     expect(harness.updateWorkflow).toHaveBeenCalledWith(
-      `${TRIAGE}-${SPACE}`,
+      reportedWorkflowId(TRIAGE, SPACE),
       { enabled: true },
       SPACE,
       request
     );
-    expect(harness.scheduledTasks.get(`${TRIAGE}-${SPACE}`)?.apiKeyId).toEqual(expect.any(String));
+    expect(harness.scheduledTasks.get(reportedWorkflowId(TRIAGE, SPACE))?.apiKeyId).toEqual(
+      expect.any(String)
+    );
   });
 
   it('re-registers the schedule at the new interval after a schedule-only save', async () => {
@@ -284,7 +314,8 @@ describe('WorkersService', () => {
     const service = harness.createService();
     const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
     if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
-    const workflowId = `${ATTACK_DISCOVERY}-${SPACE}`;
+    const storedId = `${ATTACK_DISCOVERY}-${SPACE}`;
+    const workflowId = reportedWorkflowId(ATTACK_DISCOVERY, SPACE);
 
     expect(enabled.response.worker.settings.scheduleInterval).toBe('24h');
     expect(harness.scheduledTasks.get(workflowId)?.interval).toBe('24h');
@@ -311,7 +342,7 @@ describe('WorkersService', () => {
       SPACE,
       request
     );
-    expect(harness.documents.get(workflowId)?.yaml).toContain('every: "15m"');
+    expect(harness.documents.get(storedId)?.yaml).toContain('every: "15m"');
     expect(harness.scheduledTasks.get(workflowId)?.interval).toBe('15m');
   });
 
@@ -400,7 +431,7 @@ describe('WorkersService', () => {
     const { workers } = await service.list(request, SPACE);
     const ruleTuning = workers.find(({ id }) => id === RULE_TUNING);
 
-    expect(workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
+    expect(workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
     expect(ruleTuning).toMatchObject({
       state: 'unavailable',
       stateReason: 'Worker settings could not be read from durable storage',
@@ -410,7 +441,7 @@ describe('WorkersService', () => {
         workerId: RULE_TUNING,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 14 },
+        extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
       },
     });
     expect(
@@ -432,7 +463,31 @@ describe('WorkersService', () => {
     expect(disabled.outcome).toBe('updated');
     if (disabled.outcome !== 'updated') throw new Error('Expected disable to succeed');
     expect(disabled.response.worker.enabled).toBe(false);
+    expect(disabled.response.worker.workflowId).toBe(reportedWorkflowId(TRIAGE, 'space-a'));
     expect(harness.documents.has(`${TRIAGE}-space-a`)).toBe(true);
+  });
+
+  it('does not project a workflow id when a non-managed document occupies that id', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockResolvedValue({
+      status: 'not_managed',
+      workflowId: 'opaque:foreign-workflow',
+      definitionId: TRIAGE,
+      spaceId: SPACE,
+      installed: true,
+      enabled: true,
+      valid: true,
+      managedBy: null,
+      storedVersion: null,
+      registryVersion: 1,
+      storedHash: null,
+      registryHash: 'registry',
+    });
+
+    const worker = await service.get(TRIAGE, request, SPACE);
+
+    expect(worker?.workflowId).toBeNull();
   });
 
   it('projects skills from the installed workflow definition when the worker is installed', async () => {
@@ -457,7 +512,10 @@ describe('WorkersService', () => {
     const { workers } = await service.list(request, SPACE);
     const triage = workers.find((w) => w.id === TRIAGE);
 
-    expect(harness.management.getWorkflow).toHaveBeenCalledWith(`${TRIAGE}-${SPACE}`, SPACE);
+    expect(harness.management.getWorkflow).toHaveBeenCalledWith(
+      reportedWorkflowId(TRIAGE, SPACE),
+      SPACE
+    );
     expect(triage?.skills?.some((s) => s.id === 'test.installed.skill')).toBe(true);
   });
 
@@ -472,6 +530,13 @@ describe('WorkersService', () => {
   });
 
   describe('Worker-specific settings under extras', () => {
+    /** A complete extras replacement, every field away from its default. */
+    const SAVED_EXTRAS = {
+      analysisWindowDays: 21,
+      fpCountThreshold: 4,
+      fpRateThresholdPct: 80,
+    };
+
     const enableRuleTuning = async () => {
       const harness = createPersistentHarness();
       const service = harness.createService();
@@ -480,12 +545,12 @@ describe('WorkersService', () => {
       return { harness, service, revision: enabled.response.worker.settingsRevision };
     };
 
-    it('persists an extras-only save and forwards the window into the rendered YAML', async () => {
+    it('persists an extras-only save and forwards all three inputs into the rendered YAML', async () => {
       const { harness, service, revision } = await enableRuleTuning();
 
       const result = await service.update(
         RULE_TUNING,
-        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: revision },
+        { settings: { extras: SAVED_EXTRAS }, settingsRevision: revision },
         SPACE,
         request
       );
@@ -496,18 +561,32 @@ describe('WorkersService', () => {
         workerId: RULE_TUNING,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 7 },
+        extras: SAVED_EXTRAS,
       });
-      const yaml = harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml;
-      expect(yaml).toContain('analysis_window_days: 7');
+      // The saved values are rendered into consts.worker_settings.extras; the sweep inputs
+      // read them from there, so both halves are asserted.
+      const yaml = harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml ?? '';
+      const { consts } = parse(yaml) as { consts: { worker_settings: { extras: unknown } } };
+      expect(consts.worker_settings.extras).toEqual(SAVED_EXTRAS);
+      expect(yaml).toContain(
+        'analysis_window_days: "${{ consts.worker_settings.extras.analysisWindowDays }}"'
+      );
+      expect(yaml).toContain(
+        'min_fp_count: "${{ consts.worker_settings.extras.fpCountThreshold }}"'
+      );
+      expect(yaml).toContain(
+        'min_fp_rate_pct: "${{ consts.worker_settings.extras.fpRateThresholdPct }}"'
+      );
       expect(yaml).not.toContain('__WORKER_ANALYSIS_WINDOW_DAYS__');
+      expect(yaml).not.toContain('__WORKER_FP_COUNT_THRESHOLD__');
+      expect(yaml).not.toContain('__WORKER_FP_RATE_THRESHOLD_PCT__');
     });
 
     it('keeps the saved extras when a shared-field patch omits them', async () => {
       const { service, revision } = await enableRuleTuning();
       const withWindow = await service.update(
         RULE_TUNING,
-        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: revision },
+        { settings: { extras: SAVED_EXTRAS }, settingsRevision: revision },
         SPACE,
         request
       );
@@ -526,7 +605,7 @@ describe('WorkersService', () => {
       expect(result.outcome).toBe('updated');
       if (result.outcome !== 'updated') throw new Error('Expected autonomy save to succeed');
       expect(result.response.worker.settings).toEqual(
-        expect.objectContaining({ autonomy: 'assisted', extras: { analysisWindowDays: 7 } })
+        expect.objectContaining({ autonomy: 'assisted', extras: SAVED_EXTRAS })
       );
     });
 
@@ -534,7 +613,7 @@ describe('WorkersService', () => {
       const { service, revision } = await enableRuleTuning();
       const first = await service.update(
         RULE_TUNING,
-        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: revision },
+        { settings: { extras: SAVED_EXTRAS }, settingsRevision: revision },
         SPACE,
         request
       );
@@ -544,14 +623,17 @@ describe('WorkersService', () => {
       await expect(
         service.update(
           RULE_TUNING,
-          { settings: { extras: { analysisWindowDays: 21 } }, settingsRevision: revision },
+          {
+            settings: { extras: { ...SAVED_EXTRAS, analysisWindowDays: 30 } },
+            settingsRevision: revision,
+          },
           SPACE,
           request
         )
       ).resolves.toEqual({ outcome: 'conflict' });
-      expect((await service.get(RULE_TUNING, request, SPACE))?.settings.extras).toEqual({
-        analysisWindowDays: 7,
-      });
+      expect((await service.get(RULE_TUNING, request, SPACE))?.settings.extras).toEqual(
+        SAVED_EXTRAS
+      );
     });
 
     it('rejects an extras replacement missing a required field, naming it', async () => {
@@ -597,6 +679,30 @@ describe('WorkersService', () => {
       expect(result.outcome).toBe('invalid');
       if (result.outcome !== 'invalid') throw new Error('Expected an invalid outcome');
       expect(result.message).toContain('scheduleInterval');
+    });
+  });
+
+  describe('endpoint analysis skill gate', () => {
+    it('lists endpoint analysis when the skill is registered', async () => {
+      const { workers } = await createPersistentHarness()
+        .createService(agentBuilderWithSkill(true))
+        .list(request, SPACE);
+
+      expect(workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
+    });
+
+    it('hides endpoint analysis when the registry does not have the skill', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService(agentBuilderWithSkill(false));
+
+      const { workers } = await service.list(request, SPACE);
+
+      expect(workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
+      expect(await service.get(FORENSICS, request, SPACE)).toBeUndefined();
+      expect(await service.update(FORENSICS, { enabled: true }, SPACE, request)).toEqual({
+        outcome: 'not-found',
+      });
+      expect(harness.documents.has(`${FORENSICS}-${SPACE}`)).toBe(false);
     });
   });
 });

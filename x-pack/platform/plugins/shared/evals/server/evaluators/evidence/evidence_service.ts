@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import { type TraceAccessorWithSearch, type TraceFilter } from '../trace_accessor';
+import {
+  type TraceAccessorWithSearch,
+  type TraceFilter,
+  type TraceSearchDocument,
+  type TraceSearchParams,
+  type TraceSearchResult,
+  type TraceSource,
+} from '../trace_accessor';
 import { INSTRUMENTATION_PROFILES } from './profiles';
 import { getInstrumentationProfile } from './resolve_instrumentation';
 import {
   EVIDENCE_ITEM_KEYS,
   type EvidenceItemKey,
+  type InstrumentationProfile,
   type InstrumentationProfileSpec,
   type EvidenceMessageItemSpec,
   type EvidenceRound,
@@ -20,11 +28,16 @@ import {
 
 const MAX_EVIDENCE_DOCS = 200;
 const MESSAGE_CANDIDATE_LIMIT = 20;
-const SAMPLE_LIMIT = 120;
+const SAMPLE_MAX_LENGTH = 123;
+const SAMPLE_ELLIPSIS = '...';
 const hasOwnProperty = (value: unknown, key: string): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, key);
 
 type ProbeStatus = 'found' | 'not_found' | 'content_redacted';
+type EvidenceSearch = (
+  source: TraceSource,
+  params: TraceSearchParams
+) => Promise<TraceSearchResult>;
 
 export interface EvidenceItemProbeResult {
   status: ProbeStatus;
@@ -33,8 +46,22 @@ export interface EvidenceItemProbeResult {
 }
 
 export interface InstrumentationProfileProbeResult {
-  profile: string;
+  profile: InstrumentationProfile;
   evidence: Record<EvidenceItemKey, EvidenceItemProbeResult>;
+}
+
+export interface EvidenceExtractionResult {
+  round: EvidenceRound;
+  evidence: Record<EvidenceItemKey, EvidenceItemProbeResult>;
+}
+
+export interface InstrumentationProfileEvidenceResult
+  extends InstrumentationProfileProbeResult,
+    EvidenceExtractionResult {}
+
+export interface EvidenceSelectionResult {
+  selected?: InstrumentationProfileEvidenceResult;
+  profiles?: InstrumentationProfileEvidenceResult[];
 }
 
 export const hasTraceDocuments = async (
@@ -117,6 +144,57 @@ const resolveFieldValue = (value: unknown, segments: string[]): unknown => {
 const getFieldValue = (document: Record<string, unknown>, fieldPath: string): unknown =>
   resolveFieldValue(document, fieldPath.split('.'));
 
+const compareSortValues = (left: unknown, right: unknown): number => {
+  if (left === right) {
+    return 0;
+  }
+  if (typeof left === 'number' && typeof right === 'number') {
+    return left - right;
+  }
+  const leftString = String(left);
+  const rightString = String(right);
+  if (leftString === rightString) {
+    return 0;
+  }
+  return leftString < rightString ? -1 : 1;
+};
+
+const getDocumentIdentity = ({ id, index, source }: TraceSearchDocument): string =>
+  `${index}\u0000${id || JSON.stringify(source)}`;
+
+const sortEvidenceDocuments = (
+  documents: TraceSearchDocument[],
+  order: 'asc' | 'desc'
+): TraceSearchDocument[] => {
+  const direction = order === 'asc' ? 1 : -1;
+  return [...documents].sort((left, right) => {
+    const leftSort = left.sort ?? [getFieldValue(left.source, '@timestamp')];
+    const rightSort = right.sort ?? [getFieldValue(right.source, '@timestamp')];
+    const sortLength = Math.max(leftSort.length, rightSort.length);
+    for (let index = 0; index < sortLength; index++) {
+      const leftMissing = leftSort[index] === undefined || leftSort[index] === null;
+      const rightMissing = rightSort[index] === undefined || rightSort[index] === null;
+      if (leftMissing || rightMissing) {
+        if (leftMissing !== rightMissing) {
+          return leftMissing ? 1 : -1;
+        }
+        continue;
+      }
+      const comparison = compareSortValues(leftSort[index], rightSort[index]);
+      if (comparison !== 0) {
+        return comparison * direction;
+      }
+    }
+
+    const leftIdentity = getDocumentIdentity(left);
+    const rightIdentity = getDocumentIdentity(right);
+    if (leftIdentity === rightIdentity) {
+      return 0;
+    }
+    return (leftIdentity < rightIdentity ? -1 : 1) * direction;
+  });
+};
+
 const toTraceFilters = (spec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec): TraceFilter[] =>
   spec.filter.map(({ field, value }) => ({
     type: 'term',
@@ -124,42 +202,51 @@ const toTraceFilters = (spec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpe
     value,
   }));
 
-const getMessageSearchParams = (
-  spec: EvidenceMessageItemSpec
-): {
-  filter: TraceFilter[];
-  fields: string[];
-  sort: { field: string; order: 'asc' | 'desc' };
-  size: number;
-} => ({
-  // Do not add an `exists` filter on contentField: long values under `flattened`
-  // mappings (e.g. body.structured) are omitted from the index past ignore_above
-  // but remain available in `_source`.
-  filter: toTraceFilters(spec),
-  fields: ['@timestamp', spec.contentField],
-  sort: {
-    field: '@timestamp',
-    order: spec.select === 'last' ? 'desc' : 'asc',
-  },
-  size: MESSAGE_CANDIDATE_LIMIT,
-});
+const getMessageSearchParams = (spec: EvidenceMessageItemSpec): TraceSearchParams => {
+  const order = spec.select === 'last' ? 'desc' : 'asc';
+  return {
+    // Do not add an `exists` filter on contentField: long values under `flattened`
+    // mappings (e.g. body.structured) are omitted from the index past ignore_above
+    // but remain available in `_source`.
+    filter: toTraceFilters(spec),
+    fields: ['@timestamp', spec.contentField],
+    sort: [
+      { field: '@timestamp', order },
+      { field: 'span_id', order, unmappedType: 'keyword' },
+    ],
+    size: MESSAGE_CANDIDATE_LIMIT,
+    trackTotalHits: MESSAGE_CANDIDATE_LIMIT + 1,
+  };
+};
 
-const getToolCallsSearchParams = (
-  spec: EvidenceToolCallsItemSpec
-): {
-  filter: TraceFilter[];
-  fields: string[];
-  sort: { field: string; order: 'asc' | 'desc' };
-  size: number;
-} => {
+const searchMessageCandidates = async (
+  runSearch: EvidenceSearch,
+  spec: EvidenceMessageItemSpec
+): Promise<TraceSearchResult> => {
+  const params = getMessageSearchParams(spec);
+  const initialResult = await runSearch(spec.source, params);
+  const total = initialResult.total ?? initialResult.documents.length;
+
+  if (total <= initialResult.documents.length) {
+    return initialResult;
+  }
+
+  return runSearch(spec.source, {
+    ...params,
+    size: MAX_EVIDENCE_DOCS,
+    trackTotalHits: false,
+  });
+};
+
+const getToolCallsSearchParams = (spec: EvidenceToolCallsItemSpec): TraceSearchParams => {
   const { tool_call_id, tool_id, arguments: toolArguments, result } = spec.fields;
   return {
     filter: toTraceFilters(spec),
     fields: ['@timestamp', tool_call_id, tool_id, toolArguments, result],
-    sort: {
-      field: '@timestamp',
-      order: 'asc',
-    },
+    sort: [
+      { field: '@timestamp', order: 'asc' },
+      { field: 'span_id', order: 'asc', unmappedType: 'keyword' },
+    ],
     size: MAX_EVIDENCE_DOCS,
   };
 };
@@ -261,10 +348,10 @@ const parseMessageFromDocument = (
 const parseMessageValue = (
   itemKey: typeof EVIDENCE_ITEM_KEYS.userQuery | typeof EVIDENCE_ITEM_KEYS.agentResponse,
   itemSpec: EvidenceMessageItemSpec,
-  documents: Array<Record<string, unknown>>
+  documents: TraceSearchDocument[]
 ): string | undefined => {
-  for (const document of documents) {
-    const value = parseMessageFromDocument(itemKey, itemSpec, document);
+  for (const { source } of documents) {
+    const value = parseMessageFromDocument(itemKey, itemSpec, source);
     if (typeof value === 'string' && value.trim()) {
       return value;
     }
@@ -275,15 +362,15 @@ const parseMessageValue = (
 
 const parseToolCallsValue = (
   itemSpec: EvidenceToolCallsItemSpec,
-  documents: Array<Record<string, unknown>>
+  documents: TraceSearchDocument[]
 ): ToolCallEvidence[] | undefined => {
   const entries = documents
-    .map((document) => {
+    .map(({ source }) => {
       const evidence: ToolCallEvidence = {};
-      const toolCallId = getFieldValue(document, itemSpec.fields.tool_call_id);
-      const toolId = getFieldValue(document, itemSpec.fields.tool_id);
-      const toolArguments = getFieldValue(document, itemSpec.fields.arguments);
-      const toolResult = getFieldValue(document, itemSpec.fields.result);
+      const toolCallId = getFieldValue(source, itemSpec.fields.tool_call_id);
+      const toolId = getFieldValue(source, itemSpec.fields.tool_id);
+      const toolArguments = getFieldValue(source, itemSpec.fields.arguments);
+      const toolResult = getFieldValue(source, itemSpec.fields.result);
 
       if (typeof toolCallId === 'string' && toolCallId) {
         evidence.tool_call_id = toolCallId;
@@ -323,7 +410,9 @@ const parseToolCallsValue = (
 };
 
 const truncateSample = (sample: string): string =>
-  sample.length > SAMPLE_LIMIT ? `${sample.slice(0, SAMPLE_LIMIT)}...` : sample;
+  sample.length > SAMPLE_MAX_LENGTH
+    ? `${sample.slice(0, SAMPLE_MAX_LENGTH - SAMPLE_ELLIPSIS.length)}${SAMPLE_ELLIPSIS}`
+    : sample;
 
 const stringifySample = (value: unknown): string | undefined => {
   if (typeof value === 'string') {
@@ -345,16 +434,13 @@ const stringifySample = (value: unknown): string | undefined => {
   }
 };
 
-const probeItem = async (
-  accessor: TraceAccessorWithSearch,
+const getItemProbe = (
   itemKey: EvidenceItemKey,
-  itemSpec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec
-): Promise<EvidenceItemProbeResult> => {
+  itemSpec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec,
+  documents: TraceSearchDocument[],
+  parsedValue: unknown
+): EvidenceItemProbeResult => {
   const isToolCallsItem = itemKey === EVIDENCE_ITEM_KEYS.toolCalls;
-  const searchParams = isToolCallsItem
-    ? getToolCallsSearchParams(itemSpec as EvidenceToolCallsItemSpec)
-    : getMessageSearchParams(itemSpec as EvidenceMessageItemSpec);
-  const { documents } = await accessor.runSearch(itemSpec.source, searchParams);
   const firstFieldPath = isToolCallsItem
     ? (itemSpec as EvidenceToolCallsItemSpec).fields.tool_call_id
     : (itemSpec as EvidenceMessageItemSpec).contentField;
@@ -363,13 +449,6 @@ const probeItem = async (
     return { status: 'not_found', field: firstFieldPath };
   }
 
-  const parsedValue = isToolCallsItem
-    ? parseToolCallsValue(itemSpec as EvidenceToolCallsItemSpec, documents)
-    : parseMessageValue(
-        itemKey as typeof EVIDENCE_ITEM_KEYS.userQuery | typeof EVIDENCE_ITEM_KEYS.agentResponse,
-        itemSpec as EvidenceMessageItemSpec,
-        documents
-      );
   const sample = stringifySample(parsedValue);
   if (!sample || !sample.trim()) {
     return { status: 'content_redacted', field: firstFieldPath };
@@ -382,84 +461,151 @@ const probeItem = async (
   };
 };
 
-export const normalizeEvidence = async (
-  traceAccessor: TraceAccessorWithSearch,
+const extractEvidenceWithSearch = async (
+  runSearch: EvidenceSearch,
   mapping: InstrumentationProfileSpec
-): Promise<EvidenceRound> => {
+): Promise<EvidenceExtractionResult> => {
   const [userSearch, agentSearch, toolSearch] = await Promise.all([
-    traceAccessor.runSearch(
-      mapping[EVIDENCE_ITEM_KEYS.userQuery].source,
-      getMessageSearchParams(mapping[EVIDENCE_ITEM_KEYS.userQuery])
-    ),
-    traceAccessor.runSearch(
-      mapping[EVIDENCE_ITEM_KEYS.agentResponse].source,
-      getMessageSearchParams(mapping[EVIDENCE_ITEM_KEYS.agentResponse])
-    ),
-    traceAccessor.runSearch(
+    searchMessageCandidates(runSearch, mapping[EVIDENCE_ITEM_KEYS.userQuery]),
+    searchMessageCandidates(runSearch, mapping[EVIDENCE_ITEM_KEYS.agentResponse]),
+    runSearch(
       mapping[EVIDENCE_ITEM_KEYS.toolCalls].source,
       getToolCallsSearchParams(mapping[EVIDENCE_ITEM_KEYS.toolCalls])
     ),
   ]);
 
+  const userDocuments = sortEvidenceDocuments(
+    userSearch.documents,
+    mapping[EVIDENCE_ITEM_KEYS.userQuery].select === 'last' ? 'desc' : 'asc'
+  );
+  const agentDocuments = sortEvidenceDocuments(
+    agentSearch.documents,
+    mapping[EVIDENCE_ITEM_KEYS.agentResponse].select === 'last' ? 'desc' : 'asc'
+  );
+  const toolDocuments = sortEvidenceDocuments(toolSearch.documents, 'asc');
+
   const userMessage = parseMessageValue(
     EVIDENCE_ITEM_KEYS.userQuery,
     mapping[EVIDENCE_ITEM_KEYS.userQuery],
-    userSearch.documents
+    userDocuments
   );
   const agentMessage = parseMessageValue(
     EVIDENCE_ITEM_KEYS.agentResponse,
     mapping[EVIDENCE_ITEM_KEYS.agentResponse],
-    agentSearch.documents
+    agentDocuments
   );
-  const toolCalls = parseToolCallsValue(
-    mapping[EVIDENCE_ITEM_KEYS.toolCalls],
-    toolSearch.documents
-  );
+  const toolCalls = parseToolCallsValue(mapping[EVIDENCE_ITEM_KEYS.toolCalls], toolDocuments);
 
-  return {
+  const round: EvidenceRound = {
     input: { message: typeof userMessage === 'string' ? userMessage : '' },
     response: { message: typeof agentMessage === 'string' ? agentMessage : '' },
     steps: Array.isArray(toolCalls) ? toolCalls : [],
+  };
+
+  return {
+    round,
+    evidence: {
+      [EVIDENCE_ITEM_KEYS.userQuery]: getItemProbe(
+        EVIDENCE_ITEM_KEYS.userQuery,
+        mapping[EVIDENCE_ITEM_KEYS.userQuery],
+        userDocuments,
+        userMessage
+      ),
+      [EVIDENCE_ITEM_KEYS.agentResponse]: getItemProbe(
+        EVIDENCE_ITEM_KEYS.agentResponse,
+        mapping[EVIDENCE_ITEM_KEYS.agentResponse],
+        agentDocuments,
+        agentMessage
+      ),
+      [EVIDENCE_ITEM_KEYS.toolCalls]: getItemProbe(
+        EVIDENCE_ITEM_KEYS.toolCalls,
+        mapping[EVIDENCE_ITEM_KEYS.toolCalls],
+        toolDocuments,
+        toolCalls
+      ),
+    },
+  };
+};
+
+export const extractEvidence = async (
+  traceAccessor: TraceAccessorWithSearch,
+  mapping: InstrumentationProfileSpec
+): Promise<EvidenceExtractionResult> =>
+  extractEvidenceWithSearch((source, params) => traceAccessor.runSearch(source, params), mapping);
+
+export const normalizeEvidence = async (
+  traceAccessor: TraceAccessorWithSearch,
+  mapping: InstrumentationProfileSpec
+): Promise<EvidenceRound> => (await extractEvidence(traceAccessor, mapping)).round;
+
+export const hasResolvedEvidence = (round: EvidenceRound): boolean =>
+  Boolean(round.input.message.trim()) ||
+  Boolean(round.response.message.trim()) ||
+  round.steps.length > 0;
+
+export const getRecommendedInstrumentationProfile = (
+  profiles: InstrumentationProfileProbeResult[]
+): InstrumentationProfile | undefined =>
+  profiles.find(({ evidence }) =>
+    [evidence.user_query, evidence.agent_response].every(({ status }) => status === 'found')
+  )?.profile;
+
+export const toInstrumentationProfileProbes = (
+  profiles: InstrumentationProfileEvidenceResult[]
+): InstrumentationProfileProbeResult[] =>
+  profiles.map(({ profile, evidence }) => ({ profile, evidence }));
+
+export const extractProfilesEvidence = async (
+  traceAccessor: TraceAccessorWithSearch
+): Promise<InstrumentationProfileEvidenceResult[]> => {
+  const profileNames = Object.keys(INSTRUMENTATION_PROFILES) as InstrumentationProfile[];
+  const searchCache = new Map<string, Promise<TraceSearchResult>>();
+  const runSearch: EvidenceSearch = (source, params) => {
+    const cacheKey = `${source}:${JSON.stringify(params)}`;
+    const cached = searchCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const search = traceAccessor.runSearch(source, params);
+    searchCache.set(cacheKey, search);
+    return search;
+  };
+
+  return Promise.all(
+    profileNames.map(
+      async (profile): Promise<InstrumentationProfileEvidenceResult> => ({
+        profile,
+        ...(await extractEvidenceWithSearch(runSearch, getInstrumentationProfile(profile))),
+      })
+    )
+  );
+};
+
+export const extractSelectedEvidence = async (
+  traceAccessor: TraceAccessorWithSearch,
+  requestedProfile?: InstrumentationProfile
+): Promise<EvidenceSelectionResult> => {
+  if (requestedProfile) {
+    return {
+      selected: {
+        profile: requestedProfile,
+        ...(await extractEvidence(traceAccessor, getInstrumentationProfile(requestedProfile))),
+      },
+    };
+  }
+
+  const profiles = await extractProfilesEvidence(traceAccessor);
+  const recommendedProfile = getRecommendedInstrumentationProfile(profiles);
+  return {
+    profiles,
+    selected: recommendedProfile
+      ? profiles.find(({ profile }) => profile === recommendedProfile)
+      : undefined,
   };
 };
 
 export const probeProfiles = async (
   traceAccessor: TraceAccessorWithSearch
-): Promise<InstrumentationProfileProbeResult[]> => {
-  const profileNames = Object.keys(INSTRUMENTATION_PROFILES) as Array<
-    keyof typeof INSTRUMENTATION_PROFILES
-  >;
-  const profileResults = await Promise.all(
-    profileNames.map(async (profile): Promise<InstrumentationProfileProbeResult> => {
-      const mapping = getInstrumentationProfile(profile);
-      const [userQueryProbe, agentResponseProbe, toolCallsProbe] = await Promise.all([
-        probeItem(
-          traceAccessor,
-          EVIDENCE_ITEM_KEYS.userQuery,
-          mapping[EVIDENCE_ITEM_KEYS.userQuery]
-        ),
-        probeItem(
-          traceAccessor,
-          EVIDENCE_ITEM_KEYS.agentResponse,
-          mapping[EVIDENCE_ITEM_KEYS.agentResponse]
-        ),
-        probeItem(
-          traceAccessor,
-          EVIDENCE_ITEM_KEYS.toolCalls,
-          mapping[EVIDENCE_ITEM_KEYS.toolCalls]
-        ),
-      ]);
-
-      return {
-        profile,
-        evidence: {
-          [EVIDENCE_ITEM_KEYS.userQuery]: userQueryProbe,
-          [EVIDENCE_ITEM_KEYS.agentResponse]: agentResponseProbe,
-          [EVIDENCE_ITEM_KEYS.toolCalls]: toolCallsProbe,
-        },
-      };
-    })
-  );
-
-  return profileResults;
-};
+): Promise<InstrumentationProfileProbeResult[]> =>
+  toInstrumentationProfileProbes(await extractProfilesEvidence(traceAccessor));

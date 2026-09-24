@@ -7,6 +7,7 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 import {
+  ImpactConflictError,
   ImpactForbiddenError,
   ImpactInvalidRequestError,
   ImpactNotFoundError,
@@ -14,6 +15,7 @@ import {
 
 const ERROR_TYPES: ReadonlyArray<[new (...args: never[]) => Error, string]> = [
   [ImpactForbiddenError, 'PermissionError'],
+  [ImpactConflictError, 'ConflictError'],
   [ImpactNotFoundError, 'NotFoundError'],
   [ImpactInvalidRequestError, 'ValidationError'],
 ];

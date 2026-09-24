@@ -1,10 +1,14 @@
 version: 1
 enabled: true
 review_drafts: false
+skip_labels:
+  - 'reviewer:skip-ai'
+draft_bypass_labels:
+  - 'ci:draft-checks'
 paths:
   exclude:
-    - ".github/workflows/*.lock.yml"
-    - "**/__snapshots__/**"
-    - "**/.meta/**"
-    - "**/moon.yml"
-    - "oas_docs/output/**"
+    - '.github/workflows/*.lock.yml'
+    - '**/__snapshots__/**'
+    - '**/.meta/**'
+    - '**/moon.yml'
+    - 'oas_docs/output/**'

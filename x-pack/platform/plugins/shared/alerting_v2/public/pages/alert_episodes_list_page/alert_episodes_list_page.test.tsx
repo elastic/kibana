@@ -10,6 +10,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
+import { ManageRulesHrefProvider } from '../../application/manage_rules_href_context';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -777,5 +778,43 @@ describe('AlertEpisodesListPage fetch errors', () => {
       const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
       expect(lastCall?.rows?.map((row: { id?: string }) => row.id)).toEqual(['classic-1']);
     });
+  });
+});
+
+describe('manageRulesHref override', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
+    mockCreateEpisodeActions.mockReturnValue([]);
+    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
+    mockHttp.post.mockResolvedValue({ rules: [] });
+  });
+
+  it('uses manageRulesHref from context when provided instead of the locator default', async () => {
+    const overrideHref = '/app/observability/alerting/rules/v1';
+
+    render(
+      <ManageRulesHrefProvider value={overrideHref}>
+        <ListPageTestProviders locators={mockLocators}>
+          <AlertEpisodesListPage />
+        </ListPageTestProviders>
+      </ManageRulesHrefProvider>
+    );
+
+    const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
+    expect(manageRulesLink).toHaveAttribute('href', overrideHref);
+  });
+
+  it('falls back to the locator href when no override is provided', async () => {
+    render(
+      <ListPageTestProviders locators={mockLocators}>
+        <AlertEpisodesListPage />
+      </ListPageTestProviders>
+    );
+
+    const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
+    expect(manageRulesLink).toHaveAttribute('href', '/mock-locator-url');
   });
 });

@@ -1,5 +1,5 @@
 {
-  "sha1": "a848b028e8c0e8932feba7fad8bac41b0aa254f7",
+  "sha1": "020dfe6ba0a422e192761e6050c32799d1d1234e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -56,22 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 30,
-        "column": 38
-      }
-    },
-    {
-      "id": "42293a2b206815f-b38677823af138c",
-      "title": "EIS Models Page task type filter buttons filter model cards",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 46,
-        "column": 65
+        "line": 33,
+        "column": 13
       }
     },
     {
@@ -84,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 62,
-        "column": 7
+        "line": 49,
+        "column": 65
       }
     },
     {
@@ -98,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 78,
-        "column": 11
+        "line": 66,
+        "column": 5
       }
     },
     {
@@ -112,8 +98,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 92,
-        "column": 46
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "42293a2b206815f-0f751951383f0ae",
+      "title": "EIS Models Page renders Blocked badge on model card denied by region policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 91,
+        "column": 13
+      }
+    },
+    {
+      "id": "42293a2b206815f-6663ef79cf54f12",
+      "title": "EIS Models Page renders preview badge on preview model card",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 117,
+        "column": 7
       }
     },
     {
@@ -1041,8 +1055,8 @@
       }
     },
     {
-      "id": "15dbcb23bd3138a-a92eef18ac85a0d",
-      "title": "Manage regions privileges feature-privileged user can edit from the Restricted regions popover",
+      "id": "15dbcb23bd3138a-b6e196e6299d823",
+      "title": "Manage regions privileges feature-read user cannot see Edit Region preferences in blocked model flyout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1055,6 +1069,34 @@
       }
     },
     {
+      "id": "15dbcb23bd3138a-cddf40c13c98598",
+      "title": "Manage regions privileges feature-privileged user can see Edit Region preferences in blocked model flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
+        "line": 80,
+        "column": 81
+      }
+    },
+    {
+      "id": "15dbcb23bd3138a-a92eef18ac85a0d",
+      "title": "Manage regions privileges feature-privileged user can edit from the Restricted regions popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
+        "line": 116,
+        "column": 43
+      }
+    },
+    {
       "id": "68d451451493487-058290624b65263",
       "title": "Model Detail Flyout opens flyout with model details, task badges, and author",
       "expectedStatus": "passed",
@@ -1064,7 +1106,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 18,
+        "line": 23,
         "column": 23
       }
     },
@@ -1078,7 +1120,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 34,
+        "line": 39,
         "column": 13
       }
     },
@@ -1092,7 +1134,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 49,
+        "line": 54,
         "column": 38
       }
     },
@@ -1106,7 +1148,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 72,
+        "line": 77,
         "column": 67
       }
     },
@@ -1120,7 +1162,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 98,
+        "line": 103,
         "column": 38
       }
     },
@@ -1134,7 +1176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 114,
+        "line": 119,
         "column": 7
       }
     },
@@ -1148,8 +1190,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 130,
-        "column": 11
+        "line": 135,
+        "column": 13
       }
     },
     {
@@ -1162,8 +1204,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 149,
-        "column": 38
+        "line": 156,
+        "column": 11
       }
     },
     {
@@ -1176,7 +1218,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 162,
+        "line": 168,
         "column": 7
       }
     },
@@ -1190,7 +1232,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 178,
+        "line": 184,
         "column": 13
       }
     },
@@ -1204,8 +1246,64 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 202,
+        "line": 208,
         "column": 8
+      }
+    },
+    {
+      "id": "68d451451493487-1ea90c619778573",
+      "title": "Model Detail Flyout Edit Region preferences button in blocked callout opens manage regions modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 229,
+        "column": 38
+      }
+    },
+    {
+      "id": "68d451451493487-abe5ed80f774302",
+      "title": "Model Detail Flyout EOL model flyout shows the EOL callout with date",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 269,
+        "column": 28
+      }
+    },
+    {
+      "id": "68d451451493487-f6f51ea6aa9c242",
+      "title": "Model Detail Flyout preview model flyout shows the preview callout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 286,
+        "column": 7
+      }
+    },
+    {
+      "id": "68d451451493487-c724ea55fbf5ba9",
+      "title": "Model Detail Flyout blocked callout suppresses lifecycle callouts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 297,
+        "column": 13
       }
     }
   ]

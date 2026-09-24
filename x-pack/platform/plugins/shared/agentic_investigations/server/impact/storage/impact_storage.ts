@@ -17,8 +17,17 @@ const storageSettings = {
     properties: {
       spaceId: types.keyword({}),
       conversationId: types.keyword({}),
-      // Keyword so pill aggregation and `entityIds.includes` filtering stay cheap.
-      entityIds: types.keyword({}),
+      // Nested so a filter can match `entities.id` or `entities.featureId` without
+      // scanning a flattened blob. Pill filtering stays client-side for the MVP.
+      entities: types.nested({
+        properties: {
+          id: types.keyword({}),
+          name: types.keyword({}),
+          type: types.keyword({}),
+          featureId: types.keyword({}),
+          streamName: types.keyword({}),
+        },
+      }),
       createdAt: types.date({}),
       createdBy: types.object({
         properties: {

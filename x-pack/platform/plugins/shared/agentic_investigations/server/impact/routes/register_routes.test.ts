@@ -8,8 +8,12 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { IMPACT_INTERNAL_URL } from '../../../common/impact/constants';
-import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from '../constants';
-import { ImpactInvalidRequestError, ImpactNotFoundError } from '../services/errors';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
+import {
+  ImpactConflictError,
+  ImpactInvalidRequestError,
+  ImpactNotFoundError,
+} from '../services/errors';
 import type { ImpactService } from '../services/impact_service';
 import type { ImpactRouteDependencies } from '../types';
 import { registerImpactRoutes } from './register_routes';
@@ -34,7 +38,11 @@ const ANALYST = {
 
 const registerAndCollect = (
   service: Partial<ImpactService>,
-  getAttachmentClient: ImpactRouteDependencies['getAttachmentClient'] = async () => undefined
+  getAttachmentClient: ImpactRouteDependencies['getAttachmentClient'] = async () =>
+    ({
+      create: jest.fn().mockResolvedValue({ id: 'impact-1' }),
+      update: jest.fn(),
+    } as never)
 ) => {
   const router = httpServiceMock.createRouter();
   const posts: RegisteredRoute[] = [];
@@ -64,41 +72,47 @@ describe('investigation impact routes', () => {
     jest.clearAllMocks();
   });
 
-  it('gates attach on manage and get on read', () => {
+  it('gates attach and get on the investigations manage privilege', () => {
     const { posts, gets } = registerAndCollect({});
 
     expect(posts).toHaveLength(1);
     expect(gets).toHaveLength(1);
     expect(posts[0].config.path).toBe(IMPACT_INTERNAL_URL);
     expect(posts[0].config.security?.authz?.requiredPrivileges).toEqual([
-      IMPACT_API_PRIVILEGE_MANAGE,
+      INVESTIGATIONS_API_PRIVILEGE_MANAGE,
     ]);
     expect(gets[0].config.path).toBe(IMPACT_INTERNAL_URL);
-    expect(gets[0].config.security?.authz?.requiredPrivileges).toEqual([IMPACT_API_PRIVILEGE_READ]);
+    expect(gets[0].config.security?.authz?.requiredPrivileges).toEqual([
+      INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+    ]);
   });
 
   it('attaches through the service with the space and the resolved user, never a body actor', async () => {
-    const attach = jest.fn().mockResolvedValue({ id: 'impact-1', entityIds: ['user-1'] });
+    const attach = jest.fn().mockResolvedValue({ id: 'impact-1', entities: [{ id: 'user-1' }] });
     const { posts } = registerAndCollect({ attach });
     const response = httpServerMock.createResponseFactory();
 
     await posts[0].handler(
       {},
       httpServerMock.createKibanaRequest({
-        body: { conversationId: 'conv-1', entityIds: ['user-1'] },
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
       }),
       response
     );
 
     expect(attach).toHaveBeenCalledWith(
-      { conversationId: 'conv-1', entityIds: ['user-1'] },
+      { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
       { spaceId: 'default', user: ANALYST }
     );
     expect(response.ok).toHaveBeenCalled();
   });
 
   it('stamps a by-reference attachment onto the conversation after writing', async () => {
-    const impact = { id: 'impact-1', conversationId: 'conv-1', entityIds: ['user-1'] };
+    const impact = {
+      id: 'impact-1',
+      conversationId: 'conv-1',
+      entities: [{ id: 'user-1' }],
+    };
     const attach = jest.fn().mockResolvedValue(impact);
     const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
     const { posts } = registerAndCollect({ attach }, async () => ({ create } as never));
@@ -107,7 +121,7 @@ describe('investigation impact routes', () => {
     await posts[0].handler(
       {},
       httpServerMock.createKibanaRequest({
-        body: { conversationId: 'conv-1', entityIds: ['user-1'] },
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
       }),
       response
     );
@@ -143,11 +157,27 @@ describe('investigation impact routes', () => {
     await posts[0].handler(
       {},
       httpServerMock.createKibanaRequest({
-        body: { conversationId: 'conv-1', entityIds: ['user-1'] },
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
       }),
       response
     );
 
     expect(response.badRequest).toHaveBeenCalled();
+  });
+
+  it('maps an attach that lost every version check to 409', async () => {
+    const attach = jest.fn().mockRejectedValue(new ImpactConflictError('conv-1'));
+    const { posts } = registerAndCollect({ attach });
+    const response = httpServerMock.createResponseFactory();
+
+    await posts[0].handler(
+      {},
+      httpServerMock.createKibanaRequest({
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
+      }),
+      response
+    );
+
+    expect(response.conflict).toHaveBeenCalled();
   });
 });

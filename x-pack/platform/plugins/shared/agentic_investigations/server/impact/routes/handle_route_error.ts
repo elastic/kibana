@@ -7,6 +7,7 @@
 
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import {
+  ImpactConflictError,
   ImpactForbiddenError,
   ImpactInvalidRequestError,
   ImpactNotFoundError,
@@ -25,6 +26,9 @@ export const handleRouteError = (
   }
   if (error instanceof ImpactInvalidRequestError) {
     return response.badRequest({ body: { message: error.message } });
+  }
+  if (error instanceof ImpactConflictError) {
+    return response.conflict({ body: { message: error.message } });
   }
 
   const message = error instanceof Error ? error.message : String(error);

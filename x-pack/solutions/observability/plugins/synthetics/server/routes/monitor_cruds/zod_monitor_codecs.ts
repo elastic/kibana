@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitorTypeEnum } from '../../../common/runtime_types';
+import { MonitorTypeEnum } from '../../../common/runtime_types/monitor_management/monitor_configs';
 import type { formatZodErrors as FormatZodErrors } from '../../../common/runtime_types/zod/format_errors';
 import type { MonitorTypeCodec as MonitorTypeCodecType } from '../../../common/runtime_types/zod/monitor_configs';
 import type {
@@ -41,6 +41,8 @@ let cached: ZodMonitorCodecs | undefined;
 /**
  * Lazily load the zod monitor schema tree. Eager top-level imports retain
  * several MiB on warm-start; decode only needs these on the first validation.
+ * Import `MonitorTypeEnum` from `monitor_configs` (not the runtime-types barrel)
+ * so this module does not pull `zod/monitor_types` before the first call.
  */
 export function getZodMonitorCodecs(): ZodMonitorCodecs {
   if (cached) {
