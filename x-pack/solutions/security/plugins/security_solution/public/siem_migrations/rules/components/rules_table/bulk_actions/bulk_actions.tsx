@@ -13,10 +13,12 @@ import {
   ReprocessFailedItemsButton,
 } from '../../../../common/components/bulk_actions';
 import { UpdateMissingIndex } from './update_missing_index';
+import { AddRulesToChatButton } from './add_rules_to_chat';
 import { type RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type { BulkActionsItem } from '../../../../common/components/bulk_actions/types';
 import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { RuleMigrationStats } from '../../../types';
 
 const ReprocessFailedRulesButton = WithMissingPrivilegesTooltip(
   ReprocessFailedItemsButton,
@@ -26,6 +28,7 @@ const ReprocessFailedRulesButton = WithMissingPrivilegesTooltip(
 
 export interface BulkActionsProps {
   isTableLoading: boolean;
+  migrationStats: RuleMigrationStats;
   translationStats: GetRuleMigrationTranslationStatsResponse;
   selectedRules: RuleMigrationRule[];
   installTranslatedRule?: () => void;
@@ -40,6 +43,7 @@ export interface BulkActionsProps {
 export const BulkActions: React.FC<BulkActionsProps> = memo(
   ({
     isTableLoading,
+    migrationStats,
     translationStats,
     selectedRules,
     installTranslatedRule,
@@ -74,6 +78,9 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
         wrap={true}
         data-test-subj="migrationsBulkActions"
       >
+        <EuiFlexItem grow={false}>
+          <AddRulesToChatButton migrationStats={migrationStats} selectedRules={selectedRules} />
+        </EuiFlexItem>
         {showUpdateMissingIndexPatternButton && (
           <UpdateMissingIndex
             setMissingIndexPatternFlyoutOpen={setMissingIndexPatternFlyoutOpen}

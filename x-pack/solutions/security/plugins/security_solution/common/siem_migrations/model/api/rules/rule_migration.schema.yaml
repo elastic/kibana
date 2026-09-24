@@ -221,11 +221,13 @@ paths:
         - name: page
           in: query
           required: false
+          description: Zero-based page number. Defaults to 0 — omit unless paginating past the first page.
           schema:
             type: number
         - name: per_page
           in: query
           required: false
+          description: Number of rules per page. Defaults to 50 — omit unless you need a different page size.
           schema:
             type: number
         - name: sort_field
@@ -236,6 +238,7 @@ paths:
         - name: sort_direction
           in: query
           required: false
+          description: Sort direction when sort_field is set. asc or desc. Defaults to desc.
           schema:
             type: string
             enum:
@@ -244,11 +247,13 @@ paths:
         - name: search_term
           in: query
           required: false
+          description: Free-text search term matched against the translated rule title (or original title for failed rules). Omit entirely if not searching — do not pass an empty string.
           schema:
             type: string
         - name: ids
           in: query
           required: false
+          description: Fetch specific rules by their ids. Omit entirely if not filtering by id — do not pass an empty array. When provided, no other filter param is needed.
           schema:
             type: array
             items:
@@ -257,36 +262,43 @@ paths:
         - name: is_prebuilt
           in: query
           required: false
+          description: true = only rules with a prebuilt match; false = only rules without one. Omit entirely when not filtering by this condition.
           schema:
             type: boolean
         - name: is_installed
           in: query
           required: false
+          description: true = installed rules only; false = not-yet-installed only. Omit entirely when not filtering by this condition.
           schema:
             type: boolean
         - name: is_fully_translated
           in: query
           required: false
+          description: true = fully translated rules only; false = exclude fully translated. Omit entirely when not filtering by this condition.
           schema:
             type: boolean
         - name: is_partially_translated
           in: query
           required: false
+          description: true = partially translated rules only; false = exclude partially translated. Omit entirely when not filtering by this condition.
           schema:
             type: boolean
         - name: is_untranslatable
           in: query
           required: false
+          description: true = untranslatable rules only; false = exclude untranslatable. Omit entirely when not filtering by this condition.
           schema:
             type: boolean
         - name: is_failed
           in: query
           required: false
+          description: true = failed-translation rules only; false = exclude failed. Omit entirely when not filtering by this condition.
           schema:
             type: boolean
         - name: is_missing_index
           in: query
           required: false
+          description: Set to true to return only rules that are missing a required index. false has no effect — omit this param entirely when not filtering by this condition.
           schema:
             type: boolean
       responses:

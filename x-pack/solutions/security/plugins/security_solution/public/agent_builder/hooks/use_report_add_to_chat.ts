@@ -38,11 +38,13 @@ export interface AgentBuilderAddToChatTelemetry {
     | 'attacks_page_group_summary'
     | 'attacks_page_group_take_action'
     | 'attacks_page_flyout_take_action'
+    | 'translated_rules_flyout'
+    | 'translated_rules_bulk'
     | BulkAlertPathway;
   /**
    * Attachment type
    */
-  attachments?: Array<'alert' | 'entity' | 'rule'>;
+  attachments?: Array<'alert' | 'entity' | 'rule' | 'rule_migration_items'>;
   /** Number of items added (for bulk add-to-chat actions) */
   item_count?: number;
 }

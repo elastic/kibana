@@ -43,6 +43,7 @@ does not auto-load its tools, the user must move to that workflow.
 - **${RULE_MIGRATION_SKILLS.STOP}** — Stop a running migration (mutating).
 - **${RULE_MIGRATION_SKILLS.UPDATE}** — Rename a migration (mutating).
 - **${RULE_MIGRATION_SKILLS.DELETE}** — Permanently delete a migration and all its rule items (destructive, irreversible).
+- **${RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE}** — Fix the translated version of a specific rule: correct the ES|QL query, the prebuilt rule match, or the integration. Mutating.
 `;
 
 /**
@@ -119,6 +120,7 @@ export const AUTOMATIC_MIGRATION_GENERAL_GUIDELINES = `
 - EVERY question with finite defined answers (For example yes, no) MUST be presented as a multiple choice question.
 - Detection Rules is different from Automatic Rule Migration or SIEM Rule Migration. You must not confuse between them. This skill is ONLY about Automatic Rule Migration and NOT for Detection Rules.
 - When responding to the user, highlight important information in code segments(\`\`) or code blocks in case of multiline (\`\`\`) or bold text (**).  For example, migration name, rule titles, statuses, counts, queries, prebuilt rule Id or integration ID. Do not do highlighting in the table.
+- Do not make up any information. You need to ensure that each piece of information you provide is accurate, up to date and evidence backed.
 `;
 
 /**

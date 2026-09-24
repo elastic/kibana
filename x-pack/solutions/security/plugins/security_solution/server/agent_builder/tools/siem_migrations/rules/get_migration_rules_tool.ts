@@ -24,9 +24,6 @@ import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID } from './tool_ids';
 
-// Valid sort fields from `server/lib/siem_migrations/rules/data/sort.ts` `sortingOptionsMap`.
-// An invalid field causes a silent fallback to DEFAULT_SORTING on the server — narrow to an enum
-// so the model always sends a valid value and gets the order it expects.
 const SORT_FIELDS = [
   'elastic_rule.title',
   'elastic_rule.severity',
@@ -36,55 +33,69 @@ const SORT_FIELDS = [
   'updated_at',
 ] as const;
 
-// Extend the OpenAPI-generated query schema, bounding the unbounded inputs (repo rule: prevent
-// unbounded-input DoS). `page` is ZERO-BASED — the route computes `from: page * size`
-// (api/rules/get.ts), so `page=0` is the first page. `ids` is redefined as a plain array
-// (the route validates arrays; the API model's `ArrayFromString` string-split preprocess is
-// dropped — a deliberate divergence called out in the plan). Sort fields are narrowed to the
-// server's allow-list so an invalid value cannot cause a silent fallback.
 const schema = GetRuleMigrationRulesRequestQuery.extend({
-  migration_id: NonEmptyString.describe('The id of the rule migration whose rules to retrieve.'),
+  migration_id: NonEmptyString.describe(
+    'REQUIRED. The id of the rule migration whose rules to retrieve.'
+  ),
   page: z.coerce
     .number()
     .int()
     .min(0)
     .default(0)
-    .describe('Zero-based page number (0 = first page).'),
+    .describe(
+      'Zero-based page number. Defaults to 0 — omit unless paginating past the first page.'
+    ),
   per_page: z.coerce
     .number()
     .int()
     .min(1)
     .max(200)
     .default(50)
-    .describe('Number of rules per page (1-200).'),
-  search_term: z.string().max(500).optional(),
-  ids: z.array(NonEmptyString).max(200).optional(),
+    .describe(
+      'Number of rules per page (1-200). Defaults to 50 — omit unless you need a different page size.'
+    ),
+  search_term: z
+    .string()
+    .max(500)
+    .optional()
+    .describe(
+      'Free-text search term matched against the translated rule title (or original title for failed rules). Omit entirely if not searching — do not pass an empty string.'
+    ),
+  ids: z
+    .array(NonEmptyString)
+    .max(200)
+    .optional()
+    .describe(
+      'Fetch specific rules by their ids. Omit entirely if not filtering by id — do not pass an empty array. When provided, no other filter param is needed.'
+    ),
   sort_field: z
     .enum(SORT_FIELDS)
     .optional()
     .describe(
-      `Field to sort by. One of: ${SORT_FIELDS.join(', ')}. ` +
-        'Defaults to translation_result (desc) when not supplied — matching the Kibana UI.'
+      `OPTIONAL. Field to sort by. One of: ${SORT_FIELDS.join(
+        ', '
+      )}. Defaults to translation_result (desc) — omit unless you need a different sort order.`
     ),
 });
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_RULES_PATH.replace('{migration_id}', encodeURIComponent(migrationId));
 
-// Project each RuleMigrationRule down to the fields the agent actually needs. The full rule
-// carries the original query + translated ES|QL + LLM comments — dumping those into the model
-// context is wasteful and noisy. Keep id + titles + prebuilt id + translation result + status.
 const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   id: rule.id,
   original_rule: {
     title: rule.original_rule.title,
     vendor: rule.original_rule.vendor,
+    query: rule.original_rule.query,
+    query_language: rule.original_rule.query_language,
   },
   elastic_rule: rule.elastic_rule
     ? {
         title: rule.elastic_rule.title,
         prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
         integration_ids: rule.elastic_rule.integration_ids,
+        query: rule.elastic_rule.query,
+        query_language: rule.elastic_rule.query_language,
       }
     : undefined,
   translation_result: rule.translation_result,
@@ -111,10 +122,9 @@ export const getMigrationRulesTool = (
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     description: `List the rules in an Automatic Rule Migration with their translation result and status.
 
-Supports filtering by translation result, installed/prebuilt, search term, or explicit ids.
-Pagination is zero-based.
+Only include the parameters you actually need. Boolean filter fields (is_fully_translated, is_failed, etc.) filter when set — omit them entirely when you are not filtering by that condition. Omit search_term and ids when not in use (do not pass empty strings or empty arrays). Omit pagination and sort params unless you need non-default values.
 
-Returns projected fields only (id, original title, vendor, translated title, prebuilt rule id, integration ids, translation result, status) — not full rule bodies.
+Returns: id, original rule (title, vendor, query, query_language), translated elastic rule (title, prebuilt rule id, integration ids, ES|QL query, query language), translation result, status.
 
 Read-only.`,
     schema,

@@ -43,3 +43,6 @@ export const SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID = securityTool(
 export const SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID = securityTool(
   'siem_migration.delete_rule_migration'
 );
+export const SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID = securityTool(
+  'siem_migration.update_translated_rule'
+);

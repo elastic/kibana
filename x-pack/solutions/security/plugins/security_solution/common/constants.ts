@@ -762,6 +762,7 @@ export enum SecurityAgentBuilderAttachments {
   investigationTimeline = 'security.investigation.timeline',
   rule = 'security.rule',
   rulePreview = 'security.rule.preview',
+  ruleMigrationItems = 'security.siem_migration.rule_migration_items',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';

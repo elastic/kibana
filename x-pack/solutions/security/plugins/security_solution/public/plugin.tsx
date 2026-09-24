@@ -95,6 +95,7 @@ import {
   registerExceptionAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerSiemMigrationRuleItemsAttachment,
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
@@ -365,6 +366,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerSiemMigrationRuleItemsAttachment(plugins.agentBuilder.attachments);
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
       });
