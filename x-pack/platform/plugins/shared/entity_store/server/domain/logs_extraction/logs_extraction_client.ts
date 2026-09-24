@@ -188,7 +188,10 @@ export class LogsExtractionClient {
         type,
         globalOverrides,
         engineDescriptor.logExtractionConfig,
-        this.extractionMode
+        this.extractionMode,
+        this.extractionMode === EXTRACTION_MODE.nonPriority
+          ? engineDescriptor.nonPriorityLogExtractionConfig
+          : undefined
       ),
       engineState,
     };
@@ -208,7 +211,10 @@ export class LogsExtractionClient {
       type,
       globalOverrides,
       engineDescriptor.logExtractionConfig,
-      extractionMode
+      extractionMode,
+      extractionMode === EXTRACTION_MODE.nonPriority
+        ? engineDescriptor.nonPriorityLogExtractionConfig
+        : undefined
     );
   }
 

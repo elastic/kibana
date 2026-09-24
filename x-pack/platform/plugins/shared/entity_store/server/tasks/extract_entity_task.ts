@@ -30,7 +30,11 @@ import {
   resolveExtractionMode,
 } from '../../common/domain/definitions/registry';
 import { ENGINE_STATUS } from '../domain/constants';
-import { EngineDescriptorTypeName, EngineDescriptorClient } from '../domain/saved_objects';
+import {
+  EngineDescriptorTypeName,
+  EngineDescriptorClient,
+  EntityStoreGlobalStateClient,
+} from '../domain/saved_objects';
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
@@ -110,7 +114,15 @@ async function bootstrapNonPriorityTask({
       logger,
       true
     );
-    const descriptor = await engineDescriptorClient.findOrThrow(entityType);
+    const globalStateClient = new EntityStoreGlobalStateClient(
+      coreStart.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace),
+      namespace,
+      logger
+    );
+    const [descriptor, globalOverrides] = await Promise.all([
+      engineDescriptorClient.findOrThrow(entityType),
+      globalStateClient.findLogExtractionOverrides(),
+    ]);
 
     // Skip scheduling for stopped engines: stop()/uninstall() remove both tasks and this tick
     // must not recreate the non-priority one.
@@ -118,12 +130,12 @@ async function bootstrapNonPriorityTask({
       return;
     }
 
-    // Use the merged config so a custom frequency is not overwritten with the static default.
     const { frequency } = getMergedConfig(
       entityType,
-      {},
+      globalOverrides,
       descriptor.logExtractionConfig,
-      EXTRACTION_MODE.nonPriority
+      EXTRACTION_MODE.nonPriority,
+      descriptor.nonPriorityLogExtractionConfig
     );
 
     await pluginsStart.taskManager.ensureScheduled(
