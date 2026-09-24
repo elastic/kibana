@@ -188,8 +188,8 @@ schema/v1/serverless/{index.json,strict/schema.json,template/schema.json}
   main-branch image promotion): rolling overwrite of `schema/v1/serverless`.
 
 Both call the shared `.buildkite/scripts/steps/workflow_step_schema/publish_schema.sh`,
-which reads the GCS service-account key from `GCS_SA_CDN_KEY` (exported by
-`setup_job_env.sh`), stamps the real `kibanaVersion`, `buildHash`, and `channel` onto the
+which reads the GCS service-account key from Vault
+(`kv/ci-shared/workflows-library/gcs-publish`), stamps the real `kibanaVersion`, `buildHash`, and `channel` onto the
 published `index.json` (the committed copy omits all three), and `gcloud storage rsync`s
 the bytes with `cache-control: public, max-age=300`.
 
