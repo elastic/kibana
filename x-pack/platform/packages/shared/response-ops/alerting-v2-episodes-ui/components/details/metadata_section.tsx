@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
@@ -41,12 +41,16 @@ export interface AlertEpisodeMetadataSectionProps {
    * `DEFAULT_MARGIN_BOTTOM` (16px).
    */
   decreaseAvailableHeightBy?: number;
+  calloutMarginSize?: AlertEpisodeMetadataTableProps['calloutMarginSize'];
+  controlsPaddingSize?: AlertEpisodeMetadataTableProps['controlsPaddingSize'];
 }
 
 export const AlertEpisodeMetadataSection = ({
   episodeId,
   services,
   decreaseAvailableHeightBy,
+  calloutMarginSize,
+  controlsPaddingSize,
 }: AlertEpisodeMetadataSectionProps) => {
   const { data: episode, isLoading: isLoadingEpisode } = useFetchEpisodeQuery({
     episodeId,
@@ -111,7 +115,20 @@ export const AlertEpisodeMetadataSection = ({
     (ruleId && isRuleLoading(ruleState)) ||
     isDataViewLoading
   ) {
-    return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeMetadataSectionLoading" />;
+    // Shaped like the doc-viewer table: a search input row, then field rows. The panel
+    // provides padding because this section renders edge-to-edge in the flyout.
+    return (
+      <EuiPanel
+        hasShadow={false}
+        color="transparent"
+        paddingSize="m"
+        data-test-subj="alertingV2EpisodeMetadataSectionLoading"
+      >
+        <EuiSkeletonRectangle width="100%" height={32} />
+        <EuiSpacer size="m" />
+        <EuiSkeletonText lines={8} size="s" />
+      </EuiPanel>
+    );
   }
 
   if (!isRuleLoaded(ruleState)) {
@@ -134,6 +151,8 @@ export const AlertEpisodeMetadataSection = ({
       isStale={Boolean(eventData.isStale)}
       dataTimestamp={eventData.dataTimestamp}
       dateFormat={services.uiSettings.get('dateFormat') ?? undefined}
+      calloutMarginSize={calloutMarginSize}
+      controlsPaddingSize={controlsPaddingSize}
     />
   );
 };

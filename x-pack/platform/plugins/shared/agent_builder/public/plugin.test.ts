@@ -15,7 +15,7 @@ import type {
   AgentBuilderStartDependencies,
   ConfigSchema,
 } from './types';
-import { setSidebarRuntimeContext } from './sidebar';
+import { clearSidebarRuntimeContext, setSidebarRuntimeContext } from './sidebar';
 import { AgentBuilderAccessChecker } from './services';
 
 jest.mock('./services/access', () => ({
@@ -33,6 +33,12 @@ jest.mock('./services', () => ({
   AgentService: jest.fn(),
   AttachmentsService: jest.fn(() => ({ addAttachmentType: jest.fn() })),
   RenderersService: jest.fn(() => ({ register: jest.fn() })),
+  ConversationEventsService: jest.fn(() => ({
+    register: jest.fn(),
+    getUiDefinition: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  })),
   ChatService: jest.fn(),
   ConversationsService: jest.fn(),
   ConversationTemplatesService: jest.fn(() => ({
@@ -49,6 +55,7 @@ jest.mock('./services', () => ({
   OAuthClientsService: jest.fn(),
   PluginsService: jest.fn(),
   EventsService: jest.fn(),
+  SpaceSettingsService: jest.fn(),
   AgentBuilderAccessChecker: jest.fn(),
 }));
 
@@ -62,6 +69,10 @@ jest.mock('./services/conversation_templates', () => ({
 
 jest.mock('./services/renderers', () => ({
   createPublicRenderersContract: jest.fn(() => ({})),
+}));
+
+jest.mock('./services/conversation_events', () => ({
+  createPublicConversationEventsContract: jest.fn(() => ({})),
 }));
 
 jest.mock('./services/tools', () => ({
@@ -112,7 +123,23 @@ const createMockInitializerContext = (): PluginInitializerContext<ConfigSchema> 
     },
   } as unknown as PluginInitializerContext<ConfigSchema>);
 
-const createMockSidebarApp = () => ({ open: jest.fn(), close: jest.fn() });
+const createMockSidebarApp = () => {
+  const isOpen$ = new BehaviorSubject(false);
+
+  return {
+    open: jest.fn(() => {
+      isOpen$.next(true);
+    }),
+    close: jest.fn(() => {
+      isOpen$.next(false);
+    }),
+    isOpen: jest.fn(() => isOpen$.getValue()),
+    isOpen$: jest.fn(() => isOpen$),
+    setIsOpen: (nextIsOpen: boolean) => {
+      isOpen$.next(nextIsOpen);
+    },
+  };
+};
 
 const createMockCoreSetup = (): CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart> =>
   ({
@@ -136,8 +163,7 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
     },
     chrome: {
       sidebar: { getApp: jest.fn(() => sidebarApp) },
-      navControls: { registerRight: jest.fn() },
-      next: { aiButton: { register: jest.fn() } },
+      controls: { aiButton: { register: jest.fn() } },
     },
     uiSettings: {
       get$: jest.fn(() => new BehaviorSubject(false)),
@@ -152,12 +178,14 @@ const createMockSetupDeps = (): AgentBuilderSetupDependencies =>
     licenseManagement: undefined,
     share: {},
     workflowsExtensions: {},
+    files: { registerFileKind: jest.fn() },
   } as unknown as AgentBuilderSetupDependencies);
 
 const createMockStartDeps = (): AgentBuilderStartDependencies =>
   ({
     licensing: {},
     inference: {},
+    files: { filesClientFactory: { asScoped: jest.fn().mockReturnValue({}) } },
   } as unknown as AgentBuilderStartDependencies);
 
 const createMockAttachmentGroup = (overrides: Partial<AttachmentGroup> = {}): AttachmentGroup => ({
@@ -179,6 +207,7 @@ const openSidebarAndRegisterCallbacks = (
     updateProps: mockUpdateProps,
     resetBrowserApiTools: jest.fn(),
     addAttachment: jest.fn(),
+    removeAttachmentById: jest.fn(),
   });
   return { mockUpdateProps };
 };
@@ -292,6 +321,37 @@ describe('AgentBuilderPlugin', () => {
         newConversation: true,
         attachments: [mockGroup],
       });
+    });
+  });
+
+  describe('when another sidebar app replaces Agent Builder', () => {
+    it('opens on the first toggle', () => {
+      const sidebarApp = createMockSidebarApp();
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
+
+      start.openChat();
+      sidebarApp.setIsOpen(false);
+      start.toggleChat();
+
+      expect(sidebarApp.open).toHaveBeenCalledTimes(2);
+      expect(sidebarApp.close).not.toHaveBeenCalled();
+    });
+
+    it('clears runtime state when another sidebar app replaces Agent Builder', () => {
+      const sidebarApp = createMockSidebarApp();
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
+      const { mockUpdateProps } = openSidebarAndRegisterCallbacks(start);
+      jest.mocked(clearSidebarRuntimeContext).mockClear();
+
+      sidebarApp.setIsOpen(false);
+      start.setChatConfig({ newConversation: true });
+
+      expect(clearSidebarRuntimeContext).toHaveBeenCalledTimes(1);
+      expect(mockUpdateProps).not.toHaveBeenCalled();
     });
   });
 });

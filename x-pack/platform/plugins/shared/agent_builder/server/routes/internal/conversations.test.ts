@@ -15,10 +15,11 @@ import { internalApiPath } from '../../../common/constants';
 
 const MARK_READ_PATH = `${internalApiPath}/conversations/{conversation_id}/_mark_read`;
 const SET_PINNED_PATH = `${internalApiPath}/conversations/{conversation_id}/_set_pinned`;
+const SEARCH_PATH = `${internalApiPath}/conversations/_search`;
 
 describe('registerInternalConversationRoutes - _mark_read', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let update: jest.Mock;
+  let markRead: jest.Mock;
 
   const createMockContext = () => ({
     core: Promise.resolve({}),
@@ -39,11 +40,11 @@ describe('registerInternalConversationRoutes - _mark_read', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    update = jest.fn().mockResolvedValue({ id: 'conv-1', read: true });
+    markRead = jest.fn().mockResolvedValue({ id: 'conv-1', read: true });
 
     const getInternalServices = jest.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ update }),
+        getScopedClient: jest.fn().mockResolvedValue({ markRead }),
       },
     });
 
@@ -58,6 +59,7 @@ describe('registerInternalConversationRoutes - _mark_read', () => {
           }
         ),
       patch: jest.fn(),
+      get: jest.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -76,10 +78,7 @@ describe('registerInternalConversationRoutes - _mark_read', () => {
       kibanaResponseFactory
     );
 
-    expect(update).toHaveBeenCalledWith(
-      { id: 'conv-1', read: true },
-      { access: 'converse', retryOnConflict: true }
-    );
+    expect(markRead).toHaveBeenCalledWith('conv-1', true);
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', read: true });
   });
@@ -133,6 +132,7 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
           }
         ),
       patch: jest.fn(),
+      get: jest.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -207,7 +207,10 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    patchMetadata = jest.fn().mockResolvedValue({ id: 'conv-1', metadata: { severity: 'high' } });
+    patchMetadata = jest.fn().mockResolvedValue({
+      conversation: { id: 'conv-1', metadata: { severity: 'high' } },
+      changedFields: [],
+    });
 
     const getInternalServices = jest.fn().mockReturnValue({
       conversations: {
@@ -226,6 +229,7 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
             routeHandlers[config.path] = handler;
           }
         ),
+      get: jest.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -287,7 +291,7 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
 
 describe('registerInternalConversationRoutes - _set_pinned', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let update: jest.Mock;
+  let setPinned: jest.Mock;
 
   const createMockContext = () => ({
     core: Promise.resolve({}),
@@ -308,11 +312,11 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    update = jest.fn().mockResolvedValue({ id: 'conv-1', pinned: true });
+    setPinned = jest.fn().mockResolvedValue({ id: 'conv-1', pinned: true });
 
     const getInternalServices = jest.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ update }),
+        getScopedClient: jest.fn().mockResolvedValue({ setPinned }),
       },
     });
 
@@ -327,6 +331,7 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
           }
         ),
       patch: jest.fn(),
+      get: jest.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -338,18 +343,103 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
     routeHandler = routeHandlers[SET_PINNED_PATH];
   });
 
-  it('updates pinned state using conversation accessor permissions', async () => {
+  it('updates pinned state for the calling user only', async () => {
     const response = await routeHandler(
       createMockContext() as any,
       createRequest(),
       kibanaResponseFactory
     );
 
-    expect(update).toHaveBeenCalledWith(
-      { id: 'conv-1', pinned: true },
-      { access: 'converse', retryOnConflict: true }
-    );
+    expect(setPinned).toHaveBeenCalledWith('conv-1', true);
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', pinned: true });
+  });
+});
+
+describe('registerInternalConversationRoutes - _search', () => {
+  let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
+  let search: jest.Mock;
+
+  const createMockContext = () => ({
+    core: Promise.resolve({}),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+    }),
+  });
+
+  // httpServerMock.createKibanaRequest does not run route validation, so page/per_page
+  // defaults are not applied here - pass them explicitly.
+  const createRequest = (overrides: { query?: object } = {}) =>
+    httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: SEARCH_PATH,
+      query: { query: 'sales', page: 1, per_page: 50 },
+      ...overrides,
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    search = jest.fn().mockResolvedValue({
+      results: [{ id: 'conv-1', title: 'Sales report' }],
+      total: 1,
+    });
+
+    const getInternalServices = jest.fn().mockReturnValue({
+      conversations: {
+        getScopedClient: jest.fn().mockResolvedValue({ search }),
+      },
+    });
+
+    const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
+
+    const router = {
+      post: jest.fn(),
+      patch: jest.fn(),
+      get: jest
+        .fn()
+        .mockImplementation(
+          (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
+            routeHandlers[config.path] = handler;
+          }
+        ),
+    } as unknown as IRouter;
+
+    registerInternalConversationRoutes({
+      router,
+      getInternalServices,
+      logger: loggingSystemMock.createLogger(),
+    } as unknown as RouteDependencies);
+
+    routeHandler = routeHandlers[SEARCH_PATH];
+  });
+
+  it('calls search with the query, agent_id, page, and per_page from the request', async () => {
+    await routeHandler(
+      createMockContext() as any,
+      createRequest({ query: { query: 'sales', agent_id: 'agent-1', page: 2, per_page: 10 } }),
+      kibanaResponseFactory
+    );
+
+    expect(search).toHaveBeenCalledWith({
+      query: 'sales',
+      agentId: 'agent-1',
+      page: 2,
+      perPage: 10,
+    });
+  });
+
+  it('returns the pagination envelope and results', async () => {
+    const response = await routeHandler(
+      createMockContext() as any,
+      createRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      pagination: { total: 1, page: 1, per_page: 50 },
+      results: [{ id: 'conv-1', title: 'Sales report' }],
+    });
   });
 });

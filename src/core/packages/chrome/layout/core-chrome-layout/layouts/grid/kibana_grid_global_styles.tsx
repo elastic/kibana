@@ -21,7 +21,6 @@ const kibanaGlobalLayoutStyles = css`
     --kbnHeaderBannerHeight: ${layoutVar('banner.height', '0px')};
     --kbnAppHeadersOffset: ${layoutVar('application.topBar.height', '0px')};
     --kbn-application--sticky-headers-offset: ${layoutVar('application.topBar.height', '0px')};
-    --kbnProjectHeaderAppActionMenuHeight: ${layoutVar('application.topBar.height', '0px')};
   }
 
   #kibana-body {

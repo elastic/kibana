@@ -66,11 +66,12 @@ export const listRuleExecutionsRequestSchema = z
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe(`Page number.`),
-    per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
+    per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
-      .describe(`Number of results per page.`),
+      .describe(`Number of results per page. Pass 0 for a count-only read.`),
   })
-  .refine(({ page, per_page }) => page * per_page <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
+  .strict()
+  .refine(({ page, per_page: perPage }) => page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
     message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
     path: ['page'],
   });
@@ -108,7 +109,7 @@ export const listRuleExecutionsResponseSchema = z
     items: z.array(ruleExecutionViewSchema),
     total: z.number().int().nonnegative(),
     page: z.number().int().min(1),
-    per_page: z.number().int().min(1),
+    per_page: z.number().int().min(0),
   })
   .meta({ id: 'alerting_rule_executions_response' });
 

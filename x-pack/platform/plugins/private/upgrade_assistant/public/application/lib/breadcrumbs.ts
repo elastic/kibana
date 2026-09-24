@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { History } from 'history';
+import type { AppHeaderBack } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
@@ -79,3 +81,8 @@ export class BreadcrumbService {
 }
 
 export const breadcrumbService = new BreadcrumbService();
+
+export const getOverviewBackTarget = (history: Pick<History, 'createHref'>): AppHeaderBack => ({
+  href: history.createHref({ pathname: '/overview' }),
+  label: i18nTexts.breadcrumbs.overview,
+});

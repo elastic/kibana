@@ -248,7 +248,7 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
-    if (await this.globalNav.isNextProjectChrome()) {
+    if (await this.globalNav.isProjectChrome()) {
       await this.testSubjects.click('appHeaderBack');
     } else {
       const breadcrumbLink = this.config.get('serverless')
@@ -697,6 +697,9 @@ export class DashboardPageObject extends FtrService {
     if (saveOptions.tags) {
       await this.selectDashboardTags(saveOptions.tags);
     }
+
+    // Let the async "Permissions" (access control) section render and reflow the footer before clicking Save, so the button isn't hit mid-reflow.
+    await this.testSubjects.exists('accessModeContainer');
 
     await this.clickSave();
     if (saveOptions.waitDialogIsClosed) {

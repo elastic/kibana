@@ -115,7 +115,9 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 actions,
                 systemActions,
               }),
-              options: { id: params?.id },
+              options: {
+                id: params?.id,
+              },
               ...(createRuleData.template_id ? { templateId: createRuleData.template_id } : {}),
             })) as Rule<RuleParamsV1>;
 

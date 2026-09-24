@@ -11,6 +11,7 @@ import * as Rx from 'rxjs';
 import { fork, type ChildProcess } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import type { ThemeTag } from './types';
 import { getInspectExecArgv } from './utils/inspect';
 
@@ -27,6 +28,8 @@ export interface RspackOptimizerOptions {
   pluginPaths?: string[];
   /** Directories scanned for plugins */
   pluginScanDirs?: string[];
+  /** Restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
   /** Enable HMR in watch mode (undefined = auto-detect) */
   hmr?: boolean;
   /** Dev server base path (e.g. "/abc") for HMR auto-reload on server restart */
@@ -48,7 +51,7 @@ interface WorkerMessage {
 /**
  * RSPack-based optimizer for use with kbn-cli-dev-mode
  *
- * This runs RSPack in a separate child process, similar to how @kbn/optimizer
+ * This runs RSPack in a separate child process, similar to how @kbn/rspack-optimizer
  * runs webpack in worker threads. This allows clean termination when the user
  * presses Ctrl+C - we can simply kill the worker process.
  *
@@ -135,6 +138,7 @@ export class RspackOptimizer {
                 hmr: this.options.hmr,
                 pluginPaths: this.options.pluginPaths,
                 pluginScanDirs: this.options.pluginScanDirs,
+                allowlistPluginGroups: this.options.allowlistPluginGroups,
                 basePath: this.options.basePath,
               },
             });

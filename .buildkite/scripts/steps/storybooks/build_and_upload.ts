@@ -12,12 +12,15 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import pLimit from 'p-limit';
-import { buildDocsArchive, buildDocsAssets, buildDocsRegistry } from '@kbn/storybook';
 import type { BuildDocsArchiveResult, BuildDocsRegistryResult } from '@kbn/storybook';
-import { storybookAliases } from '@kbn/dev/storybook/aliases';
+import { loadKibanaModule } from '../../../pipeline-utils/load_kibana_module.ts';
 import { getKibanaDir } from '#pipeline-utils';
 
-const GITHUB_CONTEXT = 'Build and Publish Storybooks';
+const { buildDocsArchive, buildDocsAssets, buildDocsRegistry } =
+  loadKibanaModule<typeof import('@kbn/storybook')>('@kbn/storybook');
+const { storybookAliases } = loadKibanaModule<typeof import('@kbn/dev/storybook/aliases')>(
+  '@kbn/dev/storybook/aliases'
+);
 
 const STORYBOOK_DIRECTORY =
   process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
@@ -45,7 +48,8 @@ const annotateStorybookDocsArtifacts = (
   registry: BuildDocsRegistryResult
 ) => {
   const annotation = [
-    '### Storybook docs artifacts',
+    '<details>',
+    '<summary>Storybook docs artifacts</summary>',
     '',
     `* Commit: \`${STORYBOOK_DOCS_ARCHIVE_SHA}\``,
     `* Registry: [${STORYBOOK_DOCS_REGISTRY_FILE}](${STORYBOOK_DOCS_REGISTRY_URL})`,
@@ -66,6 +70,8 @@ const annotateStorybookDocsArtifacts = (
     `    artifact: ${STORYBOOK_DOCS_ARCHIVE_URL}`,
     `    integrity: ${archive.integrity}`,
     '```',
+    '',
+    '</details>',
   ].join('\n');
 
   execSync('buildkite-agent annotate --style info --context storybook-docs-artifacts', {
@@ -81,7 +87,7 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
       logsBuffer.push(chunk.toString());
     };
 
-    const child = spawn('yarn', ['storybook', '--site', storybook], {
+    const child = spawn('pnpm', ['storybook', '--site', storybook], {
       stdio: 'pipe',
       env: {
         ...process.env,
@@ -109,16 +115,6 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
     });
   });
 };
-
-const ghStatus = (state: string, description: string) =>
-  exec(
-    `gh api "repos/elastic/kibana/statuses/${process.env.BUILDKITE_COMMIT}"`,
-    `-f state=${state}`,
-    `-f target_url="${process.env.BUILDKITE_BUILD_URL}"`,
-    `-f context="${GITHUB_CONTEXT}"`,
-    `-f description="${description}"`,
-    `--silent`
-  );
 
 const build = async (): Promise<{
   archive: BuildDocsArchiveResult;
@@ -250,13 +246,6 @@ const upload = (archive: BuildDocsArchiveResult, registry: BuildDocsRegistryResu
 };
 
 (async () => {
-  try {
-    ghStatus('pending', 'Building Storybooks');
-    const { archive, registry } = await build();
-    upload(archive, registry);
-    ghStatus('success', 'Storybooks built');
-  } catch (error) {
-    ghStatus('error', 'Building Storybooks failed');
-    throw error;
-  }
+  const { archive, registry } = await build();
+  upload(archive, registry);
 })();

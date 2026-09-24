@@ -21,8 +21,8 @@ import {
   QueryType,
   type ApiExecutableQuery,
   type HealthDiagnosticQuery,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV3,
+  type IndexQuery,
+  type ApiQuery,
   type ResolvedQuery,
 } from './health_diagnostic_service.types';
 import { artifactService } from '../artifact';
@@ -83,7 +83,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
             if ('_raw' in q) {
               return { kind: 'skipped', query: q, reason: 'parse_failure' };
             }
-            return { kind: 'executable', query: q as HealthDiagnosticQueryV1 };
+            return { kind: 'executable', query: q as IndexQuery };
           })
         )
       ),
@@ -138,7 +138,6 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
           name: 'test-query',
           passed: true,
           status: 'success',
-          descriptorVersion: 1,
           numDocs: 1,
           fieldNames: expect.arrayContaining(['@timestamp', 'user.name', 'event.action']),
         });
@@ -179,6 +178,60 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
 
         expect(result).toHaveLength(0);
         expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should skip queries whose expiresAt is in the past', async () => {
+        setupDefaultArtifact({ version: 4, expiresAt: '2000-01-01' });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should skip queries whose expiresAt is a bare date of today (start-of-day)', async () => {
+        const today = new Date().toISOString().slice(0, 10);
+        setupDefaultArtifact({ version: 4, expiresAt: today });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should skip queries whose expiresAt datetime already passed today', async () => {
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+        setupDefaultArtifact({ version: 4, expiresAt: oneHourAgo });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should run queries whose expiresAt datetime is later today', async () => {
+        const oneHourAhead = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        setupDefaultArtifact({ version: 4, expiresAt: oneHourAhead });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      test('should run queries whose expiresAt is in the future', async () => {
+        setupDefaultArtifact({ version: 4, expiresAt: '2099-12-31' });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      test('should run queries with no expiresAt set', async () => {
+        setupDefaultArtifact();
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
       });
 
       describe('query attribute filtering', () => {
@@ -333,7 +386,6 @@ enabled: true`,
           name: 'test-query',
           passed: false,
           status: 'failed',
-          descriptorVersion: 1,
           failure: {
             message: 'Query execution failed',
             reason: undefined,
@@ -583,9 +635,7 @@ enabled: true`,
     });
 
     describe('runHealthDiagnosticQueries — API queries', () => {
-      const buildResolvedApiQuery = (
-        overrides: Partial<HealthDiagnosticQueryV3> = {}
-      ): ApiExecutableQuery => ({
+      const buildResolvedApiQuery = (overrides: Partial<ApiQuery> = {}): ApiExecutableQuery => ({
         kind: 'executable_api',
         query: createMockApiQueryV3(overrides),
       });

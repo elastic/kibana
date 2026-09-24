@@ -1353,7 +1353,7 @@ export const cli = () => {
         --rule-from                      Rule lookback window for installed custom/pack rules (Default: now-30d)
         --fp-count                       Max false-positive event templates per hunt that defines them (0-3, Default: 0). FP events/alerts are tagged data-generator-fp (plus data-generator / pack:<id>).
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
-        --threat-intel                   Seed per-pack RSS sources (+ digest subscription) for mustard TI workflows. Defaults --packs to all four when omitted. Environment data is the packs (not logs-aws.local).
+        --threat-intel                   Seed per-pack RSS sources for mustard TI workflows. Defaults --packs to all four when omitted. Environment data is the packs (not logs-aws.local).
         --threat-intel-reports           Also seed historic Hub reports into .kibana-threat-reports from --start-date through --end-date minus 24h (implies --threat-intel). Leaves the last day empty for real workflow ingest. RSS stays current-only.
         --threat-intel-report-count      Historic reports per pack when --threat-intel-reports is set (Default: 12)
         --attacks                         Generate synthetic Attack Discoveries (opt-in)

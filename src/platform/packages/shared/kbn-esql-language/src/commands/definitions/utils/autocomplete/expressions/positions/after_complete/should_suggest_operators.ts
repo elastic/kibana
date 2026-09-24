@@ -91,7 +91,7 @@ type Rule = (context: EvaluatedOperatorRuleContext) => OperatorDecision | null;
 const rules: Rule[] = [
   // Rule 0: A parenthesized boolean operator can be followed by logical and null-check operators
   (ctx) => {
-    const { expressionRoot, isExpressionRootParenthesized } = ctx.ctx;
+    const { expressionRoot, parenthesizedExpressionPosition } = ctx.ctx;
     const isOperatorExpression =
       expressionRoot && (isBinaryExpression(expressionRoot) || isUnaryExpression(expressionRoot));
 
@@ -99,7 +99,7 @@ const rules: Rule[] = [
       !ctx.functionParameterContext &&
       ctx.expressionType === 'boolean' &&
       isOperatorExpression &&
-      isExpressionRootParenthesized
+      parenthesizedExpressionPosition === 'after'
     ) {
       return {
         shouldSuggest: true,

@@ -70,6 +70,7 @@ export const createExecuteConnectorSubActionTool = ({
     'Connectors reference: https://www.elastic.co/docs/reference/kibana/connectors-kibana',
   schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
+  excludeFromMcp: true,
   annotations: {
     title: 'Execute Connector Sub-Action',
     readOnlyHint: false,
@@ -90,6 +91,18 @@ export const createExecuteConnectorSubActionTool = ({
     },
   },
   handler: async ({ connectorId, subAction, params }, context) => {
+    const allowedIds = context.agentConfiguration?.connector_ids;
+    if (allowedIds !== undefined && !allowedIds.includes(connectorId)) {
+      return {
+        results: [
+          createErrorResult({
+            message: `Connector '${connectorId}' is not available to this agent. Use list_connectors to see available connectors.`,
+            metadata: { connectorId, subAction },
+          }),
+        ],
+      };
+    }
+
     const actions = await getActions();
     const actionsClient = await actions.getActionsClientWithRequest(context.request);
 

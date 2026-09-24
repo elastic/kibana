@@ -134,7 +134,7 @@ describe('suggestion_provider', () => {
         notFieldItem!,
         cancellationToken
       );
-      expect(mockFind).toBeCalledTimes(1);
+      expect(mockFind).toHaveBeenCalledTimes(1);
       expect(notFieldResolvedItem).toEqual(notFieldItem);
 
       // Variable kind but field not in ECS
@@ -151,7 +151,7 @@ describe('suggestion_provider', () => {
         notECSFieldItem!,
         cancellationToken
       );
-      expect(mockFind).toBeCalledTimes(1);
+      expect(mockFind).toHaveBeenCalledTimes(1);
       expect(notECSFieldResolvedItem).toEqual(notECSFieldItem);
     });
 
@@ -290,7 +290,7 @@ describe('suggestion_provider', () => {
 
         expect(resolvedItem).toEqual(item);
         // Only the upfront ECS list check, no stream fetch
-        expect(mockFind).toBeCalledTimes(1);
+        expect(mockFind).toHaveBeenCalledTimes(1);
       });
 
       it('should strip .keyword suffix when looking up stream description', async () => {

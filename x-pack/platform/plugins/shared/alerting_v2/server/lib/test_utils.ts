@@ -11,6 +11,8 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { loggerMock } from '@kbn/logging-mocks';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Type } from 'apache-arrow/Arrow.node';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type {
   PipelineStateStream,
   RuleExecutionInput,
@@ -65,9 +67,9 @@ export function createRuleResponse(
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     grouping: { fields: [] },
     enabled: true,
-    created_by: 'elastic_profile_uid',
+    created_by: { profile_uid: 'elastic_profile_uid' },
     created_at: '2025-01-01T00:00:00.000Z',
-    updated_by: 'elastic_profile_uid',
+    updated_by: { profile_uid: 'elastic_profile_uid' },
     updated_at: '2025-01-01T00:00:00.000Z',
     ...rest,
     metadata: { name: 'test-rule', ...metadata, version: metadata?.version ?? 1 },
@@ -89,9 +91,9 @@ export function createRuleSoAttributes(
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     grouping: { fields: [] },
     enabled: true,
-    createdBy: 'elastic_profile_uid',
+    createdBy: { profile_uid: 'elastic_profile_uid' },
     createdAt: '2025-01-01T00:00:00.000Z',
-    updatedBy: 'elastic_profile_uid',
+    updatedBy: { profile_uid: 'elastic_profile_uid' },
     updatedAt: '2025-01-01T00:00:00.000Z',
     ...overrides,
   };
@@ -110,7 +112,7 @@ export function createRuleExecutionInput(
 
   return {
     ruleId: 'rule-1',
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionContext: createExecutionContext(abortSignal),
     ...overrides,
@@ -122,7 +124,7 @@ export function createRuleExecutionPipelineInput(
 ): RuleExecutionPipelineInput {
   return {
     ruleId: 'rule-1',
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionUuid: 'execution-uuid',
     abortSignal: new AbortController().signal,
@@ -200,6 +202,7 @@ export function createEsqlResponse(
 export interface MockArrowBatch {
   numRows: number;
   rows: Array<Record<string, unknown>>;
+  timestampColumns?: string[];
 }
 
 export interface MockArrowReader {
@@ -207,6 +210,7 @@ export interface MockArrowReader {
   cancel: jest.Mock<Promise<void>, []>;
   [Symbol.asyncIterator]: () => AsyncIterator<{
     numRows: number;
+    schema: { fields: Array<{ name: string; typeId: number }> };
     toArray: () => Array<{ toJSON: () => Record<string, unknown> }>;
   }>;
 }
@@ -224,8 +228,15 @@ export function createMockArrowReader(batches: MockArrowBatch[]): MockArrowReade
     }),
     async *[Symbol.asyncIterator]() {
       for (const batch of batches) {
+        const fieldNames = Array.from(new Set(batch.rows.flatMap((row) => Object.keys(row))));
         yield {
           numRows: batch.numRows,
+          schema: {
+            fields: fieldNames.map((name) => ({
+              name,
+              typeId: batch.timestampColumns?.includes(name) ? Type.Timestamp : Type.Utf8,
+            })),
+          },
           toArray: () =>
             batch.rows.map((row) => ({
               toJSON: () => row,

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { CreateRuleData, RuleResponse, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
+import { createHookTestProviders } from '../test_utils/test_providers';
 import { useInstallRuleTemplate } from './use_install_rule_template';
 
 jest.mock('@kbn/core-di-browser');
@@ -49,22 +48,13 @@ const mockRuleResponse: RuleResponse = {
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-  created_by: 'test-user',
+  created_by: { profile_uid: 'test-user' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'test-user',
+  updated_by: { profile_uid: 'test-user' },
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-};
+const createWrapper = () => createHookTestProviders();
 
 describe('useInstallRuleTemplate', () => {
   const mockCreateRule = jest.fn();

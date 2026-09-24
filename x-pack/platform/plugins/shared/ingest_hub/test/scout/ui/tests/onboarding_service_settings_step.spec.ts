@@ -6,95 +6,186 @@
  */
 
 import { tags } from '@kbn/scout';
-import type { BrowserAuthFixture, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import {
+  mockAwsPackage,
+  navigateToOnboardingStep,
+  useOnboardingFeatureFlag,
+} from '../helpers/onboarding';
 
-// cloudtrail: dual-transport (S3 + CloudWatch); required fields are bucket_arn (S3) / log_group_arn (CW)
-// ec2_metrics: agentless metrics — no required text fields; Continue enabled once global region is set
-// firewall_metrics: regions-only optionalConfig — no required text fields, no attention badge
+// elb (DS: elb_logs): dual-transport (S3 + CloudWatch); required fields bucket_arn (S3) / log_group_arn (CW)
+//   — used for flyout tests with MOCK_AWS_PACKAGE_RESPONSE intercepting the Fleet EPR endpoint
+// cloudtrail: ECF-only (no flyout); static name 'AWS CloudTrail' — used for non-flyout assertions
+// waf: ECF-only; always showInUI:true regardless of manifest version
+// s3access: managed_integration, no required text vars → used for no-attention-callout test
 
-const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
-const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
+// Synthetic aws package manifest injected via page.route() to make all tests hermetic.
+// Covers every service used in this spec so assertions never depend on whatever
+// elastic/integrations happens to ship. ECF-only services (cloudtrail, waf, vpcflow) get
+// their names from the static matrix; only non-ECF services need policy_templates here.
+const MOCK_AWS_PACKAGE_RESPONSE = {
+  item: {
+    policy_templates: [
+      // ec2_metrics — used by signal-filter test
+      {
+        name: 'ec2',
+        data_streams: ['ec2_metrics'],
+        deployment_modes: { agentless: { enabled: true } },
+        inputs: [{ type: 'aws-cloudwatch' }],
+      },
+      // s3access — used by no-attention-callout test
+      {
+        name: 's3',
+        data_streams: ['s3access'],
+        deployment_modes: { agentless: { enabled: true } },
+        inputs: [{ type: 'aws-s3' }],
+      },
+      // elb_logs — used by flyout tests
+      {
+        name: 'elb',
+        title: 'AWS ELB',
+        data_streams: ['elb_logs'],
+        deployment_modes: { agentless: { enabled: true } },
+        inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }],
+      },
+      // cloudtrail — ECF, dual-input (S3 + CloudWatch); needed for signal-filter test
+      {
+        name: 'cloudtrail',
+        title: 'AWS CloudTrail',
+        data_streams: ['cloudtrail'],
+        inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }],
+      },
+      // waf — ECF, single-input (S3)
+      {
+        name: 'waf',
+        data_streams: ['waf'],
+        inputs: [{ type: 'aws-s3' }],
+      },
+    ],
+    data_streams: [
+      {
+        path: 'ec2_metrics',
+        type: 'metrics',
+        streams: [{ input: 'aws-cloudwatch', vars: [] }],
+      },
+      {
+        path: 's3access',
+        type: 'logs',
+        streams: [{ input: 'aws-s3', vars: [] }],
+      },
+      {
+        path: 'cloudtrail',
+        type: 'logs',
+        streams: [
+          {
+            input: 'aws-s3',
+            vars: [
+              {
+                name: 'bucket_arn',
+                type: 'text',
+                title: 'Bucket ARN',
+                required: true,
+                show_user: true,
+              },
+            ],
+          },
+          {
+            input: 'aws-cloudwatch',
+            vars: [
+              {
+                name: 'log_group_arn',
+                type: 'text',
+                title: 'Log Group ARN',
+                required: true,
+                show_user: true,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: 'waf',
+        type: 'logs',
+        streams: [
+          {
+            input: 'aws-s3',
+            vars: [
+              {
+                name: 'bucket_arn',
+                type: 'text',
+                title: 'Bucket ARN',
+                required: true,
+                show_user: true,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: 'elb_logs',
+        type: 'logs',
+        title: 'Amazon ELB Logs',
+        streams: [
+          {
+            input: 'aws-s3',
+            vars: [
+              {
+                name: 'bucket_arn',
+                type: 'text',
+                title: 'Bucket ARN',
+                required: true,
+                show_user: true,
+              },
+            ],
+          },
+          {
+            input: 'aws-cloudwatch',
+            vars: [
+              {
+                name: 'log_group_arn',
+                type: 'text',
+                title: 'Log Group ARN',
+                required: true,
+                show_user: true,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+};
+
+async function fillFlyoutField(
+  page: ScoutPage,
+  input: string,
+  fieldName: string,
+  value: string
+): Promise<void> {
+  await page.testSubj
+    .locator(`serviceSettingsFlyout-${input}-field-${fieldName}`)
+    .locator('input')
+    .fill(value);
+}
 
 async function navigateToServiceSettings(
-  browserAuth: BrowserAuthFixture,
+  browserAuth: Parameters<typeof navigateToOnboardingStep>[0],
   page: ScoutPage,
-  opts: {
-    selectedServiceIds: string[];
-    globalRegion?: string;
-    serviceVars?: Record<string, unknown>;
-    instances?: unknown[];
-  }
+  opts: Parameters<typeof navigateToOnboardingStep>[3]
 ): Promise<void> {
-  const { selectedServiceIds, globalRegion = 'us-east-1', serviceVars = {}, instances } = opts;
-  await browserAuth.loginAsAdmin();
-  await page.gotoApp('onboarding/aws#service-settings');
-  await page.evaluate(
-    ({
-      ids,
-      region,
-      vars,
-      insts,
-      servicesKey,
-      settingsKey,
-    }: {
-      ids: string[];
-      region: string;
-      vars: Record<string, unknown>;
-      insts: unknown[] | undefined;
-      servicesKey: string;
-      settingsKey: string;
-    }) => {
-      sessionStorage.setItem(servicesKey, JSON.stringify({ selectedServiceIds: ids }));
-      const settingsPayload: Record<string, unknown> = { globalRegion: region, serviceVars: vars };
-      if (insts !== undefined) settingsPayload.instances = insts;
-      sessionStorage.setItem(settingsKey, JSON.stringify(settingsPayload));
-    },
-    {
-      ids: selectedServiceIds,
-      region: globalRegion,
-      vars: serviceVars,
-      insts: instances,
-      servicesKey: SERVICES_STEP_SESSION_KEY,
-      settingsKey: SERVICE_SETTINGS_SESSION_KEY,
-    }
-  );
-  await page.reload();
-  await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
+  return navigateToOnboardingStep(browserAuth, page, 'service-settings', opts);
 }
 
 test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ apiServices, config }) => {
-    // The /internal/core/_settings route is only registered when
-    // coreApp.allowDynamicConfigOverrides=true (Scout's local stateful base config).
-    // ECH deployments don't carry that override, so the PUT 404s. Skip on Cloud.
-    // eslint-disable-next-line playwright/no-skipped-test
-    test.skip(
-      config.isCloud === true,
-      `Core API returns 404 for 'ingestHub.onboardingEnabled' on ECH`
-    );
-    // skip() in beforeAll only skips the tests, not the hook body itself.
-    if (config.isCloud) {
-      return;
-    }
+  // The /internal/core/_settings route is only registered when
+  // coreApp.allowDynamicConfigOverrides=true (Scout's local stateful base config).
+  // ECH deployments don't carry that override, so the PUT 404s. Skip on Cloud.
+  useOnboardingFeatureFlag();
 
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'true',
-      },
-    });
-  });
-
-  test.afterAll(async ({ apiServices, config }) => {
-    if (config.isCloud) {
-      return;
-    }
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'false',
-      },
-    });
+  test.beforeEach(async ({ page }) => {
+    await mockAwsPackage(page, MOCK_AWS_PACKAGE_RESPONSE);
   });
 
   test('renders table with Service Name, Collects, Category, Region columns', async ({
@@ -102,7 +193,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
+      selectedServiceIds: ['waf', 'cloudtrail'],
     });
     await expect(page.testSubj.locator('serviceSettingsStep-table')).toBeVisible();
 
@@ -113,47 +204,40 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.getByRole('columnheader', { name: 'Region' })).toBeVisible();
 
     // Both services appear as rows
-    await expect(
-      page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics')
-    ).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-waf')).toBeVisible();
     await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeVisible();
   });
 
   test('service count reflects selected services', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
+      selectedServiceIds: ['waf', 'cloudtrail'],
     });
     await expect(page.getByText(/Showing.*2.*services/)).toBeVisible();
   });
 
   test('search bar filters table rows by name', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
+      selectedServiceIds: ['waf', 'cloudtrail'],
     });
 
     await page.testSubj.locator('serviceSettingsStep-searchBox').fill('CloudTrail');
     await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeVisible();
-    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics')).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-waf')).toBeHidden();
     await expect(page.getByText(/Showing.*1.*service/)).toBeVisible();
   });
 
   test('signal filter narrows table rows by signal type', async ({ browserAuth, page }) => {
-    // ec2_metrics = metrics, cloudtrail = logs
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
+      selectedServiceIds: ['ec2', 'cloudtrail'],
     });
 
-    // Filter to Metrics — only ec2_metrics visible
     await page.testSubj.locator('serviceSettingsStep-signalFilter').getByText('Metrics').click();
-    await expect(
-      page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics')
-    ).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-ec2')).toBeVisible();
     await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeHidden();
 
-    // Filter to Logs — only cloudtrail visible
     await page.testSubj.locator('serviceSettingsStep-signalFilter').getByText('Logs').click();
     await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeVisible();
-    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics')).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-ec2')).toBeHidden();
   });
 
   test('global region shown in Region column; per-service override takes precedence', async ({
@@ -161,22 +245,36 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
-      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: { region: 'eu-west-1' } } },
+      selectedServiceIds: ['waf', 'cloudtrail'],
+      serviceVars: {
+        cloudtrail: {
+          enabledDataStreams: ['cloudtrail'],
+          varsByDataStream: {
+            cloudtrail: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { aws_region: 'eu-west-1' } },
+            },
+          },
+        },
+      },
     });
 
-    // ec2_metrics has no override — shows global region
-    const ec2Row = page.getByRole('row', { name: /AWS EC2/ });
-    await expect(ec2Row.getByText('us-east-1')).toBeVisible();
+    // waf has no override — shows global region.
+    const wafRow = page.locator('tr', {
+      has: page.testSubj.locator('serviceSettingsStep-serviceLink-waf'),
+    });
+    await expect(wafRow.getByText('us-east-1')).toBeVisible();
 
     // cloudtrail has per-service override
-    const cloudtrailRow = page.getByRole('row', { name: /AWS CloudTrail/ });
+    const cloudtrailRow = page.locator('tr', {
+      has: page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail'),
+    });
     await expect(cloudtrailRow.getByText('eu-west-1')).toBeVisible();
   });
 
   test('Continue is disabled without global region', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics'],
+      selectedServiceIds: ['cloudtrail'],
       globalRegion: '',
     });
 
@@ -188,7 +286,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics'],
+      selectedServiceIds: ['cloudtrail'],
       globalRegion: 'us-east-1',
     });
 
@@ -205,46 +303,44 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     browserAuth,
     page,
   }) => {
-    // cloudtrail with S3 trigger: bucket_arn is required and empty
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
-      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
+      selectedServiceIds: ['elb'],
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        },
+      },
     });
 
-    // Callout visible, badge on cloudtrail row, Continue disabled
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
-    await expect(
-      page.testSubj.locator('serviceSettingsStep-attentionIcon-cloudtrail')
-    ).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionIcon-elb')).toBeVisible();
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
   });
 
-  test('regions-only service shows no attention badge and does not block Continue', async ({
+  test('service with no required text vars shows no attention badge and does not block Continue', async ({
     browserAuth,
     page,
   }) => {
-    // firewall_metrics: optionalConfig: ['regions'] — no required text fields
+    // s3access: managed_integration, no required text vars → no attention callout.
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['firewall_metrics'],
+      selectedServiceIds: ['s3'],
     });
 
-    await expect(
-      page.testSubj.locator('serviceSettingsStep-attentionIcon-firewall_metrics')
-    ).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionIcon-s3')).toBeHidden();
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeHidden();
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
 
   test('expand icon opens flyout for the correct service', async ({ browserAuth, page }) => {
-    // cloudtrail has configurable flyout fields (transport toggle + bucket_arn),
-    // so it shows an edit button. ec2_metrics has no configurable fields after
-    // removing the region selector and shows plain text instead.
+    // elb_logs: dual-transport (S3 + CloudWatch), required text vars → has edit button.
+    // ec2_metrics has no configurable fields and shows plain text instead.
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
-    await expect(page.getByRole('heading', { name: 'AWS CloudTrail' })).toBeVisible();
+    await page.testSubj.locator('serviceSettingsStep-editButton-elb').click();
+    await expect(page.getByRole('heading', { name: /AWS ELB/ })).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsFlyout-closeButton').click();
     await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeHidden();
@@ -252,10 +348,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
   test('service name link also opens flyout', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-serviceLink-elb').click();
     await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
   });
 
@@ -264,35 +360,45 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
-      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
+      selectedServiceIds: ['elb'],
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        },
+      },
     });
 
-    await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-editButton-elb').click();
     await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
 
-    // Transport toggle visible
-    await expect(page.testSubj.locator('serviceSettingsFlyout-transportToggle')).toBeVisible();
+    // Input toggles visible
+    await expect(page.testSubj.locator('serviceSettingsFlyout-inputToggle-aws-s3')).toBeVisible();
+    await expect(
+      page.testSubj.locator('serviceSettingsFlyout-inputToggle-aws-cloudwatch')
+    ).toBeVisible();
 
-    // S3 active → bucket_arn field shown (label includes [S3])
-    await expect(page.testSubj.locator('serviceSettingsFlyout-field-bucket_arn')).toBeVisible();
-    await expect(page.testSubj.locator('serviceSettingsFlyout-field-log_group_arn')).toBeHidden();
+    // S3 enabled → bucket_arn field shown
+    await expect(
+      page.testSubj.locator('serviceSettingsFlyout-aws-s3-field-bucket_arn')
+    ).toBeVisible();
+    await expect(
+      page.testSubj.locator('serviceSettingsFlyout-aws-cloudwatch-field-log_group_arn')
+    ).toBeHidden();
 
-    // Switch to CloudWatch → log_group_arn shown, bucket_arn hidden
-    await page.testSubj
-      .locator('serviceSettingsFlyout-transportToggle')
-      .getByText('CloudWatch')
-      .click();
-    await expect(page.testSubj.locator('serviceSettingsFlyout-field-log_group_arn')).toBeVisible();
-    await expect(page.testSubj.locator('serviceSettingsFlyout-field-bucket_arn')).toBeHidden();
+    // Enable CloudWatch → log_group_arn shown
+    await page.testSubj.locator('serviceSettingsFlyout-inputToggle-aws-cloudwatch').click();
+    await expect(
+      page.testSubj.locator('serviceSettingsFlyout-aws-cloudwatch-field-log_group_arn')
+    ).toBeVisible();
   });
 
   test('flyout no longer shows AWS Region override field', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-editButton-elb').click();
     await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
 
     await expect(page.getByLabel('AWS Region (override)')).toBeHidden();
@@ -303,76 +409,56 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
-      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
+      selectedServiceIds: ['elb'],
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        },
+      },
     });
 
-    // Callout and badge visible, Continue disabled
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
 
-    // Open flyout, fill required field, save
-    await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
-    await page.testSubj
-      .locator('serviceSettingsFlyout-field-bucket_arn')
-      .fill('arn:aws:s3:::my-bucket');
+    await page.testSubj.locator('serviceSettingsStep-editButton-elb').click();
+    await fillFlyoutField(page, 'aws-s3', 'bucket_arn', 'arn:aws:s3:::my-bucket');
     await page.testSubj.locator('serviceSettingsFlyout-saveButton').click();
 
-    // Badge gone, callout gone, Continue enabled
-    await expect(
-      page.testSubj.locator('serviceSettingsStep-attentionIcon-cloudtrail')
-    ).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionIcon-elb')).toBeHidden();
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeHidden();
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
 
   // ── Duplicate service ───────────────────────────────────────────────────
 
-  test('⋮ actions menu is visible on every row and contains Duplicate service', async ({
-    browserAuth,
-    page,
-  }) => {
-    await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail', 'ec2_metrics'],
-    });
-
-    for (const id of ['cloudtrail', 'ec2_metrics']) {
-      await page.testSubj.locator(`serviceSettingsStep-actionsButton-${id}`).click();
-      await expect(
-        page.testSubj.locator(`serviceSettingsStep-duplicateAction-${id}`)
-      ).toBeVisible();
-      // Close popover before opening the next
-      await page.keyboard.press('Escape');
-    }
-  });
-
   test('duplicate modal opens with correct service name in body copy', async ({
     browserAuth,
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
 
     const modal = page.testSubj.locator('duplicateServiceModal');
     await expect(modal).toBeVisible();
     await expect(modal.getByText(/Add another instance of/)).toBeVisible();
-    await expect(modal.getByText('AWS CloudTrail')).toBeVisible();
+    await expect(modal.getByText('AWS ELB')).toBeVisible();
   });
 
   test('duplicate modal pre-fills name as "Service [Duplicate]"', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
 
     await expect(page.testSubj.locator('duplicateServiceModal-nameField')).toHaveValue(
-      'AWS CloudTrail [Duplicate]'
+      'AWS ELB [Duplicate]'
     );
   });
 
@@ -381,11 +467,11 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
     await expect(page.testSubj.locator('duplicateServiceModal')).toBeVisible();
 
     await page.testSubj.locator('duplicateServiceModal-cancelButton').click();
@@ -397,50 +483,61 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
   test('Add inserts a new row with the chosen name', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
       serviceVars: {
-        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
+        },
       },
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
 
     // Fill the duplicate bucket_arn and click Add
-    await page.testSubj
-      .locator('serviceSettingsFlyout-field-bucket_arn')
-      .fill('arn:aws:s3:::second-bucket');
+    await fillFlyoutField(page, 'aws-s3', 'bucket_arn', 'arn:aws:s3:::second-bucket');
     await page.testSubj.locator('duplicateServiceModal-addButton').click();
 
     await expect(page.testSubj.locator('duplicateServiceModal')).toBeHidden();
 
     // Table now shows 2 rows
     await expect(page.getByText(/Showing.*2.*services/)).toBeVisible();
-    // The new row uses the generated name
-    await expect(page.getByText('AWS CloudTrail [Duplicate]')).toBeVisible();
+    await expect(page.getByText(/AWS ELB.*\[Duplicate\]/)).toBeVisible();
   });
 
   test("duplicate row's config is independent from the original", async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
       serviceVars: {
-        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
+        },
       },
     });
 
     // Duplicate with a different bucket_arn
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
-    await page.testSubj
-      .locator('serviceSettingsFlyout-field-bucket_arn')
-      .fill('arn:aws:s3:::second-bucket');
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
+    await fillFlyoutField(page, 'aws-s3', 'bucket_arn', 'arn:aws:s3:::second-bucket');
     await page.testSubj.locator('duplicateServiceModal-addButton').click();
 
     // Open the original's flyout and verify its bucket_arn is unchanged
-    await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
-    await expect(page.testSubj.locator('serviceSettingsFlyout-field-bucket_arn')).toHaveValue(
-      'arn:aws:s3:::original-bucket'
-    );
+    await page.testSubj.locator('serviceSettingsStep-editButton-elb').click();
+    await expect(
+      page.testSubj.locator('serviceSettingsFlyout-aws-s3-field-bucket_arn').locator('input')
+    ).toHaveValue('arn:aws:s3:::original-bucket');
     await page.testSubj.locator('serviceSettingsFlyout-closeButton').click();
   });
 
@@ -448,46 +545,50 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     browserAuth,
     page,
   }) => {
-    // Seed with a complete original and an already-persisted incomplete duplicate
-    const dupInstanceId = 'cloudtrail__dup-1';
+    const dupInstanceId = 'elb__dup-1';
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
       serviceVars: {
-        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
-        [dupInstanceId]: { trigger: 'aws-s3', vars: {} }, // bucket_arn missing
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
+        },
+        [dupInstanceId]: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        }, // bucket_arn missing
       },
       instances: [
         {
-          instanceId: 'cloudtrail',
-          serviceId: 'cloudtrail',
-          name: 'AWS CloudTrail',
+          instanceId: 'elb',
+          serviceId: 'elb',
+          name: 'Amazon ELB Logs',
           isDuplicate: false,
         },
         {
           instanceId: dupInstanceId,
-          serviceId: 'cloudtrail',
-          name: 'AWS CloudTrail [Duplicate]',
+          serviceId: 'elb',
+          name: 'Amazon ELB Logs [Duplicate]',
           isDuplicate: true,
         },
       ],
     });
 
-    // Duplicate row has the attention badge
     await expect(
       page.testSubj.locator(`serviceSettingsStep-attentionIcon-${dupInstanceId}`)
     ).toBeVisible();
-    // Callout visible, Continue blocked
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
 
-    // Fill the duplicate's required field via its flyout
     await page.testSubj.locator(`serviceSettingsStep-editButton-${dupInstanceId}`).click();
-    await page.testSubj
-      .locator('serviceSettingsFlyout-field-bucket_arn')
-      .fill('arn:aws:s3:::second-bucket');
+    await fillFlyoutField(page, 'aws-s3', 'bucket_arn', 'arn:aws:s3:::second-bucket');
     await page.testSubj.locator('serviceSettingsFlyout-saveButton').click();
 
-    // All clear — Continue enabled
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeHidden();
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
@@ -500,10 +601,23 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['cloudtrail'],
       serviceVars: {
-        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+        cloudtrail: {
+          enabledDataStreams: ['cloudtrail'],
+          varsByDataStream: {
+            cloudtrail: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
+        },
         [dupInstanceId]: {
-          trigger: 'aws-s3',
-          vars: { bucket_arn: 'arn:aws:s3:::second-bucket' },
+          enabledDataStreams: ['cloudtrail'],
+          varsByDataStream: {
+            cloudtrail: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::second-bucket' } },
+            },
+          },
         },
       },
       instances: [
@@ -522,10 +636,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       ],
     });
 
-    // Original row has no Remove action
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await expect(page.testSubj.locator('serviceSettingsStep-removeAction-cloudtrail')).toBeHidden();
-    await page.keyboard.press('Escape');
+    // ECF-only original: no ⋮ button at all (Duplicate was removed, Remove never applies)
+    await expect(
+      page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail')
+    ).toBeHidden();
 
     // Duplicate row has a Remove action — clicking it removes the row
     await page.testSubj.locator(`serviceSettingsStep-actionsButton-${dupInstanceId}`).click();
@@ -540,22 +654,23 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
-      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
+      selectedServiceIds: ['elb'],
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        },
+      },
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
 
-    // bucket_arn is empty (pre-filled from source which had empty vars)
-    // Trigger name validation so the Add button state is evaluated
     await page.testSubj.locator('duplicateServiceModal-nameField').blur();
 
     await expect(page.testSubj.locator('duplicateServiceModal-addButton')).toBeDisabled();
 
-    await page.testSubj
-      .locator('serviceSettingsFlyout-field-bucket_arn')
-      .fill('arn:aws:s3:::my-bucket');
+    await fillFlyoutField(page, 'aws-s3', 'bucket_arn', 'arn:aws:s3:::my-bucket');
 
     await expect(page.testSubj.locator('duplicateServiceModal-addButton')).toBeEnabled();
   });
@@ -565,17 +680,18 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
-      serviceVars: {
-        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
-      },
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
 
-    // Change the name to match the original
-    await page.testSubj.locator('duplicateServiceModal-nameField').fill('AWS CloudTrail');
+    // Derive the original name from the modal's pre-filled value so the test
+    // stays anchored to whatever the current manifest produces.
+    const nameField = page.testSubj.locator('duplicateServiceModal-nameField');
+    const preFilled = await nameField.inputValue();
+    const originalName = preFilled.replace(/ \[Duplicate\]$/, '');
+    await nameField.fill(originalName);
 
     await expect(
       page.getByText('This name is already in use. Choose a different name.')

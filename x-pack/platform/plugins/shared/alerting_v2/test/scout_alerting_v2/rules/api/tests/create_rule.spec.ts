@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 
-const MAX_OWNER_LENGTH = 256;
 import {
   ALERTING_V2_RULES_ALL_ROLE,
   ALERTING_V2_RULES_READ_ROLE,
@@ -55,6 +54,9 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
+      // Actors are structured objects, not the legacy bare profile-UID string.
+      expect(typeof response.body.created_by.profile_uid).toBe('string');
+      expect(typeof response.body.updated_by.profile_uid).toBe('string');
 
       const persisted = await apiServices.alertingV2.rules.get(response.body.id);
       expect(persisted.id).toBe(response.body.id);
@@ -149,21 +151,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'long-description', description: 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1) },
-      });
-      const response = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body,
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
-
-  apiTest(
-    'validation: rejects body when metadata.owner exceeds the maximum length',
-    async ({ apiClient }) => {
-      const body = buildCreateRuleData({
-        metadata: { name: 'long-owner', owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
         headers: writerHeaders,
@@ -310,6 +297,23 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'validation: rejects a recovering delay when recovery is disabled',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'invalid-inert-recovery-delay' },
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 0, recovering_count: 2 },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
     'create: returns 201 with the signal kind round-tripped to the response',
     async ({ apiClient, apiServices }) => {
       // Signal rules must opt out of the default `state_transition`,
@@ -344,7 +348,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         metadata: {
           name: 'full-rule',
           description: 'fully populated rule',
-          owner: 'team-a',
           tags: ['critical', 'prod'],
         },
         schedule: { every: '5m', lookback: '10m' },
@@ -457,6 +460,30 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     expect(response).toHaveStatusCode(201);
     expect(response.body.query).toStrictEqual(body.query);
   });
+
+  apiTest(
+    'create: persists a conditionless composed rule without a breach block',
+    async ({ apiClient, apiServices }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'conditionless-composed-rule' },
+        query: {
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        },
+      });
+
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.query).toStrictEqual(body.query);
+
+      const persisted = await apiServices.alertingV2.rules.get(response.body.id);
+      expect(persisted.query).toStrictEqual(body.query);
+    }
+  );
 
   apiTest(
     'create: returns 201 with composed format including a recovery segment',

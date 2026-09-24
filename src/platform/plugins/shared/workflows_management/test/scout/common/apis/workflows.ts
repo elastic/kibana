@@ -9,7 +9,7 @@
 
 import type { ReqOptions } from '@kbn/kbn-client';
 import { type KbnClient } from '@kbn/scout';
-import type { WorkflowAggsDto, WorkflowExecutionDto } from '@kbn/workflows';
+import type { ExecutionStatus, WorkflowAggsDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { waitForConditionOrThrow } from '../utils/wait_for_condition';
 
@@ -269,8 +269,78 @@ export class WorkflowsApiService {
       condition: (execution) => !!execution && isTerminalStatus(execution.status ?? ''),
       interval: 1000,
       timeout,
-      errorMessage: `Execution with id ${workflowExecutionId} did not reach a terminal status`,
+      errorMessage: (execution) =>
+        `Execution with id ${workflowExecutionId} did not reach a terminal status` +
+        ` (last status: ${execution?.status ?? 'undefined'})`,
     });
+  }
+
+  /**
+   * Polls an execution until it reports one of `status` and, when provided, `until` also holds.
+   *
+   * Step executions are written with `refresh: false` into a different index than the execution
+   * document, so `stepExecutions` can lag the reported status by a refresh cycle. Pass `until` to
+   * wait for the step data an assertion needs instead of treating the status as a proxy for it.
+   */
+  async waitForStatus({
+    workflowExecutionId,
+    status,
+    timeout = 20_000,
+    includeOutput = false,
+    until,
+  }: {
+    workflowExecutionId: string;
+    status: ExecutionStatus | readonly ExecutionStatus[];
+    timeout?: number;
+    includeOutput?: boolean;
+    until?: (execution: WorkflowExecutionDto) => boolean;
+  }): Promise<WorkflowExecutionDto> {
+    const expected = Array.isArray(status) ? status : [status];
+    const execution = await waitForConditionOrThrow({
+      action: () => this.getExecution(workflowExecutionId, { includeOutput }),
+      condition: (next) =>
+        next != null &&
+        expected.includes(next.status as ExecutionStatus) &&
+        (until == null || until(next)),
+      interval: 1000,
+      timeout,
+      errorMessage: (last) =>
+        `Execution with id ${workflowExecutionId} did not reach ${expected.join('|')}` +
+        ` (last status: ${last?.status ?? 'undefined'})`,
+    });
+    if (execution == null) {
+      throw new Error(`Execution with id ${workflowExecutionId} was not found`);
+    }
+    return execution;
+  }
+
+  /** POST /api/workflows/executions/{id}/resume — resume a paused HITL execution. */
+  async rawResume(
+    workflowExecutionId: string,
+    input: Record<string, unknown>,
+    options?: Partial<ReqOptions> & { stepExecutionId?: string }
+  ): Promise<{
+    data: { success: boolean; executionId: string; message: string };
+    status: number;
+  }> {
+    const { headers, retries, stepExecutionId, ...rest } = options ?? {};
+    const response = await this.kbnClient.request<{
+      success: boolean;
+      executionId: string;
+      message: string;
+    }>({
+      ...rest,
+      // Resume is not idempotent: a retried POST after a successful claim returns 409.
+      retries: retries ?? 0,
+      method: 'POST',
+      path: `/s/${this.spaceId}/api/workflows/executions/${workflowExecutionId}/resume`,
+      body: {
+        input,
+        ...(stepExecutionId ? { stepExecutionId } : {}),
+      },
+      headers: { 'elastic-api-version': '2023-10-31', ...headers },
+    });
+    return response;
   }
 
   /** GET /api/workflows/workflow/aggs —  */

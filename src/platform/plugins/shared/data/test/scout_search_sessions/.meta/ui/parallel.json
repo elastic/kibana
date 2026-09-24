@@ -1,8 +1,7 @@
 {
-  "sha1": "eca40d9e3beab916950c1d36db4e3c8972900a1d",
+  "sha1": "9a287a76929564dc2fc5c7673b71958116c1f63a",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -14,8 +13,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/global.setup.ts",
-        "line": 22,
-        "column": 16
+        "line": 18,
+        "column": 1
+      }
+    },
+    {
+      "id": "b52d7aefd4c2e4a-ea56eef63465547",
+      "title": "Background search management — accessibility Background search management states have no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_a11y.spec.ts",
+        "line": 40,
+        "column": 23
       }
     },
     {
@@ -27,8 +39,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_management.spec.ts",
-        "line": 107,
-        "column": 12
+        "line": 47,
+        "column": 7
       }
     },
     {
@@ -40,8 +52,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_permissions.spec.ts",
-        "line": 54,
-        "column": 14
+        "line": 58,
+        "column": 28
       }
     },
     {
@@ -53,8 +65,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_permissions.spec.ts",
-        "line": 63,
-        "column": 14
+        "line": 65,
+        "column": 22
       }
     }
   ]

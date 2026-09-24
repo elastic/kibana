@@ -46,6 +46,7 @@ import {
   createLastNotifiedTimestampsResponse,
 } from './fixtures/dispatcher';
 import { createAlertEpisode } from './fixtures/test_utils';
+import { EpisodeScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
   ApplyMaintenanceWindowStep,
@@ -62,7 +63,7 @@ import {
   StoreActionsStep,
   StoreExecutionHistoryStep,
 } from './steps';
-import type { AlertEpisode, AlertEpisodeSuppression } from './types';
+import type { AlertEpisode, AlertEpisodeSuppression, DispatcherHaltReason } from './types';
 
 function mockRulesFindByIds(
   spy: jest.SpyInstance,
@@ -815,7 +816,7 @@ describe('DispatcherService', () => {
 
     it('only matches episodes whose hydrated data satisfies a KQL matcher', async () => {
       mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456'], {
-        matcher: 'data.severity: "critical"',
+        matcher: { expression: 'data.severity: "critical"' },
       });
 
       const alertEpisodes: AlertEpisode[] = [
@@ -991,7 +992,11 @@ describe('DispatcherService', () => {
       return {
         execute: jest.fn().mockResolvedValue({
           completed: true,
-          finalState: { input: mockInput, episodes, truncated: true, recordedEpisodes: 2 },
+          finalState: {
+            input: mockInput,
+            scan: EpisodeScan.of({ episodes, truncated: true }),
+            recordedEpisodes: 2,
+          },
         }),
       };
     }
@@ -1053,7 +1058,11 @@ describe('DispatcherService', () => {
       const pipeline2: jest.Mocked<DispatcherPipelineContract> = {
         execute: jest.fn().mockResolvedValue({
           completed: true,
-          finalState: { input: tick2MockInput, episodes: [], recordedEpisodes: 0 },
+          finalState: {
+            input: tick2MockInput,
+            scan: EpisodeScan.empty(),
+            recordedEpisodes: 0,
+          },
         }),
       };
       const service2 = new DispatcherService(
@@ -1203,10 +1212,13 @@ describe('DispatcherService', () => {
   // ── Phase 5: stuck-watermark escape hatch ────────────────────────────────────
   describe('stuck-watermark escape hatch (STUCK_TICK_LIMIT)', () => {
     // Returns a pipeline whose watermark stays pinned. `haltReason: 'aborted'` with
-    // no `recordedEpisodes` is the only path through computeNextWatermark that
-    // returns `input.eventWatermark` unchanged — simulating a tick where the pipeline
-    // was interrupted before StoreActionsStep wrote any records.
-    function buildStuckPipeline(episodes: AlertEpisode[]): jest.Mocked<DispatcherPipelineContract> {
+    // no `recordedEpisodes` returns `input.eventWatermark` unchanged from
+    // computeNextWatermark — simulating a tick where the pipeline was interrupted
+    // before StoreActionsStep wrote any records. `inline_stats_too_large` pins it too.
+    function buildStuckPipeline(
+      episodes: AlertEpisode[],
+      haltReason: DispatcherHaltReason = 'aborted'
+    ): jest.Mocked<DispatcherPipelineContract> {
       return {
         execute: jest
           .fn()
@@ -1222,10 +1234,10 @@ describe('DispatcherService', () => {
               };
               return Promise.resolve({
                 completed: false,
-                haltReason: 'aborted',
+                haltReason,
                 finalState: {
                   input,
-                  episodes,
+                  scan: EpisodeScan.of({ episodes }),
                   // recordedEpisodes absent → computeNextWatermark returns input.eventWatermark
                 },
               });
@@ -1416,6 +1428,66 @@ describe('DispatcherService', () => {
       expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.any(String),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
+          }),
+        })
+      );
+    });
+
+    it('holds the watermark on an inline_stats_too_large tick within one max window and logs the halt reason', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+        createStorageService();
+      const eventWatermark = new Date(Date.now() - 60_000);
+
+      const mockPipeline = buildStuckPipeline([], 'inline_stats_too_large');
+      const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
+
+      const result = await service.run({
+        eventWatermark,
+        stuckTicks: STUCK_TICK_LIMIT - 1,
+        taskId: 'task-1',
+      });
+
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+      expect(result.nextStuckTicks).toBe(0);
+      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          labels: expect.objectContaining({ code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK' }),
+        })
+      );
+      const [[warnMessage]] = mockLogger.warn.mock.calls;
+      expect(typeof warnMessage === 'function' ? warnMessage() : warnMessage).toContain(
+        'halt_reason: inline_stats_too_large'
+      );
+    });
+
+    it('force-advances on an inline_stats_too_large tick past one max window and logs the halt reason', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+        createStorageService();
+      const eventWatermark = new Date(Date.now() - PRE_FETCH_STUCK_ADVANCE_LAG_MS - 60_000);
+
+      const mockPipeline = buildStuckPipeline([], 'inline_stats_too_large');
+      const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
+
+      const result = await service.run({
+        eventWatermark,
+        stuckTicks: STUCK_TICK_LIMIT - 1,
+        taskId: 'task-1',
+      });
+
+      expect(result.nextWatermark.getTime()).toBe(
+        eventWatermark.getTime() + (MAX_WINDOW_MINUTES - OVERLAP_WINDOW_MINUTES) * 60_000
+      );
+      expect(result.nextStuckTicks).toBe(0);
+      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('halt_reason: inline_stats_too_large'),
         expect.objectContaining({
           labels: expect.objectContaining({
             code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',

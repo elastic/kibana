@@ -88,10 +88,10 @@ describe(`create`, () => {
 
   it('tracks create action - no tags', async () => {
     await supertest(server.listener).post(`/api/dashboards`).send({ title: 'title' });
-    expect(coreServices.userActivity.trackUserAction).toBeCalledWith({
+    expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_create',
-        type: 'creation',
+        type: ['creation'],
       },
       message: `User created dashboard "title" (id: test-dashboard).`,
       object: {
@@ -133,10 +133,10 @@ describe(`create`, () => {
     });
 
     await supertest(server.listener).post(`/api/dashboards`).send({ title: 'title' });
-    expect(coreServices.userActivity.trackUserAction).toBeCalledWith({
+    expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_create',
-        type: 'creation',
+        type: ['creation'],
       },
       message: `User created dashboard "title" (id: test-dashboard).`,
       object: {

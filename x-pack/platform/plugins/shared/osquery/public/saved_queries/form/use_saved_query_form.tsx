@@ -33,10 +33,7 @@ export interface SavedQueryFormData {
   query?: string;
   interval?: number;
   timeout?: number;
-  snapshot?: boolean;
-  removed?: boolean;
   platform?: string;
-  version?: string[];
   ecs_mapping: ECSMapping | undefined;
 }
 
@@ -50,24 +47,13 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   query: payload.query ?? '',
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
   timeout: payload.timeout ?? QUERY_TIMEOUT.DEFAULT,
-  snapshot: payload.snapshot ?? true,
-  removed: payload.removed ?? false,
   platform: payload.platform || DEFAULT_PLATFORM,
-  version: payload.version ? [payload.version] : [],
   ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
 });
 
-export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
+const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
   // @ts-expect-error update types
   produce<SavedQueryFormData>(payload, (draft: Draft<SavedQuerySOFormData>) => {
-    if (isArray(draft.version)) {
-      if (!draft.version.length) {
-        draft.version = '';
-      } else {
-        draft.version = draft.version[0];
-      }
-    }
-
     if (isArray(draft.platform) && !draft.platform.length) {
       delete draft.platform;
     }
@@ -89,8 +75,27 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
     return res;
   }, [ids, defaultValue]);
 
+  const serializer = (payload: SavedQueryFormData): SavedQuerySOFormData => {
+    const serialized = savedQueryDataSerializer(payload);
+    // The form no longer edits snapshot/removed/version. Round-trip any
+    // values already stored so an edit of a pre-V5 saved query cannot drop them.
+    if (defaultValue?.snapshot !== undefined) {
+      serialized.snapshot = defaultValue.snapshot;
+    }
+
+    if (defaultValue?.removed !== undefined) {
+      serialized.removed = defaultValue.removed;
+    }
+
+    if (defaultValue?.version !== undefined) {
+      serialized.version = defaultValue.version;
+    }
+
+    return serialized;
+  };
+
   return {
-    serializer: savedQueryDataSerializer,
+    serializer,
     idSet,
     isLoadingIds,
     ...useHookForm<SavedQueryFormData>({
@@ -102,7 +107,6 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
             interval: 3600,
             timeout: QUERY_TIMEOUT.DEFAULT,
             ecs_mapping: {},
-            snapshot: true,
             platform: DEFAULT_PLATFORM,
           },
     }),

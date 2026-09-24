@@ -19,11 +19,14 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useState, useMemo } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { useSaveAiIndexSources } from '../hooks/use_save_ai_index_sources';
-import { toSelectedSources } from '../utils/sources';
+import { areSourceSelectionsEqual, toSelectedSources } from '../utils/sources';
 import { SourcePicker } from './source_picker';
 import type { SelectedSource } from './source_picker';
 
@@ -36,8 +39,11 @@ interface EditSourcesFlyoutProps {
 export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const { saveSources, isSaving } = useSaveAiIndexSources();
-  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>(() =>
-    toSelectedSources(aiIndex.sources)
+  const [initialSources] = useState<SelectedSource[]>(() => toSelectedSources(aiIndex.sources));
+  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>(initialSources);
+  const hasChanges = useMemo(
+    () => !areSourceSelectionsEqual(selectedSources, initialSources),
+    [selectedSources, initialSources]
   );
 
   const handleDone = async () => {
@@ -47,22 +53,26 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
     }
   };
 
+  const flyoutTitle = i18n.translate('xpack.contextEngine.editSources.title', {
+    defaultMessage: 'Edit sources for "{name}"',
+    values: { name: aiIndex.id },
+  });
+
   return (
     <EuiFlyout
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
-      size="m"
+      size="s"
+      session="start"
       data-test-subj="contextEditSourcesFlyout"
+      flyoutMenuProps={{
+        title: flyoutTitle,
+        titleId: flyoutTitleId,
+      }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>
-            <FormattedMessage
-              id="xpack.contextEngine.editSources.title"
-              defaultMessage='Edit sources for "{name}"'
-              values={{ name: aiIndex.id }}
-            />
-          </h2>
+          <h2 id={flyoutTitleId}>{flyoutTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
@@ -85,6 +95,10 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
               onClick={onClose}
               flush="left"
               data-test-subj="contextEditSourcesCancelButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+                action: CONTEXT_ENGINE_UI_EBT.action.sources.CANCEL,
+              })}
             >
               <FormattedMessage
                 id="xpack.contextEngine.editSources.cancelButton"
@@ -97,7 +111,12 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
               fill
               onClick={handleDone}
               isLoading={isSaving}
+              isDisabled={!hasChanges}
               data-test-subj="contextEditSourcesDoneButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+                action: CONTEXT_ENGINE_UI_EBT.action.sources.SAVE,
+              })}
             >
               <FormattedMessage
                 id="xpack.contextEngine.editSources.doneButton"

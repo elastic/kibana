@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -8,6 +8,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { basename } from 'node:path';
 import type { BuildkiteTriggerStep } from '#pipeline-utils';
 import { getVersionsFile } from '#pipeline-utils';
 
@@ -183,7 +184,7 @@ function emitPipeline(pipelineSteps: BuildkiteTriggerStep[]) {
   console.log(JSON.stringify(pipelineSteps, null, 2));
 }
 
-if (require.main === module) {
+if (basename(process.argv[1] ?? '') === 'pipeline.ts') {
   main().catch((error) => {
     console.error(error);
     process.exit(1);

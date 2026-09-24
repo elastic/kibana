@@ -21,6 +21,7 @@ import {
   waffleConfigSchemaESQL,
   mosaicConfigSchemaESQL,
 } from '@kbn/lens-embeddable-utils';
+import { seriesStatisticsLensConfigRule } from '../shared/series_statistics_prompt';
 
 interface ChartTypeRegistryEntry<T extends z.ZodType> {
   schema: T;
@@ -31,36 +32,24 @@ interface ChartTypeRegistryEntry<T extends z.ZodType> {
      */
     selection: string;
     /**
-     * Guidance used after this chart type has been selected, while generating
-     * the Lens config JSON.
+     * Chart-specific presentation rules for the Lens config author, including
+     * color policy, stated in Lens JSON terms.
      */
-    config?: {
-      /**
-       * Chart-specific structural rules appended to the config-generation prompt.
-       */
-      rules?: string[];
-      /**
-       * Chart-specific coloring rules rendered inside the color palette section
-       * of the config-generation prompt.
-       */
-      coloringRules?: string[];
-      /**
-       * Structured config-generation options consumed by specialized prompt
-       * builders.
-       */
-      options?: {
-        coloring?: {
-          dynamic?: {
-            /**
-             * Recommended number of dynamic color bands for generated `steps[]`.
-             *
-             * This is prompt guidance, not a schema limit.
-             */
-            recommendedStepCount: number;
-          };
-          categorical?: true;
-        };
+    rules?: string[];
+    /**
+     * Coloring modes the chart supports. Drives the author-only color mechanics
+     * and palette previews compiled by `color_palettes.ts`.
+     */
+    coloring?: {
+      dynamic?: {
+        /**
+         * Recommended number of dynamic color bands for generated `steps[]`.
+         *
+         * This is prompt guidance, not a schema limit.
+         */
+        recommendedStepCount: number;
       };
+      categorical?: true;
     };
   };
 }
@@ -79,9 +68,16 @@ export interface ChartTypeRegistry {
   [SupportedChartType.Mosaic]: ChartTypeRegistryEntry<typeof mosaicConfigSchemaESQL>;
 }
 
+const panelTitleRule =
+  'Set the top-level `title` to a concise panel title naming the measure and breakdown. Category labels do not replace it.';
+
+const noPanelTitleRule = (reason: string): string =>
+  `Omit the top-level \`title\`, because ${reason}.`;
+
 /**
- * Central registry for all supported chart types: schema plus ALL
- * chart-specific prompt guidance (selection, config rules, coloring rules).
+ * Central registry for all supported chart types: schema, selection text, and
+ * presentation rules. `chart_type_guidance.ts` compiles the rules into the
+ * config author's prompt.
  *
  * To add a new chart type:
  * 1. Add its value to the `SupportedChartType` enum in agent-builder-common
@@ -97,19 +93,16 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.',
-      config: {
-        coloringRules: [
-          'Metric placement: set `apply_color_to: "value"` only together with a color config; do not color the background unless the user asks. When not coloring, omit both `color` and `apply_color_to` — `apply_color_to` without a color makes Lens tint the value with a default green.',
-          'For clearly bounded metrics, use explicit 3-band `steps` by default. Examples: percent, ratio, CPU/memory/disk utilization, error rate, success rate, or SLO compliance.',
-          'Metric charts use 3 bands; prefer "Status", "Negative", "Positive", or "Temperature" when thresholds have semantic meaning.',
-          'For bounded adverse metrics like error rate %, higher values are worse; use a status/adverse palette with thresholds in the same percent scale as the metric output.',
-          'For unbounded values (raw counts, bytes, durations, throughput, rates with unknown scale), fall back to the default policy: `color: { type: "auto" }` or no color.',
-        ],
-        options: {
-          coloring: {
-            dynamic: { recommendedStepCount: 3 },
-          },
-        },
+      rules: [
+        noPanelTitleRule('the primary metric label already names the panel'),
+        'A single number is fine. When the value benefits from context, add a trend background (`background_chart: { type: "trend" }`) or a secondary metric (a second `metrics[]` entry with `type: "secondary"`) bound to columns the same ES|QL query returns. Never invent another index or field.',
+        'For a secondary trend or delta, hide the label with `styling.secondary.label.visible: false` and omit `label`. Label a secondary metric only when it is a distinct named measure.',
+        'Omit `color` by default. Bounded metrics (percent, ratio, utilization, error/success rate, SLO compliance) are the usual exception. When such a measure reads as good or bad, apply explicit 3-band `steps` using "Status", "Negative", "Positive", or "Temperature", with a status or adverse palette when higher is worse. Take thresholds from the query or context when available, otherwise use conventional bands for the measure, in the same unit and scale as the metric output. Unbounded values (counts, bytes, durations, rates with unknown scale) stay uncolored unless the user asks.',
+        'Color the value, never the background. Set `apply_color_to: "value"` in the same edit that sets the `color` config. Never set `apply_color_to` on its own, because without a `color` config Lens tints the value with a default green that carries no meaning. When a metric is not colored, omit both `color` and `apply_color_to`.',
+        'Never combine `background_chart` with coloring. Lens forces `apply_color_to` to "background" whenever a background chart is present, so a `color` config would paint the whole panel instead of the value. When using a `background_chart`, omit both `color` and `apply_color_to`.',
+      ],
+      coloring: {
+        dynamic: { recommendedStepCount: 3 },
       },
     },
   },
@@ -118,22 +111,13 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Displays a single metric within a range with optional min/max/goal bounds. Choose when showing progress toward a goal or performance against thresholds (e.g. "CPU usage as a gauge", "sales target progress").',
-      config: {
-        rules: [
-          "Always omit the optional 'min' and 'max' fields from the final configuration.",
-          'Do not infer, synthesize, or backfill gauge bounds from the ES|QL results or the user request.',
-          'Only include goal/target-related fields when the user explicitly asks for a goal or threshold.',
-        ],
-        coloringRules: [
-          'Gauge default: mirror Lens with `range: "percentage"` and exactly 4 bands: `0 <= value < 25`, `25 <= value < 50`, `50 <= value < 75`, `75 <= value <= 100`.',
-          'If the user asks for a non-default gauge palette, keep those same percentage bands and only change the step colors.',
-          'Do not invent absolute gauge thresholds from units like bytes, requests, or rates unless the user gave those thresholds.',
-        ],
-        options: {
-          coloring: {
-            dynamic: { recommendedStepCount: 4 },
-          },
-        },
+      rules: [
+        noPanelTitleRule('the gauge label names the measure'),
+        'Bind `min`, `max`, or `goal` only to a column the query returns for that purpose. Never add or infer them otherwise.',
+        'The default bands are `range: "percentage"` with 4 steps: `0 <= value < 25`, `25 <= value < 50`, `50 <= value < 75`, `75 <= value <= 100`. During enhancement, restore these unless existing thresholds are meaningful for the measure. A focused palette-only edit changes step colors while preserving the step count, boundaries, and `range`.',
+      ],
+      coloring: {
+        dynamic: { recommendedStepCount: 4 },
       },
     },
   },
@@ -141,18 +125,16 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     schema: xyConfigSchemaESQL,
     prompt: {
       selection:
-        'Line, bar, or area charts with X and Y axes. Choose for time series, trends, comparisons across series, or distributions/histograms (e.g. "request count over time", "sales by region as a bar chart").',
-      config: {
-        rules: [
-          'For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
-          'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.',
-        ],
-        coloringRules: [
-          'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
-          'When editing an existing XY chart, preserve its existing explicit colors unless the user asks to change them; do not introduce new color overrides.',
-          'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
-        ],
-      },
+        'Line, bar, or area charts with X and Y axes. Choose for time series, trends, comparisons across series, or distributions/histograms (e.g. "request count over time", "average CPU over time", "sales by region as a bar chart"). Avg/min/max *in the legend* is still xy, not a combination chart.',
+      rules: [
+        panelTitleRule,
+        'Hide axis titles by setting `title: { visible: false }` on both the x and y axes, and do not set axis title text.',
+        'Area series use `styling.areas.fill: "gradient"`, never solid.',
+        'Set `legend.position: "bottom"` and keep the default outside placement. Use `legend.layout: { type: "list" }` without legend statistics and `legend.layout: { type: "grid" }` when statistics are set, so the values line up in columns. Always set `legend.visibility`, because an unset value hides the legend entirely. Use `"auto"` so Lens shows the legend for multiple series and hides it for a single series. Use `"visible"` instead when legend statistics are set.',
+        'Use the default Lens palette by omitting explicit `color` properties. During enhancement, remove all custom palettes and series color overrides. Add colors only when requested, and never use legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
+        'For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
+        seriesStatisticsLensConfigRule,
+      ],
     },
   },
   [SupportedChartType.Heatmap]: {
@@ -160,15 +142,12 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Colors a two-dimensional grid of x/y buckets by metric magnitude. Choose when both axes are buckets (categorical or time) and color should convey density or intensity (e.g. "errors by service and status code", "requests by hour of day and day of week").',
-      config: {
-        coloringRules: [
-          'Lens binds heatmap colors to the data automatically using the "Temperature" palette; keep that default (omit `color` or use `color: { type: "auto" }`) and generate explicit `steps` only when the user requests a custom palette or gives thresholds.',
-        ],
-        options: {
-          coloring: {
-            dynamic: { recommendedStepCount: 5 },
-          },
-        },
+      rules: [
+        panelTitleRule,
+        'Keep the default "Temperature" palette by omitting `color` or using `color: { type: "auto" }`. Generate explicit `steps` only when the user requests a custom palette or gives thresholds.',
+      ],
+      coloring: {
+        dynamic: { recommendedStepCount: 5 },
       },
     },
   },
@@ -176,7 +155,8 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     schema: tagcloudConfigSchemaESQL,
     prompt: {
       selection:
-        'Displays terms sized by frequency or value. Choose for top terms, keywords, or text-based aggregations (e.g. "most common tags", "top error messages").',
+        'Displays terms sized by frequency or value. Choose only when the terms are short strings (tags, status codes, country codes, browsers). Do not use for long text such as error messages, URLs, or log lines — use a table instead.',
+      rules: [panelTitleRule],
     },
   },
   [SupportedChartType.RegionMap]: {
@@ -184,6 +164,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Choropleth map coloring geographic boundaries (country, state, county) by a metric. Choose when the data has region identifiers that join to map boundaries and a map view is expected (e.g. "revenue by state on a map").',
+      rules: [panelTitleRule],
     },
   },
   [SupportedChartType.Datatable]: {
@@ -191,18 +172,13 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Structured table with sortable columns. Choose when precise values, sortable columns, or multi-dimensional breakdowns matter more than visual patterns (e.g. "list top 20 hosts by CPU usage").',
-      config: {
-        coloringRules: [
-          'Datatable placement: prefer `apply_color_to: "badge"`; avoid cell background or text coloring unless the user asks.',
-          'Numeric datatable columns: when coloring is useful, use `apply_color_to: "badge"` with `color: { type: "auto" }` so Lens computes stops from table data.',
-          'Categorical datatable columns: when coloring is useful, use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }` so Lens assigns colors to actual values.',
-        ],
-        options: {
-          coloring: {
-            dynamic: { recommendedStepCount: 5 },
-            categorical: true,
-          },
-        },
+      rules: [
+        panelTitleRule,
+        'Color only where it adds meaning (status, severity, magnitude), and only as badges. Numeric columns use `apply_color_to: "badge"` with `color: { type: "auto" }` so Lens computes stops from table data. Categorical columns use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }` so Lens assigns colors to actual values. Do not color cell backgrounds or text unless the user asks.',
+      ],
+      coloring: {
+        dynamic: { recommendedStepCount: 5 },
+        categorical: true,
       },
     },
   },
@@ -211,6 +187,11 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Pie or donut showing part-to-whole proportions as slices. Choose for percentage breakdowns with a limited number of categories, ideally fewer than 7 (e.g. "traffic distribution by browser as a donut").',
+      rules: [
+        panelTitleRule,
+        'Omit explicit `color` properties so Lens applies its default palette. Add colors only when the user explicitly asks.',
+        'Omit `legend` entirely so Lens applies its defaults, including during enhancement. Drop any existing `legend` block rather than carrying it over. Set `legend` only when the user explicitly asks for a legend change, and then set only the requested property.',
+      ],
     },
   },
   [SupportedChartType.Treemap]: {
@@ -218,6 +199,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Nested rectangles where area encodes magnitude. Choose for size comparisons across many categories or hierarchical breakdowns (e.g. "disk usage by folder", "log volume by service and host").',
+      rules: [panelTitleRule],
     },
   },
   [SupportedChartType.Waffle]: {
@@ -225,6 +207,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Grid of small squares where the filled share encodes a proportion. Choose for intuitive single-percentage displays that read easier than pie charts (e.g. "percentage of requests that are errors").',
+      rules: [panelTitleRule],
     },
   },
   [SupportedChartType.Mosaic]: {
@@ -232,6 +215,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Tiled rectangles where area and position encode the joint distribution of two categorical dimensions. Choose for cross-tabulations (e.g. "request methods by status code", "error distribution across services and environments").',
+      rules: [panelTitleRule],
     },
   },
 };

@@ -21,8 +21,7 @@ import {
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// Placeholder actions are clickable but do nothing yet.
-const noop = () => {};
+const noop = () => undefined;
 
 interface ToolButtonProps {
   iconType: IconType;
@@ -53,12 +52,13 @@ interface AddResourceButtonProps {
   label: string;
   tooltip: string;
   dataTestSubj: string;
+  onClick: () => void;
 }
 
 // Non-functional labeled action (e.g. "+ Source") styled as a bordered chip with
 // a plus icon and label, matching the prototype's palette buttons. Its real
 // behaviour will be wired up when canvas editing lands.
-function AddResourceButton({ label, tooltip, dataTestSubj }: AddResourceButtonProps) {
+function AddResourceButton({ label, tooltip, dataTestSubj, onClick }: AddResourceButtonProps) {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiToolTip content={tooltip} disableScreenReaderOutput>
@@ -67,7 +67,7 @@ function AddResourceButton({ label, tooltip, dataTestSubj }: AddResourceButtonPr
         hasShadow={false}
         hasBorder
         paddingSize="s"
-        onClick={noop}
+        onClick={onClick}
         data-test-subj={dataTestSubj}
         css={css`
           border-radius: ${euiTheme.border.radius.medium};
@@ -97,6 +97,7 @@ function AddResourceButton({ label, tooltip, dataTestSubj }: AddResourceButtonPr
 export interface CanvasToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
+  onAddSource: () => void;
   canUndo: boolean;
   canRedo: boolean;
 }
@@ -110,7 +111,13 @@ const comingSoonSuffix = i18n.translate('xpack.streams.canvas.toolbar.comingSoon
  * source/destination actions are placeholders whose real behaviour will be
  * implemented when editing lands.
  */
-export function CanvasToolbar({ onUndo, onRedo, canUndo, canRedo }: CanvasToolbarProps) {
+export function CanvasToolbar({
+  onUndo,
+  onRedo,
+  onAddSource,
+  canUndo,
+  canRedo,
+}: CanvasToolbarProps) {
   const { euiTheme } = useEuiTheme();
 
   const verticalRule = (
@@ -133,7 +140,7 @@ export function CanvasToolbar({ onUndo, onRedo, canUndo, canRedo }: CanvasToolba
         bottom: ${euiTheme.size.l};
         left: 50%;
         transform: translateX(-50%);
-        z-index: 5;
+        z-index: ${euiTheme.levels.menu};
         border-radius: ${euiTheme.border.radius.medium};
       `}
     >
@@ -171,7 +178,8 @@ export function CanvasToolbar({ onUndo, onRedo, canUndo, canRedo }: CanvasToolba
             })}
             tooltip={`${i18n.translate('xpack.streams.canvas.toolbar.addSourceTooltip', {
               defaultMessage: 'Add source',
-            })} ${comingSoonSuffix}`}
+            })}`}
+            onClick={onAddSource}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -183,6 +191,7 @@ export function CanvasToolbar({ onUndo, onRedo, canUndo, canRedo }: CanvasToolba
             tooltip={`${i18n.translate('xpack.streams.canvas.toolbar.addDestinationTooltip', {
               defaultMessage: 'Add destination',
             })} ${comingSoonSuffix}`}
+            onClick={noop}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

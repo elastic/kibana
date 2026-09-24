@@ -18,6 +18,7 @@ import type {
   AgentUpgradeDetails,
   OutputPreset,
   AgentlessAgentPolicyConfig,
+  OtlpExporterConfig,
 } from '../../common/types';
 import type {
   AgentStatus,
@@ -45,10 +46,12 @@ import type {
   CloudProvider,
   CloudConnectorVars,
   AccountType,
+  IacUpgradeStatus,
   VerificationStatus,
 } from '../../common/types/models/cloud_connector';
 import type {
-  CloudOnboardingDeploymentMechanism,
+  CloudOnboardingDeploymentAuthMethod,
+  DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
 
@@ -74,6 +77,7 @@ export interface AgentPolicySOAttributes {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  download_source_ids?: string[];
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
@@ -82,6 +86,7 @@ export interface AgentPolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
+  supports_agentless?: boolean | null;
   agentless?: AgentlessAgentPolicyConfig;
   version?: string;
   has_agent_version_conditions?: boolean;
@@ -183,19 +188,23 @@ export interface PackagePolicySOAttributes {
 export interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_default_otel?: boolean;
   name: string;
+  is_internal?: boolean;
+  is_preconfigured?: boolean;
+  allow_edit?: string[];
+  output_id?: string;
+}
+
+export interface BeatsSoBaseAttributes extends OutputSoBaseAttributes {
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
-  is_internal?: boolean;
-  is_preconfigured?: boolean;
   config_yaml?: string | null;
   otel_exporter_config_yaml?: string | null;
   otel_disable_beatsauth?: boolean | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
-  allow_edit?: string[];
-  output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
   write_to_logs_streams?: boolean | null;
@@ -206,12 +215,12 @@ export interface OutputSoBaseAttributes {
   };
 }
 
-interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
+interface OutputSoElasticsearchAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Elasticsearch'];
   secrets?: {};
 }
 
-export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
+export interface OutputSoRemoteElasticsearchAttributes extends BeatsSoBaseAttributes {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
   secrets?: {
@@ -226,11 +235,11 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   sync_uninstalled_integrations?: boolean;
 }
 
-interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
+interface OutputSoLogstashAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Logstash'];
 }
 
-export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
+export interface OutputSoKafkaAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Kafka'];
   client_id?: string;
   version?: string;
@@ -278,11 +287,29 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   };
 }
 
-export type OutputSOAttributes =
+export interface OutputSoOtlpAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Otlp'];
+  otlp_exporter: OtlpExporterConfig;
+  secrets?: {
+    otlp_exporter?: {
+      tls?: {
+        key_pem?: { id: string };
+        tpm?: {
+          owner_auth?: { id: string };
+          auth?: { id: string };
+        };
+      };
+    };
+  };
+}
+
+export type BeatsOutputSOAttributes =
   | OutputSoElasticsearchAttributes
   | OutputSoRemoteElasticsearchAttributes
   | OutputSoLogstashAttributes
   | OutputSoKafkaAttributes;
+
+export type OutputSOAttributes = BeatsOutputSOAttributes | OutputSoOtlpAttributes;
 
 export interface SettingsSOAttributes {
   prerelease_integrations_enabled?: boolean;
@@ -293,6 +320,7 @@ export interface SettingsSOAttributes {
   action_secret_storage_requirements_met?: boolean;
   ssl_secret_storage_requirements_met?: boolean;
   download_source_auth_secret_storage_requirements_met?: boolean;
+  otlp_output_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
@@ -344,15 +372,21 @@ export interface CloudConnectorSOAttributes {
   verification_status?: VerificationStatus;
   verification_started_at?: string;
   verification_failed_at?: string;
+  iac_key?: string | null;
+  iac_blueprint_id?: string | null;
+  iac_blueprint_version?: string | null;
+  iac_deployment_id?: string;
+  iac_upgrade_status?: IacUpgradeStatus;
+  iac_upgrade_checked_at?: string;
 }
 
 export interface CloudOnboardingDeploymentSOAttributes {
   /** Cloud provider — determines how deploymentId/deploymentName are interpreted (e.g. for AWS, deploymentId is the CFN stack ARN). */
   provider: CloudProvider;
-  /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. */
-  connectorId: string;
+  /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. Absent for static-keys deployments. */
+  connectorId?: string;
   /** Active delivery mechanisms included in this deployment's IaC stack (agentless, firehose, cloud_forwarder, agent_based). */
-  mechanisms: CloudOnboardingDeploymentMechanism[];
+  mechanisms: DeploymentMethod[];
   /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
   deploymentId?: string;
   /** Human-readable deployment name. For AWS: the CloudFormation stack name. */
@@ -366,7 +400,13 @@ export interface CloudOnboardingDeploymentSOAttributes {
   /** Number of deploy attempts — incremented on each retry. */
   attemptCount: number;
   /** Per-service config arrays — serviceVars[serviceId] is an array where each entry represents one data source (region + S3 bucket + service-specific fields). Multiple entries support multiple buckets/sources for the same service. */
-  serviceVars?: Record<string, Array<Record<string, unknown>>>;
+  serviceVars?: Record<string, Record<string, unknown>>;
+  /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume. */
+  globalRegion?: string;
+  /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */
+  dataFormat?: 'ecs' | 'otel';
+  /** Authentication method used for managed integrations. */
+  authMethod?: CloudOnboardingDeploymentAuthMethod;
   /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
   packagePolicyIds?: string[];
   /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless, agentPolicyId equals packagePolicyId and is not stored separately. */

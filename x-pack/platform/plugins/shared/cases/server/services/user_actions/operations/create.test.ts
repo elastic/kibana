@@ -184,6 +184,22 @@ describe('UserActionPersister', () => {
 
       expect(analyticsV2ActivityWriter.bulkUpsertActions).not.toHaveBeenCalled();
     });
+
+    it('does not write an audit event for a bulk entry that failed to persist', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ua-bad',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          } as unknown as SavedObject<UserActionPersistedAttributes>,
+        ],
+      });
+
+      await persister.bulkCreateUserAction({ userActions: [getRequest().userAction] });
+
+      expect(auditMockLocker.log).not.toHaveBeenCalled();
+    });
   });
 
   describe('Decoding requests', () => {
@@ -220,6 +236,38 @@ describe('UserActionPersister', () => {
           .calls[0][1] as UserActionPersistedAttributes;
 
         expect(persistedAttributes.payload).not.toHaveProperty('foo');
+      });
+
+      it('stamps source when the service context has actionSource', async () => {
+        const actionSource = {
+          type: 'agent' as const,
+          id: 'elastic-ai-agent',
+          name: 'Elastic AI Agent',
+        };
+        persister = new UserActionPersister({
+          log: mockLogger,
+          unsecuredSavedObjectsClient,
+          savedObjectsSerializer,
+          auditLogger: auditMockLocker,
+          analyticsV2ActivityWriter,
+          actionSource,
+        });
+
+        await persister.createUserAction(getRequest());
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as UserActionPersistedAttributes;
+
+        expect(persistedAttributes.source).toEqual(actionSource);
+      });
+
+      it('does not stamp source when the service context has no actionSource', async () => {
+        await persister.createUserAction(getRequest());
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as UserActionPersistedAttributes;
+
+        expect(persistedAttributes.source).toBeUndefined();
       });
     });
 
@@ -1095,6 +1143,41 @@ describe('UserActionPersister', () => {
           },
         ]
       `);
+    });
+
+    it('throws when requested and any saved object item fails', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: createUserActionSO(),
+            id: '1',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            references: [],
+          },
+          {
+            id: '2',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: {
+              error: 'Internal Server Error',
+              message: 'failed to index user action',
+              statusCode: 500,
+            },
+          },
+        ],
+      });
+
+      const connectorUserAction = getRequest().userAction;
+      const titleUserAction = getRequest<'title'>({
+        type: 'title',
+        payload: { title: 'my title' },
+      }).userAction;
+
+      await expect(
+        persister.bulkCreateUserAction({
+          userActions: [connectorUserAction, titleUserAction],
+          throwOnItemError: true,
+        })
+      ).rejects.toThrow('Failed to create 1 of 2 user actions: failed to index user action');
     });
   });
 });

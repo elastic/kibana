@@ -10,16 +10,13 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { EpisodeTriage, PolicyCatalog, PolicyMatcher, RuleCatalog } from '../state';
 import type {
-  ActionPolicy,
-  ActionPolicyId,
   AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  Rule,
-  RuleId,
 } from '../types';
 import { createMatcherContext } from './utils/matcher_context';
 
@@ -32,48 +29,54 @@ export class EvaluateMatchersStep implements DispatcherStep {
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
     const {
-      dispatchable = [],
-      rules = new Map<RuleId, Rule>(),
-      policies = new Map<ActionPolicyId, ActionPolicy>(),
+      triage = EpisodeTriage.empty(),
+      rules = RuleCatalog.empty(),
+      policies = PolicyCatalog.empty(),
     } = state;
 
-    const matched = this.evaluateMatchers(dispatchable, rules, policies, logger);
+    const matched = this.evaluateMatchers(triage.dispatchable, rules, policies, logger);
 
     return { type: 'continue', data: { matched } };
   }
 
   private evaluateMatchers(
     dispatchable: readonly AlertEpisode[],
-    rules: ReadonlyMap<RuleId, Rule>,
-    policies: ReadonlyMap<ActionPolicyId, ActionPolicy>,
+    rules: RuleCatalog,
+    policies: PolicyCatalog,
     logger: LoggerServiceContract
   ): MatchedPair[] {
     const matched: MatchedPair[] = [];
-
-    const policiesBySpace = Map.groupBy(policies.values(), (policy) => policy.spaceId);
+    const now = Date.now();
 
     for (const episode of dispatchable) {
-      const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
-      // Internal episodes whose rule is absent (deleted or failed to fetch) are skipped
-      // to prevent catch-all policies from dispatching spurious notifications.
-      if (episode.rule_id != null && rule == null) continue;
+      if (rules.isOrphanedInternalEpisode(episode)) continue;
+      const rule = rules.forEpisode(episode);
 
-      const spacePolicies = policiesBySpace.get(episode.space_id) ?? [];
+      const spacePolicies = policies.inSpace(episode.space_id);
       let context: MatcherContext | undefined;
 
       for (const policy of spacePolicies) {
         if (!policy.enabled) continue;
-        if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+        if (policy.snoozedUntil && new Date(policy.snoozedUntil).getTime() > now) continue;
 
-        if (!policy.matcher) {
+        const policyMatcher = PolicyMatcher.of(policy.matcher);
+        if (policyMatcher.isCatchAll()) {
           matched.push({ episode, policy });
           continue;
         }
 
-        context ??= createMatcherContext(episode, rule);
+        if (!policyMatcher.matchesTags(rule?.tags)) continue;
+
+        const expression = policyMatcher.expressionKql();
+        if (expression === null) {
+          matched.push({ episode, policy });
+          continue;
+        }
+
+        context ??= createMatcherContext(episode);
         let isMatch = false;
         try {
-          isMatch = evaluateKql(policy.matcher, context);
+          isMatch = evaluateKql(expression, context);
         } catch {
           logger.warn({
             message: 'Policy matcher failed to evaluate; treating as no-match',

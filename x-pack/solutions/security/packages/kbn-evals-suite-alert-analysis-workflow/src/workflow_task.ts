@@ -9,12 +9,15 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  extractAgentConversationIds,
+  readAgentToolCallsFromTraces,
+} from '@kbn/security-evals-workflow-traces';
+import {
   TerminalExecutionStatuses,
   type ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { readWorkflowAgentToolCalls } from './read_workflow_agent_tool_calls';
 import {
   ALERT_ANALYSIS_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
@@ -34,12 +37,22 @@ const isAgentStep = (step: WorkflowStepExecutionDto): boolean =>
   step.stepType === AGENT_STEP_TYPE ||
   (step.stepType === undefined && AGENT_STEP_ID_FALLBACKS.includes(step.stepId));
 
-/** Structured output the workflow's `ai.agent` step is schema-constrained to return. */
-interface StructuredOutput {
+/** One verdict, as the workflow's `ai.agent` step is schema-constrained to return it. */
+interface Verdict {
+  /** The alert id the model echoes back, used to pair a verdict with its alert. */
+  id?: string;
   classification?: Classification;
   confidence_score?: number;
   rationale?: string;
   contributing_factors?: string[];
+}
+
+/**
+ * The agent step classifies a whole batch of alerts per call, so its structured output carries a
+ * `verdicts` array.
+ */
+interface StructuredOutput {
+  verdicts?: Verdict[];
 }
 
 /**
@@ -66,20 +79,25 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
 /**
- * Reads the agent step's structured output. Each step yields multiple execution records (an
- * enter record whose `output` is null and the record that carries the result), and both report
- * status `completed`, so we cannot key off status alone. We seed one alert per run, so there is a
- * single logical agent step: scan every agent-step record and return the first
- * `structured_output` payload we find.
+ * Reads the verdict for `alertId` out of the agent step's structured output. Each step yields
+ * multiple execution records (an enter record whose `output` is null and the record that carries
+ * the result), and both report status `completed`, so we cannot key off status alone: scan every
+ * agent-step record and return the first verdict we find for the alert.
+ *
+ * We seed one alert per run, so the batch the workflow builds holds exactly that alert; the id is
+ * still matched explicitly rather than taking `verdicts[0]`, so a run that somehow classified a
+ * different alert is reported as "no verdict" instead of being graded against the wrong alert.
  */
-const readAgentStructuredOutput = (
-  stepExecutions: WorkflowStepExecutionDto[]
-): StructuredOutput | undefined => {
+const readAgentVerdict = (
+  stepExecutions: WorkflowStepExecutionDto[],
+  alertId: string
+): Verdict | undefined => {
   const agentSteps = stepExecutions.filter(isAgentStep);
   for (const step of agentSteps) {
     const output = step.output as { structured_output?: StructuredOutput } | null | undefined;
-    if (output?.structured_output) {
-      return output.structured_output;
+    const verdict = output?.structured_output?.verdicts?.find(({ id }) => id === alertId);
+    if (verdict?.classification) {
+      return verdict;
     }
   }
   return undefined;
@@ -157,7 +175,7 @@ export const runAlertAnalysisWorkflow = async ({
     );
   }
 
-  const structured = readAgentStructuredOutput(execution.stepExecutions);
+  const structured = readAgentVerdict(execution.stepExecutions, alertId);
 
   if (!structured?.classification) {
     log.warning(
@@ -165,19 +183,19 @@ export const runAlertAnalysisWorkflow = async ({
     );
   }
 
-  const { toolCallIds, unavailable } = traceEsClient
-    ? await readWorkflowAgentToolCalls({
-        traceEsClient,
-        traceId: execution.traceId,
-        log,
-      })
-    : { toolCallIds: undefined, unavailable: true };
+  const conversationIds = extractAgentConversationIds(execution.stepExecutions).map(
+    ({ conversationId }) => conversationId
+  );
+  const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
+    traceEsClient,
+    conversationIds,
+    log,
+  });
 
-  if (toolCallIds && toolCallIds.length > 0) {
+  if (unavailable) {
     log.warning(
-      `Workflow agent called unexpected tools: ${toolCallIds.join(
-        ', '
-      )} (execution ${workflowExecutionId})`
+      `Agent tool calls unavailable for execution ${workflowExecutionId} ` +
+        `(conversation ids: ${conversationIds.length > 0 ? conversationIds.join(', ') : 'none'})`
     );
   }
 

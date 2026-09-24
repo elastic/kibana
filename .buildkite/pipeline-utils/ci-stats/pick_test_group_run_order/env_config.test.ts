@@ -12,8 +12,8 @@ jest.mock('#pipeline-utils', () => ({
   collectEnvFromLabels: () => ({}),
 }));
 
-import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const';
-import { loadRunOrderConfig } from './env_config';
+import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const.ts';
+import { loadRunOrderConfig } from './env_config.ts';
 
 const TYPE_ENV = {
   BUILDKITE_BRANCH: 'main',
@@ -31,9 +31,9 @@ describe('loadRunOrderConfig', () => {
     process.env = originalEnv;
   });
 
-  it('defaults ftrTestChannels to {ci-on-commit, ci-batch-3h} when FTR_TEST_CHANNELS is unset', () => {
+  it('defaults ftrTestChannels to {ci-on-commit} when FTR_TEST_CHANNELS is unset', () => {
     const cfg = loadRunOrderConfig();
-    expect(cfg.ftrTestChannels).toEqual(new Set(['ci-on-commit', 'ci-batch-3h']));
+    expect(cfg.ftrTestChannels).toEqual(new Set(['ci-on-commit']));
   });
 
   it('applies sensible defaults when nothing is set', () => {
@@ -143,9 +143,46 @@ describe('loadRunOrderConfig', () => {
     expect(cfg.useSelectiveTesting).toBe(false);
   });
 
-  it('disables selective testing when not a PR', () => {
+  it('disables selective testing outside PR and merge-queue pipelines', () => {
     const cfg = loadRunOrderConfig();
     expect(cfg.useSelectiveTesting).toBe(false);
+  });
+
+  it('uses the pinned merge-group base while preserving the ci-stats coverage base', () => {
+    process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-merge-queue';
+    process.env.BUILDKITE_MERGE_QUEUE_BASE_COMMIT = 'group-base';
+    process.env.MERGE_QUEUE_MERGE_BASE = 'older-main-base';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.useSelectiveTesting).toBe(true);
+    expect(cfg.isMergeQueue).toBe(true);
+    expect(cfg.selectionBase).toBe('group-base');
+    expect(cfg.timingBase).toBe('older-main-base');
+  });
+
+  it('does not fall back to the coverage base when the pinned merge-group base is missing', () => {
+    process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-merge-queue';
+    process.env.MERGE_QUEUE_MERGE_BASE = 'older-main-base';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.useSelectiveTesting).toBe(true);
+    expect(cfg.selectionBase).toBeUndefined();
+    expect(cfg.timingBase).toBe('older-main-base');
+  });
+
+  it('honors the prevent label on merge-queue builds', () => {
+    process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-merge-queue';
+    process.env.BUILDKITE_MERGE_QUEUE_BASE_COMMIT = 'group-base';
+    process.env.GITHUB_PR_LABELS = PREVENT_SELECTIVE_TESTS_LABEL;
+    expect(loadRunOrderConfig().useSelectiveTesting).toBe(false);
+  });
+
+  // PR and merge-queue base variables should never be set together.
+  it('prefers the PR base when both base variables are set', () => {
+    process.env.GITHUB_PR_NUMBER = '99';
+    process.env.GITHUB_PR_MERGE_BASE = 'pr-base';
+    process.env.MERGE_QUEUE_MERGE_BASE = 'mq-base';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.selectionBase).toBe('pr-base');
+    expect(cfg.timingBase).toBe('pr-base');
   });
 
   it('uses TEST_GROUP_TYPE_* overrides when provided', () => {

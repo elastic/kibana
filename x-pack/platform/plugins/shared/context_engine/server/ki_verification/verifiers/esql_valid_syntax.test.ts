@@ -34,26 +34,28 @@ describe('esql-valid-syntax verifier', () => {
 
   describe('applies', () => {
     it('is false for a KI without attributes', () => {
-      expect(verifier.applies({ title: 'no attributes' })).toBe(false);
+      expect(verifier.applies({ title: 'no attributes' }, context)).toBe(false);
     });
 
     it('is false for a KI without an esql attribute', () => {
-      expect(verifier.applies({ attributes: { severity: 'high' } })).toBe(false);
+      expect(verifier.applies({ attributes: { severity: 'high' } }, context)).toBe(false);
     });
 
     it('is true whenever the esql attribute is present, even when malformed', () => {
-      expect(verifier.applies(makeKi(''))).toBe(true);
-      expect(verifier.applies(makeKi([]))).toBe(true);
-      expect(verifier.applies(makeKi(42))).toBe(true);
-      expect(verifier.applies(makeKi([42, true]))).toBe(true);
+      expect(verifier.applies(makeKi(''), context)).toBe(true);
+      expect(verifier.applies(makeKi([]), context)).toBe(true);
+      expect(verifier.applies(makeKi(42), context)).toBe(true);
+      expect(verifier.applies(makeKi([42, true]), context)).toBe(true);
     });
 
     it('is true for a query string', () => {
-      expect(verifier.applies(makeKi(VALID_QUERY))).toBe(true);
+      expect(verifier.applies(makeKi(VALID_QUERY), context)).toBe(true);
     });
 
     it('is true for an array of query strings', () => {
-      expect(verifier.applies(makeKi([VALID_QUERY, 'FROM metrics-* | LIMIT 1']))).toBe(true);
+      expect(verifier.applies(makeKi([VALID_QUERY, 'FROM metrics-* | LIMIT 1']), context)).toBe(
+        true
+      );
     });
   });
 

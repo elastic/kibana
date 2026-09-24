@@ -21,18 +21,20 @@ export const RuleBootstrapError = lazySchema(() =>
     /**
      * The list of rules that failed to bootstrap
      */
-    rules: z.array(
-      z.object({
-        /**
-         * The ID of the rule that failed to bootstrap
-         */
-        rule_id: z.string(),
-      })
-    ),
+    rules: z
+      .array(
+        z.object({
+          /**
+           * The ID of the rule that failed to bootstrap
+           */
+          rule_id: z.string().describe('The ID of the rule that failed to bootstrap'),
+        })
+      )
+      .describe('The list of rules that failed to bootstrap'),
     /**
      * The error message
      */
-    message: z.string(),
+    message: z.string().describe('The error message'),
   })
 );
 export type RuleBootstrapError = z.infer<typeof RuleBootstrapError>;
@@ -42,27 +44,35 @@ export const RuleBootstrapResults = lazySchema(() =>
     /**
      * The total number of rules to be processed. This is a dynamic value and depends on the number of integrations installed that have bootstrappable rules
      */
-    total: z.number().optional(),
+    total: z
+      .number()
+      .optional()
+      .describe(
+        'The total number of rules to be processed. This is a dynamic value and depends on the number of integrations installed that have bootstrappable rules'
+      ),
     /**
      * The number of rules that were installed
      */
-    installed: z.number(),
+    installed: z.number().describe('The number of rules that were installed'),
     /**
      * The number of rules that were updated
      */
-    updated: z.number(),
+    updated: z.number().describe('The number of rules that were updated'),
     /**
      * The number of rules that were deleted
      */
-    deleted: z.number(),
+    deleted: z.number().describe('The number of rules that were deleted'),
     /**
      * The number of rules that were skipped (already installed rules with no updates)
      */
-    skipped: z.number().optional(),
+    skipped: z
+      .number()
+      .optional()
+      .describe('The number of rules that were skipped (already installed rules with no updates)'),
     /**
      * The list of bootstrap errors
      */
-    errors: z.array(RuleBootstrapError),
+    errors: z.array(RuleBootstrapError).describe('The list of bootstrap errors'),
   })
 );
 export type RuleBootstrapResults = z.infer<typeof RuleBootstrapResults>;

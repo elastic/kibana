@@ -272,6 +272,30 @@ Expected one of:
           },
         }),
       };
+    case 'inSubqueryColumnCountMismatch':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.inSubqueryColumnCountMismatchErrorMessage',
+          {
+            defaultMessage:
+              'The subquery must return {expected, plural, one {# column} other {# columns}}, but returned {actual}',
+            values: { expected: out.expected, actual: out.actual },
+          }
+        ),
+      };
+    case 'inSubqueryTypeMismatch':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.inSubqueryTypeMismatch', {
+          defaultMessage:
+            'Left field [{leftField}] of type [{leftType}] is incompatible with right field [{rightField}] of type [{rightType}]',
+          values: {
+            leftField: out.leftField,
+            leftType: out.leftType.toUpperCase(),
+            rightField: out.rightField,
+            rightType: out.rightType.toUpperCase(),
+          },
+        }),
+      };
     case 'unsupportedMode':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unsupportedSettingValue', {
@@ -555,6 +579,29 @@ Expected one of:
             defaultMessage:
               '[HIGHLIGHT] Query must be a full-text function ({functions}), a string literal, or a boolean combination of them. Found [{expression}]',
             values: { functions: FULL_TEXT_FUNCTION_NAMES, expression: out.expression },
+          }
+        ),
+        type: 'error',
+      };
+    case 'denseVectorInvalidSuffixModifier':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.denseVectorInvalidSuffixModifier',
+          {
+            defaultMessage: '[DENSE_VECTOR] Invalid modifier [{keyword}], expected [suffix]',
+            values: { keyword: out.keyword },
+          }
+        ),
+        type: 'error',
+      };
+    case 'denseVectorMultipleFieldsWithTarget':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.denseVectorMultipleFieldsWithTarget',
+          {
+            defaultMessage:
+              '[DENSE_VECTOR] Output name [{target}] accepts a single field. Use [suffix = "..." ON ...] to name the columns of several fields.',
+            values: { target: out.target },
           }
         ),
         type: 'error',

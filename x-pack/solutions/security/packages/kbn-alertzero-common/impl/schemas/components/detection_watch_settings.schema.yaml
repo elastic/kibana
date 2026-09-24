@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Detection Watch Worker-specific settings
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    AnalysisWindowDays:
+      type: integer
+      minimum: 1
+      maximum: 30
+      description: >-
+        How many days of alerts feed Rule Tuning analysis. Matches the tuning sweep's
+        analysis_window_days input.
+
+    FpCountThreshold:
+      type: integer
+      # Not 1. The sweep collects each rule's alert ids with ES|QL VALUES(), and a rule with
+      # exactly one FP alert gets back a bare string instead of a one-item list. The review
+      # step only accepts a list, so a floor of 2 keeps that case from arising.
+      minimum: 2
+      maximum: 100
+      description: >-
+        Minimum number of FP-closed alerts required to trigger analysis on a rule. Matches the
+        tuning sweep's min_fp_count input.
+
+    FpRateThresholdPct:
+      type: integer
+      minimum: 0
+      maximum: 100
+      description: >-
+        Minimum FP rate (as % of total alerts) required to trigger analysis. Matches the tuning
+        sweep's min_fp_rate_pct input.
+
+    RuleTuningWorkerExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Worker-specific settings for the Rule Tuning Worker, owned by Detection Watch.
+        Sent whole on write; a replacement missing a field is rejected.
+      required:
+        - analysisWindowDays
+        - fpCountThreshold
+        - fpRateThresholdPct
+      properties:
+        analysisWindowDays:
+          $ref: '#/components/schemas/AnalysisWindowDays'
+        fpCountThreshold:
+          $ref: '#/components/schemas/FpCountThreshold'
+        fpRateThresholdPct:
+          $ref: '#/components/schemas/FpRateThresholdPct'

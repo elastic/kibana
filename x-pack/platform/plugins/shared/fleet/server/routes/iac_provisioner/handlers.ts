@@ -6,24 +6,29 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { KibanaResponseFactory } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 
 import { iacProvisionerService } from '../../services';
-import type { IacProvisionerRenderIntegration } from '../../services/iac_provisioner';
+import {
+  buildIacProvisionerIntegrations,
+  isBuildError,
+} from '../../services/iac_provisioner_integrations';
 import { appContextService } from '../../services/app_context';
-import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
 } from '../../services/telemetry/iac_provisioner_telemetry';
 import {
-  IacProvisionerRenderError,
+  IacProvisionerRequestError,
   IacProvisionerUnavailableError,
   PackageNotFoundError,
 } from '../../errors';
 import { getErrorMessage } from '../../errors/utils';
 import type { FleetRequestHandler } from '../../types';
 import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
+import type { IacProvisionerRenderFlow } from '../../../common/telemetry/iac_provisioner_events';
 
 export const renderIacTemplateHandler: FleetRequestHandler<
   undefined,
@@ -33,86 +38,43 @@ export const renderIacTemplateHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
   const logger = appContextService.getLogger().get('IacProvisioner renderIacTemplateHandler');
-  const { provider, flow, integrations: requestedIntegrations } = request.body;
+  const {
+    provider,
+    flow,
+    workflow,
+    templateSha,
+    integrations: requestedIntegrations,
+  } = request.body;
 
-  if (!isIacProvisionerEnabled()) {
+  const iacProvisionerEnabled = await isIacProvisionerEnabled();
+  if (!iacProvisionerEnabled) {
     return response.notFound({
       body: { message: 'IaC Provisioner is not enabled' },
     });
   }
 
-  // The render request must not repeat a package name, so entries sharing a
-  // package are merged into one with the union of their policy templates.
-  const templatesByPackage = new Map<string, Set<string>>();
-  for (const { name, policyTemplates } of requestedIntegrations) {
-    const templates = templatesByPackage.get(name) ?? new Set<string>();
-    for (const template of policyTemplates) {
-      templates.add(template);
-    }
-    templatesByPackage.set(name, templates);
-  }
-
   const startTime = Date.now();
   try {
-    const integrations: IacProvisionerRenderIntegration[] = await Promise.all(
-      Array.from(templatesByPackage, async ([pkgName, policyTemplates]) => {
-        // Empty pkgVersion resolves to the installed version, falling back to
-        // the latest available: at connector-creation time the package may not
-        // be installed yet. skipArchive: registry info covers everything read
-        // here; without it each request downloads and unpacks the archive.
-        const packageInfo = await getPackageInfo({
-          savedObjectsClient: internalSoClient,
-          pkgName,
-          pkgVersion: '',
-          skipArchive: true,
-        });
-
-        // MVP heuristic pending confirmation with the provisioner team
-        // (OQ-A in security-team#18632): only provider-relevant input types
-        // are sent, since mixed-provider policy templates (e.g. CSPM) would
-        // otherwise pull blueprints targeting other canonical templates.
-        const resolvedPolicyTemplates = (packageInfo.policy_templates ?? [])
-          .filter(({ name }) => policyTemplates.has(name))
-          .map((template) => {
-            const inputs = 'inputs' in template ? template.inputs ?? [] : [];
-            const enabledInputs = Array.from(
-              new Set(
-                inputs
-                  .map(({ type }) => type)
-                  .filter((type) => type.toLowerCase().includes(provider))
-              )
-            );
-            return { name: template.name, enabledInputs };
-          })
-          // Drop templates that contribute nothing for this provider so the
-          // outbound request only carries renderable policy templates.
-          .filter(({ enabledInputs }) => enabledInputs.length > 0);
-
-        return {
-          name: pkgName,
-          version: packageInfo.version,
-          policyTemplates: resolvedPolicyTemplates,
-        };
-      })
-    );
-
-    // An integration with no provider-relevant inputs cannot contribute to
-    // the template; sending it would only produce confusing provider errors.
-    const emptyIntegration = integrations.find(({ policyTemplates }) => !policyTemplates.length);
-    if (emptyIntegration) {
-      return response.badRequest({
-        body: {
-          message: `${emptyIntegration.name} has no ${provider} inputs under the requested policy templates`,
-        },
-      });
+    const built = await buildIacProvisionerIntegrations({
+      savedObjectsClient: internalSoClient,
+      requestedIntegrations,
+    });
+    if (isBuildError(built)) {
+      return response.badRequest({ body: { message: built.errorMessage } });
     }
+    const { integrations } = built;
 
     reportIacProvisionerRenderRequested({
       flow,
       integrationCount: integrations.length,
     });
 
-    const rendered = await iacProvisionerService.renderTemplate({ provider, integrations });
+    const rendered = await iacProvisionerService.renderTemplate({
+      provider,
+      workflow,
+      integrations,
+      ...(templateSha ? { templateSha } : {}),
+    });
 
     reportIacProvisionerRenderCompleted({
       flow,
@@ -123,70 +85,95 @@ export const renderIacTemplateHandler: FleetRequestHandler<
     });
     return response.ok({ body: rendered });
   } catch (error) {
-    const latencyMs = Date.now() - startTime;
+    return mapIacProvisionerRouteError({
+      error,
+      flow,
+      startTime,
+      logger,
+      response,
+      unexpectedMessage: 'An unexpected error occurred while rendering the IaC template',
+    });
+  }
+};
 
-    if (error instanceof IacProvisionerRenderError) {
-      reportIacProvisionerRenderCompleted({
-        flow,
-        success: false,
-        httpStatus: error.statusCode,
-        errorCodes: error.errorCodes,
-        latencyMs,
-      });
-      // 422 (package not renderable) passes through for the client's fallback
-      // decision. Any other provider 4xx means the broker built a bad request
-      // — surfaced as 502 so e.g. a provider 401/403 can't reach the browser
-      // and trip Kibana's session-expiry handling.
-      return response.customError({
-        statusCode: error.statusCode === 422 ? 422 : 502,
-        body: { message: error.message, attributes: { errorCodes: error.errorCodes } },
-      });
-    }
+const mapIacProvisionerRouteError = ({
+  error,
+  flow,
+  startTime,
+  logger,
+  response,
+  unexpectedMessage,
+}: {
+  error: unknown;
+  flow: IacProvisionerRenderFlow;
+  startTime: number;
+  logger: Logger;
+  response: KibanaResponseFactory;
+  unexpectedMessage: string;
+}) => {
+  const latencyMs = Date.now() - startTime;
 
-    if (error instanceof IacProvisionerUnavailableError) {
-      reportIacProvisionerRenderCompleted({
-        flow,
-        success: false,
-        httpStatus: error.statusCode ?? 0,
-        errorCodes: [],
-        latencyMs,
-      });
-      return response.customError({
-        statusCode: 502,
-        body: { message: error.message },
-      });
-    }
-
-    // A requested package doesn't exist (getPackageInfo throws
-    // PackageNotFoundError) — a caller mistake, not a server failure, so no
-    // error-level log.
-    if (error instanceof PackageNotFoundError) {
-      reportIacProvisionerRenderCompleted({
-        flow,
-        success: false,
-        httpStatus: 404,
-        errorCodes: [],
-        latencyMs,
-      });
-      return response.notFound({
-        body: { message: error.message },
-      });
-    }
-
-    logger.error(`Failed to render IaC template: ${getErrorMessage(error)}`);
+  if (error instanceof IacProvisionerRequestError) {
     reportIacProvisionerRenderCompleted({
       flow,
       success: false,
-      httpStatus: 500,
+      httpStatus: error.statusCode,
+      errorCodes: error.errorCodes,
+      latencyMs,
+    });
+    // 422 (package not renderable) passes through for the client's fallback
+    // decision. Any other provider 4xx means the broker built a bad request
+    // — surfaced as 502 so e.g. a provider 401/403 can't reach the browser
+    // and trip Kibana's session-expiry handling.
+    return response.customError({
+      statusCode: error.statusCode === 422 ? 422 : 502,
+      body: { message: error.message, attributes: { errorCodes: error.errorCodes } },
+    });
+  }
+
+  if (error instanceof IacProvisionerUnavailableError) {
+    reportIacProvisionerRenderCompleted({
+      flow,
+      success: false,
+      httpStatus: error.statusCode ?? 0,
       errorCodes: [],
       latencyMs,
     });
-    // The raw error may carry internal details (hostnames, stack context) or
-    // be undefined for non-Error throws — keep it in the log and return a
-    // stable, generic message to the client.
     return response.customError({
-      statusCode: 500,
-      body: { message: 'An unexpected error occurred while rendering the IaC template' },
+      statusCode: 502,
+      body: { message: error.message },
     });
   }
+
+  // A requested package doesn't exist (getPackageInfo throws
+  // PackageNotFoundError) — a caller mistake, not a server failure, so no
+  // error-level log.
+  if (error instanceof PackageNotFoundError) {
+    reportIacProvisionerRenderCompleted({
+      flow,
+      success: false,
+      httpStatus: 404,
+      errorCodes: [],
+      latencyMs,
+    });
+    return response.notFound({
+      body: { message: error.message },
+    });
+  }
+
+  logger.error(`Failed IaC Provisioner request: ${getErrorMessage(error)}`);
+  reportIacProvisionerRenderCompleted({
+    flow,
+    success: false,
+    httpStatus: 500,
+    errorCodes: [],
+    latencyMs,
+  });
+  // The raw error may carry internal details (hostnames, stack context) or
+  // be undefined for non-Error throws — keep it in the log and return a
+  // stable, generic message to the client.
+  return response.customError({
+    statusCode: 500,
+    body: { message: unexpectedMessage },
+  });
 };

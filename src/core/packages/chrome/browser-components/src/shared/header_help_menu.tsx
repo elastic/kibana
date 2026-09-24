@@ -20,12 +20,16 @@ import {
 } from '@elastic/eui';
 import { useIsServerless, useKibanaVersion } from '@kbn/react-env';
 import { useHelpMenuItems } from './help_links_hooks';
+import { ClassicHeaderButtonColorMode, ClassicHeaderPopoverColorMode } from './header_color_mode';
+
+export interface HeaderHelpMenuButtonProps {
+  isOpen: boolean;
+  toggleMenu: () => void;
+  hasUnreadNews: boolean;
+}
 
 interface HeaderHelpMenuProps {
-  renderButton?: (props: {
-    isOpen: boolean;
-    toggleMenu: () => void;
-  }) => NonNullable<React.ReactNode>;
+  renderButton?: (props: HeaderHelpMenuButtonProps) => NonNullable<React.ReactNode>;
 }
 
 export const HeaderHelpMenu = ({ renderButton }: HeaderHelpMenuProps = {}) => {
@@ -36,10 +40,10 @@ export const HeaderHelpMenu = ({ renderButton }: HeaderHelpMenuProps = {}) => {
   const closeMenu = useCallback(() => setIsOpen(false), []);
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
 
-  const items = useHelpMenuItems({ closeMenu });
+  const { items, hasUnreadNews } = useHelpMenuItems({ closeMenu });
 
   const button = renderButton ? (
-    renderButton({ isOpen, toggleMenu })
+    renderButton({ isOpen, toggleMenu, hasUnreadNews })
   ) : (
     <EuiHeaderSectionItemButton
       aria-expanded={isOpen}
@@ -47,6 +51,7 @@ export const HeaderHelpMenu = ({ renderButton }: HeaderHelpMenuProps = {}) => {
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel', {
         defaultMessage: 'Help menu',
       })}
+      notification={hasUnreadNews || undefined}
       onClick={toggleMenu}
     >
       <EuiIcon type="question" size="m" aria-hidden={true} />
@@ -54,47 +59,49 @@ export const HeaderHelpMenu = ({ renderButton }: HeaderHelpMenuProps = {}) => {
   );
 
   return (
-    <EuiPopover
-      anchorPosition="downRight"
-      button={button}
-      closePopover={closeMenu}
-      data-test-subj="helpMenuButton"
-      id="headerHelpMenu"
-      isOpen={isOpen}
-      repositionOnScroll
-      panelPaddingSize="none"
-      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuAriaLabel', {
-        defaultMessage: 'Help menu',
-      })}
-    >
-      <EuiContextMenu
-        initialPanelId="helpMenu"
-        panels={[
-          {
-            id: 'helpMenu',
-            title: (
-              <EuiFlexGroup responsive={false}>
-                <EuiFlexItem>
-                  <FormattedMessage
-                    id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
-                    defaultMessage="Help"
-                  />
-                </EuiFlexItem>
-                {!isServerless && (
-                  <EuiFlexItem grow={false} data-test-subj="kbnVersionString">
+    <ClassicHeaderPopoverColorMode>
+      <EuiPopover
+        anchorPosition="downRight"
+        button={<ClassicHeaderButtonColorMode>{button}</ClassicHeaderButtonColorMode>}
+        closePopover={closeMenu}
+        data-test-subj="helpMenuButton"
+        id="headerHelpMenu"
+        isOpen={isOpen}
+        repositionOnScroll
+        panelPaddingSize="none"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuAriaLabel', {
+          defaultMessage: 'Help menu',
+        })}
+      >
+        <EuiContextMenu
+          initialPanelId="helpMenu"
+          panels={[
+            {
+              id: 'helpMenu',
+              title: (
+                <EuiFlexGroup responsive={false}>
+                  <EuiFlexItem>
                     <FormattedMessage
-                      id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
-                      defaultMessage="v {version}"
-                      values={{ version: kibanaVersion }}
+                      id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
+                      defaultMessage="Help"
                     />
                   </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            ),
-            items,
-          },
-        ]}
-      />
-    </EuiPopover>
+                  {!isServerless && (
+                    <EuiFlexItem grow={false} data-test-subj="kbnVersionString">
+                      <FormattedMessage
+                        id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
+                        defaultMessage="v {version}"
+                        values={{ version: kibanaVersion }}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              ),
+              items,
+            },
+          ]}
+        />
+      </EuiPopover>
+    </ClassicHeaderPopoverColorMode>
   );
 };

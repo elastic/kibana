@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { getClusterQualifiedIndex } from '../../../../shared/utils/get_cluster_qualified_index';
+import { getNonLocalQualifiedIndex } from '../../../../shared/utils/non_local_index';
 import { ALERT_ORIGINAL_TIME } from '../../../../../../common/field_maps/field_names';
 import {
   ANCESTOR_INDEX,
@@ -22,7 +22,7 @@ import type { SessionViewConfig } from '../../../../../../common/types/session_v
  */
 export const useSessionViewConfig = (hit: DataTableRecord): SessionViewConfig | null => {
   const documentIndexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '';
-  const index = getClusterQualifiedIndex(
+  const index = getNonLocalQualifiedIndex(
     (getFieldValue(hit, ANCESTOR_INDEX) as string) ?? hit.raw._index,
     documentIndexName
   );

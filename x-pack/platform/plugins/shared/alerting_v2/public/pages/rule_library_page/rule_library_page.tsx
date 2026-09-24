@@ -11,6 +11,8 @@ import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
 import { RuleLibraryList } from './rule_library_list';
 
 const RULE_LIBRARY_PAGE_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pageTitle', {
@@ -19,6 +21,8 @@ const RULE_LIBRARY_PAGE_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pag
 
 export const RuleLibraryPage = () => {
   useBreadcrumbs('rule_library_list');
+  const { flyout, openCreateFromTemplateFlyout } = useComposeDiscoverFlyout();
+  useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
 
   return (
     <div data-test-subj="ruleLibraryPage">
@@ -30,6 +34,7 @@ export const RuleLibraryPage = () => {
       />
       <EuiSpacer size="m" />
       <RuleLibraryList />
+      {flyout}
     </div>
   );
 };

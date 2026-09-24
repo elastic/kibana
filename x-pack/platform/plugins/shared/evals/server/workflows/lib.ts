@@ -16,6 +16,7 @@ import {
 } from '@kbn/evals-common';
 import type {
   CompareExperimentsResponse,
+  Direction,
   EvaluateResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
@@ -179,7 +180,13 @@ export const ingestScores = async (
 
 /** The snake_case evaluator-result shape used by the workflow step schemas. */
 export interface SnakeEvaluatorResult {
-  evaluator: { name: string; version?: string; kind?: 'llm' | 'code'; model?: Model };
+  evaluator: {
+    name: string;
+    version?: string;
+    kind?: 'llm' | 'code';
+    model?: Model;
+    direction?: Direction;
+  };
   scores: Array<{
     name: string;
     score?: number | null;

@@ -15,7 +15,8 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
-import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../saved_objects/global_state/constants';
+import { LATEST_LOG_EXTRACTION_DEFAULTS } from '../saved_objects/global_state/constants';
+import { ENGINE_STATUS } from '../constants';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -31,6 +32,7 @@ import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilien
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 
 jest.mock('./install_assets');
 jest.mock('../../tasks/extract_entity_task');
@@ -97,6 +99,7 @@ describe('AssetManagerClient', () => {
   let mockEngineDescriptorClient: {
     getAll: jest.Mock;
     init: jest.Mock;
+    findOrThrow: jest.Mock;
     update: jest.Mock;
     delete: jest.Mock;
   };
@@ -104,6 +107,7 @@ describe('AssetManagerClient', () => {
     init: jest.Mock;
     findOrThrow: jest.Mock;
     find: jest.Mock;
+    findLogExtractionOverrides: jest.Mock;
     delete: jest.Mock;
   };
 
@@ -132,17 +136,22 @@ describe('AssetManagerClient', () => {
     mockEngineDescriptorClient = {
       getAll: jest.fn().mockResolvedValue([]),
       init: jest.fn().mockResolvedValue(undefined),
+      findOrThrow: jest.fn().mockResolvedValue({ type: 'user', status: 'started' }),
       update: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
     };
 
     mockGlobalStateClient = {
-      init: jest.fn().mockResolvedValue(undefined),
+      init: jest.fn().mockResolvedValue({
+        historySnapshot: { status: 'started', frequency: '24h' },
+        logsExtraction: LATEST_LOG_EXTRACTION_DEFAULTS,
+      }),
       findOrThrow: jest.fn().mockResolvedValue({
         historySnapshot: {},
         logsExtraction: {},
       }),
       find: jest.fn().mockResolvedValue(undefined),
+      findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
       delete: jest.fn().mockResolvedValue(undefined),
     };
 
@@ -158,9 +167,6 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn().mockResolvedValue(undefined),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -168,7 +174,9 @@ describe('AssetManagerClient', () => {
       analytics: {
         reportEvent: jest.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
-      savedObjectsClient: {} as SavedObjectsClientContract,
+      savedObjectsClient: {
+        delete: jest.fn().mockResolvedValue({}),
+      } as unknown as SavedObjectsClientContract,
     });
   });
 
@@ -180,7 +188,11 @@ describe('AssetManagerClient', () => {
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledTimes(2);
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('user');
-    expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(2);
+    // host: 1 (single) + user: 2 (priority + non-priority, always scheduled regardless of FF)
+    expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(3);
+    expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'user', extractionMode: EXTRACTION_MODE.nonPriority })
+    );
   });
 
   it('schedules status and history tasks only after engine descriptors exist', async () => {
@@ -256,9 +268,6 @@ describe('AssetManagerClient', () => {
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
         globalStateClient:
           mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-        remoteLogExtractionStateClient: {
-          delete: jest.fn().mockResolvedValue(undefined),
-        } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
         namespace,
         isServerless: false,
         logsExtractionClient: {
@@ -445,105 +454,193 @@ describe('AssetManagerClient', () => {
   });
 
   describe('logsExtraction resolution on install', () => {
-    const existingLogsExtraction = {
-      additionalIndexPatterns: ['existing-*'],
-      fieldHistoryLength: 99,
-      lookbackPeriod: '12h',
-      delay: '5m',
-      docsLimit: 1234,
-      maxLogsPerPage: 5678,
-      timeout: '60s',
-      frequency: '2m',
-    };
+    // Resolution (merging params with existing/defaults) is globalStateClient's responsibility.
+    // AssetManagerClient passes provided params through unchanged.
 
-    it('fresh install with no params applies defaults', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
+    it('passes undefined logsExtraction when no params are provided', async () => {
       await client.init({} as KibanaRequest, ['host']);
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logsExtraction: expect.objectContaining({
-            additionalIndexPatterns: [],
-            fieldHistoryLength: 10,
-            lookbackPeriod: '3h',
-            delay: '1m',
-            frequency: '1m',
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-            timeout: '59s',
-          }),
-        })
+        expect.objectContaining({ logsExtraction: undefined })
       );
     });
 
-    it('fresh install with params merges params with defaults', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
+    it('passes provided params directly as logsExtraction overrides', async () => {
       await client.init({} as KibanaRequest, ['host'], { delay: '2m', frequency: '1m' });
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logsExtraction: expect.objectContaining({
-            delay: '2m',
-            frequency: '1m',
-            lookbackPeriod: '3h',
-            fieldHistoryLength: 10,
-            additionalIndexPatterns: [],
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-          }),
-        })
+        expect.objectContaining({ logsExtraction: { delay: '2m', frequency: '1m' } })
       );
     });
 
-    it('re-install with no params preserves existing config', async () => {
-      mockGlobalStateClient.find.mockResolvedValue({
-        historySnapshot: {},
-        logsExtraction: existingLogsExtraction,
-      });
-
-      await client.init({} as KibanaRequest, ['host']);
-
-      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({ logsExtraction: existingLogsExtraction })
-      );
-    });
-
-    it('re-install with empty params object preserves existing config', async () => {
-      mockGlobalStateClient.find.mockResolvedValue({
-        historySnapshot: {},
-        logsExtraction: existingLogsExtraction,
-      });
-
+    it('passes empty object when empty params are provided', async () => {
       await client.init({} as KibanaRequest, ['host'], {});
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+        expect.objectContaining({ logsExtraction: {} })
       );
     });
 
-    it('re-install with params overwrites existing config with parsed params', async () => {
-      mockGlobalStateClient.find.mockResolvedValue({
-        historySnapshot: {},
-        logsExtraction: existingLogsExtraction,
-      });
-
+    it('passes partial params as overrides, not expanded to full config', async () => {
       await client.init({} as KibanaRequest, ['host'], { delay: '2m' });
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logsExtraction: expect.objectContaining({
-            delay: '2m',
-            frequency: '1m',
-            lookbackPeriod: '3h',
-            fieldHistoryLength: 10,
-            additionalIndexPatterns: [],
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-          }),
-        })
+        expect.objectContaining({ logsExtraction: { delay: '2m' } })
       );
+    });
+  });
+
+  /**
+   * Dual-process types run two tasks. The pair must be scheduled and removed together: one
+   * scheduled without the other would silently extract only half the logs.
+   */
+  describe('dual-process lifecycle', () => {
+    const createDualProcessClient = () =>
+      new AssetManagerClient({
+        logger: loggerMock.create(),
+        esClient: mockUserEsClient,
+        internalEsClient: mockInternalEsClient,
+        taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+        engineDescriptorClient:
+          mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
+        globalStateClient:
+          mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+        namespace,
+        isServerless: false,
+        logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
+        security: {} as SecurityPluginStart,
+        analytics: {
+          reportEvent: jest.fn(),
+        } as unknown as import('../../telemetry/events').TelemetryReporter,
+        savedObjectsClient: {
+          delete: jest.fn().mockResolvedValue({}),
+        } as unknown as SavedObjectsClientContract,
+        isDualProcessEnabled: async () => true,
+      });
+
+    const scheduledModes = () =>
+      mockScheduleExtractEntityTask.mock.calls.map(
+        ([args]) => args.extractionMode ?? EXTRACTION_MODE.single
+      );
+
+    it('start schedules both tasks for a dual-capable type', async () => {
+      await createDualProcessClient().start({} as KibanaRequest, 'user');
+
+      expect(scheduledModes()).toEqual([EXTRACTION_MODE.single, EXTRACTION_MODE.nonPriority]);
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ nonPriorityStatus: 'started' })
+      );
+    });
+
+    it('start schedules only the shared task for a type with no priority variant', async () => {
+      await createDualProcessClient().start({} as KibanaRequest, 'host');
+
+      expect(scheduledModes()).toEqual([EXTRACTION_MODE.single]);
+    });
+
+    it('start rolls the shared task back when the non-priority schedule fails', async () => {
+      mockScheduleExtractEntityTask
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('schedule failed'));
+
+      await expect(createDualProcessClient().start({} as KibanaRequest, 'user')).rejects.toThrow(
+        'schedule failed'
+      );
+
+      expect(mockStopExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'user' })
+      );
+    });
+
+    it('stop removes both tasks even when the flag is off', async () => {
+      await client.stop('user');
+
+      // Asserted as "the shared task plus non-priority" rather than a specific label, because
+      // single and priority resolve to the same task id.
+      const removedModes = mockStopExtractEntityTask.mock.calls.map(
+        ([args]) => args.extractionMode ?? EXTRACTION_MODE.single
+      );
+      expect(removedModes).toHaveLength(2);
+      expect(removedModes).toContain(EXTRACTION_MODE.nonPriority);
+      expect(
+        removedModes.some(
+          (mode) => mode === EXTRACTION_MODE.single || mode === EXTRACTION_MODE.priority
+        )
+      ).toBe(true);
+    });
+
+    it('stop sets nonPriorityStatus to stopped for a dual-capable type (user)', async () => {
+      await createDualProcessClient().stop('user');
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ nonPriorityStatus: ENGINE_STATUS.STOPPED })
+      );
+    });
+
+    it('stop does not set nonPriorityStatus for types without a priority gate (host)', async () => {
+      await createDualProcessClient().stop('host');
+
+      const updateCalls = mockEngineDescriptorClient.update.mock.calls;
+      for (const [, attrs] of updateCalls) {
+        expect(attrs).not.toHaveProperty('nonPriorityStatus');
+      }
+    });
+
+    it('stop completes even when one task removal fails', async () => {
+      // First stopExtractEntityTask call (priority) succeeds; second (nonPriority) fails.
+      mockStopExtractEntityTask
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('task removal failed'));
+
+      await expect(createDualProcessClient().stop('user')).resolves.not.toThrow();
+
+      // Both tasks were attempted.
+      expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(2);
+      // The descriptor is still updated to STOPPED after the partial failure.
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ status: ENGINE_STATUS.STOPPED })
+      );
+    });
+
+    it('attempts both task removals even when the first one fails', async () => {
+      mockStopExtractEntityTask
+        .mockRejectedValueOnce(new Error('priority task removal failed'))
+        .mockResolvedValueOnce(undefined);
+
+      await createDualProcessClient().stop('user');
+
+      expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(2);
+    });
+
+    it('stop sets nonPriorityStatus to error when the operation fails for a dual-capable type', async () => {
+      // Make the STOPPED update throw so the catch block runs.
+      mockEngineDescriptorClient.update.mockRejectedValueOnce(new Error('update failed'));
+
+      await expect(createDualProcessClient().stop('user')).rejects.toThrow('update failed');
+
+      const errorUpdate = mockEngineDescriptorClient.update.mock.calls.find(
+        ([, attrs]) => attrs.status === ENGINE_STATUS.ERROR
+      );
+      expect(errorUpdate).toBeDefined();
+      expect(errorUpdate![1]).toMatchObject({
+        status: ENGINE_STATUS.ERROR,
+        nonPriorityStatus: ENGINE_STATUS.ERROR,
+      });
+    });
+
+    it('stop does not set nonPriorityStatus when the operation fails for a type without a priority gate', async () => {
+      mockEngineDescriptorClient.update.mockRejectedValueOnce(new Error('update failed'));
+
+      await expect(createDualProcessClient().stop('host')).rejects.toThrow('update failed');
+
+      const errorUpdate = mockEngineDescriptorClient.update.mock.calls.find(
+        ([, attrs]) => attrs.status === ENGINE_STATUS.ERROR
+      );
+      expect(errorUpdate).toBeDefined();
+      expect(errorUpdate![1]).not.toHaveProperty('nonPriorityStatus');
     });
   });
 });
@@ -558,21 +655,16 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   const buildClient = (
     overrides: Partial<{
       latestExists: boolean;
-      updatesExists: boolean;
       metadataExists: boolean;
     }> = {}
   ) => {
-    const { latestExists = true, updatesExists = true, metadataExists = true } = overrides;
+    const { latestExists = true, metadataExists = true } = overrides;
 
     mockUserEsClient = {
       indices: {
         exists: jest.fn().mockResolvedValue(latestExists),
         getDataStream: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
-          if (name.includes('updates')) {
-            return updatesExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          } else {
-            return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          }
+          return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
         }),
       },
     } as unknown as jest.Mocked<ElasticsearchClient>;
@@ -594,11 +686,9 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
         init: jest.fn(),
         findOrThrow: jest.fn(),
         find: jest.fn(),
+        findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
         delete: jest.fn(),
       } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn(),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -616,7 +706,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns false and does not reinstall when all assets are present', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: true, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -625,7 +715,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns true and reinstalls when the latest index is missing', async () => {
-    buildClient({ latestExists: false, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: false, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -641,20 +731,8 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     );
   });
 
-  it('returns true and reinstalls when the updates data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: false, metadataExists: true });
-
-    const result = await client.reinstallSharedAssetsIfMissing();
-
-    expect(result).toBe(true);
-    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('.entities.v2.updates.default')
-    );
-  });
-
   it('returns true and reinstalls when the metadata data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: false });
+    buildClient({ latestExists: true, metadataExists: false });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -772,6 +850,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
       findOrThrow: jest.fn().mockResolvedValue({ historySnapshot: {}, logsExtraction: {} }),
       init: jest.fn(),
       find: jest.fn(),
+      findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
       delete: jest.fn(),
     };
 
@@ -784,9 +863,6 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
         engineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         globalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn(),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: true,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -807,7 +883,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
   };
 
   describe('legacy-only assets (FF-off post-upgrade scenario)', () => {
-    it('reports legacy index template names as installed', async () => {
+    it('reports neutral index template name as not installed when only legacy exists', async () => {
       const client = buildClient({
         latestTemplateExists: false,
         legacyLatestTemplateExists: true,
@@ -821,14 +897,12 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const templates = await getComponentsByResource(client, 'index_template');
 
-      expect(templates).toHaveLength(2);
-      expect(templates[0].id).toContain('security_');
-      expect(templates[0].installed).toBe(true);
-      expect(templates[1].id).toContain('security_');
-      expect(templates[1].installed).toBe(true);
+      expect(templates).toHaveLength(1);
+      expect(templates[0].id).not.toContain('security_');
+      expect(templates[0].installed).toBe(false);
     });
 
-    it('reports legacy component template names as installed', async () => {
+    it('reports neutral component template name as not installed when only legacy exists', async () => {
       const client = buildClient({
         latestTemplateExists: false,
         legacyLatestTemplateExists: true,
@@ -842,11 +916,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const componentTemplates = await getComponentsByResource(client, 'component_template');
 
-      expect(componentTemplates).toHaveLength(2);
-      expect(componentTemplates[0].id).toContain('security_');
-      expect(componentTemplates[0].installed).toBe(true);
-      expect(componentTemplates[1].id).toContain('security_');
-      expect(componentTemplates[1].installed).toBe(true);
+      expect(componentTemplates).toHaveLength(1);
+      expect(componentTemplates[0].id).not.toContain('security_');
+      expect(componentTemplates[0].installed).toBe(false);
     });
   });
 
@@ -865,11 +937,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const templates = await getComponentsByResource(client, 'index_template');
 
-      expect(templates).toHaveLength(2);
+      expect(templates).toHaveLength(1);
       expect(templates[0].id).not.toContain('security_');
       expect(templates[0].installed).toBe(true);
-      expect(templates[1].id).not.toContain('security_');
-      expect(templates[1].installed).toBe(true);
     });
 
     it('reports neutral component template names as installed', async () => {
@@ -886,11 +956,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const componentTemplates = await getComponentsByResource(client, 'component_template');
 
-      expect(componentTemplates).toHaveLength(2);
+      expect(componentTemplates).toHaveLength(1);
       expect(componentTemplates[0].id).not.toContain('security_');
       expect(componentTemplates[0].installed).toBe(true);
-      expect(componentTemplates[1].id).not.toContain('security_');
-      expect(componentTemplates[1].installed).toBe(true);
     });
   });
 

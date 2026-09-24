@@ -30,9 +30,10 @@ interface ScheduledActionResultsAggregations {
   aggs: {
     responses_by_schedule: {
       rows_count: { value: number };
-      responses: {
-        buckets: Array<{ key: string; doc_count: number }>;
-      };
+      // Agent counts — `cardinality(agent_id)`, not document counts.
+      responded_agents?: { value: number };
+      success_agents?: { agents: { value: number } };
+      error_agents?: { agents: { value: number } };
     };
   };
 }
@@ -81,6 +82,7 @@ export const getScheduledActionResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const { scheduleId, executionCount } = request.params;
           const page = request.query.page ?? 0;
           const pageSize = request.query.pageSize ?? 20;
@@ -120,7 +122,7 @@ export const getScheduledActionResultsRoute = (
           const search = await getScopedSearch(
             context,
             request,
-            osqueryContext.cpsEnabled,
+            cpsActive,
             osqueryContext.getStartServices
           );
           const res = await lastValueFrom(
@@ -139,7 +141,7 @@ export const getScheduledActionResultsRoute = (
                   field: request.query.sort ?? '@timestamp',
                 },
                 integrationNamespaces: namespacesOrUndefined,
-                ...(osqueryContext.cpsEnabled ? { matchMissingSpaceId: false } : {}),
+                ...(cpsActive ? { matchMissingSpaceId: false } : {}),
               },
               { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
@@ -150,10 +152,14 @@ export const getScheduledActionResultsRoute = (
             | undefined;
           const responsesBySchedule = aggs?.aggs?.responses_by_schedule;
           const rowsCount = responsesBySchedule?.rows_count?.value ?? 0;
-          const responsesBuckets = responsesBySchedule?.responses?.buckets;
 
-          const successful = responsesBuckets?.find((b) => b.key === 'success')?.doc_count ?? 0;
-          const failed = responsesBuckets?.find((b) => b.key === 'error')?.doc_count ?? 0;
+          // Agent counts. No `doc_count` fallback on purpose: it would report
+          // documents as agents, the bug this route exists to fix.
+          const successful = responsesBySchedule?.success_agents?.agents?.value ?? 0;
+          const failed = responsesBySchedule?.error_agents?.agents?.value ?? 0;
+
+          // Not `successful + failed`: an agent with both outcomes is in both buckets.
+          const totalResponded = responsesBySchedule?.responded_agents?.value ?? 0;
 
           const total =
             typeof res.rawResponse.hits.total === 'number'
@@ -209,7 +215,7 @@ export const getScheduledActionResultsRoute = (
               totalPages: Math.ceil(total / pageSize),
               aggregations: {
                 totalRowCount: rowsCount,
-                totalResponded: successful + failed,
+                totalResponded,
                 successful,
                 failed,
                 pending: 0,

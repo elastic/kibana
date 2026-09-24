@@ -497,7 +497,7 @@ describe('convertValueToString', () => {
     expect(result.formattedString).toBe('hi there');
   });
 
-  it('should return an empty string and not fail', () => {
+  it('should convert a field the document does not have to the dash the grid renders', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
       dataView: dataTableContextComplexMock.dataView,
@@ -510,7 +510,10 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('');
+    // "-" starts a formula, but the dash is our own constant rather than document content,
+    // so it must not come back escaped as "'-" even when the value is CSV compatible.
+    expect(result.formattedString).toBe('-');
+    expect(result.withFormula).toBe(false);
   });
 
   it('should return an empty string when rowIndex is out of range', () => {
@@ -585,7 +588,7 @@ describe('convertValueToString', () => {
     const flattened = convertValueToString(params).formattedString;
     const nested = convertValueToString({
       ...params,
-      sourceDisplayMode: 'json',
+      documentsDisplayMode: 'json',
       shouldShowFieldHandler: () => true,
     }).formattedString;
 

@@ -6,7 +6,8 @@
  */
 
 import { computeNextWatermark } from './watermark';
-import { createDispatcherPipelineInput, createAlertEpisode } from './fixtures/test_utils';
+import { createAlertEpisode, createDispatcherPipelineInput } from './fixtures/test_utils';
+import { EpisodeScan } from './state';
 import type { DispatcherPipelineResult } from './types';
 
 const BASE_INPUT = createDispatcherPipelineInput({
@@ -44,7 +45,9 @@ describe('computeNextWatermark', () => {
           haltReason: 'aborted',
           finalState: {
             input: BASE_INPUT,
-            episodes: [createAlertEpisode({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
+            scan: EpisodeScan.of({
+              episodes: [createAlertEpisode({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
+            }),
             // recordedEpisodes still undefined — StoreActionsStep not reached
           },
         }),
@@ -67,6 +70,30 @@ describe('computeNextWatermark', () => {
 
       // Not truncated, not no_episodes/no_actions — falls through to windowEnd
       expect(result.toISOString()).toBe('2026-01-22T07:35:00.000Z');
+    });
+  });
+
+  describe('inline_stats_too_large halt', () => {
+    it('does not advance the watermark', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({ completed: false, haltReason: 'inline_stats_too_large' }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+
+    it('holds even when scan is empty (no episodes fetched)', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({
+          completed: false,
+          haltReason: 'inline_stats_too_large',
+          finalState: { input: BASE_INPUT },
+        }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
     });
   });
 
@@ -103,7 +130,7 @@ describe('computeNextWatermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, episodes, truncated: true },
+          finalState: { input: BASE_INPUT, scan: EpisodeScan.of({ episodes, truncated: true }) },
         }),
       });
 
@@ -114,7 +141,10 @@ describe('computeNextWatermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, episodes: [], truncated: true },
+          finalState: {
+            input: BASE_INPUT,
+            scan: EpisodeScan.of({ episodes: [], truncated: true }),
+          },
         }),
       });
 
@@ -131,7 +161,7 @@ describe('computeNextWatermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, episodes, truncated: true },
+          finalState: { input: BASE_INPUT, scan: EpisodeScan.of({ episodes, truncated: true }) },
         }),
       });
 
@@ -145,7 +175,11 @@ describe('computeNextWatermark', () => {
         input: BASE_INPUT,
         result: makeResult({
           completed: true,
-          finalState: { input: BASE_INPUT, episodes: [createAlertEpisode()], recordedEpisodes: 1 },
+          finalState: {
+            input: BASE_INPUT,
+            scan: EpisodeScan.of({ episodes: [createAlertEpisode()] }),
+            recordedEpisodes: 1,
+          },
         }),
       });
 

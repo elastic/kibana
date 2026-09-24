@@ -9,13 +9,23 @@ import type {
   ConversationAction,
   ConversationAccessControl,
   ConversationRound,
-  AgentCapabilities,
   AssistantResponse,
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
+import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
+import type { ConversationWithPermissions } from './conversations';
+
+/**
+ * Whether a chat request executes the agent. `never` appends the user message to an existing
+ * conversation and returns, leaving the execution options unused.
+ */
+export enum ChatTriggerMode {
+  Always = 'always',
+  Never = 'never',
+}
 
 /**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
@@ -29,7 +39,6 @@ export interface ChatRequestBodyPayload {
   /** Applied when the round creates the conversation; ignored when continuing an existing one. */
   read_only?: boolean;
   execution_id?: string;
-  capabilities?: AgentCapabilities;
   attachments?: AttachmentInput[];
   input?: string;
   prompts?: Record<string, PromptResponse>;
@@ -37,8 +46,28 @@ export interface ChatRequestBodyPayload {
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   action?: ConversationAction;
   project_routing?: string;
+  /** Optional reasoning level forwarded to the inference plugin. */
+  reasoning_level?: ChatCompletionReasoningEffort;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
+  /** Use `never` to persist a message without executing the agent. */
+  trigger_mode?: ChatTriggerMode;
+}
+
+/** Response of `POST /internal/agent_builder/executions/{id}/abort`. */
+export interface AbortExecutionResponse {
+  acknowledged: boolean;
+  /** True when the run wound down and its `execution_aborted` event was saved before returning. */
+  terminal_persisted: boolean;
+}
+
+/**
+ * Body payload for a user message request (`trigger_mode: 'never'`), which persists a message
+ * on an existing conversation without executing the agent.
+ */
+export interface UserMessagePayload extends Pick<ChatRequestBodyPayload, 'input' | 'attachments'> {
+  trigger_mode: ChatTriggerMode.Never;
+  conversation_id: string;
 }
 
 export type ChatResponse = Omit<
@@ -52,3 +81,5 @@ export type ChatResponse = Omit<
     prompts?: PromptRequest[];
   };
 };
+
+export type ChatConverseResponse = ConversationWithPermissions;

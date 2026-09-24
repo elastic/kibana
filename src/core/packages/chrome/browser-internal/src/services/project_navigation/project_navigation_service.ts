@@ -18,6 +18,7 @@ import type {
   NavigationTreeDefinition,
   CloudLinks,
   SolutionId,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 import {
   BehaviorSubject,
@@ -44,6 +45,13 @@ import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
 import { applyCustomization, type ParsedNavigation } from './apply_customization';
 
+const rejectNavigationRegistration = (logger: Logger, message: string): void => {
+  if (process.env.NODE_ENV !== 'production') {
+    throw new Error(message);
+  }
+  logger.error(message);
+};
+
 interface StartDeps {
   history: History;
   prependBasePath: (path: string) => string;
@@ -51,7 +59,6 @@ interface StartDeps {
   getUiSettingsHomeRoute: () => string | undefined;
   logger: Logger;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  isNextChrome: boolean;
 }
 
 export class ProjectNavigationService {
@@ -60,6 +67,7 @@ export class ProjectNavigationService {
     undefined
   );
   private readonly customizeNavigationHandler$ = new BehaviorSubject<(() => void) | null>(null);
+  private readonly registeredLinks$ = new BehaviorSubject<readonly ProjectNavigationLinks[]>([]);
 
   constructor(private isServerless: boolean) {}
 
@@ -71,7 +79,6 @@ export class ProjectNavigationService {
       logger,
       prependBasePath,
       getUiSettingsHomeRoute,
-      isNextChrome,
     } = startDeps;
 
     const currentNavSource$ = new BehaviorSubject<{
@@ -110,8 +117,7 @@ export class ProjectNavigationService {
           this.customization$,
         ]).pipe(
           map(([def, deepLinks, links, customization]) =>
-            // In Chrome Next the home node is a regular, customizable sidebar item.
-            applyCustomization(source.id, def, deepLinks, links, customization, isNextChrome)
+            applyCustomization(source.id, def, deepLinks, links, customization)
           ),
           catchError((err) => {
             logger.error(err);
@@ -167,11 +173,7 @@ export class ProjectNavigationService {
     return {
       getProjectHome$: () => {
         return parsedNavigation$.pipe(
-          map((parsed) => {
-            const defaultRoute = getUiSettingsHomeRoute();
-            const navRoute = parsed?.tree.find((n) => n.renderAs === 'home')?.href;
-            return defaultRoute ?? navRoute;
-          }),
+          map(() => getUiSettingsHomeRoute()),
           filter((home): home is string => home !== undefined),
           distinctUntilChanged()
         );
@@ -235,11 +237,28 @@ export class ProjectNavigationService {
       registerCustomizeNavigationHandler: (handler: () => void) => {
         this.customizeNavigationHandler$.next(handler);
       },
+      registerNavigationLinks: (links: ProjectNavigationLinks) => {
+        const registered = this.registeredLinks$.getValue();
+        if (registered.some((entry) => entry.id === links.id)) {
+          rejectNavigationRegistration(logger, `Duplicate navigation id "${links.id}".`);
+          return;
+        }
+        if (registered.some((entry) => entry.target === links.target)) {
+          rejectNavigationRegistration(
+            logger,
+            `A second hover registration on target "${links.target}" is not allowed.`
+          );
+          return;
+        }
+        this.registeredLinks$.next([...registered, links]);
+      },
+      getRegisteredNavigationLinks$: () => this.registeredLinks$.asObservable(),
     };
   }
 
   public stop() {
     this.stop$.next();
     this.stop$.complete();
+    this.registeredLinks$.next([]);
   }
 }

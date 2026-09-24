@@ -43,6 +43,27 @@ export const SAVE_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+export const LOAD_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.loadErrorTitle',
+  {
+    defaultMessage: 'Unable to load Alert Analysis workflow settings',
+  }
+);
+
+export const LOAD_ERROR_BODY = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.loadErrorBody',
+  {
+    defaultMessage: 'Try again, or contact your administrator if the problem continues.',
+  }
+);
+
+export const LOAD_ERROR_RETRY = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.loadErrorRetry',
+  {
+    defaultMessage: 'Retry',
+  }
+);
+
 export const WORKFLOW_ENABLED_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.workflowEnabledAriaLabel',
   {

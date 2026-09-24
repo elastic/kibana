@@ -29,7 +29,12 @@ import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery, firstNonNullable, getMetricUniqueKey } from '../../../common/utils';
+import {
+  createESQLQuery,
+  firstNonNullable,
+  getAggregationLabel,
+  getMetricUniqueKey,
+} from '../../../common/utils';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -375,6 +380,11 @@ const ChartItem = React.memo(
         : '';
     }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
 
+    const yAxisTitle = useMemo(() => {
+      const instrument = firstNonNullable(metricItem.metricTypes);
+      return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
+    }, [metricItem.metricTypes, gridSettings]);
+
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
@@ -420,6 +430,7 @@ const ChartItem = React.memo(
           title={metricItem.metricName}
           description={description}
           chartLayers={chartLayers}
+          yAxisTitle={yAxisTitle}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}

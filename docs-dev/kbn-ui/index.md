@@ -74,6 +74,11 @@ src/platform/kbn-ui/
 
 Packages use the `@kbn/ui-<component>` naming convention and are owned by `@elastic/appex-sharedux`.
 
+## Component guides
+
+- [Feedback](feedback.md) — One Feedback trigger, form, and success toast
+- [Side navigation](side-navigation.md) — adaptive side navigation. Not a supported app dependency; app code uses chrome navigation APIs.
+
 ## Package visibility [kbn-ui-package-visibility]
 
 `@kbn/ui-*` packages come in two kinds. The kind decides whether app code may import the package.
@@ -91,19 +96,19 @@ All `@kbn/ui-*` packages share a single Storybook and docset.
 Run the stories in the shared `kbn-ui` Storybook:
 
 ```bash
-yarn storybook kbn_ui
+pnpm storybook kbn_ui
 ```
 
 Run a package's tests:
 
 ```bash
-yarn test:jest src/platform/kbn-ui/<component>
+pnpm test:jest src/platform/kbn-ui/<component>
 ```
 
 Preview these docs from the repository root:
 
 ```bash
-yarn storybook_docs kbn_ui --dev --docs-path docs-dev
+pnpm storybook_docs kbn_ui --dev --docs-path docs-dev
 ```
 
 Or serve the docset directly:

@@ -71,7 +71,7 @@ spaceTest.describe(
         ).toBeVisible();
 
         await expect(discoverPage.testSubj.locator('discoverDocTable')).toHaveAttribute(
-          'data-render-complete',
+          'data-table-loaded',
           'true'
         );
       }

@@ -16,8 +16,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { SignalGroup } from '../../../../common/http_api/signals';
 import { analyzeAndImprove } from '../../utils/analyze_and_improve';
@@ -60,7 +62,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
 
   const loading = isLoading || isLoadingGroups;
 
-  const hasFeedbackAgent = Boolean(aiIndex?.feedback_agent_id);
+  const hasFeedbackAgent = Boolean(aiIndex?.feedback_analysis?.agent_id);
 
   const handleAnalyze = () => {
     if (aiIndex) {
@@ -93,6 +95,10 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
               onClick={handleAnalyze}
               isDisabled={aiIndex === undefined || !hasFeedbackAgent}
               data-test-subj="contextSignalsAnalyzeButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSignalsPanel,
+                action: CONTEXT_ENGINE_UI_EBT.action.signals.ANALYZE,
+              })}
             >
               {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.analyzeButton', {
                 defaultMessage: 'Analyze & improve',

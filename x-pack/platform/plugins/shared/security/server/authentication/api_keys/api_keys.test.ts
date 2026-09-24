@@ -100,7 +100,7 @@ describe('API Keys', () => {
       };
 
       mockClusterClient.asInternalUser.security.invalidateApiKey.mockRejectedValue(error);
-      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
+      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrow(error);
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledTimes(1);
     });
 
@@ -110,7 +110,7 @@ describe('API Keys', () => {
       (error as any).body = {};
 
       mockClusterClient.asInternalUser.security.invalidateApiKey.mockRejectedValue(error);
-      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
+      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrow(error);
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledTimes(1);
     });
 
@@ -119,7 +119,7 @@ describe('API Keys', () => {
       const error = new Error();
 
       mockClusterClient.asInternalUser.security.invalidateApiKey.mockRejectedValue(error);
-      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
+      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrow(error);
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledTimes(1);
     });
 
@@ -507,7 +507,7 @@ describe('API Keys', () => {
             role_descriptors: roleDescriptors,
           }
         )
-      ).rejects.toThrowError('Elasticsearch error');
+      ).rejects.toThrow('Elasticsearch error');
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledTimes(1);
     });
 
@@ -577,6 +577,33 @@ describe('API Keys', () => {
         username: 'foo',
         password: 'bar',
       });
+    });
+
+    it('forwards refresh when provided and omits it otherwise', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponse({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+        encoded: 'utf8',
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: `Basic ${encodeToBase64('foo:bar')}` },
+      });
+      const createParams = {
+        name: 'test_api_key',
+        role_descriptors: roleDescriptors,
+      };
+
+      await apiKeys.grantAsInternalUser(request, createParams);
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenLastCalledWith(
+        expect.not.objectContaining({ refresh: expect.anything() })
+      );
+
+      await apiKeys.grantAsInternalUser(request, createParams, { refresh: false });
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenLastCalledWith(
+        expect.objectContaining({ refresh: false })
+      );
     });
 
     it('calls `grantApiKey` with proper parameters for the Bearer scheme', async () => {
@@ -681,6 +708,49 @@ describe('API Keys', () => {
     });
 
     describe('with UIAM', () => {
+      it('resolves client authentication from the request in an ES API key grant', async () => {
+        const mockUiam = uiamServiceMock.create();
+        // The UIAM service preserves the client authentication supplied with the request; see the
+        // `getClientAuthentication` tests in `uiam_service.test.ts`.
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'upstream-shared-secret',
+        });
+        const apiKeysWithUiam = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: 'Bearer essu_ephemeral_token',
+            'x-client-authentication': 'upstream-shared-secret',
+          },
+        });
+
+        await apiKeysWithUiam.grantAsInternalUser(request, {
+          name: 'test-key',
+          role_descriptors: {},
+        });
+
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith(request);
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: { name: 'test-key', role_descriptors: {} },
+          grant_type: 'access_token',
+          access_token: 'essu_ephemeral_token',
+          client_authentication: { scheme: 'SharedSecret', value: 'upstream-shared-secret' },
+        });
+      });
+
       it('uses UIAM client authentication when credentials are UIAM credentials', async () => {
         const mockUiam = uiamServiceMock.create();
         mockUiam.getClientAuthentication.mockReturnValue({

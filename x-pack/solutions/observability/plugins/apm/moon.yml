@@ -88,6 +88,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/observability-alert-details'
   - '@kbn/custom-integrations-plugin'
+  - '@kbn/as-code-dashboard-schema'
   - '@kbn/dashboard-plugin'
   - '@kbn/core-http-server'
   - '@kbn/profiling-plugin'
@@ -179,6 +180,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-browser-hooks'
+  - '@kbn/lens-common'
 tags:
   - plugin
   - prod

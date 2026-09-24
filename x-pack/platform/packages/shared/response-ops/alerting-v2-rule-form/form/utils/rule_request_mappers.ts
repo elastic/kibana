@@ -50,6 +50,13 @@ export const resolveRecoveryStrategy = (
   return formValues.query.recovery != null ? ('query' as const) : undefined;
 };
 
+export const isRecoveryEnabled = (
+  formValues: Pick<FormValues, 'kind' | 'recoveryStrategy' | 'query'>
+): boolean => {
+  const strategy = resolveRecoveryStrategy(formValues);
+  return strategy != null && strategy !== 'none';
+};
+
 // ---------------------------------------------------------------------------
 // FormValues → API request
 // ---------------------------------------------------------------------------
@@ -57,7 +64,6 @@ export const resolveRecoveryStrategy = (
 const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
   description: metadata.description,
-  owner: metadata.owner,
   ...(metadata.tags?.length ? { tags: metadata.tags } : {}),
 });
 
@@ -95,16 +101,20 @@ const mapStateTransition = (formValues: FormValues) => {
     }
   }
 
-  if (recoveryMode === DELAY_MODE.immediate) {
-    out.recovering_count = 0;
-  } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
-    out.recovering_count = stateTransition.recoveringCount;
-  } else if (recoveryMode === DELAY_MODE.duration) {
-    if (stateTransition?.recoveringTimeframe != null) {
-      out.recovering_timeframe = stateTransition.recoveringTimeframe;
-    }
-    if (stateTransition?.recoveringCount != null) {
+  // Recovering thresholds are only meaningful when recovery is enabled; emitting them
+  // while recovery is disabled is inert and rejected by the write API.
+  if (isRecoveryEnabled(formValues)) {
+    if (recoveryMode === DELAY_MODE.immediate) {
+      out.recovering_count = 0;
+    } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
       out.recovering_count = stateTransition.recoveringCount;
+    } else if (recoveryMode === DELAY_MODE.duration) {
+      if (stateTransition?.recoveringTimeframe != null) {
+        out.recovering_timeframe = stateTransition.recoveringTimeframe;
+      }
+      if (stateTransition?.recoveringCount != null) {
+        out.recovering_count = stateTransition.recoveringCount;
+      }
     }
   }
 
@@ -117,7 +127,7 @@ const mapStateTransition = (formValues: FormValues) => {
  * Contains all fields except `kind` (only required for create).
  */
 export interface RuleRequestCommon {
-  metadata: { name: string; description?: string; owner?: string; tags?: string[] };
+  metadata: { name: string; description?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback?: string };
   query: Query;
@@ -189,7 +199,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       name: rule.metadata.name,
       description: rule.metadata.description,
       enabled: rule.enabled,
-      owner: rule.metadata.owner,
       tags: rule.metadata.tags,
     },
     timeField: rule.time_field,

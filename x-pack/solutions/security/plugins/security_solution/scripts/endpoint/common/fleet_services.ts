@@ -2336,177 +2336,179 @@ export const addCrowdStrikeIntegrationToAgentPolicy = async ({
   );
 
   return createIntegrationPolicy(kbnClient, {
-    name: integrationPolicyName,
-    description: `Created by script: ${__filename}`,
-    policy_id: agentPolicyId,
     policy_ids: [agentPolicyId],
-    enabled: true,
-    inputs: [
-      {
-        type: 'cel',
-        policy_template: 'crowdstrike',
-        enabled: true,
-        vars: {
-          client_id: {
-            value: clientId,
-            type: 'text',
-          },
-          client_secret: {
-            value: clientSecret,
-            type: 'password',
-          },
-          url: {
-            value: apiUrl,
-            type: 'text',
-          },
-          token_url: {
-            value: `${apiUrl}/oauth2/token`,
-            type: 'text',
-          },
-          scopes: {
-            value: [],
-            type: 'text',
-          },
-          enable_request_tracer: {
-            value: false,
-            type: 'bool',
-          },
-          proxy_url: {
-            type: 'text',
-          },
-        },
-        streams: [
-          {
-            enabled: true,
-            data_stream: {
-              type: 'logs',
-              dataset: 'crowdstrike.alert',
-            },
-            vars: {
-              initial_interval: {
-                value: '30m',
-                type: 'text',
-              },
-              interval: {
-                value: '30s',
-                type: 'text',
-              },
-              batch_size: {
-                value: 1000,
-                type: 'text',
-              },
-              http_client_timeout: {
-                value: '30s',
-                type: 'text',
-              },
-              tags: {
-                value: ['forwarded', 'crowdstrike-alert'],
-                type: 'text',
-              },
-              preserve_original_event: {
-                value: false,
-                type: 'bool',
-              },
-              preserve_duplicate_custom_fields: {
-                value: false,
-                type: 'bool',
-              },
-              processors: {
-                type: 'yaml',
-              },
-            },
-          },
-          {
-            enabled: true,
-            data_stream: {
-              type: 'logs',
-              dataset: 'crowdstrike.host',
-            },
-            vars: {
-              initial_interval: {
-                value: '24h',
-                type: 'text',
-              },
-              interval: {
-                value: '5m',
-                type: 'text',
-              },
-              batch_size: {
-                value: 1000,
-                type: 'text',
-              },
-              http_client_timeout: {
-                value: '30s',
-                type: 'text',
-              },
-              tags: {
-                value: ['forwarded', 'crowdstrike-host'],
-                type: 'text',
-              },
-              preserve_original_event: {
-                value: false,
-                type: 'bool',
-              },
-              preserve_duplicate_custom_fields: {
-                value: false,
-                type: 'bool',
-              },
-              gov_cloud: {
-                value: false,
-                type: 'bool',
-              },
-              processors: {
-                type: 'yaml',
-              },
-            },
-          },
-          {
-            enabled: false,
-            data_stream: {
-              type: 'logs',
-              dataset: 'crowdstrike.vulnerability',
-            },
-            vars: {
-              initial_interval: {
-                value: '24h',
-                type: 'text',
-              },
-              interval: {
-                value: '5m',
-                type: 'text',
-              },
-              batch_size: {
-                value: 1000,
-                type: 'text',
-              },
-              http_client_timeout: {
-                value: '30s',
-                type: 'text',
-              },
-              tags: {
-                value: ['forwarded', 'crowdstrike-vulnerability'],
-                type: 'text',
-              },
-              preserve_original_event: {
-                value: false,
-                type: 'bool',
-              },
-              preserve_duplicate_custom_fields: {
-                value: false,
-                type: 'bool',
-              },
-              processors: {
-                type: 'yaml',
-              },
-            },
-          },
-        ],
-      },
-    ],
     package: {
       name: packageName,
       title: packageTitle,
       version: packageVersion,
     },
+    name: integrationPolicyName,
+    description: `Created by script: ${__filename}`,
+    namespace: '',
+    inputs: {
+      // @ts-expect-error This format is valid - according to the "Preview API request" on the UI, but types in fleet do not seem to have been updated.
+      'crowdstrike-logfile': {
+        enabled: false,
+        streams: {
+          'crowdstrike.falcon': {
+            enabled: false,
+            vars: {
+              paths: ['/var/log/crowdstrike/falconhoseclient/output*'],
+              tags: ['forwarded', 'crowdstrike-falcon'],
+              preserve_original_event: false,
+            },
+          },
+          'crowdstrike.fdr': {
+            enabled: false,
+            vars: {
+              paths: ['/var/log/falcon_data_replicator.log'],
+              enrich_host_metadata: true,
+              keep_metadata: true,
+              metadata_ttl: '168h',
+              preserve_original_event: false,
+              tags: ['forwarded', 'crowdstrike-fdr'],
+              prune_fields: true,
+            },
+          },
+        },
+      },
+      'crowdstrike-aws-s3': {
+        enabled: false,
+        streams: {
+          'crowdstrike.fdr': {
+            enabled: false,
+            vars: {
+              enrich_metadata: true,
+              keep_metadata: true,
+              metadata_ttl: '168h',
+              metadata_cache_capacity: 0,
+              metadata_cache_write_interval: 0,
+              long_fields: 'index_long_fields',
+              long_fields_max_length: 1024,
+              enable_deduplication: false,
+              enable_geoip_observer_ip: true,
+              enable_geoip_source_ip: true,
+              enable_geoip_destination_ip: true,
+              preserve_original_event: false,
+              endpoint: '',
+              default_region: '',
+              fips_enabled: false,
+              tags: ['forwarded', 'crowdstrike-fdr'],
+              max_number_of_messages: 5,
+              number_of_workers: 5,
+              prune_fields: true,
+            },
+          },
+        },
+      },
+      'crowdstrike-streaming': {
+        enabled: true,
+        vars: {},
+        streams: {
+          'crowdstrike.falcon': {
+            enabled: true,
+            vars: {
+              url: apiUrl,
+              token_url: `${apiUrl}/oauth2/token`,
+              client_id: clientId,
+              client_secret: clientSecret,
+              app_id: `elastic-dev-${CURRENT_USERNAME}`,
+              retry_max_attempts: '50',
+              retry_infinite_retries: false,
+              retry_wait_min: '1s',
+              retry_wait_max: '30s',
+              tags: ['forwarded', 'crowdstrike-falcon'],
+              preserve_original_event: false,
+            },
+          },
+        },
+      },
+      'crowdstrike-cel': {
+        enabled: true,
+        vars: {
+          client_id: clientId,
+          client_secret: clientSecret,
+          url: apiUrl,
+          token_url: `${apiUrl}/oauth2/token`,
+          ssl: '#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n',
+        },
+        streams: {
+          'crowdstrike.alert': {
+            enabled: true,
+            vars: {
+              initial_interval: '24h',
+              interval: '30s',
+              batch_size: 1000,
+              http_client_timeout: '30s',
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-alert'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+            },
+          },
+          'crowdstrike.host': {
+            enabled: true,
+            vars: {
+              initial_interval: '24h',
+              interval: '30s',
+              batch_size: 5000,
+              http_client_timeout: '30s',
+              gov_cloud: false,
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-host'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+            },
+          },
+          'crowdstrike.identity_protection_assessment': {
+            enabled: true,
+            vars: {
+              initial_interval: '24h',
+              interval: '30s',
+              data_sources: [],
+              http_client_timeout: '30s',
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-identity-protection-assessment'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+              enable_nested_assessment_factors: false,
+            },
+          },
+          'crowdstrike.identity_protection_timeline': {
+            enabled: true,
+            vars: {
+              initial_interval: '24h',
+              interval: '30s',
+              batch_size: 100,
+              http_client_timeout: '60s',
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-identity_protection_timeline'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+            },
+          },
+          'crowdstrike.vulnerability': {
+            enabled: true,
+            vars: {
+              initial_interval: '2160h',
+              interval: '30s',
+              batch_size: 5000,
+              http_client_timeout: '30s',
+              facet: ['host_info', 'remediation', 'cve', 'evaluation_logic'],
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-vulnerability'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+            },
+          },
+        },
+      },
+    },
+    create_dataset_templates: true,
   });
 };

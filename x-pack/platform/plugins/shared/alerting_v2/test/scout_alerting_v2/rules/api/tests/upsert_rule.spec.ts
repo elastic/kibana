@@ -18,8 +18,6 @@ import {
   testData,
 } from '../fixtures';
 
-const MAX_OWNER_LENGTH = 256;
-
 apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
@@ -88,7 +86,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.query).toStrictEqual(replacementBody.query);
       // createdAt / createdBy / enabled are preserved across an upsert-replace.
       expect(response.body.created_at).toBe(created.created_at);
-      expect(response.body.created_by).toBe(created.created_by);
+      expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.enabled).toBe(created.enabled);
       // updatedAt is refreshed on every replace.
       expect(response.body.updated_at).not.toBe(created.updated_at);
@@ -251,20 +249,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'validation: should reject body when metadata.owner exceeds the maximum length',
-    async ({ apiClient }) => {
-      const response = await apiClient.put(getRuleUrl('any-id'), {
-        headers: writerHeaders,
-        body: buildCreateRuleData({
-          metadata: { name: 'long-owner', owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) },
-        }),
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
-
-  apiTest(
     'validation: should reject body when schedule.every is below the minimum interval',
     async ({ apiClient }) => {
       const response = await apiClient.put(getRuleUrl('any-id'), {
@@ -286,6 +270,22 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
+
+  apiTest(
+    'validation: should reject a recovering delay when recovery is disabled',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getRuleUrl('any-id'), {
+        headers: writerHeaders,
+        body: buildCreateRuleData({
+          metadata: { name: 'upsert-inert-recovery-delay' },
+          recovery_strategy: 'none',
+          state_transition: { pending_count: 0, recovering_count: 2 },
+        }),
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
   apiTest(
     'authorization: should return 201 for a user with full alerting_v2 privileges',

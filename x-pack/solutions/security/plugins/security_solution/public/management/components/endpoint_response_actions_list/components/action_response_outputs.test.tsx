@@ -129,6 +129,76 @@ describe('ActionResponseOutputs component', () => {
       expect(renderResult.container.textContent).toContain('PID 1234');
     });
 
+    it('should still render the kill-process output content when the action was not successful', () => {
+      const action = new EndpointActionGenerator('seed').generateActionDetails({
+        agents: ['agent-a'],
+        command: 'kill-process',
+        wasSuccessful: false,
+        isCompleted: true,
+        errors: ['Failed to kill the parent process'],
+        outputs: {
+          'agent-a': {
+            type: 'json',
+            content: {
+              code: 'ra_kill-process_error_partial-descendants',
+              pid: 1234,
+            },
+          },
+        },
+      });
+
+      renderResult = appTestContext.render(
+        <ActionResponseOutputs action={action} data-test-subj="test" />
+      );
+
+      // Output content is rendered even on failure...
+      expect(renderResult.getByTestId('test-killProcessOutput')).not.toBeNull();
+      expect(renderResult.container.textContent).toContain('PID 1234');
+      // ...instead of the generic failure message, since output content is available
+      expect(
+        renderResult.queryByTestId('test-agent-a-outputFailureMessage-response-action-failure-info')
+      ).toBeNull();
+    });
+
+    it('should render the canceled message for a canceled action even when host output is present', () => {
+      const action = new EndpointActionGenerator('seed').generateActionDetails({
+        agents: ['agent-a'],
+        command: 'kill-process',
+        isCompleted: true,
+        wasSuccessful: false,
+        wasCanceled: true,
+        outputs: {
+          'agent-a': {
+            type: 'json',
+            content: { code: 'ra_kill-process_success_done', pid: 1234 },
+          },
+        },
+      });
+      // `wasCanceled` is read from `agentState`, which the generator does not populate by default
+      action.agentState = {
+        'agent-a': {
+          isCompleted: true,
+          wasSuccessful: false,
+          wasCanceled: true,
+          completedAt: '2022-04-30T16:08:47.449Z',
+          errors: undefined,
+        },
+      };
+
+      renderResult = appTestContext.render(
+        <ActionResponseOutputs action={action} data-test-subj="test" />
+      );
+
+      // The canceled message is shown for a canceled action...
+      expect(
+        renderResult.getByTestId('test-agent-a-outputFailureMessage-response-action-failure-info')
+          .textContent
+      ).toContain('Canceled');
+      // ...alongside the host output content (the message is no longer suppressed by output)
+      expect(renderResult.getByTestId('test-killProcessOutput')).not.toBeNull();
+      expect(renderResult.container.textContent).toContain('PID 1234');
+    });
+
     it('should render the process result output for a suspend-process action', () => {
       const action = new EndpointActionGenerator('seed').generateActionDetails({
         agents: ['agent-a'],

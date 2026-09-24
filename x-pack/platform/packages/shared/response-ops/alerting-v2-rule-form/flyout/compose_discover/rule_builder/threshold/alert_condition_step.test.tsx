@@ -359,6 +359,44 @@ describe('RuleBuilderAlertConditionStep', () => {
     expect(screen.queryByTestId('ruleBuilderConditionOperator')).not.toBeInTheDocument();
   });
 
+  it('seeds a newly added condition with a currently valid metric after a stat rename', () => {
+    let builderState = makeBuilderState();
+    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      builderState = next;
+    });
+
+    const { rerender } = render(
+      <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+      target: { value: 'my_metric' },
+    });
+    const afterRename = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+
+    rerender(
+      <Wrapper builderState={afterRename} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('ruleBuilderAddCondition'));
+    const afterAdd = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+
+    expect(afterAdd.alertConditions).toHaveLength(2);
+    expect(afterAdd.alertConditions[1].metric).toBe('my_metric');
+  });
+
   it('adds and removes evaluations and reflects label in condition metric dropdown', () => {
     let builderState = makeBuilderState();
     const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
@@ -516,6 +554,26 @@ describe('RuleBuilderAlertConditionStep', () => {
     expect(
       screen.queryByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
     ).not.toBeInTheDocument();
+  });
+
+  it('renders optional as a label append instead of in the field title', () => {
+    const builderState = makeBuilderState();
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getAllByText('Filter')).toHaveLength(2);
+    expect(screen.getAllByText('optional')).toHaveLength(2);
+    expect(screen.queryByText('Filter (optional)')).not.toBeInTheDocument();
+    expect(screen.getByText('Evaluations')).toBeInTheDocument();
+    expect(screen.queryByText('Evaluations (optional)')).not.toBeInTheDocument();
   });
 
   it('sets and displays filter input value', () => {
@@ -795,38 +853,6 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
   });
 
-  it('disables preview button when childOpen is true', () => {
-    const builderState = makeBuilderState();
-
-    render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
-        <RuleBuilderAlertConditionStep
-          state={createState({ childOpen: true })}
-          dispatch={dispatch}
-          services={createMockServices()}
-        />
-      </Wrapper>
-    );
-
-    expect(screen.getByTestId('ruleBuilderOpenPreview')).toBeDisabled();
-  });
-
-  it('enables preview button when childOpen is false', () => {
-    const builderState = makeBuilderState();
-
-    render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
-        <RuleBuilderAlertConditionStep
-          state={createState({ childOpen: false })}
-          dispatch={dispatch}
-          services={createMockServices()}
-        />
-      </Wrapper>
-    );
-
-    expect(screen.getByTestId('ruleBuilderOpenPreview')).not.toBeDisabled();
-  });
-
   describe('recovery condition sync', () => {
     const makeStateWithRecovery = (overrides: Partial<ThresholdFormValues> = {}) =>
       makeBuilderState({
@@ -1094,6 +1120,205 @@ describe('RuleBuilderAlertConditionStep', () => {
       } finally {
         jest.useRealTimers();
       }
+    });
+  });
+
+  describe('severity', () => {
+    it('shows the single-condition callout and hides severity for multiple conditions', () => {
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({
+        alertConditions: [
+          { id: 'cond-1', metric: 'count', comparator: Comparator.GT, threshold: [100] },
+          { id: 'cond-2', metric: 'count', comparator: Comparator.GT, threshold: [200] },
+        ],
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('ruleBuilderSeverityDisabledCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleBuilderSeverityEnable')).not.toBeInTheDocument();
+    });
+
+    it('shows the reserved-label notice and hides the severity config when a stat is named severity', () => {
+      const builderState = makeBuilderState({
+        stats: [{ id: 'stat-1', label: 'severity', aggregation: Aggregation.COUNT }],
+        alertConditions: [
+          { id: 'cond-1', metric: 'severity', comparator: Comparator.GT, threshold: [100] },
+        ],
+        severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('ruleBuilderSeverityReservedLabelCallout')).toBeInTheDocument();
+      expect(screen.getByText(/a stat is named "severity"/i)).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleBuilderSeverityEnable')).not.toBeInTheDocument();
+    });
+
+    it('names the group-by field in the reserved-label notice', () => {
+      const builderState = makeBuilderState({
+        groupByFields: ['severity'],
+        severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      // The remediation is group-by specific (remove/change), not "rename a stat".
+      expect(screen.getByText(/group-by field named "severity"/i)).toBeInTheDocument();
+    });
+
+    it('clears severity when a stat is renamed to severity', () => {
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({
+        severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+        target: { value: 'severity' },
+      });
+      const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(next.stats[0].label).toBe('severity');
+      expect(next.severity).toBeUndefined();
+    });
+
+    it('enables single severity from the step UI', () => {
+      const onBuilderStateChange = jest.fn();
+      render(
+        <Wrapper builderState={makeBuilderState()} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('ruleBuilderSeverityEnable'));
+      const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(next.severity).toEqual({ mode: 'single', singleLevelSeverity: 'info', levels: [] });
+    });
+
+    it('leaves the condition threshold unchanged when a severity band is edited', () => {
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({
+        severity: {
+          mode: 'multi',
+          singleLevelSeverity: 'high',
+          levels: [
+            { id: 'l1', severity: 'low', threshold: 0 }, // fallback (no input)
+            { id: 'l2', severity: 'high', threshold: 200 }, // band at idx 1
+          ],
+        },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      // Editing the band threshold must not rewrite the condition threshold (no coupling).
+      fireEvent.change(screen.getByTestId('ruleBuilderSeverityThreshold-1'), {
+        target: { value: '250' },
+      });
+      const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(next.severity?.levels[1].threshold).toBe(250);
+      expect(next.alertConditions[0].threshold).toEqual([100]);
+    });
+
+    it('leaves severity band thresholds unchanged when the condition threshold is edited', () => {
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({
+        severity: {
+          mode: 'multi',
+          singleLevelSeverity: 'high',
+          levels: [
+            { id: 'l1', severity: 'low', threshold: 0 },
+            { id: 'l2', severity: 'high', threshold: 200 },
+          ],
+        },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      // Editing the condition threshold must not rewrite the severity bands (no coupling).
+      fireEvent.change(screen.getByTestId('ruleBuilderConditionThreshold-0'), {
+        target: { value: '150' },
+      });
+      const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(next.alertConditions[0].threshold).toEqual([150]);
+      expect(next.severity?.levels[1].threshold).toBe(200);
+    });
+
+    it('keeps the stored level order when a row severity changes (no auto-reorder)', () => {
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({
+        severity: {
+          mode: 'multi',
+          singleLevelSeverity: 'high',
+          levels: [
+            { id: 'l1', severity: 'low', threshold: 5 },
+            { id: 'l2', severity: 'medium', threshold: 10 },
+          ],
+        },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      // Change row 0 (low) to critical — the row stays put; ES|QL generation sorts a copy,
+      // so the UI never reorders the rows under the user.
+      fireEvent.change(screen.getByTestId('ruleBuilderSeverityLevel-0'), {
+        target: { value: 'critical' },
+      });
+      const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(next.severity?.levels.map((l) => l.severity)).toEqual(['critical', 'medium']);
     });
   });
 });

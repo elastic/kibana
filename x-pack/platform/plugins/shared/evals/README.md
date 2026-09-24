@@ -79,7 +79,9 @@ The plugin reads from the following indices:
 | `.evaluation-scores`           | Score ingestion API   | Evaluation score documents |
 | `.evaluation-datasets`         | Datasets API          | Dataset metadata           |
 | `.evaluation-dataset-examples` | Datasets API          | Dataset examples           |
+| `.evaluation-evaluators`       | Evaluators API        | User-defined evaluators    |
 | `traces-*`                     | OTLP / EDOT collector | OpenTelemetry trace spans  |
+| `logs-*`                       | OTLP / EDOT collector | OpenTelemetry log events   |
 
 Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
 
@@ -176,9 +178,10 @@ Other plugins can contribute their own production feature as an additional targe
 
 All routes are internal (`elastic-api-version: 1`). Read routes require the `read_evals` privilege; write routes require `manage_evals`.
 
-- **Experiments** — list, detail, scores, dataset-level examples, and statistical comparison of two experiments
+- **Experiments** — list, detail, scores, and statistical comparison of two experiments. Dataset-level examples are returned as one unpaginated group with eager score and evaluator details but without complete inputs or outputs. Input/output previews are bounded to 2,048 characters, and complete input and output are retrieved for one example repetition on demand.
 - **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.
 - **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. The listing accepts `tags` and `maturity` filters and returns facet counts for both (see [Dataset tags and maturity](#dataset-tags-and-maturity)). Supports remote forwarding to a configured golden-cluster Kibana.
+- **Evaluators** — list every evaluator available in the space, and create, read, update, or delete user-defined ones
 - **Scores** — bulk ingestion of evaluation score documents
 - **Examples** — per-example score history across experiments
 - **Traces** — span retrieval for a given trace ID
@@ -213,6 +216,16 @@ Evaluator routes reconstruct a normalized evidence round (`input.message`, `resp
 
 Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/evaluators/evidence/profiles.ts).
 
+### Reading normalized trace evidence
+
+`GET /internal/evals/traces/{traceId}/evidence` returns the normalized single-turn evidence used by evaluators. Omit `profile` to auto-detect the instrumentation or pass one explicitly.
+
+`wait` defaults to `none` for an immediate read. `stable` waits for non-empty evidence to remain unchanged for five seconds. `complete` also requires a response and root span; log-backed profiles normally take at least 7.5 seconds. Waits can run for about 28 seconds, including for a valid but missing trace ID, and return available evidence as `best_effort` on expiry.
+
+`_evaluate` uses the same whole-round `complete` readiness check.
+
+The endpoint requires `read_evals` and current-user read access to `traces-*` and `logs-*`. Explicit authorization failures return `403`; wildcard searches silently narrowed to authorized indices can still appear as `404`. Exhausted transient Elasticsearch failures return `503`. The endpoint returns full message and tool content, does not persist it, and supports one turn only.
+
 ## UI pages
 
 The plugin UI is organized into four navigation tabs:
@@ -230,10 +243,10 @@ The trace waterfall UI lives in the standalone `@kbn/llm-trace-waterfall` packag
 
 ```bash
 # Plugin unit tests
-yarn test:jest --config=x-pack/platform/plugins/shared/evals/jest.config.js
+pnpm test:jest --config=x-pack/platform/plugins/shared/evals/jest.config.js
 
 # Shared query builders tests
-yarn test:jest --config=x-pack/platform/packages/shared/kbn-evals-common/jest.config.js
+pnpm test:jest --config=x-pack/platform/packages/shared/kbn-evals-common/jest.config.js
 ```
 
 ### Regenerating OpenAPI schemas
@@ -242,7 +255,7 @@ The Zod types in `@kbn/evals-common` are generated from OpenAPI `.schema.yaml` f
 
 ```bash
 cd x-pack/platform/packages/shared/kbn-evals-common
-yarn openapi:generate
+pnpm openapi:generate
 ```
 
 After regenerating, you may need to fix unused imports added by the generator:

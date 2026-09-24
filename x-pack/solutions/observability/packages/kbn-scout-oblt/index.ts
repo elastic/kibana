@@ -6,7 +6,13 @@
  */
 
 // Observability-specific test framework
-export { test, apiTest, spaceTest, OBSERVABILITY_SPA_SHELL_TIMEOUT_MS } from './src/playwright';
+export {
+  test,
+  apiTest,
+  spaceTest,
+  ObservabilityNavigation,
+  OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+} from './src/playwright';
 
 // Worker fixtures for observability tests (e.g. sloData for API tests)
 export { sloDataFixture } from './src/playwright/fixtures/worker';
@@ -20,6 +26,7 @@ export { globalSetupHook, globalTeardownHook } from './src/playwright/global_hoo
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
+  AppMenu,
   browserAuthFixture,
   apiServicesFixture,
   createPlaywrightConfig,
@@ -63,7 +70,13 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
+export type {
+  ApiServicesFixture,
+  BrowserAuthFixture,
+  SamlAuth,
+  ApiClientResponse,
+  RoleSessionCredentials,
+} from '@kbn/scout';
 export type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker/api_client';
 
 // Re-exported service & configuration types

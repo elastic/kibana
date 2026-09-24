@@ -17,6 +17,7 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: x-pack/platform/plugins/shared/saved_objects_tagging
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/scout'
   - '@kbn/content-list-common'

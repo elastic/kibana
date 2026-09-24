@@ -1,5 +1,8 @@
 {
   "sha1": "befe397fd9ee6550fdb79074fe0001c97804cc79",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "5c681991b7b4c2a-4ba6c35e1027b9d",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/ui/tests/render.spec.ts",
-        "line": 25,
-        "column": 7
+        "line": 20,
+        "column": 52
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/ui/tests/render.spec.ts",
-        "line": 31,
-        "column": 7
+        "line": 23,
+        "column": 5
       }
     }
   ]

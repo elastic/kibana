@@ -10,6 +10,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
+import { RESPOND_ACTION_ID } from '../../../../constants/action_ids';
 import { useWithResponderActionDataFromAlert } from './use_responder_action_data';
 
 export const useResponderActionItem = (
@@ -28,7 +29,7 @@ export const useResponderActionItem = (
 
     if (!isAuthzLoading && canAccessResponseConsole) {
       actions.push({
-        key: 'endpointResponseActions-action-item',
+        key: RESPOND_ACTION_ID,
         'data-test-subj': 'endpointResponseActions-action-item',
         disabled: isDisabled,
         toolTipContent: tooltip,

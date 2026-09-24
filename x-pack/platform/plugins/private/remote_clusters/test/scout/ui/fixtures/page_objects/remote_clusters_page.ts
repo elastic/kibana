@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 const REMOTE_CLUSTERS_PATH = 'management/data/remote_clusters';
@@ -32,10 +33,10 @@ export class RemoteClustersPage {
   constructor(private readonly page: ScoutPage) {
     this.emptyPromptCreateButton = page.testSubj.locator('remoteClusterEmptyPromptCreateButton');
     this.tableCreateButton = page.testSubj.locator('remoteClusterCreateButton');
-    // Create button is in the empty-state prompt with no clusters, or the table header with some
+    // Create button is in the empty-state prompt with no clusters, or the app header with some
     // (mutually exclusive) — match whichever is present so the wizard is reachable either way.
     this.createButton = this.emptyPromptCreateButton.or(this.tableCreateButton);
-    this.pageTitle = page.testSubj.locator('remoteClusterPageTitle');
+    this.pageTitle = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.listTable = page.testSubj.locator('remoteClusterListTable');
     this.deleteModalTitle = page.testSubj.locator('confirmModalTitleText');
     this.deleteModalCancelButton = page.testSubj.locator('confirmModalCancelButton');

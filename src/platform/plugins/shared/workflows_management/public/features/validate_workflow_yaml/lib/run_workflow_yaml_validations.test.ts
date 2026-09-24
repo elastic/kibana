@@ -9,9 +9,57 @@
 
 import { monaco } from '@kbn/code-editor';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
+import { createMockWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry.mock';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 
+const emptyRegistry = createMockWorkflowContextRegistry();
+
 describe('runWorkflowYamlValidations', () => {
+  it('shares step contexts across variable and Liquid validation only within one run', () => {
+    const yaml = [
+      'name: shared-context-workflow',
+      'steps:',
+      '  - name: render',
+      '    type: console',
+      '    with:',
+      '      message: "{{ consts.missing }} {% for item in consts.missing %}{{ item }}{% endfor %}"',
+    ].join('\n');
+    const { yamlDocument, yamlLineCounter, workflowGraph, workflowDefinition } =
+      performComputation(yaml);
+    if (!yamlDocument || !yamlLineCounter || !workflowGraph || !workflowDefinition) {
+      throw new Error('Expected a parsed workflow and graph');
+    }
+    const getAllPredecessorsSpy = jest.spyOn(workflowGraph, 'getAllPredecessors');
+    const model = monaco.editor.createModel(yaml, 'yaml');
+    const params = {
+      registry: emptyRegistry,
+      yamlString: yaml,
+      model,
+      yamlDocument,
+      lineCounter: yamlLineCounter,
+      workflowGraph,
+      workflowDefinition,
+    };
+
+    try {
+      const results = runWorkflowYamlValidations(params);
+
+      expect(results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ ruleId: 'invalidVariableReference', severity: 'error' }),
+          expect.objectContaining({ ruleId: 'invalidCollectionPath', severity: 'error' }),
+        ])
+      );
+      expect(getAllPredecessorsSpy).toHaveBeenCalledTimes(1);
+      expect(getAllPredecessorsSpy).toHaveBeenCalledWith('render');
+
+      expect(runWorkflowYamlValidations(params)).toEqual(results);
+      expect(getAllPredecessorsSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      model.dispose();
+    }
+  });
+
   it('reports variable validation errors with line-accurate positions', () => {
     const yaml = [
       'name: test-workflow',
@@ -30,6 +78,7 @@ describe('runWorkflowYamlValidations', () => {
 
     const model = monaco.editor.createModel(yaml, 'yaml');
     const results = runWorkflowYamlValidations({
+      registry: emptyRegistry,
       yamlString: yaml,
       model,
       yamlDocument: computed.yamlDocument!,
@@ -63,6 +112,7 @@ describe('runWorkflowYamlValidations', () => {
     const computed = performComputation(yaml);
     const model = monaco.editor.createModel(yaml, 'yaml');
     const results = runWorkflowYamlValidations({
+      registry: emptyRegistry,
       yamlString: yaml,
       model,
       yamlDocument: computed.yamlDocument!,
@@ -74,6 +124,50 @@ describe('runWorkflowYamlValidations', () => {
 
     expect(results.some((result) => result.owner === 'connector-id-validation')).toBe(false);
     expect(results.some((result) => result.owner === 'esql-validation')).toBe(false);
+
+    model.dispose();
+  });
+
+  it('keeps validating the document when a variable reads a prototype-chain key', () => {
+    // A `__proto__` key in the inferred foreach item shape used to resolve to
+    // Object.prototype, and the resulting TypeError escaped every validator and
+    // wiped the whole document's diagnostics.
+    const yaml = [
+      'name: proto-workflow',
+      'steps:',
+      '  - name: dupe',
+      '    type: console',
+      '    with:',
+      '      message: hello',
+      '  - name: dupe',
+      '    type: console',
+      '    with:',
+      '      message: world',
+      '  - name: loop',
+      '    type: foreach',
+      `    foreach: '[{"__proto__": {"x": 1}}]'`,
+      '    steps:',
+      '      - name: inner',
+      '        type: console',
+      '        with:',
+      '          message: "{{ foreach.item.__proto__ }}"',
+    ].join('\n');
+
+    const computed = performComputation(yaml);
+    const model = monaco.editor.createModel(yaml, 'yaml');
+
+    const results = runWorkflowYamlValidations({
+      registry: emptyRegistry,
+      yamlString: yaml,
+      model,
+      yamlDocument: computed.yamlDocument!,
+      lineCounter: computed.yamlLineCounter!,
+      workflowLookup: computed.workflowLookup,
+      workflowGraph: computed.workflowGraph,
+      workflowDefinition: computed.workflowDefinition ?? undefined,
+    });
+
+    expect(results.filter((result) => result.ruleId === 'duplicateStepName')).not.toHaveLength(0);
 
     model.dispose();
   });

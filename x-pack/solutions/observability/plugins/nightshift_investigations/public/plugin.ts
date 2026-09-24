@@ -6,10 +6,19 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import { InvestigationLocatorDefinition } from '../common/locators';
 import {
   createNightshiftInvestigationsRepositoryClient,
   type NightshiftInvestigationsRepositoryClient,
 } from './api';
+import { registerInvestigationsWorkflowTriggers } from './workflows/triggers';
+
+export interface NightshiftInvestigationsPublicSetupDeps {
+  share: SharePluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+}
 
 export type NightshiftInvestigationsPublicSetup = void;
 
@@ -18,9 +27,21 @@ export interface NightshiftInvestigationsPublicStart {
 }
 
 export class NightshiftInvestigationsPublicPlugin
-  implements Plugin<NightshiftInvestigationsPublicSetup, NightshiftInvestigationsPublicStart>
+  implements
+    Plugin<
+      NightshiftInvestigationsPublicSetup,
+      NightshiftInvestigationsPublicStart,
+      NightshiftInvestigationsPublicSetupDeps
+    >
 {
-  setup(_core: CoreSetup): NightshiftInvestigationsPublicSetup {}
+  setup(
+    _core: CoreSetup,
+    { share, workflowsExtensions }: NightshiftInvestigationsPublicSetupDeps
+  ): NightshiftInvestigationsPublicSetup {
+    registerInvestigationsWorkflowTriggers(workflowsExtensions);
+
+    share.url.locators.create(new InvestigationLocatorDefinition());
+  }
 
   start(core: CoreStart): NightshiftInvestigationsPublicStart {
     return {
