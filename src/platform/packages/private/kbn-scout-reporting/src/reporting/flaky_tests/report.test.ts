@@ -265,6 +265,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       .spyOn(queries, 'fetchBranchStats')
       .mockResolvedValue(activeBranchStats(['jest-flaky']));
     jest.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchTestErrors').mockResolvedValue(new Map());
     const fetchSampleFailures = jest
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
@@ -384,6 +385,24 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     const fetchTargetStats = jest
       .spyOn(queries, 'fetchTargetStats')
       .mockResolvedValue(new Map([['jest-flaky-high', targetStats]]));
+    const errors = [
+      {
+        key: 'boom',
+        message: 'boom',
+        failures: 30,
+        builds: 30,
+        byPipeline: [{ pipeline: 'kibana-on-merge', failures: 30 }],
+        branches: ['main'],
+        targets: ['unknown'],
+        firstFailedAt: new Date('2026-09-01T00:00:00.000Z'),
+        lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+        lastFailedBuildUrl: 'https://b/1',
+        lastFailedJobId: 'job-1',
+      },
+    ];
+    const fetchTestErrors = jest
+      .spyOn(queries, 'fetchTestErrors')
+      .mockResolvedValue(new Map([['jest-flaky-high', errors]]));
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats').mockResolvedValue(
       new Map([
         [
@@ -468,6 +487,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       ],
       byTarget: targetStats,
       sampleFailures: [{ message: 'boom', buildUrl: 'https://b/1' }],
+      errors,
     });
 
     expect(report.consistentlyFailing.map((entry) => entry.testId)).toEqual(['jest-broken']);
@@ -478,6 +498,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       flakiestBranch: qualifyingFlakiestBranch,
       byTarget: [],
       sampleFailures: [],
+      errors: [],
     });
     expect(report.consistentlyFailing[0].suiteTitle).toBeUndefined();
 
@@ -510,6 +531,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     );
     expect(fetchBranchStats).toHaveBeenCalledWith(es, expect.anything(), admitted);
     expect(fetchTargetStats).toHaveBeenCalledWith(es, expect.anything(), admitted);
+    expect(fetchTestErrors).toHaveBeenCalledWith(es, expect.anything(), admitted);
     expect(fetchSampleFailures).toHaveBeenCalledWith(
       es,
       expect.anything(),
@@ -558,6 +580,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       .spyOn(queries, 'fetchBranchStats')
       .mockResolvedValue(activeBranchStats(['flaky-on-9.5', 'still-running']));
     jest.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchTestErrors').mockResolvedValue(new Map());
     const fetchSampleFailures = jest
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
@@ -627,6 +650,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
     const fetchTargetStats = jest.spyOn(queries, 'fetchTargetStats');
+    const fetchTestErrors = jest.spyOn(queries, 'fetchTestErrors');
     const fetchSampleFailures = jest.spyOn(queries, 'fetchSampleFailures');
     const fetchFilePipelineStats = jest.spyOn(queries, 'fetchFilePipelineStats');
 
@@ -640,6 +664,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(fetchTestMetadata).not.toHaveBeenCalled();
     expect(fetchBranchStats).not.toHaveBeenCalled();
     expect(fetchTargetStats).not.toHaveBeenCalled();
+    expect(fetchTestErrors).not.toHaveBeenCalled();
     expect(fetchSampleFailures).not.toHaveBeenCalled();
     expect(fetchFilePipelineStats).not.toHaveBeenCalled();
   });
@@ -710,6 +735,7 @@ describe('ScoutFlakyTests.writeToFile / fromFile', () => {
     // likewise for the per-branch counts, the per-target breakdown and the per-file breakdown
     expect(report.summary.flakyByBranch).toEqual({});
     expect(report.flaky[0].byTarget).toEqual([]);
+    expect(report.flaky[0].errors).toEqual([]);
     expect(report.files).toEqual([]);
 
     const outputPath = path.join(tmpDir, 'nested', 'report.json');
