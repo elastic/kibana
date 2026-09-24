@@ -24,10 +24,10 @@ import {
   MAX_DISCOVER_SESSION_TAGS,
   DiscoverTabType,
 } from '@kbn/discover-session-constants';
-import { classicTabSchema, esqlTabSchema } from './tab';
+import { discoverSessionApiClassicTabBaseSchema, discoverSessionApiEsqlTabBaseSchema } from './tab';
 import { visContextSchema } from './vis_context';
-import { discoverSessionControlPanelsSchema } from './control_panel';
-import { discoverSessionMetricsTabTypeStateSchema } from './metrics_tab';
+import { discoverSessionApiControlPanelsSchema } from './control_panel';
+import { discoverSessionApiMetricsTabTypeStateSchema } from './metrics_tab';
 
 const discoverSessionTabPresentationSchema = z
   .object({
@@ -73,7 +73,7 @@ const discoverSessionTabPresentationSchema = z
         'Refresh interval associated with this tab. It can be stored independently; the presence of `time_range` controls whether the time settings are restored.',
     }),
     vis_context: visContextSchema.optional(),
-    control_panels: discoverSessionControlPanelsSchema.optional(),
+    control_panels: discoverSessionApiControlPanelsSchema.optional(),
   })
   .strict();
 
@@ -84,40 +84,40 @@ const discoverSessionTabIdentitySchema = z
   })
   .strict();
 
-export const discoverSessionDefaultTabTypeStateSchema = z
+export const discoverSessionApiDefaultTabTypeStateSchema = z
   .object({
     type: z
       .literal(`${DiscoverTabType.Default}`)
       .default(DiscoverTabType.Default)
       .meta({
         description:
-          'A tab with no type-specific saved state. ' +
-          'If `type` is omitted, it defaults to `default`. Responses always include `type`.',
+          'Identifies the type of profile settings saved with the tab. ' +
+          'The `default` value indicates that no profile settings are included.',
       }),
   })
   .strict();
 
-export const discoverSessionClassicTabSchema = z
+export const discoverSessionApiClassicTabSchema = z
   .object({
     ...discoverSessionTabIdentitySchema.shape,
-    ...classicTabSchema.shape,
+    ...discoverSessionApiClassicTabBaseSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
-    ...discoverSessionDefaultTabTypeStateSchema.shape,
+    ...discoverSessionApiDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
-export const discoverSessionEsqlTabSchema = z
+export const discoverSessionApiEsqlTabSchema = z
   .object({
     ...discoverSessionTabIdentitySchema.shape,
-    ...esqlTabSchema.shape,
+    ...discoverSessionApiEsqlTabBaseSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
     ...asCodeEsqlApproximationSchema.shape,
-    ...discoverSessionDefaultTabTypeStateSchema.shape,
+    ...discoverSessionApiDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
-export const discoverSessionMetricsTabSchema = discoverSessionEsqlTabSchema
-  .extend(discoverSessionMetricsTabTypeStateSchema.shape)
+export const discoverSessionApiMetricsTabSchema = discoverSessionApiEsqlTabSchema
+  .extend(discoverSessionApiMetricsTabTypeStateSchema.shape)
   .meta({
     title: 'Metrics tab',
     description: 'An ES|QL tab with saved metrics grid settings.',
@@ -125,9 +125,9 @@ export const discoverSessionMetricsTabSchema = discoverSessionEsqlTabSchema
 
 export const discoverSessionApiTabSchema = z
   .union([
-    discoverSessionClassicTabSchema,
-    discoverSessionEsqlTabSchema,
-    discoverSessionMetricsTabSchema,
+    discoverSessionApiClassicTabSchema,
+    discoverSessionApiEsqlTabSchema,
+    discoverSessionApiMetricsTabSchema,
   ])
   .meta({
     description:

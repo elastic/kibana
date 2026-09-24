@@ -7,7 +7,11 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { AuditLogger, CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type {
+  AuditLogger,
+  CoreSecurityDelegateContract,
+  ServiceAccount,
+} from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
@@ -222,14 +226,9 @@ describe('buildSecurityApi', () => {
     });
 
     it('returns the result from the service', async () => {
-      const created = {
-        id: 'service-account-id',
-        type: 'project' as const,
-        name: 'nightshift-relay',
-        organization_id: 'organization-id',
-        role_assignments: {},
-        assumable_by: [],
-      };
+      // Annotated, so a change to the contract shape fails here rather than sliding through:
+      // passing an un-annotated variable to `mockResolvedValue` skips the excess-property check.
+      const created: ServiceAccount = { id: 'service-account-id', name: 'nightshift-relay' };
       serviceAccounts!.backend.create.mockResolvedValue(created);
 
       await expect(
@@ -401,6 +400,27 @@ describe('buildSecurityApi', () => {
         expect(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
           credential
         );
+      });
+
+      it('should properly delegate isOwnClientAuthentication to the service', () => {
+        jest.mocked(authc.apiKeys.uiam!.isOwnClientAuthentication).mockReturnValue(true);
+
+        expect(api.authc.apiKeys.uiam!.isOwnClientAuthentication('kibana-shared-secret')).toBe(
+          true
+        );
+        expect(authc.apiKeys.uiam!.isOwnClientAuthentication).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.isOwnClientAuthentication).toHaveBeenCalledWith(
+          'kibana-shared-secret'
+        );
+      });
+
+      it('should properly delegate isExternalApiKey to the service', () => {
+        jest.mocked(authc.apiKeys.uiam!.isExternalApiKey).mockReturnValue(true);
+        const request = httpServerMock.createKibanaRequest();
+
+        expect(api.authc.apiKeys.uiam!.isExternalApiKey(request)).toBe(true);
+        expect(authc.apiKeys.uiam!.isExternalApiKey).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.isExternalApiKey).toHaveBeenCalledWith(request);
       });
     });
 

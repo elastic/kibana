@@ -5,40 +5,37 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   concat,
   lastValueFrom,
   mergeMap,
   of,
   shareReplay,
+  Subject,
+  tap,
   throwError,
   timer,
   toArray,
   type Observable,
 } from 'rxjs';
 import {
-  AgentExecutionMode,
   AgentBuilderErrorCode,
+  AgentExecutionMode,
   ChatEventType,
   ConversationAccessControlMode,
   ConversationOriginType,
-  createBadRequestError,
   TimelineEventType,
+  isRequestAbortedError,
   type ChatAgentEvent,
   type ChatEvent,
   type RoundCompleteEvent,
+  type RoundInterruptedEvent,
   type RoundStartedEvent,
   ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserAttributes } from '@kbn/inference-tracing';
-import {
-  collectAndWriteEvents,
-  handleAgentExecution,
-  serializeExecutionError,
-  setUserAttributes,
-} from './execution_runner';
+import { collectAndWriteEvents, handleAgentExecution, setUserAttributes } from './execution_runner';
 import {
   createConversationClientMock,
   createEmptyConversation,
@@ -111,12 +108,15 @@ const createModelProviderMock = () => ({
 const createDeps = ({
   conversationClient,
   getConversationRoundAuthor = jest.fn().mockResolvedValue(undefined),
+  analyticsService,
 }: {
   conversationClient: ReturnType<typeof createConversationClientMock>;
   getConversationRoundAuthor?: jest.Mock;
+  analyticsService?: { reportRoundComplete?: jest.Mock; reportRoundError?: jest.Mock };
 }) =>
   ({
     logger: loggingSystemMock.createLogger(),
+    analyticsService,
     runAgent: jest.fn(),
     agentService: {
       getRegistry: jest
@@ -717,7 +717,7 @@ describe('handleAgentExecution', () => {
   });
 
   describe('two-phase failure handling', () => {
-    it('keeps the receipt-time user_message on UPDATE when the run fails after round start (no cleanup write)', async () => {
+    it('keeps the receipt-time user_message on UPDATE when the run fails after round start and records the failed execution', async () => {
       const conversation = createEmptyConversation({
         id: 'conversation-1',
         agent_id: 'test-agent',
@@ -725,6 +725,7 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.appendEvents.mockResolvedValue(conversation);
+      conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
 
       mockAgentStream([makeRoundStartedEvent()], 'asyncShared', new Error('agent exploded'));
       stubResolveServices(conversationClient);
@@ -741,9 +742,10 @@ describe('handleAgentExecution', () => {
       await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
       await flushMicrotasks();
 
-      // Only the receipt-time user_message write happened; no cleanup or terminal write.
+      // The receipt-time user_message write, then the interruption rewrite of the round; no delete.
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-      expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
+      expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
+      expect(conversationClient.replaceRoundEvents.mock.calls[0][0].roundId).toBe('round-1');
       expect(conversationClient.delete).not.toHaveBeenCalled();
     });
 
@@ -767,9 +769,10 @@ describe('handleAgentExecution', () => {
       await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
       await flushMicrotasks();
 
-      // The conversation and its receipt-time user_message survive the failed round.
+      // The conversation and its receipt-time user_message survive the failed round; the failure
+      // is recorded on it.
       expect(conversationClient.delete).not.toHaveBeenCalled();
-      expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
+      expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
     });
 
     it('awaits the receipt write before the agent starts on CREATE (no tool can run before the input is stored)', async () => {
@@ -800,6 +803,497 @@ describe('handleAgentExecution', () => {
 
       expect(executeAgentMock).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('handleAgentExecution — interrupted executions', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    generateTitleMock.mockReturnValue(of('Generated title'));
+  });
+
+  const makeRoundInterruptedEvent = (roundId: string = 'round-1'): RoundInterruptedEvent => ({
+    type: ChatEventType.roundInterrupted,
+    data: {
+      round_id: roundId,
+      started_at: '2024-01-01T00:00:00.000Z',
+      input: { message: 'Hello' },
+      steps: [],
+      summary: { time_to_last_token: 1 },
+      attachments: [],
+    },
+  });
+
+  /** A client whose events writes echo the written events (a landed write). */
+  const echoingClient = () => {
+    const conversation = createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' });
+    const conversationClient = createConversationClientMock();
+    conversationClient.get.mockResolvedValue(conversation);
+    conversationClient.appendEvents.mockImplementation(async (request) => ({
+      ...conversation,
+      schema_version: 1,
+      events: request.events,
+    }));
+    conversationClient.replaceRoundEvents.mockImplementation(async (request) => ({
+      ...conversation,
+      schema_version: 1,
+      events: request.events,
+    }));
+    return conversationClient;
+  };
+
+  const collect = async (events$: Observable<ChatEvent>) => {
+    const seen: ChatEvent[] = [];
+    let thrown: unknown;
+    try {
+      await lastValueFrom(
+        events$.pipe(
+          tap((event) => seen.push(event)),
+          toArray()
+        )
+      );
+    } catch (err) {
+      thrown = err;
+    }
+    await flushMicrotasks();
+    return { seen, thrown };
+  };
+
+  it('failure mid-round: persists execution_failed, emits it on the stream, then errors with the same error', async () => {
+    const conversationClient = echoingClient();
+    mockAgentStream(
+      [makeRoundStartedEvent(), makeRoundInterruptedEvent()],
+      'asyncShared',
+      new Error('llm exploded')
+    );
+    stubResolveServices(conversationClient);
+
+    const events$ = await runHandle({
+      agentParams: {
+        agentId: 'test-agent',
+        conversationId: 'conversation-1',
+        nextInput: { message: 'Hello' },
+      },
+      conversationClient,
+    });
+    const { seen, thrown } = await collect(events$);
+
+    expect(thrown).toMatchObject({
+      code: AgentBuilderErrorCode.internalError,
+      message: 'Error executing agent: llm exploded',
+    });
+    expect(seen.map((event) => event.type)).toEqual([
+      TimelineEventType.executionStarted,
+      TimelineEventType.executionFailed,
+    ]);
+    expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
+    const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
+    expect(write.skipIfTerminalExistsFor).toBe('round-1::execution');
+    const stored = write.events.at(-1)!;
+    expect(stored.type).toBe(TimelineEventType.executionFailed);
+    // the stored error is the one the client receives
+    expect((stored.data as { error: { message: string } }).error.message).toBe(
+      'Error executing agent: llm exploded'
+    );
+    expect(seen.map((event) => event.type)).not.toContain(ChatEventType.roundInterrupted);
+  });
+
+  it('abort mid-round: emits execution_aborted and errors with RequestAbortedError', async () => {
+    const conversationClient = echoingClient();
+    const abortController = new AbortController();
+    // the agent stream emits round_started, then aborts and winds down with round_interrupted
+    const source$ = new Subject<ChatAgentEvent>();
+    executeAgentMock.mockReturnValue(source$.pipe(shareReplay()));
+    stubResolveServices(conversationClient);
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: createDeps({ conversationClient }),
+      request: { headers: {} } as never,
+      abortSignal: abortController.signal,
+    });
+    const collected = collect(events$);
+    await flushMicrotasks();
+    source$.next(makeRoundStartedEvent());
+    abortController.abort();
+    source$.next(makeRoundInterruptedEvent());
+    source$.error(new Error('AbortError'));
+    const { seen, thrown } = await collected;
+
+    expect(isRequestAbortedError(thrown)).toBe(true);
+    expect(seen.map((event) => event.type)).toEqual([
+      TimelineEventType.executionStarted,
+      TimelineEventType.executionAborted,
+    ]);
+    const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
+    expect(write.events.at(-1)!.type).toBe(TimelineEventType.executionAborted);
+  });
+
+  it('late abort after round_complete: only the success write happens', async () => {
+    const conversationClient = echoingClient();
+    const abortController = new AbortController();
+    const source$ = new Subject<ChatAgentEvent>();
+    executeAgentMock.mockReturnValue(source$.pipe(shareReplay()));
+    stubResolveServices(conversationClient);
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: createDeps({ conversationClient }),
+      request: { headers: {} } as never,
+      abortSignal: abortController.signal,
+    });
+    const collected = collect(events$);
+    await flushMicrotasks();
+    source$.next(makeRoundStartedEvent());
+    source$.next({
+      type: ChatEventType.roundComplete,
+      data: { round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }) },
+    } as RoundCompleteEvent);
+    abortController.abort();
+    source$.complete();
+    const { seen, thrown } = await collected;
+
+    expect(isRequestAbortedError(thrown)).toBe(true);
+    // one write: the success path's replaceRoundEvents; no interruption write on top of it
+    expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
+    expect(conversationClient.replaceRoundEvents.mock.calls[0][0]).not.toHaveProperty(
+      'skipIfTerminalExistsFor'
+    );
+    expect(seen.map((event) => event.type)).toContain(TimelineEventType.executionTerminated);
+    expect(seen.map((event) => event.type)).not.toContain(TimelineEventType.executionAborted);
+  });
+
+  it('success write fails: execution_failed is written from the round_complete payload', async () => {
+    const conversationClient = echoingClient();
+    const conversation = createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' });
+    conversationClient.replaceRoundEvents
+      .mockRejectedValueOnce(new Error('store down'))
+      .mockImplementationOnce(async (request) => ({
+        ...conversation,
+        schema_version: 1,
+        events: request.events,
+      }));
+    mockAgentStream(
+      [
+        makeRoundStartedEvent(),
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+              steps: [{ type: 'reasoning', reasoning: 'r' } as never],
+            },
+          },
+        } as RoundCompleteEvent,
+      ],
+      'asyncShared'
+    );
+    stubResolveServices(conversationClient);
+
+    const events$ = await runHandle({
+      agentParams: {
+        agentId: 'test-agent',
+        conversationId: 'conversation-1',
+        nextInput: { message: 'Hello' },
+      },
+      conversationClient,
+    });
+    const { seen, thrown } = await collect(events$);
+
+    expect(thrown).toMatchObject({ message: 'Error executing agent: store down' });
+    expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(2);
+    const [interruptionWrite] = conversationClient.replaceRoundEvents.mock.calls[1];
+    expect(interruptionWrite.skipIfTerminalExistsFor).toBe('round-1::execution');
+    expect(interruptionWrite.events.map((event) => event.id)).toEqual([
+      'round-1::user_message',
+      'round-1::execution_started',
+      'round-1::step::0',
+      'round-1::execution_failed',
+    ]);
+    expect(seen.map((event) => event.type)).toContain(TimelineEventType.executionFailed);
+  });
+
+  it('setup failure after the receipt write: minimal execution_failed persisted, streamed, then the normalised error', async () => {
+    const conversationClient = echoingClient();
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
+    stubResolveServices(conversationClient);
+    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
+    deps.agentService.getRegistry.mockRejectedValue(new Error('registry down'));
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    const { seen, thrown } = await collect(events$);
+
+    // the persisted terminal reaches the stream before the error, like a mid-run failure
+    expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionFailed]);
+    expect(thrown).toMatchObject({
+      code: AgentBuilderErrorCode.internalError,
+      message: 'Error executing agent: registry down',
+    });
+
+    // receipt write, then the minimal interruption projection
+    expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
+    const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
+    expect(write.events.map((event) => event.id)).toEqual([
+      'round-1::user_message',
+      'round-1::execution_started',
+      'round-1::execution_failed',
+    ]);
+  });
+
+  it('setup-time abort carries the recorded abort reason into execution_aborted', async () => {
+    const conversationClient = echoingClient();
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
+    stubResolveServices(conversationClient);
+    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
+    const abortController = new AbortController();
+    deps.agentService.getRegistry.mockImplementation(async () => {
+      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      throw new Error('AbortError');
+    });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: abortController.signal,
+    });
+    const { seen, thrown } = await collect(events$);
+
+    expect(isRequestAbortedError(thrown)).toBe(true);
+    expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionAborted]);
+    const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
+    expect(write.events.at(-1)!.data).toMatchObject({
+      aborted_by: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+    });
+  });
+
+  it('setup failure on a HITL resume: prompt_response + minimal exec_k projection appended', async () => {
+    const conversationClient = echoingClient();
+    const paused = {
+      ...createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' }),
+      rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt })],
+      events: [
+        {
+          id: 'round-1::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2024-01-01T00:00:00.000Z',
+          actor: { type: 'agent', id: 'test-agent' },
+          execution_id: 'round-1::execution',
+          trigger_event_id: 'round-1::user_message',
+          data: {
+            model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+            time_to_first_token: 1,
+            time_to_last_token: 1,
+            outcome: { type: 'prompt_requested', prompts: [] },
+          },
+        },
+      ] as never,
+    };
+    conversationClient.get.mockResolvedValue(paused);
+    stubResolveServices(conversationClient);
+    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
+    deps.agentService.getRegistry.mockRejectedValue(new Error('registry down'));
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { prompts: {} },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    const { seen, thrown } = await collect(events$);
+    expect(thrown).toBeDefined();
+    expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionFailed]);
+
+    // no receipt write on a resume; one append with the prompt_response and the exec_1 projection
+    expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    const [write] = conversationClient.appendEvents.mock.calls[0];
+    expect(write.events.map((event) => event.id)).toEqual([
+      'round-1::prompt_response::1',
+      'round-1::execution::1::execution_started',
+      'round-1::execution::1::execution_failed',
+    ]);
+    // the interrupted resume consumed the prompt: the round no longer awaits it
+    expect(write.status).toBe(ConversationRoundStatus.completed);
+  });
+
+  it('failure on a HITL resume: the round error keeps the paused round origin the request omits', async () => {
+    const conversationClient = echoingClient();
+    const paused = {
+      ...createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' }),
+      rounds: [
+        createRound({
+          id: 'round-1',
+          status: ConversationRoundStatus.awaitingPrompt,
+          origin: { type: ConversationOriginType.Slack },
+        }),
+      ],
+    };
+    conversationClient.get.mockResolvedValue(paused);
+    stubResolveServices(conversationClient);
+    mockAgentStream([makeRoundInterruptedEvent()], 'asyncShared', new Error('llm exploded'));
+
+    const reportRoundError = jest.fn();
+    const deps = createDeps({ conversationClient, analyticsService: { reportRoundError } });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { prompts: {} },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    const { thrown } = await collect(events$);
+
+    expect(thrown).toMatchObject({ code: AgentBuilderErrorCode.internalError });
+    expect(reportRoundError).toHaveBeenCalledWith(
+      expect.objectContaining({ roundOrigin: ConversationOriginType.Slack })
+    );
+  });
+
+  it('failure on a fresh round: a completed round origin is not carried over to the new round', async () => {
+    const conversationClient = echoingClient();
+    const slackConversation = {
+      ...createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' }),
+      rounds: [
+        createRound({
+          id: 'round-1',
+          status: ConversationRoundStatus.completed,
+          origin: { type: ConversationOriginType.Slack },
+        }),
+      ],
+    };
+    conversationClient.get.mockResolvedValue(slackConversation);
+    stubResolveServices(conversationClient);
+    mockAgentStream(
+      [makeRoundStartedEvent(), makeRoundInterruptedEvent()],
+      'asyncShared',
+      new Error('llm exploded')
+    );
+
+    const reportRoundError = jest.fn();
+    const deps = createDeps({ conversationClient, analyticsService: { reportRoundError } });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await collect(events$);
+
+    expect(reportRoundError).toHaveBeenCalledWith(
+      expect.objectContaining({ roundOrigin: undefined })
+    );
+  });
+
+  it('storeConversation=false: nothing is written and the error surfaces unchanged in kind', async () => {
+    const conversationClient = createConversationClientMock();
+    mockAgentStream(
+      [makeRoundStartedEvent(), makeRoundInterruptedEvent()],
+      'asyncShared',
+      new Error('llm exploded')
+    );
+    stubResolveServices(conversationClient);
+
+    const events$ = await runHandle({
+      agentParams: {
+        agentId: 'test-agent',
+        nextInput: { message: 'Hello' },
+        storeConversation: false,
+      },
+      conversationClient,
+    });
+    const { seen, thrown } = await collect(events$);
+
+    expect(thrown).toMatchObject({ code: AgentBuilderErrorCode.internalError });
+    expect(seen).toEqual([]);
+    expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
+  });
+});
+
+describe('collectAndWriteEvents — error flush', () => {
+  it('flushes the pending batch before rejecting', async () => {
+    const executionClient = { appendEvents: jest.fn().mockResolvedValue(undefined) };
+    const source$ = new Subject<ChatEvent>();
+    const failure = new Error('stream failed');
+
+    const promise = collectAndWriteEvents({
+      events$: source$,
+      execution: { executionId: 'execution-1' } as never,
+      executionClient: executionClient as never,
+      logger: loggingSystemMock.createLogger(),
+    });
+    const terminal = {
+      id: 'round-1::execution_failed',
+      type: TimelineEventType.executionFailed,
+    } as unknown as ChatEvent;
+    source$.next(terminal);
+    source$.error(failure);
+
+    await expect(promise).rejects.toBe(failure);
+    expect(executionClient.appendEvents).toHaveBeenCalledWith('execution-1', [terminal]);
   });
 });
 
@@ -858,53 +1352,5 @@ describe('collectAndWriteEvents', () => {
     ).resolves.toBeUndefined();
 
     expect(executionClient.appendEvents).toHaveBeenCalledWith('execution-1', [event]);
-  });
-});
-
-describe('serializeExecutionError', () => {
-  it('passes through AgentBuilderError code, message, and meta', () => {
-    const err = createBadRequestError('bad input', { foo: 'bar' });
-
-    expect(serializeExecutionError(err)).toEqual({
-      code: AgentBuilderErrorCode.badRequest,
-      message: 'bad input',
-      meta: expect.objectContaining({ statusCode: 400, foo: 'bar' }),
-    });
-  });
-
-  it('preserves the HTTP status from a Boom error in meta.statusCode', () => {
-    const err = Boom.forbidden('Unauthorized to get actions');
-
-    expect(serializeExecutionError(err)).toEqual({
-      code: AgentBuilderErrorCode.internalError,
-      message: 'Unauthorized to get actions',
-      meta: { statusCode: 403 },
-    });
-  });
-
-  it('preserves the HTTP status from a plain error carrying statusCode', () => {
-    const err = Object.assign(new Error('nope'), { statusCode: 401 });
-
-    expect(serializeExecutionError(err)).toEqual({
-      code: AgentBuilderErrorCode.internalError,
-      message: 'nope',
-      meta: { statusCode: 401 },
-    });
-  });
-
-  it('omits meta for plain errors with no status', () => {
-    expect(serializeExecutionError(new Error('boom'))).toEqual({
-      code: AgentBuilderErrorCode.internalError,
-      message: 'boom',
-    });
-  });
-
-  it('ignores out-of-range status codes', () => {
-    const err = Object.assign(new Error('weird'), { statusCode: 200 });
-
-    expect(serializeExecutionError(err)).toEqual({
-      code: AgentBuilderErrorCode.internalError,
-      message: 'weird',
-    });
   });
 });

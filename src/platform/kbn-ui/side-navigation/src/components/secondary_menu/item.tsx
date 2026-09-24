@@ -9,22 +9,15 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiTextTruncate, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiIcon, EuiTextTruncate, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { SIDE_PANEL_CONTENT_GAP } from '@kbn/ui-chrome-layout';
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
-import {
-  BADGE_SPACING_OFFSET,
-  ITEM_HORIZONTAL_SPACING_OFFSET,
-  NAVIGATION_SELECTOR_PREFIX,
-  SUB_MENU_ICON_SPACING_OFFSET,
-} from '../../constants';
-import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
@@ -69,6 +62,7 @@ export const SecondaryMenuItemComponent = ({
     iconType: isExternal ? 'external' : iconType,
     ...(isExternal && { target: '_blank' }),
   };
+  const submenuIconClassName = `${NAVIGATION_SELECTOR_PREFIX}-submenuIcon`;
 
   const buttonStyles = css`
     font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
@@ -80,7 +74,7 @@ export const SecondaryMenuItemComponent = ({
       justify-content: ${iconSide === 'left' ? 'flex-start' : 'space-between'};
     }
 
-    svg:not(.euiBetaBadge__icon) {
+    svg:not(.euiBetaBadge__icon):not(.${submenuIconClassName}) {
       color: ${iconSide === 'right' ? euiTheme.colors.textDisabled : 'inherit'};
     }
 
@@ -93,27 +87,28 @@ export const SecondaryMenuItemComponent = ({
   const labelAndBadgeStyles = css`
     align-items: center;
     display: flex;
+    flex: 1;
     gap: ${euiTheme.size.xs};
+    min-width: 0;
   `;
-
-  const isInSidePanel = testSubjPrefix?.includes('sidePanel');
-  let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
-  // Secondary item label inside side panel (narrower)
-  if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
-  // Secondary item label + badge
-  if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
-  // Secondary item label + right arrow (More menu)
-  if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
 
   const labelTextStyles = css`
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    max-width: ${maxWidth}px;
+    min-width: 0;
   `;
 
+  // Without a `width`, EuiTextTruncate measures its own box, so it has to fill the row.
   const truncatedLabelStyles = css`
-    max-width: ${maxWidth}px;
+    flex: 1;
+    min-width: 0;
+  `;
+
+  const submenuIconStyles = css`
+    flex-shrink: 0;
+    margin-left: auto;
+    opacity: 0.6;
   `;
 
   /* Always show non-new badges. Show new ones if isNew check allows it
@@ -126,12 +121,7 @@ export const SecondaryMenuItemComponent = ({
 
   const label =
     truncation === 'middle' && typeof children === 'string' ? (
-      <EuiTextTruncate
-        text={children}
-        truncation="middle"
-        width={maxWidth}
-        css={truncatedLabelStyles}
-      />
+      <EuiTextTruncate text={children} truncation="middle" css={truncatedLabelStyles} />
     ) : (
       <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
         {children}
@@ -142,6 +132,16 @@ export const SecondaryMenuItemComponent = ({
     <div css={labelAndBadgeStyles}>
       {label}
       {getBadge()}
+      {hasSubmenu && (
+        <EuiIcon
+          aria-hidden={true}
+          className={submenuIconClassName}
+          color={euiTheme.colors.textDisabled}
+          css={submenuIconStyles}
+          size="m"
+          type="chevronSingleRight"
+        />
+      )}
     </div>
   );
 
