@@ -17,6 +17,9 @@ import {
   titleComparators,
   apiPublishesSettings,
   initializeStateApi,
+  getViewModeSubject,
+  useStateFromPublishingSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
 import {
@@ -196,9 +199,13 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       store: savedMap.getStore(),
     });
 
+    const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
     return {
       api,
       Component: () => {
+        const viewMode = useStateFromPublishingSubject(viewMode$);
+
         useEffect(() => {
           return () => {
             crossPanelActions.cleanup();
@@ -243,6 +250,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
                   : undefined
               }
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
+              previewMode={viewMode === 'preview'}
             />
           </Provider>
         );

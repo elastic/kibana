@@ -75,6 +75,7 @@ export interface Props {
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
   renderTooltipContent?: RenderToolTipContent;
+  previewMode?: boolean;
   timeslice?: Timeslice;
   featureModeActive: boolean;
   filterModeActive: boolean;
@@ -249,7 +250,7 @@ export class MbMap extends Component<Props> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        if (this._isMounted) {
+        if (!this.props.previewMode && this._isMounted) {
           this.props.extentChanged(this._getMapExtentState());
         }
       }, 100)
@@ -443,7 +444,7 @@ export class MbMap extends Component<Props> {
     let scaleControl;
     let keydownScrollZoomControl;
     let tileStatusTrackerControl;
-    if (this.props.mapApi) {
+    if (!this.props.previewMode && this.props.mapApi) {
       drawFilterControl =
         this.props.addFilters && this.props.filterModeActive ? (
           <DrawFilterControl mbMap={this.props.mapApi} addFilters={this.props.addFilters} />
