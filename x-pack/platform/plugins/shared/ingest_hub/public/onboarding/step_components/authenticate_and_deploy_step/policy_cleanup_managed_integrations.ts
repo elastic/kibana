@@ -138,12 +138,16 @@ async function updateManagedIntegrationsPolicy(
     }
   }
 
-  const { connectorId, staticKeys } = authenticateAndDeployStep;
+  const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
   const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
   const policyNamespace = existingNamespace ?? namespace;
+
+  // Preserve the connector already on the policy (a Fleet operator may have reassigned it
+  // since the wizard ran); never substitute the stale wizard connectorId.
+  const existingCloudConnector = existingGetResult.item.cloud_connector;
 
   await sendUpdateAgentlessPolicy(policyId, {
     name: policyName,
@@ -151,14 +155,6 @@ async function updateManagedIntegrationsPolicy(
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
-    ...(connectorId
-      ? {
-          cloud_connector: {
-            enabled: true,
-            cloud_connector_id: connectorId,
-            target_csp: 'aws' as const,
-          },
-        }
-      : {}),
+    ...(existingCloudConnector ? { cloud_connector: existingCloudConnector } : {}),
   });
 }
