@@ -28,6 +28,10 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 /**
  * Row cap of `getDispatchableAlertEventsQuery`. Kept in sync by a unit test —
  * ES|QL will not accept a bound parameter in a LIMIT clause.
+ *
+ * ES|QL silently truncates to 1 000 rows when a query has no LIMIT, so every
+ * dispatcher query that can return more rows than that sets `LIMIT 10000`
+ * (the ES|QL maximum) explicitly.
  */
 export const EPISODE_QUERY_LIMIT = 10_000;
 
@@ -253,7 +257,8 @@ export const getAlertEpisodeSuppressionsQueries = (
             last_deactivate_action == "deactivate", true,
             false
           )
-        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id`.toRequest();
+        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id
+        | LIMIT 10000`.toRequest();
     }
   );
 };
@@ -271,7 +276,7 @@ export const getLastNotifiedTimestampsQueries = (
       | WHERE ${whereClause}
       | STATS last_notified = MAX(@timestamp), episode_status = LAST(episode_status, @timestamp) BY action_group_id
       | KEEP action_group_id, last_notified, episode_status
-      `.toRequest();
+      | LIMIT 10000`.toRequest();
   });
 };
 
@@ -308,6 +313,7 @@ export const getEpisodeDataQueries = (
         | EVAL episode_id = episode.id, data_json = JSON_EXTRACT(_source, "$.data")
         | DROP _source
         | STATS data_json = LAST(data_json, @timestamp) BY episode_id
-        | KEEP episode_id, data_json`.toRequest();
+        | KEEP episode_id, data_json
+        | LIMIT 10000`.toRequest();
   });
 };
