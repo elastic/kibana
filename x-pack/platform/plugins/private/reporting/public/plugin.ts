@@ -7,7 +7,13 @@
 
 import { from, map, type Observable, ReplaySubject } from 'rxjs';
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  CoreSetup,
+  CoreStart,
+  FeatureFlagsStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
@@ -42,6 +48,7 @@ import type { StartServices } from './types';
 import { APP_DESC, APP_TITLE } from './translations';
 import { APP_PATH } from './constants';
 import { shouldRegisterReportingIntegration } from './management/integrations/should_register_reporting_integration';
+import { createServerlessExportGate, withAvailabilityGate } from './share/serverless_export_gate';
 
 export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;
@@ -140,6 +147,17 @@ export class ReportingPublicPlugin
       })
     );
 
+    // Read by `isExportAvailable` below, which only runs once a user opens a share menu.
+    let featureFlags: FeatureFlagsStart | undefined;
+    void getStartServices().then(([coreStart]) => {
+      featureFlags = coreStart.featureFlags;
+    });
+
+    const isExportAvailable = createServerlessExportGate({
+      isServerless: this.isServerless,
+      getFeatureFlags: () => featureFlags,
+    });
+
     const apiClient = new ReportingAPIClient(core.http, core.uiSettings, this.kibanaVersion);
     this.apiClient = apiClient;
 
@@ -232,15 +250,27 @@ export class ReportingPublicPlugin
       })
     );
 
-    if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+    // The config decides which export types exist at all — it is read during `setup`, so it cannot
+    // be a feature flag — while `isExportAvailable` decides whether the ones that exist are offered
+    // to users. On serverless it is the rollout flag, so enabling the flag reveals only the export
+    // types this config already enabled.
+    if (this.config.export_types.pdf.enabled) {
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-        reportingPDFExportShareIntegration({ apiClient, startServices$ })
+        withAvailabilityGate(
+          reportingPDFExportShareIntegration({ apiClient, startServices$ }),
+          isExportAvailable
+        )
       );
+    }
 
+    if (this.config.export_types.png.enabled) {
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-        reportingPNGExportShareIntegration({ apiClient, startServices$ })
+        withAvailabilityGate(
+          reportingPNGExportShareIntegration({ apiClient, startServices$ }),
+          isExportAvailable
+        )
       );
     }
 

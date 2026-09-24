@@ -58,7 +58,7 @@ xpack.features.overrides:
           privileges: [ "read" ]
     ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
-    ### POC (response-ops-team#682): generate_report (PDF/PNG export) is left enabled here — see
+    ### response-ops-team#750: generate_report (PDF/PNG export) is left enabled here — see
     ### the matching `dashboard_v2: generate_report` entry added to the `reporting` feature's
     ### composedOf below.
     subFeatures.privileges:
@@ -285,9 +285,14 @@ xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
 xpack.reporting.csv.maxRows: 100000
-# POC (response-ops-team#682): PDF/PNG dashboard export via page-render-service instead of local
-# Chromium (xpack.screenshotting stays disabled above). See
+# PDF/PNG dashboard export via page-render-service instead of local Chromium
+# (xpack.screenshotting stays disabled above). See
 # x-pack/platform/plugins/private/page_render_screenshotting/README.md.
+#
+# Enabling these does not expose the exports: they are read during setup to decide which export
+# types Kibana wires up at all, and the share-menu entries stay hidden until the
+# `reporting.serverlessExportEnabled` feature flag turns them on per project. The rollout lever is
+# the flag, not this file — see x-pack/platform/plugins/private/reporting/common/feature_flags.ts.
 xpack.reporting.export_types.pdf.enabled: true
 xpack.reporting.export_types.png.enabled: true
 # page-render-service is colocated with serverless Kibana on the
