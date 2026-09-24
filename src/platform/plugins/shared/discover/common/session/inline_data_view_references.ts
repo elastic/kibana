@@ -69,20 +69,28 @@ export const withOwnInlineDataViewId = (
   return new Map([...dataViewIdMap, [previousId, identity.id]]);
 };
 
-/** Replaces exact Data View references, including those nested in combined filters. */
-export const translateFilterDataViewIds = (filters: Filter[], idMap: DataViewIdMap): Filter[] => {
+/**
+ * Replaces exact Data View references, including those nested in combined filters. Pinned filters,
+ * shared by every view, use their own map.
+ */
+export const translateFilterDataViewIds = (
+  filters: Filter[],
+  idMap: DataViewIdMap,
+  pinnedIdMap: DataViewIdMap = idMap
+): Filter[] => {
   const translatedFilters = filters.map((filter) => {
+    const filterIdMap = isFilterPinned(filter) ? pinnedIdMap : idMap;
     let translatedFilter = filter;
 
     if (isCombinedFilter(filter)) {
-      const params = translateFilterDataViewIds(filter.meta.params, idMap);
+      const params = translateFilterDataViewIds(filter.meta.params, filterIdMap);
       if (params !== filter.meta.params) {
         translatedFilter = { ...filter, meta: { ...filter.meta, params } };
       }
     }
 
     const { index } = translatedFilter.meta;
-    const translatedIndex = index === undefined ? undefined : idMap.get(index);
+    const translatedIndex = index === undefined ? undefined : filterIdMap.get(index);
     if (translatedIndex === undefined) {
       return translatedFilter;
     }
@@ -111,21 +119,23 @@ export const bindUnreferencedAppFilters = (filters: Filter[], dataViewId: string
 
 /**
  * Gives the inline view of a search source its derived ID and translates the references it owns,
- * optionally binding its app filters without a reference to that view.
+ * optionally binding its app filters without a reference to that view. Pinned filters are shared,
+ * so only IDs that refer to a single spec translate them.
  */
 export const normalizeInlineSearchSource = ({
   searchSource,
   identity,
-  idMap,
+  dataViewIdMap,
   bindUnreferencedFilters,
 }: {
   searchSource: SerializedSearchSourceFields;
   identity: InlineDataViewIdentity | undefined;
-  idMap: DataViewIdMap;
+  dataViewIdMap: DataViewIdMap;
   bindUnreferencedFilters: boolean;
 }): SerializedSearchSourceFields => {
   const { filter } = searchSource;
-  let normalizedFilter = filter && translateFilterDataViewIds(filter, idMap);
+  const ownIdMap = withOwnInlineDataViewId(identity, dataViewIdMap);
+  let normalizedFilter = filter && translateFilterDataViewIds(filter, ownIdMap, dataViewIdMap);
 
   if (identity && bindUnreferencedFilters && normalizedFilter) {
     normalizedFilter = bindUnreferencedAppFilters(normalizedFilter, identity.id);

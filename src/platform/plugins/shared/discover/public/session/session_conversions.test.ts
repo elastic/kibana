@@ -54,7 +54,9 @@ const prepareSessionForUi = (session: DiscoverSession): DiscoverSession => ({
   ...session,
   tabs: normalizeInlineDataViewIds({
     sessionTabs: session.tabs,
-    localTabs: [],
+    openTabs: [],
+    closedTabs: [],
+    openTabsFromSession: false,
     navigationDataViewSpec: undefined,
   }).sessionTabs,
 });

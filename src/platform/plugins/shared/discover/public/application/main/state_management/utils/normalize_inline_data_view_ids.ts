@@ -21,7 +21,12 @@ import {
   type DataViewIdMap,
   type InlineDataViewIdentity,
 } from '../../../../../common/session/inline_data_view_references';
-import type { DiscoverAppState, TabState, TabStateGlobalState } from '../redux/types';
+import type {
+  DiscoverAppState,
+  RecentlyClosedTabState,
+  TabState,
+  TabStateGlobalState,
+} from '../redux/types';
 
 /** A tab whose document spec has no ID, with the views its unreferenced app filters may target. */
 export interface ConventionalTab {
@@ -31,7 +36,8 @@ export interface ConventionalTab {
 
 export interface NormalizedInlineDataViewIds {
   sessionTabs: DiscoverSessionTab[];
-  localTabs: TabState[];
+  openTabs: TabState[];
+  closedTabs: RecentlyClosedTabState[];
   navigationDataViewSpec: DataViewSpec | undefined;
   /** The derived ID of the navigation view when it is an inline view. */
   navigationInlineId: string | undefined;
@@ -99,19 +105,19 @@ const bindConventionalAppFilters = (
   return boundFilters === filters ? appState : { ...appState, filters: boundFilters };
 };
 
-const normalizeLocalTab = ({
+const normalizeLocalTab = <T extends TabState>({
   tab,
   identity,
   conventionalTab,
   dataViewIdMap,
 }: {
-  tab: TabState;
+  tab: T;
   identity: InlineDataViewIdentity | undefined;
-  conventionalTab: ConventionalTab | undefined;
+  conventionalTab?: ConventionalTab;
   dataViewIdMap: DataViewIdMap;
-}): TabState => {
+}): T => {
   const idMap = withOwnInlineDataViewId(identity, dataViewIdMap);
-  const { initialInternalState, appState, previousAppState, globalState } = tab;
+  const { initialInternalState, appState, previousAppState, globalState }: TabState = tab;
   // The convention applies when the local spec or the document spec of the same tab has no ID.
   const followsConvention = Boolean(identity && (!identity.dataView.id || conventionalTab));
   const searchSource = initialInternalState?.serializedSearchSource;
@@ -120,7 +126,7 @@ const normalizeLocalTab = ({
     normalizeInlineSearchSource({
       searchSource,
       identity,
-      idMap,
+      dataViewIdMap,
       bindUnreferencedFilters: followsConvention,
     });
 
@@ -141,7 +147,7 @@ const normalizeLocalTab = ({
   };
   const normalizedAppState = normalizeAppState(appState);
   const normalizedPreviousAppState = normalizeAppState(previousAppState);
-  const normalizedGlobalState = translateGlobalStateDataViewIds(globalState, idMap);
+  const normalizedGlobalState = translateGlobalStateDataViewIds(globalState, dataViewIdMap);
 
   if (
     normalizedSearchSource === searchSource &&
@@ -173,28 +179,35 @@ const normalizeLocalTab = ({
  */
 export const normalizeInlineDataViewIds = ({
   sessionTabs,
-  localTabs,
+  openTabs,
+  closedTabs,
+  openTabsFromSession,
   navigationDataViewSpec,
 }: {
   sessionTabs: DiscoverSessionTab[];
-  localTabs: TabState[];
+  openTabs: TabState[];
+  closedTabs: RecentlyClosedTabState[];
+  /** Whether the open tabs were stored for the session, the only tabs its convention applies to. */
+  openTabsFromSession: boolean;
   navigationDataViewSpec: DataViewSpec | undefined;
 }): NormalizedInlineDataViewIds => {
+  const getLocalIdentity = (tab: TabState) =>
+    getInlineDataViewIdentity(tab.initialInternalState?.serializedSearchSource);
   const sessionIdentities = sessionTabs.map((tab) =>
     getInlineDataViewIdentity(tab.serializedSearchSource)
   );
-  const localIdentities = localTabs.map((tab) =>
-    getInlineDataViewIdentity(tab.initialInternalState?.serializedSearchSource)
-  );
+  const openIdentities = openTabs.map(getLocalIdentity);
+  const closedIdentities = closedTabs.map(getLocalIdentity);
   const navigationIdentity = getInlineDataViewIdentity({ index: navigationDataViewSpec });
   const dataViewIdMap = createInlineDataViewIdMap([
     ...sessionIdentities,
-    ...localIdentities,
+    ...openIdentities,
+    ...closedIdentities,
     navigationIdentity,
   ]);
 
-  const localIdentitiesByTabId = new Map(
-    localTabs.map((tab, index) => [tab.id, localIdentities[index]])
+  const openIdentitiesByTabId = new Map(
+    openTabs.map((tab, index) => [tab.id, openIdentities[index]])
   );
   const conventionalTabs = new Map<string, ConventionalTab>();
   sessionTabs.forEach((tab, index) => {
@@ -203,7 +216,8 @@ export const normalizeInlineDataViewIds = ({
       return;
     }
 
-    const localIdentity = localIdentitiesByTabId.get(tab.id);
+    // Closed tabs keep no session, and tabs of another session may reuse the same tab IDs.
+    const localIdentity = openTabsFromSession ? openIdentitiesByTabId.get(tab.id) : undefined;
     conventionalTabs.set(tab.id, {
       documentId: identity.id,
       viewIds: new Set(localIdentity ? [identity.id, localIdentity.id] : [identity.id]),
@@ -215,7 +229,7 @@ export const normalizeInlineDataViewIds = ({
     const serializedSearchSource = normalizeInlineSearchSource({
       searchSource: tab.serializedSearchSource,
       identity,
-      idMap: withOwnInlineDataViewId(identity, dataViewIdMap),
+      dataViewIdMap,
       bindUnreferencedFilters: identity?.dataView.id === undefined,
     });
 
@@ -223,20 +237,24 @@ export const normalizeInlineDataViewIds = ({
       ? tab
       : { ...tab, serializedSearchSource };
   });
-  const normalizedLocalTabs = localTabs.map((tab, index) =>
+  const normalizedOpenTabs = openTabs.map((tab, index) =>
     normalizeLocalTab({
       tab,
-      identity: localIdentities[index],
-      conventionalTab: conventionalTabs.get(tab.id),
+      identity: openIdentities[index],
+      conventionalTab: openTabsFromSession ? conventionalTabs.get(tab.id) : undefined,
       dataViewIdMap,
     })
+  );
+  const normalizedClosedTabs = closedTabs.map((tab, index) =>
+    normalizeLocalTab({ tab, identity: closedIdentities[index], dataViewIdMap })
   );
 
   return {
     sessionTabs: normalizedSessionTabs.every((tab, index) => tab === sessionTabs[index])
       ? sessionTabs
       : normalizedSessionTabs,
-    localTabs: normalizedLocalTabs,
+    openTabs: normalizedOpenTabs,
+    closedTabs: normalizedClosedTabs,
     navigationDataViewSpec: navigationIdentity
       ? { ...navigationIdentity.dataView, id: navigationIdentity.id }
       : navigationDataViewSpec,

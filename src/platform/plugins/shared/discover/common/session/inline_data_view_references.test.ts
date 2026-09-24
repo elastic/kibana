@@ -138,6 +138,19 @@ describe('translateFilterDataViewIds', () => {
 
     expect(translateFilterDataViewIds(filters, idMap)).toBe(filters);
   });
+
+  it('translates pinned filters, including nested ones, with their own map', () => {
+    const pinnedCombinedFilter: Filter = {
+      ...buildCombinedFilter(BooleanRelation.OR, [createFilter('legacy-id')], { id: 'legacy-id' }),
+      $state: { store: FilterStateStore.GLOBAL_STATE },
+    };
+    const filters = [createFilter('legacy-id'), pinnedCombinedFilter];
+
+    expect(translateFilterDataViewIds(filters, idMap, new Map())).toEqual([
+      createFilter(inlineDataViewId),
+      pinnedCombinedFilter,
+    ]);
+  });
 });
 
 describe('bindUnreferencedAppFilters', () => {
@@ -167,7 +180,7 @@ describe('normalizeInlineSearchSource', () => {
     const normalized = normalizeInlineSearchSource({
       searchSource: input,
       identity,
-      idMap: withOwnInlineDataViewId(identity, new Map()),
+      dataViewIdMap: new Map(),
       bindUnreferencedFilters: false,
     });
 
@@ -182,13 +195,37 @@ describe('normalizeInlineSearchSource', () => {
     const normalized = normalizeInlineSearchSource({
       searchSource,
       identity,
-      idMap: withOwnInlineDataViewId(identity, new Map()),
+      dataViewIdMap: new Map(),
       bindUnreferencedFilters: true,
     });
 
     expect(normalized.filter).toEqual([
       createFilter(inlineDataViewId),
       createFilterWithIndex(unreferencedFilter, inlineDataViewId),
+    ]);
+  });
+
+  it('translates pinned filters only with previous IDs that refer to a single spec', () => {
+    const pinnedLegacyFilter: Filter = {
+      ...createFilter('legacy-id'),
+      $state: { store: FilterStateStore.GLOBAL_STATE },
+    };
+    const input = { ...searchSource, filter: [createFilter('legacy-id'), pinnedLegacyFilter] };
+    const normalize = (dataViewIdMap: Map<string, string>) =>
+      normalizeInlineSearchSource({
+        searchSource: input,
+        identity,
+        dataViewIdMap,
+        bindUnreferencedFilters: false,
+      });
+
+    expect(normalize(new Map()).filter).toEqual([
+      createFilter(inlineDataViewId),
+      pinnedLegacyFilter,
+    ]);
+    expect(normalize(new Map([['legacy-id', inlineDataViewId]])).filter).toEqual([
+      createFilter(inlineDataViewId),
+      createFilterWithIndex(pinnedLegacyFilter, inlineDataViewId),
     ]);
   });
 
@@ -203,7 +240,7 @@ describe('normalizeInlineSearchSource', () => {
       normalizeInlineSearchSource({
         searchSource: normalizedSearchSource,
         identity: normalizedIdentity,
-        idMap: withOwnInlineDataViewId(normalizedIdentity, new Map()),
+        dataViewIdMap: new Map(),
         bindUnreferencedFilters: true,
       })
     ).toBe(normalizedSearchSource);

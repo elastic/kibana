@@ -17,6 +17,7 @@ import {
   createTabsStorageManager,
   TABS_LOCAL_STORAGE_KEY,
   type TabsInternalStatePayload,
+  type TabsToPrepare,
 } from './tabs_storage_manager';
 import type { RecentlyClosedTabState, TabState } from './redux';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
@@ -27,7 +28,6 @@ import {
 } from './redux/__mocks__/internal_state.mocks';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
 
@@ -135,6 +135,13 @@ describe('TabsStorageManager', () => {
     globalState: storedTab.globalState,
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
   });
+
+  const createPrepareTabs = () =>
+    jest.fn(({ session, openTabs, closedTabs }: TabsToPrepare) => ({
+      session: session && { ...session, title: 'Prepared session' },
+      openTabs: openTabs.map((tab) => ({ ...tab, label: `Prepared ${tab.label}` })),
+      closedTabs: closedTabs.map((tab) => ({ ...tab, label: `Prepared ${tab.label}` })),
+    }));
 
   it('should push tab state to URL', async () => {
     const { tabsStorageManager, urlStateStorage } = create();
@@ -370,23 +377,21 @@ describe('TabsStorageManager', () => {
     });
     urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab2.id });
 
-    const prepareSession = jest.fn((session: DiscoverSession, localTabs: TabState[]) => ({
-      session: { ...session, title: preparedDiscoverSession.title },
-      localTabs: localTabs.map((tab) => ({ ...tab, label: `Prepared ${tab.label}` })),
-    }));
+    const prepareTabs = createPrepareTabs();
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
       defaultTabState: DEFAULT_TAB_STATE,
-      prepareSession,
+      prepareTabs,
     });
 
-    expect(prepareSession).toHaveBeenCalledWith(
-      persistedDiscoverSession,
-      [toRestoredTab(mockTab1), toRestoredTab(mockTab2), toRestoredTab(mockRecentlyClosedTab)],
-      mockTab2.id
-    );
+    expect(prepareTabs).toHaveBeenCalledWith({
+      session: persistedDiscoverSession,
+      openTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
+      closedTabs: [toRestoredTab(mockRecentlyClosedTab)],
+      openTabsFromSession: true,
+    });
     expect(loadedProps.updatedDiscoverSession).toEqual(preparedDiscoverSession);
     expect(loadedProps.allTabs.map(({ label }) => label)).toEqual([
       'Prepared Tab 1',
@@ -396,6 +401,80 @@ describe('TabsStorageManager', () => {
       label: 'Prepared Closed tab 1',
       closedAt: mockRecentlyClosedTab.closedAt,
     });
+  });
+
+  it('should close prepared tabs of another session', () => {
+    const {
+      tabsStorageManager,
+      services: { storage },
+    } = create();
+    const newClosedAt = Date.now() + 1000;
+    jest.spyOn(Date, 'now').mockReturnValue(newClosedAt);
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: 'other-session',
+      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+
+    const prepareTabs = createPrepareTabs();
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession: createDiscoverSessionMock({ id: 'test-session' }),
+      defaultTabState: DEFAULT_TAB_STATE,
+      prepareTabs,
+    });
+
+    expect(prepareTabs).toHaveBeenCalledWith(
+      expect.objectContaining({ openTabsFromSession: false })
+    );
+    expect(loadedProps.recentlyClosedTabs.map(({ label }) => label)).toEqual([
+      'Prepared Tab 1',
+      'Prepared Tab 2',
+      'Prepared Closed tab 1',
+    ]);
+  });
+
+  it('should reopen prepared closed tabs without a persisted discover session', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [toStoredTab(mockTab1)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab), toStoredTab(mockRecentlyClosedTab2)],
+    });
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockRecentlyClosedTab2.id });
+
+    const prepareTabs = createPrepareTabs();
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+      prepareTabs,
+    });
+
+    expect(prepareTabs).toHaveBeenCalledWith(
+      expect.objectContaining({ session: undefined, openTabsFromSession: false })
+    );
+    expect(loadedProps.allTabs).toEqual([
+      toRestoredTab({
+        ...omit(mockRecentlyClosedTab, 'closedAt'),
+        label: 'Prepared Closed tab 1',
+      }),
+      toRestoredTab({
+        ...omit(mockRecentlyClosedTab2, 'closedAt'),
+        label: 'Prepared Closed tab 2',
+      }),
+    ]);
+    expect(loadedProps.recentlyClosedTabs[0].label).toBe('Prepared Tab 1');
   });
 
   it('should restore persistent and url profile state from local storage stripped of defaults', () => {

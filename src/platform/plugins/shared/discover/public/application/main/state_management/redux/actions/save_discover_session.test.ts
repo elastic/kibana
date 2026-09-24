@@ -99,6 +99,10 @@ describe('saveDiscoverSession', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should call saveDiscoverSession with the expected params', async () => {
     const { toolkit, saveDiscoverSessionSpy } = await setup({
       additionalPersistedTabs: (services) => [
@@ -199,11 +203,11 @@ describe('saveDiscoverSession', () => {
   });
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {
+    const { toolkit, saveDiscoverSessionSpy } = await setup();
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
-    const { toolkit, saveDiscoverSessionSpy } = await setup();
     const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
 
     saveDiscoverSessionSpy.mockResolvedValueOnce(undefined);
@@ -217,11 +221,11 @@ describe('saveDiscoverSession', () => {
   });
 
   it('should allow errors thrown at the persistence layer to bubble up and not modify local state', async () => {
+    const { toolkit, saveDiscoverSessionSpy } = await setup();
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
-    const { toolkit, saveDiscoverSessionSpy } = await setup();
     const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
 
     saveDiscoverSessionSpy.mockRejectedValueOnce(new Error('boom'));

@@ -68,6 +68,13 @@ export interface TabsInternalStatePayload {
   recentlyClosedTabs: RecentlyClosedTabState[];
 }
 
+/** The session and the tabs a load restores, before any of them is consumed. */
+export interface TabsToPrepare {
+  session: DiscoverSession | undefined;
+  openTabs: TabState[];
+  closedTabs: RecentlyClosedTabState[];
+}
+
 export interface TabsStorageManager {
   /**
    * Supports two-way sync of the selected tab id with the URL.
@@ -92,12 +99,11 @@ export interface TabsStorageManager {
     persistedDiscoverSession?: DiscoverSession;
     shouldClearAllTabs?: boolean;
     defaultTabState: Omit<TabState, keyof TabItem>;
-    /** Prepares the session and same-session local tabs before either is consumed. */
-    prepareSession?: (
-      session: DiscoverSession,
-      localTabs: TabState[],
-      selectedTabId: string | undefined
-    ) => { session: DiscoverSession; localTabs: TabState[] };
+    /**
+     * Prepares the session and every restored tab. Only open tabs stored for the same session
+     * belong to it; recently closed tabs keep no session.
+     */
+    prepareTabs?: (tabs: TabsToPrepare & { openTabsFromSession: boolean }) => TabsToPrepare;
   }) => TabsInternalStatePayload & {
     updatedDiscoverSession: DiscoverSession | undefined;
   };
@@ -425,7 +431,7 @@ export const createTabsStorageManager = ({
     persistedDiscoverSession,
     shouldClearAllTabs,
     defaultTabState,
-    prepareSession,
+    prepareTabs,
   }) => {
     const tabsStateFromURL = getTabsStateFromURL();
     const selectedTabId = enabled
@@ -449,33 +455,24 @@ export const createTabsStorageManager = ({
     sessionInfo.userId = userId;
     sessionInfo.spaceId = spaceId;
 
-    const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
-      toTabState(tab, defaultTabState)
-    );
-    let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
-    let closedTabs = storedTabsState.closedTabs.map((tab) =>
+    const storedOpenTabs = storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState));
+    const storedClosedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
-    let updatedDiscoverSession = persistedDiscoverSession;
-
-    // Prepare before mapping tabs so the document and open or closed tabs share one identity.
+    // Prepare before mapping tabs so the document and every restored tab share one identity.
     // Return the prepared session below so restored tabs and the unsaved-changes baseline agree.
-    if (persistedDiscoverSession && prepareSession) {
-      const hasSameSession = persistedDiscoverSession.id === storedTabsState.discoverSessionId;
-      const localTabs = hasSameSession ? [...openTabs, ...closedTabs] : [];
-      const prepared = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
-      updatedDiscoverSession = prepared.session;
-
-      if (hasSameSession) {
-        const openTabsCount = openTabs.length;
-        const previousClosedTabs = closedTabs;
-
-        openTabs = prepared.localTabs.slice(0, openTabsCount);
-        closedTabs = prepared.localTabs
-          .slice(openTabsCount)
-          .map((tab, index) => ({ ...tab, closedAt: previousClosedTabs[index].closedAt }));
-      }
-    }
+    const prepared = prepareTabs?.({
+      session: persistedDiscoverSession,
+      openTabs: storedOpenTabs,
+      closedTabs: storedClosedTabs,
+      openTabsFromSession:
+        persistedDiscoverSession !== undefined &&
+        persistedDiscoverSession.id === storedTabsState.discoverSessionId,
+    });
+    const updatedDiscoverSession = prepared ? prepared.session : persistedDiscoverSession;
+    const previousOpenTabs = prepared?.openTabs ?? storedOpenTabs;
+    const closedTabs = prepared?.closedTabs ?? storedClosedTabs;
+    let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
 
     const persistedTabs = updatedDiscoverSession?.tabs.map((tab) =>
       fromSavedObjectTabToTabState({ tab, profileStateRegistry })
@@ -536,13 +533,13 @@ export const createTabsStorageManager = ({
 
       // otherwise try to reopen some of the previously closed tabs
       if (selectedTabId && !updatedDiscoverSession && !tabsStateFromURL?.tabLabel) {
-        const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
+        const closedTab = closedTabs.find((tab) => tab.id === selectedTabId);
 
-        if (storedClosedTab) {
+        if (closedTab) {
           // restore previously closed tabs, for example when only the default tab was shown
-          const restoredTabs = storedTabsState.closedTabs
-            .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
-            .map((tab) => toTabState(tab, defaultTabState));
+          const restoredTabs = closedTabs
+            .filter((tab) => tab.closedAt === closedTab.closedAt)
+            .map((tab) => omit(tab, 'closedAt'));
           return {
             allTabs: restoredTabs,
             selectedTabId,

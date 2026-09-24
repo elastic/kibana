@@ -23,6 +23,7 @@ import {
   createRuntimeStateManager,
   selectTabSavedSearch,
   selectAllTabs,
+  selectRecentlyClosedTabs,
 } from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
@@ -63,11 +64,15 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { Filter, TimeRange } from '@kbn/es-query';
-import { FILTERS } from '@kbn/es-query';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { getTabStateMock } from './redux/__mocks__/internal_state.mocks';
-import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+} from '../../../../common/constants';
 import {
   ProfileStateType,
   type ProfileStateDefinition,
@@ -812,6 +817,234 @@ describe('Discover state', () => {
           services,
         }).hasUnsavedChanges
       ).toBe(false);
+    });
+
+    it('translates pinned filters in the URL of a legacy session', async () => {
+      const services = createDiscoverServicesMock();
+      const [inlineFilter] = cloneDeep(storedFilters);
+      const pinnedFilter: Filter = {
+        ...inlineFilter,
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+      const { path } = await appLocatorGetLocationCommon(
+        { useHash: false, setStateToKbnUrl, profileStateRegistry: services.profileStateRegistry },
+        { savedSearchId: legacySession.id, tab: { id: 'inline-tab' }, filters: [pinnedFilter] }
+      );
+      services.storage = new Storage(localStorage);
+      services.history = createMemoryHistory({ initialEntries: [path] });
+      const state = createState(services);
+
+      await state.initializeTabs({ persistedDiscoverSession: cloneDeep(legacySession) });
+
+      expect(
+        state.stateStorageContainer.get<{ filters?: Filter[] }>(GLOBAL_STATE_URL_KEY)?.filters
+      ).toEqual([{ ...pinnedFilter, meta: { ...pinnedFilter.meta, index: apiDataViewId } }]);
+      await state.initializeSingleTab({ tabId: 'inline-tab' });
+
+      expect(services.filterManager.getGlobalFilters()).toMatchObject([
+        { meta: { index: apiDataViewId } },
+      ]);
+    });
+
+    it('translates a legacy index in the URL of a legacy session', async () => {
+      const services = createDiscoverServicesMock();
+      services.storage = new Storage(localStorage);
+      services.history = createMemoryHistory({
+        initialEntries: ['/#?_tab=(tabId:inline-tab)&_a=(index:stored-inline-id)'],
+      });
+      const state = createState(services);
+
+      await state.initializeTabs({ persistedDiscoverSession: cloneDeep(legacySession) });
+
+      expect(state.stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual({
+        dataSource: createDataViewDataSource({ dataViewId: apiDataViewId }),
+      });
+      await state.initializeSingleTab({ tabId: 'inline-tab' });
+
+      expect(
+        selectTabRuntimeState(state.runtimeStateManager, 'inline-tab').currentDataView$.getValue()
+          ?.id
+      ).toBe(apiDataViewId);
+      expect(
+        selectHasUnsavedChanges(state.internalState.getState(), {
+          runtimeStateManager: state.runtimeStateManager,
+          services,
+        }).hasUnsavedChanges
+      ).toBe(false);
+    });
+
+    it('leaves an unknown legacy index in the URL unchanged', async () => {
+      const services = createDiscoverServicesMock();
+      services.storage = new Storage(localStorage);
+      services.history = createMemoryHistory({
+        initialEntries: ['/#?_tab=(tabId:inline-tab)&_a=(index:unknown-id)'],
+      });
+      const state = createState(services);
+
+      await state.initializeTabs({ persistedDiscoverSession: cloneDeep(legacySession) });
+
+      expect(state.stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual({ index: 'unknown-id' });
+    });
+
+    describe('with local tabs stored with the previous ID', () => {
+      // Stores the tab of a legacy session load as it was stored before IDs were derived from specs.
+      const storeLegacyTab = async ({
+        discoverSessionId,
+        tabId,
+        title = 'logs-*',
+      }: {
+        discoverSessionId: string | undefined;
+        tabId: string;
+        title?: string;
+      }) => {
+        const services = createDiscoverServicesMock();
+        services.storage = new Storage(localStorage);
+        services.history = createMemoryHistory();
+        const firstLoad = createState(services);
+
+        await firstLoad.initializeTabs({ persistedDiscoverSession: cloneDeep(legacySession) });
+        const loadedTabId = firstLoad.getCurrentTab().id;
+        await firstLoad.initializeSingleTab({ tabId: loadedTabId });
+        await waitFor(() => {
+          expect(services.storage.get(TABS_LOCAL_STORAGE_KEY)).toMatchObject({
+            discoverSessionId: legacySession.id,
+            openTabs: [
+              {
+                id: loadedTabId,
+                internalState: { serializedSearchSource: { index: { id: apiDataViewId } } },
+              },
+            ],
+          });
+        });
+        firstLoad.internalState.dispatch(
+          internalStateActions.disconnectTab({ tabId: loadedTabId })
+        );
+
+        const storedTabs: { openTabs: TabStateInLocalStorage[] } =
+          services.storage.get(TABS_LOCAL_STORAGE_KEY);
+        services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+          ...storedTabs,
+          discoverSessionId,
+          openTabs: storedTabs.openTabs.map((tab) => ({
+            ...tab,
+            id: tabId,
+            appState: {
+              ...tab.appState,
+              dataSource: createDataViewDataSource({ dataViewId: 'stored-inline-id' }),
+              filters: cloneDeep(storedFilters),
+            },
+            internalState: {
+              ...tab.internalState,
+              serializedSearchSource: {
+                ...tab.internalState?.serializedSearchSource,
+                index: { id: 'stored-inline-id', title },
+                filter: cloneDeep(storedFilters),
+              },
+            },
+          })),
+        });
+
+        return services.storage;
+      };
+
+      const reload = (storage: DiscoverServices['storage'], tabId: string) => {
+        const services = createDiscoverServicesMock();
+        services.storage = storage;
+        services.history = createMemoryHistory({ initialEntries: [`/#?_tab=(tabId:${tabId})`] });
+
+        return { services, state: createState(services) };
+      };
+
+      it('normalizes restored tabs of an unsaved session', async () => {
+        const storage = await storeLegacyTab({ discoverSessionId: undefined, tabId: 'local-tab' });
+        const { services, state } = reload(storage, 'local-tab');
+
+        await state.initializeTabs();
+        expect(state.getCurrentTab().id).toBe('local-tab');
+        await state.initializeSingleTab({ tabId: 'local-tab' });
+
+        expect(
+          selectTabRuntimeState(state.runtimeStateManager, 'local-tab').currentDataView$.getValue()
+            ?.id
+        ).toBe(apiDataViewId);
+        expectLoadedFilters(services, apiDataViewId);
+      });
+
+      it('normalizes a tab of another session when it is reopened', async () => {
+        const storage = await storeLegacyTab({
+          discoverSessionId: 'other-session',
+          tabId: 'other-tab',
+        });
+        const { services, state } = reload(storage, 'inline-tab');
+
+        await state.initializeTabs({
+          persistedDiscoverSession: fromDiscoverSessionApiResponse(cloneDeep(response)),
+        });
+        const [closedTab] = selectRecentlyClosedTabs(state.internalState.getState());
+        expect(closedTab).toMatchObject({
+          id: 'other-tab',
+          appState: { dataSource: createDataViewDataSource({ dataViewId: apiDataViewId }) },
+          initialInternalState: { serializedSearchSource: { index: { id: apiDataViewId } } },
+        });
+
+        await state.internalState.dispatch(
+          internalStateActions.restoreTab({ restoreTabId: 'other-tab' })
+        );
+        await state.initializeSingleTab({ tabId: 'other-tab' });
+
+        expect(
+          selectTabRuntimeState(state.runtimeStateManager, 'other-tab').currentDataView$.getValue()
+            ?.id
+        ).toBe(apiDataViewId);
+        expectLoadedFilters(services, apiDataViewId);
+      });
+
+      it('keeps a pinned URL filter on a previous ID shared by different specs', async () => {
+        const storage = await storeLegacyTab({
+          discoverSessionId: 'other-session',
+          tabId: 'other-tab',
+          title: 'other-logs-*',
+        });
+        const otherDataViewId = generateInlineDataViewId({ title: 'other-logs-*' });
+        const [inlineFilter] = cloneDeep(storedFilters);
+        const pinnedFilter: Filter = {
+          ...inlineFilter,
+          $state: { store: FilterStateStore.GLOBAL_STATE },
+        };
+        const services = createDiscoverServicesMock();
+        const { path } = await appLocatorGetLocationCommon(
+          { useHash: false, setStateToKbnUrl, profileStateRegistry: services.profileStateRegistry },
+          { savedSearchId: legacySession.id, tab: { id: 'inline-tab' }, filters: [pinnedFilter] }
+        );
+        services.storage = storage;
+        services.history = createMemoryHistory({ initialEntries: [path] });
+        const state = createState(services);
+
+        await state.initializeTabs({ persistedDiscoverSession: cloneDeep(legacySession) });
+
+        expect(
+          state.stateStorageContainer.get<{ filters?: Filter[] }>(GLOBAL_STATE_URL_KEY)?.filters
+        ).toEqual([pinnedFilter]);
+        const [closedTab] = selectRecentlyClosedTabs(state.internalState.getState());
+        expect(closedTab).toMatchObject({
+          id: 'other-tab',
+          appState: { filters: [{ meta: { index: otherDataViewId } }, {}] },
+          initialInternalState: { serializedSearchSource: { index: { id: otherDataViewId } } },
+        });
+        await state.initializeSingleTab({ tabId: 'inline-tab' });
+
+        expect(
+          selectTabRuntimeState(state.runtimeStateManager, 'inline-tab').currentDataView$.getValue()
+            ?.id
+        ).toBe(apiDataViewId);
+        expect(
+          state.internalState.getState().persistedDiscoverSession?.tabs[0].serializedSearchSource
+            .filter?.[0].meta.index
+        ).toBe(apiDataViewId);
+        expect(services.filterManager.getGlobalFilters()).toMatchObject([
+          { meta: { index: 'stored-inline-id' } },
+        ]);
+      });
     });
 
     describe('with filters stored without a reference', () => {

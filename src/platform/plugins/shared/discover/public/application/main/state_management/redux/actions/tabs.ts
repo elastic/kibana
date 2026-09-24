@@ -59,6 +59,7 @@ import {
   translateAppStateDataViewIds,
   type NormalizedInlineDataViewIds,
 } from '../../utils/normalize_inline_data_view_ids';
+import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import { translateFilterDataViewIds } from '../../../../../../common/session/inline_data_view_references';
 
 export const setTabs: InternalStateThunkActionCreator<
@@ -471,19 +472,22 @@ export const initializeTabs = createInternalStateAsyncThunk(
       shouldClearAllTabs,
       defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
       // Give each inline view the ID of its own spec before the document or local tabs are used.
-      prepareSession: (session, localTabs) => {
+      prepareTabs: ({ session, openTabs, closedTabs, openTabsFromSession }) => {
         normalized = normalizeInlineDataViewIds({
-          sessionTabs: session.tabs,
-          localTabs,
+          sessionTabs: session?.tabs ?? [],
+          openTabs,
+          closedTabs,
+          openTabsFromSession,
           navigationDataViewSpec: initialTabState?.dataViewSpec,
         });
 
         return {
           session:
-            normalized.sessionTabs === session.tabs
-              ? session
-              : { ...session, tabs: normalized.sessionTabs },
-          localTabs: normalized.localTabs,
+            session && normalized.sessionTabs !== session.tabs
+              ? { ...session, tabs: normalized.sessionTabs }
+              : session,
+          openTabs: normalized.openTabs,
+          closedTabs: normalized.closedTabs,
         };
       },
     });
@@ -491,14 +495,20 @@ export const initializeTabs = createInternalStateAsyncThunk(
       normalized ??
       normalizeInlineDataViewIds({
         sessionTabs: [],
-        localTabs: [],
+        openTabs: [],
+        closedTabs: [],
+        openTabsFromSession: false,
         navigationDataViewSpec: initialTabState?.dataViewSpec,
       });
     const { navigationDataViewSpec, navigationIdMap, dataViewIdMap } = normalizedIds;
     const selectedTab = initialTabsState.allTabs.find(
       ({ id }) => id === initialTabsState.selectedTabId
     );
-    const urlAppState = urlStateStorage.get<DiscoverAppState>(APP_STATE_URL_KEY);
+    // Migrate legacy keys such as index as the tab initialization does, so the view is translated.
+    const urlAppState = cleanupUrlState(
+      urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
+      services.uiSettings
+    );
     const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
     const normalizedUrlAppState =
       urlAppState &&
