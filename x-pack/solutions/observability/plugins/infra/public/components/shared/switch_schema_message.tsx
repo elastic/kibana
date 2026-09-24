@@ -10,11 +10,17 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SCHEMA_SELECTOR_DOCS_LINK } from '../../../common/constants';
 
-export function SwitchSchemaMessage({ dataTestSubj }: { dataTestSubj: string }) {
+export function SwitchSchemaMessage({
+  dataTestSubj,
+  entityDisplayName = 'hosts',
+}: {
+  dataTestSubj: string;
+  entityDisplayName?: string;
+}) {
   return (
     <FormattedMessage
       id="xpack.infra.waffle.noDataInSelectedSchemaTitle"
-      defaultMessage="{switchSchema} to view hosts matching another schema."
+      defaultMessage="{switchSchema} to view {entity} matching another schema."
       values={{
         switchSchema: (
           <EuiLink data-test-subj={dataTestSubj} target="_blank" href={SCHEMA_SELECTOR_DOCS_LINK}>
@@ -23,6 +29,7 @@ export function SwitchSchemaMessage({ dataTestSubj }: { dataTestSubj: string }) 
             })}
           </EuiLink>
         ),
+        entity: entityDisplayName,
       }}
     />
   );

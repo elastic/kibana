@@ -8,10 +8,12 @@
 import React, { useEffect } from 'react';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useSourceContext } from '../../../../containers/metrics_source';
+import { useIsPodSchemaSelectorEnabled } from '../../../../hooks/use_is_pod_schema_selector_enabled';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
+import { getInventoryRequestSchema } from '../lib/get_inventory_request_schema';
 import { LayoutView } from './layout_view';
 
 export const SnapshotContainer = React.memo(function SnapshotContainer() {
@@ -20,6 +22,7 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
     useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
+  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
 
   const { inventoryPrefill } = useAlertPrefillContext();
 
@@ -41,7 +44,9 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
       currentTime,
       accountId,
       region,
-      schema: preferredSchema,
+      schema: getInventoryRequestSchema(nodeType, preferredSchema, {
+        isPodSchemaSelectorEnabled,
+      }),
       includeTimeseries: true,
     },
     { sendRequestImmediately: true }

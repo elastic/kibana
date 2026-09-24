@@ -148,14 +148,19 @@ test.describe(
         await expect(inventoryPage.k8sPodWaffleContextMenu).toContainText(
           `View details for kubernetes.pod.uid ${POD_NAME}`
         );
+
+        await expect(inventoryPage.contextMenuLogsLink).toHaveAttribute(
+          'href',
+          /kubernetes\.pod\.uid/
+        );
+        await expect(inventoryPage.contextMenuApmLink).toHaveAttribute(
+          'href',
+          new RegExp(`kubernetes\\.pod\\.uid(%3A|:)(%22|")${POD_NAME}`)
+        );
       });
 
       await test.step('click pod details link and verify redirection', async () => {
-        await inventoryPage.k8sPodWaffleContextMenu
-          .getByRole('link', {
-            name: 'Kubernetes Pod metrics',
-          })
-          .click();
+        await inventoryPage.contextMenuMetricsLink.click();
 
         const url = new URL(page.url());
 

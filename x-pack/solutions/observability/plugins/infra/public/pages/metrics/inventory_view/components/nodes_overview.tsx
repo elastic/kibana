@@ -11,9 +11,12 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiLink, useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isSchemaAwareNodeType } from '../../../../../common/inventory/schema_aware_node_types';
 import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
+import { useIsPodSchemaSelectorEnabled } from '../../../../hooks/use_is_pod_schema_selector_enabled';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import type {
   InfraWaffleMapBounds,
@@ -77,6 +80,8 @@ export const NodesOverview = ({
   const { jumpToTime } = useWaffleTimeContext();
   const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
   const { preferredSchema } = useWaffleOptionsContext();
+  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
+  const inventoryModel = findInventoryModel(nodeType);
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata?.schemas]
@@ -107,7 +112,10 @@ export const NodesOverview = ({
   const noData = !loading && nodes && nodes.length === 0;
 
   const hasDataOnAnotherSchema =
-    schemas.length === 1 && preferredSchema !== schemas[0] && nodeType === 'host';
+    schemas.length === 1 &&
+    preferredSchema !== schemas[0] &&
+    isSchemaAwareNodeType(nodeType) &&
+    (nodeType !== 'pod' || isPodSchemaSelectorEnabled);
   const refetchProps = hasDataOnAnotherSchema
     ? {}
     : {
@@ -139,7 +147,10 @@ export const NodesOverview = ({
         })}
         bodyText={
           hasDataOnAnotherSchema ? (
-            <SwitchSchemaMessage dataTestSubj="infraInventoryViewNoDataInSelectedSchema" />
+            <SwitchSchemaMessage
+              dataTestSubj="infraInventoryViewNoDataInSelectedSchema"
+              entityDisplayName={inventoryModel.displayName.toLowerCase()}
+            />
           ) : (
             <FormattedMessage
               id="xpack.infra.waffle.noDataSupportedIntegrationDescription"

@@ -134,11 +134,13 @@ export const SchemaSelector = ({
   schemas,
   value,
   isLoading,
+  entityDisplayName = 'hosts',
 }: {
   onChange: (selected: DataSchemaFormat) => void;
   schemas: DataSchemaFormat[];
   value: DataSchemaFormat;
   isLoading: boolean;
+  entityDisplayName?: string;
 }) => {
   const {
     services: { telemetry },
@@ -213,8 +215,9 @@ export const SchemaSelector = ({
       css={{ minWidth: '300px' }}
       helpText={
         (options.length > 1 || (options.length === 1 && isInvalid)) &&
-        i18n.translate('xpack.infra.schemaSelector.select.helpText', {
-          defaultMessage: 'There are hosts available in another schema',
+        i18n.translate('xpack.infra.schemaSelector.select.helpTextWithEntity', {
+          defaultMessage: 'There are {entity} available in another schema',
+          values: { entity: entityDisplayName },
         })
       }
     >

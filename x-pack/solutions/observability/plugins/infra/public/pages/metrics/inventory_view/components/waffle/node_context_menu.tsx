@@ -33,6 +33,7 @@ import {
 } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 import { HOST_NAME_FIELD, HOST_HOSTNAME_FIELD } from '../../../../../../common/constants';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import type {
@@ -40,6 +41,7 @@ import type {
   InfraWaffleMapOptions,
 } from '../../../../../common/inventory/types';
 import { getUptimeUrl } from '../../lib/get_uptime_url';
+import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 
 interface Props {
@@ -55,7 +57,12 @@ export const NodeContextMenu = withEuiTheme(
     const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const { preferredSchema } = useWaffleOptionsContext();
+    const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
+    const effectiveSchema = getInventoryRequestSchema(nodeType, preferredSchema, {
+      isPodSchemaSelectorEnabled,
+    });
     const inventoryModel = findInventoryModel(nodeType);
+    const { id: nodeIdField } = findInventoryFields(nodeType, effectiveSchema);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
     const { application, share } = services;
@@ -89,14 +96,13 @@ export const NodeContextMenu = withEuiTheme(
           };
         }
       } else {
-        const { id } = findInventoryFields(nodeType);
         return {
-          label: <EuiCode>{id}</EuiCode>,
+          label: <EuiCode>{nodeIdField}</EuiCode>,
           value: node.id,
         };
       }
       return { label: '', value: '' };
-    }, [nodeType, node.ip, node.id]);
+    }, [nodeType, node.ip, node.id, nodeIdField]);
 
     const nodeDetailMenuItemLinkProps = getAssetDetailUrl({
       entityType: nodeType,
@@ -106,6 +112,7 @@ export const NodeContextMenu = withEuiTheme(
         to: currentTime,
         name: node.name,
       },
+      preferredSchema: effectiveSchema,
     });
 
     const apmTracesMenuItemLinkProps = useLinkProps({
@@ -115,7 +122,7 @@ export const NodeContextMenu = withEuiTheme(
         kuery:
           nodeType === 'host'
             ? `${HOST_NAME_FIELD}:"${node.id}" OR ${HOST_HOSTNAME_FIELD}:"${node.id}"`
-            : `${inventoryModel.fields.id}:"${node.id}"`,
+            : `${nodeIdField}:"${node.id}"`,
       },
     });
 
@@ -130,7 +137,7 @@ export const NodeContextMenu = withEuiTheme(
       }),
       href: logsLocator.getRedirectUrl({
         query: getNodeQuery({
-          nodeField: findInventoryFields(nodeType).id,
+          nodeField: nodeIdField,
           nodeId: node.id,
         }),
         timeRange: getTimeRange(currentTime),
@@ -226,7 +233,7 @@ export const NodeContextMenu = withEuiTheme(
 
         {flyoutVisible && (
           <AlertFlyout
-            filter={`${findInventoryFields(nodeType).id}: "${node.id}"`}
+            filter={`${nodeIdField}: "${node.id}"`}
             options={options}
             nodeType={nodeType}
             setVisible={setFlyoutVisible}
