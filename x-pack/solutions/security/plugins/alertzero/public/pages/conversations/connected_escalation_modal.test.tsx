@@ -68,6 +68,7 @@ const investigation: Investigation = {
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
   pendingProposalCount: 0,
+  assignees: [],
   events: [],
   recordId: 'inv-1',
   conversationId: 'conv-1',
@@ -118,7 +119,13 @@ beforeEach(() => {
 
   mockUseKibana.mockReturnValue({
     services: {
-      notifications: { toasts: { addDanger: jest.fn() } },
+      notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
+      application: {
+        getUrlForApp: jest.fn(
+          (_appId: string, { path = '' }: { path?: string } = {}) => `/base/app/alertzero${path}`
+        ),
+        navigateToApp: jest.fn(),
+      },
     },
   } as unknown as ReturnType<typeof useKibana>);
 });
@@ -257,5 +264,62 @@ describe('ConnectedEscalationModal', () => {
     renderModal({ mode: 'addToExisting' });
 
     expect(screen.getByTestId('escalationModalLoadError')).toBeInTheDocument();
+  });
+
+  it('success toast for create links to the newly created escalation', () => {
+    renderModal({ mode: 'create' });
+    fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
+
+    const [, callbacks] = createMutate.mock.calls[0];
+    const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
+    // onSuccess receives the created Conversation; its id is used to build the deep link.
+    callbacks.onSuccess({ id: 'new-esc-1' });
+
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionProps: expect.objectContaining({
+          primary: expect.objectContaining({
+            href: '/base/app/alertzero/escalations?selectedConversationId=new-esc-1',
+          }),
+        }),
+      })
+    );
+  });
+
+  it('success toast for add-to links to the selected escalation', () => {
+    mockUseListEscalations.mockReturnValue({
+      data: {
+        results: [
+          {
+            id: 'esc-3',
+            title: 'Open escalation',
+            metadata: { linked_investigations: [] },
+            permissions: { rename: true, delete: true, update_access_control: true },
+          },
+        ],
+        pagination: { total: 1, page: 1, per_page: 20 },
+      },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useListEscalations>);
+
+    renderModal({ mode: 'addToExisting' });
+    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-3'));
+    fireEvent.click(screen.getByTestId('escalationModalAddToEscalation'));
+
+    const [, callbacks] = addMutate.mock.calls[0];
+    const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
+    callbacks.onSuccess();
+
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionProps: expect.objectContaining({
+          primary: expect.objectContaining({
+            href: '/base/app/alertzero/escalations?selectedConversationId=esc-3',
+          }),
+        }),
+      })
+    );
   });
 });
