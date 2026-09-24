@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 
@@ -94,10 +94,17 @@ export const ObservablesTable = ({
 }: ObservablesTableProps) => {
   const canRunWorkflow = useCanRunCaseWorkflow();
 
-  // Store selected observable ids so derived `selected` always reflects the current list.
-  // When an observable is deleted or filtered out, it silently drops out of the selection
-  // without needing a reconciliation effect.
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
+
+  // `caseData.observables` is the search-filtered list. Drop ids that leave it so a hidden
+  // observable does not come back selected, and become a bulk target, when the search is cleared.
+  useEffect(() => {
+    setSelectedIds((previous) => {
+      const displayedIds = new Set(caseData.observables.map(({ id }) => id));
+      const next = new Set([...previous].filter((id) => displayedIds.has(id)));
+      return next.size === previous.size ? previous : next;
+    });
+  }, [caseData.observables]);
 
   const selected = useMemo(
     () => caseData.observables.filter(({ id }) => selectedIds.has(id)),

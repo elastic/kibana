@@ -66,6 +66,12 @@ export const createCaseWorkflowComparator = (
   };
 };
 
+/** Filter for surfaces without a tag allowlist. Module-scoped so the reference is stable. */
+export const untaggedCaseWorkflowFilter = createCaseWorkflowFilter(NO_WORKFLOW_TAGS);
+
+/** Comparator for surfaces without a tag allowlist. Module-scoped so the reference is stable. */
+export const untaggedCaseWorkflowComparator = createCaseWorkflowComparator(NO_WORKFLOW_TAGS);
+
 /**
  * Returns true when the current user satisfies all four conditions required to
  * run a workflow from a case:

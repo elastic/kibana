@@ -9,8 +9,9 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
-import { CaseAttachmentWorkflowProvider } from './case_attachment_workflow_context';
+import { CaseAttachmentWorkflowProvider } from './case_attachment_workflow_provider';
 import { useCaseAttachmentWorkflowRun } from './use_case_attachment_workflow_run';
+import { useCanRunCaseWorkflow } from './use_run_case_workflow';
 import * as api from './api';
 
 jest.mock('../../common/lib/kibana');
@@ -18,7 +19,12 @@ const mockRefreshCaseViewPage = jest.fn();
 jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
   useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
 }));
+jest.mock('./use_run_case_workflow', () => ({
+  ...jest.requireActual('./use_run_case_workflow'),
+  useCanRunCaseWorkflow: jest.fn(),
+}));
 
+const mockUseCanRunCaseWorkflow = jest.mocked(useCanRunCaseWorkflow);
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 
 describe('useCaseAttachmentWorkflowRun', () => {
@@ -34,6 +40,7 @@ describe('useCaseAttachmentWorkflowRun', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCanRunCaseWorkflow.mockReturnValue(true);
     useHttp.mockReturnValue(mockHttp);
     useToasts.mockReturnValue(mockToasts);
     useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });
@@ -44,24 +51,54 @@ describe('useCaseAttachmentWorkflowRun', () => {
     });
   });
 
-  it('returns undefined outside the attachment provider', () => {
+  it('falls back to the panel executor and toast outside the attachment provider', () => {
     const { result } = renderHook(() =>
       useCaseAttachmentWorkflowRun({
         attachmentType: 'security.alert',
-        attachmentId: 'alert-1',
+        target: { attachmentId: 'alert-1' },
       })
     );
 
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
   });
 
-  it('returns undefined without a row or bulk target', () => {
+  it('falls back when the user cannot run workflows through Cases', () => {
+    mockUseCanRunCaseWorkflow.mockReturnValue(false);
+    const { result } = renderHook(
+      () =>
+        useCaseAttachmentWorkflowRun({
+          attachmentType: 'security.alert',
+          target: { attachmentId: 'alert-1' },
+        }),
+      { wrapper }
+    );
+
+    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
+  });
+
+  it('falls back without a row or bulk target', () => {
     const { result } = renderHook(
       () => useCaseAttachmentWorkflowRun({ attachmentType: 'security.alert' }),
       { wrapper }
     );
 
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
+  });
+
+  it('suppresses the panel success toast when it returns a Cases executor', () => {
+    const { result } = renderHook(
+      () =>
+        useCaseAttachmentWorkflowRun({
+          attachmentType: 'security.alert',
+          target: { attachmentId: 'alert-1' },
+        }),
+      { wrapper }
+    );
+
+    expect(result.current).toEqual({
+      runWorkflow: expect.any(Function),
+      showSuccessToast: false,
+    });
   });
 
   it('posts a singular attachment origin', async () => {
@@ -69,13 +106,13 @@ describe('useCaseAttachmentWorkflowRun', () => {
       () =>
         useCaseAttachmentWorkflowRun({
           attachmentType: 'security.alert',
-          attachmentId: 'alert-1',
+          target: { attachmentId: 'alert-1' },
         }),
       { wrapper }
     );
 
     await act(async () => {
-      await result.current?.({ workflowId: 'workflow-1', inputs: {} });
+      await result.current.runWorkflow?.({ workflowId: 'workflow-1', inputs: {} });
     });
 
     expect(mockRunCaseWorkflow).toHaveBeenCalledWith(
@@ -97,13 +134,13 @@ describe('useCaseAttachmentWorkflowRun', () => {
       () =>
         useCaseAttachmentWorkflowRun({
           attachmentType: 'security.alert',
-          attachmentIds: ['alert-1'],
+          target: { attachmentIds: ['alert-1'] },
         }),
       { wrapper }
     );
 
     await act(async () => {
-      await result.current?.({ workflowId: 'workflow-1', inputs: {} });
+      await result.current.runWorkflow?.({ workflowId: 'workflow-1', inputs: {} });
     });
 
     expect(mockRunCaseWorkflow).toHaveBeenCalledWith(
@@ -125,13 +162,13 @@ describe('useCaseAttachmentWorkflowRun', () => {
       () =>
         useCaseAttachmentWorkflowRun({
           attachmentType: 'security.alert',
-          attachmentId: 'alert-1',
+          target: { attachmentId: 'alert-1' },
         }),
       { wrapper }
     );
 
     await act(async () => {
-      await result.current?.({ workflowId: 'workflow-1', inputs: {} });
+      await result.current.runWorkflow?.({ workflowId: 'workflow-1', inputs: {} });
     });
 
     expect(mockGetAppUrl).toHaveBeenCalledWith({
@@ -153,13 +190,13 @@ describe('useCaseAttachmentWorkflowRun', () => {
       () =>
         useCaseAttachmentWorkflowRun({
           attachmentType: 'security.alert',
-          attachmentIds: ['alert-1', 'alert-2'],
+          target: { attachmentIds: ['alert-1', 'alert-2'] },
         }),
       { wrapper }
     );
 
     await act(async () => {
-      await result.current?.({ workflowId: 'workflow-1', inputs: {} });
+      await result.current.runWorkflow?.({ workflowId: 'workflow-1', inputs: {} });
     });
 
     expect(mockToasts.addWarning).toHaveBeenCalledTimes(1);

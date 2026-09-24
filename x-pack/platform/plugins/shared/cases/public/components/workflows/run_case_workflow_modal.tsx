@@ -8,20 +8,17 @@
 import React from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { RunWorkflowPanel } from '@kbn/workflows-ui';
-import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
+import type { RunWorkflowExecutor, RunWorkflowPanelProps } from '@kbn/workflows-ui';
 import { useFocusButtonTrap } from '../use_focus_button';
 import * as i18n from './translations';
 
 interface RunCaseWorkflowModalProps
   extends Pick<
     RunWorkflowPanelProps,
-    | 'inputs'
-    | 'runWorkflow'
-    | 'sortWorkflow'
-    | 'filterWorkflow'
-    | 'onExecute'
-    | 'onExecutionSettled'
+    'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute' | 'onExecutionSettled'
   > {
+  /** Required: the panel's success toast is suppressed, so the executor must raise its own. */
+  runWorkflow: RunWorkflowExecutor;
   onClose: () => void;
   /** Ref to the button that opened this modal; when set, focus is returned to it on close. */
   focusButtonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement>;

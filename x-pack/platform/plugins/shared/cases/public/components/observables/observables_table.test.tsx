@@ -58,8 +58,7 @@ describe('ObservablesTable', () => {
       (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(true);
       renderWithTestingProviders(<ObservablesTable {...props} />);
       // EuiInMemoryTable adds a checkbox for each row plus one "select all" header checkbox.
-      const checkboxes = screen.getAllByRole('checkbox');
-      expect(checkboxes.length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('checkbox')).toHaveLength(mockObservables.length + 1);
     });
 
     it('does not show selection checkboxes for read-only users', () => {
@@ -77,6 +76,32 @@ describe('ObservablesTable', () => {
       await userEvent.click(checkboxes[1]);
 
       expect(await screen.findByTestId('cases-observables-selected-count')).toBeInTheDocument();
+    });
+
+    it('does not restore a selection that was filtered out once the filter is cleared', async () => {
+      (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(true);
+      const [firstObservable, secondObservable] = mockObservables;
+      const { rerender } = renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      await userEvent.click(screen.getAllByRole('checkbox')[1]);
+      expect(await screen.findByTestId('cases-observables-selected-count')).toBeInTheDocument();
+
+      rerender(
+        <ObservablesTable
+          {...props}
+          caseData={{ ...props.caseData, observables: [secondObservable] }}
+        />
+      );
+      expect(screen.queryByTestId('cases-observables-selected-count')).not.toBeInTheDocument();
+
+      rerender(
+        <ObservablesTable
+          {...props}
+          caseData={{ ...props.caseData, observables: [firstObservable, secondObservable] }}
+        />
+      );
+      expect(screen.queryByTestId('cases-observables-selected-count')).not.toBeInTheDocument();
+      expect(screen.queryAllByRole('checkbox', { checked: true })).toHaveLength(0);
     });
   });
 });

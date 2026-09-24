@@ -44,7 +44,7 @@ import {
   NO_COLLAPSIBLE_ATTACHMENTS,
 } from './translations';
 import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
-import { CaseAttachmentWorkflowProvider } from '../../workflows/case_attachment_workflow_context';
+import { CaseAttachmentWorkflowProvider } from '../../workflows/case_attachment_workflow_provider';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;

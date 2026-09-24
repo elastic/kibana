@@ -51,9 +51,9 @@ export const DocumentWorkflowsPanel = ({
   onExecute,
   originEventId,
 }: DocumentWorkflowsPanelProps) => {
-  const caseRunWorkflow = useCaseAttachmentWorkflowRun({
+  const caseRunProps = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
-    attachmentId: originEventId,
+    target: originEventId !== undefined ? { attachmentId: originEventId } : undefined,
   });
 
   const inputs = useMemo(
@@ -69,8 +69,7 @@ export const DocumentWorkflowsPanel = ({
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      runWorkflow={caseRunWorkflow}
-      showSuccessToast={caseRunWorkflow === undefined}
+      {...caseRunProps}
       sortWorkflow={sortManualWorkflow}
       onClose={onClose}
       onExecute={onExecute}
