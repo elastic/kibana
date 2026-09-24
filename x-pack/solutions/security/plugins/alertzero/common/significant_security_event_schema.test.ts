@@ -129,18 +129,24 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     // Each Tier 1 status names its own outcome, so a status that says nothing was found
     // alongside nonzero counts (or the reverse) renders as two contradicting claims.
     const contradictions = [
-      { status: 'no_environment_hits' as const, total: 4, confirmed: false },
-      { status: 'no_searchable_terms' as const, total: 4, confirmed: false },
-      { status: 'environment_hits_found' as const, total: 0, confirmed: false },
-      // Confirmed a hit while Tier 1 reports it could not search anything.
-      { status: 'no_searchable_terms' as const, total: 0, confirmed: true },
+      { status: 'no_environment_hits' as const, total: 4, confirmed: false, sources: [] as const },
+      { status: 'no_searchable_terms' as const, total: 4, confirmed: false, sources: [] as const },
+      { status: 'environment_hits_found' as const, total: 0, confirmed: false, sources: [] as const },
+      // Confirmed a hit while Tier 1 reports it could not search anything and Tier 2 did not hit.
+      {
+        status: 'no_searchable_terms' as const,
+        total: 0,
+        confirmed: true,
+        sources: ['tier1'] as const,
+      },
     ];
 
-    for (const { status, total, confirmed } of contradictions) {
+    for (const { status, total, confirmed, sources } of contradictions) {
       const result = significantSecurityEventAttachmentDataSchema.safeParse({
         ...validPayload,
         hunt_result: {
           has_confirmed_hit: confirmed,
+          hit_sources: [...sources],
           time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
           tier1: {
             status,
@@ -165,6 +171,7 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     // contradictory payload would silently read as a complete result set.
     const base = {
       has_confirmed_hit: true,
+      hit_sources: ['tier1'] as Array<'tier1' | 'tier2'>,
       time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
       tier1: {
         status: 'environment_hits_found' as const,
@@ -199,6 +206,7 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       ...validPayload,
       hunt_result: {
         has_confirmed_hit: true,
+        hit_sources: ['tier1'],
         time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-01T02:00:00.000Z' },
         tier1: {
           status: 'environment_hits_found',
@@ -211,9 +219,12 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
           behaviors: [
             {
               technique_id: 'T1021',
+              technique_name: 'Remote Services',
               tactic_ids: ['TA0008'],
               confidence: 0.8,
               rule_name: 'Lateral movement via RDP',
+              proposed_esql_rule: 'FROM logs-* | WHERE true',
+              execution: { executed: true, row_count: 0, hit: false },
             },
           ],
         },
@@ -221,6 +232,70 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('accepts a Tier 2-only confirmed hit', () => {
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      hunt_result: {
+        has_confirmed_hit: true,
+        hit_sources: ['tier2'],
+        time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-01T02:00:00.000Z' },
+        tier1: {
+          status: 'no_environment_hits',
+          counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+          per_index: [],
+          resolved_iocs: [],
+        },
+        tier2: {
+          status: 'behaviors_proposed',
+          behaviors: [
+            {
+              technique_id: 'T1078.004',
+              tactic_ids: ['TA0001'],
+              confidence: 0.9,
+              rule_name: 'AssumeRole into high-risk policy boundary',
+              proposed_esql_rule: 'FROM logs-aws.cloudtrail-* | WHERE true',
+              execution: { executed: true, row_count: 3, hit: true },
+              affected_hosts: ['WIN-ANALYST01'],
+            },
+          ],
+        },
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects has_confirmed_hit with clean Tier 1 and no Tier 2 execution hit', () => {
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      hunt_result: {
+        has_confirmed_hit: true,
+        hit_sources: ['tier1'],
+        time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-01T02:00:00.000Z' },
+        tier1: {
+          status: 'no_searchable_terms',
+          counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+          per_index: [],
+          resolved_iocs: [],
+        },
+        tier2: {
+          status: 'behaviors_proposed',
+          behaviors: [
+            {
+              technique_id: 'T1078.004',
+              tactic_ids: ['TA0001'],
+              confidence: 0.9,
+              rule_name: 'AssumeRole into high-risk policy boundary',
+              execution: { executed: true, row_count: 0, hit: false },
+            },
+          ],
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
   });
 
   describe('security_knowledge_indicators custom refinements', () => {

@@ -106,7 +106,13 @@ const huntResultPerIndexSchema = z.object({
 });
 
 const huntResultTier1Schema = z.object({
-  status: z.enum(['no_searchable_terms', 'no_environment_hits', 'environment_hits_found']),
+  // `scope_blocked`: no required index existed, so Tier 1 never ran. A failed run, never clean.
+  status: z.enum([
+    'scope_blocked',
+    'no_searchable_terms',
+    'no_environment_hits',
+    'environment_hits_found',
+  ]),
   counts: z
     .object({
       total_hits: z.number().int().min(0),
@@ -125,11 +131,28 @@ const huntResultTier1Schema = z.object({
   resolved_iocs: z.array(huntIocSchema).max(50),
 });
 
+const huntResultBehaviorExecutionSchema = z.object({
+  /** Dry-run passed and an execute call was attempted. */
+  executed: z.boolean(),
+  /** Rows after the required-index filter. */
+  row_count: z.number().int().min(0),
+  /** True when at least one required-index row was returned. */
+  hit: z.boolean(),
+});
+
 const huntResultTier2BehaviorSchema = z.object({
   technique_id: z.string().min(1).max(32),
+  technique_name: z.string().min(1).max(256).optional(),
   tactic_ids: z.array(z.string().min(1).max(32)).max(20),
   confidence: z.number().min(0).max(1),
   rule_name: z.string().min(1).max(256),
+  /** Lasting-rule candidate; present on every proposed behavior (not only env hits). */
+  proposed_esql_rule: z.string().min(1).max(32_000).optional(),
+  execution: huntResultBehaviorExecutionSchema.optional(),
+  affected_hosts: z.array(z.string().min(1).max(512)).max(20).optional(),
+  affected_users: z.array(z.string().min(1).max(512)).max(20).optional(),
+  affected_hosts_truncated: z.boolean().optional(),
+  affected_users_truncated: z.boolean().optional(),
 });
 
 const huntResultTier2Schema = z.object({
@@ -137,9 +160,18 @@ const huntResultTier2Schema = z.object({
   behaviors: z.array(huntResultTier2BehaviorSchema).max(20),
 });
 
+const tierHasExecutionHit = (tier2: z.infer<typeof huntResultTier2Schema> | undefined): boolean =>
+  tier2?.behaviors.some((behavior) => behavior.execution?.hit === true) ?? false;
+
 export const huntResultSchema = z
   .object({
     has_confirmed_hit: z.boolean(),
+    /**
+     * Which tier(s) cleared the hit bar for this SSE entry. Empty when
+     * `has_confirmed_hit` is false. Packaging and UI use this to tell a Tier 1
+     * IOC hit from a Tier 2 executed env hit (or both).
+     */
+    hit_sources: z.array(z.enum(['tier1', 'tier2'])).max(2),
     time_range: z.object({
       from: z.string().datetime(),
       to: z.string().datetime(),
@@ -158,12 +190,38 @@ export const huntResultSchema = z
       path: ['tier1', 'status'],
     }
   )
-  // A hunt that found no searchable terms or no hits cannot also have confirmed one.
+  // Confirmed hit requires Tier 1 environment hits and/or a Tier 2 executed required-index hit.
   .refine(
-    (result) => !result.has_confirmed_hit || result.tier1.status === 'environment_hits_found',
+    (result) =>
+      !result.has_confirmed_hit ||
+      result.tier1.status === 'environment_hits_found' ||
+      tierHasExecutionHit(result.tier2),
     {
-      message: 'has_confirmed_hit is true but tier1 found no environment hits',
+      message:
+        'has_confirmed_hit is true but neither tier1 found environment hits nor any tier2 behavior has execution.hit',
       path: ['has_confirmed_hit'],
+    }
+  )
+  // hit_sources must agree with has_confirmed_hit and the contributing tiers.
+  .refine(
+    (result) => {
+      if (!result.has_confirmed_hit) {
+        return result.hit_sources.length === 0;
+      }
+      if (result.hit_sources.length === 0) {
+        return false;
+      }
+      if (result.hit_sources.includes('tier1') && result.tier1.status !== 'environment_hits_found') {
+        return false;
+      }
+      if (result.hit_sources.includes('tier2') && !tierHasExecutionHit(result.tier2)) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'hit_sources must match has_confirmed_hit and the tiers that actually hit',
+      path: ['hit_sources'],
     }
   );
 
