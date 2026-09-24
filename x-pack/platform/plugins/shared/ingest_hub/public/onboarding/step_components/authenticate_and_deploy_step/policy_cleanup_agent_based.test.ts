@@ -200,4 +200,37 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     expect(payload.inputs['vpcflow-aws-s3']).toBeDefined();
     expect(payload.inputs['vpcflow-aws-s3'].enabled).toBe(true);
   });
+
+  it('disables removed service input in PUT body when package manifest includes its template', async () => {
+    // Package manifest lists both vpcflow (surviving) and removed-svc (removed) templates.
+    // The cleanup PUT must set removed-svc's input to enabled:false — not silently omit it —
+    // so Fleet does not keep collecting from the removed service.
+    const removedSvc = makeService('removed-svc');
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [],
+          policy_templates: [
+            { name: 'vpcflow', inputs: [{ type: 'aws-s3' }] },
+            { name: 'removed-svc', inputs: [{ type: 'aws-s3' }] },
+          ],
+        },
+      },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([
+        ['vpcflow', vpcflow],
+        ['removed-svc', removedSvc],
+      ]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    const payload = mockUpdatePackagePolicy.mock.calls[0][1];
+    expect(payload.inputs['vpcflow-aws-s3'].enabled).toBe(true);
+    expect(payload.inputs['removed-svc-aws-s3']).toEqual({ enabled: false, streams: {} });
+  });
 });
