@@ -224,10 +224,11 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
   const emit = useCallback((event: ChatEvent) => dispatch(event), []);
 
   const events = [...seedEvents, ...liveState.events];
-  const { attachmentsService } = useAgentBuilderServices();
+  const { attachmentsService, conversationEventsService } = useAgentBuilderServices();
   const items = resolveTimelineItems(buildItems(events), {
     attachments: seedAttachments,
     attachmentsService,
+    conversationEventsService,
   });
 
   return (

@@ -49,6 +49,7 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
     attachmentsService: {
       hasAttachmentType: (type: string) => registeredAttachmentTypes.has(type),
     },
+    conversationEventsService: { getUiDefinition: () => undefined },
   }),
 }));
 

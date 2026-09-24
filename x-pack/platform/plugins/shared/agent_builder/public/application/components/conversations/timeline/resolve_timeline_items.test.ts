@@ -6,13 +6,31 @@
  */
 
 import { resolveTimelineItems } from './resolve_timeline_items';
-import type { GroupedItem, UnresolvedAttachmentItem } from './types';
+import type { ConversationEventUIDefinition } from '@kbn/agent-builder-browser';
+import type { GroupedItem, UnresolvedAttachmentItem, UnresolvedCustomEventItem } from './types';
 import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
 import { createAttachmentUpdatedEvent } from './items/attachment_updated_event.factory';
+import { CUSTOM_EVENT_TYPE, createCustomEvent } from './items/custom_event.factory';
 import { createCompletedTurnItem, createUserMessageItem } from './items/timeline_item.factory';
 import { createVersionedAttachment } from './items/versioned_attachment.factory';
 
-const registered = { hasAttachmentType: (type: string) => type === 'dashboard' };
+const customEventDefinition: ConversationEventUIDefinition = {
+  type: CUSTOM_EVENT_TYPE,
+  render: () => null,
+};
+
+const services = {
+  attachmentsService: { hasAttachmentType: (type: string) => type === 'dashboard' },
+  conversationEventsService: {
+    getUiDefinition: (type: string) =>
+      type === CUSTOM_EVENT_TYPE ? customEventDefinition : undefined,
+  },
+};
+
+const customEventItem = (type: string = CUSTOM_EVENT_TYPE): UnresolvedCustomEventItem => {
+  const event = createCustomEvent({ id: `custom-${type}`, type });
+  return { kind: 'customEvent', key: event.id, event };
+};
 
 const addedItem = (): UnresolvedAttachmentItem => {
   const event = createAttachmentAddedEvent();
@@ -23,7 +41,7 @@ describe('resolveTimelineItems', () => {
   it('passes built-in items through untouched', () => {
     const items: GroupedItem[] = [createUserMessageItem(), createCompletedTurnItem()];
 
-    expect(resolveTimelineItems(items, { attachmentsService: registered })).toEqual(items);
+    expect(resolveTimelineItems(items, services)).toEqual(items);
   });
 
   it('attaches the record and version to an attachment item that can draw', () => {
@@ -32,7 +50,7 @@ describe('resolveTimelineItems', () => {
 
     const [resolved] = resolveTimelineItems([item], {
       attachments: [attachment],
-      attachmentsService: registered,
+      ...services,
     });
 
     expect(resolved).toEqual({ ...item, attachment, version: 1 });
@@ -50,17 +68,15 @@ describe('resolveTimelineItems', () => {
 
     const [resolved] = resolveTimelineItems([{ kind: 'attachment', key: event.id, event }], {
       attachments: [attachment],
-      attachmentsService: registered,
+      ...services,
     });
 
     expect(resolved.kind === 'attachment' && resolved.version).toBe(2);
   });
 
   it('drops the item when the attachment is not in the conversation', () => {
-    expect(
-      resolveTimelineItems([addedItem()], { attachments: [], attachmentsService: registered })
-    ).toEqual([]);
-    expect(resolveTimelineItems([addedItem()], { attachmentsService: registered })).toEqual([]);
+    expect(resolveTimelineItems([addedItem()], { attachments: [], ...services })).toEqual([]);
+    expect(resolveTimelineItems([addedItem()], services)).toEqual([]);
   });
 
   it('drops the item when the attachment type has no registered UI', () => {
@@ -69,7 +85,7 @@ describe('resolveTimelineItems', () => {
     expect(
       resolveTimelineItems([addedItem()], {
         attachments: [attachment],
-        attachmentsService: registered,
+        ...services,
       })
     ).toEqual([]);
   });
@@ -82,7 +98,7 @@ describe('resolveTimelineItems', () => {
       expect(
         resolveTimelineItems([addedItem()], {
           attachments: [attachment],
-          attachmentsService: registered,
+          ...services,
         })
       ).toEqual([]);
     }
@@ -99,9 +115,21 @@ describe('resolveTimelineItems', () => {
     expect(
       resolveTimelineItems([addedItem()], {
         attachments: [attachment],
-        attachmentsService: registered,
+        ...services,
       })
     ).toEqual([]);
+  });
+
+  it('attaches the definition to a custom event whose type has a registered UI', () => {
+    const item = customEventItem();
+
+    expect(resolveTimelineItems([item], services)).toEqual([
+      { ...item, definition: customEventDefinition },
+    ]);
+  });
+
+  it('drops a custom event whose type has no registered UI', () => {
+    expect(resolveTimelineItems([customEventItem('unregistered_type')], services)).toEqual([]);
   });
 
   it('keeps the order of the surviving items', () => {
@@ -119,11 +147,14 @@ describe('resolveTimelineItems', () => {
       event: missingEvent,
     };
 
-    const resolved = resolveTimelineItems([user, missing, turn, ok], {
+    const custom = customEventItem();
+    const unregistered = customEventItem('unregistered_type');
+
+    const resolved = resolveTimelineItems([user, missing, custom, turn, unregistered, ok], {
       attachments: [attachment],
-      attachmentsService: registered,
+      ...services,
     });
 
-    expect(resolved.map((item) => item.key)).toEqual([user.key, turn.key, ok.key]);
+    expect(resolved.map((item) => item.key)).toEqual([user.key, custom.key, turn.key, ok.key]);
   });
 });
