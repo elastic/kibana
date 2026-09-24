@@ -332,8 +332,6 @@ export function SettingsTab() {
 
       <StaleEventCleanupSection canManage={canManage} />
 
-      <CostEstimate />
-
       <EuiSpacer />
 
       <RunLimitsSection />
@@ -872,6 +870,8 @@ export function SettingsTab() {
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
+
+      {isDeveloperMode && <CostEstimate />}
 
       {isDeveloperMode && !isDeveloperModeSaving && (
         <>
