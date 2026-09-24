@@ -10,6 +10,7 @@
 import { getNodeSSLOptions } from '@kbn/actions-utils';
 import type { Pool as Mysql2Pool, SslOptions } from 'mysql2/promise';
 import type { BuildContext, ClientTypeSpec } from './client_type_spec';
+import { parseBasicAuthHeader } from './parse_basic_auth_header';
 
 // mysql2 error codes that indicate the user supplied bad configuration (not a transient network error).
 const USER_ERROR_CODES = new Set([
@@ -19,20 +20,6 @@ const USER_ERROR_CODES = new Set([
   'ECONNREFUSED', // wrong host or port
   'ENOTFOUND', // hostname cannot be resolved
 ]);
-
-const extractBasicCredentials = async (
-  credential: BuildContext['credential']
-): Promise<{ username: string; password: string }> => {
-  const headers = await credential.getAuthHeaders();
-  const authHeader = headers.Authorization ?? headers.authorization ?? '';
-  const encoded = authHeader.startsWith('Basic ') ? authHeader.slice(6) : '';
-  const decoded = Buffer.from(encoded, 'base64').toString('utf8');
-  const colonIdx = decoded.indexOf(':');
-  return {
-    username: colonIdx >= 0 ? decoded.slice(0, colonIdx) : decoded,
-    password: colonIdx >= 0 ? decoded.slice(colonIdx + 1) : '',
-  };
-};
 
 const toMysqlSslOptions = (ctx: BuildContext): SslOptions => {
   const sslSettings = ctx.networkSettings.getSslSettings();
@@ -62,7 +49,9 @@ export const mysqlClientType: ClientTypeSpec<Mysql2Pool> = {
 
     ctx.networkSettings.ensureHostnameAllowed(host);
 
-    const { username, password } = await extractBasicCredentials(ctx.credential);
+    const headers = await ctx.credential.getAuthHeaders();
+    const credentials = parseBasicAuthHeader(headers.Authorization ?? headers.authorization ?? '');
+    const { username = '', password = '' } = credentials ?? {};
     const { timeout } = ctx.networkSettings.getResponseSettings();
 
     ctx.logger.info(`[mysql] Opening connection pool for ${host}:${port}/${database}`);

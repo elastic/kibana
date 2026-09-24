@@ -9,27 +9,20 @@ export type { AnalysisTarget } from './src/shared/analysis_target';
 export { getDiverseSampleDocuments } from './src/shared/sampling/get_diverse_sample_documents';
 export { EMPTY_TOKENS, sumTokens } from './src/shared/tokens/sum_tokens';
 export {
-  identifyKIQueries,
-  DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
-  type ExistingQuerySummary,
-  type QueryAttempt,
-  type QueryAttemptStatus,
-  type QueryAttemptFailureReason,
-} from './src/significant_events/queries/identify_ki_queries';
-export {
   createQueryValidationContext,
   validateKIQueries,
   type CandidateKIQuery,
+  type ExistingQuerySummary,
+  type QueryAttempt,
+  type QueryAttemptFailureReason,
+  type QueryAttemptStatus,
   type ValidatedKIQuery,
   type QueryValidationResult,
   type QueryValidationContext,
 } from './src/significant_events/queries/validate_ki_queries';
-export {
-  createDefaultSignificantEventsToolUsage,
-  type SignificantEventsToolUsage,
-} from './src/significant_events/queries/tools/tool_usage';
+export { type SignificantEventsToolUsage } from './src/significant_events/queries/tools/tool_usage';
 export { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from './src/significant_events/queries/tools/features_tool';
-export { significantEventsPrompt } from './src/significant_events/queries/prompt';
+export { significantEventsAgentPrompt } from './src/significant_events/queries/prompt';
 export {
   SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
