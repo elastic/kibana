@@ -36,6 +36,7 @@ import {
 } from '../memory_document';
 
 const memoryTypeSchema = z.enum(['memory.session', 'memory.session_fact']);
+const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
 const rememberSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
@@ -77,7 +78,9 @@ const rememberSchema = z.object({
   expires_at: z.iso
     .datetime()
     .optional()
-    .describe('Optional timestamp after which the memory must not be recalled'),
+    .describe(
+      'Optional timestamp after which the memory must not be recalled. New memories default to 90 days from creation.'
+    ),
 });
 
 export const createRememberTool = ({
@@ -86,12 +89,14 @@ export const createRememberTool = ({
   getSecurityStart,
   generateId = randomUUID,
   generateSessionId = randomUUID,
+  getCurrentDate = () => new Date(),
 }: {
   getAiIndexService: () => Promise<AiIndexService>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   generateId?: () => string;
   generateSessionId?: () => string;
+  getCurrentDate?: () => Date;
 }): BuiltinToolDefinition<typeof rememberSchema> => ({
   id: CONTEXT_ENGINE_REMEMBER_TOOL_ID,
   type: ToolType.builtin,
@@ -155,7 +160,11 @@ export const createRememberTool = ({
       }
 
       const currentUserClient = esClient.asCurrentUser;
-      const now = new Date().toISOString();
+      const currentDate = getCurrentDate();
+      const now = currentDate.toISOString();
+      const defaultExpiresAt = new Date(
+        currentDate.getTime() + DEFAULT_MEMORY_EXPIRATION_MS
+      ).toISOString();
       const logicalId = params.id ?? generateId();
       const writer = createMemoryWriter({
         toolId: CONTEXT_ENGINE_REMEMBER_TOOL_ID,
@@ -235,7 +244,7 @@ export const createRememberTool = ({
           ? { expires_at: params.expires_at }
           : existingDocument?.expires_at !== undefined
           ? { expires_at: existingDocument.expires_at }
-          : {}),
+          : { expires_at: defaultExpiresAt }),
         updated_at: now,
         references: addConversationReference(existingDocument?.references, conversationId),
         attributes: {
