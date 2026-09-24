@@ -22,7 +22,6 @@ import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
@@ -58,7 +57,6 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { agentId, setAgentId } = useConversationContext();
-  const { removeAllErrors } = useStreamingContext();
   const { agents } = useAgentBuilderAgents();
   const { agentOptions, renderAgentOption } = useAgentOptions({ agents, selectedAgentId: agentId });
 
@@ -81,7 +79,6 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
   ) => {
     const { checked, key: newAgentId } = changedOption;
     if (checked === 'on' && newAgentId) {
-      removeAllErrors();
       setAgentId?.(newAgentId);
       onClose();
     }
