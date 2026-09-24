@@ -78,7 +78,14 @@ export type {
   FeatureFlagsSetup,
 } from '@kbn/core-feature-flags-server';
 export { defineTopic } from '@kbn/core-pubsub-server';
-export type { PubSubSetup, Topic } from '@kbn/core-pubsub-server';
+export type {
+  PubSubEvent,
+  PubSubHandler,
+  PubSubSetup,
+  PubSubStart,
+  PublishInput,
+  Topic,
+} from '@kbn/core-pubsub-server';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,

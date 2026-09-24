@@ -8,20 +8,28 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { PubSubSetup } from '@kbn/core-pubsub-server';
+import type { PubSubSetup, PubSubStart } from '@kbn/core-pubsub-server';
 import type { PubSubService } from '@kbn/core-pubsub-server-internal';
 
 const createSetup = (): jest.Mocked<PubSubSetup> => {
   return {
     registerTopic: jest.fn(),
+    subscribe: jest.fn(),
+  };
+};
+
+const createStart = (): jest.Mocked<PubSubStart> => {
+  return {
+    publish: jest.fn(),
   };
 };
 
 const createService = (): jest.Mocked<PublicMethodsOf<PubSubService>> => {
   return {
     setup: jest.fn().mockImplementation(createSetup),
-    start: jest.fn(),
+    start: jest.fn().mockImplementation(createStart),
     stop: jest.fn(),
+    publish: jest.fn(),
   };
 };
 
@@ -29,4 +37,5 @@ const createService = (): jest.Mocked<PublicMethodsOf<PubSubService>> => {
 export const pubSubServiceMock = {
   create: createService,
   createSetup,
+  createStart,
 };
