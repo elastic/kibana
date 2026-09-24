@@ -391,7 +391,7 @@ describe('remember tool', () => {
     });
   });
 
-  it('appends an existing memory revision to its data stream', async () => {
+  it('appends a data stream revision and resets omitted expiration to the default', async () => {
     search.mockResolvedValue({
       hits: {
         hits: [
@@ -463,7 +463,7 @@ describe('remember tool', () => {
           '@timestamp': expect.any(String),
           id: 'memory-1',
           tags: ['existing'],
-          expires_at: '2027-01-01T00:00:00.000Z',
+          expires_at: '2026-12-23T12:00:00.000Z',
           references: [
             {
               uri: 'conversation://conversation-0',
