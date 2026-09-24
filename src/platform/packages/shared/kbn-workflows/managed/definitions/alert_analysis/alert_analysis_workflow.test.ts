@@ -300,7 +300,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // what amortises the ~28k-token agent framework prompt across the whole batch.
     expect(loops).toHaveLength(1);
     expect(loops[0].foreach).toBe(
-      "{{ event.alerts | default: inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
+      "{% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% endif %}"
     );
     expect(workflow.consts.batch_size).toEqual(expect.any(Number));
     expect(workflow.consts.batch_size).toBeGreaterThan(1);
@@ -456,9 +456,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const anchorStep = findStepByName(workflow.steps, 'set_enrichment_anchor') as {
       with: { anchor_timestamp: string };
     };
-    expect(anchorStep.with.anchor_timestamp).toBe(
-      '{{ event.alerts[0]["@timestamp"] | default: inputs.alerts[0]["@timestamp"] }}'
-    );
+    expect(anchorStep.with.anchor_timestamp).toBe('{{ event.alerts[0]["@timestamp"] }}');
   });
 
   it('scopes enrichment alert-index queries to the executing Kibana space', () => {
@@ -967,14 +965,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(JSON.stringify(stepsWithoutRuleSource)).not.toContain('event.rule.name');
     expect(JSON.stringify(workflow.steps)).toContain('variables.rule_id');
 
-    // Alerts are never stored in a step output (max-step-size, duplicated state). Every
-    // read of the trigger event falls back to the caller's alerts, so a site cannot
-    // analyse one source while another site ignores it.
-    const serializedSteps = JSON.stringify(workflow.steps);
-    const countOf = (needle: string) => serializedSteps.split(needle).length - 1;
-    expect(serializedSteps).not.toContain('alert_set');
-    expect(countOf('event.alerts')).toBe(5);
-    expect(countOf('| default: inputs.alerts')).toBe(5);
+    // Alerts are never stored in a step output (max-step-size, duplicated state).
+    expect(JSON.stringify(workflow.steps)).not.toContain('alert_set');
   });
 
   it('fails the Worker path when alerts is missing or empty instead of completing empty', () => {
@@ -1713,36 +1705,68 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(result).toEqual(['a1', 'a2']);
   });
 
-  it('reads the trigger alerts when present and falls back to the caller alerts otherwise', () => {
-    const countsStep = findStepByName(workflow.steps, 'set_alert_counts') as {
-      with: { total_alert_count: string };
+  it('reads event.alerts on the standalone path and inputs.alerts on the Worker path', () => {
+    interface DataSetStep {
+      with: Record<string, string>;
+    }
+    interface GateStep {
+      condition: string;
+    }
+    const countsStep = findStepByName(workflow.steps, 'set_alert_counts') as DataSetStep;
+    const callerCountsGate = findStepByName(workflow.steps, 'count_caller_alerts') as GateStep;
+    const callerCountsStep = findStepByName(
+      workflow.steps,
+      'apply_caller_alert_counts'
+    ) as DataSetStep;
+    const anchorStep = findStepByName(workflow.steps, 'set_enrichment_anchor') as DataSetStep;
+    const callerAnchorGate = findStepByName(workflow.steps, 'anchor_on_caller_alerts') as GateStep;
+    const callerAnchorStep = findStepByName(
+      workflow.steps,
+      'apply_caller_enrichment_anchor'
+    ) as DataSetStep;
+    const classifyLoop = findStepByName(workflow.steps, 'classify_alert_batches') as {
+      foreach: string;
     };
-    const anchorStep = findStepByName(workflow.steps, 'set_enrichment_anchor') as {
-      with: { anchor_timestamp: string };
-    };
+    const verdictsLoop = findStepByName(workflow.steps, 'apply_verdicts') as { foreach: string };
+
     const triggerAlerts = [
       { _id: 't1', '@timestamp': '2026-01-01T00:00:00.000Z' },
       { _id: 't2', '@timestamp': '2026-01-01T00:01:00.000Z' },
     ];
     const callerAlerts = [{ _id: 'c1', '@timestamp': '2026-02-01T00:00:00.000Z' }];
-
-    const standaloneContexts = [
-      { event: { alerts: triggerAlerts }, inputs: { alerts: [] } },
-      { event: { alerts: triggerAlerts }, inputs: {} },
-      { event: { alerts: triggerAlerts }, inputs: { alerts: callerAlerts } },
-    ];
-    for (const context of standaloneContexts) {
-      expect(evaluateExpression(engine, countsStep.with.total_alert_count, context)).toBe(2);
-      expect(engine.parseAndRenderSync(anchorStep.with.anchor_timestamp, context)).toBe(
-        '2026-01-01T00:00:00.000Z'
-      );
+    const shared = { variables: { pending_filter_expr: 'false' }, consts: workflow.consts };
+    const standalone = {
+      ...shared,
+      event: { alerts: triggerAlerts },
+      inputs: { alerts: callerAlerts },
+    };
+    const worker = { ...shared, inputs: { calledByWorker: true, alerts: callerAlerts } };
+    interface LoopAlert {
+      _id: string;
     }
+    const renderLoopIds = (foreach: string, context: object): string[] =>
+      (JSON.parse(engine.parseAndRenderSync(foreach, context)) as Array<LoopAlert | LoopAlert[]>)
+        .flat()
+        .map(({ _id }) => _id);
 
-    const workerContext = { inputs: { alerts: callerAlerts } };
-    expect(evaluateExpression(engine, countsStep.with.total_alert_count, workerContext)).toBe(1);
-    expect(engine.parseAndRenderSync(anchorStep.with.anchor_timestamp, workerContext)).toBe(
+    // Standalone ignores caller alerts even when present: the flag, not the data, picks the source.
+    expect(evaluateExpression(engine, countsStep.with.total_alert_count, standalone)).toBe(2);
+    expect(evaluateExpression(engine, callerCountsGate.condition, standalone)).toBe(false);
+    expect(engine.parseAndRenderSync(anchorStep.with.anchor_timestamp, standalone)).toBe(
+      '2026-01-01T00:00:00.000Z'
+    );
+    expect(evaluateExpression(engine, callerAnchorGate.condition, standalone)).toBe(false);
+    expect(renderLoopIds(classifyLoop.foreach, standalone)).toEqual(['t1', 't2']);
+    expect(renderLoopIds(verdictsLoop.foreach, standalone)).toEqual(['t1', 't2']);
+
+    expect(evaluateExpression(engine, callerCountsGate.condition, worker)).toBe(true);
+    expect(evaluateExpression(engine, callerCountsStep.with.total_alert_count, worker)).toBe(1);
+    expect(evaluateExpression(engine, callerAnchorGate.condition, worker)).toBe(true);
+    expect(engine.parseAndRenderSync(callerAnchorStep.with.anchor_timestamp, worker)).toBe(
       '2026-02-01T00:00:00.000Z'
     );
+    expect(renderLoopIds(classifyLoop.foreach, worker)).toEqual(['c1']);
+    expect(renderLoopIds(verdictsLoop.foreach, worker)).toEqual(['c1']);
   });
 
   it('emits workflow.output counts and fields from accumulated Worker verdicts', () => {
