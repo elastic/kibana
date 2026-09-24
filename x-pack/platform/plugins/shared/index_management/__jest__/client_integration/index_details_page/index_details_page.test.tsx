@@ -1446,9 +1446,7 @@ describe('<IndexDetailsPage />', () => {
 
     describe('Add a new field', () => {
       beforeEach(async () => {
-        await renderPage(undefined, {
-          core: { application: { capabilities: { ml: { canGetTrainedModels: true } } } },
-        });
+        await renderPage();
         await clickMappingsTab();
         await user.click(screen.getByTestId('indexDetailsMappingsAddField'));
         await screen.findByTestId('indexDetailsMappingsPendingBlock');
@@ -1475,7 +1473,7 @@ describe('<IndexDetailsPage />', () => {
         }
       });
 
-      it('can cancel adding a field and can save new mappings', async () => {
+      it('can cancel adding a field', async () => {
         // Initial state: pending block open and save disabled.
         expect(screen.getByTestId('indexDetailsMappingsPendingBlock')).toBeInTheDocument();
         expect(screen.getByTestId('indexDetailsMappingsSaveMappings')).toBeDisabled();
@@ -1488,12 +1486,9 @@ describe('<IndexDetailsPage />', () => {
           expect(screen.queryByTestId('indexDetailsMappingsPendingBlock')).not.toBeInTheDocument()
         );
         expect(screen.getByTestId('indexDetailsMappingsAddField')).toBeInTheDocument();
+      }, 20000);
 
-        // Re-open add field for the save flow.
-        await user.click(screen.getByTestId('indexDetailsMappingsAddField'));
-        await screen.findByTestId('indexDetailsMappingsPendingBlock');
-        await screen.findByTestId('createFieldForm');
-
+      it('can save new mappings', async () => {
         // After save, mappings reload should include the new field.
         interface IndexMappings {
           properties: Record<string, unknown>;
