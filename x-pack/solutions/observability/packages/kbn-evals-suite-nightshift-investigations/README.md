@@ -192,7 +192,7 @@ eval and prints a warning.
 Select an existing evaluations dataset directly by its UI ID:
 
 ```bash
-NIGHTSHIFT_DATASET_ID=<dataset-id> NIGHTSHIFT_CONCURRENCY=16 \
+NIGHTSHIFT_DATASET_ID=<dataset-id> \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
   --model openrouter-anthropic-claude-sonnet-4-6 \
   --judge openrouter-anthropic-claude-sonnet-4-6
@@ -205,18 +205,15 @@ must satisfy the same question and distinct `case_id` requirements as a file. Do
 with `NIGHTSHIFT_EXAMPLES_FILE`. The dataset's telemetry source still needs the sandbox and remote
 telemetry settings below; selecting a dataset does not provision its source data.
 
-`NIGHTSHIFT_CONCURRENCY` controls investigation concurrency. It defaults to 2 and accepts integers
-from 1 to 45. The managed stack allocates one normal-task slot per concurrent workflow
-plus five background task slots, with a minimum capacity of 10: concurrency 16 sets
-`xpack.task_manager.capacity=21` (42 raw cost units).
-The workflow executes its agent inline, without a second Task Manager task. The upper bound keeps
-capacity within Kibana's supported maximum of 50 normal-task slots. The test timeout scales with
-the number of example/repetition batches and the existing 20-minute investigation deadline, with
-two additional minutes per batch for agent and evaluator trace ingestion. Independent trace
-checks use the same concurrency limit.
+The investigation spec sets the existing `runExperiment` concurrency option to **16**. Its
+Scout config reserves **21 normal-task slots** (42 raw cost units): sixteen for investigation
+workflows and five for background work. The workflow executes its agent inline, without a second
+Task Manager task. The spec uses the same concurrency constant for trace checks and for calculating
+the timeout from example/repetition batches and the 20-minute investigation deadline, with two
+additional minutes per batch for trace ingestion.
 
-Both variables work with `start` and `run`. Prefer `start` after changing concurrency: the hook
-exports it to Scout and Playwright, and Scout restarts when the hook output changes. Dataset
+To change parallelism, edit the spec's concurrency constant and ensure the Scout config and
+sandbox pool have sufficient capacity. Restart Scout after changing its capacity. Dataset
 selection alone does not restart Scout. `run` and `start --skip-server` use your existing stack,
 whose Task Manager capacity you must configure yourself. Wait for any active eval to finish before
 restarting a shared local stack.

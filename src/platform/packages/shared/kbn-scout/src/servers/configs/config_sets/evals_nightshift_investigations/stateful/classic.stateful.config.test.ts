@@ -41,7 +41,6 @@ describe('evals_nightshift_investigations config set', () => {
   beforeEach(() => {
     process.env = { ...originalEnv };
     delete process.env.NIGHTSHIFT_DATASETS;
-    delete process.env.NIGHTSHIFT_CONCURRENCY;
     delete process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
     for (const key of Object.keys(process.env)) {
       if (key.startsWith('SANDBOX_')) delete process.env[key];
@@ -88,19 +87,9 @@ describe('evals_nightshift_investigations config set', () => {
       'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
     );
   });
-  it.each([
-    ['2', 10],
-    ['16', 21],
-    ['45', 50],
-  ])('reserves matching capacity for concurrency %s', (concurrency, capacity) => {
-    const { servers } = loadConfig({ SANDBOX_KIBANA_CONFIG, NIGHTSHIFT_CONCURRENCY: concurrency });
-    expect(servers.kbnTestServer.serverArgs).toContain(`--xpack.task_manager.capacity=${capacity}`);
-  });
-
-  it.each(['0', '46', '1.5', 'invalid', ''])('rejects invalid concurrency %s', (concurrency) => {
-    expect(() =>
-      loadConfig({ SANDBOX_KIBANA_CONFIG, NIGHTSHIFT_CONCURRENCY: concurrency })
-    ).toThrow('integer between 1 and 45');
+  it('reserves capacity for sixteen investigations and five background tasks', () => {
+    const { servers } = loadConfig({ SANDBOX_KIBANA_CONFIG });
+    expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
   });
 
   it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {

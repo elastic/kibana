@@ -16,10 +16,6 @@ const createInvestigationConfig = (sandboxKibanaConfig: string): ScoutServerConf
     throw new Error(`SANDBOX_KIBANA_CONFIG references a missing file: ${sandboxKibanaConfig}`);
   }
 
-  const concurrency = Number(process.env.NIGHTSHIFT_CONCURRENCY ?? 2);
-  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 45) {
-    throw new Error('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 45');
-  }
   const telemetryConfig = process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
   if (telemetryConfig && !existsSync(telemetryConfig)) {
     throw new Error(
@@ -42,8 +38,8 @@ const createInvestigationConfig = (sandboxKibanaConfig: string): ScoutServerConf
       },
       serverArgs: [
         ...parentArgs.filter((arg) => !arg.startsWith(exporterPrefix)),
-        // Reserve five normal-cost task slots for background work.
-        `--xpack.task_manager.capacity=${Math.max(10, concurrency + 5)}`,
+        // Allow sixteen investigation workflows plus five background tasks.
+        '--xpack.task_manager.capacity=21',
         '--xpack.nightshift_investigations.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',

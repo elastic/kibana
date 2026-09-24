@@ -55,7 +55,6 @@ describe('nightshift-investigations scout hook', () => {
         SANDBOX_CLIENT_KEY: 'KEY',
         SANDBOX_CA_CERT: 'CA',
         SANDBOX_KIBANA_CONFIG: Path.join(__dirname, 'kibana.sandbox.yml'),
-        NIGHTSHIFT_CONCURRENCY: '2',
       },
     });
   });
@@ -166,22 +165,6 @@ describe('nightshift-investigations scout hook', () => {
       rmSync(shimDir, { recursive: true, force: true });
     }
   });
-  it.each(['1', '16', '45'])('exports concurrency %s for both Scout and Playwright', (value) => {
-    expect(
-      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_CONCURRENCY: value }).output.env
-        .NIGHTSHIFT_CONCURRENCY
-    ).toBe(value);
-  });
-
-  it.each(['0', '46', '1.5', 'invalid', ''])(
-    'rejects invalid concurrency %s before starting Scout',
-    (value) => {
-      const result = runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_CONCURRENCY: value });
-      expect(result.status).not.toBe(0);
-      expect(result.stderr).toContain('integer between 1 and 45');
-    }
-  );
-
   it('keeps dataset selection out of the server fingerprint', () => {
     expect(runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASET_ID: 'first' }).output).toEqual(
       runHook(

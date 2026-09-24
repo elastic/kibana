@@ -27,10 +27,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
     'persists ungraded investigations and complete agent traces',
     async ({ executorClient, connector, fetch, evalsClient, traceEsClient, repetitions, log }) => {
       const dataset = await loadInvestigationDataset(evalsClient);
-      const concurrency = Number(process.env.NIGHTSHIFT_CONCURRENCY ?? 2);
-      if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 45) {
-        throw new Error('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 45');
-      }
+      const concurrency = 16;
       evaluate.setTimeout(
         Math.ceil((dataset.examples.length * repetitions) / concurrency) *
           (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +

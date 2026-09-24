@@ -86,13 +86,6 @@ if [[ -z "$certificate" || -z "$key" ]]; then
   exit 1
 fi
 
-# Fingerprint concurrency with the hook output so changing it restarts Scout with matching capacity.
-concurrency="${NIGHTSHIFT_CONCURRENCY-2}"
-if ! concurrency="$(printf '%s' "$concurrency" | jq -Rser 'tonumber | select(. == floor and . >= 1 and . <= 45)' 2>/dev/null)"; then
-  echo "NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 45" >&2
-  exit 1
-fi
-
 # Values reach jq through its environment, not `--arg`: argv is visible to any process listing,
 # while a process's environment is readable only by its owner.
 HOOK_HOST="$host" \
@@ -101,7 +94,6 @@ HOOK_HOST="$host" \
   HOOK_CERTIFICATE="$certificate" \
   HOOK_KEY="$key" \
   HOOK_CA="$ca" \
-  HOOK_CONCURRENCY="$concurrency" \
   HOOK_TELEMETRY_URL="$telemetry_url" \
   HOOK_TELEMETRY_KEY="$telemetry_key" \
   HOOK_READABLE_INDICES="$readable_indices" \
@@ -117,8 +109,7 @@ HOOK_HOST="$host" \
     } | with_entries(select(.value != ""))) + {
       # kibana.sandbox.yml always references the CA; an empty value means no custom CA.
       SANDBOX_CA_CERT: $ENV.HOOK_CA,
-      SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG,
-      NIGHTSHIFT_CONCURRENCY: $ENV.HOOK_CONCURRENCY
+      SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
     } + (if $ENV.HOOK_TELEMETRY_CONFIG != "" then {
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: $ENV.HOOK_TELEMETRY_URL,
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: $ENV.HOOK_TELEMETRY_KEY,
