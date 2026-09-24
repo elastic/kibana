@@ -43,7 +43,7 @@ describe('createInferenceEndpointExecutor', () => {
       {
         asStream: true,
         requestTimeout: 180_000,
-        headers: { 'X-Elastic-Product-Use-Case': 'inference' },
+        headers: { 'X-Elastic-Product-Use-Case': 'inference', 'accept-encoding': 'identity' },
       }
     );
   });

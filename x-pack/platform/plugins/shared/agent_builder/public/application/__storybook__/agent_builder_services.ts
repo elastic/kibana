@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EMPTY } from 'rxjs';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
@@ -13,6 +14,7 @@ import {
 import type { ImageAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 import { AttachmentsService } from '../../services/attachments';
+import { ConversationEventsService } from '../../services/conversation_events';
 import type { AgentBuilderInternalService } from '../../services/types';
 import { createStorybookKibanaServices } from './kibana_services';
 
@@ -80,6 +82,7 @@ const defaultServices: AgentBuilderInternalService = {
     delete: () => Promise.resolve({} as never),
   } as never,
   attachmentsService: storybookAttachmentsService,
+  conversationEventsService: new ConversationEventsService(),
   renderersService: {} as never,
   chatService: {} as never,
   conversationsService: {} as never,
@@ -102,7 +105,7 @@ const defaultServices: AgentBuilderInternalService = {
   } as never,
   pluginsService: {} as never,
   oauthClientsService: {} as never,
-  startDependencies: {} as never,
+  startDependencies: { data: { search: { search: () => EMPTY } } } as never,
   accessChecker: {} as never,
   eventsService: { track: noOp } as never,
   isEarsEnabled: false,
