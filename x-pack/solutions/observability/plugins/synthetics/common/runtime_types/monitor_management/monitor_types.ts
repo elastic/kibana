@@ -24,14 +24,22 @@ import {
   VerificationModeCodec,
   RequestBodyCheckCodec,
 } from './monitor_configs';
-import { MetadataCodec } from './monitor_meta_data';
-import { PrivateLocationCodec } from './synthetics_private_locations';
+import { MetadataCodec as metadataSchema } from './monitor_meta_data';
+import { PrivateLocationCodec as privateLocationSchema } from './synthetics_private_locations';
+import { zodAsIoTs } from '../zod_as_io_ts';
 import {
-  getNonEmptyStringCodec,
-  InlineScriptString,
-  NameSpaceString,
-  TimeoutString,
+  getNonEmptyStringCodec as nonEmptyStringSchema,
+  InlineScriptString as inlineScriptSchema,
+  NameSpaceString as nameSpaceSchema,
+  TimeoutString as timeoutSchema,
 } from '../common';
+
+const MetadataCodec = zodAsIoTs(metadataSchema);
+const PrivateLocationCodec = zodAsIoTs(privateLocationSchema);
+const NameSpaceString = zodAsIoTs(nameSpaceSchema);
+const TimeoutString = zodAsIoTs(timeoutSchema);
+const InlineScriptString = zodAsIoTs(inlineScriptSchema);
+const getNonEmptyStringCodec = (fieldName: string) => zodAsIoTs(nonEmptyStringSchema(fieldName));
 
 const ScheduleCodec = t.interface({
   number: t.string,

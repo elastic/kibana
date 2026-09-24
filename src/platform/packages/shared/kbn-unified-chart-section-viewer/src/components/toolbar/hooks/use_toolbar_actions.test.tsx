@@ -95,10 +95,15 @@ describe('useToolbarActions', () => {
     ).toBe(false);
   });
 
-  it('hides the Edit grid of metrics button when featureFlags is not provided by the host (safe default)', () => {
+  it('shows the Edit grid of metrics button when featureFlags is not provided by the host (fallback enabled)', () => {
     const { result } = renderToolbarActionsHook(undefined);
 
-    expect(findEditGridButton(result.current.rightSideActions)).toBeUndefined();
+    expect(findEditGridButton(result.current.rightSideActions)).toEqual(
+      expect.objectContaining({
+        'data-ebt-action': 'editGridSettings',
+        'data-ebt-element': 'chartsToolbar',
+      })
+    );
   });
 
   it('shows the Edit grid of metrics button when the feature flag resolves to true', () => {
@@ -126,12 +131,17 @@ describe('useToolbarActions', () => {
     expect(findEditGridButton(result.current.rightSideActions)).toBeUndefined();
   });
 
-  it('hides the Edit grid of metrics button when featureFlags is provided but the flag has no override (falls back to false)', () => {
+  it('shows the Edit grid of metrics button when featureFlags is provided but the flag has no override (falls back to true)', () => {
     const { result } = renderToolbarActionsHook({
       featureFlags: createFeatureFlagsMock(),
     });
 
-    expect(findEditGridButton(result.current.rightSideActions)).toBeUndefined();
+    expect(findEditGridButton(result.current.rightSideActions)).toEqual(
+      expect.objectContaining({
+        'data-ebt-action': 'editGridSettings',
+        'data-ebt-element': 'chartsToolbar',
+      })
+    );
   });
 
   it('shows the sort selector when featureFlags is not provided by the host (fallback enabled)', () => {

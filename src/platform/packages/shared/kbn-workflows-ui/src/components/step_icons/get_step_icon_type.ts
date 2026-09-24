@@ -142,6 +142,7 @@ export const getStepIconType = (type: string): IconType => {
       break;
     case 'slack':
     case 'slack_api':
+    case 'slack2':
       iconType = 'logoSlack';
       break;
     case 'inference':
