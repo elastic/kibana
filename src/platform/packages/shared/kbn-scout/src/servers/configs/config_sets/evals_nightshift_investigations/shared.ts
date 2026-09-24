@@ -8,26 +8,62 @@
  */
 
 import { existsSync } from 'fs';
+import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../types';
 
+const exporterPrefix = '--telemetry.tracing.exporters=';
+
+// Keep trace exporter credentials out of Kibana process arguments: kibana.tracing.yml reads them
+// from the environment instead.
+const withSafeTracing = (tracing: ScoutServerConfig): ScoutServerConfig => {
+  const parentArgs = tracing.kbnTestServer.serverArgs;
+  const exporters = parentArgs
+    .find((arg) => arg.startsWith(exporterPrefix))
+    ?.slice(exporterPrefix.length);
+  return {
+    ...tracing,
+    kbnTestServer: {
+      ...tracing.kbnTestServer,
+      env: {
+        ...tracing.kbnTestServer.env,
+        NIGHTSHIFT_TRACING_EXPORTERS: exporters ?? '[]',
+      },
+      serverArgs: [
+        ...parentArgs.filter((arg) => !arg.startsWith(exporterPrefix)),
+        `--config=${join(__dirname, 'kibana.tracing.yml')}`,
+      ],
+    },
+  };
+};
+
 const createInvestigationConfig = (
-  tracing: ScoutServerConfig,
+  safeTracing: ScoutServerConfig,
   sandboxKibanaConfig: string
 ): ScoutServerConfig => {
   if (!existsSync(sandboxKibanaConfig)) {
     throw new Error(`SANDBOX_KIBANA_CONFIG references a missing file: ${sandboxKibanaConfig}`);
   }
 
+  const telemetryConfig = process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
+  if (telemetryConfig && !existsSync(telemetryConfig)) {
+    throw new Error(
+      `NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file: ${telemetryConfig}`
+    );
+  }
+
   return {
-    ...tracing,
+    ...safeTracing,
     kbnTestServer: {
-      ...tracing.kbnTestServer,
+      ...safeTracing.kbnTestServer,
       serverArgs: [
-        ...tracing.kbnTestServer.serverArgs,
+        ...safeTracing.kbnTestServer.serverArgs,
+        // Allow sixteen investigation workflows plus five background tasks.
+        '--xpack.task_manager.capacity=21',
         '--xpack.nightshift_investigations.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         `--config=${sandboxKibanaConfig}`,
+        ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
         '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
@@ -42,9 +78,12 @@ const createInvestigationConfig = (
 /**
  * Enables the investigation engine and its sandbox connection on top of an `evals_tracing` config.
  * The suite's scout hook exports SANDBOX_KIBANA_CONFIG (and the SANDBOX_* credentials it reads) only
- * when sandbox credentials are configured; without it the plain tracing config is returned.
+ * when sandbox credentials are configured; without it only tracing is configured.
  */
 export const withNightshiftInvestigations = (tracing: ScoutServerConfig): ScoutServerConfig => {
+  const safeTracing = withSafeTracing(tracing);
   const sandboxKibanaConfig = process.env.SANDBOX_KIBANA_CONFIG;
-  return sandboxKibanaConfig ? createInvestigationConfig(tracing, sandboxKibanaConfig) : tracing;
+  return sandboxKibanaConfig
+    ? createInvestigationConfig(safeTracing, sandboxKibanaConfig)
+    : safeTracing;
 };

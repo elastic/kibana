@@ -53,6 +53,7 @@ describe.each([
   beforeEach(() => {
     process.env = { ...originalEnv };
     delete process.env.NIGHTSHIFT_DATASETS;
+    delete process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
     for (const key of Object.keys(process.env)) {
       if (key.startsWith('SANDBOX_')) delete process.env[key];
     }
@@ -79,7 +80,12 @@ describe.each([
         ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
       });
       const tracing = loadServers(tracingPath, {});
-      expect(servers.kbnTestServer.serverArgs).toEqual(tracing.kbnTestServer.serverArgs);
+      expect(servers.kbnTestServer.serverArgs).toEqual([
+        ...tracing.kbnTestServer.serverArgs.filter(
+          (arg: string) => !arg.startsWith('--telemetry.tracing.exporters=')
+        ),
+        `--config=${join(__dirname, 'kibana.tracing.yml')}`,
+      ]);
     }
   );
 
@@ -92,6 +98,7 @@ describe.each([
     expect(args).toContain('--xpack.evals.enabled=true');
     expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
     expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
+      `--config=${join(__dirname, 'kibana.tracing.yml')}`,
       `--config=${SANDBOX_KIBANA_CONFIG}`,
     ]);
     expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
@@ -103,5 +110,51 @@ describe.each([
     ).toThrow(
       'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
     );
+  });
+
+  it('reserves capacity for sixteen investigations and five background tasks', () => {
+    const servers = loadServers(configPath, { SANDBOX_KIBANA_CONFIG });
+    expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
+  });
+
+  it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {
+    const telemetryConfig = join(SANDBOX_KIBANA_CONFIG, '../kibana.telemetry.yml');
+    const exporters = JSON.stringify([
+      {
+        http: {
+          url: 'https://traces.example.com',
+          headers: { Authorization: 'ApiKey trace-test-key' },
+        },
+      },
+    ]);
+    const servers = loadServers(configPath, {
+      SANDBOX_KIBANA_CONFIG,
+      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: telemetryConfig,
+      TRACING_EXPORTERS: exporters,
+    });
+    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${telemetryConfig}`);
+    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('trace-test-key');
+    expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
+  });
+
+  it('keeps exporter headers out of smoke-only process arguments', () => {
+    const exporters = JSON.stringify([
+      { http: { url: 'https://traces.example.com', headers: { Authorization: 'smoke-key' } } },
+    ]);
+    const servers = loadServers(configPath, { TRACING_EXPORTERS: exporters });
+    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('smoke-key');
+    expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
+    expect(servers.kbnTestServer.serverArgs).toContain(
+      `--config=${join(__dirname, 'kibana.tracing.yml')}`
+    );
+  });
+
+  it('fails fast when the telemetry YAML is missing', () => {
+    expect(() =>
+      loadServers(configPath, {
+        SANDBOX_KIBANA_CONFIG,
+        NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: '/missing.yml',
+      })
+    ).toThrow('NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file');
   });
 });

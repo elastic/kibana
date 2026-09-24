@@ -263,10 +263,12 @@ describe('detection rule workflows', () => {
         'propose_query',
         'propose_risk_score',
         'propose_exception',
+        'propose_threshold',
+        'propose_schedule',
         'propose_manual',
       ]);
 
-      const [entry, action, settings, exception, manual] = proposals;
+      const [entry, action, settings, exception, threshold, schedule, manual] = proposals;
       const entryInputs = entry.with?.inputs as Record<string, unknown>;
       const actionInputs = action.with?.inputs as Record<string, unknown>;
       const settingsInputs = settings.with?.inputs as Record<string, unknown>;
@@ -325,17 +327,26 @@ describe('detection rule workflows', () => {
         'query',
         'risk_score',
         'exception',
+        'threshold',
+        'schedule',
       ]);
       expect(
         (fork.cases ?? []).map(({ steps: armSteps }) => armSteps.map(({ name }) => name))
-      ).toEqual([['propose_query'], ['propose_risk_score'], ['propose_exception']]);
+      ).toEqual([
+        ['propose_query'],
+        ['propose_risk_score'],
+        ['propose_exception'],
+        ['incomplete_threshold_output', 'propose_threshold'],
+        ['propose_schedule'],
+      ]);
       // The manual proposal is the default arm, so an unrecognised change type
       // still reaches the analyst.
       expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
 
       expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
-      // The switch already guards the arms.
-      for (const proposal of [action, settings, exception, manual]) {
+      // The switch already guards the arms; propose_threshold also has a step-level
+      // guard (incomplete_threshold_output) verified by the case-arm assertion above.
+      for (const proposal of [action, settings, exception, threshold, schedule, manual]) {
         expect(proposal).not.toHaveProperty('if');
       }
       for (const proposal of proposals) {
@@ -789,6 +800,8 @@ describe('detection rule workflows', () => {
           'propose_query',
           'propose_risk_score',
           'propose_exception',
+          'propose_threshold',
+          'propose_schedule',
           'propose_manual',
         ]);
         const [, previews] = children;
