@@ -13,10 +13,13 @@ import {
   PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP,
   PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP,
   PERSISTABLE_ATTACHMENT_TYPES,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
   UNIFIED_TO_LEGACY_MAP,
   OWNER_TO_PREFIX_MAP,
   LEGACY_EVENT_TYPE,
   LEGACY_ALERT_TYPE,
+  LEGACY_EXTERNAL_REFERENCE_TYPE,
+  LEGACY_PERSISTABLE_STATE_TYPE,
 } from '../../constants/attachments';
 import { AttachmentType } from '../../types/domain';
 import type { AttachmentRequestV2 } from '../../types/api';
@@ -56,6 +59,71 @@ export const toLegacyAttachmentType = (type?: string): string | undefined => {
     return toLegacyPersistableStateAttachmentType(type);
   }
   return UNIFIED_TO_LEGACY_MAP[type] ?? type;
+};
+
+/**
+ * How a unified type is stored on `cases-comments`. Empty means no comments-SO row.
+ * `field`/`values` AND with `type` when several unified types share one comments `type`.
+ */
+export interface LegacyTypeMatch {
+  type: string;
+  field?: string;
+  values?: string[];
+}
+
+const ownersForUnifiedPrefix = (type: string): string[] => {
+  const lastDot = type.lastIndexOf('.');
+  if (lastDot <= 0) {
+    return [];
+  }
+  const prefix = type.slice(0, lastDot);
+  return Object.entries(OWNER_TO_PREFIX_MAP)
+    .filter(([, mappedPrefix]) => mappedPrefix === prefix)
+    .map(([owner]) => owner);
+};
+
+const foldedLegacyTypes = (unifiedType: string): LegacyTypeMatch[] =>
+  Object.entries(LEGACY_TO_UNIFIED_MAP)
+    .filter(([, mapped]) => mapped === unifiedType)
+    .map(([type]) => ({ type }));
+
+export const toLegacyTypeMatches = (unifiedType: string): LegacyTypeMatch[] => {
+  if (Object.hasOwn(PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP, unifiedType)) {
+    return [
+      {
+        type: LEGACY_PERSISTABLE_STATE_TYPE,
+        field: 'persistableStateAttachmentTypeId',
+        values: [toLegacyPersistableStateAttachmentType(unifiedType)],
+      },
+    ];
+  }
+
+  const externalReferenceId = UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP[unifiedType];
+  if (externalReferenceId !== undefined) {
+    return [
+      {
+        type: LEGACY_EXTERNAL_REFERENCE_TYPE,
+        field: 'externalReferenceAttachmentTypeId',
+        values: [externalReferenceId],
+      },
+      ...foldedLegacyTypes(unifiedType),
+    ];
+  }
+
+  const legacyType = UNIFIED_TO_LEGACY_MAP[unifiedType];
+  if (legacyType === LEGACY_ALERT_TYPE || legacyType === LEGACY_EVENT_TYPE) {
+    const owners = ownersForUnifiedPrefix(unifiedType);
+    if (owners.length === 0) {
+      return [];
+    }
+    return [{ type: legacyType, field: 'owner', values: owners }];
+  }
+
+  if (legacyType) {
+    return [{ type: legacyType }];
+  }
+
+  return [];
 };
 
 export const toUnifiedAttachmentType = (type: string, owner: string): string => {

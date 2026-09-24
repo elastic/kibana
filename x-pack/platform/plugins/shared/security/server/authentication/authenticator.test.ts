@@ -693,7 +693,7 @@ describe('Authenticator', () => {
         expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(1);
         expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledWith({
           message: 'User logged in via basic provider "basic1".',
-          event: { action: 'log_in_user', type: 'start' },
+          event: { action: 'log_in_user', type: ['start'] },
           object: {
             id: user.username,
             name: user.username,
@@ -769,7 +769,7 @@ describe('Authenticator', () => {
 
         expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(1);
         expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledWith(
-          expect.objectContaining({ event: { action: 'log_in_user', type: 'start' } })
+          expect.objectContaining({ event: { action: 'log_in_user', type: ['start'] } })
         );
       });
 
@@ -791,11 +791,11 @@ describe('Authenticator', () => {
         expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(2);
         expect(mockOptions.userActivity.trackUserAction).toHaveBeenNthCalledWith(
           1,
-          expect.objectContaining({ event: { action: 'log_out_user', type: 'end' } })
+          expect.objectContaining({ event: { action: 'log_out_user', type: ['end'] } })
         );
         expect(mockOptions.userActivity.trackUserAction).toHaveBeenNthCalledWith(
           2,
-          expect.objectContaining({ event: { action: 'log_in_user', type: 'start' } })
+          expect.objectContaining({ event: { action: 'log_in_user', type: ['start'] } })
         );
       });
     });
@@ -3441,7 +3441,7 @@ describe('Authenticator', () => {
         expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(1);
         expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledWith({
           message: 'User logged out via basic provider "basic1".',
-          event: { action: 'log_out_user', type: 'end' },
+          event: { action: 'log_out_user', type: ['end'] },
           object: {
             id: mockSessVal.userProfileId,
             name: mockSessVal.username,
