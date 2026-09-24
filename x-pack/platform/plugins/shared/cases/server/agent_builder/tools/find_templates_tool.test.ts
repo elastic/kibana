@@ -52,17 +52,6 @@ describe('findTemplatesTool', () => {
     expect(tool.id).toBe('platform.core.cases.find_templates');
   });
 
-  it('has read-only annotations', () => {
-    const tool = buildTool();
-    expect(tool.annotations).toEqual({
-      title: 'Find Case Templates',
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false,
-    });
-  });
-
   it('schema requires owner and makes search optional', () => {
     const tool = buildTool();
     const shape = tool.schema.shape;

@@ -68,13 +68,6 @@ Use \`search\` with the name the user mentioned — it matches as a case-insensi
 Each result includes \`nameMatch\`: true only when the template's own name contains the search term. A result with \`nameMatch: false\` only matched via its description or a field name/label (e.g. searching "phishing" matching a "phishing_url" field on an unrelated template) — do not treat that as a confident match.
 
 Judge uniqueness by the response's \`total\`, not by how many rows are on the current page. If \`total\` is 0, say so — do not guess an ID. Only when \`total\` is 1 and that match has \`nameMatch: true\` may you use its \`templateId\` directly. If \`total\` is greater than 1, or the only match has \`nameMatch: false\`, list the candidates (name + description) and ask the user to confirm which one before calling \`create_from_template\`.${CASES_TOOL_TEXT_INSTRUCTION}`,
-    annotations: {
-      title: 'Find Case Templates',
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false,
-    },
     schema: findTemplatesSchema,
     tags: ['cases'],
     handler: async ({ owner, search, tags, isEnabled, page, perPage }, { request, logger }) => {
