@@ -48,8 +48,9 @@ const setup = ({ canEncrypt = true, requestLifetimeMs = 600_000 } = {}) => {
   const license = licenseMock.create();
   license.isEnabled.mockReturnValue(true);
   const clusterClient = elasticsearchServiceMock.createClusterClient();
-  const exchange = clusterClient.asInternalUser.transport.request;
-  exchange.mockResolvedValue(exchangeResponse);
+  const exchange = clusterClient.asInternalUser.security.getToken;
+  // @ts-expect-error not full SecurityGetTokenResponse
+  exchange.mockResponse(exchangeResponse);
   const credentialStore = jest.mocked(
     new ServiceAccountCredentialStore({
       client: savedObjectsClientMock.create(),
@@ -88,12 +89,8 @@ describe('Elasticsearch service account token exchange', () => {
     });
     expect(credentialStore.getDecrypted).toHaveBeenCalledWith(ACCOUNT_ID);
     expect(exchange).toHaveBeenCalledWith({
-      method: 'POST',
-      path: '/_security/oauth2/token',
-      body: {
-        grant_type: '_user_managed_service_account',
-        service_account_token: credential.token,
-      },
+      grant_type: '_user_managed_service_account',
+      service_account_token: credential.token,
     });
     expect(clusterClient.asScoped).not.toHaveBeenCalled();
     expect(request.headers).toEqual({ authorization: 'Bearer short-lived-secret' });
@@ -146,7 +143,7 @@ describe('Elasticsearch service account token exchange', () => {
       ).rejects.toMatchObject({ retryable: false });
       expect(exchange).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(
-        `Stored credential for service account ${ACCOUNT_ID} is inconsistent (${field}: expected ${JSON.stringify(
+        `Stored credential for service account [${ACCOUNT_ID}] is inconsistent (${field}: expected ${JSON.stringify(
           credential[field]
         )}, got "unexpected").`
       );
@@ -249,20 +246,17 @@ describe('Elasticsearch service account token exchange', () => {
     const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
     jest.advanceTimersByTime(10_000);
     credentialStore.getDecrypted.mockResolvedValue({ ...credential, token: 'rotated-secret' });
-    exchange.mockResolvedValue({ ...exchangeResponse, access_token: 'new-token' });
+    // @ts-expect-error not full SecurityGetTokenResponse
+    exchange.mockResponse({ ...exchangeResponse, access_token: 'new-token' });
     const responses = await Promise.all(
       Array.from({ length: 4 }, () => backend.reauthenticateFakeRequest(request))
     );
     expect(responses).toEqual(Array(4).fill({ authorization: 'Bearer new-token' }));
     expect(exchange).toHaveBeenCalledTimes(2);
-    expect(exchange).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        body: {
-          grant_type: '_user_managed_service_account',
-          service_account_token: 'rotated-secret',
-        },
-      })
-    );
+    expect(exchange).toHaveBeenLastCalledWith({
+      grant_type: '_user_managed_service_account',
+      service_account_token: 'rotated-secret',
+    });
     expect(request.headers.authorization).toBe('Bearer new-token');
   });
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
@@ -38,7 +37,6 @@ import type {
 import {
   ES_SERVICE_ACCOUNT_FALLBACK_ROLE,
   ES_SERVICE_ACCOUNT_NAMESPACE,
-  ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
@@ -67,12 +65,6 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
 const accountEntrySchema = z.object({
   roles: z.array(z.string()),
   enabled: z.boolean(),
-});
-
-const createTokenResponseSchema = z.object({
-  token: z.object({
-    value: z.string().min(1).max(ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
-  }),
 });
 
 /**
@@ -510,7 +502,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     try {
       const credential = await this.credentialStore.getDecrypted(serviceAccountId);
       if (!credential) {
-        throw Boom.notFound('This service account has no stored credential.');
+        const errorMessage = `Unable to exchange token for service account [${serviceAccountId}]: missing stored credential`;
+        this.logger.error(errorMessage);
+        throw Boom.notFound(errorMessage);
       }
       const mismatches = [
         ['serviceAccountId', serviceAccountId, credential.serviceAccountId],
@@ -525,24 +519,18 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         );
       if (mismatches.length > 0) {
         this.logger.error(
-          `Stored credential for service account ${serviceAccountId} is inconsistent (${mismatches.join(
+          `Stored credential for service account [${serviceAccountId}] is inconsistent (${mismatches.join(
             '; '
           )}).`
         );
         throw Boom.forbidden('The stored service account credential is inconsistent.');
       }
 
-      const response =
-        await this.clusterClient.asInternalUser.transport.request<estypes.SecurityGetTokenResponse>(
-          {
-            method: 'POST',
-            path: '/_security/oauth2/token',
-            body: {
-              grant_type: '_user_managed_service_account',
-              service_account_token: credential.token,
-            },
-          }
-        );
+      const response = await this.clusterClient.asInternalUser.security.getToken({
+        // @ts-expect-error Elasticsearch client types do not yet include the `_user_managed_service_account` grant
+        grant_type: '_user_managed_service_account',
+        service_account_token: credential.token,
+      });
       return response.access_token;
     } catch (error) {
       const cause =
@@ -550,12 +538,12 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       const retryDelay = getExchangeRetryDelay(cause);
       // Transport errors can contain the credential, so neither log them nor retain them as a cause.
       this.logger.error(
-        `Failed to exchange service account ${serviceAccountId} for an ephemeral token (${
+        `Failed to exchange service account [${serviceAccountId}] for an ephemeral token (${
           retryDelay === null ? 'terminal' : 'retryable'
         } failure)`
       );
       throw new ServiceAccountTokenExchangeError(
-        new Error('Service account token exchange failed.'),
+        new Error(`Service account token exchange failed for [${serviceAccountId}].`),
         retryDelay !== null,
         retryDelay ?? 0
       );
@@ -630,14 +618,14 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     namespace: string,
     name: string
   ): Promise<string> {
-    const response = await esClient.transport.request({
+    const { token } = await esClient.transport.request<{ token: { value: string } }>({
       method: 'POST',
       path:
         `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}` +
         `/credential/token/${encodeURIComponent(ES_SERVICE_ACCOUNT_TOKEN_NAME)}`,
     });
 
-    return createTokenResponseSchema.parse(response).token.value;
+    return token.value;
   }
 
   /**
