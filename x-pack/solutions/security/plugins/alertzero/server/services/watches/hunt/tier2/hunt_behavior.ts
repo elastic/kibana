@@ -10,8 +10,13 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { z } from '@kbn/zod/v4';
-import type { HuntBehaviorArticleContext, HuntBehaviorIoc } from '@kbn/alertzero-common';
-import { buildMatchesRequired } from '../common/matches_required';
+import type {
+  HuntBehaviorArticleContext,
+  HuntBehaviorIoc,
+  HuntForThreatHit,
+} from '@kbn/alertzero-common';
+import { buildMatchesRequired, isIndexPatternAllowed } from '../common/matches_required';
+import { getKnownHuntIndexPatterns } from '../common/resolve_index_scope';
 import {
   huntBehaviorLlmExtractionSchema,
   EXTRACTION_PROMPT,
@@ -20,10 +25,10 @@ import {
 } from './extraction_contract';
 import { toIndexedBehaviors } from './indexed_behaviors';
 import { getMitreCatalog } from './mitre_catalog';
+import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
 import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
   BehaviorExecution,
-  BehaviorHitRef,
   HuntBehaviorParams,
   HuntBehaviorResult,
   SeverityLevel,
@@ -32,7 +37,7 @@ import type {
 
 const MAX_AFFECTED_ENTITIES = 20;
 /** Cap Tier 2 Discover refs to match SSE `events[]` / `alerts[]` max. */
-const MAX_HIT_REFS = 50;
+const MAX_HITS = 50;
 const NO_EXECUTION: BehaviorExecution = { executed: false, row_count: 0, hit: false };
 
 const severityFromConfidence = (confidence: number): SeverityLevel => {
@@ -66,8 +71,12 @@ const sanitizeRuleName = (
     : `Hunt: ${safe} (${techniqueId})`;
 };
 
-/** Skeleton ES|QL template emitted when grounded generation is unavailable or fails. */
-const proposedEsqlRule = ({
+/**
+ * Non-executable placeholder when grounded generation is unavailable or fails.
+ * Never emits a FROM clause — a prior `FROM *` stub was unsafe to ship as a
+ * proposed rule even though the execute path skipped it.
+ */
+const proposedEsqlRuleUnavailable = ({
   technique_id,
   technique_name,
   tactic_ids,
@@ -86,16 +95,13 @@ const proposedEsqlRule = ({
   report_id?: string;
 }): string => {
   const name = sanitizeRuleName(technique_id, technique_name, report_id);
-  const techniqueLower = technique_name.toLowerCase();
   return [
     `// rule_name: ${name}`,
     `// technique: ${technique_id} (${technique_name})`,
     `// tactics: ${tactic_ids.join(', ') || '<unmapped>'}`,
     `// severity: ${severity}  confidence: ${confidence.toFixed(2)}`,
     `// evidence: ${evidence_quote.slice(0, 120)}`,
-    `FROM *`,
-    `| WHERE TO_LOWER(message) LIKE "*${techniqueLower}*"`,
-    `| LIMIT 100`,
+    `// Grounded ES|QL generation unavailable; no executable query proposed.`,
   ].join('\n');
 };
 
@@ -177,14 +183,24 @@ const executeValidatedEsql = async ({
   affected_users?: string[];
   affected_hosts_truncated?: boolean;
   affected_users_truncated?: boolean;
-  hit_refs?: BehaviorHitRef[];
+  hits?: HuntForThreatHit[];
 }> => {
   const matchesRequired = buildMatchesRequired(requiredIndices);
 
   try {
+    const prepared = prepareEsqlForExecute(esql);
+    const sourcesAllowed = assertEsqlSourcesAllowed(prepared, requiredIndices);
+    if (!sourcesAllowed.ok) {
+      logger.warn(
+        `[hunt:esql] execute for ${techniqueId} refused — ${sourcesAllowed.reason}. ` +
+          `Recording executed:false and continuing.`
+      );
+      return { execution: NO_EXECUTION };
+    }
+
     const response = await executeEsql({
       esClient,
-      query: prepareEsqlForExecute(esql),
+      query: prepared,
       limit: row_limit,
       filter: {
         range: {
@@ -234,18 +250,18 @@ const executeValidatedEsql = async ({
           )
         : undefined;
 
-    const hitRefs: BehaviorHitRef[] = [];
+    const hits: HuntForThreatHit[] = [];
     if (idCol >= 0 && indexCol >= 0) {
       for (const row of requiredRows) {
-        if (hitRefs.length >= MAX_HIT_REFS) break;
-        const eventId = row[idCol];
-        const sourceIndex = row[indexCol];
-        if (typeof eventId !== 'string' || eventId.length === 0) continue;
-        if (typeof sourceIndex !== 'string' || sourceIndex.length === 0) continue;
+        if (hits.length >= MAX_HITS) break;
+        const id = row[idCol];
+        const index = row[indexCol];
+        if (typeof id !== 'string' || id.length === 0) continue;
+        if (typeof index !== 'string' || index.length === 0) continue;
         const timestamp = tsCol >= 0 ? row[tsCol] : undefined;
-        hitRefs.push({
-          event_id: eventId,
-          source_index: sourceIndex,
+        hits.push({
+          id,
+          index,
           ...(typeof timestamp === 'string' && timestamp.length > 0 ? { timestamp } : {}),
         });
       }
@@ -269,7 +285,7 @@ const executeValidatedEsql = async ({
             ...(users.truncated ? { affected_users_truncated: true } : {}),
           }
         : {}),
-      ...(hitRefs.length > 0 ? { hit_refs: hitRefs } : {}),
+      ...(hits.length > 0 ? { hits } : {}),
     };
   } catch (err) {
     logger.warn(
@@ -295,14 +311,21 @@ const matchedIndexPatterns = (articleContext: HuntBehaviorArticleContext | undef
 ];
 
 /**
- * Target for `generateEsql`. Prefer integrations with confirmed hits, then the
- * scope's required patterns, then the generic logs pattern.
+ * Target for `generateEsql`. Prefer integrations with confirmed hits that sit
+ * inside the allowlist (required scope when present, otherwise every known
+ * technology pattern), then the scope's required patterns, then the generic
+ * logs pattern. Caller-supplied `matched_indices` never steer generation at
+ * indices outside that allowlist.
  */
 const resolveGenerationIndex = (
   articleContext: HuntBehaviorArticleContext | undefined,
   requiredIndices: string[]
 ): string => {
-  const matched = matchedIndexPatterns(articleContext);
+  const allowlist =
+    requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns();
+  const matched = matchedIndexPatterns(articleContext).filter((pattern) =>
+    isIndexPatternAllowed(pattern, allowlist)
+  );
   if (matched.length > 0) return matched.join(',');
   if (requiredIndices.length > 0) return requiredIndices.join(',');
   return DEFAULT_GENERATION_INDEX;
@@ -342,7 +365,7 @@ const buildGenerationContext = ({
  * One `generateEsql` call per validated behavior, keyed by technique id. The
  * shared generator grounds the query in ES|QL docs and the target's mappings,
  * autocorrects, validates the AST, and retries; anything that still fails
- * falls back to the skeleton template.
+ * falls back to a non-executable placeholder (no FROM clause).
  */
 const generateGroundedEsql = async ({
   model,
@@ -391,25 +414,26 @@ const generateGroundedEsql = async ({
           rowLimit,
         });
         if (error || !query) {
-          logger.warn(
-            `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} failed — ` +
-              `falling back to the skeleton template. ${(error ?? 'no query returned').slice(
-                0,
-                300
-              )}`
-          );
-          return undefined;
-        }
-        return [behavior.technique_id, query.trim()];
-      } catch (err) {
         logger.warn(
-          `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} threw — ` +
-            `falling back to the skeleton template. ${((err as Error).message ?? '').slice(0, 300)}`
+          `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} failed — ` +
+            `falling back to a non-executable placeholder. ${(
+              error ?? 'no query returned'
+            ).slice(0, 300)}`
         );
         return undefined;
       }
-    },
-    { concurrency: ESQL_GENERATION_CONCURRENCY }
+      return [behavior.technique_id, query.trim()];
+    } catch (err) {
+      logger.warn(
+        `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} threw — ` +
+          `falling back to a non-executable placeholder. ${(
+            (err as Error).message ?? ''
+          ).slice(0, 300)}`
+      );
+      return undefined;
+    }
+  },
+  { concurrency: ESQL_GENERATION_CONCURRENCY }
   );
 
   const generated = new Map<string, string>(
@@ -418,7 +442,7 @@ const generateGroundedEsql = async ({
   if (generated.size < behaviors.length) {
     logger.warn(
       `[hunt:esql] grounded ES|QL generation covered ${generated.size}/${behaviors.length} ` +
-        `behaviors — uncovered behaviors fall back to the skeleton template.`
+        `behaviors — uncovered behaviors fall back to a non-executable placeholder.`
     );
   }
   return generated;
@@ -530,6 +554,16 @@ export const huntBehavior = async (
     // A revoked id resolves to its live successor; carry the live id forward so
     // the proposed rule and the indexed projection never cite a retired technique.
     const techniqueId = entry.id;
+    // One behavior per live technique id. The LLM can emit the same id twice
+    // (or a revoked id alongside its successor); generation, execution, and the
+    // indexed `reportId:techniqueId` projection are all keyed by that id, so a
+    // duplicate would double the LLM spend and collide in the index. Keep the
+    // higher-confidence candidate.
+    const existingIndex = validated.findIndex((b) => b.technique_id === techniqueId);
+    if (existingIndex >= 0) {
+      if (candidate.llm_confidence <= validated[existingIndex].llm_confidence) continue;
+      validated.splice(existingIndex, 1);
+    }
     const tacticIds = entry.tacticIds;
     const severity = severityFromConfidence(candidate.llm_confidence);
     const parentTechniqueId = subtechnique?.parentTechniqueId;
@@ -541,7 +575,7 @@ export const huntBehavior = async (
       reference: entry.reference,
       tactic_ids: tacticIds,
       ...(parentTechniqueId ? { parent_technique_id: parentTechniqueId } : {}),
-      proposed_esql_rule: proposedEsqlRule({
+      proposed_esql_rule: proposedEsqlRuleUnavailable({
         technique_id: techniqueId,
         technique_name: entry.name,
         tactic_ids: tacticIds,
@@ -561,7 +595,7 @@ export const huntBehavior = async (
   if (validated.length > 0 && !esClient) {
     logger.debug(
       '[hunt:esql] no Elasticsearch client — grounded ES|QL generation skipped, ' +
-        'behaviors carry the skeleton template.'
+        'behaviors carry a non-executable placeholder.'
     );
   }
 
@@ -596,7 +630,7 @@ export const huntBehavior = async (
       if (executed.affected_users) behavior.affected_users = executed.affected_users;
       if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
       if (executed.affected_users_truncated) behavior.affected_users_truncated = true;
-      if (executed.hit_refs) behavior.hit_refs = executed.hit_refs;
+      if (executed.hits) behavior.hits = executed.hits;
     }
   }
 

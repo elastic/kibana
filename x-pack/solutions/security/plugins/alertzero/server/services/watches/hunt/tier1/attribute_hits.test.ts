@@ -5,27 +5,43 @@
  * 2.0.
  */
 
-import { attributeHits } from './attribute_hits';
-import type { HuntForThreatHit } from '@kbn/alertzero-common';
+import { attributeHits, type HitDocument } from './attribute_hits';
 
-const baseHit = (overrides: Record<string, unknown> = {}): HuntForThreatHit =>
-  ({
-    index: 'logs-aws.cloudtrail-default',
-    id: 'evt-1',
-    score: 1,
-    ...overrides,
-  } as HuntForThreatHit);
+const baseDoc = (source: Record<string, unknown> = {}, overrides: Partial<HitDocument> = {}): HitDocument => ({
+  index: 'logs-aws.cloudtrail-default',
+  id: 'evt-1',
+  timestamp: '2026-09-01T00:00:00.000Z',
+  source,
+  ...overrides,
+});
 
 describe('attributeHits', () => {
   it('returns matched.ioc when a searched IP appears on source.ip', () => {
     const [hit] = attributeHits(
-      [baseHit({ 'source.ip': '198.51.100.40' })],
+      [baseDoc({ 'source.ip': '198.51.100.40' })],
       [{ type: 'ip', value: '198.51.100.40' }],
       []
     );
     expect(hit.matched).toEqual({
       ioc: { type: 'ip', value: '198.51.100.40' },
       field: 'source.ip',
+    });
+  });
+
+  it('returns a slim wire hit without source fields', () => {
+    const [hit] = attributeHits(
+      [baseDoc({ 'source.ip': '198.51.100.40', 'host.name': 'WIN-1' })],
+      [{ type: 'ip', value: '198.51.100.40' }],
+      []
+    );
+    expect(hit).toEqual({
+      id: 'evt-1',
+      index: 'logs-aws.cloudtrail-default',
+      timestamp: '2026-09-01T00:00:00.000Z',
+      matched: {
+        ioc: { type: 'ip', value: '198.51.100.40' },
+        field: 'source.ip',
+      },
     });
   });
 
@@ -51,10 +67,10 @@ describe('attributeHits', () => {
   it('returns matched.technique_id when an alert carries a searched technique id', () => {
     const [hit] = attributeHits(
       [
-        baseHit({
-          index: '.alerts-security.alerts-default',
-          'kibana.alert.rule.threat': alertThreat('T1078'),
-        }),
+        baseDoc(
+          { 'kibana.alert.rule.threat': alertThreat('T1078') },
+          { index: '.alerts-security.alerts-default' }
+        ),
       ],
       [],
       ['T1078']
@@ -68,10 +84,10 @@ describe('attributeHits', () => {
   it('returns matched.technique_id when the searched id is a sub-technique on the alert', () => {
     const [hit] = attributeHits(
       [
-        baseHit({
-          index: '.alerts-security.alerts-default',
-          'kibana.alert.rule.threat': alertThreat('T1078', 'T1078.004'),
-        }),
+        baseDoc(
+          { 'kibana.alert.rule.threat': alertThreat('T1078', 'T1078.004') },
+          { index: '.alerts-security.alerts-default' }
+        ),
       ],
       [],
       ['T1078.004']
@@ -85,10 +101,10 @@ describe('attributeHits', () => {
   it('returns matched.technique_id for an already-flattened dotted id path', () => {
     const [hit] = attributeHits(
       [
-        baseHit({
-          index: '.alerts-security.alerts-default',
-          'kibana.alert.rule.threat.technique.id': ['t1078'],
-        }),
+        baseDoc(
+          { 'kibana.alert.rule.threat.technique.id': ['t1078'] },
+          { index: '.alerts-security.alerts-default' }
+        ),
       ],
       [],
       ['T1078']
@@ -99,11 +115,13 @@ describe('attributeHits', () => {
   it('returns both ioc and technique_id when both match, preferring the IOC field', () => {
     const [hit] = attributeHits(
       [
-        baseHit({
-          index: '.alerts-security.alerts-default',
-          'source.ip': '203.0.113.10',
-          'kibana.alert.rule.threat': alertThreat('T1078', 'T1078.004'),
-        }),
+        baseDoc(
+          {
+            'source.ip': '203.0.113.10',
+            'kibana.alert.rule.threat': alertThreat('T1078', 'T1078.004'),
+          },
+          { index: '.alerts-security.alerts-default' }
+        ),
       ],
       [{ type: 'ip', value: '203.0.113.10' }],
       ['T1078.004']
@@ -117,7 +135,7 @@ describe('attributeHits', () => {
 
   it('returns no matched when the document does not contain searched terms', () => {
     const [hit] = attributeHits(
-      [baseHit({ 'source.ip': '192.0.2.1' })],
+      [baseDoc({ 'source.ip': '192.0.2.1' })],
       [{ type: 'ip', value: '198.51.100.40' }],
       ['T1078.004']
     );

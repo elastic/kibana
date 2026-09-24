@@ -14,7 +14,7 @@ import {
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { randomUUID } from 'crypto';
-import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
 import { resolveScopedModel } from './lib/scoped_model';
@@ -39,11 +39,8 @@ export const registerHuntCoordinatorRoute = ({
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
-          // Provisional. Tier 2 spends LLM tokens and executes LLM-generated ES|QL
-          // as the caller, so the read privilege is a placeholder until the hunt
-          // workflow child (the production caller) fixes the identity it runs
-          // under; revisit alongside that PR.
-          requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
+          // Tier 2 spends LLM tokens and can execute LLM-generated ES|QL as the caller.
+          requiredPrivileges: [ALERTZERO_API_PRIVILEGE_WRITE],
         },
       },
       summary: 'Run the two-tier hunt coordinator for a report',

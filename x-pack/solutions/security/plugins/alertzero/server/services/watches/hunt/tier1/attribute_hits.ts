@@ -9,6 +9,14 @@ import type { HuntForThreatHit, HuntIoc } from '@kbn/alertzero-common';
 
 type HitMatched = NonNullable<HuntForThreatHit['matched']>;
 
+/** ES hit plus `_source` for attribution; wire response drops source after matching. */
+export interface HitDocument {
+  id: string;
+  index: string;
+  timestamp?: string;
+  source: Record<string, unknown>;
+}
+
 const HASH_FIELD_PREFIXES = ['file', 'process', 'dll'] as const;
 
 /** Hash length disambiguates the algo for query-building (`hunt_for_threat.ts`); attribution here checks all algos regardless of length. */
@@ -30,7 +38,7 @@ export const IOC_FIELDS_BY_TYPE: Record<string, string[]> = {
     'client.ip',
     'server.ip',
     // ECS related + Kubernetes audit commonly stamp IPs here when `source.ip`
-    // is absent (e.g. Technology Watch kubernetes pack).
+    // is absent (e.g. Technology Watch AWS pack).
     'related.ip',
     'kubernetes.audit.sourceIPs',
   ],
@@ -46,10 +54,7 @@ const asString = (value: unknown): string | undefined => {
   return undefined;
 };
 
-/** Keys the hit envelope adds beside `_source`; skipped only at the top level, since nested `id`s are real data (`threat.technique[].id`). */
-const HIT_ENVELOPE_KEYS = new Set(['index', 'id', 'score', 'matched']);
-
-/** Flatten nested `_source`-shaped hit fields into dotted paths (arrays of objects flattened per item). */
+/** Flatten nested `_source`-shaped fields into dotted paths (arrays of objects flattened per item). */
 const collectFieldValues = (
   source: Record<string, unknown>,
   prefix = ''
@@ -64,7 +69,6 @@ const collectFieldValues = (
   };
 
   for (const [key, value] of Object.entries(source)) {
-    if (prefix === '' && HIT_ENVELOPE_KEYS.has(key)) continue;
     const path = prefix ? `${prefix}.${key}` : key;
     if (value == null) continue;
     if (Array.isArray(value)) {
@@ -144,19 +148,27 @@ const matchTechnique = (
 };
 
 /**
- * Attach `matched` to each Tier 1 hit by comparing the document to the
- * searched IOCs / technique ids. Prefer IOC when both match (IOC hunts are
- * the common path); technique alone still attributes alert hits.
+ * Build slim wire hits (`id` / `index` / `timestamp` / optional `matched`) by
+ * comparing each document `_source` to the searched IOCs / technique ids.
+ * Prefer IOC when both match (IOC hunts are the common path); technique alone
+ * still attributes alert hits. `matched` is required for SSE technique scoping
+ * and event attribution.
  */
 export const attributeHits = (
-  hits: HuntForThreatHit[],
+  docs: HitDocument[],
   iocs: HuntIoc[],
   techniques: string[]
 ): HuntForThreatHit[] =>
-  hits.map((hit) => {
-    const fields = collectFieldValues(hit as Record<string, unknown>);
+  docs.map(({ id, index, timestamp, source }) => {
+    const fields = collectFieldValues(source);
     const iocMatch = matchIoc(fields, iocs);
     const techniqueMatch = matchTechnique(fields, techniques);
+
+    const hit: HuntForThreatHit = {
+      id,
+      index,
+      ...(timestamp ? { timestamp } : {}),
+    };
     if (!iocMatch && !techniqueMatch) return hit;
 
     const matched: HitMatched = {

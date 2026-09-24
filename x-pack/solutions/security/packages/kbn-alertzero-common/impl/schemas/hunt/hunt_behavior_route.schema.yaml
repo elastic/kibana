@@ -141,28 +141,18 @@ paths:
                           type: boolean
                           description: >-
                             True when more than 20 distinct users were seen.
-                        hit_refs:
+                        hits:
                           type: array
                           maxItems: 50
                           description: >-
                             Required-index execute rows as Discover refs
-                            (`event_id` + `source_index`). Empty when METADATA
-                            `_id`/`_index` were not projected (e.g. aggregating
-                            pipelines). Consumed by the SSE mapper into
+                            (`id` + `index` + optional `timestamp`). Empty when
+                            METADATA `_id`/`_index` were not projected (e.g.
+                            aggregating pipelines). Same shape as Tier 1
+                            `hits[]`. Consumed by the SSE mapper into
                             `events[]` / `alerts[]`.
                           items:
-                            type: object
-                            required: [event_id, source_index]
-                            properties:
-                              event_id:
-                                type: string
-                                maxLength: 512
-                              source_index:
-                                type: string
-                                maxLength: 512
-                              timestamp:
-                                type: string
-                                maxLength: 64
+                            $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatHit'
                   indexed_behaviors:
                     type: array
                     items:

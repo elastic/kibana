@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HuntIoc, ResolvedIndexScope } from '@kbn/alertzero-common';
+import type { HuntForThreatResult, HuntIoc, ResolvedIndexScope } from '@kbn/alertzero-common';
 
 export interface HuntForThreatParams {
   /**
@@ -22,3 +22,12 @@ export interface HuntForThreatParams {
   size?: number;
   maxAssets?: number;
 }
+
+/**
+ * Service return: wire `HuntForThreatResult` plus internal digests for Tier 2
+ * grounding. Digests are built from `_source` before hits are slimmed; HTTP
+ * responses omit this field (not in the OpenAPI schema).
+ */
+export type HuntForThreatServiceResult = HuntForThreatResult & {
+  sample_event_summaries?: string[];
+};

@@ -17,7 +17,9 @@ import type {
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
 import type { HuntScope } from './common/resolve_index_scope';
+import { summarizeHit } from './common/summarize_hit';
 import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
+import type { HuntForThreatServiceResult } from './tier1/types';
 import { huntBehavior } from './tier2/hunt_behavior';
 import type { HuntBehaviorResult } from './tier2/types';
 
@@ -85,6 +87,8 @@ export interface HuntCoordinatorResult {
 }
 
 const DEFAULT_TIER2_SAMPLE_EVENTS = 5;
+/** Matches the OpenAPI `HuntBehaviorArticleContext.matched_indices` maxItems; `per_index` can carry far more buckets. */
+const MAX_MATCHED_INDICES = 50;
 
 /**
  * Elasticsearch clients the coordinator needs. Telemetry, alerts, and ES|QL run
@@ -102,49 +106,6 @@ const clampHuntReportText = (value: string | undefined): string | undefined => {
   return value.length > MAX_HUNT_REPORT_TEXT_CHARS
     ? value.slice(0, MAX_HUNT_REPORT_TEXT_CHARS)
     : value;
-};
-
-const asNestedString = (src: Record<string, unknown>, path: string): string | undefined => {
-  const parts = path.split('.');
-  let cur: unknown = src;
-  for (const part of parts) {
-    if (cur == null || typeof cur !== 'object' || Array.isArray(cur)) return undefined;
-    cur = (cur as Record<string, unknown>)[part];
-  }
-  return typeof cur === 'string' ? cur : undefined;
-};
-
-/**
- * Reads a field from a hit whether `_source` came back flattened (alerts store
- * `kibana.alert.*` as dotted keys) or nested (raw telemetry stores `host.name`
- * as `{ host: { name } }`). Tier 1 hits spread `_source` verbatim, so both
- * shapes reach the summarizer.
- */
-const readField = (src: Record<string, unknown>, path: string): string | undefined => {
-  const flat = src[path];
-  return typeof flat === 'string' ? flat : asNestedString(src, path);
-};
-
-const summarizeHit = (hit: { index: string; id: string; [key: string]: unknown }): string => {
-  const parts: string[] = [];
-  const src = hit as Record<string, unknown>;
-  const ruleName = readField(src, 'kibana.alert.rule.name');
-  if (ruleName) parts.push(`rule="${ruleName}"`);
-  const dataset = readField(src, 'event.dataset') ?? readField(src, 'data_stream.dataset');
-  if (dataset) parts.push(`dataset=${dataset}`);
-  const action = readField(src, 'event.action');
-  if (action) parts.push(`action=${action}`);
-  const provider = readField(src, 'event.provider');
-  if (provider) parts.push(`provider=${provider}`);
-  const host = readField(src, 'host.name');
-  if (host) parts.push(`host=${host}`);
-  const user = readField(src, 'user.name');
-  if (user) parts.push(`user=${user}`);
-  const sourceIp = readField(src, 'source.ip');
-  if (sourceIp) parts.push(`src=${sourceIp}`);
-  const destinationIp = readField(src, 'destination.ip');
-  if (destinationIp) parts.push(`dst=${destinationIp}`);
-  return parts.length > 0 ? parts.join(' ') : `_index=${hit.index} _id=${hit.id}`;
 };
 
 /**
@@ -193,9 +154,9 @@ const sampleRequiredIndexEvents = async ({
     // field cannot clobber the hit's `_id`/`_index`.
     return (response.hits.hits ?? []).map((hit) =>
       summarizeHit({
-        ...((hit._source ?? {}) as Record<string, unknown>),
         index: String(hit._index ?? ''),
         id: String(hit._id ?? ''),
+        source: (hit._source ?? {}) as Record<string, unknown>,
       })
     );
   } catch (err) {
@@ -209,7 +170,7 @@ const sampleRequiredIndexEvents = async ({
 };
 
 const buildArticleContext = (
-  tier1: HuntForThreatResult,
+  tier1: HuntForThreatServiceResult,
   maxSamples: number,
   grounding?: { requiredIndices: string[]; sampleEvents: string[] }
 ): HuntBehaviorArticleContext | undefined => {
@@ -219,11 +180,22 @@ const buildArticleContext = (
     const users = tier1.affected_assets.users.map((u) => u.name).filter((n) => n.length > 0);
     if (hosts.length > 0) context.affected_hosts = hosts;
     if (users.length > 0) context.affected_users = users;
-    if (tier1.per_index.length > 0) {
-      context.matched_indices = tier1.per_index.map((entry) => entry.index);
+    // Only required-index buckets steer Tier 2 generation: its hit bar counts
+    // required-index rows alone, so a Tier 1 match that landed only in the
+    // alerts (optional) index must not point the generator at the alerts index,
+    // where nothing it returns can ever count. With no required bucket the
+    // generator falls back to the scope's required patterns.
+    const requiredIndices = tier1.per_index
+      .filter((entry) => entry.required)
+      .map((entry) => entry.index)
+      .slice(0, MAX_MATCHED_INDICES);
+    if (requiredIndices.length > 0) {
+      context.matched_indices = requiredIndices;
     }
-    if (tier1.hits.length > 0) {
-      context.sample_events = tier1.hits.slice(0, maxSamples).map(summarizeHit);
+    // Prefer digests computed from full `_source` in Tier 1; slim wire hits
+    // no longer carry nested event/host/user fields for re-summarization.
+    if (tier1.sample_event_summaries && tier1.sample_event_summaries.length > 0) {
+      context.sample_events = tier1.sample_event_summaries.slice(0, maxSamples);
     }
     if (tier1.time_range) context.time_range = tier1.time_range;
     return Object.keys(context).length === 0 ? undefined : context;
@@ -284,14 +256,15 @@ export const huntCoordinator = async (
 
   // A report-driven run (the Worker's child passes only `report_id`) hunts the
   // report's own IOCs and techniques and hands its text to Tier 2. Anything the
-  // caller supplies explicitly wins over what the report carries.
-  const needsReportContext =
-    reportId !== undefined &&
-    (callerIocs.length === 0 || callerTechniques.length === 0 || callerText === undefined);
-  const reportContext = needsReportContext
-    ? await loadReportHuntContext({ esClient: reportsEsClient, spaceId, reportId })
-    : null;
-  if (needsReportContext && reportContext === null) {
+  // caller supplies explicitly wins over what the report carries, but the report
+  // is always loaded when a `report_id` is named: the run's evidence is written
+  // back to that report, so its visibility in this space is checked even when
+  // the caller supplied every input itself.
+  const reportContext =
+    reportId !== undefined
+      ? await loadReportHuntContext({ esClient: reportsEsClient, spaceId, reportId })
+      : null;
+  if (reportId !== undefined && reportContext === null) {
     const message = `Report ${reportId} was not found in space ${spaceId}.`;
     return {
       status: 'tier1_only',
@@ -310,9 +283,6 @@ export const huntCoordinator = async (
       },
       tier2_skipped_reason: 'report_not_found',
       message,
-      // Fail closed even when the caller supplied its own iocs/techniques/text: a
-      // report-driven run's evidence is written back to that report, so a report
-      // the space cannot see must not produce a successful run.
       next_step:
         'A report_id run requires the report to be visible in this space. Pass a report id that exists here, or omit report_id and pass iocs/techniques/text for an ad hoc hunt.',
       has_confirmed_hit: false,
@@ -400,7 +370,9 @@ export const huntCoordinator = async (
     maxAssets,
   });
 
-  const tier1: HuntCoordinatorTier1 = { ...tier1Raw, tier: 1 };
+  // Drop internal grounding digests from the wire tier1 payload.
+  const { sample_event_summaries: _summaries, ...tier1Wire } = tier1Raw;
+  const tier1: HuntCoordinatorTier1 = { ...tier1Wire, tier: 1 };
 
   const tier1Only = ({
     reason,

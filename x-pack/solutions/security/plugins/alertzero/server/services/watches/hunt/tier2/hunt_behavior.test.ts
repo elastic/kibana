@@ -133,16 +133,68 @@ describe('huntBehavior', () => {
     expect(result.indexed_behaviors[0].technique_id).toBe('T1566');
   });
 
-  it('returns the skeleton template without calling generateEsql when no esClient is given', async () => {
+  it('returns a non-executable placeholder without calling generateEsql when no esClient is given', async () => {
     const result = await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: 'report' });
     expect(generateEsqlMock).not.toHaveBeenCalled();
-    expect(result.behaviors[0].proposed_esql_rule).toContain('FROM *');
+    expect(result.behaviors[0].proposed_esql_rule).toContain(
+      'Grounded ES|QL generation unavailable'
+    );
+    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
   });
 
   it('returns one generateEsql call per validated behavior', async () => {
     const model = buildMockModel([t1078Candidate, t1566Candidate]);
     await huntBehavior(model, logger, { text: 'report' }, esClient);
     expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns one behavior and one generateEsql call when the LLM emits the same technique id twice', async () => {
+    const model = buildMockModel([
+      t1078Candidate,
+      { ...t1078Candidate, evidence_quote: 'a second quote', llm_confidence: 0.7 },
+    ]);
+    const result = await huntBehavior(
+      model,
+      logger,
+      { text: 'report', report_id: 'rpt-1' },
+      esClient
+    );
+    expect(result.behaviors).toHaveLength(1);
+    expect(result.indexed_behaviors.map((b) => b.id)).toEqual(['rpt-1:T1078.004']);
+    expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns the higher-confidence candidate when the LLM emits the same technique id twice', async () => {
+    const model = buildMockModel([
+      { ...t1078Candidate, evidence_quote: 'weaker quote', llm_confidence: 0.6 },
+      { ...t1078Candidate, evidence_quote: 'stronger quote', llm_confidence: 0.95 },
+    ]);
+    const result = await huntBehavior(model, logger, { text: 'report' });
+    expect(result.behaviors).toEqual([
+      expect.objectContaining({ evidence_quote: 'stronger quote', llm_confidence: 0.95 }),
+    ]);
+  });
+
+  it('returns generateEsql targeting only allowlisted matched indices', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      {
+        text: 'report',
+        required_indices: ['logs-aws.*'],
+        article_context: {
+          matched_indices: [
+            '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
+            '.kibana',
+            'logs-okta.system-default',
+          ],
+        },
+      },
+      esClient
+    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-aws.cloudtrail-default*' })
+    );
   });
 
   it('returns generateEsql targeting the integrations that produced Tier 1 hits', async () => {
@@ -227,7 +279,7 @@ describe('huntBehavior', () => {
     expect(rule.endsWith(`\n${GROUNDED_ESQL}`)).toBe(true);
   });
 
-  it('returns the skeleton template when generateEsql reports an error', async () => {
+  it('returns a non-executable placeholder when generateEsql reports an error', async () => {
     generateEsqlMock.mockResolvedValue({ error: 'Unknown column [nope]' });
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
@@ -235,7 +287,10 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].proposed_esql_rule).toContain('FROM *');
+    expect(result.behaviors[0].proposed_esql_rule).toContain(
+      'Grounded ES|QL generation unavailable'
+    );
+    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
     expect(executeEsqlMock).not.toHaveBeenCalled();
   });
 
@@ -250,7 +305,7 @@ describe('huntBehavior', () => {
     expect(result.has_hit).toBe(false);
   });
 
-  it('returns the skeleton template when generateEsql throws', async () => {
+  it('returns a non-executable placeholder when generateEsql throws', async () => {
     generateEsqlMock.mockRejectedValue(new Error('Could not discover a suitable index'));
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
@@ -258,7 +313,10 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].proposed_esql_rule).toContain('FROM *');
+    expect(result.behaviors[0].proposed_esql_rule).toContain(
+      'Grounded ES|QL generation unavailable'
+    );
+    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
     expect(result.status).toBe('behaviors_proposed');
   });
 
@@ -297,7 +355,7 @@ describe('huntBehavior', () => {
     expect(result.has_hit).toBe(true);
   });
 
-  it('returns hit_refs from METADATA _id and _index on required-index rows', async () => {
+  it('returns hits from METADATA _id and _index on required-index rows', async () => {
     executeEsqlMock.mockResolvedValue({
       columns: [col('_id'), col('_index'), col('@timestamp'), col('host.name')],
       values: [
@@ -310,10 +368,10 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].hit_refs).toEqual([
+    expect(result.behaviors[0].hits).toEqual([
       {
-        event_id: 'doc-1',
-        source_index: 'logs-aws.cloudtrail-default',
+        id: 'doc-1',
+        index: 'logs-aws.cloudtrail-default',
         timestamp: '2026-09-24T12:00:00.000Z',
       },
     ]);
@@ -368,6 +426,43 @@ describe('huntBehavior', () => {
     const { query } = executeEsqlMock.mock.calls[0][0];
     expect(query).toContain('FROM logs-aws.cloudtrail-* METADATA _id, _index');
     expect(query).toContain('KEEP host.name, user.name, _id, _index');
+  });
+
+  it('returns executed false without calling executeEsql when FROM is outside required scope', async () => {
+    generateByTechnique({
+      'T1078.004': 'FROM .kibana-*\n| WHERE true\n| LIMIT 10',
+    });
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      executeParams,
+      esClient
+    );
+    expect(executeEsqlMock).not.toHaveBeenCalled();
+    expect(result.behaviors[0].execution).toEqual({
+      executed: false,
+      row_count: 0,
+      hit: false,
+    });
+    expect(result.has_hit).toBe(false);
+  });
+
+  it('returns executed false without calling executeEsql when FROM is broader than required scope', async () => {
+    generateByTechnique({
+      'T1078.004': 'FROM logs-*\n| WHERE true\n| LIMIT 10',
+    });
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      executeParams,
+      esClient
+    );
+    expect(executeEsqlMock).not.toHaveBeenCalled();
+    expect(result.behaviors[0].execution).toEqual({
+      executed: false,
+      row_count: 0,
+      hit: false,
+    });
   });
 
   it('returns the LIMIT from size when size wins over row_limit', async () => {

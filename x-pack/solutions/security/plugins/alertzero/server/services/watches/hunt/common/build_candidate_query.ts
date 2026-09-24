@@ -24,7 +24,7 @@ export interface CandidateQueryResult {
   ids: string[];
   skipped: Array<{
     id: string;
-    reason: 'open_proposal' | 'already_hunted' | 'not_found' | 'other_space';
+    reason: 'open_proposal' | 'already_hunted' | 'not_found';
   }>;
   total: number;
   truncated: boolean;

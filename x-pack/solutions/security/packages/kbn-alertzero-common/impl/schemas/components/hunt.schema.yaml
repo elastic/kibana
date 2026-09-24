@@ -93,18 +93,23 @@ components:
         hit_count:
           type: integer
 
+    # Shared Discover ref for Tier 1 `hits[]` and Tier 2 behavior `hits[]`.
+    # Full `_source` is not returned; consumers refetch by id + index when needed.
     HuntForThreatHit:
       type: object
-      required: [index, id, score]
-      additionalProperties: true
+      required: [id, index]
+      additionalProperties: false
       properties:
-        index:
-          type: string
         id:
           type: string
-        score:
-          type: number
-          nullable: true
+          maxLength: 512
+        index:
+          type: string
+          maxLength: 512
+        timestamp:
+          type: string
+          maxLength: 64
+          description: Document `@timestamp` when present on the hit.
         matched:
           type: object
           description: >-
@@ -114,6 +119,8 @@ components:
             attribution only applies to alerts already tagged with that MITRE
             id (not raw telemetry matched by behavior). Used by the SSE mapper
             to scope Tier 1 `events[]` onto technique-specific attachments.
+            Tier 2 behavior `hits` omit this (technique is implied by the
+            parent behavior).
           properties:
             ioc:
               type: object

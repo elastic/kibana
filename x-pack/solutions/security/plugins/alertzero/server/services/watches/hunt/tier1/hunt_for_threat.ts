@@ -6,21 +6,18 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  AffectedAsset,
-  HuntForThreatHit,
-  HuntForThreatResult,
-  HuntIoc,
-} from '@kbn/alertzero-common';
+import type { AffectedAsset, HuntForThreatResult, HuntIoc } from '@kbn/alertzero-common';
 import { buildMatchesRequired } from '../common/matches_required';
+import { summarizeHit } from '../common/summarize_hit';
 import {
   ALERT_TECHNIQUE_ID_FIELDS,
   attributeHits,
   HASH_ALGO_BY_LENGTH,
   hashFieldsForAlgo,
   IOC_FIELDS_BY_TYPE,
+  type HitDocument,
 } from './attribute_hits';
-import type { HuntForThreatParams } from './types';
+import type { HuntForThreatParams, HuntForThreatServiceResult } from './types';
 
 const termClause = (field: string, value: string): Record<string, unknown> => ({
   term: { [field]: value },
@@ -165,8 +162,19 @@ const classifyIdentityType = (
 export const huntForThreat = async (
   esClient: ElasticsearchClient,
   params: HuntForThreatParams
-): Promise<HuntForThreatResult> => {
-  const { scope, iocs = [], techniques = [], time_range, size, maxAssets = 50 } = params;
+): Promise<HuntForThreatServiceResult> => {
+  const {
+    scope,
+    iocs = [],
+    techniques: rawTechniques = [],
+    time_range,
+    size,
+    maxAssets = 50,
+  } = params;
+  // Alerts store ATT&CK ids as `T1078.004` on keyword fields, and the `terms`
+  // clause is case-sensitive, so a caller's `t1078.004` would never match
+  // although hit attribution compares case-insensitively.
+  const techniques = rawTechniques.map((technique) => technique.trim().toUpperCase());
 
   const from = time_range?.from ?? scope.window.from;
   const to = time_range?.to ?? scope.window.to;
@@ -251,20 +259,25 @@ export const huntForThreat = async (
 
   const total =
     typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
-  const hits = attributeHits(
-    (response.hits.hits ?? []).map(
-      // Envelope keys last so a document with its own top-level `id`/`index`/`score`
-      // field cannot clobber the hit's `_id`/`_index`/`_score`.
-      (hit): HuntForThreatHit => ({
-        ...(hit._source as Record<string, unknown>),
-        index: hit._index,
-        id: hit._id ?? '',
-        score: hit._score ?? null,
-      })
-    ),
-    iocs,
-    techniques
+  const docs: HitDocument[] = (response.hits.hits ?? []).map((hit) => {
+    const source = (hit._source ?? {}) as Record<string, unknown>;
+    const timestamp =
+      typeof source['@timestamp'] === 'string' && source['@timestamp'].length > 0
+        ? source['@timestamp']
+        : undefined;
+    return {
+      id: hit._id ?? '',
+      index: hit._index,
+      ...(timestamp ? { timestamp } : {}),
+      source,
+    };
+  });
+  // Digests from full `_source` before wire hits drop source fields — Tier 2
+  // grounding still needs rule/host/user/ip context.
+  const sample_event_summaries = docs.map((doc) =>
+    summarizeHit({ id: doc.id, index: doc.index, source: doc.source })
   );
+  const hits = attributeHits(docs, iocs, techniques);
 
   const hosts: AffectedAsset[] = (aggs?.affected_hosts?.buckets ?? []).map((b) => ({
     name: b.key,
@@ -308,5 +321,6 @@ export const huntForThreat = async (
     hits,
     affected_assets: { hosts, users, services },
     per_index: perIndex,
+    ...(sample_event_summaries.length > 0 ? { sample_event_summaries } : {}),
   };
 };

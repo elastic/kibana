@@ -90,6 +90,78 @@ describe('huntForThreat', () => {
     expect(result.hits).toHaveLength(1);
   });
 
+  it('returns a slim hit with matched attribution and no source fields', async () => {
+    const esClient = buildEsClient({
+      hits: {
+        total: { value: 1 },
+        hits: [
+          {
+            _index: 'logs-aws.cloudtrail-default',
+            _id: 'abc',
+            _score: 1.2,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              'source.ip': '10.0.0.1',
+              'event.action': 'AssumeRole',
+            },
+          },
+        ],
+      },
+      aggregations: {
+        per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
+        affected_hosts: { buckets: [] },
+        affected_users: { buckets: [] },
+      },
+    });
+
+    const result = await huntForThreat(esClient, {
+      scope,
+      iocs: [{ type: 'ip', value: '10.0.0.1' }],
+    });
+
+    expect(result.hits[0]).toEqual({
+      id: 'abc',
+      index: 'logs-aws.cloudtrail-default',
+      timestamp: '2026-09-01T00:00:00.000Z',
+      matched: {
+        ioc: { type: 'ip', value: '10.0.0.1' },
+        field: 'source.ip',
+      },
+    });
+  });
+
+  it('returns sample_event_summaries from source before hits are slimmed', async () => {
+    const esClient = buildEsClient({
+      hits: {
+        total: { value: 1 },
+        hits: [
+          {
+            _index: 'logs-aws.cloudtrail-default',
+            _id: 'abc',
+            _score: 1.2,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              'source.ip': '10.0.0.1',
+              'event.action': 'AssumeRole',
+            },
+          },
+        ],
+      },
+      aggregations: {
+        per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
+        affected_hosts: { buckets: [] },
+        affected_users: { buckets: [] },
+      },
+    });
+
+    const result = await huntForThreat(esClient, {
+      scope,
+      iocs: [{ type: 'ip', value: '10.0.0.1' }],
+    });
+
+    expect(result.sample_event_summaries?.[0]).toContain('action=AssumeRole');
+  });
+
   it('counts a hit in a data stream backing index toward the required pattern', async () => {
     const backingIndex = '.ds-logs-aws.cloudtrail-default-2026.09.01-000001';
     const esClient = buildEsClient({
@@ -195,6 +267,25 @@ describe('huntForThreat', () => {
         }),
       })
     );
+  });
+
+  it('upper-cases technique ids before the case-sensitive terms clauses, matching how attribution compares them', async () => {
+    const esClient = buildEsClient(emptySearchResponse);
+
+    const result = await huntForThreat(esClient, { scope, techniques: [' t1078.004 '] });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            should: expect.arrayContaining([
+              { terms: { 'kibana.alert.rule.threat.technique.id': ['T1078.004'] } },
+            ]),
+          }),
+        }),
+      })
+    );
+    expect(result.resolved_techniques).toEqual(['T1078.004']);
   });
 
   it('requests the stored threat key, not a path inside it, so alert hits carry their ATT&CK ids', async () => {
