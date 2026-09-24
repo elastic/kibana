@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import type { FlakyTestReport, FlakyTestSampleFailure, TestFramework } from '@kbn/scout-reporting';
+import type { FlakyTestReport, TestFramework } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   BUILDKITE_ORG_URL,
@@ -18,15 +18,13 @@ import {
   formatBuildLink,
   formatFailedBranches,
   formatDateRange,
-  formatDateTime,
   formatFailedBuilds,
-  formatFailureMessage,
   formatFullFailureMessage,
+  formatPercent,
   FRAMEWORK_LABELS,
   inlineCode,
   KIBANA_BLOB_URL,
   plural,
-  shortTitle,
   table,
   targetEnvironment,
   testsTable,
@@ -37,10 +35,8 @@ import type { FlakySuite } from './suites';
 export const FLAKY_TEST_SUITE_METADATA_PREFIX = 'flaky-test-suite';
 
 const MAX_TEST_ROWS = 15;
-/** Distinct error messages shown in full; a suite with more gets a count of the rest. */
-const MAX_DISTINCT_FAILURES = 4;
-/** Test titles labelling an error are cut beyond this many characters. */
-const MAX_LABEL_TITLE_LENGTH = 80;
+/** Distinct errors shown; a suite with more gets a count of the rest. */
+const MAX_ERRORS = 4;
 /** GitHub rejects longer issue titles with a 422. */
 const MAX_TITLE_LENGTH = 256;
 
@@ -205,103 +201,6 @@ const suiteDetails = (suite: FlakySuite): string => {
   return table(['Field', 'Value'], rows);
 };
 
-interface DistinctFailure {
-  message: string;
-  count: number;
-  /** Titles of the tests the message was sampled from, most samples first. */
-  tests: string[];
-  /** The newest sample with this message, for the link to its job. */
-  latest: FlakyTestSampleFailure;
-}
-
-/** Sampled failure messages grouped by identical text, most frequent first. */
-const distinctFailures = (suite: FlakySuite): { distinct: DistinctFailure[]; total: number } => {
-  const byMessage = new Map<
-    string,
-    { count: number; byTest: Map<string, number>; latest: FlakyTestSampleFailure }
-  >();
-  let total = 0;
-  for (const test of suite.tests) {
-    for (const sample of test.sampleFailures) {
-      const text = formatFailureMessage(sample.message);
-      if (text.length === 0) {
-        continue;
-      }
-      total += 1;
-      const entry = byMessage.get(text) ?? {
-        count: 0,
-        byTest: new Map<string, number>(),
-        latest: sample,
-      };
-      entry.count += 1;
-      entry.byTest.set(test.title, (entry.byTest.get(test.title) ?? 0) + 1);
-      if (sample.timestamp > entry.latest.timestamp) {
-        entry.latest = sample;
-      }
-      byMessage.set(text, entry);
-    }
-  }
-  const distinct = [...byMessage.entries()]
-    .map(([message, { count, byTest, latest }]) => ({
-      message,
-      count,
-      tests: [...byTest.entries()].sort((a, b) => b[1] - a[1]).map(([title]) => title),
-      latest,
-    }))
-    .sort((a, b) => b.count - a.count);
-  return { distinct, total };
-};
-
-/**
- * The message's head in a code block and, when the message goes on, the whole of it collapsed
- * underneath. The head is what groups identical errors, so the full text is the newest sample's.
- */
-const errorBlock = (head: string, latest: FlakyTestSampleFailure): string => {
-  const full = formatFullFailureMessage(latest.message);
-  if (full.length <= head.length) {
-    return codeBlock(head);
-  }
-  const lines = plural(full.split('\n').length, 'line');
-  return `${codeBlock(head)}\n\n${collapsed(`Full message (${lines})`, codeBlock(full))}`;
-};
-
-/** `Last seen in [#12345](…/builds/12345#job) · Scout Lane #3 - stateful-classic / default · 2026-09-09 06:12 UTC.` */
-const lastSeen = ({ buildUrl, jobId, stepLabel, timestamp }: FlakyTestSampleFailure): string =>
-  buildUrl
-    ? `Last seen in ${formatBuildLink({ buildUrl, jobId, stepLabel }, timestamp)}.`
-    : `Last seen ${formatDateTime(timestamp)}.`;
-
-const failuresSection = (suite: FlakySuite): string => {
-  const { distinct, total } = distinctFailures(suite);
-  if (distinct.length === 0) {
-    return 'No failure messages were sampled for this suite.';
-  }
-  const samples = plural(total, 'sampled failure');
-  if (distinct.length === 1) {
-    const [{ message, latest }] = distinct;
-    const intro = total === 1 ? 'One sampled failure' : `Same error in all ${samples}`;
-    return `${intro}:\n\n${errorBlock(message, latest)}\n\n${lastSeen(latest)}`;
-  }
-  const shown = distinct
-    .slice(0, MAX_DISTINCT_FAILURES)
-    .map(({ message, count, tests, latest }) => {
-      const subject =
-        suite.tests.length > 1
-          ? tests.map((title) => `*${shortTitle(title, MAX_LABEL_TITLE_LENGTH)}*`).join(', ')
-          : '';
-      const share = count === total ? `all ${samples}` : `${count} of the ${samples}`;
-      return `${subject ? `${subject} ` : ''}(${share}):\n\n${errorBlock(
-        message,
-        latest
-      )}\n\n${lastSeen(latest)}`;
-    });
-  const rest = distinct.length - shown.length;
-  return [
-    ...shown,
-    ...(rest > 0 ? [`and ${plural(rest, 'more error')} among the sampled failures.`] : []),
-  ].join('\n\n');
-};
-
 /** Build counts of one test somewhere: on a branch, on a target. */
 interface BuildCounts {
   builds: number;
@@ -419,6 +318,167 @@ const failuresByTarget = (suite: FlakySuite): string | undefined => {
   ].join('\n');
 };
 
+/** Error titles in a summary line are cut beyond this many characters. */
+const MAX_ERROR_TITLE_LENGTH = 110;
+
+/** One error of the suite, merged over the tests that hit it. */
+interface SuiteError {
+  key: string;
+  /** The newest failure's message across the tests. */
+  message: string;
+  failures: number;
+  /** Only known when a single test hit the error; a build failing two tests would count twice. */
+  builds?: number;
+  byPipeline: Map<string, number>;
+  branches: Set<string>;
+  targets: Set<string>;
+  /** Titles of the tests that hit the error, in ranking order. */
+  tests: string[];
+  firstFailedAt: Date;
+  lastFailedAt: Date;
+  lastFailedBuildUrl?: string;
+  lastFailedJobId?: string;
+}
+
+/** The errors of every test in the suite, merged on the report's key, most failures first. */
+const suiteErrors = (suite: FlakySuite): SuiteError[] => {
+  const byKey = new Map<string, SuiteError>();
+  for (const test of suite.tests) {
+    for (const error of test.errors) {
+      const current = byKey.get(error.key);
+      if (!current) {
+        byKey.set(error.key, {
+          key: error.key,
+          message: error.message,
+          failures: error.failures,
+          builds: error.builds,
+          byPipeline: new Map(
+            error.byPipeline.map(({ pipeline, failures }) => [pipeline, failures])
+          ),
+          branches: new Set(error.branches),
+          targets: new Set(error.targets),
+          tests: [test.title],
+          firstFailedAt: error.firstFailedAt,
+          lastFailedAt: error.lastFailedAt,
+          lastFailedBuildUrl: error.lastFailedBuildUrl,
+          lastFailedJobId: error.lastFailedJobId,
+        });
+        continue;
+      }
+      current.failures += error.failures;
+      current.builds = undefined;
+      for (const { pipeline, failures } of error.byPipeline) {
+        current.byPipeline.set(pipeline, (current.byPipeline.get(pipeline) ?? 0) + failures);
+      }
+      for (const branch of error.branches) current.branches.add(branch);
+      for (const target of error.targets) current.targets.add(target);
+      current.tests.push(test.title);
+      if (error.firstFailedAt < current.firstFailedAt) {
+        current.firstFailedAt = error.firstFailedAt;
+      }
+      if (error.lastFailedAt > current.lastFailedAt) {
+        current.lastFailedAt = error.lastFailedAt;
+        current.message = error.message;
+        current.lastFailedBuildUrl = error.lastFailedBuildUrl;
+        current.lastFailedJobId = error.lastFailedJobId;
+      }
+    }
+  }
+  return [...byKey.values()].sort((a, b) => b.failures - a.failures || a.key.localeCompare(b.key));
+};
+
+/**
+ * `Error: expect(received).toStrictEqual(expected) // deep equality`: the message's first line,
+ * without the JSON payload Kibana client errors append, cut to fit a summary line.
+ */
+const errorTitle = (message: string): string => {
+  const first = formatFullFailureMessage(message)
+    .split('\n')[0]
+    .replace(/ -- \{.*$/, '')
+    .trim();
+  return first.length > MAX_ERROR_TITLE_LENGTH
+    ? `${first.slice(0, MAX_ERROR_TITLE_LENGTH - 1).trimEnd()}…`
+    : first;
+};
+
+/** Markdown does not render inside `<summary>`, so its text is HTML. */
+const escapeHtml = (text: string): string =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** `` `kibana-pull-request` (597), `kibana-on-merge` (128) ``, or `` `kibana-on-merge` only ``. */
+const formatErrorPipelines = (byPipeline: Map<string, number>): string => {
+  const entries = [...byPipeline.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  if (entries.length === 1) {
+    return `${inlineCode(entries[0][0])} only`;
+  }
+  return entries.map(([pipeline, failures]) => `${inlineCode(pipeline)} (${failures})`).join(', ');
+};
+
+/**
+ * One error, collapsed under its share of the suite's failures and its first line; inside, where
+ * it was seen and the full message.
+ */
+const errorSection = (suite: FlakySuite, error: SuiteError, totalFailures: number): string => {
+  const counts =
+    error.builds !== undefined
+      ? `${error.failures} in ${plural(error.builds, 'build')}`
+      : `${error.failures} across ${plural(error.tests.length, 'test')}`;
+  const summary =
+    `<b>${formatPercent(error.failures / totalFailures)} of failures</b> (${counts}) · ` +
+    `<code>${escapeHtml(errorTitle(error.message))}</code> · ` +
+    formatDateRange(error.firstFailedAt, error.lastFailedAt);
+  const targets = [...error.targets].filter((target) => target !== UNKNOWN_TARGET_MODE).sort();
+  const branches = [...error.branches];
+  const rows: string[][] = [
+    ...(suite.tests.length > 1
+      ? [['**Tests**', error.tests.map((title) => `*${title}*`).join(', ')]]
+      : []),
+    ['**Pipelines**', formatErrorPipelines(error.byPipeline)],
+    [
+      '**Branches**',
+      formatFailedBranches({ failedBranches: branches.length, failedBranchNames: branches }),
+    ],
+    ...(targets.length > 0
+      ? [[`**${targets.length > 1 ? 'Targets' : 'Target'}**`, targets.map(inlineCode).join(', ')]]
+      : []),
+    [
+      '**Last seen**',
+      formatBuildLink(
+        { buildUrl: error.lastFailedBuildUrl, jobId: error.lastFailedJobId },
+        error.lastFailedAt
+      ),
+    ],
+  ];
+  const message = formatFullFailureMessage(error.message);
+  return collapsed(
+    summary,
+    [
+      table(['Field', 'Value'], rows),
+      `<b>Message</b> (${plural(message.split('\n').length, 'line')})`,
+      codeBlock(message),
+    ].join('\n\n')
+  );
+};
+
+/** The suite's distinct errors over the window, most failures first, at most `MAX_ERRORS` shown. */
+const failuresByErrorMessage = (suite: FlakySuite): string => {
+  const errors = suiteErrors(suite);
+  if (errors.length === 0) {
+    return 'No failure messages were recorded for this suite.';
+  }
+  const totalFailures = errors.reduce((sum, error) => sum + error.failures, 0);
+  const shown = errors
+    .slice(0, MAX_ERRORS)
+    .map((error) => errorSection(suite, error, totalFailures));
+  const rest = errors.length - shown.length;
+  return [
+    '#### Failures by Error Message',
+    `${plural(errors.length, 'distinct error')}:`,
+    ...shown,
+    ...(rest > 0 ? [`and ${plural(rest, 'more error')}.`] : []),
+  ].join('\n\n');
+};
+
 const pipelineLink = (pipeline: string): string =>
   `[${inlineCode(pipeline)}](${BUILDKITE_ORG_URL}/${pipeline})`;
 
@@ -472,7 +532,7 @@ export const renderFlakySuiteIssueBody = (
     '### Suite',
     suiteDetails(suite),
     '### Failures',
-    failuresSection(suite),
+    failuresByErrorMessage(suite),
     failuresByBranch(suite),
     failuresByTarget(suite),
     failuresByPipeline(suite, ctx.report),

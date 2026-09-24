@@ -108,21 +108,23 @@ const multiTestReport = () => {
         // a run that recorded no target
         { mode: 'unknown', type: 'local', builds: 5, failedBuilds: 1, buildFailRate: 0.2 },
       ],
-      sampleFailures: [
-        // the older sample carries the job; the newer one is what gets linked
+      sampleFailures: [],
+      errors: [
         {
+          key: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
           message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
-          buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12300',
-          jobId: '0199-abcd',
-          stepLabel: 'Scout Lane #3 - stateful-classic / default',
-          timestamp: new Date('2026-09-08T06:12:00.000Z'),
-        },
-        {
-          message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
-          buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
-          jobId: '0199-ef01',
-          stepLabel: 'Scout Lane #7 - serverless-security_complete / default',
-          timestamp: new Date('2026-09-09T06:12:00.000Z'),
+          failures: 20,
+          builds: 20,
+          byPipeline: [
+            { pipeline: 'kibana-on-merge', failures: 12 },
+            { pipeline: 'kibana-pull-request', failures: 8 },
+          ],
+          branches: ['main', 'someone:fix-it', 'other:thing'],
+          targets: ['stateful-classic', 'serverless-security_complete'],
+          firstFailedAt: new Date('2026-09-03T00:00:00.000Z'),
+          lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+          lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+          lastFailedJobId: '0199-ef01',
         },
       ],
     }),
@@ -133,11 +135,33 @@ const multiTestReport = () => {
       builds: 264,
       buildFailRate: 10 / 264,
       owners: ['elastic/kibana-data-discovery', 'elastic/other-team'],
-      sampleFailures: [
+      sampleFailures: [],
+      errors: [
+        // the same error as test a, merged into one entry; b's newer failure is the one linked
         {
+          key: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
+          message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b',
+          failures: 3,
+          builds: 3,
+          byPipeline: [{ pipeline: 'kibana-on-merge', failures: 3 }],
+          branches: ['9.2'],
+          targets: ['stateful-classic'],
+          firstFailedAt: new Date('2026-09-01T00:00:00.000Z'),
+          lastFailedAt: new Date('2026-09-09T12:00:00.000Z'),
+          lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12350',
+          lastFailedJobId: '0199-b000',
+        },
+        {
+          key: 'TimeoutError: page.waitForSelector: Timeout Nms exceeded.',
           message: 'TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.',
-          buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12200',
-          timestamp: new Date('2026-09-07T06:12:00.000Z'),
+          failures: 1,
+          builds: 1,
+          byPipeline: [{ pipeline: 'kibana-on-merge', failures: 1 }],
+          branches: ['main'],
+          targets: ['unknown'],
+          firstFailedAt: new Date('2026-09-07T06:12:00.000Z'),
+          lastFailedAt: new Date('2026-09-07T06:12:00.000Z'),
+          lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12200',
         },
       ],
     }),
@@ -148,6 +172,7 @@ const multiTestReport = () => {
       builds: 264,
       buildFailRate: 9 / 264,
       sampleFailures: [],
+      errors: [],
     }),
   ];
   // twenty other, worse, tests in other files push the suite down the ranking
@@ -301,42 +326,71 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(body).toContain('#### Failures by Branch');
   });
 
-  it('shows the head of a long error and collapses the whole message under it', () => {
-    const diff = [
-      'Error: expect(received).toStrictEqual(expected)',
-      ...Array.from({ length: 40 }, (_, i) => `+   line ${i}`),
-    ].join('\n');
-    const report = flakyReport([
-      flakyTest({
-        sampleFailures: [
-          {
-            message: diff,
-            buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
-            jobId: '0199-abcd',
-            timestamp: new Date('2026-09-09T06:12:00.000Z'),
-          },
-        ],
-      }),
-    ]);
-    const [suite] = groupIntoSuites(report.flaky, report.files);
+  it("lists the suite's distinct errors merged across tests, most failures first, each collapsed under its share", () => {
+    const { suite, report } = multiTestReport();
     const body = renderFlakySuiteIssueBody(suite, { report });
-    // twelve lines inline, then the ellipsis
+    expect(body).toContain('#### Failures by Error Message\n\n2 distinct errors:\n\n<details>');
+    // 23 of 24 failures; builds are not summed across tests
     expect(body).toContain(
-      '+   line 10\n…\n```\n\n<details>\n<summary>Full message (41 lines)</summary>\n\n```text\nError: expect'
+      '<summary><b>96% of failures</b> (23 across 2 tests) · ' +
+        '<code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>'
     );
-    expect(body).toContain('+   line 39\n```\n\n</details>\n\nLast seen in');
-    // a short message has nothing to collapse
-    const short = singleTestReport();
-    expect(renderFlakySuiteIssueBody(short.suite, { report: short.report })).not.toContain(
-      '<details>'
+    expect(body).toContain(
+      [
+        '| **Tests** | *does not keep a hidden histogram after visiting Dashboard*, *reverts breakdown, interval, and visibility on a saved session* |',
+        '| **Pipelines** | `kibana-on-merge` (15), `kibana-pull-request` (8) |',
+        '| **Branches** | `main`, `9.2`, 2 PRs |',
+        '| **Targets** | `serverless-security_complete`, `stateful-classic` |',
+        '| **Last seen** | [#12350](https://buildkite.com/elastic/kibana-on-merge/builds/12350#0199-b000) · 2026-09-09 12:00 UTC |',
+      ].join('\n')
+    );
+    // the newest failure's message is the one shown
+    expect(body).toContain(
+      '<b>Message</b> (5 lines)\n\n```text\nError: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b\n```'
+    );
+    // a single-test error keeps its build count; an unknown target is not a target
+    expect(body).toContain(
+      '<summary><b>4% of failures</b> (1 in 1 build) · ' +
+        '<code>TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.</code> · 7 Sep 2026</summary>'
+    );
+    expect(body).toContain(
+      '| **Pipelines** | `kibana-on-merge` only |\n| **Branches** | `main` |\n| **Last seen** | [#12200]'
     );
   });
 
-  it('links the job each error was last seen in', () => {
-    const { suite, report } = multiTestReport();
+  it('cuts the summary title and strips the JSON payload of Kibana client errors', () => {
+    const message =
+      'KbnClientRequesterError: [POST http://localhost:5620/api/fleet/agent_policies] 409 Conflict -- {"statusCode":409}\n' +
+      'x'.repeat(200);
+    const report = flakyReport([
+      flakyTest({ errors: [{ ...flakyTest().errors[0], key: 'k', message }] }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
-      'Last seen in [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-ef01) · ' +
-        'Scout Lane #7 - serverless-security_complete / default · 2026-09-09 06:12 UTC.'
+      '<code>KbnClientRequesterError: [POST http://localhost:5620/api/fleet/agent_policies] 409 Conflict</code>'
+    );
+    const long = flakyReport([
+      flakyTest({ errors: [{ ...flakyTest().errors[0], key: 'k', message: 'y'.repeat(200) }] }),
+    ]);
+    expect(renderFlakySuiteIssueBody(groupIntoSuites(long.flaky)[0], { report: long })).toContain(
+      `<code>${'y'.repeat(109)}…</code>`
+    );
+  });
+
+  it('caps the errors shown and says so when the report has none', () => {
+    const errors = Array.from({ length: 6 }, (_, index) => ({
+      ...flakyTest().errors[0],
+      key: `k${index}`,
+      failures: 10 - index,
+    }));
+    const report = flakyReport([flakyTest({ errors })]);
+    const body = renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report });
+    expect(body.match(/<details>/g)).toHaveLength(4);
+    expect(body).toContain('and 2 more errors.');
+
+    const none = flakyReport([flakyTest({ errors: [] })]);
+    expect(renderFlakySuiteIssueBody(groupIntoSuites(none.flaky)[0], { report: none })).toContain(
+      '### Failures\n\nNo failure messages were recorded for this suite.'
     );
   });
 

@@ -38,6 +38,7 @@ describe('formatDateRange', () => {
     expect(range('2026-09-03T10:00:00Z', '2026-09-10T10:00:00Z')).toBe('3–10 Sep 2026');
     expect(range('2026-08-28T10:00:00Z', '2026-09-04T10:00:00Z')).toBe('28 Aug – 4 Sep 2026');
     expect(range('2025-12-28T10:00:00Z', '2026-01-04T10:00:00Z')).toBe('28 Dec 2025 – 4 Jan 2026');
+    expect(range('2026-09-07T06:00:00Z', '2026-09-07T18:00:00Z')).toBe('7 Sep 2026');
   });
 });
 

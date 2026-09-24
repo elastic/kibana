@@ -20,10 +20,11 @@ suite issue is filed, at most `--max-new-issues` (default 10) per run, titled
 `Flaky <Framework> [UI|API] suite: <suite title>` (the category comes from the config, e.g.
 `Flaky Scout API suite: …`, `Flaky Jest integration suite: …`) and labelled `failed-test` plus the
 owning teams' labels (in `elastic/kibana` only). The body carries the per-test numbers with the
-branch each test qualified on, the suite details including what the config runs, the most frequent
-sampled failures each linked to the Buildkite job it was last seen in, and breakdowns by branch, by
-Scout target (deployment mode and location, for suites that recorded one) and by pipeline naming
-the branches each failed on; issues that merely mention the file are linked as possibly related. A suite is
+branch each test qualified on, the suite details including what the config runs, the suite's
+distinct errors with their share of its failures and the pipelines, branches, targets and job each
+was last seen in, and breakdowns by branch, by Scout target (deployment mode and location, for
+suites that recorded one) and by pipeline naming the branches each failed on; issues that merely
+mention the file are linked as possibly related. A suite is
 skipped, and the issue recorded, when every one of its tests has an issue, open or closed, a
 per-test one or one about the suite or its file; commenting on and reopening
 those issues is left to a later iteration, so is the stale `failed-test` sweep closing the issues

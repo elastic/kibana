@@ -92,6 +92,24 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       timestamp: new Date('2026-09-09T06:12:00.000Z'),
     },
   ],
+  errors: [
+    {
+      key: 'Error: Timed out Nms waiting for expect(locator).toBeVisible()',
+      message: 'Error: Timed out 30000ms waiting for expect(locator).toBeVisible()',
+      failures: 61,
+      builds: 49,
+      byPipeline: [
+        { pipeline: 'kibana-on-merge', failures: 49 },
+        { pipeline: 'kibana-pull-request', failures: 12 },
+      ],
+      branches: ['main', 'someone:fix-it'],
+      targets: ['stateful-classic'],
+      firstFailedAt: new Date('2026-09-02T10:00:00.000Z'),
+      lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+      lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      lastFailedJobId: '0199-abcd',
+    },
+  ],
   suiteTitle: 'Default status alert',
   ...overrides,
 });

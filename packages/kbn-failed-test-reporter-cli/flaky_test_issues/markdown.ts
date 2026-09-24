@@ -104,8 +104,11 @@ export const formatDay = (date: Date, withYear = false): string =>
     withYear ? ` ${date.getUTCFullYear()}` : ''
   }`;
 
-/** `3–10 Sep 2026`, `28 Aug – 4 Sep 2026` or `28 Dec 2025 – 4 Jan 2026`. */
+/** `3–10 Sep 2026`, `28 Aug – 4 Sep 2026`, `28 Dec 2025 – 4 Jan 2026`, or `7 Sep 2026` for one day. */
 export const formatDateRange = (from: Date, to: Date): string => {
+  if (from.toISOString().slice(0, 10) === to.toISOString().slice(0, 10)) {
+    return formatDay(to, true);
+  }
   if (from.getUTCFullYear() !== to.getUTCFullYear()) {
     return `${formatDay(from, true)} – ${formatDay(to, true)}`;
   }
