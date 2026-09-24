@@ -138,7 +138,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         ...(detectAndReviewStep.pendingCleanupPolicyIds ?? {}),
       };
 
-      const hasPendingCleanup = !isRetry && Object.keys(effectivePendingCleanup).length > 0;
+      const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
 
       if (targetsToDeploy.length === 0 && !hasPendingCleanup) return { failed: false };
 

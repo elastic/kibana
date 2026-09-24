@@ -345,7 +345,12 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
   });
 
-  it('skips cleanup on retry even when pendingCleanupPolicyIds is non-empty', async () => {
+  it('runs cleanup on retry when pendingCleanupPolicyIds is non-empty', async () => {
+    // A retry must still process pending cleanup — skipping it only when cleanup was successfully
+    // cleared. If cleanup failed on the initial attempt and a target also failed, retrying the
+    // target should not leave the old package policy in Fleet.
+    mockCleanupAgentBasedPolicies.mockResolvedValue({ toDelete: ['pkg-policy-X'], toUpdate: [] });
+    const updateDetectAndReviewStep = jest.fn();
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: [] },
       authenticateAndDeployStep: {},
@@ -353,7 +358,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
         policyIdsByInstance: { serviceA: 'pkg-policy-A' },
         pendingCleanupPolicyIds: { instX: 'pkg-policy-X' },
       },
-      updateDetectAndReviewStep: jest.fn(),
+      updateDetectAndReviewStep,
       removeDeployInstances: jest.fn(),
       getLatestFailedInstances: jest.fn().mockReturnValue(['serviceA']),
       awsServicesMap: new Map(),
@@ -378,7 +383,11 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy(['serviceA']);
     });
 
-    expect(mockCleanupAgentBasedPolicies).not.toHaveBeenCalled();
+    expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
+    // pkg-policy-X succeeded → pending entry is cleared.
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
+      expect.objectContaining({ pendingCleanupPolicyIds: {} })
+    );
   });
 
   it('skips cleanup when pendingCleanupPolicyIds is empty', async () => {

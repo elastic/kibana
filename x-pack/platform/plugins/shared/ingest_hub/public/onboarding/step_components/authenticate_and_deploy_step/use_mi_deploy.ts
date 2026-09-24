@@ -84,6 +84,10 @@ export function useMiDeploy({
       // persisted policyIdsByInstance — filtering by deleted policyId alone misses toUpdate cases
       // where the policy survives with fewer inputs but the removed instance should not reappear.
       const cleanedInstanceIds = new Set<string>();
+      // Set when cleanup runs on the initial deploy path (targets.length > 0 branch). Written to
+      // state in the final shared update so succeeded entries are cleared after the deploy SO write.
+      // undefined means cleanup didn't run this invocation; the retry path writes mid-flight instead.
+      let remainingPending: Record<string, string> | undefined;
 
       if (isInitialDeploy) {
         // Restrict each group to members not already tracked — an already-deployed instance
@@ -181,7 +185,7 @@ export function useMiDeploy({
           // Prune stale instances before clearing the staging area (removeDeployInstances
           // must come first so its write isn't overwritten).
           removeDeployInstances(cleanedLiveStale);
-          const remainingPending = Object.fromEntries(
+          remainingPending = Object.fromEntries(
             Object.entries(pendingCleanupPolicyIds ?? {}).filter(
               ([, policyId]) => !succeededIds.has(policyId)
             )
@@ -376,6 +380,9 @@ export function useMiDeploy({
         policyIdsByInstance: newPolicyIdsByInstance,
         failedInstances: mergedFailed,
         deployErrors: errorsByInstance,
+        // Clear succeeded cleanup entries after deploy completes. Only set when cleanup ran in
+        // this initial-deploy run; undefined leaves the retry path's mid-flight update intact.
+        ...(remainingPending !== undefined ? { pendingCleanupPolicyIds: remainingPending } : {}),
       });
     },
     [
