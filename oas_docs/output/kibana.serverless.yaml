@@ -43289,6 +43289,98 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '403':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Role ARN fan-out requires integration-policy write permission
+                  value:
+                    error: Forbidden
+                    message: Role ARN updates require permission to write integration policies.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Forbidden
+        '409':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: The connector changed while the Role ARN fan-out was in progress
+                  value:
+                    error: Conflict
+                    message: Saved object [fleet-cloud-connector/cloud-connector-id-1] conflict
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict
+        '500':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Package policies could not be updated to the new role ARN
+                  value:
+                    attributes:
+                      bumpFailed: false
+                      revertFailed: []
+                      updateFailed:
+                        - policy-1
+                    error: Internal Server Error
+                    message: 'Failed to update role ARN on 1 package policy (ids: policy-1).'
+                    statusCode: 500
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Role ARN fan-out failed
       summary: Update cloud connector
       tags:
         - Fleet cloud connectors
@@ -43399,6 +43491,9 @@ paths:
                     type: number
                   perPage:
                     type: number
+                  sharedWithOtherSpaces:
+                    description: Whether the cloud connector is shared with other spaces. When true, `total` counts only the package policies in the current space.
+                    type: boolean
                   total:
                     type: number
                 required:

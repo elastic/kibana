@@ -72,9 +72,12 @@ export interface CloudConnectorUsageItem {
 
 export interface GetCloudConnectorUsageResponse {
   items: CloudConnectorUsageItem[];
+  /** Package policies using the connector in the current space. */
   total: number;
   page: number;
   perPage: number;
+  /** True when the connector is shared with other spaces, whose policies `total` does not count. */
+  sharedWithOtherSpaces?: boolean;
 }
 
 export interface VerifyCloudConnectorIacKeyRequest {

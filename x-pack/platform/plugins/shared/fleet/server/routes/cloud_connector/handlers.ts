@@ -36,7 +36,11 @@ import type {
   GetCloudConnectorUsageRequestSchema,
   VerifyCloudConnectorIacKeyRequestSchema,
 } from '../../types/rest_spec/cloud_connector';
-import { FleetError } from '../../errors';
+import {
+  CloudConnectorRoleArnPropagationError,
+  FleetError,
+  FleetUnauthorizedError,
+} from '../../errors';
 
 import { verifyCloudConnectorIacKey } from '../../services/cloud_connectors';
 
@@ -192,6 +196,8 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const cloudConnectorId = request.params.cloudConnectorId;
   const logger = appContextService
     .getLogger()
@@ -199,11 +205,19 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
 
   try {
     logger.info(`Updating cloud connector ${cloudConnectorId}`);
+    const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
     const result = await cloudConnectorService.update(
       internalSoClient,
       cloudConnectorId,
       // Type cast is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
-      request.body as Partial<UpdateCloudConnectorRequest>
+      request.body as Partial<UpdateCloudConnectorRequest>,
+      {
+        esClient,
+        user,
+        canWriteIntegrationPolicies: fleetContext.authz.integrations.writeIntegrationPolicies,
+        request,
+        listSpaces: () => fleetContext.getAllSpaces(),
+      }
     );
     logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
     const body: UpdateCloudConnectorResponse = {
@@ -211,6 +225,40 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
+    if (error instanceof CloudConnectorRoleArnPropagationError) {
+      logger.error(`Role ARN fan-out failed for ${cloudConnectorId}: ${error.message}`);
+      return response.customError({
+        statusCode: 500,
+        body: {
+          message: error.message,
+          attributes: {
+            updateFailed: error.detail.updateFailed,
+            revertFailed: error.detail.revertFailed,
+            bumpFailed: error.detail.bumpFailed,
+          },
+        },
+      });
+    }
+    if (SavedObjectsErrorHelpers.isConflictError(error)) {
+      logger.error(`Cloud connector ${cloudConnectorId} update conflicted`, error);
+      return response.customError({
+        statusCode: 409,
+        body: {
+          message: error.message,
+        },
+      });
+    }
+    if (error instanceof FleetUnauthorizedError) {
+      logger.warn(
+        `Cloud connector ${cloudConnectorId} Role ARN update was not authorized: ${error.message}`
+      );
+      return response.customError({
+        statusCode: 403,
+        body: {
+          message: error.message,
+        },
+      });
+    }
     logger.error(`Failed to update cloud connector ${cloudConnectorId}`, error);
     return response.customError({
       statusCode: 400,
@@ -323,6 +371,10 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
       total: result?.total || 0,
       page,
       perPage,
+      sharedWithOtherSpaces: await cloudConnectorService.isSharedWithOtherSpaces(
+        internalSoClient,
+        cloudConnectorId
+      ),
     };
     return response.ok({ body });
   } catch (error) {

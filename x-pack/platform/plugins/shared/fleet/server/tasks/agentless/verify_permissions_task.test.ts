@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
@@ -365,6 +366,60 @@ describe('verify_permissions_task', () => {
           verification_status: 'failed',
           verification_failed_at: expect.any(String),
         })
+      );
+    });
+
+    it('binds the verification stamp to the connector version from the start of the run', async () => {
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
+        policyId: 'verifier-policy-1',
+      });
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail')],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [{ ...makeConnectorSO('conn-1'), version: 'Wz-verifier' }],
+        });
+      mockSoClient.update.mockResolvedValue({});
+
+      await taskRunner.run();
+
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        'conn-1',
+        expect.objectContaining({
+          verification_started_at: expect.any(String),
+          verification_status: 'pending',
+        }),
+        { version: 'Wz-verifier' }
+      );
+    });
+
+    it('does not overwrite a newer connector when the in-flight verification stamp conflicts', async () => {
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
+        policyId: 'verifier-policy-1',
+      });
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail')],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [{ ...makeConnectorSO('conn-1'), version: 'Wz-verifier' }],
+        });
+      mockSoClient.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, 'conn-1')
+      );
+
+      await expect(taskRunner.run()).resolves.not.toThrow();
+
+      expect(mockSoClient.update).toHaveBeenCalledTimes(1);
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        'conn-1',
+        expect.objectContaining({ verification_status: 'pending' }),
+        { version: 'Wz-verifier' }
       );
     });
 
@@ -793,6 +848,21 @@ describe('verify_permissions_task', () => {
           updated_at: minutesAgo(2),
           verification_started_at: minutesAgo(6),
           verification_status: 'success',
+        });
+
+        await taskRunner.run();
+
+        expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should verify a connector whose Role ARN changed right after a recent verification', async () => {
+        // A Role ARN save resets the status to pending and keeps the previous timestamps.
+        setupEligibilityTest({
+          created_at: minutesAgo(10),
+          updated_at: minutesAgo(0),
+          verification_started_at: minutesAgo(2),
+          verification_failed_at: minutesAgo(2),
+          verification_status: 'pending',
         });
 
         await taskRunner.run();

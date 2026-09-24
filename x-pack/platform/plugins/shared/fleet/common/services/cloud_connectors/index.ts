@@ -63,3 +63,6 @@ export {
   parseAwsRegionFromArn,
   isCloudFormationStackArn,
 } from './iac_deployment';
+
+// IAM role ARN validation
+export { isIamRoleArn } from './iam_role';

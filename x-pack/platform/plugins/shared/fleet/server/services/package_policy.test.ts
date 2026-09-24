@@ -891,6 +891,10 @@ describe('Package policy service', () => {
     });
   });
   describe('createCloudConnectorForPackagePolicy', () => {
+    // The connector update fans the new role ARN out to every package policy referencing it,
+    // which needs an Elasticsearch client; the wizard save path has to hand one over.
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     // Mock PackageInfo for input-level storage mode (no package-level vars defined)
     const mockPackageInfo = {
       name: 'test-package',
@@ -984,6 +988,7 @@ describe('Package policy service', () => {
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
+          esClient,
           enrichedPackagePolicy,
           agentPolicy,
           mockPackageInfo
@@ -1034,6 +1039,7 @@ describe('Package policy service', () => {
 
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
+        esClient,
         enrichedPackagePolicy,
         agentPolicy,
         mockPackageInfo
@@ -1096,6 +1102,7 @@ describe('Package policy service', () => {
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
+          esClient,
           enrichedPackagePolicy,
           agentPolicy,
           mockPackageInfo
@@ -1153,6 +1160,7 @@ describe('Package policy service', () => {
 
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
+        esClient,
         enrichedPackagePolicy,
         agentPolicy,
         mockPackageInfo
@@ -1204,7 +1212,8 @@ describe('Package policy service', () => {
         },
       } as any;
 
-      // Mock updated cloud connector response
+      const storedRoleArn = 'arn:aws:iam::123456789012:role/StoredRole';
+      // The service keeps the connector's stored Role ARN when asked to.
       const updatedCloudConnector = {
         id: 'existing-connector-id',
         name: 'existing-connector',
@@ -1212,7 +1221,7 @@ describe('Package policy service', () => {
         cloudProvider: 'aws',
         vars: {
           role_arn: {
-            value: 'arn:aws:iam::123456789012:role/UpdatedRole',
+            value: storedRoleArn,
             type: 'text',
           },
           external_id: {
@@ -1235,6 +1244,7 @@ describe('Package policy service', () => {
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
+          esClient,
           enrichedPackagePolicy,
           agentPolicy,
           mockPackageInfo
@@ -1258,10 +1268,84 @@ describe('Package policy service', () => {
                 type: 'password',
               },
             },
-          }
+          },
+          { esClient, keepStoredRoleArn: true }
         );
+        expect(enrichedPackagePolicy.inputs[0].streams[0].vars.role_arn.value).toBe(storedRoleArn);
       } finally {
         // Restore the original method
+        cloudConnectorService.update = originalUpdate;
+      }
+    });
+
+    it('keeps the stored Role ARN when a new package policy names an existing connector', async () => {
+      const soClient = createSavedObjectClientMock();
+      const storedRoleArn = 'arn:aws:iam::123456789012:role/StoredRole';
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: 'existing-connector-id',
+        vars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/FromTheWizard', type: 'text' },
+        },
+        inputs: [
+          {
+            type: 'aws/metrics',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  'aws.role_arn': {
+                    value: 'arn:aws:iam::123456789012:role/FromTheWizard',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+      const agentPolicy = {
+        id: 'test',
+        agentless: { cloud_connectors: { enabled: true, target_csp: 'aws' } },
+      } as any;
+
+      const originalUpdate = cloudConnectorService.update;
+      cloudConnectorService.update = jest.fn().mockResolvedValue({
+        id: 'existing-connector-id',
+        cloudProvider: 'aws',
+        vars: { role_arn: { type: 'text', value: storedRoleArn } },
+      });
+
+      try {
+        await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          esClient,
+          enrichedPackagePolicy,
+          agentPolicy,
+          mockPackageInfo
+        );
+
+        // The connector is read only inside the update, so no earlier read can hand it a stale
+        // Role ARN that it would mistake for an edit.
+        expect(soClient.get).not.toHaveBeenCalled();
+        expect(cloudConnectorService.update).toHaveBeenCalledWith(
+          soClient,
+          'existing-connector-id',
+          {
+            vars: {
+              role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/FromTheWizard' },
+            },
+          },
+          { esClient, keepStoredRoleArn: true }
+        );
+        expect(enrichedPackagePolicy.vars.role_arn.value).toBe(storedRoleArn);
+        expect(enrichedPackagePolicy.inputs[0].streams[0].vars['aws.role_arn'].value).toBe(
+          storedRoleArn
+        );
+      } finally {
         cloudConnectorService.update = originalUpdate;
       }
     });
@@ -1319,6 +1403,7 @@ describe('Package policy service', () => {
         await expect(
           (packagePolicyService as any).createCloudConnectorForPackagePolicy(
             soClient,
+            esClient,
             enrichedPackagePolicy,
             agentPolicy,
             mockPackageInfo
@@ -1331,7 +1416,8 @@ describe('Package policy service', () => {
           'existing-connector-id',
           expect.objectContaining({
             vars: expect.any(Object),
-          })
+          }),
+          { esClient, keepStoredRoleArn: true }
         );
       } finally {
         // Restore the original method
@@ -1372,6 +1458,7 @@ describe('Package policy service', () => {
 
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
+        esClient,
         enrichedPackagePolicy,
         agentPolicy,
         mockPackageInfo
@@ -1427,6 +1514,7 @@ describe('Package policy service', () => {
 
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
+        esClient,
         enrichedPackagePolicy,
         agentPolicy,
         mockPackageInfo
@@ -1470,6 +1558,7 @@ describe('Package policy service', () => {
 
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
+        esClient,
         enrichedPackagePolicy,
         agentPolicy,
         mockPackageInfo
@@ -1531,6 +1620,7 @@ describe('Package policy service', () => {
         await expect(
           (packagePolicyService as any).createCloudConnectorForPackagePolicy(
             soClient,
+            esClient,
             enrichedPackagePolicy,
             agentPolicy,
             mockPackageInfo
@@ -1618,6 +1708,7 @@ describe('Package policy service', () => {
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
+          esClient,
           enrichedPackagePolicy,
           agentPolicy,
           mockPackageInfo
@@ -1728,6 +1819,7 @@ describe('Package policy service', () => {
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
+          esClient,
           enrichedPackagePolicy,
           agentPolicy,
           mockPackageInfo
@@ -1837,6 +1929,7 @@ describe('Package policy service', () => {
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
+          esClient,
           enrichedPackagePolicy,
           agentPolicy,
           mockPackageInfo
@@ -1862,7 +1955,8 @@ describe('Package policy service', () => {
                 type: 'text',
               },
             },
-          }
+          },
+          { esClient, keepStoredRoleArn: true }
         );
       } finally {
         cloudConnectorService.update = originalUpdate;

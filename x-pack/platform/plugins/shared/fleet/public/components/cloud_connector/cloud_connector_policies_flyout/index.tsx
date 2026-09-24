@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -37,6 +37,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { pagePathGetters } from '../../../constants';
 import type {
+  AwsCloudConnectorVars,
   CloudConnectorVar,
   CloudConnectorVars,
   AccountType,
@@ -65,6 +66,8 @@ import {
   isAzureCloudConnectorVars,
   isCloudConnectorNameValid,
   isGcpCloudConnectorVars,
+  isIamRoleArnCleared,
+  isIamRoleArnInvalid,
   isStackArnInvalid,
 } from '../utils';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -72,6 +75,7 @@ import { AccountBadge } from '../components/account_badge';
 import { IacTemplateDetails } from '../components/iac_template_details';
 import { IacUpgradeCallout } from '../components/iac_upgrade_callout';
 import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
+import { RoleArnField } from '../components/role_arn_field';
 import { useGetPackageInfoByKeyQuery, useIacProvisioner, useStartServices } from '../../../hooks';
 
 interface CloudConnectorPoliciesFlyoutProps {
@@ -110,6 +114,26 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const [editedName, setEditedName] = useState(initialName);
   const [isNameValid, setIsNameValid] = useState(() => isCloudConnectorNameValid(initialName));
   const [editedIacDeploymentId, setEditedIacDeploymentId] = useState(iacDeploymentId ?? '');
+  const existingRoleArn = useMemo(() => {
+    if (isAwsCloudConnectorVars(cloudConnectorVars, provider)) {
+      return String(cloudConnectorVars.role_arn?.value ?? '').trim();
+    }
+    return '';
+  }, [cloudConnectorVars, provider]);
+  // `editedRoleArn` stays trimmed because `RoleArnField` trims on input; seed the initial state
+  // trimmed as well so the first render's "changed" check compares like against like.
+  const [editedRoleArn, setEditedRoleArn] = useState(existingRoleArn);
+  // A connector refresh can change the stored ARN while this flyout stays open. Follow that
+  // value when the field still matches the previous baseline. A value the user has edited
+  // (diverged from that baseline) is left alone.
+  const roleArnBaselineRef = useRef(existingRoleArn);
+  if (roleArnBaselineRef.current !== existingRoleArn) {
+    const previousBaseline = roleArnBaselineRef.current;
+    roleArnBaselineRef.current = existingRoleArn;
+    if (editedRoleArn === previousBaseline) {
+      setEditedRoleArn(existingRoleArn);
+    }
+  }
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -119,6 +143,17 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   // (upgrade callout, Update, Redeploy, Launch) need the IaC Provisioner.
   const isAws = provider === AWS_PROVIDER;
   const showIac = isAws && isIacProvisionerEnabled;
+  const roleArnInvalid = isIamRoleArnInvalid(editedRoleArn);
+  // Clearing the field is not a way to remove the role: RoleArnField says so and Save blocks on
+  // it, rather than dropping the empty value from the payload and discarding the edit in silence.
+  const roleArnCleared = isIamRoleArnCleared(editedRoleArn, existingRoleArn);
+  const roleArnChanged = editedRoleArn !== existingRoleArn;
+  const roleArnToSave =
+    isAws && !roleArnInvalid && roleArnChanged && editedRoleArn !== '' ? editedRoleArn : undefined;
+  // The server merges a Role ARN update onto the connector vars it reads at request time.
+  // Sending the flyout's other vars would overwrite a secret rotated after this flyout loaded.
+  const varsToSave: AwsCloudConnectorVars | undefined =
+    roleArnToSave !== undefined ? { role_arn: { type: 'text', value: roleArnToSave } } : undefined;
 
   // IacTemplateDetails trims on input, so the value judged here is the value that gets saved.
   const deploymentIdInvalid = isStackArnInvalid(editedIacDeploymentId);
@@ -359,11 +394,17 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     updateConnector({
       ...(nameChanged && editedName ? { name: editedName } : {}),
       ...(iacDeploymentIdToSave !== undefined ? { iac_deployment_id: iacDeploymentIdToSave } : {}),
+      ...(varsToSave !== undefined ? { vars: varsToSave } : {}),
     });
   };
 
   const isSaveDisabled =
-    !isNameValid || deploymentIdInvalid || (!nameChanged && !iacChanged) || isUpdating;
+    !isNameValid ||
+    deploymentIdInvalid ||
+    roleArnInvalid ||
+    roleArnCleared ||
+    (!nameChanged && !iacChanged && varsToSave === undefined) ||
+    isUpdating;
 
   const tableCaption = useMemo(
     () =>
@@ -514,6 +555,18 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {isAws && (
+          <>
+            <RoleArnField
+              value={editedRoleArn}
+              storedValue={existingRoleArn}
+              onChange={setEditedRoleArn}
+              affectedPackagePolicyCount={usageData?.total}
+              sharedWithOtherSpaces={usageData?.sharedWithOtherSpaces}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {isAws && (
           <>
             <IacTemplateDetails

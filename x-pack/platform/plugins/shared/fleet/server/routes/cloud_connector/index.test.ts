@@ -12,6 +12,7 @@ import type { CloudProvider, CloudConnector } from '../../../common/types/models
 
 import { CLOUD_CONNECTOR_API_ROUTES } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
+import { CloudConnectorRoleArnPropagationError } from '../../errors';
 import { cloudConnectorService } from '../../services';
 import { packagePolicyService } from '../../services';
 import { createSecrets, deleteSecrets } from '../../services/secrets';
@@ -37,6 +38,11 @@ jest.mock('../../services/app_context', () => ({
         debug: jest.fn(),
       }),
     }),
+    getSecurityCore: jest.fn().mockReturnValue({
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue({ username: 'test-user' }),
+      },
+    }),
     getConfig: jest.fn().mockReturnValue({
       internal: {
         fleetServerStandalone: false,
@@ -52,6 +58,7 @@ jest.mock('../../services', () => ({
     getById: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    isSharedWithOtherSpaces: jest.fn(),
   },
   packagePolicyService: {
     list: jest.fn(),
@@ -81,6 +88,7 @@ describe('Cloud Connector API', () => {
           create: jest.fn(),
           find: jest.fn(),
         },
+        authz: { integrations: { writeIntegrationPolicies: true } },
       }),
       core: Promise.resolve({
         elasticsearch: {
@@ -823,7 +831,12 @@ describe('Cloud Connector API', () => {
         'connector-123',
         {
           name: 'updated-aws-connector',
-        }
+        },
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -874,7 +887,12 @@ describe('Cloud Connector API', () => {
         'connector-456',
         {
           name: 'updated-azure-connector',
-        }
+        },
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -920,7 +938,12 @@ describe('Cloud Connector API', () => {
         'connector-123',
         {
           vars: updatedVars,
-        }
+        },
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -973,7 +996,12 @@ describe('Cloud Connector API', () => {
         'connector-456',
         {
           vars: updatedVars,
-        }
+        },
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1024,7 +1052,12 @@ describe('Cloud Connector API', () => {
         {
           name: 'fully-updated-connector',
           vars: updatedVars,
-        }
+        },
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1079,7 +1112,12 @@ describe('Cloud Connector API', () => {
         {
           name: 'fully-updated-azure-connector',
           vars: updatedVars,
-        }
+        },
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1112,6 +1150,38 @@ describe('Cloud Connector API', () => {
         statusCode: 400,
         body: {
           message: 'External ID secret reference is not valid',
+        },
+      });
+    });
+
+    it('returns 500 with propagation failure details', async () => {
+      mockCloudConnectorService.update.mockRejectedValue(
+        new CloudConnectorRoleArnPropagationError('Role ARN fan-out failed', {
+          updateFailed: ['policy-1'],
+          revertFailed: ['policy-2'],
+          bumpFailed: true,
+        })
+      );
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'connector-123' },
+        body: {
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/UpdatedRole', type: 'text' },
+          },
+        },
+      });
+
+      await updateCloudConnectorHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: 'Role ARN fan-out failed',
+          attributes: {
+            updateFailed: ['policy-1'],
+            revertFailed: ['policy-2'],
+            bumpFailed: true,
+          },
         },
       });
     });
@@ -1171,7 +1241,12 @@ describe('Cloud Connector API', () => {
       expect(mockCloudConnectorService.update).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
         'connector-123',
-        {}
+        {},
+        expect.objectContaining({
+          esClient: expect.any(Object),
+          user: { username: 'test-user' },
+          canWriteIntegrationPolicies: true,
+        })
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1683,6 +1758,7 @@ describe('Cloud Connector API', () => {
       };
 
       mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+      mockCloudConnectorService.isSharedWithOtherSpaces.mockResolvedValueOnce(false);
 
       mockPackagePolicyService.list.mockResolvedValue({
         items: [
@@ -1767,7 +1843,36 @@ describe('Cloud Connector API', () => {
           total: 2,
           page: 1,
           perPage: 10,
+          sharedWithOtherSpaces: false,
         },
+      });
+    });
+
+    it('reports when the connector is shared with other spaces, so the count covers this space only', async () => {
+      mockCloudConnectorService.getById.mockResolvedValue({} as CloudConnector);
+      mockCloudConnectorService.isSharedWithOtherSpaces.mockResolvedValueOnce(true);
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+      } as any);
+
+      await getCloudConnectorUsageHandler(
+        context,
+        httpServerMock.createKibanaRequest({
+          params: { cloudConnectorId: 'connector-123' },
+          query: {},
+        }),
+        response
+      );
+
+      expect(mockCloudConnectorService.isSharedWithOtherSpaces).toHaveBeenCalledWith(
+        expect.any(Object),
+        'connector-123'
+      );
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ total: 0, sharedWithOtherSpaces: true }),
       });
     });
 

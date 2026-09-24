@@ -6,7 +6,8 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -23,6 +24,7 @@ import {
 } from '../../common/constants/cloud_connector';
 
 import { createSavedObjectClientMock } from '../mocks';
+import { CloudConnectorRoleArnPropagationError, FleetUnauthorizedError } from '../errors';
 import type {
   CreateCloudConnectorRequest,
   UpdateCloudConnectorRequest,
@@ -35,11 +37,17 @@ import type {
 
 import { CloudConnectorService } from './cloud_connector';
 import { appContextService } from './app_context';
+import { propagateRoleArnToPackagePolicies } from './cloud_connectors';
 
 // Mock dependencies
 jest.mock('./app_context');
+jest.mock('./cloud_connectors', () => ({
+  ...jest.requireActual('./cloud_connectors'),
+  propagateRoleArnToPackagePolicies: jest.fn(),
+}));
 
 const mockAppContextService = appContextService;
+const propagateRoleArnToPackagePoliciesMock = propagateRoleArnToPackagePolicies as jest.Mock;
 
 describe('CloudConnectorService', () => {
   let service: CloudConnectorService;
@@ -56,6 +64,8 @@ describe('CloudConnectorService', () => {
     mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
       useSpaceAwareness: false,
     });
+    const withLock = jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback());
+    mockAppContextService.getLockManagerService = jest.fn().mockReturnValue({ withLock });
 
     mockSoClient = createSavedObjectClientMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -106,6 +116,33 @@ describe('CloudConnectorService', () => {
         updated_at: '2023-01-01T00:00:00.000Z',
       },
     };
+
+    it('stores the Role ARN without the whitespace it was pasted with', async () => {
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+      await service.create(mockSoClient, {
+        ...mockCreateRequest,
+        vars: {
+          ...mockCreateRequest.vars,
+          role_arn: { type: 'text', value: ' arn:aws:iam::123456789012:role/TestRole\n' },
+        },
+      });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          vars: expect.objectContaining({
+            role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/TestRole' },
+          }),
+        })
+      );
+    });
 
     it('should create a cloud connector successfully with space awareness enabled', async () => {
       jest
@@ -894,6 +931,27 @@ describe('CloudConnectorService', () => {
     });
   });
 
+  describe('isSharedWithOtherSpaces', () => {
+    const connectorIn = (namespaces: string[] | undefined) =>
+      ({
+        id: 'cc-1',
+        namespaces,
+        attributes: { name: 'Test', cloudProvider: 'aws' },
+      } as SavedObject);
+
+    it.each([
+      [['default'], false],
+      [undefined, false],
+      [['default', 'space-b'], true],
+      [['*'], true],
+    ])('returns %p -> %p', async (namespaces, expected) => {
+      mockSoClient.get.mockResolvedValue(connectorIn(namespaces));
+
+      await expect(service.isSharedWithOtherSpaces(mockSoClient, 'cc-1')).resolves.toBe(expected);
+      expect(mockSoClient.get).toHaveBeenCalledWith(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, 'cc-1');
+    });
+  });
+
   describe('getById', () => {
     const mockSavedObject = {
       id: 'cloud-connector-123',
@@ -1215,9 +1273,14 @@ describe('CloudConnectorService', () => {
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
       mockSoClient.update.mockResolvedValue(mockUpdatedWithVars);
 
-      const result = await service.update(mockSoClient, 'cloud-connector-123', {
-        vars: validVars,
-      });
+      const result = await service.update(
+        mockSoClient,
+        'cloud-connector-123',
+        {
+          vars: validVars,
+        },
+        { esClient: mockEsClient }
+      );
 
       expect(mockSoClient.update).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -1225,6 +1288,7 @@ describe('CloudConnectorService', () => {
         {
           vars: validVars,
           updated_at: expect.any(String),
+          verification_status: 'pending',
         }
       );
 
@@ -1262,10 +1326,15 @@ describe('CloudConnectorService', () => {
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
       mockSoClient.update.mockResolvedValue(mockFullyUpdated);
 
-      const result = await service.update(mockSoClient, 'cloud-connector-123', {
-        name: 'fully-updated-connector',
-        vars: validVars,
-      });
+      const result = await service.update(
+        mockSoClient,
+        'cloud-connector-123',
+        {
+          name: 'fully-updated-connector',
+          vars: validVars,
+        },
+        { esClient: mockEsClient }
+      );
 
       expect(result.name).toEqual('fully-updated-connector');
       const awsVars = result.vars as AwsCloudConnectorVars;
@@ -1310,12 +1379,989 @@ describe('CloudConnectorService', () => {
       };
 
       await expect(
-        service.update(mockSoClient, 'cloud-connector-123', {
-          vars: varsWithoutExternalId,
-        })
+        service.update(
+          mockSoClient,
+          'cloud-connector-123',
+          {
+            vars: varsWithoutExternalId,
+          },
+          { esClient: mockEsClient }
+        )
       ).resolves.toBeDefined();
 
       expect(mockSoClient.update).toHaveBeenCalled();
+    });
+
+    describe('AWS role_arn change', () => {
+      const connectorId = 'cc-1';
+      const oldArn = 'arn:aws:iam::123456789012:role/Old';
+      const newArn = 'arn:aws:iam::123456789012:role/New';
+
+      beforeEach(() => {
+        mockSoClient.get.mockResolvedValue({
+          id: connectorId,
+          version: 'Wz-cc-version',
+          attributes: {
+            name: 'Test',
+            namespace: '*',
+            cloudProvider: 'aws',
+            vars: { role_arn: { type: 'text', value: oldArn } },
+            verification_status: 'success',
+            verification_started_at: '2026-09-01T00:00:00Z',
+            created_at: '2026-01-01T00:00:00Z',
+            updated_at: '2026-01-01T00:00:00Z',
+          },
+        } as SavedObject);
+        mockSoClient.update.mockResolvedValue({
+          id: connectorId,
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {},
+        });
+      });
+
+      it('calls propagateRoleArnToPackagePolicies when role_arn actually changes', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            soClient: mockSoClient,
+            connectorId,
+            newRoleArn: newArn,
+          })
+        );
+        expect(mockAppContextService.getLockManagerService).toHaveBeenCalled();
+        const { withLock } = (mockAppContextService.getLockManagerService as jest.Mock).mock
+          .results[0].value;
+        expect(withLock).toHaveBeenCalledWith(
+          `fleet-cloud-connector-role-arn-${connectorId}`,
+          expect.any(Function)
+        );
+      });
+
+      it('saves and fans out the Role ARN without the whitespace it was pasted with', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: ` ${newArn}\n` } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledWith(
+          expect.objectContaining({ newRoleArn: newArn })
+        );
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({ vars: { role_arn: { type: 'text', value: newArn } } }),
+          expect.anything()
+        );
+      });
+
+      it('does not treat the stored Role ARN with surrounding whitespace as a change', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: `${oldArn} ` } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+      });
+
+      it('does not fan out when the connector already stores this Role ARN once the lock is held', async () => {
+        mockSoClient.get
+          .mockResolvedValueOnce({
+            id: connectorId,
+            version: 'Wz-cc-version',
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject)
+          .mockResolvedValueOnce({
+            id: connectorId,
+            version: 'Wz-already',
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: newArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.not.objectContaining({ verification_status: 'pending' }),
+          { version: 'Wz-already' }
+        );
+      });
+
+      it('keeps the stored Role ARN instead of fanning out when asked to keep it', async () => {
+        const externalId = {
+          type: 'password',
+          value: { id: 'EXTERNALID1234567890', isSecretRef: true },
+        } as const;
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn }, external_id: externalId } },
+          { esClient: mockEsClient, keepStoredRoleArn: true }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockAppContextService.getLockManagerService).not.toHaveBeenCalled();
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({
+            vars: { role_arn: { type: 'text', value: oldArn }, external_id: externalId },
+          }),
+          { version: 'Wz-cc-version' }
+        );
+        expect(mockSoClient.update.mock.calls[0][2]).not.toHaveProperty('verification_status');
+      });
+
+      it('accepts an invalid incoming Role ARN it replaces with the stored one', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: 'not-an-arn' } } },
+          { esClient: mockEsClient, keepStoredRoleArn: true }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({ vars: { role_arn: { type: 'text', value: oldArn } } }),
+          { version: 'Wz-cc-version' }
+        );
+      });
+
+      describe('permission verifier', () => {
+        let runSoon: jest.Mock;
+
+        beforeEach(() => {
+          runSoon = jest.fn().mockResolvedValue({ id: 'fleet:verify_permissions:1.0.0' });
+          mockAppContextService.getTaskManagerStart = jest.fn().mockReturnValue({ runSoon });
+          mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
+            useSpaceAwareness: false,
+            enableOTelVerifier: true,
+          });
+        });
+
+        const updateRoleArn = (roleArn: string) =>
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: roleArn } } },
+            { esClient: mockEsClient }
+          );
+
+        it('asks the verifier to run soon once the new Role ARN is saved', async () => {
+          await updateRoleArn(newArn);
+
+          expect(runSoon).toHaveBeenCalledWith('fleet:verify_permissions:1.0.0');
+        });
+
+        it('does not ask the verifier to run when the Role ARN did not change', async () => {
+          await updateRoleArn(oldArn);
+
+          expect(runSoon).not.toHaveBeenCalled();
+        });
+
+        it('does not ask the verifier to run when the connector write fails', async () => {
+          mockSoClient.update.mockRejectedValueOnce(new Error('connector write failed'));
+
+          await expect(updateRoleArn(newArn)).rejects.toThrow();
+          expect(runSoon).not.toHaveBeenCalled();
+        });
+
+        it('does not ask the verifier to run when it is disabled', async () => {
+          mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
+            useSpaceAwareness: false,
+            enableOTelVerifier: false,
+          });
+
+          await updateRoleArn(newArn);
+
+          expect(runSoon).not.toHaveBeenCalled();
+        });
+
+        it('still saves the Role ARN when the verifier cannot be scheduled', async () => {
+          runSoon.mockRejectedValue(new Error('task is already running'));
+
+          await expect(updateRoleArn(newArn)).resolves.toBeDefined();
+        });
+      });
+
+      it('fans out and writes the connector only while holding the connector lock', async () => {
+        let holdingLock = false;
+        const heldDuring: Record<string, boolean> = {};
+        mockAppContextService.getLockManagerService = jest.fn().mockReturnValue({
+          withLock: jest.fn(async (_lockId: string, callback: () => Promise<unknown>) => {
+            holdingLock = true;
+            try {
+              return await callback();
+            } finally {
+              holdingLock = false;
+            }
+          }),
+        });
+        propagateRoleArnToPackagePoliciesMock.mockImplementationOnce(async () => {
+          heldDuring.fanOut = holdingLock;
+          return undefined;
+        });
+        mockSoClient.update.mockImplementationOnce(async () => {
+          heldDuring.connectorWrite = holdingLock;
+          return {
+            id: connectorId,
+            type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes: {},
+          };
+        });
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(heldDuring).toEqual({ fanOut: true, connectorWrite: true });
+      });
+
+      it('merges a role-only payload into the vars read once the lock is held', async () => {
+        const connectorWithSecret = (secretId: string, version: string) =>
+          ({
+            id: connectorId,
+            version,
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: {
+                role_arn: { type: 'text', value: oldArn },
+                external_id: { type: 'password', value: { isSecretRef: true, id: secretId } },
+              },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+        mockSoClient.get
+          .mockResolvedValueOnce(connectorWithSecret('secret-retired', 'Wz-opening'))
+          .mockResolvedValueOnce(connectorWithSecret('secret-rotated', 'Wz-locked'));
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({
+            vars: {
+              role_arn: { type: 'text', value: newArn },
+              external_id: { type: 'password', value: { isSecretRef: true, id: 'secret-rotated' } },
+            },
+          }),
+          { version: 'Wz-locked' }
+        );
+      });
+
+      describe('when the connector changed while waiting for the lock', () => {
+        const connectorAt = (version: string, name: string) =>
+          ({
+            id: connectorId,
+            version,
+            attributes: {
+              name,
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+
+        beforeEach(() => {
+          mockSoClient.get
+            .mockResolvedValueOnce(connectorAt('Wz-opening', 'Test'))
+            .mockResolvedValueOnce(connectorAt('Wz-locked', 'Renamed by someone else'));
+          mockSoClient.find.mockResolvedValue({
+            saved_objects: [],
+            total: 0,
+            page: 1,
+            per_page: 10,
+          });
+        });
+
+        it.each([
+          [
+            'the name also changes',
+            {
+              name: 'My rename',
+              vars: { role_arn: { type: 'text' as const, value: newArn } },
+            },
+          ],
+          [
+            'the other vars are sent too',
+            {
+              vars: {
+                role_arn: { type: 'text' as const, value: newArn },
+                external_id: {
+                  type: 'password' as const,
+                  value: { id: 'EXTERNALID1234567890', isSecretRef: true },
+                },
+              },
+            },
+          ],
+        ])('returns a conflict before fanning out when %s', async (_label, update) => {
+          const caught = await service
+            .update(mockSoClient, connectorId, update, { esClient: mockEsClient })
+            .then(
+              () => new Error('expected a conflict'),
+              (err: Error) => err
+            );
+
+          expect(SavedObjectsErrorHelpers.isConflictError(caught)).toBe(true);
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+      });
+
+      it('passes the connector OCC version on the post-fan-out write', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({
+            verification_status: 'pending',
+          }),
+          { version: 'Wz-cc-version' }
+        );
+      });
+
+      it('forwards the request user into the role ARN fan-out', async () => {
+        const user = { username: 'sean' } as AuthenticatedUser;
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient, user }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledWith(
+          expect.objectContaining({ user })
+        );
+      });
+
+      it('rolls back policies when the connector write conflicts (OCC)', async () => {
+        const rollback = { policyCount: 1, revert: jest.fn().mockResolvedValue(undefined) };
+        propagateRoleArnToPackagePoliciesMock.mockResolvedValueOnce(rollback);
+        mockSoClient.update.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId
+          )
+        );
+
+        const caught = await service
+          .update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          )
+          .then(
+            () => new Error('Expected the update to reject'),
+            (err: Error) => err
+          );
+
+        expect(SavedObjectsErrorHelpers.isConflictError(caught)).toBe(true);
+        expect(rollback.revert).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not roll back when the conflicting write already stored this role ARN', async () => {
+        const rollback = { policyCount: 1, revert: jest.fn().mockResolvedValue(undefined) };
+        propagateRoleArnToPackagePoliciesMock.mockResolvedValueOnce(rollback);
+        mockSoClient.get
+          .mockResolvedValueOnce({
+            id: connectorId,
+            version: 'Wz-cc-version',
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject)
+          .mockResolvedValueOnce({
+            id: connectorId,
+            version: 'Wz-winner',
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: newArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+        mockSoClient.update.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId
+          )
+        );
+
+        const caught = await service
+          .update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          )
+          .then(
+            () => new Error('Expected the update to reject'),
+            (err: Error) => err
+          );
+
+        expect(SavedObjectsErrorHelpers.isConflictError(caught)).toBe(true);
+        expect(rollback.revert).not.toHaveBeenCalled();
+      });
+
+      it('rejects a Role ARN change without integration-policy write and does not fan out', async () => {
+        await expect(
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient, canWriteIntegrationPolicies: false }
+          )
+        ).rejects.toThrow(/write integration policies/);
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockSoClient.update).not.toHaveBeenCalled();
+      });
+
+      it('still allows a connector-only edit without integration-policy write', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { name: 'renamed' },
+          { esClient: mockEsClient, canWriteIntegrationPolicies: false }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockSoClient.update).toHaveBeenCalled();
+      });
+
+      it('is a no-op when the incoming role_arn equals the stored one', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: oldArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+      });
+
+      describe('connector shared across spaces', () => {
+        const request = {} as KibanaRequest;
+        let atSpaces: jest.Mock;
+        const otherSpaceClient = createSavedObjectClientMock();
+
+        const shareConnector = (namespaces: string[]) => {
+          mockSoClient.get.mockResolvedValue({
+            id: connectorId,
+            version: 'Wz-cc-version',
+            namespaces,
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn } },
+              verification_status: 'success',
+              verification_started_at: '2026-09-01T00:00:00Z',
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+        };
+
+        beforeEach(() => {
+          propagateRoleArnToPackagePoliciesMock.mockReset();
+          atSpaces = jest.fn().mockResolvedValue({ hasAllRequested: true });
+          mockAppContextService.getSecurity = jest.fn().mockReturnValue({
+            authz: {
+              checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces }),
+              actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+            },
+          });
+          mockSoClient.getCurrentNamespace.mockReturnValue('default');
+          mockSoClient.asScopedToNamespace.mockReturnValue(otherSpaceClient);
+          shareConnector(['default', 'space-b']);
+        });
+
+        const updateSharedRole = (
+          options: {
+            listSpaces?: () => Promise<Array<{ id: string }>>;
+            includeRequest?: boolean;
+          } = {}
+        ) =>
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            {
+              esClient: mockEsClient,
+              ...(options.includeRequest === false ? {} : { request }),
+              listSpaces: options.listSpaces,
+            }
+          );
+
+        it('refuses the Role ARN change when the caller cannot write integration policies in every space', async () => {
+          atSpaces.mockResolvedValue({ hasAllRequested: false });
+
+          await expect(updateSharedRole()).rejects.toThrow(FleetUnauthorizedError);
+          await expect(updateSharedRole()).rejects.toThrow(
+            'This identity is shared with other spaces. You need permission to write integration policies in each of them before its Role ARN can change.'
+          );
+
+          expect(atSpaces).toHaveBeenCalledWith(['default', 'space-b'], {
+            kibana: ['api:fleet-agent-policies-all', 'api:integrations-all'],
+          });
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it('refuses the Role ARN change when the request is missing, so other spaces cannot be authorized', async () => {
+          await expect(updateSharedRole({ includeRequest: false })).rejects.toThrow(
+            FleetUnauthorizedError
+          );
+
+          expect(atSpaces).not.toHaveBeenCalled();
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        });
+
+        it('fans the Role ARN out to each space once the caller is authorized in all of them', async () => {
+          await updateSharedRole();
+
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({ soClient: mockSoClient, newRoleArn: newArn })
+          );
+          expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({ soClient: otherSpaceClient, newRoleArn: newArn })
+          );
+          expect(mockSoClient.update).toHaveBeenCalled();
+        });
+
+        it('reverts every space when the connector write fails after the fan-out', async () => {
+          const currentRollback = {
+            policyCount: 1,
+            revert: jest.fn().mockResolvedValue(undefined),
+          };
+          const otherRollback = { policyCount: 2, revert: jest.fn().mockResolvedValue(undefined) };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(currentRollback)
+            .mockResolvedValueOnce(otherRollback);
+          mockSoClient.update.mockRejectedValueOnce(new Error('connector write failed'));
+
+          await expect(updateSharedRole()).rejects.toThrow('connector write failed');
+
+          expect(currentRollback.revert).toHaveBeenCalledTimes(1);
+          expect(otherRollback.revert).toHaveBeenCalledTimes(1);
+        });
+
+        it('reverts every space and reports each failure when an earlier space cannot be reverted after the connector write fails', async () => {
+          const currentRollback = {
+            policyCount: 1,
+            revert: jest.fn().mockRejectedValue(
+              new CloudConnectorRoleArnPropagationError('current revert failed', {
+                updateFailed: [],
+                revertFailed: ['p1'],
+                bumpFailed: false,
+              })
+            ),
+          };
+          const otherRollback = {
+            policyCount: 1,
+            revert: jest.fn().mockRejectedValue(
+              new CloudConnectorRoleArnPropagationError('other revert failed', {
+                updateFailed: [],
+                revertFailed: ['p2'],
+                bumpFailed: true,
+              })
+            ),
+          };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(currentRollback)
+            .mockResolvedValueOnce(otherRollback);
+          mockSoClient.update.mockRejectedValueOnce(new Error('connector write failed'));
+
+          await expect(updateSharedRole()).rejects.toMatchObject({
+            detail: { updateFailed: [], revertFailed: ['p1', 'p2'], bumpFailed: true },
+          });
+          expect(currentRollback.revert).toHaveBeenCalledTimes(1);
+          expect(otherRollback.revert).toHaveBeenCalledTimes(1);
+        });
+
+        it('reverts spaces already updated when a later space fails', async () => {
+          const rollback = { policyCount: 1, revert: jest.fn().mockResolvedValue(undefined) };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(rollback)
+            .mockRejectedValueOnce(
+              new CloudConnectorRoleArnPropagationError('space-b failed', {
+                updateFailed: ['p2'],
+                revertFailed: [],
+                bumpFailed: false,
+              })
+            );
+
+          await expect(updateSharedRole()).rejects.toThrow(CloudConnectorRoleArnPropagationError);
+
+          expect(rollback.revert).toHaveBeenCalledTimes(1);
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it('includes the earlier space when its revert fails after a later space fails', async () => {
+          const rollback = {
+            policyCount: 1,
+            revert: jest.fn().mockRejectedValue(
+              new CloudConnectorRoleArnPropagationError('revert failed', {
+                updateFailed: [],
+                revertFailed: ['p1'],
+                bumpFailed: false,
+              })
+            ),
+          };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(rollback)
+            .mockRejectedValueOnce(
+              new CloudConnectorRoleArnPropagationError('space-b failed', {
+                updateFailed: ['p2'],
+                revertFailed: [],
+                bumpFailed: false,
+              })
+            );
+
+          await expect(updateSharedRole()).rejects.toMatchObject({
+            detail: { updateFailed: ['p2'], revertFailed: ['p1'] },
+          });
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it("keeps the later space's revert and bump failures when reverting an earlier space also fails", async () => {
+          const rollback = {
+            policyCount: 1,
+            revert: jest.fn().mockRejectedValue(
+              new CloudConnectorRoleArnPropagationError('revert failed', {
+                updateFailed: [],
+                revertFailed: ['p1'],
+                bumpFailed: false,
+              })
+            ),
+          };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(rollback)
+            .mockRejectedValueOnce(
+              new CloudConnectorRoleArnPropagationError('space-b failed', {
+                updateFailed: ['p2'],
+                revertFailed: ['p3'],
+                bumpFailed: true,
+              })
+            );
+
+          await expect(updateSharedRole()).rejects.toMatchObject({
+            detail: { updateFailed: ['p2'], revertFailed: ['p3', 'p1'], bumpFailed: true },
+          });
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it('refuses a connector shared with all spaces unless the caller holds the privileges in all spaces', async () => {
+          shareConnector(['*']);
+          atSpaces.mockResolvedValue({ hasAllRequested: false });
+          const listSpaces = jest.fn().mockResolvedValue([{ id: 'default' }, { id: 'space-b' }]);
+
+          await expect(updateSharedRole({ listSpaces })).rejects.toThrow(FleetUnauthorizedError);
+
+          expect(atSpaces).toHaveBeenCalledWith(['*'], {
+            kibana: ['api:fleet-agent-policies-all', 'api:integrations-all'],
+          });
+          expect(listSpaces).not.toHaveBeenCalled();
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it('fans out to every space when the caller holds the privileges in all spaces', async () => {
+          shareConnector(['*']);
+          const listSpaces = jest
+            .fn()
+            .mockResolvedValue([{ id: 'default' }, { id: 'space-b' }, { id: 'space-c' }]);
+          const spaceCClient = createSavedObjectClientMock();
+          mockSoClient.asScopedToNamespace.mockImplementation((spaceId: string) =>
+            spaceId === 'space-c' ? spaceCClient : otherSpaceClient
+          );
+
+          await updateSharedRole({ listSpaces });
+
+          expect(atSpaces).toHaveBeenCalledTimes(1);
+          expect(atSpaces).toHaveBeenCalledWith(['*'], {
+            kibana: ['api:fleet-agent-policies-all', 'api:integrations-all'],
+          });
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(3);
+          expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
+          expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-c');
+        });
+
+        it('authorizes and fans out to the spaces the connector is in once the lock is held', async () => {
+          const connectorIn = (namespaces: string[]) =>
+            ({
+              id: connectorId,
+              version: 'Wz-cc-version',
+              namespaces,
+              attributes: {
+                name: 'Test',
+                namespace: '*',
+                cloudProvider: 'aws',
+                vars: { role_arn: { type: 'text', value: oldArn } },
+                created_at: '2026-01-01T00:00:00Z',
+                updated_at: '2026-01-01T00:00:00Z',
+              },
+            } as SavedObject);
+          mockSoClient.get
+            .mockResolvedValueOnce(connectorIn(['default']))
+            .mockResolvedValueOnce(connectorIn(['default', 'space-b']));
+
+          await updateSharedRole();
+
+          expect(atSpaces).toHaveBeenCalledWith(['default', 'space-b'], {
+            kibana: ['api:fleet-agent-policies-all', 'api:integrations-all'],
+          });
+          expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(2);
+        });
+
+        it('does not authorize other spaces when the connector lives in only the current one', async () => {
+          shareConnector(['default']);
+
+          await updateSharedRole();
+
+          expect(mockAppContextService.getSecurity).not.toHaveBeenCalled();
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(1);
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledWith(
+            expect.objectContaining({ soClient: mockSoClient })
+          );
+        });
+      });
+
+      it('resets verification fields when role_arn changes', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({ verification_status: 'pending' }),
+          { version: 'Wz-cc-version' }
+        );
+        const [, , attributes] = mockSoClient.update.mock.calls[0];
+        expect(attributes).not.toHaveProperty('verification_started_at');
+        expect(attributes).not.toHaveProperty('verification_failed_at');
+      });
+
+      // `external_id` is a Fleet secret reference that only lives on the connector; nothing
+      // re-derives it. Role ARN edits merge server-side so a role-only payload cannot orphan it.
+      describe('vars replacement', () => {
+        const externalId = {
+          type: 'password' as const,
+          value: { id: 'EXTERNALID1234567890', isSecretRef: true },
+        };
+
+        beforeEach(() => {
+          mockSoClient.get.mockResolvedValue({
+            id: connectorId,
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn }, external_id: externalId },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+        });
+
+        it('keeps external_id when the caller sends the merged vars', async () => {
+          await service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn }, external_id: externalId } },
+            { esClient: mockEsClient }
+          );
+
+          expect(mockSoClient.update).toHaveBeenCalledWith(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId,
+            expect.objectContaining({
+              vars: { role_arn: { type: 'text', value: newArn }, external_id: externalId },
+            })
+          );
+        });
+
+        it('merges a role-only payload when the ARN is unchanged so external_id is preserved', async () => {
+          await service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: oldArn } } },
+            { esClient: mockEsClient }
+          );
+
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+          expect(mockSoClient.update).toHaveBeenCalledWith(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId,
+            expect.objectContaining({
+              vars: { role_arn: { type: 'text', value: oldArn }, external_id: externalId },
+            })
+          );
+        });
+
+        it('merges existing vars on a role-only update so external_id is preserved', async () => {
+          // A partial `{ vars: { role_arn } }` must not orphan the Fleet secret behind external_id.
+          await service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          );
+
+          expect(mockSoClient.update).toHaveBeenCalledWith(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId,
+            expect.objectContaining({
+              vars: { role_arn: { type: 'text', value: newArn }, external_id: externalId },
+            })
+          );
+        });
+      });
+
+      it('reverts policies when the connector write fails after successful fan-out', async () => {
+        const rollback = { policyCount: 1, revert: jest.fn().mockResolvedValue(undefined) };
+        propagateRoleArnToPackagePoliciesMock.mockResolvedValueOnce(rollback);
+        mockSoClient.update.mockRejectedValueOnce(new Error('write-failed'));
+
+        await expect(
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          )
+        ).rejects.toThrow('write-failed');
+
+        expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(1);
+        expect(rollback.revert).toHaveBeenCalledTimes(1);
+      });
+
+      it('surfaces updateFailed/revertFailed when post-write rollback itself fails', async () => {
+        const rollbackError = new CloudConnectorRoleArnPropagationError(
+          'Failed to update role ARN on 1 package policy',
+          { updateFailed: [], revertFailed: ['policy-stuck'], bumpFailed: false }
+        );
+        const rollback = { policyCount: 1, revert: jest.fn().mockRejectedValue(rollbackError) };
+        propagateRoleArnToPackagePoliciesMock.mockResolvedValueOnce(rollback);
+        mockSoClient.update.mockRejectedValueOnce(new Error('write-failed'));
+
+        const caught = await service
+          .update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          )
+          .then(
+            () => new Error('Expected the update to reject'),
+            (err: Error) => err
+          );
+
+        expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+        const propagationError = caught as CloudConnectorRoleArnPropagationError;
+        expect(propagationError.detail).toEqual({
+          updateFailed: [],
+          revertFailed: ['policy-stuck'],
+          bumpFailed: false,
+        });
+        expect(propagationError.message).toMatch(/write-failed/i);
+        expect(propagationError.message).toMatch(
+          /policy-stuck|Failed to update role ARN|roll back/i
+        );
+      });
+
+      it('throws when a role ARN change is requested without an esClient', async () => {
+        await expect(
+          service.update(mockSoClient, connectorId, {
+            vars: { role_arn: { type: 'text', value: newArn } },
+          })
+        ).rejects.toThrow(/missing esClient/i);
+      });
+
+      it('rejects an invalid ARN before any fan-out', async () => {
+        await expect(
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: 'not-an-arn' } } },
+            { esClient: mockEsClient }
+          )
+        ).rejects.toThrow(/valid IAM role ARN/);
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+      });
     });
 
     it('should throw error when cloud connector not found', async () => {

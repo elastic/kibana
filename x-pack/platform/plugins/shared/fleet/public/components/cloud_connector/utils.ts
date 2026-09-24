@@ -20,6 +20,7 @@ import {
   getIacTemplateUrlFromVarGroupSelection,
   getAwsConsoleHostFromArn,
   isCloudFormationStackArn,
+  isIamRoleArn,
   parseAwsRegionFromArn,
 } from '../../../common/services/cloud_connectors';
 
@@ -653,6 +654,39 @@ export const isStackArnInvalid = (stackArn: string | undefined): boolean => {
   const trimmed = stackArn?.trim() ?? '';
   return trimmed !== '' && !isCloudFormationStackArn(trimmed);
 };
+
+export const INVALID_IAM_ROLE_ARN_MESSAGE = i18n.translate(
+  'xpack.fleet.cloudConnector.aws.roleArnInvalid',
+  {
+    defaultMessage: 'Enter an IAM role ARN, for example arn:aws:iam::123456789012:role/MyRole',
+  }
+);
+
+/**
+ * True for a non-empty value that is not a valid IAM role ARN. Whitespace is ignored so a pasted
+ * value is judged as it will be saved. Matches the server-side connector API validation.
+ */
+export const isIamRoleArnInvalid = (roleArn: string | undefined): boolean => {
+  const trimmed = roleArn?.trim() ?? '';
+  return trimmed !== '' && !isIamRoleArn(trimmed);
+};
+
+export const CLEARED_IAM_ROLE_ARN_MESSAGE = i18n.translate(
+  'xpack.fleet.cloudConnector.aws.roleArnCleared',
+  {
+    defaultMessage: 'Role ARN is required. Re-enter the current ARN to leave the role unchanged.',
+  }
+);
+
+/**
+ * True when an identity that has a role ARN has had the field emptied. The API cannot remove a
+ * role from an identity, so an empty field is an edit that cannot be saved rather than a no-op —
+ * without this the clear is silently discarded.
+ */
+export const isIamRoleArnCleared = (
+  roleArn: string | undefined,
+  storedRoleArn: string | undefined
+): boolean => (storedRoleArn?.trim() ?? '') !== '' && (roleArn?.trim() ?? '') === '';
 
 /** Read-only link to the deployed stack; needs no render. */
 export const getAwsStackConsoleUrl = (deploymentId: string | undefined): string | undefined => {

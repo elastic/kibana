@@ -1,0 +1,47 @@
+format_version: 3.0.0
+name: cloud_connector_test_aws
+title: 'Cloud Connector Test (AWS)'
+version: 0.1.0
+description: 'Test fixture package exposing a role_arn variable at input and stream level, used by the cloud connector role ARN fan-out tests'
+type: integration
+categories:
+  - custom
+conditions:
+  kibana:
+    version: '^9.0.0'
+  elastic:
+    subscription: 'basic'
+icons:
+  - src: /img/logo.svg
+    title: Sample logo
+    size: 32x32
+    type: image/svg+xml
+# Top-level package vars: this is the shape the real `aws` integration uses — a single shared
+# `role_arn` referenced by every input/stream via handlebars. The fan-out has to rewrite here.
+vars:
+  - name: role_arn
+    type: text
+    title: Role ARN
+    multi: false
+    required: true
+    show_user: true
+    description: The AWS IAM role ARN assumed by every integration in this policy
+policy_templates:
+  - name: aws
+    title: AWS role ARN test
+    description: Minimal test template carrying a role_arn variable
+    inputs:
+      - type: aws/metrics
+        title: Collect test AWS metrics
+        description: Test input carrying a role_arn variable
+        vars:
+          - name: role_arn
+            type: text
+            title: Role ARN
+            multi: false
+            required: true
+            show_user: true
+            description: The AWS IAM role ARN assumed by this integration
+owner:
+  github: elastic/fleet
+  type: elastic

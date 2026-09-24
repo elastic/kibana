@@ -360,6 +360,14 @@ export const GetCloudConnectorUsageResponseSchema = schema.object({
   total: schema.number(),
   page: schema.number(),
   perPage: schema.number(),
+  sharedWithOtherSpaces: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether the cloud connector is shared with other spaces. When true, `total` counts only the package policies in the current space.',
+      },
+    })
+  ),
 });
 
 export const VerifyCloudConnectorIacKeyRequestSchema = {

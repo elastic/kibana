@@ -184,6 +184,19 @@ export class CloudConnectorUpdateError extends FleetError {
   }
 }
 
+export interface CloudConnectorRoleArnPropagationDetail {
+  updateFailed: string[];
+  revertFailed: string[];
+  /** True when the deferred agent-policy revision bump failed after a revert. */
+  bumpFailed: boolean;
+}
+
+export class CloudConnectorRoleArnPropagationError extends FleetError {
+  constructor(message: string, public readonly detail: CloudConnectorRoleArnPropagationDetail) {
+    super(message);
+  }
+}
+
 export class IacProvisionerConfigError extends FleetError {
   constructor(message: string) {
     super(`Error validating IaC Provisioner configuration in Fleet, ${message}`);

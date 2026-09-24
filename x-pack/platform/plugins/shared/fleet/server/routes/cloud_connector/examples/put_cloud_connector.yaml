@@ -46,3 +46,41 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
+  409:
+    description: 'Conflict'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'The connector changed while the Role ARN fan-out was in progress'
+            value:
+              statusCode: 409
+              error: 'Conflict'
+              message: 'Saved object [fleet-cloud-connector/cloud-connector-id-1] conflict'
+  403:
+    description: 'Forbidden'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Role ARN fan-out requires integration-policy write permission'
+            value:
+              statusCode: 403
+              error: 'Forbidden'
+              message: 'Role ARN updates require permission to write integration policies.'
+  500:
+    description: 'Role ARN fan-out failed'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Package policies could not be updated to the new role ARN'
+            value:
+              statusCode: 500
+              error: 'Internal Server Error'
+              message: 'Failed to update role ARN on 1 package policy (ids: policy-1).'
+              attributes:
+                updateFailed:
+                  - policy-1
+                revertFailed: []
+                bumpFailed: false

@@ -29,6 +29,7 @@ import {
 import { useGetPackageInfoByKeyQuery, useIacProvisioner, useStartServices } from '../../../hooks';
 import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/cloud_connector';
 import { getAnyCloudConnectorIacTemplateUrl } from '../utils';
+import { ROLE_ARN_FIELD_TEST_SUBJECTS } from '../components/role_arn_field';
 
 import { CloudConnectorPoliciesFlyout } from '.';
 
@@ -642,6 +643,258 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
       const badge = container.querySelector('.euiBadge');
       expect(badge?.className).toMatch(/euiBadge-default/);
+    });
+  });
+
+  describe('Role ARN editing (AWS)', () => {
+    it('renders the RoleArnField for AWS connectors above the Deployment ID field', () => {
+      // The Deployment ID field only renders with the provisioner on, which is what makes the
+      // ordering assertion meaningful.
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      const roleArnInput = screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT);
+      const deploymentIdInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT
+      );
+
+      expect(roleArnInput.compareDocumentPosition(deploymentIdInput)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    });
+
+    it('warns that policies in other spaces change too when the identity is shared', () => {
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: {
+          items: mockUsageData,
+          total: mockUsageData.length,
+          page: 1,
+          perPage: 10,
+          sharedWithOtherSpaces: true,
+        },
+        isLoading: false,
+        error: null,
+      } as unknown as ReturnType<typeof useCloudConnectorUsage>);
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: 'arn:aws:iam::123456789012:role/NewRole' },
+      });
+
+      expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.CALLOUT).textContent).toMatch(
+        /in this space.*other spaces/
+      );
+    });
+
+    it('does not render RoleArnField for non-AWS connectors', () => {
+      renderFlyout({
+        provider: 'azure',
+        cloudConnectorVars: {
+          tenant_id: { value: { isSecretRef: true, id: 'x' } },
+          client_id: { value: { isSecretRef: true, id: 'y' } },
+          azure_credentials_cloud_connector_id: { value: 'sub-1' },
+        },
+      });
+
+      expect(screen.queryByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT)).not.toBeInTheDocument();
+    });
+
+    it('disables Save while the Role ARN is invalid', () => {
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: 'not-an-arn' },
+      });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      ).toBeDisabled();
+    });
+
+    it('disables Save when the Role ARN is cleared, even if another field changed', () => {
+      // The API cannot remove a role from an identity, so an empty field would be dropped from
+      // the payload and the clear would be saved as a silent no-op.
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      fireEvent.change(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT),
+        {
+          target: { value: 'New Name' },
+        }
+      );
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: '' },
+      });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      ).toBeDisabled();
+      expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.ERROR).textContent).toMatch(
+        /required/i
+      );
+    });
+
+    it('enables Save once the ARN is a valid new value', () => {
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: 'arn:aws:iam::123456789012:role/NewRole' },
+      });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      ).toBeEnabled();
+    });
+
+    it('sends the new ARN in vars.role_arn on Save', () => {
+      const mockMutate = jest.fn();
+      mockUseUpdateCloudConnector.mockReturnValue({
+        mutate: mockMutate,
+        isLoading: false,
+      } as unknown as ReturnType<typeof useUpdateCloudConnector>);
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: 'arn:aws:iam::123456789012:role/NewRole' },
+      });
+      fireEvent.click(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      );
+
+      expect(mockMutate).toHaveBeenCalledWith({
+        vars: {
+          role_arn: {
+            type: 'text',
+            value: 'arn:aws:iam::123456789012:role/NewRole',
+          },
+        },
+      });
+    });
+
+    it('sends only role_arn so a stale external_id cannot overwrite a rotated secret', () => {
+      // The server merges `{ role_arn }` onto the connector vars it reads at request time.
+      // Spreading the flyout's `external_id` would restore a secret reference from render time.
+      const mockMutate = jest.fn();
+      mockUseUpdateCloudConnector.mockReturnValue({
+        mutate: mockMutate,
+        isLoading: false,
+      } as unknown as ReturnType<typeof useUpdateCloudConnector>);
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Existing' },
+          external_id: {
+            type: 'password',
+            value: { isSecretRef: true, id: 'EXTERNALID1234567890' },
+          },
+        },
+      });
+
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: 'arn:aws:iam::123456789012:role/NewRole' },
+      });
+      fireEvent.click(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      );
+
+      expect(mockMutate).toHaveBeenCalledWith({
+        vars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/NewRole' },
+        },
+      });
+    });
+
+    const rerenderFlyout = (
+      rerender: (ui: React.ReactElement) => void,
+      cloudConnectorVars: React.ComponentProps<
+        typeof CloudConnectorPoliciesFlyout
+      >['cloudConnectorVars']
+    ) => {
+      rerender(
+        <I18nProvider>
+          <QueryClientProvider client={queryClient}>
+            <CloudConnectorPoliciesFlyout
+              {...defaultProps}
+              provider="aws"
+              cloudConnectorVars={cloudConnectorVars}
+            />
+          </QueryClientProvider>
+        </I18nProvider>
+      );
+    };
+
+    it('adopts a stored Role ARN that changes while the field is untouched', () => {
+      const { rerender } = renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      rerenderFlyout(rerender, {
+        role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Rotated' },
+      });
+
+      expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT)).toHaveValue(
+        'arn:aws:iam::123456789012:role/Rotated'
+      );
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      ).toBeDisabled();
+    });
+
+    it('keeps a Role ARN the user edited when the stored value changes', () => {
+      const { rerender } = renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: 'arn:aws:iam::123456789012:role/NewRole' },
+      });
+
+      rerenderFlyout(rerender, {
+        role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Rotated' },
+      });
+
+      expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT)).toHaveValue(
+        'arn:aws:iam::123456789012:role/NewRole'
+      );
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      ).toBeEnabled();
     });
   });
 

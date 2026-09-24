@@ -28,3 +28,7 @@ export {
   type IacKeyOutcomeOptions,
   type IacKeyVerification,
 } from './iac_key_verification';
+
+export { propagateRoleArnToPackagePolicies } from './role_arn_propagation';
+export type { RoleArnPropagationRollback } from './role_arn_propagation';
+export { rewritePolicyRoleArn } from './update_input_vars_with_role_arn';

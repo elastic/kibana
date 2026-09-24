@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  type AuthenticatedUser,
+  type ElasticsearchClient,
+  type KibanaRequest,
+  type Logger,
+} from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 
+import pRetry from 'p-retry';
+
+import { isIamRoleArn } from '../../common/services/cloud_connectors';
 import {
   CLOUD_CONNECTOR_IAC_REQUEST_KEYS,
   isCloudConnectorSecretReference,
@@ -17,6 +28,7 @@ import {
   type CloudConnectorSecretReference,
   type AwsCloudConnectorVars,
   type AzureCloudConnectorVars,
+  type CloudConnectorVars,
   type GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
@@ -45,14 +57,54 @@ import {
   CloudConnectorGetListError,
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
+  CloudConnectorRoleArnPropagationError,
+  FleetUnauthorizedError,
   rethrowIfInstanceOrWrap,
   getErrorMessage,
 } from '../errors';
 
+import { VERIFY_PERMISSIONS_TASK_ID } from '../tasks/agentless/verify_permissions_task_id';
+
 import { appContextService } from './app_context';
+import { propagateRoleArnToPackagePolicies } from './cloud_connectors';
+import {
+  authorizeSharedConnectorRoleArnSpaces,
+  isConnectorSharedAcrossSpaces,
+} from './cloud_connectors/role_arn_cross_space';
+import type { RoleArnPropagationRollback } from './cloud_connectors';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
+
+/** Attempts every rollback, even after one fails, and returns the errors of those that failed. */
+const revertEveryRollback = async (
+  rollbacks: RoleArnPropagationRollback[],
+  onRevertError: (revertError: unknown) => void
+): Promise<unknown[]> => {
+  const revertErrors: unknown[] = [];
+  for (const rollback of rollbacks) {
+    try {
+      await rollback.revert();
+    } catch (revertError) {
+      revertErrors.push(revertError);
+      onRevertError(revertError);
+    }
+  }
+  return revertErrors;
+};
+
+const collectRevertFailures = (
+  revertErrors: unknown[]
+): { revertFailed: string[]; bumpFailed: boolean } => {
+  const structured = revertErrors.filter(
+    (revertError): revertError is CloudConnectorRoleArnPropagationError =>
+      revertError instanceof CloudConnectorRoleArnPropagationError
+  );
+  return {
+    revertFailed: structured.flatMap((revertError) => revertError.detail.revertFailed),
+    bumpFailed: structured.some((revertError) => revertError.detail.bumpFailed),
+  };
+};
 
 export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
   Boolean(iac && CLOUD_CONNECTOR_IAC_REQUEST_KEYS.some((key) => iac[key] !== undefined));
@@ -103,7 +155,8 @@ export interface CloudConnectorServiceInterface {
   update(
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
-    cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>
+    cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>,
+    options?: { esClient?: ElasticsearchClient }
   ): Promise<CloudConnector>;
   delete(
     soClient: SavedObjectsClientContract,
@@ -127,6 +180,21 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
    */
   private static normalizeName(name: string): string {
     return name.trim().replace(/\s+/g, ' ');
+  }
+
+  /** Trims an AWS Role ARN, which is often pasted with surrounding whitespace. */
+  private static normalizeRoleArn(
+    cloudProvider: string,
+    vars: CloudConnectorVars
+  ): CloudConnectorVars {
+    if (cloudProvider !== 'aws' || !('role_arn' in vars)) {
+      return vars;
+    }
+    const { role_arn: roleArn } = vars;
+    if (typeof roleArn?.value !== 'string') {
+      return vars;
+    }
+    return { ...vars, role_arn: { ...roleArn, value: roleArn.value.trim() } };
   }
 
   /**
@@ -252,12 +320,21 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
   async create(
     soClient: SavedObjectsClientContract,
-    cloudConnector: CreateCloudConnectorRequest
+    cloudConnectorRequest: CreateCloudConnectorRequest
   ): Promise<CloudConnector> {
     const logger = this.getLogger('create');
 
     try {
       logger.info('Creating cloud connector');
+      const cloudConnector: CreateCloudConnectorRequest = {
+        ...cloudConnectorRequest,
+        vars:
+          cloudConnectorRequest.vars &&
+          CloudConnectorService.normalizeRoleArn(
+            cloudConnectorRequest.cloudProvider,
+            cloudConnectorRequest.vars
+          ),
+      };
       this.validateCloudConnectorDetails(cloudConnector);
 
       const { vars, cloudProvider } = cloudConnector;
@@ -409,10 +486,41 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     }
   }
 
+  /** Whether the connector is shared with spaces other than one, so a per-space count is partial. */
+  async isSharedWithOtherSpaces(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string
+  ): Promise<boolean> {
+    const { namespaces } = await soClient.get<CloudConnectorSOAttributes>(
+      CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+      cloudConnectorId
+    );
+    return isConnectorSharedAcrossSpaces(namespaces);
+  }
+
   async update(
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
-    cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>
+    cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>,
+    options?: {
+      esClient?: ElasticsearchClient;
+      user?: AuthenticatedUser;
+      /**
+       * Set by the HTTP handler from the caller's Fleet authz. Omitted by internal callers
+       * (package-policy create) that already passed integration-policy write. `false` blocks a
+       * Role ARN change; connector-only edits are unaffected.
+       */
+      canWriteIntegrationPolicies?: boolean;
+      /** Present on the HTTP path so a shared connector can be authorized in every space. */
+      request?: KibanaRequest;
+      /** Resolves concrete space ids when the connector is shared into all spaces. */
+      listSpaces?: () => Promise<Array<{ id: string }>>;
+      /**
+       * Set when a new package policy attaches to this connector: the stored Role ARN replaces the
+       * incoming one, so attaching never edits the identity or fans out.
+       */
+      keepStoredRoleArn?: boolean;
+    }
   ): Promise<CloudConnector> {
     const logger = this.getLogger('update');
 
@@ -425,11 +533,27 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         cloudConnectorId
       );
 
-      // Validate updates if vars are provided
-      if (cloudConnectorUpdate.vars) {
+      const isAws = existingCloudConnector.attributes.cloudProvider === 'aws';
+      const existingAwsVars = existingCloudConnector.attributes.vars as
+        | AwsCloudConnectorVars
+        | undefined;
+      const storedRoleArnVar = existingAwsVars?.role_arn;
+      const requestedVars =
+        cloudConnectorUpdate.vars &&
+        CloudConnectorService.normalizeRoleArn(
+          existingCloudConnector.attributes.cloudProvider,
+          cloudConnectorUpdate.vars
+        );
+      const incomingVars =
+        options?.keepStoredRoleArn && isAws && storedRoleArnVar && requestedVars
+          ? { ...requestedVars, role_arn: storedRoleArnVar }
+          : requestedVars;
+
+      // Validate the vars that will be written, after any stored Role ARN replaced the incoming one
+      if (incomingVars) {
         const tempCloudConnector = {
           name: cloudConnectorUpdate.name || existingCloudConnector.attributes.name,
-          vars: cloudConnectorUpdate.vars,
+          vars: incomingVars,
           cloudProvider: existingCloudConnector.attributes.cloudProvider,
         };
         this.validateCloudConnectorDetails(tempCloudConnector);
@@ -453,20 +577,296 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updateAttributes.accountType = cloudConnectorUpdate.accountType;
       }
 
-      if (cloudConnectorUpdate.vars) {
-        updateAttributes.vars = cloudConnectorUpdate.vars;
-      }
-
       Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
 
-      // Update the saved object
-      const updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(
-        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        cloudConnectorId,
-        updateAttributes
-      );
+      const incomingAwsVars = incomingVars as AwsCloudConnectorVars | undefined;
+      const oldRoleArn = existingAwsVars?.role_arn?.value;
+      const newRoleArn = incomingAwsVars?.role_arn?.value;
+      const roleArnChanged = isAws && typeof newRoleArn === 'string' && newRoleArn !== oldRoleArn;
+      const esClient = options?.esClient;
+      const user = options?.user;
+
+      if (roleArnChanged && options?.canWriteIntegrationPolicies === false) {
+        throw new FleetUnauthorizedError(
+          'Role ARN updates require permission to write integration policies.'
+        );
+      }
+
+      // Role ARN edits (API or flyout) may send only `{ role_arn }`, including a retry that
+      // does not change the value. A wholesale replace would orphan `external_id`'s Fleet
+      // secret and break later auth. Merge those role-only payloads; other vars updates stay
+      // a full replace (package-policy create/update depends on that contract).
+      const incomingVarKeys = incomingAwsVars ? Object.keys(incomingAwsVars) : [];
+      const isRoleOnlyPayload =
+        isAws &&
+        typeof newRoleArn === 'string' &&
+        incomingVarKeys.length > 0 &&
+        incomingVarKeys.every((key) => key === 'role_arn');
+      const mergeIncomingVars = (storedVars: CloudConnectorSOAttributes['vars'] | undefined) =>
+        isRoleOnlyPayload && storedVars ? { ...storedVars, ...incomingVars } : incomingVars;
+      if (incomingVars) {
+        updateAttributes.vars = mergeIncomingVars(existingCloudConnector.attributes.vars);
+      }
+
+      let roleArnRollback: RoleArnPropagationRollback | undefined;
+      let connectorVersion = existingCloudConnector.version;
+      if (roleArnChanged) {
+        if (!esClient) {
+          logger.error(
+            `Role ARN change requested for connector ${cloudConnectorId} but no esClient was provided; cannot fan out.`
+          );
+          throw new CloudConnectorCreateError(
+            'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
+          );
+        }
+      }
+
+      async function fanOutRoleArnChange(
+        targetRoleArn: string,
+        sharedNamespaces: string[] | undefined
+      ) {
+        if (!esClient) {
+          throw new CloudConnectorCreateError(
+            'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
+          );
+        }
+        if (isConnectorSharedAcrossSpaces(sharedNamespaces)) {
+          const currentSpaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+          const spaceIds = await authorizeSharedConnectorRoleArnSpaces({
+            currentSpaceId,
+            namespaces: sharedNamespaces,
+            request: options?.request,
+            listSpaces: options?.listSpaces,
+          });
+          const rollbacks: RoleArnPropagationRollback[] = [];
+          try {
+            for (const spaceId of spaceIds) {
+              const spaceClient =
+                spaceId === currentSpaceId ? soClient : soClient.asScopedToNamespace(spaceId);
+              const rollback = await propagateRoleArnToPackagePolicies({
+                soClient: spaceClient,
+                esClient,
+                connectorId: cloudConnectorId,
+                newRoleArn: targetRoleArn,
+                user,
+              });
+              if (rollback) {
+                rollbacks.push(rollback);
+              }
+            }
+          } catch (fanOutError) {
+            const revertErrors = await revertEveryRollback(rollbacks, (revertError) =>
+              logger.error(
+                `Failed to revert a Role ARN fan-out for connector ${cloudConnectorId} after a later space failed: ${getErrorMessage(
+                  revertError
+                )}`
+              )
+            );
+            if (revertErrors.length > 0) {
+              const fanOutDetail =
+                fanOutError instanceof CloudConnectorRoleArnPropagationError
+                  ? fanOutError.detail
+                  : undefined;
+              const earlierSpaces = collectRevertFailures(revertErrors);
+              const fanOutMessage =
+                fanOutError instanceof Error ? fanOutError.message : String(fanOutError);
+              throw new CloudConnectorRoleArnPropagationError(
+                `Role ARN fan-out failed (${fanOutMessage}) and reverting an earlier space also failed`,
+                {
+                  updateFailed: fanOutDetail?.updateFailed ?? [],
+                  revertFailed: [
+                    ...(fanOutDetail?.revertFailed ?? []),
+                    ...earlierSpaces.revertFailed,
+                  ],
+                  bumpFailed: Boolean(fanOutDetail?.bumpFailed) || earlierSpaces.bumpFailed,
+                }
+              );
+            }
+            throw fanOutError;
+          }
+          if (rollbacks.length > 0) {
+            roleArnRollback = {
+              policyCount: rollbacks.reduce((count, rollback) => count + rollback.policyCount, 0),
+              async revert() {
+                const revertErrors = await revertEveryRollback(rollbacks, (revertError) =>
+                  logger.error(
+                    `Failed to revert a Role ARN fan-out in one space for connector ${cloudConnectorId}: ${getErrorMessage(
+                      revertError
+                    )}`
+                  )
+                );
+                if (revertErrors.length > 0) {
+                  throw new CloudConnectorRoleArnPropagationError(
+                    `Reverting the Role ARN failed in ${revertErrors.length} of ${rollbacks.length} spaces`,
+                    { updateFailed: [], ...collectRevertFailures(revertErrors) }
+                  );
+                }
+              },
+            };
+          }
+        } else {
+          roleArnRollback = await propagateRoleArnToPackagePolicies({
+            soClient,
+            esClient,
+            connectorId: cloudConnectorId,
+            newRoleArn: targetRoleArn,
+            user,
+          });
+        }
+        // The verifier treats a connector updated in the last few minutes as due, so the
+        // previous verification timestamps can stay until it stamps new ones.
+        updateAttributes.verification_status = 'pending';
+      }
+
+      async function commitConnectorUpdate() {
+        try {
+          // OCC: the fan-out can take long enough for a concurrent connector edit to land. Without
+          // the version from the opening get(), that edit is silently overwritten — and we would
+          // keep the policies on the new ARN while another writer already changed the connector.
+          return connectorVersion !== undefined
+            ? await soClient.update<CloudConnectorSOAttributes>(
+                CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                cloudConnectorId,
+                updateAttributes,
+                { version: connectorVersion }
+              )
+            : await soClient.update<CloudConnectorSOAttributes>(
+                CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                cloudConnectorId,
+                updateAttributes
+              );
+        } catch (writeError) {
+          // A concurrent request that already committed this same ARN has no rollback plan of its
+          // own (its fan-out was a no-op). Reverting ours would put policies back on the old ARN
+          // while the connector stays on the new one.
+          let skipRoleArnRevert = false;
+          if (roleArnRollback && SavedObjectsErrorHelpers.isConflictError(writeError)) {
+            try {
+              const current = await soClient.get<CloudConnectorSOAttributes>(
+                CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                cloudConnectorId
+              );
+              const committedRoleArn = (
+                current.attributes.vars as AwsCloudConnectorVars | undefined
+              )?.role_arn?.value;
+              if (committedRoleArn === newRoleArn) {
+                skipRoleArnRevert = true;
+                logger.warn(
+                  `Connector ${cloudConnectorId} write conflicted, but the stored role ARN is already the requested value; leaving the fan-out in place.`
+                );
+              }
+            } catch (readError) {
+              logger.error(
+                `Could not re-read connector ${cloudConnectorId} after a version conflict; reverting the role ARN fan-out.`,
+                readError
+              );
+            }
+          }
+          if (roleArnRollback && !skipRoleArnRevert) {
+            logger.error(
+              `Connector ${cloudConnectorId} write failed after successful role ARN fan-out; reverting policies.`,
+              writeError
+            );
+            try {
+              await roleArnRollback.revert();
+            } catch (revertError) {
+              logger.error(
+                `Revert after failed connector write also failed for ${cloudConnectorId}`,
+                revertError
+              );
+              // Prefer the structured policy-id lists over the bare SO write error — without
+              // them operators cannot tell which policies are still on the new ARN.
+              if (revertError instanceof CloudConnectorRoleArnPropagationError) {
+                const writeMessage =
+                  writeError instanceof Error ? writeError.message : String(writeError);
+                throw new CloudConnectorRoleArnPropagationError(
+                  `Cloud connector write failed (${writeMessage}); role ARN rollback also failed: ${revertError.message}`,
+                  revertError.detail
+                );
+              }
+            }
+          }
+          throw writeError;
+        }
+      }
+
+      // Only a role-only payload is rebuilt from the connector read under the lock. Anything else
+      // in this update was prepared from the opening read and must not overwrite a newer edit.
+      const changesOnlyRoleArn =
+        isRoleOnlyPayload &&
+        Object.keys(updateAttributes).every((key) => key === 'updated_at' || key === 'vars');
+
+      const updatedSavedObject = roleArnChanged
+        ? await pRetry(
+            () =>
+              appContextService
+                .getLockManagerService()!
+                .withLock(`fleet-cloud-connector-role-arn-${cloudConnectorId}`, async () => {
+                  const locked = await soClient.get<CloudConnectorSOAttributes>(
+                    CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                    cloudConnectorId
+                  );
+                  // Another request may have rotated `external_id` or shared the connector into
+                  // another space since the opening read; the write and the fan-out follow the
+                  // connector as it is now.
+                  if (locked.version !== existingCloudConnector.version) {
+                    if (!changesOnlyRoleArn) {
+                      throw SavedObjectsErrorHelpers.createConflictError(
+                        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                        cloudConnectorId
+                      );
+                    }
+                    connectorVersion = locked.version ?? connectorVersion;
+                  }
+                  if (incomingVars) {
+                    updateAttributes.vars = mergeIncomingVars(locked.attributes.vars);
+                  }
+                  const lockedRoleArn = (
+                    locked.attributes.vars as AwsCloudConnectorVars | undefined
+                  )?.role_arn?.value;
+                  if (lockedRoleArn !== newRoleArn) {
+                    await fanOutRoleArnChange(newRoleArn, locked.namespaces);
+                  } else {
+                    logger.info(
+                      `Connector ${cloudConnectorId} already stores the requested Role ARN; leaving its policies unchanged.`
+                    );
+                  }
+                  return commitConnectorUpdate();
+                }),
+            {
+              onFailedAttempt: (error) => {
+                if (!(error instanceof LockAcquisitionError)) {
+                  throw error;
+                }
+              },
+              minTimeout: 100,
+              factor: 2,
+              maxTimeout: 2_000,
+              retries: 100,
+              maxRetryTime: 60_000,
+            }
+          )
+        : await commitConnectorUpdate();
 
       logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
+
+      // The verifier runs every 12h, so without this a new Role ARN could stay unverified for
+      // that long. Best effort: the connector is already saved as pending either way.
+      if (
+        updateAttributes.verification_status === 'pending' &&
+        appContextService.getExperimentalFeatures()?.enableOTelVerifier
+      ) {
+        appContextService
+          .getTaskManagerStart()
+          ?.runSoon(VERIFY_PERMISSIONS_TASK_ID)
+          .catch((runSoonError) =>
+            logger.debug(
+              `Could not run the permission verifier soon after updating connector ${cloudConnectorId}: ${getErrorMessage(
+                runSoonError
+              )}`
+            )
+          );
+      }
 
       const packagePolicyCount = await this.getPackagePolicyCount(soClient, cloudConnectorId);
 
@@ -483,6 +883,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       };
     } catch (error) {
       logger.error(`Failed to update cloud connector: ${getErrorMessage(error)}`);
+      if (
+        error instanceof CloudConnectorRoleArnPropagationError ||
+        error instanceof FleetUnauthorizedError ||
+        SavedObjectsErrorHelpers.isConflictError(error)
+      ) {
+        // Keep the saved-object conflict intact so the route can return 409. Wrapping it as a
+        // generic update error makes a retryable OCC race look like a validation failure.
+        throw error;
+      }
       rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to update cloud connector');
     }
   }
@@ -580,6 +989,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (!roleArn) {
         logger.error('Package policy must contain role_arn variable');
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
+      }
+      if (typeof roleArn !== 'string' || !isIamRoleArn(roleArn)) {
+        logger.error('role_arn variable is not a valid IAM role ARN');
+        throw new CloudConnectorInvalidVarsError(
+          'role_arn must be a valid IAM role ARN (arn:<partition>:iam::<account>:role/<name>)'
+        );
       }
 
       // external_id is optional for AWS. When present, it must be a valid

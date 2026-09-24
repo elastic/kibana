@@ -179,6 +179,7 @@ import {
 } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService, cloudConnectorService } from '.';
+import { rewritePolicyRoleArn } from './cloud_connectors/update_input_vars_with_role_arn';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
@@ -342,6 +343,22 @@ export async function getCompiledVersionsForAgentPolicy(
 }
 
 /**
+ * Narrows a stored package policy to the payload `packagePolicyService.update` expects when a
+ * caller only means to change part of it: the update replaces what it is given, and `package` is
+ * what the package info the inputs are validated and compiled against is resolved from.
+ */
+export function toPackagePolicyUpdate(packagePolicy: PackagePolicy): UpdatePackagePolicy {
+  return {
+    name: packagePolicy.name,
+    enabled: packagePolicy.enabled,
+    policy_ids: packagePolicy.policy_ids,
+    inputs: packagePolicy.inputs,
+    vars: packagePolicy.vars,
+    ...(packagePolicy.package ? { package: packagePolicy.package } : {}),
+  };
+}
+
+/**
  * Returns a kuery string that excludes package policies with latest_revision:false,
  * optionally AND-ing with an additional kuery clause.
  */
@@ -385,7 +402,6 @@ export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: str
  * @todo Remove hardcoded checks for `aws.role_arn` and `aws.credentials.external_id`
  *       and implement the generic Package Spec solution once approved.
  */
-
 const extractPackagePolicyVars = (
   cloudProvider: CloudProvider,
   packagePolicy: NewPackagePolicy,
@@ -715,6 +731,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ) {
         const cloudConnector = await this.createCloudConnectorForPackagePolicy(
           soClient,
+          esClient,
           enrichedPackagePolicy,
           agentPolicies[0],
           pkgInfo
@@ -3264,13 +3281,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     if (packagePolicies.length > 0) {
       const getPackagePolicyUpdate = (packagePolicy: PackagePolicy) => ({
-        name: packagePolicy.name,
-        enabled: packagePolicy.enabled,
-        policy_ids: packagePolicy.policy_ids,
-        inputs: packagePolicy.inputs,
-        vars: packagePolicy.vars,
+        ...toPackagePolicyUpdate(packagePolicy),
         output_id: packagePolicy.output_id === outputId ? null : packagePolicy.output_id,
-        package: packagePolicy.package,
       });
 
       // Validate that the new cleared/default output is valid for the package policies
@@ -3639,6 +3651,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async createCloudConnectorForPackagePolicy(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     enrichedPackagePolicy: NewPackagePolicy,
     agentPolicy: AgentPolicy,
     packageInfo: PackageInfo
@@ -3661,16 +3674,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
       if (enrichedPackagePolicy?.cloud_connector_id) {
-        // Update the existing cloud connector with new vars
         logger.info(`Updating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
+          // Attaching a new integration to an existing identity must not change that identity's
+          // Role ARN, so the connector keeps its own and the new policy takes it from there.
           const cloudConnector = await cloudConnectorService.update(
             soClient,
             enrichedPackagePolicy.cloud_connector_id,
             {
               vars: cloudConnectorVars,
-            }
+            },
+            { esClient, keepStoredRoleArn: true }
           );
+          const attachedRoleArn = (cloudConnector.vars as AwsCloudConnectorVars | undefined)
+            ?.role_arn?.value;
+          if (cloudProvider === 'aws' && typeof attachedRoleArn === 'string' && attachedRoleArn) {
+            const rewritten = rewritePolicyRoleArn(enrichedPackagePolicy, attachedRoleArn);
+            enrichedPackagePolicy.vars = rewritten.vars;
+            enrichedPackagePolicy.inputs = rewritten.inputs;
+          }
           logger.info(`Successfully updated cloud connector: ${cloudConnector.id}`);
           return cloudConnector;
         } catch (e) {

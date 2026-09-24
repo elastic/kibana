@@ -29,6 +29,8 @@ export interface CloudConnectorUsageResponse {
   total: number;
   page: number;
   perPage: number;
+  /** True when the connector is shared with other spaces, whose policies `total` does not count. */
+  sharedWithOtherSpaces?: boolean;
 }
 
 const fetchCloudConnectorUsage = async (
