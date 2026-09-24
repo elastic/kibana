@@ -174,12 +174,13 @@ const renderPage = (initialEntry: string) => {
 };
 
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
-const dismissMutate = jest.fn();
+const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 
 beforeEach(() => {
   approveMutateAsync.mockResolvedValue(undefined);
+  dismissMutateAsync.mockResolvedValue(undefined);
   mockUseApproveProposal.mockReturnValue({ mutateAsync: approveMutateAsync });
-  mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate });
+  mockUseDismissProposal.mockReturnValue({ mutateAsync: dismissMutateAsync });
   mockOpenCount(0);
 });
 
@@ -394,10 +395,10 @@ describe('ConversationsPage decisions', () => {
     fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Not worth chasing.' } });
     fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
 
-    expect(dismissMutate).toHaveBeenCalledWith(
-      { id: 'prop-1', body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(dismissMutateAsync).toHaveBeenCalledWith({
+      id: 'prop-1',
+      body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' },
+    });
   });
 
   it('dismisses with the reason the analyst chose rather than a default', () => {
@@ -416,13 +417,10 @@ describe('ConversationsPage decisions', () => {
     fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Handled out of band.' } });
     fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
 
-    expect(dismissMutate).toHaveBeenCalledWith(
-      {
-        id: 'prop-1',
-        body: { dismissReason: 'already_handled', rationale: 'Handled out of band.' },
-      },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(dismissMutateAsync).toHaveBeenCalledWith({
+      id: 'prop-1',
+      body: { dismissReason: 'already_handled', rationale: 'Handled out of band.' },
+    });
   });
 
   it('hides the actions menu trigger for a decided proposal when escalation is not available', () => {

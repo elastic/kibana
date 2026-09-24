@@ -44,7 +44,7 @@ const mockUseCurrentUserProfile = useCurrentUserProfile as jest.MockedFunction<
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
-const dismissMutate = jest.fn();
+const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 const addDanger = jest.fn();
 
 const mockProposal: ProposalWithMetadata = {
@@ -84,12 +84,13 @@ describe('ProposedActionsSlot', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     approveMutateAsync.mockResolvedValue(undefined);
+    dismissMutateAsync.mockResolvedValue(undefined);
     mockUseApproveProposal.mockReturnValue({
       mutateAsync: approveMutateAsync,
     } as unknown as ReturnType<typeof useApproveProposal>);
-    mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate } as unknown as ReturnType<
-      typeof useDismissProposal
-    >);
+    mockUseDismissProposal.mockReturnValue({
+      mutateAsync: dismissMutateAsync,
+    } as unknown as ReturnType<typeof useDismissProposal>);
     mockUseCurrentUserProfile.mockReturnValue({
       data: null,
     } as unknown as ReturnType<typeof useCurrentUserProfile>);
@@ -195,6 +196,6 @@ describe('ProposedActionsSlot', () => {
     );
 
     expect(screen.getByText('Close the investigation?')).toBeInTheDocument();
-    expect(dismissMutate).not.toHaveBeenCalled();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 });

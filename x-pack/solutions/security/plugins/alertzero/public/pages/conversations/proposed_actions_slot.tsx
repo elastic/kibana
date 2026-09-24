@@ -97,12 +97,18 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
         <DismissProposalModal
           proposalId={dismissingProposalId}
           onClose={closeDismissModal}
-          onConfirm={({ dismissReason, rationale }) =>
-            dismiss.mutate(
-              { id: dismissingProposalId, body: { dismissReason, rationale } },
-              { onSuccess: closeDismissModal, onError: onDecisionError }
-            )
-          }
+          onConfirm={async ({ dismissReason, rationale }) => {
+            try {
+              await dismiss.mutateAsync({
+                id: dismissingProposalId,
+                body: { dismissReason, rationale },
+              });
+              closeDismissModal();
+            } catch (err) {
+              onDecisionError(err);
+              throw err;
+            }
+          }}
         />
       )}
     </>

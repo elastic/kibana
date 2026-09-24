@@ -165,18 +165,16 @@ export const ConversationsPage: React.FC = () => {
       <DismissProposalModal
         proposalId={recordId}
         onClose={onClose}
-        onConfirm={({ dismissReason, rationale }) =>
-          dismiss.mutate(
-            { id: recordId, body: { dismissReason, rationale } },
-            {
-              onSuccess: () => {
-                void dropDecided(recordId);
-                onClose();
-              },
-              onError: onDecisionError,
-            }
-          )
-        }
+        onConfirm={async ({ dismissReason, rationale }) => {
+          try {
+            await dismiss.mutateAsync({ id: recordId, body: { dismissReason, rationale } });
+            void dropDecided(recordId);
+            onClose();
+          } catch (err) {
+            onDecisionError(err);
+            throw err;
+          }
+        }}
       />
     ),
     [dismiss, dropDecided, onDecisionError]
