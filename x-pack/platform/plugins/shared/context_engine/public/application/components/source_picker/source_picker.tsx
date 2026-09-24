@@ -24,11 +24,10 @@ import { createIndexEsqlQuery } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
 import { ConnectorsTab } from './connectors_tab';
-import { EsqlTab } from './esql_tab';
-import { IndexTab } from './index_tab';
+import { ElasticsearchSourcesTab } from './elasticsearch_sources_tab';
 import type { SelectedSource } from './types';
 
-type TabId = 'index' | 'esql' | 'connectors';
+type TabId = 'esql' | 'connectors';
 
 interface SourcePickerProps {
   selectedSources: SelectedSource[];
@@ -36,7 +35,7 @@ interface SourcePickerProps {
 }
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
-  const [selectedTab, setSelectedTab] = useState<TabId>('index');
+  const [selectedTab, setSelectedTab] = useState<TabId>('esql');
 
   const hasSelectedConnectorSources = useMemo(
     () => selectedSources.some((source) => source.type === 'connector'),
@@ -102,25 +101,9 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     <div data-test-subj="contextSourcePicker">
       <EuiTabs data-test-subj="contextSourcePickerTabs">
         <EuiTab
-          isSelected={selectedTab === 'index'}
-          onClick={() => setSelectedTab('index')}
-          prepend={<EuiIcon type="indexOpen" aria-hidden={true} />}
-          append={
-            selectedEsqlCount > 0 ? (
-              <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
-            ) : undefined
-          }
-          data-test-subj="contextSourcePickerTab-index"
-        >
-          <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.tabs.index"
-            defaultMessage="Index"
-          />
-        </EuiTab>
-        <EuiTab
           isSelected={selectedTab === 'esql'}
           onClick={() => setSelectedTab('esql')}
-          prepend={<EuiIcon type="commandLine" aria-hidden={true} />}
+          prepend={<EuiIcon type="indexOpen" aria-hidden={true} />}
           append={
             selectedEsqlCount > 0 ? (
               <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
@@ -133,8 +116,8 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           })}
         >
           <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.tabs.advanced"
-            defaultMessage="Advanced"
+            id="xpack.contextEngine.sourcePicker.tabs.elasticsearch"
+            defaultMessage="Elasticsearch data"
           />
         </EuiTab>
         <EuiTab
@@ -161,10 +144,13 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
       <EuiSpacer size="m" />
 
-      {selectedTab === 'index' && (
-        <IndexTab enabled={selectedTab === 'index'} onAdd={addIndexSource} />
+      {selectedTab === 'esql' && (
+        <ElasticsearchSourcesTab
+          enabled={selectedTab === 'esql'}
+          onAddIndex={addIndexSource}
+          onAddEsql={addEsqlSource}
+        />
       )}
-      {selectedTab === 'esql' && <EsqlTab onAdd={addEsqlSource} />}
       {selectedTab === 'connectors' && (
         <ConnectorsTab
           connectors={connectors}

@@ -100,13 +100,13 @@ const renderWithProviders = (ui: React.ReactElement, services = createServices()
   };
 };
 
-const openAdvancedTab = async () => {
-  fireEvent.click(screen.getByTestId('contextSourcePickerTab-esql'));
-  await screen.findByTestId('contextEsqlTab');
+const openAdvancedEsqlAccordion = async () => {
+  fireEvent.click(screen.getByTestId('contextAdvancedEsqlAccordionButton'));
+  await screen.findByTestId('mockEsqlEditor');
 };
 
 const addEsqlSource = async (query: string) => {
-  await openAdvancedTab();
+  await openAdvancedEsqlAccordion();
   fireEvent.change(screen.getByTestId('mockEsqlEditor'), { target: { value: query } });
   fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 };
@@ -122,7 +122,6 @@ const selectIndexSource = async (indexName: string) => {
   fireEvent.focus(input);
   fireEvent.click(input);
   fireEvent.click(await screen.findByText(indexName));
-  fireEvent.click(screen.getByTestId('contextAddIndexSourceButton'));
 };
 
 describe('SourcePicker', () => {
@@ -136,14 +135,16 @@ describe('SourcePicker', () => {
     jest.clearAllMocks();
   });
 
-  it('selects the Index tab by default', () => {
+  it('selects the Elasticsearch data tab by default with index picker visible', () => {
     renderWithProviders(<Harness />);
 
-    expect(screen.getByTestId('contextIndexTab')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextEsqlTab')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchSourcesTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextIndexComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAdvancedEsqlAccordion')).toBeInTheDocument();
+    expect(screen.getByTestId('mockEsqlEditor')).not.toBeVisible();
   });
 
-  it('adds an index selection as an ES|QL source from the Index tab', async () => {
+  it('adds an index selection as an ES|QL source from the index picker', async () => {
     const { services } = renderWithProviders(<Harness />);
 
     await waitFor(() => expect(services.data.dataViews.getIndices).toHaveBeenCalled());
@@ -163,18 +164,30 @@ describe('SourcePicker', () => {
     expect(screen.getAllByTestId('contextSelectedSource-esql-0')).toHaveLength(1);
   });
 
-  it('shows an error prompt in the Index tab when the indices request fails', async () => {
+  it('adds a custom index pattern when created in the combo box', async () => {
+    renderWithProviders(<Harness />);
+
+    const comboBox = screen.getByTestId('contextIndexComboBox');
+    const input = within(comboBox).getByRole('combobox');
+
+    fireEvent.change(input, { target: { value: 'custom-*' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    const row = screen.getByTestId('contextSelectedSource-esql-0');
+    expect(row).toHaveTextContent('FROM custom-*');
+  });
+
+  it('shows an error prompt when the indices request fails', async () => {
     renderWithProviders(<Harness />, createServices({ indicesError: new Error('Network error') }));
 
     expect(await screen.findByTestId('contextIndexTabError')).toBeInTheDocument();
   });
 
-  it('adds a raw ES|QL query as a source from the Advanced tab', async () => {
+  it('adds a raw ES|QL query as a source from the advanced accordion', async () => {
     renderWithProviders(<Harness />);
 
-    await openAdvancedTab();
+    await openAdvancedEsqlAccordion();
 
-    // The add button is disabled until a non-empty query is entered.
     expect(screen.getByTestId('contextAddEsqlSourceButton')).toBeDisabled();
 
     await addEsqlSource('FROM logs-* | LIMIT 10');
@@ -202,7 +215,7 @@ describe('SourcePicker', () => {
     expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
   });
 
-  it('does not fetch connectors on mount when only the Index tab is shown', () => {
+  it('does not fetch connectors on mount when only the Elasticsearch data tab is shown', () => {
     const { services } = renderWithProviders(<Harness />);
 
     expect(services.http.get).not.toHaveBeenCalled();
