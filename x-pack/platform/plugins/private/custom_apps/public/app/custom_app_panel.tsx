@@ -53,8 +53,8 @@ export function CustomAppPanel({
    * registered nothing and those panels could not be dragged at all.
    */
   const publishHandles = useCallback(() => {
-    const handles = [headerRef.current, gripRef.current].filter(
-      (node): node is HTMLElement => node !== null
+    const handles: HTMLElement[] = [headerRef.current, gripRef.current].filter(
+      (node): node is HTMLDivElement | HTMLButtonElement => node !== null
     );
     if (handles.length > 0) setDragHandles(handles);
   }, [setDragHandles]);
