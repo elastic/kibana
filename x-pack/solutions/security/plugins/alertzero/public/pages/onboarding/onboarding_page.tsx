@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiCallOut,
@@ -19,9 +20,9 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useHistory } from 'react-router-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -37,6 +38,7 @@ import { AlertZeroPageSection } from '../../components/layout/alertzero_page_sec
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { workerName } from '../watches/workers/translations';
+import { useEnableWorkers } from './use_enable_workers';
 import * as i18n from './translations';
 
 // Ordered subset of catalog workers shown on the onboarding screen.
@@ -62,12 +64,8 @@ const onboardingWorkers = SYSTEM_SECURITY_WORKER_CATALOG.filter(({ id }) =>
     (ONBOARDING_WORKER_IDS as readonly string[]).indexOf(b.id)
 );
 
-const pageContentCss = css`
-  max-width: 800px;
-`;
-
 export const OnboardingPage: React.FC = () => {
-  const history = useHistory();
+  const { euiTheme } = useEuiTheme();
   const {
     services: { application },
   } = useKibana<CoreStart>();
@@ -76,8 +74,15 @@ export const OnboardingPage: React.FC = () => {
 
   const canWrite = Boolean(application.capabilities[ALERTZERO_FEATURE_ID]?.write);
 
-  const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
   const currentUserEmail = useCurrentUser();
+
+  const history = useHistory();
+  const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
+  const { handleEnableAndContinue, isSaving } = useEnableWorkers(
+    ONBOARDING_WORKER_IDS,
+    workerEnabled,
+    () => history.push('/watches')
+  );
 
   const enabledCount = Object.values(workerEnabled).filter(Boolean).length;
 
@@ -99,112 +104,120 @@ export const OnboardingPage: React.FC = () => {
   }
 
   return (
-    <AlertZeroPageSection>
-      <div css={pageContentCss}>
-        <EuiTitle>
-          <h1>{i18n.ONBOARDING_TITLE}</h1>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <p>{i18n.ONBOARDING_SUBTITLE}</p>
-        </EuiText>
-        <EuiSpacer size="l" />
+    <AlertZeroPageSection
+      contentProps={{
+        css: css`
+          padding-block: ${euiTheme.size.xxl};
+          align-self: center;
+          max-width: 800px;
+          width: 100%;
+        `,
+      }}
+    >
+      <EuiTitle>
+        <h1>{i18n.ONBOARDING_TITLE}</h1>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText>
+        <p>{i18n.ONBOARDING_SUBTITLE}</p>
+      </EuiText>
+      <EuiSpacer size="l" />
 
-        <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-          {onboardingWorkers.map(({ id, name }, index) => {
-            const wid = id as OnboardingWorkerId;
-            const description = i18n.onboardingWorkerDescription(id);
-            const checked = workerEnabled[wid] ?? true;
-            const isLastEnabled = checked && enabledCount <= 1;
+      <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+        {onboardingWorkers.map(({ id, name }, index) => {
+          const wid = id as OnboardingWorkerId;
+          const description = i18n.onboardingWorkerDescription(id);
+          const checked = workerEnabled[wid];
+          const isLastEnabled = checked && enabledCount <= 1;
 
-            return (
-              <React.Fragment key={id}>
-                {index > 0 && <EuiHorizontalRule margin="none" />}
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="m"
-                  responsive={false}
-                  css={css`
-                    padding: 12px 16px;
-                  `}
-                >
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>{workerName(id, name)}</strong>
-                      {description ? (
-                        <>
-                          {' — '}
-                          {description}
-                        </>
-                      ) : null}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      label={workerName(id, name)}
-                      showLabel={false}
-                      checked={checked}
-                      disabled={isLastEnabled}
-                      onChange={(e) => handleToggle(wid, e.target.checked)}
-                      data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </React.Fragment>
-            );
-          })}
-          <EuiHorizontalRule margin="none" />
-          <div
-            css={css`
-              padding: 8px 16px;
-            `}
-          >
-            <EuiText size="xs" color="subdued">
-              <p>{i18n.ONBOARDING_WORKERS_FOOTNOTE}</p>
-            </EuiText>
-          </div>
-        </EuiPanel>
-
-        <EuiSpacer size="m" />
-
-        <EuiCallOut
-          color="warning"
-          iconType="warning"
-          title={i18n.BEFORE_YOU_ENABLE_TITLE}
-          data-test-subj="alertZeroOnboardingBeforeYouEnable"
+          return (
+            <React.Fragment key={id}>
+              {index > 0 && <EuiHorizontalRule margin="none" />}
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="m"
+                responsive={false}
+                css={css`
+                  padding: 12px 16px;
+                `}
+              >
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <strong>{workerName(id, name)}</strong>
+                    {description ? (
+                      <>
+                        {' — '}
+                        {description}
+                      </>
+                    ) : null}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={workerName(id, name)}
+                    showLabel={false}
+                    checked={checked}
+                    disabled={isLastEnabled || isSaving}
+                    onChange={(e) => handleToggle(wid, e.target.checked)}
+                    data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </React.Fragment>
+          );
+        })}
+        <EuiHorizontalRule margin="none" />
+        <div
+          css={css`
+            padding: 8px 16px;
+          `}
         >
-          <ul>
-            <li>{i18n.beforeYouEnableRunsAs(currentUserEmail)}</li>
-            <li>{i18n.BEFORE_YOU_ENABLE_LLM}</li>
-            <li>
-              <em>{i18n.BEFORE_YOU_ENABLE_PRIVILEGE}</em>
-            </li>
-            <li>{i18n.BEFORE_YOU_ENABLE_AUTONOMY}</li>
-          </ul>
-        </EuiCallOut>
+          <EuiText size="xs" color="subdued">
+            <p>{i18n.ONBOARDING_WORKERS_FOOTNOTE}</p>
+          </EuiText>
+        </div>
+      </EuiPanel>
 
-        <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
 
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={() => history.push('/watches')}
-              data-test-subj="alertZeroOnboardingEnableButton"
-            >
-              {i18n.ENABLE_AND_CONTINUE}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              onClick={() => application.navigateToApp('security')}
-              data-test-subj="alertZeroOnboardingNotNowLink"
-            >
-              {i18n.NOT_NOW} &rarr;
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <EuiCallOut
+        color="warning"
+        iconType="warning"
+        title={i18n.BEFORE_YOU_ENABLE_TITLE}
+        data-test-subj="alertZeroOnboardingBeforeYouEnable"
+      >
+        <ul>
+          <li>{i18n.beforeYouEnableRunsAs(currentUserEmail)}</li>
+          <li>{i18n.BEFORE_YOU_ENABLE_LLM}</li>
+          <li>
+            <em>{i18n.BEFORE_YOU_ENABLE_PRIVILEGE}</em>
+          </li>
+          <li>{i18n.BEFORE_YOU_ENABLE_AUTONOMY}</li>
+        </ul>
+      </EuiCallOut>
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            isLoading={isSaving}
+            onClick={handleEnableAndContinue}
+            data-test-subj="alertZeroOnboardingEnableButton"
+          >
+            {i18n.ENABLE_AND_CONTINUE}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            onClick={() => application.navigateToApp('security')}
+            data-test-subj="alertZeroOnboardingNotNowLink"
+          >
+            {i18n.NOT_NOW} &rarr;
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AlertZeroPageSection>
   );
 };

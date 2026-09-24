@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
@@ -14,15 +14,28 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
+import {
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+} from '@kbn/alertzero-common';
 import { OnboardingPage } from './onboarding_page';
 
-const renderPage = ({ canWrite = false }: { canWrite?: boolean } = {}) => {
-  const core = coreMock.createStart();
+const renderPage = ({
+  canWrite = false,
+  httpPatch = jest.fn().mockResolvedValue({}),
+}: {
+  canWrite?: boolean;
+  httpPatch?: jest.Mock;
+} = {}) => {
+  const coreStart = coreMock.createStart();
   // coreMock.createStart() does not populate feature capabilities; set the
   // alertzero.write capability so the component can branch on it.
-  (core.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
+  (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
+  const core = { ...coreStart, http: { ...coreStart.http, patch: httpPatch } };
   const history = createMemoryHistory();
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
 
   render(
     <I18nProvider>
@@ -64,14 +77,24 @@ describe('OnboardingPage', () => {
       expect(screen.getByText('Before you enable')).toBeInTheDocument();
     });
 
-    it('renders the Enable and continue button that navigates to /watches', () => {
-      const { history } = renderPage({ canWrite: true });
-      const button = screen.getByRole('button', { name: 'Enable and continue' });
-      expect(button).toBeInTheDocument();
+    it('calls the API for all workers and navigates to /watches when Enable and continue is clicked', async () => {
+      const httpPatch = jest.fn().mockResolvedValue({});
+      const { history } = renderPage({ canWrite: true, httpPatch });
 
-      fireEvent.click(button);
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
-      expect(history.location.pathname).toBe('/watches');
+      await waitFor(() => expect(history.location.pathname).toBe('/watches'));
+      expect(httpPatch).toHaveBeenCalledTimes(5);
+    });
+
+    it('does not navigate when a worker update fails', async () => {
+      const httpPatch = jest.fn().mockRejectedValue(new Error('server error'));
+      const { history } = renderPage({ canWrite: true, httpPatch });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+
+      await waitFor(() => expect(httpPatch).toHaveBeenCalled());
+      expect(history.location.pathname).toBe('/');
     });
 
     it('renders the Not now link', () => {
@@ -82,15 +105,36 @@ describe('OnboardingPage', () => {
     it('disables a toggle when it is the last enabled worker', () => {
       renderPage({ canWrite: true });
 
-      // Toggle all workers off except one
+      // Disable all but the first toggle by clicking them.
       const toggles = screen.getAllByRole('switch');
-      // Disable all but the first by clicking them
       for (let i = 1; i < toggles.length; i++) {
         fireEvent.click(toggles[i]);
       }
 
-      // The first (and now only enabled) toggle should be disabled
+      // The first (and now only enabled) toggle should be disabled.
       expect(toggles[0]).toBeDisabled();
+    });
+
+    it('sends enabled: false for a worker that was toggled off', async () => {
+      const httpPatch = jest.fn().mockResolvedValue({});
+      renderPage({ canWrite: true, httpPatch });
+
+      // Toggle the second worker off.
+      const toggles = screen.getAllByRole('switch');
+      fireEvent.click(toggles[1]);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+
+      await waitFor(() =>
+        expect(httpPatch).toHaveBeenCalledWith(
+          expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+          expect.objectContaining({ body: JSON.stringify({ enabled: false }) })
+        )
+      );
+      expect(httpPatch).toHaveBeenCalledWith(
+        expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID),
+        expect.objectContaining({ body: JSON.stringify({ enabled: true }) })
+      );
     });
   });
 
