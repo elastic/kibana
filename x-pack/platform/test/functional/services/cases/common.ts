@@ -142,7 +142,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async setSearchTextInAssigneesPopover(text: string) {
-      const searchInput = await find.byCssSelector('.euiSelectableSearch input');
+      const searchInput = await find.byCssSelector('.euiSelectableSearch');
       await searchInput.type(text);
       await header.waitUntilLoadingHasFinished();
     },
