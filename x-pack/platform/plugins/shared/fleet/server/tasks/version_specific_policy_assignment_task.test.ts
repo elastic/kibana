@@ -323,7 +323,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         ['policy-1'],
         undefined,
-        { agentVersions: ['8.18'] }
+        { agentVersions: ['8.18'], spaceId: '*' }
       );
     });
 
@@ -362,7 +362,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         ['policy-1'],
         undefined,
-        { agentVersions: expect.arrayContaining(['8.18', '9.3']) }
+        { agentVersions: expect.arrayContaining(['8.18', '9.3']), spaceId: '*' }
       );
     });
 
@@ -630,7 +630,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         ['policy-1'],
         undefined,
-        { agentVersions: ['8.18'] }
+        { agentVersions: ['8.18'], spaceId: '*' }
       );
     });
   });
@@ -899,7 +899,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         ['policy-1'],
         undefined,
-        { agentVersions: ['9.2'] }
+        { agentVersions: ['9.2'], spaceId: '*' }
       );
     });
   });
