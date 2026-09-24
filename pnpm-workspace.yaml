@@ -1541,6 +1541,7 @@ packages:
   - 'x-pack/solutions/observability/packages/kbn-apm-embeddable-common'
   - 'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations'
   - 'x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai'
+  - 'x-pack/solutions/observability/packages/kbn-evals-suite-semantic-log-search'
   - 'x-pack/solutions/observability/packages/kbn-evals-suite-significant-events'
   - 'x-pack/solutions/observability/packages/kbn-genai-cli'
   - 'x-pack/solutions/observability/packages/kbn-observability-schema'

@@ -5525,6 +5525,9 @@ importers:
       '@kbn/evals-suite-security-persona-matrix':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix
+      '@kbn/evals-suite-semantic-log-search':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/packages/kbn-evals-suite-semantic-log-search
       '@kbn/evals-suite-siem-readiness':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness
@@ -9545,6 +9548,8 @@ importers:
   x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations: {}
 
   x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai: {}
+
+  x-pack/solutions/observability/packages/kbn-evals-suite-semantic-log-search: {}
 
   x-pack/solutions/observability/packages/kbn-evals-suite-significant-events: {}
 
