@@ -7,8 +7,10 @@
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { EuiSelectOption } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
 import { useUpdateFeedbackAgent } from '../../hooks/use_update_feedback_agent';
@@ -62,6 +64,10 @@ export const FeedbackAgentSelector = ({ aiIndex }: FeedbackAgentSelectorProps) =
           updateFeedbackAgent.mutate(value === UNSET_VALUE ? undefined : value);
         }}
         data-test-subj="contextSignalsFeedbackAgentSelect"
+        {...getEbtProps({
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSignalsPanel,
+          action: CONTEXT_ENGINE_UI_EBT.action.signals.INTERACT_FEEDBACK_AGENT,
+        })}
       />
     </EuiFormRow>
   );
