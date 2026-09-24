@@ -16,18 +16,23 @@ import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import type { ProcessedConversationRound } from '../../../../test_utils/timeline';
 import {
-  estimateFailedEntryTokens,
   estimateMessagesTokens,
   estimatePerRoundTokens as estimateTimelineTokens,
-  survivingFailedEntryTokens,
 } from './estimate_conversation_tokens';
-import { timelineFromRounds } from '../../../../test_utils/timeline';
+import {
+  eventsNativeConversation,
+  failedExec0Timeline,
+  timelineFromRounds,
+} from '../../../../test_utils/timeline';
+import { eventsForContext, groupTimelineRounds } from './context_timeline';
 import type { ProcessedTimelineEvent } from './context_timeline';
+import { roundToLangchain } from './to_langchain_messages';
+import { createSummarizationTransformer, type ToolSummarizationDeps } from './tool_summarization';
 
 const estimatePerRoundTokens = (
   rounds: ProcessedConversationRound[],
-  deps: Parameters<typeof estimateTimelineTokens>[1]
-) => estimateTimelineTokens(timelineFromRounds(rounds), deps);
+  deps: ToolSummarizationDeps
+) => estimateTimelineTokens(timelineFromRounds(rounds), createSummarizationTransformer(deps));
 
 const createMockToolManager = (
   summarizers: Map<
@@ -138,64 +143,27 @@ describe('estimatePerRoundTokens', () => {
   });
 });
 
-describe('failed-entry token accounting', () => {
-  const failedEntry = (id: string, createdAt: string, message: string): ProcessedTimelineEvent[] =>
-    [
-      {
-        id: `${id}::user_message`,
-        type: 'user_message',
-        created_at: createdAt,
-        actor: { type: 'user', id: 'u1' },
-        data: { message, attachments: [] },
-      },
-      {
-        id: `${id}::execution_started`,
-        type: 'execution_started',
-        created_at: createdAt,
-        actor: { type: 'agent', id: 'a' },
-        execution_id: `${id}::execution`,
-        trigger_event_id: `${id}::user_message`,
-        data: { trigger_type: 'user_message' },
-      },
-      {
-        id: `${id}::execution_failed`,
-        type: 'execution_failed',
-        created_at: createdAt,
-        actor: { type: 'agent', id: 'a' },
-        execution_id: `${id}::execution`,
-        trigger_event_id: `${id}::user_message`,
-        data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
-      },
-    ] as unknown as ProcessedTimelineEvent[];
+describe('interrupted rounds', () => {
+  it('estimates an interrupted round including its steps and the notice', async () => {
+    const toolStep = createMockRound('r'.repeat(200)).steps[0];
+    const timeline = eventsForContext(
+      eventsNativeConversation(failedExec0Timeline('r1', [toolStep]))
+    ).map((event) =>
+      event.type === 'user_message' ? { ...event, data: { ...event.data, attachments: [] } } : event
+    ) as ProcessedTimelineEvent[];
+    const transformer = createSummarizationTransformer({
+      toolManager: createMockToolManager(),
+      toolRegistry: createMockToolRegistry(),
+    });
 
-  const round = (id: string, startedAt: string): ProcessedConversationRound =>
-    ({
-      ...createMockRound('v'),
-      id,
-      started_at: startedAt,
-    } as ProcessedConversationRound);
+    const [tokens] = await estimateTimelineTokens(timeline, transformer);
+    const [round] = groupTimelineRounds(timeline);
+    const messages = await roundToLangchain(round);
 
-  // r1 → F (between r1 and r2) → r2
-  const timeline: ProcessedTimelineEvent[] = [
-    ...timelineFromRounds([round('r1', '2026-01-01T00:00:00.000Z')]),
-    ...failedEntry('f', '2026-01-01T00:01:00.000Z', 'x'.repeat(4000)),
-    ...timelineFromRounds([round('r2', '2026-01-01T00:02:00.000Z')]),
-  ];
-
-  it('estimates each failed entry as its rendered user message plus notice, keyed by user message id', () => {
-    const counts = estimateFailedEntryTokens(timeline);
-
-    expect(Array.from(counts.keys())).toEqual(['f::user_message']);
-    // ~4000 chars of message (~1000 tokens) + the notice
-    expect(counts.get('f::user_message')!).toBeGreaterThan(1000);
-  });
-
-  it('sums only the failed entries that survive the cut', () => {
-    const counts = estimateFailedEntryTokens(timeline);
-
-    expect(survivingFailedEntryTokens(timeline, 0, counts)).toBe(counts.get('f::user_message'));
-    // cutting at r2 drops F, which is older than r2
-    expect(survivingFailedEntryTokens(timeline, 1, counts)).toBe(0);
-    expect(survivingFailedEntryTokens(timeline, 0, new Map())).toBe(0);
+    expect(tokens).toBe(estimateMessagesTokens(messages));
+    expect(messages.some((message) => String(message.content).includes('<system_notice>'))).toBe(
+      true
+    );
+    expect(messages.some((message) => message.getType() === 'tool')).toBe(true);
   });
 });

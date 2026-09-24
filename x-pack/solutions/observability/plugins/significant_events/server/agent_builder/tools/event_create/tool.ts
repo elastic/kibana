@@ -15,6 +15,7 @@ import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { createEventToolHandler } from './handler';
@@ -99,8 +100,10 @@ export function createEventTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing, sourcesClient } = await getScopedClients({ request });
+        const { getEventClient, getAlertEventsClient, licensing, sourcesClient } =
+          await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
+        await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
         const eventInput = assignStoredSourceIds(catalog, toolParams);
         const sources = eventInput.stream_names;
@@ -108,6 +111,8 @@ export function createEventTool({
         const data = await createEventToolHandler({
           eventClient: await getEventClient(),
           eventInput,
+          alertEventsClient: await getAlertEventsClient(),
+          logger,
         });
 
         telemetry.trackAgentToolEventCreate({

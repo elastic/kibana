@@ -15,8 +15,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { toSourceType } from '../../utils/sources';
@@ -76,6 +78,10 @@ export const SourcesPanel = ({
               onClick={onEditSources}
               isDisabled={!canEdit}
               data-test-subj="contextEditSourcesButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
+                action: CONTEXT_ENGINE_UI_EBT.action.sources.EDIT,
+              })}
             >
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.sources.editButton"

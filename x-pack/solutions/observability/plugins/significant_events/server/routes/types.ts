@@ -17,6 +17,7 @@ import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsServer } from '../types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -50,7 +51,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   space: string;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>;
-
+  getAlertEventsClient: () => Promise<AlertEventsClientApi | undefined>;
   deleteLegacyRules: (ruleIds: string[]) => Promise<void>;
   inferenceClient: InferenceClient;
   licensing: LicensingPluginStart;

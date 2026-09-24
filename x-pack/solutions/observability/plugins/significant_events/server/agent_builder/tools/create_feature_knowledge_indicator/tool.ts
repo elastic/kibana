@@ -15,7 +15,7 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
-import { baseFeatureSchema } from '@kbn/significant-events-schema';
+import { baseFeatureSchema, MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
