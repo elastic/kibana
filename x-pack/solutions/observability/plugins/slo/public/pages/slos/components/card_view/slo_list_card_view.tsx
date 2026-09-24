@@ -60,7 +60,7 @@ export function SloListCardView({ sloList, loading, error, previewMode = false }
   if (loading && sloList.length === 0) {
     return <LoadingSloGrid gridSize={columns} />;
   }
-  console.log({ previewMode });
+
   return (
     <EuiFlexGrid columns={columns} gutterSize="m">
       {sloList

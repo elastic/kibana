@@ -126,7 +126,6 @@ export class ExplorerChartSingleMetric extends React.Component {
       previewMode,
       id: chartId,
     } = this.props;
-    console.log({ previewMode });
     const element = this.rootNode;
     const config = this.props.seriesConfig;
     const severity = this.props.severity;

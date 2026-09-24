@@ -77,7 +77,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
   );
 
   if (!dataVisualizerService) return null;
-  console.log({ previewMode });
+
   return (
     <EuiFlexItem css={statsTableCss} data-test-subj="dscFieldStatsEmbeddedContent">
       <dataVisualizerService.FieldStatisticsTable

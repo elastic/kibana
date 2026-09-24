@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+
 import {
   EuiBadge,
   EuiEmptyPrompt,
@@ -18,7 +18,7 @@ import { FilterStateStore, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTableState } from '@kbn/ml-in-memory-table';
-import { apiHasDisableTriggers, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -80,12 +80,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   onRenderComplete,
   parentApi,
 }) => {
-  const disableTriggers = useStateFromPublishingSubject(
-    apiHasDisableTriggers(parentApi)
-      ? parentApi.disableTriggers$
-      : new BehaviorSubject<boolean>(false)
-  );
-  const isInteractive = !disableTriggers;
+  const isInteractive = useIsInteractive(parentApi);
 
   const {
     fieldFormats,

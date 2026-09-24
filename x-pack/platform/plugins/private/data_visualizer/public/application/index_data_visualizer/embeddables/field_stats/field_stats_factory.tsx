@@ -419,7 +419,7 @@ export const getFieldStatsChartEmbeddableFactory = (
               </EuiFlexItem>
             );
           }
-          console.log({ viewMode });
+
           return (
             <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
               <FieldStatisticsWrapper

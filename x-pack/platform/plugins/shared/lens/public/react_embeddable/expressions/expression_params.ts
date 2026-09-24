@@ -199,7 +199,6 @@ export async function getExpressionRendererParams(
   // }
 
   if (expression) {
-    // console.log({ disableTriggers });
     const params: ExpressionWrapperProps = {
       expression,
       syncColors,

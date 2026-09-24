@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
+
 
 import type { EuiBasicTableColumn, EuiTableSortingType, Criteria } from '@elastic/eui';
 import {
@@ -38,7 +38,7 @@ import {
   type GroupTableItem,
 } from '@kbn/aiops-log-rate-analysis/state';
 import { stringHash } from '@kbn/ml-string-hash';
-import { apiHasDisableTriggers, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 import usePrevious from 'react-use/lib/usePrevious';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -256,12 +256,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     },
   ];
 
-  const disableTriggers = useStateFromPublishingSubject(
-    apiHasDisableTriggers(parentApi)
-      ? parentApi.disableTriggers$
-      : new BehaviorSubject<boolean>(false)
-  );
-  const isInteractive = !disableTriggers;
+  const isInteractive = useIsInteractive(parentApi);
 
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,

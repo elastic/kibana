@@ -368,7 +368,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   render() {
     const { open } = this.state;
     const anchorPosition = this.getAnchorPosition();
-    console.log({ test: this.props.isInteractive });
+
     return (
       <div className="visLegend" css={visLegendStyles.base}>
         {this.props.isInteractive && (

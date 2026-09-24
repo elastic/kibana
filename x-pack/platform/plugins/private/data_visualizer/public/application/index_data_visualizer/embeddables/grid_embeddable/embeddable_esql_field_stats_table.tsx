@@ -26,7 +26,7 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
     const { onTableUpdate, onRenderComplete, onFieldsCountChange } = props;
     const [dataVisualizerListState, setDataVisualizerListState] =
       useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
-    console.log({ props });
+
     const onTableChange = useCallback(
       (update: DataVisualizerTableState) => {
         setDataVisualizerListState({ ...dataVisualizerListState, ...update });

@@ -120,7 +120,7 @@ export function SloOverviewPanelContent({
   const hasGroupBy = sloDetails ? hasSloGroupBy(sloDetails.groupBy) : false;
   const showCardList =
     overviewMode === 'single' && sloInstanceId === ALL_VALUE && hasGroupBy && Boolean(sloId);
-  console.log({ previewMode, overviewMode, showCardList });
+
   if (overviewMode === 'groups') {
     return (
       <GroupOverviewPanel

@@ -2013,7 +2013,6 @@ class TimeseriesChartIntl extends Component {
   };
 
   render() {
-    console.log('RENDER', { state: this.state, props: this.props });
     return (
       <>
         <RuleEditorFlyout

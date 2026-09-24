@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
+
 import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +23,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from '@kbn/aiops-log-rate-analysis/state';
-import { apiHasDisableTriggers, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 import type { GroupTableItemGroup } from '@kbn/aiops-log-rate-analysis/state';
 import { useColumns, LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE } from './use_columns';
@@ -105,12 +105,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     zeroDocsFallback ? DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK : DEFAULT_SORT_DIRECTION
   );
 
-  const disableTriggers = useStateFromPublishingSubject(
-    apiHasDisableTriggers(parentApi)
-      ? parentApi.disableTriggers$
-      : new BehaviorSubject<boolean>(false)
-  );
-  const isInteractive = !disableTriggers;
+  const isInteractive = useIsInteractive(parentApi);
 
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.SIGNIFICANT_ITEMS,

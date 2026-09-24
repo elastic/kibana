@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   BehaviorSubject,
   Subject,
@@ -388,16 +388,13 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
             };
           }, []);
 
+          const displaySettings = useMemo(
+            () => ({ ...(state.display_settings ?? {}), previewMode: viewMode === 'preview' }),
+            [viewMode]
+          );
+
           return (
-            <OptionsListControlContext.Provider
-              value={{
-                componentApi,
-                displaySettings: {
-                  ...(state.display_settings ?? {}),
-                  previewMode: viewMode === 'preview',
-                },
-              }}
-            >
+            <OptionsListControlContext.Provider value={{ componentApi, displaySettings }}>
               <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );

@@ -439,7 +439,7 @@ export const getSearchEmbeddableFactory = ({
               />
             );
           }
-          console.log({ renderAsFieldStatsTable });
+
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>

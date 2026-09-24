@@ -389,6 +389,9 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           const isApproximate = data.isApproximate;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
+          const disableTriggers = apiHasDisableTriggers(parentApi)
+            ? parentApi.disableTriggers$.getValue()
+            : undefined;
           const settings = apiPublishesSettings(parentApi)
             ? {
                 syncColors: parentApi.settings.syncColors$.getValue(),
@@ -428,9 +431,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
               vis: vis$.getValue(),
               settings,
               viewMode,
-              disableTriggers: apiHasDisableTriggers(parentApi)
-                ? parentApi.disableTriggers$.getValue()
-                : undefined,
+              disableTriggers,
               searchSessionId,
               parentExecutionContext: executionContext,
               abortController: expressionAbortController$.getValue(),
@@ -472,10 +473,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
                   return;
                 }
                 const currentVis = vis$.getValue();
-                const disableTriggers = apiHasDisableTriggers(parentApi)
-                  ? parentApi.disableTriggers$.getValue()
-                  : undefined;
-
                 if (!disableTriggers) {
                   const triggerId: string = get(
                     VIS_EVENT_TO_TRIGGER,

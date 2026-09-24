@@ -9,7 +9,7 @@
 
 import * as jsondiffpatch from 'jsondiffpatch';
 import { cloneDeep } from 'lodash';
-import { BehaviorSubject, combineLatest, filter, pairwise, tap, type Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, pairwise, type Observable } from 'rxjs';
 
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 
@@ -32,9 +32,6 @@ export function startTrackingHistory<T extends object = {}>({
   let latestState: T | undefined;
   const stateSubscription = onStateChange$
     .pipe(
-      tap((state) => {
-        console.log({ state });
-      }),
       filter((state): state is T => Boolean(state)),
       pairwise()
     )
@@ -46,7 +43,6 @@ export function startTrackingHistory<T extends object = {}>({
         return;
       }
       const diff = jsondiffpatch.diff(previous, current);
-      console.log({ previous, current, diff });
       if (!diff) return;
 
       const pointer = pointer$.getValue();

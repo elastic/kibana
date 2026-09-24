@@ -37,7 +37,6 @@ export function initializeViewModeManager({
   const dashboardBackupService = getDashboardBackupService();
   const accessControlClient = getAccessControlClient();
   const { viewMode: creationOptionsViewMode } = creationOptions?.getInitialInput?.() ?? {};
-  // console.log({ creationOptionsViewMode });
   const { canEditDashboard: canUserEditDashboard } = getDashboardAccessControlState({
     accessControlClient,
     accessControl,
@@ -66,7 +65,6 @@ export function initializeViewModeManager({
   const disableTriggers$ = new BehaviorSubject<boolean>(viewMode$.getValue() === 'preview');
 
   const disableTriggersSubscription = viewMode$.subscribe((viewMode) => {
-    // console.log('!!!!!!!!!!', { viewMode });
     disableTriggers$.next(viewMode === 'preview');
   });
 

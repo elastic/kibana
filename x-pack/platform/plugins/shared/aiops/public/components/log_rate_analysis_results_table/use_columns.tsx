@@ -158,7 +158,6 @@ export const useColumns = (
   barHighlightColorOverride?: string,
   isExpandedRow: boolean = false
 ): Array<EuiBasicTableColumn<SignificantItem>> => {
-  console.log({ skippedColumns });
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
   const { dataView } = useDataSource();
   const { euiTheme } = useEuiTheme();

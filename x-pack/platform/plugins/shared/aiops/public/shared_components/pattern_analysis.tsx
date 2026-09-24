@@ -82,7 +82,6 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   filtersApi,
   parentApi,
 }) => {
-  console.log('!!!!!', { parentApi });
   const deps = useMemo(() => {
     const {
       lens,

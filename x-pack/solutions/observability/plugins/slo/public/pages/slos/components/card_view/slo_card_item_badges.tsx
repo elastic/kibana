@@ -41,7 +41,7 @@ export function SloCardItemBadges({
     onStateChange({
       kqlQuery: `slo.tags: "${tag}"`,
     });
-  console.log({ previewMode });
+
   return (
     <div
       css={({ euiTheme }) => css`

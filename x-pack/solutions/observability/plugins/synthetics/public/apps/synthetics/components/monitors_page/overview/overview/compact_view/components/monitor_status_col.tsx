@@ -40,7 +40,7 @@ export const MonitorStatusCol = ({
   openFlyout: (monitor: OverviewStatusMetaData) => void;
   previewMode?: boolean;
 }) => {
-  console.log({ previewMode });
+
   const timestamp = monitor.timestamp ? parseTimestamp(monitor.timestamp) : null;
   // Per-user, per-space display preference set from the overview's display
   // options popover; controls whether the "Checked …" label (and its tooltip)

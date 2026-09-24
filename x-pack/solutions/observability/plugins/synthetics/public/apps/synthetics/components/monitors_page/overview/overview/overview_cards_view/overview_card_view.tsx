@@ -109,7 +109,7 @@ const UnGroupedCardView = ({
     () => expandByLocation(monitorsSortedByStatus),
     [monitorsSortedByStatus]
   );
-  console.log('asfdasdfasdfasfasdf', { previewMode });
+
   // Pagination is driven by monitor count (what the server pages on), not the
   // expanded card count. `total` is the server-side total for the active filter.
   const loadedMonitors = allConfigs.length;

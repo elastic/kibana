@@ -33,7 +33,7 @@ export function SlosView({ sloList, loading, error, view, previewMode = false }:
   if (!loading && error) {
     return <SloListError />;
   }
-  console.log({ view });
+
   if (view === 'cardView') {
     return (
       <Wrapper sloList={sloList}>

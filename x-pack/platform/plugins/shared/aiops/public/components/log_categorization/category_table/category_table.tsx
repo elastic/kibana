@@ -31,8 +31,8 @@ import type { EventRate } from '../use_categorize_request';
 
 import { ExpandedRow } from './expanded_row';
 import { FormattedPatternExamples, FormattedTokens } from '../format_category';
-import { apiHasDisableTriggers, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import { useIsInteractive } from '../../../hooks/use_is_interactive';
+
 
 interface Props {
   categories: Category[];
@@ -70,12 +70,7 @@ export const CategoryTable: FC<Props> = ({
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { onTableChange, pagination, sorting } = tableState;
 
-  const disableTriggers = useStateFromPublishingSubject(
-    apiHasDisableTriggers(parentApi)
-      ? parentApi.disableTriggers$
-      : new BehaviorSubject<boolean>(false)
-  );
-  const isInteractive = !disableTriggers;
+  const isInteractive = useIsInteractive(parentApi);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
@@ -277,7 +272,6 @@ export const CategoryTable: FC<Props> = ({
 
   const renderCompleteListener = useCallback(
     (event: Event) => {
-      console.log('onRenderComplete !!!!');
       if (event.target !== chartWrapperRef.current) {
         return;
       }
@@ -293,7 +287,6 @@ export const CategoryTable: FC<Props> = ({
       throw new Error('Reference to the chart wrapper is not set');
     }
     const chartWrapper = chartWrapperRef.current;
-    console.log('????');
     chartWrapper.addEventListener('renderComplete', renderCompleteListener);
     return () => {
       chartWrapper.removeEventListener('renderComplete', renderCompleteListener);

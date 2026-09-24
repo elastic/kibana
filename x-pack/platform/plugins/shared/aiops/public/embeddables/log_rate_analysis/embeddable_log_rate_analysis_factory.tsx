@@ -145,7 +145,6 @@ export const getLogRateAnalysisEmbeddableFactory = (
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
       const onRenderComplete = () => {
-        console.log('onRenderComplete');
         dataLoading$.next(false);
       };
       const onError = (error: Error) => blockingError$.next(error);

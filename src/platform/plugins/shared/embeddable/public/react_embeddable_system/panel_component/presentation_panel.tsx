@@ -54,6 +54,11 @@ const PresentationPanelChrome = <
 >) => {
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
+  const viewModeSubject = useMemo(
+    () => getViewModeSubject(componentApi) ?? new BehaviorSubject(undefined),
+    [componentApi]
+  );
+
   const [
     dataLoading,
     blockingError,
@@ -74,7 +79,7 @@ const PresentationPanelChrome = <
     componentApi.description$ ?? new BehaviorSubject(undefined),
     componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
     componentApi.defaultDescription$ ?? new BehaviorSubject(undefined),
-    getViewModeSubject(componentApi) ?? new BehaviorSubject(undefined),
+    viewModeSubject,
     (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
     componentApi.rendered$ ?? new BehaviorSubject(true),
     componentApi.renderCount$ ?? new BehaviorSubject(undefined)
@@ -112,7 +117,6 @@ const PresentationPanelChrome = <
   const panelRef = useRef<HTMLDivElement | null>(null);
   const firstRenderCompleteRef = useRef(false);
   useEffect(() => {
-    console.log('DISPATCH EVENT', isSharedItem, panelRef.current, dataAttributes);
     if (!firstRenderCompleteRef.current && dataAttributes['data-render-complete']) {
       firstRenderCompleteRef.current = true;
       if (isSharedItem && panelRef.current) {

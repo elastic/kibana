@@ -329,7 +329,6 @@ function ExplorerChartContainer({
             </MlTooltipComponent>
           );
         }
-        console.log({ chartType, previewMode });
         if (
           chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
           chartType === CHART_TYPE.POPULATION_DISTRIBUTION

@@ -152,7 +152,6 @@ export const getPatternAnalysisEmbeddableFactory = (
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
       const onRenderComplete = () => {
-        console.log('onRenderComplete');
         dataLoading$.next(false);
       };
       const onError = (error: Error) => blockingError$.next(error);
@@ -202,7 +201,6 @@ export const getPatternAnalysisEmbeddableFactory = (
           const embeddingOrigin = apiHasExecutionContext(parentApi)
             ? parentApi.executionContext.type
             : undefined;
-          console.log('???', { parentApi });
           return (
             <PatternAnalysisComponent
               parentApi={parentApi}

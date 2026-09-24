@@ -45,7 +45,6 @@ export function SearchEmbeddablFieldStatsTableComponent({
   if (isEsql && services.dataVisualizer?.FieldStatsUnavailableMessage) {
     return <services.dataVisualizer.FieldStatsUnavailableMessage />;
   }
-  console.log('HERE');
   return (
     <FieldStatisticsTable
       dataView={dataView}

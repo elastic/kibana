@@ -48,8 +48,6 @@ export function ReactExpressionRenderer({
     hasCustomErrorRenderer: !!renderError,
   });
 
-  // console.log({ expressionRendererOptions });
-
   return (
     <div {...dataAttrs} className={className} css={styles}>
       {isEmpty && <PanelLoader />}

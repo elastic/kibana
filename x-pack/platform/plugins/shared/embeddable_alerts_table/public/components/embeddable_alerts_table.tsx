@@ -189,7 +189,7 @@ export const EmbeddableAlertsTable = ({
         renderCellValue={
           viewMode === 'preview'
             ? (props) => {
-                if (viewMode === 'preview' && props.columnId === ALERT_RULE_NAME && props.alert) {
+                if (props.columnId === ALERT_RULE_NAME && props.alert) {
                   const ruleName = props.alert[ALERT_RULE_NAME]?.[0] as string | undefined;
                   return (
                     <EuiText size="s" data-test-subj="alertRuleName">
