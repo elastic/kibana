@@ -59,6 +59,10 @@ const writeNotification = async (
   const [{ dataStreams, featureFlags }] = await core.getStartServices();
 
   // A notification type without a flag defined in the registry passes through.
+  // Risk: this reads only the first emission. If the provider is not initialized
+  // yet, that value is the fallback and this submission is not retried when the
+  // provider later becomes ready. Later `submit` calls evaluate the flag again,
+  // so they use the real value once the provider is initialized.
   const flagKey = NOTIFICATION_TYPE_FLAGS[joinNotificationTypeId(namespace, type)];
   const enabled = flagKey
     ? await firstValueFrom(
