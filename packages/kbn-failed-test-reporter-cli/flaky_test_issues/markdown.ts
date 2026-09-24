@@ -218,9 +218,12 @@ export const testsTable = (
 
 const MAX_FAILURE_LINES = 12;
 const MAX_FAILURE_CHARACTERS = 1200;
-/** The collapsed full message is bounded too: GitHub caps an issue body at 65,536 characters. */
+/**
+ * The collapsed full message is bounded too: GitHub caps an issue body at 65,536 characters, and
+ * four errors at this size leave the rest of the body more than half of it.
+ */
 const MAX_FULL_FAILURE_LINES = 300;
-const MAX_FULL_FAILURE_CHARACTERS = 12_000;
+const MAX_FULL_FAILURE_CHARACTERS = 8_000;
 
 /** A failure message safe to post publicly: redacted, fences neutralised, cut to the given size. */
 const cutFailureMessage = (message: string, maxLines: number, maxCharacters: number): string => {

@@ -730,12 +730,12 @@ describe('buildTestErrorsQuery', () => {
     expect(query).not.toContain('buildkite.pipeline.slug IN');
     expect(query).toContain(
       'event.action == "test-end" AND reporter.type IN ("jest", "playwright") AND ' +
-        'test.status IN ("failed", "timedOut") AND event.error.message IS NOT NULL AND test.id IN ("j1", "p1")'
+        'test.status IN ("failed", "timedOut") AND event.error.message IS NOT NULL AND TRIM(event.error.message) != "" AND test.id IN ("j1", "p1")'
     );
     // three lines, then ids, URLs and numbers normalised
     expect(query).toContain(
       'head = REPLACE(REPLACE(REPLACE(LEFT(CONCAT(MV_FIRST(lines), "\\n", COALESCE(MV_SLICE(lines, 1, 1), ""), "\\n", COALESCE(MV_SLICE(lines, 2, 2), "")), 300), ' +
-        '"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "ID"), "https?://[^ ]+", "URL"), "[0-9]+", "N")'
+        '"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "ID"), "https?://[^ \\n]+", "URL"), "[0-9]+", "N")'
     );
     expect(query).toContain('message = LEFT(event.error.message, 12000)');
     expect(query).toContain(
@@ -767,6 +767,16 @@ describe('fetchTestErrors', () => {
 
     expect(await fetchTestErrors(client, scope, [])).toEqual(new Map());
     expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('fails when the result hits the row limit, as the cut-off rows would pass for complete totals', async () => {
+    const { client } = mockEs(
+      Array.from({ length: ESQL_ROW_LIMIT }, (_, i) => row({ head: `e${i}` }))
+    );
+
+    await expect(
+      fetchTestErrors(client, scope, [{ testId: 't1', framework: 'jest' }])
+    ).rejects.toThrow(`Distinct errors query hit the ${ESQL_ROW_LIMIT} row limit`);
   });
 
   it('folds the per-pipeline rows of an error, newest message and build first, most failures first', async () => {

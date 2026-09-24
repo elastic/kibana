@@ -555,7 +555,8 @@ const ERROR_HEAD_CHARACTERS = 300;
 const ERROR_MESSAGE_CHARACTERS = 12_000;
 
 const UUID_PATTERN = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
-const URL_PATTERN = 'https?://[^ ]+';
+/** Stops at a space or a line break, so a URL ending one line cannot swallow the next. */
+const URL_PATTERN = 'https?://[^ \\n]+';
 
 /**
  * ES|QL for the normalised head of `event.error.message`: its first lines, with UUIDs, URLs and
@@ -594,6 +595,7 @@ export const buildTestErrorsQuery = (
       `reporter.type IN (${inList(frameworks)})`,
       'test.status IN ("failed", "timedOut")',
       'event.error.message IS NOT NULL',
+      'TRIM(event.error.message) != ""',
       `test.id IN (${inList(testIds)})`,
     ].join(' AND ')}`,
     'EVAL lines = SPLIT(event.error.message, "\\n"),' +
@@ -669,6 +671,12 @@ export const fetchTestErrors = async (
       tests.map((test) => test.testId)
     )
   );
+  // A cut-off result would pass for complete failure totals, so this fails rather than publish it
+  if (records.length >= ESQL_ROW_LIMIT) {
+    throw new Error(
+      `Distinct errors query hit the ${ESQL_ROW_LIMIT} row limit; narrow the scope with --lookbackDays`
+    );
+  }
 
   const rowsByTestAndKey = new Map<string, Map<string, TestErrorRow[]>>();
   for (const record of records) {
