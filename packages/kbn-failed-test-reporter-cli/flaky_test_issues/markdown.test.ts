@@ -12,6 +12,7 @@ import {
   formatBuildLink,
   formatDateRange,
   formatFailedBranches,
+  formatFailedBuilds,
   formatFailureMessage,
   formatBranchRates,
   formatPercent,
@@ -127,6 +128,17 @@ describe('formatFailureMessage', () => {
     const cut = formatFailureMessage(long);
     expect(cut.split('\n')).toHaveLength(13);
     expect(cut.endsWith('line 11\n…')).toBe(true);
+  });
+});
+
+describe('formatFailedBuilds', () => {
+  it('bolds the rate', () => {
+    expect(formatFailedBuilds({ builds: 505, failedBuilds: 98, buildFailRate: 98 / 505 })).toBe(
+      '98 / 505 (**19%**)'
+    );
+    expect(formatFailedBuilds({ builds: 400, failedBuilds: 1, buildFailRate: 1 / 400 })).toBe(
+      '1 / 400 (**<1%**)'
+    );
   });
 });
 

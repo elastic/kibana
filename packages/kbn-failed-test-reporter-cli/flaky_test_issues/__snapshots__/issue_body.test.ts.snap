@@ -45,16 +45,16 @@ Last seen in [#12200](https://buildkite.com/elastic/kibana-on-merge/builds/12200
 
 | Branch | Failed builds | Last failure |
 |---|---|---|
-| 🔴 \`main\` | 49 / 509 (10%) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| 🔴 \`9.2\` | 3 / 64 (5%) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |
+| 🔴 \`main\` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| 🔴 \`9.2\` | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |
 | ✅ \`9.1\` | 0 / 58 |  |
 
 #### Failures by Target
 
 | Target | Failed builds | Last failure |
 |---|---|---|
-| 🔴 \`stateful-classic\` · local | 49 / 509 (10%) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| 🔴 \`serverless-security_complete\` · cloud | 3 / 64 (5%) | 2026-09-07 11:40 UTC |
+| 🔴 \`stateful-classic\` · local | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| 🔴 \`serverless-security_complete\` · cloud | 3 / 64 (**5%**) | 2026-09-07 11:40 UTC |
 | ✅ \`serverless-observability_complete\` · local | 0 / 426 |  |
 
 Possibly related: #7, #8.
@@ -93,13 +93,13 @@ Last seen in [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345
 
 | Branch | Failed builds | Last failure |
 |---|---|---|
-| 🔴 \`main\` | 49 / 509 (10%) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| 🔴 \`main\` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
 
 #### Failures by Target
 
 | Target | Failed builds | Last failure |
 |---|---|---|
-| 🔴 \`stateful-classic\` · local | 49 / 509 (10%) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| 🔴 \`stateful-classic\` · local | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
 | ✅ \`serverless-observability_complete\` · local | 0 / 426 |  |
 
 #### Failures by Pipeline
@@ -108,9 +108,9 @@ Where it failed 2–9 Sep 2026, across all pipelines and branches:
 
 | Pipeline | Failed builds | Branches | Sample failure |
 |---|---|---|---|
-| [\`kibana-pull-request\`](https://buildkite.com/elastic/kibana-pull-request) | 70 / 661 (11%) | \`main\`, 63 PRs | [#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441#0199-abcd) · 2026-09-08 16:05 UTC |
-| [\`kibana-on-merge\`](https://buildkite.com/elastic/kibana-on-merge) | 49 / 509 (10%) | \`main\` | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| [\`kibana-elasticsearch-snapshot-verify\`](https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify) | 1 / 5 (20%) | 1 | 2026-09-09 06:12 UTC |
+| [\`kibana-pull-request\`](https://buildkite.com/elastic/kibana-pull-request) | 70 / 661 (**11%**) | \`main\`, 63 PRs | [#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441#0199-abcd) · 2026-09-08 16:05 UTC |
+| [\`kibana-on-merge\`](https://buildkite.com/elastic/kibana-on-merge) | 49 / 509 (**10%**) | \`main\` | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| [\`kibana-elasticsearch-snapshot-verify\`](https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify) | 1 / 5 (**20%**) | 1 | 2026-09-09 06:12 UTC |
 
 <!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.title\\":\\"Default status alert\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"playwright:default_status_alert:creates default alert\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":509,\\"failedBuilds\\":49}]}} -->"
 `;

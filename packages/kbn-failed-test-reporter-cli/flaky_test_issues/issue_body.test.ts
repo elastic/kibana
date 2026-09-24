@@ -225,8 +225,8 @@ describe('renderFlakySuiteIssueBody', () => {
         '',
         '| Branch | Failed builds | Last failure |',
         '|---|---|---|',
-        '| 🔴 `main` | 49 / 509 (10%) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
-        '| 🔴 `9.2` | 3 / 64 (5%) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
+        '| 🔴 `main` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
+        '| 🔴 `9.2` | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
         '| ✅ `9.1` | 0 / 58 |',
       ].join('\n')
     );
@@ -248,7 +248,7 @@ describe('renderFlakySuiteIssueBody', () => {
     ]);
     const [suite] = groupIntoSuites(report.flaky, report.files);
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
-      '| 🔴 `main` | 2 / 10 (20%) | 2026-09-09 06:12 UTC |'
+      '| 🔴 `main` | 2 / 10 (**20%**) | 2026-09-09 06:12 UTC |'
     );
   });
 
@@ -260,8 +260,8 @@ describe('renderFlakySuiteIssueBody', () => {
         '',
         '| Target | Failed builds | Last failure |',
         '|---|---|---|',
-        '| 🔴 `stateful-classic` · local | 49 / 509 (10%) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
-        '| 🔴 `serverless-security_complete` · cloud | 3 / 64 (5%) | 2026-09-07 11:40 UTC |',
+        '| 🔴 `stateful-classic` · local | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
+        '| 🔴 `serverless-security_complete` · cloud | 3 / 64 (**5%**) | 2026-09-07 11:40 UTC |',
         '| ✅ `serverless-observability_complete` · local | 0 / 426 |  |',
       ].join('\n')
     );
@@ -280,10 +280,10 @@ describe('renderFlakySuiteIssueBody', () => {
   it('names the branches each pipeline failed on, collapsing pull request heads', () => {
     const { suite, report } = singleTestReport();
     const body = renderFlakySuiteIssueBody(suite, { report });
-    expect(body).toContain('| 70 / 661 (11%) | `main`, 63 PRs | ');
-    expect(body).toContain('| 49 / 509 (10%) | `main` | ');
+    expect(body).toContain('| 70 / 661 (**11%**) | `main`, 63 PRs | ');
+    expect(body).toContain('| 49 / 509 (**10%**) | `main` | ');
     // the count, for a report written before the names were recorded
-    expect(body).toContain('| 1 / 5 (20%) | 1 | ');
+    expect(body).toContain('| 1 / 5 (**20%**) | 1 | ');
   });
 
   it('omits the target table when no test of the suite recorded a target', () => {

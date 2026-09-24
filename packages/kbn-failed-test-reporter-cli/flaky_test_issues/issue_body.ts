@@ -18,8 +18,8 @@ import {
   formatFailedBranches,
   formatDateRange,
   formatDateTime,
+  formatFailedBuilds,
   formatFailureMessage,
-  formatPercent,
   FRAMEWORK_LABELS,
   inlineCode,
   KIBANA_BLOB_URL,
@@ -346,9 +346,7 @@ const worstPerKey = <T extends BuildCounts>(
  */
 const failuresRow = (label: string, { worst, latest }: WorstFailures<BuildCounts>): string[] => [
   `${worst.failedBuilds > 0 ? '🔴' : '✅'} ${label}`,
-  worst.failedBuilds > 0
-    ? `${worst.failedBuilds} / ${worst.builds} (${formatPercent(worst.buildFailRate)})`
-    : `0 / ${worst.builds}`,
+  worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
   latest
     ? formatBuildLink(
         { buildUrl: latest.lastFailedBuildUrl, jobId: latest.lastFailedJobId },
@@ -404,13 +402,6 @@ const failuresByTarget = (suite: FlakySuite): string | undefined => {
 const pipelineLink = (pipeline: string): string =>
   `[${inlineCode(pipeline)}](${BUILDKITE_ORG_URL}/${pipeline})`;
 
-const pipelineFailedBuilds = ({
-  builds,
-  failedBuilds,
-  buildFailRate,
-}: FlakySuite['byPipeline'][number]): string =>
-  `${failedBuilds} / ${builds} (${formatPercent(buildFailRate)})`;
-
 /**
  * Where else the suite fails: every pipeline and branch, not just the report scope. Rates here
  * are over all branches and say how widely it hurts, not how flaky it is; that is the table above.
@@ -424,7 +415,7 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
     `all pipelines and branches${suite.tests.length > 1 ? ', any of the tests above' : ''}:`;
   const rows = suite.byPipeline.map((stats) => [
     pipelineLink(stats.pipeline),
-    pipelineFailedBuilds(stats),
+    formatFailedBuilds(stats),
     formatFailedBranches(stats),
     formatBuildLink(
       { buildUrl: stats.lastFailedBuildUrl, jobId: stats.lastFailedJobId },

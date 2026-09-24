@@ -68,7 +68,13 @@ export const formatPercent = (rate: number): string => {
   return percent === 0 && rate > 0 ? '<1%' : `${percent}%`;
 };
 
-/** `98 / 505 (19%)` */
+/** `98 / 505 (**19%**)`, the rate in bold so it stands out in a table. */
+export const formatFailedBuilds = ({
+  builds,
+  failedBuilds,
+  buildFailRate,
+}: Pick<FlakyTestBranchStats, 'builds' | 'failedBuilds' | 'buildFailRate'>): string =>
+  `${failedBuilds} / ${builds} (**${formatPercent(buildFailRate)}**)`;
 
 /** `2026-09-08 16:05 UTC` */
 export const formatDateTime = (date: Date): string =>
