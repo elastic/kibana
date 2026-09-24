@@ -108,5 +108,6 @@ export const createConnectorTypeFromSpec = (
     description: spec.metadata.description,
     isExperimental: spec.metadata.isTechnicalPreview,
     isTestable: Boolean(spec.test.enabled),
+    ...(spec.sandbox ? { sandbox: spec.sandbox } : {}),
   };
 };

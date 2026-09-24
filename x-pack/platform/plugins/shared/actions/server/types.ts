@@ -19,7 +19,7 @@ import type { AxiosHeaderValue } from 'axios';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z4 from '@kbn/zod/v4';
-import type { AuthMode } from '@kbn/connector-specs';
+import type { AuthMode, ConnectorSandboxSpec } from '@kbn/connector-specs';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -277,6 +277,11 @@ export interface ActionTypeCoreFields<
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
+  /**
+   * Exposes connectors of this type to agent sandboxes as environment variables.
+   * Required when `supportedFeatureIds` includes 'sandbox', forbidden otherwise.
+   */
+  sandbox?: ConnectorSandboxSpec<Config, Secrets>;
 }
 
 export type WorkflowActionType<

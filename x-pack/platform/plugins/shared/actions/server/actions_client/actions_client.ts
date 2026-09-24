@@ -98,6 +98,8 @@ import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import type { SandboxEnvVars } from '../application/connector/methods/get_sandbox_env_vars';
+import { getSandboxEnvVars } from '../application/connector/methods/get_sandbox_env_vars';
 import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
 import { invalidateInboundConnectorEventIdentity } from '../inbound/event_identity';
 import { deleteIngressCredentialForConnector } from '../inbound/ingress_credential';
@@ -681,6 +683,10 @@ export class ActionsClient {
 
   public async getAxiosInstance(actionId: string): Promise<AxiosInstance> {
     return getAxiosInstance(this.context, actionId);
+  }
+
+  public async getSandboxEnvVars(connectorId: string): Promise<SandboxEnvVars> {
+    return getSandboxEnvVars(this.context, connectorId);
   }
 
   public async bulkEnqueueExecution(

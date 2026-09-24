@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  ActionsClient,
+  PluginStartContract as ActionsPluginStart,
+  SandboxEnvVars,
+} from '@kbn/actions-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
@@ -109,6 +113,24 @@ export const buildConnectorEnv = ({
   return { env, secretValues };
 };
 
+/** Adds the connector identity to the env vars a sandbox-enabled connector type returned. */
+export const buildSandboxConnectorEnv = ({
+  connectorId,
+  actionTypeId,
+  sandboxEnvVars: { env, sensitiveValues },
+}: {
+  connectorId: string;
+  actionTypeId: string;
+  sandboxEnvVars: SandboxEnvVars;
+}): ConnectorCredentialEnv => ({
+  env: {
+    ...env,
+    [`${CONNECTOR_ENV_PREFIX}ID`]: connectorId,
+    [`${CONNECTOR_ENV_PREFIX}TYPE`]: actionTypeId,
+  },
+  secretValues: sensitiveValues.filter((value) => value.length >= MIN_REDACTABLE_SECRET_LENGTH),
+});
+
 /** Replaces every occurrence of an injected secret value in command output. */
 export const redactSecrets = (text: string, secretValues: readonly string[]): string =>
   secretValues.reduce((acc, secret) => acc.split(secret).join('[REDACTED]'), text);
@@ -116,8 +138,9 @@ export const redactSecrets = (text: string, secretValues: readonly string[]): st
 /**
  * Creates the resolver that turns a connector id into a one-command credential environment.
  * Deny by default: the connector must be on the agent allow-list and the current user must be
- * allowed to read and execute it in the current space. Only preconfigured (kibana.yml)
- * connectors are supported: their secrets are held in memory by the actions plugin.
+ * allowed to read and execute it in the current space. Connectors whose type supports the
+ * `sandbox` feature get the env vars that type declares; other connectors are only supported
+ * when preconfigured (kibana.yml), whose secrets the actions plugin holds in memory.
  */
 export const createConnectorCredentialResolver =
   ({
@@ -145,11 +168,10 @@ export const createConnectorCredentialResolver =
 
     const { request } = callContext;
 
-    let connector: Awaited<
-      ReturnType<Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>['get']>
-    >;
+    let actionsClient: ActionsClient;
+    let connector: Awaited<ReturnType<ActionsClient['get']>>;
     try {
-      const actionsClient = await actions.getActionsClientWithRequest(request);
+      actionsClient = await actions.getActionsClientWithRequest(request);
       connector = await actionsClient.get({ id: connectorId });
     } catch (err) {
       return { errorMessage: `Failed to resolve connector '${connectorId}': ${err}` };
@@ -159,6 +181,25 @@ export const createConnectorCredentialResolver =
       return {
         errorMessage: `Connector '${connectorId}' is a system connector and cannot be used`,
       };
+    }
+
+    if (actions.getSandboxEnvVarDefinitions(connector.actionTypeId)) {
+      let sandboxEnvVars: SandboxEnvVars;
+      try {
+        sandboxEnvVars = await actionsClient.getSandboxEnvVars(connectorId);
+      } catch (err) {
+        return {
+          errorMessage: `Failed to get sandbox env vars for connector '${connectorId}': ${err}`,
+        };
+      }
+
+      logger.debug(`Injecting sandbox env vars for connector ${connectorId} into a single command`);
+
+      return buildSandboxConnectorEnv({
+        connectorId,
+        actionTypeId: connector.actionTypeId,
+        sandboxEnvVars,
+      });
     }
 
     try {
@@ -174,8 +215,9 @@ export const createConnectorCredentialResolver =
     if (!inMemoryConnector) {
       return {
         errorMessage:
-          `Connector '${connectorId}' is not a preconfigured connector. Only connectors defined ` +
-          `in kibana.yml (xpack.actions.preconfigured) can be used from the sandbox.`,
+          `Connector '${connectorId}' cannot be used from the sandbox: its type ` +
+          `'${connector.actionTypeId}' does not support sandboxes and it is not a preconfigured ` +
+          `connector (xpack.actions.preconfigured in kibana.yml).`,
       };
     }
 

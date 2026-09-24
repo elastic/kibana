@@ -15,6 +15,7 @@ export interface AgentConnector {
   id: string;
   name: string;
   actionTypeId: string;
+  isPreconfigured: boolean;
 }
 
 /**
@@ -33,7 +34,12 @@ export const listAgentConnectors = async (
     const allowedSet = new Set(callContext.allowedConnectorIds);
     return all
       .filter((c) => allowedSet.has(c.id))
-      .map((c) => ({ id: c.id, name: c.name, actionTypeId: c.actionTypeId }));
+      .map((c) => ({
+        id: c.id,
+        name: c.name,
+        actionTypeId: c.actionTypeId,
+        isPreconfigured: c.isPreconfigured,
+      }));
   } catch (err) {
     return [];
   }

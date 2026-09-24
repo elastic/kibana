@@ -199,6 +199,8 @@ export interface PluginStartContract {
 
   getAllTypes: ActionTypeRegistry['getAllTypes'];
 
+  getSandboxEnvVarDefinitions: ActionTypeRegistry['getSandboxEnvVarDefinitions'];
+
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
@@ -889,6 +891,8 @@ export class ActionsPlugin
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
+      getSandboxEnvVarDefinitions:
+        actionTypeRegistry!.getSandboxEnvVarDefinitions.bind(actionTypeRegistry),
       listTypes: (featureId?: string) => {
         return this.actionTypeRegistry!.list({ featureId, exposeValidation: true });
       },

@@ -59,23 +59,33 @@ const createGetActionsClient = (connectors: Array<Record<string, unknown>>) => {
   return { getActionsClient, getAll };
 };
 
+const SANDBOX_ENV_VAR_DEFINITIONS = {
+  GH_TOKEN: { description: 'GitHub access credential.', sensitive: true },
+  GITHUB_API_URL: { description: 'GitHub REST API base URL.', sensitive: false },
+};
+
 const renderManifest = async ({
   allowedConnectorIds = ['connector-1'],
   connectors = [createRawConnector()],
   withActionsClient = true,
+  sandboxTypeIds = [],
 }: {
   allowedConnectorIds?: readonly string[];
   connectors?: Array<Record<string, unknown>>;
   withActionsClient?: boolean;
+  sandboxTypeIds?: string[];
 } = {}) => {
   const session = createSessionMock();
   const { getActionsClient } = createGetActionsClient(connectors);
   const logger = loggingSystemMock.createLogger();
+  const getSandboxEnvVarDefinitions = (actionTypeId: string) =>
+    sandboxTypeIds.includes(actionTypeId) ? SANDBOX_ENV_VAR_DEFINITIONS : undefined;
 
   await writeConnectorManifest({
     session: session as unknown as SandboxSession,
     callContext: createCallContext(allowedConnectorIds),
     getActionsClient: withActionsClient ? (getActionsClient as any) : undefined,
+    getSandboxEnvVarDefinitions,
     logger,
   });
 
@@ -107,9 +117,8 @@ describe('writeConnectorManifest', () => {
 
       expect(content).toContain('# Sandbox Connectors');
       expect(content).toContain('`connector_id` parameter of the bash tool');
-      expect(content).toContain('CONNECTOR_CONFIG_<KEY>');
-      expect(content).toContain('CONNECTOR_SECRET_<KEY>');
-      expect(content).toContain('env | grep ^CONNECTOR_ | cut -d= -f1');
+      expect(content).toContain('`CONNECTOR_ID`, `CONNECTOR_TYPE`');
+      expect(content).toContain('secret values are redacted from command output');
     });
 
     it('does not advertise an in-sandbox connector callback CLI', async () => {
@@ -141,6 +150,30 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('## Second GitHub (connector-id: connector-2');
     });
 
+    it('lists the declared env vars of sandbox-enabled connector types', async () => {
+      const { content } = await renderManifest({ sandboxTypeIds: ['.github'] });
+
+      expect(content).toContain('- `GH_TOKEN` (secret): GitHub access credential.');
+      expect(content).toContain('- `GITHUB_API_URL`: GitHub REST API base URL.');
+      expect(content).not.toContain('CONNECTOR_SECRET_<KEY>');
+    });
+
+    it('documents the generic CONNECTOR_* variables for other preconfigured connectors', async () => {
+      const { content } = await renderManifest({
+        connectors: [createRawConnector({ isPreconfigured: true })],
+      });
+
+      expect(content).toContain('`CONNECTOR_CONFIG_<KEY>`');
+      expect(content).toContain('`CONNECTOR_SECRET_<KEY>`');
+      expect(content).toContain('env | grep ^CONNECTOR_ | cut -d= -f1');
+    });
+
+    it('marks connectors that cannot be used from the sandbox', async () => {
+      const { content } = await renderManifest();
+
+      expect(content).toContain('*Not usable from the sandbox');
+    });
+
     it('notes when the allow-list is empty', async () => {
       const { content } = await renderManifest({ allowedConnectorIds: [], connectors: [] });
 
@@ -158,6 +191,7 @@ describe('writeConnectorManifest', () => {
     it('never renders secret-bearing fields or values', async () => {
       const { content } = await renderManifest({
         connectors: [createRawConnector({ extraSensitiveField: 'another-secret-value' })],
+        sandboxTypeIds: ['.github'],
       });
 
       for (const [field, value] of Object.entries(SECRETS)) {

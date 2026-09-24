@@ -101,6 +101,32 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('sandbox', () => {
+    const getEnvVars = async (secrets: Record<string, unknown>) => {
+      const { sandbox } = GithubConnector;
+      if (!sandbox) throw new Error('GitHub connector must declare sandbox support');
+      return sandbox.getEnvVars({
+        config: { serverUrl: 'https://api.githubcopilot.com/mcp/' },
+        secrets,
+        log: mockContext.log,
+      });
+    };
+
+    it('exposes a personal access token under the names gh and other tools read', async () => {
+      await expect(getEnvVars({ authType: 'bearer', token: 'ghp_secret' })).resolves.toEqual({
+        GH_TOKEN: 'ghp_secret',
+        GITHUB_TOKEN: 'ghp_secret',
+        GITHUB_API_URL: 'https://api.github.com',
+      });
+    });
+
+    it('rejects OAuth connectors, whose token is not part of the connector secrets', async () => {
+      await expect(getEnvVars({ authType: 'oauth_authorization_code' })).rejects.toThrow(
+        'Personal Access Token'
+      );
+    });
+  });
+
   describe('getMe action', () => {
     it('calls get_me tool and returns content', async () => {
       const result = await GithubConnector.actions.getMe.handler(mockContext, {});

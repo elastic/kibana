@@ -18,6 +18,7 @@ export enum ConnectorAuditAction {
   EXECUTE = 'connector_execute',
   GET_GLOBAL_EXECUTION_LOG = 'connector_get_global_execution_log',
   GET_GLOBAL_EXECUTION_KPI = 'connector_get_global_execution_kpi',
+  GET_SANDBOX_ENV_VARS = 'connector_get_sandbox_env_vars',
 }
 
 type VerbsTuple = [string, string, string];
@@ -31,6 +32,11 @@ const eventVerbs: Record<ConnectorAuditAction, VerbsTuple> = {
   connector_execute: ['execute', 'executing', 'executed'],
   connector_get_global_execution_log: ['access', 'accessing', 'accessed'],
   connector_get_global_execution_kpi: ['access', 'accessing', 'accessed'],
+  connector_get_sandbox_env_vars: [
+    'release credentials of',
+    'releasing credentials of',
+    'released credentials of',
+  ],
 };
 
 const eventTypes: Record<ConnectorAuditAction, ArrayElement<EcsEvent['type']> | undefined> = {
@@ -42,6 +48,7 @@ const eventTypes: Record<ConnectorAuditAction, ArrayElement<EcsEvent['type']> | 
   connector_execute: undefined,
   connector_get_global_execution_log: 'access',
   connector_get_global_execution_kpi: 'access',
+  connector_get_sandbox_env_vars: 'access',
 };
 
 export interface ConnectorAuditEventParams {

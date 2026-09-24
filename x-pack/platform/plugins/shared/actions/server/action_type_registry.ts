@@ -11,9 +11,11 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { getSandboxEnvVarDeclarationErrors } from '@kbn/connector-specs';
+import type { SandboxEnvVarDefinition } from '@kbn/connector-specs';
 import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { ActionType as CommonActionType } from '../common';
-import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
+import { areValidFeatures, MAX_FEATURE_ID_LENGTH, SandboxConnectorFeatureId } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
@@ -203,6 +205,36 @@ export class ActionTypeRegistry {
       );
     }
 
+    const hasSandboxFeature = actionType.supportedFeatureIds.includes(SandboxConnectorFeatureId);
+    if (hasSandboxFeature !== Boolean(actionType.sandbox)) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.inconsistentSandboxSupport', {
+          defaultMessage:
+            'Connector type "{connectorTypeId}" must define "sandbox" if and only if its supported feature ids include "{sandboxFeatureId}".',
+          values: {
+            connectorTypeId: actionType.id,
+            sandboxFeatureId: SandboxConnectorFeatureId,
+          },
+        })
+      );
+    }
+
+    const sandboxDeclarationErrors = actionType.sandbox
+      ? getSandboxEnvVarDeclarationErrors(actionType.sandbox.envVars)
+      : [];
+    if (sandboxDeclarationErrors.length > 0) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.invalidSandboxEnvVars', {
+          defaultMessage:
+            'Invalid sandbox env vars for connector type "{connectorTypeId}": {errors}.',
+          values: {
+            connectorTypeId: actionType.id,
+            errors: sandboxDeclarationErrors.join('; '),
+          },
+        })
+      );
+    }
+
     if (
       !actionType.isSystemActionType &&
       !actionType.subFeature &&
@@ -311,6 +343,16 @@ export class ActionTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.list().map(({ id }) => id)];
+  }
+
+  /**
+   * Returns the env vars a connector type exposes to agent sandboxes, or undefined when the
+   * type is not sandbox-enabled or not registered.
+   */
+  public getSandboxEnvVarDefinitions(
+    actionTypeId: string
+  ): Readonly<Record<string, SandboxEnvVarDefinition>> | undefined {
+    return this.actionTypes.get(actionTypeId)?.sandbox?.envVars;
   }
 
   isDeprecated(actionTypeId: string): boolean {

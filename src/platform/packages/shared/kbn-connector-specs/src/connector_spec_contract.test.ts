@@ -10,6 +10,7 @@
 import * as authTypeSpecs from './all_auth_types';
 import * as connectorsSpecs from './all_specs';
 import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector_spec';
+import { getSandboxEnvVarDeclarationErrors } from './connector_spec';
 import { ConnectorIconsMap } from './connector_icons_map';
 import { getSchemaForAuthType } from './lib';
 import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from './event_type_id';
@@ -43,6 +44,15 @@ describe('connector spec contracts', () => {
     // Non-empty entries must be valid feature ID strings.
     if (metadata.supportedFeatureIds.length > 0) {
       expect(metadata.supportedFeatureIds.every((id) => typeof id === 'string')).toBe(true);
+    }
+  });
+
+  it.each(allSpecs)('%s has a consistent sandbox declaration', (_exportName, spec) => {
+    const hasSandboxFeature = spec.metadata.supportedFeatureIds.includes('sandbox');
+
+    expect(Boolean(spec.sandbox)).toBe(hasSandboxFeature);
+    if (spec.sandbox) {
+      expect(getSandboxEnvVarDeclarationErrors(spec.sandbox.envVars)).toEqual([]);
     }
   });
 

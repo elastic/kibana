@@ -330,15 +330,13 @@ explicitly asks for. Nothing in the sandbox is sensitive on its own.
 `/workspace/connectors.md` lists the connectors assigned to this agent. **Read it before using a
 connector.** Connector credentials are never stored in the sandbox: to call an external service,
 pass the connector id as the bash tool's `connector_id` parameter. For that single command only, the
-environment then contains `CONNECTOR_ID`, `CONNECTOR_TYPE`, one `CONNECTOR_CONFIG_<KEY>` per
-connector setting and one `CONNECTOR_SECRET_<KEY>` per credential; they are gone when the command
-exits. Call the service directly with standard tools:
+environment then contains `CONNECTOR_ID`, `CONNECTOR_TYPE`, and the environment variables the
+manifest lists under that connector; they are gone when the command exits. Call the service
+directly with standard tools, e.g. with a GitHub connector:
 
 ```bash
-# discover the variable names for this connector (values are redacted from output)
-env | grep ^CONNECTOR_ | cut -d= -f1
-# then call the service
-curl -sS -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/repos/org/repo/issues?state=open"
+# secret values are redacted from output
+curl -sS -H "Authorization: Bearer $GH_TOKEN" "$GITHUB_API_URL/repos/org/repo/issues?state=open"
 ```
 
 Only the connectors listed in the manifest can be requested; if one you expected is absent, it has

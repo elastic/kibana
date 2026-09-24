@@ -32,6 +32,7 @@ export const EndpointSecurityConnectorFeatureId = 'endpointSecurity';
 export const WorkflowsConnectorFeatureId = 'workflows';
 export const AgentBuilderConnectorFeatureId = 'agentBuilder';
 export const ContextEngineConnectorFeatureId = 'contextEngine';
+export const SandboxConnectorFeatureId = 'sandbox';
 
 const compatibilityEndpointSecurity = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.endpointSecurity',
@@ -94,6 +95,11 @@ const compatibilityAgentBuilder = i18n.translate(
 const compatibilityContextEngine = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.contextEngine',
   { defaultMessage: 'Context Engine' }
+);
+
+const compatibilitySandbox = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.sandbox',
+  { defaultMessage: 'Agent Sandbox' }
 );
 
 export const AlertingConnectorFeature: ConnectorFeatureConfig = {
@@ -170,6 +176,12 @@ export const ContextEngineConnectorFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityContextEngine,
 };
 
+export const SandboxConnectorFeature: ConnectorFeatureConfig = {
+  id: SandboxConnectorFeatureId,
+  name: compatibilitySandbox,
+  compatibility: compatibilitySandbox,
+};
+
 const AllAvailableConnectorFeatures = {
   [AlertingConnectorFeature.id]: AlertingConnectorFeature,
   [CasesConnectorFeature.id]: CasesConnectorFeature,
@@ -182,6 +194,7 @@ const AllAvailableConnectorFeatures = {
   [WorkflowsConnectorFeature.id]: WorkflowsConnectorFeature,
   [AgentBuilderConnectorFeature.id]: AgentBuilderConnectorFeature,
   [ContextEngineConnectorFeature.id]: ContextEngineConnectorFeature,
+  [SandboxConnectorFeature.id]: SandboxConnectorFeature,
 };
 
 export function areValidFeatures(ids: string[]) {

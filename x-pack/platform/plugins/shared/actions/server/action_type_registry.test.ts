@@ -145,6 +145,57 @@ describe('actionTypeRegistry', () => {
       );
     });
 
+    describe('sandbox support', () => {
+      const sandbox = {
+        envVars: { SERVICE_TOKEN: { description: 'Token', sensitive: true } },
+        getEnvVars: async () => ({ SERVICE_TOKEN: 'token' }),
+      };
+
+      test('registers a sandbox-enabled connector type and exposes its env var definitions', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({ supportedFeatureIds: ['workflows', 'sandbox'], sandbox })
+        );
+
+        expect(actionTypeRegistry.getSandboxEnvVarDefinitions('my-connector-type')).toEqual(
+          sandbox.envVars
+        );
+      });
+
+      test('returns no env var definitions for connector types without sandbox support', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(getConnectorType());
+
+        expect(actionTypeRegistry.getSandboxEnvVarDefinitions('my-connector-type')).toBe(undefined);
+      });
+
+      test('throws if the sandbox feature id is set without a sandbox definition', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        expect(() =>
+          actionTypeRegistry.register(getConnectorType({ supportedFeatureIds: ['sandbox'] }))
+        ).toThrow('must define "sandbox" if and only if');
+      });
+
+      test('throws if a sandbox definition is set without the sandbox feature id', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        expect(() => actionTypeRegistry.register(getConnectorType({ sandbox }))).toThrow(
+          'must define "sandbox" if and only if'
+        );
+      });
+
+      test('throws if a sandbox env var name is reserved', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        expect(() =>
+          actionTypeRegistry.register(
+            getConnectorType({
+              supportedFeatureIds: ['sandbox'],
+              sandbox: { ...sandbox, envVars: { PATH: { description: 'x', sensitive: false } } },
+            })
+          )
+        ).toThrow('"PATH" is reserved');
+      });
+    });
+
     test('throws if a supported feature id exceeds the max length', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       expect(() =>
