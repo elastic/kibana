@@ -463,7 +463,10 @@ export class WorkflowsManagementApi {
     spaceId: string,
     options: { page?: number; perPage?: number; request: KibanaRequest }
   ): Promise<WorkflowChangesHistoryResponse> {
-    await this.assertWorkflowAccess(id, spaceId, 'read', options?.request);
+    const workflow = await this.workflowsService.getWorkflow(id, spaceId, { includeDeleted: true });
+    if (!workflow) throw new WorkflowNotFoundError(id);
+    const access = await this.workflowsService.getAccessControl();
+    await access.assertAccess(workflow, 'read', options.request);
     return this.workflowsService.getHistoryForWorkflow(id, spaceId, options);
   }
 

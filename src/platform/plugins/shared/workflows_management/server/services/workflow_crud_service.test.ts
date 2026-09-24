@@ -2890,7 +2890,11 @@ describe('WorkflowCrudService force deletion access', () => {
 
     if (allowed) {
       await expect(result).resolves.toMatchObject({ deleted: 1, failures: [] });
-      expect(client.delete).toHaveBeenCalledWith({ id: 'wf-1', if_seq_no: 6, if_primary_term: 1 });
+      expect(client.delete).toHaveBeenCalledWith({
+        id: 'wf-1',
+        if_seq_no: accessControl?.access_mode === 'private' ? 6 : 5,
+        if_primary_term: 1,
+      });
     } else {
       await expect(result).rejects.toThrow();
       expect(client.delete).not.toHaveBeenCalled();

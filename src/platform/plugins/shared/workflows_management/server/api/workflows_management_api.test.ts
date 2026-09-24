@@ -132,7 +132,7 @@ describe('WorkflowsManagementApi', () => {
     mockRequest = httpServerMock.createKibanaRequest();
   });
 
-  describe('workflow execution history access', () => {
+  describe('workflow history access', () => {
     const workflow = {
       id: 'workflow-123',
       name: 'Test workflow',
@@ -149,7 +149,9 @@ describe('WorkflowsManagementApi', () => {
 
     it.each([
       { name: 'owner', profileId: 'owner', mode: 'private', allowed: true },
+      { name: 'viewer', profileId: 'viewer', mode: 'private', allowed: true },
       { name: 'executor', profileId: 'executor', mode: 'private', allowed: true },
+      { name: 'editor', profileId: 'editor', mode: 'private', allowed: true },
       { name: 'outsider', profileId: 'outsider', mode: 'private', allowed: false },
       { name: 'missing profile', profileId: null, mode: 'private', allowed: false },
       { name: 'public', profileId: 'outsider', mode: 'public', allowed: true },
@@ -170,7 +172,9 @@ describe('WorkflowsManagementApi', () => {
             ? {
                 access_mode: mode,
                 entries: [
+                  { type: 'user', id: 'viewer', role: 'viewer', added_at: '2026-09-17' },
                   { type: 'user', id: 'executor', role: 'executor', added_at: '2026-09-17' },
+                  { type: 'user', id: 'editor', role: 'editor', added_at: '2026-09-17' },
                 ],
               }
             : undefined,
@@ -216,6 +220,45 @@ describe('WorkflowsManagementApi', () => {
           await expect(history).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
           expect(mockWorkflowsService.searchStepExecutions).not.toHaveBeenCalled();
         }
+
+        const historyOptions = { request: mockRequest, page: 2, perPage: 10 };
+        const historyResponse = { page: 2, perPage: 10, total: 1, items: [] };
+        mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(historyResponse);
+        const changes = api.getHistoryForWorkflow(workflow.id, 'default', historyOptions);
+        if (allowed) {
+          await expect(changes).resolves.toBe(historyResponse);
+          expect(mockWorkflowsService.getHistoryForWorkflow).toHaveBeenCalledWith(
+            workflow.id,
+            'default',
+            historyOptions
+          );
+        } else {
+          await expect(changes).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+        }
+      }
+    );
+
+    it('does not read change history when the workflow document is missing', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(null);
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', { request: mockRequest })
+      ).rejects.toBeInstanceOf(WorkflowNotFoundError);
+
+      expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+    });
+
+    it.each(['edit', 'execute'] as const)(
+      'still excludes soft-deleted workflows from %s access',
+      async (operation) => {
+        mockWorkflowsService.getWorkflow.mockImplementation(async (_id, _spaceId, options) =>
+          options?.includeDeleted ? workflow : null
+        );
+
+        await expect(
+          api.assertWorkflowAccess(workflow.id, 'default', operation, mockRequest)
+        ).rejects.toBeInstanceOf(WorkflowNotFoundError);
       }
     );
 

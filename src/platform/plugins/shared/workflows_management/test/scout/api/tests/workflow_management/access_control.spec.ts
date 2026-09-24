@@ -242,12 +242,26 @@ steps:
         })
       ).toHaveStatusCode(200);
       expect(await apiClient.get(workflowPath, { headers: readerHeaders })).toHaveStatusCode(200);
-      expect(
-        await apiClient.post(`${workflowPath}/run`, {
-          headers: readerHeaders,
-          body: { inputs: {} },
-        })
-      ).toHaveStatusCode(200);
+      const publicRun = await apiClient.post(`${workflowPath}/run`, {
+        headers: readerHeaders,
+        body: { inputs: {} },
+      });
+      expect(publicRun).toHaveStatusCode(200);
+      await expect
+        .poll(
+          async () => {
+            const executions = await apiClient.get(`${workflowPath}/executions`, {
+              headers: readerHeaders,
+            });
+            expect(executions).toHaveStatusCode(200);
+            return executions.body.results.find(
+              (execution: WorkflowExecutionDto) =>
+                execution.id === publicRun.body.workflowExecutionId
+            )?.status;
+          },
+          { timeout: 60000 }
+        )
+        .toBe('completed');
       expect(
         await apiClient.put(workflowPath, { headers: readerHeaders, body: { yaml } })
       ).toHaveStatusCode(200);
@@ -989,6 +1003,75 @@ steps:
       }
     }
   );
+
+  for (const { mode, shared, readerStatus } of [
+    { mode: 'public', shared: false, readerStatus: 200 },
+    { mode: 'private', shared: false, readerStatus: 403 },
+    { mode: 'private', shared: true, readerStatus: 200 },
+  ] as const) {
+    apiTest(
+      `retains change history after soft deletion (${mode}, shared=${shared})`,
+      async ({ apiClient }) => {
+        const created = await apiClient.post(`s/${spaceId}/api/workflows/workflow`, {
+          headers: ownerHeaders,
+          body: { yaml },
+        });
+        expect(created).toHaveStatusCode(200);
+        const deletedId = created.body.id;
+        const workflowPath = `s/${spaceId}/api/workflows/workflow/${deletedId}`;
+        const historyPath = `s/${spaceId}/internal/workflows/workflow/${deletedId}/history`;
+        const ownerHistoryHeaders = { ...ownerHeaders, 'elastic-api-version': '1' };
+        const readerHistoryHeaders = { ...readerHeaders, 'elastic-api-version': '1' };
+        try {
+          expect(
+            await apiClient.put(`s/${spaceId}/internal/workflows/${deletedId}/access_control`, {
+              headers: ownerHeaders,
+              body: {
+                access_mode: mode,
+                entries: shared ? [{ type: 'user', id: readerProfileId, role: 'viewer' }] : [],
+              },
+            })
+          ).toHaveStatusCode(200);
+          await expect
+            .poll(async () => {
+              const history = await apiClient.get(historyPath, { headers: ownerHistoryHeaders });
+              expect(history).toHaveStatusCode(200);
+              return history.body.total;
+            })
+            .toBeGreaterThan(0);
+          const before = await apiClient.get(historyPath, { headers: ownerHistoryHeaders });
+          expect(before).toHaveStatusCode(200);
+
+          expect(await apiClient.delete(workflowPath, { headers: ownerHeaders })).toHaveStatusCode(
+            200
+          );
+
+          const after = await apiClient.get(historyPath, { headers: ownerHistoryHeaders });
+          expect(after).toHaveStatusCode(200);
+          expect(after.body.items).toStrictEqual(expect.arrayContaining(before.body.items));
+          expect(
+            await apiClient.get(historyPath, { headers: readerHistoryHeaders })
+          ).toHaveStatusCode(readerStatus);
+          expect(await apiClient.get(workflowPath, { headers: ownerHeaders })).toHaveStatusCode(
+            404
+          );
+
+          expect(
+            await apiClient.delete(`${workflowPath}?force=true&acknowledgeAclLoss=true`, {
+              headers: ownerHeaders,
+            })
+          ).toHaveStatusCode(200);
+          expect(
+            await apiClient.get(historyPath, { headers: ownerHistoryHeaders })
+          ).toHaveStatusCode(404);
+        } finally {
+          await apiClient.delete(`${workflowPath}?force=true&acknowledgeAclLoss=true`, {
+            headers: ownerHeaders,
+          });
+        }
+      }
+    );
+  }
 
   apiTest('keeps unsaved test executions accessible', async ({ apiClient }) => {
     const run = await apiClient.post(`s/${spaceId}/api/workflows/test`, {

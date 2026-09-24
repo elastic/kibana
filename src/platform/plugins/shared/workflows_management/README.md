@@ -414,14 +414,17 @@ workflows. This requires a search of inaccessible workflows in the space before
 querying execution data. Writes retain the ACL during YAML updates and imports.
 Execution checks use the current ACL and the execution identity.
 
-Soft deletion retains the workflow document and its ACL for execution reads.
+Soft deletion retains the workflow document and its ACL for execution and change
+history reads.
 Only the owner can hard-delete a private workflow, and the request must include
 `force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
-require no ACL acknowledgment. Hard deletion first marks the workflow as deleted
-and disabled, then removes its steps and executions before removing the workflow
-document. If history cleanup fails or is incomplete, the API returns an error
-and retains the soft-deleted workflow and its ACL. The caller can retry force
-deletion after the error is resolved.
+require no ACL acknowledgment. Their documents are removed before best-effort
+history cleanup, and cleanup failures do not fail deletion.
+Hard deletion of a private workflow first marks it as deleted and disabled, then
+removes its steps and executions before removing the workflow document. If history
+cleanup fails or is incomplete, the API returns an error and retains the
+soft-deleted workflow and its ACL. The caller can retry force deletion after the
+error is resolved.
 Direct Elasticsearch document deletion bypasses these checks. Private workflows
 are excluded from Agent Builder's search index, which currently supports feature
 privileges only.
