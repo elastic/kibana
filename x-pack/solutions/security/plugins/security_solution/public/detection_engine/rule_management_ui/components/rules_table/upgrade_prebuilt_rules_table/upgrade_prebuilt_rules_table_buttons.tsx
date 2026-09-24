@@ -39,7 +39,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
       loadingRules,
       isRefetching,
       isInitializingPrebuiltRulesPackage,
-      allRulesCustomizationCounts,
+      isFetched,
     },
     actions: {
       upgradeRules,
@@ -193,13 +193,9 @@ export const UpgradePrebuiltRulesTableButtons = ({
     () =>
       isRulesCustomizationEnabled
         ? {
-            // Force-upgrading everything skips the confirmation modal when no rule is customized,
-            // so the action must stay disabled until the counts are actually known.
-            isDisabled:
-              !canEditRules ||
-              !hasRulesToUpgrade ||
-              isRequestInProgress ||
-              allRulesCustomizationCounts === null,
+            // The action re-fetches the upgrade review before confirming, so it only needs the
+            // review to have loaded once.
+            isDisabled: !canEditRules || !hasRulesToUpgrade || isRequestInProgress || !isFetched,
             tooltip: secondaryActionsButtonTooltip,
             ariaLabel: i18n.UPDATE_ALL_RULES_MORE_ACTIONS_ARIA_LABEL,
             dataTestSubj: 'upgradeAllRulesButton-secondary',
@@ -210,12 +206,12 @@ export const UpgradePrebuiltRulesTableButtons = ({
           }
         : undefined,
     [
-      allRulesCustomizationCounts,
       allRulesToTargetMenuItems,
       canEditRules,
       closeAllPopover,
       hasRulesToUpgrade,
       isAllPopoverOpen,
+      isFetched,
       isRequestInProgress,
       isRulesCustomizationEnabled,
       secondaryActionsButtonTooltip,

@@ -373,7 +373,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       mockContext({
         upgradeAllRulesToTarget,
         upgradeRulesToTarget,
-        allRulesCustomizationCounts: {
+        fetchedCounts: {
           total: 12,
           customizedCount: 4,
           ruleTypeChangeCount: undefined,
@@ -395,22 +395,14 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(upgradeRulesToTarget).not.toHaveBeenCalled();
     });
 
-    it('confirms against freshly fetched counts rather than the cached review', async () => {
+    it('confirms against freshly fetched counts', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
       const fetchAllRulesCustomizationCounts = jest
         .fn()
         .mockResolvedValue({ total: 4, customizedCount: 2, ruleTypeChangeCount: undefined });
 
-      mockContext({
-        upgradeAllRulesToTarget,
-        fetchAllRulesCustomizationCounts,
-        allRulesCustomizationCounts: {
-          total: 3,
-          customizedCount: 0,
-          ruleTypeChangeCount: undefined,
-        },
-      });
+      mockContext({ upgradeAllRulesToTarget, fetchAllRulesCustomizationCounts });
       renderButtons([]);
 
       await openAllRulesToTargetAction(user);
@@ -428,11 +420,6 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       mockContext({
         upgradeAllRulesToTarget,
         fetchAllRulesCustomizationCounts: jest.fn().mockResolvedValue(null),
-        allRulesCustomizationCounts: {
-          total: 3,
-          customizedCount: 0,
-          ruleTypeChangeCount: undefined,
-        },
       });
       renderButtons([]);
 
@@ -453,7 +440,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
       mockContext({
         upgradeAllRulesToTarget,
-        allRulesCustomizationCounts: {
+        fetchedCounts: {
           total: 9,
           customizedCount: 0,
           ruleTypeChangeCount: undefined,
@@ -484,7 +471,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
       mockContext({
         upgradeAllRulesToTarget,
-        allRulesCustomizationCounts: {
+        fetchedCounts: {
           total: 5,
           customizedCount: 5,
           ruleTypeChangeCount: undefined,
@@ -535,18 +522,18 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
     });
 
     it('disables only the All secondary segment while the upgrade review has not loaded yet', () => {
-      mockContext({ allRulesCustomizationCounts: null });
+      mockContext({ isFetched: false });
       renderButtons([]);
 
       expect(screen.getByTestId('upgradeAllRulesButton')).toBeEnabled();
       expect(screen.getByTestId('upgradeAllRulesButton-secondary')).toBeDisabled();
     });
 
-    it('never force-upgrades when customization counts are unavailable', async () => {
+    it('never force-upgrades while the upgrade review has not loaded yet', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
 
-      mockContext({ upgradeAllRulesToTarget, allRulesCustomizationCounts: null });
+      mockContext({ upgradeAllRulesToTarget, isFetched: false });
       renderButtons([]);
 
       // The disabled segment swallows the click, so the popover and the action never appear.
@@ -642,7 +629,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         getSelectedRulesCustomizationCounts: jest
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
-        allRulesCustomizationCounts: {
+        fetchedCounts: {
           total: 12,
           customizedCount: 4,
           ruleTypeChangeCount: undefined,
@@ -678,7 +665,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         getSelectedRulesCustomizationCounts: jest
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
-        allRulesCustomizationCounts: {
+        fetchedCounts: {
           total: 12,
           customizedCount: 4,
           ruleTypeChangeCount: undefined,
@@ -760,7 +747,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         getSelectedRulesCustomizationCounts: jest
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
-        allRulesCustomizationCounts: {
+        fetchedCounts: {
           total: 12,
           customizedCount: 4,
           ruleTypeChangeCount: undefined,
@@ -804,7 +791,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         getSelectedRulesCustomizationCounts: jest
           .fn()
           .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 }),
-        allRulesCustomizationCounts: {
+        fetchedCounts: {
           total: 12,
           customizedCount: 4,
           ruleTypeChangeCount: undefined,
@@ -843,7 +830,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         getSelectedRulesCustomizationCounts: jest
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 0, ruleTypeChangeCount: 0 }),
-        allRulesCustomizationCounts: {
+        fetchedCounts: {
           total: 3,
           customizedCount: 3,
           ruleTypeChangeCount: undefined,
@@ -895,7 +882,8 @@ function mockContext({
   loadingRules = [],
   isRefetching = false,
   isInitializingPrebuiltRulesPackage = false,
-  allRulesCustomizationCounts = { total: 0, customizedCount: 0, ruleTypeChangeCount: undefined },
+  isFetched = true,
+  fetchedCounts = { total: 0, customizedCount: 0, ruleTypeChangeCount: undefined },
   upgradeRules = jest.fn(),
   upgradeAllRules = jest.fn(),
   upgradeRulesToTarget = jest.fn(),
@@ -903,13 +891,14 @@ function mockContext({
   getSelectedRulesCustomizationCounts = jest
     .fn()
     .mockReturnValue({ total: 0, customizedCount: 0, ruleTypeChangeCount: 0 }),
-  fetchAllRulesCustomizationCounts = jest.fn().mockResolvedValue(allRulesCustomizationCounts),
+  fetchAllRulesCustomizationCounts = jest.fn().mockResolvedValue(fetchedCounts),
 }: {
   hasRulesToUpgrade?: boolean;
   loadingRules?: string[];
   isRefetching?: boolean;
   isInitializingPrebuiltRulesPackage?: boolean;
-  allRulesCustomizationCounts?: RuleUpgradeCustomizationCounts | null;
+  isFetched?: boolean;
+  fetchedCounts?: RuleUpgradeCustomizationCounts | null;
   upgradeRules?: jest.Mock;
   upgradeAllRules?: jest.Mock;
   upgradeRulesToTarget?: jest.Mock;
@@ -923,7 +912,7 @@ function mockContext({
       loadingRules,
       isRefetching,
       isInitializingPrebuiltRulesPackage,
-      allRulesCustomizationCounts,
+      isFetched,
     },
     actions: {
       upgradeRules,

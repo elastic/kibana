@@ -401,55 +401,6 @@ describe('usePrebuiltRulesUpgrade', () => {
       );
     });
 
-    it('derives allRulesCustomizationCounts from the total and isCustomized.true facet', () => {
-      mockUsePrebuiltRulesUpgradeReview.mockReturnValue(
-        buildReviewResult(
-          [createRuleUpgradeInfoMock({ rule_id: 'rule-a', revision: 1, targetVersion: 3 })],
-          { total: 137, counts: { isCustomized: { true: 12, false: 125 } } }
-        )
-      );
-
-      const { result } = renderHook(() => usePrebuiltRulesUpgrade({}), {
-        wrapper: TestProviders,
-      });
-
-      expect(result.current.allRulesCustomizationCounts).toEqual({
-        total: 137,
-        customizedCount: 12,
-      });
-    });
-
-    it('defaults customizedCount to 0 when the counts facet is absent', () => {
-      mockUsePrebuiltRulesUpgradeReview.mockReturnValue(buildReviewResult([], { total: 42 }));
-
-      const { result } = renderHook(() => usePrebuiltRulesUpgrade({}), {
-        wrapper: TestProviders,
-      });
-
-      expect(result.current.allRulesCustomizationCounts).toEqual({
-        total: 42,
-        customizedCount: 0,
-      });
-    });
-
-    it('is null while the review has not loaded so callers cannot mistake it for zero customized rules', () => {
-      mockUsePrebuiltRulesUpgradeReview.mockReturnValue({
-        data: undefined,
-        refetch: jest.fn(),
-        dataUpdatedAt: 0,
-        isFetched: false,
-        isLoading: true,
-        isFetching: true,
-        isRefetching: false,
-      });
-
-      const { result } = renderHook(() => usePrebuiltRulesUpgrade({}), {
-        wrapper: TestProviders,
-      });
-
-      expect(result.current.allRulesCustomizationCounts).toBeNull();
-    });
-
     it('getSelectedRulesCustomizationCounts counts customized rules among the selected ids', () => {
       mockUsePrebuiltRulesUpgradeReview.mockReturnValue(
         buildReviewResult([
@@ -632,18 +583,31 @@ describe('usePrebuiltRulesUpgrade', () => {
         { wrapper: TestProviders }
       );
 
-      expect(result.current.allRulesCustomizationCounts).toEqual({
-        total: 5,
-        customizedCount: 0,
-        ruleTypeChangeCount: undefined,
-      });
-
       await expect(result.current.fetchAllRulesCustomizationCounts()).resolves.toEqual({
         total: 7,
         customizedCount: 3,
         ruleTypeChangeCount: undefined,
       });
       expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('fetchAllRulesCustomizationCounts defaults customizedCount to 0 when the counts facet is absent', async () => {
+      const refetch = jest.fn().mockResolvedValue({
+        isSuccess: true,
+        data: buildReviewResult([], { total: 42 }).data,
+      });
+      mockUsePrebuiltRulesUpgradeReview.mockReturnValue({ ...buildReviewResult(), refetch });
+
+      const { result } = renderHook(
+        () => usePrebuiltRulesUpgrade({ withCustomizationCounts: true }),
+        { wrapper: TestProviders }
+      );
+
+      await expect(result.current.fetchAllRulesCustomizationCounts()).resolves.toEqual({
+        total: 42,
+        customizedCount: 0,
+        ruleTypeChangeCount: undefined,
+      });
     });
 
     it('fetchAllRulesCustomizationCounts resolves to null when the re-fetch fails even though cached data is retained', async () => {
@@ -701,7 +665,7 @@ describe('usePrebuiltRulesUpgrade', () => {
       });
     });
 
-    it('getSelectedRulesCustomizationCounts and allRulesCustomizationCounts share the same key shape', () => {
+    it('getSelectedRulesCustomizationCounts returns total, customizedCount and ruleTypeChangeCount', () => {
       mockUsePrebuiltRulesUpgradeReview.mockReturnValue(
         buildReviewResult(
           [createRuleUpgradeInfoMock({ rule_id: 'rule-a', revision: 1, targetVersion: 1 })],
@@ -716,11 +680,6 @@ describe('usePrebuiltRulesUpgrade', () => {
       expect(
         Object.keys(result.current.getSelectedRulesCustomizationCounts(['rule-a'])).sort()
       ).toEqual(['customizedCount', 'ruleTypeChangeCount', 'total']);
-      expect(Object.keys(result.current.allRulesCustomizationCounts ?? {}).sort()).toEqual([
-        'customizedCount',
-        'ruleTypeChangeCount',
-        'total',
-      ]);
     });
   });
 });

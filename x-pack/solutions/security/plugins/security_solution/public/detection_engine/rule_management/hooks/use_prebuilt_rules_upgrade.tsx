@@ -78,8 +78,9 @@ export interface UsePrebuiltRulesUpgradeParams {
   searchTerm?: string;
   onUpgrade?: () => void;
   /**
-   * Requests the `isCustomized` facet from the upgrade review so `allRulesCustomizationCounts`
-   * can be derived. Off by default because the facet costs an extra aggregation pass on the server.
+   * Requests the `isCustomized` facet from the upgrade review so customized-rule counts can be
+   * derived for the whole filtered set. Off by default because the facet costs an extra
+   * aggregation pass on the server.
    */
   withCustomizationCounts?: boolean;
 }
@@ -350,13 +351,6 @@ export function usePrebuiltRulesUpgrade({
     [rulesUpgradeState]
   );
 
-  // Stays `null` until the upgrade review has loaded so that callers fail closed: a missing or
-  // failed review must never be mistaken for "no customized rules" when confirming a force upgrade.
-  const allRulesCustomizationCounts = useMemo<RuleUpgradeCustomizationCounts | null>(
-    () => toAllRulesCustomizationCounts(upgradeReviewResponse),
-    [upgradeReviewResponse]
-  );
-
   /**
    * Re-fetches the upgrade review and derives the counts from the fresh response so that the
    * "Update all" confirmation reflects customizations made since the cached review loaded.
@@ -566,7 +560,6 @@ export function usePrebuiltRulesUpgrade({
     upgradeRulesToTarget,
     upgradeAllRulesToTarget,
     getSelectedRulesCustomizationCounts,
-    allRulesCustomizationCounts,
     fetchAllRulesCustomizationCounts,
   };
 }

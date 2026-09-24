@@ -95,11 +95,6 @@ export interface UpgradePrebuiltRulesTableState {
    * Currently selected table sorting
    */
   sortingOptions: UpgradePrebuiltRulesSortingOptions;
-  /**
-   * Customized-rule counts for the full filtered set of upgradeable rules.
-   * `null` until the upgrade review has loaded.
-   */
-  allRulesCustomizationCounts: RuleUpgradeCustomizationCounts | null;
 }
 
 export interface UpgradePrebuiltRulesTableActions {
@@ -194,7 +189,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     upgradeRulesToTarget,
     upgradeAllRulesToTarget,
     getSelectedRulesCustomizationCounts,
-    allRulesCustomizationCounts,
     fetchAllRulesCustomizationCounts,
   } = usePrebuiltRulesUpgrade({
     pagination,
@@ -255,7 +249,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           total: upgradeReviewResponse?.total ?? 0,
         },
         sortingOptions,
-        allRulesCustomizationCounts,
       },
       actions,
     }),
@@ -274,7 +267,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       pagination,
       upgradeReviewResponse?.total,
       sortingOptions,
-      allRulesCustomizationCounts,
       actions,
     ]
   );
