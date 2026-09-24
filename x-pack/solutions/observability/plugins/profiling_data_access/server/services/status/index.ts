@@ -27,55 +27,35 @@ export function createGetStatusService(params: RegisterServicesParams) {
     spaceId,
     isServerless,
   }: HasSetupParams): Promise<ProfilingStatus> => {
-    try {
-      const { type, setupState } = await getSetupState({
-        ...params,
-        esClient,
-        soClient,
-        spaceId,
-        isServerless,
-      });
+    const { type, setupState } = await getSetupState({
+      ...params,
+      esClient,
+      soClient,
+      spaceId,
+      isServerless,
+    });
 
-      params.logger.debug(
-        () => `Set up state for: ${type}: ${JSON.stringify(setupState, null, 2)}`
-      );
+    params.logger.debug(() => `Set up state for: ${type}: ${JSON.stringify(setupState, null, 2)}`);
 
-      let hasSetup = false;
-      switch (type) {
-        case 'cloud':
-          hasSetup = areCloudResourcesSetup(setupState);
-          break;
-        case 'self-managed':
-          hasSetup = areResourcesSetup(setupState);
-          break;
-        case 'serverless':
-          hasSetup = areServerlessResourcesSetup(setupState);
-          break;
-      }
-
-      return {
-        type,
-        profiling_enabled: setupState.profiling.enabled,
-        has_setup: hasSetup,
-        has_data: setupState.data.available,
-        pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
-      };
-    } catch (error) {
-      // We cannot fully check the status of all resources
-      // to make sure Profiling has been set up and has data
-      // for users with monitor privileges. This privileges
-      // is needed to call the profiling ES plugin for example.
-      if (error?.meta?.statusCode === 403 || error?.originalError?.meta?.statusCode === 403) {
-        return {
-          profiling_enabled: true,
-          has_setup: true,
-          pre_8_9_1_data: false,
-          has_data: true,
-          unauthorized: true,
-        };
-      }
-
-      throw error;
+    let hasSetup = false;
+    switch (type) {
+      case 'cloud':
+        hasSetup = areCloudResourcesSetup(setupState);
+        break;
+      case 'self-managed':
+        hasSetup = areResourcesSetup(setupState);
+        break;
+      case 'serverless':
+        hasSetup = areServerlessResourcesSetup(setupState);
+        break;
     }
+
+    return {
+      type,
+      profiling_enabled: setupState.profiling.enabled,
+      has_setup: hasSetup,
+      has_data: setupState.data.available,
+      pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
+    };
   };
 }
