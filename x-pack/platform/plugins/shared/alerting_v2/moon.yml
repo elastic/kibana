@@ -109,6 +109,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-agent-builder'
+  - '@kbn/deeplinks-observability'
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/core-user-profile-browser'
   - '@kbn/datemath'
