@@ -96,10 +96,6 @@ export class FlyoutSystemApp {
     return this.flyout(form, session).locator(subj(name));
   }
 
-  ownFocusSwitch(session: string): Locator {
-    return this.page.locator(subj(`flyoutOwnFocusSwitch-${session}`));
-  }
-
   async openFlyout(form: FlyoutForm, session: string): Promise<Locator> {
     await this.trigger(form, session).click();
     const flyout = this.flyout(form, session);
@@ -119,11 +115,6 @@ export class FlyoutSystemApp {
   header(form: FlyoutForm, session: string): Locator {
     return this.flyout(form, session).locator(subj(`${this.rootSubj(form, session)}Header`));
   }
-
-  childHeaderSelector(form: FlyoutForm, session: string, label: ChildLabel): string {
-    return subj(`${this.childRootSubj(form, session, label)}Header`);
-  }
-
   collapsibleRegion(form: FlyoutForm, session: string): Locator {
     return this.flyout(form, session).locator(subj('flyoutHeaderCollapsibleRegion'));
   }
@@ -168,10 +159,6 @@ export class FlyoutSystemApp {
 
   closeButton(form: FlyoutForm, session: string): Locator {
     return this.flyout(form, session).locator(subj('euiFlyoutCloseButton'));
-  }
-
-  childCloseButton(form: FlyoutForm, session: string, label: ChildLabel): Locator {
-    return this.childFlyout(form, session, label).locator(subj('euiFlyoutCloseButton'));
   }
 
   resizeHandle(form: FlyoutForm, session: string): Locator {

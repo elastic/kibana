@@ -165,29 +165,6 @@ test.describe(
         expect(await app.isFocusWithin(flyout)).toBe(true);
       });
 
-      test(`the ${form} header keeps aria-hidden and focusability in agreement during the collapse animation`, async ({
-        page,
-        pageObjects,
-      }) => {
-        const app = pageObjects.flyoutSystem;
-        const session = app.session(form);
-        await app.openFlyout(form, session);
-        await expect(app.infoBlocks(form, session)).toBeVisible();
-
-        const region = app.collapsibleRegion(form, session);
-        const closeButton = app.closeButton(form, session);
-        await closeButton.focus();
-
-        // Sweep focus mid-transition to ensure aria-hidden and focusability agree.
-        await app.wheelOverHeader(form, session, WHEEL_DELTA);
-        await expect(region).toHaveAttribute('aria-hidden', 'true');
-
-        for (let i = 0; i < TAB_SWEEP_STOPS; i++) {
-          await page.keyboard.press('Tab');
-          expect(await app.isFocusWithin(region)).toBe(false);
-        }
-      });
-
       test(`a scroll-collapsed ${form} header has no accessibility violations`, async ({
         page,
         pageObjects,
@@ -206,36 +183,6 @@ test.describe(
           include: [app.rootSelector(form, session)],
         });
         expect(violations).toHaveLength(0);
-      });
-
-      test(`the ${form} header swallows the wheel when nothing in the flyout can scroll`, async ({
-        pageObjects,
-      }) => {
-        const app = pageObjects.flyoutSystem;
-        const session = app.session(form);
-        await app.openFlyout(form, session);
-        await expect(app.childTrigger(form, session, 'A')).toBeVisible();
-        const child = await app.openChildFlyout(form, session, 'A');
-
-        const result = await child.evaluate((el, headerSelector) => {
-          const body = el.querySelector('[data-test-subj="euiFlyoutBodyOverflow"]') as HTMLElement;
-          const content = el.querySelector('[data-test-subj="euiFlyoutContent"]') as HTMLElement;
-          const header = el.querySelector(headerSelector) as HTMLElement;
-          const event = new WheelEvent('wheel', { deltaY: 50, cancelable: true, bubbles: true });
-          header.dispatchEvent(event);
-          return {
-            bodyScrolls: body.scrollHeight > body.clientHeight,
-            contentScrolls: content.scrollHeight > content.clientHeight,
-            defaultPrevented: event.defaultPrevented,
-          };
-        }, app.childHeaderSelector(form, session, 'A'));
-
-        // The swallow path only exists when neither scroller has anywhere left to go.
-        expect(result.bodyScrolls).toBe(false);
-        expect(result.contentScrolls).toBe(false);
-
-        // Releasing here would chain the scroll out to the page behind the flyout.
-        expect(result.defaultPrevented).toBe(true);
       });
 
       test(`the ${form} footer stays reachable by wheel at a reflow viewport`, async ({

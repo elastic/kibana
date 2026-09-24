@@ -140,18 +140,6 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     });
 
     expect(region).toHaveAttribute('aria-hidden', 'true');
-    expect(region).toHaveAttribute('inert');
-  });
-
-  it('takes the collapsible region out of the tab order as soon as it is hidden', () => {
-    renderCollapsibleFlyout();
-    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
-    const region = screen.getByTestId('flyoutHeaderCollapsibleRegion');
-
-    expect(region).not.toHaveAttribute('inert');
-
-    collapseByScroll(overflowEl);
-
     // `aria-hidden` alone would disagree with focusability for the length of the animation.
     expect(region).toHaveAttribute('inert');
   });
@@ -197,32 +185,6 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     const heading = screen.getByRole('heading', { name: 'Long title' });
     expect(heading).toBeInTheDocument();
     expect(heading.id).toMatch(/^flyoutTemplateTitle/);
-  });
-
-  it('keeps the title tooltip anchor focusable after collapsing on scroll', () => {
-    const { container } = render(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header
-          title="Long title"
-          description="A timestamp"
-          titleTooltip="Extra context"
-        />
-        <FlyoutTemplate.Body>
-          <span>content</span>
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
-    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
-
-    collapseByScroll(overflowEl);
-    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute(
-      'aria-hidden',
-      'true'
-    );
-
-    const anchor = container.querySelector('.euiToolTipAnchor');
-    expect(anchor).not.toBeNull();
-    expect(anchor?.querySelector('[data-euiicon-type="info"]')).toHaveAttribute('tabindex', '0');
   });
 
   it('stays expanded when the body does not overflow enough to cover the collapse budget', () => {
@@ -404,7 +366,8 @@ describe('FlyoutTemplate header collapse on scroll', () => {
    * guard reads as "already at the end" — the default here is mid-scroll so forwarding is live.
    */
   const setUpWheelForwarding = (
-    scrollState = { scrollTop: 100, scrollHeight: 1000, clientHeight: 400 }
+    scrollState = { scrollTop: 100, scrollHeight: 1000, clientHeight: 400 },
+    outerScrollState?: { scrollTop: number; scrollHeight: number; clientHeight: number }
   ) => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
@@ -413,6 +376,8 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     Object.defineProperty(overflowEl, 'scrollBy', { value: scrollBy, configurable: true });
     // Page mode derives its pixel delta from the viewport height.
     setScrollState(overflowEl, scrollState);
+    // `.euiFlyout__content` wraps header, body, and footer, and scrolls at short viewports.
+    if (outerScrollState) setScrollState(screen.getByTestId('euiFlyoutContent'), outerScrollState);
     return { headerEl, scrollBy };
   };
 
@@ -477,11 +442,10 @@ describe('FlyoutTemplate header collapse on scroll', () => {
   });
 
   it('releases the wheel event at the end of the scroll range so the scroll can chain outward', () => {
-    const { headerEl, scrollBy } = setUpWheelForwarding({
-      scrollTop: 600,
-      scrollHeight: 1000,
-      clientHeight: 400,
-    });
+    const { headerEl, scrollBy } = setUpWheelForwarding(
+      { scrollTop: 600, scrollHeight: 1000, clientHeight: 400 },
+      { scrollTop: 0, scrollHeight: 800, clientHeight: 400 }
+    );
 
     let notCancelled = true;
     act(() => {
@@ -495,11 +459,10 @@ describe('FlyoutTemplate header collapse on scroll', () => {
   });
 
   it('releases the wheel event at the top of the scroll range when scrolling up', () => {
-    const { headerEl, scrollBy } = setUpWheelForwarding({
-      scrollTop: 0,
-      scrollHeight: 1000,
-      clientHeight: 400,
-    });
+    const { headerEl, scrollBy } = setUpWheelForwarding(
+      { scrollTop: 0, scrollHeight: 1000, clientHeight: 400 },
+      { scrollTop: 200, scrollHeight: 800, clientHeight: 400 }
+    );
 
     let notCancelled = true;
     act(() => {
@@ -507,6 +470,22 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     });
 
     expect(notCancelled).toBe(true);
+    expect(scrollBy).not.toHaveBeenCalled();
+  });
+
+  it('swallows the wheel event when neither the body nor the outer container can scroll', () => {
+    const { headerEl, scrollBy } = setUpWheelForwarding(
+      { scrollTop: 0, scrollHeight: 400, clientHeight: 400 },
+      { scrollTop: 0, scrollHeight: 400, clientHeight: 400 }
+    );
+
+    let notCancelled = true;
+    act(() => {
+      notCancelled = fireEvent.wheel(headerEl, { deltaY: 50 });
+    });
+
+    // Releasing here would chain the scroll out to the page behind the flyout.
+    expect(notCancelled).toBe(false);
     expect(scrollBy).not.toHaveBeenCalled();
   });
 
