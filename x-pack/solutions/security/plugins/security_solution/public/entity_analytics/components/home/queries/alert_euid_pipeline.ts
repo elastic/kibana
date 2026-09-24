@@ -40,9 +40,7 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
   // alerts (with both user + host context) will contribute via whichever EUID is first
   // non-null; full multi-entity support can be added later via MV_EXPAND over separate fields.
   const euidVars = ENTITY_TYPES.map((t) => `${t}_euid`);
-  parts.push(
-    `| EVAL _ea_entity_id = COALESCE(\`kibana.alert.entity.id\`, ${euidVars.join(', ')})`
-  );
+  parts.push(`| EVAL _ea_entity_id = COALESCE(\`kibana.alert.entity.id\`, ${euidVars.join(', ')})`);
   parts.push('| MV_EXPAND _ea_entity_id');
   parts.push('| WHERE _ea_entity_id IS NOT NULL');
   // Rename only after STATS to avoid STATS BY grouping on the mapped entity.id field

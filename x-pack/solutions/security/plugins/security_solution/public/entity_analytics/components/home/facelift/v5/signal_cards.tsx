@@ -333,9 +333,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                 css={css`
                   line-height: ${METRIC_LINE_HEIGHT};
                   text-align: end;
-                  ${isExpanded
-                    ? `font-size: calc(${euiTheme.base}px * 2.5);`
-                    : ''}
+                  ${isExpanded ? `font-size: calc(${euiTheme.base}px * 2.5);` : ''}
                 `}
               >
                 <span>{card.value}</span>

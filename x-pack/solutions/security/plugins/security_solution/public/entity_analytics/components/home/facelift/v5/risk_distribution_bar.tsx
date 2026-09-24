@@ -92,7 +92,12 @@ export const RiskDistributionBar: React.FC<RiskDistributionBarProps> = ({
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       {/* Total count + label — count large on left, "by risk level" subdued on right */}
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
+        <EuiFlexGroup
+          alignItems="baseline"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
             <EuiText size="l">
               <strong>

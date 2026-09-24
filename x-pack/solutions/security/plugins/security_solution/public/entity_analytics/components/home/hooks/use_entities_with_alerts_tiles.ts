@@ -33,7 +33,8 @@ interface AlertBasedTilesResult {
 
 export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
   const row = raw.values?.[0];
-  if (!row) return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
+  if (!row)
+    return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
 
   const col = (name: string) => raw.columns?.findIndex((c) => c.name === name) ?? -1;
   const toIds = (idx: number): string[] => {
@@ -45,10 +46,14 @@ export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBase
   };
 
   return {
-    alertsCount:           typeof row[col('alerts_count')]    === 'number' ? (row[col('alerts_count')]    as number) : 0,
-    alertsEntityIds:       toIds(col('alerts_entity_ids')),
-    watchlistedCount:      typeof row[col('watchlisted_count')] === 'number' ? (row[col('watchlisted_count')] as number) : 0,
-    watchlistedEntityIds:  toIds(col('watchlisted_entity_ids')),
+    alertsCount:
+      typeof row[col('alerts_count')] === 'number' ? (row[col('alerts_count')] as number) : 0,
+    alertsEntityIds: toIds(col('alerts_entity_ids')),
+    watchlistedCount:
+      typeof row[col('watchlisted_count')] === 'number'
+        ? (row[col('watchlisted_count')] as number)
+        : 0,
+    watchlistedEntityIds: toIds(col('watchlisted_entity_ids')),
   };
 };
 
@@ -102,12 +107,15 @@ export const useAlertBasedTiles = ({
   } = useQuery<AlertBasedTilesResult, SecurityAppError>(
     ['alertBasedTiles', query],
     async ({ signal }) => {
-      if (!query) return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
+      if (!query)
+        return {
+          alertsCount: 0,
+          alertsEntityIds: [],
+          watchlistedCount: 0,
+          watchlistedEntityIds: [],
+        };
       const raw = await lastValueFrom(
-        data.search.search(
-          { params: { query } },
-          { abortSignal: signal, strategy: 'esql_async' }
-        )
+        data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
       );
       return parseAlertBasedTilesResponse(raw.rawResponse as unknown as ESQLSearchResponse);
     },
@@ -132,9 +140,9 @@ export const useAlertBasedTiles = ({
   );
 
   return {
-    alertsCount:          queryResult?.alertsCount ?? 0,
-    alertsEntityIds:      queryResult?.alertsEntityIds ?? [],
-    watchlistedCount:     queryResult?.watchlistedCount ?? 0,
+    alertsCount: queryResult?.alertsCount ?? 0,
+    alertsEntityIds: queryResult?.alertsEntityIds ?? [],
+    watchlistedCount: queryResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: queryResult?.watchlistedEntityIds ?? [],
     isLoading: isStatusLoading || isIndexLoading || isLoading,
     error: filteredError,

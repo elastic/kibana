@@ -93,10 +93,7 @@ describe('parseAlertBasedTilesResponse', () => {
 
   it('returns zeros when a column is missing from the response', () => {
     const result = parseAlertBasedTilesResponse(
-      makeResponse(
-        [{ name: 'alerts_count', type: 'long' }],
-        [[10]]
-      )
+      makeResponse([{ name: 'alerts_count', type: 'long' }], [[10]])
     );
     expect(result.alertsCount).toBe(10);
     expect(result.alertsEntityIds).toEqual([]);
