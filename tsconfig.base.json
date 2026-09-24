@@ -2477,6 +2477,8 @@
       "@kbn/serverless-workplace-ai/*": ["./x-pack/solutions/workplaceai/plugins/serverless_workplace_ai/*"],
       "@kbn/serverless-workplace-ai-settings": ["./src/platform/packages/shared/serverless/settings/workplace_ai_project"],
       "@kbn/serverless-workplace-ai-settings/*": ["./src/platform/packages/shared/serverless/settings/workplace_ai_project/*"],
+      "@kbn/service-accounts-test-plugin": ["./x-pack/platform/test/security_api_integration/plugins/service_accounts"],
+      "@kbn/service-accounts-test-plugin/*": ["./x-pack/platform/test/security_api_integration/plugins/service_accounts/*"],
       "@kbn/session-notifications-plugin": ["./src/platform/test/plugin_functional/plugins/session_notifications"],
       "@kbn/session-notifications-plugin/*": ["./src/platform/test/plugin_functional/plugins/session_notifications/*"],
       "@kbn/session-view-plugin": ["./x-pack/solutions/security/plugins/session_view"],

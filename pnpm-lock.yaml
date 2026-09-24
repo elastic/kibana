@@ -3502,6 +3502,9 @@ importers:
       '@kbn/serverless-workplace-ai-settings':
         specifier: workspace:*
         version: link:src/platform/packages/shared/serverless/settings/workplace_ai_project
+      '@kbn/service-accounts-test-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
       '@kbn/session-notifications-plugin':
         specifier: workspace:*
         version: link:src/platform/test/plugin_functional/plugins/session_notifications
@@ -9512,6 +9515,8 @@ importers:
   x-pack/platform/test/security_api_integration/plugins/oidc_provider: {}
 
   x-pack/platform/test/security_api_integration/plugins/saml_provider: {}
+
+  x-pack/platform/test/security_api_integration/plugins/service_accounts: {}
 
   x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer: {}
 

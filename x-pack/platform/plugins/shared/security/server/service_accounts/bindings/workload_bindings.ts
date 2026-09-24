@@ -299,24 +299,3 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     }
   }
 }
-
-/**
- * Stand-in for runtimes whose service account backend cannot execute workloads. Bind refuses
- * too: a binding that can never be exchanged for a credential is a promise Kibana cannot keep.
- *
- * See https://github.com/elastic/kibana/issues/284466.
- */
-export const createNotImplementedWorkloadBindings = (): ServiceAccountWorkloadBindingsApi => {
-  const notImplemented = () => {
-    throw Boom.notImplemented(
-      'Service account workload bindings are not yet implemented for the Elasticsearch backend'
-    );
-  };
-
-  return {
-    bindWorkload: async () => notImplemented(),
-    unbindWorkload: async () => notImplemented(),
-    getBinding: async () => notImplemented(),
-    withScopedRequest: async () => notImplemented(),
-  };
-};

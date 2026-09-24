@@ -1338,6 +1338,7 @@ x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-
 x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/service_accounts @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security

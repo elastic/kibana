@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type {
@@ -24,6 +25,9 @@ import { parseCreateServiceAccountParams } from './create_params';
 import type { ServiceAccountCredentialStore } from './credentials';
 import type { EsServiceAccountPrincipal } from './es_service_account_id';
 import { parseEsServiceAccountId } from './es_service_account_id';
+import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import type {
@@ -33,12 +37,13 @@ import type {
 import {
   ES_SERVICE_ACCOUNT_FALLBACK_ROLE,
   ES_SERVICE_ACCOUNT_NAMESPACE,
-  ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  SERVICE_ACCOUNT_NAME_REGEX,
   serviceAccountRolesSchema,
 } from '../../common/service_accounts';
-import { getDetailedErrorMessage } from '../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
 
 /**
@@ -60,12 +65,6 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
 const accountEntrySchema = z.object({
   roles: z.array(z.string()),
   enabled: z.boolean(),
-});
-
-const createTokenResponseSchema = z.object({
-  token: z.object({
-    value: z.string().min(1).max(ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
-  }),
 });
 
 /**
@@ -101,6 +100,7 @@ const toDirectoryEntry = (
 
 export interface EsServiceAccountsOptions {
   logger: Logger;
+  requestLifetimeMs: number;
   license: SecurityLicense;
   clusterClient: IClusterClient;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
@@ -119,6 +119,7 @@ export interface EsServiceAccountsOptions {
  * handed a short-lived token exchanged from it.
  */
 export class EsServiceAccounts implements ServiceAccountsBackend {
+  private readonly fakeRequests: ServiceAccountFakeRequests;
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly clusterClient: IClusterClient;
@@ -130,6 +131,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   constructor({
     logger,
+    requestLifetimeMs,
     license,
     clusterClient,
     checkPrivilegesWithRequest,
@@ -146,6 +148,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     this.canEncrypt = canEncrypt;
     this.getCurrentUser = getCurrentUser;
     this.getCurrentUserProfileId = getCurrentUserProfileId;
+    this.fakeRequests = new ServiceAccountFakeRequests(
+      logger,
+      (serviceAccountId) => this.exchangeToken(serviceAccountId),
+      requestLifetimeMs
+    );
   }
 
   async create(
@@ -444,22 +451,104 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     return false;
   }
 
-  // See https://github.com/elastic/kibana/issues/284466.
-  async createFakeRequest(): Promise<KibanaRequest> {
-    throw Boom.notImplemented(
-      'Creating requests for Elasticsearch service accounts is not yet implemented'
-    );
+  async createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
+    return await this.fakeRequests.create(params);
   }
 
-  // This backend does not mint service-account-bound requests yet, so there is nothing to
-  // refresh; `null` (rather than an error) keeps the ES-client unauthorized-error handler on its
-  // not-handled path for unrelated fake requests.
-  async reauthenticateFakeRequest(): Promise<{ authorization: string } | null> {
-    return null;
+  async reauthenticateFakeRequest(
+    request: KibanaRequest
+  ): Promise<{ authorization: string } | null> {
+    if (!this.fakeRequests.isServiceAccountRequest(request)) {
+      return null;
+    }
+
+    try {
+      const token = await this.fakeRequests.ensureFreshToken(
+        request,
+        SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS
+      );
+      return { authorization: `Bearer ${token}` };
+    } catch {
+      return null;
+    }
   }
 
-  // Nothing is ever registered by this backend, so there is nothing to release.
-  releaseFakeRequest(): void {}
+  releaseFakeRequest(request: KibanaRequest): void {
+    this.fakeRequests.release(request);
+  }
+
+  private async exchangeToken(serviceAccountId: string): Promise<string> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot exchange a service account token: security features are disabled in Elasticsearch'
+      );
+    }
+    if (!this.canEncrypt) {
+      throw Boom.forbidden(
+        'Cannot exchange a service account token: saved object encryption is not available. Set `xpack.encryptedSavedObjects.encryptionKey`.'
+      );
+    }
+
+    const principal = parseEsServiceAccountId(serviceAccountId);
+    if (
+      !principal ||
+      principal.namespace !== ES_SERVICE_ACCOUNT_NAMESPACE ||
+      principal.name.length > SERVICE_ACCOUNT_NAME_MAX_LENGTH ||
+      !SERVICE_ACCOUNT_NAME_REGEX.test(principal.name)
+    ) {
+      throw Boom.badRequest('Invalid Elasticsearch service account ID.');
+    }
+
+    try {
+      const credential = await this.credentialStore.getDecrypted(serviceAccountId);
+      if (!credential) {
+        const errorMessage = `Unable to exchange token for service account [${serviceAccountId}]: missing stored credential`;
+        this.logger.error(errorMessage);
+        throw Boom.notFound(errorMessage);
+      }
+      const mismatches = [
+        ['serviceAccountId', serviceAccountId, credential.serviceAccountId],
+        ['namespace', principal.namespace, credential.namespace],
+        ['name', principal.name, credential.name],
+        ['tokenName', ES_SERVICE_ACCOUNT_TOKEN_NAME, credential.tokenName],
+      ]
+        .filter(([, expected, actual]) => expected !== actual)
+        .map(
+          ([field, expected, actual]) =>
+            `${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`
+        );
+      if (mismatches.length > 0) {
+        this.logger.error(
+          `Stored credential for service account [${serviceAccountId}] is inconsistent (${mismatches.join(
+            '; '
+          )}).`
+        );
+        throw Boom.forbidden('The stored service account credential is inconsistent.');
+      }
+
+      const response = await this.clusterClient.asInternalUser.security.getToken({
+        // @ts-expect-error Elasticsearch client types do not yet include the `_user_managed_service_account` grant
+        grant_type: '_user_managed_service_account',
+        service_account_token: credential.token,
+      });
+      return response.access_token;
+    } catch (error) {
+      const cause =
+        error instanceof Error ? error : new Error('Service account token exchange failed.');
+      const retryDelay = getExchangeRetryDelay(cause);
+      // Transport errors can contain the credential, so neither log them nor retain them as a cause.
+      this.logger.error(
+        `Failed to exchange service account [${serviceAccountId}] for an ephemeral token (${
+          retryDelay === null ? 'terminal' : 'retryable'
+        } failure)`
+      );
+      throw new ServiceAccountTokenExchangeError(
+        new Error(`Service account token exchange failed for [${serviceAccountId}].`),
+        retryDelay !== null,
+        retryDelay ?? 0
+      );
+    }
+  }
 
   /**
    * Reads the account back, resolving `undefined` when it does not exist, or when the principal
@@ -529,14 +618,14 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     namespace: string,
     name: string
   ): Promise<string> {
-    const response = await esClient.transport.request({
+    const { token } = await esClient.transport.request<{ token: { value: string } }>({
       method: 'POST',
       path:
         `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}` +
         `/credential/token/${encodeURIComponent(ES_SERVICE_ACCOUNT_TOKEN_NAME)}`,
     });
 
-    return createTokenResponseSchema.parse(response).token.value;
+    return token.value;
   }
 
   /**
@@ -689,3 +778,32 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
   }
 }
+
+const RETRYABLE_EXCHANGE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+
+const getExchangeRetryDelay = (error: Error): number | null => {
+  if (
+    error instanceof errors.ConnectionError ||
+    error instanceof errors.TimeoutError ||
+    error instanceof errors.NoLivingConnectionsError
+  ) {
+    return 0;
+  }
+  if (!RETRYABLE_EXCHANGE_STATUSES.has(getErrorStatusCode(error))) {
+    return null;
+  }
+
+  const headers = Boom.isBoom(error)
+    ? error.output.headers
+    : error instanceof errors.ResponseError
+    ? error.headers
+    : undefined;
+  const retryAfter = headers?.['retry-after'];
+  if (typeof retryAfter !== 'string' || retryAfter.trim() === '') {
+    return 0;
+  }
+  const delay = /^\d+$/.test(retryAfter.trim())
+    ? Number(retryAfter) * 1000
+    : Date.parse(retryAfter) - Date.now();
+  return Number.isFinite(delay) && delay > 0 ? delay : 0;
+};
