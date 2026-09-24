@@ -362,7 +362,10 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         ['policy-1'],
         undefined,
-        expect.objectContaining({ agentVersions: expect.arrayContaining(['8.18', '9.3']), spaceId: '*' })
+        expect.objectContaining({
+          agentVersions: expect.arrayContaining(['8.18', '9.3']),
+          spaceId: '*',
+        })
       );
     });
 
