@@ -23,9 +23,6 @@ export const aiIndexAutomationsSkill = defineSkillType({
   description:
     'Read, draft and change the workflow automations that generate Knowledge Indicators for a Context Engine AI Index. Load when authoring a KI generation workflow, when inspecting what an existing automation does, when a proposed fix names a workflow step, or when validating or piloting an automation.',
   content,
-  // One runnable workflow per strategy that comes up most. These are the starting point for
-  // authoring: an agent handed a template edits it, where one handed only a prose shape writes a
-  // workflow from nothing and rediscovers what the template already encodes.
   referencedContent: [
     {
       name: 'index-metadata-template',
@@ -43,11 +40,6 @@ export const aiIndexAutomationsSkill = defineSkillType({
       content: documentTemplateYaml,
     },
   ],
-  // This is the skill that holds the authoring and execution tools. Skill tools are additive, so
-  // an agent that only diagnoses an index loads `analyze-and-improve` and stays read-only; loading
-  // this one is what grants the ability to write.
-  // No `generateWorkflow`: authoring starts from the templates above. Generating a workflow from a
-  // description is slower than editing one and lands on a draft that still needs repairing.
   getRegistryTools: () => [
     platformCoreTools.executeWorkflow,
     platformCoreTools.getWorkflowExecutionStatus,
@@ -61,7 +53,6 @@ export const aiIndexAutomationsSkill = defineSkillType({
     `${internalNamespaces.workflows}.get_examples`,
     `${internalNamespaces.workflows}.get_connectors`,
     `${internalNamespaces.workflows}.workflow_execute_step`,
-    // CE automation lifecycle tools — save writes a named workflow; run fires it asynchronously.
     'platform.context_engine.save_automation',
     'platform.context_engine.run_automation',
   ],

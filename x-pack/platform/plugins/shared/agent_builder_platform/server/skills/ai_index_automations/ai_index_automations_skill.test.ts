@@ -57,8 +57,6 @@ describe('aiIndexAutomationsSkill', () => {
 
   it('routes ai.prompt via the context-engine-prompt feature rather than a literal connector', () => {
     for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
-      // Templates must use connector-id-by-feature (deployment-agnostic feature resolution)
-      // rather than a literal connector-id, which would break on rename / quota exhaustion.
       expect(reference.content).toContain('connector-id-by-feature: context_engine_prompt');
       expect(reference.content).not.toMatch(/^.*connector-id: /m);
     }
