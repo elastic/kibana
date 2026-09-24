@@ -24,7 +24,8 @@ export const DEFAULT_FILE_EXCLUSIONS = [
 ] as const;
 
 export const DEFAULT_ENCODING = 'UTF-8';
-export const DEFAULT_DATETIME_FORMAT = 'ISO-8601';
+export const DEFAULT_DATETIME_FORMAT = 'ISO8601';
+export const DEFAULT_DATETIME_FORMAT_LABEL = 'ISO-8601';
 export const DEFAULT_COLUMN_PREFIX = 'col';
 export const DEFAULT_CSV_QUOTE = '"';
 export const DEFAULT_CSV_ESCAPE = '\\';

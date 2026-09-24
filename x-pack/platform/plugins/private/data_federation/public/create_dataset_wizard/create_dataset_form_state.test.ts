@@ -157,7 +157,7 @@ describe('create_dataset_form_state', () => {
         buildDatasetSettingsFromFormValues({
           ...empty(),
           format: 'csv',
-          datetime_format: 'ISO-8601',
+          datetime_format: 'ISO8601',
         })
       ).toEqual({ format: 'csv' });
     });

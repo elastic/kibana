@@ -19,7 +19,7 @@ import { useController, useWatch } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
-  DEFAULT_DATETIME_FORMAT,
+  DEFAULT_DATETIME_FORMAT_LABEL,
   DEFAULT_ENCODING,
   validateDelimiter,
   validateSkipRows,
@@ -28,6 +28,7 @@ import {
   type DatasetFormatFormValue,
   type DatasetModeFormValue,
 } from '../create_dataset_form_state';
+import { DatetimeFormatSelect } from './datetime_format_select';
 import { DelimiterSelect } from './delimiter_select';
 import { EncodingSelect } from './encoding_select';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
@@ -64,10 +65,6 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
     name: 'settings.skip_rows',
     control,
     rules: { validate: validateSkipRows },
-  });
-  const { field: datetimeFormatField } = useController({
-    name: 'settings.datetime_format',
-    control,
   });
   const { field: nullValueField } = useController({ name: 'settings.null_value', control });
 
@@ -163,18 +160,10 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDatetimeFormatDescription}
           />
         }
-        helpText={helpTextDefault(DEFAULT_DATETIME_FORMAT)}
+        helpText={helpTextDefault(DEFAULT_DATETIME_FORMAT_LABEL)}
         fullWidth
       >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsDatetimeFormat"
-          fullWidth
-          placeholder={createDatasetWizardStrings.settingsDatetimeFormatPlaceholder}
-          value={datetimeFormatField.value}
-          onChange={(e) => datetimeFormatField.onChange(e.target.value)}
-          name={datetimeFormatField.name}
-          inputRef={datetimeFormatField.ref}
-        />
+        <DatetimeFormatSelect control={control} />
       </EuiFormRow>
       <EuiFormRow
         label={
