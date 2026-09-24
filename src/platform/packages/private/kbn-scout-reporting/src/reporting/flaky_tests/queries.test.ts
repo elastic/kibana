@@ -636,7 +636,7 @@ describe('fetchTargetStats', () => {
               failed_builds: 2,
               last_failed_at: '2026-09-05T00:00:00.000Z',
             },
-            // rows without a target are dropped
+            // a document without the target fields counts as an unknown target, not nothing
             {
               test_id: 'j1',
               target_mode: null,
@@ -691,6 +691,14 @@ describe('fetchTargetStats', () => {
         failedBuilds: 2,
         buildFailRate: 0.05,
         lastFailedAt: new Date('2026-09-05T00:00:00.000Z'),
+      },
+      {
+        mode: 'unknown',
+        type: 'unknown',
+        builds: 1,
+        failedBuilds: 1,
+        buildFailRate: 1,
+        lastFailedAt: undefined,
       },
     ]);
     expect(stats.get('p1')).toEqual([

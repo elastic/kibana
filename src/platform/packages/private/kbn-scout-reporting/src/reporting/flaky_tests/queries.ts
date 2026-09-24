@@ -487,6 +487,9 @@ export const buildTargetStatsQuery = (
   ].join(' | ');
 };
 
+/** What the reporters record when a run has no Scout target; a missing field is treated the same. */
+const UNKNOWN_TARGET = 'unknown';
+
 /** Per-target build counts keyed by test id, most failed builds first. */
 export const fetchTargetStats = async (
   es: ESClient,
@@ -512,11 +515,10 @@ export const fetchTargetStats = async (
 
   const byTest = new Map<string, FlakyTestTargetStats[]>();
   for (const record of results.flat()) {
-    if (record.target_mode === null || record.target_type === null) continue;
     const stats = byTest.get(record.test_id) ?? [];
     stats.push({
-      mode: record.target_mode,
-      type: record.target_type,
+      mode: record.target_mode ?? UNKNOWN_TARGET,
+      type: record.target_type ?? UNKNOWN_TARGET,
       builds: record.builds,
       failedBuilds: record.failed_builds,
       buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,
