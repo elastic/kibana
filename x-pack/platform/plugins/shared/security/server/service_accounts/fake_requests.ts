@@ -188,6 +188,14 @@ export class ServiceAccountFakeRequests {
   }
 
   /**
+   * Returns the id of the service account a fake request minted by this registry is bound to, or
+   * `undefined` for any other request, including released ones.
+   */
+  getServiceAccountId(request: KibanaRequest): string | undefined {
+    return this.registry.get(request)?.serviceAccountId;
+  }
+
+  /**
    * Returns a token no older than `maxAgeMs` for the service account bound to this request. When
    * the current token is older, a replacement is minted (single-flight) and the request's
    * `authorization` header is updated in place. Throws when the request is not bound to a service

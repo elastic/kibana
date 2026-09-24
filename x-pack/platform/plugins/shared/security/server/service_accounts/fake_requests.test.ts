@@ -113,6 +113,28 @@ describe('ServiceAccountFakeRequests', () => {
     });
   });
 
+  describe('#getServiceAccountId', () => {
+    it('returns the id the request was minted for', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      expect(fakeRequests.getServiceAccountId(request)).toBe('sa-id');
+    });
+
+    it('returns undefined for requests it did not mint', () => {
+      expect(
+        fakeRequests.getServiceAccountId(httpServerMock.createKibanaRequest())
+      ).toBeUndefined();
+      expect(
+        fakeRequests.getServiceAccountId(httpServerMock.createFakeKibanaRequest({}))
+      ).toBeUndefined();
+    });
+
+    it('returns undefined once the request has been released', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      fakeRequests.release(request);
+      expect(fakeRequests.getServiceAccountId(request)).toBeUndefined();
+    });
+  });
+
   describe('#ensureFreshToken', () => {
     it('throws for requests it did not mint', async () => {
       await expect(
