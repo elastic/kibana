@@ -19,7 +19,8 @@
       "kibanaReact",
       "esUiShared",
       "kibanaUtils",
-      "unifiedSearch"
+      "unifiedSearch",
+      "kql"
     ],
     "optionalPlugins": ["spaces", "serverless"],
     "extraPublicDirs": ["common"]

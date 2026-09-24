@@ -418,8 +418,8 @@ export const StepsEditor = React.memo(() => {
                   suggestPipeline({ connectorId, streamName: definition.stream.name })
                 }
               >
-                {i18n.translate('xpack.streams.stepsEditor.suggestPipelineButtonLabel', {
-                  defaultMessage: 'Suggest a pipeline',
+                {i18n.translate('xpack.streams.stepsEditor.getSuggestionsButtonLabel', {
+                  defaultMessage: 'Get suggestions based on your data',
                 })}
               </GenerateSuggestionButton>
               {aiFeatures.isManagedAIConnector && !aiFeatures.hasAcknowledgedAdditionalCharges && (
