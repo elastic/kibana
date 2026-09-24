@@ -36,18 +36,39 @@ const N_LISTS = Number(process.env.N_LISTS ?? 30);
 const IMPORT_LINES = Number(process.env.IMPORT_LINES ?? 10000);
 const BURST = Number(process.env.BURST ?? 50);
 
-const kh = { authorization: AUTH, 'content-type': 'application/json', 'kbn-xsrf': 'poc', 'elastic-api-version': '2023-10-31' };
+const kh = {
+  authorization: AUTH,
+  'content-type': 'application/json',
+  'kbn-xsrf': 'poc',
+  'elastic-api-version': '2023-10-31',
+};
 const kbn = async (method, path, body) => {
-  const res = await fetch(`${KBN}${path}`, { method, headers: kh, body: body == null ? undefined : JSON.stringify(body) });
+  const res = await fetch(`${KBN}${path}`, {
+    method,
+    headers: kh,
+    body: body == null ? undefined : JSON.stringify(body),
+  });
   const text = await res.text();
   let json;
-  try { json = text ? JSON.parse(text) : {}; } catch { json = { raw: text }; }
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    json = { raw: text };
+  }
   return { status: res.status, json };
 };
 const es = async (method, path, body) => {
-  const res = await fetch(`${ES}${path}`, { method, headers: { authorization: AUTH, 'content-type': 'application/json' }, body: body == null ? undefined : JSON.stringify(body) });
+  const res = await fetch(`${ES}${path}`, {
+    method,
+    headers: { authorization: AUTH, 'content-type': 'application/json' },
+    body: body == null ? undefined : JSON.stringify(body),
+  });
   const text = await res.text();
-  try { return { status: res.status, json: text ? JSON.parse(text) : {} }; } catch { return { status: res.status, json: { raw: text } }; }
+  try {
+    return { status: res.status, json: text ? JSON.parse(text) : {} };
+  } catch {
+    return { status: res.status, json: { raw: text } };
+  }
 };
 const log = (...a) => console.log(...a);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -61,9 +82,16 @@ const stats = (samples) => {
   const sorted = [...samples].sort((a, b) => a - b);
   const at = (q) => sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))];
   const mean = sorted.reduce((a, b) => a + b, 0) / Math.max(sorted.length, 1);
-  return { max: sorted[sorted.length - 1] ?? 0, mean, n: sorted.length, p50: at(0.5), p95: at(0.95) };
+  return {
+    max: sorted[sorted.length - 1] ?? 0,
+    mean,
+    n: sorted.length,
+    p50: at(0.5),
+    p95: at(0.95),
+  };
 };
-const fmt = (ms) => (ms == null ? '-' : ms >= 1000 ? `${(ms / 1000).toFixed(2)} s` : `${ms.toFixed(1)} ms`);
+const fmt = (ms) =>
+  ms == null ? '-' : ms >= 1000 ? `${(ms / 1000).toFixed(2)} s` : `${ms.toFixed(1)} ms`;
 
 const ipValue = (i) => `10.${Math.floor(i / 65536) % 256}.${Math.floor(i / 256) % 256}.${i % 256}`;
 // Every other /24, so no two ranges touch: the coalesced set holds one interval per range,
@@ -81,7 +109,8 @@ const listBody = (id, kind, storage) => {
 };
 
 const ensureOk = (label, r) => {
-  if (r.status >= 400) throw new Error(`${label}: ${r.status} ${JSON.stringify(r.json).slice(0, 200)}`);
+  if (r.status >= 400)
+    throw new Error(`${label}: ${r.status} ${JSON.stringify(r.json).slice(0, 200)}`);
   return r;
 };
 
@@ -89,9 +118,12 @@ const importValues = async (listId, type, values) => {
   const fd = new FormData();
   fd.append('file', new Blob([values.join('\n') + '\n'], { type: 'text/plain' }), `${listId}.txt`);
   const res = await fetch(`${KBN}/api/lists/items/_import?list_id=${listId}&type=${type}`, {
-    method: 'POST', headers: { authorization: AUTH, 'kbn-xsrf': 'poc', 'elastic-api-version': '2023-10-31' }, body: fd,
+    method: 'POST',
+    headers: { authorization: AUTH, 'kbn-xsrf': 'poc', 'elastic-api-version': '2023-10-31' },
+    body: fd,
   });
-  if (res.status >= 400) throw new Error(`import into ${listId}: ${res.status} ${await res.text()}`);
+  if (res.status >= 400)
+    throw new Error(`import into ${listId}: ${res.status} ${await res.text()}`);
 };
 
 const countItems = async (storage, kind, listId) => {
@@ -100,7 +132,11 @@ const countItems = async (storage, kind, listId) => {
     return r.json.count ?? 0;
   }
   const body = kind === 'range' ? { query: { term: { kind: 'source' } } } : undefined;
-  const r = await es('POST', `/.value-list-v2-${SPACE}-${listId}/_count?ignore_unavailable=true`, body);
+  const r = await es(
+    'POST',
+    `/.value-list-v2-${SPACE}-${listId}/_count?ignore_unavailable=true`,
+    body
+  );
   return r.json.count ?? 0;
 };
 
@@ -122,7 +158,8 @@ const coalescedClean = async (listId) => {
 const cleanup = async () => {
   const lists = await kbn('GET', `/api/lists/_find?per_page=1000&filter=name:${P}*`);
   for (const list of lists.json?.data ?? []) {
-    if (String(list.id).startsWith(P)) await kbn('DELETE', `/api/lists?id=${list.id}&deleteReferences=true`);
+    if (String(list.id).startsWith(P))
+      await kbn('DELETE', `/api/lists?id=${list.id}&deleteReferences=true`);
   }
   await es('DELETE', `/.value-list-v2-${SPACE}-${P}-*`);
 };
@@ -137,19 +174,30 @@ const measureCell = async (storage, kind) => {
   // item create, sequential
   const creates = [];
   for (let i = 0; i < N_ITEMS; i++) {
-    const { ms, result } = await timed(() => kbn('POST', '/api/lists/items', { list_id: listId, value: valueFor(kind, i) }));
+    const { ms, result } = await timed(() =>
+      kbn('POST', '/api/lists/items', { list_id: listId, value: valueFor(kind, i) })
+    );
     ensureOk('create item', result);
     creates.push(ms);
   }
   out['item create'] = stats(creates);
   if (storage === 'lookup' && kind === 'range') {
-    out[`coalesced clean after ${N_ITEMS} sequential creates (from the last one)`] = { single: await waitFor(() => coalescedClean(listId), 120000) };
+    out[`coalesced clean after ${N_ITEMS} sequential creates (from the last one)`] = {
+      single: await waitFor(() => coalescedClean(listId), 120000),
+    };
   }
 
   // reads
   const gets = [];
   for (let i = 0; i < N_READS; i++) {
-    const { ms, result } = await timed(() => kbn('GET', `/api/lists/items?list_id=${listId}&value=${encodeURIComponent(readValueFor(kind, i % N_ITEMS))}`));
+    const { ms, result } = await timed(() =>
+      kbn(
+        'GET',
+        `/api/lists/items?list_id=${listId}&value=${encodeURIComponent(
+          readValueFor(kind, i % N_ITEMS)
+        )}`
+      )
+    );
     ensureOk('get by value', result);
     gets.push(ms);
   }
@@ -157,7 +205,9 @@ const measureCell = async (storage, kind) => {
 
   const finds = [];
   for (let i = 0; i < Math.min(N_READS, 20); i++) {
-    const { ms, result } = await timed(() => kbn('GET', `/api/lists/items/_find?list_id=${listId}&page=1&per_page=100`));
+    const { ms, result } = await timed(() =>
+      kbn('GET', `/api/lists/items/_find?list_id=${listId}&page=1&per_page=100`)
+    );
     ensureOk('find', result);
     finds.push(ms);
   }
@@ -165,12 +215,18 @@ const measureCell = async (storage, kind) => {
 
   // burst of concurrent creates (new values)
   const burst = await timed(() =>
-    Promise.all(Array.from({ length: BURST }, (_, i) => kbn('POST', '/api/lists/items', { list_id: listId, value: valueFor(kind, N_ITEMS + i) })))
+    Promise.all(
+      Array.from({ length: BURST }, (_, i) =>
+        kbn('POST', '/api/lists/items', { list_id: listId, value: valueFor(kind, N_ITEMS + i) })
+      )
+    )
   );
   burst.result.forEach((r) => ensureOk('burst create', r));
   out[`burst of ${BURST} concurrent creates (wall)`] = { single: burst.ms };
   if (storage === 'lookup' && kind === 'range') {
-    out[`coalesced clean after the burst (from its end)`] = { single: await waitFor(() => coalescedClean(listId), 120000) };
+    out[`coalesced clean after the burst (from its end)`] = {
+      single: await waitFor(() => coalescedClean(listId), 120000),
+    };
   }
 
   // deletes by value (ip lists only: on a range list the two storages delete different
@@ -178,7 +234,12 @@ const measureCell = async (storage, kind) => {
   if (kind === 'ip') {
     const deletes = [];
     for (let i = 0; i < N_READS; i++) {
-      const { ms, result } = await timed(() => kbn('DELETE', `/api/lists/items?list_id=${listId}&value=${encodeURIComponent(valueFor(kind, i))}`));
+      const { ms, result } = await timed(() =>
+        kbn(
+          'DELETE',
+          `/api/lists/items?list_id=${listId}&value=${encodeURIComponent(valueFor(kind, i))}`
+        )
+      );
       ensureOk('delete by value', result);
       deletes.push(ms);
     }
@@ -186,16 +247,29 @@ const measureCell = async (storage, kind) => {
   }
 
   // import; refresh first so the baseline count includes the deletes above
-  await es('POST', storage === 'legacy' ? `/${ITEMS_INDEX}/_refresh` : `/.value-list-v2-${SPACE}-${listId}/_refresh`);
+  await es(
+    'POST',
+    storage === 'legacy'
+      ? `/${ITEMS_INDEX}/_refresh`
+      : `/.value-list-v2-${SPACE}-${listId}/_refresh`
+  );
   const before = await countItems(storage, kind, listId);
   const values = Array.from({ length: IMPORT_LINES }, (_, i) => valueFor(kind, 1_000_000 + i));
   // the legacy import answers before it writes and the lookup import answers after, so
   // only the time until the items are visible in the store compares the two
   const imp = await timed(() => importValues(listId, type, values));
-  const visible = await waitFor(async () => (await countItems(storage, kind, listId)) >= before + IMPORT_LINES, 120000, 250);
-  out[`import ${IMPORT_LINES} lines (until visible in store)`] = { single: visible == null ? undefined : imp.ms + visible };
+  const visible = await waitFor(
+    async () => (await countItems(storage, kind, listId)) >= before + IMPORT_LINES,
+    120000,
+    250
+  );
+  out[`import ${IMPORT_LINES} lines (until visible in store)`] = {
+    single: visible == null ? undefined : imp.ms + visible,
+  };
   if (storage === 'lookup' && kind === 'range') {
-    out['coalesced clean after import (from its end)'] = { single: await waitFor(() => coalescedClean(listId), 300000, 500) };
+    out['coalesced clean after import (from its end)'] = {
+      single: await waitFor(() => coalescedClean(listId), 300000, 500),
+    };
   }
 
   const del = await timed(() => kbn('DELETE', `/api/lists?id=${listId}&deleteReferences=true`));
@@ -223,10 +297,16 @@ const measureListLifecycle = async (storage) => {
 };
 
 const row = (label, legacy, lookup) => {
-  const cell = (s) => (s == null ? '-' : 'single' in s ? fmt(s.single) : `${fmt(s.p50)} / ${fmt(s.p95)}`);
-  const ratio = legacy == null || lookup == null ? '-'
-    : 'single' in legacy ? (legacy.single && lookup.single ? `${(lookup.single / legacy.single).toFixed(2)}x` : '-')
-    : `${(lookup.p50 / legacy.p50).toFixed(2)}x`;
+  const cell = (s) =>
+    s == null ? '-' : 'single' in s ? fmt(s.single) : `${fmt(s.p50)} / ${fmt(s.p95)}`;
+  const ratio =
+    legacy == null || lookup == null
+      ? '-'
+      : 'single' in legacy
+      ? legacy.single && lookup.single
+        ? `${(lookup.single / legacy.single).toFixed(2)}x`
+        : '-'
+      : `${(lookup.p50 / legacy.p50).toFixed(2)}x`;
   return `| ${label} | ${cell(legacy)} | ${cell(lookup)} | ${ratio} |`;
 };
 
@@ -234,7 +314,9 @@ const main = async () => {
   log(`=== cleanup ===`);
   await cleanup();
   await kbn('POST', '/api/lists/index');
-  log(`=== settings: N_ITEMS=${N_ITEMS} N_READS=${N_READS} N_LISTS=${N_LISTS} IMPORT_LINES=${IMPORT_LINES} BURST=${BURST} ===`);
+  log(
+    `=== settings: N_ITEMS=${N_ITEMS} N_READS=${N_READS} N_LISTS=${N_LISTS} IMPORT_LINES=${IMPORT_LINES} BURST=${BURST} ===`
+  );
 
   const results = {};
   for (const kind of ['ip', 'range']) {
@@ -250,10 +332,13 @@ const main = async () => {
     lifecycle[storage] = await measureListLifecycle(storage);
   }
 
-  log('\n## Results (p50 / p95 per request, or a single wall time; ratio = lookup / legacy on p50 or the single value)\n');
+  log(
+    '\n## Results (p50 / p95 per request, or a single wall time; ratio = lookup / legacy on p50 or the single value)\n'
+  );
   log(`| List lifecycle (${N_LISTS} lists) | legacy | lookup | ratio |`);
   log('|---|---|---|---|');
-  for (const op of Object.keys(lifecycle.legacy)) log(row(op, lifecycle.legacy[op], lifecycle.lookup[op]));
+  for (const op of Object.keys(lifecycle.legacy))
+    log(row(op, lifecycle.legacy[op], lifecycle.lookup[op]));
   for (const kind of ['ip', 'range']) {
     const legacy = results[`${kind}/legacy`];
     const lookup = results[`${kind}/lookup`];
@@ -266,4 +351,7 @@ const main = async () => {
   await cleanup();
 };
 
-main().catch((e) => { console.error('\nFAILED:', e.message); process.exit(1); });
+main().catch((e) => {
+  console.error('\nFAILED:', e.message);
+  process.exit(1);
+});

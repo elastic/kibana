@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 const C = {
   es: process.env.ES_URL ?? 'http://localhost:9200',
   kibana: process.env.KIBANA_URL ?? 'http://localhost:5601/kbn',
@@ -17,7 +26,11 @@ const auth = 'Basic ' + Buffer.from(`${C.user}:${C.pass}`).toString('base64');
 async function call(base, path, { method = 'GET', body, xsrf } = {}) {
   const res = await fetch(`${base}${path}`, {
     method,
-    headers: { 'content-type': 'application/json', authorization: auth, ...(xsrf && { 'kbn-xsrf': 'true' }) },
+    headers: {
+      'content-type': 'application/json',
+      authorization: auth,
+      ...(xsrf && { 'kbn-xsrf': 'true' }),
+    },
     body: typeof body === 'string' ? body : body ? JSON.stringify(body) : undefined,
   });
   const text = await res.text();
@@ -52,7 +65,10 @@ function value(fieldIndex, combo, len) {
 
 async function seed() {
   await es(`/${C.index}`, { method: 'DELETE' });
-  await es(`/${C.index}`, { method: 'PUT', body: { mappings: { properties: nest(C.fields, { type: 'keyword' }) } } });
+  await es(`/${C.index}`, {
+    method: 'PUT',
+    body: { mappings: { properties: nest(C.fields, { type: 'keyword' }) } },
+  });
   const now = Date.now();
   let lines = [];
   let count = 0;
@@ -70,7 +86,9 @@ async function seed() {
   }
   if (lines.length) await es(`/_bulk`, { method: 'POST', body: lines.join('\n') + '\n' });
   await es(`/${C.index}/_refresh`, { method: 'POST' });
-  console.log(`Indexed ${count} docs, ${C.distinct} distinct combinations of [${C.fields.join(', ')}].`);
+  console.log(
+    `Indexed ${count} docs, ${C.distinct} distinct combinations of [${C.fields.join(', ')}].`
+  );
 }
 
 async function createRule() {
@@ -92,7 +110,9 @@ async function createRule() {
       history_window_start: 'now-7d',
       from: 'now-360s',
       interval: C.interval,
-      max_signals: process.env.MAX_SIGNALS ? Number(process.env.MAX_SIGNALS) : Math.max(C.distinct * 2, 1000),
+      max_signals: process.env.MAX_SIGNALS
+        ? Number(process.env.MAX_SIGNALS)
+        : Math.max(C.distinct * 2, 1000),
     },
   });
 }
@@ -114,7 +134,11 @@ async function main() {
   const rule = await createRule();
   console.log(`Rule ${rule.rule_id} created (id=${rule.id}), waiting for execution...`);
   const last = await waitForRun(after);
-  console.log(last ? `Executed: ${last.status} ${last.message ?? ''}` : 'No execution within timeout; check Kibana logs.');
+  console.log(
+    last
+      ? `Executed: ${last.status} ${last.message ?? ''}`
+      : 'No execution within timeout; check Kibana logs.'
+  );
   const combineLen = C.fields.length * C.valueLen;
   console.log('Expected EBT payload:', {
     isElasticRule: false,

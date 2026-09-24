@@ -87,11 +87,14 @@ const kbn = async (method, path, body) => {
 const importValues = async (listId, type, values, filename) => {
   const fd = new FormData();
   fd.append('file', new Blob([values.join('\n') + '\n'], { type: 'text/plain' }), filename);
-  const res = await fetch(`${KBN}/api/lists/items/_import?list_id=${listId}&type=${type}&refresh=true`, {
-    method: 'POST',
-    headers: { authorization: AUTH, 'kbn-xsrf': 'poc', 'x-elastic-internal-origin': 'poc' },
-    body: fd,
-  });
+  const res = await fetch(
+    `${KBN}/api/lists/items/_import?list_id=${listId}&type=${type}&refresh=true`,
+    {
+      method: 'POST',
+      headers: { authorization: AUTH, 'kbn-xsrf': 'poc', 'x-elastic-internal-origin': 'poc' },
+      body: fd,
+    }
+  );
   return { status: res.status, json: await res.json().catch(() => ({})) };
 };
 
@@ -101,7 +104,11 @@ const exportValues = async (listId) => {
     headers: { authorization: AUTH, 'kbn-xsrf': 'poc', 'x-elastic-internal-origin': 'poc' },
   });
   const text = await res.text();
-  return text.split('\n').map((l) => l.trim()).filter(Boolean).sort();
+  return text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .sort();
 };
 
 const es = async (method, path, body) => {
@@ -141,9 +148,13 @@ const cleanup = async () => {
   await es('POST', `/${ITEMS_INDEX}/_delete_by_query?refresh=true&conflicts=proceed`, {
     query: { term: { list_id: LEGACY_LIST } },
   });
-  await es('POST', `/.alerts-security.alerts-default/_delete_by_query?refresh=true&conflicts=proceed&ignore_unavailable=true`, {
-    query: { prefix: { 'kibana.alert.rule.name': 'POC value-list' } },
-  });
+  await es(
+    'POST',
+    `/.alerts-security.alerts-default/_delete_by_query?refresh=true&conflicts=proceed&ignore_unavailable=true`,
+    {
+      query: { prefix: { 'kibana.alert.rule.name': 'POC value-list' } },
+    }
+  );
   log('cleanup done');
 };
 
@@ -157,7 +168,8 @@ const ensureFlagActive = async () => {
     name: 'POC lookup ip list',
     description: 'per-list lookup index',
   });
-  if (create.status >= 400) throw new Error(`create lookup list failed: ${JSON.stringify(create.json)}`);
+  if (create.status >= 400)
+    throw new Error(`create lookup list failed: ${JSON.stringify(create.json)}`);
   await kbn('POST', '/api/lists/items', { list_id: LOOKUP_LIST, value: IN_LOOKUP });
   await sleep(500);
   const idx = await es('GET', `/_cat/indices/${LOOKUP_INDEX}?h=index`);
@@ -187,7 +199,11 @@ const createLegacyList = async () => {
 const checkLegacyExport = async () => {
   const exported = await exportValues(LEGACY_LIST);
   const ok = JSON.stringify(exported) === JSON.stringify([IN_LEGACY]);
-  log(`  legacy list export (shared .items via unified stream): ${JSON.stringify(exported)} ${ok ? 'PASS' : 'FAIL'}`);
+  log(
+    `  legacy list export (shared .items via unified stream): ${JSON.stringify(exported)} ${
+      ok ? 'PASS' : 'FAIL'
+    }`
+  );
   return ok;
 };
 
@@ -230,7 +246,8 @@ const checkSourceBounds = async (label) => {
     _source: ['value', 'src_start', 'src_end'],
   });
   const hits = r.json.hits?.hits ?? [];
-  const ok = hits.length > 0 && hits.every((h) => h._source.src_start != null && h._source.src_end != null);
+  const ok =
+    hits.length > 0 && hits.every((h) => h._source.src_start != null && h._source.src_end != null);
   log(`  ${label}: ${hits.length} source docs all carry src bounds ${ok ? 'PASS' : 'FAIL'}`);
   return ok;
 };
@@ -249,14 +266,18 @@ const setupRangeListWithModifications = async () => {
 
   // 1. import three overlapping ranges -> one merged interval
   const imp = await importValues(RANGE_LIST, 'ip_range', RANGE_INITIAL, 'ranges.txt');
-  if (imp.status >= 400) throw new Error(`import ranges failed: ${imp.status} ${JSON.stringify(imp.json)}`);
+  if (imp.status >= 400)
+    throw new Error(`import ranges failed: ${imp.status} ${JSON.stringify(imp.json)}`);
   await sleep(500);
   log(`range lookup list imported ${RANGE_INITIAL.length} overlapping ranges -> ${RANGE_INDEX}`);
   const checks = [];
   checks.push(await checkCoalesced('after import (A,B,C overlap -> 1 interval)', [MERGED]));
 
   // 2. delete the bridge B -> the merged interval fragments into two
-  await kbn('DELETE', `/api/lists/items?list_id=${RANGE_LIST}&value=${encodeURIComponent(RANGE_B)}&refresh=true`);
+  await kbn(
+    'DELETE',
+    `/api/lists/items?list_id=${RANGE_LIST}&value=${encodeURIComponent(RANGE_B)}&refresh=true`
+  );
   await sleep(500);
   checks.push(await checkCoalesced('after delete bridge B -> fragments into 2', FRAGMENTS));
 
@@ -269,10 +290,15 @@ const setupRangeListWithModifications = async () => {
   //    (localized insert only writes the affected window)
   await kbn('POST', '/api/lists/items', { list_id: RANGE_LIST, value: RANGE_E });
   await sleep(500);
-  checks.push(await checkCoalesced('after add disjoint E -> 2 disjoint intervals', [MERGED, DISJOINT]));
+  checks.push(
+    await checkCoalesced('after add disjoint E -> 2 disjoint intervals', [MERGED, DISJOINT])
+  );
 
   // 5. delete the disjoint range E -> its standalone interval is removed, the first stays
-  await kbn('DELETE', `/api/lists/items?list_id=${RANGE_LIST}&value=${encodeURIComponent(RANGE_E)}&refresh=true`);
+  await kbn(
+    'DELETE',
+    `/api/lists/items?list_id=${RANGE_LIST}&value=${encodeURIComponent(RANGE_E)}&refresh=true`
+  );
   await sleep(500);
   checks.push(await checkCoalesced('after delete disjoint E -> back to 1 interval', [MERGED]));
 
@@ -283,7 +309,11 @@ const setupRangeListWithModifications = async () => {
   const exported = await exportValues(RANGE_LIST);
   const expected = [...RANGE_FINAL].sort();
   const exportOk = JSON.stringify(exported) === JSON.stringify(expected);
-  log(`  export after modify: ${JSON.stringify(exported)} ${exportOk ? 'PASS' : 'FAIL (expected ' + JSON.stringify(expected) + ')'}`);
+  log(
+    `  export after modify: ${JSON.stringify(exported)} ${
+      exportOk ? 'PASS' : 'FAIL (expected ' + JSON.stringify(expected) + ')'
+    }`
+  );
   checks.push(exportOk);
 
   return checks.every(Boolean);
@@ -308,12 +338,13 @@ const createSourceDocs = async () => {
   ];
   const bulk =
     rows
-      .map(([ip, host]) =>
-        `${JSON.stringify({ index: {} })}\n${JSON.stringify({
-          '@timestamp': now(),
-          destination: { ip },
-          host: { name: host },
-        })}`
+      .map(
+        ([ip, host]) =>
+          `${JSON.stringify({ index: {} })}\n${JSON.stringify({
+            '@timestamp': now(),
+            destination: { ip },
+            host: { name: host },
+          })}`
       )
       .join('\n') + '\n';
   await es('POST', `/${SRC_INDEX}/_bulk?refresh=true`, bulk);
@@ -336,12 +367,21 @@ const createExceptionList = async (listId, name, valueListIds) => {
       namespace_type: 'single',
       type: 'simple',
       // "included" = field value IS in the list -> that alert is excluded (whitelisted)
-      entries: [{ field: 'destination.ip', operator: 'included', type: 'list', list: { id, type } }],
+      entries: [
+        { field: 'destination.ip', operator: 'included', type: 'list', list: { id, type } },
+      ],
     });
   }
 };
 
-const baseRule = { risk_score: 50, severity: 'medium', from: 'now-1h', interval: '1m', enabled: true, tags: [TAG] };
+const baseRule = {
+  risk_score: 50,
+  severity: 'medium',
+  from: 'now-1h',
+  interval: '1m',
+  enabled: true,
+  tags: [TAG],
+};
 
 const ruleDefs = () => ({
   [RULE_EXC]: {
@@ -353,7 +393,9 @@ const ruleDefs = () => ({
     index: [SRC_INDEX],
     query: `host.name: "${EQ_HOST}"`,
     language: 'kuery',
-    exceptions_list: [{ id: undefined, list_id: EXC_LIST, namespace_type: 'single', type: 'detection' }],
+    exceptions_list: [
+      { id: undefined, list_id: EXC_LIST, namespace_type: 'single', type: 'detection' },
+    ],
   },
   [RULE_EXC_RANGE]: {
     ...baseRule,
@@ -364,7 +406,9 @@ const ruleDefs = () => ({
     index: [SRC_INDEX],
     query: `host.name: "${RANGE_HOST}"`,
     language: 'kuery',
-    exceptions_list: [{ id: undefined, list_id: EXC_RANGE, namespace_type: 'single', type: 'detection' }],
+    exceptions_list: [
+      { id: undefined, list_id: EXC_RANGE, namespace_type: 'single', type: 'detection' },
+    ],
   },
   [RULE_IM_LEGACY]: {
     ...baseRule,
@@ -396,7 +440,8 @@ const ruleDefs = () => ({
   },
 });
 
-const excId = async (listId) => (await kbn('GET', `/api/exception_lists?list_id=${listId}&namespace_type=single`)).json.id;
+const excId = async (listId) =>
+  (await kbn('GET', `/api/exception_lists?list_id=${listId}&namespace_type=single`)).json.id;
 
 const createRealRules = async (excIds) => {
   const ids = {};
@@ -407,7 +452,8 @@ const createRealRules = async (excIds) => {
       rule.exceptions_list = [{ ...rule.exceptions_list[0], id: eid }];
     }
     const r = await kbn('POST', '/api/detection_engine/rules', rule);
-    if (r.status >= 400) log(`  ! create ${ruleId} -> ${r.status} ${JSON.stringify(r.json).slice(0, 200)}`);
+    if (r.status >= 400)
+      log(`  ! create ${ruleId} -> ${r.status} ${JSON.stringify(r.json).slice(0, 200)}`);
     else ids[ruleId] = r.json.id;
   }
   log('real enabled rules created (also firing every 1m for the Alerts UI)');
@@ -416,7 +462,8 @@ const createRealRules = async (excIds) => {
 
 const runRulesNow = async (ids) => {
   for (let pass = 0; pass < 2; pass++) {
-    for (const id of Object.values(ids)) await kbn('POST', `/internal/alerting/rule/${id}/_run_soon`);
+    for (const id of Object.values(ids))
+      await kbn('POST', `/internal/alerting/rule/${id}/_run_soon`);
     await sleep(8000);
   }
 };
@@ -428,7 +475,9 @@ const realAlertsFor = async (name) => {
     fields: ['destination.ip'],
     _source: false,
   });
-  return [...new Set((r.json.hits?.hits ?? []).map((h) => h.fields?.['destination.ip']?.[0]))].filter(Boolean).sort();
+  return [...new Set((r.json.hits?.hits ?? []).map((h) => h.fields?.['destination.ip']?.[0]))]
+    .filter(Boolean)
+    .sort();
 };
 
 // ---------------------------------------------------------------- main
@@ -445,7 +494,9 @@ const main = async () => {
     { id: LEGACY_LIST, type: 'ip' },
     { id: LOOKUP_LIST, type: 'ip' },
   ]);
-  await createExceptionList(EXC_RANGE, 'POC ip_range exception list', [{ id: RANGE_LIST, type: 'ip_range' }]);
+  await createExceptionList(EXC_RANGE, 'POC ip_range exception list', [
+    { id: RANGE_LIST, type: 'ip_range' },
+  ]);
   const excIds = { [EXC_LIST]: await excId(EXC_LIST), [EXC_RANGE]: await excId(EXC_RANGE) };
   const ids = await createRealRules(excIds);
 
@@ -463,10 +514,26 @@ const main = async () => {
     return ok;
   };
 
-  report('Exceptions ip (whitelist on a legacy AND a lookup ip list):', await realAlertsFor(ruleDefs()[RULE_EXC].name), [IN_NEITHER]);
-  report('Exceptions ip_range (whitelist on a lookup ip_range list):', await realAlertsFor(ruleDefs()[RULE_EXC_RANGE].name), [OUT_RANGE]);
-  report('IM legacy (threat index = .items, list_id filter):', await realAlertsFor(ruleDefs()[RULE_IM_LEGACY].name), [IN_LEGACY]);
-  report('IM lookup (threat index = per-list lookup index):', await realAlertsFor(ruleDefs()[RULE_IM_LOOKUP].name), [IN_LOOKUP]);
+  report(
+    'Exceptions ip (whitelist on a legacy AND a lookup ip list):',
+    await realAlertsFor(ruleDefs()[RULE_EXC].name),
+    [IN_NEITHER]
+  );
+  report(
+    'Exceptions ip_range (whitelist on a lookup ip_range list):',
+    await realAlertsFor(ruleDefs()[RULE_EXC_RANGE].name),
+    [OUT_RANGE]
+  );
+  report(
+    'IM legacy (threat index = .items, list_id filter):',
+    await realAlertsFor(ruleDefs()[RULE_IM_LEGACY].name),
+    [IN_LEGACY]
+  );
+  report(
+    'IM lookup (threat index = per-list lookup index):',
+    await realAlertsFor(ruleDefs()[RULE_IM_LOOKUP].name),
+    [IN_LOOKUP]
+  );
 
   log('\n=== summary ===');
   log(`  range import/modify/export:       ${rangeChecksOk ? 'PASS' : 'FAIL'}`);
@@ -476,7 +543,9 @@ const main = async () => {
   log(`  IM legacy threat index:           ${results[2] ? 'PASS' : 'FAIL'}`);
   log(`  IM lookup threat index:           ${results[3] ? 'PASS' : 'FAIL'}`);
   log('\nData left in place. Inspect in the UI:');
-  log(`  - Value lists: "${LOOKUP_LIST}" and "${RANGE_LIST}" (lookup indices), "${LEGACY_LIST}" (data stream)`);
+  log(
+    `  - Value lists: "${LOOKUP_LIST}" and "${RANGE_LIST}" (lookup indices), "${LEGACY_LIST}" (data stream)`
+  );
   log(`  - Rules: tag "${TAG}" (4 enabled rules, also firing every 1m)`);
   log(`  - Alerts: rule names starting with "POC value-list"`);
   log('Re-run this script to reset and repeat.');

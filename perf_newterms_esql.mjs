@@ -25,9 +25,13 @@
 
 // ----------------------------------------------------------------- config
 
-const KB = (process.env.KIBANA_URL ?? 'https://newterms-lookup-indices-acee57.kb.europe-west1.gcp.elastic.cloud').replace(/\/$/, '');
+const KB = (
+  process.env.KIBANA_URL ??
+  'https://newterms-lookup-indices-acee57.kb.europe-west1.gcp.elastic.cloud'
+).replace(/\/$/, '');
 const ES = (process.env.ES_URL ?? KB.replace('.kb.', '.es.')).replace(/\/$/, '');
-const API_KEY = process.env.API_KEY ?? 'am8zNWlxQUJIVmQyLTlHU0YxcC06bjFTMGZ6WTBUMjdmaXMzX0FSank5dw==';
+const API_KEY =
+  process.env.API_KEY ?? 'am8zNWlxQUJIVmQyLTlHU0YxcC06bjFTMGZ6WTBUMjdmaXMzX0FSank5dw==';
 
 const SPACE = 'default';
 const LIST_SIZE = Number(process.env.LIST_SIZE ?? 5_000_000);
@@ -131,19 +135,24 @@ const bulkLoad = async (index, count, makeDoc, label, action = 'index') => {
     let ndjson = '';
     for (let k = 0; k < n; k++) {
       const { _id, doc } = makeDoc(done + k);
-      const meta = action === 'create' ? { create: {} } : _id != null ? { index: { _id } } : { index: {} };
+      const meta =
+        action === 'create' ? { create: {} } : _id != null ? { index: { _id } } : { index: {} };
       ndjson += JSON.stringify(meta) + '\n';
       ndjson += JSON.stringify(doc) + '\n';
     }
     const r = await es('POST', `/${index}/_bulk?filter_path=errors,items.*.error`, ndjson);
     if (r.status >= 400 || r.json.errors) {
       const firstErr = r.json.items?.find((i) => Object.values(i)[0]?.error)?.[action]?.error;
-      throw new Error(`bulk into ${index} failed: ${r.status} ${JSON.stringify(firstErr ?? r.json).slice(0, 300)}`);
+      throw new Error(
+        `bulk into ${index} failed: ${r.status} ${JSON.stringify(firstErr ?? r.json).slice(0, 300)}`
+      );
     }
     done += n;
     if (done % (BULK_BATCH * 10) === 0 || done === count) {
       const rate = Math.round(done / ((Date.now() - t0) / 1000));
-      log(`  ${label}: ${done.toLocaleString()}/${count.toLocaleString()} (${rate.toLocaleString()}/s)`);
+      log(
+        `  ${label}: ${done.toLocaleString()}/${count.toLocaleString()} (${rate.toLocaleString()}/s)`
+      );
     }
   }
   await es('POST', `/${index}/_refresh`);
@@ -167,7 +176,12 @@ const setupList = async (listId, valuePrefix) => {
   const lookupIndex = `${listId}-lookup`;
 
   // 1. legacy value list for the rule
-  const c = await kbn('POST', '/api/lists', { id: listId, type: LIST_TYPE, name: listId, description: `perf ${listId}` });
+  const c = await kbn('POST', '/api/lists', {
+    id: listId,
+    type: LIST_TYPE,
+    name: listId,
+    description: `perf ${listId}`,
+  });
   if (c.status >= 400 && !JSON.stringify(c.json).includes('already exists')) {
     throw new Error(`create list ${listId} failed: ${c.status} ${JSON.stringify(c.json)}`);
   }
@@ -242,7 +256,9 @@ const setupEvents = async () => {
 
   const have = await countDocs(EVENTS_INDEX);
   if (!FORCE && have >= EVENT_COUNT) {
-    log(`  events: already has ${have.toLocaleString()} docs, skipping generation (FORCE=1 to redo)`);
+    log(
+      `  events: already has ${have.toLocaleString()} docs, skipping generation (FORCE=1 to redo)`
+    );
     return;
   }
 
@@ -275,7 +291,13 @@ const setupEvents = async () => {
         Math.random() < MEMBER_B_FRAC ? `l2-${randInt(LIST_SIZE)}` : `x2-${randInt(LIST_SIZE)}`;
       return {
         _id: `e-${i}`,
-        doc: { '@timestamp': new Date(ts).toISOString(), username, field_a, field_b, host: { name: 'perf' } },
+        doc: {
+          '@timestamp': new Date(ts).toISOString(),
+          username,
+          field_a,
+          field_b,
+          host: { name: 'perf' },
+        },
       };
     },
     'events'
@@ -298,7 +320,14 @@ const setupExceptions = async () => {
     description: 'whitelist events whose field_a is in list1',
     type: 'simple',
     namespace_type: 'single',
-    entries: [{ field: 'field_a', operator: 'included', type: 'list', list: { id: LIST1, type: LIST_TYPE } }],
+    entries: [
+      {
+        field: 'field_a',
+        operator: 'included',
+        type: 'list',
+        list: { id: LIST1, type: LIST_TYPE },
+      },
+    ],
   });
   // item 2: field_b is NOT in list2 -> whitelist (exclusion)
   await kbn('POST', '/api/exception_lists/items', {
@@ -307,7 +336,14 @@ const setupExceptions = async () => {
     description: 'whitelist events whose field_b is not in list2',
     type: 'simple',
     namespace_type: 'single',
-    entries: [{ field: 'field_b', operator: 'excluded', type: 'list', list: { id: LIST2, type: LIST_TYPE } }],
+    entries: [
+      {
+        field: 'field_b',
+        operator: 'excluded',
+        type: 'list',
+        list: { id: LIST2, type: LIST_TYPE },
+      },
+    ],
   });
   const got = await kbn('GET', `/api/exception_lists?list_id=${EXC_LIST}&namespace_type=single`);
   return got.json.id;
@@ -332,9 +368,12 @@ const setupRule = async (excId) => {
     risk_score: 50,
     severity: 'medium',
     enabled: true,
-    exceptions_list: [{ id: excId, list_id: EXC_LIST, type: 'detection', namespace_type: 'single' }],
+    exceptions_list: [
+      { id: excId, list_id: EXC_LIST, type: 'detection', namespace_type: 'single' },
+    ],
   });
-  if (create.status >= 400) throw new Error(`create rule failed: ${create.status} ${JSON.stringify(create.json)}`);
+  if (create.status >= 400)
+    throw new Error(`create rule failed: ${create.status} ${JSON.stringify(create.json)}`);
   return create.json.id; // the alerting rule id, used by _run_soon
 };
 
@@ -354,7 +393,12 @@ const runRuleAndMeasure = async (alertingId) => {
     await sleep(3000);
     const r = await kbn('GET', `/api/detection_engine/rules?rule_id=${RULE_ID}`);
     const last = r.json?.execution_summary?.last_execution;
-    if (last?.date && last.date !== beforeDate && last.status !== 'going to run' && last.status !== 'running') {
+    if (
+      last?.date &&
+      last.date !== beforeDate &&
+      last.status !== 'going to run' &&
+      last.status !== 'running'
+    ) {
       summary = last;
       break;
     }
@@ -366,7 +410,9 @@ const runRuleAndMeasure = async (alertingId) => {
   const start = new Date(Date.now() - 15 * 60_000).toISOString();
   const results = await kbn(
     'GET',
-    `/internal/detection_engine/rules/${alertingId}/execution/results?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&per_page=1&sort_field=timestamp&sort_order=desc`
+    `/internal/detection_engine/rules/${alertingId}/execution/results?start=${encodeURIComponent(
+      start
+    )}&end=${encodeURIComponent(end)}&per_page=1&sort_field=timestamp&sort_order=desc`
   );
   const execEvent = results.json?.events?.[0];
   return { execEvent, summary, wallMs };
@@ -412,7 +458,9 @@ const runEsqlAndMeasure = async (query) => {
 const main = async () => {
   log(`Kibana: ${KB}`);
   log(`ES:     ${ES}`);
-  log(`config: LIST_SIZE=${LIST_SIZE.toLocaleString()} EVENT_COUNT=${EVENT_COUNT.toLocaleString()} BULK_BATCH=${BULK_BATCH} FORCE=${FORCE}`);
+  log(
+    `config: LIST_SIZE=${LIST_SIZE.toLocaleString()} EVENT_COUNT=${EVENT_COUNT.toLocaleString()} BULK_BATCH=${BULK_BATCH} FORCE=${FORCE}`
+  );
 
   const { l1, l2 } = await setupLists();
   await setupEvents();
@@ -427,10 +475,26 @@ const main = async () => {
   // ------------------------------------------------------------- report
   log('\n\n======================= RESULTS =======================');
   log(`\nData:`);
-  log(`  list1 legacy items (.items-${SPACE} list_id=${LIST1}): ${(await countListItems(LIST1)).toLocaleString()}`);
-  log(`  list2 legacy items (.items-${SPACE} list_id=${LIST2}): ${(await countListItems(LIST2)).toLocaleString()}`);
-  log(`  list1 lookup index (${l1.lookupIndex}): ${(await countDocs(l1.lookupIndex)).toLocaleString()} docs`);
-  log(`  list2 lookup index (${l2.lookupIndex}): ${(await countDocs(l2.lookupIndex)).toLocaleString()} docs`);
+  log(
+    `  list1 legacy items (.items-${SPACE} list_id=${LIST1}): ${(
+      await countListItems(LIST1)
+    ).toLocaleString()}`
+  );
+  log(
+    `  list2 legacy items (.items-${SPACE} list_id=${LIST2}): ${(
+      await countListItems(LIST2)
+    ).toLocaleString()}`
+  );
+  log(
+    `  list1 lookup index (${l1.lookupIndex}): ${(
+      await countDocs(l1.lookupIndex)
+    ).toLocaleString()} docs`
+  );
+  log(
+    `  list2 lookup index (${l2.lookupIndex}): ${(
+      await countDocs(l2.lookupIndex)
+    ).toLocaleString()} docs`
+  );
   log(`  events (${EVENTS_INDEX}): ${(await countDocs(EVENTS_INDEX)).toLocaleString()} docs`);
 
   log(`\nNew Terms rule execution:`);
@@ -445,7 +509,11 @@ const main = async () => {
   if (execEvent) {
     log(`  execution results API:`);
     log(`    total duration_ms:   ${execEvent.duration_ms ?? 'n/a'}`);
-    log(`    search_duration_ms:  ${execEvent.search_duration_ms ?? 'n/a'}   <-- compare with ES|QL took`);
+    log(
+      `    search_duration_ms:  ${
+        execEvent.search_duration_ms ?? 'n/a'
+      }   <-- compare with ES|QL took`
+    );
     log(`    indexing_duration_ms:${execEvent.indexing_duration_ms ?? 'n/a'}`);
     log(`    schedule_delay_ms:   ${execEvent.schedule_delay_ms ?? 'n/a'}`);
   }
@@ -454,7 +522,11 @@ const main = async () => {
   if (esqlResult?.error) {
     log(`  ! ES|QL error: ${JSON.stringify(esqlResult.error).slice(0, 400)}`);
   } else if (esqlResult) {
-    log(`  took (3 runs): ${esqlResult.tooks.join(', ')} ms  (best ${Math.min(...esqlResult.tooks)} ms)`);
+    log(
+      `  took (3 runs): ${esqlResult.tooks.join(', ')} ms  (best ${Math.min(
+        ...esqlResult.tooks
+      )} ms)`
+    );
     log(`  result: ${JSON.stringify(esqlResult.last?.values ?? [])}`);
   }
 
@@ -464,7 +536,9 @@ const main = async () => {
 
   log(`\nCaveats:`);
   log(`  - The rule reads the legacy value list (.items data stream); the ES|QL query joins the`);
-  log(`    parallel lookup-mode indices. Both hold the same ${LIST_SIZE.toLocaleString()} values, so this compares the`);
+  log(
+    `    parallel lookup-mode indices. Both hold the same ${LIST_SIZE.toLocaleString()} values, so this compares the`
+  );
   log(`    two storage+execution models over identical membership.`);
   log(`  - The ES|QL query approximates the rule: INLINE STATS gives "new terms" (username whose`);
   log(`    first occurrence in the window is inside the current interval); the two LOOKUP JOINs`);
@@ -473,7 +547,9 @@ const main = async () => {
   log(`    to force full evaluation without returning every row.`);
   log(`  - total_search_duration_ms is ES search time inside the rule; ES|QL took is end-to-end`);
   log(`    query time. Compare them as orders of magnitude, not to the millisecond.`);
-  log(`\nData left in place. Re-run to re-measure (generation is skipped when counts already match).`);
+  log(
+    `\nData left in place. Re-run to re-measure (generation is skipped when counts already match).`
+  );
 };
 
 main().catch((e) => {

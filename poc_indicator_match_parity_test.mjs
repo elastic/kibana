@@ -30,34 +30,52 @@ const ADDED = '10.30.0.2'; // added to the migrated list after migration
 const OUT = '10.99.0.1'; // in no list
 const concreteIndex = (listId) => `.value-list-v2-${SPACE}-${listId}`;
 
-const TWINS = [
-  { storage: 'legacy' },
-  { storage: 'lookup' },
-];
+const TWINS = [{ storage: 'legacy' }, { storage: 'lookup' }];
 const twinList = (c) => `${P}-${c.storage}`;
 const twinRule = (c) => `${P}-${c.storage}-rule`;
 const MIG_LIST = `${P}-mig`;
 const MIG_LEGACY_RULE = `${P}-mig-legacy-rule`;
 const MIG_CONCRETE_RULE = `${P}-mig-concrete-rule`;
 
-const kh = { authorization: AUTH, 'content-type': 'application/json', 'kbn-xsrf': 'poc', 'x-elastic-internal-origin': 'poc', 'elastic-api-version': '2023-10-31' };
+const kh = {
+  authorization: AUTH,
+  'content-type': 'application/json',
+  'kbn-xsrf': 'poc',
+  'x-elastic-internal-origin': 'poc',
+  'elastic-api-version': '2023-10-31',
+};
 const ih = { ...kh, 'elastic-api-version': '1' };
 const kbn = async (method, path, body, headers = kh) => {
-  const res = await fetch(`${KBN}${path}`, { method, headers, body: body == null ? undefined : JSON.stringify(body) });
+  const res = await fetch(`${KBN}${path}`, {
+    method,
+    headers,
+    body: body == null ? undefined : JSON.stringify(body),
+  });
   const text = await res.text();
   let json;
-  try { json = text ? JSON.parse(text) : {}; } catch { json = { raw: text }; }
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    json = { raw: text };
+  }
   return { status: res.status, json };
 };
 const es = async (method, path, body) => {
   const isNdjson = typeof body === 'string';
   const res = await fetch(`${ES}${path}`, {
     method,
-    headers: { authorization: AUTH, 'content-type': isNdjson ? 'application/x-ndjson' : 'application/json' },
+    headers: {
+      authorization: AUTH,
+      'content-type': isNdjson ? 'application/x-ndjson' : 'application/json',
+    },
     body: body == null ? undefined : isNdjson ? body : JSON.stringify(body),
   });
   const text = await res.text();
-  try { return { status: res.status, json: text ? JSON.parse(text) : {} }; } catch { return { status: res.status, json: { raw: text } }; }
+  try {
+    return { status: res.status, json: text ? JSON.parse(text) : {} };
+  } catch {
+    return { status: res.status, json: { raw: text } };
+  }
 };
 const log = (...a) => console.log(...a);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -72,16 +90,36 @@ const cleanup = async () => {
     await es('DELETE', `/${concreteIndex(listId)}`);
   }
   await es('DELETE', `/${SRC_INDEX}`);
-  await es('POST', `/${ALERTS_INDEX}/_delete_by_query?refresh=true&conflicts=proceed&ignore_unavailable=true`, {
-    query: { prefix: { 'kibana.alert.rule.name': P } },
-  });
+  await es(
+    'POST',
+    `/${ALERTS_INDEX}/_delete_by_query?refresh=true&conflicts=proceed&ignore_unavailable=true`,
+    {
+      query: { prefix: { 'kibana.alert.rule.name': P } },
+    }
+  );
 };
 
 const writeEvents = async () => {
-  const bulk = [IN, ADDED, OUT]
-    .map((ip) => `${JSON.stringify({ index: {} })}\n${JSON.stringify({ '@timestamp': now(), destination: { ip }, host: { name: P } })}`)
-    .join('\n') + '\n';
-  await es('PUT', `/${SRC_INDEX}`, { mappings: { properties: { '@timestamp': { type: 'date' }, destination: { properties: { ip: { type: 'ip' } } }, host: { properties: { name: { type: 'keyword' } } } } } });
+  const bulk =
+    [IN, ADDED, OUT]
+      .map(
+        (ip) =>
+          `${JSON.stringify({ index: {} })}\n${JSON.stringify({
+            '@timestamp': now(),
+            destination: { ip },
+            host: { name: P },
+          })}`
+      )
+      .join('\n') + '\n';
+  await es('PUT', `/${SRC_INDEX}`, {
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        destination: { properties: { ip: { type: 'ip' } } },
+        host: { properties: { name: { type: 'keyword' } } },
+      },
+    },
+  });
   await es('POST', `/${SRC_INDEX}/_bulk?refresh=true`, bulk);
 };
 
@@ -89,31 +127,58 @@ const createList = async (listId, storage, check) => {
   const body = { id: listId, type: 'ip', name: listId, description: listId };
   if (storage === 'legacy') body.meta = { __forceLegacy: true };
   const created = await kbn('POST', '/api/lists', body);
-  if (created.status >= 400) throw new Error(`create list ${listId}: ${created.status} ${JSON.stringify(created.json)}`);
+  if (created.status >= 400)
+    throw new Error(`create list ${listId}: ${created.status} ${JSON.stringify(created.json)}`);
   const isLookup = created.json?.storage?.type === 'lookup_index';
   check(`${listId}: storage is ${storage}`, storage === 'lookup' ? isLookup : !isLookup);
   const item = await kbn('POST', '/api/lists/items', { list_id: listId, value: IN });
-  if (item.status >= 400) throw new Error(`add item to ${listId}: ${item.status} ${JSON.stringify(item.json)}`);
+  if (item.status >= 400)
+    throw new Error(`add item to ${listId}: ${item.status} ${JSON.stringify(item.json)}`);
 };
 
 // The threat side of an indicator match rule, per storage: the shared stream needs the
 // list filter and maps the typed `ip` column; a lookup list is its own index with `value`.
 const threatSide = (storage, listId) =>
   storage === 'legacy'
-    ? { threat_index: [ITEMS_INDEX], threat_query: `list_id: "${listId}"`, threat_mapping: [{ entries: [{ field: 'destination.ip', type: 'mapping', value: 'ip' }] }] }
-    : { threat_index: [concreteIndex(listId)], threat_query: '*:*', threat_mapping: [{ entries: [{ field: 'destination.ip', type: 'mapping', value: 'value' }] }] };
+    ? {
+        threat_index: [ITEMS_INDEX],
+        threat_query: `list_id: "${listId}"`,
+        threat_mapping: [{ entries: [{ field: 'destination.ip', type: 'mapping', value: 'ip' }] }],
+      }
+    : {
+        threat_index: [concreteIndex(listId)],
+        threat_query: '*:*',
+        threat_mapping: [
+          { entries: [{ field: 'destination.ip', type: 'mapping', value: 'value' }] },
+        ],
+      };
 
 // The rule handle: its saved object id, its rule_id, and the lookup index it reads (if any).
-const ruleHandle = (id, ruleId, storage, listId) => ({ id, ruleId, lookupIndex: storage === 'lookup' ? concreteIndex(listId) : undefined });
+const ruleHandle = (id, ruleId, storage, listId) => ({
+  id,
+  ruleId,
+  lookupIndex: storage === 'lookup' ? concreteIndex(listId) : undefined,
+});
 
 const createRule = async (ruleId, storage, listId) => {
   const rule = await kbn('POST', '/api/detection_engine/rules', {
-    rule_id: ruleId, name: ruleId, description: ruleId, type: 'threat_match', enabled: true,
-    risk_score: 1, severity: 'low', from: 'now-1h', interval: '1m',
-    index: [SRC_INDEX], query: `host.name: "${P}"`, language: 'kuery', threat_language: 'kuery',
+    rule_id: ruleId,
+    name: ruleId,
+    description: ruleId,
+    type: 'threat_match',
+    enabled: true,
+    risk_score: 1,
+    severity: 'low',
+    from: 'now-1h',
+    interval: '1m',
+    index: [SRC_INDEX],
+    query: `host.name: "${P}"`,
+    language: 'kuery',
+    threat_language: 'kuery',
     ...threatSide(storage, listId),
   });
-  if (rule.status >= 400) throw new Error(`create rule ${ruleId}: ${rule.status} ${JSON.stringify(rule.json)}`);
+  if (rule.status >= 400)
+    throw new Error(`create rule ${ruleId}: ${rule.status} ${JSON.stringify(rule.json)}`);
   return rule.json.id;
 };
 
@@ -133,14 +198,26 @@ const runAndCollect = async (rules, check) => {
   for (const { id } of rules) await kbn('POST', `/internal/alerting/rule/${id}/_run_soon`);
   for (const { ruleId, lookupIndex } of rules) {
     const last = await waitForExecution(ruleId, since);
-    check(`${ruleId}: executed (${last?.status ?? 'no execution'})`, last?.status === 'succeeded', last?.status === 'succeeded' ? '' : String(last?.message ?? '').slice(0, 200));
+    check(
+      `${ruleId}: executed (${last?.status ?? 'no execution'})`,
+      last?.status === 'succeeded',
+      last?.status === 'succeeded' ? '' : String(last?.message ?? '').slice(0, 200)
+    );
     if (lookupIndex != null) {
       // A lookup index carries no @timestamp on purpose. The executor's threat index
       // timestamp check must skip it, so the run is not a partial failure.
       const mapping = await es('GET', `/${lookupIndex}/_mapping`);
       const properties = Object.values(mapping.json)[0]?.mappings?.properties ?? {};
-      check(`${ruleId}: the lookup index has no @timestamp field`, properties['@timestamp'] == null);
-      check(`${ruleId}: no partial failure about the timestamp field`, last?.status !== 'partial failure' && !String(last?.message ?? '').includes('missing the timestamp field'), String(last?.message ?? '').slice(0, 160));
+      check(
+        `${ruleId}: the lookup index has no @timestamp field`,
+        properties['@timestamp'] == null
+      );
+      check(
+        `${ruleId}: no partial failure about the timestamp field`,
+        last?.status !== 'partial failure' &&
+          !String(last?.message ?? '').includes('missing the timestamp field'),
+        String(last?.message ?? '').slice(0, 160)
+      );
     }
   }
   await sleep(3000);
@@ -151,16 +228,24 @@ const runAndCollect = async (rules, check) => {
 
 const alertsFor = async (name) => {
   const r = await es('POST', `/${ALERTS_INDEX}/_search?ignore_unavailable=true`, {
-    _source: false, fields: ['destination.ip'], size: 100, query: { term: { 'kibana.alert.rule.name': name } },
+    _source: false,
+    fields: ['destination.ip'],
+    size: 100,
+    query: { term: { 'kibana.alert.rule.name': name } },
   });
-  return [...new Set((r.json.hits?.hits ?? []).map((h) => h.fields?.['destination.ip']?.[0]))].filter(Boolean).sort();
+  return [...new Set((r.json.hits?.hits ?? []).map((h) => h.fields?.['destination.ip']?.[0]))]
+    .filter(Boolean)
+    .sort();
 };
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 const main = async () => {
   const results = [];
-  const check = (label, ok, extra = '') => { log(`  ${label}: ${ok ? 'PASS' : 'FAIL'} ${extra}`); results.push(ok); };
+  const check = (label, ok, extra = '') => {
+    log(`  ${label}: ${ok ? 'PASS' : 'FAIL'} ${extra}`);
+    results.push(ok);
+  };
 
   log('=== cleanup ===');
   await cleanup();
@@ -171,40 +256,101 @@ const main = async () => {
   const twinRules = [];
   for (const cell of TWINS) {
     await createList(twinList(cell), cell.storage, check);
-    twinRules.push(ruleHandle(await createRule(twinRule(cell), cell.storage, twinList(cell)), twinRule(cell), cell.storage, twinList(cell)));
+    twinRules.push(
+      ruleHandle(
+        await createRule(twinRule(cell), cell.storage, twinList(cell)),
+        twinRule(cell),
+        cell.storage,
+        twinList(cell)
+      )
+    );
   }
   const twinAlerts = await runAndCollect(twinRules, check);
   for (const cell of TWINS) {
-    check(`${twinRule(cell)}: alerts ${JSON.stringify(twinAlerts[twinRule(cell)])} match expected ["${IN}"]`, same(twinAlerts[twinRule(cell)], [IN]));
+    check(
+      `${twinRule(cell)}: alerts ${JSON.stringify(
+        twinAlerts[twinRule(cell)]
+      )} match expected ["${IN}"]`,
+      same(twinAlerts[twinRule(cell)], [IN])
+    );
   }
-  check('lookup alerts equal legacy alerts', same(twinAlerts[twinRule(TWINS[1])], twinAlerts[twinRule(TWINS[0])]));
+  check(
+    'lookup alerts equal legacy alerts',
+    same(twinAlerts[twinRule(TWINS[1])], twinAlerts[twinRule(TWINS[0])])
+  );
 
   log('\n=== phase 2: migration ===');
   await createList(MIG_LIST, 'legacy', check);
-  const legacyRule = ruleHandle(await createRule(MIG_LEGACY_RULE, 'legacy', MIG_LIST), MIG_LEGACY_RULE, 'legacy', MIG_LIST);
+  const legacyRule = ruleHandle(
+    await createRule(MIG_LEGACY_RULE, 'legacy', MIG_LIST),
+    MIG_LEGACY_RULE,
+    'legacy',
+    MIG_LIST
+  );
   await sleep(1500); // let the rule become searchable for the scan
   const blocked = await kbn('POST', '/internal/lists/_migrate', { id: MIG_LIST }, ih);
-  check('migration without force is blocked by the indicator match rule (409, referenced)', blocked.status === 409 && blocked.json?.attributes?.warningLevel === 'referenced');
+  check(
+    'migration without force is blocked by the indicator match rule (409, referenced)',
+    blocked.status === 409 && blocked.json?.attributes?.warningLevel === 'referenced'
+  );
   const migrated = await kbn('POST', '/internal/lists/_migrate', { id: MIG_LIST, force: true }, ih);
-  check('forced migration copies the items', migrated.status === 200 && migrated.json?.migration?.itemsCopied === 1, JSON.stringify(migrated.json?.migration ?? migrated.json).slice(0, 200));
-  const concreteRule = ruleHandle(await createRule(MIG_CONCRETE_RULE, 'lookup', MIG_LIST), MIG_CONCRETE_RULE, 'lookup', MIG_LIST);
+  check(
+    'forced migration copies the items',
+    migrated.status === 200 && migrated.json?.migration?.itemsCopied === 1,
+    JSON.stringify(migrated.json?.migration ?? migrated.json).slice(0, 200)
+  );
+  const concreteRule = ruleHandle(
+    await createRule(MIG_CONCRETE_RULE, 'lookup', MIG_LIST),
+    MIG_CONCRETE_RULE,
+    'lookup',
+    MIG_LIST
+  );
 
   const afterMigration = await runAndCollect([legacyRule, concreteRule], check);
-  check(`legacy rule after migration alerts ${JSON.stringify(afterMigration[MIG_LEGACY_RULE])} (frozen copy still matches)`, same(afterMigration[MIG_LEGACY_RULE], [IN]));
-  check(`concrete-index rule alerts ${JSON.stringify(afterMigration[MIG_CONCRETE_RULE])} match the legacy rule`, same(afterMigration[MIG_CONCRETE_RULE], afterMigration[MIG_LEGACY_RULE]));
+  check(
+    `legacy rule after migration alerts ${JSON.stringify(
+      afterMigration[MIG_LEGACY_RULE]
+    )} (frozen copy still matches)`,
+    same(afterMigration[MIG_LEGACY_RULE], [IN])
+  );
+  check(
+    `concrete-index rule alerts ${JSON.stringify(
+      afterMigration[MIG_CONCRETE_RULE]
+    )} match the legacy rule`,
+    same(afterMigration[MIG_CONCRETE_RULE], afterMigration[MIG_LEGACY_RULE])
+  );
 
   log('\n=== phase 2b: an edit after migration reaches the lookup rule only ===');
   const added = await kbn('POST', '/api/lists/items', { list_id: MIG_LIST, value: ADDED });
-  if (added.status >= 400) throw new Error(`add item after migration: ${added.status} ${JSON.stringify(added.json)}`);
-  const itemsRows = await es('POST', `/${ITEMS_INDEX}/_count`, { query: { term: { list_id: MIG_LIST } } });
-  check('the write went to the lookup index, not to the frozen copy in .items', (itemsRows.json.count ?? 0) === 1);
+  if (added.status >= 400)
+    throw new Error(`add item after migration: ${added.status} ${JSON.stringify(added.json)}`);
+  const itemsRows = await es('POST', `/${ITEMS_INDEX}/_count`, {
+    query: { term: { list_id: MIG_LIST } },
+  });
+  check(
+    'the write went to the lookup index, not to the frozen copy in .items',
+    (itemsRows.json.count ?? 0) === 1
+  );
   const afterEdit = await runAndCollect([legacyRule, concreteRule], check);
-  check(`legacy rule still alerts only ${JSON.stringify([IN])} (reads the frozen copy)`, same(afterEdit[MIG_LEGACY_RULE], [IN]));
-  check(`concrete-index rule now alerts ${JSON.stringify([IN, ADDED].sort())}`, same(afterEdit[MIG_CONCRETE_RULE], [IN, ADDED].sort()));
+  check(
+    `legacy rule still alerts only ${JSON.stringify([IN])} (reads the frozen copy)`,
+    same(afterEdit[MIG_LEGACY_RULE], [IN])
+  );
+  check(
+    `concrete-index rule now alerts ${JSON.stringify([IN, ADDED].sort())}`,
+    same(afterEdit[MIG_CONCRETE_RULE], [IN, ADDED].sort())
+  );
 
   log('\n=== summary ===');
-  log(`  ${results.every(Boolean) ? 'ALL PASS' : 'SOME FAILED'} (${results.filter(Boolean).length}/${results.length})`);
+  log(
+    `  ${results.every(Boolean) ? 'ALL PASS' : 'SOME FAILED'} (${results.filter(Boolean).length}/${
+      results.length
+    })`
+  );
   if (!results.every(Boolean)) process.exit(1);
 };
 
-main().catch((e) => { console.error('\nFAILED:', e.message); process.exit(1); });
+main().catch((e) => {
+  console.error('\nFAILED:', e.message);
+  process.exit(1);
+});
