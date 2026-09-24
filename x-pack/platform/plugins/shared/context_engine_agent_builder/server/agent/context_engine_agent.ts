@@ -72,6 +72,7 @@ export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup
           ],
         },
       ],
+      ai_indices: [],
       enable_elastic_capabilities: false,
       subagent_ids: [SELF_AGENT_ID],
       connector_ids: [],
