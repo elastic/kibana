@@ -127,9 +127,12 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
           )}
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="chevronSingleRight" color="subdued" size="s" aria-hidden={true} />
-        </EuiFlexItem>
+        {/* The chevron promises a drill-down, so a row that has none does not show one. */}
+        {renderDrilldown ? (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="chevronSingleRight" color="subdued" size="s" aria-hidden={true} />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
 

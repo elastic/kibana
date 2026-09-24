@@ -115,6 +115,12 @@ describe('AttachmentSummaryRow', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
+  it('shows no chevron on a read-only row, which would promise a drill-down it lacks', () => {
+    const { container } = renderRow({ getLabel: () => '3 alerts' });
+
+    expect(container.querySelector('[data-euiicon-type="chevronSingleRight"]')).toBeNull();
+  });
+
   describe('with a registered drill-down', () => {
     const renderConversationDetailsContent = jest.fn(() => <div data-test-subj="drilldown" />);
 
@@ -125,6 +131,14 @@ describe('AttachmentSummaryRow', () => {
         { getLabel: () => '3 alerts', getIcon: () => 'bell', renderConversationDetailsContent },
         overrides
       );
+
+    it('shows the chevron, which marks the row as leading somewhere', () => {
+      const { container } = renderDrilldownRow();
+
+      expect(
+        container.querySelector('[data-euiicon-type="chevronSingleRight"]')
+      ).toBeInTheDocument();
+    });
 
     it('names the row by its kind and label, since the kind is otherwise only visual', () => {
       renderDrilldownRow();
