@@ -4131,7 +4131,7 @@
             "example": true
           },
           "extractObservables": {
-            "description": "When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used; falls back to `true` if no space configuration exists. Precedence: explicit value > template setting > space config > true.\n",
+            "description": "When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default.\n",
             "type": "boolean",
             "example": true
           }
@@ -5574,7 +5574,7 @@
           },
           "extractObservables": {
             "type": "boolean",
-            "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to `true`.\n"
+            "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.\n"
           },
           "owner": {
             "$ref": "#/components/schemas/owner"

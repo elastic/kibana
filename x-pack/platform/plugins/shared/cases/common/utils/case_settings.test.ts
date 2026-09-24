@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getCaseSettings, isObservablesExtractionBlocked } from './case_settings';
+import {
+  getCaseSettings,
+  isObservablesExtractionBlocked,
+  resolveExtractObservables,
+} from './case_settings';
 
 describe('getCaseSettings', () => {
   it('returns Security owner flags from OWNER_INFO', () => {
@@ -63,4 +67,33 @@ describe('isObservablesExtractionBlocked', () => {
       expect(isObservablesExtractionBlocked(owner)).toBe(false);
     }
   );
+});
+
+describe('resolveExtractObservables', () => {
+  it('returns false for Observability regardless of space config', () => {
+    expect(resolveExtractObservables('observability', true)).toBe(false);
+    expect(resolveExtractObservables('observability', false)).toBe(false);
+    expect(resolveExtractObservables('observability', undefined)).toBe(false);
+  });
+
+  it('returns the space config value when present for Security', () => {
+    expect(resolveExtractObservables('securitySolution', true)).toBe(true);
+    expect(resolveExtractObservables('securitySolution', false)).toBe(false);
+  });
+
+  it('falls back to Security autoExtractDefault (true) when no space config exists', () => {
+    expect(resolveExtractObservables('securitySolution', undefined)).toBe(true);
+  });
+
+  it('falls back to Stack autoExtractDefault (false) when no space config exists', () => {
+    expect(resolveExtractObservables('cases', undefined)).toBe(false);
+  });
+
+  it('falls back to false for unknown owners when no space config exists', () => {
+    expect(resolveExtractObservables('unknownOwner', undefined)).toBe(false);
+  });
+
+  it('respects explicit space config for unknown owners', () => {
+    expect(resolveExtractObservables('unknownOwner', true)).toBe(true);
+  });
 });

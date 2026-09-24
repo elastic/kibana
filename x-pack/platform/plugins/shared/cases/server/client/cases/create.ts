@@ -17,9 +17,7 @@ import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import type { Owner } from '../../../common/constants/types';
-import { OWNER_INFO } from '../../../common/constants/owners';
-import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
+import { resolveExtractObservables } from '../../../common/utils/case_settings';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {
@@ -64,7 +62,6 @@ import {
  * Creates a new case.
  *
  */
-// eslint-disable-next-line complexity
 export const create = async (
   data: CasePostRequest,
   clientArgs: CasesClientArgs,
@@ -165,21 +162,17 @@ export const create = async (
       }
     }
 
-    // Default extractObservables from the space configuration when the caller omitted it
-    // and template expansion did not fill it. Precedence:
-    // caller-explicit > template definition > space config default > observablesEnabled.
-    // observablesEnabled is the primary gate: if the feature is off for this owner, extraction
-    // is always false regardless of what the space config holds.
+    // Default extractObservables when the caller omitted it and template expansion did not fill it.
+    // Precedence: caller-explicit > template definition > space config > owner default > false.
     if (query.settings.extractObservables === undefined) {
       query = {
         ...query,
         settings: {
           ...query.settings,
-          extractObservables: isObservablesExtractionBlocked(query.owner)
-            ? false
-            : configurations[0]?.extractObservables ??
-              OWNER_INFO[query.owner as Owner]?.features.observables.autoExtractDefault ??
-              false,
+          extractObservables: resolveExtractObservables(
+            query.owner,
+            configurations[0]?.extractObservables
+          ),
         },
       };
     }

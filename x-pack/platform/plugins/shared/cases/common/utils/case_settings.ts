@@ -46,3 +46,27 @@ export const getCaseSettings = (owner: string): OwnerCaseSettings => {
  */
 export const isObservablesExtractionBlocked = (owner: string): boolean =>
   Object.hasOwn(OWNER_INFO, owner) && !OWNER_INFO[owner as Owner].features.observables.enabled;
+
+/**
+ * Resolves the effective `extractObservables` value for a new case, applying the full precedence
+ * chain when the caller omitted the field:
+ *   blocked by owner → false
+ *   space config present → space config value
+ *   no space config → owner autoExtractDefault
+ *   owner unknown → false
+ *
+ * Pass `spaceExtractObservables` as `undefined` when no configuration exists for the owner.
+ */
+export const resolveExtractObservables = (
+  owner: string,
+  spaceExtractObservables: boolean | undefined
+): boolean => {
+  if (isObservablesExtractionBlocked(owner)) {
+    return false;
+  }
+  return (
+    spaceExtractObservables ??
+    OWNER_INFO[owner as Owner]?.features.observables.autoExtractDefault ??
+    false
+  );
+};

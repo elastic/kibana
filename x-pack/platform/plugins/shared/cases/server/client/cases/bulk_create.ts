@@ -19,8 +19,7 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
-import { OWNER_INFO } from '../../../common/constants/owners';
-import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
+import { resolveExtractObservables } from '../../../common/utils/case_settings';
 import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
@@ -545,20 +544,14 @@ const createBulkCreateCaseRequest = async ({
   // fields, one supplied via customFields and the other via extended_fields — a pre-pair check
   // only sees the latter and rejects the former as missing.
 
-  // Default extractObservables from the space configuration when the caller omitted it.
-  // observablesEnabled is the primary gate: if the feature is off for this owner, extraction
-  // is always false regardless of what the space config holds.
-  // Precedence: caller-explicit > space config default > owner autoExtractDefault > false.
+  // Default extractObservables when the caller omitted it.
+  // Precedence: caller-explicit > space config > owner default > false.
   if (caseWithoutId.settings.extractObservables === undefined) {
     caseWithoutId = {
       ...caseWithoutId,
       settings: {
         ...caseWithoutId.settings,
-        extractObservables: isObservablesExtractionBlocked(caseWithoutId.owner)
-          ? false
-          : spaceExtractObservables ??
-            OWNER_INFO[caseWithoutId.owner as Owner]?.features.observables.autoExtractDefault ??
-            false,
+        extractObservables: resolveExtractObservables(caseWithoutId.owner, spaceExtractObservables),
       },
     };
   }

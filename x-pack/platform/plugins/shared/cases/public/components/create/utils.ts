@@ -26,7 +26,7 @@ import {
   getConnectorsFormSerializer,
 } from '../utils';
 
-/** Space-level extractObservables default; falls back to the owner's autoExtractDefault when absent. */
+/** Returns the space-level extractObservables value from the configuration. */
 export const getSpaceExtractObservables = (configuration: CasesConfigurationUI): boolean =>
   configuration.extractObservables ?? false;
 
@@ -147,7 +147,9 @@ export const createFormSerializer = (
     connector: connectorToUpdate,
     settings: {
       syncAlerts: syncAlerts ?? false,
-      extractObservables: extractObservables ?? getSpaceExtractObservables(currentConfiguration),
+      extractObservables: isObservablesExtractionBlocked(currentConfiguration.owner)
+        ? false
+        : extractObservables ?? getSpaceExtractObservables(currentConfiguration),
     },
     owner: currentConfiguration.owner,
     customFields: transformedCustomFields,

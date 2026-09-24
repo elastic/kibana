@@ -35,8 +35,8 @@ properties:
   extractObservables:
     type: boolean
     description: >
-      Indicates whether observables are automatically extracted from alerts when
-      they are added to new cases. When omitted, defaults to `true`.
+      Indicates whether observables are automatically extracted from alerts when they are added to new cases.
+      When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.
   owner:
     $ref: 'owner.yaml'
   templates:

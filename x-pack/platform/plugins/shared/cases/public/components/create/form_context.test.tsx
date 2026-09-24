@@ -478,7 +478,7 @@ describe('Create case', () => {
         request: {
           ...sampleDataWithoutTags,
           owner: OBSERVABILITY_OWNER,
-          settings: { syncAlerts: false, extractObservables: true },
+          settings: { syncAlerts: false, extractObservables: false },
         },
       });
     });
