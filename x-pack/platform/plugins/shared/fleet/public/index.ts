@@ -157,7 +157,6 @@ export type {
 export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/use_request/epm';
 export { sendRenderIacTemplate } from './hooks/use_request/iac_provisioner';
 export { useIacProvisioner } from './hooks/use_iac_provisioner';
-export { useDisabledIdentityFederationProviders } from './hooks/use_disabled_identity_federation_providers';
 export type {
   IacPolicyTemplateSelection,
   RenderIacTemplateIntegration,
