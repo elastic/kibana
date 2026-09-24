@@ -10,7 +10,11 @@
 import { isEqual } from 'lodash';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { ProfileStateDefinition, ProfileStateRegistry } from '../../common/context_awareness';
+import type {
+  ProfileStateDefinition,
+  ProfileStateMap,
+  ProfileStateRegistry,
+} from '../../common/context_awareness';
 import type { ContextAwarenessToolkit, ContextAwarenessToolkitActions } from './toolkit';
 import {
   createProfileStateAdapterFactory,
@@ -23,9 +27,11 @@ import {
  */
 export const createInMemoryContextAwarenessToolkit = ({
   actions = {},
+  initialProfileState,
   profileStateRegistry,
 }: {
   actions?: ContextAwarenessToolkitActions;
+  initialProfileState?: ProfileStateMap;
   profileStateRegistry: ProfileStateRegistry;
 }): ContextAwarenessToolkit => {
   return {
@@ -35,7 +41,10 @@ export const createInMemoryContextAwarenessToolkit = ({
       createAdapter: <TState extends SerializableRecord>(
         definition: ProfileStateDefinition<TState>
       ): ProfileStateAdapter<TState> => {
-        const stateSubject = new BehaviorSubject<TState>(definition.defaultState);
+        const stateSubject = new BehaviorSubject<TState>({
+          ...definition.defaultState,
+          ...initialProfileState?.[definition.key],
+        });
         const state$ = stateSubject.pipe(distinctUntilChanged(isEqual));
         const getState = () => stateSubject.getValue();
 

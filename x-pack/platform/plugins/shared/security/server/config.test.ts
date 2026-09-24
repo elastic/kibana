@@ -76,6 +76,10 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
+        "serviceAccounts": Object {
+          "enabled": false,
+          "requestLifetime": "PT10M",
+        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -141,6 +145,10 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
+        "serviceAccounts": Object {
+          "enabled": false,
+          "requestLifetime": "PT10M",
+        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -205,6 +213,10 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
+        "serviceAccounts": Object {
+          "enabled": false,
+          "requestLifetime": "PT10M",
+        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -1752,17 +1764,21 @@ describe('config schema', () => {
   });
 
   describe('serviceAccounts', () => {
-    it('should not allow xpack.security.serviceAccounts to be configured outside of the serverless context', () => {
-      expect(() =>
+    it('should allow xpack.security.serviceAccounts.enabled to be configured outside of the serverless context', () => {
+      expect(
         ConfigSchema.validate(
           {
             serviceAccounts: { enabled: true },
           },
           { serverless: false }
-        )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[serviceAccounts]: a value wasn't expected to be present"`
-      );
+        ).serviceAccounts
+      ).toMatchObject({ enabled: true });
+    });
+
+    it('should be disabled by default outside of the serverless context', () => {
+      expect(ConfigSchema.validate({}, { serverless: false }).serviceAccounts).toMatchObject({
+        enabled: false,
+      });
     });
 
     it('should allow xpack.security.serviceAccounts.enabled to be configured inside of the serverless context', () => {

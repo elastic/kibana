@@ -805,6 +805,7 @@ export const findRulesRequestSchema = z
       .optional()
       .describe('A text string to search across rule fields.'),
   })
+  .strict()
   .refine(
     ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
     { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
@@ -852,22 +853,6 @@ export const ruleIdSchema = z
   .min(1)
   .max(ID_MAX_LENGTH)
   .describe('A rule identifier.');
-
-/**
- * Request body schema for `POST /api/alerting/v2/rules/_bulk_get`.
- */
-export const bulkGetRulesParamsSchema = z
-  .object({
-    ids: z
-      .array(ruleIdSchema)
-      .min(1)
-      .max(MAX_BULK_ITEMS)
-      .describe('Rule identifiers to retrieve. The response preserved this order.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_bulk_get_rules_request' });
-
-export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.

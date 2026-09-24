@@ -148,6 +148,23 @@ describe('User actions APIs', () => {
         });
       });
 
+      it('accepts sources including none', () => {
+        const query = UserActionInternalFindRequestRt.decode({
+          ...defaultRequest,
+          sources: ['agent', 'none'],
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: {
+            ...defaultRequest,
+            page: 1,
+            perPage: 10,
+            sources: ['agent', 'none'],
+          },
+        });
+      });
+
       it('removes foo:bar attributes from request', () => {
         const query = UserActionInternalFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
