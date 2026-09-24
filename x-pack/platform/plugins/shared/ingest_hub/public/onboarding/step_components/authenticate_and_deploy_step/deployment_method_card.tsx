@@ -22,6 +22,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -79,7 +80,7 @@ const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
 interface DeploymentMethodCardProps {
   selectedMethod: DeploymentMethod;
   onChange: (method: DeploymentMethod) => void;
-  /** When true, the Edit button is hidden — deployment method is locked after the first deploy. */
+  /** When true, the Edit button is disabled with a tooltip — deployment method is locked after the first deploy. */
   disabled?: boolean;
 }
 
@@ -142,20 +143,36 @@ export function DeploymentMethodCard({
               <strong>{selectedOption.name}.</strong> {selectedOption.tagline}
             </EuiText>
           </EuiFlexItem>
-          {!disabled && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                onClick={openModal}
-                data-test-subj="deploymentMethodCard-editButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.editButton"
-                  defaultMessage="Edit"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                disabled
+                  ? i18n.translate(
+                      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.disabledTooltip',
+                      {
+                        defaultMessage:
+                          'Deployment method cannot be changed after services have been deployed. Start a new session to choose a different method.',
+                      }
+                    )
+                  : undefined
+              }
+            >
+              {/* span needed: disabled EuiButtonEmpty has pointer-events:none; span intercepts hover so tooltip fires */}
+              <span style={{ display: 'inline-block' }}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={disabled ? undefined : openModal}
+                  disabled={disabled}
+                  data-test-subj="deploymentMethodCard-editButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.editButton"
+                    defaultMessage="Edit"
+                  />
+                </EuiButtonEmpty>
+              </span>
+            </EuiToolTip>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
 
