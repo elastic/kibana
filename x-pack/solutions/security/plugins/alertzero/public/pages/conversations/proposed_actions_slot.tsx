@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import {
   useApproveProposal,
@@ -29,9 +29,9 @@ export interface ProposedActionsSlotProps {
  * `renderProposedActions` content for the investigation flyout's overview tab. Shows the whole
  * proposal history for this conversation, decided or not, so an already-applied action still
  * shows the closed record `ProposedActionButton` renders — rather than `usePendingProposals`,
- * which drops a proposal the moment it stops awaiting a human. Owns the dismiss modal itself —
- * like the footer, this slot is mounted through `core.overlays.openFlyout`, where there is no
- * page-level React tree to delegate it to.
+ * which drops a proposal the moment it stops awaiting a human. Each row owns its own dismiss
+ * modal (via `renderDismissModal`) rather than this slot sharing one, so its own "Declining"
+ * badge and the modal's own submit button track the exact same mutation.
  */
 export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps) => {
   const {
@@ -41,13 +41,11 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   const { data: currentUserProfile } = useCurrentUserProfile();
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
-  const [dismissingProposalId, setDismissingProposalId] = useState<string | null>(null);
 
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
 
-  const closeDismissModal = useCallback(() => setDismissingProposalId(null), []);
   const onDecisionError = useCallback(
     (err: unknown) => notifications?.toasts.addDanger(decisionErrorMessage(err)),
     [notifications]
@@ -68,49 +66,45 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   }
 
   return (
-    <>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {proposals.map((proposal) => (
-          <EuiFlexItem key={proposal.id}>
-            <ProposedActionButton
-              proposal={proposal}
-              onConfirm={async () => {
-                try {
-                  await approve.mutateAsync({
-                    id: proposal.id,
-                    body: { actionInput: proposal.actionInput },
-                  });
-                } catch (err) {
-                  onDecisionError(err);
-                  throw err;
-                }
-              }}
-              onDismiss={() => setDismissingProposalId(proposal.id)}
-              currentActorName={currentActorName}
-              data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-
-      {dismissingProposalId && (
-        <DismissProposalModal
-          proposalId={dismissingProposalId}
-          onClose={closeDismissModal}
-          onConfirm={async ({ dismissReason, rationale }) => {
-            try {
-              await dismiss.mutateAsync({
-                id: dismissingProposalId,
-                body: { dismissReason, rationale },
-              });
-              closeDismissModal();
-            } catch (err) {
-              onDecisionError(err);
-              throw err;
-            }
-          }}
-        />
-      )}
-    </>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {proposals.map((proposal) => (
+        <EuiFlexItem key={proposal.id}>
+          <ProposedActionButton
+            proposal={proposal}
+            onConfirm={async () => {
+              try {
+                await approve.mutateAsync({
+                  id: proposal.id,
+                  body: { actionInput: proposal.actionInput },
+                });
+              } catch (err) {
+                onDecisionError(err);
+                throw err;
+              }
+            }}
+            onDismiss={async ({ dismissReason, rationale }) => {
+              try {
+                await dismiss.mutateAsync({
+                  id: proposal.id,
+                  body: { dismissReason, rationale },
+                });
+              } catch (err) {
+                onDecisionError(err);
+                throw err;
+              }
+            }}
+            renderDismissModal={({ onClose, onConfirm }) => (
+              <DismissProposalModal
+                proposalId={proposal.id}
+                onClose={onClose}
+                onConfirm={onConfirm}
+              />
+            )}
+            currentActorName={currentActorName}
+            data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };

@@ -21,5 +21,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/user-profile-components",
     "@kbn/proposals-ui",
+    "@kbn/proposals-common",
   ]
 }

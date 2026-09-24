@@ -13,7 +13,12 @@ export {
   type ApprovalDecision,
   type AlwaysAllowOption,
 } from './src/approval_content';
-export type { ApprovalOutcomeStatus } from './src/approval_outcome';
+export {
+  getApprovalOutcomeBadge,
+  type ApprovalOutcomeBadge,
+  type ApprovalOutcomeStatus,
+  type ApprovalPhase,
+} from './src/approval_outcome';
 export {
   ProposedActionStatusBadge,
   type ProposedActionStatusBadgeProps,
