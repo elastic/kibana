@@ -29,7 +29,7 @@ import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/det
 import { ActionPolicySnoozeButton } from '../../../components/action_policy/action_policy_snooze_button';
 import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
-import { resolveDisplayName } from '../../../utils/resolve_display_name';
+import { collectActorUids, resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
 import { ActionPoliciesBulkActions } from './action_policies_bulk_actions';
 import { ActionPolicyActionsCell } from './action_policy_actions_cell';
@@ -127,8 +127,7 @@ export const ActionPoliciesTableContent = ({
     [policyToViewId, items]
   );
   const updatedByUids = useMemo(
-    () =>
-      items.map((item) => toPolicy(item).updated_by).filter((uid): uid is string => Boolean(uid)),
+    () => collectActorUids(items.map((item) => toPolicy(item).updated_by)),
     [items]
   );
   const { data: updatedByProfileByUid, isLoading: isProfileLoading } = useBulkGetUserProfiles({
@@ -172,9 +171,7 @@ export const ActionPoliciesTableContent = ({
                   <EuiSkeletonText lines={1} />
                 </div>
               );
-            return (
-              <>{resolveDisplayName(updatedBy, updatedByProfileByUidRef.current, updatedBy)}</>
-            );
+            return <>{resolveDisplayName(updatedBy, updatedByProfileByUidRef.current)}</>;
           }}
         />
         <Column
