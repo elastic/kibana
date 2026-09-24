@@ -35,6 +35,8 @@ export {
 
 export {
   AnalysisWindowDays,
+  FpCountThreshold,
+  FpRateThresholdPct,
   RuleTuningWorkerExtras,
 } from './components/detection_watch_settings.gen';
 

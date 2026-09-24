@@ -1,0 +1,716 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "82fdabaac554eba-15831800091ed82",
+      "title": "Agent Builder — conversations access-control API public conversations require conversation access and agent use access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
+        "line": 478,
+        "column": 7
+      }
+    },
+    {
+      "id": "82fdabaac554eba-984590e296dee6c",
+      "title": "Agent Builder — conversations access-control API auto-create cannot overwrite or take over another user conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
+        "line": 934,
+        "column": 20
+      }
+    },
+    {
+      "id": "82fdabaac554eba-e38e31fb05e9d1c",
+      "title": "Agent Builder — conversations access-control API the owner shares a private conversation through the access-control routes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
+        "line": 979,
+        "column": 16
+      }
+    },
+    {
+      "id": "82fdabaac554eba-9eb3af49d734524",
+      "title": "Agent Builder — conversations access-control API cluster admin can rename and delete a public conversation they do not own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
+        "line": 1172,
+        "column": 26
+      }
+    },
+    {
+      "id": "82fdabaac554eba-89debe42fbe73e7",
+      "title": "Agent Builder — conversations access-control API cluster admin cannot rename or delete a private conversation they do not own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
+        "line": 1223,
+        "column": 70
+      }
+    },
+    {
+      "id": "82fdabaac554eba-38ea603d84caa81",
+      "title": "Agent Builder — conversations access-control API route-level privilege remains distinct from resource access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
+        "line": 1275,
+        "column": 29
+      }
+    },
+    {
+      "id": "d032a6105294199-6ddd6b9a8a0348d",
+      "title": "Agent Builder — conversations API GET /conversations lists conversations with expected shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 75,
+        "column": 44
+      }
+    },
+    {
+      "id": "d032a6105294199-d18ffddc72632be",
+      "title": "Agent Builder — conversations API GET /conversations includes created conversations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 101,
+        "column": 14
+      }
+    },
+    {
+      "id": "d032a6105294199-0d0a41b9729ce9a",
+      "title": "Agent Builder — conversations API GET /conversations filters by agent_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 115,
+        "column": 29
+      }
+    },
+    {
+      "id": "d032a6105294199-2de084e147b177e",
+      "title": "Agent Builder — conversations API GET /conversations returns empty when filtering unknown agent_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 139,
+        "column": 8
+      }
+    },
+    {
+      "id": "d032a6105294199-4a01bcedc48a1cd",
+      "title": "Agent Builder — conversations API GET /conversations/:id returns conversation with rounds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 151,
+        "column": 26
+      }
+    },
+    {
+      "id": "d032a6105294199-7a976f5b597784d",
+      "title": "Agent Builder — conversations API GET /conversations/:id includes round messages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 169,
+        "column": 21
+      }
+    },
+    {
+      "id": "d032a6105294199-1bb0c1f810ae2fb",
+      "title": "Agent Builder — conversations API converse create exposes and stores conversation access mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 183,
+        "column": 28
+      }
+    },
+    {
+      "id": "d032a6105294199-1c24d03c0a93c25",
+      "title": "Agent Builder — conversations API converse ignores access mode when continuing a conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 232,
+        "column": 8
+      }
+    },
+    {
+      "id": "d032a6105294199-b049acf3d770a33",
+      "title": "Agent Builder — conversations API converse create stores the read_only flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 281,
+        "column": 28
+      }
+    },
+    {
+      "id": "d032a6105294199-66ec29b5fadc9a1",
+      "title": "Agent Builder — conversations API converse ignores read_only when continuing a conversation, and a read-only conversation can still be continued",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 295,
+        "column": 9
+      }
+    },
+    {
+      "id": "d032a6105294199-c10af7f6e206d2a",
+      "title": "Agent Builder — conversations API GET /conversations/:id returns 404 for missing id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 338,
+        "column": 30
+      }
+    },
+    {
+      "id": "d032a6105294199-63326cb859ac2a0",
+      "title": "Agent Builder — conversations API DELETE /conversations/:id deletes then GET 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 352,
+        "column": 9
+      }
+    },
+    {
+      "id": "d032a6105294199-e718505f8f720bf",
+      "title": "Agent Builder — conversations API DELETE /conversations/:id returns 404 when missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 364,
+        "column": 24
+      }
+    },
+    {
+      "id": "d032a6105294199-ee26fe1683143b3",
+      "title": "Agent Builder — conversations API DELETE cannot delete same conversation twice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 373,
+        "column": 16
+      }
+    },
+    {
+      "id": "d032a6105294199-2819ff389f29579",
+      "title": "Agent Builder — conversations API conversation lifecycle: create, list, get, delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 386,
+        "column": 13
+      }
+    },
+    {
+      "id": "f10b583306dc58a-69dccf9a88e32b3",
+      "title": "Agent Builder — concurrent conversation writes API keeps both rounds when two clients converse with the same conversation at once",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_concurrency_api.spec.ts",
+        "line": 35,
+        "column": 38
+      }
+    },
+    {
+      "id": "5af53fed7a22469-ba7ee492946819f",
+      "title": "Agent Builder — POST /conversations returns 200 with correct default shape when called with an empty body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 32,
+        "column": 9
+      }
+    },
+    {
+      "id": "5af53fed7a22469-d59bc6faca96363",
+      "title": "Agent Builder — POST /conversations stores a custom title when provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 53,
+        "column": 16
+      }
+    },
+    {
+      "id": "5af53fed7a22469-024297807892038",
+      "title": "Agent Builder — POST /conversations stores access_control when provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 61,
+        "column": 43
+      }
+    },
+    {
+      "id": "5af53fed7a22469-e7c9b98d1297f56",
+      "title": "Agent Builder — POST /conversations uses the client-supplied conversation_id when provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 75,
+        "column": 19
+      }
+    },
+    {
+      "id": "5af53fed7a22469-ec4a08f7ddf88a2",
+      "title": "Agent Builder — POST /conversations the created conversation is retrievable via GET /conversations/:id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 91,
+        "column": 18
+      }
+    },
+    {
+      "id": "5af53fed7a22469-e890ce740626bcd",
+      "title": "Agent Builder — POST /conversations the created conversation appears in GET /conversations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 107,
+        "column": 11
+      }
+    },
+    {
+      "id": "5af53fed7a22469-18d1652a150127e",
+      "title": "Agent Builder — POST /conversations stores access_control entries when provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 124,
+        "column": 15
+      }
+    },
+    {
+      "id": "5af53fed7a22469-9190903e3aebd2f",
+      "title": "Agent Builder — POST /conversations returns 400 when entries are supplied with access_mode public",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 141,
+        "column": 43
+      }
+    },
+    {
+      "id": "5af53fed7a22469-f5708b829f8a1e2",
+      "title": "Agent Builder — POST /conversations returns 404 when agent_id does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 159,
+        "column": 17
+      }
+    },
+    {
+      "id": "5af53fed7a22469-48d2b2600bcba4d",
+      "title": "Agent Builder — POST /conversations returns 409 when the supplied conversation_id already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 164,
+        "column": 12
+      }
+    },
+    {
+      "id": "5af53fed7a22469-ccb606a16bce733",
+      "title": "Agent Builder — POST /conversations returns 400 when conversation_id is not a valid UUID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_create_api.spec.ts",
+        "line": 181,
+        "column": 86
+      }
+    },
+    {
+      "id": "cabba4228e0458f-8d46479da760ad0",
+      "title": "Agent Builder — conversations events persistence newly created conversations are stored events-native (schema_version + empty events on _source, matched by GET)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_events_persistence_api.spec.ts",
+        "line": 63,
+        "column": 40
+      }
+    },
+    {
+      "id": "cabba4228e0458f-eadfde8ecef00bd",
+      "title": "Agent Builder — conversations events persistence a completed round is persisted as a stored events projection that GET serves verbatim",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_events_persistence_api.spec.ts",
+        "line": 89,
+        "column": 11
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-f9a6a7ac291feea",
+      "title": "Agent Builder — conversations list pagination API response includes _meta with total, page, and per_page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 76,
+        "column": 33
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-1cc36ad405e066e",
+      "title": "Agent Builder — conversations list pagination API defaults to page=1 and per_page=MAX_CONVERSATIONS_PER_PAGE when not provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 88,
+        "column": 94
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-d513a4ae84baabe",
+      "title": "Agent Builder — conversations list pagination API per_page limits the number of results returned",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 110,
+        "column": 27
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-97c6699a4a540ca",
+      "title": "Agent Builder — conversations list pagination API per_page exceeding the maximum returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 121,
+        "column": 21
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-38a4f32cf1d6b63",
+      "title": "Agent Builder — conversations list pagination API page=2 returns the second page of results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 131,
+        "column": 25
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-c6cccb9060b4854",
+      "title": "Agent Builder — conversations list pagination API pages are non-overlapping and together cover all conversations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 148,
+        "column": 9
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-240afbfa53ca9b5",
+      "title": "Agent Builder — conversations list pagination API page * per_page exceeding MAX_RESULT_WINDOW returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 184,
+        "column": 27
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-6f1759bbecdede6",
+      "title": "Agent Builder — conversations list pagination API pinned=true returns only pinned conversations, pinned=false only unpinned",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 201,
+        "column": 30
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-b312b4f23f7cfc3",
+      "title": "Agent Builder — conversations list pagination API omitting pinned returns all conversations (pinned and unpinned)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 251,
+        "column": 21
+      }
+    },
+    {
+      "id": "99ba4a9aad05831-641f75789d11384",
+      "title": "Agent Builder — conversations list pagination API a conversation with no pinned value is treated as unpinned",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_pagination_api.spec.ts",
+        "line": 291,
+        "column": 9
+      }
+    }
+  ]
+}

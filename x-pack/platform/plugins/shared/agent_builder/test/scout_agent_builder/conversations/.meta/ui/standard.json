@@ -1,0 +1,38 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "3a6e78719ef5d79-1e606eb0875fa7e",
+      "title": "Agent Builder — conversation history conversation history flows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/ui/tests/conversation_history.spec.ts",
+        "line": 38,
+        "column": 5
+      }
+    },
+    {
+      "id": "c5b5f09d9178216-dccba25ad811936",
+      "title": "Agent Builder — sidebar conversation history embeddable sidebar conversation history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/ui/tests/sidebar_conversation_history.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    }
+  ]
+}

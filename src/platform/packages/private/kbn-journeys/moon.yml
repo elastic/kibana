@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/synthtrace-client'
   - '@kbn/synthtrace'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - test-helper
   - package

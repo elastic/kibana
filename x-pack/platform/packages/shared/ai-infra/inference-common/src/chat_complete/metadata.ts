@@ -24,8 +24,11 @@ export interface ChatCompleteMetadata {
 export interface ConnectorTelemetryMetadata {
   pluginId?: string;
   aggregateBy?: string;
+  /** Sent as the X-Elastic-Product-Solution header on inference endpoint requests. */
   productSolution?: string;
+  /** Sent as the X-Elastic-Product-Feature header on inference endpoint requests. */
   productFeature?: string;
+  /** Sent as the X-Elastic-Inference-Interaction-Id header on inference endpoint requests. */
   interactionId?: string;
 }
 

@@ -480,35 +480,6 @@ describe('generateQueriesRoute', () => {
     internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];
   const strictGenerateParams = DeepStrict(generateRoute.params);
 
-  const makeGenerateHandlerParams = (body: Record<string, unknown>) =>
-    ({
-      params: { path: { streamName: 'logs.test' }, body },
-      request: { events: { aborted$: { subscribe: jest.fn() } } },
-      getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: {},
-        inferenceClient: {},
-        soClient: {},
-        scopedClusterClient: { asCurrentUser: {} },
-        streamDataEsClient: {},
-        licensing: {},
-        tuningConfig: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
-      }),
-      server: {
-        core: {
-          featureFlags: {},
-        },
-        searchInferenceEndpoints: undefined,
-        agentBuilder: undefined,
-      },
-      maintenanceService: makeMaintenanceService(),
-      logger: {
-        warn: jest.fn(),
-        get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
-      },
-      telemetry: {},
-    } as unknown as GenerateHandlerParams);
-
   beforeEach(() => {
     mockGenerateKIQueries.mockReset();
     mockGenerateKIQueries.mockResolvedValue({
@@ -518,7 +489,37 @@ describe('generateQueriesRoute', () => {
     });
   });
 
-  it('retains valid run ids and rejects overlong run ids during route validation', () => {
+  const makeHandlerParams = ({
+    agentBuilder,
+    body = { connectorId: 'test-connector' },
+  }: {
+    agentBuilder: unknown;
+    body?: Record<string, unknown>;
+  }) =>
+    ({
+      params: { path: { streamName: 'logs.test' }, body },
+      request: { events: { aborted$: { subscribe: jest.fn() } } },
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: {},
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
+      }),
+      server: {
+        core: {
+          featureFlags: {},
+        },
+        searchInferenceEndpoints: undefined,
+        agentBuilder,
+      },
+      maintenanceService: makeMaintenanceService(),
+      logger: {
+        warn: jest.fn(),
+        get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
+      },
+      telemetry: {},
+    } as unknown as GenerateHandlerParams);
+
+  it('retains valid run ids and rejects blank or overlong run ids during route validation', () => {
     const parsed = strictGenerateParams.safeParse({
       path: { streamName: 'logs.test' },
       body: { runId: 'run-1' },
@@ -531,25 +532,30 @@ describe('generateQueriesRoute', () => {
     expect(
       strictGenerateParams.safeParse({
         path: { streamName: 'logs.test' },
+        body: { runId: '   ' },
+      }).success
+    ).toBe(false);
+    expect(
+      strictGenerateParams.safeParse({
+        path: { streamName: 'logs.test' },
         body: { runId: 'x'.repeat(MAX_ID_LENGTH + 1) },
       }).success
     ).toBe(false);
   });
 
-  it('passes a 300000 ms duration budget to query generation', async () => {
-    const handlerParams = makeGenerateHandlerParams({
-      connectorId: 'test-connector',
-      runId: 'run-1',
-    });
-
-    const result = await generateRoute.handler(handlerParams);
+  it('delegates to query generation and returns its result', async () => {
+    const result = await generateRoute.handler(
+      makeHandlerParams({
+        agentBuilder: {},
+        body: { connectorId: 'test-connector', runId: 'run-1' },
+      })
+    );
 
     expect(mockGenerateKIQueries).toHaveBeenCalledWith(
       expect.objectContaining({
         streamName: 'logs.test',
         connectorId: 'test-connector',
         runId: 'run-1',
-        maxDurationMs: 300000,
       }),
       expect.any(Object)
     );
@@ -560,14 +566,19 @@ describe('generateQueriesRoute', () => {
     });
   });
 
-  it('normalizes a blank run id before query generation', async () => {
-    await generateRoute.handler(
-      makeGenerateHandlerParams({ connectorId: 'test-connector', runId: '' })
-    );
+  it('generates a run id when one is not provided', async () => {
+    await generateRoute.handler(makeHandlerParams({ agentBuilder: {} }));
 
     const { runId } = mockGenerateKIQueries.mock.calls[0][0];
     expect(runId).toEqual(expect.any(String));
     expect(runId).not.toBe('');
+  });
+
+  it('fails when agent builder is unavailable', async () => {
+    await expect(
+      generateRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
+    ).rejects.toThrow('Agent Builder is required');
+    expect(mockGenerateKIQueries).not.toHaveBeenCalled();
   });
 });
 

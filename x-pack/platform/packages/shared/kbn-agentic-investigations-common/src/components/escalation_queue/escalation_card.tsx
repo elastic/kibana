@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -27,19 +27,38 @@ interface EscalationCardProps {
   hasBorder: boolean;
   /** Render the assignee widget. Supplied by the page so hook calls stay outside the package. */
   renderAssignees: (escalation: EscalationQueueItem) => React.ReactNode;
+  /**
+   * When provided the row becomes interactive (keyboard and pointer): clicking or pressing Enter/
+   * Space calls this callback with the escalation id. This is used to open the escalation details
+   * flyout. The assignee widget captures pointer events so it does not trigger the card click.
+   */
+  onClickCard?: (id: string) => void;
+  /** Renders with a highlighted background when true (e.g. the flyout for this row is open). */
+  isSelected?: boolean;
 }
 
 /**
  * One row in the escalation queue.
- *
- * The row is intentionally **not** interactive (no `role="button"`/`onClick`) because
- * row-level navigation has not been built yet. The only interactive element is the
- * assignee widget injected via `renderAssignees`.
  */
 export const EscalationCard = memo<EscalationCardProps>(
-  ({ escalation, hasBorder, renderAssignees }) => {
+  ({ escalation, hasBorder, renderAssignees, onClickCard, isSelected = false }) => {
     const { euiTheme } = useEuiTheme();
     const isClosed = escalation.status === 'closed';
+    const isClickable = onClickCard !== undefined;
+
+    const handleClick = useCallback(() => {
+      onClickCard?.(escalation.id);
+    }, [onClickCard, escalation.id]);
+
+    const handleKeyDown = useCallback(
+      (event: React.KeyboardEvent) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClickCard?.(escalation.id);
+        }
+      },
+      [onClickCard, escalation.id]
+    );
 
     return (
       <EuiPanel
@@ -47,11 +66,30 @@ export const EscalationCard = memo<EscalationCardProps>(
         borderRadius="none"
         hasBorder={false}
         hasShadow={false}
+        // Interactive mode: add pointer cursor and keyboard/hover affordances.
+        role={isClickable ? 'button' : undefined}
+        tabIndex={isClickable ? 0 : undefined}
+        aria-label={isClickable ? escalation.title : undefined}
+        aria-current={isSelected || undefined}
+        onClick={isClickable ? handleClick : undefined}
+        onKeyDown={isClickable ? handleKeyDown : undefined}
         css={{
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
           borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
           boxSizing: 'border-box',
           boxShadow: 'none',
+          cursor: isClickable ? 'pointer' : undefined,
+          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
+          ...(isClickable && {
+            '&:hover': {
+              backgroundColor: isSelected
+                ? euiTheme.colors.backgroundBaseInteractiveSelect
+                : euiTheme.colors.backgroundBaseSubdued,
+            },
+            '&:focus-visible': {
+              outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
+            },
+          }),
         }}
         data-test-subj={`escalationCard-${escalation.id}`}
       >
@@ -102,8 +140,18 @@ export const EscalationCard = memo<EscalationCardProps>(
                   </EuiText>
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{renderAssignees(escalation)}</EuiFlexItem>
-              {/* Chevron: purely visual — kept for parity with the mock but does nothing yet. */}
+              {/*
+               * Stop propagation so interacting with the assignee picker
+               * (clicking the + button or selecting a user) does not trigger the row click.
+               */}
+              <EuiFlexItem
+                grow={false}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+              >
+                {renderAssignees(escalation)}
+              </EuiFlexItem>
+              {/* Chevron: visual affordance for interactive rows. */}
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type="chevronSingleRight"
