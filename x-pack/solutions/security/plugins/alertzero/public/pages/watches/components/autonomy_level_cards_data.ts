@@ -12,6 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   type WatchAutonomyLevel,
 } from '@kbn/alertzero-common';
 
@@ -513,6 +514,46 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.proposalsValue',
               '<you> approve each'
+            ),
+          },
+        ],
+      },
+    ],
+  },
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: {
+    intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.intro', {
+      defaultMessage:
+        'Analyzes endpoints on its own. Containment always waits for your approval, so this Worker offers no other level.',
+    }),
+    levels: [
+      {
+        level: 'manual',
+        who: i18n.translate(
+          'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.who',
+          {
+            defaultMessage:
+              'Analyzes each endpoint an Investigation hands it; every containment action waits for you.',
+          }
+        ),
+        facts: [
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.findings',
+              { defaultMessage: 'Findings' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.analysisValue',
+              '<worker> reconstructs the attack and adds its findings to the investigation'
+            ),
+          },
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.response',
+              { defaultMessage: 'Response' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.containmentValue',
+              '<you> approve each proposed response — isolate host, kill process, or suspend process'
             ),
           },
         ],

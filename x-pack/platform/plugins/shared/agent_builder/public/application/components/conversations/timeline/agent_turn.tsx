@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentAvatar } from '../../common/agent_avatar';
-import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
+import { AuthorHeader } from './author_header';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { RoundEvents } from '../conversation_rounds/round_events/round_events';
+import { EventSteps } from './event_steps/event_steps';
 import { AgentResponse } from './agent_response';
 import { executionTerminatedToResponse } from './items/execution_terminated_event';
 import { ExecutionFailedEvent } from './items/execution_failed_event';
@@ -54,7 +54,7 @@ const renderContent = (
       <EuiFlexGroup direction="column" gutterSize="s">
         {item.steps.length > 0 && (
           <EuiFlexItem grow={false}>
-            <RoundEvents
+            <EventSteps
               steps={item.steps}
               conversationAttachments={conversationAttachments}
               attachmentRefs={item.attachmentRefs}
@@ -146,7 +146,7 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
         <EuiFlexGroup direction="column" gutterSize="s">
           {agent && (
             <EuiFlexItem grow={false}>
-              <RoundAuthorHeader
+              <AuthorHeader
                 name={agent.name}
                 showAgentBadge
                 origin={origin}

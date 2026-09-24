@@ -470,6 +470,9 @@ describe('TransactionsTable', () => {
 
       const expandButton = screen.getByTestId('apmTransactionsTableExpandButton');
       expect(expandButton).toHaveAttribute('aria-label', 'Open transaction details');
+      expect(expandButton).toHaveAttribute('data-ebt-action', 'viewTransactionGroup');
+      expect(expandButton).toHaveAttribute('data-ebt-element', 'transactionsTableRowName');
+      expect(expandButton).toHaveAttribute('data-ebt-detail', 'open');
       fireEvent.click(expandButton);
       expect(onClick).toHaveBeenCalledWith(items[0]);
     });
@@ -490,10 +493,9 @@ describe('TransactionsTable', () => {
         />
       );
 
-      expect(screen.getByTestId('apmTransactionsTableExpandButton')).toHaveAttribute(
-        'aria-label',
-        'Close transaction details'
-      );
+      const expandButton = screen.getByTestId('apmTransactionsTableExpandButton');
+      expect(expandButton).toHaveAttribute('aria-label', 'Close transaction details');
+      expect(expandButton).toHaveAttribute('data-ebt-detail', 'close');
     });
 
     it('does not render an expand button when name uses href', () => {

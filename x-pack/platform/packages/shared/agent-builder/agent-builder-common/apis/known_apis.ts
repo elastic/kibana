@@ -84,6 +84,15 @@ export const isKnownApiSelector = ({ target, api }: ApiReference): boolean =>
   selectorSetsByTarget[target].has(api);
 
 /**
+ * Whether a selector stands for a set of operations rather than naming one.
+ *
+ * @param selector - Granted value, as passed to a pre-approval.
+ * @returns True for `*` and for a namespace wildcard such as `indices.*`.
+ */
+export const isApiWildcardSelector = (selector: string): boolean =>
+  selector === allApisSelector || selector.endsWith(namespaceSelectorSuffix);
+
+/**
  * Whether a granted selector covers a specific operation.
  *
  * @param selector - Granted value: `*`, a namespace wildcard such as `indices.*`, or an exact identifier.

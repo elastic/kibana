@@ -26,12 +26,6 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
   exposeToBrowser: {
     rules: { minimumScheduleInterval: true },
   },
-  // Exposed as dynamic config solely for testing: it lets Scout tests
-  // flip the ES|QL response format at runtime via the `PUT /internal/core/_settings`
-  // API to exercise the Arrow path, instead of booting a dedicated Kibana instance.
-  dynamicConfig: {
-    esql: { responseFormat: true },
-  },
 };
 
 const pluginModule = new ContainerModule((options) => {
@@ -56,6 +50,7 @@ export type {
   AlertingServerStart,
   RulesClientApi,
   ActionPolicyClientApi,
+  AlertEventsClientApi,
 } from './types';
 export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
 export type { FindRulesArgs } from './lib/rules_client';
