@@ -32,6 +32,7 @@ import { CustomAppGrid, getTabs, useAppSurfaces } from './custom_app_grid';
 import { PanelEditorFlyout } from './panel_editor_flyout';
 import { AppEditorFlyout } from './app_editor_flyout';
 import { createActionHandler } from './handle_action';
+import { applyPanelEdit } from './apply_panel_edit';
 
 /** Stands in before the app loads, so the surfaces hook keeps a stable identity. */
 const EMPTY_DEFINITION = emptyAppDefinition('');
@@ -369,16 +370,11 @@ export function CustomAppPage({
           panelId={editingPanelId}
           title={definition.panels[editingPanelId]?.title}
           messages={(definition.surfaces[editingPanelId] ?? []) as A2uiMessage[]}
+          queries={definition.queries?.[editingPanelId] ?? []}
           onClose={() => setEditingPanelId(undefined)}
-          onSave={({ title, messages }) => {
+          onSave={(edit) => {
             setDefinition((current) =>
-              current
-                ? {
-                    ...current,
-                    panels: { ...current.panels, [editingPanelId]: { title } },
-                    surfaces: { ...current.surfaces, [editingPanelId]: messages },
-                  }
-                : current
+              current ? applyPanelEdit(current, editingPanelId, edit) : current
             );
             setEditingPanelId(undefined);
           }}
