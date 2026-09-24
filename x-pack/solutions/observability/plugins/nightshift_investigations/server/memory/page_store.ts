@@ -18,6 +18,7 @@ import { formatPageRefs, previewText } from './log_format';
 import { DECAY_LAMBDA, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
 
 const MAX_LIST_SIZE = 500;
+const MAX_ARCHIVE_ATTEMPTS = 3;
 const MEMORY_TAG = 'memory';
 const SPACE_ID_FIELD = 'attributes.space_id';
 
@@ -93,6 +94,14 @@ export const canonicalizeSlug = (slug: string): string => {
 export const toMemoryKiId = (slug: string): string => {
   const normalizedSlug = canonicalizeSlug(slug);
   return `memory_${normalizedSlug}`.slice(0, 512);
+};
+
+export const isCanonicalMemoryId = (id: string): boolean => {
+  if (!id.startsWith('memory_')) {
+    return false;
+  }
+  const slug = id.slice('memory_'.length);
+  return slug.length > 0 && id === toMemoryKiId(slug);
 };
 
 export const slugFromMemoryId = (id: string): string => {
@@ -203,9 +212,11 @@ export const createMemoryPageStore = ({
 
   const idPrefix = `${spaceId}:`;
   const toStoredId = (pageId: string): string => `${idPrefix}${pageId}`;
-  /** Drops ids from other spaces. */
+  /** Drops ids from other spaces and non-canonical page ids. */
   const toPageId = (storedId: string): string | undefined =>
-    storedId.startsWith(idPrefix) ? storedId.slice(idPrefix.length) : undefined;
+    storedId.startsWith(idPrefix) && isCanonicalMemoryId(storedId.slice(idPrefix.length))
+      ? storedId.slice(idPrefix.length)
+      : undefined;
 
   const buildDocument = (
     page: MemoryPageWrite,
@@ -450,6 +461,9 @@ export const createMemoryPageStore = ({
     },
 
     async get(id) {
+      if (!isCanonicalMemoryId(id)) {
+        return undefined;
+      }
       const storedId = toStoredId(id);
       try {
         const response = await esClient.get<StoredMemoryPage>(
@@ -469,6 +483,9 @@ export const createMemoryPageStore = ({
     },
 
     async getVersioned(id) {
+      if (!isCanonicalMemoryId(id)) {
+        return undefined;
+      }
       const storedId = toStoredId(id);
       try {
         const response = await esClient.get<StoredMemoryPage>(
@@ -637,27 +654,45 @@ if (ctx.op == 'create' || ctx._source.attributes == null || ctx._source.attribut
     },
 
     async archive(id, reason) {
-      const existing = await this.get(id);
-      if (!existing || existing.status === 'archived') {
-        return undefined;
+      for (let attempt = 0; attempt < MAX_ARCHIVE_ATTEMPTS; attempt++) {
+        const versioned = await this.getVersioned(id);
+        if (!versioned || versioned.page.status === 'archived') {
+          return undefined;
+        }
+        const latest = versioned.page;
+        try {
+          return await this.update(
+            id,
+            {
+              slug: latest.slug,
+              title: latest.title,
+              description: latest.description,
+              content: latest.content,
+              context: latest.context,
+              tags: latest.tags,
+              categories: latest.categories,
+              references: latest.references,
+              status: 'archived',
+              source: latest.source,
+              merged_from: latest.merged_from,
+              archive_reason: reason,
+              telemetry: latest.telemetry,
+              user: latest.updated_by,
+            },
+            versioned
+          );
+        } catch (err) {
+          if ((err as { statusCode?: number }).statusCode !== 409) {
+            throw err;
+          }
+          if (attempt === MAX_ARCHIVE_ATTEMPTS - 1) {
+            throw new Error(`Memory archive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`, {
+              cause: err,
+            });
+          }
+        }
       }
-
-      return this.upsert({
-        slug: existing.slug,
-        title: existing.title,
-        description: existing.description,
-        content: existing.content,
-        context: existing.context,
-        tags: existing.tags,
-        categories: existing.categories,
-        references: existing.references,
-        status: 'archived',
-        source: existing.source,
-        merged_from: existing.merged_from,
-        archive_reason: reason,
-        telemetry: existing.telemetry,
-        user: existing.updated_by,
-      });
+      return undefined;
     },
 
     async delete(id) {

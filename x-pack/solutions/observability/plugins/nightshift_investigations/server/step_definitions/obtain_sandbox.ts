@@ -86,14 +86,29 @@ export const obtainSandboxStepDefinition = ({
         );
       }
 
-      const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
+      try {
+        const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
 
-      // Stat is enough: the session allocates on the first RPC, including workspace restore.
-      await withTimeout(
-        (_signal) => session.statFiles(['/workspace']),
-        ALLOCATE_TIMEOUT_MS,
-        `Sandbox allocate timed out after ${ALLOCATE_TIMEOUT_MS}ms`
-      );
+        // Stat is enough: the session allocates on the first RPC, including workspace restore.
+        await withTimeout(
+          (_signal) => session.statFiles(['/workspace']),
+          ALLOCATE_TIMEOUT_MS,
+          `Sandbox allocate timed out after ${ALLOCATE_TIMEOUT_MS}ms`
+        );
+      } catch (error) {
+        if (required) {
+          throw error;
+        }
+        stepLogger.info(`Sandbox unavailable — skipping allocate for ${sandboxId}`);
+        stepLogger.debug(
+          `Optional sandbox allocation failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return {
+          output: { sandbox_id: sandboxId, conversation_id: conversationId, skipped: true },
+        };
+      }
 
       stepLogger.info(`Obtained sandbox ${sandboxId}`);
       return { output: { sandbox_id: sandboxId, conversation_id: conversationId } };

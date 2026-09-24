@@ -366,25 +366,55 @@ Return title, markdown content, and context.
 context is the recall key: compact, semantically rich phrases covering the union of the sources' task and goal descriptors. Not verbatim sentences. Not a concatenation of full prompts. Not one source's task copied when the others differ.
 If you cannot write a non-empty context that covers that union, return an empty context string.`;
 
+export const MAX_FORMATTED_MERGE_CHARS = 32_000;
+
+export const formatMemoryMergeSources = ({
+  sources,
+  extract,
+}: {
+  sources: readonly MemoryPage[];
+  extract?: MemoryExtractProposal;
+}): string => {
+  const entries = [
+    ...sources.map((page) => ({
+      prefix: `- id=${page.id}\n  title: ${page.title}\n  context: ${
+        page.context ?? ''
+      }\n  content: `,
+      content: page.content,
+    })),
+    ...(extract
+      ? [
+          {
+            prefix: `\n\nNew extract to fold in:\n- slug=${extract.slug}\n  title: ${extract.title}\n  content: `,
+            content: extract.content,
+          },
+        ]
+      : []),
+  ];
+  let output = '';
+  for (const entry of entries) {
+    const separator = output.length === 0 ? '' : '\n';
+    const prefix = separator + entry.prefix;
+    const remaining = MAX_FORMATTED_MERGE_CHARS - output.length;
+    if (prefix.length > remaining) {
+      break;
+    }
+    const contentBudget = remaining - prefix.length;
+    output += prefix + entry.content.slice(0, contentBudget);
+    if (entry.content.length > contentBudget) {
+      break;
+    }
+  }
+  return output;
+};
+
 export const createLlmSynthesizeMemoryGroup = ({
   inferenceClient,
 }: {
   inferenceClient: BoundInferenceClient;
 }): SynthesizeMemoryGroup => {
   return async ({ sources, extract, task }) => {
-    const sourceBlock = sources
-      .map(
-        (page) =>
-          `- id=${page.id}\n  title: ${page.title}\n  context: ${
-            page.context ?? ''
-          }\n  content: ${page.content.slice(0, 1500)}`
-      )
-      .join('\n');
-    const extractBlock = extract
-      ? `\n\nNew extract to fold in:\n- slug=${extract.slug}\n  title: ${
-          extract.title
-        }\n  content: ${extract.content.slice(0, 1500)}`
-      : '';
+    const sourceAndExtractBlock = formatMemoryMergeSources({ sources, extract });
     const taskBlock =
       extract && task
         ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${task}`
@@ -392,7 +422,7 @@ export const createLlmSynthesizeMemoryGroup = ({
     const response = await inferenceClient.output({
       id: 'nightshift_memory_merge',
       system: MEMORY_MERGE_SYSTEM_PROMPT,
-      input: `Sources:\n${sourceBlock}${extractBlock}${taskBlock}`,
+      input: `Sources:\n${sourceAndExtractBlock}${taskBlock}`,
       schema: {
         type: 'object',
         properties: {
@@ -414,6 +444,9 @@ export const createLlmSynthesizeMemoryGroup = ({
 const looksLikeSecret = (value: string): boolean =>
   /(?:api[_-]?key|secret|password)\s*[:=]\s*\S+/i.test(value) ||
   /bearer\s+[a-z0-9._-]{12,}/i.test(value);
+
+const extractionSafetyText = (extra: MemoryExtractProposal, task: string): string =>
+  [extra.title, extra.content, extra.tags.join('\n'), extra.categories.join('\n'), task].join('\n');
 
 export const EXTRACTION_OVERLAP_THRESHOLD = 0.8;
 
@@ -671,8 +704,9 @@ export const applyMemoryEdits = async ({
       )} content=${JSON.stringify(previewText(extra.content))} ` +
         `tags=${extra.tags.join(',') || '(none)'}`
     );
-    if (looksLikeSecret(`${extra.title}\n${extra.content}\n${task}`)) {
-      logger.warn(`Skipped extraction "${extra.slug}" — content or recall context looks secret`);
+    if (looksLikeSecret(extractionSafetyText(extra, task))) {
+      logger.warn('Skipped a memory extraction because proposed content looks secret');
+      logger.debug(`Memory extraction safety skip slug=${extra.slug}`);
       summary.safetySkipCount += 1;
       consumedExtracts.add(index);
       continue;
@@ -782,7 +816,6 @@ export const applyMemoryEdits = async ({
         user: 'nightshift-optimizer',
       });
       summary.standaloneUpsertCount += 1;
-      logger.info(`Extracted new memory page: ${extra.slug}`);
       logger.debug(
         `Memory extract upserted ${toMemoryKiId(extra.slug)} contextChars=${task.length}`
       );
@@ -814,9 +847,17 @@ export const applyMemoryEdits = async ({
         }
       }
       summary.writeFailureCount += 1;
-      logger.warn(`Failed to extract memory "${extra.slug}": ${(err as Error).message}`);
+      logger.warn('Failed to extract a memory page');
+      logger.debug(`Memory extraction write failed slug=${extra.slug}: ${(err as Error).message}`);
     }
   }
+  logger.info(
+    `Memory edits completed: standalone=${summary.standaloneUpsertCount}, ` +
+      `merged=${summary.mergeSuccessCount}, archived=${
+        summary.harmfulArchiveCount + summary.mergedSourceArchiveCount
+      }, ` +
+      `writeFailures=${summary.writeFailureCount}`
+  );
   return summary;
 };
 
@@ -854,7 +895,8 @@ const mergeMemoryGroup = async ({
     let versionedCanonical =
       canonicalId !== undefined ? await store.getVersioned(canonicalId) : undefined;
     if (canonicalId && !versionedCanonical) {
-      logger.warn(`Memory merge aborted — canonical ${canonicalId} disappeared`);
+      logger.warn('Memory merge aborted because the canonical page disappeared');
+      logger.debug(`Memory merge missing canonical=${canonicalId}`);
       return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
     }
     if (versionedCanonical?.page.status === 'archived') {
@@ -874,7 +916,8 @@ const mergeMemoryGroup = async ({
         task: extract ? task : undefined,
       });
     } catch (err) {
-      logger.warn(`Memory merge synthesis failed: ${(err as Error).message}`);
+      logger.warn('Memory merge synthesis failed');
+      logger.debug(`Memory merge synthesis error: ${(err as Error).message}`);
       return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
     }
 
@@ -883,7 +926,16 @@ const mergeMemoryGroup = async ({
       logger.warn('Memory merge aborted — synthesis returned an empty title or content');
       return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
     }
-    if (looksLikeSecret(`${synthesis.title}\n${content}\n${synthesis.context}`)) {
+    if (
+      looksLikeSecret(
+        [
+          synthesis.title,
+          content,
+          synthesis.context,
+          ...(extract ? [extract.tags.join('\n'), extract.categories.join('\n')] : []),
+        ].join('\n')
+      )
+    ) {
       logger.warn('Memory merge aborted — synthesised content looks like a secret');
       return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
     }
@@ -969,7 +1021,8 @@ const mergeMemoryGroup = async ({
       break;
     } catch (err) {
       if ((err as { statusCode?: number }).statusCode !== 409) {
-        logger.warn(`Memory merge failed to write canonical page: ${(err as Error).message}`);
+        logger.warn('Memory merge failed to write its canonical page');
+        logger.debug(`Memory merge canonical write error: ${(err as Error).message}`);
         return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       versionedCanonical = await store.getVersioned(targetCanonicalId);
@@ -978,7 +1031,8 @@ const mergeMemoryGroup = async ({
         return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
       }
       if (conflictAttempt === 2) {
-        logger.warn(`Memory merge exhausted conflicts for ${targetCanonicalId}; sources preserved`);
+        logger.warn('Memory merge exhausted version conflicts; sources preserved');
+        logger.debug(`Memory merge conflict exhaustion canonical=${targetCanonicalId}`);
         return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
       }
     }
@@ -999,12 +1053,11 @@ const mergeMemoryGroup = async ({
       archivedSourceCount += 1;
     } catch (err) {
       writeFailureCount += 1;
-      logger.warn(
-        `Memory merge wrote canonical but failed to archive ${page.id}: ${(err as Error).message}`
-      );
+      logger.warn('Memory merge wrote canonical but failed to archive a source');
+      logger.debug(`Memory merge archive failed source=${page.id}: ${String(err)}`);
     }
   }
-  logger.info(
+  logger.debug(
     `Merged ${sources.map((page) => page.id).join(', ')} into ${writtenCanonicalId}` +
       (extract ? ` (folded extract ${extract.slug})` : '')
   );

@@ -252,4 +252,47 @@ describe('memoryOptimizeStepDefinition', () => {
       outcome: 'failure',
     });
   });
+
+  it('reports one failure event and fails the step when required writes fail', async () => {
+    runMemoryOptimizeMock.mockResolvedValueOnce({
+      recalledCount: 1,
+      loadedCount: 1,
+      usefulCount: 0,
+      harmfulCount: 0,
+      extractionProposedCount: 1,
+      standaloneUpsertCount: 0,
+      safetySkipCount: 0,
+      mergeAttemptCount: 0,
+      mergeSuccessCount: 0,
+      harmfulArchiveCount: 0,
+      mergedSourceArchiveCount: 0,
+      writeFailureCount: 2,
+    });
+    const definition = memoryOptimizeStepDefinition({
+      getAgentBuilder,
+      logger: loggerMock.create(),
+      telemetry: telemetry as never,
+    });
+
+    await expect(
+      definition.handler(
+        createContext({
+          prompt: 'why?',
+          response: 'because',
+          agent_id: 'significant-events.deductive-investigation',
+          conversation_id: 'conv-1',
+          round_id: 'round-1',
+        })
+      )
+    ).rejects.toThrow('Memory optimize failed to persist 2 required operation(s)');
+    expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledTimes(1);
+    expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
+      agent_id: 'significant-events.deductive-investigation',
+      conversation_id: 'conv-1',
+      round_id: 'round-1',
+      workflow_execution_id: 'workflow-exec-1',
+      outcome: 'failure',
+      write_failure_count: 2,
+    });
+  });
 });

@@ -15,9 +15,11 @@ import {
   canonicalizeMemoryLabelIds,
   contentOverlap,
   createLlmProposeMemoryExtractions,
+  formatMemoryMergeSources,
   formatRecalled,
   isDuplicateExtraction,
   MAX_FORMATTED_RECALLED_CHARS,
+  MAX_FORMATTED_MERGE_CHARS,
   optimizeMemory,
   unwrapUserTask,
 } from './optimize';
@@ -86,6 +88,41 @@ describe('formatRecalled', () => {
 
     expect(formatted).toBe(formatRecalled([first, second, third]));
     expect(formatted).toHaveLength(MAX_FORMATTED_RECALLED_CHARS);
+    expect(formatted).toContain('id=memory_second');
+    expect(formatted).not.toContain('id=memory_third');
+  });
+});
+
+describe('formatMemoryMergeSources', () => {
+  it('includes source and extract facts beyond character 1,500', () => {
+    const source = page('memory_long-source');
+    source.content = `${'s'.repeat(1_600)}SOURCE_FACT`;
+    const formatted = formatMemoryMergeSources({
+      sources: [source],
+      extract: {
+        slug: 'long-extract',
+        title: 'Long extract',
+        content: `${'e'.repeat(1_600)}EXTRACT_FACT`,
+        tags: [],
+        categories: [],
+      },
+    });
+
+    expect(formatted).toContain('SOURCE_FACT');
+    expect(formatted).toContain('EXTRACT_FACT');
+  });
+
+  it('uses a deterministic total cap and truncates only the final included content', () => {
+    const first = page('memory_first');
+    first.content = 'a'.repeat(20_000);
+    const second = page('memory_second');
+    second.content = 'b'.repeat(20_000);
+    const third = page('memory_third', 'Third', 'must-not-appear');
+
+    const formatted = formatMemoryMergeSources({ sources: [first, second, third] });
+
+    expect(formatted).toBe(formatMemoryMergeSources({ sources: [first, second, third] }));
+    expect(formatted).toHaveLength(MAX_FORMATTED_MERGE_CHARS);
     expect(formatted).toContain('id=memory_second');
     expect(formatted).not.toContain('id=memory_third');
   });
@@ -637,6 +674,75 @@ describe('applyMemoryEdits', () => {
 
     expect(store.create).not.toHaveBeenCalled();
     expect(summary.safetySkipCount).toBe(1);
+  });
+
+  it.each([
+    ['tag', { tags: ['api_key=sk-live-not-a-real-key'], categories: [] }],
+    ['category', { tags: [], categories: ['password=not-a-real-password'] }],
+  ])('rejects secret-bearing model metadata in a proposed %s', async (_kind, metadata) => {
+    const source = page('memory_checkout', 'Checkout environment');
+    const store = createStore({
+      get: jest.fn().mockResolvedValue(source),
+    });
+    const synthesizeMemoryGroup = jest.fn();
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-environment',
+          title: 'Checkout environment',
+          content: 'Checkout runs in production.',
+          ...metadata,
+        },
+      ],
+      synthesizeMemoryGroup,
+      logger: loggerMock.create(),
+    });
+
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.retrieve).not.toHaveBeenCalled();
+    expect(synthesizeMemoryGroup).not.toHaveBeenCalled();
+    expect(summary.safetySkipCount).toBe(1);
+  });
+
+  it('keeps extraction slugs and merge page ids out of info logs', async () => {
+    const source = page('memory_customer-service', 'Customer service');
+    const logger = loggerMock.create();
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === source.id ? source : undefined)),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'customer-service-detail',
+          title: 'Customer service',
+          content: 'Same customer-specific fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup: async () => ({
+        title: 'Merged customer service',
+        content: 'Merged fact.',
+        context: 'customer service',
+      }),
+      logger,
+    });
+
+    const infoLogs = logger.info.mock.calls.flat().join('\n');
+    expect(infoLogs).not.toContain('memory_customer-service');
+    expect(infoLogs).not.toContain('customer-service-detail');
   });
 });
 

@@ -111,4 +111,66 @@ describe('obtainSandboxStepDefinition', () => {
       },
     });
   });
+
+  it.each([
+    [
+      'session acquisition',
+      () =>
+        ({
+          getSession: jest.fn(),
+          getSessionForSpace: jest.fn(() => {
+            throw new Error('sandbox is not configured');
+          }),
+        } as unknown as SandboxPluginStart),
+    ],
+    [
+      'workspace allocation',
+      () => {
+        statFiles.mockRejectedValueOnce(new Error('sandbox API unavailable'));
+        return makeSandboxStart();
+      },
+    ],
+  ])('skips an optional sandbox after %s failure', async (_name, createSandboxStart) => {
+    const definition = obtainSandboxStepDefinition({
+      getSandboxStart: createSandboxStart,
+      logger: loggerMock.create(),
+    });
+
+    await expect(
+      definition.handler(createContext('conv-1', 'default', { required: false }))
+    ).resolves.toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        conversation_id: 'conv-1',
+        skipped: true,
+      },
+    });
+  });
+
+  it.each([
+    [
+      'session acquisition',
+      () =>
+        ({
+          getSession: jest.fn(),
+          getSessionForSpace: jest.fn(() => {
+            throw new Error('session failed');
+          }),
+        } as unknown as SandboxPluginStart),
+    ],
+    [
+      'workspace allocation',
+      () => {
+        statFiles.mockRejectedValueOnce(new Error('allocation failed'));
+        return makeSandboxStart();
+      },
+    ],
+  ])('fails closed after required %s failure', async (_name, createSandboxStart) => {
+    const definition = obtainSandboxStepDefinition({
+      getSandboxStart: createSandboxStart,
+      logger: loggerMock.create(),
+    });
+
+    await expect(definition.handler(createContext('conv-1'))).rejects.toThrow(/failed/);
+  });
 });
