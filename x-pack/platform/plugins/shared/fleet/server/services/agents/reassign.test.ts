@@ -413,7 +413,12 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
     const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue('space-a') } as any;
 
     await expect(
-      reassignAgents(scopedClient, esClient, { agentIds: ['agent-1'], spaceId: '*' }, regularAgentPolicySO2.id)
+      reassignAgents(
+        scopedClient,
+        esClient,
+        { agentIds: ['agent-1'], spaceId: '*' },
+        regularAgentPolicySO2.id
+      )
     ).rejects.toThrow(FleetError);
   });
 

@@ -104,8 +104,7 @@ export async function reassignBatch(
   // For cross-space task calls (spaceId === '*'), scope the action to the target policy's actual
   // spaces rather than the wildcard sentinel. ALL_SPACES_ID ('*') is not a concrete namespace
   // and would make the action invisible in Fleet UI; fall back to DEFAULT_SPACE_ID.
-  const rawNamespaces =
-    spaceId && spaceId !== '*' ? [spaceId] : (newAgentPolicy?.space_ids ?? []);
+  const rawNamespaces = spaceId && spaceId !== '*' ? [spaceId] : newAgentPolicy?.space_ids ?? [];
   const namespaces = rawNamespaces.map((id) => (id === '*' ? DEFAULT_SPACE_ID : id));
 
   await createAgentAction(esClient, soClient, {
