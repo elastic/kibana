@@ -480,6 +480,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       enableDeprecationHttpDebugLogs: `${ELASTIC_DOCS}reference/kibana/configuration-reference/logging-settings#enable-http-debug-logs`,
     },
     securitySolution: {
+      guide: `${SECURITY_SOLUTION_DOCS}index.html`,
       artifactControl: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-updates-for-protection-artifacts`,
       cloudSecurityPosture: `${ELASTIC_DOCS}solutions/security/cloud/cloud-security-posture-management`,
       cspmGcpAgentless: `${ELASTIC_DOCS}solutions/security/cloud/get-started-with-cspm-for-gcp#cspm-gcp-agentless`,
