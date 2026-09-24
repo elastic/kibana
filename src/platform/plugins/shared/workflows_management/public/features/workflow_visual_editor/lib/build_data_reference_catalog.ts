@@ -15,13 +15,20 @@ import {
   WorkflowExecutionContextSchema,
 } from '@kbn/workflows';
 import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
+import { getWorkflowContextSchema, type WorkflowContextRegistry } from '@kbn/workflows-yaml';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import { getWorkflowContextSchema } from '../../workflow_context/lib/get_workflow_context_schema';
 import {
   getDocumentOrderPredecessors,
   type PrecedingStepRef,
 } from './get_document_order_predecessors';
+
+/** Registry with no extensions — enough for trigger/consts/event catalog shapes. */
+const EMPTY_CONTEXT_REGISTRY: WorkflowContextRegistry = {
+  getStepOutput: () => undefined,
+  getConnector: () => undefined,
+  getTriggerDefinition: () => undefined,
+};
 
 export type DataReferenceGroupId = 'event' | 'steps' | 'consts' | 'context';
 
@@ -199,7 +206,8 @@ export const buildDataReferenceCatalog = ({
   const groups: DataReferenceGroup[] = [];
 
   if (definition) {
-    const contextSchema = getWorkflowContextSchema(definition);
+    // Catalog only needs trigger/consts/event shapes — no registered step outputs.
+    const contextSchema = getWorkflowContextSchema(EMPTY_CONTEXT_REGISTRY, definition);
     const eventField = (contextSchema as z.ZodObject<z.ZodRawShape>).shape?.event as
       | z.ZodType
       | undefined;

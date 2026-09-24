@@ -94,6 +94,7 @@ export type {
   RegisteredStepOutput,
   WorkflowContextRegistry,
 } from './common/validation/context/registry';
+export { getWorkflowContextSchema } from './common/validation/context/get_workflow_context_schema';
 export { getContextSchemaForPath } from './common/validation/context/get_context_for_path';
 export {
   createStepContextResolver,
