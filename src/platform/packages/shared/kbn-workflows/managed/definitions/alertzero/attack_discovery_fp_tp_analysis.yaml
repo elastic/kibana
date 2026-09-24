@@ -65,7 +65,7 @@ triggers:
 # schema and fails the run on a mismatch.
 #
 # JSON Schema form rather than the legacy `- name:` array: only this form carries
-# `maxLength`, which the legacy conversion silently drops.
+# `maxLength`, which the legacy conversion drops.
 outputs:
   properties:
     # Not an `enum` of the three, though that is where it belongs: the editor
