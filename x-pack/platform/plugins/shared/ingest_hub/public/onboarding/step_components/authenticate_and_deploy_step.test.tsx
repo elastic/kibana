@@ -168,7 +168,7 @@ describe('AuthenticateAndDeployStep', () => {
     });
     mockUseOnboardingSO.mockReturnValue({
       createDeployment: jest.fn().mockResolvedValue(null),
-      updateDeployment: jest.fn().mockResolvedValue(undefined),
+      updateDeployment: jest.fn().mockResolvedValue(true),
       persistDeploymentId: jest.fn(),
     });
     mockUseAgentBasedDeploy.mockReturnValue({
@@ -693,7 +693,7 @@ describe('AuthenticateAndDeployStep', () => {
     it('reuses existing deploymentId and does not call createDeployment when SO already exists', async () => {
       // Simulates: user clicked Next (SO created, id persisted), navigated Back, clicked Next again.
       const mockCreate = jest.fn().mockResolvedValue('new-dep-id');
-      const mockUpdate = jest.fn().mockResolvedValue(undefined);
+      const mockUpdate = jest.fn().mockResolvedValue(true);
       const mockPersist = jest.fn();
       mockUseOnboardingSO.mockReturnValue({
         createDeployment: mockCreate,
