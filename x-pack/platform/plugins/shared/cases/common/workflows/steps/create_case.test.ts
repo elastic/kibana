@@ -91,21 +91,18 @@ describe('create_case common step definition', () => {
     expect(OutputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
   });
 
-  it('accepts extended_fields and extended_fields_labels on the output payload', () => {
+  it('accepts extended_fields on the output payload', () => {
     const extendedFields = { priority_as_keyword: 'high' };
-    const extendedFieldsLabels = { priority_as_keyword: 'Priority' };
     const responseWithExtendedFields = {
       case: {
         ...createCaseResponseFixture,
         extended_fields: extendedFields,
-        extended_fields_labels: extendedFieldsLabels,
       },
     };
 
     const result = OutputSchema.parse(responseWithExtendedFields);
     expect(result.case).toMatchObject({
       extended_fields: extendedFields,
-      extended_fields_labels: extendedFieldsLabels,
     });
   });
 
