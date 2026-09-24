@@ -490,6 +490,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       request?: KibanaRequest;
       /** Resolves concrete space ids when the connector is shared into all spaces. */
       listSpaces?: () => Promise<Array<{ id: string }>>;
+      /**
+       * Set when a new package policy attaches to this connector: the stored Role ARN replaces the
+       * incoming one, so attaching never edits the identity or fans out.
+       */
+      keepStoredRoleArn?: boolean;
     }
   ): Promise<CloudConnector> {
     const logger = this.getLogger('update');
@@ -537,7 +542,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const existingAwsVars = existingCloudConnector.attributes.vars as
         | AwsCloudConnectorVars
         | undefined;
-      const incomingAwsVars = cloudConnectorUpdate.vars as AwsCloudConnectorVars | undefined;
+      const storedRoleArnVar = existingAwsVars?.role_arn;
+      const incomingVars =
+        options?.keepStoredRoleArn && isAws && storedRoleArnVar && cloudConnectorUpdate.vars
+          ? { ...cloudConnectorUpdate.vars, role_arn: storedRoleArnVar }
+          : cloudConnectorUpdate.vars;
+      const incomingAwsVars = incomingVars as AwsCloudConnectorVars | undefined;
       const oldRoleArn = existingAwsVars?.role_arn?.value;
       const newRoleArn = incomingAwsVars?.role_arn?.value;
       const roleArnChanged = isAws && typeof newRoleArn === 'string' && newRoleArn !== oldRoleArn;
@@ -561,10 +571,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         incomingVarKeys.length > 0 &&
         incomingVarKeys.every((key) => key === 'role_arn');
       const mergeIncomingVars = (storedVars: CloudConnectorSOAttributes['vars'] | undefined) =>
-        isRoleOnlyPayload && storedVars
-          ? { ...storedVars, ...cloudConnectorUpdate.vars }
-          : cloudConnectorUpdate.vars;
-      if (cloudConnectorUpdate.vars) {
+        isRoleOnlyPayload && storedVars ? { ...storedVars, ...incomingVars } : incomingVars;
+      if (incomingVars) {
         updateAttributes.vars = mergeIncomingVars(existingCloudConnector.attributes.vars);
       }
 
@@ -764,7 +772,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
                   // another space since the opening read; the write and the fan-out follow the
                   // connector as it is now.
                   connectorVersion = locked.version ?? connectorVersion;
-                  if (cloudConnectorUpdate.vars) {
+                  if (incomingVars) {
                     updateAttributes.vars = mergeIncomingVars(locked.attributes.vars);
                   }
                   const lockedRoleArn = (

@@ -1212,7 +1212,8 @@ describe('Package policy service', () => {
         },
       } as any;
 
-      // Mock updated cloud connector response
+      const storedRoleArn = 'arn:aws:iam::123456789012:role/StoredRole';
+      // The service keeps the connector's stored Role ARN when asked to.
       const updatedCloudConnector = {
         id: 'existing-connector-id',
         name: 'existing-connector',
@@ -1220,7 +1221,7 @@ describe('Package policy service', () => {
         cloudProvider: 'aws',
         vars: {
           role_arn: {
-            value: 'arn:aws:iam::123456789012:role/UpdatedRole',
+            value: storedRoleArn,
             type: 'text',
           },
           external_id: {
@@ -1235,15 +1236,6 @@ describe('Package policy service', () => {
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T02:00:00.000Z',
       };
-
-      const storedRoleArn = 'arn:aws:iam::123456789012:role/StoredRole';
-      soClient.get.mockResolvedValue({
-        id: 'existing-connector-id',
-        attributes: {
-          cloudProvider: 'aws',
-          vars: { role_arn: { type: 'text', value: storedRoleArn } },
-        },
-      } as any);
 
       // Mock the cloudConnectorService.update method
       const originalUpdate = cloudConnectorService.update;
@@ -1265,7 +1257,7 @@ describe('Package policy service', () => {
           {
             vars: {
               role_arn: {
-                value: storedRoleArn,
+                value: 'arn:aws:iam::123456789012:role/UpdatedRole',
                 type: 'text',
               },
               external_id: {
@@ -1277,7 +1269,7 @@ describe('Package policy service', () => {
               },
             },
           },
-          { esClient }
+          { esClient, keepStoredRoleArn: true }
         );
         expect(enrichedPackagePolicy.inputs[0].streams[0].vars.role_arn.value).toBe(storedRoleArn);
       } finally {
@@ -1320,15 +1312,12 @@ describe('Package policy service', () => {
         agentless: { cloud_connectors: { enabled: true, target_csp: 'aws' } },
       } as any;
 
-      soClient.get.mockResolvedValue({
-        id: 'existing-connector-id',
-        attributes: {
-          cloudProvider: 'aws',
-          vars: { role_arn: { type: 'text', value: storedRoleArn } },
-        },
-      } as any);
       const originalUpdate = cloudConnectorService.update;
-      cloudConnectorService.update = jest.fn().mockResolvedValue({ id: 'existing-connector-id' });
+      cloudConnectorService.update = jest.fn().mockResolvedValue({
+        id: 'existing-connector-id',
+        cloudProvider: 'aws',
+        vars: { role_arn: { type: 'text', value: storedRoleArn } },
+      });
 
       try {
         await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
@@ -1339,15 +1328,18 @@ describe('Package policy service', () => {
           mockPackageInfo
         );
 
+        // The connector is read only inside the update, so no earlier read can hand it a stale
+        // Role ARN that it would mistake for an edit.
+        expect(soClient.get).not.toHaveBeenCalled();
         expect(cloudConnectorService.update).toHaveBeenCalledWith(
           soClient,
           'existing-connector-id',
           {
             vars: {
-              role_arn: { type: 'text', value: storedRoleArn },
+              role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/FromTheWizard' },
             },
           },
-          { esClient }
+          { esClient, keepStoredRoleArn: true }
         );
         expect(enrichedPackagePolicy.vars.role_arn.value).toBe(storedRoleArn);
         expect(enrichedPackagePolicy.inputs[0].streams[0].vars['aws.role_arn'].value).toBe(
@@ -1425,7 +1417,7 @@ describe('Package policy service', () => {
           expect.objectContaining({
             vars: expect.any(Object),
           }),
-          { esClient }
+          { esClient, keepStoredRoleArn: true }
         );
       } finally {
         // Restore the original method
@@ -1964,7 +1956,7 @@ describe('Package policy service', () => {
               },
             },
           },
-          { esClient }
+          { esClient, keepStoredRoleArn: true }
         );
       } finally {
         cloudConnectorService.update = originalUpdate;

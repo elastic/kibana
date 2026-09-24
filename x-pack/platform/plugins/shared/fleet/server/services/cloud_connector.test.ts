@@ -1462,6 +1462,32 @@ describe('CloudConnectorService', () => {
         );
       });
 
+      it('keeps the stored Role ARN instead of fanning out when asked to keep it', async () => {
+        const externalId = {
+          type: 'password',
+          value: { id: 'EXTERNALID1234567890', isSecretRef: true },
+        } as const;
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn }, external_id: externalId } },
+          { esClient: mockEsClient, keepStoredRoleArn: true }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockAppContextService.getLockManagerService).not.toHaveBeenCalled();
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({
+            vars: { role_arn: { type: 'text', value: oldArn }, external_id: externalId },
+          }),
+          { version: 'Wz-cc-version' }
+        );
+        expect(mockSoClient.update.mock.calls[0][2]).not.toHaveProperty('verification_status');
+      });
+
       describe('permission verifier', () => {
         let runSoon: jest.Mock;
 
