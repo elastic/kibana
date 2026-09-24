@@ -17,6 +17,9 @@ import { MetricsExecutionContextName } from './execution_context_enums';
 
 const DATASET_FIELD = 'data_stream.dataset';
 const NAMESPACE_FIELD = 'data_stream.namespace';
+// One row per metric per stream. Without an explicit limit ES|QL silently caps at 1000 rows;
+// 10000 is the engine's maximum (`esql.query.result_truncation_max_size`).
+const MAX_PROBE_ROWS = 10000;
 
 /**
  * Querying an exemplars stream that does not exist results in an HTTP 400, not an empty
@@ -24,7 +27,7 @@ const NAMESPACE_FIELD = 'data_stream.namespace';
  * metric name lets a chart check its own derived stream rather than the whole cluster. It is
  * a workaround until `TS_EXEMPLARS` is available (elasticsearch#154786).
  */
-export const EXEMPLARS_PROBE_QUERY = `FROM exemplars-*.otel-* | STATS BY ${EXEMPLARS_METRIC_NAME_FIELD}, ${DATASET_FIELD}, ${NAMESPACE_FIELD}`;
+export const EXEMPLARS_PROBE_QUERY = `FROM exemplars-*.otel-* | STATS BY ${EXEMPLARS_METRIC_NAME_FIELD}, ${DATASET_FIELD}, ${NAMESPACE_FIELD} | LIMIT ${MAX_PROBE_ROWS}`;
 
 /** `metrics.`-prefixed metric names that have exemplars, keyed by exemplars data stream. */
 export type MetricsWithExemplars = ReadonlyMap<string, ReadonlySet<string>>;
