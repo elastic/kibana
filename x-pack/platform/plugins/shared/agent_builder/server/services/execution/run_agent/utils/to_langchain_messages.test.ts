@@ -223,7 +223,7 @@ describe('prepareMessages', () => {
     expect(result[2].content).toBe('how are you?');
   });
 
-  it('uses the pending round input (with its author) when an awaiting-prompt round is promoted to next input', async () => {
+  it('replays the pending round input and its persisted model context on resume', async () => {
     const pendingStartedAt = '2026-06-30T12:34:56.000Z';
     const previousRounds = [
       createRound({
@@ -231,6 +231,7 @@ describe('prepareMessages', () => {
         status: ConversationRoundStatus.awaitingPrompt,
         input: makeRoundInput('original user request', [], {
           author: { id: 'u1', username: 'alice' },
+          model_context: '<system_update>original round context</system_update>',
         }),
         started_at: pendingStartedAt,
       }),
@@ -241,14 +242,18 @@ describe('prepareMessages', () => {
         previousRounds,
         nextInput: makeRoundInput('prompt answer', [], {
           author: { id: 'u2', username: 'bob' },
+          model_context: '<system_update>rerun hook context</system_update>',
         }),
       }),
     });
 
     expect(result).toHaveLength(1);
     expect(result[0].content).toBe(
-      `[User: alice — Sent: ${formatDate(pendingStartedAt)}]\n\noriginal user request`
+      `[User: alice — Sent: ${formatDate(
+        pendingStartedAt
+      )}]\n\noriginal user request\n\n<system_update>original round context</system_update>\n`
     );
+    expect(result[0].content).not.toContain('rerun hook context');
   });
 
   it('places the next-input date prefix above attachment XML', async () => {

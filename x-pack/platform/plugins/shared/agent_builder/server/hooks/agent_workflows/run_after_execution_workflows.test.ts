@@ -164,13 +164,18 @@ describe('runAfterExecutionWorkflows', () => {
         input: { message: 'my question', workflow_context: workflowContext },
         response: { message: 'my answer' },
         model_usage: {
-          connector_id: ' connector-1 ',
+          connector_id: 'stale-folded-connector',
           llm_calls: 1,
           input_tokens: 10,
           output_tokens: 5,
         },
       });
-      const context = createContext({ round, agentId: 'ag-1', conversationId: 'cv-1' });
+      const context = createContext({
+        round,
+        agentId: 'ag-1',
+        conversationId: 'cv-1',
+        connectorId: ' current-connector ',
+      });
 
       await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
@@ -183,7 +188,7 @@ describe('runAfterExecutionWorkflows', () => {
             round_id: 'round-1',
             agent_id: 'ag-1',
             conversation_id: 'cv-1',
-            connector_id: 'connector-1',
+            connector_id: 'current-connector',
             workflow_context: workflowContext,
             tool_calls: [],
           }),

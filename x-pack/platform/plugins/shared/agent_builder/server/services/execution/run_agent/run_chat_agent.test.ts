@@ -240,7 +240,7 @@ describe('runDefaultAgentMode', () => {
   it('persists workflow contexts separately from the user-authored message', async () => {
     const context = createAgentHandlerContextMock();
     jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
-      connector: { name: 'test-connector' },
+      connector: { name: 'test-connector', connectorId: 'current-connector' },
       chatModel: {},
     } as any);
     context.toolManager.getToolIdMapping.mockReturnValue(new Map());
@@ -305,6 +305,10 @@ describe('runDefaultAgentMode', () => {
         semantic_memory: { recalled_ids: ['memory-1', 'memory-2'] },
       },
     });
+    expect(context.hooks.run).toHaveBeenCalledWith(
+      HookLifecycle.afterExecution,
+      expect.objectContaining({ connectorId: 'current-connector' })
+    );
   });
 
   describe('plugin skill id filtering', () => {

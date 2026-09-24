@@ -48,6 +48,8 @@ export interface AfterToolCallHookContext extends ToolCallHookContextBase {
 export interface AfterExecutionHookContext extends AgentHookContextBase {
   round: ConversationRound;
   conversationId?: string;
+  /** Connector used by this execution, which may differ from a folded pending round's connector. */
+  connectorId?: string;
   agentConfiguration: AgentConfiguration;
 }
 

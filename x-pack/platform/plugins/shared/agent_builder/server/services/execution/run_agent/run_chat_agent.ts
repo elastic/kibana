@@ -565,6 +565,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentId,
       round,
       conversationId: conversation?.id,
+      connectorId: model.connector.connectorId,
       agentConfiguration,
     });
   } catch (err) {
