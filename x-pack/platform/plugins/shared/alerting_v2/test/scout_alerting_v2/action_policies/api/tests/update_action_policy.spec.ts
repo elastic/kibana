@@ -9,8 +9,10 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { VERSION_MAX_LENGTH, ID_MAX_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
+  ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   getActionPolicyUrl,
@@ -24,7 +26,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     writerCredentials = await requestAuth.getApiKeyForCustomRole(
-      ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+      ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
     );
     writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
@@ -533,7 +535,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'authorization: 403 with read-only alerting_v2 privileges',
+    'authorization: 403 with read-only action policy alerting_v2 privileges',
     async ({ apiClient, apiServices, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(
         ALERTING_V2_ACTION_POLICIES_READ_ROLE
@@ -562,6 +564,44 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { name: 'no-access-cannot-patch-updated', version: created.version },
+      });
+
+      expect(response).toHaveStatusCode(403);
+    }
+  );
+
+  apiTest(
+    'authorization: 403 with action policies write but without rules read',
+    async ({ apiClient, apiServices, requestAuth }) => {
+      const actionPoliciesOnlyCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+      );
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'action-policies-only-cannot-patch' })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...actionPoliciesOnlyCredentials.apiKeyHeader },
+        body: { name: 'action-policies-only-cannot-patch-updated', version: created.version },
+      });
+
+      expect(response).toHaveStatusCode(403);
+    }
+  );
+
+  apiTest(
+    'authorization: 403 with rules read but no action policies write permissions',
+    async ({ apiClient, apiServices, requestAuth }) => {
+      const rulesOnlyCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_READ_ROLE
+      );
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'action-policies-only-cannot-patch' })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...rulesOnlyCredentials.apiKeyHeader },
+        body: { name: 'rules-only-cannot-patch-updated', version: created.version },
       });
 
       expect(response).toHaveStatusCode(403);

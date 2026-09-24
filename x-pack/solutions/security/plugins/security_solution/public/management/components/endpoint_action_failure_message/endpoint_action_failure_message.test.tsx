@@ -604,6 +604,165 @@ describe('EndpointActionFailureMessage', () => {
     });
   });
 
+  describe('when action was rejected as duplicate', () => {
+    it('should show duplicate message for single agent with duplicate_of_id in output', () => {
+      action = {
+        ...action,
+        agents: ['agent-a'],
+        command: 'isolate',
+        isCompleted: true,
+        wasSuccessful: false,
+        hosts: { 'agent-a': { name: 'Agent A' } },
+        errors: ['Action rejected: duplicate'],
+        agentState: {
+          'agent-a': {
+            isCompleted: true,
+            wasSuccessful: false,
+            wasCanceled: false,
+            completedAt: new Date().toISOString(),
+            errors: ['Action rejected: duplicate'],
+          },
+        },
+        outputs: {
+          'agent-a': {
+            type: 'json',
+            content: {
+              code: 'ra_isolate_error_duplicate-action',
+              duplicate_of_id: 'original-action-id-123',
+            },
+          },
+        },
+      };
+      render();
+      const { getByTestId } = renderResult;
+      const errorMessages = getByTestId(testId);
+      expect(errorMessages).not.toBeNull();
+      expect(errorMessages.textContent).toContain(
+        'An identical (duplicate) action (ID: original-action-id-123) was already running on the host'
+      );
+    });
+
+    it('should show duplicate message for each applicable agent in multi-agent action', () => {
+      action = {
+        ...action,
+        agents: ['agent-a', 'agent-b'],
+        command: 'isolate',
+        isCompleted: true,
+        wasSuccessful: false,
+        hosts: {
+          'agent-a': { name: 'Agent A' },
+          'agent-b': { name: 'Agent B' },
+        },
+        errors: ['Action rejected: duplicate', 'Other error'],
+        agentState: {
+          'agent-a': {
+            isCompleted: true,
+            wasSuccessful: false,
+            wasCanceled: false,
+            completedAt: new Date().toISOString(),
+            errors: ['Action rejected: duplicate'],
+          },
+          'agent-b': {
+            isCompleted: true,
+            wasSuccessful: false,
+            wasCanceled: false,
+            completedAt: new Date().toISOString(),
+            errors: ['Other error'],
+          },
+        },
+        outputs: {
+          'agent-a': {
+            type: 'json',
+            content: {
+              code: 'ra_isolate_error_duplicate-action',
+              duplicate_of_id: 'original-action-id-abc',
+            },
+          },
+          'agent-b': {
+            type: 'json',
+            content: {
+              code: 'ra_isolate_error_not-isolated',
+            },
+          },
+        },
+      };
+      render();
+      const { getByTestId } = renderResult;
+      const errorMessages = getByTestId(testId);
+      expect(errorMessages).not.toBeNull();
+      expect(errorMessages.textContent).toContain('Host: Agent A');
+      expect(errorMessages.textContent).toContain(
+        'An identical (duplicate) action (ID: original-action-id-abc) was already running on the host'
+      );
+      expect(errorMessages.textContent).toContain('Host: Agent B');
+      // duplicate message appears only once (only for Agent A, not Agent B)
+      const duplicateMessageCount = (
+        errorMessages.textContent.match(/original-action-id-abc/g) || []
+      ).length;
+      expect(duplicateMessageCount).toBe(1);
+    });
+
+    it('should show duplicate message when agentId prop is provided and that agent has duplicate_of_id', () => {
+      action = {
+        ...action,
+        agents: ['agent-a', 'agent-b'],
+        command: 'isolate',
+        isCompleted: true,
+        wasSuccessful: false,
+        hosts: {
+          'agent-a': { name: 'Agent A' },
+          'agent-b': { name: 'Agent B' },
+        },
+        errors: ['Action rejected: duplicate'],
+        agentState: {
+          'agent-a': {
+            isCompleted: true,
+            wasSuccessful: false,
+            wasCanceled: false,
+            completedAt: new Date().toISOString(),
+            errors: ['Action rejected: duplicate'],
+          },
+          'agent-b': {
+            isCompleted: true,
+            wasSuccessful: true,
+            wasCanceled: false,
+            completedAt: new Date().toISOString(),
+            errors: undefined,
+          },
+        },
+        outputs: {
+          'agent-a': {
+            type: 'json',
+            content: {
+              code: 'ra_isolate_error_duplicate-action',
+              duplicate_of_id: 'original-action-xyz',
+            },
+          },
+          'agent-b': {
+            type: 'json',
+            content: {
+              code: 'ra_isolate_success',
+            },
+          },
+        },
+      };
+      renderResult = appTestContext.render(
+        <EndpointActionFailureMessage
+          action={action}
+          agentId="agent-a"
+          data-test-subj={testPrefix}
+        />
+      );
+      const errorMessages = renderResult.getByTestId(testId);
+      expect(errorMessages).not.toBeNull();
+      expect(errorMessages.textContent).toContain(
+        'An identical (duplicate) action (ID: original-action-xyz) was already running on the host'
+      );
+      expect(errorMessages.textContent).not.toContain('Agent A');
+      expect(errorMessages.textContent).not.toContain('Agent B');
+    });
+  });
+
   describe('when agentId prop is provided', () => {
     beforeEach(() => {
       action = {

@@ -7,19 +7,27 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { EventClient } from './event_client';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import { toRuleEvent } from './to_rule_event';
 
 export const updateSignificantEventStatus = async ({
   eventClient,
   eventUuid,
   status,
   assessmentNote,
+  alertEventsClient,
+  logger,
 }: {
   eventClient: EventClient;
   eventUuid: string;
   status: SignificantEventStatus;
   assessmentNote?: string;
+  /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
+  alertEventsClient?: AlertEventsClientApi;
+  logger?: Logger;
 }): Promise<{
   event_uuid: string;
   updated: number;
@@ -60,6 +68,11 @@ export const updateSignificantEventStatus = async ({
   // `wait_for` ensures the write is searchable before this resolves, so an immediate
   // re-fetch (e.g. the UI invalidating its query right after this route responds) sees it.
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true, refresh: 'wait_for' });
+
+  // Dual-write to .rule-events (fire-and-forget). Errors are logged but never affect the result.
+  alertEventsClient?.createAlertEvent(toRuleEvent(updatedEvent)).catch((err) => {
+    logger?.error(`Failed to write to .rule-events: ${err instanceof Error ? err.message : err}`);
+  });
 
   // Notify subscribed workflows of the status change (fire-and-forget).
   emitSignificantEventWriteTriggers({
