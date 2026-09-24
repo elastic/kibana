@@ -74,7 +74,7 @@ export const listEndpointsTool = (
           ? `united.endpoint.host.hostname: *${escapeKuery(params.hostNameFilter)}*`
           : undefined;
 
-        const page = (params.page) ?? 0;
+        const page = params.page ?? 0;
 
         if (page > MAX_LIST_ENDPOINTS_PAGE) {
           return responseActionErrorResult(
