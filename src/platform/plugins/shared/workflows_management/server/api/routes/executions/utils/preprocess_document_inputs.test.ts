@@ -289,6 +289,29 @@ describe('preprocessDocumentInputs', () => {
       expect(mockEsClient.search).not.toHaveBeenCalled();
     });
 
+    it('accepts a full selection of the longest valid pairs, which fits the default payload', async () => {
+      // If the cap or the per-field limits grow, this is what catches a request the HTTP layer
+      // would reject for size before validation could run.
+      const longest = Array.from({ length: MAX_RUN_WORKFLOW_DOCS }, (_, i) => ({
+        _id: `${i}-`.padEnd(512, 'x'),
+        _index: 'i'.repeat(255),
+      }));
+      mockEsClient.search.mockResolvedValue(
+        searchHits([{ _id: longest[0]._id, _index: longest[0]._index, fields: {} }])
+      );
+
+      await preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds: longest } },
+        mockContext,
+        mockLogger
+      );
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+      expect(
+        Buffer.byteLength(JSON.stringify({ inputs: { event: { documentIds: longest } } }))
+      ).toBeLessThan(1024 * 1024);
+    });
+
     it.each([
       ['a non-array', 'doc-1', 'inputs.event.documentIds must be an array.'],
       ['an entry without _index', [{ _id: 'doc-1' }], 'non-empty string "_id" and "_index"'],
@@ -297,6 +320,12 @@ describe('preprocessDocumentInputs', () => {
       [
         'an over-long _index',
         [{ _id: 'doc-1', _index: 'i'.repeat(256) }],
+        'non-empty string "_id" and "_index"',
+      ],
+      [
+        // 200 characters, but 600 UTF-8 bytes.
+        'an _id over 512 bytes of multi-byte characters',
+        [{ _id: '日'.repeat(200), _index: 'logs' }],
         'non-empty string "_id" and "_index"',
       ],
     ])('rejects %s without querying', async (_name, badDocumentIds, message) => {
