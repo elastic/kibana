@@ -29,6 +29,7 @@ const source = {
   attributes: {
     status: 'established' as const,
     slug: 'kafka-lag',
+    space_id: 'space-a',
     agent_id: 'agent-1',
     impressions: 10,
     conversions: 3,
@@ -52,11 +53,11 @@ describe('canonicalizeSlug / toMemoryKiId', () => {
 describe('createMemoryPageStore', () => {
   const logger = loggerMock.create();
 
-  it('lists pages with raw counters and agent-scoped ids', async () => {
+  it('lists pages with raw counters and space-scoped ids', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({
         hits: {
-          hits: [{ _id: 'agent-1:memory_kafka-lag', _source: source }],
+          hits: [{ _id: 'space-a:memory_kafka-lag', _source: source }],
         },
       }),
     };
@@ -64,6 +65,7 @@ describe('createMemoryPageStore', () => {
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0 + HALF_LIFE_SEC,
     });
@@ -84,7 +86,7 @@ describe('createMemoryPageStore', () => {
       expect.objectContaining({
         query: {
           bool: {
-            filter: [{ term: { tags: 'memory' } }, { term: { 'attributes.agent_id': 'agent-1' } }],
+            filter: [{ term: { tags: 'memory' } }, { term: { 'attributes.space_id': 'space-a' } }],
           },
         },
       }),
@@ -99,11 +101,11 @@ describe('createMemoryPageStore', () => {
     };
     const esClient = {
       search: jest.fn().mockResolvedValue({
-        hits: { hits: [{ _id: 'agent-1:memory_kafka-lag', _source: archived }] },
+        hits: { hits: [{ _id: 'space-a:memory_kafka-lag', _source: archived }] },
       }),
       get: jest.fn().mockResolvedValue({
         found: true,
-        _id: 'agent-1:memory_kafka-lag',
+        _id: 'space-a:memory_kafka-lag',
         _source: archived,
       }),
     };
@@ -111,6 +113,7 @@ describe('createMemoryPageStore', () => {
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0,
     });
@@ -151,7 +154,7 @@ describe('createMemoryPageStore', () => {
     expect(display.conversions).toBeCloseTo(1.5, 10);
   });
 
-  it('upserts with an agent-prefixed stored id and does not write space_id', async () => {
+  it('upserts with a space-prefixed stored id and writes space and agent metadata', async () => {
     const esClient = {
       get: jest.fn().mockRejectedValue({ statusCode: 404 }),
       index: jest.fn().mockResolvedValue({}),
@@ -160,6 +163,7 @@ describe('createMemoryPageStore', () => {
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'significant-events.deductive-investigation',
       now: () => T0,
     });
@@ -177,11 +181,12 @@ describe('createMemoryPageStore', () => {
 
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'significant-events.deductive-investigation:memory_kafka-lag',
+        id: 'space-a:memory_kafka-lag',
         document: expect.objectContaining({
           tags: ['memory', 'kafka'],
           attributes: expect.objectContaining({
             agent_id: 'significant-events.deductive-investigation',
+            space_id: 'space-a',
             impressions: 0,
             conversions: 0,
           }),
@@ -191,16 +196,109 @@ describe('createMemoryPageStore', () => {
     );
     expect(page.id).toBe('memory_kafka-lag');
     expect(page.telemetry.impressions).toBe(0);
-    expect(esClient.index.mock.calls[0][0].document.attributes.space_id).toBeUndefined();
+    expect(esClient.index.mock.calls[0][0].document.attributes.space_id).toBe('space-a');
   });
 
-  it('drops a leftover default: id even when search returns it', async () => {
+  it('writes an existing canonical in place with optimistic concurrency', async () => {
+    const esClient = { index: jest.fn().mockResolvedValue({}) };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+    const existing = {
+      id: 'memory_kafka-lag',
+      slug: 'kafka-lag',
+      title: 'Kafka lag',
+      content: 'Old content.',
+      tags: ['memory'],
+      status: 'established' as const,
+      agent_id: 'agent-1',
+      categories: [],
+      references: [],
+      created_at: T0_ISO,
+      updated_at: T0_ISO,
+      created_by: 'sre',
+      updated_by: 'sre',
+      telemetry: {
+        impressions: 10,
+        conversions: 3,
+        last_impression_time: T0_ISO,
+      },
+    };
+
+    await store.update(
+      existing.id,
+      {
+        slug: existing.slug,
+        title: 'Merged Kafka lag',
+        content: 'Merged content.',
+        tags: ['kafka'],
+        categories: [],
+        references: [],
+        status: 'established',
+        user: 'nightshift-optimizer',
+      },
+      { page: existing, seqNo: 12, primaryTerm: 3 }
+    );
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'space-a:memory_kafka-lag',
+        if_seq_no: 12,
+        if_primary_term: 3,
+        document: expect.objectContaining({
+          title: 'Merged Kafka lag',
+          attributes: expect.objectContaining({
+            created_at: T0_ISO,
+            space_id: 'space-a',
+            agent_id: 'agent-1',
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('uses create-only indexing for a new page', async () => {
+    const esClient = { index: jest.fn().mockResolvedValue({}) };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+
+    await store.create({
+      slug: 'kafka-lag',
+      title: 'Kafka lag',
+      content: 'Scale the consumer.',
+      tags: ['kafka'],
+      categories: [],
+      references: [],
+      status: 'tentative',
+      user: 'nightshift-optimizer',
+    });
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'space-a:memory_kafka-lag',
+        op_type: 'create',
+      }),
+      expect.anything()
+    );
+  });
+
+  it('keeps the same slug isolated between spaces', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({
         hits: {
           hits: [
-            { _id: 'default:memory_kafka-lag', _source: source },
-            { _id: 'agent-1:memory_kafka-lag', _source: source },
+            { _id: 'space-b:memory_kafka-lag', _source: source },
+            { _id: 'space-a:memory_kafka-lag', _source: source },
           ],
         },
       }),
@@ -208,6 +306,7 @@ describe('createMemoryPageStore', () => {
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0,
     });
@@ -218,7 +317,7 @@ describe('createMemoryPageStore', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           bool: expect.objectContaining({
-            filter: expect.arrayContaining([{ term: { 'attributes.agent_id': 'agent-1' } }]),
+            filter: expect.arrayContaining([{ term: { 'attributes.space_id': 'space-a' } }]),
           }),
         }),
       }),
@@ -228,15 +327,13 @@ describe('createMemoryPageStore', () => {
 
   it('applies useful then unrelated as one bulk write with a shared now', async () => {
     const esClient = {
-      mget: jest.fn().mockResolvedValue({
-        docs: [{ _id: 'agent-1:memory_kafka-lag', found: true, _source: source }],
-      }),
       bulk: jest.fn().mockResolvedValue({ errors: false }),
     };
 
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0 + HALF_LIFE_SEC,
     });
@@ -246,30 +343,39 @@ describe('createMemoryPageStore', () => {
       { id: 'memory_kafka-lag', addImp: 1, addConv: 0 },
     ]);
 
-    expect(esClient.mget).toHaveBeenCalledTimes(1);
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
     const bulkBody = esClient.bulk.mock.calls[0][0];
     expect(bulkBody.refresh).toBe('wait_for');
-    const document = bulkBody.operations[1];
-    // decay(10, 7d)=5 then +2 imp; decay(3)=1.5 then +1 conv
-    expect(document.attributes.impressions).toBeCloseTo(7, 10);
-    expect(document.attributes.conversions).toBeCloseTo(2.5, 10);
-    expect(document.attributes.last_impression_time).toBe(epochSecondsToIso(T0 + HALF_LIFE_SEC));
     expect(bulkBody.operations[0]).toEqual({
-      index: { _index: MEMORY_INDEX, _id: 'agent-1:memory_kafka-lag' },
+      update: {
+        _index: MEMORY_INDEX,
+        _id: 'space-a:memory_kafka-lag',
+        retry_on_conflict: 3,
+      },
+    });
+    expect(bulkBody.operations[1]).toEqual({
+      script: expect.objectContaining({
+        source: expect.stringContaining("attributes.status == 'archived'"),
+        params: {
+          now: T0 + HALF_LIFE_SEC,
+          decayLambda: Math.log(2) / HALF_LIFE_SEC,
+          addImp: 2,
+          addConv: 1,
+        },
+      }),
+      scripted_upsert: true,
+      upsert: {},
     });
   });
 
   it('throws when a counter bulk write contains item errors', async () => {
     const esClient = {
-      mget: jest.fn().mockResolvedValue({
-        docs: [{ _id: 'agent-1:memory_kafka-lag', found: true, _source: source }],
-      }),
       bulk: jest.fn().mockResolvedValue({ errors: true }),
     };
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0,
     });
@@ -279,43 +385,37 @@ describe('createMemoryPageStore', () => {
     ).rejects.toThrow('Memory counter bulk update failed');
   });
 
-  it('skips archived pages in counter updates', async () => {
+  it('uses a scripted upsert that noops archived pages and missing docs', async () => {
     const esClient = {
-      mget: jest.fn().mockResolvedValue({
-        docs: [
-          {
-            _id: 'agent-1:memory_kafka-lag',
-            found: true,
-            _source: {
-              ...source,
-              attributes: { ...source.attributes, status: 'archived' },
-            },
-          },
-        ],
-      }),
-      bulk: jest.fn(),
+      bulk: jest.fn().mockResolvedValue({ errors: false }),
     };
 
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0,
     });
 
     await store.applyCounterUpdates([{ id: 'memory_kafka-lag', addImp: 1, addConv: 1 }]);
-    expect(esClient.bulk).not.toHaveBeenCalled();
+    const operations = esClient.bulk.mock.calls[0][0].operations;
+    expect(operations[0]).toHaveProperty('update');
+    expect(operations[1]).toMatchObject({ scripted_upsert: true, upsert: {} });
+    expect(operations[1].script.source).toContain("ctx.op == 'create'");
+    expect(operations[1].script.source).toContain("ctx.op = 'noop'");
   });
 
   it('retrieves browse candidates without a query and search hits with one', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({
-        hits: { hits: [{ _id: 'agent-1:memory_kafka-lag', _source: source }] },
+        hits: { hits: [{ _id: 'space-a:memory_kafka-lag', _source: source }] },
       }),
     };
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0,
     });
@@ -357,12 +457,13 @@ describe('createMemoryPageStore', () => {
   it('retrieves catalog duplicates against title and content, not context', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({
-        hits: { hits: [{ _id: 'agent-1:memory_kafka-lag', _source: source }] },
+        hits: { hits: [{ _id: 'space-a:memory_kafka-lag', _source: source }] },
       }),
     };
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0,
     });
@@ -398,6 +499,7 @@ describe('createMemoryPageStore', () => {
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0,
     });
@@ -430,7 +532,7 @@ describe('createMemoryPageStore', () => {
     const esClient = {
       get: jest.fn().mockResolvedValue({
         found: true,
-        _id: 'agent-1:memory_kafka-lag',
+        _id: 'space-a:memory_kafka-lag',
         _source: {
           ...source,
           context: 'why is checkout slow?',
@@ -446,6 +548,7 @@ describe('createMemoryPageStore', () => {
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'space-a',
       agentId: 'agent-1',
       now: () => T0,
     });
@@ -454,7 +557,7 @@ describe('createMemoryPageStore', () => {
 
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'agent-1:memory_kafka-lag',
+        id: 'space-a:memory_kafka-lag',
         document: expect.objectContaining({
           context: 'why is checkout slow?',
           attributes: expect.objectContaining({

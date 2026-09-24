@@ -6,12 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  materializeMemory,
-  parseMemoryCatalog,
-  parseRecalledSidecar,
-  readRecalledIds,
-} from './materialize';
+import { materializeMemory, parseMemoryCatalog } from './materialize';
 import type { MemoryPageStore } from './page_store';
 import type { MemoryPage } from '../../common/memory';
 
@@ -64,8 +59,11 @@ describe('materializeMemory', () => {
       list: jest.fn(),
       retrieve: jest.fn().mockResolvedValue(pages),
       get: jest.fn().mockResolvedValue(undefined),
+      getVersioned: jest.fn(),
       getByName: jest.fn(),
       upsert: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
       applyCounterUpdates: jest.fn(),
       archive: jest.fn(),
       delete: jest.fn(),
@@ -156,20 +154,22 @@ describe('materializeMemory', () => {
     );
   });
 
-  it('writes a recalled-id sidecar for the optimizer', async () => {
+  it('returns recalled ids and writes only the durable workspace catalog', async () => {
     const store = createStore(candidates.slice(0, 1));
     const session = createSession();
 
-    await materializeMemory({
+    const result = await materializeMemory({
       session: session as never,
       store,
       logger: loggerMock.create(),
     });
 
-    const sidecar = session.writeFiles.mock.calls[1][0].find(
-      (file: { path: string }) => file.path === '/workspace/memories/.recalled.json'
-    );
-    expect(JSON.parse(sidecar.content.toString('utf8'))).toEqual({ ids: ['memory_a'] });
+    expect(result.recalledIds).toEqual(['memory_a']);
+    expect(
+      session.writeFiles.mock.calls[1][0].some(
+        (file: { path: string }) => file.path === '/workspace/memories/.recalled.json'
+      )
+    ).toBe(false);
     const indexWrite = session.writeFiles.mock.calls[1][0].find(
       (file: { path: string }) => file.path === '/workspace/memories/.index.json'
     );
@@ -247,12 +247,6 @@ describe('materializeMemory', () => {
     });
 
     expect(recalledIds).toEqual(['memory_a', 'memory_b']);
-    const sidecar = session.writeFiles.mock.calls[1][0].find(
-      (file: { path: string }) => file.path === '/workspace/memories/.recalled.json'
-    );
-    expect(JSON.parse(sidecar.content.toString('utf8'))).toEqual({
-      ids: ['memory_a', 'memory_b'],
-    });
     const indexWrite = session.writeFiles.mock.calls[1][0].find(
       (file: { path: string }) => file.path === '/workspace/memories/.index.json'
     );
@@ -314,44 +308,5 @@ describe('parseMemoryCatalog', () => {
       )
     ).toEqual([{ id: 'memory_a', title: 'Alpha', path: '/workspace/memories/memory_a.md' }]);
     expect(parseMemoryCatalog('not-json')).toEqual([]);
-  });
-});
-
-describe('parseRecalledSidecar', () => {
-  it('reads string ids and ignores junk', () => {
-    expect(parseRecalledSidecar('{"ids":["memory_a","",1,null,"memory_b"]}')).toEqual([
-      'memory_a',
-      'memory_b',
-    ]);
-    expect(parseRecalledSidecar('not-json')).toEqual([]);
-    expect(parseRecalledSidecar('{"ids":"memory_a"}')).toEqual([]);
-  });
-});
-
-describe('readRecalledIds', () => {
-  it('returns an empty list when the sidecar cannot be read', async () => {
-    const ids = await readRecalledIds({
-      session: {
-        readFiles: jest
-          .fn()
-          .mockResolvedValue([{ path: '/workspace/memories/.recalled.json', success: false }]),
-      } as never,
-    });
-    expect(ids).toEqual([]);
-  });
-
-  it('parses the sidecar written by hydrate', async () => {
-    const ids = await readRecalledIds({
-      session: {
-        readFiles: jest.fn().mockResolvedValue([
-          {
-            path: '/workspace/memories/.recalled.json',
-            success: true,
-            content: Buffer.from(JSON.stringify({ ids: ['memory_a'] }), 'utf8'),
-          },
-        ]),
-      } as never,
-    });
-    expect(ids).toEqual(['memory_a']);
   });
 });

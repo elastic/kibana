@@ -34,6 +34,17 @@ triggers:
         connector_id:
           type: string
           description: Inference connector the triggering agent used for this round.
+        workflow_context:
+          type: object
+          description: Persisted non-model workflow state for the completed round.
+          properties:
+            semantic_memory:
+              type: object
+              properties:
+                recalled_ids:
+                  type: array
+                  items:
+                    type: string
         tool_calls:
           type: array
           description: Tool calls from the completed round. Unused by this workflow.
@@ -79,3 +90,4 @@ steps:
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              recalled_ids: '{{ inputs.workflow_context.semantic_memory.recalled_ids }}'

@@ -11,7 +11,7 @@ import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { previewText } from './log_format';
-import { materializeMemory, readRecalledIds, type MaterializeMemoryResult } from './materialize';
+import { materializeMemory, type MaterializeMemoryResult } from './materialize';
 import {
   createLlmProposeMemoryExtractions,
   createLlmProposeMemoryLabels,
@@ -24,18 +24,21 @@ import { createMemoryPageStore, type MemoryPageStore } from './page_store';
 export const createMemoryStore = ({
   esClient,
   logger,
+  spaceId,
   agentId,
   signal,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  spaceId: string;
   agentId: string;
   signal?: AbortSignal;
-}): MemoryPageStore => createMemoryPageStore({ esClient, logger, agentId, signal });
+}): MemoryPageStore => createMemoryPageStore({ esClient, logger, spaceId, agentId, signal });
 
 export const hydrateMemoryWorkspace = async ({
   session,
   esClient,
+  spaceId,
   agentId,
   query,
   signal,
@@ -43,37 +46,17 @@ export const hydrateMemoryWorkspace = async ({
 }: {
   session: SandboxSession;
   esClient: ElasticsearchClient;
+  spaceId: string;
   agentId: string;
   query?: string;
   signal?: AbortSignal;
   logger: Logger;
 }): Promise<MaterializeMemoryResult> => {
-  const store = createMemoryStore({ esClient, logger, agentId, signal });
-  logger.debug(`Memory hydrate agent=${agentId} query=${JSON.stringify(previewText(query))}`);
+  const store = createMemoryStore({ esClient, logger, spaceId, agentId, signal });
+  logger.debug(
+    `Memory hydrate space=${spaceId} agent=${agentId} query=${JSON.stringify(previewText(query))}`
+  );
   return materializeMemory({ session, store, logger, query });
-};
-
-const loadRecalledIds = async ({
-  session,
-  logger,
-}: {
-  session?: SandboxSession;
-  logger: Logger;
-}): Promise<string[]> => {
-  if (!session) {
-    logger.info('Memory optimizer has no sandbox conversation — recalled set is empty');
-    return [];
-  }
-
-  try {
-    const ids = await readRecalledIds({ session });
-    logger.info(`Memory optimizer recalled sidecar: ${ids.length} id(s)`);
-    logger.debug(`Memory optimizer sidecar ids: ${ids.join(', ') || '(none)'}`);
-    return ids;
-  } catch (err) {
-    logger.info(`Memory optimizer could not read .recalled.json: ${(err as Error).message}`);
-    return [];
-  }
 };
 
 export const runMemoryOptimize = async ({
@@ -81,7 +64,7 @@ export const runMemoryOptimize = async ({
   agentId,
   userMessage,
   assistantMessage,
-  session,
+  recalledIds,
   esClient,
   spaceId,
   signal,
@@ -93,7 +76,7 @@ export const runMemoryOptimize = async ({
   agentId?: string;
   userMessage: string;
   assistantMessage: string;
-  session?: SandboxSession;
+  recalledIds: string[];
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
@@ -113,7 +96,7 @@ export const runMemoryOptimize = async ({
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
       `connector=${requestedConnectorId ?? '(agent default)'} ` +
-      `hasSession=${Boolean(session)} userChars=${userMessage.length} ` +
+      `recalledIds=${recalledIds.length} userChars=${userMessage.length} ` +
       `assistantChars=${assistantMessage.length} user=${JSON.stringify(previewText(userMessage))}`
   );
 
@@ -127,8 +110,7 @@ export const runMemoryOptimize = async ({
     return undefined;
   }
 
-  const store = createMemoryStore({ esClient, logger, agentId, signal });
-  const recalledIds = await loadRecalledIds({ session, logger });
+  const store = createMemoryStore({ esClient, logger, spaceId, agentId, signal });
   return optimizeMemory({
     store,
     recalledIds,

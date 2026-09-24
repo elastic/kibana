@@ -22,20 +22,35 @@ export const composeHydrateNotificationsStepDefinition = () =>
       notifications: z
         .array(z.string())
         .describe('Hydrate-node markdown fragments, in workflow order. Empty strings are dropped.'),
+      recalled_ids: z
+        .array(z.string())
+        .max(100)
+        .describe('Semantic Memory ids recalled for this exact round.'),
     }),
     outputSchema: z.object({
       model_context: z
         .string()
         .optional()
         .describe('Model-only <system_update> block. Absent when nothing was new.'),
+      workflow_context: z.object({
+        semantic_memory: z.object({
+          recalled_ids: z.array(z.string()).max(100),
+        }),
+      }),
     }),
     handler: async (context) => {
       const { model_context: modelContext } = composeHydrateNotificationContext({
         notifications: context.input.notifications,
       });
-      if (!modelContext) {
-        return { output: {} };
-      }
-      return { output: { model_context: modelContext } };
+      return {
+        output: {
+          ...(modelContext ? { model_context: modelContext } : {}),
+          workflow_context: {
+            semantic_memory: {
+              recalled_ids: context.input.recalled_ids,
+            },
+          },
+        },
+      };
     },
   });
