@@ -31,9 +31,24 @@ import {
   getRebalancePrivateLocationShardsEnabled,
   setRebalancePrivateLocationShardsEnabled,
 } from '../../tasks/rebalance_shards_enabled';
+import type { SyntheticsServerSetup } from '../../types';
+import { canManageClusterSettings } from './cluster_settings_privileges';
 
 const parseIntervalMinutes = (interval: string): number =>
   parseInt(interval, 10) || MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
+
+const getSyncIntervalMinutes = async (
+  server: SyntheticsServerSetup,
+  fallback: number
+): Promise<number> => {
+  try {
+    const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+    const taskInterval = (task.schedule as IntervalSchedule | undefined)?.interval;
+    return taskInterval ? parseIntervalMinutes(taskInterval) : fallback;
+  } catch (_err) {
+    return fallback;
+  }
+};
 
 export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   DynamicSettings
@@ -46,16 +61,10 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       savedObjectsClient
     );
 
-    let privateLocationsSyncInterval = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
-    try {
-      const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
-      const taskInterval = (task.schedule as IntervalSchedule | undefined)?.interval;
-      if (taskInterval) {
-        privateLocationsSyncInterval = parseIntervalMinutes(taskInterval);
-      }
-    } catch (_err) {
-      // not yet created
-    }
+    const privateLocationsSyncInterval = await getSyncIntervalMinutes(
+      server,
+      MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL
+    );
 
     const rebalancePrivateLocationShardsEnabled = await getRebalancePrivateLocationShardsEnabled(
       server.pluginsStart.taskManager
@@ -84,6 +93,30 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       rebalancePrivateLocationShardsEnabled,
       ...otherSettings
     } = request.body;
+    const defaultSyncInterval = parseIntervalMinutes(DEFAULT_TASK_SCHEDULE);
+
+    const syncIntervalChanged =
+      privateLocationsSyncInterval != null &&
+      privateLocationsSyncInterval !== (await getSyncIntervalMinutes(server, defaultSyncInterval));
+    const rebalanceChanged =
+      rebalancePrivateLocationShardsEnabled != null &&
+      rebalancePrivateLocationShardsEnabled !==
+        (await getRebalancePrivateLocationShardsEnabled(server.pluginsStart.taskManager));
+
+    if (
+      (syncIntervalChanged || rebalanceChanged) &&
+      !(await canManageClusterSettings(server, request))
+    ) {
+      return response.forbidden({
+        body: {
+          message: i18n.translate('xpack.synthetics.settings.clusterSettings.forbidden', {
+            defaultMessage:
+              'Changing the private locations sync interval or shard rebalancing requires the "Can manage private locations" privilege in all spaces.',
+          }),
+        },
+      }) as never;
+    }
+
     const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
     const { rebalancePrivateLocationShardsEnabled: _ignoredRebalance, ...prevWithoutRebalance } =
       prevSettings;
@@ -93,7 +126,7 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       ...otherSettings,
     } as DynamicSettingsAttributes);
 
-    if (privateLocationsSyncInterval != null) {
+    if (syncIntervalChanged) {
       await server.pluginsStart.taskManager.bulkUpdateSchedules([PRIVATE_LOCATIONS_SYNC_TASK_ID], {
         interval: `${privateLocationsSyncInterval}m`,
       });
@@ -104,7 +137,7 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
     }
 
     let persistedRebalance = true;
-    if (rebalancePrivateLocationShardsEnabled != null) {
+    if (rebalanceChanged) {
       persistedRebalance = await setRebalancePrivateLocationShardsEnabled(
         server.pluginsStart.taskManager,
         rebalancePrivateLocationShardsEnabled
@@ -118,16 +151,7 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       );
     }
 
-    let persistedInterval = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
-    try {
-      const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
-      const taskInterval = (task.schedule as IntervalSchedule | undefined)?.interval;
-      if (taskInterval) {
-        persistedInterval = parseIntervalMinutes(taskInterval);
-      }
-    } catch (_err) {
-      persistedInterval = parseIntervalMinutes(DEFAULT_TASK_SCHEDULE);
-    }
+    const persistedInterval = await getSyncIntervalMinutes(server, defaultSyncInterval);
 
     if (
       privateLocationsSyncInterval != null &&

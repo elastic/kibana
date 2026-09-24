@@ -19,6 +19,7 @@ import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
 } from './settings/dynamic_settings';
+import { getClusterSettingsPrivilegesRoute } from './settings/cluster_settings_privileges';
 import {
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
@@ -129,6 +130,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createPostDynamicSettingsRoute,
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
+  getClusterSettingsPrivilegesRoute,
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,

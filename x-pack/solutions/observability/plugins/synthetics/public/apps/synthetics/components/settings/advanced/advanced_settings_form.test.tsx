@@ -10,6 +10,10 @@ import { fireEvent } from '@testing-library/react';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
 import { render, makeSyntheticsPermissionsCore } from '../../../utils/testing/rtl_helpers';
 import { AdvancedSettingsForm } from './advanced_settings_form';
+import { useCanManageClusterSettings } from './use_can_manage_cluster_settings';
+
+jest.mock('./use_can_manage_cluster_settings');
+const mockUseCanManageClusterSettings = jest.mocked(useCanManageClusterSettings);
 
 const loadedSettingsState = {
   dynamicSettings: {
@@ -20,6 +24,10 @@ const loadedSettingsState = {
 };
 
 describe('AdvancedSettingsForm', () => {
+  beforeEach(() => {
+    mockUseCanManageClusterSettings.mockReturnValue({ canManage: true, loading: false });
+  });
+
   it('enables Apply after toggling shard rebalancing off', () => {
     const { getByTestId } = render(<AdvancedSettingsForm />, { state: loadedSettingsState });
 
@@ -58,6 +66,16 @@ describe('AdvancedSettingsForm', () => {
       getByText(/You do not have sufficient permissions to edit these settings/)
     ).toBeInTheDocument();
     expect(getByTestId('syntheticsRebalanceShardsEnabledSwitch')).toBeDisabled();
+    expect(getByTestId('syntheticsAdvancedSettingsApplyButton')).toBeDisabled();
+  });
+
+  it('disables cluster-wide settings without the global private location privilege', () => {
+    mockUseCanManageClusterSettings.mockReturnValue({ canManage: false, loading: false });
+    const { getByTestId } = render(<AdvancedSettingsForm />, { state: loadedSettingsState });
+
+    expect(getByTestId('syntheticsAdvancedSettingsClusterPrivilegeCallout')).toBeInTheDocument();
+    expect(getByTestId('syntheticsRebalanceShardsEnabledSwitch')).toBeDisabled();
+    expect(getByTestId('syntheticsSyncIntervalField')).toBeDisabled();
     expect(getByTestId('syntheticsAdvancedSettingsApplyButton')).toBeDisabled();
   });
 });

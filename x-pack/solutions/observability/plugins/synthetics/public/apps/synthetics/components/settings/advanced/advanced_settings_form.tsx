@@ -35,6 +35,7 @@ import {
   setDynamicSettingsAction,
 } from '../../../state/settings/actions';
 import type { DynamicSettings } from '../../../../../../common/runtime_types';
+import { useCanManageClusterSettings } from './use_can_manage_cluster_settings';
 
 export const AdvancedSettingsForm = () => {
   const dispatch = useDispatch();
@@ -52,7 +53,10 @@ export const AdvancedSettingsForm = () => {
   const canEdit: boolean =
     !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
 
-  const isDisabled = !canEdit;
+  const { canManage: canManageClusterSettings, loading: privilegesLoading } =
+    useCanManageClusterSettings();
+
+  const isDisabled = !canEdit || !canManageClusterSettings;
 
   useEffect(() => {
     dispatch(getDynamicSettingsAction.get());
@@ -100,6 +104,20 @@ export const AdvancedSettingsForm = () => {
             title={i18n.translate('xpack.synthetics.settings.advanced.readOnly', {
               defaultMessage:
                 'You do not have sufficient permissions to edit these settings. Contact your administrator.',
+            })}
+            size="s"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {canEdit && !canManageClusterSettings && !privilegesLoading && (
+        <>
+          <KbnInfoCallout
+            announceOnMount
+            data-test-subj="syntheticsAdvancedSettingsClusterPrivilegeCallout"
+            title={i18n.translate('xpack.synthetics.settings.advanced.clusterPrivilegeRequired', {
+              defaultMessage:
+                'These settings apply to private locations in all spaces. Editing them requires the "Can manage private locations" privilege in all spaces.',
             })}
             size="s"
           />
