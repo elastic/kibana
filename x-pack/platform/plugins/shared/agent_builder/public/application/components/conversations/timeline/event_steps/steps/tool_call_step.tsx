@@ -16,10 +16,10 @@ import { ToolCallStepHeadline } from './tool_call_step_headline';
 
 interface ToolCallStepProps {
   step: ToolCallStepData;
-  isInterrupted?: boolean;
+  isAborted?: boolean;
 }
 
-export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step, isInterrupted = false }) => {
+export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step, isAborted = false }) => {
   const flyoutStack = useFlyoutStack();
   const [isFlyoutOpen, { on: openFlyout, off: closeFlyout }] = useBoolean();
 
@@ -29,9 +29,7 @@ export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step, isInterrupted 
   return (
     <div data-test-subj="agentBuilderToolCallStep">
       <StepLayout
-        label={
-          <ToolCallStepHeadline step={step} hasResults={hasResults} isInterrupted={isInterrupted} />
-        }
+        label={<ToolCallStepHeadline step={step} hasResults={hasResults} isAborted={isAborted} />}
         isExpandable={false}
         onClick={handleClick}
         ebtAction={AGENT_BUILDER_UI_EBT.action.conversation.VIEW_TOOL_RESPONSE}

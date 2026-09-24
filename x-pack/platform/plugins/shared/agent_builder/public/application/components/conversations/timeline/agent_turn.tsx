@@ -59,7 +59,7 @@ const renderContent = (
               conversationAttachments={conversationAttachments}
               attachmentRefs={item.attachmentRefs}
               conversationId={conversationId}
-              isInterrupted
+              isAborted
             />
           </EuiFlexItem>
         )}

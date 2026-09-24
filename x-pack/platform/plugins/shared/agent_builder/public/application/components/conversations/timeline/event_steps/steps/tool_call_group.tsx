@@ -16,10 +16,10 @@ import { ToolCallStep } from './tool_call_step';
 
 interface ToolCallGroupProps {
   steps: ToolCallStepData[];
-  isInterrupted?: boolean;
+  isAborted?: boolean;
 }
 
-export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps, isInterrupted = false }) => {
+export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps, isAborted = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const onToggle = () => setIsExpanded((v) => !v);
 
@@ -35,10 +35,10 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps, isInterrupt
             defaultMessage="{count, plural, one {# tool ran} other {# tools ran}}"
             values={{ count: steps.length }}
           />
-        ) : isInterrupted ? (
+        ) : isAborted ? (
           <FormattedMessage
-            id="xpack.agentBuilder.eventSteps.toolCallGroup.interrupted"
-            defaultMessage="{count, plural, one {# tool interrupted} other {# tools interrupted}}"
+            id="xpack.agentBuilder.eventSteps.toolCallGroup.stopped"
+            defaultMessage="{count, plural, one {# tool stopped} other {# tools stopped}}"
             values={{ count: steps.length }}
           />
         ) : (
@@ -62,7 +62,7 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps, isInterrupt
           <EuiFlexGroup direction="column" gutterSize="s">
             {steps.map((step) => (
               <EuiFlexItem grow={false} key={step.tool_call_id}>
-                <ToolCallStep step={step} isInterrupted={isInterrupted} />
+                <ToolCallStep step={step} isAborted={isAborted} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

@@ -32,13 +32,13 @@ const toolBadgeToolLabel = i18n.translate(
 interface ToolCallStepHeadlineProps {
   step: ToolCallStepData;
   hasResults: boolean;
-  isInterrupted?: boolean;
+  isAborted?: boolean;
 }
 
 export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
   step,
   hasResults,
-  isInterrupted = false,
+  isAborted = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const suffixFontSize = useEuiFontSize('s');
@@ -79,10 +79,10 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
                 id="xpack.agentBuilder.eventSteps.steps.toolCall.ran"
                 defaultMessage="ran"
               />
-            ) : isInterrupted ? (
+            ) : isAborted ? (
               <FormattedMessage
-                id="xpack.agentBuilder.eventSteps.steps.toolCall.interrupted"
-                defaultMessage="interrupted"
+                id="xpack.agentBuilder.eventSteps.steps.toolCall.stopped"
+                defaultMessage="stopped"
               />
             ) : (
               <FormattedMessage

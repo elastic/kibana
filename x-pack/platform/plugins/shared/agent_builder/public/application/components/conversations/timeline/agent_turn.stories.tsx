@@ -77,8 +77,8 @@ export const Aborted: Story = {
 };
 
 // A single tool call that never returned inside a stopped turn. Reads "running…" before the fix,
-// "interrupted" after.
-export const AbortedWithInterruptedToolCall: Story = {
+// "stopped" after.
+export const AbortedWithStoppedToolCall: Story = {
   args: {
     item: createAbortedTurnItem({
       steps: [
@@ -89,8 +89,8 @@ export const AbortedWithInterruptedToolCall: Story = {
 };
 
 // A group of tool calls in flight when the turn was stopped. Reads "N tools running…" before the
-// fix, "N tools interrupted" after.
-export const AbortedWithInterruptedToolCallGroup: Story = {
+// fix, "N tools stopped" after.
+export const AbortedWithStoppedToolCallGroup: Story = {
   args: {
     item: createAbortedTurnItem({
       steps: [
@@ -106,8 +106,8 @@ export const AbortedWithInterruptedToolCallGroup: Story = {
   },
 };
 
-// Same interrupted tool call inside a failed turn, to confirm both terminals share the treatment.
-export const FailedWithInterruptedToolCall: Story = {
+// Same stopped tool call inside a failed turn, to confirm both terminals share the treatment.
+export const FailedWithStoppedToolCall: Story = {
   args: {
     item: createFailedTurnItem({
       steps: [

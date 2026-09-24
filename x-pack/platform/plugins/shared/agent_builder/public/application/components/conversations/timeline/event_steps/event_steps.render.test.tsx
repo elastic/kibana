@@ -39,24 +39,24 @@ describe('EventSteps — single vs grouped tool calls', () => {
   });
 });
 
-describe('EventSteps — interrupted turn threads isInterrupted to the labels', () => {
-  it('a lone in-flight tool call reads "interrupted", not "running…"', () => {
-    renderWithProviders(<EventSteps steps={[toolStep('tc-1', 'search')]} isInterrupted />);
-    expect(screen.getByText('interrupted')).toBeInTheDocument();
+describe('EventSteps — stopped turn threads isAborted to the labels', () => {
+  it('a lone in-flight tool call reads "stopped", not "running…"', () => {
+    renderWithProviders(<EventSteps steps={[toolStep('tc-1', 'search')]} isAborted />);
+    expect(screen.getByText('stopped')).toBeInTheDocument();
     expect(screen.queryByText('running…')).not.toBeInTheDocument();
   });
 
-  it('a group of in-flight tool calls reads "N tools interrupted"', () => {
+  it('a group of in-flight tool calls reads "N tools stopped"', () => {
     renderWithProviders(
-      <EventSteps steps={[toolStep('tc-1', 'search'), toolStep('tc-2', 'read')]} isInterrupted />
+      <EventSteps steps={[toolStep('tc-1', 'search'), toolStep('tc-2', 'read')]} isAborted />
     );
-    expect(screen.getByText('2 tools interrupted')).toBeInTheDocument();
+    expect(screen.getByText('2 tools stopped')).toBeInTheDocument();
     expect(screen.queryByText('2 tools running…')).not.toBeInTheDocument();
   });
 
   it('leaves a running turn (default) reading "running…"', () => {
     renderWithProviders(<EventSteps steps={[toolStep('tc-1', 'search')]} />);
     expect(screen.getByText('running…')).toBeInTheDocument();
-    expect(screen.queryByText('interrupted')).not.toBeInTheDocument();
+    expect(screen.queryByText('stopped')).not.toBeInTheDocument();
   });
 });

@@ -21,7 +21,7 @@ interface ConversationActionButtonProps {
 
 const labels = {
   cancel: i18n.translate('xpack.agentBuilder.conversationInput.actionButton.cancel', {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Stop',
   }),
   submit: i18n.translate('xpack.agentBuilder.conversationInput.actionButton.submit', {
     defaultMessage: 'Submit',
