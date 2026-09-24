@@ -11,7 +11,7 @@ import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
-import type { DiscoverTabType } from '@kbn/discover-session-constants';
+import type { DiscoverGridImplementation, DiscoverTabType } from '@kbn/discover-session-constants';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -46,8 +46,7 @@ import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
 
-/** Documents grid implementation. `unified` is the EUI data grid. */
-export type DiscoverGridImplementation = 'tanstack' | 'unified';
+export type { DiscoverGridImplementation };
 
 /** Group path used to reconstruct a cascade leaf query for a nested-grid flyout. */
 export interface ExpandedDocCascadePath {

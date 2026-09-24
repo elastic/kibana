@@ -53,6 +53,7 @@ export const fromSavedObjectTabToAppState = ({
       documentsDisplayMode: tab.documentsDisplayMode,
       jsonModeSettings: tab.jsonModeSettings,
       esqlApproximation: tab.esqlApproximation,
+      gridImplementation: tab.gridImplementation,
     },
     isUndefined
   );
@@ -158,6 +159,7 @@ export const fromSavedObjectTabToSavedSearch = async ({
   density: tab.density,
   documentsDisplayMode: tab.documentsDisplayMode,
   jsonModeSettings: tab.jsonModeSettings,
+  gridImplementation: tab.gridImplementation,
   visContext: tab.visContext, // managed via Redux state now
   controlGroupJson: tab.controlGroupJson, // managed via Redux state now
   tabTypeState: tab.tabTypeState,
@@ -223,6 +225,7 @@ export const fromTabStateToSavedObjectTab = ({
     density: tab.appState.density,
     documentsDisplayMode: tab.appState.documentsDisplayMode,
     jsonModeSettings: tab.appState.jsonModeSettings,
+    gridImplementation: tab.appState.gridImplementation,
     visContext: tab.attributes.visContext,
     controlGroupJson: tab.attributes.controlGroupState
       ? JSON.stringify(tab.attributes.controlGroupState)
@@ -285,6 +288,7 @@ export const fromSavedSearchToSavedObjectTab = ({
     density: savedSearch.density,
     documentsDisplayMode: savedSearch.documentsDisplayMode,
     jsonModeSettings: savedSearch.jsonModeSettings,
+    gridImplementation: savedSearch.gridImplementation,
     visContext: tab.attributes ? tab.attributes?.visContext : savedSearch.visContext,
     controlGroupJson: tab.attributes
       ? tab.attributes?.controlGroupState

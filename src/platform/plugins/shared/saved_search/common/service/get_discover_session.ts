@@ -13,6 +13,7 @@ import type {
   JsonModeSettings,
   DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
+import type { DiscoverGridImplementation } from '@kbn/discover-session-constants';
 import type { DiscoverSession, SortOrder } from '../types';
 import type { GetSavedSearchDependencies } from './get_saved_searches';
 import { getSearchSavedObject } from './get_saved_searches';
@@ -55,6 +56,7 @@ export const getDiscoverSession = async (
       density: tab.attributes.density as DataGridDensity,
       documentsDisplayMode: tab.attributes.documentsDisplayMode as DocumentsDisplayMode,
       jsonModeSettings: tab.attributes.jsonModeSettings as JsonModeSettings,
+      gridImplementation: tab.attributes.gridImplementation as DiscoverGridImplementation | undefined,
       visContext: tab.attributes.visContext,
       controlGroupJson: tab.attributes.controlGroupJson,
       tabTypeState: tab.attributes.tabTypeState,

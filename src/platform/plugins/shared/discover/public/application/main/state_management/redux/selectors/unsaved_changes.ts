@@ -244,6 +244,7 @@ const TAB_COMPARATORS: TabComparators = {
   density: fieldComparator('density', DataGridDensity.COMPACT),
   documentsDisplayMode: fieldComparator('documentsDisplayMode', 'table'),
   jsonModeSettings: fieldComparator('jsonModeSettings', {}),
+  gridImplementation: fieldComparator('gridImplementation', 'tanstack'),
   esqlApproximation: fieldComparator('esqlApproximation', false),
   visContext: visContextComparator,
   controlGroupJson: (a, b) => {

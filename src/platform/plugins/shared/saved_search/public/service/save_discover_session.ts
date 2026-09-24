@@ -106,6 +106,7 @@ export const saveDiscoverSession = async (
         density: tab.density,
         documentsDisplayMode: tab.documentsDisplayMode,
         jsonModeSettings: tab.jsonModeSettings,
+        gridImplementation: tab.gridImplementation,
         visContext: tab.visContext,
         controlGroupJson: tab.controlGroupJson,
         tabTypeState: tab.tabTypeState,

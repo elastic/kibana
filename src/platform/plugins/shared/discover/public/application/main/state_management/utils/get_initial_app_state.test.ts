@@ -282,6 +282,27 @@ describe('getInitialAppState', () => {
     expect(actual.gridImplementation).toBe('unified');
   });
 
+  test('restores the grid implementation from the persisted tab', () => {
+    const services = createDiscoverServicesMock();
+    const actual = getInitialAppState({
+      hasGlobalState: false,
+      initialUrlState: undefined,
+      persistedTab: {
+        ...fromTabStateToSavedObjectTab({
+          tab: getTabStateMock({ id: 'mock-tab' }),
+          services,
+          currentDataView: undefined,
+          tabType: undefined,
+        }),
+        gridImplementation: 'unified',
+      },
+      dataView: dataViewWithTimefieldMock,
+      services,
+    });
+
+    expect(actual.gridImplementation).toBe('unified');
+  });
+
   const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
     fromTabStateToSavedObjectTab({
       tab: getTabStateMock({ id: 'mock-tab' }),

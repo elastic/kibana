@@ -106,6 +106,7 @@ const fromApiTab = (apiTab: DiscoverSessionApiTab) => {
     density: storedTab.density,
     documentsDisplayMode: storedTab.documentsDisplayMode,
     jsonModeSettings: storedTab.jsonModeSettings,
+    gridImplementation: storedTab.gridImplementation,
     isTextBasedQuery: storedTab.isTextBasedQuery,
     usesAdHocDataView: apiTab.data_source.type === AS_CODE_DATA_VIEW_SPEC_TYPE,
     serializedSearchSource: normalizeSearchSourceFilters(serializedSearchSource),

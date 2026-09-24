@@ -65,3 +65,6 @@ export enum DiscoverTabType {
   Default = 'default',
   Metrics = 'metrics',
 }
+
+/** Identifies which grid implementation renders the documents table in Discover. */
+export type DiscoverGridImplementation = 'tanstack' | 'unified';

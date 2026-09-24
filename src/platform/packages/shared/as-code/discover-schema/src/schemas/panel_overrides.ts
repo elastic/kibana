@@ -66,6 +66,13 @@ export const panelOverridesSchema = z
       description:
         'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.',
     }),
+    grid_implementation: z
+      .union([z.literal('tanstack'), z.literal('unified')])
+      .optional()
+      .meta({
+        description:
+          'Discover display option: controls which grid implementation renders the documents table ("tanstack" or "unified"). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+      }),
     hide_nulls: z.boolean().optional().meta({
       description:
         'Discover display option: controls whether fields with null values are hidden in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
