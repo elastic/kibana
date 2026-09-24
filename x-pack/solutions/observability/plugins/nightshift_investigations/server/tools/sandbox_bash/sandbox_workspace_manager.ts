@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
+import { listAgentConnectors } from './agent_connectors';
 import { writeConnectorManifest } from './connector_manifest';
 import { writeElasticManifest } from './elastic_manifest';
 
@@ -41,19 +42,39 @@ export const createSandboxWorkspaceManager = ({
       session: SandboxSession;
       callContext: SandboxCallContext;
     }): Promise<void> {
-      const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
-      const lastKey = lastConnectorIds.get(session);
-
-      if (!session.isReset && lastKey === currentKey) return;
-
       const { actions } = getDeps();
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
+      const canReadTelemetry = Boolean(
+        telemetryConnectorId &&
+          callContext.allowedConnectorIds.includes(telemetryConnectorId) &&
+          (await listAgentConnectors(callContext, getActionsClient)).some(
+            ({ id }) => id === telemetryConnectorId
+          )
+      );
+      const currentKey = JSON.stringify({
+        connectorIds: [...callContext.allowedConnectorIds].sort(),
+        canReadTelemetry,
+      });
+      const lastKey = lastConnectorIds.get(session);
+      if (!session.isReset && lastKey === currentKey) return;
+
+      if (telemetryConnectorId && !canReadTelemetry) {
+        lastConnectorIds.delete(session);
+        // Clear previously seeded hints on revocation; a failed clear must block file access.
+        const [result] = await session.writeFiles([
+          {
+            path: '/workspace/elastic.md',
+            content: Buffer.from('No telemetry connector is available.\n'),
+          },
+        ]);
+        if (!result?.success) throw new Error('Failed to clear sandbox telemetry guidance');
+      }
 
       try {
         await writeConnectorManifest({ session, callContext, getActionsClient, logger });
-        if (telemetryConnectorId) {
+        if (telemetryConnectorId && canReadTelemetry) {
           await writeElasticManifest({
             session,
             connectorId: telemetryConnectorId,
