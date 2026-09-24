@@ -31,12 +31,12 @@ export interface Props {
   isLayerTOCOpen: boolean;
   layerList: ILayer[];
   isFlyoutOpen: boolean;
+  isLoading: boolean;
   showAddLayerWizard: () => Promise<void>;
   closeLayerTOC: () => void;
   openLayerTOC: () => void;
   hideAllLayers: () => void;
   showAllLayers: () => void;
-  zoom: number;
 }
 
 export function LayerControl({
@@ -47,9 +47,9 @@ export function LayerControl({
   openLayerTOC,
   layerList,
   isFlyoutOpen,
+  isLoading,
   hideAllLayers,
   showAllLayers,
-  zoom,
 }: Props) {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -59,9 +59,6 @@ export function LayerControl({
     }
     const hasErrorsOrWarnings = layerList.some((layer) => {
       return layer.hasErrors() || layer.hasWarnings();
-    });
-    const isLoading = layerList.some((layer) => {
-      return layer.isLayerLoading(zoom);
     });
 
     return (
