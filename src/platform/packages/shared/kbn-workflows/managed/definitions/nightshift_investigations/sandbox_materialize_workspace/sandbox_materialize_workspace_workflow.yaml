@@ -65,4 +65,5 @@ steps:
       notifications:
         - '{{ steps.hydrate_cortex.output.notification }}'
         - '{{ steps.memory_materialize_to_sandbox.output.notification }}'
-      recalled_ids: '{{ steps.memory_materialize_to_sandbox.output.recalled_ids }}'
+      # ${{ }} preserves the array; Liquid `{{ }}` stringifies a one-item array.
+      recalled_ids: '${{ steps.memory_materialize_to_sandbox.output.recalled_ids }}'

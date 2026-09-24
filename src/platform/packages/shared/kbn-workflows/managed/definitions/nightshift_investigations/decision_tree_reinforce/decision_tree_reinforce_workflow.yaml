@@ -30,6 +30,13 @@ triggers:
         agent_id:
           type: string
           description: Agent id that produced the round.
+        connector_id:
+          type: string
+          description: Inference connector used by the completed round. Unused by this workflow.
+        workflow_context:
+          type: object
+          description: Persisted non-model workflow state. Unused by this workflow.
+          additionalProperties: true
         tool_calls:
           type: array
           description: >
