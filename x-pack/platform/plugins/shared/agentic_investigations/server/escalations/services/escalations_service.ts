@@ -11,6 +11,7 @@ import {
   ConversationAccessControlRole,
   createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
+import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationPublicClient,
   ConversationTemplatesStart,
@@ -24,7 +25,9 @@ import type {
   UpdateEscalationRequest,
 } from '../../../common/escalations/escalation';
 import {
+  ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
@@ -36,10 +39,23 @@ import {
 } from './errors';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
-// Scopes list results to escalations and hides closed ones. Uses `metadata.status` (the
-// template field), not the bare `status` field (which tracks round execution state).
-const NON_CLOSED_ESCALATIONS_FILTER =
-  `template_id: "${ESCALATION_TEMPLATE_ID}" and not (metadata.status: "closed")` as const;
+/**
+ * Builds the Elasticsearch filter clause for the list endpoint.
+ *
+ * "open" is expressed as *not closed* rather than `metadata.status: "open"` so
+ * escalations created before the template default was applied (and therefore
+ * missing a status value) still appear in the open bucket.
+ *
+ * Uses `metadata.status` (the template field), not the bare `status` field
+ * (which tracks round execution state).
+ */
+const buildEscalationsFilter = (status: ListEscalationsQuery['status']): string => {
+  const base = `template_id: "${ESCALATION_TEMPLATE_ID}"`;
+  if (status === 'all') return base;
+  if (status === 'closed') return `${base} and metadata.status: "closed"`;
+  // 'open' — fall through. "not closed" instead of "open" for the reason above.
+  return `${base} and not (metadata.status: "closed")`;
+};
 
 const ESCALATIONS_LIST_SORT: ConversationSearchSort = { field: 'updated_at', order: 'desc' };
 
@@ -95,6 +111,7 @@ export class EscalationsService {
     const metadata = {
       ...filteredMetadata,
       [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [body.linked_investigation_id],
+      ...(body.assignees?.length ? { [ESCALATION_ASSIGNEES_FIELD]: body.assignees } : {}),
     };
 
     const accessControl =
@@ -117,7 +134,7 @@ export class EscalationsService {
       // Omit agentId so it defaults to the shared default agent, which all users can access.
       // Inheriting the investigation's agent_id would hide the escalation from collaborators
       // who lack access to that agent.
-      title: investigation.title,
+      title: body.title ?? investigation.title,
       templateId: ESCALATION_TEMPLATE_ID,
       metadata,
       accessControl,
@@ -137,6 +154,11 @@ export class EscalationsService {
     }
 
     let result: EscalationConversation = current;
+
+    // Accumulate all metadata fields so they land in a single OCC-protected write.
+    // Sending them as separate patchMetadata calls would allow partial application:
+    // if a later write failed, earlier fields would already be committed.
+    const metadataUpdates: Record<string, MetadataFieldValue> = {};
 
     if (body.linked_investigations?.length) {
       // Validate that every id being appended is an accessible investigation.
@@ -165,8 +187,16 @@ export class EscalationsService {
         );
       }
 
-      const { conversation } = await client.patchMetadata(escalationId, {
-        [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: union,
+      metadataUpdates[ESCALATION_LINKED_INVESTIGATIONS_FIELD] = union;
+    }
+
+    if (body.status !== undefined) {
+      metadataUpdates[ESCALATION_STATUS_FIELD] = body.status;
+    }
+
+    if (Object.keys(metadataUpdates).length > 0) {
+      const { conversation } = await client.patchMetadata(escalationId, metadataUpdates, {
+        access: 'converse',
       });
       result = conversation;
     }
@@ -185,10 +215,11 @@ export class EscalationsService {
     const client = await this.getConversationClient(request);
 
     const { results, total } = await client.search({
-      filter: NON_CLOSED_ESCALATIONS_FILTER,
+      filter: buildEscalationsFilter(query.status),
       sort: ESCALATIONS_LIST_SORT,
       page: query.page,
       perPage: query.per_page,
+      query: query.search,
     });
 
     return { pagination: { total, page: query.page, per_page: query.per_page }, results };

@@ -13,7 +13,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { apiPublishesEsql, type ViewMode } from '@kbn/presentation-publishing';
@@ -120,8 +120,8 @@ describe('vegaEmbeddableFactory', () => {
     standaloneEmbeddableEnabled = false,
   }: { standaloneEmbeddableEnabled?: boolean } = {}) => {
     const coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue.mockImplementation((key, fallback) =>
-      key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback
+    coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
+      of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback)
     );
     const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },

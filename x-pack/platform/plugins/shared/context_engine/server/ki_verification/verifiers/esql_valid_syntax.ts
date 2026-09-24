@@ -19,7 +19,7 @@ import type { KiVerifier } from '../types';
 
 export { ESQL_VALID_SYNTAX_VERIFIER_ID };
 
-const formatValidationError = (error: ESQLMessage | EditorError): string =>
+export const formatValidationError = (error: ESQLMessage | EditorError): string =>
   'text' in error
     ? `${error.text} (at position ${error.location.min}-${error.location.max})`
     : `${error.message} (at line ${error.startLineNumber}:${error.startColumn})`;

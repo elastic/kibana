@@ -18,13 +18,18 @@ export type {
 } from './types';
 
 export {
-  retryOnTransientError,
-  useApproveProposal,
-  useDismissProposal,
-  usePendingProposals,
-  useProposal,
-} from './proposals/hooks/use_proposals_api';
+  useAssignEscalation,
+  useListEscalations,
+  useCreateEscalation,
+  useAddToEscalation,
+  useUpdateEscalation,
+} from './escalations/hooks/use_escalations_api';
 
-export { queryKeys } from './proposals/query_keys';
+export { escalationQueryKeys } from './escalations/query_keys';
 
-export { DISMISS_REASON_LABELS, DISMISS_REASON_OPTIONS } from './proposals/dismiss_reason_i18n';
+export {
+  useCurrentUserProfile,
+  useSuggestUserProfiles,
+  useUserProfiles,
+  userProfileQueryKeys,
+} from './user_profiles';
