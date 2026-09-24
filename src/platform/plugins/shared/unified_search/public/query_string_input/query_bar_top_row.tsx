@@ -861,33 +861,8 @@ export const QueryBarTopRow = React.memo(
       // Consumers (e.g. Discover, Dashboard) opt into a disabled picker via `showDatePicker={{ disabled: true }}`.
       const consumerDatePicker =
         typeof props.showDatePicker === 'object' ? props.showDatePicker : undefined;
-      const isConsumerDisabled = Boolean(consumerDatePicker?.disabled);
+      const isDatePickerDisabled = Boolean(consumerDatePicker?.disabled);
       const consumerDisabledTooltip = consumerDatePicker?.disabledReason;
-
-      const adHocDataview = props.indexPatterns?.[0];
-      const hasEsqlTimeField =
-        Boolean(isQueryLangSelected) &&
-        !!adHocDataview &&
-        typeof adHocDataview !== 'string' &&
-        Boolean(adHocDataview.timeFieldName);
-
-      // Discover disables the picker from dataView.isTimeBased(), which is false for a dataset
-      // even after the timefield route sets timeFieldName (field_caps does not return the column).
-      // ES|QL keys off timeFieldName. A disabledReason (empty query) still disables the picker.
-      const ignoreConsumerDisabled = hasEsqlTimeField && !consumerDisabledTooltip;
-
-      // ES|QL self-detects a missing @timestamp on its ad-hoc data view, unless the consumer already disabled it.
-      const esqlNoTimeField =
-        !isConsumerDisabled &&
-        Boolean(isQueryLangSelected) &&
-        !props.isDirty &&
-        !!adHocDataview &&
-        typeof adHocDataview !== 'string' &&
-        !adHocDataview.timeFieldName;
-
-      const isDatePickerDisabled =
-        (isConsumerDisabled && !ignoreConsumerDisabled) || esqlNoTimeField;
-
       if (isDatePickerDisabled) {
         isDisabled = {
           display: (

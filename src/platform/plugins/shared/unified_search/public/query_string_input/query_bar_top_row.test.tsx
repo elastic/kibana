@@ -872,40 +872,6 @@ describe('QueryBarTopRowTopRow', () => {
         ).not.toBeInTheDocument();
       });
     });
-
-    it('Should render disabled date picker if on text based languages mode and no timeFieldName', async () => {
-      const dataView = {
-        ...stubIndexPattern,
-        timeFieldName: undefined,
-        isPersisted: () => false,
-      };
-      const { container } = render(
-        wrapWithPicker({
-          query: esqlQuery,
-          isDirty: false,
-          screenTitle: 'SQL Screen',
-          timeHistory: mockTimeHistory,
-          indexPatterns: [dataView],
-          showDatePicker: true,
-          dateRangeFrom: 'now-7d',
-          dateRangeTo: 'now',
-        })
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
-        if (useNewPicker) {
-          const button = screen.getByTestId('dateRangePickerControlButton');
-          expect(button).toBeDisabled();
-        } else {
-          expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
-        }
-        expect(
-          container.querySelector('input[placeholder*="search"], textarea')
-        ).not.toBeInTheDocument();
-      });
-    });
-
     it('Should keep the date picker enabled when the ES|QL query is empty', async () => {
       render(
         wrapWithPicker({
@@ -954,30 +920,6 @@ describe('QueryBarTopRowTopRow', () => {
         } else {
           expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
         }
-      });
-    });
-
-    it('Should keep the ES|QL date picker enabled when timeFieldName is set even if showDatePicker.disabled is true', async () => {
-      render(
-        wrapWithPicker({
-          query: esqlQuery,
-          isDirty: false,
-          screenTitle: 'ES|QL Screen',
-          timeHistory: mockTimeHistory,
-          indexPatterns: [stubIndexPattern],
-          showDatePicker: { disabled: true },
-          dateRangeFrom: 'now-15m',
-          dateRangeTo: 'now',
-        })
-      );
-
-      await waitFor(() => {
-        if (useNewPicker) {
-          expect(screen.getByTestId('dateRangePickerControlButton')).toBeEnabled();
-        } else {
-          expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
-        }
-        expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
       });
     });
 
