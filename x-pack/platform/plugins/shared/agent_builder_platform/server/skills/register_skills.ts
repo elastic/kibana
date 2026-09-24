@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { agentBuilderTracesSkill } from './agent_builder_traces/agent_builder_traces_skill';
@@ -18,7 +19,15 @@ import { analyzeAndImproveSkill } from './analyze_and_improve';
 import { contextEngineSignalsSkill } from './context_engine_signals';
 import { aiIndexSourcesSkill } from './ai_index_sources';
 import { aiIndexAutomationsSkill } from './ai_index_automations';
+import { contextEngineSkillAvailability } from './context_engine_skill_availability';
 import { loadElasticSkills } from './elastic_skills';
+
+const KIBANA_CONTEXT_ENGINE_SKILL_ID = 'kibana-context-engine';
+
+const withContextEngineAvailability = (skill: SkillDefinition): SkillDefinition =>
+  skill.id === KIBANA_CONTEXT_ENGINE_SKILL_ID
+    ? { ...skill, availability: contextEngineSkillAvailability }
+    : skill;
 
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -37,6 +46,6 @@ export const registerSkills = (
   agentBuilder.skills.register(aiIndexAutomationsSkill);
 
   loadElasticSkills({ logger: logger.get('elastic-skills') }).forEach((skill) => {
-    agentBuilder.skills.register(skill);
+    agentBuilder.skills.register(withContextEngineAvailability(skill));
   });
 };
