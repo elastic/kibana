@@ -48,6 +48,7 @@ const buildTypeSettings = (): Record<string, UiSettingsParams> => {
         type: 'boolean',
         category: CATEGORY,
         requiresPageReload: false,
+        technicalPreview: true,
         order: order++,
       };
     }
