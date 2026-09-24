@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/server/constants';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
@@ -56,11 +57,18 @@ export default function (providerContext: FtrProviderContext) {
 
       await apiClient.postEnableSpaceAwareness();
 
-      // Create the agentless policy in space A only.
-      const policyRes = await apiClient.createAgentPolicy(TEST_SPACE_A, {
-        supports_agentless: true,
-      });
+      // Create a regular policy in space A, then patch its SO to set supports_agentless: true.
+      // Passing supports_agentless through the creation API would trigger checkAgentless(), which
+      // rejects the flag unless the instance is running in a cloud/agentless-enabled config.
+      // Patching the SO directly bypasses that gate and works in standard CI environments.
+      const policyRes = await apiClient.createAgentPolicy(TEST_SPACE_A);
       agentlessPolicyId = policyRes.item.id;
+      await kibanaServer.savedObjects.update({
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        id: agentlessPolicyId,
+        attributes: { supports_agentless: true },
+        space: TEST_SPACE_A,
+      });
 
       // Agent 1 (legacy): bare policy_id, no policy_base_id.
       // Exercises the fallback branch: match by policy_id + NOT exists(policy_base_id).
