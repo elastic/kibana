@@ -8,23 +8,16 @@
  */
 
 import React from 'react';
-import type { CSSProperties, ReactNode } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiIcon,
-  EuiToolTip,
-  euiCanAnimate,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { ReactNode } from 'react';
+import { EuiButton, EuiButtonEmpty, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
-import { useOverflowWidth } from '../../hooks/use_overflow_width';
+import { useLabelMarquee } from '../../hooks/use_label_marquee';
 import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
@@ -60,8 +53,7 @@ export const SecondaryMenuItemComponent = ({
   const { euiTheme } = useEuiTheme();
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
-  const [labelRef, labelOverflowWidth] = useOverflowWidth<HTMLSpanElement>();
-  const isLabelOverflowing = labelOverflowWidth > 0;
+  const { isOverflowing: isLabelOverflowing, labelProps, trackProps } = useLabelMarquee();
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
 
   const iconSide = iconType ? 'left' : 'right';
@@ -100,88 +92,6 @@ export const SecondaryMenuItemComponent = ({
     min-width: 0;
   `;
 
-  // Slide the hidden part of the label into view at a steady speed after a short
-  // hover delay; snap back instantly on mouse leave. The measured width comes in as a
-  // unitless CSS variable so these classes stay static across items.
-  const marqueeDelay = euiTheme.animation.slow;
-  const marqueeDuration = 'calc(var(--label-overflow-width) * 20ms)';
-  const fadeWidth = euiTheme.size.l;
-  const fadeDuration = euiTheme.animation.normal;
-
-  // Each edge fades only while text is hidden past it: the start fade comes in as the
-  // slide begins, the end fade goes out as it finishes. Registered properties let the
-  // gradient stops animate. Keyframes instead of transitions because a delayed custom
-  // property transition can outlive a quick hover, showing the start fade at rest.
-  const fadeStartIn = keyframes`
-    from {
-      --label-fade-start: 0px;
-    }
-    to {
-      --label-fade-start: ${fadeWidth};
-    }
-  `;
-  const fadeEndOut = keyframes`
-    from {
-      --label-fade-end: ${fadeWidth};
-    }
-    to {
-      --label-fade-end: 0px;
-    }
-  `;
-
-  const labelTextStyles = css`
-    display: block;
-    min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    ${isLabelOverflowing &&
-    css`
-      @property --label-fade-start {
-        syntax: '<length>';
-        inherits: false;
-        initial-value: 0px;
-      }
-      @property --label-fade-end {
-        syntax: '<length>';
-        inherits: false;
-        initial-value: 0px;
-      }
-      --label-fade-start: 0px;
-      --label-fade-end: ${fadeWidth};
-      mask-image: linear-gradient(
-        to right,
-        transparent,
-        black var(--label-fade-start),
-        black calc(100% - var(--label-fade-end)),
-        transparent
-      );
-      button:hover &,
-      a:hover & {
-        --label-fade-start: ${fadeWidth};
-        --label-fade-end: 0px;
-        ${euiCanAnimate} {
-          animation: ${fadeStartIn} ${fadeDuration} ${marqueeDelay} both,
-            ${fadeEndOut} ${fadeDuration}
-              calc(${marqueeDelay} + ${marqueeDuration} - ${fadeDuration}) both;
-        }
-      }
-    `}
-  `;
-
-  const labelInnerStyles = css`
-    display: inline-block;
-    ${isLabelOverflowing &&
-    css`
-      button:hover &,
-      a:hover & {
-        transform: translateX(calc(var(--label-overflow-width) * -1px));
-        ${euiCanAnimate} {
-          transition: transform ${marqueeDuration} linear ${marqueeDelay};
-        }
-      }
-    `}
-  `;
-
   const submenuIconStyles = css`
     flex-shrink: 0;
     margin-left: auto;
@@ -198,16 +108,8 @@ export const SecondaryMenuItemComponent = ({
 
   const content = (
     <div css={labelAndBadgeStyles}>
-      <span
-        ref={labelRef}
-        css={labelTextStyles}
-        style={
-          isLabelOverflowing
-            ? ({ '--label-overflow-width': labelOverflowWidth } as CSSProperties)
-            : undefined
-        }
-      >
-        <span css={labelInnerStyles}>{children}</span>
+      <span {...labelProps}>
+        <span {...trackProps}>{children}</span>
       </span>
       {getBadge()}
       {hasSubmenu && (
