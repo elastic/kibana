@@ -280,7 +280,7 @@ describe('ConversationsPage open in chat', () => {
 
   const chatControl = () => screen.getByTestId('conversationCardOpenInChat');
 
-  it("navigates to the conversation's Agent Builder page", () => {
+  it("navigates to the conversation's Agent Builder page with the details flyout open", () => {
     const { core } = renderPage('/');
 
     fireEvent.click(chatControl());
@@ -288,7 +288,7 @@ describe('ConversationsPage open in chat', () => {
     // The chat is the investigation's own Agent Builder conversation, so the card resolves its
     // proposal to that conversation and its agent — the route is scoped to the agent.
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
     });
   });
 
@@ -296,11 +296,11 @@ describe('ConversationsPage open in chat', () => {
     const { core } = renderPage('/');
 
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
     });
     expect(chatControl()).toHaveAttribute(
       'href',
-      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1'
+      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true'
     );
   });
 
@@ -313,7 +313,7 @@ describe('ConversationsPage open in chat', () => {
     fireEvent.click(chatControl());
 
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/conversations/inv-1',
+      path: '/conversations/inv-1?openConversationDetails=true',
     });
   });
 

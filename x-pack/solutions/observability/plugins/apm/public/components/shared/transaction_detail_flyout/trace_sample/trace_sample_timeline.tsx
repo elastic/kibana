@@ -7,13 +7,10 @@
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { Error, TraceItem } from '@kbn/apm-types';
-import {
-  TRACE_WATERFALL_EBT_ELEMENTS,
-  TraceWaterfall,
-  useGetServiceBadgeHrefFromCore,
-} from '@kbn/apm-ui-shared';
+import { TraceWaterfall, useGetServiceBadgeHrefFromCore } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
 
 interface TransactionDetailFlyoutTraceSampleTimelineProps {
@@ -46,9 +43,9 @@ export function TransactionDetailFlyoutTraceSampleTimeline({
 
   const ebt = useMemo(
     () => ({
-      row: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ROW },
-      errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
-      serviceBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
+      row: { element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.WATERFALL_ROW },
+      errorBadge: { element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
+      serviceBadge: { element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
     }),
     []
   );
