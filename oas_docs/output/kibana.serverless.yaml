@@ -140718,7 +140718,8 @@ components:
       type: object
       properties:
         profile_uid:
-          description: User profile ID of the actor.
+          description: User profile ID of the actor, or `null` when it cannot be resolved.
+          nullable: true
           type: string
       required:
         - profile_uid
