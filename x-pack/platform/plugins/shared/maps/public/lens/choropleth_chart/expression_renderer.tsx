@@ -64,7 +64,6 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         await coreSetup.getStartServices();
       const { ChoroplethChart } = await import('./choropleth_chart');
       const { getEmsFileLayers } = await import('../../util');
-      console.log({ interactive: handlers.isInteractive() });
       let emsFileLayers: FileLayer[] = [];
       try {
         emsFileLayers = await getEmsFileLayers();

@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
@@ -38,11 +39,13 @@ export interface Props {
   mapCenter?: MapCenterAndZoom;
   getTooltipRenderer?: () => RenderToolTipContent;
   onApiAvailable?: (api: MapApi) => void;
+  interactive?: boolean;
 }
 
 export function MapRenderer(props: Props) {
   const mapApiRef = useRef<MapApi | undefined>(undefined);
   const beforeApiReadyLayerListRef = useRef<LayerDescriptor[] | undefined>(undefined);
+  const viewMode$ = new BehaviorSubject(props.interactive === false ? 'preview' : 'view');
 
   useEffect(() => {
     if (mapApiRef.current) {
@@ -64,6 +67,7 @@ export function MapRenderer(props: Props) {
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
           type: MAP_RENDERER_TYPE,
+          viewMode$,
           getTooltipRenderer: props.getTooltipRenderer,
           hideFilterActions: props.hideFilterActions,
           getSerializedStateForChild: () => {
