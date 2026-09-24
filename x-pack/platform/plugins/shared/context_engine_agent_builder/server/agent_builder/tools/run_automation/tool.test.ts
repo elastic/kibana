@@ -34,7 +34,7 @@ describe('run_automation tool', () => {
         } as never),
     });
 
-  const createConfirmationContext = (toolParams: { workflowId?: unknown }, spaceId = 'default') => {
+  const createConfirmationContext = (toolParams: { workflowId: string }, spaceId = 'default') => {
     const handlerContext = agentBuilderMocks.tools.createHandlerContext();
     return {
       toolParams,
@@ -62,10 +62,10 @@ describe('run_automation tool', () => {
     expect(createTool().confirmation?.askUser).toBe('always');
   });
 
-  it('returns a generic confirmation when workflowId is not a string', async () => {
+  it('returns a generic confirmation when workflowId is empty', async () => {
     const tool = createTool();
     const confirmation = await tool.confirmation?.getConfirmation?.(
-      createConfirmationContext({ workflowId: undefined })
+      createConfirmationContext({ workflowId: '' })
     );
 
     expect(confirmation).toEqual(
