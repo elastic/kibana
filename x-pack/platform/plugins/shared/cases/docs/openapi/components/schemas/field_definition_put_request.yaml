@@ -1,0 +1,59 @@
+title: Field definition PUT request
+description: >
+  The body for updating a field definition.
+
+
+  Identity constraints: the `name` property must match the `name` key in the YAML `definition`.
+  When `name` is omitted, the server extracts it from the `definition` YAML automatically.
+  A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with
+  `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity
+  attributes were modified.
+
+
+  Unlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds
+  30 000 characters, so that field definitions created through internal tooling remain modifiable.
+  When the submitted `definition` differs from the stored value, the 30 000-character limit is
+  enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the
+  definition is changed.
+type: object
+additionalProperties: false
+required:
+  - owner
+  - definition
+properties:
+  name:
+    type: string
+    minLength: 1
+    maxLength: 1000
+    description: >
+      The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML
+      definition. When omitted, the name is extracted from the definition YAML automatically.
+      Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that
+      definitions with legacy names that exceed the limit remain modifiable.
+  owner:
+    type: string
+    minLength: 1
+    maxLength: 30
+    description: The application that owns this field definition.
+  definition:
+    type: string
+    maxLength: 1000000
+    description: The field definition as a YAML string describing a single field (type, label, control, metadata).
+    example: |
+      name: priority
+      label: Priority
+      type: keyword
+      control: SELECT_BASIC
+      metadata:
+        options: [low, medium, high]
+        default: medium
+  description:
+    type: string
+    maxLength: 1000
+    description: Optional human-readable description of the field's purpose.
+  isGlobal:
+    type: boolean
+    description: >
+      When true, this field is rendered in every case for this owner, regardless of the template
+      used. Global fields cannot be demoted (set to false) while they are linked to an active
+      custom field in the Cases configuration.

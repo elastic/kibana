@@ -1,0 +1,36 @@
+version: '1'
+name: Decision Tree Hydrate
+description: >
+  Pre-execution workflow that materializes the stored decision trees into the
+  reinforcement agent's sandbox before each round. Trees are written under
+  /workspace/decision-trees so the agent can read and edit them with its file tools.
+enabled: true
+tags:
+  - observability
+  - nightshift
+  - investigation
+  - decision-tree
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        prompt:
+          type: string
+          description: The message for this round, forwarded by the agent's beforeAgent hook.
+        conversation_id:
+          type: string
+          description: Conversation id that namespaces the sandbox. Absent for standalone runs.
+      additionalProperties: false
+
+steps:
+  - name: hydrate_decision_trees
+    type: nightshift.decisionTreeHydrate
+    # `${{ }}` must render a boolean. A bare conversation id becomes a KQL string
+    # and evaluateCondition treats it as a field query, which skips the step.
+    if: '${{ inputs.conversation_id != null }}'
+    with:
+      conversation_id: '{{ inputs.conversation_id }}'
+      prompt: '{{ inputs.prompt }}'
+    on-failure:
+      continue: true

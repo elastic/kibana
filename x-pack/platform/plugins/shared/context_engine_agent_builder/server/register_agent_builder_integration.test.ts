@@ -9,6 +9,16 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID } from './agent/context_engine_agent';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import {
+  ANALYZE_AND_IMPROVE_SKILL_ID,
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
+  KI_RETRIEVAL_SKILL_ID,
+  CONTEXT_ENGINE_SIGNALS_SKILL_ID,
+} from '../common/agent_builder_skills';
+import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -27,14 +37,10 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
   const setup = ({
     aiIndices,
     authorized = true,
-    spaceId = 'default',
-    spacesAvailable = true,
   }: {
     aiIndices: unknown[];
     /** Outcome of the privilege check: granted, denied, or the error it rejects with. */
     authorized?: boolean | Error;
-    spaceId?: string;
-    spacesAvailable?: boolean;
   }) => {
     const checkPrivileges =
       authorized instanceof Error
@@ -48,15 +54,15 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     };
 
     const list = jest.fn().mockResolvedValue(aiIndices);
-    const getSpaceId = jest.fn().mockReturnValue(spaceId);
-    const spaces = spacesAvailable ? { spacesService: { getSpaceId } } : undefined;
+    const getAiIndexDataReadService = jest.fn().mockReturnValue({ list });
+    const asCurrentUser = {};
+    const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
     const coreSetup = {
       getStartServices: jest.fn().mockResolvedValue([
-        {},
+        { elasticsearch: { client: { asScoped } } },
         {
-          contextEngine: { getAiIndexService: () => ({ list }) },
+          contextEngine: { getAiIndexDataReadService },
           security,
-          spaces,
         },
         {},
       ]),
@@ -66,8 +72,11 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     >;
 
     let resolver: AiIndexResolver | undefined;
+    const register = jest.fn();
     const agentBuilder = {
       agents: {
+        register,
+        registerType: jest.fn(),
         registerAiIndexResolver: jest.fn((registered: AiIndexResolver) => {
           resolver = registered;
         }),
@@ -81,10 +90,39 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     });
 
     if (!resolver) {
-      throw new Error('Expected an AI index resolver to be registered');
+      throw new Error('Expected an AI Index resolver to be registered');
     }
-    return { resolver, list, security, checkPrivileges, getSpaceId };
+    return {
+      resolver,
+      register,
+      list,
+      getAiIndexDataReadService,
+      asScoped,
+      asCurrentUser,
+      security,
+      checkPrivileges,
+    };
   };
+
+  it('registers the tools with a Context Engine start accessor', async () => {
+    const { getAiIndexDataReadService } = setup({ aiIndices: [] });
+    const { registerAgentBuilderTools } = jest.requireMock('./agent_builder/tools');
+
+    const [{ getContextEngineStart }] = registerAgentBuilderTools.mock.calls.at(-1);
+
+    await expect(getContextEngineStart()).resolves.toEqual({ getAiIndexDataReadService });
+  });
+
+  it('reads readable AI Indices as the requesting user through the data read service', async () => {
+    const { resolver, getAiIndexDataReadService, asScoped, asCurrentUser } = setup({
+      aiIndices: [],
+    });
+
+    await resolver({ ids: ['my-custom'], request });
+
+    expect(asScoped).toHaveBeenCalledWith(request);
+    expect(getAiIndexDataReadService).toHaveBeenCalledWith({ esClient: asCurrentUser, request });
+  });
 
   it('registers a resolver mapping registry items to id, esqlTarget (dest.value) and description', async () => {
     const { resolver } = setup({
@@ -102,42 +140,16 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     ]);
   });
 
-  it('filters the registry to the requested ids', async () => {
+  it('asks the service for the requested ids only, so just those are probed', async () => {
     const { resolver, list } = setup({
-      aiIndices: [
-        { id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } },
-        { id: 'other', dest: { type: 'data_stream', value: 'ds-other' } },
-      ],
+      aiIndices: [{ id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } }],
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
       { id: 'wanted', esqlTarget: 'idx-wanted' },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
-    expect(list).toHaveBeenCalledWith('default');
-  });
-
-  it('lists AI indices for the request space', async () => {
-    const { resolver, list, getSpaceId } = setup({
-      aiIndices: [{ id: 'my-custom', dest: { type: 'index', value: 'idx-custom' } }],
-      spaceId: 'marketing',
-    });
-
-    await resolver({ ids: ['my-custom'], request });
-
-    expect(getSpaceId).toHaveBeenCalledWith(request);
-    expect(list).toHaveBeenCalledWith('marketing');
-  });
-
-  it('falls back to default space when spaces plugin is unavailable', async () => {
-    const { resolver, list } = setup({
-      aiIndices: [{ id: 'my-custom', dest: { type: 'index', value: 'idx-custom' } }],
-      spacesAvailable: false,
-    });
-
-    await resolver({ ids: ['my-custom'], request });
-
-    expect(list).toHaveBeenCalledWith('default');
+    expect(list).toHaveBeenCalledWith(['wanted', 'unknown']);
   });
 
   it('checks the Context Engine read privilege for the request before disclosing details', async () => {
@@ -169,5 +181,51 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
     await expect(resolver({ ids: ['my-custom'], request })).rejects.toThrow('cluster unreachable');
     expect(list).not.toHaveBeenCalled();
+  });
+
+  it('registers the Context Engine Setup agent as a built-in during setup', () => {
+    const { register } = setup({ aiIndices: [] });
+
+    expect(register).toHaveBeenCalledTimes(1);
+    expect(register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: CONTEXT_ENGINE_SETUP_AGENT_ID,
+        type: chatAgentTypeId,
+        availability: expect.objectContaining({
+          cacheMode: 'space',
+          handler: expect.any(Function),
+        }),
+        configuration: expect.objectContaining({
+          enable_elastic_capabilities: false,
+          subagent_ids: [SELF_AGENT_ID],
+          skill_ids: expect.arrayContaining([
+            ANALYZE_AND_IMPROVE_SKILL_ID,
+            AI_INDEX_AUTOMATIONS_SKILL_ID,
+            AI_INDEX_SOURCES_SKILL_ID,
+            KI_RETRIEVAL_SKILL_ID,
+            CONTEXT_ENGINE_SIGNALS_SKILL_ID,
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('hides the agent in spaces where Context Engine is disabled', async () => {
+    const { register } = setup({ aiIndices: [] });
+    const { availability } = register.mock.calls[0][0];
+
+    const unavailable = await availability.handler({
+      uiSettings: { get: jest.fn().mockResolvedValue(false) } as any,
+      request: {} as any,
+      spaceId: 'my-space',
+    });
+    expect(unavailable.status).toBe('unavailable');
+
+    const available = await availability.handler({
+      uiSettings: { get: jest.fn().mockResolvedValue(true) } as any,
+      request: {} as any,
+      spaceId: 'my-space',
+    });
+    expect(available.status).toBe('available');
   });
 });
