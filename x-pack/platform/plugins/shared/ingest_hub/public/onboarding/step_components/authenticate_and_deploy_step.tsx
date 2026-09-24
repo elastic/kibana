@@ -19,6 +19,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { useDisabledIdentityFederationProviders } from '@kbn/fleet-plugin/public';
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
@@ -164,12 +165,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     return handleAgentDeploy();
   }, [handleAgentDeploy]);
 
+  // `fleet.awsIdentityFederationEnabled` gates the option here as it does in the Fleet policy form.
+  const isAwsIdentityFederationEnabled = !useDisabledIdentityFederationProviders().includes('aws');
   const showIdentityFederation = useMemo(() => {
+    if (!isAwsIdentityFederationEnabled) return false;
     if (miServiceIds.length === 0) return true;
     return miServiceIds.every(
       (id) => awsServicesMap?.get(id)?.identityFederationSupported !== false
     );
-  }, [miServiceIds, awsServicesMap]);
+  }, [isAwsIdentityFederationEnabled, miServiceIds, awsServicesMap]);
 
   // The Federated Identity template must cover exactly the instances Deploy will create as
   // managed integrations, duplicates included.

@@ -46,6 +46,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(() => ({ services: { cloud: undefined } })),
 }));
 
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  useDisabledIdentityFederationProviders: jest.fn(() => []),
+}));
+
 jest.mock('./authenticate_and_deploy_step/use_onboarding_so', () => ({
   useOnboardingSO: jest.fn(),
 }));
@@ -63,6 +67,7 @@ import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useDisabledIdentityFederationProviders } from '@kbn/fleet-plugin/public';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -75,6 +80,8 @@ const mockUseAgentBasedDeploy = useAgentBasedDeploy as jest.Mock;
 const MockAgentBasedSection = AgentBasedSection as unknown as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockBuildIacIntegrations = buildIacIntegrations as jest.Mock;
+const mockUseDisabledIdentityFederationProviders =
+  useDisabledIdentityFederationProviders as jest.Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -182,6 +189,7 @@ describe('AuthenticateAndDeployStep', () => {
     });
     // clearAllMocks wipes the factory's default implementation, so restore it here.
     MockAgentBasedSection.mockImplementation(() => null);
+    mockUseDisabledIdentityFederationProviders.mockReturnValue([]);
     mockUseDeploy.mockReturnValue(makeDeployReturn());
     mockUseEcfDeployment.mockReturnValue(makeEcfReturn());
     mockUseSessionStorage.mockReturnValue([
@@ -299,6 +307,25 @@ describe('AuthenticateAndDeployStep', () => {
       expect(mockBuildIacIntegrations).toHaveBeenCalledWith([original, duplicate], serviceVars);
       expect(MockManagedIntegrationsSection).toHaveBeenCalledWith(
         expect.objectContaining({ iacIntegrations: integrations }),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('Identity Federation flag', () => {
+    it('offers Identity Federation when the aws flag is on and the services support it', () => {
+      renderStep();
+      expect(MockManagedIntegrationsSection).toHaveBeenCalledWith(
+        expect.objectContaining({ showIdentityFederation: true }),
+        expect.anything()
+      );
+    });
+
+    it('hides Identity Federation when fleet.awsIdentityFederationEnabled is off', () => {
+      mockUseDisabledIdentityFederationProviders.mockReturnValue(['aws']);
+      renderStep();
+      expect(MockManagedIntegrationsSection).toHaveBeenCalledWith(
+        expect.objectContaining({ showIdentityFederation: false }),
         expect.anything()
       );
     });
