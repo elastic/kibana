@@ -82,6 +82,7 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
             async (fakeRequest) => {
               const client = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
               const initialAuthorization = fakeRequest.headers.authorization;
+              const principal = start.security.authc.getPrincipal(fakeRequest);
               const initial = await client.security.authenticate();
               await client.cluster.health();
               if (action === 'read_role') await client.security.getRole({ name: 'superuser' });
@@ -118,6 +119,8 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
                   renewedUsername: renewed.username,
                   tokenChanged: initialAuthorization !== fakeRequest.headers.authorization,
                   spaceId: fakeRequest.spaceId,
+                  principal,
+                  renewedPrincipal: start.security.authc.getPrincipal(fakeRequest),
                 };
               } catch (error) {
                 if (!(error instanceof errors.ResponseError)) throw error;
