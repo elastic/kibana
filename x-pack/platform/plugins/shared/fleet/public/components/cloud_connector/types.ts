@@ -124,6 +124,7 @@ export type CloudSetupForCloudConnector = Pick<
   | 'cloudHost'
   | 'baseUrl'
   | 'deploymentUrl'
+  | 'deploymentId'
   | 'organizationId'
   | 'csp'
   | 'region'

@@ -33,6 +33,7 @@ import {
   getAwsStackConsoleUrl,
   hasTemplateUrlParam,
   isStackArnInvalid,
+  getUnresolvedTemplateUrlTokens,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT, TEMPLATE_URL_TOKENS } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -577,6 +578,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
     cloudId: 'cluster:ZW5kcG9pbnQkZGVwbG95bWVudCRraWJhbmEtY29tcG9uZW50LWlk',
     baseUrl: 'https://elastic.co',
     deploymentUrl: 'https://cloud.elastic.co/deployments/deployment-123/kibana',
+    deploymentId: 'deployment-123',
     profileUrl: 'https://elastic.co/profile',
     organizationUrl: 'https://elastic.co/organizations',
     snapshotsUrl: 'https://elastic.co/snapshots',
@@ -726,14 +728,14 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should return undefined when cloud is enabled but deployment URL is missing', () => {
-      const noDeploymentUrlSetup = {
+    it('should return undefined when cloud is enabled but deployment ID is missing', () => {
+      const noDeploymentIdSetup = {
         ...mockCloudSetup,
-        deploymentUrl: undefined,
+        deploymentId: undefined,
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        cloud: noDeploymentUrlSetup,
+        cloud: noDeploymentIdSetup,
         accountType: SINGLE_ACCOUNT,
         iacTemplateUrl: mockIacTemplateUrl,
       });
@@ -771,14 +773,14 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should return undefined when deployment URL has invalid format', () => {
-      const invalidDeploymentUrlSetup = {
+    it('should return undefined when deployment ID is empty', () => {
+      const emptyDeploymentIdSetup = {
         ...mockCloudSetup,
-        deploymentUrl: 'https://invalid-url-without-deployments-path',
+        deploymentId: '',
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        cloud: invalidDeploymentUrlSetup,
+        cloud: emptyDeploymentIdSetup,
         accountType: SINGLE_ACCOUNT,
         iacTemplateUrl: mockIacTemplateUrl,
       });
@@ -1057,6 +1059,7 @@ describe('Workload Identity template URLs', () => {
     isServerlessEnabled: false,
     cloudId: encodeCloudId('eu-west-1.aws.qa.cld.elstc.co:9243', KIBANA_COMPONENT_ID),
     deploymentUrl: 'https://console.qa.cld.elstc.co/deployments/1f2e3d4c5b6a79808172635445362718',
+    deploymentId: '1f2e3d4c5b6a79808172635445362718',
     organizationId: '2070044029',
     serverless: {},
   } as CloudSetup;
@@ -1559,5 +1562,66 @@ describe('isStackArnInvalid', () => {
 
   it('ignores leading and trailing whitespace around a valid ARN', () => {
     expect(isStackArnInvalid(`  ${STACK_ARN}\n`)).toBe(false);
+  });
+});
+
+describe('getUnresolvedTemplateUrlTokens', () => {
+  const wiiUrl =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://example.com/wii.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticCloudProvider=CLOUD_PROVIDER&param_ElasticCloudRegion=CLOUD_REGION&param_ElasticResourceId=RESOURCE_ID';
+  const echCloud = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    cloudId: `qa:${btoa('eu-west-1.aws.qa.cld.elstc.co:9243$es-id$kibana-id')}`,
+    deploymentId: 'deployment-id',
+    organizationId: '2070044029',
+    serverless: {},
+  } as CloudSetup;
+
+  it('returns nothing when every token resolves', () => {
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: echCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: wiiUrl,
+      })
+    ).toEqual([]);
+  });
+
+  it('names the tokens the cloud contract cannot fill', () => {
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: { ...echCloud, organizationId: undefined } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: wiiUrl,
+      })
+    ).toEqual(['ORGANIZATION_ID']);
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: {
+          ...echCloud,
+          organizationId: undefined,
+          cloudId: `ece:${btoa('my-ece.example.com$es-id$kibana-id')}`,
+        } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: wiiUrl,
+      })
+    ).toEqual(['ORGANIZATION_ID', 'CLOUD_PROVIDER']);
+  });
+
+  it('returns nothing for a token-free or missing URL', () => {
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: echCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: 'https://example.com/legacy.yml',
+      })
+    ).toEqual([]);
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: echCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: undefined,
+      })
+    ).toEqual([]);
   });
 });

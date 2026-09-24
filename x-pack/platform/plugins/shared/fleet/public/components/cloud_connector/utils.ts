@@ -264,10 +264,9 @@ export interface ElasticResource {
 export const getElasticResource = (
   cloud: CloudSetupForCloudConnector | undefined
 ): ElasticResource => {
-  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
 
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+  if (cloud?.isCloudEnabled && cloud.deploymentId && kibanaComponentId) {
     return { type: ELASTIC_RESOURCE_TYPE_DEPLOYMENT, id: kibanaComponentId };
   }
   if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
@@ -369,6 +368,16 @@ export const getAnyCloudConnectorIacTemplateUrl = (
     if (cloudOption) selections[group.name] = cloudOption.name;
   }
   return getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
+};
+
+/** Tokens in the template URL that cannot be filled from the cloud contract. */
+export const getUnresolvedTemplateUrlTokens = ({
+  cloud,
+  accountType,
+  iacTemplateUrl,
+}: GetCloudConnectorRemoteRoleTemplateParams): TemplateUrlToken[] => {
+  const values = getTemplateTokenValues(cloud, accountType);
+  return getTemplateUrlTokens(iacTemplateUrl).filter((token) => !values[token]);
 };
 
 export const getCloudConnectorRemoteRoleTemplate = ({
