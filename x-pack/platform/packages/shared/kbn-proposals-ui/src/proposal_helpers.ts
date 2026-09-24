@@ -16,6 +16,10 @@ import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 export const getProposalTitle = (proposal: ApprovalProposal): string =>
   proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
 
+/** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
+const toSentenceCase = (value: string): string =>
+  value.length > 0 ? `${value[0].toUpperCase()}${value.slice(1)}` : value;
+
 /**
  * The category/reversibility line shown under a proposal's title — in the modal header and the
  * flyout's `ProposedActionButton` row alike, so the two describe the same proposal identically.
@@ -26,7 +30,7 @@ export const getProposalCaption = (proposal: ApprovalProposal): string | undefin
   const category = proposal.action?.category ?? proposal.category;
   const reversible = proposal.action?.reversible;
   const parts = [
-    category,
+    category === undefined ? undefined : toSentenceCase(category),
     reversible === undefined
       ? undefined
       : reversible

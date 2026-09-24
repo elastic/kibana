@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elas
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import {
   ApprovalModal,
+  getProposalCaption,
   getProposalTitle,
   ProposedActionStatusBadge,
   type ApprovalProposal,
@@ -84,13 +85,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const badge = badgeConfigFor(proposal);
 
     const decidedByName = proposal.decidedBy?.fullName ?? proposal.decidedBy?.username ?? undefined;
-    const category = proposal.action?.category ?? proposal.category;
-    const reversible = proposal.action?.reversible;
-    const reversibleLabel =
-      reversible !== undefined
-        ? DETAILS_FLYOUT_LABELS.proposedAction[reversible ? 'reversible' : 'irreversible']
-        : getEmptyValue();
-    const pendingCaption = [category, reversibleLabel].filter((e) => e?.trim().length).join(' • ');
+    const pendingCaption = getProposalCaption(proposal);
 
     const caption =
       isDecided && decidedByName && proposal.decidedAt ? (

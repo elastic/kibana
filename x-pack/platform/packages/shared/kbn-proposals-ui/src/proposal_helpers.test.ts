@@ -45,12 +45,12 @@ describe('getProposalTone', () => {
 });
 
 describe('getProposalCaption', () => {
-  it('joins category and reversibility', () => {
+  it('joins category and reversibility, capitalizing the stored-lowercase category', () => {
     expect(
       getProposalCaption(
         proposal({ category: 'configure', action: { name: 'Isolate host', reversible: true } })
       )
-    ).toBe('configure • Reversible');
+    ).toBe('Configure • Reversible');
   });
 
   it("prefers the action's own category over the proposal's", () => {
@@ -61,11 +61,11 @@ describe('getProposalCaption', () => {
           action: { name: 'Isolate host', category: 'response', reversible: false },
         })
       )
-    ).toBe('response • Irreversible');
+    ).toBe('Response • Irreversible');
   });
 
   it('omits reversibility when the action declares none', () => {
-    expect(getProposalCaption(proposal({ category: 'configure' }))).toBe('configure');
+    expect(getProposalCaption(proposal({ category: 'configure' }))).toBe('Configure');
   });
 
   it('omits category when neither the proposal nor its action declares one', () => {

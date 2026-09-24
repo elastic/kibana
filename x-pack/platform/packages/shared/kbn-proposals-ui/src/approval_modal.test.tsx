@@ -57,7 +57,7 @@ describe('ApprovalModal', () => {
         action: { name: 'Apply monitored exception', reversible: true },
       },
     });
-    expect(screen.getByText('configure • Reversible')).toBeInTheDocument();
+    expect(screen.getByText('Configure • Reversible')).toBeInTheDocument();
   });
 
   it('omits the header caption when the proposal has neither a category nor reversibility', () => {
