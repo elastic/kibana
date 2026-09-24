@@ -179,23 +179,41 @@ export class ImpactService {
     }
   }
 
+  /**
+   * Versioned read for optimistic concurrency. Storage `get` is a search that
+   * does not request `_seq_no` / `_primary_term`, and a search hit omits them
+   * unless asked. This read asks, so a later attach can merge instead of
+   * failing closed on a document that is already there.
+   */
   private async findById(id: string): Promise<VersionedImpact | undefined> {
-    try {
-      const hit = await this.deps.storage.get({ id });
-      if (!hit._source || hit._seq_no === undefined || hit._primary_term === undefined) {
-        throw new Error(`Impact document [${id}] is missing concurrency metadata`);
-      }
-      return {
-        ...toImpact(hit._id, hit._source),
-        seqNo: hit._seq_no,
-        primaryTerm: hit._primary_term,
-      };
-    } catch (error) {
-      if (isNotFound(error)) {
-        return undefined;
-      }
-      throw error;
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      seq_no_primary_term: true,
+      query: {
+        bool: {
+          filter: [{ term: { _id: id } }],
+        },
+      },
+    });
+    const hit = response.hits.hits[0];
+    if (!hit) {
+      return undefined;
     }
+    if (
+      hit._id === undefined ||
+      !hit._source ||
+      hit._seq_no === undefined ||
+      hit._primary_term === undefined
+    ) {
+      throw new Error(`Impact document [${id}] is missing concurrency metadata`);
+    }
+    return {
+      ...toImpact(hit._id, hit._source),
+      seqNo: hit._seq_no,
+      primaryTerm: hit._primary_term,
+    };
   }
 }
 
@@ -274,7 +292,5 @@ const statusCodeOf = (error: unknown): number | undefined => {
   const candidate = error as { statusCode?: number; meta?: { statusCode?: number } };
   return candidate.statusCode ?? candidate.meta?.statusCode;
 };
-
-const isNotFound = (error: unknown): boolean => statusCodeOf(error) === 404;
 
 const isVersionConflict = (error: unknown): boolean => statusCodeOf(error) === 409;
