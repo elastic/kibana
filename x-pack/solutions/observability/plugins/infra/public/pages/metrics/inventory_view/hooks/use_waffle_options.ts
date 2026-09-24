@@ -128,7 +128,7 @@ export const useWaffleOptions = () => {
   // Seed from URL so a remount/reload does not treat the initial null local
   // state as authoritative and wipe a persisted preferredSchema from the URL.
   const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(
-    urlState.preferredSchema
+    urlState.preferredSchema ?? null
   );
 
   const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
