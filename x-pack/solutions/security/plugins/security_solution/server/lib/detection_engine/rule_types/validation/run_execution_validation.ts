@@ -119,6 +119,10 @@ export const runExecutionValidation = async (
     }
 
     if (!skipExecution) {
+      // The concrete indices the threat patterns resolve to. A rule may name a lookup list
+      // by its alias, which the field caps response resolves to the concrete index; the
+      // names the rule typed are kept as a fallback when the request fails.
+      let resolvedThreatIndices: string[] = params.threatIndex;
       try {
         const threatFieldCapsResponse = await withSecuritySpan('fieldCapsThreatIndex', () =>
           scopedClusterClient.asCurrentUser.fieldCaps(
@@ -131,6 +135,8 @@ export const runExecutionValidation = async (
             { meta: true }
           )
         );
+        const { indices } = threatFieldCapsResponse.body;
+        resolvedThreatIndices = Array.isArray(indices) ? indices : [indices];
 
         const { warningMessage: missingThreatTimestampWarning } = await hasTimestampFields({
           timestampField: primaryTimestamp,
@@ -147,14 +153,19 @@ export const runExecutionValidation = async (
 
       // The timestamp check above is skipped for a value list's lookup index, which has
       // no timestamp field. The threat query still applies to it, and the product default
-      // filters on the timestamp field, so such a rule would match no indicators with no
-      // sign of why. Say so instead of running silently against nothing.
-      const lookupThreatIndices = params.threatIndex.filter(
-        (name) => isValueListLookupIndex?.(name) === true
+      // filters on `@timestamp`, so such a rule would match no indicators with no sign of
+      // why. Say so instead of running silently against nothing. Both the rule's timestamp
+      // field and `@timestamp` are looked for, since the default query names the latter
+      // whatever the rule's timestamp override is.
+      const lookupThreatIndices = [
+        ...new Set([...params.threatIndex, ...resolvedThreatIndices]),
+      ].filter((name) => isValueListLookupIndex?.(name) === true);
+      const filteredTimestamp = [primaryTimestamp, '@timestamp'].find((field) =>
+        params.threatQuery.includes(field)
       );
-      if (lookupThreatIndices.length > 0 && params.threatQuery.includes(primaryTimestamp)) {
+      if (lookupThreatIndices.length > 0 && filteredTimestamp != null) {
         warnings.push(
-          `The threat query filters on "${primaryTimestamp}", but the value list lookup ${
+          `The threat query filters on "${filteredTimestamp}", but the value list lookup ${
             lookupThreatIndices.length === 1 ? 'index' : 'indices'
           } ${lookupThreatIndices.join(
             ', '

@@ -14,7 +14,7 @@ import type {
 import { TaskCost, throwRetryableError } from '@kbn/task-manager-plugin/server';
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { reconcileCoalesced } from '../services/lookup';
+import { ensureLookupIndexCurrent, reconcileCoalesced } from '../services/lookup';
 import type { PluginsStart } from '../types';
 
 export const COALESCE_REBUILD_TASK_TYPE = 'lists:coalesce-rebuild';
@@ -86,6 +86,11 @@ export const registerCoalesceRebuildTask = ({
             const { index, type } = taskInstance.params as { index: string; type: Type };
             const [coreStart] = await getStartServices();
             const esClient = coreStart.elasticsearch.client.asInternalUser;
+            // The task may be the first writer to an index created by an earlier build (a
+            // run left pending across a restart), and its documents carry fields that build
+            // did not map. Bring the mapping up to date before writing; one mapping read per
+            // index per process.
+            await ensureLookupIndexCurrent({ esClient, index, type });
 
             let outcome = await reconcileCoalesced({ esClient, index, shouldAbort, type });
             for (

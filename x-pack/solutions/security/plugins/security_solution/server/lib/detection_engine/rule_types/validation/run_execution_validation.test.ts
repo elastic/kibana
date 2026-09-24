@@ -129,42 +129,88 @@ describe('runExecutionValidation', () => {
 
   describe('a value list lookup index as a threat index', () => {
     const LOOKUP_INDEX = '.value-list-v2-default-my-list';
+    const LOOKUP_ALIAS = '.items-default-my-list';
+    const DEFAULT_THREAT_QUERY = '@timestamp >= "now-30d/d"';
     const isValueListLookupIndex = (name: string): boolean => name.startsWith('.value-list-v2-');
-    const runThreat = (threatQuery: string, threatIndex: string[] = [LOOKUP_INDEX]) =>
+    // field caps answers with the concrete indices the threat patterns resolve to
+    const mockThreatFieldCaps = (indices: string[]): void => {
+      scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue({
+        body: { indices, fields: { '@timestamp': { date: { type: 'date' } } } },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    };
+    const runThreat = ({
+      threatQuery,
+      threatIndex = [LOOKUP_INDEX],
+      primaryTimestamp = '@timestamp',
+    }: {
+      threatQuery: string;
+      threatIndex?: string[];
+      primaryTimestamp?: string;
+    }) =>
       runExecutionValidation({
         params: { ...getThreatRuleParams(), threatIndex, threatQuery },
         inputIndex: ['auditbeat-*'],
         ruleName: 'test-rule',
         scopedClusterClient,
         runtimeMappings: undefined,
-        primaryTimestamp: '@timestamp',
+        primaryTimestamp,
         secondaryTimestamp: undefined,
         ruleExecutionLogger,
         isServerless: false,
         isValueListLookupIndex,
       });
+    const warnsAbout = (field: string, index: string): unknown[] => [
+      expect.stringContaining(
+        `The threat query filters on "${field}", but the value list lookup index ${index} carries no timestamp field`
+      ),
+    ];
 
     beforeEach(() => {
-      mockFieldCaps({ '@timestamp': { date: { type: 'date' } } });
+      mockThreatFieldCaps([LOOKUP_INDEX]);
     });
 
     it('warns when the threat query filters on the timestamp the lookup index lacks', async () => {
-      const result = await runThreat('@timestamp >= "now-30d/d"');
-      expect(result.warnings).toEqual([
-        expect.stringContaining(
-          `The threat query filters on "@timestamp", but the value list lookup index ${LOOKUP_INDEX} carries no timestamp field`
-        ),
-      ]);
+      const result = await runThreat({ threatQuery: DEFAULT_THREAT_QUERY });
+      expect(result.warnings).toEqual(warnsAbout('@timestamp', LOOKUP_INDEX));
       expect(result.skipExecution).toBe(false);
     });
 
+    it('warns when the rule names the lookup list by its alias, which resolves to the lookup index', async () => {
+      const result = await runThreat({
+        threatQuery: DEFAULT_THREAT_QUERY,
+        threatIndex: [LOOKUP_ALIAS],
+      });
+      expect(result.warnings).toEqual(warnsAbout('@timestamp', LOOKUP_INDEX));
+    });
+
+    it('warns about the default query even when the rule overrides its timestamp field', async () => {
+      const result = await runThreat({
+        primaryTimestamp: 'event.ingested',
+        threatQuery: DEFAULT_THREAT_QUERY,
+      });
+      expect(result.warnings).toEqual(warnsAbout('@timestamp', LOOKUP_INDEX));
+    });
+
+    it('warns when the threat query filters on the overridden timestamp field', async () => {
+      const result = await runThreat({
+        primaryTimestamp: 'event.ingested',
+        threatQuery: 'event.ingested >= "now-30d/d"',
+      });
+      expect(result.warnings).toEqual(warnsAbout('event.ingested', LOOKUP_INDEX));
+    });
+
     it('does not warn for a threat query that does not filter on the timestamp', async () => {
-      const result = await runThreat('*:*');
+      const result = await runThreat({ threatQuery: '*:*' });
       expect(result.warnings).toEqual([]);
     });
 
     it('does not warn when no threat index is a lookup index', async () => {
-      const result = await runThreat('@timestamp >= "now-30d/d"', ['.items-default']);
+      mockThreatFieldCaps(['.items-default']);
+      const result = await runThreat({
+        threatIndex: ['.items-default'],
+        threatQuery: DEFAULT_THREAT_QUERY,
+      });
       expect(result.warnings).toEqual([]);
     });
   });

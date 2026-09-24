@@ -38,7 +38,10 @@ const MIG_LEGACY_RULE = `${P}-mig-legacy-rule`;
 const MIG_CONCRETE_RULE = `${P}-mig-concrete-rule`;
 // a lookup rule saved with the product's default threat query, which filters on @timestamp
 const DEFAULT_QUERY_RULE = `${P}-default-query-rule`;
+// the same, but reading the list through its alias under `.items*`
+const ALIAS_QUERY_RULE = `${P}-alias-default-query-rule`;
 const DEFAULT_THREAT_QUERY = '@timestamp >= "now-30d/d"';
+const aliasOf = (listId) => `${ITEMS_INDEX}-${listId}`;
 
 const kh = {
   authorization: AUTH,
@@ -85,7 +88,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const now = () => new Date().toISOString();
 
 const cleanup = async () => {
-  for (const ruleId of [...TWINS.map(twinRule), MIG_LEGACY_RULE, MIG_CONCRETE_RULE, DEFAULT_QUERY_RULE]) {
+  for (const ruleId of [
+    ...TWINS.map(twinRule),
+    MIG_LEGACY_RULE,
+    MIG_CONCRETE_RULE,
+    DEFAULT_QUERY_RULE,
+    ALIAS_QUERY_RULE,
+  ]) {
     await kbn('DELETE', `/api/detection_engine/rules?rule_id=${ruleId}`);
   }
   for (const listId of [...TWINS.map(twinList), MIG_LIST]) {
@@ -359,6 +368,25 @@ const main = async () => {
   check(`${DEFAULT_QUERY_RULE}: the message names the timestamp filter and the lookup index`, String(last3?.message ?? '').includes('carries no timestamp field') && String(last3?.message ?? '').includes(concreteIndex(twinList(lookupTwin))), String(last3?.message ?? '').slice(0, 200));
   await sleep(3000);
   check(`${DEFAULT_QUERY_RULE}: no alerts, since the query matches no indicator`, same(await alertsFor(DEFAULT_QUERY_RULE), []));
+
+  // The same rule reading the list through its alias. The alias is the name under
+  // `.items*` a rule can read with the roles it holds today, and field caps resolves it to
+  // the concrete index, so the check must reach the same conclusion.
+  const aliasRule = ruleHandle(
+    await createRule(ALIAS_QUERY_RULE, 'lookup', twinList(lookupTwin), {
+      threat_index: [aliasOf(twinList(lookupTwin))],
+      threat_query: DEFAULT_THREAT_QUERY,
+    }),
+    ALIAS_QUERY_RULE,
+    'lookup',
+    twinList(lookupTwin)
+  );
+  const since3b = now();
+  await sleep(1000);
+  await kbn('POST', `/internal/alerting/rule/${aliasRule.id}/_run_soon`);
+  const last3b = await waitForExecution(ALIAS_QUERY_RULE, since3b);
+  check(`${ALIAS_QUERY_RULE}: run through the alias is a partial failure too`, last3b?.status === 'partial failure', String(last3b?.status));
+  check(`${ALIAS_QUERY_RULE}: the message names the concrete lookup index the alias resolves to`, String(last3b?.message ?? '').includes('carries no timestamp field') && String(last3b?.message ?? '').includes(concreteIndex(twinList(lookupTwin))), String(last3b?.message ?? '').slice(0, 200));
 
   log('\n=== summary ===');
   log(
