@@ -88,8 +88,10 @@ apiTest.describe(
       privateLocation = await apiServices.syntheticsPrivateLocations.getSharedPrivateLocation();
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
+    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
       await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
+      await apiServices.syntheticsPrivateLocations.deletePrivateLocation(privateLocation.id);
+      await apiServices.fleet.agent_policies.delete(privateLocation.agentPolicyId, true);
     });
 
     apiTest(
