@@ -99,6 +99,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
   `${internalNamespaces.security}.siem_migration.update_rule_migration`,
   `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.install_migration_rules`,
   `${internalNamespaces.security}.alert-triage`,
 
   // Streams
@@ -176,6 +177,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
   `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
+  `${internalNamespaces.platformSignificantEvents}.ki-query-generation-type`,
   `${internalNamespaces.platformContextEngine}.setup-type`,
 ] as const;
 
@@ -220,6 +222,12 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'knowledge-indicators-management',
   'ki-identification-management',
   'feature-identification',
+  'ki-query-generation',
+  'streams-memory-synthesis',
+  'streams-memory-consolidation',
+  'streams-conversation-scraper',
+  'significant-events-onboarding',
+  'streams-gap-detection',
 
   // Platform – Context Engine
   'ki-retrieval',
@@ -253,6 +261,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'investigate-rule',
   'siem-readiness',
   'automatic-migration-rules-start-migration',
+  'automatic-migration-rules-install-rules',
   'automatic-migration-rules-summarize',
   'automatic-migration-rules-stop-migration',
   'automatic-migration-rules-update-migration',
@@ -393,6 +402,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Proposals
   'platform.proposal',
+
+  // Platform – Agentic Investigations
+  'investigation_impact',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

@@ -22,7 +22,10 @@ const createClient = ({
   assertCanRead?: jest.Mock;
   getSpaceId?: jest.Mock;
 } = {}) => {
-  const privileges: ImpactPrivilegesChecker = { assertCanRead };
+  const privileges: ImpactPrivilegesChecker = {
+    assertCanRead,
+    assertCanManage: jest.fn(),
+  };
   const client = createImpactClient({
     getImpactService: () => ({ listByConversationIds } as unknown as ImpactService),
     getSpaceId,
@@ -43,7 +46,7 @@ describe('createImpactClient', () => {
     expect(listByConversationIds).toHaveBeenCalledWith(['c1', 'c2'], 'space-from-request');
   });
 
-  it('should refuse before searching when the principal lacks read_impact', async () => {
+  it('should refuse before searching when the principal cannot manage investigations', async () => {
     const { client, listByConversationIds, getSpaceId } = createClient({
       assertCanRead: jest.fn().mockRejectedValue(new ImpactForbiddenError('nope')),
     });
