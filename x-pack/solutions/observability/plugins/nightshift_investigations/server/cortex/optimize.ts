@@ -183,8 +183,9 @@ export const applyCortexEdits = async ({
   logger: Logger;
 }): Promise<void> => {
   const { pages } = await store.list();
-  logger.info(
-    `Applying ${edits.length} Cortex edit(s): ${edits
+  logger.info(`Applying ${edits.length} Cortex edit(s)`);
+  logger.debug(
+    `Cortex edit proposals: ${edits
       .map((edit) => `${edit.action}:${edit.entity_type}/${edit.slug}`)
       .join(', ')}`
   );
@@ -200,7 +201,7 @@ export const applyCortexEdits = async ({
     if (edit.action === 'corroborate') {
       const updated = await store.corroborate(id);
       if (updated) {
-        logger.info(`Corroborated Cortex page ${id}`);
+        logger.debug(`Corroborated Cortex page ${id}`);
       }
       continue;
     }
@@ -208,7 +209,7 @@ export const applyCortexEdits = async ({
     if (edit.action === 'archive') {
       const updated = await store.archive(id);
       if (updated) {
-        logger.info(`Archived Cortex page ${id}`);
+        logger.debug(`Archived Cortex page ${id}`);
       }
       continue;
     }
@@ -228,7 +229,7 @@ export const applyCortexEdits = async ({
           : edit.status ?? existing?.status ?? 'tentative',
       corroborations: existing?.corroborations,
     });
-    logger.info(`Upserted Cortex page ${id}`);
+    logger.debug(`Upserted Cortex page ${id}`);
   }
 };
 

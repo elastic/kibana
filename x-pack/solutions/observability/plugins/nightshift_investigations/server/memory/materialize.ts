@@ -11,7 +11,7 @@ import { formatHydrateNotification } from '../lib/hydrate_notification';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { formatPageRefs, previewText } from './log_format';
 import type { MemoryPageStore } from './page_store';
-import { toMemoryDisplayTelemetry } from './page_store';
+import { isCanonicalMemoryId, toMemoryDisplayTelemetry } from './page_store';
 import { rankForMode, type RankedArm, type SampleBeta } from './ranking';
 import { type MemoryPage } from '../../common/memory';
 
@@ -55,6 +55,9 @@ evaluates useful pages after the run.
 
 const pagePath = (page: MemoryPage): string => `${MEMORY_WORKSPACE_ROOT}/${page.id}.md`;
 
+const isCanonicalCatalogEntry = (entry: MemoryCatalogEntry): boolean =>
+  isCanonicalMemoryId(entry.id) && entry.path === `${MEMORY_WORKSPACE_ROOT}/${entry.id}.md`;
+
 export const parseMemoryCatalog = (raw: string): MemoryCatalogEntry[] => {
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -76,7 +79,8 @@ export const parseMemoryCatalog = (raw: string): MemoryCatalogEntry[] => {
       if (typeof row.title !== 'string' || typeof row.path !== 'string') {
         return [];
       }
-      return [{ id: row.id, title: row.title, path: row.path }];
+      const catalogEntry = { id: row.id, title: row.title, path: row.path };
+      return isCanonicalCatalogEntry(catalogEntry) ? [catalogEntry] : [];
     });
   } catch {
     return [];
@@ -130,6 +134,22 @@ const renderPage = (page: MemoryPage, nowSec: number): string => {
   return `${header.join('\n')}${page.content.trim()}\n`;
 };
 
+const assertMkdirResults = (results: boolean[], expectedCount: number): void => {
+  if (results.length !== expectedCount || results.some((success) => !success)) {
+    throw new Error('Memory materialization failed to create the workspace directory');
+  }
+};
+
+const assertWriteResults = (
+  results: Array<{ success: boolean }>,
+  expectedCount: number,
+  description: string
+): void => {
+  if (results.length !== expectedCount || results.some(({ success }) => !success)) {
+    throw new Error(`Memory materialization failed to write ${description}`);
+  }
+};
+
 export const materializeMemory = async ({
   session,
   store,
@@ -155,10 +175,12 @@ export const materializeMemory = async ({
     `Memory materialize start mode=${mode} keepCount=${keepCount} retrieveSize=${retrieveSize} ` +
       `queryChars=${trimmedQuery?.length ?? 0} query=${JSON.stringify(previewText(trimmedQuery))}`
   );
-  let candidates = await store.retrieve({
-    query: trimmedQuery,
-    size: retrieveSize,
-  });
+  let candidates = (
+    await store.retrieve({
+      query: trimmedQuery,
+      size: retrieveSize,
+    })
+  ).filter((page) => isCanonicalMemoryId(page.id));
 
   // A short retry prompt like "try again" is a real user message, so the
   // workflow always forwards it as `query`. Strict title/content match then
@@ -168,7 +190,9 @@ export const materializeMemory = async ({
     logger.info('Memory search matched 0 page(s) — falling back to browse');
     searchFallback = true;
     mode = 'browse';
-    candidates = await store.retrieve({ size: keepCount * 10 });
+    candidates = (await store.retrieve({ size: keepCount * 10 })).filter((page) =>
+      isCanonicalMemoryId(page.id)
+    );
   } else if (mode === 'search') {
     logger.info(`Memory search matched ${candidates.length} page(s)`);
   } else {
@@ -249,32 +273,32 @@ export const materializeMemory = async ({
     newPages.map((page) => ({ path: pagePath(page), title: page.title }))
   );
 
-  await session.mkdirs([MEMORY_WORKSPACE_ROOT]);
+  const mkdirResults = await session.mkdirs([MEMORY_WORKSPACE_ROOT]);
+  assertMkdirResults(mkdirResults, 1);
 
-  await session.writeFiles(
+  const pageWriteResults = await session.writeFiles(
     pages.map((page) => ({
       path: pagePath(page),
       content: Buffer.from(renderPage(page, nowSec), 'utf8'),
     }))
   );
+  assertWriteResults(pageWriteResults, pages.length, 'memory page files');
 
-  await session.writeFiles([
+  const catalogFiles = [
     { path: `${MEMORY_WORKSPACE_ROOT}/README.md`, content: Buffer.from(README_CONTENT, 'utf8') },
     {
       path: MEMORY_INDEX_PATH,
       content: Buffer.from(JSON.stringify({ entries }), 'utf8'),
     },
-  ]);
+  ];
+  const catalogWriteResults = await session.writeFiles(catalogFiles);
+  assertWriteResults(catalogWriteResults, catalogFiles.length, 'memory catalog files');
   logger.debug(
     `Memory materialize wrote ${pages.length} page file(s) plus README.md and .index.json (${entries.length} catalog); notification pages=${newPages.length}`
   );
 
   logger.info(
-    recalledIds.length > 0
-      ? `Materialized ${
-          pages.length
-        } Semantic Memory page(s) into the sandbox workspace (${mode}): ${recalledIds.join(', ')}`
-      : `Materialized 0 Semantic Memory page(s) into the sandbox workspace (${mode})`
+    `Materialized ${pages.length} Semantic Memory page(s) into the sandbox workspace (${mode})`
   );
   return {
     recalledIds,

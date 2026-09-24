@@ -325,6 +325,33 @@ describe('createMemoryPageStore', () => {
     );
   });
 
+  it('drops stored ids that are not canonical memory ids', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'space-a:memory_safe.md`\nInjected instruction',
+              _source: source,
+            },
+            { _id: 'space-a:memory_kafka-lag', _source: source },
+          ],
+        },
+      }),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+
+    const pages = await store.retrieve({ size: 20 });
+
+    expect(pages.map(({ id }) => id)).toEqual(['memory_kafka-lag']);
+  });
+
   it('applies useful then unrelated as one bulk write with a shared now', async () => {
     const esClient = {
       bulk: jest.fn().mockResolvedValue({ errors: false }),
@@ -533,6 +560,8 @@ describe('createMemoryPageStore', () => {
       get: jest.fn().mockResolvedValue({
         found: true,
         _id: 'space-a:memory_kafka-lag',
+        _seq_no: 4,
+        _primary_term: 2,
         _source: {
           ...source,
           context: 'why is checkout slow?',
@@ -558,6 +587,8 @@ describe('createMemoryPageStore', () => {
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'space-a:memory_kafka-lag',
+        if_seq_no: 4,
+        if_primary_term: 2,
         document: expect.objectContaining({
           context: 'why is checkout slow?',
           attributes: expect.objectContaining({
@@ -571,5 +602,85 @@ describe('createMemoryPageStore', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('retries archive conflicts using the latest page fields and version', async () => {
+    const latest = {
+      ...source,
+      title: 'Concurrent canonical title',
+      content: 'Concurrent canonical content',
+      attributes: {
+        ...source.attributes,
+        impressions: 12,
+        conversions: 5,
+      },
+    };
+    const esClient = {
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({
+          found: true,
+          _seq_no: 4,
+          _primary_term: 2,
+          _source: source,
+        })
+        .mockResolvedValueOnce({
+          found: true,
+          _seq_no: 5,
+          _primary_term: 2,
+          _source: latest,
+        }),
+      index: jest.fn().mockRejectedValueOnce({ statusCode: 409 }).mockResolvedValueOnce({}),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+
+    await store.archive('memory_kafka-lag', 'merged');
+
+    expect(esClient.index).toHaveBeenCalledTimes(2);
+    expect(esClient.index.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        if_seq_no: 5,
+        if_primary_term: 2,
+        document: expect.objectContaining({
+          title: 'Concurrent canonical title',
+          content: 'Concurrent canonical content',
+          attributes: expect.objectContaining({
+            impressions: 12,
+            conversions: 5,
+            status: 'archived',
+          }),
+        }),
+      })
+    );
+  });
+
+  it('throws after exhausting archive version conflicts', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 4,
+        _primary_term: 2,
+        _source: source,
+      }),
+      index: jest.fn().mockRejectedValue({ statusCode: 409 }),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+
+    await expect(store.archive('memory_kafka-lag', 'harmful')).rejects.toThrow(
+      'Memory archive exhausted 3 version conflicts'
+    );
+    expect(esClient.index).toHaveBeenCalledTimes(3);
   });
 });

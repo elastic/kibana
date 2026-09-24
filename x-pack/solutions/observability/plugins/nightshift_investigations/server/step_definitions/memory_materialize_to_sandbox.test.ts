@@ -141,12 +141,20 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     });
 
     const result = await definition.handler(
-      createContext('marketing__conv-1', 'marketing', undefined, 'agent-1')
+      createContext(
+        'marketing__conv-1',
+        'marketing',
+        undefined,
+        'significant-events.deductive-investigation'
+      )
     );
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith(
-      expect.objectContaining({ session: mockSession, agentId: 'agent-1' })
+      expect.objectContaining({
+        session: mockSession,
+        agentId: 'significant-events.deductive-investigation',
+      })
     );
     expect(result).toEqual({
       output: {
@@ -165,7 +173,14 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     });
 
     await expect(
-      definition.handler(createContext('default__conv-1', 'default', undefined, 'agent-1'))
+      definition.handler(
+        createContext(
+          'default__conv-1',
+          'default',
+          undefined,
+          'significant-events.deductive-investigation'
+        )
+      )
     ).rejects.toThrow(/sandbox is not configured/);
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
   });
@@ -179,11 +194,18 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     });
 
     await expect(
-      definition.handler(createContext('default__conv-1', 'default', 'task', 'agent-1'))
+      definition.handler(
+        createContext(
+          'default__conv-1',
+          'default',
+          'task',
+          'significant-events.deductive-investigation'
+        )
+      )
     ).rejects.toThrow('write failed');
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledTimes(1);
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledWith({
-      agent_id: 'agent-1',
+      agent_id: 'significant-events.deductive-investigation',
       conversation_id: 'conv-1',
       workflow_execution_id: 'workflow-exec-1',
       outcome: 'failure',
@@ -220,6 +242,30 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
 
     const result = await definition.handler(createContext('default__conv-1', 'default', 'task'));
 
+    expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        skipped: true,
+        recalled_ids: [],
+        notification: '',
+      },
+    });
+  });
+
+  it('skips memory materialize for an unsupported agent', async () => {
+    const sandboxStart = makeSandboxStart();
+    const definition = memoryMaterializeToSandboxStepDefinition({
+      getSandboxStart: () => sandboxStart,
+      logger: loggerMock.create(),
+      telemetry: telemetry as never,
+    });
+
+    const result = await definition.handler(
+      createContext('default__conv-1', 'default', 'task', 'another-agent')
+    );
+
+    expect(sandboxStart.getSessionForSpace).not.toHaveBeenCalled();
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
     expect(result).toEqual({
       output: {

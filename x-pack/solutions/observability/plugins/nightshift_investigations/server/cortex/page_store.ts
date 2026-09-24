@@ -455,7 +455,8 @@ export const createCortexPageStore = ({
           removed += 1;
         }
 
-        logger.info(`Pruned ${extras.length} duplicate Cortex page(s) into ${canonicalId}`);
+        logger.info(`Pruned ${extras.length} duplicate Cortex page(s)`);
+        logger.debug(`Cortex duplicate prune canonical=${canonicalId}`);
       }
 
       return removed;

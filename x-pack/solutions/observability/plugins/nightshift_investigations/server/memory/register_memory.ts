@@ -33,7 +33,12 @@ export const createMemoryStore = ({
   spaceId: string;
   agentId: string;
   signal?: AbortSignal;
-}): MemoryPageStore => createMemoryPageStore({ esClient, logger, spaceId, agentId, signal });
+}): MemoryPageStore => {
+  if (agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
+    throw new Error('Semantic Memory is only available to the Nightshift deductive investigator');
+  }
+  return createMemoryPageStore({ esClient, logger, spaceId, agentId, signal });
+};
 
 export const hydrateMemoryWorkspace = async ({
   session,

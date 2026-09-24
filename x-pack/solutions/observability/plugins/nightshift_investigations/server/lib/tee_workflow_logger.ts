@@ -38,6 +38,12 @@ export const teeWorkflowLogger = (
     (level: 'debug' | 'info' | 'warn' | 'error') =>
     (message: unknown, ...args: unknown[]) => {
       (pluginLogger[level] as (msg: unknown, ...rest: unknown[]) => void)(message, ...args);
+      // Debug logs may contain page ids, slugs, or bounded prompt previews useful for local
+      // diagnostics. Keep them in the plugin logger; workflow logs are persisted and broadly
+      // visible, so only forward operational info/warn/error lines there.
+      if (level === 'debug') {
+        return;
+      }
       const text = resolveMessage(message);
       if (level === 'error') {
         workflowLogger.error(text, args[0] instanceof Error ? args[0] : undefined);

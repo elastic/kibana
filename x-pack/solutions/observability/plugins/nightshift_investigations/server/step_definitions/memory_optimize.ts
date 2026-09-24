@@ -139,6 +139,22 @@ export const memoryOptimizeStepDefinition = ({
         throw error;
       }
 
+      if (summary && summary.writeFailureCount > 0) {
+        telemetry.reportSemanticMemoryOptimized({
+          agent_id: context.input.agent_id ?? 'unknown',
+          ...(context.input.conversation_id
+            ? { conversation_id: context.input.conversation_id }
+            : {}),
+          ...(context.input.round_id ? { round_id: context.input.round_id } : {}),
+          workflow_execution_id: workflowExecutionId,
+          outcome: 'failure',
+          write_failure_count: summary.writeFailureCount,
+        });
+        throw new Error(
+          `Memory optimize failed to persist ${summary.writeFailureCount} required operation(s)`
+        );
+      }
+
       if (!summary && context.input.agent_id === NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
         telemetry.reportSemanticMemoryOptimized({
           agent_id: context.input.agent_id,
