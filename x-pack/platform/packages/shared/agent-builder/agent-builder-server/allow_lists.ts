@@ -124,11 +124,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_view_file',
   'nightshift_sandbox_str_replace',
   'nightshift_sandbox_write_file',
-  // Short model-facing names. Keep the namespaced aliases during migration.
-  'bash',
-  'view_file',
-  'str_replace',
-  'write_file',
 
   // Nightshift – Decision trees
   'nightshift_submit_optimizer_result',

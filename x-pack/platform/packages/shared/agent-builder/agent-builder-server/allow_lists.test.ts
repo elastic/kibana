@@ -13,11 +13,9 @@ import {
 import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
 describe('isAllowedBuiltinTool', () => {
-  it('allows both namespaced and short Nightshift sandbox tool ids during migration', () => {
+  it('allows namespaced Nightshift sandbox tool ids', () => {
     expect(isAllowedBuiltinTool('nightshift_sandbox_bash')).toBe(true);
     expect(isAllowedBuiltinTool('nightshift_sandbox_view_file')).toBe(true);
-    expect(isAllowedBuiltinTool('bash')).toBe(true);
-    expect(isAllowedBuiltinTool('view_file')).toBe(true);
   });
 });
 
