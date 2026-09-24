@@ -16,3 +16,20 @@ export type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
 } from './types';
+
+export {
+  useAssignEscalation,
+  useListEscalations,
+  useCreateEscalation,
+  useAddToEscalation,
+  useUpdateEscalation,
+} from './escalations/hooks/use_escalations_api';
+
+export { escalationQueryKeys } from './escalations/query_keys';
+
+export {
+  useCurrentUserProfile,
+  useSuggestUserProfiles,
+  useUserProfiles,
+  userProfileQueryKeys,
+} from './user_profiles';

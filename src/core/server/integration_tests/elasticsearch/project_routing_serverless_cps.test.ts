@@ -63,7 +63,7 @@ describe('project_routing on serverless CPS', () => {
     const { startES, startKibana } = createTestServerlessInstances({
       adjustTimeout: (timeout: number) => jest.setTimeout(timeout),
       enableCPS: true,
-      // Match `yarn es serverless --projectType observability ...`
+      // Match `pnpm es serverless --projectType observability ...`
       projectType: 'oblt',
       // Setup-only: use superuser so tests can create temp indices.
       kibana: {

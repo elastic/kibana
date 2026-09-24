@@ -8,14 +8,12 @@
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useMatchedActionPolicies } from '@kbn/alerting-v2-rule-form';
 
-/** Max policies evaluated by _match_for_rule; counts may undercount when the space has more. */
-export const LINKED_ACTION_POLICIES_FETCH_LIMIT = 100;
-
 export interface UseLinkedActionPoliciesResult {
   totalCount: number;
   catchAllCount: number;
   matchingCriteriaCount: number;
-  /** True when the space has more policies than {@link LINKED_ACTION_POLICIES_FETCH_LIMIT} and some may not have been evaluated. */
+  evaluatedCount: number;
+  /** True when some policies in the space were not evaluated and counts may be incomplete. */
   isCountTruncated: boolean;
   isLoading: boolean;
   isError: boolean;
@@ -24,13 +22,17 @@ export interface UseLinkedActionPoliciesResult {
 
 export const useLinkedActionPolicies = (tags: string[]): UseLinkedActionPoliciesResult => {
   const http = useService(CoreStart('http'));
-  const { isLoading, error, items, total } = useMatchedActionPolicies({ http, tags });
+  const { isLoading, error, items, evaluatedCount, isTruncated } = useMatchedActionPolicies({
+    http,
+    tags,
+  });
 
   return {
     totalCount: items.length,
-    catchAllCount: items.filter((item) => item.category === 'catch-all').length,
+    catchAllCount: items.filter((item) => item.category === 'catch_all').length,
     matchingCriteriaCount: items.filter((item) => item.category === 'tags').length,
-    isCountTruncated: total > LINKED_ACTION_POLICIES_FETCH_LIMIT,
+    evaluatedCount,
+    isCountTruncated: isTruncated,
     isLoading,
     isError: error != null,
     error,

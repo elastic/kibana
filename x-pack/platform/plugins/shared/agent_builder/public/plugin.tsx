@@ -32,6 +32,7 @@ import {
   AgentService,
   AttachmentsService,
   RenderersService,
+  ConversationEventsService,
   ChatService,
   ConversationsService,
   ConversationTemplatesService,
@@ -50,9 +51,11 @@ import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicConversationTemplatesContract } from './services/conversation_templates';
 import { createPublicRenderersContract } from './services/renderers';
+import { createPublicConversationEventsContract } from './services/conversation_events';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
+import { createPublicConversationsContract } from './services/conversations';
 import { registerWorkflowSteps } from './step_types';
 import type {
   ConfigSchema,
@@ -177,6 +180,7 @@ export class AgentBuilderPlugin
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
     const renderersService = new RenderersService();
+    const conversationEventsService = new ConversationEventsService();
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
@@ -262,6 +266,7 @@ export class AgentBuilderPlugin
       agentService,
       attachmentsService,
       renderersService,
+      conversationEventsService,
       chatService,
       conversationsService,
       conversationTemplatesService,
@@ -369,6 +374,8 @@ export class AgentBuilderPlugin
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      conversationEvents: createPublicConversationEventsContract({ conversationEventsService }),
+      conversations: createPublicConversationsContract({ conversationsService }),
       getAgentBuilderAccess: createPublicEmbeddableChatAccess({
         accessChecker,
         application: core.application,
