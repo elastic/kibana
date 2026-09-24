@@ -30,6 +30,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const config = getService('config');
   const retry = getService('retry');
+  const browser = getService('browser');
   const comboBox = getService('comboBox');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
@@ -475,6 +476,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           owner,
         });
         await cases.casesTable.waitForCasesToBeListed();
+        // Pre-open the accordion so it is ready when the case view loads.
+        await cases.common.openLegacyCustomFieldsAccordion(owner);
         await cases.casesTable.goToFirstListedCase();
         await header.waitUntilLoadingHasFinished();
       });
@@ -484,18 +487,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a custom field correctly', async () => {
-        // The legacy custom fields accordion is closed by default; open it before asserting.
-        await testSubjects.click('case-view-sidebar-legacy-custom-fields-toggle');
+        // Section starts in view mode — use view-mode selectors to read initial values.
+        const textViewEl = await testSubjects.find(`text-custom-field-view-${customFields[0].key}`);
+        expect(await textViewEl.getVisibleText()).equal('this is a text field value');
 
-        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
-        expect(await textField.getVisibleText()).equal('this is a text field value');
-
-        const toggle = await testSubjects.find(
-          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        const toggleViewEl = await testSubjects.find(
+          `toggle-custom-field-view-${customFields[1].key}`
         );
-        expect(await toggle.getAttribute('aria-checked')).equal('true');
+        expect(await toggleViewEl.getAttribute('aria-label')).equal('On');
 
-        await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
+        // Enter section edit mode by clicking the text field row.
+        await testSubjects.click(`template-field-edit-${customFields[0].key}`);
 
         await retry.waitFor('custom field edit form to exist', async () => {
           return await testSubjects.exists(
@@ -509,19 +511,32 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await inputField.type(' edited!!');
 
-        await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
+        // Toggle the toggle field while in section edit mode.
+        await testSubjects.click(`case-toggle-custom-field-form-field-${customFields[1].key}`);
+
+        // Save all pending changes. The save button lives in the pinned accordion header which can
+        // sit behind the sticky app header — scroll it into the viewport center first.
+        const saveBtn = await testSubjects.find('section-edit-save');
+        await browser.execute(
+          'arguments[0].scrollIntoView({behavior:"instant",block:"center"})',
+          saveBtn
+        );
+        await saveBtn.click();
 
         await header.waitUntilLoadingHasFinished();
 
-        await toggle.click();
+        // Back in view mode: verify the updated values.
+        const updatedText = await testSubjects.find(
+          `text-custom-field-view-${customFields[0].key}`
+        );
+        expect(await updatedText.getVisibleText()).equal('this is a text field value edited!!');
 
-        await header.waitUntilLoadingHasFinished();
+        const updatedToggle = await testSubjects.find(
+          `toggle-custom-field-view-${customFields[1].key}`
+        );
+        expect(await updatedToggle.getAttribute('aria-label')).equal('Off');
 
-        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
-
-        expect(await toggle.getAttribute('aria-checked')).equal('false');
-
-        // validate user action
+        // validate user action (one per changed field)
         const userActions = await find.allByCssSelector(
           '[data-test-subj*="customFields-update-action"]'
         );
