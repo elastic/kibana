@@ -10,6 +10,7 @@ import type {
   ExecutionPartialRunSummary,
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
+import { isToolCallStep } from '@kbn/agent-builder-common';
 import type { RoundModelUsageStats } from '@kbn/agent-builder-common/chat';
 import type { ModelProvider, ModelProviderStats } from '@kbn/agent-builder-server/runner';
 import { getCurrentTraceId } from '../../../../tracing';
@@ -49,7 +50,8 @@ export const getModelUsage = (
  * Steps and partial run summary of an execution that did not complete. The steps are the ones this
  * execution owns (fresh: everything; resume: the resolved paused calls and the new steps), projected
  * from the latest graph state the stream carried, including tool progress and a `todo_write` the
- * graph never got to fold in.
+ * graph never got to fold in. Tool calls still in flight when the run was interrupted are marked
+ * `interrupted`.
  */
 export const buildInterruptedRound = ({
   tracker,
@@ -67,8 +69,19 @@ export const buildInterruptedRound = ({
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): { steps: ConversationRoundStep[]; summary: ExecutionPartialRunSummary } => {
   const traceId = getCurrentTraceId();
+  const state = tracker.latestState();
+  // The latest `values` chunk is the post-LLM super-step while tools run: a mid-tool interruption
+  // leaves the whole group pending, a mid-LLM one leaves nothing pending.
+  const inFlight = new Set(state.pendingToolCallIds);
+  const steps = tracker
+    .executionProjection(state)
+    .map((step) =>
+      isToolCallStep(step) && inFlight.has(step.tool_call_id)
+        ? { ...step, interrupted: true as const }
+        : step
+    );
   return {
-    steps: tracker.executionProjection(),
+    steps,
     summary: {
       model_usage: getModelUsage(modelProvider.getUsageStats(), mainConnectorId),
       time_to_last_token: endTime.getTime() - startTime.getTime(),
