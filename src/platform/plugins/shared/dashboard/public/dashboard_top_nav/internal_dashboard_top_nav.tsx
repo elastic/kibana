@@ -370,16 +370,6 @@ export function InternalDashboardTopNav({
     };
   }, [embedSettings, forceHideUnifiedSearch, fullScreenMode, isChromeVisible, viewMode]);
 
-  // Disable the date picker when the dashboard has data views but none are time-based.
-  const showDatePicker = useMemo(() => {
-    if (!visibilityProps.showDatePicker) {
-      return false;
-    }
-    const disabled =
-      (allDataViews?.length ?? 0) > 0 && !allDataViews?.some((dv) => dv.isTimeBased());
-    return { disabled };
-  }, [visibilityProps.showDatePicker, allDataViews]);
-
   const shareAction = useDashboardShareAction({ redirectTo });
   const enhanceAction = useEnhanceDashboardAction(dashboardApi);
   const experimentalDashboardAiAction = useMemo(
@@ -519,7 +509,6 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
-          showDatePicker={showDatePicker}
           query={query as Query | undefined}
           screenTitle={title}
           useDefaultBehaviors={true}

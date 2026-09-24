@@ -113,10 +113,6 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
       defaultMessage: 'All time',
     }),
-  getNoTimeFieldTooltip: () =>
-    i18n.translate('unifiedSearch.query.queryBar.noTimeFieldTooltip', {
-      defaultMessage: 'Date range selection requires a time field on the data view.',
-    }),
   getSendToBackgroundLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.sendToBackground', {
       defaultMessage: 'Send to background',
@@ -129,11 +125,7 @@ const getWrapperWithTooltip = (
   query?: Query | AggregateQuery,
   tooltipContent?: string
 ) => {
-  if (!enableTooltip) {
-    return children;
-  }
-
-  if (query && isOfAggregateQueryType(query)) {
+  if (enableTooltip && query && isOfAggregateQueryType(query)) {
     const textBasedLanguage = getAggregateQueryMode(query);
     const displayName = getLanguageDisplayName(textBasedLanguage);
     return (
@@ -153,11 +145,7 @@ const getWrapperWithTooltip = (
     );
   }
 
-  return (
-    <EuiToolTip position="top" content={strings.getNoTimeFieldTooltip()}>
-      {children}
-    </EuiToolTip>
-  );
+  return children;
 };
 
 // @internal

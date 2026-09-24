@@ -11,22 +11,8 @@
  * Tests for timepicker and data view switching behavior.
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-
-const expectTimePickerState = async (
-  datePicker: PageObjects['datePicker'],
-  expected: 'enabled' | 'disabled'
-) => {
-  await expect(datePicker.getTimePickerControl()).toBeVisible();
-
-  if (expected === 'disabled') {
-    await expect(datePicker.getDisabledDatePickerIndicator()).toBeAttached();
-  } else {
-    await expect(datePicker.getDisabledDatePickerIndicator()).toBeHidden();
-  }
-};
 
 spaceTest.describe('Data view without timefield', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -50,9 +36,10 @@ spaceTest.describe('Data view without timefield', { tag: '@local-stateful-classi
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('should display a disabled timepicker', async ({ pageObjects }) => {
-    await expect(pageObjects.datePicker.getTimePickerControl()).toBeVisible();
-    await expect(pageObjects.datePicker.getDisabledDatePickerIndicator()).toBeAttached();
+  spaceTest('should not display a timepicker', async ({ pageObjects }) => {
+    // Verify timepicker does not exist for data view without timefield
+    const timePickerExists = await pageObjects.datePicker.timePickerExists();
+    expect(timePickerExists).toBe(false);
   });
 
   spaceTest('should adapt sidebar fields when switching', async ({ page, pageObjects }) => {
@@ -78,8 +65,9 @@ spaceTest.describe('Data view without timefield', { tag: '@local-stateful-classi
       await pageObjects.discover.selectDataView('with-timefield');
       await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await expect(pageObjects.datePicker.getTimePickerControl()).toBeVisible();
-      await expect(pageObjects.datePicker.getDisabledDatePickerIndicator()).toBeHidden();
+      // Verify timepicker exists
+      const timePickerExists = await pageObjects.datePicker.timePickerExists();
+      expect(timePickerExists).toBe(true);
     }
   );
 
@@ -88,11 +76,21 @@ spaceTest.describe('Data view without timefield', { tag: '@local-stateful-classi
     async ({ page, pageObjects }) => {
       await pageObjects.discover.selectDataView('without-timefield');
       await pageObjects.dataGrid.waitForDocTableRendered();
-      await expectTimePickerState(pageObjects.datePicker, 'disabled');
+
+      // Wait for timepicker to disappear
+      await expect(async () => {
+        const timePickerExists = await pageObjects.datePicker.timePickerExists();
+        expect(timePickerExists).toBe(false);
+      }).toPass();
 
       await pageObjects.discover.selectDataView('with-timefield');
       await pageObjects.dataGrid.waitForDocTableRendered();
-      await expectTimePickerState(pageObjects.datePicker, 'enabled');
+
+      // Wait for timepicker to appear
+      await expect(async () => {
+        const timePickerExists = await pageObjects.datePicker.timePickerExists();
+        expect(timePickerExists).toBe(true);
+      }).toPass();
 
       // Navigate back using browser back button
       await page.goBack();
@@ -102,7 +100,11 @@ spaceTest.describe('Data view without timefield', { tag: '@local-stateful-classi
         'without-timefield'
       );
 
-      await expectTimePickerState(pageObjects.datePicker, 'disabled');
+      // Verify timepicker disappeared again
+      await expect(async () => {
+        const timePickerExists = await pageObjects.datePicker.timePickerExists();
+        expect(timePickerExists).toBe(false);
+      }).toPass();
     }
   );
 

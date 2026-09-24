@@ -101,11 +101,11 @@ export const DiscoverTopNav = ({
   );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
-    if (dataView.type === DataViewType.ROLLUP) {
-      return false;
-    }
-    return { disabled: !dataView.isTimeBased() };
-  }, [dataView]);
+    // always show the timepicker for ES|QL mode
+    return (
+      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+    );
+  }, [dataView, isEsqlMode]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -347,11 +347,8 @@ export const DiscoverTopNav = ({
       })
     : undefined;
   const datePicker =
-    typeof showDatePicker === 'object'
-      ? {
-          disabled: showDatePicker.disabled || disableEmptyEsqlControls,
-          disabledReason: emptyEsqlQueryDisabledTooltip,
-        }
+    showDatePicker && disableEmptyEsqlControls
+      ? { disabled: true, disabledReason: emptyEsqlQueryDisabledTooltip }
       : showDatePicker;
   const esqlEditorInitialState = useMemo(
     () =>
