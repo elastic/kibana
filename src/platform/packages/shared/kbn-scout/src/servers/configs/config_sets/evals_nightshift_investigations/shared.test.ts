@@ -10,6 +10,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ScoutServerConfig } from '../../../../types';
 
 // `src/` packages cannot import `@kbn/nightshift-shared` (x-pack), so read the flag from its source
 // to fail if it is renamed again without this config set following (see #292333).
@@ -25,17 +26,28 @@ const SANDBOX_KIBANA_CONFIG = join(
   'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/kibana.sandbox.yml'
 );
 
-const loadConfig = (env: Record<string, string>) => {
-  let loaded: typeof import('./classic.stateful.config') | undefined;
+const loadServers = (modulePath: string, env: Record<string, string>): ScoutServerConfig => {
+  let servers: ScoutServerConfig | undefined;
   jest.isolateModules(() => {
     Object.assign(process.env, env);
-    loaded = jest.requireActual('./classic.stateful.config');
+    ({ servers } = jest.requireActual(modulePath));
   });
-  if (!loaded) throw new Error('config failed to load');
-  return loaded;
+  if (!servers) throw new Error(`${modulePath} failed to load`);
+  return servers;
 };
 
-describe('evals_nightshift_investigations config set', () => {
+describe.each([
+  {
+    arch: 'stateful',
+    configPath: './stateful/classic.stateful.config',
+    tracingPath: '../evals_tracing/stateful/classic.stateful.config',
+  },
+  {
+    arch: 'serverless',
+    configPath: './serverless/observability_complete.serverless.config',
+    tracingPath: '../evals_tracing/serverless/observability_complete.serverless.config',
+  },
+])('evals_nightshift_investigations config set ($arch)', ({ arch, configPath, tracingPath }) => {
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -50,28 +62,34 @@ describe('evals_nightshift_investigations config set', () => {
     process.env = originalEnv;
   });
 
+  it(`runs on the ${arch} evals_tracing config`, () => {
+    const servers = loadServers(configPath, { SANDBOX_KIBANA_CONFIG });
+    expect(servers.serverless ?? false).toBe(arch === 'serverless');
+    if (arch === 'serverless') {
+      expect(servers.kbnTestServer.serverArgs).toContain('--serverless=oblt');
+    }
+  });
+
   // The config set must ignore NIGHTSHIFT_DATASETS: Scout is reused when only the selection changes.
   it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
     'starts plain evals_tracing without the sandbox Kibana config (NIGHTSHIFT_DATASETS=%s)',
     (selection) => {
-      const { servers } = loadConfig({
+      const servers = loadServers(configPath, {
         SANDBOX_API_KEY: 'key',
         ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
       });
-      const { servers: tracing } = jest.requireActual(
-        '../../evals_tracing/stateful/classic.stateful.config'
-      );
+      const tracing = loadServers(tracingPath, {});
       expect(servers.kbnTestServer.serverArgs).toEqual(tracing.kbnTestServer.serverArgs);
     }
   );
 
   it('enables the investigation engine and loads the sandbox config with SANDBOX_KIBANA_CONFIG', () => {
-    const { servers } = loadConfig({ SANDBOX_KIBANA_CONFIG });
-    const args = servers.kbnTestServer.serverArgs;
+    const args = loadServers(configPath, { SANDBOX_KIBANA_CONFIG }).kbnTestServer.serverArgs;
 
     expect(NIGHTSHIFT_ENABLED_FLAG).toBeTruthy();
     expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`);
     expect(args).toContain('--xpack.nightshift_investigations.enabled=true');
+    expect(args).toContain('--xpack.evals.enabled=true');
     expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
     expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
       `--config=${SANDBOX_KIBANA_CONFIG}`,
@@ -81,7 +99,7 @@ describe('evals_nightshift_investigations config set', () => {
 
   it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', () => {
     expect(() =>
-      loadConfig({ SANDBOX_KIBANA_CONFIG: '/does/not/exist/kibana.sandbox.yml' })
+      loadServers(configPath, { SANDBOX_KIBANA_CONFIG: '/does/not/exist/kibana.sandbox.yml' })
     ).toThrow(
       'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
     );

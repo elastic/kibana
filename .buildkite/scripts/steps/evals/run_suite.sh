@@ -41,6 +41,9 @@ EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
 # Per-suite step timeout for suites that legitimately need longer than the 120m default.
 EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
+# The suite's Scout arch/domain, for steps (e.g. the weekly pipeline) that don't pass them.
+EVAL_SCOUT_ARCH="${EVAL_SCOUT_ARCH:-$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutArch // empty' 2>/dev/null || true)}"
+EVAL_SCOUT_DOMAIN="${EVAL_SCOUT_DOMAIN:-$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutDomain // empty' 2>/dev/null || true)}"
 
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
@@ -283,6 +286,9 @@ EOF
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+          EVAL_SCOUT_ARCH: "${EVAL_SCOUT_ARCH:-}"
+          EVAL_SCOUT_DOMAIN: "${EVAL_SCOUT_DOMAIN:-}"
+          EVALS_SCOUT_ARCH: "${EVALS_SCOUT_ARCH:-}"
           EVAL_GREP: "${EVAL_GREP:-}"
           EVAL_GREP_INVERT: "${EVAL_GREP_INVERT:-}"
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
@@ -429,6 +435,9 @@ EOF
         EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
         EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
         EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+        EVAL_SCOUT_ARCH: "${EVAL_SCOUT_ARCH:-}"
+        EVAL_SCOUT_DOMAIN: "${EVAL_SCOUT_DOMAIN:-}"
+        EVALS_SCOUT_ARCH: "${EVALS_SCOUT_ARCH:-}"
 EOF
       elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
         # Fresh-baseline mode: emit the post-comparison step inside the fanout so
@@ -503,8 +512,32 @@ if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
   unset _scout_hook_config _scout_hook_output _scout_hook_name
 fi
 
+# Scout arch/domain come from the suite's scoutArch/scoutDomain (EVAL_SCOUT_ARCH/EVAL_SCOUT_DOMAIN),
+# stateful/classic by default. EVALS_SCOUT_ARCH=stateful opts a serverless suite back into stateful,
+# matching `node scripts/evals start --scout-arch`.
+SCOUT_ARCH="${EVAL_SCOUT_ARCH:-stateful}"
+SCOUT_DOMAIN="${EVAL_SCOUT_DOMAIN:-classic}"
+if [[ -n "${EVALS_SCOUT_ARCH:-}" && "${EVALS_SCOUT_ARCH}" != "$SCOUT_ARCH" ]]; then
+  if [[ "${EVALS_SCOUT_ARCH}" != "stateful" ]]; then
+    echo "EVALS_SCOUT_ARCH=${EVALS_SCOUT_ARCH} is not supported for suite ${EVAL_SUITE_ID}: only stateful can override its scoutArch (${SCOUT_ARCH})"
+    exit 1
+  fi
+  SCOUT_ARCH="stateful"
+  SCOUT_DOMAIN="classic"
+fi
+echo "Scout target: ${SCOUT_ARCH}/${SCOUT_DOMAIN}"
+
+# Serverless ES serves https with the dev CA and authenticates as elastic_serverless, so read the
+# credentials Scout wrote to local.json instead of assuming elastic:changeme.
+es_curl() {
+  local user password
+  user="$(jq -r '.auth.username // "elastic"' .scout/servers/local.json)"
+  password="$(jq -r '.auth.password // "changeme"' .scout/servers/local.json)"
+  curl --cacert src/platform/packages/shared/kbn-dev-utils/certs/ca.crt -u "${user}:${password}" "$@"
+}
+
 # Start Scout server in background (run Kibana from the distributable)
-SCOUT_SERVER_ARGS=(start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
+SCOUT_SERVER_ARGS=(start-server --location local --arch "$SCOUT_ARCH" --domain "$SCOUT_DOMAIN" --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
 if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then
   SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
 else
@@ -558,15 +591,18 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
 
     echo "--- Waiting for Elasticsearch to be ready at $ES_URL"
     ES_READY="false"
-    for _ in {1..120}; do
+    # Serverless starts three ES containers (and may pull the image) before it is ready.
+    ES_READY_ATTEMPTS=120
+    [[ "$SCOUT_ARCH" == "serverless" ]] && ES_READY_ATTEMPTS=600
+    for (( _attempt = 1; _attempt <= ES_READY_ATTEMPTS; _attempt++ )); do
       if ! kill -0 "$SCOUT_PID" 2>/dev/null; then
         echo "Scout server exited before Elasticsearch became ready"
         wait "$SCOUT_PID" || true
         exit 1
       fi
 
-      if curl -sSf -u elastic:changeme \
-        "$ES_URL/_cluster/health?wait_for_status=yellow&timeout=1s" >/dev/null; then
+      if es_curl -sSf \
+        "$ES_URL/_cluster/health?wait_for_status=yellow&timeout=1s" >/dev/null 2>&1; then
         ES_READY="true"
         break
       fi
@@ -581,21 +617,21 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
 
     echo "--- Enabling EIS Cloud Connected Mode (CCM) on $ES_URL"
 
-    curl -sSf -u elastic:changeme \
+    es_curl -sSf \
       -H 'content-type: application/json' \
       -X PUT "$ES_URL/_inference/_ccm" \
       -d "{\"api_key\":\"${KIBANA_EIS_CCM_API_KEY:?}\"}" >/dev/null
 
     echo "--- Waiting for EIS inference endpoints"
     for attempt in {1..10}; do
-      if curl -sSf -u elastic:changeme "$ES_URL/_inference/_all" \
+      if es_curl -sSf "$ES_URL/_inference/_all" \
         | jq -e '.endpoints | any(.task_type=="chat_completion" and .service=="elastic")' >/dev/null; then
         echo "✅ EIS endpoints available"
         break
       fi
       if [[ "$attempt" == "10" ]]; then
         echo "❌ Timed out waiting for EIS endpoints"
-        curl -sSf -u elastic:changeme "$ES_URL/_inference/_all" || true
+        es_curl -sSf "$ES_URL/_inference/_all" || true
         exit 1
       fi
       sleep 3

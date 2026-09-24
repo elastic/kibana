@@ -12,8 +12,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
-
-const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
+import { withEvalsTracing } from '../shared';
 
 const gcsCredentials = process.env.GCS_CREDENTIALS;
 let gcsSecureFile: string | undefined;
@@ -33,29 +32,8 @@ if (gcsCredentials) {
     }
   });
 }
-const defaultExporters = JSON.stringify([
-  {
-    http: {
-      url: 'http://localhost:4318/v1/traces',
-    },
-  },
-  {
-    phoenix: {
-      base_url: 'http://localhost:6006',
-      public_url: 'http://localhost:6006',
-      project_name: 'kibana-evals',
-    },
-  },
-]);
 
-// When TRACING_EXPORTERS is set (e.g. in CI), use it instead of the localhost defaults.
-const { TRACING_EXPORTERS: tracingExporters } = process.env;
-if (tracingExporters) {
-  JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
-}
-const isCi = Boolean(process.env.CI);
-const shouldEnableTracing = Boolean(tracingExporters) || !isCi;
-const exporters = tracingExporters ?? defaultExporters;
+const tracingConfig = withEvalsTracing(defaultConfig);
 
 /**
  * Custom Scout stateful server configuration that enables OTLP trace exporting
@@ -65,50 +43,9 @@ const exporters = tracingExporters ?? defaultExporters;
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_tracing
  */
 export const servers: ScoutServerConfig = {
-  ...defaultConfig,
+  ...tracingConfig,
   esTestCluster: {
-    ...defaultConfig.esTestCluster,
+    ...tracingConfig.esTestCluster,
     secureFiles: [...(gcsSecureFile ? [gcsSecureFile] : [])],
-    serverArgs: [
-      ...defaultConfig.esTestCluster.serverArgs,
-      `xpack.inference.elastic.url=${EIS_QA_URL}`,
-    ],
-  },
-  kbnTestServer: {
-    ...defaultConfig.kbnTestServer,
-    env: {
-      ...defaultConfig.kbnTestServer.env,
-      ...(shouldEnableTracing
-        ? {
-            ELASTIC_APM_ACTIVE: 'false',
-            ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
-          }
-        : {}),
-    },
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      '--xpack.evals.enabled=true',
-      ...(shouldEnableTracing
-        ? [
-            '--elastic.apm.active=false',
-            '--elastic.apm.contextPropagationOnly=false',
-            '--telemetry.enabled=true',
-            '--telemetry.tracing.enabled=true',
-            '--telemetry.tracing.sample_rate=1',
-            `--telemetry.tracing.exporters=${exporters}`,
-            /* Disable tracing redaction so exported spans carry real prompt/response and
-             * tool-call content when inspecting eval runs in Phoenix or Kibana's Tracing UI.
-             * Every config set that extends this one (agent-builder, security, workflows,
-             * entity-analytics, etc.) inherits these overrides, so `Skill Invoked` / `Tool Calls`
-             * evaluators stop reading empty tool-call attributes across the board. See elastic/kibana#291754. */
-            '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
-            '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',
-            '--uiSettings.overrides.agentBuilder:tracing:includeLlmResponses=true',
-            '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
-            '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
-            '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
-          ]
-        : []),
-    ],
   },
 };

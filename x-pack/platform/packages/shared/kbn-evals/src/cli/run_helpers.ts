@@ -31,6 +31,7 @@ import {
   isExportProfileImplicitLocal,
 } from './profiles';
 import { runScoutHook } from './scout_hook';
+import { resolveScoutTarget, SCOUT_ARCH_OVERRIDE_ENV, type ScoutTarget } from './scout_target';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
 import {
@@ -481,12 +482,27 @@ export const buildEvalRunArgs = ({
     runArgs.push('--space-ids', spaceIds.join(','));
   }
 
+  const scoutArch = flagsReader.string('scout-arch');
+  if (scoutArch) {
+    runArgs.push('--scout-arch', scoutArch);
+  }
+
   if (skipServer) {
     runArgs.push('--skip-server');
   }
 
   return runArgs;
 };
+
+/** The suite's Scout arch/domain, with `--scout-arch` (or `EVALS_SCOUT_ARCH`) applied. */
+export const resolveEvalScoutTarget = (
+  flagsReader: FlagsReader,
+  suite?: EvalSuiteDefinition
+): ScoutTarget =>
+  resolveScoutTarget(
+    suite,
+    flagsReader.string('scout-arch') ?? process.env[SCOUT_ARCH_OVERRIDE_ENV]
+  );
 
 export const evalRunFlags: FlagOptions = {
   string: [
@@ -502,6 +518,7 @@ export const evalRunFlags: FlagOptions = {
     'export-profile',
     'evaluations-kbn-url',
     'evaluations-kbn-api-key',
+    'scout-arch',
   ],
   boolean: ['skip-server', 'dry-run', 'skip-init'],
   alias: { model: 'project', judge: 'evaluation-connector-id' },

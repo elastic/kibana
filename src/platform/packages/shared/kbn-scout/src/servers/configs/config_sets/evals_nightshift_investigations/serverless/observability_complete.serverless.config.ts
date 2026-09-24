@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as tracing } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as tracing } from '../../evals_tracing/serverless/observability_complete.serverless.config';
 import { withNightshiftInvestigations } from '../shared';
 
 export const servers: ScoutServerConfig = withNightshiftInvestigations(tracing);

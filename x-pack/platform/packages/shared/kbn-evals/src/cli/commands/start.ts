@@ -12,11 +12,13 @@ import {
   ensureEvalInit,
   resolveEvalSuite,
   resolveEvalRunContext,
+  resolveEvalScoutTarget,
   buildEvalRunArgs,
   buildEvalRunEnv,
   formatEvalCliCommand,
   evalRunFlags,
 } from '../run_helpers';
+import { formatScoutTarget } from '../scout_target';
 
 export const startCmd: Command<void> = {
   name: 'start',
@@ -33,7 +35,11 @@ export const startCmd: Command<void> = {
     node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
     node scripts/evals start --suite agent-builder --grep "product documentation"
     node scripts/evals start --suite agent-builder --skip-server
+    node scripts/evals start --suite nightshift-investigations --scout-arch stateful
     node scripts/evals stop
+
+  The Scout arch/domain comes from the suite's scoutArch/scoutDomain in evals.suites.json
+  (stateful/classic by default). --scout-arch (or EVALS_SCOUT_ARCH) overrides the arch.
   `,
   flags: evalRunFlags,
   run: async ({ log, flagsReader }) => {
@@ -45,6 +51,7 @@ export const startCmd: Command<void> = {
       log,
       flagsReader
     );
+    const scoutTarget = resolveEvalScoutTarget(flagsReader, suite);
 
     const {
       evaluationConnectorId,
@@ -66,7 +73,11 @@ export const startCmd: Command<void> = {
     } else {
       log.info(`Models:    all (from KIBANA_TESTING_INFERENCE_ENDPOINTS)`);
     }
-    log.info(`Server:    ${skipServer ? 'skip (using existing)' : 'managed'}`);
+    log.info(
+      `Server:    ${
+        skipServer ? 'skip (using existing)' : `managed (${formatScoutTarget(scoutTarget)})`
+      }`
+    );
     if (suite?.serverConfigSet) {
       log.info(`Config:    ${suite.serverConfigSet}`);
     }
@@ -100,6 +111,7 @@ export const startCmd: Command<void> = {
         profileEnvOverrides,
         suiteScoutEnv,
         serverConfigSet: suite?.serverConfigSet,
+        scoutTarget,
         requiresEisCcm,
       });
     }

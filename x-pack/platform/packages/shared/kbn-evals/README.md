@@ -218,6 +218,8 @@ Run a suite on any branch without a PR:
 | `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
 | `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
 | `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
+| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
+| `EVALS_SCOUT_ARCH`                | no                 | Set to `stateful` to run a serverless suite on stateful/classic                                              |
 | `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
@@ -280,6 +282,21 @@ A suite whose Scout server needs secrets from the evals config can map them into
 ```
 
 The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
+
+### Serverless suites (`scoutArch` / `scoutDomain`)
+
+Suites run on a stateful/classic Scout cluster unless their `evals.suites.json` entry says otherwise:
+
+```json
+{
+  "id": "my-suite",
+  "serverConfigSet": "evals_my_suite",
+  "scoutArch": "serverless",
+  "scoutDomain": "observability_complete"
+}
+```
+
+`node scripts/evals start` and `run_suite.sh` then start Scout with `--arch serverless --domain observability_complete`, so the config set needs a matching `serverless/observability_complete.serverless.config.ts` (the serverless `evals_tracing` config is a starting point). Serverless Elasticsearch runs in Docker and has no keystore, so `GCS_CREDENTIALS` is not available to it. `--scout-arch stateful` (or `EVALS_SCOUT_ARCH=stateful`) runs such a suite on stateful/classic instead; switching arch restarts Scout.
 
 ### Playwright config
 

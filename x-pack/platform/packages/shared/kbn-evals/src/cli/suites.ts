@@ -47,6 +47,10 @@ export interface EvalSuiteMetadata {
   tags?: string[];
   ciLabels?: string[];
   serverConfigSet?: string;
+  /** Scout `--arch` for the suite's stack (`stateful` or `serverless`), stateful by default. */
+  scoutArch?: string;
+  /** Scout `--domain` for the suite's stack (e.g. `observability_complete`), `classic` by default. */
+  scoutDomain?: string;
   /**
    * Repo-relative bash script that adds env for the suite's Scout server and Playwright run.
    * It reads the evals config JSON on stdin and prints `{ "env"?: {...} }`.
@@ -68,6 +72,8 @@ export interface EvalSuiteDefinition {
   description?: string;
   source: 'metadata' | 'discovery';
   serverConfigSet?: string;
+  scoutArch?: string;
+  scoutDomain?: string;
   scoutHook?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
@@ -176,6 +182,8 @@ const normalizeSuite = (
     description: metadata?.description,
     source: metadata ? 'metadata' : 'discovery',
     serverConfigSet: metadata?.serverConfigSet,
+    scoutArch: metadata?.scoutArch,
+    scoutDomain: metadata?.scoutDomain,
     scoutHook: metadata?.scoutHook,
     shards: metadata?.shards,
     stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
