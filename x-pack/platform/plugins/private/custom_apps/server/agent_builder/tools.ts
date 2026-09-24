@@ -11,25 +11,10 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import euiCatalogSchema from '@kbn/a2ui-eui-catalog/catalog.json';
 import { describeCatalog } from '../../common/describe_catalog';
-import {
-  CHART_SCHEMA,
-  KBN_LENS_PANEL_SCHEMA,
-  KBN_TIME_FILTER_SCHEMA,
-} from '../../common/kbn_components_schema';
+import { catalogForPrompt as fullCatalog } from '../../common/catalog_schema';
 import { PLUGIN_ID } from '../../common/constants';
 import { createCustomApp, InvalidCustomAppError, listCustomApps } from '../custom_app_service';
-
-const fullCatalog = {
-  ...euiCatalogSchema,
-  components: {
-    ...euiCatalogSchema.components,
-    Chart: CHART_SCHEMA,
-    KbnTimeFilter: KBN_TIME_FILTER_SCHEMA,
-    KbnLensPanel: KBN_LENS_PANEL_SCHEMA,
-  },
-} as unknown as Parameters<typeof describeCatalog>[0];
 
 const createAppSchema = z.object({
   definition: z
@@ -93,6 +78,14 @@ export const createCreateAppTool = (): BuiltinToolDefinition<typeof createAppSch
 
     Components are a flat list; parents reference children by id, and exactly one
     component must have the id "root".
+
+    All panels in an app share ONE data model, so JSON pointers are app-wide and
+    two panels must never claim the same top-level key. That sharing is what lets
+    a filter panel drive another panel's query. Name paths accordingly:
+      /filters/...        controls one panel owns and other panels' queries read
+      /<queryName>        query results, named after what they hold
+      /ui/<panelId>/...   scratch state local to a panel, such as a modal's
+                          open flag, prefixed so it cannot collide
 
     ${describeCatalog(fullCatalog)}
 

@@ -19,6 +19,19 @@ export interface Surface {
   dataModel: DataModel;
 }
 
+export interface MessageProcessorOptions {
+  /**
+   * When set, every surface shares this one data model instead of getting its
+   * own, and a surface's initial `dataModel` is merged into it rather than
+   * replacing it. That lets one surface drive another — a filter panel feeding a
+   * chart panel's query, or a row action opening an overlay declared elsewhere.
+   *
+   * The cost is that JSON pointers become app-wide: two surfaces must not both
+   * claim `/selected`.
+   */
+  sharedDataModel?: DataModel;
+}
+
 /**
  * Applies A2UI messages to a set of surfaces. Only the four document-shaped
  * message types are handled; the agent round-trip messages
@@ -28,6 +41,8 @@ export class MessageProcessor {
   private readonly surfaces = new Map<string, Surface>();
   private readonly listeners = new Set<() => void>();
   private version = 0;
+
+  constructor(private readonly options: MessageProcessorOptions = {}) {}
 
   getSurface = (surfaceId: string): Surface | undefined => this.surfaces.get(surfaceId);
 
@@ -51,12 +66,14 @@ export class MessageProcessor {
   apply = (message: A2uiMessage, { silent = false }: { silent?: boolean } = {}): void => {
     if ('createSurface' in message) {
       const { surfaceId, catalogId, sendDataModel, components, dataModel } = message.createSurface;
+      const shared = this.options.sharedDataModel;
+      if (shared) shared.merge((dataModel ?? {}) as Record<string, JsonValue>);
       this.surfaces.set(surfaceId, {
         id: surfaceId,
         catalogId,
         sendDataModel: sendDataModel ?? false,
         components: new Map((components ?? []).map((c) => [c.id, c])),
-        dataModel: new DataModel((dataModel ?? {}) as JsonValue),
+        dataModel: shared ?? new DataModel((dataModel ?? {}) as JsonValue),
       });
     } else if ('updateComponents' in message) {
       const { surfaceId, components } = message.updateComponents;

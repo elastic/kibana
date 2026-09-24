@@ -118,6 +118,28 @@ describe.each(CUSTOM_APP_TEMPLATES.map((t) => [t.name, t] as const))(
       }
     });
 
+    it('never has two panels claim the same top-level data model key', () => {
+      // Panels share one data model, so `/selected` seeded by two panels would
+      // silently overwrite: one panel's modal would open on the other's row.
+      const owners = new Map<string, string>();
+      const claim = (key: string, panelId: string) => {
+        expect({ key, owner: owners.get(key) ?? panelId }).toEqual({ key, owner: panelId });
+        owners.set(key, panelId);
+      };
+
+      for (const [panelId, messages] of Object.entries(definition.surfaces)) {
+        const created = messages[0] as { createSurface?: { dataModel?: Record<string, unknown> } };
+        for (const key of Object.keys(created.createSurface?.dataModel ?? {})) {
+          claim(key, panelId);
+        }
+      }
+      for (const [panelId, queries] of Object.entries(definition.queries ?? {})) {
+        for (const query of queries) {
+          claim(query.path.split('/')[1], panelId);
+        }
+      }
+    });
+
     it('owns its time filter, exactly once', () => {
       const pickers = Object.keys(definition.surfaces)
         .flatMap(componentsOf)

@@ -40,8 +40,7 @@ describe('describeCatalog', () => {
     expect(text).toContain("must have the id 'root'");
   });
 
-  it('stays small enough to sit in every prompt', () => {
-    // The raw JSON Schema is ~16KB; this is the whole point of the summary.
-    expect(text.length).toBeLessThan(8000);
-  });
+  // The size budget is asserted in catalog_schema.test.ts, against the full
+  // catalog the agent is actually sent. Measuring the base catalog here, as this
+  // file used to, never saw the three plugin components in the prompt.
 });

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { euiCatalogSchema } from '@kbn/a2ui-eui-catalog';
-import { customAppCatalog, customAppCatalogSchema } from '.';
+import { customAppCatalog, customAppCatalogSchema, KIBANA_COMPONENT_SCHEMAS } from '.';
 
 describe('customAppCatalog', () => {
   it('implements exactly the components its schema declares', () => {
@@ -15,24 +14,16 @@ describe('customAppCatalog', () => {
     );
   });
 
-  it('adds the Kibana components on top of the base EUI catalog', () => {
-    const base = Object.keys(euiCatalogSchema.components);
-    const extended = Object.keys(customAppCatalogSchema.components);
-    expect(extended).toEqual(expect.arrayContaining(base));
-    expect(extended.filter((name) => !base.includes(name)).sort()).toEqual([
-      'Chart',
-      'KbnLensPanel',
-      'KbnTimeFilter',
-    ]);
+  it('registers a runtime implementation for each declared Kibana component', () => {
+    // Derived from the shared list rather than a hardcoded one, so adding a
+    // component is a single edit instead of four.
+    for (const name of Object.keys(KIBANA_COMPONENT_SCHEMAS)) {
+      expect(customAppCatalog.components[name]).toBeDefined();
+    }
   });
 
   it('requires a KbnLensPanel to be either by-reference or by-value, not neither', () => {
     const schema = customAppCatalogSchema.components.KbnLensPanel;
     expect(schema.oneOf).toEqual([{ required: ['savedObjectId'] }, { required: ['attributes'] }]);
-  });
-
-  it('keeps the base catalog free of plugin-backed components', () => {
-    // The shared package must stay usable without plugin dependencies.
-    expect(Object.keys(euiCatalogSchema.components)).not.toContain('KbnLensPanel');
   });
 });

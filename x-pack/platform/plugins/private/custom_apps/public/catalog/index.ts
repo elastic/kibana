@@ -6,20 +6,19 @@
  */
 
 import type { Catalog } from '@kbn/a2ui-renderer';
-import { euiCatalog, euiCatalogSchema } from '@kbn/a2ui-eui-catalog';
+import { euiCatalog } from '@kbn/a2ui-eui-catalog';
 import { KbnLensPanel } from './kbn_lens_panel';
 import { Chart } from './chart';
 import { KbnTimeFilter } from './kbn_time_filter';
-import {
-  CHART_SCHEMA,
-  KBN_LENS_PANEL_SCHEMA,
-  KBN_TIME_FILTER_SCHEMA,
-} from '../../common/kbn_components_schema';
 
 /**
  * The base catalog is a shared package and stays pure EUI, so it can be used
  * anywhere without pulling plugin dependencies. Kibana-backed components live
  * here in the plugin and are composed on top.
+ *
+ * Only the runtime implementations are assembled here. Their schemas come from
+ * `common/catalog_schema`, which the server shares — a test asserts the two stay
+ * in step.
  */
 export const customAppCatalog: Catalog = {
   ...euiCatalog,
@@ -31,15 +30,7 @@ export const customAppCatalog: Catalog = {
   },
 };
 
-export const customAppCatalogSchema = {
-  ...euiCatalogSchema,
-  components: {
-    ...euiCatalogSchema.components,
-    Chart: CHART_SCHEMA,
-    KbnTimeFilter: KBN_TIME_FILTER_SCHEMA,
-    KbnLensPanel: KBN_LENS_PANEL_SCHEMA,
-  },
-};
+export { customAppCatalogSchema, KIBANA_COMPONENT_SCHEMAS } from '../../common/catalog_schema';
 
 export { CustomAppServicesProvider, useCustomAppServices } from './services_context';
 export type { CustomAppServices } from './services_context';

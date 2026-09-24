@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { GridLayout } from '@kbn/grid-layout';
 import type { GridLayoutData } from '@kbn/grid-layout';
-import { A2uiSurface, MessageProcessor } from '@kbn/a2ui-renderer';
+import { A2uiSurface, DataModel, MessageProcessor } from '@kbn/a2ui-renderer';
 import type { A2uiMessage, JsonValue, ResolvedActionEvent, Surface } from '@kbn/a2ui-renderer';
 import { EuiCallOut, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { customAppCatalog, useCustomAppServices } from '../catalog';
@@ -126,8 +126,13 @@ export function CustomAppGrid({
 }: CustomAppGridProps) {
   // Surfaces are rebuilt only when the stored A2UI messages change, so dragging
   // a panel does not reset the data model a user has been typing into.
+  //
+  // One data model for the whole app, not one per panel: a filter panel has to be
+  // able to drive a query belonging to a chart panel, and a table row action has
+  // to be able to open an overlay declared somewhere else. The trade is a single
+  // pointer namespace — two panels must not both claim `/selected`.
   const processor = useMemo(() => {
-    const next = new MessageProcessor();
+    const next = new MessageProcessor({ sharedDataModel: new DataModel({}) });
     for (const messages of Object.values(definition.surfaces)) {
       next.applyAll(messages as A2uiMessage[]);
     }

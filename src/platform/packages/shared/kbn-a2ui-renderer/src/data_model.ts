@@ -34,6 +34,21 @@ export class DataModel {
     this.listeners.forEach((listener) => listener());
   };
 
+  /**
+   * Shallow-merges top-level keys, for hosts that share one model across several
+   * surfaces. Assignment rather than repeated `set`, because `set(path, null)`
+   * *deletes* a key — a surface seeding `{ selected: null }` still needs the key
+   * to exist so a binding to it resolves.
+   */
+  merge = (partial: Record<string, JsonValue>): void => {
+    const base =
+      typeof this.root === 'object' && this.root !== null && !Array.isArray(this.root)
+        ? this.root
+        : {};
+    this.root = { ...base, ...partial };
+    this.listeners.forEach((listener) => listener());
+  };
+
   subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
     return () => {
