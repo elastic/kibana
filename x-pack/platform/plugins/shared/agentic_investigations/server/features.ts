@@ -9,7 +9,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
-import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
@@ -18,7 +17,6 @@ import {
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from '../common/investigations/constants';
-import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
@@ -42,17 +40,17 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: [],
-        // Impact rides on the feature itself: an investigation always has one,
-        // so All and Read grant it together with the rest of the feature.
-        api: [IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE],
+        // Impact has no privilege of its own yet. Reads and writes use the
+        // investigations sub-feature below, which `includeIn: 'all'` joins here.
+        api: [],
         savedObject: { all: [], read: [] },
-        ui: [IMPACT_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_MANAGE],
+        ui: [],
       },
       read: {
         app: [],
-        api: [IMPACT_API_PRIVILEGE_READ],
+        api: [],
         savedObject: { all: [], read: [] },
-        ui: [IMPACT_UI_CAPABILITY_SHOW],
+        ui: [],
       },
     },
     subFeatures: [
