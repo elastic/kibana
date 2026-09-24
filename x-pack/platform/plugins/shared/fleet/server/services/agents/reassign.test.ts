@@ -407,4 +407,29 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
     expect(mockReassignBatch).not.toHaveBeenCalled();
     mockGetAgentsById.mockRestore();
   });
+
+  it('with spaceId "*", passes skipNamespaceFilter to getAgentsById and spaceId to reassignBatch', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const mockGetAgentsById = jest
+      .spyOn(crud, 'getAgentsById')
+      .mockResolvedValue([{ id: 'agent-1', policy_id: 'other-policy' } as any]);
+
+    await reassignAgents(
+      soClient,
+      esClient,
+      { agentIds: ['agent-1'], spaceId: '*' },
+      regularAgentPolicySO2.id
+    );
+
+    expect(mockGetAgentsById).toHaveBeenCalledWith(esClient, soClient, ['agent-1'], {
+      skipNamespaceFilter: true,
+    });
+    expect(mockReassignBatch).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({ spaceId: '*' }),
+      expect.anything(),
+      expect.anything()
+    );
+    mockGetAgentsById.mockRestore();
+  });
 });
