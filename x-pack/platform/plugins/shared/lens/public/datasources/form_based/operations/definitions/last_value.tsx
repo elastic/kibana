@@ -307,7 +307,11 @@ export const lastValueOperation: OperationDefinition<
       });
 
     const sortField = currentColumn.params?.sortField;
-    const showArrayValues = Boolean(currentColumn.params?.showArrayValues);
+    const showArrayValues = Boolean(
+      currentColumn.params &&
+        'showArrayValues' in currentColumn.params &&
+        currentColumn.params.showArrayValues
+    );
 
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid =
