@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import type { EventClient } from '../../../lib/significant_events/events';
 
@@ -14,12 +16,16 @@ export const attachEventInvestigationToolHandler = async ({
   workflowExecutionId,
   startedAt,
   completedAt,
+  alertEventsClient,
+  logger,
 }: {
   eventClient: EventClient;
   eventUuid: string;
   workflowExecutionId: string;
   startedAt: string;
   completedAt?: string;
+  alertEventsClient?: AlertEventsClientApi;
+  logger?: Logger;
 }): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
   const { hits } = await eventClient.findByEventUuid(eventUuid);
   const event = hits[0];
@@ -35,5 +41,7 @@ export const attachEventInvestigationToolHandler = async ({
       started_at: startedAt,
       completed_at: completedAt,
     },
+    alertEventsClient,
+    logger,
   });
 };
