@@ -53,7 +53,6 @@ export const createForgetTool = ({
     idempotentHint: true,
     openWorldHint: false,
   },
-  confirmation: { askUser: 'always' },
   description: dedent`
     Mark a memory as deleted in a memory-enabled Context Engine AI index so it is no longer
     recalled. Provide the id returned by the remember tool. The memory remains stored as a

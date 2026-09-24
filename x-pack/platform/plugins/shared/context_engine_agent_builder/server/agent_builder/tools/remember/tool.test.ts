@@ -100,6 +100,7 @@ describe('remember tool', () => {
 
     expect(tool.id).toBe(CONTEXT_ENGINE_REMEMBER_TOOL_ID);
     expect(tool.availability).toBe(aiIndexToolsAvailability);
+    expect(tool.confirmation).toBeUndefined();
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ ...params, type: 'document' }).success).toBe(false);
     expect(tool.schema.shape.aiIndexId.description).toContain(

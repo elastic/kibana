@@ -117,7 +117,7 @@ describe('forget tool', () => {
     });
   });
 
-  it('registers an ID-only destructive tool that always requires confirmation', () => {
+  it('registers an ID-only destructive tool without confirmation', () => {
     const tool = createTool();
 
     expect(tool.id).toBe(CONTEXT_ENGINE_FORGET_TOOL_ID);
@@ -128,7 +128,7 @@ describe('forget tool', () => {
       'not the backing Elasticsearch index or data stream name'
     );
     expect(tool.annotations?.destructiveHint).toBe(true);
-    expect(tool.confirmation).toEqual({ askUser: 'always' });
+    expect(tool.confirmation).toBeUndefined();
   });
 
   it('tombstones an index-backed memory using concurrency metadata', async () => {
