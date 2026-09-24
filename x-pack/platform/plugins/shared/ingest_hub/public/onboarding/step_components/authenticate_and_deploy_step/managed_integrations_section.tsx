@@ -119,7 +119,15 @@ export function ManagedIntegrationsSection({
     if (isDone) setIsOpen(false);
   }, [isDone]);
 
-  const [isDeployReady, setIsDeployReady] = useState(false);
+  // Re-seed from session so the user doesn't have to re-enter credentials they already provided
+  // (e.g. after navigating Back/Forward or adding a new service without changing auth).
+  // isStaticKeysEditMode intentionally skips the seed: the replace-flow requires new credentials.
+  const [isDeployReady, setIsDeployReady] = useState(() => {
+    if (authenticateAndDeployStep.connectorId != null) return true;
+    if (isStaticKeysEditMode) return false;
+    const keys = authenticateAndDeployStep.staticKeys;
+    return Boolean(keys?.access_key_id && keys?.secret_access_key);
+  });
 
   const handleStaticKeysChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
