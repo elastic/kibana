@@ -63,6 +63,19 @@ interface Props {
   showPerPageOptions?: boolean;
   onLoadTable?: () => void;
   tableCaption?: string;
+  /**
+   * Rendered in place of the table once main statistics have loaded successfully,
+   * the service has no APM error groups, and no in-table search query is active.
+   *
+   * Omit to keep the default "No errors found" message.
+   *
+   * Gated on an empty search query so that typing a non-matching term does not
+   * silently swap the whole table out. `searchQuery === ''` is sound — the only
+   * thing that can produce a genuinely empty `errorGroups` array with a non-empty
+   * query is the server-side filter; the ManagedTable client-only `filteredItems`
+   * layer never mutates the source items list.
+   */
+  emptyStateContent?: React.ReactNode;
 }
 
 const defaultSorting = {
@@ -79,6 +92,7 @@ export function ErrorGroupList({
   showPerPageOptions = true,
   onLoadTable,
   tableCaption,
+  emptyStateContent,
 }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -95,6 +109,7 @@ export function ErrorGroupList({
   const [renderedItemIndices, setRenderedItemIndices] = useState<VisibleItemsStartEnd>([0, 0]);
 
   const {
+    searchQuery,
     setDebouncedSearchQuery,
     mainStatistics,
     mainStatisticsStatus,
@@ -323,6 +338,17 @@ export function ErrorGroupList({
       }),
     };
   }, [isTableSearchBarEnabled, mainStatistics.maxCountExceeded, setDebouncedSearchQuery]);
+
+  // Show the alternative content (e.g. compact logs table for the Overview) when the
+  // APM errors table is fully loaded, truly empty, and no in-table search is active.
+  // The `!searchQuery` guard is critical: without it, a non-matching search term would
+  // silently swap the table out from under the user rather than showing "No errors found".
+  const hasNoApmErrors =
+    isSuccess(mainStatisticsStatus) && mainStatistics.errorGroups.length === 0 && !searchQuery;
+
+  if (emptyStateContent && hasNoApmErrors) {
+    return <>{emptyStateContent}</>;
+  }
 
   return (
     <ManagedTable
