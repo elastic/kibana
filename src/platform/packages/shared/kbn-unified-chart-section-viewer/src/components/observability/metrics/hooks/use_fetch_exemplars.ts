@@ -18,7 +18,7 @@ import { useReportChartSectionError } from '../../../chart/hooks/use_report_char
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
-import { probeExemplarsAvailability } from '../utils/probe_exemplars_availability';
+import { useExemplarsAvailabilityProbe } from '../context/exemplars_availability_provider';
 
 export type ExemplarsResponse = Pick<ESQLSearchResponse, 'columns' | 'values'>;
 
@@ -48,6 +48,7 @@ export const useFetchExemplars = ({
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]
   );
   const reportError = useReportChartSectionError();
+  const probeExemplarsAvailability = useExemplarsAvailabilityProbe();
   const { dataView } = fetchParams;
   const {
     data: {
@@ -115,6 +116,7 @@ export const useFetchExemplars = ({
       uiSettings,
       profileId,
       reportError,
+      probeExemplarsAvailability,
     ]
   );
 

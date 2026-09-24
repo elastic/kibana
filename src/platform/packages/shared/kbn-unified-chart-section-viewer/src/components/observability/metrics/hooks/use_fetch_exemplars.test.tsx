@@ -10,8 +10,9 @@
 jest.mock('../utils/execute_esql_query', () => ({
   executeEsqlQuery: jest.fn(),
 }));
-jest.mock('../utils/probe_exemplars_availability', () => ({
-  probeExemplarsAvailability: jest.fn(),
+const mockProbe = jest.fn();
+jest.mock('../context/exemplars_availability_provider', () => ({
+  useExemplarsAvailabilityProbe: jest.fn(() => mockProbe),
 }));
 jest.mock('../../../../hooks/use_feature_flag', () => ({
   useFeatureFlag: jest.fn(),
@@ -35,15 +36,11 @@ import { FEATURE_FLAGS } from '../../../../common/constants';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
-import { probeExemplarsAvailability } from '../utils/probe_exemplars_availability';
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
 import type { ParsedMetricItem } from '../../../../types';
 import { useFetchExemplars, type UseFetchExemplarsParams } from './use_fetch_exemplars';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
-const mockProbe = probeExemplarsAvailability as jest.MockedFunction<
-  typeof probeExemplarsAvailability
->;
 const mockUseFeatureFlag = useFeatureFlag as jest.MockedFunction<typeof useFeatureFlag>;
 const mockCreateExemplarsQuery = createExemplarsQuery as jest.MockedFunction<
   typeof createExemplarsQuery

@@ -12,7 +12,6 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { EXEMPLARS_METRIC_NAME_FIELD } from '../../../../common/constants';
-import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch_error';
 import { executeEsqlQuery } from './execute_esql_query';
 import { MetricsExecutionContextName } from './execution_context_enums';
 
@@ -23,58 +22,20 @@ import { MetricsExecutionContextName } from './execution_context_enums';
  */
 export const EXEMPLARS_PROBE_QUERY = `FROM exemplars-*.otel-* | STATS BY ${EXEMPLARS_METRIC_NAME_FIELD}`;
 
-const NO_METRICS: ReadonlySet<string> = new Set();
-
-export interface ProbeExemplarsAvailabilityParams {
+export interface FetchMetricsWithExemplarsParams {
   search: ISearchGeneric;
   dataView: DataView;
   uiSettings: IUiSettingsClient;
   profileId: string;
-  /** Called at most once per probe request, never for aborts. */
-  onError: (error: unknown) => void;
 }
 
-// The in-flight promise is shared so every chart on the grid rides one request.
-let pendingProbe: Promise<ReadonlySet<string>> | undefined;
-
-export const resetExemplarsAvailabilityCache = () => {
-  pendingProbe = undefined;
-};
-
-/**
- * Resolves to the `metrics.`-prefixed names of the metrics that have exemplars.
- * Never rejects: a failed probe resolves to an empty set after reporting once.
- */
-export const probeExemplarsAvailability = (
-  params: ProbeExemplarsAvailabilityParams
-): Promise<ReadonlySet<string>> => {
-  if (!pendingProbe) {
-    const probe = fetchMetricsWithExemplars(params).catch((error: unknown) => {
-      if (!isSuppressedFetchError(error)) {
-        params.onError(error);
-      }
-      return NO_METRICS;
-    });
-    pendingProbe = probe;
-
-    // The exemplars stream is created on the first exemplar write, so an empty or failed
-    // probe may be transient. Only a non-empty result stays cached.
-    void probe.then((metricNames) => {
-      if (metricNames.size === 0 && pendingProbe === probe) {
-        pendingProbe = undefined;
-      }
-    });
-  }
-
-  return pendingProbe;
-};
-
-const fetchMetricsWithExemplars = async ({
+/** Resolves to the `metrics.`-prefixed names of the metrics that have exemplars. */
+export const fetchMetricsWithExemplars = async ({
   search,
   dataView,
   uiSettings,
   profileId,
-}: ProbeExemplarsAvailabilityParams): Promise<ReadonlySet<string>> => {
+}: FetchMetricsWithExemplarsParams): Promise<ReadonlySet<string>> => {
   // No signal (the request is shared across charts) and no time range or filters (this is
   // a schema question, and a filter on an unmapped field would silently return nothing).
   const { rawResponse } = await executeEsqlQuery({
