@@ -79,16 +79,41 @@ const multiTestReport = () => {
         status: 'skipped',
         timestamp: new Date('2026-09-09T06:04:41.000Z'),
       },
-      sampleFailures: [
+      byTarget: [
         {
-          message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
-          buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd',
-          timestamp: new Date('2026-09-09T06:12:00.000Z'),
+          mode: 'stateful-classic',
+          type: 'local',
+          builds: 200,
+          failedBuilds: 20,
+          buildFailRate: 0.1,
+          lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
         },
+        {
+          mode: 'serverless-security_complete',
+          type: 'cloud',
+          builds: 64,
+          failedBuilds: 3,
+          buildFailRate: 3 / 64,
+          lastFailedAt: new Date('2026-09-07T11:40:00.000Z'),
+        },
+        // a run that recorded no target
+        { mode: 'unknown', type: 'local', builds: 5, failedBuilds: 1, buildFailRate: 0.2 },
+      ],
+      sampleFailures: [
+        // the older sample carries the job; the newer one is what gets linked
         {
           message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
           buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12300',
+          jobId: '0199-abcd',
+          stepLabel: 'Scout Lane #3 - stateful-classic / default',
           timestamp: new Date('2026-09-08T06:12:00.000Z'),
+        },
+        {
+          message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
+          buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+          jobId: '0199-ef01',
+          stepLabel: 'Scout Lane #7 - serverless-security_complete / default',
+          timestamp: new Date('2026-09-09T06:12:00.000Z'),
         },
       ],
     }),
@@ -180,6 +205,44 @@ describe('renderFlakySuiteIssueBody', () => {
         '| 🔴 `9.2` | 3 / 64 (5%) | 2026-09-07 11:40 UTC |',
         '| ✅ `9.1` | 0 / 58 |',
       ].join('\n')
+    );
+  });
+
+  it("lists every target of the suite, failing ones first with the worst test's counts, leaving runs without one out", () => {
+    const { suite, report } = multiTestReport();
+    expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
+      [
+        '#### Failures by Target',
+        '',
+        '| Target | Failed builds | Last failure |',
+        '|---|---|---|',
+        '| 🔴 `stateful-classic` · local | 49 / 509 (10%) | 2026-09-09 06:12 UTC |',
+        '| 🔴 `serverless-security_complete` · cloud | 3 / 64 (5%) | 2026-09-07 11:40 UTC |',
+        '| ✅ `serverless-observability_complete` · local | 0 / 426 |  |',
+      ].join('\n')
+    );
+  });
+
+  it('omits the target table when no test of the suite recorded a target', () => {
+    const report = flakyReport([
+      flakyTest({
+        framework: 'jest',
+        byTarget: [
+          { mode: 'unknown', type: 'local', builds: 509, failedBuilds: 49, buildFailRate: 0.1 },
+        ],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+    const body = renderFlakySuiteIssueBody(suite, { report });
+    expect(body).not.toContain('Failures by Target');
+    expect(body).toContain('#### Failures by Branch');
+  });
+
+  it('links the job each error was last seen in', () => {
+    const { suite, report } = multiTestReport();
+    expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
+      'Last seen in [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-ef01) · ' +
+        'Scout Lane #7 - serverless-security_complete / default · 2026-09-09 06:12 UTC.'
     );
   });
 

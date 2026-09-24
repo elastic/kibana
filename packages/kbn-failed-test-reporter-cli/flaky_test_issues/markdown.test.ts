@@ -130,21 +130,29 @@ describe('formatFailureMessage', () => {
 });
 
 describe('formatBuildLink', () => {
+  const buildUrl = 'https://buildkite.com/elastic/kibana-on-merge/builds/12345';
+
   it('links the build number and appends the time', () => {
-    expect(
-      formatBuildLink(
-        'https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199',
-        new Date('2026-09-09T06:12:00Z')
-      )
-    ).toBe(
-      '[#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199) · 2026-09-09 06:12 UTC'
+    expect(formatBuildLink({ buildUrl }, new Date('2026-09-09T06:12:00Z'))).toBe(
+      `[#12345](${buildUrl}) · 2026-09-09 06:12 UTC`
     );
-    expect(formatBuildLink(undefined, new Date('2026-09-09T06:12:00Z'))).toBe(
-      '2026-09-09 06:12 UTC'
-    );
-    expect(formatBuildLink('https://example.com/no-number', undefined)).toBe(
+    expect(formatBuildLink({}, new Date('2026-09-09T06:12:00Z'))).toBe('2026-09-09 06:12 UTC');
+    expect(formatBuildLink({ buildUrl: 'https://example.com/no-number' }, undefined)).toBe(
       '[build](https://example.com/no-number)'
     );
-    expect(formatBuildLink(undefined, undefined)).toBe('-');
+    expect(formatBuildLink({}, undefined)).toBe('-');
+  });
+
+  it('points the link at the job and names its step when known', () => {
+    expect(
+      formatBuildLink(
+        { buildUrl, jobId: '0199-abcd', stepLabel: 'FTR Configs #3' },
+        new Date('2026-09-09T06:12:00Z')
+      )
+    ).toBe(`[#12345](${buildUrl}#0199-abcd) · FTR Configs #3 · 2026-09-09 06:12 UTC`);
+    // a URL that already points at a job is left alone
+    expect(formatBuildLink({ buildUrl: `${buildUrl}#0199`, jobId: 'other' }, undefined)).toBe(
+      `[#12345](${buildUrl}#0199)`
+    );
   });
 });

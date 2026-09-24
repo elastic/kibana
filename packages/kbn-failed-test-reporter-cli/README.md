@@ -19,8 +19,10 @@ For every suite in the report, worst first: when its tests are not all covered b
 suite issue is filed, at most `--max-new-issues` (default 10) per run, titled
 `Flaky <Framework> suite: <suite title>` and labelled `failed-test` plus the owning
 teams' labels (in `elastic/kibana` only). The body carries the per-test numbers with the branch
-each test qualified on, the suite details, the most frequent sampled failures and a collapsed
-breakdown by pipeline; issues that merely mention the file are linked as possibly related. A suite is
+each test qualified on, the suite details, the most frequent sampled failures each linked to the
+Buildkite job it was last seen in, and breakdowns by branch, by Scout target (deployment mode and
+location, for suites that recorded one) and by pipeline; issues that merely mention the file are
+linked as possibly related. A suite is
 skipped, and the issue recorded, when every one of its tests has an issue, open or closed, a
 per-test one or one about the suite or its file; commenting on and reopening
 those issues is left to a later iteration, so is the stale `failed-test` sweep closing the issues

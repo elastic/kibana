@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import type { FlakyTestReport } from '@kbn/scout-reporting';
+import type { FlakyTestReport, FlakyTestSampleFailure } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   BUILDKITE_ORG_URL,
@@ -176,34 +176,53 @@ interface DistinctFailure {
   count: number;
   /** Titles of the tests the message was sampled from, most samples first. */
   tests: string[];
+  /** The newest sample with this message, for the link to its job. */
+  latest: FlakyTestSampleFailure;
 }
 
 /** Sampled failure messages grouped by identical text, most frequent first. */
 const distinctFailures = (suite: FlakySuite): { distinct: DistinctFailure[]; total: number } => {
-  const byMessage = new Map<string, { count: number; byTest: Map<string, number> }>();
+  const byMessage = new Map<
+    string,
+    { count: number; byTest: Map<string, number>; latest: FlakyTestSampleFailure }
+  >();
   let total = 0;
   for (const test of suite.tests) {
-    for (const { message } of test.sampleFailures) {
-      const text = formatFailureMessage(message);
+    for (const sample of test.sampleFailures) {
+      const text = formatFailureMessage(sample.message);
       if (text.length === 0) {
         continue;
       }
       total += 1;
-      const entry = byMessage.get(text) ?? { count: 0, byTest: new Map<string, number>() };
+      const entry = byMessage.get(text) ?? {
+        count: 0,
+        byTest: new Map<string, number>(),
+        latest: sample,
+      };
       entry.count += 1;
       entry.byTest.set(test.title, (entry.byTest.get(test.title) ?? 0) + 1);
+      if (sample.timestamp > entry.latest.timestamp) {
+        entry.latest = sample;
+      }
       byMessage.set(text, entry);
     }
   }
   const distinct = [...byMessage.entries()]
-    .map(([message, { count, byTest }]) => ({
+    .map(([message, { count, byTest, latest }]) => ({
       message,
       count,
       tests: [...byTest.entries()].sort((a, b) => b[1] - a[1]).map(([title]) => title),
+      latest,
     }))
     .sort((a, b) => b.count - a.count);
   return { distinct, total };
 };
+
+/** `Last seen in [#12345](…/builds/12345#job) · Scout Lane #3 - stateful-classic / default · 2026-09-09 06:12 UTC.` */
+const lastSeen = ({ buildUrl, jobId, stepLabel, timestamp }: FlakyTestSampleFailure): string =>
+  buildUrl
+    ? `Last seen in ${formatBuildLink({ buildUrl, jobId, stepLabel }, timestamp)}.`
+    : `Last seen ${formatDateTime(timestamp)}.`;
 
 const failuresSection = (suite: FlakySuite): string => {
   const { distinct, total } = distinctFailures(suite);
@@ -212,17 +231,22 @@ const failuresSection = (suite: FlakySuite): string => {
   }
   const samples = plural(total, 'sampled failure');
   if (distinct.length === 1) {
+    const [{ message, latest }] = distinct;
     const intro = total === 1 ? 'One sampled failure' : `Same error in all ${samples}`;
-    return `${intro}:\n\n${codeBlock(distinct[0].message)}`;
+    return `${intro}:\n\n${codeBlock(message)}\n\n${lastSeen(latest)}`;
   }
-  const shown = distinct.slice(0, MAX_DISTINCT_FAILURES).map(({ message, count, tests }) => {
-    const subject =
-      suite.tests.length > 1
-        ? tests.map((title) => `*${shortTitle(title, MAX_LABEL_TITLE_LENGTH)}*`).join(', ')
-        : '';
-    const share = count === total ? `all ${samples}` : `${count} of the ${samples}`;
-    return `${subject ? `${subject} ` : ''}(${share}):\n\n${codeBlock(message)}`;
-  });
+  const shown = distinct
+    .slice(0, MAX_DISTINCT_FAILURES)
+    .map(({ message, count, tests, latest }) => {
+      const subject =
+        suite.tests.length > 1
+          ? tests.map((title) => `*${shortTitle(title, MAX_LABEL_TITLE_LENGTH)}*`).join(', ')
+          : '';
+      const share = count === total ? `all ${samples}` : `${count} of the ${samples}`;
+      return `${subject ? `${subject} ` : ''}(${share}):\n\n${codeBlock(message)}\n\n${lastSeen(
+        latest
+      )}`;
+    });
   const rest = distinct.length - shown.length;
   return [
     ...shown,
@@ -230,68 +254,110 @@ const failuresSection = (suite: FlakySuite): string => {
   ].join('\n\n');
 };
 
-/** A branch's row of the breakdown: the worst test's counts there and the newest failure. */
-interface BranchFailures {
-  branch: string;
+/** Build counts of one test somewhere: on a branch, on a target. */
+interface BuildCounts {
   builds: number;
   failedBuilds: number;
   buildFailRate: number;
   lastFailedAt?: Date;
 }
 
+/** A row of a breakdown: the worst test's counts there and the newest failure across tests. */
+interface WorstFailures<T extends BuildCounts> {
+  worst: T;
+  lastFailedAt?: Date;
+}
+
 /**
- * Every branch in scope a test of the suite ran on, failing branches first then by rate. Counts
- * are the worst test's on that branch rather than a sum over tests, as one build failing several
- * tests would otherwise count several times.
+ * The suite's tests folded into one row per key: the worst test's counts rather than a sum over
+ * tests, as one build failing several tests would otherwise count several times. Failing rows
+ * first, then by rate, then by key.
  */
-const branchFailures = (suite: FlakySuite): BranchFailures[] => {
-  const byBranch = new Map<string, BranchFailures>();
+const worstPerKey = <T extends BuildCounts>(
+  suite: FlakySuite,
+  rowsOf: (test: FlakySuite['tests'][number]) => readonly T[],
+  keyOf: (row: T) => string
+): Array<WorstFailures<T>> => {
+  const byKey = new Map<string, WorstFailures<T>>();
   for (const test of suite.tests) {
-    for (const stats of test.byBranch) {
-      const current = byBranch.get(stats.branch);
+    for (const stats of rowsOf(test)) {
+      const key = keyOf(stats);
+      const current = byKey.get(key);
       const worst =
         !current ||
-        stats.failedBuilds > current.failedBuilds ||
-        (stats.failedBuilds === current.failedBuilds && stats.builds > current.builds)
+        stats.failedBuilds > current.worst.failedBuilds ||
+        (stats.failedBuilds === current.worst.failedBuilds && stats.builds > current.worst.builds)
           ? stats
-          : current;
+          : current.worst;
       const lastFailedAt = [current?.lastFailedAt, stats.lastFailedAt]
         .filter((date): date is Date => date !== undefined)
         .sort((a, b) => b.getTime() - a.getTime())[0];
-      byBranch.set(stats.branch, {
-        branch: stats.branch,
-        builds: worst.builds,
-        failedBuilds: worst.failedBuilds,
-        buildFailRate: worst.buildFailRate,
-        lastFailedAt,
-      });
+      byKey.set(key, { worst, lastFailedAt });
     }
   }
-  return [...byBranch.values()].sort(
-    (a, b) =>
-      Number(b.failedBuilds > 0) - Number(a.failedBuilds > 0) ||
-      b.buildFailRate - a.buildFailRate ||
-      a.branch.localeCompare(b.branch)
-  );
+  return [...byKey.entries()]
+    .sort(
+      ([keyA, a], [keyB, b]) =>
+        Number(b.worst.failedBuilds > 0) - Number(a.worst.failedBuilds > 0) ||
+        b.worst.buildFailRate - a.worst.buildFailRate ||
+        keyA.localeCompare(keyB)
+    )
+    .map(([, row]) => row);
 };
+
+/** `🔴 \`main\` | 49 / 509 (10%) | 2026-09-09 06:12 UTC`, or `✅ \`9.1\` | 0 / 58 |` for a clean row. */
+const failuresRow = (
+  label: string,
+  { worst, lastFailedAt }: WorstFailures<BuildCounts>
+): string[] => [
+  `${worst.failedBuilds > 0 ? '🔴' : '✅'} ${label}`,
+  worst.failedBuilds > 0
+    ? `${worst.failedBuilds} / ${worst.builds} (${formatPercent(worst.buildFailRate)})`
+    : `0 / ${worst.builds}`,
+  lastFailedAt ? formatDateTime(lastFailedAt) : '',
+];
 
 /** Which branches the suite fails on and which it does not, at a glance. */
 const failuresByBranch = (suite: FlakySuite): string | undefined => {
-  const branches = branchFailures(suite);
+  const branches = worstPerKey(
+    suite,
+    (test) => test.byBranch,
+    (stats) => stats.branch
+  );
   if (branches.length === 0) {
     return undefined;
   }
-  const rows = branches.map(({ branch, builds, failedBuilds, buildFailRate, lastFailedAt }) => [
-    `${failedBuilds > 0 ? '🔴' : '✅'} ${inlineCode(branch)}`,
-    failedBuilds > 0
-      ? `${failedBuilds} / ${builds} (${formatPercent(buildFailRate)})`
-      : `0 / ${builds}`,
-    lastFailedAt ? formatDateTime(lastFailedAt) : '',
-  ]);
+  const rows = branches.map((row) => failuresRow(inlineCode(row.worst.branch), row));
   return [
     '#### Failures by Branch',
     '',
     table(['Branch', 'Failed builds', 'Last failure'], rows),
+  ].join('\n');
+};
+
+/** What frameworks without a Scout target (Jest, FTR, Cypress) record as the target mode. */
+const UNKNOWN_TARGET_MODE = 'unknown';
+
+/**
+ * Which Scout targets (deployment mode and location) the suite fails on and which it does not.
+ * Runs that recorded no target are left out, so the table only appears for suites that have one.
+ */
+const failuresByTarget = (suite: FlakySuite): string | undefined => {
+  const targets = worstPerKey(
+    suite,
+    (test) => test.byTarget.filter((stats) => stats.mode !== UNKNOWN_TARGET_MODE),
+    (stats) => `${stats.mode} · ${stats.type}`
+  );
+  if (targets.length === 0) {
+    return undefined;
+  }
+  const rows = targets.map((row) =>
+    failuresRow(`${inlineCode(row.worst.mode)} · ${row.worst.type}`, row)
+  );
+  return [
+    '#### Failures by Target',
+    '',
+    table(['Target', 'Failed builds', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -320,7 +386,10 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
     pipelineLink(stats.pipeline),
     pipelineFailedBuilds(stats),
     String(stats.failedBranches),
-    formatBuildLink(stats.lastFailedBuildUrl, stats.lastFailedAt),
+    formatBuildLink(
+      { buildUrl: stats.lastFailedBuildUrl, jobId: stats.lastFailedJobId },
+      stats.lastFailedAt
+    ),
   ]);
   return [
     '#### Failures by Pipeline',
@@ -354,6 +423,7 @@ export const renderFlakySuiteIssueBody = (
     '### Failures',
     failuresSection(suite),
     failuresByBranch(suite),
+    failuresByTarget(suite),
     failuresByPipeline(suite, ctx.report),
     relatedIssues(ctx),
   ];

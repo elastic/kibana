@@ -196,12 +196,32 @@ export const formatFailureMessage = (message: string): string => {
 
 export const codeBlock = (text: string): string => `\`\`\`text\n${text}\n\`\`\``;
 
-/** `[#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441) · 2026-09-08 16:05 UTC` */
-export const formatBuildLink = (buildUrl: string | undefined, at: Date | undefined): string => {
+/** A Buildkite build and, when known, the job within it that ran the test. */
+export interface BuildkiteRef {
+  buildUrl?: string;
+  jobId?: string;
+  /** Label of the step the job ran, e.g. `FTR Configs #21`. */
+  stepLabel?: string;
+}
+
+/** The job's tab of the build page, which opens its log and artifacts; the build page without a job. */
+export const buildkiteJobUrl = (buildUrl: string, jobId?: string): string =>
+  jobId && !buildUrl.includes('#') ? `${buildUrl}#${jobId}` : buildUrl;
+
+/**
+ * `[#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441#0199-abcd) · FTR Configs #3 · 2026-09-08 16:05 UTC`,
+ * with whichever parts are known.
+ */
+export const formatBuildLink = (
+  { buildUrl, jobId, stepLabel }: BuildkiteRef,
+  at: Date | undefined
+): string => {
   const number = buildUrl?.match(/\/builds\/(\d+)/)?.[1];
-  const link = buildUrl ? `[${number ? `#${number}` : 'build'}](${buildUrl})` : undefined;
+  const link = buildUrl
+    ? `[${number ? `#${number}` : 'build'}](${buildkiteJobUrl(buildUrl, jobId)})`
+    : undefined;
   const time = at ? formatDateTime(at) : undefined;
-  return [link, time].filter((part) => part !== undefined).join(' · ') || '-';
+  return [link, stepLabel, time].filter((part) => part !== undefined).join(' · ') || '-';
 };
 
 /** Newest sampled failure of a suite, across its tests. */

@@ -53,7 +53,23 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       },
     },
   ],
-  byTarget: [],
+  byTarget: [
+    {
+      mode: 'stateful-classic',
+      type: 'local',
+      builds: 509,
+      failedBuilds: 49,
+      buildFailRate: 49 / 509,
+      lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+    },
+    {
+      mode: 'serverless-observability_complete',
+      type: 'local',
+      builds: 426,
+      failedBuilds: 0,
+      buildFailRate: 0,
+    },
+  ],
   firstFailedAt: new Date('2026-09-02T10:00:00.000Z'),
   lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
   latestRun: {
@@ -65,7 +81,9 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   sampleFailures: [
     {
       message: 'Error: Timed out 30000ms waiting for expect(locator).toBeVisible()',
-      buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd',
+      buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      jobId: '0199-abcd',
+      stepLabel: 'Scout Lane #3 - stateful-classic / default',
       timestamp: new Date('2026-09-09T06:12:00.000Z'),
     },
   ],
@@ -83,6 +101,8 @@ export const pipelineStats = (
   failedBranches: 1,
   lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
   lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+  lastFailedJobId: '0199-abcd',
+  lastFailedStepLabel: 'Scout Lane #3 - stateful-classic / default',
   ...overrides,
 });
 
