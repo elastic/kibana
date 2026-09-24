@@ -130,6 +130,7 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/mock-idp-utils",
     "@kbn/discover-session-constants",
+    "@kbn/ci-stats-reporter",
   ],
   "exclude": ["target/**/*"]
 }

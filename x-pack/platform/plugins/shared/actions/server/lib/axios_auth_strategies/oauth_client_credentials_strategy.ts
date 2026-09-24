@@ -47,6 +47,7 @@ export class OAuthClientCredentialsStrategy implements AxiosAuthStrategy {
       },
       connectorTokenClient,
       tokenEndpointAuthMethod: opts.tokenEndpointAuthMethod,
+      tokenType: opts.tokenType,
     });
   }
 }
