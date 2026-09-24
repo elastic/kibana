@@ -13,12 +13,12 @@ import { render, fireEvent, act } from '@testing-library/react';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeBreadcrumb, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
-import { ChromeNextPageAnnouncer, HeaderPageAnnouncer } from './header_page_announcer';
+import { ChromeHeaderPageAnnouncer, HeaderPageAnnouncer } from './header_page_announcer';
 import {
   getDeepestActiveNavigationTitle,
   normalizeAppHeaderTitle,
-  resolveChromeNextAnnouncement,
-} from './resolve_chrome_next_announcement';
+  resolveChromeHeaderAnnouncement,
+} from './resolve_chrome_header_announcement';
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -183,7 +183,7 @@ const createNavNode = (
   ...extras,
 });
 
-describe('resolveChromeNextAnnouncement', () => {
+describe('resolveChromeHeaderAnnouncement', () => {
   it('normalizes string and editable titles', () => {
     expect(normalizeAppHeaderTitle('  Dashboards  ')).toBe('Dashboards');
     expect(normalizeAppHeaderTitle({ text: '  Name  ', onSave: jest.fn() })).toBe('Name');
@@ -206,7 +206,7 @@ describe('resolveChromeNextAnnouncement', () => {
 
   it('does not join the full active navigation path', () => {
     expect(
-      resolveChromeNextAnnouncement({
+      resolveChromeHeaderAnnouncement({
         activeNodes: [[createNavNode('root', 'Observability'), createNavNode('leaf', 'Alerts')]],
       })
     ).toBe('Alerts');
@@ -214,7 +214,7 @@ describe('resolveChromeNextAnnouncement', () => {
 
   it('uses only the first document-title segment so breadcrumb-style titles do not re-announce', () => {
     expect(
-      resolveChromeNextAnnouncement({
+      resolveChromeHeaderAnnouncement({
         docTitleParts: ['SLOs', 'Observability', 'Elastic'],
         activeNodes: [[createNavNode('root', 'Observability'), createNavNode('leaf', 'SLOs')]],
       })
@@ -223,7 +223,7 @@ describe('resolveChromeNextAnnouncement', () => {
 
   it('keeps a document-title part that contains the display separator', () => {
     expect(
-      resolveChromeNextAnnouncement({
+      resolveChromeHeaderAnnouncement({
         docTitleParts: ['CPU - Memory', 'Elastic'],
       })
     ).toBe('CPU - Memory');
@@ -231,13 +231,13 @@ describe('resolveChromeNextAnnouncement', () => {
 
   it('falls through a brand-only or empty first document-title part to the navigation title', () => {
     expect(
-      resolveChromeNextAnnouncement({
+      resolveChromeHeaderAnnouncement({
         docTitleParts: ['Elastic'],
         activeNodes: [[createNavNode('leaf', 'Workflows')]],
       })
     ).toBe('Workflows');
     expect(
-      resolveChromeNextAnnouncement({
+      resolveChromeHeaderAnnouncement({
         docTitleParts: ['  ', 'Elastic'],
         activeNodes: [[createNavNode('leaf', 'Workflows')]],
       })
@@ -245,7 +245,7 @@ describe('resolveChromeNextAnnouncement', () => {
   });
 });
 
-describe('ChromeNextPageAnnouncer', () => {
+describe('ChromeHeaderPageAnnouncer', () => {
   const flushAnnouncement = () => {
     act(() => {
       jest.runAllTimers();
@@ -271,7 +271,7 @@ describe('ChromeNextPageAnnouncer', () => {
     const renderAnnouncer = () =>
       render(
         <TestChromeProviders chrome={chrome} deps={deps}>
-          <ChromeNextPageAnnouncer />
+          <ChromeHeaderPageAnnouncer />
         </TestChromeProviders>
       );
 

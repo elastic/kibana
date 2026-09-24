@@ -59,6 +59,10 @@ export class ArtifactListPage {
     return this.page.testSubj.locator(`${pagePrefix}-card-cardDeleteAction`);
   }
 
+  flyout(pagePrefix: string): Locator {
+    return this.page.testSubj.locator(`${pagePrefix}-flyout`);
+  }
+
   flyoutSubmit(pagePrefix: string): Locator {
     return this.page.testSubj.locator(`${pagePrefix}-flyout-submitButton`);
   }

@@ -9,16 +9,15 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { getESQLQuery } from './get_esql_query';
-import type { ESQLQueryParams, IndexType } from './get_esql_query';
+import { getESQLQuery, getESQLQueryFromIndexPattern } from './get_esql_query';
+import type { DiscoverIndexSource, ESQLQueryParams } from './get_esql_query';
 
 export function useDiscoverHref({
-  indexType,
   rangeFrom,
   rangeTo,
   queryParams,
-}: {
-  indexType: IndexType;
+  ...source
+}: DiscoverIndexSource & {
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
@@ -26,15 +25,17 @@ export function useDiscoverHref({
   const { share } = useApmPluginContext();
   const { indexSettings = [], indexSettingsStatus } = useApmIndexSettingsContext();
 
-  if (indexSettingsStatus !== FETCH_STATUS.SUCCESS) {
-    return undefined;
-  }
+  let esqlQuery: string | null = null;
 
-  const esqlQuery = getESQLQuery({
-    indexType,
-    params: queryParams,
-    indexSettings,
-  });
+  if (source.indexType === 'logs') {
+    // The log-sources pattern comes from logSourcesService, not apmIndexSettings.
+    // Its fetch status is independent and must not gate this branch.
+    esqlQuery = source.indexPattern
+      ? getESQLQueryFromIndexPattern({ indexPattern: source.indexPattern, params: queryParams })
+      : null;
+  } else if (indexSettingsStatus === FETCH_STATUS.SUCCESS) {
+    esqlQuery = getESQLQuery({ indexType: source.indexType, params: queryParams, indexSettings });
+  }
 
   if (!esqlQuery) {
     return undefined;

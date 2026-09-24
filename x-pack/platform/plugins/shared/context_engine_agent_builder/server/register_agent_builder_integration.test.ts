@@ -9,10 +9,8 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
-import {
-  CONTEXT_ENGINE_SETUP_AGENT_ID,
-  CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
-} from './agent/context_engine_agent';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID } from './agent/context_engine_agent';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import {
   ANALYZE_AND_IMPROVE_SKILL_ID,
   AI_INDEX_AUTOMATIONS_SKILL_ID,
@@ -192,7 +190,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     expect(register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: CONTEXT_ENGINE_SETUP_AGENT_ID,
-        type: CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
+        type: chatAgentTypeId,
         availability: expect.objectContaining({
           cacheMode: 'space',
           handler: expect.any(Function),

@@ -16,10 +16,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { AiIndexDescriptionField } from '../ai_index_description_field';
 import { useSaveAiIndexDescription } from '../../hooks/use_save_ai_index_description';
 import { validateTextInput } from '../../utils/validate_text_input';
@@ -82,6 +84,10 @@ export const DescriptionPanel = ({
               onClick={startEditing}
               isDisabled={aiIndex === undefined}
               data-test-subj="contextEditDescriptionButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
+                action: CONTEXT_ENGINE_UI_EBT.action.description.EDIT,
+              })}
             >
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.description.editButton"
@@ -110,6 +116,10 @@ export const DescriptionPanel = ({
                 onClick={() => setIsEditing(false)}
                 isDisabled={isSaving}
                 data-test-subj="contextDescriptionCancelButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.description.CANCEL,
+                })}
               >
                 <FormattedMessage
                   id="xpack.contextEngine.aiIndexDetail.description.cancelButton"
@@ -125,6 +135,10 @@ export const DescriptionPanel = ({
                 isLoading={isSaving}
                 isDisabled={!descriptionValidation.valid}
                 data-test-subj="contextDescriptionSaveButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.description.SAVE,
+                })}
               >
                 <FormattedMessage
                   id="xpack.contextEngine.aiIndexDetail.description.saveButton"
