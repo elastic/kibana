@@ -18,7 +18,7 @@ const PRINCIPAL_PATH = 'test_endpoints/principal';
 // These tests cannot be run on MKI because they rely on the Mock IdP plugin and its fixed credentials.
 apiTest.describe(
   '[NON-MKI] Core security.authc.getPrincipal with UIAM credentials',
-  { tag: tags.serverless.all },
+  { tag: tags.serverless.all.filter((tag) => tag.startsWith('@local-')) },
   () => {
     apiTest(
       'classifies a session-authenticated request as a user',
