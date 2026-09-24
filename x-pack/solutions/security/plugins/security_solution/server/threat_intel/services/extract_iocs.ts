@@ -64,7 +64,9 @@ const URL_PATTERN = /\bhttps?:\/\/[^\s<>"']{4,}/gi;
  * Closing brackets are only trimmed when they are unbalanced, so a Wikipedia-style
  * `.../Foo_(bar)` path survives.
  */
-const TRAILING_PROSE_CHARS = '.,;:!?\'"';
+// Backticks delimit Markdown inline code. If retained, URL serialization turns
+// one into `%60`, producing an indicator that can never match the source URL.
+const TRAILING_PROSE_CHARS = '.,;:!?\'"`';
 const CLOSER_TO_OPENER: Readonly<Record<string, string>> = { ')': '(', ']': '[', '}': '{' };
 
 const trimUrlPunctuation = (url: string): string => {

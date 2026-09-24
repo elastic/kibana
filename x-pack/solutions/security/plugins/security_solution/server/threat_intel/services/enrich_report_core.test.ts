@@ -8,7 +8,11 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ExtractedIoc } from './extract_iocs';
-import { enrichReportCore, type ReportCoreModelOutput } from './enrich_report_core';
+import {
+  enrichReportCore,
+  reportCoreModelOutputSchema,
+  type ReportCoreModelOutput,
+} from './enrich_report_core';
 
 const URL = 'https://evil.example/PAYLOAD/Stage2.exe';
 const HASH = 'A'.repeat(64);
@@ -54,6 +58,32 @@ const buildModel = (invoke: jest.Mock) => {
     chatModel: { withStructuredOutput },
   } as unknown as ScopedModel;
 };
+
+describe('reportCoreModelOutputSchema', () => {
+  it('canonicalizes slash-separated and lowercase ATT&CK technique ids', () => {
+    const parsed = reportCoreModelOutputSchema.parse({
+      ...OUTPUT,
+      behaviors: [
+        { ...OUTPUT.behaviors[0], technique_id: 'T1053/005' },
+        { ...OUTPUT.behaviors[0], technique_id: 't1059.001' },
+      ],
+    });
+
+    expect(parsed.behaviors.map(({ technique_id }) => technique_id)).toEqual([
+      'T1053.005',
+      'T1059.001',
+    ]);
+  });
+
+  it('clears malformed ATT&CK technique ids', () => {
+    const parsed = reportCoreModelOutputSchema.parse({
+      ...OUTPUT,
+      behaviors: [{ ...OUTPUT.behaviors[0], technique_id: 'not-an-attack-id' }],
+    });
+
+    expect(parsed.behaviors[0].technique_id).toBe('');
+  });
+});
 
 describe('enrichReportCore', () => {
   const logger = loggingSystemMock.createLogger();

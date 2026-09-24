@@ -36,8 +36,18 @@ const closedSet = <T extends string>(allowed: readonly T[], max: number) =>
     .transform((values) => values.filter((value): value is T => allowed.includes(value as T)))
     .transform((values) => [...new Set(values)].slice(0, max));
 
+const ATTACK_TECHNIQUE_ID_PATTERN = /^T\d{4}(?:\.\d{3})?$/;
+
+const normalizeAttackTechniqueId = (value: string): string => {
+  const normalized = value
+    .trim()
+    .toUpperCase()
+    .replace(/^(T\d{4})\/(\d{3})$/, '$1.$2');
+  return ATTACK_TECHNIQUE_ID_PATTERN.test(normalized) ? normalized : '';
+};
+
 const behaviorSchema = z.object({
-  technique_id: z.string().transform((value) => value.slice(0, 32)),
+  technique_id: z.string().transform(normalizeAttackTechniqueId),
   description: z.string().transform((value) => value.slice(0, 2_000)),
   telemetry_targets: z
     .array(z.string())

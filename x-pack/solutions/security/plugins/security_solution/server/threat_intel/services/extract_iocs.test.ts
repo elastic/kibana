@@ -165,6 +165,12 @@ describe('extract_iocs — refang pre-pass and value normalization', () => {
       expect(urlValues(r)).toContain('https://evil.example/a');
     });
 
+    test('a Markdown inline-code backtick is not encoded into the URL', () => {
+      const r = extractIocs({ text: 'C2: `hxxps://evil[.]example/api/payload`' });
+      expect(urlValues(r)).toContain('https://evil.example/api/payload');
+      expect(urlValues(r)).not.toContain('https://evil.example/api/payload%60');
+    });
+
     test('a balanced paren inside the path survives', () => {
       const r = extractIocs({ text: 'ref https://evil.example/Foo_(bar) here' });
       expect(urlValues(r)).toContain('https://evil.example/Foo_(bar)');
