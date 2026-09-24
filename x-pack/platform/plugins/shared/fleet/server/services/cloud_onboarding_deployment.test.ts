@@ -271,7 +271,9 @@ describe('cloudOnboardingDeploymentService', () => {
       await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', updateInput);
 
       // Verify what was actually written, not what getById returned.
-      const writtenAttrs = soClient.create.mock.calls.find((c) => c[2]?.overwrite)?.[1];
+      const writtenAttrs = soClient.create.mock.calls.find((c) => c[2]?.overwrite)?.[1] as
+        | CloudOnboardingDeploymentSOAttributes
+        | undefined;
       expect(writtenAttrs?.serviceVars).not.toHaveProperty('old_service');
       expect(writtenAttrs?.policyIdsByInstance).not.toHaveProperty('removed_instance');
       expect(writtenAttrs?.serviceVars).toHaveProperty('cloudtrail');
