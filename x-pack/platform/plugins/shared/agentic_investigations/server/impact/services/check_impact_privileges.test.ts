@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { IMPACT_API_PRIVILEGE_READ } from '../constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
 import { createImpactPrivilegesChecker } from './check_impact_privileges';
 import { ImpactForbiddenError } from './errors';
 
@@ -43,14 +43,14 @@ describe('createImpactPrivilegesChecker', () => {
     jest.clearAllMocks();
   });
 
-  it('should resolve when the principal holds read_impact', async () => {
+  it('should resolve a read when the principal can manage investigations', async () => {
     const { security, checkPrivileges } = createSecurity(true);
     const { checker } = createChecker(security);
 
     await expect(checker.assertCanRead(request)).resolves.toBeUndefined();
 
     expect(checkPrivileges).toHaveBeenCalledWith({
-      kibana: [`api:${IMPACT_API_PRIVILEGE_READ}`],
+      kibana: [`api:${INVESTIGATIONS_API_PRIVILEGE_MANAGE}`],
     });
   });
 
@@ -66,5 +66,23 @@ describe('createImpactPrivilegesChecker', () => {
 
     await expect(checker.assertCanRead(request)).rejects.toBeInstanceOf(ImpactForbiddenError);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fails closed'));
+  });
+
+  it('should resolve a write when the principal can manage investigations', async () => {
+    const { security, checkPrivileges } = createSecurity(true);
+    const { checker } = createChecker(security);
+
+    await expect(checker.assertCanManage(request)).resolves.toBeUndefined();
+
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      kibana: [`api:${INVESTIGATIONS_API_PRIVILEGE_MANAGE}`],
+    });
+  });
+
+  it('should throw when the principal cannot manage investigations', async () => {
+    const { security } = createSecurity(false);
+    const { checker } = createChecker(security);
+
+    await expect(checker.assertCanManage(request)).rejects.toBeInstanceOf(ImpactForbiddenError);
   });
 });
