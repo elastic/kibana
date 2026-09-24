@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import {
   HTTPAuthorizationHeader,
@@ -105,6 +106,7 @@ export interface CallKibanaApiDeps {
  * under the engine's control.
  */
 const RESERVED_HEADER_NAMES = new Set([
+  ALERTING_CLONE_API_KEY_HEADER,
   'authorization',
   'content-type',
   'kbn-xsrf',
@@ -230,6 +232,12 @@ export async function callKibanaApi<T = unknown>(
     ...stripReservedHeaders(params.headers),
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
     ...getInternalUiamCallerAttestationHeaders(coreStart, fakeRequest),
+    // The fake request's key is borrowed: Task Manager granted or cloned it for this workflow run
+    // and invalidates it once the run completes. Alerting persists an API-key caller's credential
+    // on any rule it creates or enables, which would leave those rules running on a revoked key.
+    // This header tells alerting to mint the rule its own framework-owned key instead. It is a
+    // no-op for routes that do not consult it and for non-API-key callers.
+    [ALERTING_CLONE_API_KEY_HEADER]: 'true',
   };
 
   // The workflow's fake request carries neither a space nor the server base path, so both have to

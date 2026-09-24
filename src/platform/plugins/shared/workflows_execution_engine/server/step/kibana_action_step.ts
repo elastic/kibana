@@ -10,6 +10,7 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest, KibanaHttpMethods } from '@kbn/workflows';
@@ -165,6 +166,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     } else {
       throw new Error('No authentication headers found');
     }
+    // The key above is borrowed: Task Manager granted or cloned it for this workflow run and
+    // invalidates it once the run completes. Alerting persists an API-key caller's credential on
+    // any rule it creates or enables ("the user owns this key"), which would leave those rules
+    // running on a revoked key. This header tells alerting to mint the rule its own framework-owned
+    // key instead. It is a no-op for routes that do not consult it and for non-API-key callers.
+    headers[ALERTING_CLONE_API_KEY_HEADER] = 'true';
     return headers;
   }
 

@@ -510,6 +510,24 @@ describe('callKibanaApi', () => {
     expect(headers['x-custom-trace-id']).toBe('trace-1');
   });
 
+  it('declares the borrowed task key to alerting and ignores a caller-supplied override', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/detection_engine/rules/_bulk_action',
+        body: { action: 'enable', ids: ['r1'] },
+        headers: { 'X-Kbn-Alerting-Clone-Api-Key': 'false' },
+      }
+    );
+
+    const headers = lastFetchHeaders();
+    expect(headers['x-kbn-alerting-clone-api-key']).toBe('true');
+    expect(headers['X-Kbn-Alerting-Clone-Api-Key']).toBeUndefined();
+  });
+
   it('throws a KibanaApiCallError with the unchanged HTTP <status>: <body> message on non-2xx', async () => {
     mockSelfFetch.mockResolvedValue(
       mockSelfResponse(createMockResponse({ body: { message: 'forbidden' }, status: 403 }))

@@ -220,6 +220,43 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     expect(mockGetInternalCallerAttestationHeaders).not.toHaveBeenCalled();
   });
 
+  it('declares the borrowed task key to alerting and ignores a caller-supplied override', async () => {
+    mockContextManager.getFakeRequest.mockReturnValue({
+      headers: { authorization: 'ApiKey task-key' },
+    } as unknown as KibanaRequest);
+
+    const stepWith = {
+      request: {
+        method: 'POST',
+        path: '/api/detection_engine/rules',
+        body: { name: 'r' },
+        headers: { 'x-kbn-alerting-clone-api-key': 'false' },
+      },
+    };
+    const step = {
+      id: 'create_rule',
+      type: 'kibana.request',
+      stepId: 'create_rule',
+      stepType: 'kibana.request',
+      configuration: { name: 'create_rule', type: 'kibana.request', with: stepWith },
+    } as unknown as KibanaGraphNode;
+
+    await runStep(
+      new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      ),
+      stepWith
+    );
+
+    const fetchOptions = mockedFetch.mock.calls[0][1] as RequestInit;
+    const headers = new Headers(fetchOptions.headers);
+    expect(headers.get('authorization')).toBe('ApiKey task-key');
+    expect(headers.get('x-kbn-alerting-clone-api-key')).toBe('true');
+  });
+
   it('does not attest a user-created (external) UIAM credential on loopback requests', async () => {
     // The receiving Kibana would honor the attestation and attach the UIAM shared secret to its
     // Elasticsearch calls, and UIAM rejects external keys presented with client authentication.
