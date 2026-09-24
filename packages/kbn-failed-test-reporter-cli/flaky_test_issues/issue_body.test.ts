@@ -206,14 +206,14 @@ describe('renderFlakySuiteIssueBody', () => {
     const single = singleTestReport();
     expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
       [
-        '1 test in the `Default status alert` suite appears to be flaky:',
+        `1 test in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/${SUITE_PATH}) suite appears to be flaky:`,
         '',
         '| Test | Flaky branches | Dashboard |',
       ].join('\n')
     );
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(
-      '3 tests in the `Default status alert` suite appear to be flaky:\n\n| Test |'
+      `3 tests in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/${SUITE_PATH}) suite appear to be flaky:\n\n| Test |`
     );
   });
 

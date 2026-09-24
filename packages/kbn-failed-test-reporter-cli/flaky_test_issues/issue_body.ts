@@ -178,12 +178,13 @@ const skippedNote = (suite: FlakySuite): string | undefined => {
   return `Latest run on ${inlineCode(latestRun.branch)} was skipped (${since}).`;
 };
 
-/** `3 tests in the \`Default status alert\` suite appear to be flaky:` */
+/** `3 tests in the [\`Default status alert\`](…/default_status_alert.spec.ts) suite appear to be flaky:` */
 const opening = (suite: FlakySuite): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
+  const link = `[${inlineCode(subject)}](${KIBANA_BLOB_URL}/${suite.filePath})`;
   const count = suite.tests.length;
   return (
-    `${plural(count, 'test')} in the ${inlineCode(subject)} suite ` +
+    `${plural(count, 'test')} in the ${link} suite ` +
     `${count === 1 ? 'appears' : 'appear'} to be flaky:`
   );
 };
