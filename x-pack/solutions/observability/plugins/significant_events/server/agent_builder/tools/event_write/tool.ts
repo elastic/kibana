@@ -19,7 +19,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
@@ -270,7 +270,7 @@ export function createEventsWriteTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof eventsWriteSchema> {
