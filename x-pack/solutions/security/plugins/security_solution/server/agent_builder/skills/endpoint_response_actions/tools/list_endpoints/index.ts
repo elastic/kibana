@@ -148,8 +148,13 @@ export const listEndpointsTool = (
                 page,
                 pageSize: LIST_ENDPOINTS_PAGE_SIZE,
                 // Report truncation explicitly: the agent must not treat a
-                // partial page as the complete inventory.
-                hasMore: page * LIST_ENDPOINTS_PAGE_SIZE + endpoints.length < total,
+                // partial page as the complete inventory. At the page cap the
+                // answer is always `false`: the next page would be rejected by
+                // the cap above, so signaling more data would send the agent
+                // into a guaranteed-error request.
+                hasMore:
+                  page < MAX_LIST_ENDPOINTS_PAGE &&
+                  page * LIST_ENDPOINTS_PAGE_SIZE + endpoints.length < total,
               },
             },
           ],

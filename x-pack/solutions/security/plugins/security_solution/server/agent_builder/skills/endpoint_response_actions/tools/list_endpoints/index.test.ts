@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable require-atomic-updates */
+
 import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
@@ -16,7 +18,7 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import { LIST_ENDPOINTS_TOOL_ID } from '../..';
-import { listEndpointsTool } from '.';
+import { listEndpointsTool, MAX_LIST_ENDPOINTS_PAGE } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
@@ -339,6 +341,43 @@ describe('listEndpointsTool', () => {
         expect(data.page).toBe(0);
         expect(data.pageSize).toBe(50);
         expect(data.hasMore).toBe(true);
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('reports hasMore false at the page cap even when the fleet is larger', async () => {
+      // The page cap rejects page 200+, so signaling more data at the cap
+      // would steer the agent into a guaranteed-error request.
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: Array.from({ length: 50 }, (_, i) => ({
+            metadata: {
+              host: { hostname: `host-${i}` },
+              agent: { id: `agent-${i}` },
+              Endpoint: { state: { isolation: false } },
+            },
+            last_checkin: '2024-06-01T12:00:00Z',
+            host_status: 'healthy',
+          })),
+          total: 20000,
+        }),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({ page: MAX_LIST_ENDPOINTS_PAGE }, mockContext);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+        expect(data.page).toBe(MAX_LIST_ENDPOINTS_PAGE);
+        expect(data.total).toBe(20000);
+        expect(data.hasMore).toBe(false);
       } finally {
         mockEndpointAppContextService.getEndpointMetadataService =
           originalGetEndpointMetadataService;
