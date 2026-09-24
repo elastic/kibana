@@ -218,7 +218,8 @@ Run a suite on any branch without a PR:
 | `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
 | `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
 | `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
-| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     || `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
+| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
+| `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
 | `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |

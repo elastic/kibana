@@ -27,12 +27,17 @@ const isScoutArch = (value: string): value is ScoutArch =>
  * while its arch is used; Scout itself rejects a domain the config set has no file for.
  */
 export const resolveScoutTarget = (
-  suite: { scoutArch?: string; scoutDomain?: string } | undefined,
+  suite: { id?: string; scoutArch?: string; scoutDomain?: string } | undefined,
   flags: { arch?: string; domain?: string } = {}
 ): ScoutTarget => {
   const arch = flags.arch ?? suite?.scoutArch ?? DEFAULT_SCOUT_TARGET.arch;
   if (!isScoutArch(arch)) {
-    throw createFlagError(`Invalid Scout arch "${arch}" (expected ${SCOUT_ARCHES.join(' or ')})`);
+    const expected = `expected ${SCOUT_ARCHES.join(' or ')}`;
+    throw flags.arch !== undefined
+      ? createFlagError(`Invalid Scout arch "${arch}" (${expected})`)
+      : new Error(
+          `Suite "${suite?.id}" has an invalid scoutArch "${arch}" in evals.suites.json (${expected})`
+        );
   }
 
   const suiteDomain =

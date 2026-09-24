@@ -43,12 +43,15 @@ describe('resolveScoutTarget', () => {
     );
   });
 
-  it('rejects an unknown arch', () => {
+  it('rejects an unknown --scout-arch', () => {
     expect(() => resolveScoutTarget(serverlessSuite, { arch: 'cloud' })).toThrow(
       'Invalid Scout arch "cloud" (expected stateful or serverless)'
     );
-    expect(() => resolveScoutTarget({ scoutArch: 'cloud' })).toThrow(
-      'Invalid Scout arch "cloud" (expected stateful or serverless)'
+  });
+
+  it('names the suite when its scoutArch is invalid', () => {
+    expect(() => resolveScoutTarget({ id: 'my-suite', scoutArch: 'cloud' })).toThrow(
+      'Suite "my-suite" has an invalid scoutArch "cloud" in evals.suites.json (expected stateful or serverless)'
     );
   });
 });
