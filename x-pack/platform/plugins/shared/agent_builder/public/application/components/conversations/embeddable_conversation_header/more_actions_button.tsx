@@ -24,7 +24,6 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useLoadTraceFromFile } from '../../../hooks/use_load_trace_from_file';
 import { triggerDownload } from '../../../utils/download';
 import { TraceFlyout } from '../timeline/response/trace_flyout';
@@ -79,7 +78,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   const { conversation } = useConversation();
   const { title: conversationTitle } = useConversationTitle();
-  const { agent, isLoading: isAgentLoading, error: agentError } = useAgentBuilderAgentById(agentId);
 
   const {
     openFilePicker,
@@ -91,8 +89,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     handleFileChange,
   } = useLoadTraceFromFile();
 
-  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const togglePopover = useCallback(() => setIsPopoverOpen((v) => !v), []);
+  const closePopover = () => setIsPopoverOpen(false);
+  const togglePopover = () => setIsPopoverOpen((v) => !v);
 
   const handleOpenFullScreen = useCallback(() => {
     if (!application) return;
@@ -109,23 +107,19 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   }, [application, conversationId, onCloseSidebar, agentId, navigateToAgentBuilderUrl]);
 
   const handleDownloadConversation = useCallback(() => {
-    closePopover();
+    setIsPopoverOpen(false);
     const slug =
       conversationTitle
-        .replace(/[^\p{L}\p{N}]+/gu, '-')
-        .replace(/^-|-$/g, '')
+        .replace(/[^\p{L}\p{N}]+/gu, '-') // replace non-alphanumeric chars (unicode-aware) with hyphens
+        .replace(/^-|-$/g, '') // strip leading/trailing hyphens
         .toLowerCase() || 'conversation';
-    const payload = {
-      agent: agent ?? undefined,
-      conversation,
-    };
-    triggerDownload(`${slug}.json`, JSON.stringify(payload, null, 2));
-  }, [closePopover, conversationTitle, agent, conversation]);
+    triggerDownload(`${slug}.json`, JSON.stringify({ conversation }, null, 2));
+  }, [conversationTitle, conversation]);
 
   const handleLoadTrace = useCallback(() => {
-    closePopover();
+    setIsPopoverOpen(false);
     openFilePicker();
-  }, [closePopover, openFilePicker]);
+  }, [openFilePicker]);
 
   const fullScreenMenuItemLabel = useMemo(() => {
     if (conversationId) {
@@ -142,9 +136,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     <EuiContextMenuItem
       key="download-conversation"
       icon="download"
-      disabled={isAgentLoading || !!agentError || !conversation}
+      disabled={!conversation}
       onClick={handleDownloadConversation}
-      data-test-subj="agentBuilderDownloadConversationMenuItem"
       {...getEbtProps({
         element: AGENT_BUILDER_UI_EBT.element.pageContent,
         action: AGENT_BUILDER_UI_EBT.action.conversation.DOWNLOAD_CONVERSATION,
@@ -157,7 +150,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       key="load-trace"
       icon="export"
       onClick={handleLoadTrace}
-      data-test-subj="agentBuilderLoadTraceMenuItem"
       {...getEbtProps({
         element: AGENT_BUILDER_UI_EBT.element.pageContent,
         action: AGENT_BUILDER_UI_EBT.action.conversation.LOAD_TRACE_FROM_FILE,
@@ -245,7 +237,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         accept=".json"
         style={{ display: 'none' }}
         onChange={handleFileChange}
-        data-test-subj="agentBuilderTraceFileInput"
       />
       <EuiPopover
         button={<EuiButtonIcon {...buttonProps} />}

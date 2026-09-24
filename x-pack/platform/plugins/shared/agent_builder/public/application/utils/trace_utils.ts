@@ -35,6 +35,9 @@ export const parseTraceSpansFromFile = async (file: File): Promise<ParsedTraceFi
   const text = await readFileAsText(file);
   const parsed: unknown = JSON.parse(text);
 
+  const isSpan = (item: unknown): item is TraceSpan =>
+    typeof item === 'object' && item !== null && 'span_id' in item;
+
   let spans: unknown;
   let traceId: string | undefined;
 
@@ -48,12 +51,7 @@ export const parseTraceSpansFromFile = async (file: File): Promise<ParsedTraceFi
     return null;
   }
 
-  if (!Array.isArray(spans)) return null;
+  if (!Array.isArray(spans) || !spans.every(isSpan)) return null;
 
-  const isSpan = (item: unknown): boolean =>
-    typeof item === 'object' && item !== null && 'span_id' in item;
-
-  if (!(spans as unknown[]).every(isSpan)) return null;
-
-  return { spans: spans as TraceSpan[], traceId };
+  return { spans, traceId };
 };

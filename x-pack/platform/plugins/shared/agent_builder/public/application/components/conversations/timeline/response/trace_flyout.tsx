@@ -63,8 +63,8 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans,
   const handleDownload = useCallback(() => {
     const slug = traceId
       ? traceId
-          .replace(/[^\p{L}\p{N}]+/gu, '-')
-          .replace(/^-|-$/g, '')
+          .replace(/[^\p{L}\p{N}]+/gu, '-') // replace non-alphanumeric chars (unicode-aware) with hyphens
+          .replace(/^-|-$/g, '') // strip leading/trailing hyphens
           .toLowerCase()
       : 'trace';
     const envelope = { ...(traceId ? { trace_id: traceId } : {}), spans };
@@ -108,7 +108,6 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans,
                 onClick={handleDownload}
                 color="text"
                 size="s"
-                data-test-subj="traceFlyoutDownloadButton"
               />
             </EuiToolTip>
           </EuiFlexItem>
