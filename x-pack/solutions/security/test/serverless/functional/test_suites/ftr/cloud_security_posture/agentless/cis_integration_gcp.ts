@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type * as http from 'http';
 import {
   GCP_PROVIDER_TEST_SUBJ,
   GCP_SINGLE_ACCOUNT_TEST_SUBJ,
@@ -16,45 +15,15 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
 
-  const supertest = getService('supertest');
-
   describe('Agentless CIS Integration Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
-    let mockApiServer: http.Server;
-
     before(async () => {
-      const { setupMockServer } = await import('./mock_agentless_api');
-      const mockAgentlessApiService = setupMockServer();
-      await new Promise<void>((resolve, reject) => {
-        mockApiServer = mockAgentlessApiService.listen(8089, resolve);
-        mockApiServer.once('error', reject);
-      });
-
-      // Ensure CSP is installed — prior suites in this FTR config (e.g. cis_integration_aws)
-      // delete the package in their after hook, so we can't rely on the server-args preinstall.
-      await supertest
-        .post('/api/fleet/epm/packages/cloud_security_posture')
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
-
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
-    });
-
-    after(async () => {
-      try {
-        await supertest
-          .delete(`/api/fleet/epm/packages/cloud_security_posture`)
-          .set('kbn-xsrf', 'xxxx')
-          .query({ force: true })
-          .expect(200);
-      } finally {
-        await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
-      }
     });
 
     describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {

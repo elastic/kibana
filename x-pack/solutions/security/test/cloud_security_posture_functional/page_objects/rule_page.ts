@@ -30,6 +30,7 @@ export const CLOSE_TOAST_BUTTON = 'toastCloseButton';
 
 export function RulePagePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const supertest = getService('supertest');
@@ -62,7 +63,8 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     closeBulkActionButton: async () => {
       const button = await testSubjects.find(RULES_BULK_ACTION_BUTTON);
       if ((await button.getAttribute('aria-expanded')) === 'true') {
-        await button.click();
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.missingOrFail(RULES_BULK_ACTION_OPTION_DISABLE, { timeout: 5000 });
       }
     },
 

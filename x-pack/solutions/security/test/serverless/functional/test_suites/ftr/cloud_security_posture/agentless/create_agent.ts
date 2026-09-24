@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as http from 'http';
 import expect from '@kbn/expect';
 import {
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
@@ -26,23 +25,11 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
   describe('Agentless API Serverless', function () {
     this.tags(['skipMKI', 'cloud_security_posture_agentless']);
-    let mockApiServer: http.Server;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
-      const { setupMockServer } = await import('./mock_agentless_api');
-      const mockAgentlessApiService = setupMockServer();
-      await new Promise<void>((resolve, reject) => {
-        mockApiServer = mockAgentlessApiService.listen(8089, resolve);
-        mockApiServer.once('error', reject);
-      });
-
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
-    });
-
-    after(async () => {
-      await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
     });
 
     it(`should create agentless-agent`, async () => {

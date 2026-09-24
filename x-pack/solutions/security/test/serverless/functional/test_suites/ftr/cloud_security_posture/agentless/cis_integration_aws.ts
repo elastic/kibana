@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type * as http from 'http';
 import {
   AWS_PROVIDER_TEST_SUBJ,
   AWS_SINGLE_ACCOUNT_TEST_SUBJ,
@@ -20,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
     'header',
   ]);
-  const supertest = getService('supertest');
   const retry = getService('retry');
 
   describe('Serverless - Agentless CIS Integration Page', function () {
@@ -28,31 +26,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
-    let mockApiServer: http.Server;
-
     before(async () => {
-      const { setupMockServer } = await import('./mock_agentless_api');
-      const mockAgentlessApiService = setupMockServer();
-      await new Promise<void>((resolve, reject) => {
-        mockApiServer = mockAgentlessApiService.listen(8089, resolve);
-        mockApiServer.once('error', reject);
-      });
-
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
-    });
-
-    after(async () => {
-      try {
-        await supertest
-          .delete(`/api/fleet/epm/packages/cloud_security_posture`)
-          .set('kbn-xsrf', 'xxxx')
-          .query({ force: true })
-          .expect(200);
-      } finally {
-        await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
-      }
     });
 
     describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {

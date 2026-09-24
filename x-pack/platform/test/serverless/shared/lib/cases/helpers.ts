@@ -67,9 +67,11 @@ export const navigateToCasesApp = async (
   owner: string
 ) => {
   const common = getPageObject('common');
+  const header = getPageObject('header');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   await common.navigateToApp('landingPage');
+  await header.waitUntilLoadingHasFinished();
 
   if (owner === SECURITY_SOLUTION_OWNER) {
     await svlCommonNavigation.sidenav.clickLink({
