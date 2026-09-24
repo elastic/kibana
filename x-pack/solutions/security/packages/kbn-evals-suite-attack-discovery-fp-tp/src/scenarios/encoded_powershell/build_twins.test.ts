@@ -67,8 +67,33 @@ describe('encoded-powershell FP/TP twins', () => {
     expect(event?.source.message).toBe('WINWORD.EXE started powershell.exe');
   });
 
-  it('returns no fp raw event that mentions the TP C2 domain', () => {
-    expect(JSON.stringify(fp.events)).not.toContain('malicious-c2.example.com');
+  it.each([
+    'malicious-c2.example.com',
+    'payload.exe',
+    'ADMIN$',
+    'update.ps1',
+    'CurrentVersion\\\\Run',
+  ])('returns no fp raw event that mentions %s', (needle) => {
+    expect(JSON.stringify(fp.events)).not.toContain(needle);
+  });
+
+  it('returns the SCCM distribution point on the fp step 4 command line', () => {
+    const event = fp.events.find((item) => item.id === ids.network4Id);
+    const process = event?.source.process as { command_line?: string } | undefined;
+    expect(process?.command_line).toContain('\\\\sccm-dp-02.contoso.local\\SMS_DP$');
+  });
+
+  it('returns a fp file message that matches its path', () => {
+    const event = fp.events.find((item) => item.id === ids.file3Id);
+    expect(event?.source.message).toBe(
+      'powershell.exe created C:\\Windows\\CCM\\SystemTemp\\ComplianceScript.ps1'
+    );
+  });
+
+  it('returns the Run-key command line on the tp step 3 process event', () => {
+    const event = tp.events.find((item) => item.id === ids.process3Id);
+    const process = event?.source.process as { command_line?: string } | undefined;
+    expect(process?.command_line).toContain('CurrentVersion\\Run');
   });
 
   it('returns the same authored attack document for both twins', () => {

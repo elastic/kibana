@@ -33,6 +33,9 @@ export interface EncodedPowershellIds {
   readonly userEntityId: string;
   readonly process1Id: string;
   readonly network2Id: string;
+  readonly process3Id: string;
+  readonly file3Id: string;
+  readonly process4Id: string;
   readonly network4Id: string;
 }
 
@@ -51,6 +54,9 @@ export const getEncodedPowershellIds = (
     userEntityId: `user:${ENCODED_POWERSHELL_USER}@${hostId}@local`,
     process1Id: ad2SeedId(runMarker, 'process', ENCODED_POWERSHELL_SCENARIO_KEY, 1),
     network2Id: ad2SeedId(runMarker, 'network', ENCODED_POWERSHELL_SCENARIO_KEY, 2),
+    process3Id: ad2SeedId(runMarker, 'process', ENCODED_POWERSHELL_SCENARIO_KEY, 3),
+    file3Id: ad2SeedId(runMarker, 'file', ENCODED_POWERSHELL_SCENARIO_KEY, 3),
+    process4Id: ad2SeedId(runMarker, 'process', ENCODED_POWERSHELL_SCENARIO_KEY, 4),
     network4Id: ad2SeedId(runMarker, 'network', ENCODED_POWERSHELL_SCENARIO_KEY, 4),
   };
 };

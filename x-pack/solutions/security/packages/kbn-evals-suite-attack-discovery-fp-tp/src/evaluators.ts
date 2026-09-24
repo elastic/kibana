@@ -74,6 +74,9 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
     return ['no payload'];
   }
   const problems: string[] = [];
+  if (output.executionStatus !== ExecutionStatus.COMPLETED) {
+    problems.push(`execution ended ${output.executionStatus}, not completed`);
+  }
   if (!FP_TP_VERDICTS.some((verdict) => verdict === payload.verdict)) {
     problems.push(`unsupported verdict "${payload.verdict}"`);
   }

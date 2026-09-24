@@ -39,11 +39,15 @@ export interface FpTpLiveSeedPlan {
   readonly entities: readonly FpTpEntityCrudRequest[];
   /** `host.id` of every seeded alert and event. */
   readonly hostIds: readonly string[];
+  /** The world with its timestamps shifted to the seed time, as indexed. */
+  readonly world: FpTpWorld;
 }
 
 export interface FpTpSeededFixture {
   /** Deletes exactly the documents and entities this seed wrote. */
   readonly cleanup: () => Promise<void>;
+  /** The documents as indexed, with timestamps shifted to the seed time. */
+  readonly seededWorld: FpTpWorld;
 }
 
 export interface FpTpLiveSeedSummary {
@@ -126,6 +130,7 @@ export const buildLiveSeedPlan = (world: FpTpWorld, now: Date = new Date()): FpT
     ]),
     entities: shifted.entities.map(toEntityCrudRequest),
     hostIds: [...hostIds],
+    world: shifted,
   };
 };
 
@@ -454,7 +459,7 @@ export const seedFixture = async ({
     throw error;
   }
 
-  return { cleanup };
+  return { cleanup, seededWorld: plan.world };
 };
 
 /**

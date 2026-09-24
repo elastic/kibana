@@ -160,7 +160,7 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
                   entityIds: world.entities.map(({ id }) => id),
                   eventIds: world.events.map(({ id }) => id),
                 },
-                seededEvidence: toSeededEvidence(world),
+                seededEvidence: toSeededEvidence(fixture.seededWorld),
               });
               agentConversationIds = result.agentConversationIds;
               log.info(

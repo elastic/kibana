@@ -62,7 +62,7 @@ src/
 
 - `OutcomeAccuracy` (primary): the outcome matches the gold. The label is the predicted outcome, so the report reads as a confusion matrix.
 - `UnsafeClose`: 0 when the run predicts `false_positive` and the gold is anything else. A false positive closes the attack.
-- `PayloadConformance`: a completed run has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` did not complete and produced no payload.
+- `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` did not complete and produced no payload.
 - `trajectory`: the agent called no tools. N/A when traces are unavailable.
 - LLM criteria on the summary and rationale: cited ids exist in the seeded data, nothing is invented (the task output carries the seeded documents in `seededEvidence`), the deciding checks are named, and an `inconclusive` verdict says what was missing or conflicting. N/A for failed runs.
 

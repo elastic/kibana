@@ -108,6 +108,7 @@ describe('PayloadConformance', () => {
       },
     ],
     ['a different attack id echo', { attackDiscoveryIdEcho: 'ad-2' }],
+    ['a conforming payload from a failed execution', { executionStatus: ExecutionStatus.FAILED }],
     ['no payload', { payload: undefined }],
   ])('returns 0 for %s', async (_, overrides) => {
     expect(await score(payloadConformance, { ...completed, ...overrides }, 'inconclusive')).toBe(0);

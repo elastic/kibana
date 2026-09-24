@@ -190,6 +190,18 @@ describe('seedFixture', () => {
     ]);
   });
 
+  it('returns the seeded world with timestamps shifted to the seed time', async () => {
+    const now = new Date('2026-09-24T10:00:00.000Z');
+    const { seededWorld } = await seedFixture({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest,
+      world,
+      now,
+    });
+
+    expect(seededWorld).toEqual(buildLiveSeedPlan(world, now).world);
+  });
+
   it('returns after writing the user name and host id onto the seeded user entity', async () => {
     await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
 
