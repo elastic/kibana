@@ -104,6 +104,15 @@ describe('ParameterValuesEditor', () => {
     expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"********"}');
   });
 
+  it('clears a masked value when its parameter is renamed', () => {
+    const { getByTestId } = render(<ParameterValuesEditorForm />);
+
+    fireEvent.change(getByTestId('keyValuePairsKey0'), { target: { value: 'token' } });
+
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('');
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"token":""}');
+  });
+
   it('shows the loaded value without requesting it again', () => {
     const { getByTestId } = render(
       <ParameterValuesEditorForm defaultParams={'{"password":"changeme"}'} />

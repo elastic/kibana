@@ -190,7 +190,11 @@ export const ParameterValuesEditor = ({
                       onBlur={onBlur}
                       onChange={(event) => {
                         const nextPairs = [...pairs];
-                        nextPairs[index] = [event.target.value, paramValue];
+                        // The stored secret is keyed by name, so a renamed mask has nothing to restore.
+                        nextPairs[index] = [
+                          event.target.value,
+                          paramValue === MASKED_PARAM_VALUE ? '' : paramValue,
+                        ];
                         updatePairs(nextPairs);
                       }}
                       readOnly={readOnly}
