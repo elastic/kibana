@@ -43256,6 +43256,11 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      policyIdsByInstance:
+                        additionalProperties:
+                          type: string
+                        description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                        type: object
                       provider:
                         description: Cloud provider.
                         enum:
@@ -43572,6 +43577,11 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      policyIdsByInstance:
+                        additionalProperties:
+                          type: string
+                        description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                        type: object
                       provider:
                         description: Cloud provider.
                         enum:
@@ -43781,6 +43791,11 @@ paths:
                     type: string
                   maxItems: 100
                   type: array
+                policyIdsByInstance:
+                  additionalProperties:
+                    maxLength: 255
+                    type: string
+                  type: object
                 services:
                   description: Updated service list. Replaces the stored services array.
                   items:
@@ -43921,6 +43936,11 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      policyIdsByInstance:
+                        additionalProperties:
+                          type: string
+                        description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                        type: object
                       provider:
                         description: Cloud provider.
                         enum:
@@ -44163,6 +44183,11 @@ paths:
                             type: string
                           maxItems: 100
                           type: array
+                        policyIdsByInstance:
+                          additionalProperties:
+                            type: string
+                          description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                          type: object
                         provider:
                           description: Cloud provider.
                           enum:
