@@ -1702,18 +1702,37 @@ describe('ConversationClient', () => {
     });
 
     it('appends a null-vote tombstone on retract instead of deleting the prior event', async () => {
-      mockGetDocumentResponse(createConversationDocument({ rounds: [round] }));
+      const priorVoteEvent: TimelineEvent = {
+        id: 'prior-vote-event-id',
+        type: TimelineEventType.roundFeedback,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1' },
+        data: {
+          round_id: 'round-1',
+          vote: 'up' as const,
+          submitted_at: '2025-01-01T00:00:00.000Z',
+        },
+      };
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [round],
+          events: [priorVoteEvent],
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+        })
+      );
 
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
 
       const { events } = mockEsClient.index.mock.calls[0][0].document as {
         events: TimelineEvent[];
       };
-      const tombstone = events.find(
+      const feedbackEvents = events.filter(
         (e) =>
           e.type === TimelineEventType.roundFeedback &&
           (e.data as { round_id: string }).round_id === 'round-1'
       );
+      expect(feedbackEvents.find((e) => e.id === 'prior-vote-event-id')).toBeDefined();
+      const tombstone = feedbackEvents.find((e) => e.id !== 'prior-vote-event-id');
       expect(tombstone).toBeDefined();
       expect((tombstone!.data as { vote: unknown }).vote).toBeNull();
     });

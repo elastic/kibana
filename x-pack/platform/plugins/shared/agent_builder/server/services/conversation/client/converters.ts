@@ -64,7 +64,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { roundsToEvents } from './rounds_to_events';
+import { roundsToEvents, backfillRoundFeedbackEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 import { reconcileEvents } from './round_writes';
 
@@ -277,12 +277,14 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
     ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
   };
 
-  const events =
-    isEventsNative && storedEvents && storedEvents.length > 0
-      ? storedEvents
-      : roundsToEvents(conversation);
+  const useStoredEvents = isEventsNative && storedEvents != null && storedEvents.length > 0;
+  const events = useStoredEvents ? storedEvents! : roundsToEvents(conversation);
+  const feedbackBackfill = useStoredEvents ? backfillRoundFeedbackEvents(conversation, events) : [];
 
-  return { ...conversation, events };
+  return {
+    ...conversation,
+    events: feedbackBackfill.length > 0 ? [...events, ...feedbackBackfill] : events,
+  };
 };
 
 const withPermissions = <T extends ConversationWithoutRounds>({
