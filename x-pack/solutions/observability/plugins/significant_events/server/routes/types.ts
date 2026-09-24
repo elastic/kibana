@@ -14,12 +14,10 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { SignificantEventsTuningConfig } from '@kbn/significant-events-schema';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
-import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { AttachmentClient } from '@kbn/streams-plugin/server';
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsServer } from '../types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -51,7 +49,6 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   soClient: SavedObjectsClientContract;
   /** Request space (`request.spaceId`); knowledge indicators and their rules are scoped to it. */
   space: string;
-  attachmentClient: AttachmentClient;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>;
   getAlertEventsClient: () => Promise<AlertEventsClientApi | undefined>;
@@ -61,7 +58,6 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   uiSettingsClient: IUiSettingsClient;
   globalUiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
-  streamsClient: StreamsClient;
   sourcesClient: SourcesClient;
   isSecurityEnabled: boolean;
   tuningConfig: SignificantEventsTuningConfig;

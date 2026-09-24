@@ -14,7 +14,7 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
-import type { AttachmentClient } from '@kbn/streams-plugin/server';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 
@@ -25,7 +25,7 @@ import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/t
  */
 type ToolScopedClients = Pick<
   RouteHandlerScopedClients,
-  'scopedClusterClient' | 'getKnowledgeIndicatorClient' | 'uiSettingsClient' | 'attachmentClient'
+  'scopedClusterClient' | 'getKnowledgeIndicatorClient' | 'uiSettingsClient'
 >;
 
 export const createMockGetScopedClients = () => {
@@ -43,10 +43,6 @@ export const createMockGetScopedClients = () => {
 
   const getKnowledgeIndicatorClient = jest.fn().mockResolvedValue(kiClient);
 
-  const attachmentClient: jest.Mocked<Pick<AttachmentClient, 'getAttachments'>> = {
-    getAttachments: jest.fn().mockResolvedValue([]),
-  };
-
   // Satisfies ensures property names stay in sync with RouteHandlerScopedClients.
   // If a property is renamed or removed from the interface, this will fail.
   const scopedClients: {
@@ -55,7 +51,6 @@ export const createMockGetScopedClients = () => {
     scopedClusterClient,
     getKnowledgeIndicatorClient,
     uiSettingsClient,
-    attachmentClient,
   };
 
   const getScopedClients = jest
@@ -67,10 +62,35 @@ export const createMockGetScopedClients = () => {
     esClient,
     scopedClusterClient,
     getKnowledgeIndicatorClient,
-    attachmentClient,
     uiSettingsClient,
   };
 };
+
+/** A source whose id equals its slug, so tool tests can keep the old stream-name strings. */
+export const sourceWithSlug = (
+  slug: string,
+  overrides: Partial<NightshiftSource> = {}
+): NightshiftSource => ({
+  id: slug,
+  title: slug,
+  tags: [],
+  esql: '',
+  slug,
+  view_name: `$.nightshift.sources.default.${slug}`,
+  enabled: true,
+  created_by: 'user',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+  esql_updated_at: '2026-01-01T00:00:00.000Z',
+  ...overrides,
+});
+
+export const mockSourcesClient = (slugs: readonly string[]) => ({
+  list: jest.fn().mockResolvedValue({
+    sources: slugs.map((slug) => sourceWithSlug(slug)),
+    total: slugs.length,
+  }),
+});
 
 export const createMockRequest = () => httpServerMock.createKibanaRequest();
 

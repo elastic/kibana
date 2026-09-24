@@ -1,1 +1,1 @@
-Discover and manage Streams Knowledge Indicators (KIs): search existing indicators, avoid duplicates, and create feature or query KIs with built-in tool confirmation.
+Discover and manage Knowledge Indicators (KIs) for Nightshift sources: search existing indicators, avoid duplicates, and create feature or query KIs with built-in tool confirmation. Pass the source slug. Tell the user the source title.

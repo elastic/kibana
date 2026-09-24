@@ -6,31 +6,20 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { Streams } from '@kbn/streams-schema';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
+import {
+  createMockToolContext,
+  invokeHandler,
+  mockSourcesClient,
+} from '../../../utils/test_helpers';
 import { createGetFeaturesTool } from './tool';
 
 describe('ki_features_get tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const stream: Streams.WiredStream.Definition = {
-    name: 'logs.test',
-    description: 'Test logs',
-    updated_at: new Date().toISOString(),
-    type: 'wired',
-    ingest: {
-      lifecycle: { inherit: {} },
-      processing: { steps: [], updated_at: new Date().toISOString() },
-      settings: {},
-      failure_store: { inherit: {} },
-      wired: { fields: {}, routing: [] },
-    },
-  };
-  const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
-      streamsClient: { getStream },
+      sourcesClient: mockSourcesClient(['logs.test']),
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     } as unknown as RouteHandlerScopedClients;
   }) as unknown as jest.MockedFunction<GetScopedClients>;
@@ -65,15 +54,15 @@ describe('ki_features_get tool', () => {
       throw new Error('Expected a schema-backed tool registration');
     }
 
-    expect(tool.schema.safeParse({ target_id: 'logs.test', limit: 100 }).success).toBe(true);
-    expect(tool.schema.safeParse({ target_id: 'logs.test', limit: 101 }).success).toBe(false);
+    expect(tool.schema.safeParse({ slug: 'logs.test', limit: 100 }).success).toBe(true);
+    expect(tool.schema.safeParse({ slug: 'logs.test', limit: 101 }).success).toBe(false);
   });
 
   it('loads features for an authorized target', async () => {
     const result = await invokeHandler(
       createTool(),
       {
-        target_id: 'logs.test',
+        slug: 'logs.test',
         feature_types: ['entity'],
         min_confidence: 70,
         limit: 25,
@@ -84,7 +73,6 @@ describe('ki_features_get tool', () => {
       throw new Error('Expected a standard tool result');
     }
 
-    expect(getStream).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).toHaveBeenCalledWith('logs.test', {
       type: ['entity'],
       minConfidence: 70,
@@ -96,6 +84,9 @@ describe('ki_features_get tool', () => {
         type: 'other',
         data: {
           count: 1,
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
           features: [
             expect.objectContaining({
               id: 'feature-1',
@@ -108,21 +99,15 @@ describe('ki_features_get tool', () => {
     ]);
   });
 
-  it('does not read internally stored features when target authorization fails', async () => {
-    getStream.mockRejectedValueOnce(new Error('insufficient privileges'));
-
-    const result = await invokeHandler(
-      createTool(),
-      { target_id: 'logs.restricted' },
-      createMockToolContext()
-    );
+  it('does not read features when the slug is missing', async () => {
+    const result = await invokeHandler(createTool(), { slug: 'missing' }, createMockToolContext());
     if (!('results' in result)) {
       throw new Error('Expected a standard tool result');
     }
 
     expect(getFeatures).not.toHaveBeenCalled();
     expect(result.results).toEqual([
-      { type: 'error', data: { message: 'insufficient privileges' } },
+      { type: 'error', data: { message: 'Source not found in this space: missing' } },
     ]);
   });
 });

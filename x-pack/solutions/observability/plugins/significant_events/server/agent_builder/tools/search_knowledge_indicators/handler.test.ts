@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
 import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
 import type { COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { StreamsClient } from '@kbn/streams-plugin/server';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
+import type { SourceCatalog } from '../../utils/resolve_source_slugs';
 import {
   searchKnowledgeIndicatorsToolHandler,
   type CompactFeature,
@@ -54,12 +54,31 @@ function makeStreamQuery(overrides: Partial<StreamQuery> = {}): StreamQuery {
   };
 }
 
+function catalogFor(ids: string[]): SourceCatalog {
+  const sources = ids.map(
+    (id): NightshiftSource => ({
+      id,
+      slug: id,
+      title: id,
+      tags: [],
+      esql: '',
+      view_name: `$.nightshift.sources.default.${id}`,
+      enabled: true,
+      created_by: 'user',
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_at: '2026-01-01T00:00:00.000Z',
+      esql_updated_at: '2026-01-01T00:00:00.000Z',
+    })
+  );
+  return {
+    bySlug: new Map(sources.map((source) => [source.slug, source])),
+    byId: new Map(sources.map((source) => [source.id, source])),
+  };
+}
+
 describe('searchKnowledgeIndicatorsToolHandler', () => {
   const logger = loggingSystemMock.createLogger();
-
-  const streamsClient = {
-    listStreams: jest.fn(),
-  } as unknown as StreamsClient;
+  let catalog = catalogFor(['logs.test']);
 
   const kiClient = {
     getFeatures: jest.fn(),
@@ -70,13 +89,10 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    catalog = catalogFor(['logs.test']);
   });
 
   it('returns both features and queries when kind is omitted', async () => {
-    streamsClient.listStreams = jest
-      .fn()
-      .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
-
     kiClient.getFeatures = jest
       .fn()
       .mockResolvedValue({ hits: [makeFeature({ id: 'f1', confidence: 80 })], total: 1 });
@@ -94,7 +110,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     ]);
 
     const result = await searchKnowledgeIndicatorsToolHandler({
-      streamsClient,
+      catalog,
       kiClient,
       logger,
       params: {},
@@ -107,10 +123,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('returns only queries when kind is [query] and does not call kiClient.getFeatures', async () => {
-    streamsClient.listStreams = jest
-      .fn()
-      .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
-
     kiClient.getQueryLinks = jest.fn().mockResolvedValue([
       {
         'asset.uuid': 'a1',
@@ -124,7 +136,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     ]);
 
     const result = await searchKnowledgeIndicatorsToolHandler({
-      streamsClient,
+      catalog,
       kiClient,
       logger,
       params: { kind: ['query'] },
@@ -152,14 +164,10 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('uses findQueries when search_text is provided', async () => {
-    streamsClient.listStreams = jest
-      .fn()
-      .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
-
     kiClient.findQueries = jest.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
-      streamsClient,
+      catalog,
       kiClient,
       logger,
       params: {
@@ -182,13 +190,10 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('passes feature filters to semantic search', async () => {
-    streamsClient.listStreams = jest
-      .fn()
-      .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
     kiClient.findFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
     await searchKnowledgeIndicatorsToolHandler({
-      streamsClient,
+      catalog,
       kiClient,
       logger,
       params: {
@@ -208,9 +213,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('loads topology candidates in one feature search', async () => {
-    streamsClient.listStreams = jest
-      .fn()
-      .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
     kiClient.getFeatures = jest
       .fn()
       .mockImplementation(
@@ -236,7 +238,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       );
 
     const result = await searchKnowledgeIndicatorsToolHandler({
-      streamsClient,
+      catalog,
       kiClient,
       logger,
       params: {
@@ -258,16 +260,79 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     });
   });
 
+  it('presents a stored source id as its slug and includes view_name on the envelope', async () => {
+    const source: NightshiftSource = {
+      id: 'source-uuid',
+      slug: 'nginx-errors',
+      title: 'Nginx errors',
+      tags: [],
+      esql: '',
+      view_name: '$.nightshift.sources.default.nginx-errors',
+      enabled: true,
+      created_by: 'user',
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_at: '2026-01-01T00:00:00.000Z',
+      esql_updated_at: '2026-01-01T00:00:00.000Z',
+    };
+    catalog = {
+      bySlug: new Map([[source.slug, source]]),
+      byId: new Map([[source.id, source]]),
+    };
+    kiClient.getFeatures = jest.fn().mockResolvedValue({
+      hits: [makeFeature({ id: 'f1', stream_name: source.id })],
+      total: 1,
+    });
+    kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
+
+    const result = await searchKnowledgeIndicatorsToolHandler({
+      catalog,
+      sources: [source],
+      kiClient,
+      logger,
+      params: { stream_names: [source.id], kind: ['feature'] },
+      view: 'full',
+    });
+
+    expect(result.sources).toEqual([
+      {
+        slug: 'nginx-errors',
+        title: 'Nginx errors',
+        view_name: '$.nightshift.sources.default.nginx-errors',
+      },
+    ]);
+    expect(result.knowledge_indicators[0]).toEqual(
+      expect.objectContaining({
+        kind: 'feature',
+        feature: expect.objectContaining({ stream_name: 'nginx-errors' }),
+      })
+    );
+  });
+
+  it('searches every catalog source when slugs are omitted', async () => {
+    catalog = catalogFor(['logs.checkout', 'logs.payments']);
+    kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
+    kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
+
+    await searchKnowledgeIndicatorsToolHandler({
+      catalog,
+      kiClient,
+      logger,
+      params: { kind: ['feature'] },
+      view: 'compact',
+    });
+
+    expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.checkout', expect.any(Object));
+    expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.payments', expect.any(Object));
+  });
+
   it('filters requested streamNames against accessible streams', async () => {
-    streamsClient.listStreams = jest
-      .fn()
-      .mockResolvedValue([{ name: 'logs.allowed' } as Streams.all.Definition]);
+    catalog = catalogFor(['logs.allowed']);
 
     kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
     kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
-      streamsClient,
+      catalog,
       kiClient,
       logger,
       params: { stream_names: ['logs.allowed', 'logs.not_allowed'] },
@@ -283,14 +348,11 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('passes feature and rule-backed query filters to the client', async () => {
-    streamsClient.listStreams = jest
-      .fn()
-      .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
     kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
     kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
 
     const result = await searchKnowledgeIndicatorsToolHandler({
-      streamsClient,
+      catalog,
       kiClient,
       logger,
       params: {
@@ -319,12 +381,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('logs a debug message when feature retrieval fails for a stream', async () => {
-    streamsClient.listStreams = jest
-      .fn()
-      .mockResolvedValue([
-        { name: 'logs.bad' } as Streams.all.Definition,
-        { name: 'logs.good' } as Streams.all.Definition,
-      ]);
+    catalog = catalogFor(['logs.bad', 'logs.good']);
 
     kiClient.getFeatures = jest.fn().mockImplementation((streamName: string) => {
       if (streamName === 'logs.bad') {
@@ -336,7 +393,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
-      streamsClient,
+      catalog,
       kiClient,
       logger,
       params: { kind: ['feature'] },
@@ -348,9 +405,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
   describe('compact view', () => {
     function setupFeatureStream(feature: Feature) {
-      streamsClient.listStreams = jest
-        .fn()
-        .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
       kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [feature], total: 1 });
       kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
     }
@@ -358,7 +412,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     async function getCompactFeature(feature: Feature): Promise<CompactFeature> {
       setupFeatureStream(feature);
       const result = await searchKnowledgeIndicatorsToolHandler({
-        streamsClient,
+        catalog,
         kiClient,
         logger,
         params: { kind: ['feature'] },
@@ -547,9 +601,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
   describe('full view', () => {
     it('returns all StrippedFeatureKeys unchanged and marks view: full', async () => {
-      streamsClient.listStreams = jest
-        .fn()
-        .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
       const filter = { field: 'service.name', operator: 'eq', value: 'svc' } as Feature['filter'];
       kiClient.getFeatures = jest
         .fn()
@@ -557,7 +608,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
 
       const result = await searchKnowledgeIndicatorsToolHandler({
-        streamsClient,
+        catalog,
         kiClient,
         logger,
         params: { kind: ['feature'] },
@@ -574,9 +625,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     });
 
     it('returns severity_score and features[].run_id for query KIs unchanged', async () => {
-      streamsClient.listStreams = jest
-        .fn()
-        .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
       kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
       kiClient.getQueryLinks = jest.fn().mockResolvedValue([
         {
@@ -595,7 +643,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       ]);
 
       const result = await searchKnowledgeIndicatorsToolHandler({
-        streamsClient,
+        catalog,
         kiClient,
         logger,
         params: { kind: ['query'] },

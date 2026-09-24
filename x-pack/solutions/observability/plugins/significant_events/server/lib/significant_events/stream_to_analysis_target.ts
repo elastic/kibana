@@ -7,19 +7,6 @@
 
 import type { AnalysisTarget } from '@kbn/nightshift-ai';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { getSourcesForStream, getStreamSamplingSource, type Streams } from '@kbn/streams-schema';
-
-/**
- * Maps a stream definition onto the stream-agnostic analysis contract.
- * Agent tools still call this until they resolve Nightshift sources.
- */
-export const streamToAnalysisTarget = (definition: Streams.all.Definition): AnalysisTarget => ({
-  id: definition.name,
-  name: definition.name,
-  description: definition.description,
-  sources: getSourcesForStream(definition),
-  samplingSource: getStreamSamplingSource(definition),
-});
 
 /** Maps a Nightshift source onto the analysis contract. Sampling and generated queries read the view. */
 export const sourceToAnalysisTarget = (source: NightshiftSource): AnalysisTarget => ({

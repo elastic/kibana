@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -16,7 +16,6 @@ import type {
   PluginStartContract as ActionsPluginStart,
   RelayClientContract,
 } from '@kbn/actions-plugin/server';
-import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgentBuilderSmlPluginSetup,
@@ -29,6 +28,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   FieldsMetadataServerSetup,
@@ -66,6 +66,10 @@ export interface SignificantEventsPluginSetupDependencies {
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  /**
+   * Still required so this plugin can register the KI client provider.
+   * https://github.com/elastic/kibana/pull/292293 removes that hook.
+   */
   streams: StreamsPluginSetup;
   nightshiftSources: NightshiftSourcesServerSetup;
   nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
@@ -90,6 +94,10 @@ export interface SignificantEventsPluginStartDependencies {
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
 
+/**
+ * Services this plugin assembles for its own routes and tools. It used to be
+ * the Streams server object; the fields here are the ones `plugin.ts` assigns.
+ */
 export interface SignificantEventsServer {
   core: CoreStart;
   logger: Logger;

@@ -217,13 +217,8 @@ export class SignificantEventsPlugin
       const licensing = pluginsStart.licensing;
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
-      const [attachmentClient, tuningConfig] = await Promise.all([
-        streamsSetup.getAttachmentClient({ request }),
+      const [tuningConfig, sourcesClient] = await Promise.all([
         getSignificantEventsTuningConfig(globalUiSettingsClient, this.logger),
-      ]);
-
-      const [streamsClient, sourcesClient] = await Promise.all([
-        streamsSetup.getStreamsClient({ request, rulesClientOptions }),
         pluginsStart.nightshiftSources.getSourcesClient({ request }),
       ]);
 
@@ -303,7 +298,6 @@ export class SignificantEventsPlugin
         streamDataEsClient,
         soClient,
         space,
-        attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
         getAlertEventsClient,
@@ -311,7 +305,6 @@ export class SignificantEventsPlugin
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
-        streamsClient,
         sourcesClient,
         licensing,
         uiSettingsClient,

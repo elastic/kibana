@@ -37,7 +37,7 @@ const eventToSmlContent = (event: SignificantEvent): string => {
     `status: ${event.status}`,
     `severity: ${event.severity}`,
     `confidence: ${event.confidence}`,
-    `streams: ${event.stream_names.join(', ')}`,
+    `sources: ${event.stream_names.join(', ')}`,
   ]
     .filter((part): part is string => Boolean(part))
     .join('\n');

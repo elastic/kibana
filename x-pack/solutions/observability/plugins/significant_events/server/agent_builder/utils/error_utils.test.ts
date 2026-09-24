@@ -5,30 +5,27 @@
  * 2.0.
  */
 
-import { STREAMS_INSPECT_STREAMS_TOOL_ID } from '@kbn/streams-plugin/server';
 import { SignificantEventsPausedError } from '../../lib/errors/significant_events_paused_error';
 import { classifyError } from './error_utils';
+import { SourceDisabledError, UnknownSourceSlugError } from './resolve_source_slugs';
 
 describe('classifyError', () => {
-  it('returns not-found message for 404 statusCode', () => {
-    const err = Object.assign(new Error('something'), { statusCode: 404 });
-    expect(classifyError(err)).toContain('Stream not found');
-    expect(classifyError(err)).toContain(STREAMS_INSPECT_STREAMS_TOOL_ID);
-  });
-
-  it('returns not-found message for 404 statusCode without "not found" in message', () => {
-    const err = Object.assign(new Error('resource unavailable'), { statusCode: 404 });
-    expect(classifyError(err)).toContain('Stream not found');
-  });
-
-  it('does not misclassify errors that happen to contain "not found"', () => {
-    expect(classifyError(new Error('index not found in cluster'))).not.toContain(
-      'Stream not found'
+  it('returns the unknown-slug message without matching other not-found errors', () => {
+    expect(classifyError(new UnknownSourceSlugError(['checkout']))).toBe(
+      'Source not found in this space: checkout'
+    );
+    expect(classifyError(new Error('index not found in cluster'))).toBe(
+      'Unexpected error: index not found in cluster'
     );
   });
 
-  it('returns not-found message for "Cannot find stream" in message', () => {
-    expect(classifyError(new Error('Cannot find stream logs'))).toContain('Stream not found');
+  it('returns the disabled-source message', () => {
+    expect(classifyError(new SourceDisabledError('payments'))).toBe('Source "payments" is disabled.');
+  });
+
+  it('leaves a generic 404 as an unexpected error', () => {
+    const err = Object.assign(new Error('resource unavailable'), { statusCode: 404 });
+    expect(classifyError(err)).toBe('Unexpected error: resource unavailable');
   });
 
   it('returns permissions message for security_exception', () => {
@@ -54,12 +51,12 @@ describe('classifyError', () => {
 
   it('returns lock contention message for 409 statusCode', () => {
     const err = Object.assign(new Error('conflict'), { statusCode: 409 });
-    expect(classifyError(err)).toContain('Another stream operation is in progress');
+    expect(classifyError(err)).toBe('Another operation is in progress. Try again in a moment.');
   });
 
   it('returns lock contention message for "Could not acquire lock" in message', () => {
-    expect(classifyError(new Error('Could not acquire lock on streams/apply_changes'))).toContain(
-      'Another stream operation is in progress'
+    expect(classifyError(new Error('Could not acquire lock on streams/apply_changes'))).toBe(
+      'Another operation is in progress. Try again in a moment.'
     );
   });
 
@@ -94,6 +91,6 @@ describe('classifyError', () => {
 
   it('reads statusCode from meta.statusCode', () => {
     const err = Object.assign(new Error('not found'), { meta: { statusCode: 404 } });
-    expect(classifyError(err)).toContain('Stream not found');
+    expect(classifyError(err)).toBe('Unexpected error: not found');
   });
 });

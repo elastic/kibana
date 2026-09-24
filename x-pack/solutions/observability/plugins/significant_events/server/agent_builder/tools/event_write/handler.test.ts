@@ -1027,6 +1027,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
 describe('eventsWriteItemSchema', () => {
   const validItem = {
     ...baseInput,
+    slugs: ['logs.checkout'],
     signals: [
       {
         type: 'detection',

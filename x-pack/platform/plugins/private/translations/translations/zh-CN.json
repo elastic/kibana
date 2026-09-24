@@ -50467,7 +50467,6 @@
     "xpack.sharedComponents.trialUsageBadge.trialPeriodTooltip": "您的免费试用期。到期后，您需要订阅才能继续使用该服务。",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.cancel": "取消",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.confirm": "创建",
-    "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.message": "为流 {streams} 创建重大事件“{title}”吗？",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.title": "创建重大事件",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.description": "为一个或多个数据流创建重大事件。",
     "xpack.significantEvents.agentBuilder.tools.eventCreate.errorMessage": "创建重要事件失败：{message}",

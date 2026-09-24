@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import {
   MAX_FEATURE_ARRAY_ITEMS,
@@ -32,6 +33,7 @@ import {
   MAX_COMPACT_META_KEYS,
   searchKnowledgeIndicatorsToolHandler,
 } from './handler';
+import { loadSourceCatalog, resolveSourcesBySlug } from '../../utils/resolve_source_slugs';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchKnowledgeIndicators;
@@ -40,10 +42,13 @@ const MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE = 50;
 const KI_SEARCH_MAX_PER_PAGE_FULL = 10;
 
 const searchKnowledgeIndicatorsSchema = z.object({
-  stream_names: z
-    .array(z.string().max(MAX_ID_LENGTH))
+  slugs: nightshiftSourceSlugsField(
+    'Omit to search every source in this space, including disabled ones.'
+  )
     .optional()
-    .describe('Optional. If omitted, search across all accessible streams.'),
+    .describe(
+      'Nightshift source slugs, e.g. "nginx-errors". Not titles and not view names. Omit to search every source in this space, including disabled ones.'
+    ),
   search_text: z
     .string()
     .max(MAX_TEXT_LENGTH)
@@ -130,16 +135,18 @@ export function createSearchKnowledgeIndicatorsTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Search Knowledge Indicators (KIs) derived from streams data to enrich context for a target
-      stream, service, or group of streams.
+      Search Knowledge Indicators (KIs) for Nightshift sources.
 
       KIs include:
-      - Feature-based indicators (stream features)
-      - Query-based indicators (stored stream queries)
+      - Feature-based indicators
+      - Query-based indicators (stored detection queries)
+
+      Pass source slugs in \`slugs\`. Omit \`slugs\` to search every source in this space.
+      Results report each source as its slug, with \`title\` and \`view_name\` alongside.
 
       Use this tool to:
-      - Gather domain context for a specific stream or group of streams
-      - Narrow results by stream, kind, feature/query type, IDs, or rule backing
+      - Gather domain context for a specific source or group of sources
+      - Narrow results by source, kind, feature/query type, IDs, or rule backing
       - Traverse large filtered result sets with \`page\` and \`per_page\`
       - Find relevant KIs via semantic text using \`search_text\`
       - Retrieve queries-only KIs with \`kind: ['query']\`
@@ -189,18 +196,21 @@ export function createSearchKnowledgeIndicatorsTool({
           licensing: scopedClients.licensing,
         });
 
-        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-
-        const { view, ...restParams } = toolParams;
+        const { view, slugs, ...restParams } = toolParams;
         const maxPerPage =
           view === 'full' ? KI_SEARCH_MAX_PER_PAGE_FULL : MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE;
+        const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+        const sources = slugs ? resolveSourcesBySlug(catalog, slugs) : undefined;
+        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const params = {
           ...restParams,
+          ...(sources ? { stream_names: sources.map((source) => source.id) } : {}),
           per_page: Math.min(restParams.per_page, maxPerPage),
         };
 
         const output = await searchKnowledgeIndicatorsToolHandler({
-          streamsClient: scopedClients.streamsClient,
+          catalog,
+          sources,
           kiClient,
           logger,
           params,

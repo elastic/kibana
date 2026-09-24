@@ -16,7 +16,6 @@ interface CancelKiIdentificationHandlerParams {
 }
 
 interface CancelKiIdentificationHandlerResult {
-  stream_name: string;
   execution_id: string | null;
   status: SignificantEventsWorkflowStatus.Canceled;
 }
@@ -29,7 +28,6 @@ export async function cancelKiIdentificationToolHandler({
   const executionId = await streamsKIsOnboardingClient.cancel({ streamName, request });
 
   return {
-    stream_name: streamName,
     execution_id: executionId,
     status: SignificantEventsWorkflowStatus.Canceled,
   };

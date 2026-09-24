@@ -5,45 +5,56 @@
  * 2.0.
  */
 
+import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
-import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { classifyError } from '../../utils/error_utils';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlug,
+  toSourceRef,
+} from '../../utils/resolve_source_slugs';
 import { cancelKiIdentificationToolHandler } from './handler';
+import type { GetScopedClients } from '../../../routes/types';
 
 export const SIGNIFICANT_EVENTS_KI_IDENTIFICATION_CANCEL_TOOL_ID =
   'platform.sig_events.ki_identification_cancel';
 
 const cancelSchema = z.object({
-  stream_name: z.string().max(MAX_ID_LENGTH).describe('Target stream name, e.g. "logs.ecs.nginx".'),
+  slug: nightshiftSourceSlugField('Disabled sources are accepted.'),
 });
 
 export const createKiIdentificationCancelTool = ({
   streamsKIsOnboardingClient,
+  getScopedClients,
 }: {
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  getScopedClients: GetScopedClients;
 }): BuiltinSkillBoundedTool<typeof cancelSchema> => ({
   id: SIGNIFICANT_EVENTS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Cancel an in-progress KI identification background task for a stream.
+    Cancel an in-progress KI identification background task for a Nightshift source.
 
     Use this tool to:
     - Stop a running KI identification background task when the user requests cancellation
 
     Returns:
-    - On success: cancel acknowledgement payload with stream, execution_id, and status
-    - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
+    - On success: cancel acknowledgement with slug, title, view_name, execution_id, and status
+    - On failure: an error result with \`message\`, \`slug\`, \`operation\`, and \`likely_cause\`
   `,
   schema: cancelSchema,
-  handler: async ({ stream_name: streamName }, { request }) => {
+  handler: async ({ slug }, { request }) => {
     try {
-      const data = await cancelKiIdentificationToolHandler({
-        streamName,
+      const scopedClients = await getScopedClients({ request });
+      const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+      const [source] = resolveSourcesBySlug(catalog, [slug]);
+      const cancelled = await cancelKiIdentificationToolHandler({
+        streamName: source.id,
         streamsKIsOnboardingClient,
         request,
       });
@@ -52,7 +63,7 @@ export const createKiIdentificationCancelTool = ({
         results: [
           {
             type: ToolResultType.other,
-            data,
+            data: { ...toSourceRef(source), ...cancelled },
           },
         ],
       };
@@ -63,8 +74,8 @@ export const createKiIdentificationCancelTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to cancel KI identification background task for "${streamName}": ${message}`,
-              stream: streamName,
+              message: `Failed to cancel KI identification background task for "${slug}": ${message}`,
+              slug,
               operation: 'ki_identification_cancel',
               likely_cause: classifyError(err),
             },
