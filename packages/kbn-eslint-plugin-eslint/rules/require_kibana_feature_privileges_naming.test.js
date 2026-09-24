@@ -191,5 +191,27 @@ ruleTester.run('@kbn/require_kibana_feature_privileges_naming', rule, {
         },
       ],
     },
+    {
+      filename: fixtureFilename,
+      code: `
+        import { invalidPrivilege, localPrivilege } from './index';
+
+        features.registerKibanaFeature({
+          privileges: {
+            all: {
+              api: [invalidPrivilege, localPrivilege],
+            },
+          },
+        });
+      `,
+      errors: [
+        {
+          message: `API privilege 'invalid-privilege' should start with [manage|create|update|delete|read] or use ApiPrivileges.manage instead`,
+        },
+        {
+          message: `API privilege 'invalid-privilege' should start with [manage|create|update|delete|read] or use ApiPrivileges.manage instead`,
+        },
+      ],
+    },
   ],
 });

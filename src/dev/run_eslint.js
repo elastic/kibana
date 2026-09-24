@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { spawnSync } from 'child_process';
+
 import { createFailError } from '@kbn/dev-cli-errors';
 
 import { run } from '@kbn/dev-cli-runner';
@@ -41,14 +43,10 @@ const runLegacyOxlint = async (log, flags) => {
   }
 
   const paths = flags._.map((path) => new File(path));
-  const result = await lintOxlintFiles(log, paths, {
+  return lintOxlintFiles(log, paths, {
     fix: flags.fix,
     fullRepo: paths.length === 0,
   });
-
-  if (result.failedFiles.length > 0) {
-    throw createFailError('Oxlint errors');
-  }
 };
 
 const runLegacyEslint = () => {
@@ -63,7 +61,7 @@ const runLegacyEslint = () => {
   run(
     async ({ log, flags }) => {
       flags._ = flags._ || [];
-      await runLegacyOxlint(log, flags);
+      const oxlintResult = await runLegacyOxlint(log, flags);
 
       // verbose is only a flag for our CLI runner, not for ESLint
       if (process.argv.includes('--verbose')) {
@@ -80,9 +78,19 @@ const runLegacyEslint = () => {
         process.argv.push('--ext', '.js,.mjs,.ts,.tsx');
       }
 
-      // common-js is required so that logic before this executes before loading eslint
-      // requiring the module is still going to pass along all flags
-      require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
+      const eslintResult = spawnSync(process.execPath, [eslintBinPath, ...process.argv.slice(2)], {
+        stdio: 'inherit',
+      });
+      if (eslintResult.error) {
+        throw eslintResult.error;
+      }
+
+      if (eslintResult.status !== 0) {
+        process.exitCode = eslintResult.status ?? 1;
+      }
+      if (oxlintResult.failedFiles.length > 0) {
+        process.exitCode = 1;
+      }
 
       process.on('exit', (code) => {
         if (!code) {

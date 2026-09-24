@@ -96,11 +96,12 @@ function findExportInitializer(filename, name, seen = new Set()) {
       continue;
     }
 
-    const exportSpecifier = ts.isNamedExports(statement.exportClause)
-      ? statement.exportClause.elements.find((candidate) => candidate.name.text === name)
-      : undefined;
+    const exportSpecifier =
+      statement.exportClause && ts.isNamedExports(statement.exportClause)
+        ? statement.exportClause.elements.find((candidate) => candidate.name.text === name)
+        : undefined;
 
-    if (!ts.isStringLiteral(statement.moduleSpecifier)) {
+    if (!statement.moduleSpecifier || !ts.isStringLiteral(statement.moduleSpecifier)) {
       if (exportSpecifier) {
         return findLocalInitializer(sourceFile, exportSpecifier.propertyName?.text ?? name);
       }
