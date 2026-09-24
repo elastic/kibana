@@ -42,7 +42,7 @@ export interface CorpusCase {
 /** A corpus case mapped onto the `@kbn/evals` Example shape. */
 export interface CorpusExample {
   input: { caseId: string; payload: Record<string, unknown> };
-  output: Record<string, never>;
+  output: { classification: Label };
   expected: { label: Label };
   metadata: {
     caseId: string;
@@ -177,7 +177,7 @@ export const loadCorpus = (name: CorpusName): CorpusCase[] => {
 /** Maps a validated case onto an `@kbn/evals` Example with usage flags. */
 export const toExample = (c: CorpusCase): CorpusExample => ({
   input: { caseId: c.case_id, payload: c.payload },
-  output: {},
+  output: { classification: c.label },
   expected: { label: c.label },
   metadata: {
     caseId: c.case_id,

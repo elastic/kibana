@@ -45,7 +45,8 @@ const verdictSummary = (verdict: GradedVerdict): string | undefined =>
 const asOutput = (output: unknown): Output => output as Output;
 
 const expectedLabel = (expected: unknown): Label | undefined =>
-  (expected as { label?: Label } | undefined)?.label;
+  (expected as { label?: Label; classification?: Label } | undefined)?.label ??
+  (expected as { classification?: Label } | undefined)?.classification;
 
 /**
  * Primary metric (CODE): did the workflow's verdict label match the corpus

@@ -38,7 +38,7 @@ import { runAttackDiscoveryWorkflow } from '../src/workflow_task';
 
 interface AttackDiscoveryExample extends Example {
   input: { caseId: string; payload: Record<string, unknown> };
-  output: Record<string, never>;
+  output: { classification: string };
   expected: { label: string };
   metadata: {
     caseId: string;

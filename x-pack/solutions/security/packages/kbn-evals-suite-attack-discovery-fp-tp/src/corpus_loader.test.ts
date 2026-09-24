@@ -76,6 +76,7 @@ describe('corpus_loader — real vendored corpora', () => {
     const c = loadCorpus('tp-chains')[0];
     const example = toExample(c);
     expect(example.expected).toEqual({ label: 'true_positive' });
+    expect(example.output).toEqual({ classification: 'true_positive' });
     expect(example.metadata.caseId).toBe(c.case_id);
     expect(example.metadata.labelProvenance).toBe('replay');
     expect(example.input.caseId).toBe(c.case_id);
