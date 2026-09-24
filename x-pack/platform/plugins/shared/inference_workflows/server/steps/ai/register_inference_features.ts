@@ -72,5 +72,6 @@ export const registerInferenceFeatures = (
       'AI model used for ai.prompt steps inside Context Engine automation workflows. Defaults to a fast, cost-efficient model (Gemini Flash Lite) since these steps run once per document.',
     taskType: 'chat_completion',
     recommendedEndpoints: CONTEXT_ENGINE_PROMPT_RECOMMENDED_ENDPOINTS,
+    ignoreGlobalDefault: true,
   });
 };
