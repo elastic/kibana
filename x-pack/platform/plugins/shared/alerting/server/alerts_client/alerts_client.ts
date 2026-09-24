@@ -486,7 +486,8 @@ export class AlertsClient<
 
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(rawRecoveredAlerts)) {
-      const trackedAlert = this.trackedAlerts.getById(id);
+      const uuid = rawRecoveredAlerts[id].meta?.uuid;
+      const trackedAlert = uuid ? this.trackedAlerts.get(uuid) : undefined;
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (trackedAlert) {
@@ -514,6 +515,7 @@ export class AlertsClient<
               runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               rule: this.rule,
+              recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
             });
         recoveredAlertsToIndex.push(
           stopTrackingIds.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
