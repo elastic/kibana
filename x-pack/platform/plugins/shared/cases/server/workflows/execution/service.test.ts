@@ -191,7 +191,7 @@ describe('CasesWorkflowRunService', () => {
       inputs: { event: {} },
       request,
       preprocessingContext: context,
-      expandSelections: ['alertIds'],
+      expandSelections: ['alertIds', 'documentIds'],
       eventOverrides: { caseIds: ['case-1'] },
       metadata: {
         schemaVersion: 1,
@@ -297,6 +297,51 @@ describe('CasesWorkflowRunService', () => {
         preprocessingContext: context,
       })
     );
+  });
+
+  describe('documentIds inputs', () => {
+    const documentIdsBody: RunCaseWorkflowRequest = {
+      caseIds: ['case-1'],
+      inputs: {
+        event: { triggerType: 'document', documentIds: [{ _id: 'event-1', _index: 'logs' }] },
+      },
+      origin: { type: 'cases.case', caseId: 'case-1' },
+    };
+
+    it('forwards documentIds attached to the case for server-side expansion', async () => {
+      casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([
+        { id: 'event-1', index: 'logs', attached_at: '2026-08-26T00:00:00.000Z' },
+      ]);
+
+      await expect(run(documentIdsBody)).resolves.toEqual({
+        workflowExecutionId: 'execution-1',
+        activityStatus: 'succeeded',
+      });
+
+      expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        attachmentTypes: ['event'],
+      });
+      expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputs: documentIdsBody.inputs,
+          expandSelections: ['alertIds', 'documentIds'],
+        })
+      );
+    });
+
+    // SECURITY REGRESSION TEST: documentIds are expanded by the workflows server, so a case run
+    // must not let them reference documents that are not attached to the case.
+    it('rejects documentIds that are not attached to the case', async () => {
+      casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([
+        { id: 'event-other', index: 'logs', attached_at: '2026-08-26T00:00:00.000Z' },
+      ]);
+
+      await expect(run(documentIdsBody)).rejects.toThrow(
+        'All selected documents must belong to the case.'
+      );
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulk runs (no origin)', () => {
@@ -432,19 +477,15 @@ describe('CasesWorkflowRunService', () => {
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
-    // SECURITY REGRESSION TEST: case membership is only checked for pre-expanded documents, so a
-    // case run must never accept documentIds — otherwise a run could carry documents unrelated to
-    // the case it is audited against.
-    it('rejects documentIds inputs', async () => {
+    it('rejects documentIds inputs when origin is absent', async () => {
       await expect(
         run({
-          caseIds: ['case-a'],
+          caseIds: ['case-a', 'case-b'],
           inputs: {
             event: { triggerType: 'document', documentIds: [{ _id: 'd-1', _index: 'logs' }] },
           },
-          origin: { type: 'cases.case', caseId: 'case-a' },
         })
-      ).rejects.toThrow('inputs.event.documentIds cannot be used with a case workflow run.');
+      ).rejects.toThrow('Document inputs can only be used with a single case.');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
