@@ -43,20 +43,18 @@ describe('upsertDiscoverSession', () => {
     });
   });
 
-  it('passes the requested ID and full-replacement options to the Saved Objects client', async () => {
+  it('updates the requested session with full-replacement options', async () => {
     const updated = createSavedObject(requestId, {
       updated_at: '2026-07-15T12:00:00.000Z',
       version: 'WzIsMV0=',
     });
 
-    coreContext.savedObjects.client.resolve.mockResolvedValue({
-      outcome: 'exactMatch',
-      saved_object: createSavedObject(requestId),
-    });
-    coreContext.savedObjects.client.get.mockResolvedValue(updated);
+    coreContext.savedObjects.client.get
+      .mockResolvedValueOnce(createSavedObject(requestId))
+      .mockResolvedValueOnce(updated);
     coreContext.savedObjects.client.update.mockResolvedValue(updated);
 
-    await upsertDiscoverSession(requestContext, requestId, discoverSessionApiData);
+    const result = await upsertDiscoverSession(requestContext, requestId, discoverSessionApiData);
 
     expect(coreContext.savedObjects.client.update).toHaveBeenCalledWith(
       SavedSearchType,
@@ -68,16 +66,23 @@ describe('upsertDiscoverSession', () => {
         mergeAttributes: false,
       }
     );
-    expect(coreContext.savedObjects.client.resolve).toHaveBeenCalledWith(
+    expect(coreContext.savedObjects.client.get).toHaveBeenNthCalledWith(
+      1,
       SavedSearchType,
       requestId
     );
-    expect(coreContext.savedObjects.client.get).toHaveBeenCalledWith(SavedSearchType, requestId);
+    expect(coreContext.savedObjects.client.get).toHaveBeenNthCalledWith(
+      2,
+      SavedSearchType,
+      requestId
+    );
+    expect(result.body.id).toBe(requestId);
+    expect(result.operation).toBe('update');
   });
 
   it('propagates non-not-found errors from the existence check', async () => {
-    const error = new Error('Resolve failed');
-    coreContext.savedObjects.client.resolve.mockRejectedValue(error);
+    const error = new Error('Get failed');
+    coreContext.savedObjects.client.get.mockRejectedValue(error);
 
     await expect(
       upsertDiscoverSession(requestContext, requestId, discoverSessionApiData)
@@ -86,28 +91,21 @@ describe('upsertDiscoverSession', () => {
     expect(coreContext.savedObjects.client.update).not.toHaveBeenCalled();
   });
 
-  it('updates the target of a legacy URL alias', async () => {
-    const aliasId = 'Legacy-Discover-Session';
-    const resolvedId = 'resolved-discover-session';
-    const updated = createSavedObject(resolvedId, {
+  it('updates an existing legacy ID without applying the new ID validation', async () => {
+    const legacyId = 'Legacy-Discover-Session';
+    const updated = createSavedObject(legacyId, {
       updated_at: '2026-07-15T12:00:00.000Z',
       version: 'WzIsMV0=',
     });
 
-    coreContext.savedObjects.client.resolve.mockResolvedValue({
-      outcome: 'aliasMatch',
-      saved_object: createSavedObject(resolvedId),
-      alias_target_id: resolvedId,
-      alias_purpose: 'savedObjectConversion',
-    });
     coreContext.savedObjects.client.update.mockResolvedValue(updated);
     coreContext.savedObjects.client.get.mockResolvedValue(updated);
 
-    const result = await upsertDiscoverSession(requestContext, aliasId, discoverSessionApiData);
+    const result = await upsertDiscoverSession(requestContext, legacyId, discoverSessionApiData);
 
     expect(coreContext.savedObjects.client.update).toHaveBeenCalledWith(
       SavedSearchType,
-      resolvedId,
+      legacyId,
       attributes,
       {
         upsert: attributes,
@@ -115,42 +113,45 @@ describe('upsertDiscoverSession', () => {
         mergeAttributes: false,
       }
     );
-    expect(coreContext.savedObjects.client.get).toHaveBeenCalledWith(SavedSearchType, resolvedId);
-    expect(result.body.id).toBe(resolvedId);
+    expect(coreContext.savedObjects.client.get).toHaveBeenCalledWith(SavedSearchType, legacyId);
+    expect(result.body.id).toBe(legacyId);
     expect(result.operation).toBe('update');
-  });
-
-  it('throws a conflict when the requested ID resolves ambiguously', async () => {
-    coreContext.savedObjects.client.resolve.mockResolvedValue({
-      outcome: 'conflict',
-      saved_object: createSavedObject(requestId),
-      alias_target_id: 'alias-target',
-      alias_purpose: 'savedObjectConversion',
-    });
-
-    await expect(
-      upsertDiscoverSession(requestContext, requestId, discoverSessionApiData)
-    ).rejects.toMatchObject({
-      output: {
-        statusCode: 409,
-      },
-    });
-
-    expect(coreContext.savedObjects.client.update).not.toHaveBeenCalled();
   });
 
   it('propagates conflicts from update without performing the final fetch', async () => {
     const error = SavedObjectsErrorHelpers.createConflictError(SavedSearchType, requestId);
-    coreContext.savedObjects.client.resolve.mockResolvedValue({
-      outcome: 'exactMatch',
-      saved_object: createSavedObject(requestId),
-    });
+    coreContext.savedObjects.client.get.mockResolvedValue(createSavedObject(requestId));
     coreContext.savedObjects.client.update.mockRejectedValue(error);
 
     await expect(
       upsertDiscoverSession(requestContext, requestId, discoverSessionApiData)
     ).rejects.toBe(error);
 
-    expect(coreContext.savedObjects.client.get).not.toHaveBeenCalled();
+    expect(coreContext.savedObjects.client.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates a session when the exact ID does not exist', async () => {
+    const created = createSavedObject(requestId, { created_at: '2026-07-15T12:00:00.000Z' });
+    coreContext.savedObjects.client.get
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(SavedSearchType, requestId)
+      )
+      .mockResolvedValueOnce(created);
+    coreContext.savedObjects.client.update.mockResolvedValue(created);
+
+    const result = await upsertDiscoverSession(requestContext, requestId, discoverSessionApiData);
+
+    expect(result.operation).toBe('create');
+    expect(result.body.id).toBe(requestId);
+    expect(coreContext.savedObjects.client.update).toHaveBeenCalledWith(
+      SavedSearchType,
+      requestId,
+      attributes,
+      {
+        upsert: attributes,
+        references,
+        mergeAttributes: false,
+      }
+    );
   });
 });
