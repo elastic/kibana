@@ -50,6 +50,19 @@ export const Default: Story = {
   },
 };
 
+/** A definition with `getHeader` gets the framework header: icon, actor, label and time. */
+export const WithHeader: Story = {
+  args: {
+    item: createCustomEventItem({
+      event,
+      definition: {
+        ...storyNoteEventDefinition,
+        getHeader: () => ({ icon: 'document', iconTitle: 'Note', label: 'Note' }),
+      },
+    }),
+  },
+};
+
 /** A renderer that throws is caught by the error boundary and replaced with a callout. */
 export const RendererThrows: Story = {
   args: {

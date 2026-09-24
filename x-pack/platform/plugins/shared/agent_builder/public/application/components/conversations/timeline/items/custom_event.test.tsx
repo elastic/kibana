@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { render, screen } from '@testing-library/react';
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
-import { CUSTOM_EVENT_TYPE } from './custom_event.factory';
+import { CUSTOM_EVENT_TYPE, createCustomEvent } from './custom_event.factory';
 import { createCustomEventItem } from './timeline_item.factory';
 import { CustomEvent } from './custom_event';
 
@@ -61,6 +62,55 @@ describe('CustomEvent', () => {
     render(<CustomEvent item={createCustomEventItem()} />);
 
     expect(screen.getByTestId('agentBuilderTimelineCustomEvent')).toHaveTextContent('');
+  });
+
+  it('draws no header and an empty avatar column when the definition has no getHeader', () => {
+    render(<CustomEvent item={createCustomEventItem()} />);
+
+    expect(screen.getByTestId('agentBuilderTimelineCustomEventAvatar')).toBeEmptyDOMElement();
+    expect(screen.queryByText('elastic')).not.toBeInTheDocument();
+  });
+
+  it('draws the icon, actor name, label and time when getHeader returns data', () => {
+    const event = createCustomEvent();
+    const getHeader = jest.fn(() => ({
+      icon: 'document',
+      iconTitle: 'Note icon',
+      label: 'Text Note',
+    }));
+    const item = createCustomEventItem({
+      event,
+      definition: { type: CUSTOM_EVENT_TYPE, render: () => null, getHeader },
+    });
+
+    render(<CustomEvent item={item} isStreaming />);
+
+    expect(getHeader).toHaveBeenCalledWith(event, { conversationId: 'conv-1', isStreaming: true });
+    const icon = screen
+      .getByTestId('agentBuilderTimelineCustomEventAvatar')
+      .querySelector('[data-euiicon-type="document"]');
+    expect(icon).toHaveTextContent('Note icon');
+    expect(screen.getByText('elastic')).toBeInTheDocument();
+    expect(screen.getByText('Text Note')).toBeInTheDocument();
+    expect(screen.getByText(moment(event.created_at).format('LT'))).toBeInTheDocument();
+  });
+
+  it('shows a callout instead of crashing when getHeader throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    const item = createCustomEventItem({
+      definition: {
+        type: CUSTOM_EVENT_TYPE,
+        render: () => <p>Note body</p>,
+        getHeader: () => {
+          throw new Error('boom');
+        },
+      },
+    });
+
+    render(<CustomEvent item={item} />);
+
+    expect(screen.getByText("Couldn't render this event")).toBeInTheDocument();
+    expect(screen.queryByText('Note body')).not.toBeInTheDocument();
   });
 
   it('renders nothing without a conversation id', () => {
