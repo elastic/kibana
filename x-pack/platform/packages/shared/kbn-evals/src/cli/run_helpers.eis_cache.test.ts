@@ -86,8 +86,8 @@ describe('resolveEvalRunContext EIS cache guard', () => {
     await expect(call()).rejects.toThrow(/is expired \(>7 days old\)/);
   });
 
-  it('loads endpoints from a fresh cache', async () => {
-    const connectors = { 'eis-x': { inferenceId: 'x' } };
+  it('loads endpoints from a fresh cache that defines the required connector', async () => {
+    const connectors = { 'eis-test-connector': { inferenceId: 'test' } };
     mockReadCachedEisConnectors.mockReturnValue(connectors);
 
     await call();
@@ -98,6 +98,18 @@ describe('resolveEvalRunContext EIS cache guard', () => {
     expect(log.info).toHaveBeenCalledWith(
       expect.stringContaining('EIS connectors loaded from cache')
     );
+  });
+
+  it('refuses a fresh cache that does not define the connector the run needs', async () => {
+    // The regression this guards: a present, in-TTL cache that simply lacks the
+    // requested connector id used to be exported anyway, so every inference
+    // call 404'd with the cache reported as healthy.
+    mockReadCachedEisConnectors.mockReturnValue({ 'eis-something-else': { inferenceId: 'x' } });
+    mockGetEisCacheStatus.mockReturnValue('fresh');
+
+    await expect(call()).rejects.toThrow(/eis-test-connector/);
+    await expect(call()).rejects.toThrow(/does not define every connector this run needs/);
+    expect(process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS).toBeUndefined();
   });
 
   it('does not touch the env var when it is already set', async () => {

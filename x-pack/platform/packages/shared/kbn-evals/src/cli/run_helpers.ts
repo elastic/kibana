@@ -270,6 +270,45 @@ export const resolveEvaluationConnectorId = async (
 
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
 
+/**
+ * EIS connector IDs the run will actually resolve.
+ *
+ * The guard below exports the cached connector map as
+ * `KIBANA_TESTING_INFERENCE_ENDPOINTS`, so a cache that is present and fresh
+ * but does not define one of these IDs still produces a 404 for every call
+ * that resolves it — the very failure the cache is meant to prevent. Collect
+ * the ids up front so presence can be checked against the cache keys.
+ */
+export const requiredEisConnectorIds = (
+  evaluationConnectorId: string,
+  projects: string[],
+  repoRoot: string
+): string[] => {
+  const ids = new Set<string>();
+
+  if (isEisConnectorId(evaluationConnectorId)) {
+    ids.add(evaluationConnectorId);
+  }
+
+  if (projects.length > 0) {
+    for (const project of projects) {
+      if (isEisConnectorId(project)) {
+        ids.add(project);
+      }
+    }
+  } else {
+    // No explicit --model: the run walks every available connector, so every
+    // EIS-backed one of them has to be resolvable from the cache.
+    for (const connector of getAllAvailableConnectors(repoRoot)) {
+      if (isEisConnectorId(connector.id)) {
+        ids.add(connector.id);
+      }
+    }
+  }
+
+  return [...ids];
+};
+
 export interface EvalRunContext {
   evaluationConnectorId: string;
   projects: string[];
@@ -314,22 +353,32 @@ export const resolveEvalRunContext = async ({
 
   if (requiresEisCcm && !process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS) {
     const cached = readCachedEisConnectors();
-    if (cached) {
+    // A fresh cache is not sufficient on its own: it must actually define the
+    // EIS connector IDs this run resolves, otherwise exporting it still 404s.
+    const required = requiredEisConnectorIds(evaluationConnectorId, projects, repoRoot);
+    const missing = cached ? required.filter((id) => !(id in cached)) : required;
+
+    if (cached && missing.length === 0) {
       process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(JSON.stringify(cached)).toString(
         'base64'
       );
       log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
     } else {
       const status = getEisCacheStatus();
-      const reason =
-        status === 'missing'
-          ? 'is missing'
-          : status === 'expired'
-          ? 'is expired (>7 days old)'
-          : 'is malformed';
+      // `cached` is present but incomplete: neither "missing" nor "malformed"
+      // describes it, so name the actual problem instead of falling through to
+      // the malformed branch.
+      const cacheState = cached
+        ? 'is fresh but does not define every connector this run needs'
+        : status === 'missing'
+        ? 'is missing'
+        : status === 'expired'
+        ? 'is expired (>7 days old)'
+        : 'is malformed';
+      const missingDetail = cached && missing.length > 0 ? ` Missing: ${missing.join(', ')}.` : '';
       throw createFlagError(
         `This eval requires EIS connectors, but KIBANA_TESTING_INFERENCE_ENDPOINTS is not set and ` +
-          `the EIS connectors cache at ~/.elastic/eis-connectors-cache.json ${reason}. ` +
+          `the EIS connectors cache at ~/.elastic/eis-connectors-cache.json ${cacheState}.${missingDetail} ` +
           `Without it, eis-* connector IDs cannot be resolved and every inference call will 404. ` +
           `Run \`node scripts/evals init\` to refresh the cache, or set KIBANA_TESTING_INFERENCE_ENDPOINTS explicitly.`
       );
