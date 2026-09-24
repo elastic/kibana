@@ -107,7 +107,14 @@ export const HuntBehaviorResponse = lazySchema(() =>
     dropped_unknown_ids: z.array(z.string()).optional(),
     message: z.string().optional(),
     next_step: z.string(),
-    hasHit: z.boolean(),
+    /**
+     * True when any behavior's execute path found at least one row in a required index. Independent of Tier 1.
+     */
+    hasHit: z
+      .boolean()
+      .describe(
+        "True when any behavior's execute path found at least one row in a required index. Independent of Tier 1."
+      ),
   })
 );
 export type HuntBehaviorResponse = z.infer<typeof HuntBehaviorResponse>;

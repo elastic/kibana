@@ -123,7 +123,14 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         dropped_unknown_ids: z.array(z.string()).optional(),
         message: z.string().optional(),
         next_step: z.string(),
-        hasHit: z.boolean(),
+        /**
+         * True when any behavior's execute path found at least one row in a required index. Independent of Tier 1.
+         */
+        hasHit: z
+          .boolean()
+          .describe(
+            "True when any behavior's execute path found at least one row in a required index. Independent of Tier 1."
+          ),
         tier: z.number().int().optional(),
       })
       .nullable()
@@ -131,6 +138,14 @@ export const HuntCoordinatorResponse = lazySchema(() =>
     tier2_skipped_reason: z.string().optional(),
     message: z.string(),
     next_step: z.string(),
+    /**
+     * True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.hasConfirmedHit alone.
+     */
+    hasConfirmedHit: z
+      .boolean()
+      .describe(
+        'True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.hasConfirmedHit alone.'
+      ),
     /**
      * True when the run completed without hard errors. The calling workflow checks this before writing hunt evidence, so a failed run writes nothing.
      */

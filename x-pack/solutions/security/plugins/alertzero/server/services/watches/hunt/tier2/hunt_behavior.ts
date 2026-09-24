@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { z } from '@kbn/zod/v4';
 import type { HuntBehaviorArticleContext, HuntBehaviorIoc } from '@kbn/alertzero-common';
+import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
   huntBehaviorEsqlGenerationSchema,
@@ -18,12 +19,18 @@ import {
 } from './extraction_contract';
 import { toIndexedBehaviors } from './indexed_behaviors';
 import { getMitreCatalog } from './mitre_catalog';
+import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
+  BehaviorExecution,
   HuntBehaviorParams,
   HuntBehaviorResult,
   SeverityLevel,
   ValidatedBehavior,
 } from './types';
+
+const ESQL_REQUEST_TIMEOUT = '30s';
+const MAX_AFFECTED_ENTITIES = 20;
+const NO_EXECUTION: BehaviorExecution = { executed: false, row_count: 0, hit: false };
 
 const severityFromConfidence = (confidence: number): SeverityLevel => {
   if (confidence > 0.8) return 'critical';
@@ -147,7 +154,10 @@ const validateEsqlAgainstEnvironment = async (
   let candidate = esql;
   for (let attempt = 0; attempt < MAX_ESQL_REPAIR_ATTEMPTS; attempt++) {
     try {
-      await esClient.esql.query({ query: `${candidate}\n| LIMIT 0` });
+      await esClient.esql.query(
+        { query: `${candidate}\n| LIMIT 0` },
+        { requestTimeout: ESQL_REQUEST_TIMEOUT }
+      );
       return candidate;
     } catch (err) {
       const message = (err as Error).message ?? '';
@@ -168,6 +178,126 @@ const validateEsqlAgainstEnvironment = async (
       `${MAX_ESQL_REPAIR_ATTEMPTS} repair attempts — falling back to the skeleton template.`
   );
   return undefined;
+};
+
+const columnIndex = (columns: Array<{ name: string }> | undefined, name: string): number =>
+  columns?.findIndex((c) => c.name === name) ?? -1;
+
+const uniqueTrimmed = (values: unknown[], max: number): { items: string[]; truncated: boolean } => {
+  const seen = new Set<string>();
+  for (const value of values) {
+    if (typeof value !== 'string') continue;
+    const trimmed = value.trim();
+    if (trimmed.length === 0) continue;
+    seen.add(trimmed);
+  }
+  const all = [...seen];
+  return {
+    items: all.slice(0, max),
+    truncated: all.length > max,
+  };
+};
+
+/**
+ * Execute a dry-run-passed query in the hunt window. Hit bar counts only rows
+ * whose `_index` matches a required pattern. Per-behavior errors record
+ * `executed: false` and do not fail the tier.
+ */
+const executeValidatedEsql = async ({
+  esClient,
+  logger,
+  techniqueId,
+  esql,
+  window,
+  rowLimit,
+  requiredIndices,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  techniqueId: string;
+  esql: string;
+  window: { from: string; to: string };
+  rowLimit: number;
+  requiredIndices: string[];
+}): Promise<{
+  execution: BehaviorExecution;
+  affected_hosts?: string[];
+  affected_users?: string[];
+  affected_hosts_truncated?: boolean;
+  affected_users_truncated?: boolean;
+}> => {
+  const prepared = prepareEsqlForExecute(esql, rowLimit);
+  const matchesRequired = buildMatchesRequired(requiredIndices);
+
+  try {
+    const response = await esClient.esql.query(
+      {
+        query: prepared,
+        filter: {
+          range: {
+            '@timestamp': { gte: window.from, lte: window.to },
+          },
+        },
+      },
+      { requestTimeout: ESQL_REQUEST_TIMEOUT }
+    );
+
+    const columns = response.columns ?? [];
+    const values = response.values ?? [];
+    const indexCol = columnIndex(columns, '_index');
+    const hostCol = columnIndex(columns, 'host.name');
+    const userCol = columnIndex(columns, 'user.name');
+
+    const requiredRows: unknown[][] = [];
+    for (const row of values) {
+      if (!Array.isArray(row)) continue;
+      const indexValue = indexCol >= 0 ? row[indexCol] : undefined;
+      if (typeof indexValue === 'string' && matchesRequired(indexValue)) {
+        requiredRows.push(row);
+      }
+    }
+
+    const hosts =
+      hostCol >= 0
+        ? uniqueTrimmed(
+            requiredRows.map((row) => row[hostCol]),
+            MAX_AFFECTED_ENTITIES
+          )
+        : undefined;
+    const users =
+      userCol >= 0
+        ? uniqueTrimmed(
+            requiredRows.map((row) => row[userCol]),
+            MAX_AFFECTED_ENTITIES
+          )
+        : undefined;
+
+    return {
+      execution: {
+        executed: true,
+        row_count: requiredRows.length,
+        hit: requiredRows.length > 0,
+      },
+      ...(hosts && hosts.items.length > 0
+        ? {
+            affected_hosts: hosts.items,
+            ...(hosts.truncated ? { affected_hosts_truncated: true } : {}),
+          }
+        : {}),
+      ...(users && users.items.length > 0
+        ? {
+            affected_users: users.items,
+            ...(users.truncated ? { affected_users_truncated: true } : {}),
+          }
+        : {}),
+    };
+  } catch (err) {
+    logger.warn(
+      `[ti:esql] execute for ${techniqueId} failed — recording executed:false and continuing. ` +
+        `${((err as Error).message ?? '').slice(0, 300)}`
+    );
+    return { execution: NO_EXECUTION };
+  }
 };
 
 const generateGroundedEsql = async (
@@ -312,7 +442,18 @@ export const huntBehavior = async (
     llm_confidence_threshold: llmThreshold = 0.5,
     iocs,
     article_context: articleContext,
+    window,
+    size,
+    row_limit: rowLimitParam,
+    required_indices: requiredIndices = [],
   } = params;
+
+  const rowLimit = size ?? rowLimitParam;
+  const canExecute =
+    window !== undefined &&
+    rowLimit !== undefined &&
+    requiredIndices.length > 0 &&
+    esClient !== undefined;
 
   let candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }> =
     [];
@@ -383,6 +524,7 @@ export const huntBehavior = async (
       rule_name: sanitizeRuleName(techniqueId, entry.name, reportId),
       severity,
       risk_score: severityToRiskScore(severity),
+      execution: NO_EXECUTION,
     });
   }
 
@@ -400,12 +542,35 @@ export const huntBehavior = async (
       }
       if (esql) {
         behavior.proposed_esql_rule = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
+        if (canExecute) {
+          const executed = await executeValidatedEsql({
+            esClient: esClient!,
+            logger,
+            techniqueId: behavior.technique_id,
+            esql,
+            window: window!,
+            rowLimit: rowLimit!,
+            requiredIndices,
+          });
+          behavior.execution = executed.execution;
+          if (executed.affected_hosts) behavior.affected_hosts = executed.affected_hosts;
+          if (executed.affected_users) behavior.affected_users = executed.affected_users;
+          if (executed.affected_hosts_truncated) {
+            behavior.affected_hosts_truncated = true;
+          }
+          if (executed.affected_users_truncated) {
+            behavior.affected_users_truncated = true;
+          }
+        }
       }
     }
   }
 
+  const hasHit = validated.some((b) => b.execution?.hit === true);
+
   logger.debug(
-    `hunt_behavior validated=${validated.length} dropped=${droppedIds.length} report_id=${reportId}`
+    `hunt_behavior validated=${validated.length} dropped=${droppedIds.length} ` +
+      `hasHit=${hasHit} report_id=${reportId}`
   );
 
   return {
@@ -413,13 +578,15 @@ export const huntBehavior = async (
     report_id: reportId,
     behaviors: validated,
     indexed_behaviors: toIndexedBehaviors(validated, reportId),
-    hasHit: false,
+    hasHit,
     ...(droppedIds.length > 0 && { dropped_unknown_ids: droppedIds }),
     next_step:
       validated.length === 0
         ? 'No candidates matched the canonical ATT&CK catalog. The LLM may have ' +
           'hallucinated technique IDs; consider lowering the LLM threshold or falling ' +
           'back to IOC matching for this report.'
+        : hasHit
+        ? 'Behaviors proposed; at least one grounded query hit a required index.'
         : 'Behaviors proposed for Investigation staging.',
   };
 };

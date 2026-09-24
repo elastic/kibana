@@ -133,7 +133,9 @@ paths:
                     type: string
                   hasHit:
                     type: boolean
-                    enum: [false]
+                    description: >-
+                      True when any behavior's execute path found at least one
+                      row in a required index. Independent of Tier 1.
         '503':
           description: No GenAI connector configured
 components:

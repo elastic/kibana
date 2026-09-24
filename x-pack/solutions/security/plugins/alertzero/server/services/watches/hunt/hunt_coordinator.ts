@@ -72,6 +72,12 @@ export interface HuntCoordinatorResult {
   message: string;
   next_step: string;
   /**
+   * True when Tier 1 confirmed a required-index hit or any Tier 2 behavior
+   * executed with a required-index hit. Callers that gate SSE emit / packaging
+   * on the hit bar must read this field, not `tier1.hasConfirmedHit` alone.
+   */
+  hasConfirmedHit: boolean;
+  /**
    * True when the run completed without hard errors. The calling workflow checks
    * this before writing hunt evidence; the coordinator itself never writes feedback.
    */
@@ -155,7 +161,7 @@ export const huntCoordinator = async (
     size,
     max_assets: maxAssets,
     llm_confidence_threshold: llmThreshold,
-    tier2_when: tier2When = 'on_hits',
+    tier2_when: tier2When = 'always',
     max_tier2_sample_events: maxSamples = DEFAULT_TIER2_SAMPLE_EVENTS,
     text: callerText,
     runId,
@@ -192,6 +198,7 @@ export const huntCoordinator = async (
       message,
       next_step:
         'Pass a report id that exists in this space, or pass iocs/techniques/text explicitly.',
+      hasConfirmedHit: false,
       completedSuccessfully: false,
     };
   }
@@ -229,6 +236,7 @@ export const huntCoordinator = async (
       tier2_skipped_reason: 'no_searchable_input',
       message: `Scope resolution failed: ${(err as Error).message}`,
       next_step: 'Verify the technology index patterns are configured correctly.',
+      hasConfirmedHit: false,
       completedSuccessfully: false,
     };
   }
@@ -261,6 +269,7 @@ export const huntCoordinator = async (
       message,
       next_step:
         'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
+      hasConfirmedHit: false,
       completedSuccessfully: false,
     };
   }
@@ -295,6 +304,7 @@ export const huntCoordinator = async (
     tier2_skipped_reason: reason,
     message,
     next_step: nextStep,
+    hasConfirmedHit: tier1Raw.hasConfirmedHit,
     completedSuccessfully,
   });
 
@@ -332,6 +342,7 @@ export const huntCoordinator = async (
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no report text).`,
       next_step:
         'Tier 2 needs report text. Pass `text` explicitly or use a `report_id` whose `content.body_text` has been ingested.',
+      hasConfirmedHit: tier1Raw.hasConfirmedHit,
       completedSuccessfully: true,
     };
   }
@@ -348,6 +359,10 @@ export const huntCoordinator = async (
         llm_confidence_threshold: llmThreshold,
         iocs: iocs.map((ioc) => ({ type: ioc.type, value: ioc.value })),
         article_context: articleContext,
+        window: tier1Raw.timeRange,
+        size,
+        row_limit: indexScope.rowLimit,
+        required_indices: indexScope.required,
       },
       esClient
     );
@@ -362,6 +377,7 @@ export const huntCoordinator = async (
   }
 
   const tier2: HuntCoordinatorTier2 = { ...tier2Raw, tier: 2 };
+  const hasConfirmedHit = tier1Raw.hasConfirmedHit || tier2Raw.hasHit;
 
   return {
     status: 'tier1_and_tier2',
@@ -373,8 +389,11 @@ export const huntCoordinator = async (
     message: `Tier 1: ${tier1Raw.status}. Tier 2: ${tier2Raw.status} (${tier2Raw.behaviors.length} proposed).`,
     next_step:
       tier2Raw.status === 'behaviors_proposed'
-        ? 'Behaviors proposed for Investigation staging.'
+        ? hasConfirmedHit
+          ? 'Behaviors proposed; at least one tier confirmed an environment hit.'
+          : 'Behaviors proposed for Investigation staging.'
         : 'No behavioral candidates survived catalog validation.',
+    hasConfirmedHit,
     completedSuccessfully: true,
   };
 };

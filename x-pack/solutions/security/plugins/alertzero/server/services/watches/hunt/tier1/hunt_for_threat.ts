@@ -12,9 +12,8 @@ import type {
   HuntForThreatResult,
   HuntIoc,
 } from '@kbn/alertzero-common';
+import { buildMatchesRequired } from '../common/matches_required';
 import type { HuntForThreatParams } from './types';
-
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const termClause = (field: string, value: string): Record<string, unknown> => ({
   term: { [field]: value },
@@ -92,8 +91,6 @@ const buildTechniqueShould = (techniques: string[]): Array<Record<string, unknow
   techniques.length === 0
     ? []
     : [{ terms: { 'kibana.alert.rule.threat.technique.id': techniques } }];
-
-const DATA_STREAM_BACKING_PREFIX = '.ds-';
 
 export const emptyHuntForThreatResult = (
   status: HuntForThreatResult['status'],
@@ -203,19 +200,8 @@ export const huntForThreat = async (
   const searchIndices = [...scope.required, ...scope.optional];
   // `perIndex` buckets on `_index`, which is a concrete index/data-stream name
   // (e.g. `logs-aws.cloudtrail-default`), never the wildcard pattern it resolved
-  // from (e.g. `logs-aws.*`), so the required check below needs pattern matching,
-  // not set membership.
-  const requiredPatterns = scope.required.map(
-    (pattern) => new RegExp(`^${pattern.split('*').map(escapeRegExp).join('.*')}$`)
-  );
-  // A data stream's documents report their backing index (`.ds-logs-aws.cloudtrail-default-2026.09.01-000001`),
-  // which would never match `logs-aws.*` literally, so strip the backing prefix before testing.
-  const matchesRequired = (index: string): boolean => {
-    const concrete = index.startsWith(DATA_STREAM_BACKING_PREFIX)
-      ? index.slice(DATA_STREAM_BACKING_PREFIX.length)
-      : index;
-    return requiredPatterns.some((pattern) => pattern.test(concrete));
-  };
+  // from (e.g. `logs-aws.*`). Shared with Tier 2 so both hit bars agree.
+  const matchesRequired = buildMatchesRequired(scope.required);
 
   const response = await esClient.search({
     index: searchIndices,
