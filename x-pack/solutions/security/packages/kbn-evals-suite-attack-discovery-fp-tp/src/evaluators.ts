@@ -25,24 +25,30 @@ const expectedOutcome = (expected: unknown): FpTpOutcome | undefined =>
   (expected as ExpectedOutcome | undefined)?.outcome;
 
 /**
- * Primary metric: does the run's outcome match the gold outcome? The label is the
- * predicted outcome, so the report reads as a confusion matrix.
+ * Primary metric: does the run's outcome match the gold outcome? A `failed` gold also
+ * needs an explicit FAILED execution, so a timeout or cancellation cannot stand in for
+ * the required-source guard. The label is the predicted outcome, so the report reads
+ * as a confusion matrix.
  */
 export const outcomeAccuracy: Evaluator = {
   name: 'OutcomeAccuracy',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    const predicted = asOutput(output).outcome;
+    const { outcome: predicted, executionStatus } = asOutput(output);
     const gold = expectedOutcome(expected);
+    const matches =
+      predicted !== undefined &&
+      predicted === gold &&
+      (gold !== 'failed' || executionStatus === ExecutionStatus.FAILED);
     return {
-      score: predicted !== undefined && predicted === gold ? 1 : 0,
+      score: matches ? 1 : 0,
       label: predicted ?? 'none',
       explanation: `predicted="${predicted ?? 'none'}" expected="${gold ?? 'none'}"`,
       metadata: {
         predicted: predicted ?? null,
         expected: gold ?? null,
-        executionStatus: asOutput(output).executionStatus,
+        executionStatus,
       },
     };
   },
@@ -97,14 +103,15 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
 };
 
 const failureProblems = (output: FpTpTaskOutput): string[] => [
-  ...(output.executionStatus === ExecutionStatus.COMPLETED
-    ? ['execution completed but should have failed']
+  ...(output.executionStatus !== ExecutionStatus.FAILED
+    ? [`execution ended ${output.executionStatus}, not failed`]
     : []),
   ...(output.payload ? ['payload produced by a run that should have failed'] : []),
 ];
 
 /**
- * Contract conformance. A run whose gold is `failed` must fail and produce no payload;
+ * Contract conformance. A run whose gold is `failed` must end FAILED (not timed out or
+ * cancelled) and produce no payload;
  * any other run must produce a payload that satisfies the output contract.
  */
 export const payloadConformance: Evaluator = {

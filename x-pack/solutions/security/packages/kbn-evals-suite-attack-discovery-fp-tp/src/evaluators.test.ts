@@ -59,6 +59,13 @@ describe('OutcomeAccuracy', () => {
     expect(await score(outcomeAccuracy, failed, 'failed')).toBe(1);
   });
 
+  it.each([ExecutionStatus.TIMED_OUT, ExecutionStatus.CANCELLED, ExecutionStatus.RUNNING])(
+    'returns 0 for a %s run whose gold is failed',
+    async (executionStatus) => {
+      expect(await score(outcomeAccuracy, { ...failed, executionStatus }, 'failed')).toBe(0);
+    }
+  );
+
   it('returns 0 for a run with no outcome', async () => {
     expect(await score(outcomeAccuracy, { ...completed, outcome: undefined }, 'inconclusive')).toBe(
       0
@@ -131,6 +138,13 @@ describe('PayloadConformance', () => {
       )
     ).toBe(0);
   });
+
+  it.each([ExecutionStatus.TIMED_OUT, ExecutionStatus.CANCELLED, ExecutionStatus.RUNNING])(
+    'returns 0 for a run that should fail but ended %s',
+    async (executionStatus) => {
+      expect(await score(payloadConformance, { ...failed, executionStatus }, 'failed')).toBe(0);
+    }
+  );
 });
 
 describe('trajectory', () => {
