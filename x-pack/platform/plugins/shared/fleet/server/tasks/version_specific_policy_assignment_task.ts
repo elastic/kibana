@@ -464,7 +464,8 @@ export class VersionSpecificPolicyAssignmentTask {
       // Compile version-specific inputs for package policies with agent version conditions
       const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
         soClient,
-        parentPolicyId
+        parentPolicyId,
+        { spaceIds: ['*'] }
       );
 
       for (const packagePolicy of packagePolicies) {
@@ -552,6 +553,7 @@ export class VersionSpecificPolicyAssignmentTask {
         {
           agentIds,
           showInactive: false,
+          spaceId: '*',
         },
         targetPolicyId
       );
@@ -821,7 +823,12 @@ export class VersionSpecificPolicyAssignmentTask {
         );
         // Reassign by agent id (not kuery) so agents in every space are covered — the task runs
         // with a space-agnostic saved objects client.
-        await reassignAgents(soClient, esClient, { agentIds, showInactive: true }, parentPolicyId);
+        await reassignAgents(
+          soClient,
+          esClient,
+          { agentIds, showInactive: true, spaceId: '*' },
+          parentPolicyId
+        );
 
         // bulkUpdateAgents collects per-agent ES errors without throwing, so reassignAgents
         // returns { actionId } even if some updates silently failed (e.g. retry_on_conflict

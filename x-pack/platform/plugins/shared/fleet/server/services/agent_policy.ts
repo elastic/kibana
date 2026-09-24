@@ -901,7 +901,9 @@ class AgentPolicyService {
           logger.debug(`Retrieving package policies for agent policies [${agentPolicySO.id}]`);
 
           agentPolicy.package_policies =
-            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
+            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id, {
+              spaceIds: agentPolicySO.namespaces,
+            })) || [];
         }
 
         return agentPolicy;
@@ -2021,7 +2023,8 @@ class AgentPolicyService {
               soClient,
               fleetServerPolicy,
               fullPolicy,
-              agentVersionsToUse
+              agentVersionsToUse,
+              { spaceId: options?.spaceId }
             );
             fleetServerPolicies.push(...versionSpecificPolicies);
           }

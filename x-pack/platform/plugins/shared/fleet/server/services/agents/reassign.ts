@@ -36,11 +36,14 @@ import { ReassignActionRunner, reassignBatch } from './reassign_action_runner';
 
 async function verifyNewAgentPolicy(
   soClient: SavedObjectsClientContract,
-  newAgentPolicyId: string
+  newAgentPolicyId: string,
+  options?: { spaceId?: string }
 ) {
   let newAgentPolicy;
   try {
-    newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+    newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId, false, {
+      spaceId: options?.spaceId,
+    });
   } catch (err) {
     if (err instanceof SavedObjectNotFound) {
       throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
@@ -102,10 +105,12 @@ export async function reassignAgents(
     force?: boolean;
     batchSize?: number;
     dryRun?: boolean;
+    /** Space ID for the target policy lookup. Pass '*' when using an unscoped SO client. */
+    spaceId?: string;
   },
   newAgentPolicyId: string
 ): Promise<{ actionId: string } | { count: number }> {
-  await verifyNewAgentPolicy(soClient, newAgentPolicyId);
+  await verifyNewAgentPolicy(soClient, newAgentPolicyId, { spaceId: options.spaceId });
 
   const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
