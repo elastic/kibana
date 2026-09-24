@@ -130,7 +130,15 @@ export const ensureEvalInit = async (
       }
     }
 
-    if (getAllAvailableConnectors(repoRoot).length === 0) {
+    const evaluationConnectorId =
+      flagsReader.string('evaluation-connector-id') ?? process.env.EVAL_CONNECTOR_ID;
+    const explicitEisConnector = evaluationConnectorId?.startsWith('eis-') ?? false;
+
+    // The cache guard (resolveEvalRunContext / ensureEisConnectorCache) is the
+    // better diagnostic for an explicit eis-* judge: it reports exactly which
+    // connector is unresolvable and how to repair the cache. The generic
+    // "no connectors available" rejection would throw first and hide it.
+    if (!explicitEisConnector && getAllAvailableConnectors(repoRoot).length === 0) {
       if (!isTTY()) {
         throw createFlagError(
           'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run with a TTY to use the setup wizard.'
@@ -331,6 +339,108 @@ export const requiredEisConnectorIds = (
   return [...ids];
 };
 
+export interface EnsureEisConnectorCacheOptions {
+  log: ToolingLog;
+  /** Every EIS connector ID this run will resolve. */
+  required: string[];
+  /**
+   * A dry run only previews the invocation (no server, no Playwright), so an
+   * unusable EIS cache is reported as a warning instead of aborting the preview.
+   */
+  dryRun?: boolean;
+}
+
+/**
+ * Fail fast when the EIS connector map this run will use cannot resolve every
+ * `eis-*` ID in `required`. Shared by `start` and `run` so both entry points
+ * behave the same. On success a fresh, complete cache is exported as
+ * `KIBANA_TESTING_INFERENCE_ENDPOINTS` for the Playwright child process.
+ */
+export const ensureEisConnectorCache = ({
+  log,
+  required,
+  dryRun = false,
+}: EnsureEisConnectorCacheOptions): void => {
+  // A cache or payload that covers only *some* of the EIS connector IDs this
+  // run resolves still 404s every call for a missing id, so validate the map
+  // that will actually be exported — not just that one exists.
+  const envEndpoints = process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS;
+
+  if (envEndpoints) {
+    // The payload can come from the user's shell, or from `ensureEvalInit`
+    // exporting the cache earlier in this same command (interactive `start`).
+    // The cache-exported case used to bypass this check entirely.
+    const available = endpointIdsFromEnvVar(envEndpoints);
+    const missing = available ? required.filter((id) => !available.has(id)) : [];
+
+    if (missing.length > 0) {
+      const message =
+        `KIBANA_TESTING_INFERENCE_ENDPOINTS does not define ${missing.join(
+          ', '
+        )}, which this run ` +
+        `resolves, so every inference call for those connectors will 404. Add them to the payload, or ` +
+        `unset it and run \`node scripts/evals init --refresh\` to re-discover and rewrite the cache.`;
+      if (dryRun) {
+        log.warning(`${message} Continuing because this is a dry run.`);
+      } else {
+        throw createFlagError(message);
+      }
+    }
+  } else {
+    const cached = readCachedEisConnectors();
+    const missing = cached ? required.filter((id) => !(id in cached)) : required;
+
+    if (cached && missing.length === 0) {
+      process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(JSON.stringify(cached)).toString(
+        'base64'
+      );
+      log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
+    } else {
+      const status = getEisCacheStatus();
+      // `cached` is present but incomplete: neither "missing" nor "malformed"
+      // describes it, so name the actual problem instead of falling through to
+      // the malformed branch.
+      const cacheState = cached
+        ? 'is fresh but does not define every connector this run needs'
+        : status === 'missing'
+        ? 'is missing'
+        : status === 'expired'
+        ? 'is expired (>7 days old)'
+        : 'is malformed';
+      const missingDetail = cached && missing.length > 0 ? ` Missing: ${missing.join(', ')}.` : '';
+      const message =
+        `This eval requires EIS connectors, but KIBANA_TESTING_INFERENCE_ENDPOINTS is not set and ` +
+        `the EIS connectors cache at ~/.elastic/eis-connectors-cache.json ${cacheState}.${missingDetail} ` +
+        `Without it, eis-* connector IDs cannot be resolved and every inference call will 404. ` +
+        `Run \`node scripts/evals init --refresh\` to re-discover the connectors and rewrite the cache, ` +
+        `or set KIBANA_TESTING_INFERENCE_ENDPOINTS explicitly.`;
+
+      // A dry run only previews the invocation: it starts no server and runs no
+      // Playwright, so an unusable cache must not block it.
+      if (dryRun) {
+        log.warning(`${message} Continuing because this is a dry run.`);
+      } else {
+        throw createFlagError(message);
+      }
+    }
+  }
+};
+
+/**
+ * True when the run can resolve at least one `eis-*` connector ID, so the cache
+ * guard has to run. With no explicit models the run walks every available
+ * connector, so any EIS-backed one counts.
+ */
+export const requiresEisConnectorCache = (
+  evaluationConnectorId: string,
+  projects: string[],
+  repoRoot: string
+): boolean =>
+  isEisConnectorId(evaluationConnectorId) ||
+  (projects.length > 0
+    ? projects.some(isEisConnectorId)
+    : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
+
 export interface EvalRunContext {
   evaluationConnectorId: string;
   projects: string[];
@@ -373,78 +483,14 @@ export const resolveEvalRunContext = async ({
     }
   }
 
-  const requiresEisCcm =
-    isEisConnectorId(evaluationConnectorId) ||
-    (projects.length > 0
-      ? projects.some(isEisConnectorId)
-      : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
+  const requiresEisCcm = requiresEisConnectorCache(evaluationConnectorId, projects, repoRoot);
 
   if (requiresEisCcm) {
-    // A cache or payload that covers only *some* of the EIS connector IDs this
-    // run resolves still 404s every call for a missing id, so validate the map
-    // that will actually be exported — not just that one exists.
-    const required = requiredEisConnectorIds(evaluationConnectorId, projects, repoRoot);
-    const envEndpoints = process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS;
-
-    if (envEndpoints) {
-      // The payload can come from the user's shell, or from `ensureEvalInit`
-      // exporting the cache earlier in this same command (interactive `start`).
-      // The cache-exported case used to bypass this check entirely.
-      const available = endpointIdsFromEnvVar(envEndpoints);
-      const missing = available ? required.filter((id) => !available.has(id)) : [];
-
-      if (missing.length > 0) {
-        const message =
-          `KIBANA_TESTING_INFERENCE_ENDPOINTS does not define ${missing.join(
-            ', '
-          )}, which this run ` +
-          `resolves, so every inference call for those connectors will 404. Add them to the payload, or ` +
-          `unset it and run \`node scripts/evals init --refresh\` to re-discover and rewrite the cache.`;
-        if (dryRun) {
-          log.warning(`${message} Continuing because this is a dry run.`);
-        } else {
-          throw createFlagError(message);
-        }
-      }
-    } else {
-      const cached = readCachedEisConnectors();
-      const missing = cached ? required.filter((id) => !(id in cached)) : required;
-
-      if (cached && missing.length === 0) {
-        process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(
-          JSON.stringify(cached)
-        ).toString('base64');
-        log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
-      } else {
-        const status = getEisCacheStatus();
-        // `cached` is present but incomplete: neither "missing" nor "malformed"
-        // describes it, so name the actual problem instead of falling through to
-        // the malformed branch.
-        const cacheState = cached
-          ? 'is fresh but does not define every connector this run needs'
-          : status === 'missing'
-          ? 'is missing'
-          : status === 'expired'
-          ? 'is expired (>7 days old)'
-          : 'is malformed';
-        const missingDetail =
-          cached && missing.length > 0 ? ` Missing: ${missing.join(', ')}.` : '';
-        const message =
-          `This eval requires EIS connectors, but KIBANA_TESTING_INFERENCE_ENDPOINTS is not set and ` +
-          `the EIS connectors cache at ~/.elastic/eis-connectors-cache.json ${cacheState}.${missingDetail} ` +
-          `Without it, eis-* connector IDs cannot be resolved and every inference call will 404. ` +
-          `Run \`node scripts/evals init --refresh\` to re-discover the connectors and rewrite the cache, ` +
-          `or set KIBANA_TESTING_INFERENCE_ENDPOINTS explicitly.`;
-
-        // `start --dry-run` only previews the invocation: it starts no server and
-        // runs no Playwright, so an unusable cache must not block it.
-        if (dryRun) {
-          log.warning(`${message} Continuing because this is a dry run.`);
-        } else {
-          throw createFlagError(message);
-        }
-      }
-    }
+    ensureEisConnectorCache({
+      log,
+      required: requiredEisConnectorIds(evaluationConnectorId, projects, repoRoot),
+      dryRun,
+    });
   }
 
   const { datasetsProfile, exportProfile, profileEnvOverrides } = await resolveProfileEnvOverrides({

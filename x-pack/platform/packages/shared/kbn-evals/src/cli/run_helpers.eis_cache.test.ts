@@ -8,10 +8,14 @@
 import { FlagsReader } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { resolveEvalRunContext } from './run_helpers';
+import { resolveEvalRunContext, ensureEvalInit } from './run_helpers';
 
 const mockReadCachedEisConnectors = jest.fn<Record<string, object> | undefined, []>();
 const mockGetEisCacheStatus = jest.fn<'fresh' | 'expired' | 'missing' | 'malformed', []>();
+const mockGetAllAvailableConnectors = jest.fn<
+  Array<{ id: string; name: string; source: string }>,
+  [string]
+>();
 
 jest.mock('./eis_connectors_cache', () => ({
   readCachedEisConnectors: () => mockReadCachedEisConnectors(),
@@ -23,9 +27,7 @@ jest.mock('./prompts', () => ({
   promptForConnector: jest.fn(),
   promptForProject: jest.fn(),
   isTTY: jest.fn().mockReturnValue(false),
-  getAllAvailableConnectors: jest
-    .fn()
-    .mockReturnValue([{ id: 'eis-test-connector', name: 'EIS test connector' }]),
+  getAllAvailableConnectors: (repoRoot: string) => mockGetAllAvailableConnectors(repoRoot),
 }));
 
 jest.mock('./commands/init', () => ({
@@ -64,6 +66,9 @@ describe('resolveEvalRunContext EIS cache guard', () => {
     jest.spyOn(log, 'info');
     jest.spyOn(log, 'warning');
     delete process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS;
+    mockGetAllAvailableConnectors.mockReturnValue([
+      { id: 'eis-test-connector', name: 'EIS test connector', source: 'env' },
+    ]);
   });
 
   afterEach(() => {
@@ -211,5 +216,52 @@ describe('resolveEvalRunContext EIS cache guard', () => {
     expect(log.warning).toHaveBeenCalledWith(
       expect.stringContaining('Continuing because this is a dry run')
     );
+  });
+});
+
+describe('ensureEvalInit zero-connectors rejection', () => {
+  let log: ToolingLog;
+
+  beforeEach(() => {
+    log = new ToolingLog();
+    jest.spyOn(log, 'info').mockImplementation(() => undefined);
+    delete process.env.EVAL_CONNECTOR_ID;
+    mockGetAllAvailableConnectors.mockReturnValue([]);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    delete process.env.EVAL_CONNECTOR_ID;
+  });
+
+  it('still rejects a non-EIS run with no connectors available', async () => {
+    await expect(
+      ensureEvalInit('/repo', log, new FlagsReader({ profile: 'local', 'skip-init': false }))
+    ).rejects.toThrow(/No connectors available/);
+  });
+
+  it('defers the rejection to the cache guard for an explicit eis-* judge', async () => {
+    // `ensureEvalInit` used to throw "No connectors available" before the cache
+    // guard could run, so the advertised cache-state diagnostic (which names the
+    // connector and the repair command) was unreachable exactly when it mattered.
+    await expect(
+      ensureEvalInit(
+        '/repo',
+        log,
+        new FlagsReader({
+          profile: 'local',
+          'evaluation-connector-id': 'eis-test-connector',
+          'skip-init': false,
+        })
+      )
+    ).resolves.toBe('local');
+  });
+
+  it('defers the rejection when the eis-* judge comes from the environment', async () => {
+    process.env.EVAL_CONNECTOR_ID = 'eis-test-connector';
+
+    await expect(
+      ensureEvalInit('/repo', log, new FlagsReader({ profile: 'local', 'skip-init': false }))
+    ).resolves.toBe('local');
   });
 });
