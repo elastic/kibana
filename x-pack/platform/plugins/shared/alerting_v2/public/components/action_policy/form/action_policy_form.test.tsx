@@ -7,13 +7,13 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from './constants';
 import { ActionPolicyForm } from './action_policy_form';
-import type { ActionPolicyFormState } from './types';
+import type { ActionPolicyFormConfig, ActionPolicyFormState } from './types';
 
 const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
@@ -53,8 +53,17 @@ const INLINE_DEFS = [
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-  InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
-    <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
+  InlineWorkflowEditor: ({
+    value,
+    connectorCreationConfig,
+  }: {
+    value: { id: string };
+    connectorCreationConfig?: { mode: string; href?: string };
+  }) => (
+    <div
+      data-test-subj={`inlineWorkflowEditor-${value.id}`}
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+    />
   ),
   isActionValid: () => true,
   buildInlineWorkflowYaml: () => 'workflow: yaml',
@@ -93,7 +102,10 @@ jest.mock('../../../hooks/use_fetch_workflows', () => ({
   }),
 }));
 
-const renderForm = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) => {
+const renderForm = (
+  defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,
+  config?: ActionPolicyFormConfig
+) => {
   const TestComponent = () => {
     const methods = useForm<ActionPolicyFormState>({
       mode: 'onBlur',
@@ -103,7 +115,7 @@ const renderForm = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) =
     return (
       <I18nProvider>
         <FormProvider {...methods}>
-          <ActionPolicyForm />
+          <ActionPolicyForm config={config} />
         </FormProvider>
       </I18nProvider>
     );
@@ -124,6 +136,52 @@ describe('ActionPolicyForm', () => {
   beforeEach(() => {
     mockWorkflowsEnabled = true;
     jest.clearAllMocks();
+  });
+
+  it('renders static sections by default', () => {
+    renderForm();
+
+    expect(screen.getByRole('heading', { name: 'Policy details' })).toBeInTheDocument();
+    expect(screen.queryByTestId('actionPolicyFormSection-policyDetails')).not.toBeInTheDocument();
+  });
+
+  it('uses the flyout layout and only collapses configured sections', async () => {
+    const user = userEvent.setup();
+    renderForm(DEFAULT_FORM_STATE, {
+      layout: 'flyout',
+      connectorCreation: { mode: 'new-tab', href: '/connectors' },
+      collapsibleSections: {
+        notificationControls: { initialIsOpen: false },
+        destination: { initialIsOpen: true },
+      },
+    });
+
+    expect(screen.getByRole('heading', { name: 'Policy details' }).tagName).toBe('H3');
+    expect(screen.getByRole('heading', { name: 'Policy scope' }).tagName).toBe('H3');
+    expect(screen.getByTestId('actionPolicyFormSection-policyDetails')).toContainElement(
+      screen.getByTestId(TEST_SUBJ.nameInput)
+    );
+    expect(screen.getByTestId('actionPolicyFormSection-policyScope')).toContainElement(
+      screen.getByTestId('ruleTagsSelector')
+    );
+
+    const notificationControlsButton = within(
+      screen.getByTestId('actionPolicyFormSection-notificationControls')
+    )
+      .getByText('Notification controls')
+      .closest('button');
+    const destinationButton = within(screen.getByTestId('actionPolicyFormSection-destination'))
+      .getByText('Destination')
+      .closest('button');
+
+    expect(notificationControlsButton).toHaveAttribute('aria-expanded', 'false');
+    await waitFor(() => expect(destinationButton).toHaveAttribute('aria-expanded', 'true'));
+
+    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+    expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-mode',
+      'new-tab'
+    );
   });
 
   it('shows required errors for name on blur', async () => {
