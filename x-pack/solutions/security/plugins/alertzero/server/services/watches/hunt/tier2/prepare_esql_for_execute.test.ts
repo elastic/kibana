@@ -5,98 +5,83 @@
  * 2.0.
  */
 
-import {
-  injectMetadataIndex,
-  prepareEsqlForExecute,
-  rewriteLimit,
-} from './prepare_esql_for_execute';
+import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 
-describe('injectMetadataIndex', () => {
-  it('returns injection of _id and _index when METADATA is absent', () => {
+describe('prepareEsqlForExecute', () => {
+  it('returns _id and _index injected when METADATA is absent', () => {
     expect(
-      injectMetadataIndex('FROM logs-aws.*\n| WHERE event.action == "AssumeRole"\n| LIMIT 10')
+      prepareEsqlForExecute('FROM logs-aws.*\n| WHERE event.action == "AssumeRole"\n| LIMIT 10')
     ).toBe(
       'FROM logs-aws.* METADATA _id, _index\n| WHERE event.action == "AssumeRole"\n| LIMIT 10'
     );
   });
 
   it('returns no double-injection when both fields are already present', () => {
-    expect(injectMetadataIndex('FROM logs-aws.* METADATA _id, _index | WHERE true | LIMIT 5')).toBe(
-      'FROM logs-aws.* METADATA _id, _index | WHERE true | LIMIT 5'
-    );
+    expect(
+      prepareEsqlForExecute('FROM logs-aws.* METADATA _id, _index | WHERE true | LIMIT 5')
+    ).toBe('FROM logs-aws.* METADATA _id, _index\n| WHERE TRUE\n| LIMIT 5');
   });
 
   it('returns missing METADATA fields appended to an existing list', () => {
-    expect(injectMetadataIndex('FROM logs-* METADATA _id | LIMIT 1')).toBe(
-      'FROM logs-* METADATA _id, _index | LIMIT 1'
+    expect(prepareEsqlForExecute('FROM logs-* METADATA _id | LIMIT 1')).toBe(
+      'FROM logs-* METADATA _id, _index\n| LIMIT 1'
     );
-    expect(injectMetadataIndex('FROM logs-* METADATA _index | LIMIT 1')).toBe(
-      'FROM logs-* METADATA _index, _id | LIMIT 1'
+    expect(prepareEsqlForExecute('FROM logs-* METADATA _index | LIMIT 1')).toBe(
+      'FROM logs-* METADATA _index, _id\n| LIMIT 1'
     );
   });
 
   it('returns _id and _index appended to KEEP when KEEP would drop them', () => {
-    expect(injectMetadataIndex('FROM logs-* | KEEP host.name | LIMIT 5')).toBe(
-      'FROM logs-* METADATA _id, _index | KEEP host.name, _id, _index | LIMIT 5'
+    expect(prepareEsqlForExecute('FROM logs-* | KEEP host.name | LIMIT 5')).toBe(
+      'FROM logs-* METADATA _id, _index\n| KEEP host.name, _id, _index\n| LIMIT 5'
     );
   });
 
-  it('returns METADATA injection when the first pipe has no leading whitespace', () => {
-    expect(injectMetadataIndex('FROM logs-*| WHERE true | LIMIT 1')).toBe(
-      'FROM logs-* METADATA _id, _index| WHERE true | LIMIT 1'
+  it('returns every pre-aggregation KEEP rewritten, not only the first', () => {
+    expect(
+      prepareEsqlForExecute('FROM logs-* | KEEP host.name, user.name | WHERE true | KEEP host.name')
+    ).toBe(
+      'FROM logs-* METADATA _id, _index\n| KEEP host.name, user.name, _id, _index\n| WHERE TRUE\n| KEEP host.name, _id, _index'
     );
   });
 
-  it('returns string literals in the pipeline unchanged', () => {
-    expect(injectMetadataIndex('FROM logs-*\n| WHERE message == "hello  world"\n| LIMIT 1')).toBe(
-      'FROM logs-* METADATA _id, _index\n| WHERE message == "hello  world"\n| LIMIT 1'
+  it('returns a wildcard KEEP unchanged', () => {
+    expect(prepareEsqlForExecute('FROM logs-* | KEEP * | LIMIT 5')).toBe(
+      'FROM logs-* METADATA _id, _index\n| KEEP *\n| LIMIT 5'
     );
   });
 
-  it('returns comment lines in the pipeline unchanged', () => {
-    expect(injectMetadataIndex('FROM logs-*\n| WHERE true\n// keep me\n| LIMIT 1')).toBe(
-      'FROM logs-* METADATA _id, _index\n| WHERE true\n// keep me\n| LIMIT 1'
+  it('returns a pipe inside a string literal untouched', () => {
+    expect(
+      prepareEsqlForExecute('FROM logs-* | WHERE process.command_line == "cat /etc/passwd | nc"')
+    ).toBe(
+      'FROM logs-* METADATA _id, _index\n| WHERE process.command_line == "cat /etc/passwd | nc"'
     );
   });
 
   it('returns a KEEP after STATS unchanged, since aggregate output has no METADATA columns', () => {
     expect(
-      injectMetadataIndex(
+      prepareEsqlForExecute(
         'FROM logs-*\n| KEEP user.name, event.action\n| STATS c = COUNT(*) BY user.name\n| KEEP user.name, c\n| LIMIT 10'
       )
     ).toBe(
       'FROM logs-* METADATA _id, _index\n| KEEP user.name, event.action, _id, _index\n| STATS c = COUNT(*) BY user.name\n| KEEP user.name, c\n| LIMIT 10'
     );
   });
-});
 
-describe('rewriteLimit', () => {
-  it('returns rewritten LIMIT when one is present', () => {
-    expect(rewriteLimit('FROM logs-* | WHERE true | LIMIT 100', 25)).toBe(
-      'FROM logs-* | WHERE true | LIMIT 25'
+  it('returns KEEP after a DROP of a METADATA column unchanged', () => {
+    expect(prepareEsqlForExecute('FROM logs-* | DROP _id | KEEP host.name')).toBe(
+      'FROM logs-* METADATA _id, _index\n| DROP _id\n| KEEP host.name'
     );
   });
 
-  it('returns appended LIMIT when none is present', () => {
-    expect(rewriteLimit('FROM logs-* | WHERE true', 25)).toBe(
-      'FROM logs-* | WHERE true\n| LIMIT 25'
-    );
+  it('returns the input unchanged when it does not parse', () => {
+    const broken = 'FROM logs-* | WHERE ((';
+    expect(prepareEsqlForExecute(broken)).toBe(broken);
   });
 
-  it('returns a single LIMIT rather than appending a second', () => {
-    expect(rewriteLimit('FROM logs-* | LIMIT 0', 50)).toBe('FROM logs-* | LIMIT 50');
-  });
-});
-
-describe('prepareEsqlForExecute', () => {
-  it('returns METADATA injection and LIMIT rewrite together', () => {
-    expect(
-      prepareEsqlForExecute(
-        'FROM logs-aws.cloudtrail-*\n| WHERE aws.cloudtrail.event_name == "AssumeRole"\n| KEEP host.name, user.name\n| LIMIT 100',
-        25
-      )
-    ).toBe(
-      'FROM logs-aws.cloudtrail-* METADATA _id, _index\n| WHERE aws.cloudtrail.event_name == "AssumeRole"\n| KEEP host.name, user.name, _id, _index\n| LIMIT 25'
-    );
+  it('returns the input unchanged when it does not start with FROM', () => {
+    const rowQuery = 'ROW a = 1';
+    expect(prepareEsqlForExecute(rowQuery)).toBe(rowQuery);
   });
 });

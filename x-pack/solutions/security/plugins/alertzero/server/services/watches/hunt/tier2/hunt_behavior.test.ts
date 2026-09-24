@@ -7,41 +7,36 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { huntBehavior } from './hunt_behavior';
-import {
-  huntBehaviorLlmExtractionSchema,
-  huntBehaviorEsqlGenerationSchema,
-} from './extraction_contract';
+import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
+
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
+  generateEsql: jest.fn(),
+  executeEsql: jest.fn(),
+}));
+
+const generateEsqlMock = generateEsql as jest.MockedFunction<typeof generateEsql>;
+const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
 
 const GROUNDED_ESQL =
   'FROM logs-aws.cloudtrail-*\n| WHERE aws.cloudtrail.event_name == "AssumeRole"\n| KEEP host.name, user.name\n| LIMIT 100';
+const T1566_ESQL = 'FROM logs-aws.*\n| WHERE email.from.address == "evil@example.com"\n| LIMIT 10';
 
-const buildMockModel = ({
-  extractionResult = {},
-  esqlRules,
-}: {
-  extractionResult?: Partial<{
-    candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }>;
-  }>;
-  esqlRules?: Array<{ technique_id: string; esql: string }>;
-} = {}): ScopedModel => {
-  const withStructuredOutput = jest.fn().mockImplementation((schema) => {
-    if (schema === huntBehaviorLlmExtractionSchema) {
-      return {
-        invoke: jest.fn().mockResolvedValue({ candidates: extractionResult.candidates ?? [] }),
-      };
-    }
-    if (schema === huntBehaviorEsqlGenerationSchema) {
-      return {
-        invoke: jest.fn().mockResolvedValue({
-          rules: esqlRules ?? [{ technique_id: 'T1078.004', esql: GROUNDED_ESQL }],
-        }),
-      };
-    }
-    return { invoke: jest.fn().mockResolvedValue({}) };
+/** Resolve a grounded query per technique id from the `nlQuery` the service builds. */
+const generateByTechnique = (queries: Record<string, string>) =>
+  generateEsqlMock.mockImplementation(async ({ nlQuery }) => {
+    const match = Object.entries(queries).find(([id]) => nlQuery.includes(id));
+    return match ? { query: match[1] } : { error: `no fixture for ${nlQuery}` };
   });
 
+const buildMockModel = (
+  candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }> = []
+): ScopedModel => {
+  const withStructuredOutput = jest.fn().mockReturnValue({
+    invoke: jest.fn().mockResolvedValue({ candidates }),
+  });
   return {
     chatModel: { withStructuredOutput } as unknown as ScopedModel['chatModel'],
     inferenceClient: {} as ScopedModel['inferenceClient'],
@@ -49,6 +44,8 @@ const buildMockModel = ({
   };
 };
 
+const esClient = {} as ElasticsearchClient;
+const col = (name: string) => ({ name, type: 'keyword' });
 const logger = loggingSystemMock.createLogger();
 
 const t1078Candidate = {
@@ -56,28 +53,36 @@ const t1078Candidate = {
   evidence_quote: 'cloud account abuse via AssumeRole',
   llm_confidence: 0.9,
 };
+const t1566Candidate = { technique_id: 'T1566', evidence_quote: 'phishing', llm_confidence: 0.9 };
+
+const executeParams = {
+  text: 'report',
+  window: { from: 'now-30d', to: 'now' },
+  required_indices: ['logs-aws.*'],
+  row_limit: 25,
+};
 
 describe('huntBehavior', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    generateByTechnique({ 'T1078.004': GROUNDED_ESQL, T1566: T1566_ESQL });
+    executeEsqlMock.mockResolvedValue({ columns: [], values: [] });
+  });
+
   it('returns no_behaviors_found when LLM extracts nothing', async () => {
-    const model = buildMockModel({ extractionResult: { candidates: [] } });
-    const result = await huntBehavior(model, logger, { text: 'some report text' });
+    const result = await huntBehavior(buildMockModel([]), logger, { text: 'some report text' });
     expect(result.status).toBe('no_behaviors_found');
   });
 
   it('returns has_hit false when LLM extracts nothing', async () => {
-    const model = buildMockModel({ extractionResult: { candidates: [] } });
-    const result = await huntBehavior(model, logger, { text: 'some report text' });
+    const result = await huntBehavior(buildMockModel([]), logger, { text: 'some report text' });
     expect(result.has_hit).toBe(false);
   });
 
   it('returns no_behaviors_found when candidates are below the confidence threshold', async () => {
-    const model = buildMockModel({
-      extractionResult: {
-        candidates: [
-          { technique_id: 'T1566', evidence_quote: 'phishing email', llm_confidence: 0.3 },
-        ],
-      },
-    });
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'phishing email', llm_confidence: 0.3 },
+    ]);
     const result = await huntBehavior(model, logger, {
       text: 'report text',
       llm_confidence_threshold: 0.5,
@@ -86,171 +91,223 @@ describe('huntBehavior', () => {
   });
 
   it('returns behaviors_proposed for a catalog technique id', async () => {
-    const model = buildMockModel({
-      extractionResult: {
-        candidates: [
-          { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
-          { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
-        ],
-      },
-      esqlRules: [],
-    });
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
+      { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
+    ]);
     const result = await huntBehavior(model, logger, { text: 'report' });
     expect(result.status).toBe('behaviors_proposed');
   });
 
   it('returns only the catalog-validated technique', async () => {
-    const model = buildMockModel({
-      extractionResult: {
-        candidates: [
-          { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
-          { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
-        ],
-      },
-      esqlRules: [],
-    });
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
+      { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
+    ]);
     const result = await huntBehavior(model, logger, { text: 'report' });
     expect(result.behaviors).toHaveLength(1);
   });
 
   it('returns the dropped unknown technique id', async () => {
-    const model = buildMockModel({
-      extractionResult: {
-        candidates: [
-          { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
-          { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
-        ],
-      },
-      esqlRules: [],
-    });
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
+      { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
+    ]);
     const result = await huntBehavior(model, logger, { text: 'report' });
     expect(result.dropped_unknown_ids).toContain('T9999999');
   });
 
   it('returns indexed_behaviors id as reportId:techniqueId', async () => {
-    const model = buildMockModel({
-      extractionResult: {
-        candidates: [
-          { technique_id: 'T1566', evidence_quote: 'spear phishing', llm_confidence: 0.8 },
-        ],
-      },
-      esqlRules: [],
-    });
-    const result = await huntBehavior(model, logger, {
-      text: 'report',
-      report_id: 'rpt-001',
-    });
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'spear phishing', llm_confidence: 0.8 },
+    ]);
+    const result = await huntBehavior(model, logger, { text: 'report', report_id: 'rpt-001' });
     expect(result.indexed_behaviors[0].id).toBe('rpt-001:T1566');
   });
 
-  it('returns has_hit false when no window is provided (dry-run only)', async () => {
-    const esClient = {
-      esql: {
-        query: jest.fn().mockResolvedValue({ columns: [], values: [] }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
-    });
-    const result = await huntBehavior(
-      model,
+  it('returns indexed_behaviors with a technique_id', async () => {
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'spear phishing', llm_confidence: 0.8 },
+    ]);
+    const result = await huntBehavior(model, logger, { text: 'report', report_id: 'rpt-001' });
+    expect(result.indexed_behaviors[0].technique_id).toBe('T1566');
+  });
+
+  it('returns the skeleton template without calling generateEsql when no esClient is given', async () => {
+    const result = await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: 'report' });
+    expect(generateEsqlMock).not.toHaveBeenCalled();
+    expect(result.behaviors[0].proposed_esql_rule).toContain('FROM *');
+  });
+
+  it('returns one generateEsql call per validated behavior', async () => {
+    const model = buildMockModel([t1078Candidate, t1566Candidate]);
+    await huntBehavior(model, logger, { text: 'report' }, esClient);
+    expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns generateEsql targeting the integrations that produced Tier 1 hits', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
       logger,
       {
         text: 'report',
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
+        required_indices: ['logs-*'],
+        article_context: {
+          matched_indices: [
+            '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
+            '.ds-logs-aws.cloudtrail-default-2026.09.02-000002',
+            'logs-okta.system-default',
+          ],
+        },
       },
+      esClient
+    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-aws.cloudtrail-default*,logs-okta.system-default*' })
+    );
+  });
+
+  it('returns generateEsql targeting the required indices when Tier 1 had no hits', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: 'report', required_indices: ['logs-aws.*', 'logs-okta.*'] },
+      esClient
+    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-aws.*,logs-okta.*' })
+    );
+  });
+
+  it('returns generateEsql with index discovery when neither hits nor scope name an index', async () => {
+    await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: 'report' }, esClient);
+    expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: undefined }));
+  });
+
+  it('returns generateEsql in schema-probe mode with the hunt instructions and row limit', async () => {
+    await huntBehavior(buildMockModel([t1078Candidate]), logger, executeParams, esClient);
+    expect(generateEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        execute: 'schema',
+        disableNamedParams: true,
+        rowLimit: 25,
+        additionalInstructions: ESQL_GENERATION_INSTRUCTIONS,
+      })
+    );
+  });
+
+  it('returns the technique and evidence in the generateEsql natural-language query', async () => {
+    await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: 'report' }, esClient);
+    const { nlQuery } = generateEsqlMock.mock.calls[0][0];
+    expect(nlQuery).toContain('T1078.004');
+    expect(nlQuery).toContain('cloud account abuse via AssumeRole');
+  });
+
+  it('returns the extracted IOCs and report text as generateEsql context', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: 'the report body', iocs: [{ type: 'ip', value: '203.0.113.7' }] },
+      esClient
+    );
+    const { additionalContext } = generateEsqlMock.mock.calls[0][0];
+    expect(additionalContext).toContain('ip: 203.0.113.7');
+    expect(additionalContext).toContain('the report body');
+  });
+
+  it('returns the generated query under the grounded header as the proposed rule', async () => {
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: 'report' },
+      esClient
+    );
+    const rule = result.behaviors[0].proposed_esql_rule;
+    expect(rule.startsWith('// Generated from hunt.hunt_behavior')).toBe(true);
+    expect(rule.endsWith(`\n${GROUNDED_ESQL}`)).toBe(true);
+  });
+
+  it('returns the skeleton template when generateEsql reports an error', async () => {
+    generateEsqlMock.mockResolvedValue({ error: 'Unknown column [nope]' });
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      executeParams,
+      esClient
+    );
+    expect(result.behaviors[0].proposed_esql_rule).toContain('FROM *');
+    expect(executeEsqlMock).not.toHaveBeenCalled();
+  });
+
+  it('returns has_hit false when generateEsql reports an error', async () => {
+    generateEsqlMock.mockResolvedValue({ error: 'Unknown column [nope]' });
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      executeParams,
       esClient
     );
     expect(result.has_hit).toBe(false);
   });
 
-  it('returns executed false when no window is provided', async () => {
-    const esClient = {
-      esql: {
-        query: jest.fn().mockResolvedValue({ columns: [], values: [] }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
-    });
+  it('returns the skeleton template when generateEsql throws', async () => {
+    generateEsqlMock.mockRejectedValue(new Error('Could not discover a suitable index'));
     const result = await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
+      executeParams,
       esClient
     );
-    expect(result.behaviors[0].execution).toEqual({
-      executed: false,
-      row_count: 0,
-      hit: false,
-    });
+    expect(result.behaviors[0].proposed_esql_rule).toContain('FROM *');
+    expect(result.status).toBe('behaviors_proposed');
+  });
+
+  it('returns has_hit false when no window is provided (validate only)', async () => {
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: 'report', required_indices: ['logs-aws.*'], row_limit: 25 },
+      esClient
+    );
+    expect(result.has_hit).toBe(false);
+  });
+
+  it('returns executed false and no execute call when no window is provided', async () => {
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: 'report', required_indices: ['logs-aws.*'], row_limit: 25 },
+      esClient
+    );
+    expect(executeEsqlMock).not.toHaveBeenCalled();
+    expect(result.behaviors[0].execution).toEqual({ executed: false, row_count: 0, hit: false });
   });
 
   it('returns has_hit true when a required-index row is returned', async () => {
-    const esClient = {
-      esql: {
-        query: jest
-          .fn()
-          .mockResolvedValueOnce({ columns: [], values: [] }) // dry-run
-          .mockResolvedValueOnce({
-            columns: [{ name: '_index' }, { name: 'host.name' }, { name: 'user.name' }],
-            values: [['logs-aws.cloudtrail-default', 'WIN-ANALYST01', 'alice']],
-          }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
+    executeEsqlMock.mockResolvedValue({
+      columns: [col('_index'), col('host.name'), col('user.name')],
+      values: [['logs-aws.cloudtrail-default', 'WIN-ANALYST01', 'alice']],
     });
     const result = await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
+      executeParams,
       esClient
     );
     expect(result.has_hit).toBe(true);
   });
 
   it('returns hit_refs from METADATA _id and _index on required-index rows', async () => {
-    const esClient = {
-      esql: {
-        query: jest
-          .fn()
-          .mockResolvedValueOnce({ columns: [], values: [] })
-          .mockResolvedValueOnce({
-            columns: [
-              { name: '_id' },
-              { name: '_index' },
-              { name: '@timestamp' },
-              { name: 'host.name' },
-            ],
-            values: [
-              ['doc-1', 'logs-aws.cloudtrail-default', '2026-09-24T12:00:00.000Z', 'WIN-ANALYST01'],
-            ],
-          }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
+    executeEsqlMock.mockResolvedValue({
+      columns: [col('_id'), col('_index'), col('@timestamp'), col('host.name')],
+      values: [
+        ['doc-1', 'logs-aws.cloudtrail-default', '2026-09-24T12:00:00.000Z', 'WIN-ANALYST01'],
+      ],
     });
     const result = await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
+      executeParams,
       esClient
     );
     expect(result.behaviors[0].hit_refs).toEqual([
@@ -263,131 +320,76 @@ describe('huntBehavior', () => {
   });
 
   it('returns execution.hit true for a required-index row', async () => {
-    const esClient = {
-      esql: {
-        query: jest
-          .fn()
-          .mockResolvedValueOnce({ columns: [], values: [] })
-          .mockResolvedValueOnce({
-            columns: [{ name: '_index' }, { name: 'host.name' }],
-            values: [['logs-aws.cloudtrail-default', 'WIN-ANALYST01']],
-          }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
+    executeEsqlMock.mockResolvedValue({
+      columns: [col('_index'), col('host.name')],
+      values: [['logs-aws.cloudtrail-default', 'WIN-ANALYST01']],
     });
     const result = await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
+      executeParams,
       esClient
     );
-    expect(result.behaviors[0].execution).toEqual({
-      executed: true,
-      row_count: 1,
-      hit: true,
-    });
+    expect(result.behaviors[0].execution).toEqual({ executed: true, row_count: 1, hit: true });
   });
 
   it('returns has_hit false when only optional-index rows are returned', async () => {
-    const esClient = {
-      esql: {
-        query: jest
-          .fn()
-          .mockResolvedValueOnce({ columns: [], values: [] })
-          .mockResolvedValueOnce({
-            columns: [{ name: '_index' }],
-            values: [['.alerts-security.alerts-default']],
-          }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
+    executeEsqlMock.mockResolvedValue({
+      columns: [col('_index')],
+      values: [['.alerts-security.alerts-default']],
     });
     const result = await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
+      executeParams,
       esClient
     );
     expect(result.has_hit).toBe(false);
   });
 
-  it('returns the hunt window as the ES|QL filter on execute', async () => {
-    const query = jest
-      .fn()
-      .mockResolvedValueOnce({ columns: [], values: [] })
-      .mockResolvedValueOnce({ columns: [{ name: '_index' }], values: [] });
-    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
-    });
+  it('returns the hunt window as the execute filter and the row limit as the LIMIT', async () => {
     await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-7d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
+      { ...executeParams, window: { from: 'now-7d', to: 'now' } },
       esClient
     );
-    expect(query).toHaveBeenNthCalledWith(
-      2,
+    expect(executeEsqlMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        esClient,
+        limit: 25,
         filter: { range: { '@timestamp': { gte: 'now-7d', lte: 'now' } } },
-      }),
-      expect.objectContaining({ requestTimeout: '30s' })
+      })
     );
   });
 
-  it('returns executed false for a behavior whose execute throws without failing siblings', async () => {
-    const query = jest
-      .fn()
-      .mockResolvedValueOnce({ columns: [], values: [] }) // dry-run T1078
-      .mockRejectedValueOnce(new Error('timeout')) // execute T1078
-      .mockResolvedValueOnce({ columns: [], values: [] }) // dry-run T1566
-      .mockResolvedValueOnce({
-        columns: [{ name: '_index' }],
-        values: [['logs-aws.cloudtrail-default']],
-      });
-    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: {
-        candidates: [
-          t1078Candidate,
-          { technique_id: 'T1566', evidence_quote: 'phishing', llm_confidence: 0.9 },
-        ],
-      },
-      esqlRules: [
-        { technique_id: 'T1078.004', esql: GROUNDED_ESQL },
-        {
-          technique_id: 'T1566',
-          esql: 'FROM logs-aws.*\n| WHERE true\n| LIMIT 10',
-        },
-      ],
-    });
-    const result = await huntBehavior(
-      model,
+  it('returns METADATA _id, _index injected into the executed query', async () => {
+    await huntBehavior(buildMockModel([t1078Candidate]), logger, executeParams, esClient);
+    const { query } = executeEsqlMock.mock.calls[0][0];
+    expect(query).toContain('FROM logs-aws.cloudtrail-* METADATA _id, _index');
+    expect(query).toContain('KEEP host.name, user.name, _id, _index');
+  });
+
+  it('returns the LIMIT from size when size wins over row_limit', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
+      { ...executeParams, row_limit: 100, size: 7 },
+      esClient
+    );
+    expect(executeEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ limit: 7 }));
+  });
+
+  it('returns executed false for a behavior whose execute throws without failing siblings', async () => {
+    executeEsqlMock.mockImplementation(async ({ query }) =>
+      query.includes('AssumeRole')
+        ? Promise.reject(new Error('timeout'))
+        : { columns: [col('_index')], values: [['logs-aws.cloudtrail-default']] }
+    );
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate, t1566Candidate]),
+      logger,
+      executeParams,
       esClient
     );
     expect(result.behaviors.find((b) => b.technique_id === 'T1078.004')?.execution).toEqual({
@@ -398,106 +400,26 @@ describe('huntBehavior', () => {
   });
 
   it('returns has_hit true when a sibling behavior hits after another throws', async () => {
-    const query = jest
-      .fn()
-      .mockResolvedValueOnce({ columns: [], values: [] })
-      .mockRejectedValueOnce(new Error('timeout'))
-      .mockResolvedValueOnce({ columns: [], values: [] })
-      .mockResolvedValueOnce({
-        columns: [{ name: '_index' }],
-        values: [['logs-aws.cloudtrail-default']],
-      });
-    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: {
-        candidates: [
-          t1078Candidate,
-          { technique_id: 'T1566', evidence_quote: 'phishing', llm_confidence: 0.9 },
-        ],
-      },
-      esqlRules: [
-        { technique_id: 'T1078.004', esql: GROUNDED_ESQL },
-        {
-          technique_id: 'T1566',
-          esql: 'FROM logs-aws.*\n| WHERE true\n| LIMIT 10',
-        },
-      ],
-    });
+    executeEsqlMock.mockImplementation(async ({ query }) =>
+      query.includes('AssumeRole')
+        ? Promise.reject(new Error('timeout'))
+        : { columns: [col('_index')], values: [['logs-aws.cloudtrail-default']] }
+    );
     const result = await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate, t1566Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
+      executeParams,
       esClient
     );
     expect(result.has_hit).toBe(true);
   });
 
-  it('returns dry-run-only when the dry-run fails (no execute call)', async () => {
-    const query = jest.fn().mockRejectedValue(new Error('Unknown column [nope]'));
-    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
-    });
-    const result = await huntBehavior(
-      model,
-      logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
-      esClient
-    );
-    expect(query).toHaveBeenCalledTimes(1);
-    expect(result.has_hit).toBe(false);
-  });
-
-  it('returns indexed_behaviors with a technique_id', async () => {
-    const model = buildMockModel({
-      extractionResult: {
-        candidates: [
-          { technique_id: 'T1566', evidence_quote: 'spear phishing', llm_confidence: 0.8 },
-        ],
-      },
-      esqlRules: [],
-    });
-    const result = await huntBehavior(model, logger, {
-      text: 'report',
-      report_id: 'rpt-001',
-    });
-    expect(result.indexed_behaviors[0].technique_id).toBe('T1566');
-  });
-
   it('returns has_hit false when rows lack an _index column', async () => {
-    const esClient = {
-      esql: {
-        query: jest
-          .fn()
-          .mockResolvedValueOnce({ columns: [], values: [] })
-          .mockResolvedValueOnce({
-            columns: [{ name: 'count' }],
-            values: [[3]],
-          }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
-    });
+    executeEsqlMock.mockResolvedValue({ columns: [col('count')], values: [[3]] });
     const result = await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
+      executeParams,
       esClient
     );
     expect(result.has_hit).toBe(false);
@@ -505,89 +427,21 @@ describe('huntBehavior', () => {
 
   it('returns a warning when rows lack an _index column', async () => {
     const warn = jest.spyOn(logger, 'warn');
-    const esClient = {
-      esql: {
-        query: jest
-          .fn()
-          .mockResolvedValueOnce({ columns: [], values: [] })
-          .mockResolvedValueOnce({
-            columns: [{ name: 'count' }],
-            values: [[3]],
-          }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
-    });
-    await huntBehavior(
-      model,
-      logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 25,
-      },
-      esClient
-    );
+    executeEsqlMock.mockResolvedValue({ columns: [col('count')], values: [[3]] });
+    await huntBehavior(buildMockModel([t1078Candidate]), logger, executeParams, esClient);
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('no _index column'));
   });
 
-  it('returns LIMIT rewritten from size when size wins over row_limit', async () => {
-    const query = jest
-      .fn()
-      .mockResolvedValueOnce({ columns: [], values: [] })
-      .mockResolvedValueOnce({ columns: [{ name: '_index' }], values: [] });
-    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
-    });
-    await huntBehavior(
-      model,
-      logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 100,
-        size: 7,
-      },
-      esClient
-    );
-    expect(query).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        query: expect.stringMatching(/\|\s*LIMIT 7\b/),
-      }),
-      expect.anything()
-    );
-  });
-
-  it('returns affected_hosts_truncated when more than 20 hosts are present', async () => {
+  it('returns affected_hosts capped at 20 when more hosts are present', async () => {
     const hosts = Array.from({ length: 21 }, (_, i) => `host-${i}`);
-    const esClient = {
-      esql: {
-        query: jest
-          .fn()
-          .mockResolvedValueOnce({ columns: [], values: [] })
-          .mockResolvedValueOnce({
-            columns: [{ name: '_index' }, { name: 'host.name' }],
-            values: hosts.map((h) => ['logs-aws.cloudtrail-default', h]),
-          }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
+    executeEsqlMock.mockResolvedValue({
+      columns: [col('_index'), col('host.name')],
+      values: hosts.map((h) => ['logs-aws.cloudtrail-default', h]),
     });
     const result = await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 50,
-      },
+      { ...executeParams, row_limit: 50 },
       esClient
     );
     expect(result.behaviors[0].affected_hosts).toHaveLength(20);
@@ -595,29 +449,14 @@ describe('huntBehavior', () => {
 
   it('returns the truncation flag when more than 20 hosts are present', async () => {
     const hosts = Array.from({ length: 21 }, (_, i) => `host-${i}`);
-    const esClient = {
-      esql: {
-        query: jest
-          .fn()
-          .mockResolvedValueOnce({ columns: [], values: [] })
-          .mockResolvedValueOnce({
-            columns: [{ name: '_index' }, { name: 'host.name' }],
-            values: hosts.map((h) => ['logs-aws.cloudtrail-default', h]),
-          }),
-      },
-    } as unknown as ElasticsearchClient;
-    const model = buildMockModel({
-      extractionResult: { candidates: [t1078Candidate] },
+    executeEsqlMock.mockResolvedValue({
+      columns: [col('_index'), col('host.name')],
+      values: hosts.map((h) => ['logs-aws.cloudtrail-default', h]),
     });
     const result = await huntBehavior(
-      model,
+      buildMockModel([t1078Candidate]),
       logger,
-      {
-        text: 'report',
-        window: { from: 'now-30d', to: 'now' },
-        required_indices: ['logs-aws.*'],
-        row_limit: 50,
-      },
+      { ...executeParams, row_limit: 50 },
       esClient
     );
     expect(result.behaviors[0].affected_hosts_truncated).toBe(true);

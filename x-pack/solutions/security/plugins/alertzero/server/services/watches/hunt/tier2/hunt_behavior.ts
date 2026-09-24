@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { z } from '@kbn/zod/v4';
 import type { HuntBehaviorArticleContext, HuntBehaviorIoc } from '@kbn/alertzero-common';
 import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
-  huntBehaviorEsqlGenerationSchema,
   EXTRACTION_PROMPT,
   CONTEXT_PREAMBLE,
-  ESQL_GENERATION_PROMPT,
+  ESQL_GENERATION_INSTRUCTIONS,
 } from './extraction_contract';
 import { toIndexedBehaviors } from './indexed_behaviors';
 import { getMitreCatalog } from './mitre_catalog';
@@ -29,7 +30,6 @@ import type {
   ValidatedBehavior,
 } from './types';
 
-const ESQL_REQUEST_TIMEOUT = '30s';
 const MAX_AFFECTED_ENTITIES = 20;
 /** Cap Tier 2 Discover refs to match SSE `events[]` / `alerts[]` max. */
 const MAX_HIT_REFS = 50;
@@ -99,19 +99,6 @@ const proposedEsqlRule = ({
   ].join('\n');
 };
 
-const sanitizeGeneratedEsql = (raw: string): string | undefined => {
-  let text = raw.trim();
-  const fenced = text.match(/```(?:esql|sql)?\s*([\s\S]*?)```/i);
-  if (fenced) text = fenced[1].trim();
-  text = text
-    .split('\n')
-    .filter((line) => !line.trim().startsWith('//'))
-    .join('\n')
-    .trim();
-  if (!/^FROM\s/i.test(text)) return undefined;
-  return text;
-};
-
 const buildGroundedEsqlHeader = (b: {
   rule_name: string;
   severity: SeverityLevel;
@@ -122,7 +109,8 @@ const buildGroundedEsqlHeader = (b: {
 }): string =>
   [
     `// Generated from hunt.hunt_behavior — grounded in the report's extracted`,
-    `// IOCs/behaviors. Review the FROM clause and artifact values before enabling.`,
+    `// IOCs/behaviors and validated against the target index mappings.`,
+    `// Review the FROM clause and artifact values before enabling.`,
     `// rule_name: ${b.rule_name}`,
     `// severity: ${b.severity}  risk_score: ${b.risk_score}`,
     `// mitre_attack: ${b.technique_id}${
@@ -133,55 +121,10 @@ const buildGroundedEsqlHeader = (b: {
 
 const MAX_ESQL_PROMPT_IOCS = 30;
 const MAX_ESQL_PROMPT_TEXT_CHARS = 6000;
-const MAX_ESQL_REPAIR_ATTEMPTS = 3;
-
-const pruneKeepColumn = (esql: string, column: string): string | undefined => {
-  const keepRegex = /(\bKEEP\b\s+)([^|]+)/i;
-  const match = esql.match(keepRegex);
-  if (!match) return undefined;
-  const columns = match[2]
-    .split(',')
-    .map((c) => c.trim())
-    .filter(Boolean);
-  const remaining = columns.filter((c) => c !== column);
-  if (remaining.length === columns.length || remaining.length === 0) return undefined;
-  return esql.replace(keepRegex, `$1${remaining.join(', ')} `);
-};
-
-const validateEsqlAgainstEnvironment = async (
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  techniqueId: string,
-  esql: string
-): Promise<string | undefined> => {
-  let candidate = esql;
-  for (let attempt = 0; attempt < MAX_ESQL_REPAIR_ATTEMPTS; attempt++) {
-    try {
-      await esClient.esql.query(
-        { query: `${candidate}\n| LIMIT 0` },
-        { requestTimeout: ESQL_REQUEST_TIMEOUT }
-      );
-      return candidate;
-    } catch (err) {
-      const message = (err as Error).message ?? '';
-      const unknownColumn = message.match(/Unknown column \[([^\]]+)\]/);
-      const repaired = unknownColumn ? pruneKeepColumn(candidate, unknownColumn[1]) : undefined;
-      if (!repaired) {
-        logger.warn(
-          `[hunt:esql] generated ES|QL for ${techniqueId} failed environment validation — ` +
-            `falling back to the skeleton template. ${message.slice(0, 300)}`
-        );
-        return undefined;
-      }
-      candidate = repaired;
-    }
-  }
-  logger.warn(
-    `[hunt:esql] generated ES|QL for ${techniqueId} still failing after ` +
-      `${MAX_ESQL_REPAIR_ATTEMPTS} repair attempts — falling back to the skeleton template.`
-  );
-  return undefined;
-};
+/** Concurrent `generateEsql` calls; each one is a multi-step LLM graph plus mapping lookups. */
+const ESQL_GENERATION_CONCURRENCY = 3;
+/** LIMIT the generator writes into a proposed rule when the caller has no row bound. */
+const DEFAULT_PROPOSED_RULE_LIMIT = 100;
 
 const columnIndex = (columns: Array<{ name: string }> | undefined, name: string): number =>
   columns?.findIndex((c) => c.name === name) ?? -1;
@@ -202,7 +145,7 @@ const uniqueTrimmed = (values: unknown[], max: number): { items: string[]; trunc
 };
 
 /**
- * Execute a dry-run-passed query in the hunt window. Hit bar counts only rows
+ * Execute a generated query in the hunt window. Hit bar counts only rows
  * whose `_index` matches a required pattern. Per-behavior errors record
  * `executed: false` and do not fail the tier.
  */
@@ -230,21 +173,19 @@ const executeValidatedEsql = async ({
   affected_users_truncated?: boolean;
   hit_refs?: BehaviorHitRef[];
 }> => {
-  const prepared = prepareEsqlForExecute(esql, row_limit);
   const matchesRequired = buildMatchesRequired(requiredIndices);
 
   try {
-    const response = await esClient.esql.query(
-      {
-        query: prepared,
-        filter: {
-          range: {
-            '@timestamp': { gte: window.from, lte: window.to },
-          },
+    const response = await executeEsql({
+      esClient,
+      query: prepareEsqlForExecute(esql),
+      limit: row_limit,
+      filter: {
+        range: {
+          '@timestamp': { gte: window.from, lte: window.to },
         },
       },
-      { requestTimeout: ESQL_REQUEST_TIMEOUT }
-    );
+    });
 
     const columns = response.columns ?? [];
     const values = response.values ?? [];
@@ -333,48 +274,45 @@ const executeValidatedEsql = async ({
   }
 };
 
-const generateGroundedEsql = async (
-  model: ScopedModel,
-  logger: Logger,
-  {
-    text,
-    iocs,
-    articleContext,
-    behaviors,
-  }: {
-    text: string;
-    iocs?: HuntBehaviorIoc[];
-    articleContext?: HuntBehaviorArticleContext;
-    behaviors: ValidatedBehavior[];
-  }
-): Promise<Map<string, string>> => {
-  const generated = new Map<string, string>();
-  const sections: string[] = [ESQL_GENERATION_PROMPT];
+/**
+ * Wildcard patterns for the integrations that produced Tier 1 hits, derived
+ * from concrete backing indices (`.ds-logs-okta.system-default-2026.09.01-000001`
+ * → `logs-okta.system-default*`). A confirmed hit only says WHICH integration
+ * to target, never a dated index name.
+ */
+const matchedIndexPatterns = (articleContext: HuntBehaviorArticleContext | undefined): string[] => [
+  ...new Set(
+    (articleContext?.matched_indices ?? []).map(
+      (index) => `${index.replace(/^\.ds-/, '').replace(/[-.]\d{4}[.-]\d{2}[.-]\d{2}.*$/, '')}*`
+    )
+  ),
+];
 
-  const fallbackPatterns = ['logs-*', '.alerts-security.alerts-*', 'metrics-*'];
-  const indexPatterns = new Set<string>(
-    articleContext?.matched_indices && articleContext.matched_indices.length > 0
-      ? articleContext.matched_indices
-      : fallbackPatterns
-  );
-  const matchedPatterns = [
-    ...new Set(
-      (articleContext?.matched_indices ?? []).map(
-        (index) => `${index.replace(/^\.ds-/, '').replace(/[-.]\d{4}[.-]\d{2}[.-]\d{2}.*$/, '')}*`
-      )
-    ),
-  ];
-  for (const pattern of matchedPatterns) {
-    indexPatterns.add(pattern);
-  }
-  sections.push(`--- AVAILABLE INDEX PATTERNS ---\n${[...indexPatterns].join('\n')}`);
-  if (matchedPatterns.length > 0) {
-    sections.push(
-      `--- INDEX PATTERNS WITH CONFIRMED ENVIRONMENT HITS (prefer these in FROM) ---\n${matchedPatterns.join(
-        '\n'
-      )}`
-    );
-  }
+/**
+ * Target for `generateEsql`. Prefer integrations with confirmed hits, then the
+ * scope's required patterns. `undefined` lets the generator run index discovery.
+ */
+const resolveGenerationIndex = (
+  articleContext: HuntBehaviorArticleContext | undefined,
+  requiredIndices: string[]
+): string | undefined => {
+  const matched = matchedIndexPatterns(articleContext);
+  if (matched.length > 0) return matched.join(',');
+  if (requiredIndices.length > 0) return requiredIndices.join(',');
+  return undefined;
+};
+
+/** Report-level grounding shared by every per-behavior generation call. */
+const buildGenerationContext = ({
+  text,
+  iocs,
+  articleContext,
+}: {
+  text: string;
+  iocs?: HuntBehaviorIoc[];
+  articleContext?: HuntBehaviorArticleContext;
+}): string => {
+  const sections: string[] = [];
   if (articleContext?.sample_events?.length) {
     sections.push(
       `--- SAMPLE MATCHED ENVIRONMENT EVENTS ---\n${articleContext.sample_events
@@ -390,35 +328,91 @@ const generateGroundedEsql = async (
         .join('\n')}`
     );
   }
-  sections.push(
-    `--- CANDIDATE BEHAVIORS (one query each) ---\n${behaviors
-      .map((b) => `- ${b.technique_id} (${b.technique_name}): "${b.evidence_quote}"`)
-      .join('\n')}`
-  );
   sections.push(`--- REPORT TEXT ---\n${text.slice(0, MAX_ESQL_PROMPT_TEXT_CHARS)}`);
+  return sections.join('\n\n');
+};
 
-  try {
-    const structured = model.chatModel.withStructuredOutput(huntBehaviorEsqlGenerationSchema);
-    const result = (await structured.invoke(sections.join('\n\n'))) as z.infer<
-      typeof huntBehaviorEsqlGenerationSchema
-    >;
-    for (const rule of result.rules ?? []) {
-      const techniqueId = rule.technique_id?.toUpperCase().trim();
-      const esql = sanitizeGeneratedEsql(rule.esql ?? '');
-      if (techniqueId && esql && !generated.has(techniqueId)) {
-        generated.set(techniqueId, esql);
+/**
+ * One `generateEsql` call per validated behavior, keyed by technique id. The
+ * shared generator grounds the query in ES|QL docs and the target's mappings,
+ * autocorrects, validates the AST, and retries; anything that still fails
+ * falls back to the skeleton template.
+ */
+const generateGroundedEsql = async ({
+  model,
+  esClient,
+  logger,
+  behaviors,
+  text,
+  iocs,
+  articleContext,
+  requiredIndices,
+  rowLimit,
+}: {
+  model: ScopedModel;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  behaviors: ValidatedBehavior[];
+  text: string;
+  iocs?: HuntBehaviorIoc[];
+  articleContext?: HuntBehaviorArticleContext;
+  requiredIndices: string[];
+  rowLimit: number;
+}): Promise<Map<string, string>> => {
+  const index = resolveGenerationIndex(articleContext, requiredIndices);
+  const additionalContext = buildGenerationContext({ text, iocs, articleContext });
+
+  const entries = await pMap(
+    behaviors,
+    async (behavior): Promise<[string, string] | undefined> => {
+      try {
+        const { query, error } = await generateEsql({
+          model,
+          esClient,
+          logger,
+          nlQuery:
+            `Hunt for MITRE ATT&CK ${behavior.technique_id} (${behavior.technique_name}) ` +
+            `as described by this report evidence: "${behavior.evidence_quote}"`,
+          index,
+          additionalInstructions: ESQL_GENERATION_INSTRUCTIONS,
+          additionalContext,
+          // The hunt window is bound as an execute-time filter, not ?_tstart/?_tend params.
+          disableNamedParams: true,
+          // AST-validate against mappings, then probe-execute (LIMIT 1) so environment
+          // errors feed the generator's retry loop. The real execute runs below with
+          // METADATA columns and the hunt window.
+          execute: 'schema',
+          rowLimit,
+        });
+        if (error || !query) {
+          logger.warn(
+            `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} failed — ` +
+              `falling back to the skeleton template. ${(error ?? 'no query returned').slice(
+                0,
+                300
+              )}`
+          );
+          return undefined;
+        }
+        return [behavior.technique_id, query.trim()];
+      } catch (err) {
+        logger.warn(
+          `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} threw — ` +
+            `falling back to the skeleton template. ${((err as Error).message ?? '').slice(0, 300)}`
+        );
+        return undefined;
       }
-    }
-    if (generated.size < behaviors.length) {
-      logger.warn(
-        `[hunt:esql] grounded ES|QL generation covered ${generated.size}/${behaviors.length} ` +
-          `behaviors — uncovered behaviors fall back to the skeleton template.`
-      );
-    }
-  } catch (err) {
+    },
+    { concurrency: ESQL_GENERATION_CONCURRENCY }
+  );
+
+  const generated = new Map<string, string>(
+    entries.filter((entry): entry is [string, string] => entry !== undefined)
+  );
+  if (generated.size < behaviors.length) {
     logger.warn(
-      `[hunt:esql] grounded ES|QL generation failed — all behaviors fall back to the ` +
-        `skeleton template. ${(err as Error).message}`
+      `[hunt:esql] grounded ES|QL generation covered ${generated.size}/${behaviors.length} ` +
+        `behaviors — uncovered behaviors fall back to the skeleton template.`
     );
   }
   return generated;
@@ -558,42 +552,45 @@ export const huntBehavior = async (
     });
   }
 
-  if (validated.length > 0) {
-    const groundedEsql = await generateGroundedEsql(model, logger, {
+  if (validated.length > 0 && !esClient) {
+    logger.debug(
+      '[hunt:esql] no Elasticsearch client — grounded ES|QL generation skipped, ' +
+        'behaviors carry the skeleton template.'
+    );
+  }
+
+  if (validated.length > 0 && esClient) {
+    const groundedEsql = await generateGroundedEsql({
+      model,
+      esClient,
+      logger,
+      behaviors: validated,
       text,
       iocs,
       articleContext,
-      behaviors: validated,
+      requiredIndices,
+      rowLimit: rowLimit ?? DEFAULT_PROPOSED_RULE_LIMIT,
     });
     for (const behavior of validated) {
-      let esql = groundedEsql.get(behavior.technique_id);
-      if (esql && esClient) {
-        esql = await validateEsqlAgainstEnvironment(esClient, logger, behavior.technique_id, esql);
-      }
-      if (esql) {
-        behavior.proposed_esql_rule = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
-        if (canExecute) {
-          const executed = await executeValidatedEsql({
-            esClient: esClient!,
-            logger,
-            techniqueId: behavior.technique_id,
-            esql,
-            window: window!,
-            row_limit: rowLimit!,
-            requiredIndices,
-          });
-          behavior.execution = executed.execution;
-          if (executed.affected_hosts) behavior.affected_hosts = executed.affected_hosts;
-          if (executed.affected_users) behavior.affected_users = executed.affected_users;
-          if (executed.affected_hosts_truncated) {
-            behavior.affected_hosts_truncated = true;
-          }
-          if (executed.affected_users_truncated) {
-            behavior.affected_users_truncated = true;
-          }
-          if (executed.hit_refs) behavior.hit_refs = executed.hit_refs;
-        }
-      }
+      const esql = groundedEsql.get(behavior.technique_id);
+      if (!esql) continue;
+      behavior.proposed_esql_rule = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
+      if (!canExecute) continue;
+      const executed = await executeValidatedEsql({
+        esClient,
+        logger,
+        techniqueId: behavior.technique_id,
+        esql,
+        window: window!,
+        row_limit: rowLimit!,
+        requiredIndices,
+      });
+      behavior.execution = executed.execution;
+      if (executed.affected_hosts) behavior.affected_hosts = executed.affected_hosts;
+      if (executed.affected_users) behavior.affected_users = executed.affected_users;
+      if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
+      if (executed.affected_users_truncated) behavior.affected_users_truncated = true;
+      if (executed.hit_refs) behavior.hit_refs = executed.hit_refs;
     }
   }
 
