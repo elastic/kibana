@@ -8,7 +8,7 @@
 import React from 'react';
 import { EMPTY } from 'rxjs';
 import { EuiCodeBlock, EuiPanel, EuiText } from '@elastic/eui';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
@@ -25,6 +25,18 @@ import type { AgentBuilderInternalService } from '../../services/types';
 import { createStorybookKibanaServices } from './kibana_services';
 
 const noOp = () => {};
+
+/** The agent the timeline stories draw turns for; in the app the connector fetches it. */
+export const storyAgent: AgentDefinition = {
+  id: agentBuilderDefaultAgentId,
+  type: 'chat',
+  name: 'Elastic AI Agent',
+  description: '',
+  readonly: true,
+  configuration: {
+    tools: [],
+  },
+};
 
 let fileIdCounter = 0;
 const storybookFileBlobUrls = new Map<string, string>();

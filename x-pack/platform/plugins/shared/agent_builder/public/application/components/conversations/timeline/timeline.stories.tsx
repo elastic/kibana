@@ -24,6 +24,7 @@ import {
   STORY_CUSTOM_EVENT_TYPE,
   STORY_CUSTOM_EVENT_WITH_HEADER_TYPE,
   STORY_INLINE_ATTACHMENT_TYPE,
+  storyAgent,
   storyNoteEventDefinition,
 } from '../../../__storybook__/agent_builder_services';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -139,6 +140,9 @@ const meta: Meta<typeof Timeline> = {
       </AgentBuilderStorybookProvider>
     ),
   ],
+  args: {
+    agent: storyAgent,
+  },
 };
 export default meta;
 
@@ -358,7 +362,7 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder paddingSize="l">
-          <Timeline items={items} conversationAttachments={attachments} />
+          <Timeline items={items} agent={storyAgent} conversationAttachments={attachments} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
