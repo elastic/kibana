@@ -885,6 +885,15 @@ describe('UiamServiceAccounts', () => {
 
         expect(serviceAccounts.getFakeRequestPrincipal(request)).toBeNull();
       });
+
+      it('returns null once the request carries a credential other than the one it was minted with', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        (request.headers as Record<string, string>).authorization = 'ApiKey someone-else';
+
+        expect(serviceAccounts.getFakeRequestPrincipal(request)).toBeNull();
+      });
     });
   });
 });

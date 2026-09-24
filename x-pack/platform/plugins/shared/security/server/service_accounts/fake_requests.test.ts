@@ -133,6 +133,29 @@ describe('ServiceAccountFakeRequests', () => {
       fakeRequests.release(request);
       expect(fakeRequests.getServiceAccountId(request)).toBeUndefined();
     });
+
+    it('keeps identifying the request after its token has been replaced', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      await fakeRequests.ensureFreshToken(request, 0);
+
+      expect(request.headers.authorization).toBe('Bearer essu_token_2');
+      expect(fakeRequests.getServiceAccountId(request)).toBe('sa-id');
+    });
+
+    it('returns undefined when the authorization header has been swapped for another credential', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      (request.headers as Record<string, string>).authorization = 'ApiKey someone-else';
+
+      expect(fakeRequests.getServiceAccountId(request)).toBeUndefined();
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('was replaced'));
+    });
+
+    it('returns undefined when the authorization header has been removed', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      delete (request.headers as Record<string, string>).authorization;
+
+      expect(fakeRequests.getServiceAccountId(request)).toBeUndefined();
+    });
   });
 
   describe('#ensureFreshToken', () => {

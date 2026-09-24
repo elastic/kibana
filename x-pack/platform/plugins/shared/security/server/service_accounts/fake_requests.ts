@@ -189,10 +189,26 @@ export class ServiceAccountFakeRequests {
 
   /**
    * Returns the id of the service account a fake request minted by this registry is bound to, or
-   * `undefined` for any other request, including released ones.
+   * `undefined` for any other request, including released ones and ones whose `authorization`
+   * header no longer carries the token this registry issued for them.
    */
   getServiceAccountId(request: KibanaRequest): string | undefined {
-    return this.registry.get(request)?.serviceAccountId;
+    const entry = this.registry.get(request);
+    if (!entry) {
+      return undefined;
+    }
+
+    // The headers are mutable in place, so a swapped credential would otherwise still be vouched
+    // for as the service account while Elasticsearch authenticates someone else.
+    if (request.headers.authorization !== `Bearer ${entry.token}`) {
+      this.logger.error(
+        `Authorization header on a fake request bound to service account ${entry.serviceAccountId} ` +
+          `was replaced; refusing to identify the request as that service account.`
+      );
+      return undefined;
+    }
+
+    return entry.serviceAccountId;
   }
 
   /**

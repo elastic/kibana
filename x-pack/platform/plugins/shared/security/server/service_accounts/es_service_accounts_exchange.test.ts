@@ -425,5 +425,13 @@ describe('Elasticsearch service account token exchange', () => {
 
       expect(backend.getFakeRequestPrincipal(request)).toBeNull();
     });
+
+    it('returns null once the request carries a credential other than the one it was minted with', async () => {
+      const { backend } = setup();
+      const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
+      (request.headers as Record<string, string>).authorization = 'ApiKey someone-else';
+
+      expect(backend.getFakeRequestPrincipal(request)).toBeNull();
+    });
   });
 });
