@@ -31,8 +31,7 @@ test.describe(
       await browserAuth.loginAsViewer();
     });
 
-    test.afterAll(async ({ kbnClient, esArchiver, uiSettings }) => {
-      await esArchiver.unload(ES_ARCHIVE_MAPS_DATA);
+    test.afterAll(async ({ kbnClient, uiSettings }) => {
       await kbnClient.savedObjects.cleanStandardList();
       await uiSettings.unset('defaultIndex');
     });
