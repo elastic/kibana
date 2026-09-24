@@ -68,4 +68,20 @@ describe('createEventToolHandler', () => {
     expect(delegatedInput).not.toHaveProperty('signals');
     expect(delegatedInput).not.toHaveProperty('workflow_execution_id');
   });
+
+  it('passes alertEventsClient and logger through to eventsWriteHandler', async () => {
+    const alertEventsClient = { createAlertEvent: jest.fn() } as never;
+    const logger = { error: jest.fn() } as never;
+
+    await createEventToolHandler({
+      eventClient: {} as never,
+      eventInput: baseInput,
+      alertEventsClient,
+      logger,
+    });
+
+    expect(eventsWriteHandler).toHaveBeenCalledWith(
+      expect.objectContaining({ alertEventsClient, logger })
+    );
+  });
 });
