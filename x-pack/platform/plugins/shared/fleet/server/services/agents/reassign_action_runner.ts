@@ -77,7 +77,9 @@ export async function reassignBatch(
     throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
   }
 
-  const newAgentPolicy = await agentPolicyService.get(soClient, options.newAgentPolicyId);
+  const newAgentPolicy = await agentPolicyService.get(soClient, options.newAgentPolicyId, true, {
+    spaceId: options.spaceId,
+  });
 
   await bulkUpdateAgents(
     esClient,

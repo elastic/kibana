@@ -121,11 +121,12 @@ export async function reassignAgents(
     }
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
+    const agentIdOptions = { skipNamespaceFilter: options.spaceId === '*' };
     if (options.dryRun) {
-      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds, agentIdOptions);
       return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
     }
-    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds, agentIdOptions);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
         outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
@@ -178,7 +179,7 @@ export async function reassignAgents(
 
   return await reassignBatch(
     esClient,
-    { newAgentPolicyId, spaceId: currentSpaceId },
+    { newAgentPolicyId, spaceId: options.spaceId ?? currentSpaceId },
     givenAgents,
     outgoingErrors
   );
