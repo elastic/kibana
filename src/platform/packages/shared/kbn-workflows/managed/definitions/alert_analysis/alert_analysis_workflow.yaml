@@ -615,13 +615,23 @@ steps:
           rule_id: "{{ inputs.alerts[0].kibana.alert.rule.uuid }}"
           rule_name: "{{ inputs.alerts[0].kibana.alert.rule.name }}"
 
-  # Alerts are read inline (trigger event first, caller input as fallback) and never stored
-  # in a step output, which would subject them to max-step-size and duplicate them in state.
+  # Alerts are read inline from event.alerts (standalone) or inputs.alerts (Worker) and never
+  # stored in a step output, which would subject them to max-step-size and duplicate them in state.
   - name: set_alert_counts
     type: data.set
     with:
-      total_alert_count: "${{ event.alerts | default: inputs.alerts | size }}"
-      pending_alert_count: "${{ event.alerts | default: inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | size }}"
+      total_alert_count: "${{ event.alerts | size }}"
+      pending_alert_count: "${{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | size }}"
+
+  - name: count_caller_alerts
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: apply_caller_alert_counts
+        type: data.set
+        with:
+          total_alert_count: "${{ inputs.alerts | size }}"
+          pending_alert_count: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | size }}"
 
   # ---------------------------------------------------------------------------
   # Runtime guard
@@ -660,7 +670,16 @@ steps:
       - name: set_enrichment_anchor
         type: data.set
         with:
-          anchor_timestamp: '{{ event.alerts[0]["@timestamp"] | default: inputs.alerts[0]["@timestamp"] }}'
+          anchor_timestamp: '{{ event.alerts[0]["@timestamp"] }}'
+
+      - name: anchor_on_caller_alerts
+        type: if
+        condition: "${{ inputs.calledByWorker == true }}"
+        steps:
+          - name: apply_caller_enrichment_anchor
+            type: data.set
+            with:
+              anchor_timestamp: '{{ inputs.alerts[0]["@timestamp"] }}'
 
       # Close history: how often this rule's alerts have been closed and
       # the distribution of close reasons (e.g. false_positive, resolved).
@@ -1003,7 +1022,8 @@ steps:
       # the total alert count), so workflow-execution state stays proportional to batch size.
       - name: classify_alert_batches
         type: foreach
-        foreach: "{{ event.alerts | default: inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
+        foreach: >-
+          {% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% endif %}
         steps:
 
           # -----------------------------------------------------------------
@@ -1691,7 +1711,8 @@ steps:
 
       - name: apply_verdicts
         type: foreach
-        foreach: "{{ event.alerts | default: inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}"
+        foreach: >-
+          {% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% endif %}
         steps:
           - name: select_alert_verdict
             type: data.set
