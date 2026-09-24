@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
+  AnalyticsServiceSetup,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
@@ -234,6 +235,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   private isServerless: boolean;
   private securityEventBus?: SecuritySolutionEventBus;
 
+  /** Captured in `setup()`: rule lifecycle telemetry needs the setup contract, not the start one. */
+  private analyticsSetup?: AnalyticsServiceSetup;
+
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
   private platformCpsEnabled = false;
   /** The `defendCrossProjectSearch` experimental flag; AND-ed with `cps.isCpsActive` per request */
@@ -361,6 +365,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
+    this.analyticsSetup = core.analytics;
     this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     this.defendCpsFeatureFlagEnabled = experimentalFeatures.defendCrossProjectSearch;
 
@@ -1288,7 +1293,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           rulesAuthz,
           productFeaturesService,
           license,
-          analytics: core.analytics,
+          analytics: this.analyticsSetup,
           userProfile: core.userProfile,
           logger: this.logger,
         });

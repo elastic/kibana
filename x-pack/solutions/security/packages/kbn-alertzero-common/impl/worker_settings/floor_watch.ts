@@ -8,7 +8,6 @@
 import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  WATCH_AUTONOMY_LEVELS,
 } from '../../constants';
 import { AlertTriageWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
@@ -21,6 +20,10 @@ export const ALERT_TRIAGE_DEFAULT_EXTRAS: AlertTriageWorkerExtras = {
 
 export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration<AlertTriageWorkerExtras> = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  // Two levels rather than the shared three, for the same reason as Attack Discovery below:
+  // this Worker has exactly one gate — the false-positive closure proposal — so it needs one
+  // level that gates it and one that does not. `floor_alert_triage.yaml` decides `autoApprove`
+  // on `autonomy == 'supervised'` alone, which leaves `assisted` meaning the same as `manual`.
   allowedAutonomyLevels: ['manual', 'supervised'] as const,
   extras: { schema: AlertTriageWorkerExtras, defaultValue: ALERT_TRIAGE_DEFAULT_EXTRAS },
 };

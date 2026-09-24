@@ -145,9 +145,12 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
             return rest;
           });
         } catch (error) {
+          const body = isHttpFetchError(error)
+            ? (error.body as { message?: unknown } | undefined)
+            : undefined;
           const message =
-            isHttpFetchError(error) && typeof error.body?.message === 'string'
-              ? error.body.message
+            typeof body?.message === 'string'
+              ? body.message
               : error instanceof Error
               ? error.message
               : String(error);
