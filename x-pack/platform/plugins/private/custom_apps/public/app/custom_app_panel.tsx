@@ -41,10 +41,22 @@ export function CustomAppPanel({
   const headerRef = useRef<HTMLDivElement | null>(null);
   const gripRef = useRef<HTMLButtonElement | null>(null);
 
-  // Both the title bar and the pill's grip drag the panel: the bar is the bigger
-  // target when there is one, and the grip is the only one a title-less panel has.
+  /**
+   * Both the title bar and the pill's grip drag the panel: the bar is the bigger
+   * target when there is one, and the grip is the only one a title-less panel
+   * has.
+   *
+   * Nulls are filtered out rather than passed through. `setDragHandles` in
+   * `@kbn/grid-layout` does `if (handle === null) return` inside its loop — a
+   * `return`, not a `continue` — so a single null abandons the rest of the
+   * array. A title-less panel has no header, so `[null, grip]` silently
+   * registered nothing and those panels could not be dragged at all.
+   */
   const publishHandles = useCallback(() => {
-    setDragHandles([headerRef.current, gripRef.current]);
+    const handles = [headerRef.current, gripRef.current].filter(
+      (node): node is HTMLElement => node !== null
+    );
+    if (handles.length > 0) setDragHandles(handles);
   }, [setDragHandles]);
 
   const setHeader = useCallback(
