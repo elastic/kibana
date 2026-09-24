@@ -42,6 +42,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/dev-cli-runner",
     "@kbn/tooling-log",
-    "@kbn/setup-node-env"
+    "@kbn/setup-node-env",
+    "@kbn/esql-types"
   ]
 }

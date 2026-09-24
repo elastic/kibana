@@ -451,6 +451,74 @@ describe('row actions and dialogs', () => {
     });
   });
 
+  describe('filter controls', () => {
+    const filter = (selected: string[]) => [
+      {
+        id: 'root',
+        component: 'FilterGroup',
+        children: ['clusters'],
+      },
+      {
+        id: 'clusters',
+        component: 'MultiSelectFilter',
+        label: 'Cluster',
+        emptyLabel: 'All clusters',
+        value: { path: '/filters/clusters' },
+        options: [{ name: 'k8s-eu-prod' }, { name: 'k8s-us-prod' }],
+        optionLabelField: 'name',
+        optionValueField: 'name',
+      },
+    ];
+
+    it('shows the empty label until something is selected', () => {
+      renderApp(filter([]), { filters: { clusters: [] } });
+      // The accessible name is the visible text, not the field label — otherwise
+      // the button would announce "Cluster" while reading "All clusters".
+      expect(screen.getByRole('button', { name: /All clusters/ })).toBeInTheDocument();
+    });
+
+    it('shows the label and an active count once a selection exists', () => {
+      renderApp(filter(['k8s-eu-prod']), { filters: { clusters: ['k8s-eu-prod'] } });
+      const button = screen.getByRole('button', { name: /Cluster/ });
+      expect(button).toHaveTextContent('Cluster');
+      expect(button).toHaveTextContent('1');
+    });
+
+    it('writes the chosen values back as an array a query can read', () => {
+      renderApp(filter([]), { filters: { clusters: [] } });
+
+      fireEvent.click(screen.getByRole('button', { name: /All clusters/ }));
+      fireEvent.click(screen.getByRole('option', { name: 'k8s-eu-prod' }));
+
+      // The pill now reports one active filter, so the bound path holds an
+      // array — which `toParamValue` turns into CSV for the query.
+      expect(screen.getByRole('button', { name: /Cluster/ })).toHaveTextContent('1');
+    });
+
+    it('binds a ToggleGroup selection to the data model', () => {
+      renderApp(
+        [
+          { id: 'root', component: 'Column', children: ['toggle', 'echo'] },
+          {
+            id: 'toggle',
+            component: 'ToggleGroup',
+            legend: 'Result layout',
+            value: { path: '/ui/view' },
+            options: [
+              { label: 'Grid', value: 'grid', iconType: 'grid' },
+              { label: 'List', value: 'list', iconType: 'list' },
+            ],
+          },
+          { id: 'echo', component: 'Text', text: { path: '/ui/view' } },
+        ],
+        { ui: { view: 'grid' } }
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'List' }));
+      expect(screen.getByText('list')).toBeInTheDocument();
+    });
+  });
+
   describe('layout escape hatches', () => {
     it('lets one child take the leftover width via grow', () => {
       const { container } = renderApp([

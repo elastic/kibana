@@ -6,7 +6,7 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { rowsToObjects, shapeResult } from './use_esql_queries';
+import { rowsToObjects, shapeResult, toParamValue } from './use_esql_queries';
 
 const response = {
   columns: [
@@ -54,5 +54,32 @@ describe('shapeResult', () => {
     expect(shapeResult(empty, 'first')).toBeNull();
     expect(shapeResult(empty, 'value')).toBeNull();
     expect(shapeResult(empty, 'rows')).toEqual([]);
+  });
+});
+
+describe('toParamValue', () => {
+  it('turns a cleared control into the empty string, which queries read as "no filter"', () => {
+    expect(toParamValue(undefined)).toBe('');
+    expect(toParamValue(null)).toBe('');
+    expect(toParamValue([])).toBe('');
+  });
+
+  it('joins a multi-select to CSV, for SPLIT to take apart again', () => {
+    // ES|QL has no defined substitution for an *empty* multi-value parameter,
+    // and empty is the resting state of every filter — so scalars throughout.
+    expect(toParamValue(['k8s-eu-prod', 'k8s-us-prod'])).toBe('k8s-eu-prod,k8s-us-prod');
+  });
+
+  it('drops empty entries so a stray blank cannot match everything', () => {
+    expect(toParamValue(['checkout', '', null, 'payments'])).toBe('checkout,payments');
+  });
+
+  it('passes numbers through unquoted and stringifies booleans', () => {
+    expect(toParamValue(42)).toBe(42);
+    expect(toParamValue(true)).toBe('true');
+  });
+
+  it('refuses to guess at an object', () => {
+    expect(toParamValue({ nested: 1 })).toBe('');
   });
 });

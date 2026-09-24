@@ -1079,6 +1079,137 @@
         "child",
         "onClose"
       ]
+    },
+    "FilterGroup": {
+      "type": "object",
+      "description": "Joins filter pills into one control. Maps to EuiFilterGroup.",
+      "properties": {
+        "component": {
+          "const": "FilterGroup"
+        },
+        "children": {
+          "$ref": "common_types.json#/$defs/ChildList"
+        },
+        "fullWidth": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "component",
+        "children"
+      ]
+    },
+    "MultiSelectFilter": {
+      "type": "object",
+      "description": "A filter pill with a searchable checkbox list. Bind 'value' to an array; an ES|QL query reads that same path as a named parameter to filter on it.",
+      "properties": {
+        "component": {
+          "const": "MultiSelectFilter"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "emptyLabel": {
+          "$ref": "common_types.json#/$defs/DynamicString",
+          "description": "Shown when nothing is selected, e.g. 'All clusters'."
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicValue",
+          "description": "Bind to an array of strings in the data model."
+        },
+        "options": {
+          "$ref": "common_types.json#/$defs/DynamicValue",
+          "description": "An array of objects, normally a binding to ES|QL rows."
+        },
+        "optionLabelField": {
+          "type": "string",
+          "default": "label"
+        },
+        "optionValueField": {
+          "type": "string",
+          "default": "value"
+        },
+        "searchable": {
+          "type": "boolean",
+          "default": true
+        },
+        "singleSelection": {
+          "type": "boolean",
+          "default": false
+        },
+        "disabled": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        }
+      },
+      "required": [
+        "component",
+        "label",
+        "value",
+        "options"
+      ]
+    },
+    "ToggleGroup": {
+      "type": "object",
+      "description": "A segmented control for switching between views. Maps to EuiButtonGroup.",
+      "properties": {
+        "component": {
+          "const": "ToggleGroup"
+        },
+        "legend": {
+          "type": "string",
+          "description": "Names the group for assistive technology."
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicString",
+          "description": "Bind to the data model; holds the selected option's value."
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              },
+              "iconType": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "iconOnly": {
+          "type": "boolean",
+          "default": false
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "compressed",
+            "s",
+            "m"
+          ],
+          "default": "s"
+        },
+        "disabled": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        }
+      },
+      "required": [
+        "component",
+        "legend",
+        "value",
+        "options"
+      ]
     }
   },
   "functions": {

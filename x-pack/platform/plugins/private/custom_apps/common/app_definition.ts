@@ -68,6 +68,14 @@ export const esqlQuerySchema = z.object({
   query: z.string().min(1),
   path: z.string().startsWith('/'),
   shape: z.enum(['rows', 'first', 'value']).optional().default('rows'),
+  /**
+   * ES|QL named parameters, as `paramName -> data model pointer`. A query using
+   * `?clusters` with `params: { clusters: '/filters/clusters' }` re-runs whenever
+   * that pointer changes, which is how a control in one panel filters another.
+   */
+  params: z
+    .record(z.string().regex(/^[a-zA-Z_][a-zA-Z0-9_]{0,63}$/), z.string().startsWith('/').max(512))
+    .optional(),
 });
 
 export type EsqlQuery = z.infer<typeof esqlQuerySchema>;

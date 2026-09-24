@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { GridLayout } from '@kbn/grid-layout';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import { A2uiSurface, DataModel, MessageProcessor } from '@kbn/a2ui-renderer';
 import type { A2uiMessage, JsonValue, ResolvedActionEvent, Surface } from '@kbn/a2ui-renderer';
-import { EuiCallOut, EuiLoadingChart, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingChart, EuiProgress, EuiText } from '@elastic/eui';
 import { customAppCatalog, useCustomAppServices } from '../catalog';
 import type { CustomAppDefinition, EsqlQuery } from '../../common/app_definition';
 import { ACTION_SET_DATA, GRID_SETTINGS } from '../../common/constants';
@@ -61,6 +61,16 @@ function PanelSurface({
   });
 
   /**
+   * Only the very first load replaces the surface with a spinner. Once a filter
+   * control can re-run queries, unmounting on every fetch would blank the panel
+   * on each keystroke, lose its scroll position, and tear out the anchor of any
+   * open popover — so later loads show a progress bar over the live content.
+   */
+  const hasLoaded = useRef(false);
+  if (!isLoading) hasLoaded.current = true;
+  const showSpinner = isLoading && !hasLoaded.current && Boolean(queries?.length);
+
+  /**
    * `kbn.setData` is handled here rather than in the shared action handler
    * because it writes to *this* panel's data model — which is what lets a table
    * row action open a modal without any component holding hidden state.
@@ -89,22 +99,25 @@ function PanelSurface({
           </ul>
         </EuiCallOut>
       )}
-      {isLoading && queries?.length ? (
+      {showSpinner ? (
         <EuiLoadingChart size="l" />
       ) : (
-        <A2uiSurface
-          surface={surface}
-          catalog={customAppCatalog}
-          onAction={handleAction}
-          renderUnknown={(componentType) => (
-            <EuiCallOut
-              announceOnMount
-              size="s"
-              color="danger"
-              title={`Unknown component "${componentType}"`}
-            />
-          )}
-        />
+        <>
+          {isLoading && <EuiProgress size="xs" color="primary" position="absolute" />}
+          <A2uiSurface
+            surface={surface}
+            catalog={customAppCatalog}
+            onAction={handleAction}
+            renderUnknown={(componentType) => (
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="danger"
+                title={`Unknown component "${componentType}"`}
+              />
+            )}
+          />
+        </>
       )}
     </>
   );

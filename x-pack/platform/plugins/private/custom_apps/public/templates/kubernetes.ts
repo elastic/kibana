@@ -15,6 +15,18 @@ import {
 import { surface } from './surface';
 
 /**
+ * Every filter is optional, and its resting state is the empty string — which is
+ * what a cleared control resolves to. `?p == ""` short-circuits to "no filter", so
+ * one query serves both the unfiltered first paint and any combination of
+ * selections. Multi-selects arrive as CSV because ES|QL has no defined
+ * substitution for an *empty* multi-value parameter.
+ */
+const FILTER_CLAUSES = `| WHERE (?q == "" OR LOCATE(TO_LOWER(pod), TO_LOWER(?q)) > 0)
+      AND (?clusters == "" OR MV_CONTAINS(SPLIT(?clusters, ","), cluster))
+      AND (?namespaces == "" OR MV_CONTAINS(SPLIT(?namespaces, ","), namespace))
+      AND (?health == "" OR MV_CONTAINS(SPLIT(?health, ","), health))`;
+
+/**
  * Resolves a pod's health in one pass: the metrics collapse to a row per pod, then
  * a lookup join adds the alert state. Health is stored rather than derived from
  * thresholds, because "no alert set up" is a statement about rule coverage that no
@@ -33,9 +45,17 @@ const PODS_QUERY = `FROM ${K8S_POD_METRICS_INDEX}
 | LOOKUP JOIN ${K8S_ALERTS_INDEX} ON entity_id
 | EVAL health = COALESCE(alert_status, "untracked"),
        rank = CASE(health == "active", 0, health == "untracked", 2, 1)
+${FILTER_CLAUSES}
 | SORT rank ASC, cpu DESC
 | KEEP pod, namespace, cluster, node, cpu, mem, health, reason, rule_count
 | LIMIT 40`;
+
+const PODS_PARAMS = {
+  q: '/filters/search',
+  clusters: '/filters/clusters',
+  namespaces: '/filters/namespaces',
+  health: '/filters/health',
+};
 
 const kubernetes = (): CustomAppDefinition => ({
   version: 1,
@@ -43,8 +63,9 @@ const kubernetes = (): CustomAppDefinition => ({
   description: 'Pods, nodes and alert state across two clusters, from OTel metrics and logs.',
   layout: {
     // Untabbed, so the heading and time picker persist across tabs.
-    header: { type: 'panel', id: 'header', row: 0, column: 0, width: 32, height: 5 },
-    toolbar: { type: 'panel', id: 'toolbar', row: 0, column: 32, width: 16, height: 5 },
+    header: { type: 'panel', id: 'header', row: 0, column: 0, width: 32, height: 3 },
+    toolbar: { type: 'panel', id: 'toolbar', row: 0, column: 32, width: 16, height: 3 },
+    filters: { type: 'panel', id: 'filters', row: 3, column: 0, width: 48, height: 2 },
 
     // Each tab starts from the same row, since only one is visible at a time.
     summary: { type: 'panel', id: 'summary', row: 5, column: 0, width: 48, height: 6 },
@@ -58,6 +79,7 @@ const kubernetes = (): CustomAppDefinition => ({
     // Prose and controls read as page content, so they lose the panel frame.
     header: { hideBorder: true },
     toolbar: { hideBorder: true },
+    filters: { hideBorder: true },
     summary: { title: 'Fleet', tab: 'Resources' },
     legend: { hideBorder: true, tab: 'Resources' },
     pods: { title: 'Pods', tab: 'Resources' },
@@ -83,7 +105,19 @@ const kubernetes = (): CustomAppDefinition => ({
         query: `FROM ${K8S_ALERTS_INDEX} | STATS count = COUNT(*) BY status = alert_status | EVAL color = CASE(status == "active", "danger", status == "clear", "success", "subdued"), label = CASE(status == "active", "Resources with active alerts", status == "clear", "Resources with no active alerts", "Resources with no alert set up") | SORT count DESC`,
       },
     ],
-    pods: [{ path: '/pods', shape: 'rows', query: PODS_QUERY }],
+    filters: [
+      {
+        path: '/options/clusters',
+        shape: 'rows',
+        query: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid) BY name = resource.attributes.k8s.cluster.name | WHERE name IS NOT NULL | SORT name`,
+      },
+      {
+        path: '/options/namespaces',
+        shape: 'rows',
+        query: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid) BY name = resource.attributes.k8s.namespace.name | WHERE name IS NOT NULL | SORT name`,
+      },
+    ],
+    pods: [{ path: '/pods', shape: 'rows', query: PODS_QUERY, params: PODS_PARAMS }],
     logs: [
       {
         path: '/logEvents',
@@ -116,6 +150,69 @@ const kubernetes = (): CustomAppDefinition => ({
       { id: 'label', component: 'Text', text: 'Time range', variant: 'caption', color: 'subdued' },
       { id: 'picker', component: 'KbnTimeFilter', showUpdateButton: false, fullWidth: true },
     ]),
+    filters: surface(
+      'filters',
+      [
+        {
+          id: 'root',
+          component: 'Row',
+          gap: 's',
+          align: 'center',
+          // The search box takes whatever width the pills leave.
+          grow: [1, 0],
+          children: ['search', 'pills'],
+        },
+        {
+          id: 'search',
+          component: 'TextField',
+          variant: 'search',
+          hideLabel: true,
+          compressed: true,
+          label: 'Search pods',
+          placeholder: 'Search pods — try "checkout" or "search-api"',
+          value: { path: '/filters/search' },
+        },
+        { id: 'pills', component: 'FilterGroup', children: ['clusters', 'namespaces', 'health'] },
+        {
+          id: 'clusters',
+          component: 'MultiSelectFilter',
+          label: 'Cluster',
+          emptyLabel: 'All clusters',
+          value: { path: '/filters/clusters' },
+          options: { path: '/options/clusters' },
+          optionLabelField: 'name',
+          optionValueField: 'name',
+        },
+        {
+          id: 'namespaces',
+          component: 'MultiSelectFilter',
+          label: 'Namespace',
+          emptyLabel: 'All namespaces',
+          value: { path: '/filters/namespaces' },
+          options: { path: '/options/namespaces' },
+          optionLabelField: 'name',
+          optionValueField: 'name',
+        },
+        {
+          id: 'health',
+          component: 'MultiSelectFilter',
+          label: 'Health',
+          emptyLabel: 'Any health',
+          searchable: false,
+          value: { path: '/filters/health' },
+          options: [
+            { name: 'active', label: 'Active alerts' },
+            { name: 'clear', label: 'No active alerts' },
+            { name: 'untracked', label: 'Not monitored' },
+          ],
+          optionLabelField: 'label',
+          optionValueField: 'name',
+        },
+      ],
+      // Seeded empty so every parameter resolves to "" on the first paint, which
+      // the query reads as "no filter".
+      { filters: { search: '', clusters: [], namespaces: [], health: [] } }
+    ),
     summary: surface('summary', [
       { id: 'root', component: 'Row', children: ['pods', 'nodes', 'clusters', 'cpu'], gap: 'l' },
       {

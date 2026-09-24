@@ -29,6 +29,7 @@ import {
   Slider,
   TextField,
 } from './components/inputs';
+import { FilterGroup, MultiSelectFilter, ToggleGroup } from './components/filters';
 import { euiCatalogFunctions } from './functions';
 
 export const EUI_CATALOG_ID = 'elastic/kibana-eui/v1';
@@ -51,6 +52,9 @@ const components = [
   ChoicePicker,
   Slider,
   DateTimeInput,
+  FilterGroup,
+  MultiSelectFilter,
+  ToggleGroup,
   Modal,
   Flyout,
   Popover,
