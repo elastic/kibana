@@ -36,6 +36,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
     async waitForCaseViewToLoad() {
       await retry.waitFor('the case view page to load', async () => {
+        if (await testSubjects.exists('create-case-submit')) return false;
         return testSubjects.exists('appHeaderTitle');
       });
     },

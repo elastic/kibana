@@ -461,6 +461,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a custom field correctly', async () => {
+        // The legacy custom fields accordion is closed by default; open it before asserting.
+        await testSubjects.click('case-view-sidebar-legacy-custom-fields-toggle');
+
         const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
         expect(await textField.getVisibleText()).equal('this is a text field value');
 
