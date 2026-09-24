@@ -5,7 +5,7 @@
     "query": {
       "bool": {
         "filter": [
-          { "range": { "@timestamp": { "gte": "now-1d" } } },
+          { "range": { "@timestamp": { "gte": "2026-09-23T00:00:00.000Z" } } },
           {
             "terms": {
               "buildkite.pipeline.slug": ["kibana-pull-request", "kibana-on-merge"]

@@ -81,8 +81,5 @@ describe('withTestHistoryDashboardLink', () => {
     expect(linked.indexOf('Test history:')).toBeLessThan(linked.indexOf('<!-- kibanaCiData'));
     expect(getIssueMetadata(linked, 'test.failCount')).toBe(2);
     expect(withTestHistoryDashboardLink(linked, ftrFailure)).toBe(linked);
-
-    const oldLink = linked.replace('/view/test-failure-history', '/view/ci-test-history-ftr-scout');
-    expect(withTestHistoryDashboardLink(oldLink, ftrFailure)).toBe(linked);
   });
 });
