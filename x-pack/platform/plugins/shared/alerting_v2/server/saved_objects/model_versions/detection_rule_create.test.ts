@@ -86,7 +86,6 @@ const detectionConfig: PluginConfig = {
       maxGroupsPerExecution: 10000,
     },
   },
-  esql: { responseFormat: 'json' },
 } as PluginConfig;
 
 function createDetectionClient(builderTypeRegistry: BuilderTypeRegistry) {

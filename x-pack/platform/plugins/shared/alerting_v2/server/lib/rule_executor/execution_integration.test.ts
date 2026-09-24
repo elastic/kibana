@@ -40,6 +40,7 @@ import { CreateAlertEventsStep } from './steps/create_alert_events_step';
 import { StoreAlertEventsStep } from './steps/store_alert_events';
 import type { PluginConfig } from '../../config';
 import { createQueryService } from '../services/query_service/query_service.mock';
+import { createEsqlResponseFormatService } from '../services/esql_response_format_service/esql_response_format_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createMockStorageServiceContract } from '../services/storage_service/storage_service.mock';
 import {
@@ -139,7 +140,6 @@ function createPluginConfigAccessor() {
         query: { maxResponseSize: ByteSizeValue.parse('50mb') },
       },
     },
-    esql: { responseFormat: 'json' },
   };
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
 }
@@ -160,7 +160,11 @@ function createPipeline(registry: BuilderTypeRegistry): PipelineSetup {
   const mockStorage = createMockStorageServiceContract();
 
   const compileStep = new CompileRuleQueryStep(registry);
-  const executeQueryStep = new ExecuteRuleQueryStep(queryService, pluginConfigAccessor);
+  const executeQueryStep = new ExecuteRuleQueryStep(
+    queryService,
+    createEsqlResponseFormatService(),
+    pluginConfigAccessor
+  );
   const createEventsStep = new CreateAlertEventsStep(loggerService, pluginConfigAccessor, registry);
   const storeEventsStep = new StoreAlertEventsStep(mockStorage);
 

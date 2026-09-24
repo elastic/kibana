@@ -229,7 +229,6 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
           maxGroupsPerExecution: 10000,
         },
       },
-      esql: { responseFormat: 'json' },
     };
     const pluginConfigAccessor =
       coreMock.createPluginInitializerContext<PluginConfig>(config).config;
