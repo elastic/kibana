@@ -100,9 +100,13 @@ const PER_LITERAL_OVERHEAD_BYTES = 6;
 
 // Exported for unit-testing chunk boundaries. An oversized single literal gets its own chunk;
 // at ≤150-byte keys (UUID/hash) this is unreachable in practice.
+//
+// The byte budget alone fits ~14 000 UUIDs per chunk, more than `LIMIT 10000` returns. Capping
+// the literal count at EPISODE_QUERY_LIMIT keeps one-row-per-literal queries from truncating.
 export const chunkInClauseLiterals = (
   literals: readonly string[],
-  budgetBytes: number = ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES
+  budgetBytes: number = ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES,
+  maxLiteralsPerChunk: number = EPISODE_QUERY_LIMIT
 ): string[][] => {
   if (literals.length === 0) return [];
 
@@ -112,7 +116,8 @@ export const chunkInClauseLiterals = (
 
   for (const literal of literals) {
     const cost = literal.length + PER_LITERAL_OVERHEAD_BYTES;
-    if (current.length > 0 && currentSize + cost > budgetBytes) {
+    const isFull = current.length >= maxLiteralsPerChunk || currentSize + cost > budgetBytes;
+    if (current.length > 0 && isFull) {
       chunks.push(current);
       current = [];
       currentSize = 0;

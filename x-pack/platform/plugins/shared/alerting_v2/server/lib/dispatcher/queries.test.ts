@@ -266,6 +266,15 @@ describe('getEpisodeDataQueries', () => {
     expect(concatenated).toContain(longIds[longIds.length - 1]);
   });
 
+  it('never puts more episode ids in a chunk than the row limit returns', () => {
+    const ids = Array.from({ length: EPISODE_QUERY_LIMIT + 1 }, (_, i) => `ep-${i}`);
+
+    const requests = getEpisodeDataQueries(ids, { gte: GTE, lte: LTE });
+
+    expect(requests).toHaveLength(2);
+    expect(requests[1].query).toContain(`episode.id IN ("ep-${EPISODE_QUERY_LIMIT}")`);
+  });
+
   it('applies the same gte/lte bounds on every chunk', () => {
     const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
     const requests = getEpisodeDataQueries(longIds, { gte: GTE, lte: LTE });
@@ -347,6 +356,24 @@ describe('chunkInClauseLiterals', () => {
     }
 
     expect(seen.size).toBe(literals.length);
+  });
+
+  it('caps each chunk at the row limit even when the byte budget would fit more', () => {
+    // 36-byte UUID-sized literals: the 600 KB budget alone fits ~14 285 per chunk.
+    const literals = Array.from({ length: EPISODE_QUERY_LIMIT + 5 }, (_, i) =>
+      `${i}`.padStart(36, '0')
+    );
+
+    const chunks = chunkInClauseLiterals(literals);
+
+    expect(chunks.map((chunk) => chunk.length)).toEqual([EPISODE_QUERY_LIMIT, 5]);
+    expect(chunks.flat()).toEqual(literals);
+  });
+
+  it('honors a custom max literal count', () => {
+    const chunks = chunkInClauseLiterals(['a', 'b', 'c', 'd', 'e'], undefined, 2);
+
+    expect(chunks).toEqual([['a', 'b'], ['c', 'd'], ['e']]);
   });
 
   it('honors a custom budget smaller than the default', () => {
@@ -777,6 +804,16 @@ describe('getLastNotifiedTimestampsQueries', () => {
     const requests = getLastNotifiedTimestampsQueries(['group-1']);
 
     expect(requests[0].query).toContain('BY action_group_id');
+  });
+
+  it('never puts more action group ids in a chunk than the row limit returns', () => {
+    // 40-char object-hash ids fit ~13 000 per chunk by bytes alone.
+    const ids = Array.from({ length: EPISODE_QUERY_LIMIT + 1 }, (_, i) => `${i}`.padStart(40, '0'));
+
+    const requests = getLastNotifiedTimestampsQueries(ids);
+
+    expect(requests).toHaveLength(2);
+    expect(requests[1].query).toContain(`action_group_id IN ("${ids[EPISODE_QUERY_LIMIT]}")`);
   });
 
   it('ends every chunk with an explicit row limit', () => {
