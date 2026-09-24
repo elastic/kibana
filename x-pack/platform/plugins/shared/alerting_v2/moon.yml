@@ -155,6 +155,8 @@ dependsOn:
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/content-list-common'
   - '@kbn/core-ui-settings-server'
+  - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
 tags:
   - plugin
   - prod
