@@ -82,6 +82,27 @@ export interface ConversationPublicClient {
    */
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
   /**
+   * Adds user members to a private conversation's ACL without removing existing entries or
+   * changing the access mode. A no-op for public conversations; never removes entries.
+   * Safe to call with `access: 'converse'` so collaborators (e.g. existing assignees) can
+   * add new members.
+   */
+  addMembers(
+    conversationId: string,
+    userIds: string[],
+    options?: { access?: 'owner' | 'converse' }
+  ): Promise<Conversation>;
+  /**
+   * Removes user members from a private conversation's ACL. A no-op for public conversations
+   * or when none of the ids are present as members. Never changes the access mode or the owner.
+   * Safe to call with `access: 'converse'` so assignees can revoke access when un-assigning.
+   */
+  removeMembers(
+    conversationId: string,
+    userIds: string[],
+    options?: { access?: 'owner' | 'converse' }
+  ): Promise<Conversation>;
+  /**
    * Validate updates against the conversation's template and merge them into its metadata.
    * Defaults to owner-only access. Pass `{ access: 'converse' }` to allow collaborators or
    * any authenticated user (for public conversations) to write metadata.

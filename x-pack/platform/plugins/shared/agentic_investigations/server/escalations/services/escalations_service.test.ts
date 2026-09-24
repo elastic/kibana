@@ -263,6 +263,39 @@ describe('EscalationsService.create', () => {
     expect(accessControl.entries[0]).not.toHaveProperty('added_at');
   });
 
+  it('merges assignees into ACL entries for a private escalation without duplicates', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'private',
+      collaborators: ['user-a'],
+      // user-a is both a collaborator and an assignee — should appear once.
+      assignees: ['user-a', 'user-c'],
+    });
+
+    const { accessControl } = client.create.mock.calls[0][0];
+    expect(accessControl.access_mode).toBe(ConversationAccessControlMode.Private);
+    const entryIds = accessControl.entries.map((e: { id: string }) => e.id);
+    // user-a once, user-c added from assignees
+    expect(entryIds).toEqual(['user-a', 'user-c']);
+  });
+
+  it('does not add ACL entries for a public escalation even when assignees are provided', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'public',
+      collaborators: [],
+      assignees: ['user-a'],
+    });
+
+    const { accessControl } = client.create.mock.calls[0][0];
+    expect(accessControl.access_mode).toBe(ConversationAccessControlMode.Public);
+    expect(accessControl.entries).toBeUndefined();
+  });
+
   it('uses the investigation title as the escalation initial title', async () => {
     const { service, client } = makeService();
 

@@ -2789,6 +2789,306 @@ describe('ConversationClient', () => {
     });
   });
 
+  describe('addMembers', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('adds new users as member entries on a private conversation, stamping added_at', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      await client.addMembers('conversation-1', ['user-2']);
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            access_control: {
+              access_mode: ConversationAccessControlMode.Private,
+              entries: [
+                {
+                  type: 'user',
+                  id: 'user-2',
+                  role: ConversationAccessControlRole.Member,
+                  added_at: '2026-08-11T10:00:00.000Z',
+                },
+              ],
+            },
+          }),
+        })
+      );
+    });
+
+    it('is a no-op for a public conversation — does not index and returns the existing conversation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Public,
+          entries: [],
+        })
+      );
+
+      await client.addMembers('conversation-1', ['user-2']);
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when every uid is already a member', async () => {
+      const existing: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
+
+      await client.addMembers('conversation-1', ['user-2']);
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('preserves added_at for uids that are already members when new uids are also given', async () => {
+      const existing: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
+
+      await client.addMembers('conversation-1', ['user-2', 'user-3']);
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      const entry2 = access_control.entries.find(
+        (e: ConversationAccessControlEntry) => e.id === 'user-2'
+      );
+      const entry3 = access_control.entries.find(
+        (e: ConversationAccessControlEntry) => e.id === 'user-3'
+      );
+      // user-2 was already a member — original added_at is kept
+      expect(entry2.added_at).toBe('2025-01-01T00:00:00.000Z');
+      // user-3 is new — added_at is stamped now
+      expect(entry3.added_at).toBe('2026-08-11T10:00:00.000Z');
+    });
+
+    it('silently skips the owner uid — adding the owner to entries would be inert', async () => {
+      mockGetDocumentResponse(createConversationDocument({ userId: 'user-1', entries: [] }));
+
+      await client.addMembers('conversation-1', ['user-1']);
+
+      // no-op because the only uid is the owner
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects when total entries (existing + new) would exceed CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES', async () => {
+      const existing: ConversationAccessControlEntry[] = Array.from(
+        { length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES },
+        (_, i) => ({
+          type: 'user',
+          id: `existing-user-${i}`,
+          role: ConversationAccessControlRole.Member,
+          added_at: '2025-01-01T00:00:00.000Z',
+        })
+      );
+      mockGetDocumentResponse(createConversationDocument({ entries: existing }));
+
+      await expect(client.addMembers('conversation-1', ['new-user-1'])).rejects.toThrow(
+        `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`
+      );
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('masks non-members (converse access) as not found on a private conversation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      await expect(client.addMembers('conversation-1', ['user-2'])).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows a member (non-owner) to add new members using default converse access', async () => {
+      const existingMember: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-1', // this is the test client's user
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'owner-user-id',
+          username: 'owner-user',
+          entries: [existingMember],
+        })
+      );
+
+      await client.addMembers('conversation-1', ['user-3']);
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            access_control: expect.objectContaining({
+              entries: expect.arrayContaining([expect.objectContaining({ id: 'user-3' })]),
+            }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('removeMembers', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('removes the given member and keeps others with their original added_at', async () => {
+      const keep: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      const toRemove: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-3',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-06-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [keep, toRemove] }));
+
+      await client.removeMembers('conversation-1', ['user-3']);
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.entries).toHaveLength(1);
+      expect(access_control.entries[0].id).toBe('user-2');
+      expect(access_control.entries[0].added_at).toBe('2025-01-01T00:00:00.000Z');
+    });
+
+    it('is a no-op for a public conversation — does not index', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Public,
+          entries: [],
+        })
+      );
+
+      await client.removeMembers('conversation-1', ['user-2']);
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when none of the requested ids are members', async () => {
+      const existing: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
+
+      await client.removeMembers('conversation-1', ['user-99']);
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('ignores the owner id — owner cannot appear in entries', async () => {
+      const member: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      // The document is owned by 'user-1' (default in createConversationDocument)
+      mockGetDocumentResponse(createConversationDocument({ userId: 'user-1', entries: [member] }));
+
+      // Trying to remove the owner — no entries match, so it's a no-op
+      await client.removeMembers('conversation-1', ['user-1']);
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('keeps access_mode as Private when the last entry is removed', async () => {
+      const entry: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [entry] }));
+
+      await client.removeMembers('conversation-1', ['user-2']);
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.access_mode).toBe(ConversationAccessControlMode.Private);
+      expect(access_control.entries).toHaveLength(0);
+    });
+
+    it('masks non-members (converse access) as not found on a private conversation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      await expect(client.removeMembers('conversation-1', ['user-2'])).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows a member (non-owner) to remove other members using default converse access', async () => {
+      const caller: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-1', // test client's user
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      const target: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-3',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'owner-user-id',
+          username: 'owner-user',
+          entries: [caller, target],
+        })
+      );
+
+      await client.removeMembers('conversation-1', ['user-3']);
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.entries.map((e: ConversationAccessControlEntry) => e.id)).toEqual([
+        'user-1',
+      ]);
+    });
+  });
+
   describe('admin client', () => {
     let adminClient: ConversationClient;
 

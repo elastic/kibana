@@ -20,6 +20,12 @@ export const PUBLIC_HEADERS = {
 export const LIST_ESCALATIONS_PATH = 'internal/investigations/escalations';
 export const CREATE_ESCALATION_PATH = 'internal/investigations/escalations';
 export const ESCALATION_BY_ID_PATH = (id: string) => `internal/investigations/escalations/${id}`;
+export const ESCALATION_ASSIGNEES_PATH = (id: string) =>
+  `internal/investigations/escalations/${id}/assignees`;
+
+export const INVESTIGATIONS_INTERNAL_PATH = 'internal/investigations/investigations';
+export const INVESTIGATION_ASSIGNEES_PATH = (id: string) =>
+  `internal/investigations/investigations/${id}/assignees`;
 
 /** Agent Builder public conversations API. */
 export const AB_CONVERSATIONS_PATH = 'api/agent_builder/conversations';

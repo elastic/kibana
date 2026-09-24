@@ -54,6 +54,8 @@ export const createWorkflowStepConversationClientMock = (
     bulkGet: jest.Mock;
     list: jest.Mock;
     search: jest.Mock;
+    addMembers: jest.Mock;
+    removeMembers: jest.Mock;
     patchMetadata: jest.Mock;
     create: jest.Mock;
     exists: jest.Mock;
@@ -64,6 +66,8 @@ export const createWorkflowStepConversationClientMock = (
   const bulkGet = overrides.bulkGet ?? jest.fn().mockResolvedValue(new Map());
   const list = overrides.list ?? jest.fn();
   const search = overrides.search ?? jest.fn();
+  const addMembers = overrides.addMembers ?? jest.fn().mockResolvedValue({});
+  const removeMembers = overrides.removeMembers ?? jest.fn().mockResolvedValue({});
   const patchMetadata = overrides.patchMetadata ?? jest.fn();
   const create = overrides.create ?? jest.fn();
   const exists = overrides.exists ?? jest.fn().mockResolvedValue(false);
@@ -73,6 +77,8 @@ export const createWorkflowStepConversationClientMock = (
     bulkGet,
     list,
     search,
+    addMembers,
+    removeMembers,
     patchMetadata,
     create,
     exists,
@@ -84,6 +90,8 @@ export const createWorkflowStepConversationClientMock = (
     bulkGet,
     list,
     search,
+    addMembers,
+    removeMembers,
     patchMetadata,
     create,
     exists,
