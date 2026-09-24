@@ -454,9 +454,11 @@ export function toPublicResponse(rule: RuleResponse): DetectionRuleResponse {
     source: publicSource,
     enabled: rule.enabled,
     created_at: rule.created_at,
-    created_by: rule.created_by,
+    // Alerting v2 reports actors as `{ profile_uid }` objects; the Detections API
+    // contract keeps the bare profile uid (rule-domain-model.md).
+    created_by: rule.created_by?.profile_uid ?? null,
     updated_at: rule.updated_at,
-    updated_by: rule.updated_by,
+    updated_by: rule.updated_by?.profile_uid ?? null,
 
     // Common detection fields — same key names as builder_fields keys.
     name: metadata.name,

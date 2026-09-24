@@ -1,5 +1,5 @@
 {
-  "sha1": "12ae6a6414fd5126be608fdc8fc610879b6b8440",
+  "sha1": "db561f190b69bb48c436ca7c2cddfe0a37feecc1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -845,8 +845,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 90,
-        "column": 15
+        "line": 93,
+        "column": 16
       }
     },
     {
@@ -858,7 +858,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 115,
+        "line": 118,
         "column": 15
       }
     },
@@ -871,7 +871,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 146,
+        "line": 149,
         "column": 17
       }
     },
@@ -884,7 +884,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 190,
+        "line": 194,
         "column": 11
       }
     }

@@ -155,9 +155,9 @@ function buildFrameworkResponse(
       ...(input.schedule.lookback !== undefined ? { lookback: input.schedule.lookback } : {}),
     },
     enabled: false,
-    created_by: 'elastic_profile_uid',
+    created_by: { profile_uid: 'elastic_profile_uid' },
     created_at: '2026-09-11T09:14:02.331Z',
-    updated_by: 'elastic_profile_uid',
+    updated_by: { profile_uid: 'elastic_profile_uid' },
     updated_at: '2026-09-11T09:14:02.331Z',
     metadata: {
       name: input.name,

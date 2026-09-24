@@ -72,8 +72,10 @@ describe('ruleAttachmentDataSchema', () => {
   });
 
   it('rejects a rule that is missing a required field', () => {
-    const { query, ...withoutQuery } = baseRule;
+    // `query` is optional on the response (execution-time builder rules persist
+    // none), so drop `kind`, which every rule has to carry.
+    const { kind, ...withoutKind } = baseRule;
 
-    expect(ruleAttachmentDataSchema.safeParse(withoutQuery).success).toBe(false);
+    expect(ruleAttachmentDataSchema.safeParse(withoutKind).success).toBe(false);
   });
 });

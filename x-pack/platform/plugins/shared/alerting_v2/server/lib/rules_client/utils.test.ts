@@ -272,7 +272,7 @@ describe('utils', () => {
 
     describe('schedule.lookback — set, change, clear, omit (step 7.3)', () => {
       const lookbackTestServerFields = {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       };
@@ -538,7 +538,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -561,7 +561,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -881,7 +881,7 @@ describe('utils', () => {
       const next = buildUpdateRuleAttributes(
         existing,
         {},
-        { updatedBy: 'u', updatedAt: 't', version: 2 }
+        { updatedBy: { profile_uid: 'u' }, updatedAt: 't', version: 2 }
       );
 
       expect(next.metadata.signature_id).toBe('stored-sig');
@@ -895,7 +895,7 @@ describe('utils', () => {
       const next = buildUpdateRuleAttributes(
         existing,
         { metadata: { signature_id: 'stored-sig' } },
-        { updatedBy: 'u', updatedAt: 't', version: 2 }
+        { updatedBy: { profile_uid: 'u' }, updatedAt: 't', version: 2 }
       );
 
       expect(next.metadata.signature_id).toBe('stored-sig');
@@ -912,7 +912,7 @@ describe('utils', () => {
       const next = buildUpdateRuleAttributes(
         existing,
         { metadata: { signature_id: 'changed-sig' } },
-        { updatedBy: 'u', updatedAt: 't', version: 2 }
+        { updatedBy: { profile_uid: 'u' }, updatedAt: 't', version: 2 }
       );
 
       expect(next.metadata.signature_id).toBe('stored-sig');
@@ -1314,7 +1314,7 @@ describe('utils', () => {
       const next = {
         ...stored,
         updatedAt: '2099-01-01T00:00:00.000Z',
-        updatedBy: 'some-other-user',
+        updatedBy: { profile_uid: 'some-other-user' },
         metadata: {
           ...stored.metadata,
           version: 99,
@@ -1459,7 +1459,7 @@ describe('utils', () => {
       metadata: { name: 'rule-1', version: 1, revision: 3, signature_id: 'sig-1' },
     });
     const baseUpdateServerFields = {
-      updatedBy: 'user-2',
+      updatedBy: { profile_uid: 'user-2' },
       updatedAt: '2099-01-01T00:00:00.000Z',
       version: 2,
     };
@@ -1510,7 +1510,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(
         storedNoTags,
         { metadata: { tags: null } },
-        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
       );
       expect(result.metadata.revision).toBe(7); // no bump
     });
@@ -1525,7 +1525,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(
         storedNoArtifacts,
         { artifacts: null },
-        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
       );
       expect(result.metadata.revision).toBe(4); // no bump
     });
@@ -1540,7 +1540,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(
         storedNoStateTransition,
         { state_transition: null },
-        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
       );
       expect(result.metadata.revision).toBe(2); // no bump
     });
@@ -1552,7 +1552,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(
         storedNoArtifacts,
         { artifacts: [{ type: 'dashboard', id: 'dash-1', data: { dashboard_id: 'dash-1' } }] },
-        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
       );
       expect(result.metadata.revision).toBe(2); // bumps
     });
@@ -1564,7 +1564,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(
         storedNoStateTransition,
         { state_transition: { pending_count: 3 } },
-        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
       );
       expect(result.metadata.revision).toBe(2); // bumps
     });
@@ -1774,7 +1774,7 @@ describe('utils', () => {
       const next = buildUpdateRuleAttributes(
         existing,
         {},
-        { updatedBy: 'u', updatedAt: 't', version: 2 }
+        { updatedBy: { profile_uid: 'u' }, updatedAt: 't', version: 2 }
       );
 
       expect(next.metadata.source).toEqual(stored);
@@ -1792,7 +1792,7 @@ describe('utils', () => {
       const next = buildUpdateRuleAttributes(
         existing,
         { metadata: { source: { type: 'template', version: 5, id: 'tmpl-abc' } } },
-        { updatedBy: 'u', updatedAt: 't', version: 2 }
+        { updatedBy: { profile_uid: 'u' }, updatedAt: 't', version: 2 }
       );
 
       expect(next.metadata.source).toEqual({ type: 'template', version: 5, id: 'tmpl-abc' });
@@ -1813,7 +1813,7 @@ describe('utils', () => {
       const next = buildUpdateRuleAttributes(
         existing,
         { metadata: { source: { type: 'external', version: 101, id: 'changed-id' } } },
-        { updatedBy: 'u', updatedAt: 't', version: 2 }
+        { updatedBy: { profile_uid: 'u' }, updatedAt: 't', version: 2 }
       );
 
       // type and id forced from storage; only version moved
@@ -1826,7 +1826,7 @@ describe('utils', () => {
       const next = buildUpdateRuleAttributes(
         existing,
         { metadata: { source: { type: 'internal', version: 2 } } },
-        { updatedBy: 'u', updatedAt: 't', version: 2 }
+        { updatedBy: { profile_uid: 'u' }, updatedAt: 't', version: 2 }
       );
 
       expect(next.metadata.source).toEqual({ type: 'internal', version: 2 });
@@ -2018,7 +2018,7 @@ describe('utils', () => {
       const next = buildUpdateRuleAttributes(
         existing,
         {},
-        { updatedBy: 'u', updatedAt: 't', version: 2 }
+        { updatedBy: { profile_uid: 'u' }, updatedAt: 't', version: 2 }
       );
 
       expect(next.metadata.ownership).toEqual({
@@ -2038,7 +2038,7 @@ describe('utils', () => {
       const next = buildUpdateRuleAttributes(
         existing,
         {},
-        { updatedBy: 'u', updatedAt: 't', version: 2 }
+        { updatedBy: { profile_uid: 'u' }, updatedAt: 't', version: 2 }
       );
 
       // The stored value (undefined) is preserved as-is; the fallback happens

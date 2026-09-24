@@ -142247,10 +142247,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        owner:
-          description: Owner of the rule.
-          maxLength: 256
-          type: string
         signature_id:
           description: Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.
           maxLength: 256

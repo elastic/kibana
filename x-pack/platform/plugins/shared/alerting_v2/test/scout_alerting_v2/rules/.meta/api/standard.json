@@ -1,5 +1,5 @@
 {
-  "sha1": "e629b2a1145ed2ed9b9df0528cdcb584e64e3372",
+  "sha1": "f8cddeae28924a6b61b6ee78bfe1221deae9705e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -793,7 +793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 31,
+        "line": 30,
         "column": 31
       }
     },
@@ -806,7 +806,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 65,
+        "line": 67,
         "column": 14
       }
     },
@@ -819,7 +819,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 80,
+        "line": 82,
         "column": 46
       }
     },
@@ -832,7 +832,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 91,
+        "line": 93,
         "column": 30
       }
     },
@@ -845,7 +845,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 107,
+        "line": 109,
         "column": 20
       }
     },
@@ -858,7 +858,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 122,
+        "line": 124,
         "column": 5
       }
     },
@@ -871,7 +871,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 128,
+        "line": 130,
         "column": 8
       }
     },
@@ -884,21 +884,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 139,
+        "line": 141,
         "column": 37
-      }
-    },
-    {
-      "id": "ebd999d5574271b-aa546c2a0270706",
-      "title": "Create rule API validation: rejects body when metadata.owner exceeds the maximum length",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 149,
-        "column": 58
       }
     },
     {
@@ -910,8 +897,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 162,
-        "column": 19
+        "line": 151,
+        "column": 58
       }
     },
     {
@@ -923,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 174,
-        "column": 5
+        "line": 162,
+        "column": 30
       }
     },
     {
@@ -936,8 +923,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 183,
-        "column": 14
+        "line": 173,
+        "column": 4
       }
     },
     {
@@ -949,8 +936,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 196,
-        "column": 5
+        "line": 187,
+        "column": 14
       }
     },
     {
@@ -962,8 +949,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 209,
-        "column": 4
+        "line": 198,
+        "column": 78
       }
     },
     {
@@ -975,8 +962,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 224,
-        "column": 18
+        "line": 213,
+        "column": 25
       }
     },
     {
@@ -988,8 +975,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 244,
-        "column": 19
+        "line": 232,
+        "column": 28
       }
     },
     {
@@ -1001,8 +988,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 264,
-        "column": 27
+        "line": 253,
+        "column": 19
       }
     },
     {
@@ -1014,8 +1001,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 284,
-        "column": 27
+        "line": 272,
+        "column": 28
       }
     },
     {
@@ -1027,8 +1014,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 300,
-        "column": 4
+        "line": 291,
+        "column": 14
       }
     },
     {
@@ -1040,8 +1027,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 325,
-        "column": 14
+        "line": 313,
+        "column": 20
       }
     },
     {
@@ -1053,8 +1040,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 376,
-        "column": 28
+        "line": 364,
+        "column": 19
       }
     },
     {
@@ -1066,8 +1053,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 391,
-        "column": 14
+        "line": 379,
+        "column": 19
       }
     },
     {
@@ -1079,8 +1066,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 407,
-        "column": 25
+        "line": 396,
+        "column": 4
       }
     },
     {
@@ -1092,8 +1079,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 433,
-        "column": 9
+        "line": 421,
+        "column": 14
       }
     },
     {
@@ -1105,8 +1092,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 451,
-        "column": 24
+        "line": 439,
+        "column": 9
       }
     },
     {
@@ -1118,8 +1105,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 468,
-        "column": 53
+        "line": 455,
+        "column": 29
       }
     },
     {
@@ -1131,8 +1118,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 488,
-        "column": 28
+        "line": 475,
+        "column": 7
       }
     },
     {
@@ -1144,8 +1131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 506,
-        "column": 17
+        "line": 494,
+        "column": 9
       }
     },
     {
@@ -1157,8 +1144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 525,
-        "column": 14
+        "line": 512,
+        "column": 20
       }
     },
     {
@@ -1170,8 +1157,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 533,
-        "column": 21
+        "line": 519,
+        "column": 52
       }
     },
     {
@@ -1183,8 +1170,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 547,
-        "column": 5
+        "line": 534,
+        "column": 30
       }
     },
     {
@@ -1196,8 +1183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 555,
-        "column": 30
+        "line": 542,
+        "column": 9
       }
     },
     {
@@ -1209,8 +1196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 568,
-        "column": 29
+        "line": 554,
+        "column": 70
       }
     },
     {
@@ -3717,7 +3704,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 31,
+        "line": 29,
         "column": 31
       }
     },
@@ -3730,7 +3717,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 59,
+        "line": 57,
         "column": 14
       }
     },
@@ -3743,7 +3730,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 75,
+        "line": 73,
         "column": 14
       }
     },
@@ -3756,7 +3743,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 97,
+        "line": 95,
         "column": 24
       }
     },
@@ -3769,7 +3756,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 124,
+        "line": 122,
         "column": 14
       }
     },
@@ -3782,7 +3769,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 158,
+        "line": 156,
         "column": 17
       }
     },
@@ -3795,7 +3782,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 194,
+        "line": 192,
         "column": 30
       }
     },
@@ -3808,7 +3795,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 213,
+        "line": 211,
         "column": 66
       }
     },
@@ -3821,7 +3808,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 232,
+        "line": 230,
         "column": 7
       }
     },
@@ -3834,7 +3821,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 267,
+        "line": 265,
         "column": 24
       }
     },
@@ -3847,7 +3834,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 288,
+        "line": 286,
         "column": 14
       }
     },
@@ -3860,7 +3847,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 307,
+        "line": 305,
         "column": 77
       }
     },
@@ -3873,7 +3860,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 331,
+        "line": 329,
         "column": 14
       }
     },
@@ -3886,7 +3873,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 356,
+        "line": 354,
         "column": 7
       }
     },
@@ -3899,7 +3886,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 380,
+        "line": 378,
         "column": 5
       }
     },
@@ -3912,7 +3899,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 387,
+        "line": 385,
         "column": 15
       }
     },
@@ -3925,7 +3912,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 397,
+        "line": 395,
         "column": 78
       }
     },
@@ -3938,7 +3925,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 410,
+        "line": 408,
         "column": 24
       }
     },
@@ -3951,21 +3938,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 423,
+        "line": 421,
         "column": 49
-      }
-    },
-    {
-      "id": "df929c73b65283e-ac7b3c43478e5e0",
-      "title": "Update rule API validation: should reject body when metadata.owner exceeds the maximum length",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 436,
-        "column": 43
       }
     },
     {
@@ -3977,8 +3951,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 450,
-        "column": 5
+        "line": 434,
+        "column": 43
       }
     },
     {
@@ -3990,8 +3964,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 459,
-        "column": 14
+        "line": 448,
+        "column": 5
       }
     },
     {
@@ -4003,8 +3977,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 472,
-        "column": 69
+        "line": 457,
+        "column": 14
       }
     },
     {
@@ -4016,8 +3990,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 487,
-        "column": 15
+        "line": 470,
+        "column": 50
       }
     },
     {
@@ -4029,8 +4003,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 510,
-        "column": 5
+        "line": 494,
+        "column": 43
       }
     },
     {
@@ -4042,8 +4016,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 537,
-        "column": 12
+        "line": 521,
+        "column": 43
       }
     },
     {
@@ -4055,8 +4029,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 553,
-        "column": 29
+        "line": 538,
+        "column": 68
       }
     },
     {
@@ -4068,8 +4042,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 562,
-        "column": 18
+        "line": 546,
+        "column": 43
       }
     },
     {
@@ -4081,8 +4055,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 580,
-        "column": 29
+        "line": 564,
+        "column": 51
       }
     },
     {
@@ -4094,8 +4068,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 598,
-        "column": 32
+        "line": 583,
+        "column": 9
       }
     },
     {
@@ -4107,8 +4081,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 628,
-        "column": 29
+        "line": 612,
+        "column": 78
       }
     },
     {
@@ -4120,8 +4094,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 642,
-        "column": 23
+        "line": 626,
+        "column": 29
       }
     },
     {
@@ -4133,8 +4107,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 655,
-        "column": 15
+        "line": 639,
+        "column": 9
       }
     },
     {
@@ -4146,8 +4120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 673,
-        "column": 34
+        "line": 659,
+        "column": 8
       }
     },
     {
@@ -4159,8 +4133,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 693,
-        "column": 49
+        "line": 678,
+        "column": 24
       }
     },
     {
@@ -4172,8 +4146,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 712,
-        "column": 27
+        "line": 695,
+        "column": 54
       }
     },
     {
@@ -4185,7 +4159,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 32,
+        "line": 30,
         "column": 31
       }
     },
@@ -4198,7 +4172,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 62,
+        "line": 60,
         "column": 14
       }
     },
@@ -4211,7 +4185,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 103,
+        "line": 101,
         "column": 14
       }
     },
@@ -4224,7 +4198,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 128,
+        "line": 126,
         "column": 47
       }
     },
@@ -4237,7 +4211,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 155,
+        "line": 153,
         "column": 55
       }
     },
@@ -4250,7 +4224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 162,
+        "line": 160,
         "column": 7
       }
     },
@@ -4263,7 +4237,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 181,
+        "line": 179,
         "column": 11
       }
     },
@@ -4276,7 +4250,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 183,
+        "line": 181,
         "column": 79
       }
     },
@@ -4289,7 +4263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 193,
+        "line": 191,
         "column": 32
       }
     },
@@ -4302,7 +4276,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 202,
+        "line": 200,
         "column": 95
       }
     },
@@ -4315,7 +4289,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 215,
+        "line": 213,
         "column": 18
       }
     },
@@ -4328,21 +4302,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 225,
+        "line": 223,
         "column": 14
-      }
-    },
-    {
-      "id": "63d456e0152970c-f355ddab85bfe85",
-      "title": "Upsert rule API validation: should reject body when metadata.owner exceeds the maximum length",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 234,
-        "column": 9
       }
     },
     {
@@ -4354,7 +4315,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 246,
+        "line": 232,
         "column": 9
       }
     },
@@ -4367,8 +4328,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 260,
-        "column": 29
+        "line": 243,
+        "column": 64
       }
     },
     {
@@ -4380,8 +4341,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 275,
-        "column": 54
+        "line": 260,
+        "column": 10
       }
     },
     {
@@ -4393,8 +4354,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 289,
-        "column": 9
+        "line": 275,
+        "column": 14
       }
     },
     {
@@ -4406,8 +4367,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 299,
-        "column": 48
+        "line": 283,
+        "column": 60
       }
     },
     {
@@ -4419,8 +4380,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 314,
-        "column": 65
+        "line": 299,
+        "column": 10
       }
     }
   ]

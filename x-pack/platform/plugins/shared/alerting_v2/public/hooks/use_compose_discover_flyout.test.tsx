@@ -167,7 +167,7 @@ describe('useComposeDiscoverFlyout — create-from-template source stamping (ste
     jest.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
-    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.(createdRule));
+    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.());
   });
 
   it('stamps { type: template, id } on the create payload when opened from a template', async () => {
