@@ -10,6 +10,7 @@ import type {
   CreateRuleData,
   RuleTemplateData,
 } from '@kbn/alerting-v2-schemas';
+import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
@@ -21,35 +22,34 @@ import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
  * Notes:
  * - `schedule` uses the fast test-harness interval (5s every / 1m lookback)
  *   so the executor produces events quickly during integration runs.
- * - `state_transition: { pending_count: 0, recovering_count: 0 }` drives the
- *   lifecycle straight to active/inactive, which is what most executor tests
- *   want. Tests that care about the lifecycle override it explicitly. Signal
- *   rules must opt out via `state_transition: undefined` because the schema
- *   forbids state_transition for `kind: 'signal'`.
- * - `recovery_strategy: 'no_breach'` so that, by default, rules recover
+ * - `state_transition: { pending: { count: 0 }, recovering: { count: 0 } }`
+ *   drives the lifecycle straight to active/inactive, which is what most
+ *   executor tests want. Tests that care about the lifecycle override it
+ *   explicitly. Signal rules must opt out via `state_transition: undefined`
+ *   because the schema forbids state_transition for `kind: 'signal'`.
+ * - `recovery: { strategy: 'no_breach' }` so that, by default, rules recover
  *   whenever a previously-breaching group stops appearing in the breach query
- *   results. Signal rules must opt out by passing
- *   `recovery_strategy: undefined` (or `'none'`) because the schema forbids
- *   recovery strategies on `kind: 'signal'`. Tests that override `query`
- *   should include `recovery_strategy: 'no_breach'` (or another valid
- *   strategy) if they want the executor to emit recovery events.
- * - When a caller disables recovery (`recovery_strategy: 'none'` or `undefined`)
+ *   results, and `no_data: { strategy: 'ignore' }` so absence is not
+ *   classified. Alert rules must carry both. Signal rules must opt out by
+ *   passing `recovery: undefined` and `no_data: undefined`, because the schema
+ *   forbids them on `kind: 'signal'`. Tests that override `query` should keep a
+ *   recovering `recovery` strategy if they want the executor to emit recovery
+ *   events.
+ * - When a caller turns recovery off (`recovery: { strategy: 'manual' }`)
  *   without supplying its own `state_transition`, `buildCreateRuleData` strips
- *   the default `recovering_count`/`recovering_timeframe`, since the write API
- *   rejects an inert recovering delay when recovery is off.
+ *   the default `recovering` block, since the write API rejects an inert
+ *   recovering delay when recovery never happens.
  */
 const DEFAULTS: CreateRuleData = {
   kind: 'alert',
   metadata: { name: 'scout-rule' },
   schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-  recovery_strategy: 'no_breach',
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | LIMIT 10' },
-  },
+  recovery: { strategy: recoveryStrategy.no_breach },
+  no_data: { strategy: noDataStrategy.ignore },
+  query: { base: 'FROM logs-* | LIMIT 10' },
   time_field: '@timestamp',
   grouping: { fields: ['host.name'] },
-  state_transition: { pending_count: 0, recovering_count: 0 },
+  state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
 };
 
 const ACTION_POLICY_DEFAULTS: CreateActionPolicyDataInput = {
@@ -63,9 +63,11 @@ export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => {
   const merged: CreateRuleData = { ...DEFAULTS, ...input };
 
-  const recoveryEnabled = merged.recovery_strategy != null && merged.recovery_strategy !== 'none';
+  const recoveryEnabled =
+    merged.recovery != null && merged.recovery.strategy !== recoveryStrategy.manual;
+
   if (!recoveryEnabled && input.state_transition === undefined && merged.state_transition != null) {
-    const { recovering_count, recovering_timeframe, ...rest } = merged.state_transition;
+    const { recovering, ...rest } = merged.state_transition;
     merged.state_transition = rest;
   }
 

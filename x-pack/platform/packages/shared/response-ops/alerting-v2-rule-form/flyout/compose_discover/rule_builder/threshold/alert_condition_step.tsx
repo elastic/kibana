@@ -31,6 +31,7 @@ import {
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { getDatasets } from '@kbn/esql-utils';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../../../../form/types';
 import { useResolveTimeField } from '../../use_resolve_time_field';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
@@ -166,16 +167,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
     if (isAlert) {
       const { base, alertBlock } = splitQuery(esqlQuery);
-      setValue('query', {
-        format: 'composed',
-        base,
-        breach: {
-          segment: alertBlock,
-        },
-        ...(recoveryBlock ? { recovery: { segment: recoveryBlock } } : {}),
-      });
+      setValue('query', { base, breach: { segment: alertBlock } });
+      if (recoveryBlock) {
+        setValue('recovery', { strategy: recoveryStrategy.condition, segment: recoveryBlock });
+      }
     } else {
-      setValue('query', { format: 'standalone', breach: { query: esqlQuery } });
+      setValue('query', { base: esqlQuery, breach: { segment: '' } });
     }
     setValue('timeField', thresholdValues.timeField);
     if (thresholdValues.groupByFields.length > 0) {

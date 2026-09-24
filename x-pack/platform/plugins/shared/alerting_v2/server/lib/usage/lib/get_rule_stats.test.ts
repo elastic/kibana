@@ -35,15 +35,18 @@ function mockRuleSearchResponse({
   countWithGrouping = 4,
   avgGroupingFieldsCount = 2.0,
   minCreatedAt = '2026-01-15T12:00:00.000Z',
-  queryFormatBuckets = [
-    { key: 'composed', doc_count: 5 },
-    { key: 'standalone', doc_count: 15 },
-  ],
   recoveryStrategyBuckets = [
     { key: 'no_breach', doc_count: 9 },
+    { key: 'condition', doc_count: 3 },
     { key: 'query', doc_count: 6 },
+    { key: 'manual', doc_count: 2 },
   ],
-  noDataStrategyBuckets = [{ key: 'emit', doc_count: 4 }],
+  noDataStrategyBuckets = [
+    { key: 'ignore', doc_count: 12 },
+    { key: 'keep_last', doc_count: 3 },
+    { key: 'resolve', doc_count: 1 },
+    { key: 'alert', doc_count: 4 },
+  ],
 }: {
   total?: number;
   countEnabled?: number;
@@ -58,7 +61,6 @@ function mockRuleSearchResponse({
   countWithGrouping?: number;
   avgGroupingFieldsCount?: number | null;
   minCreatedAt?: string | null;
-  queryFormatBuckets?: Array<{ key: string; doc_count: number }>;
   recoveryStrategyBuckets?: Array<{ key: string; doc_count: number }>;
   noDataStrategyBuckets?: Array<{ key: string; doc_count: number }>;
 } = {}) {
@@ -83,7 +85,6 @@ function mockRuleSearchResponse({
         value: minCreatedAt ? Date.parse(minCreatedAt) : null,
         value_as_string: minCreatedAt ?? undefined,
       },
-      count_by_query_format: { buckets: queryFormatBuckets },
       count_by_recovery_strategy: { buckets: recoveryStrategyBuckets },
       count_by_no_data_strategy: { buckets: noDataStrategyBuckets },
     },
@@ -113,9 +114,8 @@ describe('getRuleStats', () => {
       count_with_grouping: 4,
       avg_grouping_fields_count: 2.0,
       min_created_at: '2026-01-15T12:00:00.000Z',
-      count_by_query_format: { composed: 5, standalone: 15 },
-      count_by_recovery_strategy: { no_breach: 9, query: 6 },
-      count_by_no_data_strategy: { emit: 4 },
+      count_by_recovery_strategy: { no_breach: 9, condition: 3, query: 6, manual: 2 },
+      count_by_no_data_strategy: { ignore: 12, keep_last: 3, resolve: 1, alert: 4 },
     });
   });
 
@@ -134,7 +134,6 @@ describe('getRuleStats', () => {
       countWithGrouping: 0,
       avgGroupingFieldsCount: null,
       minCreatedAt: null,
-      queryFormatBuckets: [],
       recoveryStrategyBuckets: [],
       noDataStrategyBuckets: [],
     });
@@ -155,7 +154,6 @@ describe('getRuleStats', () => {
       count_with_grouping: 0,
       avg_grouping_fields_count: null,
       min_created_at: null,
-      count_by_query_format: {},
       count_by_recovery_strategy: {},
       count_by_no_data_strategy: {},
     });
@@ -185,7 +183,6 @@ describe('getRuleStats', () => {
       count_with_grouping: 0,
       avg_grouping_fields_count: null,
       min_created_at: null,
-      count_by_query_format: {},
       count_by_recovery_strategy: {},
       count_by_no_data_strategy: {},
     });
@@ -210,7 +207,6 @@ describe('getRuleStats', () => {
         count_with_grouping: { doc_count: 0 },
         avg_grouping_fields_count: { value: null },
         min_created_at: { value: null },
-        count_by_query_format: { buckets: [] },
         count_by_recovery_strategy: { buckets: [] },
         count_by_no_data_strategy: { buckets: [] },
       },

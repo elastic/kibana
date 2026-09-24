@@ -85,7 +85,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       const { step, internalEsClient } = createStep();
       mockActiveGroups(internalEsClient, ['host-a', 'host-b', 'host-c', 'host-d']);
 
-      const rule = createRuleResponse({ kind: 'alert', recovery_strategy: 'no_breach' });
+      const rule = createRuleResponse({ kind: 'alert', recovery: { strategy: 'no_breach' } });
 
       const batch1 = createRulePipelineState({
         rule,
@@ -118,7 +118,7 @@ describe('ClassifyAbsentGroupsStep', () => {
     it('propagates an upstream halt and emits no final batch', async () => {
       const { step, internalEsClient } = createStep();
 
-      const rule = createRuleResponse({ kind: 'alert', recovery_strategy: 'no_breach' });
+      const rule = createRuleResponse({ kind: 'alert', recovery: { strategy: 'no_breach' } });
       const continueState = createRulePipelineState({ rule, alertEventsBatch: [] });
       const haltState = createRulePipelineState({ rule, alertEventsBatch: [] });
 
@@ -162,14 +162,14 @@ describe('ClassifyAbsentGroupsStep', () => {
       expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
     });
 
-    it("emits no final batch when recovery_strategy is 'none' and no_data_strategy is 'none'", async () => {
+    it("emits no final batch when recovery.strategy is 'manual' and no_data.strategy is 'ignore'", async () => {
       const { step, internalEsClient } = createStep();
 
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_strategy: 'none',
-          no_data_strategy: 'none',
+          recovery: { strategy: 'manual' },
+          no_data: { strategy: 'ignore' },
         }),
         alertEventsBatch: [createAlertEvent({ group_hash: 'host-a', status: 'breached' })],
       });
@@ -185,7 +185,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       mockActiveGroups(internalEsClient, []);
 
       const state = createRulePipelineState({
-        rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'no_breach' }),
+        rule: createRuleResponse({ kind: 'alert', recovery: { strategy: 'no_breach' } }),
         alertEventsBatch: [createAlertEvent({ group_hash: 'host-a', status: 'breached' })],
       });
 
@@ -203,7 +203,7 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'no_breach',
+        recovery: { strategy: 'no_breach' },
         grouping: { fields: ['host.name'] },
       });
 
@@ -238,13 +238,9 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'query',
+        recovery: { strategy: 'query', query: 'FROM m | STATS c BY host.name' },
         grouping: { fields: ['host.name'] },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM m | WHERE breach' },
-          recovery: { query: 'FROM m | STATS c BY host.name' },
-        },
+        query: { base: 'FROM m | WHERE breach' },
       });
 
       const batch1 = createRulePipelineState({ rule, alertEventsBatch: [] });
@@ -268,13 +264,10 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'no_breach',
+        recovery: { strategy: 'no_breach' },
         metadata: { version: 9 },
         grouping: { fields: ['host.name'] },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM m | WHERE breach' },
-        },
+        query: { base: 'FROM m | WHERE breach' },
       });
 
       const results = await collectStreamResults(
@@ -307,15 +300,10 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'query',
-        no_data_strategy: 'emit',
+        recovery: { strategy: 'query', query: 'FROM m | WHERE recovery_match' },
+        no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },
         grouping: { fields: ['host.name'] },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM m | WHERE breach' },
-          recovery: { query: 'FROM m | WHERE recovery_match' },
-          no_data: { query: 'FROM m | STATS c BY host.name' },
-        },
+        query: { base: 'FROM m | WHERE breach' },
       });
 
       const state = createRulePipelineState({
@@ -358,15 +346,10 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'query',
-        no_data_strategy: 'emit',
+        recovery: { strategy: 'query', query: 'FROM m | WHERE recovery_match' },
+        no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },
         grouping: { fields: ['host.name'] },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM m | WHERE breach' },
-          recovery: { query: 'FROM m | WHERE recovery_match' },
-          no_data: { query: 'FROM m | STATS c BY host.name' },
-        },
+        query: { base: 'FROM m | WHERE breach' },
       });
 
       // A filler group breaches in batch 1; host-a breaches only in batch 2.
@@ -405,14 +388,10 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'no_breach',
-        no_data_strategy: 'emit',
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },
         grouping: { fields: ['host.name'] },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM m | WHERE breach' },
-          no_data: { query: 'FROM m | STATS c BY host.name' },
-        },
+        query: { base: 'FROM m | WHERE breach' },
       });
 
       await collectStreamResults(
@@ -440,14 +419,10 @@ describe('ClassifyAbsentGroupsStep', () => {
       const input = createRuleExecutionInput({ abortSignal: abortController.signal });
       const rule: RuleResponse = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'no_breach',
-        no_data_strategy: 'emit',
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },
         grouping: { fields: ['host.name'] },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM m | WHERE breach' },
-          no_data: { query: 'FROM m | STATS c BY host.name' },
-        },
+        query: { base: 'FROM m | WHERE breach' },
       });
 
       await collectStreamResults(

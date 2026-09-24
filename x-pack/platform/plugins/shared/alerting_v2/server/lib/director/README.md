@@ -117,18 +117,18 @@ The director writes one of these episode statuses:
 | `recovering` | `breached` | `active` |
 | `recovering` | `recovered` | `inactive` |
 
-`no_data` transitions depend on `rule.no_data_strategy`:
+`no_data` transitions depend on `rule.no_data.strategy`:
 
-| Current episode status | `no_data_strategy` | Next episode status |
+| Current episode status | `no_data.strategy` | Next episode status |
 | --- | --- | --- |
-| any | `'emit'` | `active` |
-| any | `'last_known_status'` | (unchanged — preserve current status) |
-| `inactive` | `'recover'` | `inactive` |
-| `pending` | `'recover'` | `inactive` |
-| `active` | `'recover'` | `inactive` |
-| `recovering` | `'recover'` | `inactive` |
+| any | `'alert'` | `active` |
+| any | `'keep_last'` | (unchanged — preserve current status) |
+| `inactive` | `'resolve'` | `inactive` |
+| `pending` | `'resolve'` | `inactive` |
+| `active` | `'resolve'` | `inactive` |
+| `recovering` | `'resolve'` | `inactive` |
 
-For `'recover'`, the episode resolves directly to `inactive` on the first no-data run.
+For `'resolve'`, the episode resolves directly to `inactive` on the first no-data run. `'ignore'` never produces a `no_data` event to begin with.
 
 ### `CountTimeframeStrategy`
 
@@ -137,7 +137,7 @@ For `'recover'`, the episode resolves directly to `inactive` on the first no-dat
 - `pending -> active`
 - `recovering -> inactive`
 
-A `no_data` event on a rule with `no_data_strategy: 'recover'` always bypasses this gating and resolves directly to `inactive`, regardless of `recovering_count` / `recovering_timeframe`.
+A `no_data` event on a rule with `no_data.strategy: 'resolve'` always bypasses this gating and resolves directly to `inactive`, regardless of `state_transition.recovering.count` / `state_transition.recovering.timeframe`.
 
 It supports:
 

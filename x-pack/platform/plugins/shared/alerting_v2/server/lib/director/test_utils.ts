@@ -54,13 +54,13 @@ export const buildStrategyStateTransitionContext = ({
 }: {
   eventStatus: AlertEventStatus;
   stateTransition?: RuleResponse['state_transition'];
-  noDataStrategy?: RuleResponse['no_data_strategy'];
+  noDataStrategy?: NonNullable<RuleResponse['no_data']>['strategy'];
   eventTimestamp?: string;
   previousEpisode?: LatestAlertEventState;
 }): StateTransitionContext => ({
   rule: createRuleResponse({
     state_transition: stateTransition,
-    no_data_strategy: noDataStrategy,
+    ...(noDataStrategy ? { no_data: { strategy: noDataStrategy } } : {}),
   }),
   alertEvent: createAlertEvent({
     status: eventStatus,

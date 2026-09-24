@@ -1,5 +1,6 @@
 {
-  "sha1": "947dfcaf8f49f45649440f99aa20160dae9ba855",  "testChannels": [
+  "sha1": "ad7342fc8840ee1dc4be943231eaed8a7a369ff3",
+  "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
@@ -64,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 128,
+        "line": 130,
         "column": 85
       }
     },
@@ -77,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 207,
+        "line": 209,
         "column": 15
       }
     },
@@ -103,20 +104,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 323,
+        "line": 321,
         "column": 9
       }
     },
     {
-      "id": "0d4530450053d38-84edadaa6d859e7",
-      "title": "ComposeDiscoverFlyout — create and edit flows edit flow: alert + standalone opens YAML-only",
+      "id": "0d4530450053d38-12f227a92302c43",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow: alert + recovery query opens YAML-only",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 380,
+        "line": 377,
         "column": 15
       }
     },
@@ -129,7 +130,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 414,
+        "line": 412,
         "column": 10
       }
     },
@@ -142,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 467,
+        "line": 463,
         "column": 26
       }
     },
@@ -155,7 +156,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 517,
+        "line": 513,
         "column": 26
       }
     },
@@ -168,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 554,
+        "line": 550,
         "column": 26
       }
     },
@@ -181,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 612,
+        "line": 611,
         "column": 24
       }
     },
@@ -194,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 637,
+        "line": 633,
         "column": 9
       }
     },
@@ -207,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 655,
+        "line": 651,
         "column": 15
       }
     },
@@ -220,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 678,
+        "line": 674,
         "column": 26
       }
     },
@@ -259,7 +260,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/execution_history_smoke.spec.ts",
-        "line": 120,
+        "line": 117,
         "column": 24
       }
     }

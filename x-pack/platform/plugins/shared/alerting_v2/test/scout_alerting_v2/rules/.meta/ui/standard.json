@@ -1,20 +1,20 @@
 {
-  "sha1": "a7ba547ccf54242b53804483507243296a2c8e94",
+  "sha1": "58e925197e60cb1a2258146d466b4763e513507d",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "9d9e2576f83ca69-f39fa53ccc71915",
-      "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) recovery tab appears in the YAML-mode sandbox when YAML sets recovery_strategy: query",
+      "id": "9d9e2576f83ca69-16f66a115f40c62",
+      "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) recovery tab appears in the YAML-mode sandbox when YAML sets recovery.strategy: condition",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 111,
-        "column": 11
+        "line": 110,
+        "column": 25
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 151,
-        "column": 10
+        "line": 150,
+        "column": 18
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 200,
-        "column": 22
+        "line": 201,
+        "column": 9
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 252,
-        "column": 15
+        "line": 248,
+        "column": 20
       }
     },
     {
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 283,
+        "line": 279,
         "column": 26
       }
     },
@@ -145,7 +145,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 169,
+        "line": 167,
         "column": 26
       }
     },
@@ -158,7 +158,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 182,
+        "line": 180,
         "column": 12
       }
     },
@@ -171,8 +171,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 228,
-        "column": 51
+        "line": 225,
+        "column": 31
       }
     },
     {
@@ -184,7 +184,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 264,
+        "line": 259,
         "column": 21
       }
     },

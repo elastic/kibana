@@ -26,8 +26,7 @@ import type { RuleResponse } from '../rules_client';
  * Pure, single-query helper lifted from the former `DetectDataPresenceStep` so
  * the end-of-stream classifier can run data-presence detection exactly once per
  * run (rather than once per streamed batch). Returns an empty set when the rule
- * has no resolvable no_data query (e.g. `no_data_strategy: 'none'`, or a stale
- * standalone saved object with no `query.no_data` block).
+ * does not classify absence (`no_data.strategy: 'ignore'`).
  */
 export const detectDataPresence = async ({
   queryService,
@@ -42,7 +41,7 @@ export const detectDataPresence = async ({
   logger: LoggerServiceContract;
   maxResponseSize?: number;
 }): Promise<Set<string>> => {
-  const noDataQuery = getNoDataEsqlQuery(rule.query, rule.no_data_strategy);
+  const noDataQuery = getNoDataEsqlQuery(rule.query, rule.no_data);
 
   if (!noDataQuery) {
     return new Set();

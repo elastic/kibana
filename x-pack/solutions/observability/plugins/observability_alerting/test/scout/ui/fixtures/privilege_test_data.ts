@@ -155,7 +155,9 @@ export const seedV2PrivilegeRule = async (
       kind: 'alert',
       metadata: { name: '[scout] Observability privilege v2 rule', tags: [V2_EPISODE_TAG] },
       schedule: { every: '1h' },
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      query: { base: 'FROM logs-* | LIMIT 1' },
+      recovery: { strategy: 'no_breach' },
+      no_data: { strategy: 'ignore' },
     },
   });
 

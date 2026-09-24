@@ -99,10 +99,7 @@ describe('manageRuleTool', () => {
             { operation: 'set_kind', kind: 'alert' },
             {
               operation: 'set_query',
-              query: {
-                format: 'standalone',
-                breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-              },
+              query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
             },
           ],
         },
@@ -141,7 +138,7 @@ describe('manageRuleTool', () => {
             { operation: 'set_metadata', name: 'Test' },
             {
               operation: 'set_query',
-              query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS COUNT(*)' } },
+              query: { base: 'FROM logs-* | STATS COUNT(*)' },
             },
           ],
         },
@@ -164,10 +161,7 @@ describe('manageRuleTool', () => {
             { operation: 'set_metadata', name: 'Bad Query Rule' },
             {
               operation: 'set_query',
-              query: {
-                format: 'standalone',
-                breach: { query: 'FROM bad-index-* | STATS COUNT(*)' },
-              },
+              query: { base: 'FROM bad-index-* | STATS COUNT(*)' },
             },
           ],
         },
@@ -196,7 +190,7 @@ describe('manageRuleTool', () => {
       expect(results[0].data.message).toContain('rule name is required');
     });
 
-    it('stores recovery_strategy and no_data_strategy from set_query', async () => {
+    it('stores the recovery object from set_query', async () => {
       const ctx = createContext();
       getEsqlQueryMock(ctx).mockResolvedValueOnce({
         columns: [{ name: 'host.name', type: 'keyword' }],
@@ -211,12 +205,8 @@ describe('manageRuleTool', () => {
             { operation: 'set_kind', kind: 'alert' },
             {
               operation: 'set_query',
-              query: {
-                format: 'standalone',
-                breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-                recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-              },
-              recovery_strategy: 'query',
+              query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+              recovery: { strategy: 'query', query: 'FROM metrics-* | WHERE cpu < 0.5' },
             },
           ],
         },
@@ -224,12 +214,15 @@ describe('manageRuleTool', () => {
       );
 
       const addCall = ctx.attachments.add.mock.calls[0][0] as {
-        data: { recovery_strategy?: string };
+        data: { recovery?: { strategy: string; query?: string } };
       };
-      expect(addCall.data.recovery_strategy).toBe('query');
+      expect(addCall.data.recovery).toEqual({
+        strategy: 'query',
+        query: 'FROM metrics-* | WHERE cpu < 0.5',
+      });
     });
 
-    it('stores no_data_strategy and no_data from set_query', async () => {
+    it('stores the no_data object from set_query', async () => {
       const ctx = createContext();
       getEsqlQueryMock(ctx).mockResolvedValueOnce({
         columns: [{ name: 'host.name', type: 'keyword' }],
@@ -244,12 +237,11 @@ describe('manageRuleTool', () => {
             { operation: 'set_kind', kind: 'alert' },
             {
               operation: 'set_query',
-              query: {
-                format: 'standalone',
-                breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-                no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name' },
+              query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+              no_data: {
+                strategy: 'keep_last',
+                query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name',
               },
-              no_data_strategy: 'last_known_status',
             },
           ],
         },
@@ -257,9 +249,12 @@ describe('manageRuleTool', () => {
       );
 
       const addCall = ctx.attachments.add.mock.calls[0][0] as {
-        data: { no_data_strategy?: string };
+        data: { no_data?: { strategy: string; query?: string } };
       };
-      expect(addCall.data.no_data_strategy).toBe('last_known_status');
+      expect(addCall.data.no_data).toEqual({
+        strategy: 'keep_last',
+        query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name',
+      });
     });
 
     it('stores set_dashboards IDs as dashboard artifacts on the rule attachment', async () => {
@@ -380,7 +375,7 @@ describe('manageRuleTool', () => {
             data: {
               metadata: { name: 'Persisted Rule' },
               kind: 'alert',
-              query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+              query: { base: 'FROM logs-* | LIMIT 1' },
             },
           },
         ],

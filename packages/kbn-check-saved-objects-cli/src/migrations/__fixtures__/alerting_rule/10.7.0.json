@@ -1,0 +1,442 @@
+{
+  "10.6.0": [
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "composed rule recovering on a condition",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "query",
+      "no_data_strategy": "last_known_status",
+      "query": {
+        "format": "composed",
+        "base": "FROM metrics-* | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY host.name",
+        "breach": {
+          "segment": "WHERE avg_cpu > 0.85"
+        },
+        "recovery": {
+          "segment": "WHERE avg_cpu < 0.60"
+        }
+      },
+      "state_transition": {
+        "pending_count": 3,
+        "pending_timeframe": "5m",
+        "pending_operator": "AND",
+        "recovering_count": 2,
+        "recovering_timeframe": "10m",
+        "recovering_operator": "OR"
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "standalone rule with an independent recovery and presence query",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "query",
+      "no_data_strategy": "recover",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | WHERE log.level == \"error\" | STATS errors = COUNT() BY service.name | WHERE errors > 100"
+        },
+        "recovery": {
+          "query": "FROM logs-* | STATS errors = COUNT() BY service.name | WHERE errors == 0"
+        },
+        "no_data": {
+          "query": "FROM heartbeat-* | STATS beats = COUNT() BY service.name"
+        }
+      },
+      "grouping": {
+        "fields": [
+          "service.name"
+        ]
+      },
+      "artifacts": [
+        {
+          "id": "runbook-1",
+          "type": "runbook",
+          "value": "## Runbook\n\n1. Check the service health",
+          "data": {
+            "content": "## Runbook\n\n1. Check the service health"
+          }
+        }
+      ],
+      "enabled": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "composed rule with a blank breach segment and no strategies",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "query": {
+        "format": "composed",
+        "base": "FROM logs-* | WHERE log.level == \"error\" | KEEP @timestamp, host.name",
+        "breach": {
+          "segment": ""
+        }
+      },
+      "state_transition": {
+        "pending_count": 0,
+        "recovering_count": 0
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "composed rule alerting on missing data",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "none",
+      "no_data_strategy": "emit",
+      "query": {
+        "format": "composed",
+        "base": "FROM metrics-* | STATS beats = COUNT() BY host.name",
+        "breach": {
+          "segment": "WHERE beats == 0"
+        }
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": false,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "signal",
+      "metadata": {
+        "name": "signal rule whose stored strategies are dropped",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "no_breach",
+      "no_data_strategy": "last_known_status",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-security* | WHERE event.action == \"privilege_escalation\" | KEEP @timestamp, user.name, host.name"
+        }
+      },
+      "enabled": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.7.0": [
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "composed rule recovering on a condition",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "query",
+      "no_data_strategy": "last_known_status",
+      "query": {
+        "format": "composed",
+        "base": "FROM metrics-* | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY host.name",
+        "breach": {
+          "segment": "WHERE avg_cpu > 0.85"
+        },
+        "recovery": {
+          "segment": "WHERE avg_cpu < 0.60"
+        }
+      },
+      "state_transition": {
+        "pending_count": 3,
+        "pending_timeframe": "5m",
+        "pending_operator": "AND",
+        "recovering_count": 2,
+        "recovering_timeframe": "10m",
+        "recovering_operator": "OR",
+        "pending": {
+          "count": 3,
+          "timeframe": "5m",
+          "operator": "AND"
+        },
+        "recovering": {
+          "count": 2,
+          "timeframe": "10m",
+          "operator": "OR"
+        }
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "recovery": {
+        "strategy": "condition",
+        "segment": "WHERE avg_cpu < 0.60"
+      },
+      "no_data": {
+        "strategy": "keep_last"
+      }
+    },
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "standalone rule with an independent recovery and presence query",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "query",
+      "no_data_strategy": "recover",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | WHERE log.level == \"error\" | STATS errors = COUNT() BY service.name | WHERE errors > 100"
+        },
+        "recovery": {
+          "query": "FROM logs-* | STATS errors = COUNT() BY service.name | WHERE errors == 0"
+        },
+        "no_data": {
+          "query": "FROM heartbeat-* | STATS beats = COUNT() BY service.name"
+        },
+        "base": "FROM logs-* | WHERE log.level == \"error\" | STATS errors = COUNT() BY service.name | WHERE errors > 100"
+      },
+      "grouping": {
+        "fields": [
+          "service.name"
+        ]
+      },
+      "artifacts": [
+        {
+          "id": "runbook-1",
+          "type": "runbook",
+          "value": "## Runbook\n\n1. Check the service health",
+          "data": {
+            "content": "## Runbook\n\n1. Check the service health"
+          }
+        }
+      ],
+      "enabled": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "recovery": {
+        "strategy": "query",
+        "query": "FROM logs-* | STATS errors = COUNT() BY service.name | WHERE errors == 0"
+      },
+      "no_data": {
+        "strategy": "resolve",
+        "query": "FROM heartbeat-* | STATS beats = COUNT() BY service.name"
+      }
+    },
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "composed rule with a blank breach segment and no strategies",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "query": {
+        "format": "composed",
+        "base": "FROM logs-* | WHERE log.level == \"error\" | KEEP @timestamp, host.name",
+        "breach": {
+          "segment": ""
+        }
+      },
+      "state_transition": {
+        "pending_count": 0,
+        "recovering_count": 0,
+        "pending": {
+          "count": 0
+        }
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "recovery": {
+        "strategy": "manual"
+      },
+      "no_data": {
+        "strategy": "ignore"
+      }
+    },
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "composed rule alerting on missing data",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "none",
+      "no_data_strategy": "emit",
+      "query": {
+        "format": "composed",
+        "base": "FROM metrics-* | STATS beats = COUNT() BY host.name",
+        "breach": {
+          "segment": "WHERE beats == 0"
+        }
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": false,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "recovery": {
+        "strategy": "manual"
+      },
+      "no_data": {
+        "strategy": "alert"
+      }
+    },
+    {
+      "kind": "signal",
+      "metadata": {
+        "name": "signal rule whose stored strategies are dropped",
+        "description": "a test alerting v2 rule",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "no_breach",
+      "no_data_strategy": "last_known_status",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-security* | WHERE event.action == \"privilege_escalation\" | KEEP @timestamp, user.name, host.name"
+        },
+        "base": "FROM logs-security* | WHERE event.action == \"privilege_escalation\" | KEEP @timestamp, user.name, host.name"
+      },
+      "enabled": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}

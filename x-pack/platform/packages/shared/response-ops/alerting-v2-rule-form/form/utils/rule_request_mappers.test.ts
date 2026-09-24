@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import {
@@ -27,8 +28,8 @@ describe('rule_request_mappers', () => {
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
     query: {
-      format: 'standalone',
-      breach: { query: 'FROM logs-* | LIMIT 10' },
+      base: 'FROM logs-* | LIMIT 10',
+      breach: { segment: '' },
     },
     stateTransitionAlertDelayMode: 'immediate',
     stateTransitionRecoveryDelayMode: 'immediate',
@@ -42,9 +43,21 @@ describe('rule_request_mappers', () => {
         metadata: { name: 'Test Rule', tags: ['tag1', 'tag2'] },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        query: { base: 'FROM logs-* | LIMIT 10' },
         grouping: undefined,
         state_transition: undefined,
+      });
+    });
+
+    it('keeps the breach block when the segment is non-empty', () => {
+      const result = mapFormValuesToRuleRequest({
+        ...baseFormValues,
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 10' } },
+      });
+
+      expect(result.query).toEqual({
+        base: 'FROM logs-*',
+        breach: { segment: 'WHERE count > 10' },
       });
     });
 
@@ -88,8 +101,8 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(formValues);
 
       expect(result.state_transition).toEqual({
-        pending_count: 3,
-        pending_timeframe: '10m',
+        pending: { count: 3, timeframe: '10m' },
+        recovering: { count: 0 },
       });
     });
 
@@ -104,8 +117,11 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 5 });
-      expect(result.state_transition).not.toHaveProperty('pending_timeframe');
+      expect(result.state_transition).toEqual({
+        pending: { count: 5 },
+        recovering: { count: 0 },
+      });
+      expect(result.state_transition?.pending).not.toHaveProperty('timeframe');
     });
 
     it('returns undefined state_transition for signal kind even with stateTransition data', () => {
@@ -120,47 +136,52 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toBeUndefined();
     });
 
-    it('emits pending_count: 0 and recovering_count: 0 for an alert with recovery enabled when both modes are immediate', () => {
+    it('emits pending and recovering counts of 0 for an alert with recovery enabled when both modes are immediate', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        recoveryStrategy: 'no_breach',
+        recovery: { strategy: recoveryStrategy.no_breach },
         stateTransition: {},
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
+      expect(result.state_transition).toEqual({
+        pending: { count: 0 },
+        recovering: { count: 0 },
+      });
     });
 
-    it('omits recovering_count for an alert when recovery is disabled and both modes are immediate', () => {
+    it('omits the recovering phase for an alert when recovery is disabled and both modes are immediate', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        recovery: { strategy: recoveryStrategy.manual },
         stateTransition: {},
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 0 });
+      expect(result.state_transition).toEqual({ pending: { count: 0 } });
     });
 
-    it('omits recovering_count for an alert when recovery is disabled and stateTransition is undefined', () => {
+    it('omits the recovering phase for an alert when recovery is disabled and stateTransition is undefined', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        recovery: { strategy: recoveryStrategy.manual },
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 0 });
+      expect(result.state_transition).toEqual({ pending: { count: 0 } });
     });
 
-    it('omits recovering fields when recovery_strategy is "none" even if recovering values are set', () => {
+    it('omits the recovering phase under recovery.strategy "manual" even if recovering values are set', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        recoveryStrategy: 'none',
+        recovery: { strategy: recoveryStrategy.manual },
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'duration',
         stateTransition: { recoveringCount: 3, recoveringTimeframe: '5m' },
@@ -168,14 +189,14 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 0 });
+      expect(result.state_transition).toEqual({ pending: { count: 0 } });
     });
 
-    it('emits pending_count: 0 when alert delay mode is immediate even if pendingCount is stale', () => {
+    it('emits a pending count of 0 when alert delay mode is immediate even if pendingCount is stale', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        recoveryStrategy: 'no_breach',
+        recovery: { strategy: recoveryStrategy.no_breach },
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: {
@@ -187,8 +208,8 @@ describe('rule_request_mappers', () => {
       };
 
       expect(mapFormValuesToUpdateRequest(formValues).state_transition).toEqual({
-        pending_count: 0,
-        recovering_count: 3,
+        pending: { count: 0 },
+        recovering: { count: 3 },
       });
     });
 
@@ -196,7 +217,7 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        recoveryStrategy: 'no_breach',
+        recovery: { strategy: recoveryStrategy.no_breach },
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'duration',
         stateTransition: { recoveringCount: 4, recoveringTimeframe: '15m' },
@@ -205,9 +226,8 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(formValues);
 
       expect(result.state_transition).toEqual({
-        pending_count: 0,
-        recovering_count: 4,
-        recovering_timeframe: '15m',
+        pending: { count: 0 },
+        recovering: { count: 4, timeframe: '15m' },
       });
     });
 
@@ -215,7 +235,7 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        recoveryStrategy: 'no_breach',
+        recovery: { strategy: recoveryStrategy.no_breach },
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 3 },
@@ -223,15 +243,18 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 3 });
-      expect(result.state_transition).not.toHaveProperty('recovering_timeframe');
+      expect(result.state_transition).toEqual({
+        pending: { count: 0 },
+        recovering: { count: 3 },
+      });
+      expect(result.state_transition?.recovering).not.toHaveProperty('timeframe');
     });
 
-    it('maps state_transition with both pending and recovering fields', () => {
+    it('maps state_transition with both pending and recovering phases', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        recoveryStrategy: 'no_breach',
+        recovery: { strategy: recoveryStrategy.no_breach },
         stateTransitionAlertDelayMode: 'breaches',
         stateTransitionRecoveryDelayMode: 'duration',
         stateTransition: {
@@ -244,9 +267,8 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(formValues);
 
       expect(result.state_transition).toEqual({
-        pending_count: 2,
-        recovering_count: 5,
-        recovering_timeframe: '10m',
+        pending: { count: 2 },
+        recovering: { count: 5, timeframe: '10m' },
       });
     });
 
@@ -393,61 +415,101 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toBeUndefined();
     });
 
-    it('maps recovery query and sets recovery_strategy: "query"', () => {
+    it('maps an independent recovery query onto the query strategy', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 10' },
-          recovery: { query: 'FROM logs-* | WHERE ok == true' },
+        recovery: {
+          strategy: recoveryStrategy.query,
+          query: 'FROM logs-* | WHERE ok == true',
         },
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.query).toEqual({
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | LIMIT 10' },
-        recovery: { query: 'FROM logs-* | WHERE ok == true' },
+      expect(result.query).toEqual({ base: 'FROM logs-* | LIMIT 10' });
+      expect(result.recovery).toEqual({
+        strategy: 'query',
+        query: 'FROM logs-* | WHERE ok == true',
       });
-      expect(result.recovery_strategy).toBe('query');
     });
 
-    it('omits recovery_strategy when query.recovery is absent', () => {
-      const result = mapFormValuesToRuleRequest(baseFormValues);
-
-      expect(result.recovery_strategy).toBeUndefined();
-    });
-
-    it('includes no_data_strategy when set on alert rule', () => {
+    it('maps a recovery segment onto the condition strategy', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        noDataStrategy: 'recover',
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+        recovery: { strategy: recoveryStrategy.condition, segment: 'WHERE count < 50' },
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.no_data_strategy).toBe('recover');
+      expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE count < 50' });
     });
 
-    it('omits no_data_strategy when undefined', () => {
+    it('omits recovery when the form carries none', () => {
       const result = mapFormValuesToRuleRequest(baseFormValues);
 
-      expect(result.no_data_strategy).toBeUndefined();
+      expect(result.recovery).toBeUndefined();
     });
 
-    it('omits recovery_strategy for signal rules even when set', () => {
+    it('includes no_data when set on an alert rule', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        noData: { strategy: noDataStrategy.resolve },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.no_data).toEqual({ strategy: 'resolve' });
+    });
+
+    it('includes a no_data presence query when provided', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        noData: { strategy: noDataStrategy.alert, query: 'FROM logs-* | LIMIT 1' },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.no_data).toEqual({
+        strategy: 'alert',
+        query: 'FROM logs-* | LIMIT 1',
+      });
+    });
+
+    it('drops a blank no_data presence query', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        noData: { strategy: noDataStrategy.keep_last, query: '   ' },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.no_data).toEqual({ strategy: 'keep_last' });
+    });
+
+    it('omits no_data when undefined', () => {
+      const result = mapFormValuesToRuleRequest(baseFormValues);
+
+      expect(result.no_data).toBeUndefined();
+    });
+
+    it('omits recovery and no_data for signal rules even when set', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'signal',
-        recoveryStrategy: 'no_breach',
+        recovery: { strategy: recoveryStrategy.no_breach },
+        noData: { strategy: noDataStrategy.resolve },
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.recovery_strategy).toBeUndefined();
+      expect(result.recovery).toBeUndefined();
+      expect(result.no_data).toBeUndefined();
     });
 
     it('passes non-empty runbook artifact data through unchanged', () => {
@@ -622,8 +684,13 @@ describe('rule_request_mappers', () => {
       expect(updateRequest.grouping).toBeNull();
       expect(updateRequest.state_transition).toBeNull();
       expect(updateRequest.artifacts).toBeNull();
-      expect(updateRequest.recovery_strategy).toBeNull();
-      expect(updateRequest.no_data_strategy).toBeNull();
+    });
+
+    it('omits recovery and no_data rather than nulling them — the update API rejects null', () => {
+      const result = mapFormValuesToUpdateRequest(baseFormValues);
+
+      expect(result).not.toHaveProperty('recovery');
+      expect(result).not.toHaveProperty('no_data');
     });
 
     it('does not include kind in the update payload', () => {
@@ -637,8 +704,8 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         kind: 'alert',
         grouping: { fields: ['host.name'] },
-        recoveryStrategy: 'no_breach',
-        noDataStrategy: 'recover',
+        recovery: { strategy: recoveryStrategy.no_breach },
+        noData: { strategy: noDataStrategy.resolve },
         stateTransitionAlertDelayMode: 'duration',
         stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 2, pendingTimeframe: '5m' },
@@ -647,37 +714,36 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToUpdateRequest(formValues);
 
       expect(result.grouping).toEqual({ fields: ['host.name'] });
-      expect(result.recovery_strategy).toBe('no_breach');
-      expect(result.no_data_strategy).toBe('recover');
+      expect(result.recovery).toEqual({ strategy: 'no_breach' });
+      expect(result.no_data).toEqual({ strategy: 'resolve' });
       expect(result.state_transition).toEqual({
-        pending_count: 2,
-        pending_timeframe: '5m',
-        recovering_count: 0,
+        pending: { count: 2, timeframe: '5m' },
+        recovering: { count: 0 },
       });
     });
 
-    it('preserves recovery_strategy: none', () => {
+    it('preserves recovery.strategy: manual', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        recoveryStrategy: 'none',
+        recovery: { strategy: recoveryStrategy.manual },
       };
 
       const result = mapFormValuesToUpdateRequest(formValues);
 
-      expect(result.recovery_strategy).toBe('none');
+      expect(result.recovery).toEqual({ strategy: 'manual' });
     });
 
-    it('nullifies recovery_strategy when form recoveryStrategy is unset (do not recover)', () => {
+    it('sends no_breach when the form recovery is unset', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        recoveryStrategy: undefined,
+        recovery: undefined,
       };
 
       const result = mapFormValuesToUpdateRequest(formValues);
 
-      expect(result.recovery_strategy).toBeNull();
+      expect(result.recovery).toEqual({ strategy: 'no_breach' });
     });
 
     it('nullifies empty grouping fields instead of leaving as undefined', () => {
@@ -701,10 +767,7 @@ describe('rule_request_mappers', () => {
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
-      expect(result.query).toEqual({
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | LIMIT 10' },
-      });
+      expect(result.query).toEqual({ base: 'FROM logs-* | LIMIT 10' });
     });
 
     it('coerces empty artifacts array to null for explicit removal', () => {
@@ -718,50 +781,46 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toBeNull();
     });
 
-    it('nullifies no_data_strategy when absent', () => {
+    it('omits no_data when absent', () => {
       const result = mapFormValuesToUpdateRequest(baseFormValues);
 
-      expect(result.no_data_strategy).toBeNull();
+      expect(result.no_data).toBeUndefined();
     });
 
-    it('preserves no_data_strategy when set on alert rule', () => {
+    it('preserves no_data when set on an alert rule', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        noDataStrategy: 'recover',
+        noData: { strategy: noDataStrategy.resolve },
       };
 
       const result = mapFormValuesToUpdateRequest(formValues);
 
-      expect(result.no_data_strategy).toBe('recover');
+      expect(result.no_data).toEqual({ strategy: 'resolve' });
     });
 
-    it('infers recovery_strategy: query when user adds recovery via form (recoveryStrategy undefined)', () => {
+    it('sends the condition strategy when the user authors a recovery segment', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
-        query: {
-          format: 'composed',
-          base: 'FROM logs-*',
-          breach: { segment: 'WHERE count > 100' },
-          recovery: { segment: 'WHERE count < 50' },
-        },
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+        recovery: { strategy: recoveryStrategy.condition, segment: 'WHERE count < 50' },
       };
 
       const result = mapFormValuesToUpdateRequest(formValues);
 
-      expect(result.recovery_strategy).toBe('query');
+      expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE count < 50' });
     });
 
-    it('nullifies recovery_strategy when user removes recovery from a loaded rule', () => {
+    it('omits recovery for signal rules, which cannot carry it', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        recoveryStrategy: 'query',
+        recovery: { strategy: recoveryStrategy.query, query: 'FROM logs-*' },
       };
 
       const result = mapFormValuesToUpdateRequest(formValues);
 
-      expect(result.recovery_strategy).toBeNull();
+      expect(result.recovery).toBeUndefined();
     });
   });
 
@@ -780,8 +839,7 @@ describe('rule_request_mappers', () => {
         lookback: '2m',
       },
       query: {
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | STATS count() BY host' },
+        base: 'FROM logs-* | STATS count() BY host',
       },
     } as RuleResponse;
 
@@ -833,13 +891,44 @@ describe('rule_request_mappers', () => {
       expect(result.schedule).toEqual({ every: '10m', lookback: '1m' });
     });
 
-    it('maps query to RuleQuery shape', () => {
+    it('maps query to RuleQuery shape, defaulting the breach segment to empty', () => {
       const result = mapRuleResponseToFormValues(baseRuleResponse);
 
       expect(result.query).toEqual({
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | STATS count() BY host' },
+        base: 'FROM logs-* | STATS count() BY host',
+        breach: { segment: '' },
       });
+    });
+
+    it('maps a breach segment through when the response carries one', () => {
+      const rule = {
+        ...baseRuleResponse,
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 10' } },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.query).toEqual({
+        base: 'FROM logs-*',
+        breach: { segment: 'WHERE count > 10' },
+      });
+    });
+
+    it('widens the recovery union into form state', () => {
+      const rule = {
+        ...baseRuleResponse,
+        recovery: { strategy: recoveryStrategy.condition, segment: 'WHERE count < 5' },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE count < 5' });
+    });
+
+    it('leaves recovery undefined when the response carries none', () => {
+      const result = mapRuleResponseToFormValues(baseRuleResponse);
+
+      expect(result.recovery).toBeUndefined();
     });
 
     it('maps grouping when present', () => {
@@ -862,7 +951,7 @@ describe('rule_request_mappers', () => {
     it('maps state_transition when present', () => {
       const rule = {
         ...baseRuleResponse,
-        state_transition: { pending_count: 3, pending_timeframe: '10m' },
+        state_transition: { pending: { count: 3, timeframe: '10m' } },
       } as RuleResponse;
 
       const result = mapRuleResponseToFormValues(rule);
@@ -880,7 +969,7 @@ describe('rule_request_mappers', () => {
     it('maps state_transition with recovering fields', () => {
       const rule = {
         ...baseRuleResponse,
-        state_transition: { recovering_count: 5, recovering_timeframe: '15m' },
+        state_transition: { recovering: { count: 5, timeframe: '15m' } },
       } as RuleResponse;
 
       const result = mapRuleResponseToFormValues(rule);
@@ -899,9 +988,8 @@ describe('rule_request_mappers', () => {
       const rule = {
         ...baseRuleResponse,
         state_transition: {
-          pending_count: 2,
-          recovering_count: 4,
-          recovering_timeframe: '20m',
+          pending: { count: 2 },
+          recovering: { count: 4, timeframe: '20m' },
         },
       } as RuleResponse;
 
@@ -930,34 +1018,50 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
-    it('maps no_data_strategy from rule response', () => {
+    it('widens no_data from the rule response', () => {
       const rule = {
         ...baseRuleResponse,
-        no_data_strategy: 'last_known_status',
+        no_data: { strategy: noDataStrategy.keep_last },
       } as RuleResponse;
 
       const result = mapRuleResponseToFormValues(rule);
 
-      expect(result.noDataStrategy).toBe('last_known_status');
+      expect(result.noData).toEqual({ strategy: 'keep_last' });
     });
 
-    it('defaults noDataStrategy to none for alert rules without no_data_strategy', () => {
-      const result = mapRuleResponseToFormValues(baseRuleResponse);
+    it('carries the no_data presence query into form state', () => {
+      const rule = {
+        ...baseRuleResponse,
+        no_data: { strategy: noDataStrategy.alert, query: 'FROM logs-* | LIMIT 1' },
+      } as RuleResponse;
 
-      expect(result.noDataStrategy).toBe('none');
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.noData).toEqual({ strategy: 'alert', query: 'FROM logs-* | LIMIT 1' });
     });
 
-    it('defaults noDataStrategy to undefined for signal rules without no_data_strategy', () => {
+    it('maps the ignore strategy through unchanged', () => {
+      const rule = {
+        ...baseRuleResponse,
+        no_data: { strategy: noDataStrategy.ignore },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.noData).toEqual({ strategy: 'ignore' });
+    });
+
+    it('leaves noData undefined for signal rules, which carry no no_data block', () => {
       const rule = { ...baseRuleResponse, kind: 'signal' } as RuleResponse;
       const result = mapRuleResponseToFormValues(rule);
 
-      expect(result.noDataStrategy).toBeUndefined();
+      expect(result.noData).toBeUndefined();
     });
 
-    it('treats pending_count: 0 and recovering_count: 0 as immediate mode', () => {
+    it('treats pending and recovering counts of 0 as immediate mode', () => {
       const rule = {
         ...baseRuleResponse,
-        state_transition: { pending_count: 0, recovering_count: 0 },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
       } as RuleResponse;
 
       const result = mapRuleResponseToFormValues(rule);
@@ -1000,7 +1104,9 @@ describe('rule_request_mappers', () => {
         ...baseRuleResponse,
         metadata: { ...baseRuleResponse.metadata, description: 'Roundtrip description' },
         grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 3, pending_timeframe: '10m' },
+        state_transition: { pending: { count: 3, timeframe: '10m' } },
+        recovery: { strategy: recoveryStrategy.no_breach },
+        no_data: { strategy: noDataStrategy.keep_last },
       } as RuleResponse;
 
       const formValues = mapRuleResponseToFormValues(fullRule);
@@ -1012,6 +1118,8 @@ describe('rule_request_mappers', () => {
         timeField: formValues.timeField!,
         schedule: formValues.schedule as FormValues['schedule'],
         query: formValues.query!,
+        recovery: formValues.recovery,
+        noData: formValues.noData,
         grouping: formValues.grouping,
         stateTransition: formValues.stateTransition,
         stateTransitionAlertDelayMode: formValues.stateTransitionAlertDelayMode!,
@@ -1025,16 +1133,13 @@ describe('rule_request_mappers', () => {
 
       expect(createPayload.kind).toBe('alert');
       expect(createPayload.metadata.description).toBe('Roundtrip description');
-      expect(createPayload.query).toEqual({
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | STATS count() BY host' },
-      });
+      expect(createPayload.query).toEqual({ base: 'FROM logs-* | STATS count() BY host' });
       expect(createPayload.grouping).toEqual({ fields: ['host.name'] });
-      // baseRuleResponse has no recovery_strategy, so recovery is disabled and the
-      // inert recovering_count is not emitted.
+      expect(createPayload.recovery).toEqual({ strategy: 'no_breach' });
+      expect(createPayload.no_data).toEqual({ strategy: 'keep_last' });
       expect(createPayload.state_transition).toEqual({
-        pending_count: 3,
-        pending_timeframe: '10m',
+        pending: { count: 3, timeframe: '10m' },
+        recovering: { count: 0 },
       });
     });
   });

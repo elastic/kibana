@@ -13352,17 +13352,22 @@ paths:
                             - production
                             - infra
                           version: 1
+                        no_data:
+                          strategy: keep_last
                         query:
+                          base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
-                            query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                          format: standalone
-                        recovery_strategy: no_breach
+                            segment: WHERE avg_cpu > 0.9
+                        recovery:
+                          strategy: no_breach
                         schedule:
                           every: 1m
                           lookback: 5m
                         state_transition:
-                          pending_count: 1
-                          recovering_count: 1
+                          pending:
+                            count: 1
+                          recovering:
+                            count: 1
                         time_field: '@timestamp'
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
@@ -13488,17 +13493,22 @@ paths:
                     tags:
                       - production
                       - infra
+                  no_data:
+                    strategy: keep_last
                   query:
+                    base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                     breach:
-                      query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                    format: standalone
-                  recovery_strategy: no_breach
+                      segment: WHERE avg_cpu > 0.9
+                  recovery:
+                    strategy: no_breach
                   schedule:
                     every: 1m
                     lookback: 5m
                   state_transition:
-                    pending_count: 1
-                    recovering_count: 1
+                    pending:
+                      count: 1
+                    recovering:
+                      count: 1
                   time_field: '@timestamp'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_rule'
@@ -13526,17 +13536,22 @@ paths:
                         - production
                         - infra
                       version: 1
+                    no_data:
+                      strategy: keep_last
                     query:
+                      base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
-                        query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                      format: standalone
-                    recovery_strategy: no_breach
+                        segment: WHERE avg_cpu > 0.9
+                    recovery:
+                      strategy: no_breach
                     schedule:
                       every: 1m
                       lookback: 5m
                     state_transition:
-                      pending_count: 1
-                      recovering_count: 1
+                      pending:
+                        count: 1
+                      recovering:
+                        count: 1
                     time_field: '@timestamp'
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -13658,17 +13673,22 @@ paths:
                         tags:
                           - production
                           - infra
+                      no_data:
+                        strategy: keep_last
                       query:
+                        base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                         breach:
-                          query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                        format: standalone
-                      recovery_strategy: no_breach
+                          segment: WHERE avg_cpu > 0.9
+                      recovery:
+                        strategy: no_breach
                       schedule:
                         every: 1m
                         lookback: 5m
                       state_transition:
-                        pending_count: 1
-                        recovering_count: 1
+                        pending:
+                          count: 1
+                        recovering:
+                          count: 1
                       time_field: '@timestamp'
                     - enabled: false
                       grouping:
@@ -13682,17 +13702,22 @@ paths:
                         tags:
                           - production
                           - infra
+                      no_data:
+                        strategy: keep_last
                       query:
+                        base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                         breach:
-                          query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                        format: standalone
-                      recovery_strategy: no_breach
+                          segment: WHERE avg_cpu > 0.9
+                      recovery:
+                        strategy: no_breach
                       schedule:
                         every: 1m
                         lookback: 5m
                       state_transition:
-                        pending_count: 1
-                        recovering_count: 1
+                        pending:
+                          count: 1
+                        recovering:
+                          count: 1
                       time_field: '@timestamp'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rules_request'
@@ -13722,17 +13747,22 @@ paths:
                             - production
                             - infra
                           version: 1
+                        no_data:
+                          strategy: keep_last
                         query:
+                          base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
-                            query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                          format: standalone
-                        recovery_strategy: no_breach
+                            segment: WHERE avg_cpu > 0.9
+                        recovery:
+                          strategy: no_breach
                         schedule:
                           every: 1m
                           lookback: 5m
                         state_transition:
-                          pending_count: 1
-                          recovering_count: 1
+                          pending:
+                            count: 1
+                          recovering:
+                            count: 1
                         time_field: '@timestamp'
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
@@ -13754,17 +13784,22 @@ paths:
                             - production
                             - infra
                           version: 1
+                        no_data:
+                          strategy: keep_last
                         query:
+                          base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
-                            query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                          format: standalone
-                        recovery_strategy: no_breach
+                            segment: WHERE avg_cpu > 0.9
+                        recovery:
+                          strategy: no_breach
                         schedule:
                           every: 1m
                           lookback: 5m
                         state_transition:
-                          pending_count: 1
-                          recovering_count: 1
+                          pending:
+                            count: 1
+                          recovering:
+                            count: 1
                         time_field: '@timestamp'
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
@@ -14265,17 +14300,22 @@ paths:
                             - production
                             - infra
                           version: 1
+                        no_data:
+                          strategy: keep_last
                         query:
+                          base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
-                            query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                          format: standalone
-                        recovery_strategy: no_breach
+                            segment: WHERE avg_cpu > 0.9
+                        recovery:
+                          strategy: no_breach
                         schedule:
                           every: 1m
                           lookback: 5m
                         state_transition:
-                          pending_count: 1
-                          recovering_count: 1
+                          pending:
+                            count: 1
+                          recovering:
+                            count: 1
                         time_field: '@timestamp'
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
@@ -15148,17 +15188,22 @@ paths:
                         - production
                         - infra
                       version: 1
+                    no_data:
+                      strategy: keep_last
                     query:
+                      base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
-                        query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                      format: standalone
-                    recovery_strategy: no_breach
+                        segment: WHERE avg_cpu > 0.9
+                    recovery:
+                      strategy: no_breach
                     schedule:
                       every: 1m
                       lookback: 5m
                     state_transition:
-                      pending_count: 1
-                      recovering_count: 1
+                      pending:
+                        count: 1
+                      recovering:
+                        count: 1
                     time_field: '@timestamp'
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -15324,17 +15369,22 @@ paths:
                         - production
                         - infra
                       version: 1
+                    no_data:
+                      strategy: keep_last
                     query:
+                      base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
-                        query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                      format: standalone
-                    recovery_strategy: no_breach
+                        segment: WHERE avg_cpu > 0.9
+                    recovery:
+                      strategy: no_breach
                     schedule:
                       every: 1m
                       lookback: 5m
                     state_transition:
-                      pending_count: 1
-                      recovering_count: 1
+                      pending:
+                        count: 1
+                      recovering:
+                        count: 1
                     time_field: '@timestamp'
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -15492,17 +15542,22 @@ paths:
                     tags:
                       - production
                       - infra
+                  no_data:
+                    strategy: keep_last
                   query:
+                    base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                     breach:
-                      query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                    format: standalone
-                  recovery_strategy: no_breach
+                      segment: WHERE avg_cpu > 0.9
+                  recovery:
+                    strategy: no_breach
                   schedule:
                     every: 1m
                     lookback: 5m
                   state_transition:
-                    pending_count: 1
-                    recovering_count: 1
+                    pending:
+                      count: 1
+                    recovering:
+                      count: 1
                   time_field: '@timestamp'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_rule'
@@ -15530,17 +15585,22 @@ paths:
                         - production
                         - infra
                       version: 1
+                    no_data:
+                      strategy: keep_last
                     query:
+                      base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
-                        query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                      format: standalone
-                    recovery_strategy: no_breach
+                        segment: WHERE avg_cpu > 0.9
+                    recovery:
+                      strategy: no_breach
                     schedule:
                       every: 1m
                       lookback: 5m
                     state_transition:
-                      pending_count: 1
-                      recovering_count: 1
+                      pending:
+                        count: 1
+                      recovering:
+                        count: 1
                     time_field: '@timestamp'
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -15572,17 +15632,22 @@ paths:
                         - production
                         - infra
                       version: 1
+                    no_data:
+                      strategy: keep_last
                     query:
+                      base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
-                        query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                      format: standalone
-                    recovery_strategy: no_breach
+                        segment: WHERE avg_cpu > 0.9
+                    recovery:
+                      strategy: no_breach
                     schedule:
                       every: 1m
                       lookback: 5m
                     state_transition:
-                      pending_count: 1
-                      recovering_count: 1
+                      pending:
+                        count: 1
+                      recovering:
+                        count: 1
                     time_field: '@timestamp'
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -15733,17 +15798,22 @@ paths:
                         - production
                         - infra
                       version: 1
+                    no_data:
+                      strategy: keep_last
                     query:
+                      base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
-                        query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                      format: standalone
-                    recovery_strategy: no_breach
+                        segment: WHERE avg_cpu > 0.9
+                    recovery:
+                      strategy: no_breach
                     schedule:
                       every: 1m
                       lookback: 5m
                     state_transition:
-                      pending_count: 1
-                      recovering_count: 1
+                      pending:
+                        count: 1
+                      recovering:
+                        count: 1
                     time_field: '@timestamp'
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -15912,17 +15982,22 @@ paths:
                         - production
                         - infra
                       version: 1
+                    no_data:
+                      strategy: keep_last
                     query:
+                      base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
-                        query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                      format: standalone
-                    recovery_strategy: no_breach
+                        segment: WHERE avg_cpu > 0.9
+                    recovery:
+                      strategy: no_breach
                     schedule:
                       every: 1m
                       lookback: 5m
                     state_transition:
-                      pending_count: 1
-                      recovering_count: 1
+                      pending:
+                        count: 1
+                      recovering:
+                        count: 1
                     time_field: '@timestamp'
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -149118,83 +149193,21 @@ components:
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
-        no_data_strategy:
-          anyOf:
-            - description: Keeps the alert's last status when the rule finds no data.
-              enum:
-                - last_known_status
-              type: string
-            - description: Not accepted when creating or updating rules. Do not send this value.
-              enum:
-                - emit
-              type: string
-            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
-              enum:
-                - recover
-              type: string
-            - description: Ignores runs where the rule finds no data.
-              enum:
-                - none
-              type: string
-          description: 'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
+        no_data:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
-        recovery_strategy:
-          anyOf:
-            - description: Recovers an alert when the breach query no longer returns matches.
-              enum:
-                - no_breach
-              type: string
-            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
-              enum:
-                - query
-              type: string
-            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
-              enum:
-                - none
-              type: string
-          description: 'The condition that marks an alert recovered. If omitted or set to `none`, recovery is disabled: the alert stays `active` even after the breach query stops returning matches, and `state_transition.recovering_count` / `recovering_timeframe` are not allowed. Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.'
+        recovery:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          additionalProperties: false
-          description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
           nullable: true
-          type: object
-          properties:
-            pending_count:
-              description: Number of consecutive matches required before the alert becomes `active`.
-              maximum: 1000
-              minimum: 0
-              type: integer
-            pending_operator:
-              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
-              enum:
-                - AND
-                - OR
-              type: string
-            pending_timeframe:
-              description: Time window used with `pending_count`, for example `5m` or `15m`.
-              maxLength: 32
-              type: string
-            recovering_count:
-              description: Number of consecutive recoveries required before the alert becomes `inactive`.
-              maximum: 1000
-              minimum: 0
-              type: integer
-            recovering_operator:
-              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
-              enum:
-                - AND
-                - OR
-              type: string
-            recovering_timeframe:
-              description: Time window used with `recovering_count`, for example `5m` or `15m`.
-              maxLength: 32
-              type: string
         time_field:
           default: '@timestamp'
-          description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
           maxLength: 128
           minLength: 1
           type: string
@@ -149435,47 +149448,6 @@ components:
           type: array
       required:
         - items
-    Kibana_HTTP_APIs_alerting_composed_rule_query:
-      additionalProperties: false
-      description: 'Composed query: a shared base with appendable breach and recovery segments.'
-      type: object
-      properties:
-        base:
-          description: Base ES|QL query. Time filters are applied automatically via the lookback window.
-          maxLength: 10000
-          minLength: 1
-          type: string
-        breach:
-          additionalProperties: false
-          description: Breach detection configuration. Omit to treat every base row as a breach.
-          type: object
-          properties:
-            segment:
-              description: A clause appended to the end of the rule's ES|QL query. Required in breach blocks.
-              maxLength: 10000
-              minLength: 1
-              type: string
-          required:
-            - segment
-        format:
-          enum:
-            - composed
-          type: string
-        recovery:
-          additionalProperties: false
-          description: Recovery query segment. Required when recovery_strategy is "query".
-          type: object
-          properties:
-            segment:
-              description: Appendable ES|QL segment for recovery detection.
-              maxLength: 10000
-              minLength: 1
-              type: string
-          required:
-            - segment
-      required:
-        - format
-        - base
     Kibana_HTTP_APIs_alerting_error_response:
       additionalProperties: false
       type: object
@@ -149616,83 +149588,21 @@ components:
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
-        no_data_strategy:
-          anyOf:
-            - description: Keeps the alert's last status when the rule finds no data.
-              enum:
-                - last_known_status
-              type: string
-            - description: Not accepted when creating or updating rules. Do not send this value.
-              enum:
-                - emit
-              type: string
-            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
-              enum:
-                - recover
-              type: string
-            - description: Ignores runs where the rule finds no data.
-              enum:
-                - none
-              type: string
-          description: 'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
+        no_data:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
-        recovery_strategy:
-          anyOf:
-            - description: Recovers an alert when the breach query no longer returns matches.
-              enum:
-                - no_breach
-              type: string
-            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
-              enum:
-                - query
-              type: string
-            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
-              enum:
-                - none
-              type: string
-          description: 'The condition that marks an alert recovered. If omitted or set to `none`, recovery is disabled: the alert stays `active` even after the breach query stops returning matches, and `state_transition.recovering_count` / `recovering_timeframe` are not allowed. Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.'
+        recovery:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          additionalProperties: false
-          description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
           nullable: true
-          type: object
-          properties:
-            pending_count:
-              description: Number of consecutive matches required before the alert becomes `active`.
-              maximum: 1000
-              minimum: 0
-              type: integer
-            pending_operator:
-              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
-              enum:
-                - AND
-                - OR
-              type: string
-            pending_timeframe:
-              description: Time window used with `pending_count`, for example `5m` or `15m`.
-              maxLength: 32
-              type: string
-            recovering_count:
-              description: Number of consecutive recoveries required before the alert becomes `inactive`.
-              maximum: 1000
-              minimum: 0
-              type: integer
-            recovering_operator:
-              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
-              enum:
-                - AND
-                - OR
-              type: string
-            recovering_timeframe:
-              description: Time window used with `recovering_count`, for example `5m` or `15m`.
-              maxLength: 32
-              type: string
         time_field:
           default: '@timestamp'
-          description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
           maxLength: 128
           minLength: 1
           type: string
@@ -149884,6 +149794,18 @@ components:
         - id
         - type
         - data
+    Kibana_HTTP_APIs_alerting_rule_breach:
+      additionalProperties: false
+      description: Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.
+      type: object
+      properties:
+        segment:
+          description: ES|QL clause appended to `query.base`, for example `WHERE avg_cpu > 0.85`. Don't include a `FROM` clause.
+          maxLength: 10000
+          minLength: 1
+          type: string
+      required:
+        - segment
     Kibana_HTTP_APIs_alerting_rule_execution:
       additionalProperties: false
       type: object
@@ -150049,16 +149971,163 @@ components:
           type: array
       required:
         - name
-    Kibana_HTTP_APIs_alerting_rule_query:
-      description: Detection query configuration.
+    Kibana_HTTP_APIs_alerting_rule_no_data:
+      description: What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.
       discriminator:
         mapping:
-          composed: '#/components/schemas/Kibana_HTTP_APIs_alerting_composed_rule_query'
-          standalone: '#/components/schemas/Kibana_HTTP_APIs_alerting_standalone_rule_query'
-        propertyName: format
+          alert: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_alert'
+          ignore: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_ignore'
+          keep_last: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_keep_last'
+          resolve: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_resolve'
+        propertyName: strategy
       oneOf:
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_composed_rule_query'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_standalone_rule_query'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_ignore'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_keep_last'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_resolve'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_alert'
+    Kibana_HTTP_APIs_alerting_rule_no_data_alert:
+      additionalProperties: false
+      description: Marks an existing alert episode `active` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.
+      type: object
+      properties:
+        query:
+          description: Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        strategy:
+          enum:
+            - alert
+          type: string
+      required:
+        - strategy
+    Kibana_HTTP_APIs_alerting_rule_no_data_ignore:
+      additionalProperties: false
+      description: Does not check whether a group still has data. Missing groups do not produce `no_data` events.
+      type: object
+      properties:
+        strategy:
+          enum:
+            - ignore
+          type: string
+      required:
+        - strategy
+    Kibana_HTTP_APIs_alerting_rule_no_data_keep_last:
+      additionalProperties: false
+      description: Holds the alert episode's current status when the rule finds no data.
+      type: object
+      properties:
+        query:
+          description: Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        strategy:
+          enum:
+            - keep_last
+          type: string
+      required:
+        - strategy
+    Kibana_HTTP_APIs_alerting_rule_no_data_resolve:
+      additionalProperties: false
+      description: Closes the alert episode the first time the rule finds no data for a group.
+      type: object
+      properties:
+        query:
+          description: Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        strategy:
+          enum:
+            - resolve
+          type: string
+      required:
+        - strategy
+    Kibana_HTTP_APIs_alerting_rule_query:
+      additionalProperties: false
+      description: ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.
+      type: object
+      properties:
+        base:
+          description: ES|QL query that specifies the data to evaluate. Must include a `FROM` clause. Kibana applies the time filter from `schedule.lookback` using `time_field`.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        breach:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_breach'
+      required:
+        - base
+    Kibana_HTTP_APIs_alerting_rule_recovery:
+      description: When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+      discriminator:
+        mapping:
+          condition: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_condition'
+          manual: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_manual'
+          no_breach: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_no_breach'
+          query: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_query'
+        propertyName: strategy
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_no_breach'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_condition'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_query'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_manual'
+    Kibana_HTTP_APIs_alerting_rule_recovery_condition:
+      additionalProperties: false
+      description: Recovers the alert episode when `query.base` plus `segment` returns the group. Requires `query.breach`.
+      type: object
+      properties:
+        segment:
+          description: ES|QL clause appended to `query.base`, for example `WHERE avg_cpu < 0.60`. Don't include a `FROM` clause.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        strategy:
+          enum:
+            - condition
+          type: string
+      required:
+        - strategy
+        - segment
+    Kibana_HTTP_APIs_alerting_rule_recovery_manual:
+      additionalProperties: false
+      description: Does not recover automatically. Close the alert episode with a user action. `state_transition.recovering` has no effect.
+      type: object
+      properties:
+        strategy:
+          enum:
+            - manual
+          type: string
+      required:
+        - strategy
+    Kibana_HTTP_APIs_alerting_rule_recovery_no_breach:
+      additionalProperties: false
+      description: Recovers the alert episode when its group no longer appears in the breach results.
+      type: object
+      properties:
+        strategy:
+          enum:
+            - no_breach
+          type: string
+      required:
+        - strategy
+    Kibana_HTTP_APIs_alerting_rule_recovery_query:
+      additionalProperties: false
+      description: Recovers the alert episode when this separate query returns the group.
+      type: object
+      properties:
+        query:
+          description: Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert episode.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        strategy:
+          enum:
+            - query
+          type: string
+      required:
+        - strategy
+        - query
     Kibana_HTTP_APIs_alerting_rule_response:
       additionalProperties: false
       type: object
@@ -150098,83 +150167,19 @@ components:
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
-        no_data_strategy:
-          anyOf:
-            - description: Keeps the alert's last status when the rule finds no data.
-              enum:
-                - last_known_status
-              type: string
-            - description: Not accepted when creating or updating rules. Do not send this value.
-              enum:
-                - emit
-              type: string
-            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
-              enum:
-                - recover
-              type: string
-            - description: Ignores runs where the rule finds no data.
-              enum:
-                - none
-              type: string
-          description: 'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
+        no_data:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
-        recovery_strategy:
-          anyOf:
-            - description: Recovers an alert when the breach query no longer returns matches.
-              enum:
-                - no_breach
-              type: string
-            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
-              enum:
-                - query
-              type: string
-            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
-              enum:
-                - none
-              type: string
-          description: 'The condition that marks an alert recovered. If omitted or set to `none`, recovery is disabled: the alert stays `active` even after the breach query stops returning matches, and `state_transition.recovering_count` / `recovering_timeframe` are not allowed. Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.'
+        recovery:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          additionalProperties: false
-          description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
-          nullable: true
-          type: object
-          properties:
-            pending_count:
-              description: Number of consecutive matches required before the alert becomes `active`.
-              maximum: 1000
-              minimum: 0
-              type: integer
-            pending_operator:
-              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
-              enum:
-                - AND
-                - OR
-              type: string
-            pending_timeframe:
-              description: Time window used with `pending_count`, for example `5m` or `15m`.
-              maxLength: 32
-              type: string
-            recovering_count:
-              description: Number of consecutive recoveries required before the alert becomes `inactive`.
-              maximum: 1000
-              minimum: 0
-              type: integer
-            recovering_operator:
-              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
-              enum:
-                - AND
-                - OR
-              type: string
-            recovering_timeframe:
-              description: Time window used with `recovering_count`, for example `5m` or `15m`.
-              maxLength: 32
-              type: string
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
         time_field:
           default: '@timestamp'
-          description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
           maxLength: 128
           minLength: 1
           type: string
@@ -150249,6 +150254,55 @@ components:
           type: string
       required:
         - every
+    Kibana_HTTP_APIs_alerting_rule_state_transition:
+      additionalProperties: false
+      description: Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
+      type: object
+      properties:
+        pending:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_pending'
+          description: Delay before a match opens an alert episode.
+        recovering:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_recovering'
+          description: Delay before a recovered match closes the alert episode. Has no effect when `recovery.strategy` is `manual`.
+    Kibana_HTTP_APIs_alerting_rule_state_transition_pending:
+      additionalProperties: false
+      type: object
+      properties:
+        count:
+          description: Consecutive matches required before the alert episode becomes `active`. Set to `0` to open it on the first match.
+          maximum: 1000
+          minimum: 0
+          type: integer
+        operator:
+          description: When both `count` and `timeframe` are set, `AND` requires both and `OR` requires either. Allowed only when both fields are present.
+          enum:
+            - AND
+            - OR
+          type: string
+        timeframe:
+          description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
+          maxLength: 32
+          type: string
+    Kibana_HTTP_APIs_alerting_rule_state_transition_recovering:
+      additionalProperties: false
+      type: object
+      properties:
+        count:
+          description: Consecutive recoveries required before the alert episode becomes `inactive`. Set to `0` to close it on the first recovery.
+          maximum: 1000
+          minimum: 0
+          type: integer
+        operator:
+          description: When both `count` and `timeframe` are set, `AND` requires both and `OR` requires either. Allowed only when both fields are present.
+          enum:
+            - AND
+            - OR
+          type: string
+        timeframe:
+          description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
+          maxLength: 32
+          type: string
     Kibana_HTTP_APIs_alerting_snooze_action_policy_request:
       additionalProperties: false
       type: object
@@ -150260,54 +150314,6 @@ components:
           type: string
       required:
         - snoozed_until
-    Kibana_HTTP_APIs_alerting_standalone_rule_query:
-      additionalProperties: false
-      description: 'Standalone queries: independent full queries for breach, recovery, and no_data.'
-      type: object
-      properties:
-        breach:
-          additionalProperties: false
-          description: Breach detection configuration (required).
-          type: object
-          properties:
-            query:
-              description: Full ES|QL query for breach detection (required).
-              maxLength: 10000
-              minLength: 1
-              type: string
-          required:
-            - query
-        format:
-          enum:
-            - standalone
-          type: string
-        no_data:
-          additionalProperties: false
-          description: No-data detection query. Required when no_data_strategy is not "none".
-          type: object
-          properties:
-            query:
-              description: Full ES|QL query that detects presence of data.
-              maxLength: 10000
-              minLength: 1
-              type: string
-          required:
-            - query
-        recovery:
-          additionalProperties: false
-          description: Recovery query. Required when recovery_strategy is "query".
-          type: object
-          properties:
-            query:
-              description: Full ES|QL query for recovery detection.
-              maxLength: 10000
-              minLength: 1
-              type: string
-          required:
-            - query
-      required:
-        - format
-        - breach
     Kibana_HTTP_APIs_alerting_update_action_policy:
       additionalProperties: false
       type: object
@@ -150415,44 +150421,12 @@ components:
               minItems: 1
               nullable: true
               type: array
-        no_data_strategy:
-          anyOf:
-            - description: Keeps the alert's last status when the rule finds no data.
-              enum:
-                - last_known_status
-              type: string
-            - description: Not accepted when creating or updating rules. Do not send this value.
-              enum:
-                - emit
-              type: string
-            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
-              enum:
-                - recover
-              type: string
-            - description: Ignores runs where the rule finds no data.
-              enum:
-                - none
-              type: string
-          description: 'How the rule behaves when it finds no data for a group. If omitted, the existing value is kept. Set to `null` to clear it (those runs are then ignored). If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
-          nullable: true
+        no_data:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
-        recovery_strategy:
-          anyOf:
-            - description: Recovers an alert when the breach query no longer returns matches.
-              enum:
-                - no_breach
-              type: string
-            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
-              enum:
-                - query
-              type: string
-            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
-              enum:
-                - none
-              type: string
-          description: The condition that marks an alert recovered. If omitted, the existing value is kept. Set to `null` to clear it (recovery is then disabled). Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`. With `none`, the alert stays `active`, even after the breach query stops returning matches. `state_transition.recovering_count` and `recovering_timeframe` require an explicit `recovery_strategy` other than `none`.
-          nullable: true
+        recovery:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
           additionalProperties: false
           nullable: true
@@ -150467,45 +150441,11 @@ components:
               maxLength: 32
               type: string
         state_transition:
-          anyOf:
-            - additionalProperties: false
-              description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
-              type: object
-              properties:
-                pending_count:
-                  description: Number of consecutive matches required before the alert becomes `active`.
-                  maximum: 1000
-                  minimum: 0
-                  type: integer
-                pending_operator:
-                  description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
-                  enum:
-                    - AND
-                    - OR
-                  type: string
-                pending_timeframe:
-                  description: Time window used with `pending_count`, for example `5m` or `15m`.
-                  maxLength: 32
-                  type: string
-                recovering_count:
-                  description: Number of consecutive recoveries required before the alert becomes `inactive`.
-                  maximum: 1000
-                  minimum: 0
-                  type: integer
-                recovering_operator:
-                  description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
-                  enum:
-                    - AND
-                    - OR
-                  type: string
-                recovering_timeframe:
-                  description: Time window used with `recovering_count`, for example `5m` or `15m`.
-                  maxLength: 32
-                  type: string
-            - nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
           nullable: true
         time_field:
-          description: Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`. If omitted, the existing value is kept.
           maxLength: 128
           minLength: 1
           type: string

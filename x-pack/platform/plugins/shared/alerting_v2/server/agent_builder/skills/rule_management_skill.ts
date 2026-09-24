@@ -110,12 +110,12 @@ ${generateRuleOperationsDoc()}
 
 ## ES|QL Query Guidance
 
-- Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
-  - **Composed** shares a \`base\` query with appendable \`breach.segment\` and optional \`recovery.segment\`:
-    \`{ format: "composed", base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
-    Omit \`breach\` to treat every row returned by \`base\` as a breach.
-  - **Standalone** uses independent full queries:
-    \`{ format: "standalone", breach: { query: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" } }\`
+- A rule defines a \`base\` query plus an optional \`breach\` segment appended to it.
+  \`{ base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
+  Omit \`breach\` to treat every row returned by \`base\` as a breach:
+  \`{ base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" }\`
+- \`base\` is the only place a \`FROM\` belongs. A \`breach.segment\` is a bare clause such as \`WHERE avg_cpu > 0.9\`, appended to \`base\`.
+- \`set_query\` also accepts optional \`recovery\` and \`no_data\` objects. See the [recovery-strategy reference](./references/recovery-strategy.md) and the [no-data-strategy reference](./references/no-data-strategy.md).
 - The base query must be a valid ES|QL statement.
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
@@ -190,10 +190,10 @@ When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\`
 When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ### Recovery Strategy
-When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, set \`recovery_strategy\` on \`set_query\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
+When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, set \`recovery\` on \`set_query\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
 
 ### No-Data Strategy
-When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status"), set \`no_data_strategy\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
+When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), set \`no_data\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,

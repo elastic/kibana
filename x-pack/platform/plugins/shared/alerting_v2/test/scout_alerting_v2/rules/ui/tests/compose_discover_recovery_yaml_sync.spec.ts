@@ -22,7 +22,7 @@ const yamlRule = ({
   recoverySegment,
 }: {
   name: string;
-  recoveryStrategy: 'no_breach' | 'query' | 'none';
+  recoveryStrategy: 'no_breach' | 'condition' | 'manual';
   recoverySegment?: string;
 }) => {
   const lines = [
@@ -34,12 +34,14 @@ const yamlRule = ({
     '  every: 5s',
     '  lookback: 1m',
     'query:',
-    '  format: composed',
     `  base: ${BASE_QUERY}`,
     '  breach:',
     `    segment: ${BREACH_SEGMENT}`,
-    ...(recoverySegment ? ['  recovery:', `    segment: ${recoverySegment}`] : []),
-    `recovery_strategy: ${recoveryStrategy}`,
+    'recovery:',
+    `  strategy: ${recoveryStrategy}`,
+    ...(recoverySegment ? [`  segment: ${recoverySegment}`] : []),
+    'no_data:',
+    '  strategy: ignore',
   ];
   return lines.join('\n');
 };
@@ -93,19 +95,15 @@ test.describe(
         buildCreateRuleData({
           kind: 'alert',
           time_field: '@timestamp',
-          query: {
-            format: 'composed',
-            base: BASE_QUERY,
-            breach: { segment: BREACH_SEGMENT },
-          },
-          recovery_strategy: 'no_breach',
+          query: { base: BASE_QUERY, breach: { segment: BREACH_SEGMENT } },
+          recovery: { strategy: 'no_breach' },
           metadata: { name },
         })
       );
       return rule.id;
     };
 
-    test('recovery tab appears in the YAML-mode sandbox when YAML sets recovery_strategy: query', async ({
+    test('recovery tab appears in the YAML-mode sandbox when YAML sets recovery.strategy: condition', async ({
       pageObjects,
       apiServices,
     }) => {
@@ -131,11 +129,11 @@ test.describe(
         await expect(pageObjects.composeDiscover.sandboxTab('recovery')).toBeHidden();
       });
 
-      await test.step('set YAML to recovery_strategy: query with a recovery segment', async () => {
+      await test.step('set YAML to recovery.strategy: condition with a recovery segment', async () => {
         await pageObjects.composeDiscover.setYamlText(
           yamlRule({
             name: 'scout-recovery-yaml-tab-appears',
-            recoveryStrategy: 'query',
+            recoveryStrategy: 'condition',
             recoverySegment: RECOVERY_SEGMENT,
           })
         );
@@ -168,13 +166,13 @@ test.describe(
           .toBe('no_breach');
       });
 
-      await test.step('edit recovery_strategy to "query" in YAML and return to the form', async () => {
+      await test.step('edit recovery.strategy to "condition" in YAML and return to the form', async () => {
         await pageObjects.composeDiscover.toggleEditMode('yaml');
         await expect(pageObjects.composeDiscover.yamlBadge).toBeVisible();
         await pageObjects.composeDiscover.setYamlText(
           yamlRule({
             name: 'scout-recovery-yaml-to-dropdown',
-            recoveryStrategy: 'query',
+            recoveryStrategy: 'condition',
             recoverySegment: RECOVERY_SEGMENT,
           })
         );
@@ -184,20 +182,22 @@ test.describe(
       await test.step('the dropdown and recovery condition reflect the YAML edit', async () => {
         await expect
           .poll(() => pageObjects.composeDiscover.getSelectedRecoveryType())
-          .toBe('query');
+          .toBe('condition');
         await expect(
           pageObjects.composeDiscover.flyout.getByText('Recovery condition')
         ).toBeVisible();
         await expect(pageObjects.composeDiscover.flyout.getByText(RECOVERY_SEGMENT)).toBeVisible();
       });
 
-      await test.step('editing recovery_strategy to "none" in YAML also reaches the dropdown', async () => {
+      await test.step('editing recovery.strategy to "manual" in YAML also reaches the dropdown', async () => {
         await pageObjects.composeDiscover.toggleEditMode('yaml');
         await pageObjects.composeDiscover.setYamlText(
-          yamlRule({ name: 'scout-recovery-yaml-to-dropdown', recoveryStrategy: 'none' })
+          yamlRule({ name: 'scout-recovery-yaml-to-dropdown', recoveryStrategy: 'manual' })
         );
         await pageObjects.composeDiscover.toggleEditMode('form');
-        await expect.poll(() => pageObjects.composeDiscover.getSelectedRecoveryType()).toBe('none');
+        await expect
+          .poll(() => pageObjects.composeDiscover.getSelectedRecoveryType())
+          .toBe('manual');
       });
     });
 
@@ -212,13 +212,8 @@ test.describe(
           buildCreateRuleData({
             kind: 'alert',
             time_field: '@timestamp',
-            query: {
-              format: 'composed',
-              base: BASE_QUERY,
-              breach: { segment: BREACH_SEGMENT },
-              recovery: { segment: RECOVERY_SEGMENT },
-            },
-            recovery_strategy: 'query',
+            query: { base: BASE_QUERY, breach: { segment: BREACH_SEGMENT } },
+            recovery: { strategy: 'condition', segment: RECOVERY_SEGMENT },
             metadata: { name: 'scout-recovery-yaml-tab-drops' },
           })
         );
@@ -239,7 +234,7 @@ test.describe(
         );
       });
 
-      await test.step('remove the recovery block and recovery_strategy from YAML', async () => {
+      await test.step('reset the recovery block to no_breach in YAML', async () => {
         await pageObjects.composeDiscover.setYamlText(
           yamlRule({
             name: 'scout-recovery-yaml-tab-drops',
@@ -274,7 +269,7 @@ test.describe(
         await pageObjects.composeDiscover.openEditFlyout(ruleId!);
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await pageObjects.composeDiscover.clickNext(); // Outcome
-        await pageObjects.composeDiscover.selectRecoveryType('query');
+        await pageObjects.composeDiscover.selectRecoveryType('condition');
         // Selecting "Custom recovery" auto-opens the sandbox on the recovery tab.
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
       });
@@ -288,7 +283,7 @@ test.describe(
         await pageObjects.composeDiscover.toggleEditMode('yaml');
         await expect
           .poll(() => pageObjects.composeDiscover.getYamlText())
-          .toContain('recovery_strategy: query');
+          .toContain('strategy: condition');
         await expect
           .poll(() => pageObjects.composeDiscover.getYamlText())
           .toContain(RECOVERY_SEGMENT_UPDATED);
@@ -302,7 +297,7 @@ test.describe(
         ruleId = await seedRule(apiServices, 'scout-recovery-yaml-persists');
       });
 
-      await test.step('open the edit flyout and set recovery_strategy: query in YAML', async () => {
+      await test.step('open the edit flyout and set recovery.strategy: condition in YAML', async () => {
         await gotoRulesListWithRule(pageObjects);
         await pageObjects.composeDiscover.openEditFlyout(ruleId!);
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
@@ -311,7 +306,7 @@ test.describe(
         await pageObjects.composeDiscover.setYamlText(
           yamlRule({
             name: 'scout-recovery-yaml-persists',
-            recoveryStrategy: 'query',
+            recoveryStrategy: 'condition',
             recoverySegment: RECOVERY_SEGMENT,
           })
         );
@@ -324,15 +319,15 @@ test.describe(
 
       await test.step('verify the recovery edit persisted via API', async () => {
         await expect
-          .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).recovery_strategy, {
+          .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).recovery?.strategy, {
             timeout: 30_000,
           })
-          .toBe('query');
+          .toBe('condition');
         await expect
           .poll(
             async () => {
-              const rule = await apiServices.alertingV2.rules.get(ruleId!);
-              return rule.query.format === 'composed' ? rule.query.recovery?.segment : undefined;
+              const { recovery } = await apiServices.alertingV2.rules.get(ruleId!);
+              return recovery?.strategy === 'condition' ? recovery.segment : undefined;
             },
             { timeout: 30_000 }
           )

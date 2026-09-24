@@ -56,7 +56,7 @@ describe('BasicTransitionStrategy', () => {
     it('returns true for any rule (acts as fallback)', () => {
       expect(strategy.canHandle(createRuleResponse())).toBe(true);
       expect(
-        strategy.canHandle(createRuleResponse({ state_transition: { pending_count: 3 } }))
+        strategy.canHandle(createRuleResponse({ state_transition: { pending: { count: 3 } } }))
       ).toBe(true);
     });
   });
@@ -162,16 +162,16 @@ describe('BasicTransitionStrategy', () => {
     });
   });
 
-  describe('no_data event branching on rule.no_data_strategy', () => {
+  describe('no_data event branching on rule.no_data.strategy', () => {
     it.each<[AlertEpisodeStatus]>([
       [alertEpisodeStatus.inactive],
       [alertEpisodeStatus.pending],
       [alertEpisodeStatus.active],
       [alertEpisodeStatus.recovering],
-    ])("'emit' sets %s to active", (from) => {
+    ])("'alert' sets %s to active", (from) => {
       const result = getNextState({
         eventStatus: alertEventStatus.no_data,
-        noDataStrategy: 'emit',
+        noDataStrategy: 'alert',
         previousEpisode: buildLatestAlertEvent({
           episodeStatus: from,
           eventStatus: alertEventStatus.no_data,
@@ -185,10 +185,10 @@ describe('BasicTransitionStrategy', () => {
       [alertEpisodeStatus.pending],
       [alertEpisodeStatus.active],
       [alertEpisodeStatus.recovering],
-    ])("'last_known_status' preserves %s", (from) => {
+    ])("'keep_last' preserves %s", (from) => {
       const result = getNextState({
         eventStatus: alertEventStatus.no_data,
-        noDataStrategy: 'last_known_status',
+        noDataStrategy: 'keep_last',
         previousEpisode: buildLatestAlertEvent({
           episodeStatus: from,
           eventStatus: alertEventStatus.no_data,
@@ -202,10 +202,10 @@ describe('BasicTransitionStrategy', () => {
       [alertEpisodeStatus.pending, alertEpisodeStatus.inactive],
       [alertEpisodeStatus.active, alertEpisodeStatus.inactive],
       [alertEpisodeStatus.recovering, alertEpisodeStatus.inactive],
-    ])("'recover' transitions %s → %s (resolves immediately to inactive)", (from, to) => {
+    ])("'resolve' transitions %s → %s (resolves immediately to inactive)", (from, to) => {
       const result = getNextState({
         eventStatus: alertEventStatus.no_data,
-        noDataStrategy: 'recover',
+        noDataStrategy: 'resolve',
         previousEpisode: buildLatestAlertEvent({
           episodeStatus: from,
           eventStatus: alertEventStatus.no_data,

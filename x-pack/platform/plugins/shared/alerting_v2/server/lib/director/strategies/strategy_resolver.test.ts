@@ -23,14 +23,8 @@ describe('TransitionStrategyFactory', () => {
       expect(resolved.name).toBe('basic');
     });
 
-    it('returns the basic (fallback) strategy when stateTransition is null', () => {
-      const rule = createRuleResponse({ state_transition: null });
-      const resolved = factory.getStrategy(rule);
-      expect(resolved.name).toBe('basic');
-    });
-
     it('returns the count_timeframe strategy when rule has stateTransition', () => {
-      const rule = createRuleResponse({ state_transition: { pending_count: 3 } });
+      const rule = createRuleResponse({ state_transition: { pending: { count: 3 } } });
       const resolved = factory.getStrategy(rule);
       expect(resolved.name).toBe('count_timeframe');
     });

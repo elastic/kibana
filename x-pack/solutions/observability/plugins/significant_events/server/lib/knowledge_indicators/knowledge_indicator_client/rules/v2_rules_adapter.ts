@@ -330,14 +330,11 @@ function toV2CommonBody({ definition, isServerless }: ToV2BodyParams) {
     },
     grouping: { fields: [...METRIC_SERIES_GROUPING_FIELDS] },
     query: {
-      format: 'standalone' as const,
-      breach: {
-        query: toV2BreachQuery({
-          esqlQuery: definition.esqlQuery,
-          timestampField: definition.timestampField,
-          isServerless,
-        }),
-      },
+      base: toV2BreachQuery({
+        esqlQuery: definition.esqlQuery,
+        timestampField: definition.timestampField,
+        isServerless,
+      }),
     },
   };
 }

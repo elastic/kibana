@@ -11,9 +11,11 @@ import {
   ruleSavedObjectAttributesSchemaV2,
   ruleSavedObjectAttributesSchemaV3,
   ruleSavedObjectAttributesSchemaV4,
+  ruleSavedObjectAttributesSchemaV5,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
+import { migrateRuleQueryShape } from './migrate_rule_query_shape';
 import { toActor } from './to_actor';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -131,6 +133,32 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV4,
+    },
+  },
+  '7': {
+    // The GA baseline shape: one `query` (`base` plus an optional `breach`
+    // segment) instead of the `composed`/`standalone` union, `recovery` and
+    // `no_data` objects instead of the top-level strategy scalars, and a
+    // `state_transition` nested per phase.
+    //
+    // Additive only. Model version 6's schema requires `query.format` and a
+    // present `query.breach`, so the pre-collapse keys stay on disk for the
+    // rollback window and model version 8 removes them. Rules created after the
+    // upgrade carry only the new shape, matching the model version 4 precedent.
+    //
+    // An `unsafe_transform` rather than a `data_backfill` because `query` has to
+    // merge the two shapes key by key; `data_backfill` deep-merges its result,
+    // which cannot leave a composed `breach.segment` in place while adding
+    // `base` from a standalone `breach.query`.
+    changes: [
+      {
+        type: 'unsafe_transform',
+        transformFn: (typeSafeGuard) => typeSafeGuard(migrateRuleQueryShape),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV5.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV5,
     },
   },
 };

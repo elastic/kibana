@@ -1073,22 +1073,6 @@
             "description": "Earliest rule creation date."
           }
         },
-        "count_by_query_format": {
-          "properties": {
-            "composed": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules using the composed query format."
-              }
-            },
-            "standalone": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules using the standalone query format."
-              }
-            }
-          }
-        },
         "count_by_recovery_strategy": {
           "properties": {
             "no_breach": {
@@ -1097,44 +1081,50 @@
                 "description": "Number of rules with recovery strategy no_breach."
               }
             },
+            "condition": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of rules with recovery strategy condition."
+              }
+            },
             "query": {
               "type": "long",
               "_meta": {
                 "description": "Number of rules with recovery strategy query."
               }
             },
-            "none": {
+            "manual": {
               "type": "long",
               "_meta": {
-                "description": "Number of rules with recovery strategy none."
+                "description": "Number of rules with recovery strategy manual."
               }
             }
           }
         },
         "count_by_no_data_strategy": {
           "properties": {
-            "last_known_status": {
+            "ignore": {
               "type": "long",
               "_meta": {
-                "description": "Number of rules with no-data strategy last_known_status."
+                "description": "Number of rules with no-data strategy ignore."
               }
             },
-            "emit": {
+            "keep_last": {
               "type": "long",
               "_meta": {
-                "description": "Number of rules with no-data strategy emit."
+                "description": "Number of rules with no-data strategy keep_last."
               }
             },
-            "recover": {
+            "resolve": {
               "type": "long",
               "_meta": {
-                "description": "Number of rules with no-data strategy recover."
+                "description": "Number of rules with no-data strategy resolve."
               }
             },
-            "none": {
+            "alert": {
               "type": "long",
               "_meta": {
-                "description": "Number of rules with no-data strategy none."
+                "description": "Number of rules with no-data strategy alert."
               }
             }
           }

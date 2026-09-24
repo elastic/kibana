@@ -16,6 +16,8 @@ export {
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  validateComposedEsqlQuery,
+  composeEsqlQuery,
   parseDurationToMs,
 } from './validation';
 export * from './policy_matcher_schema';

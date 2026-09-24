@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { isNonRepresentableRule, isNonRepresentableFormState } from './is_non_representable';
 import type { FormValues } from '../types';
 
@@ -19,122 +20,106 @@ const createMockRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
     time_field: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
     query: {
-      format: 'composed',
       base: 'FROM logs-*',
       breach: { segment: 'WHERE count > 10' },
     },
+    recovery: { strategy: recoveryStrategy.no_breach },
+    no_data: { strategy: noDataStrategy.ignore },
     ...overrides,
   } as unknown as RuleResponse);
 
 describe('isNonRepresentableRule', () => {
-  it('returns false for a standard composed alert rule', () => {
+  it('returns false for a standard alert rule', () => {
     expect(isNonRepresentableRule(createMockRule())).toBe(false);
   });
 
-  it('returns false for a composed alert with recovery_strategy: query', () => {
+  it('returns true for an alert rule with recovery.strategy: query', () => {
     expect(
       isNonRepresentableRule(
         createMockRule({
-          recovery_strategy: 'query',
-          query: {
-            format: 'composed',
-            base: 'FROM logs-*',
-            breach: { segment: 'WHERE count > 10' },
-            recovery: { segment: 'WHERE count < 5' },
-          },
+          recovery: { strategy: recoveryStrategy.query, query: 'FROM logs-* | WHERE count < 5' },
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for an alert rule with recovery.strategy: condition', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          recovery: { strategy: recoveryStrategy.condition, segment: 'WHERE count < 5' },
         })
       )
     ).toBe(false);
   });
 
-  it('returns false for a signal rule with the required standalone format', () => {
+  it('returns false for recovery.strategy: no_breach', () => {
+    expect(
+      isNonRepresentableRule(createMockRule({ recovery: { strategy: recoveryStrategy.no_breach } }))
+    ).toBe(false);
+  });
+
+  it('returns false for recovery.strategy: manual', () => {
+    expect(
+      isNonRepresentableRule(createMockRule({ recovery: { strategy: recoveryStrategy.manual } }))
+    ).toBe(false);
+  });
+
+  it('returns false when recovery is null or undefined', () => {
+    expect(
+      isNonRepresentableRule({ ...createMockRule(), recovery: null } as unknown as RuleResponse)
+    ).toBe(false);
+    expect(isNonRepresentableRule(createMockRule({ recovery: undefined }))).toBe(false);
+  });
+
+  it('returns false for an unknown recovery strategy value', () => {
     expect(
       isNonRepresentableRule(
         createMockRule({
-          kind: 'signal',
-          query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+          recovery: { strategy: 'future_strategy' } as unknown as RuleResponse['recovery'],
         })
       )
     ).toBe(false);
   });
 
-  it('returns true for a signal rule with composed format', () => {
+  it('returns false for a signal rule, which carries no recovery block', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({ kind: 'signal', recovery: undefined, no_data: undefined })
+      )
+    ).toBe(false);
+  });
+
+  it.each([noDataStrategy.ignore, noDataStrategy.keep_last, noDataStrategy.resolve])(
+    'returns false for no_data.strategy: %s',
+    (strategy) => {
+      expect(isNonRepresentableRule(createMockRule({ no_data: { strategy } }))).toBe(false);
+    }
+  );
+
+  it('returns true for no_data.strategy: alert, which the strategy select omits', () => {
+    expect(
+      isNonRepresentableRule(createMockRule({ no_data: { strategy: noDataStrategy.alert } }))
+    ).toBe(true);
+  });
+
+  it('returns true for a no_data presence query, which the form cannot show', () => {
     expect(
       isNonRepresentableRule(
         createMockRule({
-          kind: 'signal',
-          query: {
-            format: 'composed',
-            base: 'FROM logs-*',
-            breach: { segment: 'WHERE count > 10' },
-          },
+          no_data: { strategy: noDataStrategy.keep_last, query: 'FROM heartbeat-* | LIMIT 1' },
         })
       )
     ).toBe(true);
   });
 
-  it('returns true for any alert + standalone rule', () => {
-    expect(
-      isNonRepresentableRule(
-        createMockRule({
-          query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-        })
-      )
-    ).toBe(true);
-  });
-
-  it('returns true for alert + standalone with a recovery block', () => {
-    expect(
-      isNonRepresentableRule(
-        createMockRule({
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-*' },
-            recovery: { query: 'FROM logs-* | WHERE count < 1' },
-          },
-        })
-      )
-    ).toBe(true);
-  });
-
-  it('returns false for recovery_strategy: no_breach', () => {
-    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'no_breach' }))).toBe(false);
-  });
-
-  it('returns false for recovery_strategy: none', () => {
-    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'none' }))).toBe(false);
-  });
-
-  it('returns false when recovery_strategy is null or undefined', () => {
+  it('returns false for a signal rule, whatever the alert-only blocks hold', () => {
     expect(
       isNonRepresentableRule({
-        ...createMockRule(),
-        recovery_strategy: null,
+        ...createMockRule({ kind: 'signal' }),
+        no_data: { strategy: noDataStrategy.alert },
       } as unknown as RuleResponse)
     ).toBe(false);
-    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: undefined }))).toBe(false);
-  });
-
-  it('returns true for an unknown recovery_strategy value', () => {
-    expect(
-      isNonRepresentableRule(
-        createMockRule({
-          recovery_strategy: 'future_strategy' as RuleResponse['recovery_strategy'],
-        })
-      )
-    ).toBe(true);
-  });
-
-  it('returns true for no_data_strategy: emit (not supported by form dropdown)', () => {
-    expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'emit' }))).toBe(true);
-  });
-
-  it('returns false for supported no_data_strategy values', () => {
-    expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'last_known_status' }))).toBe(
-      false
-    );
-    expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'recover' }))).toBe(false);
-    expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'none' }))).toBe(false);
   });
 });
 
@@ -143,45 +128,62 @@ const baseFormValues: FormValues = {
   metadata: { name: 'Test', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '1m' },
-  query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE count > 10' } },
+  query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 10' } },
+  recovery: { strategy: recoveryStrategy.no_breach },
+  noData: { strategy: noDataStrategy.ignore },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
 };
 
 describe('isNonRepresentableFormState', () => {
-  it('returns false for alert + composed (the form-authored alert shape)', () => {
+  it('returns false for the form-authored alert shape', () => {
     expect(isNonRepresentableFormState(baseFormValues)).toBe(false);
   });
 
-  it('returns true for alert + standalone', () => {
+  it('returns true for alert + recovery.strategy: query', () => {
     expect(
       isNonRepresentableFormState({
         ...baseFormValues,
-        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        recovery: { strategy: recoveryStrategy.query, query: 'FROM logs-* | WHERE count < 5' },
       })
     ).toBe(true);
   });
 
-  it('returns false for signal + standalone (the form-authored signal shape)', () => {
+  it('returns false for alert + recovery.strategy: condition', () => {
     expect(
       isNonRepresentableFormState({
         ...baseFormValues,
-        kind: 'signal',
-        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        recovery: { strategy: recoveryStrategy.condition, segment: 'WHERE count < 5' },
       })
     ).toBe(false);
   });
 
-  it('returns true for signal + composed', () => {
-    expect(
-      isNonRepresentableFormState({
-        ...baseFormValues,
-        kind: 'signal',
-      })
-    ).toBe(true);
+  it('returns false for the form-authored signal shape', () => {
+    const signalValues: FormValues = {
+      ...baseFormValues,
+      kind: 'signal',
+      recovery: undefined,
+      noData: undefined,
+    };
+
+    expect(isNonRepresentableFormState(signalValues)).toBe(false);
   });
 
-  it('returns true for alert + no_data_strategy: emit', () => {
-    expect(isNonRepresentableFormState({ ...baseFormValues, noDataStrategy: 'emit' })).toBe(true);
+  it('returns true for alert + noData.strategy: alert', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      noData: { strategy: noDataStrategy.alert },
+    };
+
+    expect(isNonRepresentableFormState(values)).toBe(true);
+  });
+
+  it('returns true for alert + a noData presence query', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      noData: { strategy: noDataStrategy.resolve, query: 'FROM heartbeat-* | LIMIT 1' },
+    };
+
+    expect(isNonRepresentableFormState(values)).toBe(true);
   });
 });

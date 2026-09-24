@@ -13,7 +13,7 @@ import { KibanaCodeEditorWrapper } from '@kbn/scout';
 // Mirror its `QueryTab` / `RecoveryStrategy` value unions here instead.
 // Source: x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/compose_discover/types.ts
 type QueryTab = 'base' | 'alert' | 'recovery';
-type RecoveryStrategyValue = 'no_breach' | 'query' | 'none';
+type RecoveryStrategyValue = 'no_breach' | 'condition' | 'query' | 'manual';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;

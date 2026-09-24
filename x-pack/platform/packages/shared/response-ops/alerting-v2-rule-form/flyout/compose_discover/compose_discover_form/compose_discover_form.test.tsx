@@ -45,7 +45,7 @@ const BASE_COMPOSE_VALUES: FormValues = {
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', breach: { segment: '' } },
+  query: { base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -241,6 +241,11 @@ describe('step validation', () => {
       expect(outcomeStep.validate).toBeUndefined();
     });
 
+    it('outcome triggers both lifecycle fields, so the no-data rule blocks "Next"', () => {
+      const outcomeStep = getSteps(true).steps.find((s) => s.id === 'outcome')!;
+      expect(outcomeStep.fields).toEqual(['recovery', 'noData']);
+    });
+
     it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
       const builderStep = getSteps(true, 'threshold').steps.find(
         (s) => s.id === 'builderCondition'
@@ -383,7 +388,7 @@ describe('shell shared fields', () => {
   it('renders Outcome kind cards without alert-only fields for signal kind', () => {
     renderShell(
       { step: 1 },
-      { kind: 'signal', query: { format: 'standalone', breach: { query: 'FROM logs-*' } } }
+      { kind: 'signal', query: { base: 'FROM logs-*', breach: { segment: '' } } }
     );
 
     expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();

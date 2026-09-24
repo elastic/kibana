@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
 
 /**
  * WARNING: Do not modify the existing versioned schema(s) below; add a new version instead.
@@ -117,6 +118,28 @@ const stateSchemaV3 = stateSchemaV2.extends({
   ),
 });
 
+const stateSchemaV4 = stateSchemaV3.extends({
+  // `query.format` no longer exists, and both strategy vocabularies were
+  // renamed, so none of the v3 counters has a source any more.
+  count_by_query_format: undefined,
+  count_by_recovery_strategy: schema.maybe(
+    schema.object({
+      no_breach: schema.maybe(schema.number()),
+      condition: schema.maybe(schema.number()),
+      query: schema.maybe(schema.number()),
+      manual: schema.maybe(schema.number()),
+    })
+  ),
+  count_by_no_data_strategy: schema.maybe(
+    schema.object({
+      ignore: schema.maybe(schema.number()),
+      keep_last: schema.maybe(schema.number()),
+      resolve: schema.maybe(schema.number()),
+      alert: schema.maybe(schema.number()),
+    })
+  ),
+});
+
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
@@ -179,9 +202,17 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV3,
   },
+  4: {
+    up: (state: Record<string, unknown>) => ({
+      ...omit(state, 'count_by_query_format'),
+      count_by_recovery_strategy: undefined,
+      count_by_no_data_strategy: undefined,
+    }),
+    schema: stateSchemaV4,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[3].schema;
+const latestTaskStateSchema = stateSchemaByVersion[4].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

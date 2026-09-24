@@ -22,7 +22,9 @@ import type { LatestAlertEventState } from '../queries';
 
 const DEFAULT_STATUS_COUNT = 1;
 
-type Operator = NonNullable<NonNullable<RuleResponse['state_transition']>['pending_operator']>;
+type StateTransition = NonNullable<RuleResponse['state_transition']>;
+type StateTransitionPhase = NonNullable<StateTransition['pending']>;
+type Operator = NonNullable<StateTransitionPhase['operator']>;
 const DEFAULT_OPERATOR: Operator = 'OR';
 
 interface ThresholdConfig {
@@ -140,7 +142,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
 
     if (
       alertEvent.status === alertEventStatus.no_data &&
-      rule.no_data_strategy === noDataStrategy.recover
+      rule.no_data?.strategy === noDataStrategy.resolve
     ) {
       return basicResult;
     }
@@ -160,10 +162,10 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.pending_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.pending_count,
+        operator: stateTransition.pending?.operator ?? DEFAULT_OPERATOR,
+        count: stateTransition.pending?.count,
         timeframeMs: this.safeParseDurationToMs(
-          stateTransition.pending_timeframe,
+          stateTransition.pending?.timeframe,
           rule.id,
           'pending_timeframe'
         ),
@@ -177,10 +179,10 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.recovering_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.recovering_count,
+        operator: stateTransition.recovering?.operator ?? DEFAULT_OPERATOR,
+        count: stateTransition.recovering?.count,
         timeframeMs: this.safeParseDurationToMs(
-          stateTransition.recovering_timeframe,
+          stateTransition.recovering?.timeframe,
           rule.id,
           'recovering_timeframe'
         ),
@@ -215,17 +217,17 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }
 
   private shouldSkipPending(
-    stateTransition: NonNullable<RuleResponse['state_transition']>,
+    stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.pending_count === 0 && nextStatus === alertEpisodeStatus.pending;
+    return stateTransition.pending?.count === 0 && nextStatus === alertEpisodeStatus.pending;
   }
 
   private shouldSkipRecovering(
-    stateTransition: NonNullable<RuleResponse['state_transition']>,
+    stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.recovering_count === 0 && nextStatus === alertEpisodeStatus.recovering;
+    return stateTransition.recovering?.count === 0 && nextStatus === alertEpisodeStatus.recovering;
   }
 
   private isPendingToActiveTransition(

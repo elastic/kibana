@@ -6,8 +6,13 @@
  */
 
 import { formatDuration } from '@kbn/alerting-plugin/common';
-import type { NoDataStrategy, RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { recoveryStrategy, type Query, type RecoveryStrategy } from '@kbn/alerting-v2-schemas';
+import type {
+  NoDataStrategy,
+  Recovery,
+  RecoveryStrategy,
+  RuleAttachmentData,
+} from '@kbn/alerting-v2-schemas';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_VALUE = '-';
@@ -93,53 +98,57 @@ const recoveryLabel = (n: number) =>
   });
 
 export function formatAlertDelay(stateTransition: RuleAttachmentData['state_transition']): string {
-  if (stateTransition?.pending_count == null && stateTransition?.pending_timeframe == null) {
+  const pending = stateTransition?.pending;
+
+  if (pending?.count == null && pending?.timeframe == null) {
     return EMPTY_VALUE;
   }
 
-  if (stateTransition.pending_count === 0 && stateTransition.pending_timeframe == null) {
+  if (pending.count === 0 && pending.timeframe == null) {
     return IMMEDIATE_LABEL;
   }
 
   return formatDelay({
-    count: stateTransition.pending_count,
+    count: pending.count,
     countLabel: matchLabel,
-    timeframe: stateTransition.pending_timeframe,
-    operator: stateTransition.pending_operator,
+    timeframe: pending.timeframe,
+    operator: pending.operator,
   });
 }
 
 export function formatRecoveryDelay(
   stateTransition: RuleAttachmentData['state_transition']
 ): string {
-  if (stateTransition?.recovering_count == null && stateTransition?.recovering_timeframe == null) {
+  const recovering = stateTransition?.recovering;
+
+  if (recovering?.count == null && recovering?.timeframe == null) {
     return EMPTY_VALUE;
   }
 
-  if (stateTransition.recovering_count === 0 && stateTransition.recovering_timeframe == null) {
+  if (recovering.count === 0 && recovering.timeframe == null) {
     return IMMEDIATE_LABEL;
   }
 
   return formatDelay({
-    count: stateTransition.recovering_count,
+    count: recovering.count,
     countLabel: recoveryLabel,
-    timeframe: stateTransition.recovering_timeframe,
-    operator: stateTransition.recovering_operator,
+    timeframe: recovering.timeframe,
+    operator: recovering.operator,
   });
 }
 
 const NO_DATA_STRATEGY_LABELS: Record<NoDataStrategy, string> = {
-  last_known_status: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.lastKnownStatus', {
+  ignore: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.ignore', {
+    defaultMessage: 'Do nothing',
+  }),
+  keep_last: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.keepLast', {
     defaultMessage: 'Keep last known status',
   }),
-  emit: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.emit', {
-    defaultMessage: 'Use no data status',
-  }),
-  recover: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.recover', {
+  resolve: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.resolve', {
     defaultMessage: 'Recover immediately',
   }),
-  none: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.none', {
-    defaultMessage: 'Do nothing',
+  alert: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.alert', {
+    defaultMessage: 'Alert on no data',
   }),
 };
 
@@ -148,34 +157,14 @@ export function formatNoDataStrategy(strategy?: NoDataStrategy | null): string {
   return NO_DATA_STRATEGY_LABELS[strategy] ?? EMPTY_VALUE;
 }
 
-export function getDisplayRecoveryCondition(
-  query: Query,
-  strategy?: RecoveryStrategy
-): string | undefined {
-  if (strategy !== recoveryStrategy.query || !query.recovery) return undefined;
-  if (query.format === 'composed') {
-    return query.recovery.segment;
-  }
-  return query.recovery.query;
-}
-
 /**
- * Display parts for the conditions panel. Composed rules use the stored base /
- * breach segment; standalone rules have a single query and no alert condition.
+ * The ES|QL the user authored for recovery: a bare segment for `condition`, the
+ * whole query for `query`, and nothing for the strategies that never run one.
  */
-export function getDisplayQueryParts(query: Query): {
-  baseQuery: string;
-  alertCondition?: string;
-} {
-  if (query.format === 'composed') {
-    const segment = query.breach?.segment?.trim();
-    return {
-      baseQuery: query.base,
-      ...(segment ? { alertCondition: segment } : {}),
-    };
-  }
-
-  return { baseQuery: query.breach.query };
+export function getRecoverEsqlSegment(recovery?: Recovery | null): string | undefined {
+  if (recovery?.strategy === recoveryStrategy.condition) return recovery.segment;
+  if (recovery?.strategy === recoveryStrategy.query) return recovery.query;
+  return undefined;
 }
 
 export function getQueryOverflowHeight(query: string): number | undefined {
@@ -189,14 +178,17 @@ export function getQueryOverflowHeight(query: string): number | undefined {
 }
 
 const RECOVERY_STRATEGY_LABELS: Record<RecoveryStrategy, string> = {
-  query: i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
-    defaultMessage: 'Custom',
-  }),
   no_breach: i18n.translate('xpack.alertingV2.ruleDetails.recoveryDefault', {
     defaultMessage: 'Default',
   }),
-  none: i18n.translate('xpack.alertingV2.ruleDetails.recoveryNone', {
-    defaultMessage: 'No recovery',
+  condition: i18n.translate('xpack.alertingV2.ruleDetails.recoveryStrategy.condition', {
+    defaultMessage: 'Custom condition',
+  }),
+  query: i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
+    defaultMessage: 'Custom',
+  }),
+  manual: i18n.translate('xpack.alertingV2.ruleDetails.recoveryStrategy.manual', {
+    defaultMessage: 'Manual only',
   }),
 };
 

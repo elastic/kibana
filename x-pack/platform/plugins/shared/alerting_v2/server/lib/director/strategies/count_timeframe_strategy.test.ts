@@ -42,7 +42,7 @@ describe('CountTimeframeStrategy', () => {
     on: AlertEventStatus;
     to: AlertEpisodeStatus;
     stateTransition?: RuleResponse['state_transition'];
-    noDataStrategy?: RuleResponse['no_data_strategy'];
+    noDataStrategy?: NonNullable<RuleResponse['no_data']>['strategy'];
     statusCount?: number | null;
     expectedStatusCount?: number;
     eventTimestamp?: string;
@@ -78,7 +78,7 @@ describe('CountTimeframeStrategy', () => {
   describe('canHandle', () => {
     it('returns true when rule has stateTransition', () => {
       expect(
-        strategy.canHandle(createRuleResponse({ state_transition: { pending_count: 3 } }))
+        strategy.canHandle(createRuleResponse({ state_transition: { pending: { count: 3 } } }))
       ).toBe(true);
     });
 
@@ -88,10 +88,6 @@ describe('CountTimeframeStrategy', () => {
 
     it('returns false when stateTransition is undefined', () => {
       expect(strategy.canHandle(createRuleResponse({ state_transition: undefined }))).toBe(false);
-    });
-
-    it('returns false when stateTransition is null', () => {
-      expect(strategy.canHandle(createRuleResponse({ state_transition: null }))).toBe(false);
     });
   });
 
@@ -122,7 +118,7 @@ describe('CountTimeframeStrategy', () => {
   });
 
   describe('pendingCount of 0 (skip pending)', () => {
-    const stateTransition: RuleResponse['state_transition'] = { pending_count: 0 };
+    const stateTransition: RuleResponse['state_transition'] = { pending: { count: 0 } };
 
     it('transitions directly to active from inactive on breach', () => {
       expectTransition({
@@ -143,7 +139,7 @@ describe('CountTimeframeStrategy', () => {
   });
 
   describe('pendingCount threshold', () => {
-    const stateTransition: RuleResponse['state_transition'] = { pending_count: 3 };
+    const stateTransition: RuleResponse['state_transition'] = { pending: { count: 3 } };
 
     it('enters pending with statusCount 1 from inactive', () => {
       expectTransition({
@@ -212,7 +208,7 @@ describe('CountTimeframeStrategy', () => {
         from: alertEpisodeStatus.pending,
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.active,
-        stateTransition: { pending_timeframe: '2m' },
+        stateTransition: { pending: { timeframe: '2m' } },
         statusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
@@ -224,7 +220,7 @@ describe('CountTimeframeStrategy', () => {
         from: alertEpisodeStatus.pending,
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.pending,
-        stateTransition: { pending_timeframe: '5m' },
+        stateTransition: { pending: { timeframe: '5m' } },
         statusCount: 2,
         expectedStatusCount: 3,
         eventTimestamp: '2025-01-01T00:03:00.000Z',
@@ -237,11 +233,7 @@ describe('CountTimeframeStrategy', () => {
         from: alertEpisodeStatus.pending,
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.active,
-        stateTransition: {
-          pending_count: 5,
-          pending_timeframe: '2m',
-          pending_operator: 'OR',
-        },
+        stateTransition: { pending: { count: 5, timeframe: '2m', operator: 'OR' } },
         statusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
@@ -253,11 +245,7 @@ describe('CountTimeframeStrategy', () => {
         from: alertEpisodeStatus.pending,
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.pending,
-        stateTransition: {
-          pending_count: 5,
-          pending_timeframe: '2m',
-          pending_operator: 'AND',
-        },
+        stateTransition: { pending: { count: 5, timeframe: '2m', operator: 'AND' } },
         statusCount: 1,
         expectedStatusCount: 2,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
@@ -267,7 +255,7 @@ describe('CountTimeframeStrategy', () => {
   });
 
   describe('recoveringCount of 0 (skip recovering)', () => {
-    const stateTransition: RuleResponse['state_transition'] = { recovering_count: 0 };
+    const stateTransition: RuleResponse['state_transition'] = { recovering: { count: 0 } };
 
     it('transitions directly to inactive from active on recovered', () => {
       expectTransition({
@@ -280,7 +268,7 @@ describe('CountTimeframeStrategy', () => {
   });
 
   describe('recoveringCount threshold', () => {
-    const stateTransition: RuleResponse['state_transition'] = { recovering_count: 3 };
+    const stateTransition: RuleResponse['state_transition'] = { recovering: { count: 3 } };
 
     it('enters recovering with statusCount 1 from active', () => {
       expectTransition({
@@ -330,7 +318,7 @@ describe('CountTimeframeStrategy', () => {
         from: alertEpisodeStatus.recovering,
         on: alertEventStatus.recovered,
         to: alertEpisodeStatus.inactive,
-        stateTransition: { recovering_timeframe: '2m' },
+        stateTransition: { recovering: { timeframe: '2m' } },
         statusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
@@ -342,7 +330,7 @@ describe('CountTimeframeStrategy', () => {
         from: alertEpisodeStatus.recovering,
         on: alertEventStatus.recovered,
         to: alertEpisodeStatus.recovering,
-        stateTransition: { recovering_timeframe: '5m' },
+        stateTransition: { recovering: { timeframe: '5m' } },
         statusCount: 2,
         expectedStatusCount: 3,
         eventTimestamp: '2025-01-01T00:03:00.000Z',
@@ -355,11 +343,7 @@ describe('CountTimeframeStrategy', () => {
         from: alertEpisodeStatus.recovering,
         on: alertEventStatus.recovered,
         to: alertEpisodeStatus.inactive,
-        stateTransition: {
-          recovering_count: 5,
-          recovering_timeframe: '2m',
-          recovering_operator: 'OR',
-        },
+        stateTransition: { recovering: { count: 5, timeframe: '2m', operator: 'OR' } },
         statusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
@@ -371,11 +355,7 @@ describe('CountTimeframeStrategy', () => {
         from: alertEpisodeStatus.recovering,
         on: alertEventStatus.recovered,
         to: alertEpisodeStatus.recovering,
-        stateTransition: {
-          recovering_count: 5,
-          recovering_timeframe: '2m',
-          recovering_operator: 'AND',
-        },
+        stateTransition: { recovering: { count: 5, timeframe: '2m', operator: 'AND' } },
         statusCount: 1,
         expectedStatusCount: 2,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
@@ -386,8 +366,8 @@ describe('CountTimeframeStrategy', () => {
 
   describe('combined pending and recovering thresholds', () => {
     const stateTransition: RuleResponse['state_transition'] = {
-      pending_count: 2,
-      recovering_count: 2,
+      pending: { count: 2 },
+      recovering: { count: 2 },
     };
 
     it('applies pending threshold independently of recovering', () => {
@@ -416,7 +396,7 @@ describe('CountTimeframeStrategy', () => {
       expectTransition({
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.pending,
-        stateTransition: { pending_count: 3 },
+        stateTransition: { pending: { count: 3 } },
         expectedStatusCount: 1,
       });
     });
@@ -426,7 +406,7 @@ describe('CountTimeframeStrategy', () => {
         from: alertEpisodeStatus.pending,
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.pending,
-        stateTransition: { pending_count: 3 },
+        stateTransition: { pending: { count: 3 } },
         statusCount: null,
         expectedStatusCount: 2,
       });
@@ -434,22 +414,22 @@ describe('CountTimeframeStrategy', () => {
   });
 
   describe('malformed duration fallback', () => {
-    it('ignores an invalid pending_timeframe and evaluates count only', () => {
+    it('ignores an invalid pending.timeframe and evaluates count only', () => {
       expectTransition({
         from: alertEpisodeStatus.pending,
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.active,
-        stateTransition: { pending_count: 2, pending_timeframe: 'bad' },
+        stateTransition: { pending: { count: 2, timeframe: 'bad' } },
         statusCount: 1,
       });
     });
 
-    it('ignores an invalid recovering_timeframe and evaluates count only', () => {
+    it('ignores an invalid recovering.timeframe and evaluates count only', () => {
       expectTransition({
         from: alertEpisodeStatus.recovering,
         on: alertEventStatus.recovered,
         to: alertEpisodeStatus.inactive,
-        stateTransition: { recovering_count: 2, recovering_timeframe: 'bad' },
+        stateTransition: { recovering: { count: 2, timeframe: 'bad' } },
         statusCount: 1,
       });
     });
@@ -457,8 +437,8 @@ describe('CountTimeframeStrategy', () => {
 
   describe('unaffected transitions (same as basic)', () => {
     const stateTransition: RuleResponse['state_transition'] = {
-      pending_count: 5,
-      recovering_count: 5,
+      pending: { count: 5 },
+      recovering: { count: 5 },
     };
 
     it.each<[string, AlertEpisodeStatus, AlertEventStatus, AlertEpisodeStatus]>([
@@ -480,10 +460,10 @@ describe('CountTimeframeStrategy', () => {
     });
   });
 
-  describe("no_data event with no_data_strategy: 'recover'", () => {
+  describe("no_data event with no_data.strategy: 'resolve'", () => {
     const stateTransition: RuleResponse['state_transition'] = {
-      pending_count: 3,
-      recovering_count: 3,
+      pending: { count: 3 },
+      recovering: { count: 3 },
     };
 
     it('transitions inactive → inactive immediately, ignoring pending gating', () => {
@@ -492,7 +472,7 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.inactive,
         stateTransition,
-        noDataStrategy: 'recover',
+        noDataStrategy: 'resolve',
       });
     });
 
@@ -502,7 +482,7 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.inactive,
         stateTransition,
-        noDataStrategy: 'recover',
+        noDataStrategy: 'resolve',
         statusCount: 1,
       });
     });
@@ -513,7 +493,7 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.inactive,
         stateTransition,
-        noDataStrategy: 'recover',
+        noDataStrategy: 'resolve',
       });
     });
 
@@ -523,16 +503,16 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.inactive,
         stateTransition,
-        noDataStrategy: 'recover',
+        noDataStrategy: 'resolve',
         statusCount: 1,
       });
     });
   });
 
-  describe("no_data event with no_data_strategy: 'emit'", () => {
+  describe("no_data event with no_data.strategy: 'alert'", () => {
     const stateTransition: RuleResponse['state_transition'] = {
-      pending_count: 3,
-      recovering_count: 3,
+      pending: { count: 3 },
+      recovering: { count: 3 },
     };
 
     it.each<[AlertEpisodeStatus]>([
@@ -545,7 +525,7 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.active,
         stateTransition,
-        noDataStrategy: 'emit',
+        noDataStrategy: 'alert',
       });
     });
 
@@ -555,7 +535,7 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.pending,
         stateTransition,
-        noDataStrategy: 'emit',
+        noDataStrategy: 'alert',
         statusCount: 1,
         expectedStatusCount: 2,
       });
@@ -567,7 +547,7 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.active,
         stateTransition,
-        noDataStrategy: 'emit',
+        noDataStrategy: 'alert',
         statusCount: 2,
       });
     });

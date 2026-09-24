@@ -1,5 +1,5 @@
 {
-  "sha1": "2d4aeeb833e88dc34d1a4abac0c123fe69ab4f38",
+  "sha1": "64eccfbc17a70d9cf6d8f11fa4984c053f27fb65",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 72,
-        "column": 11
+        "line": 69,
+        "column": 25
       }
     },
     {
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 122,
+        "line": 116,
         "column": 9
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 189,
+        "line": 180,
         "column": 75
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 270,
+        "line": 258,
         "column": 31
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 393,
+        "line": 378,
         "column": 13
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 450,
+        "line": 432,
         "column": 9
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 503,
+        "line": 482,
         "column": 28
       }
     },
@@ -126,13 +126,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 584,
+        "line": 560,
         "column": 26
       }
     },
     {
-      "id": "e747878cbda0163-9a9ef6a5fa308a9",
-      "title": "Director keeps episode in recovering until recovering_count threshold is met",
+      "id": "e747878cbda0163-4fee124cae28348",
+      "title": "Director keeps episode in recovering until recovering.count threshold is met",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -140,13 +140,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 642,
+        "line": 615,
         "column": 22
       }
     },
     {
-      "id": "e747878cbda0163-03be7bd31066395",
-      "title": "Director recovering_count: 0 skips the recovering status and goes straight to inactive",
+      "id": "e747878cbda0163-c99de238208baa6",
+      "title": "Director recovering.count: 0 skips the recovering status and goes straight to inactive",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -154,13 +154,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 696,
+        "line": 666,
         "column": 69
       }
     },
     {
-      "id": "e747878cbda0163-8411a599b7698cc",
-      "title": "Director pending_count: 0 skips the pending status and goes straight to active",
+      "id": "e747878cbda0163-b5629a4e0245702",
+      "title": "Director pending.count: 0 skips the pending status and goes straight to active",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 751,
+        "line": 718,
         "column": 9
       }
     },
@@ -182,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 796,
-        "column": 18
+        "line": 762,
+        "column": 54
       }
     },
     {
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 892,
+        "line": 853,
         "column": 13
       }
     },
@@ -210,13 +210,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 964,
+        "line": 922,
         "column": 25
       }
     },
     {
-      "id": "e747878cbda0163-d675ba276f0a73c",
-      "title": "Director transitions pending -> active via pending_timeframe even when pending_count is unreachable",
+      "id": "e747878cbda0163-adf00d806c9ba02",
+      "title": "Director transitions pending -> active via pending.timeframe even when pending.count is unreachable",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -224,13 +224,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 1076,
+        "line": 1031,
         "column": 26
       }
     },
     {
-      "id": "e747878cbda0163-2460e798459b606",
-      "title": "Director transitions recovering -> inactive via recovering_timeframe when recovering_operator is OR",
+      "id": "e747878cbda0163-8dc42afb6ce5a77",
+      "title": "Director transitions recovering -> inactive via recovering.timeframe when recovering.operator is OR",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -238,13 +238,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 1130,
+        "line": 1078,
         "column": 49
       }
     },
     {
-      "id": "e747878cbda0163-7182c84cbe7c68a",
-      "title": "Director keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator AND",
+      "id": "e747878cbda0163-2b7d597da9af9f7",
+      "title": "Director keeps the latest episode in recovering when only recovering.timeframe is met under recovering.operator AND",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -252,13 +252,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 1192,
+        "line": 1135,
         "column": 24
       }
     },
     {
-      "id": "e747878cbda0163-5c5ce4414752b37",
-      "title": "Director keeps the latest episode in pending when only pending_timeframe is met under pending_operator AND",
+      "id": "e747878cbda0163-1786f48749f0968",
+      "title": "Director keeps the latest episode in pending when only pending.timeframe is met under pending.operator AND",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -266,13 +266,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 1268,
+        "line": 1206,
         "column": 11
       }
     },
     {
-      "id": "e747878cbda0163-7faf6350097a4dc",
-      "title": "Director transitions pending -> active under pending_operator AND when both count and timeframe are met",
+      "id": "e747878cbda0163-fc9b1f27983658f",
+      "title": "Director transitions pending -> active under pending.operator AND when both count and timeframe are met",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -280,13 +280,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 1338,
+        "line": 1269,
         "column": 22
       }
     },
     {
-      "id": "e747878cbda0163-9085e2d8ed11df7",
-      "title": "Director no_data_strategy 'last_known_status' preserves the prior episode status",
+      "id": "e747878cbda0163-4b15608c5c02bc8",
+      "title": "Director no_data.strategy 'keep_last' preserves the prior episode status",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -294,13 +294,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 1404,
+        "line": 1328,
         "column": 28
       }
     },
     {
-      "id": "e747878cbda0163-f90e3171bd2118a",
-      "title": "Director no_data_strategy 'recover' resolves the episode to inactive via a no_data event",
+      "id": "e747878cbda0163-18deee7335bace1",
+      "title": "Director no_data.strategy 'resolve' resolves the episode to inactive via a no_data event",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -308,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
-        "line": 1463,
+        "line": 1384,
         "column": 9
       }
     }

@@ -12,7 +12,6 @@ const thresholdRule = (query: object): RuleResponse =>
   ({ id: 'rule1', query } as unknown as RuleResponse);
 
 const breachComposed = {
-  format: 'composed',
   base: 'FROM logs-* | STATS count = COUNT(*) BY `host.name`',
   breach: { segment: '| WHERE count > 100' },
 };
@@ -23,8 +22,8 @@ describe('prepareTrendInputs', () => {
   });
 
   it('returns null when the rule query is not a parseable threshold rule', () => {
-    const standalone = { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } };
-    expect(prepareTrendInputs(thresholdRule(standalone))).toBeNull();
+    const baseOnly = { base: 'FROM logs-* | LIMIT 10' };
+    expect(prepareTrendInputs(thresholdRule(baseOnly))).toBeNull();
   });
 
   it('returns one group per threshold-referenced metric', () => {
@@ -39,7 +38,6 @@ describe('prepareTrendInputs', () => {
 
   it('plots only threshold-referenced metrics, excluding stats used solely in evals', () => {
     const breachWithEval = {
-      format: 'composed',
       base: 'FROM logs-* | STATS errors = COUNT(*) WHERE status >= 500, total = COUNT(*) | EVAL error_rate = errors / total * 100',
       breach: { segment: '| WHERE error_rate > 5' },
     };
@@ -50,7 +48,6 @@ describe('prepareTrendInputs', () => {
 
   it('returns one group per metric when multiple metrics have thresholds', () => {
     const breachMixed = {
-      format: 'composed',
       base: 'FROM logs-* | STATS errors = COUNT(*), total = COUNT(*) | EVAL error_rate = errors / total * 100',
       breach: { segment: '| WHERE errors > 10 AND error_rate > 5' },
     };
@@ -61,7 +58,6 @@ describe('prepareTrendInputs', () => {
 
   it('assigns all threshold conditions for a metric to its group', () => {
     const breachMultiThreshold = {
-      format: 'composed',
       base: 'FROM logs-* | STATS count = COUNT(*)',
       breach: { segment: '| WHERE count > 100 AND count < 500' },
     };
