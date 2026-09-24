@@ -11,8 +11,9 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import { TestChromeProviders } from '../../test_helpers';
+import { TestChromeProviders } from '../test_helpers';
 import { SearchButton } from './search_button';
+import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 jest.mock('@kbn/shared-ux-utility', () => ({
   ...jest.requireActual('@kbn/shared-ux-utility'),
@@ -40,19 +41,19 @@ describe('SearchButton', () => {
   it('renders nothing when no config is set', () => {
     const { container } = renderButton(undefined);
     expect(container).toBeEmptyDOMElement();
-    expect(screen.queryByTestId('chromeNextGlobalHeaderSearchButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(CHROME_HEADER_TEST_SUBJECTS.searchButton)).not.toBeInTheDocument();
   });
 
   it('renders the search button when config is provided', () => {
     renderButton({ onClick: jest.fn() });
-    expect(screen.getByTestId('chromeNextGlobalHeaderSearchButton')).toBeInTheDocument();
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.searchButton)).toBeInTheDocument();
   });
 
   it('calls onClick when clicked', () => {
     const onClick = jest.fn();
     renderButton({ onClick });
 
-    fireEvent.click(screen.getByTestId('chromeNextGlobalHeaderSearchButton'));
+    fireEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.searchButton));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 

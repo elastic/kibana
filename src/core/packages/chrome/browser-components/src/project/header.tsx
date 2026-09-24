@@ -8,20 +8,20 @@
  */
 
 import React from 'react';
-import { ChromeNextGlobalHeaderLogo } from './global_header_logo';
-import { SearchButton } from './search_button';
-import { AiButtonSlot } from './ai_button_slot';
-import { HelpButton } from './help_button';
-import { ChromeNextGlobalHeaderShell } from './global_header_shell';
-import { useContextSwitcher, useProjectPicker, useUserMenu } from '../../shared/chrome_hooks';
-import { ChromeNextPageAnnouncer } from '../../shared/header_page_announcer';
+import { ChromeHeaderLogo } from './header_logo';
+import { SearchButton } from '../shared/search_button';
+import { AiButtonSlot } from '../shared/ai_button_slot';
+import { HelpButton } from '../shared/help_button';
+import { ChromeHeaderShell } from './header_shell';
+import { useContextSwitcher, useProjectPicker, useUserMenu } from '../shared/chrome_hooks';
+import { ChromeHeaderPageAnnouncer } from '../shared/header_page_announcer';
 
-export const ChromeNextGlobalHeader = React.memo(() => {
+export const ChromeHeader = React.memo(() => {
   return (
     <>
-      <ChromeNextPageAnnouncer />
-      <ChromeNextGlobalHeaderShell
-        logo={<ChromeNextGlobalHeaderLogo />}
+      <ChromeHeaderPageAnnouncer />
+      <ChromeHeaderShell
+        logo={<ChromeHeaderLogo />}
         search={<SearchButton />}
         actions={<AiButtonSlot />}
         help={<HelpButton />}
@@ -33,4 +33,4 @@ export const ChromeNextGlobalHeader = React.memo(() => {
   );
 });
 
-ChromeNextGlobalHeader.displayName = 'ChromeNextGlobalHeader';
+ChromeHeader.displayName = 'ChromeHeader';
