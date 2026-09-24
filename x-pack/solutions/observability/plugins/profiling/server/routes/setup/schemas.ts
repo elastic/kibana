@@ -8,15 +8,9 @@
 import { schema } from '@kbn/config-schema';
 
 /**
- * Response body for `GET /api/profiling/setup/es_resources`: the `ProfilingStatus`
- * returned by `profilingDataAccess.services.getStatus()` spread together with the
- * `has_required_role` flag the route adds unconditionally.
+ * Response body for `GET /api/profiling/setup/es_resources`
  *
- * Intentionally narrower than the `ProfilingStatus` TS type: `type` is required here
- * and `unauthorized` is absent, because the only code path that omits `type` / sets
- * `unauthorized` is the unreachable 403 branch in `profiling_data_access`. Safe because
- * Kibana never applies `validate.response` to unversioned routes — this is OAS
- * documentation only. Do not loosen it to match the TS type.
+ * OAS documentation only: Kibana never applies `validate.response` to unversioned routes.
  *
  * Lazily loaded.
  */

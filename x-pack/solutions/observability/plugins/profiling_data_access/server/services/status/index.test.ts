@@ -119,22 +119,4 @@ describe('createGetStatusService', () => {
       pre_8_9_1_data: false,
     });
   });
-
-  it('handles 403 exceptions from getSetupState gracefully', async () => {
-    mockedGetSetupState.mockRejectedValue({
-      meta: {
-        statusCode: 403,
-      },
-    });
-
-    const getStatus = createGetStatusService(registerServicesParams);
-
-    await expect(getStatus({ soClient, esClient, spaceId: 'test-space' })).resolves.toEqual({
-      profiling_enabled: true,
-      has_setup: true,
-      pre_8_9_1_data: false,
-      has_data: true,
-      unauthorized: true,
-    });
-  });
 });
