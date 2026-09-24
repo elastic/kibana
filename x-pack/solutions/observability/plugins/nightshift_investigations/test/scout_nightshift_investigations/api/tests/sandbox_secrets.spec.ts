@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/api';
-import { tags, type ApiServicesFixture } from '@kbn/scout';
+import { expect } from '@kbn/scout-oblt/api';
+import { tags, type ApiServicesFixture } from '@kbn/scout-oblt';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
   apiTest,

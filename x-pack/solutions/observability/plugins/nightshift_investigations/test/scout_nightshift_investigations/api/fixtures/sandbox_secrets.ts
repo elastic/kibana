@@ -6,7 +6,7 @@
  */
 
 import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
-import type { ApiClientFixture, ApiClientResponse, KibanaRole } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientResponse, KibanaRole } from '@kbn/scout-oblt';
 import { COMMON_HEADERS } from './constants';
 
 const SANDBOX_SECRETS_PATH = 'internal/nightshift/sandbox_secrets';
