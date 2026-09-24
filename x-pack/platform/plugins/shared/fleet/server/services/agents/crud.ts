@@ -16,7 +16,6 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
-import { getAgentPolicySavedObjectType } from '../agent_policy';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
@@ -25,7 +24,7 @@ import {
   removeVersionSuffixFromPolicyId,
   buildPolicyBaseIdsWithFallbackEsFilter,
 } from '../../../common/services/version_specific_policies_utils';
-import { AGENTS_INDEX } from '../../constants';
+import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 import {
   FleetError,
   isESClientError,
@@ -286,26 +285,32 @@ export async function getAgentsByKuery(
   // space-b's agents query. Using a space-scoped client would miss agentless policies created
   // in other spaces, leaving their agents in the list. Without spaceId '*', the namespaces
   // filter defaults to the caller's space and excludes cross-space policies.
+  //
+  // fetchAllAgentPolicyIds is used (rather than a single list() call) so that deployments with
+  // more than SO_SEARCH_LIMIT agentless policies across all spaces are not silently truncated.
   let agentlessExcludeFilter: ReturnType<typeof buildPolicyBaseIdsWithFallbackEsFilter> | null =
     null;
   if (showAgentless === false) {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
-    const agentlessPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
-      spaceId: '*',
-      perPage: SO_SEARCH_LIMIT,
-      fields: ['supports_agentless'],
-      kuery: `${await getAgentPolicySavedObjectType()}.supports_agentless:true`,
-    });
-    if (agentlessPolicies.items.length > 0) {
+    const agentlessPolicyIdPages = await agentPolicyService.fetchAllAgentPolicyIds(
+      internalSoClientWithoutSpaceExtension,
+      {
+        spaceId: '*',
+        kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
+      }
+    );
+    const agentlessPolicyIds: string[] = [];
+    for await (const pageOfIds of agentlessPolicyIdPages) {
+      agentlessPolicyIds.push(...pageOfIds);
+    }
+    if (agentlessPolicyIds.length > 0) {
       // Use the policy_base_id-with-fallback ES DSL filter so agents whose policy_id carries a
       // version suffix (e.g. "<uuid>#9.6") are still excluded. The fallback branch covers
       // agents enrolled by an older fleet-server that did not yet write policy_base_id.
       // Using buildPolicyBaseIdsWithFallbackEsFilter (terms queries) rather than the KQL
       // equivalent keeps the clause count at ~4 instead of ~2N.
-      agentlessExcludeFilter = buildPolicyBaseIdsWithFallbackEsFilter(
-        agentlessPolicies.items.map((policy) => policy.id)
-      );
+      agentlessExcludeFilter = buildPolicyBaseIdsWithFallbackEsFilter(agentlessPolicyIds);
     }
   }
 

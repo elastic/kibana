@@ -78,7 +78,11 @@ export default function (providerContext: FtrProviderContext) {
           user_provided_metadata: {},
           policy_id: agentlessPolicyId,
           // No policy_base_id — simulates a legacy/unmigrated agent doc.
-          namespaces: [TEST_SPACE_A],
+          // namespaces: ['*'] so the agent is visible from every space via the space-awareness
+          // namespace filter. Without this, agents scoped to TEST_SPACE_A are hidden from the
+          // default space and space B before showAgentless is evaluated, making the negative
+          // assertions vacuously true even without the fix.
+          namespaces: ['*'],
         },
       });
       agentIdPlain = agentPlainRes._id;
@@ -99,7 +103,7 @@ export default function (providerContext: FtrProviderContext) {
           user_provided_metadata: {},
           policy_id: `${agentlessPolicyId}#9.6`,
           policy_base_id: agentlessPolicyId,
-          namespaces: [TEST_SPACE_A],
+          namespaces: ['*'],
         },
       });
       agentIdVersioned = agentVersionedRes._id;
@@ -114,9 +118,20 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('GET /agents?showAgentless=false', () => {
       it('should exclude agentless agents from the default space even when the policy lives in another space', async () => {
+        // Pre-check: confirm agents are visible from the default space with showAgentless=true.
+        // Because namespaces is ['*'] they pass the space-awareness namespace filter, so any
+        // exclusion below is solely due to the showAgentless filter — not a vacuous pass.
+        const { body: withAgentless } = await supertest
+          .get('/api/fleet/agents?showAgentless=true')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        const idsWithAgentless = withAgentless.items.map((a: { id: string }) => a.id);
+        expect(idsWithAgentless).to.contain(agentIdPlain);
+        expect(idsWithAgentless).to.contain(agentIdVersioned);
+
         // The default space owns no agentless policies. Before the fix, the guard
-        // `agentlessPolicies.items.length > 0` was false (space-scoped client returned
-        // nothing), so no filter was built and all agentless agents leaked through.
+        // `agentlessPolicyIds.length > 0` was false (space-scoped client returned nothing),
+        // so no filter was built and all agentless agents leaked through.
         const { body } = await supertest
           .get('/api/fleet/agents?showAgentless=false')
           .set('kbn-xsrf', 'xxxx')
@@ -128,6 +143,15 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should exclude agentless agents from a space that does not own the agentless policy', async () => {
+        // Pre-check: agents are visible from space B with showAgentless=true (namespaces: ['*']).
+        const { body: withAgentless } = await supertest
+          .get(`/s/${TEST_SPACE_B}/api/fleet/agents?showAgentless=true`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        const idsWithAgentless = withAgentless.items.map((a: { id: string }) => a.id);
+        expect(idsWithAgentless).to.contain(agentIdPlain);
+        expect(idsWithAgentless).to.contain(agentIdVersioned);
+
         // Space B owns no agentless policies but the agents are still queryable from it
         // because .fleet-agents is not space-partitioned.
         const { body } = await supertest

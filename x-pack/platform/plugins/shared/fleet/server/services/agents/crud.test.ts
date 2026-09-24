@@ -45,8 +45,9 @@ jest.mock('../agent_policy', () => ({
     get: jest.fn().mockResolvedValue(null),
     getByIds: jest.fn().mockResolvedValue([]),
     getInactivityTimeouts: jest.fn().mockResolvedValue([]),
+    // fetchAllAgentPolicyIds returns an AsyncIterable<string[]>; default to empty.
+    fetchAllAgentPolicyIds: jest.fn().mockResolvedValue((async function* () {})()),
   },
-  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('fleet-agent-policies'),
 }));
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeAvailable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
@@ -767,19 +768,28 @@ describe('Agents CRUD test', () => {
     describe('showAgentless filter', () => {
       const agentlessPolicyIds = ['policy-agentless-1', 'policy-agentless-2'];
 
+      // Helper: build an AsyncIterable<string[]> that yields a single page of ids.
+      function makeAsyncIterable(ids: string[]) {
+        return (async function* () {
+          yield ids;
+        })();
+      }
+
       beforeEach(() => {
         searchMock.mockResolvedValue(getEsResponse([], 0, 'online'));
       });
 
       afterEach(() => {
-        (agentPolicyService.list as jest.Mock).mockReset();
-        (agentPolicyService.list as jest.Mock).mockResolvedValue({ items: [] });
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockReset();
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValue(
+          makeAsyncIterable([])
+        );
       });
 
       it('excludes agents on versioned agentless policies using policy_base_id fallback', async () => {
-        (agentPolicyService.list as jest.Mock).mockResolvedValueOnce({
-          items: agentlessPolicyIds.map((id) => ({ id })),
-        });
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+          makeAsyncIterable(agentlessPolicyIds)
+        );
 
         await getAgentsByKuery(esClientMock, soClientMock, {
           showAgentless: false,
@@ -806,9 +816,9 @@ describe('Agents CRUD test', () => {
         // .fleet-agents is not space-partitioned. If a space-scoped client is used to build the
         // exclusion list, agentless policies from other spaces are missed and their agents leak
         // through. The fix uses getInternalUserSOClientWithoutSpaceExtension() + spaceId '*'.
-        (agentPolicyService.list as jest.Mock).mockResolvedValueOnce({
-          items: agentlessPolicyIds.map((id) => ({ id })),
-        });
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+          makeAsyncIterable(agentlessPolicyIds)
+        );
 
         await getAgentsByKuery(esClientMock, soClientMock, {
           showAgentless: false,
@@ -817,8 +827,9 @@ describe('Agents CRUD test', () => {
 
         // soClientMock is wired as the withoutSpaceExtensions client in beforeEach
         // (createAppContextStartContractMock({ withoutSpaceExtensions: soClientMock })).
-        // Assert that list() was called with that specific unscoped client and spaceId '*'.
-        expect(agentPolicyService.list).toHaveBeenCalledWith(
+        // Assert that fetchAllAgentPolicyIds() was called with that specific unscoped client
+        // and spaceId '*' so the lookup is never silently restricted to the caller's space.
+        expect(agentPolicyService.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
           soClientMock,
           expect.objectContaining({ spaceId: '*' })
         );
@@ -826,12 +837,12 @@ describe('Agents CRUD test', () => {
 
       it('excludes cross-space agentless agents even when the current space owns no agentless policies', async () => {
         // Worst-case: current space owns zero agentless policies, but the unscoped query
-        // finds policies from other spaces. Without the unscoped client the items.length > 0
+        // finds policies from other spaces. Without the unscoped client the ids.length > 0
         // guard fails and NO filter is built, leaking every agentless agent deployment-wide.
         const crossSpacePolicyIds = ['space-a-policy-1', 'space-a-policy-2'];
-        (agentPolicyService.list as jest.Mock).mockResolvedValueOnce({
-          items: crossSpacePolicyIds.map((id) => ({ id })),
-        });
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+          makeAsyncIterable(crossSpacePolicyIds)
+        );
 
         await getAgentsByKuery(esClientMock, soClientMock, {
           showAgentless: false,
@@ -845,7 +856,7 @@ describe('Agents CRUD test', () => {
       });
 
       it('adds no exclusion clause when there are no agentless policies', async () => {
-        // agentPolicyService.list returns { items: [] } by default (see mock above).
+        // fetchAllAgentPolicyIds returns empty iterable by default (see afterEach reset above).
 
         await getAgentsByKuery(esClientMock, soClientMock, {
           showAgentless: false,
