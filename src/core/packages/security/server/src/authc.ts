@@ -26,11 +26,20 @@ export interface CoreAuthenticationService {
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
   /**
    * Classify the principal bound to the provided request: a user, an anonymous user, an API key
-   * (stack or UIAM) or a service account (Elasticsearch or UIAM). Resolves service-account-bound
-   * fake requests minted by the security plugin without an Elasticsearch round trip. Returns
-   * `null` when no authenticated principal is known for the request — the same cases in which
-   * {@link getCurrentUser} returns `null`, e.g. unauthenticated requests and fake requests that
-   * were neither minted for a service account nor enriched with a user identity.
+   * or a service account, each Elasticsearch-issued (`stack`) or UIAM-issued (`uiam`) where that
+   * applies. Performs no I/O.
+   *
+   * Real requests are classified from {@link getCurrentUser}. Fake requests differ:
+   * - Service-account-bound fake requests minted by the security plugin resolve to their service
+   *   account, although {@link getCurrentUser} returns `null` for them. They stop resolving once
+   *   released or once their `authorization` header no longer carries the token they were minted
+   *   with.
+   * - Fake requests enriched with a user identity (e.g. by Task Manager) resolve to `user`, even
+   *   though the credential they carry is usually an API key.
+   * - Any other fake request, including a Task Manager request that carries an API key but was not
+   *   enriched, resolves to `null`, not `api_key`.
+   *
+   * `null` otherwise means no authenticated principal is known, e.g. for unauthenticated requests.
    *
    * @param request The request to classify the authenticated principal for.
    */

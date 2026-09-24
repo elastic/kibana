@@ -39,11 +39,18 @@ const toUserPrincipal = (user: AuthenticatedUser): AuthenticatedPrincipal => ({
 /**
  * Classifies the given authenticated user by the kind of principal that authenticated it.
  *
- * Pure and synchronous. Only the `http` authentication provider accepts API keys and service
- * account tokens; every other provider yields a session-backed user. Deciding on the provider
- * first also keeps this function off `authentication_realm` and `authentication_type`, which throw
- * on minimally authenticated users, and lets partial users (the fake-request enrichment override)
- * degrade to `user`. Unrecognized credentials over the `http` provider fail closed to `user`.
+ * Pure and synchronous. The anonymous provider always yields `anonymous`, even when it is configured
+ * to authenticate with an API key: anonymous takes precedence over the credential kind, unlike a
+ * check on `authentication_type === 'api_key'`. Apart from that, only the `http` provider accepts
+ * API keys and service account tokens; every other provider yields a session-backed `user`.
+ * Deciding on the provider first also keeps this function off `authentication_realm` and
+ * `authentication_type`, which throw on minimally authenticated users, and lets partial users (the
+ * fake-request enrichment override) degrade to `user`.
+ *
+ * Credentials over the `http` provider that are neither an API key nor a service account token
+ * default to `user`. That covers Basic and bearer credentials from any realm, including realms
+ * this function does not know about, so `type === 'user'` means "not a known machine identity",
+ * not "a verified human".
  */
 export function getAuthenticatedPrincipal(user: AuthenticatedUser): AuthenticatedPrincipal {
   const providerType = user.authentication_provider?.type;

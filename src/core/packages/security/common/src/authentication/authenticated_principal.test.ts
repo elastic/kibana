@@ -206,7 +206,7 @@ describe('getAuthenticatedPrincipal', () => {
     ['JWT', { name: 'jwt1', type: 'jwt' }, 'realm', 'bearer'],
     ['unknown realm', { name: 'future', type: '_future_realm' }, 'token', 'bearer'],
   ])(
-    'classifies %s credentials over the http provider as a user (fail closed)',
+    'classifies %s credentials over the http provider as a user by default',
     (_label, realm, authenticationType, scheme) => {
       expect(
         getAuthenticatedPrincipal(
