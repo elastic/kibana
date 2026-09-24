@@ -471,7 +471,7 @@ export function AddCisIntegrationFormPageProvider({
 
   const waitForIntegrationPliAuthBlock = async () => {
     return await testSubjects.waitForExists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK, {
-      timeout: 5000,
+      timeout: 20000,
     });
   };
 

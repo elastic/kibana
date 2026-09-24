@@ -170,6 +170,15 @@ export function CasesTableServiceProvider(
       await header.waitUntilLoadingHasFinished();
     },
 
+    async waitForCaseToBeListed(caseId: string) {
+      await this.ensureTableView();
+      await retry.waitFor(`case ${caseId} to appear in the cases table`, async () => {
+        return await find.existsByCssSelector(`[data-test-subj*="cases-table-row-${caseId}"]`);
+      });
+
+      await header.waitUntilLoadingHasFinished();
+    },
+
     async waitForCasesToBeListed() {
       await retry.waitFor('cases to appear on the all cases list', async () => {
         await this.refreshTable();
