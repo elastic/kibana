@@ -15,7 +15,7 @@ spaceTest.describe('Dashboard search session lifecycle', { tag: '@local-stateful
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const objects = await scoutSpace.savedObjects.load(
-      'src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/fixtures/dashboard_with_filter.json'
+      'src/platform/plugins/shared/data/test/scout_test_plugins/ui/fixtures/kbn_archives/dashboard_with_filter.json'
     );
     const dashboard = objects.find(
       ({ type, title }) => type === 'dashboard' && title === 'dashboard with filter'
@@ -48,21 +48,31 @@ spaceTest.describe('Dashboard search session lifecycle', { tag: '@local-stateful
   });
 
   spaceTest('starts a session on refresh', async ({ pageObjects, sessionObserver }) => {
+    await expect.poll(() => sessionObserver.getSessionIds()).toHaveLength(1);
+    const [initialSessionId] = await sessionObserver.getSessionIds();
     await sessionObserver.clear();
+
     await pageObjects.dashboard.refresh();
     await expect.poll(() => sessionObserver.getSessionIds()).toHaveLength(1);
     await pageObjects.dashboard.waitForRenderComplete();
-    expect(await sessionObserver.getSessionIds()).toHaveLength(1);
+    const sessionIds = await sessionObserver.getSessionIds();
+    expect(sessionIds).toHaveLength(1);
+    expect(sessionIds[0]).not.toBe(initialSessionId);
   });
 
   spaceTest('starts a session on filter change', async ({ pageObjects, sessionObserver }) => {
+    await expect.poll(() => sessionObserver.getSessionIds()).toHaveLength(1);
+    const [initialSessionId] = await sessionObserver.getSessionIds();
     await sessionObserver.clear();
+
     await pageObjects.filterBar.removeFilter('animal');
     await expect
       .poll(() => pageObjects.filterBar.hasFilter({ field: 'animal', value: 'dog' }))
       .toBe(false);
     await expect.poll(() => sessionObserver.getSessionIds()).toHaveLength(1);
     await pageObjects.dashboard.waitForRenderComplete();
-    expect(await sessionObserver.getSessionIds()).toHaveLength(1);
+    const sessionIds = await sessionObserver.getSessionIds();
+    expect(sessionIds).toHaveLength(1);
+    expect(sessionIds[0]).not.toBe(initialSessionId);
   });
 });

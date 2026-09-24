@@ -12,7 +12,7 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 apiTest.describe('data.indexPatterns contract', { tag: '@local-stateful-classic' }, () => {
-  const spaceId = `index-patterns-contract-${randomUUID()}`;
+  const spaceId = `data-views-contract-${randomUUID()}`;
   const route = `/s/${spaceId}/api/index-patterns-plugin`;
   let headers: Record<string, string>;
 
@@ -36,8 +36,8 @@ apiTest.describe('data.indexPatterns contract', { tag: '@local-stateful-classic'
     await apiServices.spaces.delete(spaceId);
   });
 
-  apiTest('creates, gets, updates, and deletes an index pattern', async ({ apiClient }) => {
-    const indexPatternId = await apiTest.step('can create an index pattern', async () => {
+  apiTest('creates, gets, updates, and deletes a data view', async ({ apiClient }) => {
+    const dataViewId = await apiTest.step('can create a data view', async () => {
       const title = 'shakes*';
       const fieldFormats = { bytes: { id: 'bytes' } };
       const response = await apiClient.post(`${route}/create`, {
@@ -54,21 +54,21 @@ apiTest.describe('data.indexPatterns contract', { tag: '@local-stateful-classic'
       return id;
     });
 
-    await apiTest.step('can get index pattern by id', async () => {
-      const response = await apiClient.get(`${route}/get/${indexPatternId}`, { headers });
+    await apiTest.step('can get a data view by id', async () => {
+      const response = await apiClient.get(`${route}/get/${dataViewId}`, { headers });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.id).toBe(indexPatternId);
+      expect(response.body.id).toBe(dataViewId);
     });
 
-    await apiTest.step('can update index pattern', async () => {
-      // The fixture calls updateSavedObject on the existing object without changing its fields.
-      const response = await apiClient.get(`${route}/update/${indexPatternId}`, { headers });
+    await apiTest.step('can update a data view', async () => {
+      // The fixture calls updateSavedObject on the existing data view without changing its fields.
+      const response = await apiClient.get(`${route}/update/${dataViewId}`, { headers });
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({});
     });
 
-    await apiTest.step('can delete index pattern', async () => {
-      const response = await apiClient.get(`${route}/delete/${indexPatternId}`, { headers });
+    await apiTest.step('can delete a data view', async () => {
+      const response = await apiClient.get(`${route}/delete/${dataViewId}`, { headers });
       expect(response).toHaveStatusCode(200);
     });
   });

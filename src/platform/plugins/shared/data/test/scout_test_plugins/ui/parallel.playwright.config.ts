@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../default/stateful/base.config';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const servers: ScoutServerConfig = {
-  ...defaultConfig,
-  kbnTestServer: {
-    ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, '--data.search.sessions.enabled=true'],
-  },
-};
+/**
+ * The `scout_test_plugins` directory name is load-bearing: Scout derives the server config set
+ * from it, and that set is what loads the plugin_functional test plugins these specs rely on.
+ */
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+  runGlobalSetup: true,
+});

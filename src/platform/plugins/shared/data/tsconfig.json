@@ -12,9 +12,9 @@
     "public/**/*.json",
     "../../../../../typings/index.d.ts",
     "test/scout/**/*",
-    "test/scout_examples/**/*",
     "test/scout_http2/**/*",
-    "test/scout_search_sessions/**/*"
+    "test/scout_search_sessions/**/*",
+    "test/scout_test_plugins/**/*"
   ],
   "kbn_references": [
     "@kbn/scout",

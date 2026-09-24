@@ -65,7 +65,7 @@ spaceTest.describe('Discover search session lifecycle', { tag: '@local-stateful-
   });
 
   spaceTest('Starts a new session on sort', async ({ pageObjects, sessionObserver }) => {
-    // Observe the entire add-column and sort sequence, as in the original FTR scenario.
+    // Observe the entire add-column and sort sequence as one session.
     await pageObjects.dataGrid.addFieldFromSidebar('speaker');
     await pageObjects.dataGrid.sortColumn('speaker', 'Sort A-Z');
     await pageObjects.discover.waitUntilTabIsLoaded();

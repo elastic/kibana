@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SessionObserver, spaceTest as baseSpaceTest } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
 
-export const spaceTest = baseSpaceTest.extend<{ sessionObserver: SessionObserver }>({
-  sessionObserver: async ({ page }, use) => {
-    await use(new SessionObserver(page));
-  },
-});
+globalSetupHook(
+  'Ingest ES data for test plugin UI tests',
+  { tag: '@local-stateful-classic' },
+  async ({ esArchiver }) => {
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+    );
+  }
+);
