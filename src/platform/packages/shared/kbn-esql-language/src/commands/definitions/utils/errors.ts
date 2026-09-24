@@ -583,6 +583,29 @@ Expected one of:
         ),
         type: 'error',
       };
+    case 'denseVectorInvalidSuffixModifier':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.denseVectorInvalidSuffixModifier',
+          {
+            defaultMessage: '[DENSE_VECTOR] Invalid modifier [{keyword}], expected [suffix]',
+            values: { keyword: out.keyword },
+          }
+        ),
+        type: 'error',
+      };
+    case 'denseVectorMultipleFieldsWithTarget':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.denseVectorMultipleFieldsWithTarget',
+          {
+            defaultMessage:
+              '[DENSE_VECTOR] Output name [{target}] accepts a single field. Use [suffix = "..." ON ...] to name the columns of several fields.',
+            values: { target: out.target },
+          }
+        ),
+        type: 'error',
+      };
     case 'tsdbIncompatibleFunction':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.tsdbIncompatibleFunction', {

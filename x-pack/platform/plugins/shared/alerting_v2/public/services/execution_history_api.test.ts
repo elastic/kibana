@@ -15,7 +15,7 @@ import { ExecutionHistoryApi } from './execution_history_api';
 describe('ExecutionHistoryApi', () => {
   const buildApi = () => {
     const http = httpServiceMock.createStartContract();
-    http.get.mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 });
+    http.get.mockResolvedValue({ items: [], page: 1, per_page: 50, total: 0 });
     const api = new ExecutionHistoryApi(http);
     return { api, http };
   };
@@ -31,7 +31,7 @@ describe('ExecutionHistoryApi', () => {
     );
   });
 
-  it('forwards page, perPage, search, outcome and start_date as query params', async () => {
+  it('forwards page, perPage, search, outcome, from, to and sort params as query params', async () => {
     const { api, http } = buildApi();
 
     await api.listActionPolicyExecutions({
@@ -39,7 +39,10 @@ describe('ExecutionHistoryApi', () => {
       per_page: 25,
       search: 'foo',
       outcome: ['throttled'],
-      start_date: '2026-01-01T00:00:00.000Z',
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+      sort: 'dispatched_at',
+      sort_order: 'asc',
     });
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
@@ -50,7 +53,10 @@ describe('ExecutionHistoryApi', () => {
         rule_ids: undefined,
         outcome: ['throttled'],
         episode_ids: undefined,
-        start_date: '2026-01-01T00:00:00.000Z',
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+        sort: 'dispatched_at',
+        sort_order: 'asc',
       },
     });
   });
@@ -68,20 +74,23 @@ describe('ExecutionHistoryApi', () => {
         rule_ids: undefined,
         outcome: undefined,
         episode_ids: undefined,
-        start_date: undefined,
+        from: undefined,
+        to: undefined,
+        sort: undefined,
+        sort_order: undefined,
       },
     });
   });
 
-  it('supports a count-only read via perPage=0 and start_date', async () => {
+  it('supports a count-only read via perPage=0 and from', async () => {
     const { api, http } = buildApi();
 
-    await api.listActionPolicyExecutions({ start_date: '2026-01-01T00:00:00.000Z', per_page: 0 });
+    await api.listActionPolicyExecutions({ from: '2026-01-01T00:00:00.000Z', per_page: 0 });
 
     expect(http.get).toHaveBeenCalledWith(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
       expect.objectContaining({
-        query: expect.objectContaining({ per_page: 0, start_date: '2026-01-01T00:00:00.000Z' }),
+        query: expect.objectContaining({ per_page: 0, from: '2026-01-01T00:00:00.000Z' }),
       })
     );
   });
@@ -91,8 +100,8 @@ describe('ExecutionHistoryApi', () => {
     const fakeResponse = {
       items: [{ dispatched_at: '2026-05-05T10:00:00Z' }],
       page: 2,
-      perPage: 25,
-      totalEvents: 137,
+      per_page: 25,
+      total: 137,
     };
     http.get.mockResolvedValueOnce(fakeResponse);
 

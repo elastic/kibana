@@ -20,6 +20,7 @@ import type {
   BulkCreateAttachmentsRequestV2,
   AttachmentPatchRequest,
   AttachmentsFindResponse,
+  UnifiedAttachmentsFindResponse,
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
 import type {
@@ -339,6 +340,97 @@ export const findAttachments = async ({
     .query(query)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
+
+  return body;
+};
+
+// -----------------------------V2 Unified Attachments API----------------------------
+
+export const findAttachmentsV2 = async ({
+  supertest,
+  caseId,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<UnifiedAttachmentsFindResponse> => {
+  const { body } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/attachments`)
+    .set('kbn-xsrf', 'true')
+    .query(query)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const getAttachmentV2 = async ({
+  supertest,
+  caseId,
+  attachmentId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  attachmentId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<UnifiedAttachment> => {
+  const { body: attachment } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/attachments/${attachmentId}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return attachment;
+};
+
+export const deleteAttachmentV2 = async ({
+  supertest,
+  caseId,
+  attachmentId,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  attachmentId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<{} | Error> => {
+  const { body } = await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/attachments/${attachmentId}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode)
+    .send();
+
+  return body;
+};
+
+export const deleteAllAttachmentsV2 = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<{} | Error> => {
+  const { body } = await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/attachments`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode)
+    .send();
 
   return body;
 };

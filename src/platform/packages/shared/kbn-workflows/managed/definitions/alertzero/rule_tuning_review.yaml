@@ -107,7 +107,7 @@ outputs:
 consts:
   # Fallbacks for the optional operational inputs; keep in sync with the sweep's
   # consts in rule_tuning_worker.yaml.
-  analysis_window_days: 14
+  analysis_window_days: 7
   preview_invocation_count: 2
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
@@ -190,7 +190,7 @@ steps:
       ${{ inputs.autonomy_level == 'manual'
         and steps.create_investigation.output.conversation_id != null }}
     with:
-      workflow-id: system-create-investigation-proposal
+      workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ steps.create_investigation.output.conversation_id }}"
         comment: |-
@@ -649,7 +649,7 @@ steps:
           - name: propose_query
             type: workflow.execute
             with:
-              workflow-id: system-create-investigation-proposal
+              workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
@@ -668,7 +668,7 @@ steps:
           - name: propose_risk_score
             type: workflow.execute
             with:
-              workflow-id: system-create-investigation-proposal
+              workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
@@ -688,7 +688,7 @@ steps:
           - name: propose_exception
             type: workflow.execute
             with:
-              workflow-id: system-create-investigation-proposal
+              workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
@@ -713,7 +713,7 @@ steps:
       - name: propose_manual
         type: workflow.execute
         with:
-          workflow-id: system-create-investigation-proposal
+          workflow-id: system-create-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: "{{ steps.compose_proposal.output.comment }}"
