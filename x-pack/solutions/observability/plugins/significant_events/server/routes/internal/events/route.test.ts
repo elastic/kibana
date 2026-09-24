@@ -46,6 +46,7 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventClient: () => eventClient,
+        getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: {},
@@ -55,6 +56,7 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       eventClient,
       rulesClient,
       candidateRuleIds: ['rule-1'],
+      alertEventsClient: undefined,
     });
     expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
   });

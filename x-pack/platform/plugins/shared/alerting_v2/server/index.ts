@@ -56,6 +56,7 @@ export type {
   AlertingServerStart,
   RulesClientApi,
   ActionPolicyClientApi,
+  AlertEventsClientApi,
 } from './types';
 export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
 export type { FindRulesArgs } from './lib/rules_client';

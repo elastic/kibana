@@ -17,6 +17,7 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
   combineLatest,
@@ -239,6 +240,21 @@ export class SignificantEventsPlugin
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
 
+      let alertEventsClientPromise: Promise<AlertEventsClientApi | undefined> | undefined;
+      const getAlertEventsClient = (): Promise<AlertEventsClientApi | undefined> => {
+        alertEventsClientPromise ??= pluginsStart.alertingVTwo
+          .getAlertEventsClientWithRequest(request)
+          .catch((err) => {
+            this.logger.warn(
+              `Failed to acquire AlertEventsClient; .rule-events dual-write skipped: ${
+                err instanceof Error ? err.message : err
+              }`
+            );
+            return undefined;
+          });
+        return alertEventsClientPromise;
+      };
+
       const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
         if (ruleIds.length === 0) {
           return;
@@ -282,6 +298,7 @@ export class SignificantEventsPlugin
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        getAlertEventsClient,
         deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,

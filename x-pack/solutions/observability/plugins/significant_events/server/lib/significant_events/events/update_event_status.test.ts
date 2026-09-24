@@ -11,6 +11,8 @@ import {
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
 } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { updateSignificantEventStatus } from './update_event_status';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
@@ -27,6 +29,22 @@ const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): Sign
   confidence: 0.8,
   ...overrides,
 });
+
+const makeAlertEventsClient = (
+  overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
+): jest.Mocked<AlertEventsClientApi> =>
+  ({
+    createAlertEvent: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  } as jest.Mocked<AlertEventsClientApi>);
+
+const makeLogger = (): jest.Mocked<Logger> =>
+  ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as jest.Mocked<Logger>);
 
 /**
  * @param hits - results returned for the first esql query (findByEventUuid)
@@ -68,6 +86,8 @@ describe('updateSignificantEventStatus', () => {
       eventClient: client,
       eventUuid: 'event-1',
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     expect(result).toEqual({
@@ -104,6 +124,8 @@ describe('updateSignificantEventStatus', () => {
         eventClient: client,
         eventUuid: 'event-1',
         status: 'closed',
+        alertEventsClient: makeAlertEventsClient(),
+        logger: makeLogger(),
       })
     ).resolves.toMatchObject({ updated: 1, status: 'closed' });
 
@@ -119,6 +141,8 @@ describe('updateSignificantEventStatus', () => {
       eventUuid: 'event-1',
       status: 'closed',
       assessmentNote: 'Automatically closed by cleanup.',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     const [[callArg]] = dataStreamClient.create.mock.calls;
@@ -137,6 +161,8 @@ describe('updateSignificantEventStatus', () => {
       eventClient: client,
       eventUuid: 'event-1',
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     const [[callArg]] = dataStreamClient.create.mock.calls;
@@ -150,6 +176,8 @@ describe('updateSignificantEventStatus', () => {
       eventClient: client,
       eventUuid: 'missing-event',
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     expect(result).toEqual({
@@ -169,6 +197,8 @@ describe('updateSignificantEventStatus', () => {
       eventClient: client,
       eventUuid: 'event-1',
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     expect(result).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'closed' });
@@ -195,6 +225,8 @@ describe('updateSignificantEventStatus', () => {
       eventClient: client,
       eventUuid: 'event-0',
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     expect(result.updated).toBe(1);
@@ -205,5 +237,84 @@ describe('updateSignificantEventStatus', () => {
     // Must chain off E1 (the true latest), not E0 (the stale caller reference)
     expect(written.previous_event_uuid).toBe('event-1');
     expect(written.status).toBe('closed');
+  });
+
+  describe('dual-write to .rule-events (Writer 2)', () => {
+    it('calls createAlertEvent once with the toRuleEvent output of the updated event', async () => {
+      const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+      const { client } = createEventClient([existing]);
+      const alertEventsClient = makeAlertEventsClient();
+      const logger = makeLogger();
+
+      await updateSignificantEventStatus({
+        eventClient: client,
+        eventUuid: 'event-1',
+        status: 'closed',
+        alertEventsClient,
+        logger,
+      });
+
+      expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+      const [calledWith] = alertEventsClient.createAlertEvent.mock.calls[0];
+      // Verify the argument is the toRuleEvent output: must have fingerprint and alert_status
+      expect(calledWith).toMatchObject({
+        fingerprint: existing.event_id,
+        alert_status: 'inactive', // 'closed' maps to inactive
+      });
+    });
+
+    it('does not call createAlertEvent when no write occurs (status unchanged)', async () => {
+      const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'closed' });
+      const { client } = createEventClient([existing]);
+      const alertEventsClient = makeAlertEventsClient();
+
+      await updateSignificantEventStatus({
+        eventClient: client,
+        eventUuid: 'event-1',
+        status: 'closed',
+        alertEventsClient,
+        logger: makeLogger(),
+      });
+
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not call createAlertEvent when the event is not found', async () => {
+      const { client } = createEventClient([]);
+      const alertEventsClient = makeAlertEventsClient();
+
+      await updateSignificantEventStatus({
+        eventClient: client,
+        eventUuid: 'missing-event',
+        status: 'closed',
+        alertEventsClient,
+        logger: makeLogger(),
+      });
+
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('returns success and logs error when createAlertEvent rejects (error suppression)', async () => {
+      const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+      const { client } = createEventClient([existing]);
+      const alertEventsClient = makeAlertEventsClient({
+        createAlertEvent: jest.fn().mockRejectedValue(new Error('index unavailable')),
+      });
+      const logger = makeLogger();
+
+      // Writer still returns success despite .rule-events failure
+      const result = await updateSignificantEventStatus({
+        eventClient: client,
+        eventUuid: 'event-1',
+        status: 'closed',
+        alertEventsClient,
+        logger,
+      });
+
+      expect(result).toMatchObject({ updated: 1, status: 'closed' });
+      // Give the fire-and-forget promise a chance to settle (flush full microtask queue)
+      await new Promise(setImmediate);
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('index unavailable'));
+    });
   });
 });

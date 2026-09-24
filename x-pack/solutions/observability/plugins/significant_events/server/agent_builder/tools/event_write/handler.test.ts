@@ -18,8 +18,11 @@ import {
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
 } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { eventsWriteItemSchema } from './tool';
 import type { EventClient } from '../../../lib/significant_events/events';
+import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
 
 const TS_EARLIER = '2024-01-01T00:00:00.000Z';
 
@@ -77,6 +80,22 @@ const makeEventClient = (
     emitTrigger: jest.fn(),
     ...overrides,
   } as jest.Mocked<EventClient>);
+
+const makeAlertEventsClient = (
+  overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
+): jest.Mocked<AlertEventsClientApi> =>
+  ({
+    createAlertEvent: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  } as jest.Mocked<AlertEventsClientApi>);
+
+const makeLogger = (): jest.Mocked<Logger> =>
+  ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as jest.Mocked<Logger>);
 
 describe('eventsWriteHandler', () => {
   it('writes a new event', async () => {
@@ -1166,5 +1185,117 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     expect(writtenDoc.symptom_hypothesis).toBe(
       'Both auth route and SageMaker provider return >=400.'
     );
+  });
+});
+
+describe('eventsWriteBulkHandler — dual-write to .rule-events (Writer 1)', () => {
+  it('calls createAlertEvent once per successfully written document', async () => {
+    const eventClient = makeEventClient();
+    const alertEventsClient = makeAlertEventsClient();
+    const logger = makeLogger();
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        { ...baseInput, event_id: 'event-a' },
+        { ...baseInput, event_id: 'event-b' },
+      ],
+      alertEventsClient,
+      logger,
+    });
+
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(2);
+  });
+
+  it('calls createAlertEvent with the in-memory pre-write document (toRuleEvent output), not the bulkCreate response', async () => {
+    const eventClient = makeEventClient();
+    const alertEventsClient = makeAlertEventsClient();
+    const logger = makeLogger();
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [{ ...baseInput, event_id: 'checkout__latency-abc12345' }],
+      alertEventsClient,
+      logger,
+    });
+
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+    const [calledWith] = alertEventsClient.createAlertEvent.mock.calls[0];
+
+    // The argument should be the toRuleEvent output of the in-memory document:
+    // it has fingerprint = event_id (stable series key) and alert_status mapped from status.
+    expect(calledWith).toMatchObject({
+      fingerprint: 'checkout__latency-abc12345',
+      alert_status: 'active', // 'open' maps to active
+    });
+    // Verify it matches the toRuleEvent output exactly — not a bulkCreate response shape
+    // (which would not have fingerprint/alert_status at the top level).
+    const writtenDoc = eventClient.bulkCreate.mock.calls[0][0][0] as SignificantEvent;
+    expect(calledWith).toEqual(toRuleEvent(writtenDoc));
+  });
+
+  it('does not call createAlertEvent for errored items in the bulk response', async () => {
+    const errorBulkCreate = async (documents: object[]) => ({
+      errors: true,
+      items: documents.map((_, i) =>
+        i === 0
+          ? { create: { status: 409, error: { type: 'conflict', reason: 'version conflict' } } }
+          : { create: { status: 201, result: 'created' } }
+      ),
+    });
+    const eventClient = makeEventClient({
+      bulkCreate: jest.fn().mockImplementation(errorBulkCreate),
+    });
+    const alertEventsClient = makeAlertEventsClient();
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        { ...baseInput, event_id: 'event-a' },
+        { ...baseInput, event_id: 'event-b' },
+      ],
+      alertEventsClient,
+      logger: makeLogger(),
+    });
+
+    // Only the successful item should trigger createAlertEvent
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for and logs a rejected createAlertEvent without failing the significant event write', async () => {
+    const eventClient = makeEventClient();
+    let rejectAlertEvent: ((reason?: unknown) => void) | undefined;
+    const alertEventsClient = makeAlertEventsClient();
+    alertEventsClient.createAlertEvent.mockImplementation(
+      () =>
+        new Promise((_, reject) => {
+          rejectAlertEvent = reject;
+        })
+    );
+    const logger = makeLogger();
+
+    const handlerPromise = eventsWriteBulkHandler({
+      eventClient,
+      inputs: [{ ...baseInput, event_id: 'checkout__latency-abc12345' }],
+      alertEventsClient,
+      logger,
+    });
+
+    let settled = false;
+    void handlerPromise.then(() => {
+      settled = true;
+    });
+    await new Promise(setImmediate);
+    expect(settled).toBe(false);
+
+    if (rejectAlertEvent === undefined) {
+      throw new Error('createAlertEvent did not start');
+    }
+    rejectAlertEvent(new Error('rule-events unavailable'));
+    const results = await handlerPromise;
+
+    // Old-stream write succeeds despite .rule-events failure.
+    expect(results[0].written).toBe(true);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('rule-events unavailable'));
   });
 });

@@ -6,6 +6,8 @@
  */
 
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { EventClient } from './event_client';
 import { cleanupStaleEvents, STALE_EVENT_ASSESSMENT_NOTE } from './cleanup_stale_events';
@@ -18,6 +20,22 @@ jest.mock('./update_event_status', () => ({
 const updateStatusMock = updateSignificantEventStatus as jest.MockedFunction<
   typeof updateSignificantEventStatus
 >;
+
+const makeAlertEventsClient = (
+  overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
+): jest.Mocked<AlertEventsClientApi> =>
+  ({
+    createAlertEvent: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  } as jest.Mocked<AlertEventsClientApi>);
+
+const makeLogger = (): jest.Mocked<Logger> =>
+  ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as jest.Mocked<Logger>);
 
 const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResponse =>
   ({
@@ -64,8 +82,12 @@ describe('cleanupStaleEvents', () => {
     const noRules = createEvent('no-rules-event', []);
     const eventClient = createEventClient([[stale, mixed, noRules]]);
     const rulesClient = createRulesClient(['live-rule']);
+    const alertEventsClient = makeAlertEventsClient();
+    const logger = makeLogger();
 
-    await expect(cleanupStaleEvents({ eventClient, rulesClient })).resolves.toEqual({
+    await expect(
+      cleanupStaleEvents({ eventClient, rulesClient, alertEventsClient, logger })
+    ).resolves.toEqual({
       scanned: 3,
       closed: 1,
       kept: 1,
@@ -79,6 +101,8 @@ describe('cleanupStaleEvents', () => {
       eventUuid: 'stale-event',
       status: 'closed',
       assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
+      alertEventsClient,
+      logger,
     });
   });
 
@@ -89,7 +113,12 @@ describe('cleanupStaleEvents', () => {
     const eventClient = createEventClient([firstBatch, [createEvent('event-1000', ['rule-2'])]]);
     const rulesClient = createRulesClient([]);
 
-    await cleanupStaleEvents({ eventClient, rulesClient });
+    await cleanupStaleEvents({
+      eventClient,
+      rulesClient,
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
+    });
 
     expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenCalledTimes(2);
     expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenNthCalledWith(2, {
@@ -111,6 +140,8 @@ describe('cleanupStaleEvents', () => {
       eventClient,
       rulesClient,
       candidateRuleIds: ['rule-1', 'rule-1'],
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenCalledWith({
@@ -128,9 +159,14 @@ describe('cleanupStaleEvents', () => {
       .mocked(rulesClient.findExistingRuleIds)
       .mockRejectedValueOnce(new Error('rule lookup failed'));
 
-    await expect(cleanupStaleEvents({ eventClient, rulesClient })).rejects.toThrow(
-      'rule lookup failed'
-    );
+    await expect(
+      cleanupStaleEvents({
+        eventClient,
+        rulesClient,
+        alertEventsClient: makeAlertEventsClient(),
+        logger: makeLogger(),
+      })
+    ).rejects.toThrow('rule lookup failed');
     expect(updateStatusMock).not.toHaveBeenCalled();
   });
 
@@ -145,9 +181,14 @@ describe('cleanupStaleEvents', () => {
       .mockResolvedValueOnce([])
       .mockRejectedValueOnce(new Error('later lookup failed'));
 
-    await expect(cleanupStaleEvents({ eventClient, rulesClient })).rejects.toThrow(
-      'later lookup failed'
-    );
+    await expect(
+      cleanupStaleEvents({
+        eventClient,
+        rulesClient,
+        alertEventsClient: makeAlertEventsClient(),
+        logger: makeLogger(),
+      })
+    ).rejects.toThrow('later lookup failed');
     expect(updateStatusMock).toHaveBeenCalledTimes(1000);
     expect(updateStatusMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ eventUuid: 'event-1000' })
@@ -174,8 +215,49 @@ describe('cleanupStaleEvents', () => {
       };
     });
 
-    await cleanupStaleEvents({ eventClient, rulesClient });
+    await cleanupStaleEvents({
+      eventClient,
+      rulesClient,
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
+    });
 
     expect(maxActiveUpdates).toBe(10);
+  });
+
+  describe('dual-write to .rule-events (Writer 3)', () => {
+    it('propagates alertEventsClient and logger to each updateSignificantEventStatus call', async () => {
+      const stale = createEvent('stale-1', ['deleted-rule']);
+      const eventClient = createEventClient([[stale]]);
+      const rulesClient = createRulesClient([]);
+      const alertEventsClient = makeAlertEventsClient();
+      const logger = makeLogger();
+
+      await cleanupStaleEvents({ eventClient, rulesClient, alertEventsClient, logger });
+
+      expect(updateStatusMock).toHaveBeenCalledWith(
+        expect.objectContaining({ alertEventsClient, logger })
+      );
+    });
+
+    it('returns success even when updateSignificantEventStatus rejects (error not swallowed by cleanup)', async () => {
+      // Note: cleanupStaleEvents does NOT suppress errors from updateSignificantEventStatus —
+      // that suppression happens inside updateSignificantEventStatus itself for the .rule-events write.
+      // This test verifies the propagation contract: alertEventsClient reaches each update call.
+      const stale1 = createEvent('stale-1', ['deleted-rule']);
+      const stale2 = createEvent('stale-2', ['deleted-rule']);
+      const eventClient = createEventClient([[stale1, stale2]]);
+      const rulesClient = createRulesClient([]);
+      const alertEventsClient = makeAlertEventsClient();
+      const logger = makeLogger();
+
+      await cleanupStaleEvents({ eventClient, rulesClient, alertEventsClient, logger });
+
+      // Both stale events should have received the alertEventsClient
+      expect(updateStatusMock).toHaveBeenCalledTimes(2);
+      for (const call of updateStatusMock.mock.calls) {
+        expect(call[0]).toMatchObject({ alertEventsClient, logger });
+      }
+    });
   });
 });

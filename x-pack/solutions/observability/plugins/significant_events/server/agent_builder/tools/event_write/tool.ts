@@ -24,6 +24,7 @@ import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   getBulkWriteToolErrorCode,
@@ -311,10 +312,12 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, getKnowledgeIndicatorClient, licensing } = await getScopedClients({
-          request,
-        });
+        const { getEventClient, getKnowledgeIndicatorClient, getAlertEventsClient, licensing } =
+          await getScopedClients({
+            request,
+          });
         await assertSignificantEventsAccess({ server, licensing });
+        await assertCanManageSignificantEvents({ request, server });
         const items = await enrichCausalFeatures(
           toolParams.items,
           getKnowledgeIndicatorClient,
@@ -325,6 +328,8 @@ export function createEventsWriteTool({
           eventClient: await getEventClient(),
           inputs: items,
           source: toolParams.source,
+          alertEventsClient: await getAlertEventsClient(),
+          logger,
         });
 
         data.forEach((result) => {
