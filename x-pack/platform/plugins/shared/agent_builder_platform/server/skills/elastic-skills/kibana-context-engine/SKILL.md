@@ -15,6 +15,7 @@ compatibility:
   against the equivalent `platform_context_engine_*` tools where a runtime exposes them over MCP. The caller needs Agent
   Builder `read` and Context Engine `read`, plus Elasticsearch `read` and `view_index_metadata` on the backing
   `ai-index-*` indices.
+experimental: true
 ---
 
 # Query Context Engine AI Indices

@@ -13,7 +13,7 @@ import { expect } from '@kbn/scout/api';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import {
   COMMON_HEADERS,
   DISCOVER_SESSION_API_BASE_PATH,
@@ -36,6 +36,7 @@ const createEsqlTab = (id: string, query: string) => ({
 apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
+  const createdLegacyAliasIds: string[] = [];
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
@@ -47,6 +48,12 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
   });
 
   apiTest.afterEach(async ({ kbnClient }) => {
+    if (createdLegacyAliasIds.length > 0) {
+      await kbnClient.savedObjects.bulkDelete({
+        objects: createdLegacyAliasIds.map((id) => ({ type: 'legacy-url-alias', id })),
+      });
+      createdLegacyAliasIds.length = 0;
+    }
     await kbnClient.savedObjects.clean({ types: ['search'] });
   });
 
@@ -99,6 +106,70 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
     });
     expect(response.body.meta.version).toBeDefined();
   });
+
+  apiTest(
+    'returns the resolved ID when loading an alias and rejects writes through the alias',
+    async ({ apiClient, kbnClient }) => {
+      const aliasId = createId('legacy-session');
+      const legacyAliasId = `default:search:${aliasId}`;
+      const headers = { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader };
+
+      await kbnClient.savedObjects.create({
+        type: 'legacy-url-alias',
+        id: legacyAliasId,
+        overwrite: false,
+        attributes: {
+          targetType: 'search',
+          targetId: TEST_DISCOVER_SESSION_ID,
+          targetNamespace: 'default',
+          sourceId: aliasId,
+          purpose: 'savedObjectConversion',
+        },
+        references: [],
+        migrationVersion: { 'legacy-url-alias': '8.2.0' },
+      });
+      createdLegacyAliasIds.push(legacyAliasId);
+
+      const session = await apiTest.step('load the session through its alias', async () => {
+        const response = await apiClient.get(`${DISCOVER_SESSION_API_BASE_PATH}/${aliasId}`, {
+          headers,
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveHeaders({
+          'kbn-resolve-outcome': 'aliasMatch',
+          'kbn-resolve-alias-target-id': TEST_DISCOVER_SESSION_ID,
+        });
+        expect(response.body.id).toBe(TEST_DISCOVER_SESSION_ID);
+        return response.body;
+      });
+
+      await apiTest.step(
+        'reject a write through the alias without changing the session',
+        async () => {
+          const response = await apiClient.put(`${DISCOVER_SESSION_API_BASE_PATH}/${aliasId}`, {
+            headers,
+            body: { ...session.data, title: 'Must not overwrite the alias target' },
+            responseType: 'json',
+          });
+
+          expect(response).toHaveStatusCode(409);
+
+          const reloaded = await apiClient.get(
+            `${DISCOVER_SESSION_API_BASE_PATH}/${TEST_DISCOVER_SESSION_ID}`,
+            {
+              headers,
+              responseType: 'json',
+            }
+          );
+
+          expect(reloaded).toHaveStatusCode(200);
+          expect(reloaded.body.data).toStrictEqual(session.data);
+        }
+      );
+    }
+  );
 
   apiTest('fully replaces an existing Discover session', async ({ apiClient, kbnClient }) => {
     const id = TEST_DISCOVER_SESSION_ID;

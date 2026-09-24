@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-/** Seed label for scenario-registry fixtures. */
+/**
+ * The generation marker for scenario-registry fixtures: the prefix of every run
+ * marker this fixture seeds (`run_marker.ts`), so a seeded index is still
+ * greppable as this fixture. It is not on its own a retrieval scope or a
+ * cleanup predicate — it matches every run of the fixture, which is what made a
+ * concurrent run's `afterAll` delete a live fixture.
+ */
 export const AD2_SCENARIO_SEED_LABEL = 'ad-scenario-registry-2026-07';
 
 export const AD2_SCENARIO_ID_PREFIX = 'ad-scenario-';

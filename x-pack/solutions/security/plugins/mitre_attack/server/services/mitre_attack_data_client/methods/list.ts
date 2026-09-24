@@ -52,7 +52,7 @@ export const list = async ({
     type: MITRE_ATTACK_ENTITY_SO_TYPE,
     namespaces: ['*'],
     perPage: 10000,
-    sortField: 'id',
+    sortField: 'name',
     sortOrder: 'asc',
     filter: buildKqlFilter({ framework, frameworkVersion, types, status }),
   });
