@@ -104,6 +104,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                   openFullscreenConversation({
                     conversationId: conversation.id,
                     agentId: conversation.agent_id,
+                    openDetails: true,
                   })
                 }
                 onOpenEscalation={renderEscalationModal}
