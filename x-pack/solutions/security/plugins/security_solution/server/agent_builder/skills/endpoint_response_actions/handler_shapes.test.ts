@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable require-atomic-updates */
+
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   isToolHandlerStandardReturn,
@@ -81,6 +83,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
               last_checkin: '2024-01-01T00:00:00Z',
               isolation: false,
               host_status: 'healthy',
+              packages: ['endpoint'],
             },
           ],
         }),
@@ -141,6 +144,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
               last_checkin: '2024-01-01T00:00:00Z',
               isolation: false,
               host_status: 'healthy',
+              packages: ['endpoint'],
             },
           ],
         }),

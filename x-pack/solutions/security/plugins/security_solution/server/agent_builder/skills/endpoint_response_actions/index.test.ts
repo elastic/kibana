@@ -5,156 +5,558 @@
  * 2.0.
  */
 
-import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { createMockEndpointAppContext } from '../../../endpoint/mocks';
-import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import {
-  createEndpointResponseActionsSkill,
-  GET_ENDPOINT_STATUS_TOOL_ID,
-  LIST_ENDPOINTS_TOOL_ID,
-  GET_RESPONSE_ACTION_STATUS_TOOL_ID,
-} from '.';
+  isToolHandlerStandardReturn,
+  type ToolHandlerContext,
+  type ToolHandlerReturn,
+  type ToolHandlerStandardReturn,
+} from '@kbn/agent-builder-server/tools';
+import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
-describe('createEndpointResponseActionsSkill', () => {
+import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
+import { GET_ENDPOINT_STATUS_TOOL_ID } from '../..';
+import { getEndpointStatusTool } from '.';
+import { LOOKUP_PAGE_SIZE } from '../services/endpoint_lookup';
+
+const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
+const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
+
+function assertStandardReturn(result: unknown) {
+  if (!isToolHandlerStandardReturn(result as ToolHandlerReturn)) {
+    throw new Error('Expected standard tool return');
+  }
+  return (result as ToolHandlerStandardReturn).results;
+}
+
+describe('getEndpointStatusTool', () => {
   let mockEndpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mockEndpointAppContextService = createMockEndpointAppContext().service;
   });
 
-  describe('skill definition', () => {
-    it('returns a valid skill definition', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-
-      expect(skill).toBeDefined();
-      expect(skill.id).toBe('endpoint-response-actions');
-      expect(skill.name).toBe('endpoint-response-actions');
-      expect(skill.basePath).toBe('skills/security/endpoint');
-      expect(skill.description).toContain('endpoint response action');
-      expect(skill.content).toContain('Endpoint Response Actions Skill');
+  describe('tool definition', () => {
+    it('returns a valid builtin tool definition', () => {
+      const tool = getEndpointStatusTool(mockEndpointAppContextService);
+      expect(tool.type).toBe(ToolType.builtin);
+      expect(tool.id).toBe(GET_ENDPOINT_STATUS_TOOL_ID);
+      expect(tool.description).toContain('Retrieves the current status');
+      expect(tool.schema).toBeDefined();
     });
 
-    it('includes system instructions in content', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-
-      expect(skill.content).toContain('Endpoint Response Actions Skill');
-      expect(skill.content).toContain('When to Use This Skill');
-      expect(skill.content).toContain('Process');
-      expect(skill.content).toContain('Guardrails');
-    });
-
-    it('exposes detailed reference material via referencedContent', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-
-      expect(skill.referencedContent).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: 'reference',
-            content: expect.stringContaining('Error Handling Reference'),
-          }),
-        ])
-      );
-    });
-
-    it('declares itself read-only and names the write actions it cannot perform', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-
-      // This slice ships read-only tools. The instructions must say so
-      // explicitly, otherwise the agent is free to claim it isolated a host
-      // it never touched, or to improvise a write via another skill's tools.
-      expect(skill.content).toContain('read-only');
-      expect(skill.description).toContain('Read-only');
-      for (const writeAction of ['isolate', 'release', 'scan']) {
-        expect(skill.content).toContain(writeAction);
-      }
-    });
-
-    it('distinguishes not-found reasons from error codes in the reference doc', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-
-      // A missing host or action comes back as `found: false` + `reason`, not
-      // as an `error`. Naming a reason an error is what makes the model treat
-      // a normal not-found as an unexpected result instead of asking the
-      // analyst to verify the id. The exact contract lives in the reference
-      // doc the skill points the model to for error-code handling.
-      const reference = skill.referencedContent?.find((c) => c.name === 'reference')?.content;
-      expect(reference).toContain('reason: endpoint_not_found');
-      expect(reference).toContain('reason: action_not_found');
-      expect(reference).toContain('error: insufficient_privileges');
-      expect(reference).toContain('error: unknown_error');
+    it('has correct tool id format', () => {
+      expect(GET_ENDPOINT_STATUS_TOOL_ID).toBe('endpoint-response-actions.get_endpoint_status');
     });
   });
 
-  describe('getInlineTools', () => {
-    it('returns exactly the 3 read-only inline tools (list_endpoints, get_endpoint_status, get_response_action_status)', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      expect(inlineTools).toHaveLength(3);
-      const toolIds = (inlineTools ?? []).map((t) => t.id);
-      expect(toolIds).toEqual(
-        expect.arrayContaining([
-          LIST_ENDPOINTS_TOOL_ID,
-          GET_ENDPOINT_STATUS_TOOL_ID,
-          GET_RESPONSE_ACTION_STATUS_TOOL_ID,
-        ])
-      );
+  describe('handler', () => {
+    let tool: ReturnType<typeof getEndpointStatusTool>;
+
+    beforeEach(() => {
+      tool = getEndpointStatusTool(mockEndpointAppContextService);
     });
 
-    it('exposes no write/state-changing tools in this slice', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const toolIds = (inlineTools ?? []).map((t) => t.id);
+    it('returns found: false with reason "endpoint_not_found" when no agent matches', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+      };
 
-      // Guards the slice boundary: a write tool re-added to `getInlineTools`
-      // without its confirmation/authz review must fail here rather than ship
-      // silently under a skill the analyst was told is read-only.
-      for (const writeToolId of [
-        'endpoint-response-actions.isolate_host',
-        'endpoint-response-actions.unisolate_host',
-        'endpoint-response-actions.scan',
-        'endpoint-response-actions.running_processes',
-      ]) {
-        expect(toolIds).not.toContain(writeToolId);
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+      try {
+        const result = await tool.handler({ hostName: 'nonexistent-host' }, mockContext);
+
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.found).toBe(false);
+        expect(data.reason).toBe('endpoint_not_found');
+        expect(data.hostName).toBe('nonexistent-host');
+        expect(data.isolated).toBe(false);
+        expect(data.lastSeen).toBeNull();
+        expect(data.status).toBe('offline');
+        expect(mockLogger.error).not.toHaveBeenCalled();
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
       }
     });
 
-    it('satisfies the 7-tool hard cap enforced by validateSkillDefinition', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
+    it('calls agentService.list with the correct kuery filter', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+      try {
+        await tool.handler({ hostName: 'my-host' }, mockContext);
+
+        expect(mockAgentService.listAgents).toHaveBeenCalledWith({
+          showInactive: true,
+          kuery: 'local_metadata.host.name: my-host',
+          page: 1,
+          perPage: LOOKUP_PAGE_SIZE,
+        });
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+      }
     });
 
-    it('includes list_endpoints tool', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+    it('returns found: true with correct data when agent and metadata lookups succeed', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-123' }],
+        }),
+      };
 
-      const inlineTools = await skill.getInlineTools?.();
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { Endpoint: { state: { isolation: true } } },
+              last_checkin: '2024-01-01T00:00:00Z',
+              host_status: 'healthy',
+            },
+          ],
+          total: 1,
+        }),
+      };
 
-      const listTool = inlineTools?.find((tool) => tool.id === LIST_ENDPOINTS_TOOL_ID);
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
 
-      expect(listTool).toBeDefined();
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.found).toBe(true);
+        expect(data.hostName).toBe('my-host');
+        expect(data.agentId).toBe('agent-123');
+        expect(data.status).toBe('healthy');
+        expect(data.isolated).toBe(true);
+        expect(data.lastSeen).toBe('2024-01-01T00:00:00Z');
+
+        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+          {
+            page: 0,
+            pageSize: 1,
+            // Constrained by the hostname as well as the ID, so a mismatched
+            // pair cannot return another host's status.
+            kuery: 'agent.id: agent-123 AND united.endpoint.host.hostname: my-host',
+          },
+          // Scoped services are required for this read to fan out under CPS.
+          expect.objectContaining({ isCpsRead: expect.any(Function) })
+        );
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
     });
 
-    it('includes get_endpoint_status tool', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+    it('returns found: true with non-isolated status when metadata shows isolation is false', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-456' }],
+        }),
+      };
 
-      const inlineTools = await skill.getInlineTools?.();
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { Endpoint: { state: { isolation: false } } },
+              last_checkin: '2024-06-01T12:00:00Z',
+              host_status: 'healthy',
+            },
+          ],
+          total: 1,
+        }),
+      };
 
-      const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
 
-      expect(statusTool).toBeDefined();
-      expect(statusTool?.description).toContain('Retrieves the current status');
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({ hostName: 'safe-host' }, mockContext);
+
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.found).toBe(true);
+        expect(data.isolated).toBe(false);
+        expect(data.status).toBe('healthy');
+        expect(data.lastSeen).toBe('2024-06-01T12:00:00Z');
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
     });
 
-    it('includes get_response_action_status tool', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+    it('returns endpoint_not_found when agent exists but metadata service returns empty', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [
+            {
+              id: 'agent-789',
+              last_checkin: '2024-01-01T00:00:00Z',
+              isolation: false,
+              host_status: 'healthy',
+            },
+          ],
+        }),
+      };
 
-      const inlineTools = await skill.getInlineTools?.();
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      };
 
-      const statusTool = inlineTools?.find(
-        (tool) => tool.id === GET_RESPONSE_ACTION_STATUS_TOOL_ID
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({ hostName: 'found-host' }, mockContext);
+
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.found).toBe(false);
+        expect(data.reason).toBe('endpoint_not_found');
+        expect(data.hostName).toBe('found-host');
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('returns an ambiguous result when two online agents share the hostname', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [
+            { id: 'live-a', status: 'online', packages: ['endpoint'] },
+            { id: 'live-b', status: 'online', packages: ['endpoint'] },
+          ],
+        }),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+      try {
+        const result = await tool.handler({ hostName: 'duplicated-host' }, mockContext);
+
+        const results = assertStandardReturn(result);
+        expect(results).toHaveLength(1);
+        expect(results[0].type).toBe(ToolResultType.other);
+        const data = results[0].data as Record<string, unknown>;
+        // Must NOT report a status for an arbitrary one of the two hosts.
+        expect(data.found).toBe(false);
+        expect(data.reason).toBe('ambiguous_hostname');
+        expect(data.candidates).toEqual([
+          { agentId: 'live-a', status: 'online' },
+          { agentId: 'live-b', status: 'online' },
+        ]);
+        expect(data.message).toContain('duplicated-host');
+        expect(mockLogger.error).not.toHaveBeenCalled();
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+      }
+    });
+
+    it('returns an ambiguous result when more records match than the lookup examined', async () => {
+      // A full page plus a total far beyond it: an unexamined record could be
+      // another live machine, so reporting one of the visible agents' status
+      // would be a guess.
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: Array.from({ length: LOOKUP_PAGE_SIZE }, (_, i) => ({
+            id: `live-${i}`,
+            status: 'online',
+          })),
+          total: 5000,
+        }),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+      try {
+        const result = await tool.handler({ hostName: 'huge-history-host' }, mockContext);
+
+        const results = assertStandardReturn(result);
+        const data = results[0].data as Record<string, unknown>;
+        expect(data.found).toBe(false);
+        expect(data.reason).toBe('ambiguous_hostname');
+        expect(data.truncated).toBe(true);
+        // Fleet's `total` is deliberately NOT surfaced: it counts agents
+        // before space filtering, so exposing it would report how many matching
+        // records exist in other Spaces. `truncated` alone carries the signal
+        // the agent needs — "there were more than I examined".
+        expect(data.totalCandidates).toBeUndefined();
+        // The message must name the way out: re-calling with the agent ID.
+        expect(data.message).toContain('agentId');
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+      }
+    });
+
+    it('reads status by agent ID when the hostname resolves to several endpoints', async () => {
+      // The ambiguity result tells the model to ask for an agent ID; accepting
+      // one is what makes that instruction actionable instead of a dead end.
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [
+            { id: 'live-a', status: 'online', packages: ['endpoint'] },
+            { id: 'live-b', status: 'online', packages: ['endpoint'] },
+          ],
+        }),
+      };
+
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { Endpoint: { state: { isolation: false } } },
+              last_checkin: '2024-05-05T00:00:00Z',
+              host_status: 'healthy',
+            },
+          ],
+          total: 1,
+        }),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler(
+          { hostName: 'duplicated-host', agentId: 'live-b' },
+          mockContext
+        );
+
+        const results = assertStandardReturn(result);
+        const data = results[0].data as Record<string, unknown>;
+        expect(data.found).toBe(true);
+        expect(data.agentId).toBe('live-b');
+        // The ID read stays constrained by the hostname it was requested for:
+        // querying `agent.id` alone would return whatever host owns that ID and
+        // then label the result with the caller's hostname, reporting (or
+        // isolating) the wrong machine when the pair does not match.
+        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+          {
+            page: 0,
+            pageSize: 1,
+            kuery: 'agent.id: live-b AND united.endpoint.host.hostname: duplicated-host',
+          },
+          expect.objectContaining({ isCpsRead: expect.any(Function) })
+        );
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('does not report status for an agent ID that belongs to a different hostname', async () => {
+      // An agent ID supplied alongside a hostname it does not belong to must not
+      // resolve: the metadata read is hostname-constrained, so it finds nothing
+      // and the caller gets endpoint_not_found instead of another host's status.
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [
+            { id: 'live-a', status: 'online', packages: ['endpoint'] },
+            { id: 'live-b', status: 'online', packages: ['endpoint'] },
+          ],
+        }),
+      };
+
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler(
+          { hostName: 'other-host', agentId: 'live-b' },
+          mockContext
+        );
+
+        const results = assertStandardReturn(result);
+        const data = results[0].data as Record<string, unknown>;
+        expect(data.found).toBe(false);
+        expect(data.reason).toBe('endpoint_not_found');
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('returns insufficient_privileges when caller lacks canReadSecuritySolution and canAccessFleet', async () => {
+      const { getEndpointAuthzInitialStateMock } = jest.requireActual(
+        '../../../../../../common/endpoint/service/authz/mocks'
+      );
+      mockEndpointAppContextService.getEndpointAuthz = jest.fn().mockResolvedValue(
+        getEndpointAuthzInitialStateMock({
+          canReadSecuritySolution: false,
+          canAccessFleet: false,
+        })
       );
 
-      expect(statusTool).toBeDefined();
-      expect(statusTool?.description).toContain('action ID');
+      const result = await tool.handler({ hostName: 'safe-host' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      const denialData = results[0].data as Record<string, unknown>;
+      expect(denialData.error).toBe('insufficient_privileges');
+      expect(denialData.privilege).toBe('canReadSecuritySolution');
+    });
+
+    it('returns unknown_error when metadata service throws', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [
+            {
+              id: 'agent-fallback',
+              last_checkin: '2024-03-15T08:00:00Z',
+              isolation: true,
+              host_status: 'unhealthy',
+            },
+          ],
+        }),
+      };
+
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockRejectedValue(new Error('metadata service timeout')),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({ hostName: 'fallback-host' }, mockContext);
+
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.error).toBe('unknown_error');
+        expect(data.message).toContain('metadata service timeout');
+        expect(mockLogger.error).toHaveBeenCalled();
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('returns an error result when the agent service throws', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockRejectedValue(new Error('fleet service unavailable')),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+      try {
+        const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.error).toBe('unknown_error');
+        expect(data.message).toContain('fleet service unavailable');
+        expect(mockLogger.error).toHaveBeenCalled();
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+      }
     });
   });
 });

@@ -119,7 +119,7 @@ describe('createEndpointLookupService', () => {
     });
   });
 
-  it('defaults agentType to endpoint when packages are missing', async () => {
+  it('ignores agents without a response-action integration even when they match the hostname', async () => {
     const { lookup } = buildService({
       listAgents: jest.fn().mockResolvedValue({
         agents: [{ id: 'agent-unknown', status: 'online' }],
@@ -128,14 +128,7 @@ describe('createEndpointLookupService', () => {
 
     const result = await lookup.resolveByHostName('unknown-host');
 
-    expect(result).toEqual({
-      kind: 'found',
-      endpoint: {
-        agentId: 'agent-unknown',
-        agentType: 'endpoint',
-        packages: [],
-      },
-    });
+    expect(result).toEqual({ kind: 'not_found' });
   });
 
   it('prefers the online agent over stale offline/uninstalled enrollments for the same hostname', async () => {
@@ -177,8 +170,18 @@ describe('createEndpointLookupService', () => {
     const { lookup } = buildService({
       listAgents: jest.fn().mockResolvedValue({
         agents: [
-          { id: 'older', status: 'offline', enrolled_at: '2026-07-17T10:00:00.000Z' },
-          { id: 'newer', status: 'offline', enrolled_at: '2026-07-17T13:00:00.000Z' },
+          {
+            id: 'older',
+            status: 'offline',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T10:00:00.000Z',
+          },
+          {
+            id: 'newer',
+            status: 'offline',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T13:00:00.000Z',
+          },
         ],
       }),
     });
@@ -195,8 +198,18 @@ describe('createEndpointLookupService', () => {
     const { lookup } = buildService({
       listAgents: jest.fn().mockResolvedValue({
         agents: [
-          { id: 'live-a', status: 'online', enrolled_at: '2026-07-17T10:00:00.000Z' },
-          { id: 'live-b', status: 'online', enrolled_at: '2026-07-17T13:00:00.000Z' },
+          {
+            id: 'live-a',
+            status: 'online',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T10:00:00.000Z',
+          },
+          {
+            id: 'live-b',
+            status: 'online',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T13:00:00.000Z',
+          },
         ],
       }),
     });
@@ -217,8 +230,18 @@ describe('createEndpointLookupService', () => {
     const { lookup } = buildService({
       listAgents: jest.fn().mockResolvedValue({
         agents: [
-          { id: 'offline-peer', status: 'offline', enrolled_at: '2026-07-17T10:00:00.000Z' },
-          { id: 'live-one', status: 'online', enrolled_at: '2026-07-17T13:00:00.000Z' },
+          {
+            id: 'offline-peer',
+            status: 'offline',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T10:00:00.000Z',
+          },
+          {
+            id: 'live-one',
+            status: 'online',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T13:00:00.000Z',
+          },
         ],
       }),
     });
@@ -356,6 +379,7 @@ describe('createEndpointLookupService', () => {
         agents: Array.from({ length: LOOKUP_PAGE_SIZE }, (_, i) => ({
           id: `page-${page}-agent-${i}`,
           status: 'online',
+          packages: ['endpoint'],
         })),
         total: 5000,
       }));

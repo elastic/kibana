@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable require-atomic-updates */
+
 import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
@@ -117,7 +119,7 @@ describe('getEndpointStatusTool', () => {
     it('returns found: true with correct data when agent and metadata lookups succeed', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-          agents: [{ id: 'agent-123' }],
+          agents: [{ id: 'agent-123', packages: ['endpoint'] }],
         }),
       };
 
@@ -181,7 +183,7 @@ describe('getEndpointStatusTool', () => {
     it('returns found: true with non-isolated status when metadata shows isolation is false', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-          agents: [{ id: 'agent-456' }],
+          agents: [{ id: 'agent-456', packages: ['endpoint'] }],
         }),
       };
 
@@ -236,6 +238,7 @@ describe('getEndpointStatusTool', () => {
               last_checkin: '2024-01-01T00:00:00Z',
               isolation: false,
               host_status: 'healthy',
+              packages: ['endpoint'],
             },
           ],
         }),
@@ -277,8 +280,8 @@ describe('getEndpointStatusTool', () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
           agents: [
-            { id: 'live-a', status: 'online' },
-            { id: 'live-b', status: 'online' },
+            { id: 'live-a', status: 'online', packages: ['endpoint'] },
+            { id: 'live-b', status: 'online', packages: ['endpoint'] },
           ],
         }),
       };
@@ -320,6 +323,7 @@ describe('getEndpointStatusTool', () => {
           agents: Array.from({ length: LOOKUP_PAGE_SIZE }, (_, i) => ({
             id: `live-${i}`,
             status: 'online',
+            packages: ['endpoint'],
           })),
           total: 5000,
         }),
@@ -358,8 +362,8 @@ describe('getEndpointStatusTool', () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
           agents: [
-            { id: 'live-a', status: 'online' },
-            { id: 'live-b', status: 'online' },
+            { id: 'live-a', status: 'online', packages: ['endpoint'] },
+            { id: 'live-b', status: 'online', packages: ['endpoint'] },
           ],
         }),
       };
@@ -426,8 +430,8 @@ describe('getEndpointStatusTool', () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
           agents: [
-            { id: 'live-a', status: 'online' },
-            { id: 'live-b', status: 'online' },
+            { id: 'live-a', status: 'online', packages: ['endpoint'] },
+            { id: 'live-b', status: 'online', packages: ['endpoint'] },
           ],
         }),
       };
@@ -495,6 +499,7 @@ describe('getEndpointStatusTool', () => {
               last_checkin: '2024-03-15T08:00:00Z',
               isolation: true,
               host_status: 'unhealthy',
+              packages: ['endpoint'],
             },
           ],
         }),
