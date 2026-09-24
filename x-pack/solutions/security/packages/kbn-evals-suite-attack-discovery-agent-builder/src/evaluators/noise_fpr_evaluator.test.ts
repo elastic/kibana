@@ -74,26 +74,23 @@ describe('noise FPR evaluators', () => {
     expect(result.score).toBe(0);
   });
 
-
   it('NoiseFalsePositive fails when a forbidden noise ID is cited only in the Markdown fields', async () => {
     // alertIds is empty, so the structured scan alone finds nothing; the
     // noise citation is user-visible in detailsMarkdown and must still fail.
     const evaluator = createNoiseFalsePositiveEvaluator();
-    const result = await evaluator.evaluate(
-      {
-        expected: { forbiddenAlertIds: ['noise-alert-42'] } as never,
-        output: {
-          insights: [
-            {
-              title: 'Looks clean',
-              summaryMarkdown: 'Chain summary',
-              detailsMarkdown: 'Built from alert noise-alert-42 context.',
-              alertIds: [],
-            },
-          ],
-        } as never,
-      } as never
-    );
+    const result = await evaluator.evaluate({
+      expected: { forbiddenAlertIds: ['noise-alert-42'] } as never,
+      output: {
+        insights: [
+          {
+            title: 'Looks clean',
+            summaryMarkdown: 'Chain summary',
+            detailsMarkdown: 'Built from alert noise-alert-42 context.',
+            alertIds: [],
+          },
+        ],
+      } as never,
+    } as never);
 
     expect(result.score).toBe(0);
   });
@@ -101,21 +98,19 @@ describe('noise FPR evaluators', () => {
   it('NoiseFalsePositive does not flag a forbidden ID embedded in a longer different ID', async () => {
     // Word-boundary matching: 'noise-alert-4' must not match 'noise-alert-42'.
     const evaluator = createNoiseFalsePositiveEvaluator();
-    const result = await evaluator.evaluate(
-      {
-        expected: { forbiddenAlertIds: ['noise-alert-4'] } as never,
-        output: {
-          insights: [
-            {
-              title: 't',
-              summaryMarkdown: 'Built from alert noise-alert-42 context.',
-              detailsMarkdown: '',
-              alertIds: [],
-            },
-          ],
-        } as never,
-      } as never
-    );
+    const result = await evaluator.evaluate({
+      expected: { forbiddenAlertIds: ['noise-alert-4'] } as never,
+      output: {
+        insights: [
+          {
+            title: 't',
+            summaryMarkdown: 'Built from alert noise-alert-42 context.',
+            detailsMarkdown: '',
+            alertIds: [],
+          },
+        ],
+      } as never,
+    } as never);
 
     expect(result.score).toBe(1);
   });
