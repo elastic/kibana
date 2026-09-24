@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -285,6 +286,18 @@ export const WatchDetailPage: React.FC = () => {
       headerItems={canWrite ? headerItems : undefined}
     >
       <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+        {!canWrite ? (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              announceOnMount
+              iconType="alert"
+              title={settingsI18n.READ_ONLY_CALLOUT_TITLE}
+              data-test-subj="alertZeroReadOnlyCallout"
+            >
+              <p>{settingsI18n.READ_ONLY_CALLOUT_BODY}</p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        ) : null}
         {saveBlockedByInvalidDraft || hasInvalidDraft ? (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">

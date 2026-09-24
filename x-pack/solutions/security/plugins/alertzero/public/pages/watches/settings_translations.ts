@@ -35,6 +35,21 @@ export const viewExecutionsAriaLabel = (workerName: string) =>
     values: { workerName },
   });
 
+export const READ_ONLY_CALLOUT_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.readOnlyCalloutTitle',
+  {
+    defaultMessage: 'You have read-only access',
+  }
+);
+
+export const READ_ONLY_CALLOUT_BODY = i18n.translate(
+  'xpack.alertzero.watches.settings.readOnlyCalloutBody',
+  {
+    defaultMessage:
+      'Your role does not allow changing AlertZero settings, so every action and input on this page is disabled.',
+  }
+);
+
 export const SAVE_WATCH_SETTINGS = i18n.translate(
   'xpack.alertzero.watches.settings.saveWatchSettings',
   { defaultMessage: 'Save' }

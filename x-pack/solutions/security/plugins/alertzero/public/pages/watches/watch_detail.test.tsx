@@ -1135,10 +1135,13 @@ describe('WatchDetailPage', () => {
     expect(
       await screen.findByTestId(`alertZeroWorkerHeaderSaveError-${shared.id}`)
     ).toBeInTheDocument();
+  });
+
   it('locks worker settings and hides save when the user cannot write', () => {
     mockUseCanWriteAlertZero.mockReturnValue(false);
     renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
 
+    expect(screen.getByTestId('alertZeroReadOnlyCallout')).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroWatchSettingsSave')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroWatchSettingsDiscard')).not.toBeInTheDocument();
     expect(
@@ -1146,12 +1149,12 @@ describe('WatchDetailPage', () => {
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
       )
     ).toBeDisabled();
-    expect(
-      within(
-        screen.getByTestId(
-          `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
-        )
-      ).getByTestId('alertZeroAutonomySlider')
-    ).toBeDisabled();
+    within(
+      screen.getByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    )
+      .getAllByRole('radio')
+      .forEach((radio) => expect(radio).toBeDisabled());
   });
 });
