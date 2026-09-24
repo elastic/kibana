@@ -33,6 +33,12 @@ jest.mock('./services', () => ({
   AgentService: jest.fn(),
   AttachmentsService: jest.fn(() => ({ addAttachmentType: jest.fn() })),
   RenderersService: jest.fn(() => ({ register: jest.fn() })),
+  ConversationEventsService: jest.fn(() => ({
+    register: jest.fn(),
+    getUiDefinition: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  })),
   ChatService: jest.fn(),
   ConversationsService: jest.fn(),
   ConversationTemplatesService: jest.fn(() => ({
@@ -63,6 +69,10 @@ jest.mock('./services/conversation_templates', () => ({
 
 jest.mock('./services/renderers', () => ({
   createPublicRenderersContract: jest.fn(() => ({})),
+}));
+
+jest.mock('./services/conversation_events', () => ({
+  createPublicConversationEventsContract: jest.fn(() => ({})),
 }));
 
 jest.mock('./services/tools', () => ({

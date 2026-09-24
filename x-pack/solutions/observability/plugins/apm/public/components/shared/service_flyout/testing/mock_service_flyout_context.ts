@@ -42,6 +42,8 @@ export function createMockServiceFlyoutContext(
       setEnvironment: jest.fn(),
       rangeFrom: 'now-15m',
       rangeTo: 'now',
+      start: '2026-01-01T00:00:00.000Z',
+      end: '2026-01-01T00:15:00.000Z',
       setRange: jest.fn(),
       refreshToken: 0,
       onRefresh: jest.fn(),

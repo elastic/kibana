@@ -14,7 +14,10 @@ export { isExternalApiKey } from './is_external_api_key';
 export type {
   ServiceAccountAssumableBy,
   ServiceAccountRoleAssignments,
+  UiamListServiceAccountsResponse,
   UiamServiceAccount,
+  UiamServiceAccountCreator,
+  UiamServiceAccountDetails,
 } from './service_account_types';
 export {
   UiamService,
