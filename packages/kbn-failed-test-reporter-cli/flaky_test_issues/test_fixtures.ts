@@ -53,6 +53,7 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       },
     },
   ],
+  byTarget: [],
   firstFailedAt: new Date('2026-09-02T10:00:00.000Z'),
   lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
   latestRun: {
