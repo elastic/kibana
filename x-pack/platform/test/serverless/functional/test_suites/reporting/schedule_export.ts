@@ -25,25 +25,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   describe('Schedule export menu', () => {
+    const suiteDefaultIndex = 'logstash-*';
+    let previousDefaultIndex: string | undefined;
+
     before(async () => {
       // Serverless Observability shows the "Add data" intercept until a data view exists.
       // Load a data view (not a saved dashboard) so Dashboard/Discover actually render.
+      const currentDefaultIndex = await kibanaServer.uiSettings.getDefaultIndex();
+      previousDefaultIndex =
+        typeof currentDefaultIndex === 'string' ? currentDefaultIndex : undefined;
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.update({ defaultIndex: suiteDefaultIndex });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     after(async () => {
+      await kibanaServer.uiSettings.unset('defaultIndex');
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      if (previousDefaultIndex !== undefined) {
+        await kibanaServer.uiSettings.update({ defaultIndex: previousDefaultIndex });
+      }
     });
 
     it('does not show Schedule export on dashboards', async () => {
