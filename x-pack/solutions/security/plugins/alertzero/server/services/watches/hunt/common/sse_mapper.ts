@@ -190,8 +190,7 @@ const isAlertsIndex = (index: string): boolean => {
 };
 
 const hitTimestamp = (hit: HuntCoordinatorResult['tier1']['hits'][number]): string | undefined => {
-  const timestamp = (hit as Record<string, unknown>)['@timestamp'];
-  return typeof timestamp === 'string' ? timestamp : undefined;
+  return typeof hit.timestamp === 'string' ? hit.timestamp : undefined;
 };
 
 const toEventMatched = (
@@ -274,22 +273,22 @@ const mergeTierHitRefs = ({
   );
 
   for (const behavior of behaviors) {
-    for (const ref of behavior.hit_refs ?? []) {
-      const key = `${ref.source_index}|${ref.event_id}`;
+    for (const ref of behavior.hits ?? []) {
+      const key = `${ref.index}|${ref.id}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      if (isAlertsIndex(ref.source_index)) {
+      if (isAlertsIndex(ref.index)) {
         if (alerts.length >= MAX_HIT_REFS) continue;
         alerts.push({
-          alert_id: ref.event_id,
-          index: ref.source_index,
+          alert_id: ref.id,
+          index: ref.index,
           ...(ref.timestamp ? { timestamp: ref.timestamp } : {}),
         });
       } else {
         if (events.length >= MAX_HIT_REFS) continue;
         events.push({
-          event_id: ref.event_id,
-          source_index: ref.source_index,
+          event_id: ref.id,
+          source_index: ref.index,
           ...(ref.timestamp ? { timestamp: ref.timestamp } : {}),
           matched: {
             technique_id: behavior.technique_id,
@@ -577,7 +576,7 @@ const buildEntry = ({
  * `ai.attachment.add`, one call per entry.
  *
  * Each technique-scoped entry's `security_knowledge_indicators`,
- * `hunt_result.tier2.behaviors`, Tier 2 `hit_refs`, and Tier 2 entities are
+ * `hunt_result.tier2.behaviors`, Tier 2 `hits`, and Tier 2 entities are
  * filtered to that technique. Tier 1 events attributed to another technique
  * are excluded; IOC-only / unscoped Tier 1 hits stay shared.
  */
