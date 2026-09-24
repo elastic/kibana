@@ -451,6 +451,100 @@ describe('row actions and dialogs', () => {
     });
   });
 
+  describe('tables', () => {
+    const rows = [
+      { pod: 'web-ui', namespace: 'frontend', events: 7 },
+      { pod: 'asset-server', namespace: 'frontend', events: 231 },
+      { pod: 'log-shipper', namespace: 'observability', events: 15 },
+    ];
+
+    const table = (extra: object = {}) => [
+      {
+        id: 'root',
+        component: 'Table',
+        caption: 'Noisiest containers',
+        rows: { path: '/rows' },
+        columns: [
+          { field: 'pod', name: 'Pod' },
+          { field: 'namespace', name: 'Namespace' },
+          { field: 'events', name: 'Events', dataType: 'number' },
+        ],
+        ...extra,
+      },
+    ];
+
+    const bodyCells = () =>
+      Array.from(document.querySelectorAll('tbody tr')).map(
+        (row) => row.querySelector('td')?.textContent ?? ''
+      );
+
+    it('sorts on a column heading, since EUI sorts the rows already loaded', () => {
+      renderApp(table(), { rows });
+      fireEvent.click(screen.getByRole('button', { name: /Events/ }));
+      expect(bodyCells().map((c) => c.replace(/^Pod/, ''))).toEqual([
+        'web-ui',
+        'log-shipper',
+        'asset-server',
+      ]);
+    });
+
+    it('honours an initial sort so the first paint is already ordered', () => {
+      renderApp(table({ sortField: 'events', sortDirection: 'desc' }), { rows });
+      expect(bodyCells()[0]).toContain('asset-server');
+    });
+
+    it('filters as the reader types in the in-table search box', () => {
+      renderApp(table({ search: true }), { rows });
+      fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'observability' } });
+      expect(bodyCells()).toHaveLength(1);
+      expect(bodyCells()[0]).toContain('log-shipper');
+    });
+
+    it('pages long tables rather than running off the panel', () => {
+      renderApp(table({ pageSize: 2 }), { rows });
+      expect(bodyCells()).toHaveLength(2);
+      expect(screen.getByRole('button', { name: 'Page 1 of 2' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Rows per page: 2/ })).toBeInTheDocument();
+    });
+
+    it('shows every row when no page size is given', () => {
+      renderApp(table(), { rows });
+      expect(bodyCells()).toHaveLength(3);
+    });
+
+    it('renders a missing cell as a dash rather than blank', () => {
+      renderApp(table(), { rows: [{ pod: 'web-ui', namespace: null, events: 1 }] });
+      expect(screen.getByText('—')).toBeInTheDocument();
+    });
+
+    it('still dispatches a row action with the clicked row', () => {
+      const onAction = jest.fn();
+      renderApp(
+        table({
+          sortField: 'events',
+          sortDirection: 'desc',
+          rowActions: [
+            {
+              label: 'Inspect',
+              action: { event: { name: 'kbn.setData', context: { path: '/selected' } } },
+            },
+          ],
+        }),
+        { rows },
+        onAction
+      );
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Inspect' })[0]);
+      expect(onAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: expect.objectContaining({
+            row: expect.objectContaining({ pod: 'asset-server' }),
+          }),
+        })
+      );
+    });
+  });
+
   describe('filter controls', () => {
     const filter = (selected: string[]) => [
       {

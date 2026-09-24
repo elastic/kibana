@@ -441,7 +441,7 @@
     },
     "Table": {
       "type": "object",
-      "description": "A read-only data table. Bind 'rows' to an array of objects in the data model and declare which fields to show. Maps to EuiBasicTable.",
+      "description": "A sortable, searchable, paged data table over rows from the data model. Maps to EuiInMemoryTable, so sorting, the search box and paging all work on the rows already loaded \u2014 no extra query.",
       "properties": {
         "component": {
           "const": "Table"
@@ -458,11 +458,27 @@
             "properties": {
               "field": {
                 "type": "string",
-                "description": "Key to read from each row object."
+                "description": "Key in each row object."
               },
               "name": {
                 "type": "string",
-                "description": "Column header text."
+                "description": "Column heading."
+              },
+              "dataType": {
+                "type": "string",
+                "enum": [
+                  "string",
+                  "number",
+                  "date",
+                  "boolean"
+                ],
+                "default": "string",
+                "description": "Numbers sort numerically and align right."
+              },
+              "sortable": {
+                "type": "boolean",
+                "default": true,
+                "description": "Set false to stop readers reordering by this column."
               },
               "align": {
                 "type": "string",
@@ -470,7 +486,17 @@
                   "left",
                   "center",
                   "right"
-                ]
+                ],
+                "description": "Overrides the alignment dataType implies."
+              },
+              "width": {
+                "type": "string",
+                "description": "A CSS width such as '120px' or '20%'."
+              },
+              "truncate": {
+                "type": "boolean",
+                "default": false,
+                "description": "Ellipsise long values instead of wrapping them."
               }
             },
             "required": [
@@ -484,9 +510,34 @@
           "$ref": "common_types.json#/$defs/DynamicValue",
           "description": "An array of row objects, normally a binding such as {\"path\": \"/results\"}."
         },
+        "search": {
+          "type": "boolean",
+          "default": false,
+          "description": "Adds EUI's in-table search box, filtering the loaded rows as the reader types."
+        },
+        "searchPlaceholder": {
+          "type": "string"
+        },
+        "pageSize": {
+          "type": "number",
+          "description": "Rows per page. Omit to show every row without a pager; set it for long tables."
+        },
+        "sortField": {
+          "type": "string",
+          "description": "Column to sort by initially; must match a column's field."
+        },
+        "sortDirection": {
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "default": "asc"
+        },
         "compressed": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "description": "Tighter rows and a smaller font. Leave it off unless the table is genuinely cramped."
         },
         "rowActions": {
           "type": "array",

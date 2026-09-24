@@ -10,24 +10,25 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiBasicTable,
   EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiInMemoryTable,
   EuiMarkdownFormat,
   EuiStat,
   EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import type { CatalogComponent } from '@kbn/a2ui-renderer';
-import { bool, objectArray, oneOf, optionalStr, str } from '../coerce';
+import { bool, num, objectArray, oneOf, optionalStr, str } from '../coerce';
 
 const TEXT_COLORS = ['default', 'subdued', 'success', 'warning', 'danger', 'accent'] as const;
 const ALIGNS = ['left', 'center', 'right'] as const;
+const DATA_TYPES = ['string', 'number', 'date', 'boolean'] as const;
 
 const HEADING_SIZES = { heading1: 'l', heading2: 'm', heading3: 's' } as const;
 
@@ -134,16 +135,25 @@ export const Table: CatalogComponent = {
   name: 'Table',
   render: ({ props, rawProps, dispatchAction, accessibility }) => {
     const items = objectArray(props.rows);
-    const columns: Array<EuiBasicTableColumn<Record<string, unknown>>> = objectArray(
-      props.columns
-    ).map((column) => ({
-      field: str(column.field),
-      name: str(column.name),
-      align: ALIGNS.includes(column.align as never)
-        ? (column.align as (typeof ALIGNS)[number])
-        : undefined,
-      render: (value: unknown) => str(value),
-    }));
+    const declared = objectArray(props.columns);
+
+    const columns: Array<EuiBasicTableColumn<Record<string, unknown>>> = declared.map((column) => {
+      const dataType = oneOf(column.dataType, DATA_TYPES, 'string');
+      return {
+        field: str(column.field),
+        name: str(column.name),
+        dataType,
+        // Sortable unless the author opts out: a reader expects to be able to
+        // reorder a table, and EUI sorts in memory over rows we already hold.
+        sortable: bool(column.sortable, true),
+        truncateText: bool(column.truncate),
+        width: optionalStr(column.width),
+        align: ALIGNS.includes(column.align as never)
+          ? (column.align as (typeof ALIGNS)[number])
+          : undefined,
+        render: (value: unknown) => (value === null || value === undefined ? '—' : str(value)),
+      };
+    });
 
     /**
      * Row actions dispatch with the clicked row merged into the event context
@@ -193,10 +203,41 @@ export const Table: CatalogComponent = {
 
     if (columns.length === 0) return null;
 
+    const sortField = optionalStr(props.sortField);
+    const sorting = sortField
+      ? {
+          sort: {
+            field: sortField,
+            direction: oneOf(props.sortDirection, ['asc', 'desc'] as const, 'asc'),
+          },
+        }
+      : true;
+
+    // 0 (or absent) means show every row; anything else turns on EUI's pager.
+    const pageSize = num(props.pageSize, 0);
+    const pagination =
+      pageSize > 0
+        ? { initialPageSize: pageSize, pageSizeOptions: [pageSize, pageSize * 2, pageSize * 5] }
+        : undefined;
+
+    const search: EuiSearchBarProps | undefined = bool(props.search)
+      ? {
+          box: {
+            incremental: true,
+            placeholder: optionalStr(props.searchPlaceholder) ?? 'Search',
+            schema: true,
+            'aria-label': `Search ${str(props.caption) || 'the table'}`,
+          },
+        }
+      : undefined;
+
     return (
-      <EuiBasicTable
+      <EuiInMemoryTable
         items={items}
         columns={columns}
+        sorting={sorting}
+        pagination={pagination}
+        search={search}
         compressed={bool(props.compressed)}
         tableLayout="auto"
         tableCaption={str(props.caption) || accessibility?.label || 'Data table'}
