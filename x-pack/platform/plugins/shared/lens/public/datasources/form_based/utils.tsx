@@ -660,8 +660,7 @@ export function getCustomRankLastValueSortFieldWarningMessages(
         shortMessage: i18n.translate(
           'xpack.lens.indexPattern.terms.customRankLastValueMissingSortField.shortMessage',
           {
-            defaultMessage: 'Ranking by last value uses {field} because no sort field is set.',
-            values: { field: defaultField },
+            defaultMessage: 'Set a date field for ranking by last value',
           }
         ),
         longMessage: (
@@ -671,6 +670,7 @@ export function getCustomRankLastValueSortFieldWarningMessages(
               defaultMessage="{name} is ranked by the last value of {sourceField}, but no date field is set. {field} is used for now. Edit the visualization and set a date field in Rank by."
               values={{
                 name: <strong>{columnName}</strong>,
+                sourceField: <strong>{orderAgg.sourceField}</strong>,
                 field: <strong>{defaultField}</strong>,
               }}
             />
@@ -703,7 +703,7 @@ export function getCustomRankLastValueSortFieldWarningMessages(
                   }}
                 >
                   {i18n.translate('xpack.lens.indexPattern.terms.customRankLastValueSortByField', {
-                    defaultMessage: 'Sort by {field}',
+                    defaultMessage: 'Set {field} as date field',
                     values: { field: defaultField },
                   })}
                 </EuiButtonEmpty>

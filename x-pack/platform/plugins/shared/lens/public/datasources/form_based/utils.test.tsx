@@ -633,7 +633,7 @@ describe('indexpattern_datasource utils', () => {
       );
 
       expect(container).toHaveTextContent(
-        'Top values of source ranks top values by their last value, but no sort field is set, so timestamp is used by default. Edit in the Lens editor to set a sort field.'
+        'Top values of source is ranked by the last value of bytes, but no date field is set. timestamp is used for now. Edit the visualization and set a date field in Rank by.'
       );
       expect(screen.queryByTestId('lnsCustomRankLastValueSortByField')).not.toBeInTheDocument();
     });
