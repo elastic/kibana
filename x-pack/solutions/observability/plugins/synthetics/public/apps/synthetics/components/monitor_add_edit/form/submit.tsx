@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { restoreMaskedMonitorParams } from '../../../../../../common/utils/mask_monitor_params';
 import { MONITORS_ROUTE } from '../../../../../../common/constants';
 import { useEnablement } from '../../../hooks';
 import { RunTestButton } from './run_test_btn';
@@ -24,7 +23,6 @@ import type { SyntheticsMonitor } from '../types';
 import { ConfigKey, SourceType } from '../types';
 import { format } from './formatter';
 import { getAddMonitorCancelHref } from './cancel_href';
-import { useParameterValues } from './parameter_values_context';
 
 export const ActionBar = ({
   readOnly = false,
@@ -45,11 +43,8 @@ export const ActionBar = ({
 
   const [monitorsPendingDeletion, setMonitorsPendingDeletion] = useState<string[]>([]);
 
-  const [submission, setSubmission] = useState<
-    { monitor: SyntheticsMonitor; preserveMaskedParams: boolean } | undefined
-  >(undefined);
+  const [submission, setSubmission] = useState<SyntheticsMonitor | undefined>(undefined);
 
-  const { parametersAreMasked, plaintextSnapshot } = useParameterValues();
   const { status, loading, isEdit } = useMonitorSave({
     submission,
   });
@@ -62,20 +57,7 @@ export const ActionBar = ({
     if (!isValid) {
       return;
     }
-    const monitor = format(formData, readOnly);
-    const hasPlaintextSnapshot = Boolean(plaintextSnapshot);
-    setSubmission({
-      monitor: hasPlaintextSnapshot
-        ? {
-            ...monitor,
-            [ConfigKey.PARAMS]: restoreMaskedMonitorParams({
-              previousParams: plaintextSnapshot,
-              submittedParams: monitor[ConfigKey.PARAMS],
-            }),
-          }
-        : monitor,
-      preserveMaskedParams: parametersAreMasked && !hasPlaintextSnapshot,
-    });
+    setSubmission(format(formData, readOnly));
   };
 
   return status === FETCH_STATUS.SUCCESS ? (

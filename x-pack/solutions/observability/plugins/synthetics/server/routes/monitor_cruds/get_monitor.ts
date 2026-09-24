@@ -36,7 +36,6 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       }),
       query: z.strictObject({
         internal: queryBoolean.optional().default(false).describe('For internal use only.'),
-        hideParams: queryBoolean.optional().default(false).describe('For internal use only.'),
       }),
     },
   },
@@ -49,7 +48,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   }): Promise<any> => {
     const { id: monitorId } = request.params;
     try {
-      const { internal, hideParams } = request.query;
+      const { internal } = request.query;
 
       const capabilities = await coreStart?.capabilities.resolveCapabilities(request, {
         capabilityPath: 'uptime.*',
@@ -63,18 +62,17 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       if (canSave) {
         // only user with write permissions can decrypt the monitor
         const monitor = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
-        const normalizedMonitor =
-          hideParams || !canRevealParams
-            ? {
-                ...monitor.normalizedMonitor,
-                attributes: {
-                  ...monitor.normalizedMonitor.attributes,
-                  [ConfigKey.PARAMS]: maskMonitorParams(
-                    monitor.normalizedMonitor.attributes[ConfigKey.PARAMS]
-                  ),
-                },
-              }
-            : monitor.normalizedMonitor;
+        const normalizedMonitor = !canRevealParams
+          ? {
+              ...monitor.normalizedMonitor,
+              attributes: {
+                ...monitor.normalizedMonitor.attributes,
+                [ConfigKey.PARAMS]: maskMonitorParams(
+                  monitor.normalizedMonitor.attributes[ConfigKey.PARAMS]
+                ),
+              },
+            }
+          : monitor.normalizedMonitor;
         return {
           ...mapSavedObjectToMonitor({ monitor: normalizedMonitor, internal }),
           spaceId,

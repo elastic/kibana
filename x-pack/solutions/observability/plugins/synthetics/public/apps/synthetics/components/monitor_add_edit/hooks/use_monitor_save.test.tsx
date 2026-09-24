@@ -43,10 +43,7 @@ jest.mock('../../../../../utils/kibana_service', () => ({
 
 describe('useMonitorSave', () => {
   it('saves a submission only once when its masked-parameter state is captured', async () => {
-    const submission = {
-      monitor: { name: 'Monitor' } as SyntheticsMonitor,
-      preserveMaskedParams: true,
-    };
+    const submission = { name: 'Monitor' } as SyntheticsMonitor;
 
     const { rerender } = renderHook(
       ({ currentSubmission }) => useMonitorSave({ submission: currentSubmission }),
@@ -61,8 +58,7 @@ describe('useMonitorSave', () => {
     expect(updateMonitorAPI).toHaveBeenCalledWith({
       id: 'monitor-id',
       spaceId: 'default',
-      monitor: submission.monitor,
-      preserveMaskedParams: true,
+      monitor: submission,
     });
     expect(updateMonitorAPI).toHaveBeenCalledTimes(1);
   });
