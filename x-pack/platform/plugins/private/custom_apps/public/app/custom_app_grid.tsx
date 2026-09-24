@@ -65,6 +65,38 @@ export function persistentDepth(definition: CustomAppDefinition): number {
   return depth;
 }
 
+/** True when a panel belongs to the grid this scope draws. */
+function inScope(
+  definition: CustomAppDefinition,
+  id: string,
+  scope: 'persistent' | 'tab',
+  activeTab: string | undefined
+): boolean {
+  const tab = definition.panels[id]?.tab;
+  return scope === 'persistent' ? !tab : Boolean(tab) && tab === activeTab;
+}
+
+/**
+ * How far to shift a scope's rows so its own grid starts at row 0.
+ *
+ * Measured from the scope's *own* topmost panel rather than from where the
+ * persistent panels end. The two must not be coupled: deriving a tab's offset
+ * from the header's depth meant anything that grew the header — adding a panel
+ * to it, say — shifted every tab panel above row 0, where they clamped together
+ * and the grid fought the echo in an endless loop.
+ */
+export function scopeOffset(
+  definition: CustomAppDefinition,
+  scope: 'persistent' | 'tab',
+  activeTab: string | undefined
+): number {
+  let top = Infinity;
+  for (const [id, widget] of Object.entries(definition.layout)) {
+    if (inScope(definition, id, scope, activeTab)) top = Math.min(top, widget.row);
+  }
+  return Number.isFinite(top) ? top : 0;
+}
+
 /**
  * The panels one grid draws, with their rows rebased to that grid's origin.
  *
@@ -80,13 +112,13 @@ export function scopedLayout(
 ): GridLayoutData {
   const filtered: GridLayoutData = {};
   for (const [id, widget] of Object.entries(definition.layout)) {
-    const tab = definition.panels[id]?.tab;
-    const belongs = scope === 'persistent' ? !tab : Boolean(tab) && tab === activeTab;
-    if (!belongs) continue;
+    if (!inScope(definition, id, scope, activeTab)) continue;
+    // `offset` is the scope's smallest row, so this can never go negative and
+    // never needs a clamp — which is what kept the round trip lossless.
     filtered[id] =
       offset === 0
         ? (widget as GridLayoutData[string])
-        : ({ ...widget, row: Math.max(0, widget.row - offset) } as GridLayoutData[string]);
+        : ({ ...widget, row: widget.row - offset } as GridLayoutData[string]);
   }
   return filtered;
 }
@@ -216,8 +248,8 @@ export function CustomAppGrid({
   // but their grid starts at row 0, so they are shifted up on the way in and back
   // down on the way out. That keeps the saved geometry readable as one page.
   const offset = useMemo(
-    () => (scope === 'tab' ? persistentDepth(definition) : 0),
-    [scope, definition]
+    () => scopeOffset(definition, scope, activeTab),
+    [definition, scope, activeTab]
   );
 
   const visibleLayout = useMemo(

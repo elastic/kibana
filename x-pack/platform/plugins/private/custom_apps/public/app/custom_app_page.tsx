@@ -25,14 +25,14 @@ import type { A2uiMessage } from '@kbn/a2ui-renderer';
 import { CustomAppServicesProvider } from '../catalog';
 import { SampleDataCallout } from './sample_data_callout';
 import type { CustomAppDefinition } from '../../common/app_definition';
-import { emptyAppDefinition, getPanelIds } from '../../common/app_definition';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH, PLUGIN_NAME } from '../../common/constants';
+import { emptyAppDefinition } from '../../common/app_definition';
+import { PLUGIN_NAME } from '../../common/constants';
 import type { CustomAppClient } from './custom_app_client';
 import { CustomAppGrid, getTabs, useAppSurfaces } from './custom_app_grid';
 import { PanelEditorFlyout } from './panel_editor_flyout';
 import { AppEditorFlyout } from './app_editor_flyout';
 import { createActionHandler } from './handle_action';
-import { applyPanelEdit } from './apply_panel_edit';
+import { addPanelTo, applyPanelEdit } from './panel_mutations';
 
 /** Stands in before the app loads, so the surfaces hook keeps a stable identity. */
 const EMPTY_DEFINITION = emptyAppDefinition('');
@@ -51,27 +51,6 @@ export interface CustomAppPageProps {
   onNavigateToList: () => void;
   /** Saving may change whether this app appears in the navigation. */
   onAppsChanged: () => void;
-}
-
-function nextPanelId(definition: CustomAppDefinition): string {
-  const existing = new Set(getPanelIds(definition.layout));
-  let index = existing.size + 1;
-  while (existing.has(`panel${index}`)) index++;
-  return `panel${index}`;
-}
-
-/** Places a new panel on a fresh row below everything currently laid out. */
-function bottomRow(layout: GridLayoutData): number {
-  let max = 0;
-  for (const widget of Object.values(layout)) {
-    if (widget.type === 'panel') max = Math.max(max, widget.row + widget.height);
-    else {
-      for (const panel of Object.values(widget.panels)) {
-        max = Math.max(max, widget.row + panel.row + panel.height);
-      }
-    }
-  }
-  return max;
 }
 
 export function CustomAppPage({
@@ -185,39 +164,8 @@ export function CustomAppPage({
   }, []);
 
   const addPanel = useCallback(() => {
-    setDefinition((current) => {
-      if (!current) return current;
-      const id = nextPanelId(current);
-      return {
-        ...current,
-        layout: {
-          ...current.layout,
-          [id]: {
-            type: 'panel',
-            id,
-            row: bottomRow(current.layout as GridLayoutData),
-            column: 0,
-            width: DEFAULT_PANEL_WIDTH,
-            height: DEFAULT_PANEL_HEIGHT,
-          },
-        },
-        panels: { ...current.panels, [id]: { title: 'New panel' } },
-        surfaces: {
-          ...current.surfaces,
-          [id]: [
-            {
-              version: 'v1.0',
-              createSurface: {
-                surfaceId: id,
-                catalogId: 'elastic/kibana-eui/v1',
-                components: [{ id: 'root', component: 'Text', text: 'Edit this panel.' }],
-              },
-            },
-          ] as A2uiMessage[],
-        },
-      };
-    });
-  }, []);
+    setDefinition((current) => (current ? addPanelTo(current, activeTab) : current));
+  }, [activeTab]);
 
   const removePanel = useCallback((panelId: string) => {
     setDefinition((current) => {

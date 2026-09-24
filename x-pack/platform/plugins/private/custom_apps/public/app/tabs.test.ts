@@ -6,7 +6,13 @@
  */
 
 import type { CustomAppDefinition } from '../../common/app_definition';
-import { getTabs, persistentDepth, rebaseLayout, scopedLayout } from './custom_app_grid';
+import {
+  getTabs,
+  persistentDepth,
+  rebaseLayout,
+  scopedLayout,
+  scopeOffset,
+} from './custom_app_grid';
 
 const definition = (panels: CustomAppDefinition['panels']): CustomAppDefinition =>
   ({ version: 1, title: 't', layout: {}, panels, surfaces: {} } as CustomAppDefinition);
@@ -84,5 +90,59 @@ describe('splitting an app across two grids', () => {
   it('leaves the layout alone when there is nothing to rebase', () => {
     const layout = scopedLayout(app, 'persistent', undefined, 0);
     expect(rebaseLayout(layout, 0)).toBe(layout);
+  });
+});
+
+describe('scopeOffset', () => {
+  const app = (extra: Record<string, unknown> = {}) =>
+    ({
+      layout: {
+        header: { type: 'panel', id: 'header', row: 0, column: 0, width: 48, height: 3 },
+        chart: { type: 'panel', id: 'chart', row: 6, column: 0, width: 24, height: 10 },
+        table: { type: 'panel', id: 'table', row: 16, column: 0, width: 24, height: 8 },
+        ...(extra.layout as object),
+      },
+      panels: {
+        header: {},
+        chart: { tab: 'Overview' },
+        table: { tab: 'Overview' },
+        ...(extra.panels as object),
+      },
+    } as unknown as CustomAppDefinition);
+
+  it('rebases a tab from its own topmost panel', () => {
+    expect(scopeOffset(app(), 'tab', 'Overview')).toBe(6);
+  });
+
+  it('leaves the persistent strip at the origin', () => {
+    expect(scopeOffset(app(), 'persistent', undefined)).toBe(0);
+  });
+
+  it('is unmoved by a panel added to the other grid', () => {
+    // This is the freeze: deriving a tab's offset from where the persistent
+    // panels ended meant adding an untabbed panel low in the document pushed
+    // every tab panel above row 0, where they clamped together and the grid
+    // fought its own echo forever.
+    const grown = app({
+      layout: { stray: { type: 'panel', id: 'stray', row: 61, column: 0, width: 24, height: 15 } },
+      panels: { stray: { title: 'New panel' } },
+    });
+    expect(scopeOffset(grown, 'tab', 'Overview')).toBe(6);
+
+    const shown = scopedLayout(grown, 'tab', 'Overview', scopeOffset(grown, 'tab', 'Overview'));
+    // Still distinct rows rather than everything collapsed onto row 0.
+    expect(shown.chart.row).toBe(0);
+    expect(shown.table.row).toBe(10);
+  });
+
+  it('round-trips a rebased row back to where it was stored', () => {
+    const current = app();
+    const offset = scopeOffset(current, 'tab', 'Overview');
+    const shown = scopedLayout(current, 'tab', 'Overview', offset);
+    expect(rebaseLayout(shown, offset).table.row).toBe(current.layout.table.row);
+  });
+
+  it('falls back to the origin for a scope with no panels', () => {
+    expect(scopeOffset(app(), 'tab', 'NoSuchTab')).toBe(0);
   });
 });

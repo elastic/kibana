@@ -7,7 +7,7 @@
 
 import type { A2uiMessage } from '@kbn/a2ui-renderer';
 import type { CustomAppDefinition } from '../../common/app_definition';
-import { applyPanelEdit } from './apply_panel_edit';
+import { addPanelTo, applyPanelEdit } from './panel_mutations';
 
 const message = (text: string) =>
   ({
@@ -90,5 +90,78 @@ describe('applyPanelEdit', () => {
     });
 
     expect(next.queries?.chart).toEqual([{ path: '/new', shape: 'first', query: 'FROM z' }]);
+  });
+});
+
+describe('addPanelTo', () => {
+  const app = (): CustomAppDefinition =>
+    ({
+      version: 1,
+      title: 'App',
+      layout: {
+        header: { type: 'panel', id: 'header', row: 0, column: 0, width: 48, height: 3 },
+        filters: { type: 'panel', id: 'filters', row: 3, column: 0, width: 48, height: 3 },
+        chart: { type: 'panel', id: 'chart', row: 6, column: 0, width: 24, height: 10 },
+        table: { type: 'panel', id: 'table', row: 16, column: 0, width: 24, height: 20 },
+        logs: { type: 'panel', id: 'logs', row: 6, column: 0, width: 48, height: 12 },
+      },
+      panels: {
+        header: {},
+        filters: {},
+        chart: { tab: 'Overview' },
+        table: { tab: 'Overview' },
+        logs: { tab: 'Logs' },
+      },
+      surfaces: {},
+    } as unknown as CustomAppDefinition);
+
+  it('puts the new panel on the tab being looked at', () => {
+    // Untabbed, it would land in the persistent strip above the tab bar.
+    const next = addPanelTo(app(), 'Overview');
+    const added = Object.keys(next.panels).find((id) => !app().panels[id])!;
+    expect(next.panels[added].tab).toBe('Overview');
+  });
+
+  it('measures the bottom of that tab, not the whole document', () => {
+    // The Overview tab ends at 16 + 20 = 36; the Logs tab is irrelevant to it.
+    const next = addPanelTo(app(), 'Overview');
+    const added = Object.keys(next.layout).find((id) => !app().layout[id])!;
+    expect(next.layout[added].row).toBe(36);
+  });
+
+  it('starts a shorter tab below only its own panels', () => {
+    // Logs ends at 6 + 12 = 18, well above the Overview tab's bottom.
+    const next = addPanelTo(app(), 'Logs');
+    const added = Object.keys(next.layout).find((id) => !app().layout[id])!;
+    expect(next.layout[added].row).toBe(18);
+  });
+
+  it('leaves a panel untabbed when the app has no tabs', () => {
+    const next = addPanelTo(app(), undefined);
+    const added = Object.keys(next.panels).find((id) => !app().panels[id])!;
+    expect(next.panels[added].tab).toBeUndefined();
+    // Below the persistent panels, which end at 3 + 3 = 6.
+    expect(next.layout[added].row).toBe(6);
+  });
+
+  it('gives the new panel a surface with exactly one root', () => {
+    const next = addPanelTo(app(), 'Overview');
+    const added = Object.keys(next.surfaces).find((id) => !app().surfaces[id])!;
+    const created = next.surfaces[added][0] as {
+      createSurface?: { components?: Array<{ id: string }> };
+    };
+    expect(created.createSurface?.components?.filter((c) => c.id === 'root')).toHaveLength(1);
+  });
+
+  it('never reuses an id that is already taken', () => {
+    let current = app();
+    const ids = new Set(Object.keys(current.layout));
+    for (let i = 0; i < 5; i++) {
+      current = addPanelTo(current, 'Overview');
+      const added = Object.keys(current.layout).filter((id) => !ids.has(id));
+      expect(added).toHaveLength(1);
+      ids.add(added[0]);
+    }
+    expect(ids.size).toBe(10);
   });
 });
