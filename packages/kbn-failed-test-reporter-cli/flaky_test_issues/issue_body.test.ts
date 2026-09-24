@@ -172,7 +172,20 @@ const multiTestReport = () => {
       builds: 264,
       buildFailRate: 9 / 264,
       sampleFailures: [],
-      errors: [],
+      errors: [
+        // seen on pull request builds only: someone's broken branch, not the suite's problem
+        {
+          key: 'TypeError: Cannot read properties of undefined',
+          message: 'TypeError: Cannot read properties of undefined',
+          failures: 5,
+          builds: 2,
+          byPipeline: [{ pipeline: 'kibana-pull-request', failures: 5 }],
+          branches: ['someone:wip', 'pull/1234/head'],
+          targets: ['stateful-classic'],
+          firstFailedAt: new Date('2026-09-08T00:00:00.000Z'),
+          lastFailedAt: new Date('2026-09-08T00:00:00.000Z'),
+        },
+      ],
     }),
   ];
   // twenty other, worse, tests in other files push the suite down the ranking
@@ -355,6 +368,25 @@ describe('renderFlakySuiteIssueBody', () => {
     );
     expect(body).toContain(
       '| **Pipelines** | `kibana-on-merge` only |\n| **Branches** | `main` |\n| **Last seen** | [#12200]'
+    );
+    // the pull-request-only error is counted, not shown
+    expect(body).not.toContain('Cannot read properties of undefined');
+    expect(body).toContain(
+      '</details>\n\nLeft out: 1 error (5 failures) seen only on pull request builds.'
+    );
+  });
+
+  it('says so when every error was seen on pull request builds only', () => {
+    const report = flakyReport([
+      flakyTest({
+        errors: [
+          { ...flakyTest().errors[0], branches: ['a:x'] },
+          { ...flakyTest().errors[0], key: 'other', failures: 2, branches: ['pull/7/head'] },
+        ],
+      }),
+    ]);
+    expect(renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report })).toContain(
+      '### Failures\n\n#### Failures by Error Message\n\nLeft out: 2 errors (63 failures) seen only on pull request builds.\n\n#### Failures by Branch'
     );
   });
 

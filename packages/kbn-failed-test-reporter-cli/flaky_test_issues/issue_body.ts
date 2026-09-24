@@ -23,6 +23,7 @@ import {
   formatPercent,
   FRAMEWORK_LABELS,
   inlineCode,
+  isPullRequestRef,
   KIBANA_BLOB_URL,
   plural,
   table,
@@ -460,11 +461,31 @@ const errorSection = (suite: FlakySuite, error: SuiteError, totalFailures: numbe
   );
 };
 
-/** The suite's distinct errors over the window, most failures first, at most `MAX_ERRORS` shown. */
+/** An error seen on nothing but pull request builds is that pull request's, not the suite's. */
+const isPullRequestOnly = (error: SuiteError): boolean =>
+  [...error.branches].every(isPullRequestRef);
+
+/**
+ * The suite's distinct errors over the window, most failures first, at most `MAX_ERRORS` shown.
+ * Errors seen only on pull request builds are left out and counted, so the section says what the
+ * suite does on real branches.
+ */
 const failuresByErrorMessage = (suite: FlakySuite): string => {
-  const errors = suiteErrors(suite);
-  if (errors.length === 0) {
+  const all = suiteErrors(suite);
+  if (all.length === 0) {
     return 'No failure messages were recorded for this suite.';
+  }
+  const errors = all.filter((error) => !isPullRequestOnly(error));
+  const pullRequestOnly = all.filter(isPullRequestOnly);
+  const leftOut =
+    pullRequestOnly.length > 0
+      ? `Left out: ${plural(pullRequestOnly.length, 'error')} (${plural(
+          pullRequestOnly.reduce((sum, error) => sum + error.failures, 0),
+          'failure'
+        )}) seen only on pull request builds.`
+      : undefined;
+  if (errors.length === 0) {
+    return ['#### Failures by Error Message', leftOut].join('\n\n');
   }
   const totalFailures = errors.reduce((sum, error) => sum + error.failures, 0);
   const shown = errors
@@ -476,6 +497,7 @@ const failuresByErrorMessage = (suite: FlakySuite): string => {
     `${plural(errors.length, 'distinct error')}:`,
     ...shown,
     ...(rest > 0 ? [`and ${plural(rest, 'more error')}.`] : []),
+    ...(leftOut ? [leftOut] : []),
   ].join('\n\n');
 };
 

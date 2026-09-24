@@ -277,8 +277,12 @@ export const formatBuildLink = (
 
 const MAX_BRANCH_NAMES = 4;
 
-/** Pull request builds record the head ref as `owner:branch`; no release branch has a colon. */
-const isPullRequestRef = (branch: string): boolean => branch.includes(':');
+/**
+ * Pull request builds record the head ref as `owner:branch`, or as `pull/<number>/head` on
+ * pipelines that check the merge ref out; no release branch looks like either.
+ */
+export const isPullRequestRef = (branch: string): boolean =>
+  branch.includes(':') || branch.startsWith('pull/');
 
 /**
  * `` `main`, `8.19`, `9.4` ``, `57 PRs`, or `` `main`, 3 PRs `` for a mixed pipeline: the branches

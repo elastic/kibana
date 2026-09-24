@@ -182,6 +182,12 @@ describe('formatFailedBranches', () => {
     );
   });
 
+  it('treats merge refs of pull requests as pull requests too', () => {
+    expect(
+      formatFailedBranches({ failedBranches: 2, failedBranchNames: ['pull/286809/head', 'main'] })
+    ).toBe('`main`, 1 PR');
+  });
+
   it('names at most four branches', () => {
     expect(
       formatFailedBranches({
