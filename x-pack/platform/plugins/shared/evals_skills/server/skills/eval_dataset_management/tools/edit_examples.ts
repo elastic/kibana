@@ -86,7 +86,7 @@ export const editExamplesTool = (
               return dataset
                 ? `This ${edit} in dataset ${inlineCode(dataset.name)}, which currently has ${
                     dataset.examples_count
-                  }. Every other example is kept.`
+                  } example(s). Every other example is kept.`
                 : `Dataset ${inlineCode(datasetId)} was not found in this space.`;
             }
           ),
