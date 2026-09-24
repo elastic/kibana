@@ -354,6 +354,12 @@ export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
   render: (args) => <ControlledNavigation {...args} />,
 };
 
+export const WithLongPopoverItemLabels: StoryObj<PropsAndArgs> = {
+  ...WithLongSecondaryItemLabels,
+  name: 'Navigation with Long Popover Item Labels',
+  args: { ...WithLongSecondaryItemLabels.args, isCollapsed: true },
+};
+
 export const WithinLayout: StoryObj<PropsAndArgs> = {
   name: 'Navigation within Layout',
   render: (args) => <Layout {...args} />,
