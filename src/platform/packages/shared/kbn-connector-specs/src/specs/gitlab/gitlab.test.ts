@@ -928,6 +928,22 @@ describe('Gitlab connector', () => {
       );
       expect(result).toMatchObject({ values: [{ id: 5 }] });
     });
+
+    it('passes scope as scope[] param (not double-bracketed)', async () => {
+      mockGet.mockResolvedValue(pageResponse([{ id: 6, name: 'test' }]));
+      const input = parse('listJobs', {
+        projectId: '123',
+        pipelineId: 99,
+        scope: ['failed', 'running'],
+      });
+      await Gitlab.actions.listJobs.handler(mockContext, input as never);
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          params: expect.objectContaining({ 'scope[]': ['failed', 'running'] }),
+        })
+      );
+    });
   });
 
   describe('getJobArtifact', () => {
