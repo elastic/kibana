@@ -102,7 +102,15 @@ export const importRulesRoute = (
           const endpointService = ctx.securitySolution.getEndpointService();
           const spaceId = ctx.securitySolution.getSpaceId();
 
-          const { filename } = (request.body.file as HapiReadableStream).hapi;
+          const file = request.body?.file as HapiReadableStream | undefined;
+          if (!file) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: 'file is required',
+            });
+          }
+
+          const { filename } = file.hapi;
           const fileExtension = extname(filename).toLowerCase();
           if (fileExtension !== '.ndjson') {
             return siemResponse.error({
@@ -115,7 +123,7 @@ export const importRulesRoute = (
 
           // parse file to separate out exceptions from rules
           const [{ exceptions, rules, actionConnectors }] = await createPromiseFromRuleImportStream(
-            { stream: request.body.file as HapiReadableStream, objectLimit }
+            { stream: file, objectLimit }
           );
 
           // import exceptions, includes validation
