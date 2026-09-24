@@ -18,7 +18,9 @@ fi
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 config="$(cat)"
 [[ -n "$config" ]] || config='{}'
-if ! jq -e 'type == "object"' <<<"$config" >/dev/null 2>&1; then
+# Pipe the config rather than use `<<<`: bash before 5.1 (including macOS /bin/bash) backs here-strings
+# with a temp file, which would write the private key to disk.
+if ! printf '%s' "$config" | jq -e 'type == "object"' >/dev/null 2>&1; then
   echo "nightshift-investigations scout hook: stdin is not a JSON object" >&2
   exit 1
 fi
@@ -26,8 +28,8 @@ fi
 # Config value at a jq path, ignoring `REPLACE_ME` placeholders, else the named shell variable.
 resolve() {
   local env_name="$1" path="$2" from_config
-  from_config="$(jq -r --arg placeholder REPLACE_ME \
-    "$path // empty | tostring | select(contains(\$placeholder) | not)" <<<"$config")"
+  from_config="$(printf '%s' "$config" | jq -r --arg placeholder REPLACE_ME \
+    "$path // empty | tostring | select(contains(\$placeholder) | not)")"
   printf '%s' "${from_config:-${!env_name:-}}"
 }
 

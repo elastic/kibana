@@ -495,10 +495,11 @@ if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
     _scout_hook_config='{}'
   fi
   _scout_hook_output="$(printf '%s' "$_scout_hook_config" | bash "$EVAL_SUITE_SCOUT_HOOK")"
+  # Piped, not `<<<`: older bash backs here-strings with a temp file, and this holds the private key.
   while IFS= read -r _scout_hook_name; do
     [[ -z "$_scout_hook_name" ]] && continue
-    export "$_scout_hook_name=$(jq -r --arg name "$_scout_hook_name" '.env[$name]' <<<"$_scout_hook_output")"
-  done < <(jq -r '(.env // {}) | keys[]' <<<"$_scout_hook_output")
+    export "$_scout_hook_name=$(printf '%s' "$_scout_hook_output" | jq -r --arg name "$_scout_hook_name" '.env[$name]')"
+  done < <(printf '%s' "$_scout_hook_output" | jq -r '(.env // {}) | keys[]')
   unset _scout_hook_config _scout_hook_output _scout_hook_name
 fi
 

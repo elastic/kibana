@@ -244,6 +244,8 @@ steps:
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # Smoke scores do not depend on the model, so skip repeating it for every weekly model.
+          EVAL_GREP_INVERT: 'Nightshift investigations: smoke'
           # Enables the investigation engine and sandbox when the ci-prod config has a sandbox block.
           EVAL_SERVER_CONFIG_SET: 'evals_nightshift_investigations'
         timeout_in_minutes: 60

@@ -42,12 +42,13 @@ export const runScoutHook = (
     );
   }
 
-  let parsed: ReturnType<typeof scoutHookOutputSchema.safeParse>;
+  let json: unknown;
   try {
-    parsed = scoutHookOutputSchema.safeParse(JSON.parse(result.stdout || '{}'));
+    json = JSON.parse(result.stdout || '{}');
   } catch {
     throw new Error(`scoutHook ${hookPath} did not print JSON`);
   }
+  const parsed = scoutHookOutputSchema.safeParse(json);
   if (!parsed.success) {
     throw new Error(`scoutHook ${hookPath} must print { "env"?: Record<string, string> }`);
   }

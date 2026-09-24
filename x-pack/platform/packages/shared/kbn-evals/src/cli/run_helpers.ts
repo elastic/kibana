@@ -217,17 +217,12 @@ export interface ResolveProfileEnvOverridesOptions {
   suite?: EvalSuiteDefinition;
 }
 
-/** The config a `scoutHook` reads: the datasets profile, overlaid by a different export profile. */
-const loadScoutHookConfig = (
-  repoRoot: string,
-  datasetsProfile: string | undefined,
-  exportProfile: string | undefined
-) => ({
-  ...loadVaultConfig(repoRoot, datasetsProfile),
-  ...(exportProfile && exportProfile !== datasetsProfile
-    ? loadVaultConfig(repoRoot, exportProfile)
-    : {}),
-});
+/**
+ * The config a `scoutHook` reads: the datasets profile only. Suite secrets are credentials, like
+ * `evaluationsKbn`, so an auto-selected export profile (e.g. `config.local.json`) must not replace them.
+ */
+const loadScoutHookConfig = (repoRoot: string, datasetsProfile: string | undefined): object =>
+  loadVaultConfig(repoRoot, datasetsProfile) ?? {};
 
 export const resolveProfileEnvOverrides = async ({
   repoRoot,
@@ -265,11 +260,7 @@ export const resolveProfileEnvOverrides = async ({
   }
 
   const suiteScoutEnv = suite?.scoutHook
-    ? runScoutHook(
-        repoRoot,
-        suite.scoutHook,
-        loadScoutHookConfig(repoRoot, datasetsProfile, exportProfile)
-      )
+    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile))
     : {};
 
   return { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv };
