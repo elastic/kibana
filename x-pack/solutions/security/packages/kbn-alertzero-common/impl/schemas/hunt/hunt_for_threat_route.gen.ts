@@ -29,7 +29,7 @@ export const HuntForThreatRequestBody = lazySchema(() =>
       technology: HuntTechnology,
       iocs: z.array(HuntIoc).max(100).optional(),
       techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
-      timeRange: z
+      time_range: z
         .object({
           from: z.string().min(1).max(64),
           to: z.string().min(1).max(64),

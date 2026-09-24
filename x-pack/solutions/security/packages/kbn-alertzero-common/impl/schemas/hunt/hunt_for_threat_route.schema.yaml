@@ -37,7 +37,7 @@ paths:
                     type: string
                     minLength: 1
                     maxLength: 32
-                timeRange:
+                time_range:
                   type: object
                   required: [from, to]
                   properties:

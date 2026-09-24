@@ -176,7 +176,7 @@ export const HuntBehaviorResponse = lazySchema(() =>
     /**
      * True when any behavior's execute path found at least one row in a required index. Independent of Tier 1.
      */
-    hasHit: z
+    has_hit: z
       .boolean()
       .describe(
         "True when any behavior's execute path found at least one row in a required index. Independent of Tier 1."

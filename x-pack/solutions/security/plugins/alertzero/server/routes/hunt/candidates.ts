@@ -93,10 +93,10 @@ export const registerCandidatesRoute = ({
         try {
           const spaceId = getSpaceId(request);
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          const { reportIds, limit } = request.body;
+          const { report_ids, limit } = request.body;
 
           const trigger =
-            reportIds && reportIds.length > 0 ? ('manual' as const) : ('scheduled' as const);
+            report_ids && report_ids.length > 0 ? ('manual' as const) : ('scheduled' as const);
 
           const proposalsService = getHuntServices().getProposalsService();
           const readOpenProposalConversationIds: OpenProposalConversationIdsReader = (space) =>
@@ -107,7 +107,7 @@ export const registerCandidatesRoute = ({
             logger,
             {
               trigger,
-              reportIds: reportIds ?? undefined,
+              report_ids: report_ids ?? undefined,
               spaceId,
               limit,
             },

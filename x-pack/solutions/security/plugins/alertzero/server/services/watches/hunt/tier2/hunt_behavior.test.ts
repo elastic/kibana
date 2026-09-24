@@ -64,10 +64,10 @@ describe('huntBehavior', () => {
     expect(result.status).toBe('no_behaviors_found');
   });
 
-  it('returns hasHit false when LLM extracts nothing', async () => {
+  it('returns has_hit false when LLM extracts nothing', async () => {
     const model = buildMockModel({ extractionResult: { candidates: [] } });
     const result = await huntBehavior(model, logger, { text: 'some report text' });
-    expect(result.hasHit).toBe(false);
+    expect(result.has_hit).toBe(false);
   });
 
   it('returns no_behaviors_found when candidates are below the confidence threshold', async () => {
@@ -143,7 +143,7 @@ describe('huntBehavior', () => {
     expect(result.indexed_behaviors[0].id).toBe('rpt-001:T1566');
   });
 
-  it('returns hasHit false when no window is provided (dry-run only)', async () => {
+  it('returns has_hit false when no window is provided (dry-run only)', async () => {
     const esClient = {
       esql: {
         query: jest.fn().mockResolvedValue({ columns: [], values: [] }),
@@ -162,7 +162,7 @@ describe('huntBehavior', () => {
       },
       esClient
     );
-    expect(result.hasHit).toBe(false);
+    expect(result.has_hit).toBe(false);
   });
 
   it('returns executed false when no window is provided', async () => {
@@ -191,7 +191,7 @@ describe('huntBehavior', () => {
     });
   });
 
-  it('returns hasHit true when a required-index row is returned', async () => {
+  it('returns has_hit true when a required-index row is returned', async () => {
     const esClient = {
       esql: {
         query: jest
@@ -217,7 +217,7 @@ describe('huntBehavior', () => {
       },
       esClient
     );
-    expect(result.hasHit).toBe(true);
+    expect(result.has_hit).toBe(true);
   });
 
   it('returns hit_refs from METADATA _id and _index on required-index rows', async () => {
@@ -295,7 +295,7 @@ describe('huntBehavior', () => {
     });
   });
 
-  it('returns hasHit false when only optional-index rows are returned', async () => {
+  it('returns has_hit false when only optional-index rows are returned', async () => {
     const esClient = {
       esql: {
         query: jest
@@ -321,7 +321,7 @@ describe('huntBehavior', () => {
       },
       esClient
     );
-    expect(result.hasHit).toBe(false);
+    expect(result.has_hit).toBe(false);
   });
 
   it('returns the hunt window as the ES|QL filter on execute', async () => {
@@ -397,7 +397,7 @@ describe('huntBehavior', () => {
     });
   });
 
-  it('returns hasHit true when a sibling behavior hits after another throws', async () => {
+  it('returns has_hit true when a sibling behavior hits after another throws', async () => {
     const query = jest
       .fn()
       .mockResolvedValueOnce({ columns: [], values: [] })
@@ -434,7 +434,7 @@ describe('huntBehavior', () => {
       },
       esClient
     );
-    expect(result.hasHit).toBe(true);
+    expect(result.has_hit).toBe(true);
   });
 
   it('returns dry-run-only when the dry-run fails (no execute call)', async () => {
@@ -455,7 +455,7 @@ describe('huntBehavior', () => {
       esClient
     );
     expect(query).toHaveBeenCalledTimes(1);
-    expect(result.hasHit).toBe(false);
+    expect(result.has_hit).toBe(false);
   });
 
   it('returns indexed_behaviors with a technique_id', async () => {
@@ -474,7 +474,7 @@ describe('huntBehavior', () => {
     expect(result.indexed_behaviors[0].technique_id).toBe('T1566');
   });
 
-  it('returns hasHit false when rows lack an _index column', async () => {
+  it('returns has_hit false when rows lack an _index column', async () => {
     const esClient = {
       esql: {
         query: jest
@@ -500,7 +500,7 @@ describe('huntBehavior', () => {
       },
       esClient
     );
-    expect(result.hasHit).toBe(false);
+    expect(result.has_hit).toBe(false);
   });
 
   it('returns a warning when rows lack an _index column', async () => {

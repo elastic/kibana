@@ -33,7 +33,7 @@ components:
 
     ResolvedIndexScope:
       type: object
-      required: [technology, status, required, optional, missing, window, rowLimit]
+      required: [technology, status, required, optional, missing, window, row_limit]
       description: >-
         `required`/`optional` list every pattern checked for the technology;
         `missing` lists every pattern from either list that resolved to zero indices.
@@ -56,7 +56,7 @@ components:
             type: string
         window:
           $ref: '#/components/schemas/IndexScopeWindow'
-        rowLimit:
+        row_limit:
           type: integer
 
     HuntIocType:
@@ -86,11 +86,11 @@ components:
 
     AffectedAsset:
       type: object
-      required: [name, hitCount]
+      required: [name, hit_count]
       properties:
         name:
           type: string
-        hitCount:
+        hit_count:
           type: integer
 
     HuntForThreatHit:
@@ -131,37 +131,37 @@ components:
       type: object
       required:
         - status
-        - hasConfirmedHit
-        - searchedIocs
-        - searchedTechniques
-        - resolvedIocs
-        - resolvedTechniques
-        - timeRange
+        - has_confirmed_hit
+        - searched_iocs
+        - searched_techniques
+        - resolved_iocs
+        - resolved_techniques
+        - time_range
         - counts
         - hits
-        - affectedAssets
-        - perIndex
+        - affected_assets
+        - per_index
       properties:
         status:
           $ref: '#/components/schemas/HuntForThreatStatus'
-        hasConfirmedHit:
+        has_confirmed_hit:
           type: boolean
           description: >-
             A confirmed event match in a required index inside the window.
             Never set by an optional-index or out-of-window match.
-        searchedIocs:
+        searched_iocs:
           type: integer
-        searchedTechniques:
+        searched_techniques:
           type: integer
-        resolvedIocs:
+        resolved_iocs:
           type: array
           items:
             $ref: '#/components/schemas/HuntIoc'
-        resolvedTechniques:
+        resolved_techniques:
           type: array
           items:
             type: string
-        timeRange:
+        time_range:
           type: object
           required: [from, to]
           properties:
@@ -171,21 +171,21 @@ components:
               type: string
         counts:
           type: object
-          required: [totalHits, returnedHits, affectedHosts, affectedUsers]
+          required: [total_hits, returned_hits, affected_hosts, affected_users]
           properties:
-            totalHits:
+            total_hits:
               type: integer
-            returnedHits:
+            returned_hits:
               type: integer
-            affectedHosts:
+            affected_hosts:
               type: integer
-            affectedUsers:
+            affected_users:
               type: integer
         hits:
           type: array
           items:
             $ref: '#/components/schemas/HuntForThreatHit'
-        affectedAssets:
+        affected_assets:
           type: object
           required: [hosts, users, services]
           properties:
@@ -201,15 +201,15 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/AffectedAsset'
-        perIndex:
+        per_index:
           type: array
           items:
             type: object
-            required: [index, hitCount, required]
+            required: [index, hit_count, required]
             properties:
               index:
                 type: string
-              hitCount:
+              hit_count:
                 type: integer
               required:
                 type: boolean

@@ -95,22 +95,22 @@ const buildTechniqueShould = (techniques: string[]): Array<Record<string, unknow
 
 export const emptyHuntForThreatResult = (
   status: HuntForThreatResult['status'],
-  resolvedIocs: HuntIoc[],
-  resolvedTechniques: string[],
-  timeRange: { from: string; to: string },
+  resolved_iocs: HuntIoc[],
+  resolved_techniques: string[],
+  time_range: { from: string; to: string },
   message: string
 ): HuntForThreatResult => ({
   status,
-  hasConfirmedHit: false,
-  searchedIocs: resolvedIocs.length,
-  searchedTechniques: resolvedTechniques.length,
-  resolvedIocs,
-  resolvedTechniques,
-  timeRange,
-  counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
+  has_confirmed_hit: false,
+  searched_iocs: resolved_iocs.length,
+  searched_techniques: resolved_techniques.length,
+  resolved_iocs,
+  resolved_techniques,
+  time_range,
+  counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
   hits: [],
-  affectedAssets: { hosts: [], users: [], services: [] },
-  perIndex: [],
+  affected_assets: { hosts: [], users: [], services: [] },
+  per_index: [],
   message,
 });
 
@@ -163,19 +163,19 @@ const classifyIdentityType = (
  *
  * Hit bar: at least one confirmed match in a *required* index pattern inside
  * the window. A match only in an optional pattern (including the alerts
- * pattern), or outside the window, does not set `hasConfirmedHit`. It can
- * still appear in `hits`/`counts`/`perIndex` for context. The coordinator's
- * `tier2_when: on_hits` gate follows `hasConfirmedHit` for the same reason.
+ * pattern), or outside the window, does not set `has_confirmed_hit`. It can
+ * still appear in `hits`/`counts`/`per_index` for context. The coordinator's
+ * `tier2_when: on_hits` gate follows `has_confirmed_hit` for the same reason.
  */
 export const huntForThreat = async (
   esClient: ElasticsearchClient,
   params: HuntForThreatParams
 ): Promise<HuntForThreatResult> => {
-  const { scope, iocs = [], techniques = [], timeRange, size, maxAssets = 50 } = params;
+  const { scope, iocs = [], techniques = [], time_range, size, maxAssets = 50 } = params;
 
-  const from = timeRange?.from ?? scope.window.from;
-  const to = timeRange?.to ?? scope.window.to;
-  const rowLimit = size ?? scope.rowLimit;
+  const from = time_range?.from ?? scope.window.from;
+  const to = time_range?.to ?? scope.window.to;
+  const row_limit = size ?? scope.row_limit;
 
   const iocShould = buildIocShould(iocs);
   const techniqueShould = buildTechniqueShould(techniques);
@@ -199,7 +199,7 @@ export const huntForThreat = async (
   // search never needs to distinguish required from optional; that distinction only
   // matters for the hit bar below.
   const searchIndices = [...scope.required, ...scope.optional];
-  // `perIndex` buckets on `_index`, which is a concrete index/data-stream name
+  // `per_index` buckets on `_index`, which is a concrete index/data-stream name
   // (e.g. `logs-aws.cloudtrail-default`), never the wildcard pattern it resolved
   // from (e.g. `logs-aws.*`). Shared with Tier 2 so both hit bars agree.
   const matchesRequired = buildMatchesRequired(scope.required);
@@ -208,7 +208,7 @@ export const huntForThreat = async (
     index: searchIndices,
     ignore_unavailable: true,
     allow_no_indices: true,
-    size: rowLimit,
+    size: row_limit,
     track_total_hits: true,
     sort: [{ '@timestamp': { order: 'desc' } }],
     _source: [
@@ -268,43 +268,43 @@ export const huntForThreat = async (
 
   const hosts: AffectedAsset[] = (aggs?.affected_hosts?.buckets ?? []).map((b) => ({
     name: b.key,
-    hitCount: b.doc_count,
+    hit_count: b.doc_count,
   }));
   const userBuckets = aggs?.affected_users?.buckets ?? [];
   const users: AffectedAsset[] = [];
   const services: AffectedAsset[] = [];
   for (const bucket of userBuckets) {
-    const asset: AffectedAsset = { name: bucket.key, hitCount: bucket.doc_count };
+    const asset: AffectedAsset = { name: bucket.key, hit_count: bucket.doc_count };
     if (classifyIdentityType(bucket.identity_types?.buckets) === 'service') {
       services.push(asset);
     } else {
       users.push(asset);
     }
   }
-  const perIndex = (aggs?.per_index?.buckets ?? []).map((b) => ({
+  const per_index = (aggs?.per_index?.buckets ?? []).map((b) => ({
     index: b.key,
-    hitCount: b.doc_count,
+    hit_count: b.doc_count,
     required: matchesRequired(b.key),
   }));
 
-  const hasConfirmedHit = perIndex.some((bucket) => bucket.required && bucket.hitCount > 0);
+  const has_confirmed_hit = per_index.some((bucket) => bucket.required && bucket.hit_count > 0);
 
   return {
     status: total === 0 ? 'no_environment_hits' : 'environment_hits_found',
-    hasConfirmedHit,
-    searchedIocs: iocs.length,
-    searchedTechniques: techniques.length,
-    resolvedIocs: iocs,
-    resolvedTechniques: techniques,
-    timeRange: { from, to },
+    has_confirmed_hit,
+    searched_iocs: iocs.length,
+    searched_techniques: techniques.length,
+    resolved_iocs: iocs,
+    resolved_techniques: techniques,
+    time_range: { from, to },
     counts: {
-      totalHits: total,
-      returnedHits: hits.length,
-      affectedHosts: hosts.length,
-      affectedUsers: users.length,
+      total_hits: total,
+      returned_hits: hits.length,
+      affected_hosts: hosts.length,
+      affected_users: users.length,
     },
     hits,
-    affectedAssets: { hosts, users, services },
-    perIndex,
+    affected_assets: { hosts, users, services },
+    per_index,
   };
 };

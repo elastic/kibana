@@ -24,7 +24,7 @@ export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinato
 
 /**
  * Runs the two-tier hunt pipeline (Tier 1 + optional Tier 2) for a single report.
- * The coordinator does NOT write feedback — `completedSuccessfully` on the result
+ * The coordinator does NOT write feedback — `completed_successfully` on the result
  * tells the caller whether the managed-workflow feedback step should proceed.
  */
 export const registerHuntCoordinatorRoute = ({
@@ -93,7 +93,7 @@ export const registerHuntCoordinatorRoute = ({
             tier2_when,
             max_tier2_sample_events,
             trigger,
-            run_id: runId,
+            run_id,
           } = request.body;
 
           const result = await huntCoordinator(esClient, model, logger, {
@@ -113,7 +113,7 @@ export const registerHuntCoordinatorRoute = ({
             // The Worker fan-out supplies a run id so one sweep's children share it,
             // which is what the packaging barrier and conclusion dedupe key off. Only
             // mint one when the caller has no sweep to tie the run to.
-            runId: runId ?? randomUUID(),
+            run_id: run_id ?? randomUUID(),
           });
 
           const body: HuntCoordinatorResponse = result;
