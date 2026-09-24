@@ -170,13 +170,17 @@ export function useWorkflowUrlState() {
     [updateUrlState]
   );
 
+  /**
+   * Authoring-time selection in the editor, not navigation: the step panel is part of the editing
+   * surface, so Back should leave the workflow page rather than walk back through step clicks.
+   */
   const setSelectedStep = useCallback<WorkflowUrlSelectionSetter>(
     (stepId, options = {}) => {
       updateUrlState(
         {
           stepId: stepId || undefined,
         },
-        { replace: false, ...options }
+        options
       );
     },
     [updateUrlState]

@@ -446,7 +446,7 @@ describe('WorkflowDetailPage', () => {
       fireEvent.click(screen.getByTestId('workflowDetailExecutionsButton'));
       expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
       expect(screen.queryByTestId('workflow-execution-flyout')).not.toBeInTheDocument();
-      expect(setSelectedExecution).toHaveBeenCalledWith(null);
+      expect(setSelectedExecution).toHaveBeenCalledWith(null, { replace: true });
     });
 
     it('closes the detail and list flyouts when Executions is clicked while a run is selected', () => {
@@ -467,7 +467,7 @@ describe('WorkflowDetailPage', () => {
 
       fireEvent.click(screen.getByTestId('workflowDetailExecutionsButton'));
       expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
-      expect(setSelectedExecution).toHaveBeenCalledWith(null);
+      expect(setSelectedExecution).toHaveBeenCalledWith(null, { replace: true });
     });
   });
 

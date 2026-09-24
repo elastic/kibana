@@ -440,6 +440,20 @@ describe('useWorkflowUrlState', () => {
       expect(result.current.urlState.selectedExecutionId).toBeUndefined();
     });
 
+    it('replaces the entry when a graph step is selected so Back leaves the page', () => {
+      const { result } = renderWithHistory(['/?view=graph']);
+
+      act(() => {
+        result.current.urlState.setSelectedStep('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStep('step-b');
+      });
+
+      expect(result.current.urlState.selectedStepId).toBe('step-b');
+      expect(result.current.history.length).toBe(1);
+    });
+
     it('replaces the entry when a selection is normalised with replace', () => {
       const { result } = renderWithHistory(['/?executionId=exec-1']);
 
