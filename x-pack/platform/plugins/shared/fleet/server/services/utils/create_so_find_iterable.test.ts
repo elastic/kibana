@@ -42,7 +42,6 @@ describe('createSoFindIterable', () => {
         resultsMapper: (data) => data.saved_objects.map((so) => so.id),
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _page of iterable) {
         break; // triggers iterator.return()
       }
