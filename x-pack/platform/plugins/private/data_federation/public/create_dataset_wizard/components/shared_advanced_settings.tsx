@@ -13,13 +13,13 @@ import { useController } from 'react-hook-form';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
   DEFAULT_FILE_EXCLUSIONS,
-  validateMaxErrorRatio,
   validateMaxErrors,
   type CreateDatasetFormValues,
 } from '../create_dataset_form_state';
 import { ErrorModeSelect } from './error_mode_select';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { FileExclusionsSelect } from './file_exclusions_select';
+import { MaxErrorRatioField } from './max_error_ratio_field';
 import { PartitionDetectionSelect } from './partition_detection_select';
 
 const helpTextDefault = (valueLabel: string) => (
@@ -43,11 +43,6 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
     name: 'settings.max_errors',
     control,
     rules: { validate: validateMaxErrors },
-  });
-  const { field: maxErrorRatioField, fieldState: maxErrorRatioState } = useController({
-    name: 'settings.max_error_ratio',
-    control,
-    rules: { validate: validateMaxErrorRatio },
   });
 
   return (
@@ -140,32 +135,7 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsMaxErrorRatioLabel}
-            infoText={createDatasetWizardStrings.settingsMaxErrorRatioDescription}
-          />
-        }
-        helpText={helpTextDefault('0.0')}
-        fullWidth
-        isInvalid={Boolean(maxErrorRatioState.error)}
-        error={maxErrorRatioState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsMaxErrorRatio"
-          fullWidth
-          min={0}
-          max={1}
-          step={0.01}
-          placeholder={createDatasetWizardStrings.settingsMaxErrorRatioPlaceholder}
-          isInvalid={Boolean(maxErrorRatioState.error)}
-          value={maxErrorRatioField.value}
-          onChange={(e) => maxErrorRatioField.onChange(e.target.value)}
-          name={maxErrorRatioField.name}
-          inputRef={maxErrorRatioField.ref}
-        />
-      </EuiFormRow>
+      <MaxErrorRatioField control={control} />
     </div>
   );
 }
