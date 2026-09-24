@@ -28,9 +28,8 @@ const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
 /**
- * Collects every open-proposal conversation id in the space. A single page of
- * 50 would fail open past that: any further open gate would be invisible and
- * the report would be re-hunted while containment is still parked.
+ * A single page of 50 would fail open past that: any further open gate would be
+ * invisible and the report would be re-hunted while containment is still parked.
  */
 const readAllOpenProposalConversationIds = async (
   proposalsService: ProposalsService,

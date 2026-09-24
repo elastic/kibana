@@ -9,30 +9,35 @@ import type { HuntForThreatHit, HuntIoc } from '@kbn/alertzero-common';
 
 type HitMatched = NonNullable<HuntForThreatHit['matched']>;
 
-const IOC_FIELDS_BY_TYPE: Record<string, string[]> = {
+const HASH_FIELD_PREFIXES = ['file', 'process', 'dll'] as const;
+
+/** Hash length disambiguates the algo for query-building (`hunt_for_threat.ts`); attribution here checks all algos regardless of length. */
+export const HASH_ALGO_BY_LENGTH: Record<number, 'md5' | 'sha1' | 'sha256'> = {
+  32: 'md5',
+  40: 'sha1',
+  64: 'sha256',
+};
+
+export const hashFieldsForAlgo = (algo: string): string[] =>
+  HASH_FIELD_PREFIXES.map((prefix) => `${prefix}.hash.${algo}`);
+
+/** ECS fields an IOC value might land in; shared by hit attribution here and query-building in `hunt_for_threat.ts`. */
+export const IOC_FIELDS_BY_TYPE: Record<string, string[]> = {
   ip: [
     'source.ip',
     'destination.ip',
     'host.ip',
     'client.ip',
     'server.ip',
+    // ECS related + Kubernetes audit commonly stamp IPs here when `source.ip`
+    // is absent (e.g. Technology Watch kubernetes pack).
     'related.ip',
     'kubernetes.audit.sourceIPs',
   ],
   email: ['user.email', 'user.name', 'user.target.email', 'user.target.name', 'related.user'],
   domain: ['dns.question.name', 'destination.domain', 'url.domain', 'source.domain'],
   url: ['url.full', 'url.original'],
-  hash: [
-    'file.hash.md5',
-    'file.hash.sha1',
-    'file.hash.sha256',
-    'process.hash.md5',
-    'process.hash.sha1',
-    'process.hash.sha256',
-    'dll.hash.md5',
-    'dll.hash.sha1',
-    'dll.hash.sha256',
-  ],
+  hash: Object.values(HASH_ALGO_BY_LENGTH).flatMap(hashFieldsForAlgo),
 };
 
 const asString = (value: unknown): string | undefined => {

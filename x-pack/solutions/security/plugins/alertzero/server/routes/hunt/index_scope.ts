@@ -60,8 +60,8 @@ export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: Rout
           );
 
           return response.ok({ body });
-        } catch (error) {
-          logger.error(`Failed to resolve hunt index scope: ${error}`);
+        } catch (err) {
+          logger.error(`Failed to resolve hunt index scope: ${(err as Error).message}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to resolve hunt index scope' },

@@ -74,8 +74,8 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
 
           const body: HuntForThreatResponse = { scope, result };
           return response.ok({ body });
-        } catch (error) {
-          logger.error(`Failed to run hunt_for_threat: ${error}`);
+        } catch (err) {
+          logger.error(`Failed to run hunt_for_threat: ${(err as Error).message}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to run hunt_for_threat' },

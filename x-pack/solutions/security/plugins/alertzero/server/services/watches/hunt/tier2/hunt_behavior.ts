@@ -353,7 +353,6 @@ const generateGroundedEsql = async (
 
   const fallbackPatterns = ['logs-*', '.alerts-security.alerts-*', 'metrics-*'];
   const indexPatterns = new Set<string>(
-    // Use matched_indices from article_context as the primary patterns, or fall back to defaults.
     articleContext?.matched_indices && articleContext.matched_indices.length > 0
       ? articleContext.matched_indices
       : fallbackPatterns
@@ -488,14 +487,12 @@ export const huntBehavior = async (
     requiredIndices.length > 0 &&
     esClient !== undefined;
 
-  let candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }> =
-    [];
   const structured = model.chatModel.withStructuredOutput(huntBehaviorLlmExtractionSchema);
   const contextBlock = renderArticleContext(articleContext);
   const result = (await structured.invoke(
     `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`
   )) as z.infer<typeof huntBehaviorLlmExtractionSchema>;
-  candidates = (result.candidates ?? [])
+  const candidates = (result.candidates ?? [])
     .map((c) => ({
       technique_id: c.technique_id.toUpperCase().trim(),
       evidence_quote: c.evidence_quote.trim(),

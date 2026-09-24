@@ -210,57 +210,39 @@ export class AlertZeroPlugin
     return {};
   }
 
-  private requireWatchesService(): WatchesService {
-    if (!this.watchesService) {
-      throw new Error('Watches service is not available until the AlertZero plugin has started');
+  private requireStarted<T>(value: T | undefined, name: string): T {
+    if (!value) {
+      throw new Error(`${name} is not available until the AlertZero plugin has started`);
     }
-    return this.watchesService;
+    return value;
+  }
+
+  private requireWatchesService(): WatchesService {
+    return this.requireStarted(this.watchesService, 'Watches service');
   }
 
   private requireActionsService(): ActionsService {
-    if (!this.actionsService) {
-      throw new Error('Actions service is not available until the AlertZero plugin has started');
-    }
-    return this.actionsService;
+    return this.requireStarted(this.actionsService, 'Actions service');
   }
+
   private requireProposals(): AlertZeroStartDependencies['proposals'] {
-    if (!this.proposals) {
-      throw new Error(
-        'proposals plugin start contract is not available until the AlertZero plugin has started'
-      );
-    }
-    return this.proposals;
+    return this.requireStarted(this.proposals, 'proposals plugin start contract');
   }
+
   private requireWorkersService(): WorkersService {
-    if (!this.workersService) {
-      throw new Error('Workers service is not available until the AlertZero plugin has started');
-    }
-    return this.workersService;
+    return this.requireStarted(this.workersService, 'Workers service');
   }
 
   private requireConversationProposalsService(): ConversationProposalsService {
-    if (!this.conversationProposalsService) {
-      throw new Error(
-        'ConversationProposalsService is not available until the AlertZero plugin has started'
-      );
-    }
-    return this.conversationProposalsService;
+    return this.requireStarted(this.conversationProposalsService, 'ConversationProposalsService');
   }
 
   private requireAgentBuilderConversations(): AlertZeroStartDependencies['agentBuilder']['conversations'] {
-    if (!this.agentBuilderConversations) {
-      throw new Error(
-        'agentBuilder.conversations is not available until the AlertZero plugin has started'
-      );
-    }
-    return this.agentBuilderConversations;
+    return this.requireStarted(this.agentBuilderConversations, 'agentBuilder.conversations');
   }
 
   private requireHuntServices(): HuntServices {
-    if (!this.huntServices) {
-      throw new Error('Hunt services are not available until the AlertZero plugin has started');
-    }
-    return this.huntServices;
+    return this.requireStarted(this.huntServices, 'Hunt services');
   }
 
   private getSpaceId(request: KibanaRequest): string {

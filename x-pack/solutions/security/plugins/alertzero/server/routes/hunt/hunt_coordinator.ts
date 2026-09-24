@@ -91,10 +91,9 @@ export const registerHuntCoordinatorRoute = ({
             run_id,
           } = request.body;
 
-          // Same Reasoning tier as the standalone Tier 2 route: this is the path that
-          // actually runs Tier 2 in production, so it must not resolve a different
-          // model than a direct hunt_behavior call would. A `never` run has no use for
-          // a model, so it skips the connector chain entirely.
+          // Same Reasoning tier as the standalone hunt_behavior route, so this path (the
+          // one that actually runs Tier 2 in production) resolves the same model. A
+          // `never` run has no use for a model, so it skips resolution entirely.
           const modelOutcome =
             tier2_when === 'never'
               ? undefined
@@ -108,27 +107,31 @@ export const registerHuntCoordinatorRoute = ({
                 });
           const model = modelOutcome?.ok ? modelOutcome.model : undefined;
 
-          const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
-            report_id,
-            spaceId,
-            text,
-            iocs,
-            techniques,
-            time_range,
-            size,
-            max_assets,
-            llm_confidence_threshold,
-            tier2_when,
-            max_tier2_sample_events,
-            trigger,
-            technology: technologyInput.technology,
-            // The Worker fan-out supplies a run id so one sweep's children share it,
-            // which is what the packaging barrier and conclusion dedupe key off. Only
-            // mint one when the caller has no sweep to tie the run to.
-            run_id: run_id ?? randomUUID(),
-          });
+          const body: HuntCoordinatorResponse = await huntCoordinator(
+            { esClient, reportsEsClient },
+            model,
+            logger,
+            {
+              report_id,
+              spaceId,
+              text,
+              iocs,
+              techniques,
+              time_range,
+              size,
+              max_assets,
+              llm_confidence_threshold,
+              tier2_when,
+              max_tier2_sample_events,
+              trigger,
+              technology: technologyInput.technology,
+              // The Worker fan-out supplies a run id so one sweep's children share it,
+              // which is what the packaging barrier and conclusion dedupe key off. Only
+              // mint one when the caller has no sweep to tie the run to.
+              run_id: run_id ?? randomUUID(),
+            }
+          );
 
-          const body: HuntCoordinatorResponse = result;
           return response.ok({ body });
         } catch (err) {
           logger.error(`hunt_coordinator route failed: ${(err as Error).message}`);

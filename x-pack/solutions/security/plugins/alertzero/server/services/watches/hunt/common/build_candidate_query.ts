@@ -30,22 +30,24 @@ export interface CandidateQueryResult {
   truncated: boolean;
 }
 
-/**
- * Returns the conversation ids that currently carry an open Hunt Proposal, so
- * selection can drop their reports. Injected rather than imported so the route
- * owns the proposals-service wiring and the unit tests can stub it.
- */
+/** Injected rather than imported so the route owns the proposals-service wiring and tests can stub it. */
 export type OpenProposalConversationIdsReader = (spaceId: string) => Promise<Set<string>>;
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 10;
 
-/**
- * Over-fetch factor for the scheduled path. Open-proposal exclusion happens
- * after the search, so asking for exactly `limit` would under-fill the page
- * whenever a candidate is dropped.
- */
+/** Exclusion happens after the search, so asking for exactly `limit` could under-fill the page. */
 const OVERFETCH_MULTIPLIER = 3;
+
+/**
+ * Both callers below must fail closed: an empty result would read as "nothing
+ * to hunt" and hide a broken index or store behind a clean 200.
+ */
+const failClosed = (logger: Logger, context: string, err: unknown): never => {
+  const message = (err as Error).message;
+  logger.error(`build_candidate_query: ${context}, refusing to select candidates. ${message}`);
+  throw err;
+};
 
 export const buildCandidateQuery = async (
   esClient: ElasticsearchClient,
@@ -61,9 +63,8 @@ export const buildCandidateQuery = async (
   const filterClauses: Array<Record<string, unknown>> = [buildHuntSpaceFilterTerms(spaceId)];
 
   if (isManualWithIds) {
-    // Manual bypass: target exactly these report ids. The hunt-once gate is bypassed
-    // for explicit ids (replay/re-run semantics), but the open-proposal guard below
-    // still applies.
+    // Manual bypass lifts the hunt-once gate for these ids (replay semantics); the
+    // open-proposal guard below still applies.
     filterClauses.push({ ids: { values: report_ids } });
   } else {
     // Scheduled trigger: hunt-once gate, only reports never hunted in this space.
@@ -118,8 +119,7 @@ export const buildCandidateQuery = async (
   try {
     response = await esClient.search({
       index: HUNT_REPORTS_INDEX,
-      // Manual selection is already bounded by the named ids, so it asks for exactly
-      // what it was given; only the scheduled sweep needs headroom for exclusions.
+      // Manual selection is already bounded by the named ids; only the scheduled sweep needs headroom.
       size: isManualWithIds ? limit : limit * OVERFETCH_MULTIPLIER,
       ignore_unavailable: true,
       track_total_hits: true,
@@ -128,14 +128,7 @@ export const buildCandidateQuery = async (
       query: { bool: { filter: filterClauses } },
     });
   } catch (err) {
-    // Fail closed by throwing: an empty 200 would look like "no reports to hunt"
-    // and hide a broken reports index from the Worker / operator.
-    logger.error(
-      `build_candidate_query: ES search failed, refusing to select candidates. ${
-        (err as Error).message
-      }`
-    );
-    throw err;
+    throw failClosed(logger, 'ES search failed', err);
   }
 
   const hits = response.hits.hits ?? [];
@@ -153,16 +146,7 @@ export const buildCandidateQuery = async (
     try {
       openProposalConversationIds = await readOpenProposalConversationIds(spaceId);
     } catch (err) {
-      // Failing open here would re-hunt a report whose containment is still parked
-      // at a gate. Throw rather than return an empty page: an empty 200 reads as
-      // "nothing to hunt" and hides the broken proposals store, the same way the
-      // reports search above refuses to.
-      logger.error(
-        `build_candidate_query: could not read open proposals, refusing to select candidates. ${
-          (err as Error).message
-        }`
-      );
-      throw err;
+      throw failClosed(logger, 'could not read open proposals', err);
     }
   }
 
