@@ -175,7 +175,9 @@ export async function getFullAgentPolicy(
   // package policies are accessible from any namespace and soClient.get rejects '*' as a namespace.
   const packagePoliciesNamespace =
     options?.spaceId === '*'
-      ? (agentPolicy.space_ids?.[0] === '*' ? undefined : agentPolicy.space_ids?.[0])
+      ? agentPolicy.space_ids?.[0] === '*'
+        ? undefined
+        : agentPolicy.space_ids?.[0]
       : options?.spaceId;
 
   const agentInputs = await storedPackagePoliciesToAgentInputs(
