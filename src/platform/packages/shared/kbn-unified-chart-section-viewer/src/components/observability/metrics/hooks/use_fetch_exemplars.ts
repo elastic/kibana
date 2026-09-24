@@ -32,7 +32,7 @@ export interface UseFetchExemplarsParams {
 }
 
 /**
- * Fetches the exemplars for one metric chart. Returns `undefined` while in flight, when
+ * Fetches the exemplars for a metric chart. Returns `undefined` while in flight, when
  * the flag is off, or when the metric has no exemplars. Never throws.
  */
 export const useFetchExemplars = ({
@@ -62,7 +62,6 @@ export const useFetchExemplars = ({
         return undefined;
       }
 
-      // Empty for non-OTel metrics, which can have no exemplars stream and so never probe.
       const esqlQuery = createExemplarsQuery({ metricItem, whereStatements, originalSource });
       if (!esqlQuery) {
         return undefined;

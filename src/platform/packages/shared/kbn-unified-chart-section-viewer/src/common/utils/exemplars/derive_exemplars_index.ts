@@ -25,11 +25,7 @@ const isConcreteSource = (metricsIndex: string): boolean =>
  * `undefined` when no such stream can exist. Callers treat `undefined` as "do not fetch".
  */
 export const deriveExemplarsIndex = (metricsIndex: string): string | undefined => {
-  if (!metricsIndex.startsWith(METRICS_INDEX_PREFIX)) {
-    return undefined;
-  }
-
-  if (!isConcreteSource(metricsIndex)) {
+  if (!metricsIndex.startsWith(METRICS_INDEX_PREFIX) || !isConcreteSource(metricsIndex)) {
     return undefined;
   }
 

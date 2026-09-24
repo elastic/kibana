@@ -31,9 +31,7 @@ const BASE_COLUMNS = [
 
 interface CreateExemplarsQueryParams {
   metricItem: ParsedMetricItem;
-  /** The user's own ES|QL `WHERE` fragments, re-applied so exemplars match the chart's filters. */
   whereStatements?: string[];
-  /** The source the user typed; wins over `metricItem.indexName` when it is one concrete index. */
   originalSource?: string;
   maxRows?: number;
 }
@@ -41,7 +39,7 @@ interface CreateExemplarsQueryParams {
 /**
  * Builds the ES|QL query that fetches OTel exemplars for one metric, or `''` when the metric
  * cannot have exemplars. Takes no breakdown accessors on purpose: breaking the chart down
- * must not change which exemplars are fetched.
+ * does not change which exemplars are fetched.
  */
 export function createExemplarsQuery({
   metricItem,
@@ -57,7 +55,6 @@ export function createExemplarsQuery({
     return '';
   }
 
-  // TODO(elasticsearch#154786): swap `FROM <index>` for `TS_EXEMPLARS` when available.
   const query = esql.from(exemplarsIndex);
 
   const exemplarMetricName = escapeStringValue(metricName.replace(/^metrics\./, ''));
@@ -77,7 +74,6 @@ export function createExemplarsQuery({
       .map(({ name }) => sanitazeESQLInput(name)),
   ];
   query.pipe(`KEEP ${keepColumns.join(', ')}`);
-
   query.pipe(`SORT ${TIMESTAMP_FIELD} DESC`);
   query.pipe(`LIMIT ${maxRows}`);
 
