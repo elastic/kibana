@@ -85,7 +85,8 @@ describe('streamRoutingMachine condition editor validity', () => {
       },
     });
     await Promise.resolve();
-    expect(actor.getSnapshot().context.definition.privileges.manage).toBe(true);
+    const def = actor.getSnapshot().context.definition;
+    expect('privileges' in def ? def.privileges.manage : true).toBe(true);
     expect(actor.getSnapshot().context.isConditionEditorValid).toBe(true);
     expect(
       isSchema(

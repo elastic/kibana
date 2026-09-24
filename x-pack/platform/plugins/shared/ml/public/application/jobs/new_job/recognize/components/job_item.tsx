@@ -21,10 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { JobOverride, DatafeedResponse } from '@kbn/ml-common-types/modules';
 import type { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
-import type { JobOverride, DatafeedResponse } from '../../../../../../common/types/modules';
 
 interface JobItemProps {
   job: ModuleJobUI;

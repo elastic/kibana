@@ -19,7 +19,10 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { EsqlResponseError, extractEsqlEmbeddedError } from './esql_response_error';
+import {
+  EsqlResponseError,
+  extractEsqlEmbeddedError,
+} from '../../../../common/errors/esql_response_error';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 import { getMetricsExecutionContext } from './execution_context';
 
@@ -32,6 +35,12 @@ export interface ExecuteEsqlParams {
   filters?: Filter[];
   variables?: ESQLControlVariable[];
   uiSettings: IUiSettingsClient;
+  /**
+   * Forwarded onto `executionContext.meta` so the server-side pipeline tags
+   * the APM transaction with `kibana_meta_profile_id`, keeping request and
+   * error telemetry filterable by the same profile.
+   */
+  profileId: string;
 }
 
 export const fetchEsqlResponseOrThrow = async (
@@ -65,6 +74,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
   filters = [],
   variables,
   uiSettings,
+  profileId,
 }: ExecuteEsqlParams): Promise<ExecuteEsqlResult<TDocument>> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
@@ -86,7 +96,8 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
     variables,
     ...getMetricsExecutionContext(
       MetricsExecutionContextAction.FETCH,
-      MetricsExecutionContextName.METRICS_INFO
+      MetricsExecutionContextName.METRICS_INFO,
+      { profile_id: profileId }
     ),
   });
 

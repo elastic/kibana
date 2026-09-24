@@ -6,6 +6,7 @@
  */
 
 import { SolutionNavigationProvider } from '@kbn/test-suites-src/functional/page_objects';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 
 import { NavigationalSearchPageObject } from '../../../functional/page_objects/navigational_search';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -19,6 +20,9 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
   };
 }
 
+const SEARCH_BUTTON = CHROME_HEADER_TEST_SUBJECTS.searchButton;
+const SEARCH_MODAL = 'globalSearchModal';
+
 class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
   constructor(ctx: FtrProviderContext) {
     // @ts-expect-error -- this expects FtrProviderContext from x-pack/platform/test/functional/ftr_provider_context.ts
@@ -26,9 +30,21 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
   }
 
   async showSearch() {
-    await this.ctx.getService('testSubjects').click('nav-search-reveal');
+    const testSubjects = this.ctx.getService('testSubjects');
+    if (await testSubjects.exists(SEARCH_MODAL, { timeout: 0 })) return;
+    await testSubjects.click(SEARCH_BUTTON);
+    await testSubjects.existOrFail(SEARCH_MODAL);
   }
+
   async hideSearch() {
-    await this.ctx.getService('testSubjects').click('nav-search-conceal');
+    const testSubjects = this.ctx.getService('testSubjects');
+    const browser = this.ctx.getService('browser');
+    if (await testSubjects.exists(SEARCH_MODAL, { timeout: 0 })) {
+      // The open modal renders an overlay mask above the header, which intercepts clicks
+      // on the search button. Press Escape to close the modal instead.
+      // (Selecting a result already closes the modal, so this only runs if still open.)
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await testSubjects.missingOrFail(SEARCH_MODAL);
+    }
   }
 }

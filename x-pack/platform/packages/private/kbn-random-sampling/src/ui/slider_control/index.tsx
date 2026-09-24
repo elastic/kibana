@@ -40,12 +40,7 @@ export function ControlSlider({
   const currentSamplingIndex = samplingIndex > -1 ? samplingIndex : values.length - 1;
 
   return (
-    <TooltipWrapper
-      tooltipContent={disabledReason}
-      condition={disabled}
-      delay="regular"
-      display="block"
-    >
+    <TooltipWrapper tooltipContent={disabledReason} condition={disabled} display="block">
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiText

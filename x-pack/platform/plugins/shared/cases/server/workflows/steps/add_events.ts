@@ -11,9 +11,28 @@ import {
   addEventsStepCommonDefinition,
   type AddEventsStepInput,
 } from '../../../common/workflows/steps/add_events';
-import { AttachmentType } from '../../../common';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
+import { LEGACY_EVENT_TYPE } from '../../../common/constants/attachments';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
+
+const groupEventsByIndex = (
+  events: AddEventsStepInput['events']
+): Map<string, AddEventsStepInput['events']> => {
+  const groups = new Map<string, AddEventsStepInput['events']>();
+  for (const event of events) {
+    const key = event.index;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.push(event);
+    } else {
+      groups.set(key, [event]);
+    }
+  }
+  return groups;
+};
 
 export const addEventsStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -22,19 +41,25 @@ export const addEventsStepDefinition = (
     ...addEventsStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddEventsStepInput) => {
       return withCaseOwner(client, input.case_id, async (owner) => {
+        const attachments: UnifiedAttachmentPayload[] = [
+          ...groupEventsByIndex(input.events).values(),
+        ].map((group) => ({
+          type: toUnifiedAttachmentType(LEGACY_EVENT_TYPE, owner),
+          attachmentId: group.map((event) => event.eventId),
+          metadata: { index: group.map((event) => event.index) },
+          owner,
+        }));
+
         const updatedCase = await client.attachments.bulkCreate({
           caseId: input.case_id,
-          attachments: input.events.map((event) => ({
-            type: AttachmentType.event,
-            eventId: event.eventId,
-            index: event.index,
-            owner,
-          })),
+          attachments,
         });
 
+        // The client returns unified comments; the output schema mirrors the
+        // public (legacy) wire shape, so convert back before validating.
         return safeParseCaseForWorkflowOutput(
           addEventsStepCommonDefinition.outputSchema.shape.case,
-          updatedCase
+          toLegacyCaseResponse(updatedCase)
         );
       });
     }),

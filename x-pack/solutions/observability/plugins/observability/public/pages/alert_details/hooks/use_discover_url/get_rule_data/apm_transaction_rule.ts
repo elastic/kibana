@@ -18,6 +18,7 @@ import {
   TRANSACTION_TYPE,
 } from '@kbn/apm-types';
 import type { TopAlert } from '../../../../../typings/alerts';
+import { getEnvironmentKqlFilter } from './get_environment_kql_filter';
 
 type ApmTransactionRuleDataResult = {
   discoverAppLocatorParams: DiscoverAppLocatorParams & {
@@ -38,9 +39,9 @@ export const apmTransactionAlertFieldsToKqlQuery = (alert: TopAlert): string => 
     return acc;
   }, []);
 
-  const environment = fields[SERVICE_ENVIRONMENT];
-  if (environment && environment !== 'ENVIRONMENT_ALL') {
-    filters.push(`${escapeKuery(SERVICE_ENVIRONMENT)}:"${escapeQuotes(environment)}"`);
+  const environmentFilter = getEnvironmentKqlFilter(fields[SERVICE_ENVIRONMENT]);
+  if (environmentFilter) {
+    filters.push(environmentFilter);
   }
 
   if (filters.length === 0) {

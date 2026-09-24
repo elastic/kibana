@@ -9,7 +9,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import moment, { type Moment } from 'moment';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 
 const DATEPICKER_WIDTH = 373;
 

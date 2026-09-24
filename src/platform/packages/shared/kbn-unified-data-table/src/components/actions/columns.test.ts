@@ -8,14 +8,16 @@
  */
 
 import { getStateColumnActions } from './columns';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { Capabilities } from '@kbn/core/types';
 import { dataViewsMock } from '../../../__mocks__/data_views';
 import type { UnifiedDataTableSettings } from '../../types';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 function getStateColumnAction(
   state: { columns?: string[]; sort?: string[][]; settings?: UnifiedDataTableSettings },
-  setAppState: (state: { columns: string[]; sort?: string[][] }) => void
+  setAppState: (state: { columns: string[]; sort?: string[][] }) => void,
+  dataView: DataView = dataViewMock
 ) {
   return getStateColumnActions({
     capabilities: {
@@ -23,7 +25,7 @@ function getStateColumnAction(
         save: false,
       },
     } as unknown as Capabilities,
-    dataView: dataViewMock,
+    dataView,
     dataViews: dataViewsMock,
     setAppState,
     columns: state.columns,
@@ -169,6 +171,111 @@ describe('Test column actions', () => {
     expect(setAppState).toHaveBeenCalledWith({
       columns: ['second', 'third'],
       settings: { columns: { third: { width: 100 } } },
+    });
+  });
+
+  describe('Summary column coexistence', () => {
+    it('keeps _source when adding another column', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction({ columns: ['message', '_source'] }, setAppState);
+
+      actions.onAddColumn('extension');
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['message', '_source', 'extension'],
+        })
+      );
+    });
+
+    it('keeps sole _source when the last field column is removed', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction({ columns: ['message', '_source'] }, setAppState);
+
+      actions.onRemoveColumn('message');
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['_source'],
+          sort: [],
+        })
+      );
+    });
+
+    it('restores field columns alongside pinned _source when adding after summary-only', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction({ columns: ['_source'] }, setAppState);
+
+      actions.onAddColumn('message');
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['_source', 'message'],
+        })
+      );
+    });
+
+    it('does not add _source when leaving classic empty summary-only', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction({ columns: [] }, setAppState);
+
+      actions.onAddColumn('message');
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['message'],
+        })
+      );
+    });
+
+    it('keeps sole _source through onSetColumns and resets its width to auto', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction(
+        {
+          columns: ['message', '_source'],
+          settings: { columns: { _source: { width: 400 }, message: { width: 100 } } },
+        },
+        setAppState
+      );
+
+      actions.onSetColumns(['_source'], true);
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['_source'],
+          // Last remaining absolute-width column is reset to auto width
+          settings: { columns: {} },
+        })
+      );
+    });
+  });
+
+  describe('Display-only time column', () => {
+    it('preserves its width when reordering columns', () => {
+      const setAppState = jest.fn();
+      const settings: UnifiedDataTableSettings = {
+        columns: {
+          '@timestamp': { width: 212 },
+          message: { width: 150 },
+          extension: { width: 120 },
+        },
+      };
+      const actions = getStateColumnAction(
+        {
+          columns: ['message', 'extension'],
+          settings,
+        },
+        setAppState,
+        dataViewMockWithTimeField
+      );
+
+      // Classic table prepends the time field in visible columns and calls onSetColumns(..., false)
+      actions.onSetColumns(['@timestamp', 'extension', 'message'], false);
+
+      expect(setAppState).toHaveBeenCalledWith({
+        columns: ['extension', 'message'],
+        settings,
+      });
     });
   });
 });

@@ -21,10 +21,7 @@ test.describe(
       });
     });
 
-    // Skipped: with DEFAULT_SCHEMA='semconv' and no OTel data in Scout yet,
-    // APM-only hosts resolve to semconv, causing '(blank)' instead of 'N/A'.
-    // Revisit once OTel synthtrace data is added to Scout (PR #263136).
-    test.skip('Overview Tab - KPI tiles show N/A', async ({ pageObjects: { nodeDetailsPage } }) => {
+    test('Overview Tab - KPI tiles show N/A', async ({ pageObjects: { nodeDetailsPage } }) => {
       await nodeDetailsPage.clickOverviewTab();
       const kpiTiles = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
 

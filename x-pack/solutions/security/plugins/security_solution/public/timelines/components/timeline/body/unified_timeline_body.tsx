@@ -9,9 +9,7 @@ import type { ComponentProps, ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { DataViewErrorComponent } from '../../../../common/components/data_view_error';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
@@ -43,15 +41,9 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     leadingControlColumns,
     onUpdatePageIndex,
   } = props;
-  const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: PageScope.timeline,
-  });
   const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 
-  const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView } = useDataView(PageScope.timeline);
 
   return (
     <StyledTableFlexGroup direction="column" gutterSize="s">

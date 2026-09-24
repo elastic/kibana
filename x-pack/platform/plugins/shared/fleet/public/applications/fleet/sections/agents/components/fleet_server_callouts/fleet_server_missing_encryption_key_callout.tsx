@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useStartServices } from '../../../../hooks';
 
@@ -20,16 +22,20 @@ export const FleetServerMissingEncryptionKeyCallout: React.FunctionComponent<
 > = ({ onClickHandler }) => {
   const { docLinks } = useStartServices();
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       data-test-subj="missingEncryptionKeyCallout"
-      iconType="info"
-      color="warning"
       title={
         <FormattedMessage
           id="xpack.fleet.missingEncryptionKeyCallout.title"
           defaultMessage="Set up encryption key"
         />
       }
+      onDismiss={onClickHandler}
+      dismissButtonProps={{
+        'aria-label': i18n.translate('xpack.fleet.missingEncryptionKeyCallout.dismiss', {
+          defaultMessage: 'Dismiss',
+        }),
+      }}
     >
       <p data-test-subj="missingEncryptionKeyBody">
         <FormattedMessage
@@ -47,12 +53,6 @@ export const FleetServerMissingEncryptionKeyCallout: React.FunctionComponent<
           }}
         />
       </p>
-      <EuiButtonEmpty flush="left" size="s" color="warning" onClick={onClickHandler}>
-        <FormattedMessage
-          id="xpack.fleet.missingEncryptionKeyCallout.dismiss"
-          defaultMessage="Dismiss"
-        />
-      </EuiButtonEmpty>
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };

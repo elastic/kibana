@@ -12,6 +12,7 @@ import type { Subscription } from 'rxjs';
 import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { createNavigationTree } from './navigation_tree';
 import type {
   ServerlessObservabilityPublicSetup,
@@ -45,25 +46,28 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { serverless, management, security, workflowsManagement } = setupDeps;
+    const { serverless, navigation, management, security, workflowsManagement } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
     const navigationTree$ = combineLatest([
       setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       chatExperience$,
+      core.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
     ]).pipe(
-      map(([{ status }, chatExperience]) => {
+      map(([{ status }, chatExperience, significantEventsAvailable]) => {
         return createNavigationTree({
+          core,
+          significantEventsAvailable,
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
+          genAiSettingsAvailable: core.pricing.isFeatureAvailable('observability:gen_ai_settings'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
-          showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
         });
       })
     );
-    serverless.initNavigation('oblt', navigationTree$);
+    navigation.initNavigation('oblt', navigationTree$);
 
     if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
       workflowsManagement.setUnavailableInServerlessTier({

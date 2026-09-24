@@ -8,7 +8,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial, MaybePromise } from '@kbn/utility-types';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -34,6 +34,32 @@ export type SafeRouteMethod = 'get' | 'options';
  * @public
  */
 export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
+
+/**
+ * Code sample metadata rendered by the public API docs.
+ * @public
+ */
+export interface OASCodeSample {
+  lang: string;
+  label?: string;
+  source: string;
+}
+
+/**
+ * Partial OpenAPI operation object merged into generated route docs.
+ * @public
+ */
+export type OASOperationObject = DeepPartial<
+  OpenAPIV3.OperationObject & {
+    'x-codeSamples': OASCodeSample[];
+  }
+>;
+
+/**
+ * Lazily provides route-specific OpenAPI operation metadata.
+ * @public
+ */
+export type OASOperationObjectProvider = () => string | MaybePromise<OASOperationObject>;
 
 /**
  * The set of supported parseable Content-Types
@@ -225,9 +251,13 @@ export type Privileges = Array<Privilege | PrivilegeSet>;
  * Describes the authorization requirements when authorization is enabled.
  *
  * - `requiredPrivileges`: An array of privileges or privilege sets that are required for the route.
+ * - `extendedPrivileges`: A flat list of privilege name strings checked and surfaced in
+ *   `request.authzResult` but not enforced. Missing extended privileges never produce a 403.
+ *   Privilege sets (`anyRequired` / `allRequired`) are not supported here — only string names.
  */
 export interface AuthzEnabled {
   requiredPrivileges: Privileges;
+  extendedPrivileges?: Privilege[];
 }
 
 /**
@@ -423,9 +453,33 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *      },
    *  })
    */
-  oasOperationObject?: () =>
-    | string
-    | DeepPartial<Pick<OpenAPIV3.OperationObject, 'requestBody' | 'responses'>>;
+  oasOperationObject?: OASOperationObjectProvider;
+
+  /**
+   * Stable identifier for this operation in generated OAS documents.
+   *
+   * When omitted, the ID is derived from the method and the path, which yields
+   * names like `put-foo-id`. SDK and CLI code generators turn the ID into
+   * command and method names, so set it explicitly on public APIs where the
+   * derived name would read poorly.
+   *
+   * Prefer kebab-case `verb-resource` names such as `create-dashboard`. That
+   * keeps CLI command names consistent across resources.
+   *
+   * IDs must be unique across the generated document. A duplicate raises an
+   * error during OAS generation.
+   *
+   * @example
+   * ```ts
+   * router.put({
+   *  path: '/api/dashboards/{id}',
+   *  access: 'public',
+   *  summary: `Upsert a dashboard`,
+   *  operationId: 'upsert-dashboard',
+   * })
+   * ```
+   */
+  operationId?: string;
 
   /**
    * Whether this route should be treated as "invisible" and excluded from router
@@ -466,6 +520,13 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   httpResource?: boolean;
 
   /**
+   * When set to `info`, core emits a slim HTTP response log at info for this
+   * route (`status`, `path`, `http.request.id`). The full access-log record
+   * remains at debug.
+   */
+  httpResponseLogLevel?: 'info';
+
+  /**
    * Based on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)
    * Kibana APIs can also specify some metadata about API availability.
    *
@@ -475,7 +536,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    */
   availability?: {
     /** @default stable */
-    stability?: 'experimental' | 'beta' | 'stable';
+    stability?: 'experimental' | 'stable' | 'tech_preview';
     /**
      * The stack version in which the route was introduced (eg: 8.15.0).
      */

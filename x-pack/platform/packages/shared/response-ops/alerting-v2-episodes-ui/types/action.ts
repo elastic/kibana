@@ -10,6 +10,10 @@ export interface EpisodeActionState {
   ruleId: string | null;
   groupHash: string | null;
   lastAckAction: string | null;
+  lastAssigneeUid: string | null;
+  lastAckActor: string | null;
+  lastDeactivateAction: string | null;
+  lastDeactivateActor: string | null;
 }
 
 export interface AlertEpisodeGroupAction {
@@ -19,4 +23,11 @@ export interface AlertEpisodeGroupAction {
   lastSnoozeAction: string | null;
   snoozeExpiry: string | null;
   tags: string[];
+  lastSnoozeActor: string | null;
+  lastDeactivateActor: string | null;
+}
+
+export interface EpisodeStatusGroupAction {
+  lastSnoozeAction: string | null;
+  snoozeExpiry: string | null;
 }

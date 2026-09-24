@@ -2596,6 +2596,14 @@
               "type": "keyword"
             }
           }
+        },
+        "endgame": {
+          "properties": {
+            "event_type_full": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
         }
       }
     },

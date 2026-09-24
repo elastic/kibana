@@ -30,7 +30,7 @@ import { Reference } from '../references';
  */
 export interface TypeMetaAvailability {
   /** @default stable */
-  stability?: 'experimental' | 'beta' | 'stable';
+  stability?: 'experimental' | 'stable' | 'tech_preview';
   /**
    * The stack version in which this field was introduced (eg: 9.4.0).
    */
@@ -137,8 +137,11 @@ export abstract class Type<V> {
    * @type {Schema}
    */
   protected readonly internalSchema: Schema;
+  private readonly meta: TypeOptions<V>['meta'];
 
   protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
+    this.meta = options.meta;
+
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
 
@@ -219,6 +222,10 @@ export abstract class Type<V> {
    */
   public getSchema() {
     return this.internalSchema;
+  }
+
+  public getMeta(): TypeOptions<V>['meta'] {
+    return this.meta;
   }
 
   public getSchemaStructure() {

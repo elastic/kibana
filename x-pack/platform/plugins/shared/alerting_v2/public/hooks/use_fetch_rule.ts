@@ -9,6 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
+import { isNotFoundError } from '../utils/is_not_found_error';
 import { ruleKeys } from './query_key_factory';
 
 export const useFetchRule = (id: string | undefined) => {
@@ -19,7 +20,8 @@ export const useFetchRule = (id: string | undefined) => {
     queryKey: ruleKeys.detail(id!),
     queryFn: () => rulesApi.getRule(id!),
     enabled: Boolean(id),
-    onError: () => {
+    onError: (error: unknown) => {
+      if (isNotFoundError(error)) return;
       toasts.addDanger(
         i18n.translate('xpack.alertingV2.hooks.useFetchRule.errorMessage', {
           defaultMessage: 'Failed to load rule',

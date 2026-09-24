@@ -11,6 +11,7 @@ import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { useWorkflowUrlState } from './use_workflow_url_state';
+import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_editor_preferences';
 
 const createWrapper = (initialEntries: string[] = ['/']) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -19,16 +20,68 @@ const createWrapper = (initialEntries: string[] = ['/']) => {
 };
 
 describe('useWorkflowUrlState', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('should return default state when no query params are present', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
       wrapper: createWrapper(),
     });
 
     expect(result.current.activeTab).toBe('workflow');
+    expect(result.current.editorView).toBe('yaml');
+    expect(result.current.graphDirection).toBe('TB');
     expect(result.current.selectedExecutionId).toBeUndefined();
     expect(result.current.selectedStepExecutionId).toBeUndefined();
     expect(result.current.selectedStepId).toBeUndefined();
     expect(result.current.shouldAutoResume).toBe(false);
+  });
+
+  it('should parse view=graph and direction=LR from URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?view=graph&direction=LR']),
+    });
+
+    expect(result.current.editorView).toBe('graph');
+    expect(result.current.graphDirection).toBe('LR');
+  });
+
+  it('should update URL when setEditorView is called', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?stepId=my-step']),
+    });
+
+    act(() => {
+      result.current.setEditorView('graph');
+    });
+
+    expect(result.current.editorView).toBe('graph');
+    expect(result.current.selectedStepId).toBeUndefined();
+  });
+
+  it('should update URL when setGraphDirection is called', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?view=graph']),
+    });
+
+    act(() => {
+      result.current.setGraphDirection('LR');
+    });
+
+    expect(result.current.graphDirection).toBe('LR');
+  });
+
+  it('should omit direction from URL when setGraphDirection is TB', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?direction=LR']),
+    });
+
+    act(() => {
+      result.current.setGraphDirection('TB');
+    });
+
+    expect(result.current.graphDirection).toBe('TB');
   });
 
   it('should parse tab from URL', () => {
@@ -70,6 +123,14 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.shouldAutoResume).toBe(false);
+  });
+
+  it('should parse replayExecutionId from URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?replayExecutionId=exec-1']),
+    });
+
+    expect(result.current.replayExecutionId).toBe('exec-1');
   });
 
   it('should update URL when setActiveTab is called', () => {
@@ -152,6 +213,18 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.shouldAutoResume).toBe(false);
   });
 
+  it('should clear replayExecutionId when clearReplayExecutionId is called', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?replayExecutionId=exec-1']),
+    });
+
+    act(() => {
+      result.current.clearReplayExecutionId();
+    });
+
+    expect(result.current.replayExecutionId).toBeUndefined();
+  });
+
   it('should support updateUrlState for arbitrary updates', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
       wrapper: createWrapper(),
@@ -180,5 +253,131 @@ describe('useWorkflowUrlState', () => {
 
     expect(result.current.activeTab).toBe('workflow');
     expect(result.current.selectedExecutionId).toBeUndefined();
+  });
+
+  describe('localStorage persistence', () => {
+    it('falls back to stored editorView when no URL param is present', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"graph"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.editorView).toBe('graph');
+    });
+
+    it('falls back to stored graphDirection when no URL param is present', () => {
+      localStorage.setItem('workflowsUi.graph.direction', '"LR"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.graphDirection).toBe('LR');
+    });
+
+    it('stored editorView takes priority over URL param', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"graph"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?view=yaml']),
+      });
+
+      expect(result.current.editorView).toBe('graph');
+    });
+
+    it('stored graphDirection takes priority over URL param', () => {
+      localStorage.setItem('workflowsUi.graph.direction', '"LR"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?direction=TB']),
+      });
+
+      expect(result.current.graphDirection).toBe('LR');
+    });
+
+    it('falls back to URL param for editorView when localStorage is not set', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?view=graph']),
+      });
+
+      expect(result.current.editorView).toBe('graph');
+    });
+
+    it('falls back to URL param for graphDirection when localStorage is not set', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?direction=LR']),
+      });
+
+      expect(result.current.graphDirection).toBe('LR');
+    });
+
+    it('setEditorView persists to localStorage', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.setEditorView('graph');
+      });
+
+      expect(getStoredEditorView()).toBe('graph');
+    });
+
+    it('setEditorView persists default yaml to localStorage', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?view=graph']),
+      });
+
+      act(() => {
+        result.current.setEditorView('yaml');
+      });
+
+      expect(getStoredEditorView()).toBe('yaml');
+    });
+
+    it('setGraphDirection persists to localStorage', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.setGraphDirection('LR');
+      });
+
+      expect(getStoredGraphDirection()).toBe('LR');
+    });
+
+    it('setGraphDirection persists default TB to localStorage', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?direction=LR']),
+      });
+
+      act(() => {
+        result.current.setGraphDirection('TB');
+      });
+
+      expect(getStoredGraphDirection()).toBe('TB');
+    });
+
+    it('ignores a garbage stored editorView and falls back to default', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"invalid"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.editorView).toBe('yaml');
+    });
+
+    it('ignores a garbage stored graphDirection and falls back to default', () => {
+      localStorage.setItem('workflowsUi.graph.direction', '"XY"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.graphDirection).toBe('TB');
+    });
   });
 });

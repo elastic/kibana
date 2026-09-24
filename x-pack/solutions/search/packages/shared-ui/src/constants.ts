@@ -16,3 +16,4 @@ export const GETTING_STARTED_SESSIONSTORAGE_KEY = 'gettingStartedVisited';
 // SEARCH_HOMEPAGE_INGESTION_CTA_FEATURE_FLAG = 'searchSolution.homepage.ingestionCTA';
 // `searchSolution.gettingStartedEnabled` FF is deprecated
 // SEARCH_GETTING_STARTED_FEATURE_FLAG = 'searchSolution.gettingStartedEnabled';
+export const SEARCH_GETTING_STARTED_CHAT_FEATURE_FLAG = 'searchSolution.gettingStartedChatEnabled';

@@ -42,6 +42,7 @@ export interface ContextValue extends ConsoleStartServices {
   config: {
     isDevMode: boolean;
     isPackagedEnvironment?: boolean;
+    defaultEditorContent?: string;
   };
 }
 

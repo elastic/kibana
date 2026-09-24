@@ -10,28 +10,32 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiSpacer,
+  EuiScreenReaderOnly,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDispatch } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
-import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useLocationMonitors } from './hooks/use_location_monitors';
+import { useAgentStats } from './hooks/use_agent_stats';
+import { LocationAgentDetails } from './location_agent_details';
+import { RelativeTimestamp } from './relative_timestamp';
 import { PolicyName } from './policy_name';
+import { LocationHealth } from './location_health';
 import { LOCATION_NAME_LABEL } from './location_form';
-import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { UnhealthyCountBadge } from './unhealthy_count_badge';
 import { ResetMonitorModal } from '../../monitors_page/management/monitor_list_table/reset_monitor_modal';
@@ -54,8 +58,6 @@ export const PrivateLocationsTable = ({
   onEdit: (privateLocation: PrivateLocation) => void;
   privateLocations: PrivateLocation[];
 }) => {
-  const dispatch = useDispatch();
-
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [monitorPendingReset, setMonitorPendingReset] = useState<{
@@ -68,8 +70,27 @@ export const PrivateLocationsTable = ({
   const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
 
   const { locationMonitors, loading } = useLocationMonitors();
+  const {
+    byLocation: agentStatsByLocation,
+    loading: agentStatsLoading,
+    error: agentStatsError,
+  } = useAgentStats();
+  const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
 
-  const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
+  // Expanded rows: per-agent health/capacity breakdown for a location's agents.
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleRow = (id: string) =>
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+
+  const { canSave } = useSyntheticsSettingsContext();
 
   const { services } = useKibana<ClientPluginsStart>();
 
@@ -82,8 +103,34 @@ export const PrivateLocationsTable = ({
 
   const columns: Array<EuiBasicTableColumn<ListItem>> = [
     {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>{EXPAND_ROW_LABEL}</span>
+        </EuiScreenReaderOnly>
+      ),
+      render: (item: ListItem) => {
+        const isExpanded = expandedIds.has(item.id);
+        const label = isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL;
+        return (
+          <EuiToolTip content={label} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="syntheticsExpandLocationAgents"
+              size="xs"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              aria-label={label}
+              onClick={() => toggleRow(item.id)}
+            />
+          </EuiToolTip>
+        );
+      },
+    },
+    {
       field: 'label',
       name: LOCATION_NAME_LABEL,
+      width: '20%',
       render: (label: string) => <CopyName text={label} />,
     },
     {
@@ -103,7 +150,25 @@ export const PrivateLocationsTable = ({
     {
       field: 'agentPolicyId',
       name: AGENT_POLICY_LABEL,
-      render: (agentPolicyId: string) => <PolicyName agentPolicyId={agentPolicyId} />,
+      render: (agentPolicyId: string, item: ListItem) => (
+        <PolicyName
+          agentPolicyId={agentPolicyId}
+          locationStats={agentStatsByLocation.get(item.id)}
+          // The expanded panel already shows the agent count, so drop the badge there.
+          hideAgentCount={expandedIds.has(item.id)}
+          isAgentSharding={item.isAgentSharding}
+        />
+      ),
+    },
+    {
+      name: HEALTH_LABEL,
+      render: (item: ListItem) => (
+        <LocationHealth
+          stats={agentStatsByLocation.get(item.id)}
+          loading={agentStatsLoading}
+          error={Boolean(agentStatsError)}
+        />
+      ),
     },
     {
       name: TAGS_LABEL,
@@ -210,41 +275,62 @@ export const PrivateLocationsTable = ({
     monitors: locationMonitors?.find((l) => l.id === location.id)?.count ?? 0,
   }));
 
-  const openFlyout = () => dispatch(setIsPrivateLocationFlyoutVisible(true));
+  const itemIdToExpandedRowMap = items.reduce<Record<string, React.ReactNode>>((acc, item) => {
+    if (expandedIds.has(item.id)) {
+      acc[item.id] = (
+        <LocationAgentDetails
+          stats={agentStatsByLocation.get(item.id)}
+          loading={agentStatsLoading}
+          agentPolicyId={item.agentPolicyId}
+          locationLabel={item.label}
+          locationMonitorCount={item.monitors}
+        />
+      );
+    }
+    return acc;
+  }, {});
 
   const renderToolRight = () => {
     return [
-      <NoPermissionsTooltip
-        canEditSynthetics={canSave}
-        canManagePrivateLocations={canManagePrivateLocations}
-        key="addPrivateLocationButton"
+      <EuiFlexGroup
+        key="refreshPrivateLocations"
+        direction="column"
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
       >
-        <EuiButton
-          fill
-          data-test-subj={'addPrivateLocationButton'}
-          isLoading={loading}
-          disabled={!canSave || !canManagePrivateLocations}
-          onClick={openFlyout}
-          iconType="plusCircle"
-        >
-          {ADD_LABEL}
-        </EuiButton>
-      </NoPermissionsTooltip>,
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="syntheticsRefreshPrivateLocationsButton"
+            iconType="refresh"
+            onClick={refreshApp}
+            isLoading={loading || agentStatsLoading}
+          >
+            {REFRESH_LABEL}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+            <FormattedMessage
+              id="xpack.synthetics.monitorManagement.lastUpdated"
+              defaultMessage="Updated {time}"
+              values={{ time: <RelativeTimestamp timestamp={lastRefresh} /> }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>,
     ];
   };
 
   return (
     <div>
-      <EuiText>
-        {START_ADDING_LOCATIONS_DESCRIPTION} <PrivateLocationDocsLink label={LEARN_MORE} />
-      </EuiText>
-      <EuiSpacer size="m" />
       <EuiInMemoryTable<ListItem>
         itemId={'id'}
         tableLayout="auto"
         tableCaption={PRIVATE_LOCATIONS}
         items={items}
         columns={columns}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         childrenBetween={
           <TableTitle
             total={items.length}
@@ -320,6 +406,22 @@ export const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManage
   defaultMessage: 'Agent Policy',
 });
 
+const HEALTH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.locationHealthLabel', {
+  defaultMessage: 'Health',
+});
+
+const EXPAND_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.expandRow', {
+  defaultMessage: 'Expand per-agent details',
+});
+
+const COLLAPSE_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.collapseRow', {
+  defaultMessage: 'Collapse per-agent details',
+});
+
+const REFRESH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.refresh', {
+  defaultMessage: 'Refresh',
+});
+
 const DELETE_LOCATION = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.deleteLabel',
   {
@@ -337,14 +439,6 @@ const getDeleteDescription = (canDelete: boolean, monCount: number) =>
 
 const EDIT_LOCATION = i18n.translate('xpack.synthetics.settingsRoute.privateLocations.editLabel', {
   defaultMessage: 'Edit private location',
-});
-
-const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
-  defaultMessage: 'Create location',
-});
-
-export const LEARN_MORE = i18n.translate('xpack.synthetics.privateLocations.learnMore.label', {
-  defaultMessage: 'Learn more.',
 });
 
 const RESET_MONITORS_LABEL = i18n.translate(

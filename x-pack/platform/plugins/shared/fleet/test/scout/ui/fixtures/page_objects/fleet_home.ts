@@ -22,7 +22,12 @@ export class FleetHomePage {
       state: 'visible',
       timeout: 20_000,
     });
-    await this.page.testSubj.waitForSelector(FLEET_SETUP_LOADING_SELECTOR, { state: 'hidden' });
+    // 60 s: sendSetup() is slower on ECH/cloud than locally — the default 10 s was too short
+    // causing flaky timeouts on cloud-stateful-classic runs. See https://github.com/elastic/kibana/issues/262268
+    await this.page.testSubj.waitForSelector(FLEET_SETUP_LOADING_SELECTOR, {
+      state: 'hidden',
+      timeout: 60_000,
+    });
   }
 
   getMissingPrivilegesPromptTitle() {

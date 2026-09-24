@@ -17,7 +17,7 @@
  */
 
 import type { EuiInMemoryTableProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { forwardRef, useMemo } from 'react';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
@@ -31,6 +31,7 @@ import {
 } from '../../../../doc_viewer_logs_overview/scrollable_section_wrapper';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors',
@@ -61,8 +62,13 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
       docId,
     });
 
+    // The section-level "Open in Discover" spans both APM errors and unprocessed OTel errors.
+    // Widen the index pattern to cover both: join the APM error pattern and the log sources (if
+    // configured) so that datasets outside `logs-apm*,apm-*,logs-*.otel-*` are also included.
+    const errorsIndexPattern = [indexes.apm.errors, indexes.logs].filter(Boolean).join(',');
+
     const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
-      indexPattern: indexes.apm.errors,
+      indexPattern: errorsIndexPattern,
       whereClause: createTraceContextWhereClauseForErrors({ traceId, spanId: docId }),
     });
 
@@ -71,6 +77,10 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
       esql: esqlQueryString,
       tabLabel: sectionTitle,
       dataTestSubj: 'docViewerErrorsOpenInDiscoverButton',
+      ebt: {
+        element: TRACES_DOC_VIEWER_EBT_ELEMENTS.ERRORS,
+        detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+      },
     });
     const actions = useMemo(
       () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
@@ -78,10 +88,10 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
     );
 
     const { columns } = useMemo(() => {
-      const cols = getColumns({ traceId, docId, source: response.source });
+      const cols = getColumns({ traceId, docId });
 
       return { columns: cols };
-    }, [traceId, docId, response.source]);
+    }, [traceId, docId]);
 
     if (loading || (!error && response.traceErrors.length === 0)) {
       return null;
@@ -97,30 +107,37 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
             description={sectionDescription}
             actions={actions}
           >
-            <EuiSpacer size="s" />
             {error ? (
-              <EuiText color="subdued">
-                {i18n.translate(
-                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.error',
+              <EuiCallOut
+                announceOnMount
+                data-test-subj="unifiedDocViewerErrorsFetchErrorCallout"
+                color="warning"
+                iconType="warning"
+                size="s"
+                title={i18n.translate(
+                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.error',
                   {
-                    defaultMessage: 'An error happened when trying to fetch data. Please try again',
+                    defaultMessage: "Couldn't load errors for this trace. Please try again later.",
                   }
                 )}
-              </EuiText>
+              />
             ) : (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiInMemoryTable
-                    tableCaption={sectionDescription}
-                    responsiveBreakpoint={false}
-                    items={response.traceErrors}
-                    columns={columns}
-                    pagination={{ showPerPageOptions: false, pageSize: 5 }}
-                    sorting={sorting}
-                    compressed
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiInMemoryTable
+                      tableCaption={sectionDescription}
+                      responsiveBreakpoint={false}
+                      items={response.traceErrors}
+                      columns={columns}
+                      pagination={{ showPerPageOptions: false, pageSize: 5 }}
+                      sorting={sorting}
+                      compressed
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
             )}
           </ContentFrameworkSection>
         )}

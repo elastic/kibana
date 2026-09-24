@@ -6,7 +6,7 @@
  */
 
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
-import type { RiskScoreModifierEntity } from '../steps/pipeline_types';
+import type { EntityStoreModifierSource, RiskScoreModifierEntity } from '../steps/pipeline_types';
 import type { ScopedLogger } from './with_log_context';
 
 interface FetchEntitiesByIdsParams {
@@ -14,15 +14,8 @@ interface FetchEntitiesByIdsParams {
   entityIds: string[];
   logger: ScopedLogger;
   errorContext: string;
-}
-
-interface NormalizedModifierEntitySource {
-  entity?: {
-    id?: string;
-    attributes?: { watchlists?: unknown };
-    relationships?: { resolution?: { resolved_to?: unknown } };
-  };
-  asset?: RiskScoreModifierEntity['asset'] | null;
+  /** Throw on lookup failure so an empty fallback cannot route the page through entity creation without criticality or watchlist modifiers. */
+  strict?: boolean;
 }
 
 const normalizeWatchlists = (value: unknown): string[] => {
@@ -35,8 +28,8 @@ const normalizeWatchlists = (value: unknown): string[] => {
   return [];
 };
 
-const normalizeModifierEntity = (
-  entity: NormalizedModifierEntitySource | undefined
+export const normalizeModifierEntity = (
+  entity: EntityStoreModifierSource | undefined
 ): RiskScoreModifierEntity | undefined => {
   if (!entity) {
     return undefined;
@@ -72,6 +65,7 @@ export const fetchEntitiesByIds = async ({
   entityIds,
   logger,
   errorContext,
+  strict = false,
 }: FetchEntitiesByIdsParams): Promise<Map<string, RiskScoreModifierEntity>> => {
   const entityMap = new Map<string, RiskScoreModifierEntity>();
 
@@ -102,6 +96,9 @@ export const fetchEntitiesByIds = async ({
       searchAfter = nextSearchAfter;
     } while (searchAfter !== undefined);
   } catch (error) {
+    if (strict) {
+      throw error;
+    }
     logger.warn(`${errorContext}: ${error}`);
   }
 

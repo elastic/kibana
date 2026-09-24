@@ -185,22 +185,13 @@ jest.mock('../../../../../common/components/link_to', () => {
     }),
   };
 });
-jest.mock('../../../../../sourcerer/containers', () => {
-  const actual = jest.requireActual('../../../../../sourcerer/containers');
-  return {
-    ...actual,
-    useSourcererDataView: jest
-      .fn()
-      .mockReturnValue({ indexPattern: ['fakeindex'], loading: false }),
-  };
-});
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '/alerts' }) };
 });
 
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,

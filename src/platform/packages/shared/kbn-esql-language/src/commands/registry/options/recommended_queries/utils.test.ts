@@ -17,9 +17,9 @@ describe('prettifyQueryTemplate', () => {
   });
 
   it('should remove FROM command and return formatted template when query has pipes', () => {
-    const query = 'FROM logs | WHERE status = "error"';
+    const query = 'FROM logs | WHERE status == "error"';
     const result = prettifyQueryTemplate(query);
-    expect(result).toBe('\n| WHERE status = "error"');
+    expect(result).toBe('\n| WHERE status == "error"');
   });
 });
 
@@ -31,8 +31,17 @@ describe('prettifyQuery', () => {
   });
 
   it('should format multiple commands with proper indentation', () => {
-    const query = 'FROM logs | WHERE status = "error" | STATS count = COUNT(*)';
+    const query = 'FROM logs | WHERE status == "error" | STATS count = COUNT(*)';
     const result = prettifyQuery(query);
-    expect(result).toBe('FROM logs\n  | WHERE status = "error"\n  | STATS count = COUNT(*)');
+    expect(result).toBe('FROM logs\n  | WHERE status == "error"\n  | STATS count = COUNT(*)');
+  });
+
+  it('should handle header commands correctly', () => {
+    const query =
+      'SET option = "value"; SET option2 = "value2"; FROM logs | WHERE status == "error"';
+    const result = prettifyQuery(query);
+    expect(result).toBe(
+      'SET option = "value";\nSET option2 = "value2";\nFROM logs\n  | WHERE status == "error"'
+    );
   });
 });

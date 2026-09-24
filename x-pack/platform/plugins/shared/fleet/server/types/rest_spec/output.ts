@@ -7,18 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { NewOutputSchema, OutputSchema, UpdateOutputSchema } from '../models';
+import { NewOutputSchema, OutputResponseItemSchema, UpdateOutputSchema } from '../models';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
 };
 
 export const DeleteOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
 };
 
@@ -32,11 +32,7 @@ export const GenerateLogstashApiKeyResponseSchema = schema.object({
 
 export const GetOutputsRequestSchema = {};
 
-export const GetOutputsResponseSchema = ListResponseSchema(
-  OutputSchema.extendsDeep({
-    unknowns: 'allow',
-  })
-);
+export const GetOutputsResponseSchema = ListResponseSchema(OutputResponseItemSchema);
 
 export const PostOutputRequestSchema = {
   body: NewOutputSchema,
@@ -44,14 +40,14 @@ export const PostOutputRequestSchema = {
 
 export const PutOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
   body: UpdateOutputSchema,
 };
 
 export const GetLatestOutputHealthRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
 };
 
@@ -70,5 +66,38 @@ export const GetLatestOutputHealthResponseSchema = schema.object({
     meta: {
       description: 'timestamp of reported state',
     },
+  }),
+});
+
+export const GetOutputAgentPolicyCountRequestSchema = {
+  params: schema.object({
+    outputId: schema.string({ maxLength: 500, meta: { description: 'The ID of the output' } }),
+  }),
+  query: schema.object({
+    isDefault: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            "If true, count policies as if this output is the default data output, including policies with no `data_output_id`. If omitted, uses the output's saved `is_default` value.",
+        },
+      })
+    ),
+    isDefaultMonitoring: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            "If true, count policies as if this output is the default monitoring output, including policies with no `monitoring_output_id`. If omitted, uses the output's saved `is_default_monitoring` value.",
+        },
+      })
+    ),
+  }),
+};
+
+export const GetOutputAgentPolicyCountResponseSchema = schema.object({
+  agentPolicyCount: schema.number({
+    meta: { description: 'Number of agent policies using this output' },
+  }),
+  agentCount: schema.number({
+    meta: { description: 'Number of active agents assigned to those policies' },
   }),
 });

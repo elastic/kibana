@@ -22,15 +22,26 @@ import { List } from '../model/list_schemas.gen';
 
 export const DeleteListRequestQuery = lazySchema(() =>
   z.object({
-    id: ListId,
+    /**
+     * Value list identifier to delete, including all of its list items.
+     */
+    id: ListId.describe('Value list identifier to delete, including all of its list items.'),
     /**
      * Determines whether exception items referencing this value list should be deleted.
      */
-    deleteReferences: BooleanFromString.optional().default(false),
+    deleteReferences: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Determines whether exception items referencing this value list should be deleted.'
+      ),
     /**
      * Determines whether to delete value list without performing any additional checks of where this list may be utilized.
      */
-    ignoreReferences: BooleanFromString.optional().default(false),
+    ignoreReferences: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Determines whether to delete value list without performing any additional checks of where this list may be utilized.'
+      ),
   })
 );
 export type DeleteListRequestQuery = z.infer<typeof DeleteListRequestQuery>;

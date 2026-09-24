@@ -6,12 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import type { Attachment } from '../../lib/streams/attachments/types';
 import { ATTACHMENT_TYPES } from '../../lib/streams/attachments/types';
-import { assertAttachmentsAccess } from '../utils/assert_attachments_access';
-
 export interface ListAttachmentsResponse {
   attachments: Attachment[];
 }
@@ -84,16 +83,23 @@ const listAttachmentsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      streamName: z.string().describe('The name of the stream'),
+      streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
     }),
     query: z
       .object({
-        query: z.optional(z.string()).describe('Search query to filter attachments by title'),
+        query: z
+          .optional(z.string().max(1000))
+          .describe('Search query to filter attachments by title'),
         attachmentTypes: z
-          .optional(z.union([attachmentTypeSchema, z.array(attachmentTypeSchema)]))
+          .optional(
+            z.union([
+              attachmentTypeSchema,
+              z.array(attachmentTypeSchema).max(ATTACHMENT_TYPES.length),
+            ])
+          )
           .describe('Filter by attachment types (single value or array)'),
         tags: z
-          .optional(z.union([z.string(), z.array(z.string())]))
+          .optional(z.union([z.string().max(256), z.array(z.string().max(256)).max(100)]))
           .describe('Filter by tags (single value or array)'),
       })
       .optional(),
@@ -104,10 +110,9 @@ const listAttachmentsRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListAttachmentsResponse> {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
     await streamsClient.ensureStream(params.path.streamName);
 
     const {
@@ -182,16 +187,15 @@ const linkAttachmentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      streamName: z.string().describe('The name of the stream'),
+      streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
       attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
-      attachmentId: z.string().describe('The ID of the attachment'),
+      attachmentId: z.string().max(256).describe('The ID of the attachment'),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkAttachmentResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
 
     const {
       path: { attachmentId, attachmentType, streamName },
@@ -259,16 +263,15 @@ const unlinkAttachmentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      streamName: z.string().describe('The name of the stream'),
+      streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
       attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
-      attachmentId: z.string().describe('The ID of the attachment'),
+      attachmentId: z.string().max(256).describe('The ID of the attachment'),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkAttachmentResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
 
     await streamsClient.ensureStream(params.path.streamName);
 
@@ -288,7 +291,7 @@ const unlinkAttachmentRoute = createServerRoute({
 });
 
 const attachmentSchema = z.object({
-  id: z.string(),
+  id: z.string().max(256),
   type: attachmentTypeSchema,
 });
 
@@ -355,19 +358,21 @@ const bulkAttachmentsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      streamName: z.string().describe('The name of the stream'),
+      streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
     }),
     body: z.object({
-      operations: z.array(
-        z.union([
-          z.object({
-            index: attachmentSchema,
-          }),
-          z.object({
-            delete: attachmentSchema,
-          }),
-        ])
-      ),
+      operations: z
+        .array(
+          z.union([
+            z.object({
+              index: attachmentSchema,
+            }),
+            z.object({
+              delete: attachmentSchema,
+            }),
+          ])
+        )
+        .max(1000),
     }),
   }),
   handler: async ({
@@ -376,10 +381,9 @@ const bulkAttachmentsRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<BulkUpdateAttachmentsResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
 
     const {
       path: { streamName },

@@ -11,10 +11,12 @@ import { MAX_ACTIONS_RETURNED } from './constants';
 export const findConnectorsSo = async ({
   savedObjectsClient,
   namespace,
+  fields,
 }: FindConnectorsSoParams): Promise<FindConnectorsSoResult> => {
   return savedObjectsClient.find({
     perPage: MAX_ACTIONS_RETURNED,
     type: 'action',
     ...(namespace ? { namespaces: [namespace] } : {}),
+    ...(fields ? { fields } : {}),
   });
 };

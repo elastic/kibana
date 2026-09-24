@@ -58,6 +58,7 @@ import {
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { ensureGlobalFieldDefinitions } from './ensure_field_definitions';
 
 /**
  * Defines the internal helper functions.
@@ -244,6 +245,7 @@ export async function get(
         return {
           ...caseConfigureWithoutConnector,
           connector,
+          extractObservables: caseConfigureWithoutConnector.extractObservables,
           mappings: mappings != null ? mappings.mappings : [],
           version: configuration.version ?? '',
           error,
@@ -296,7 +298,7 @@ export async function update(
   casesClientInternal: CasesClientInternal
 ): Promise<Configuration> {
   const {
-    services: { caseConfigureService },
+    services: { caseConfigureService, fieldDefinitionsService },
     logger,
     unsecuredSavedObjectsClient,
     user,
@@ -388,6 +390,24 @@ export async function update(
           }`;
     }
 
+    // Linked field definitions are ensured BEFORE the configuration is persisted so a
+    // configured v1 custom field can never become active without its v2 definition; a
+    // linkage failure fails the whole update (addendum A1). Runs regardless of the
+    // templates feature flag — the definition substrate must stay consistent either way.
+    // Skipped entirely when the patch omits customFields: the pre-patch set is already
+    // linked (a no-op), and re-running it would re-validate every existing link on writes
+    // that never touch custom fields (e.g. a connector-only patch) — a link that's since
+    // gone stale (imported duplicate legacyKey, etc.) would then block an unrelated edit.
+    if (request.customFields !== undefined) {
+      await ensureGlobalFieldDefinitions({
+        owner: configuration.attributes.owner,
+        spaceId: clientArgs.spaceId,
+        customFields: request.customFields,
+        fieldDefinitionsService,
+        logger,
+      });
+    }
+
     const patch = await caseConfigureService.patch({
       unsecuredSavedObjectsClient,
       configurationId: configuration.id,
@@ -401,10 +421,15 @@ export async function update(
       originalConfiguration: configuration,
     });
 
-    const res = {
+    const merged = {
       ...configuration.attributes,
       ...patch.attributes,
+    };
+
+    const res = {
+      ...merged,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
+      extractObservables: merged.extractObservables,
       mappings,
       version: patch.version ?? '',
       error,
@@ -428,7 +453,7 @@ export async function create(
 ): Promise<Configuration> {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseConfigureService },
+    services: { caseConfigureService, fieldDefinitionsService },
     logger,
     user,
     authorization,
@@ -483,6 +508,28 @@ export async function create(
       }))
     );
 
+    const savedObjectID = SavedObjectsUtils.generateId();
+
+    await authorization.ensureAuthorized({
+      operation: Operations.createConfiguration,
+      entities: [{ owner: validatedConfigurationRequest.owner, id: savedObjectID }],
+    });
+
+    // Ensure linked field definitions BEFORE deleting any existing configuration and BEFORE
+    // persisting the new one (addendum A1): a linkage failure (definition cap reached, malformed
+    // link, failed definition write) is fatal to the create, and running it after the deletion
+    // below would destroy the caller's active configuration when the replacement is rejected.
+    // An orphaned inactive definition when a later delete/post fails is an accepted trade-off —
+    // strictly safer than losing the active configuration. Must stay after ensureAuthorized
+    // above (it performs unsecured SO writes). Runs regardless of the templates feature flag.
+    await ensureGlobalFieldDefinitions({
+      owner: validatedConfigurationRequest.owner,
+      spaceId: clientArgs.spaceId,
+      customFields: validatedConfigurationRequest.customFields ?? [],
+      fieldDefinitionsService,
+      logger,
+    });
+
     if (myCaseConfigure.saved_objects.length > 0) {
       const deleteConfigurationMapper = async (c: SavedObject<ConfigurationAttributes>) =>
         caseConfigureService.delete({
@@ -491,18 +538,11 @@ export async function create(
           refresh: false,
         });
 
-      // Ensuring we don't too many concurrent deletions running.
+      // Ensuring we don't have too many concurrent deletions running.
       await pMap(myCaseConfigure.saved_objects, deleteConfigurationMapper, {
         concurrency: MAX_CONCURRENT_SEARCHES,
       });
     }
-
-    const savedObjectID = SavedObjectsUtils.generateId();
-
-    await authorization.ensureAuthorized({
-      operation: Operations.createConfiguration,
-      entities: [{ owner: validatedConfigurationRequest.owner, id: savedObjectID }],
-    });
 
     const creationDate = new Date().toISOString();
     let mappings: ConnectorMappings = [];
@@ -533,6 +573,7 @@ export async function create(
         updated_at: null,
         updated_by: null,
         observableTypes: validatedConfigurationRequest.observableTypes ?? [],
+        extractObservables: validatedConfigurationRequest.extractObservables ?? true,
       },
       id: savedObjectID,
     });

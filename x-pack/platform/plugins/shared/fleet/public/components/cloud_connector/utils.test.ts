@@ -22,6 +22,11 @@ import {
   getCloudConnectorNameError,
   isCloudConnectorNameValid,
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
+  getAnyCloudConnectorIacTemplateUrl,
+  getIacLaunchUrl,
+  getAwsStackConsoleUrl,
+  hasTemplateUrlParam,
+  isStackArnInvalid,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -331,9 +336,13 @@ describe('isCloudConnectorReusableEnabled - AWS provider', () => {
     expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '0.9.0', 'asset_inventory')).toBe(false);
   });
 
-  it('should handle unknown template names by defaulting to asset inventory version', () => {
-    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.5', 'unknown_template')).toBe(false);
-    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.4', 'unknown_template')).toBe(false);
+  it('should return true for var_groups-driven packages regardless of version', () => {
+    // Packages using Fleet's var_groups UI only render cloud connector setup when the
+    // manifest declares identity federation support, so reuse is enabled without
+    // per-package registration in Kibana.
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.5', 'aws_securityhub')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '7.2.0', 'aws')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '0.1.0', 'aws_bedrock')).toBe(true);
   });
 
   it('should handle edge cases with version formats', () => {
@@ -367,6 +376,7 @@ describe('isCloudConnectorReusableEnabled - Azure provider', () => {
 
   it('should return false for unknown providers', () => {
     expect(isCloudConnectorReusableEnabled('unknown', '1.0.0', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled('unknown', '1.0.0', 'aws_securityhub')).toBe(false);
   });
 });
 
@@ -399,8 +409,8 @@ describe('isCloudConnectorReusableEnabled - GCP provider', () => {
     expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.0.0', 'asset_inventory')).toBe(false);
   });
 
-  it('should return false for GCP with unknown template names', () => {
-    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '4.0.0', 'unknown_template')).toBe(false);
+  it('should return true for GCP var_groups-driven packages regardless of version', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '4.0.0', 'gcp_some_package')).toBe(true);
   });
 });
 
@@ -770,6 +780,36 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       expect(result).toBeUndefined();
     });
   });
+
+  describe('Token-free template URLs', () => {
+    const tokenFreeUrl =
+      'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-aws-9.5.0.yml';
+
+    it('should return the URL as-is when it contains no substitution tokens', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: tokenFreeUrl,
+      });
+
+      expect(result).toBe(tokenFreeUrl);
+    });
+
+    it('should return the URL as-is even when no elastic resource ID can be derived', () => {
+      const noResourceCloudSetup = {
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: noResourceCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: tokenFreeUrl,
+      });
+
+      expect(result).toBe(tokenFreeUrl);
+    });
+  });
 });
 
 describe('getKibanaComponentId', () => {
@@ -944,5 +984,214 @@ describe('Cloud Connector Name Validation', () => {
         'Federated Identity Name must be 255 characters or less'
       );
     });
+  });
+});
+
+describe('getAnyCloudConnectorIacTemplateUrl', () => {
+  it('returns undefined for undefined input', () => {
+    expect(getAnyCloudConnectorIacTemplateUrl(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined when package has no var_groups or policy_templates', () => {
+    expect(getAnyCloudConnectorIacTemplateUrl({} as any)).toBeUndefined();
+  });
+
+  it('returns iac_template_url from var_groups options (primary path — AWS package format)', () => {
+    const packageInfo = {
+      var_groups: [
+        {
+          name: 'credentials',
+          title: 'Credentials',
+          selector_title: 'Auth method',
+          options: [
+            {
+              name: 'cloud_connector',
+              title: 'Federated Identity',
+              provider: 'aws',
+              vars: [],
+              iac_template_url:
+                'https://example.com/cloudformation.yaml?account_type=ACCOUNT_TYPE&resource_id=RESOURCE_ID',
+            },
+          ],
+        },
+      ],
+    } as any;
+    expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBe(
+      'https://example.com/cloudformation.yaml?account_type=ACCOUNT_TYPE&resource_id=RESOURCE_ID'
+    );
+  });
+
+  it('returns undefined when var_groups exist but no cloud provider option found', () => {
+    const packageInfo = {
+      var_groups: [
+        {
+          name: 'g1',
+          options: [{ name: 'no_cloud_provider', provider: 'other', vars: [] }],
+        },
+      ],
+    } as any;
+    expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBeUndefined();
+  });
+});
+
+describe('IaC launch URL helpers', () => {
+  const STATIC_URL =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ft.yml&param_X=1';
+  const ARTIFACT = 'https://s3.example/rendered?X-Amz-Signature=abc';
+  const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+
+  it('getIacLaunchUrl swaps templateURL on the quick-create scaffold when no deployment id', () => {
+    expect(getIacLaunchUrl({ provider: 'aws', staticUrl: STATIC_URL, artifactUrl: ARTIFACT })).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&param_X=1`
+    );
+  });
+
+  it('getIacLaunchUrl builds the stack-update deep link when a deployment id is known', () => {
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: STACK_ARN,
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
+    );
+  });
+
+  it('getIacLaunchUrl returns undefined for non-AWS providers and scaffolds without templateURL', () => {
+    expect(
+      getIacLaunchUrl({ provider: 'azure', staticUrl: STATIC_URL, artifactUrl: ARTIFACT })
+    ).toBeUndefined();
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: 'https://x.example/no-param',
+        artifactUrl: ARTIFACT,
+      })
+    ).toBeUndefined();
+  });
+
+  it('getIacLaunchUrl and getAwsStackConsoleUrl link to the console of the ARN partition', () => {
+    // The ARN validator accepts GovCloud and China stacks; their consoles live on other hosts.
+    const GOV_ARN = 'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/s/u';
+    const CN_ARN = 'arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/s/u';
+
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: GOV_ARN,
+      })
+    ).toBe(
+      `https://console.amazonaws-us-gov.com/cloudformation/home?region=us-gov-west-1#/stacks/update/template?stackId=${encodeURIComponent(
+        GOV_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
+    );
+    expect(getAwsStackConsoleUrl(CN_ARN)).toBe(
+      `https://console.amazonaws.cn/cloudformation/home?region=cn-north-1#/stacks/stackinfo?stackId=${encodeURIComponent(
+        CN_ARN
+      )}`
+    );
+  });
+
+  it('returns undefined for a partition with no public console instead of a commercial link', () => {
+    const ISO_ARN = 'arn:aws-iso:cloudformation:us-iso-east-1:123456789012:stack/s/u';
+
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: ISO_ARN,
+      })
+    ).toBeUndefined();
+    expect(getAwsStackConsoleUrl(ISO_ARN)).toBeUndefined();
+  });
+
+  it('returns undefined for a regional ARN that is not a CloudFormation stack', () => {
+    // A CloudWatch Logs ARN has a parseable region and a console host, but no stack to update or
+    // view; a legacy stored value like this must not be linked as a stack.
+    const LOGS_ARN = 'arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/fn:*';
+
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: LOGS_ARN,
+      })
+    ).toBeUndefined();
+    expect(getAwsStackConsoleUrl(LOGS_ARN)).toBeUndefined();
+  });
+
+  it('getIacLaunchUrl returns undefined for a malformed deploymentId that has no parseable region', () => {
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: 'not-an-arn',
+      })
+    ).toBeUndefined();
+  });
+
+  it('getAwsStackConsoleUrl links to the stack info page', () => {
+    expect(getAwsStackConsoleUrl(STACK_ARN)).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}`
+    );
+    expect(getAwsStackConsoleUrl(undefined)).toBeUndefined();
+  });
+
+  it('getAwsStackConsoleUrl returns undefined for a malformed ARN', () => {
+    expect(getAwsStackConsoleUrl('not-an-arn')).toBeUndefined();
+  });
+
+  it('hasTemplateUrlParam returns false for undefined', () => {
+    expect(hasTemplateUrlParam(undefined)).toBe(false);
+  });
+});
+
+describe('isStackArnInvalid', () => {
+  const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+
+  it('returns false for an empty or undefined value', () => {
+    expect(isStackArnInvalid(undefined)).toBe(false);
+    expect(isStackArnInvalid('')).toBe(false);
+    expect(isStackArnInvalid('   ')).toBe(false);
+  });
+
+  it('returns false for a valid stack ARN', () => {
+    expect(isStackArnInvalid(STACK_ARN)).toBe(false);
+  });
+
+  it('returns true for a value whose region cannot be parsed', () => {
+    expect(isStackArnInvalid('not-an-arn')).toBe(true);
+    expect(isStackArnInvalid('arn:aws:cloudformation::123456789012:stack/x/y')).toBe(true);
+  });
+
+  it('returns true for a regional ARN that is not a CloudFormation stack', () => {
+    // A region alone is not enough: the value is deep-linked as a stack and stored as one.
+    expect(
+      isStackArnInvalid('arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/fn:*')
+    ).toBe(true);
+    expect(isStackArnInvalid('arn:aws:iam::123456789012:role/MyRole')).toBe(true);
+  });
+
+  it('accepts other AWS partitions', () => {
+    expect(
+      isStackArnInvalid('arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/s/u')
+    ).toBe(false);
+  });
+
+  it('ignores leading and trailing whitespace around a valid ARN', () => {
+    expect(isStackArnInvalid(`  ${STACK_ARN}\n`)).toBe(false);
   });
 });

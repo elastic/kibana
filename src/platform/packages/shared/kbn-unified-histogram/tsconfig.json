@@ -40,5 +40,10 @@
     "@kbn/lens-common",
     "@kbn/control-group-renderer",
     "@kbn/controls-schemas",
+    "@kbn/react-hooks",
+    "@kbn/ebt-click",
+    "@kbn/i18n-react",
+    "@kbn/discover-session-constants",
+    "@kbn/esql-browser"
   ]
 }

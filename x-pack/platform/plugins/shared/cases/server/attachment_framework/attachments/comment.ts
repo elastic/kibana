@@ -5,43 +5,26 @@
  * 2.0.
  */
 import { badRequest } from '@hapi/boom';
-import * as rt from 'io-ts';
+import {
+  CommentAttachmentDataSchema,
+  CommentAttachmentPayloadSchema,
+} from '../../../common/types/domain_zod/attachment/comment/v2';
+import type { CommentAttachmentData } from '../../../common/types/domain_zod/attachment/comment/v2';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
-import { MAX_COMMENT_LENGTH } from '../../../common/constants';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 export const commentAttachmentType: UnifiedAttachmentTypeSetup = {
   id: COMMENT_ATTACHMENT_TYPE,
-  schemaValidator: (data: unknown) => {
-    decodeCommentAttachmentData(data);
-  },
+  schema: CommentAttachmentPayloadSchema,
 };
 
-/**
- * Single source of truth for comment attachment data shape.
- * Used by: registry validator (on write) and schema transformer (on read/transform).
- * Define → register & validate → then transform; no data-specific checks in cases main codebase.
- */
-export const CommentAttachmentDataRt = rt.strict({
-  content: rt.string,
-});
+export type { CommentAttachmentData };
 
-export type CommentAttachmentData = rt.TypeOf<typeof CommentAttachmentDataRt>;
-
-/**
- * Decodes and validates comment attachment data.
- * Enforces non-empty content. Use this for both registry validation and parsing in the transformer.
- */
+/** Decodes the `data` slice for SO transformer / read paths that don't have the full payload. */
 export const decodeCommentAttachmentData = (data: unknown): CommentAttachmentData => {
-  const validated = decodeWithExcessOrThrow(CommentAttachmentDataRt)(data);
-
-  if (validated.content.trim().length === 0) {
-    throw badRequest('Comment content must be a non-empty string');
+  const result = CommentAttachmentDataSchema.safeParse(data);
+  if (!result.success) {
+    throw badRequest(result.error.issues[0]?.message ?? 'Invalid comment attachment data');
   }
-  if (validated.content.length > MAX_COMMENT_LENGTH) {
-    throw badRequest(`Comment content exceeds maximum length of ${MAX_COMMENT_LENGTH} characters`);
-  }
-
-  return validated;
+  return result.data;
 };

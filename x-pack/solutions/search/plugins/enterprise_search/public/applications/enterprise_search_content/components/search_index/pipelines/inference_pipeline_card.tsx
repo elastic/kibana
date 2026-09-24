@@ -70,6 +70,10 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.inferencePipelineCard.popover.ariaLabel',
+          { defaultMessage: 'Inference pipeline actions' }
+        )}
         button={actionButton}
         isOpen={isPopOverOpen}
         closePopover={() => setIsPopOverOpen(false)}

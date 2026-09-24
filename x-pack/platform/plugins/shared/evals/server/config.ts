@@ -16,4 +16,7 @@ export type EvalsConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<EvalsConfig> = {
   schema: configSchema,
+  exposeToBrowser: {
+    enabled: true,
+  },
 };

@@ -22,7 +22,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceMapGraph } from '../graph';
 import {
   generateServiceMapElements,
@@ -33,6 +32,11 @@ import {
 } from './generate_elements';
 import { transformToReactFlow } from '../../../../../common/service_map/transform_to_react_flow';
 import type { ServiceMapResponse } from '../../../../../common/service_map';
+import {
+  opbeansScenario,
+  toServiceMapResponse,
+  APM_STORY_A11Y,
+} from '../../../../test_helpers/synthtrace_stories';
 
 function getHeight() {
   return window.innerHeight - 50;
@@ -47,26 +51,10 @@ const defaultTimeRange = {
 const meta: Meta<typeof ServiceMapGraph> = {
   title: 'app/ServiceMap/ServiceMap',
   component: ServiceMapGraph,
-  decorators: [
-    (Story) => (
-      <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
-        <Story />
-      </MockApmPluginStorybook>
-    ),
-  ],
   parameters: {
+    routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
     layout: 'fullscreen',
-    a11y: {
-      config: {
-        rules: [
-          { id: 'color-contrast', enabled: true },
-          { id: 'image-alt', enabled: true },
-          { id: 'aria-required-attr', enabled: true },
-          { id: 'aria-roles', enabled: true },
-          { id: 'region', enabled: false }, // Disabled for Storybook context
-        ],
-      },
-    },
+    a11y: APM_STORY_A11Y,
     docs: {
       description: {
         component:
@@ -97,6 +85,58 @@ export const SimpleExample: Story = {
   },
 };
 
+/**
+ * **Synthtrace-generated story** — demonstrates the scenario-driven pattern.
+ *
+ * Data comes from the shared `opbeansScenario()` in
+ * `test_helpers/synthtrace_stories/`, not from a hand-crafted fixture or a
+ * random generator. Any APM story can import the same scenario and run it
+ * through a component-specific selector:
+ *
+ * ```
+ * scenario()              ─→  flat ApmFields[]
+ *   └── toServiceMapResponse()  ─→  ServiceMapResponse
+ *         └── transformToReactFlow()  ─→  { nodes, edges }
+ *               └── <ServiceMapGraph nodes edges />
+ * ```
+ *
+ * The `toServiceMapResponse` selector is the in-memory analog of the server's
+ * `fetch_exit_span_samples.ts` — it reconstructs service→service connections
+ * from exit spans and their downstream transaction's `parent.id`, then feeds
+ * the result to the production `transformToReactFlow` function unchanged.
+ *
+ * This story is tagged `autodocs` so the Docs panel shows the component API
+ * and this description together.
+ */
+export const SynthtraceGenerated: Story = {
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Rendered from in-memory synthtrace data (opbeans scenario). ' +
+          'No Elasticsearch involved — the scenario generates raw APM documents, ' +
+          'a selector reconstructs the service-map connection shape, and the ' +
+          'production `transformToReactFlow` function converts it to React Flow nodes/edges.',
+      },
+    },
+  },
+  render: () => {
+    const { nodes, edges } = transformToReactFlow(toServiceMapResponse(opbeansScenario()));
+    return (
+      <ServiceMapGraph
+        height={getHeight()}
+        nodes={nodes}
+        edges={edges}
+        environment={defaultEnvironment}
+        kuery=""
+        start={new Date('2024-01-15T12:00:00.000Z').toISOString()}
+        end={new Date('2024-01-15T12:15:00.000Z').toISOString()}
+      />
+    );
+  },
+};
+
 export const MicroservicesExample: Story = {
   render: () => {
     const { nodes, edges } = createMicroservicesExample();
@@ -122,6 +162,8 @@ export const GenerateMap: StoryFn = () => {
     groupedResourceCount: 2,
     hasAnomalies: true,
     includeBidirectional: true,
+    hasAlerts: true,
+    hasSlos: true,
   });
   const [json, setJson] = useState<string>('');
   const [{ nodes, edges }, setElements] = useState(() => generateServiceMapElements(options));
@@ -137,7 +179,7 @@ export const GenerateMap: StoryFn = () => {
 
   return (
     <div style={{ padding: 16 }}>
-      <EuiFlexGroup wrap>
+      <EuiFlexGroup wrap alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiToolTip content="Number of service nodes">
             <EuiFieldNumber
@@ -189,6 +231,20 @@ export const GenerateMap: StoryFn = () => {
             onChange={(e) =>
               setOptions((prev) => ({ ...prev, includeBidirectional: e.target.checked }))
             }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="Alert Badges"
+            checked={options.hasAlerts ?? false}
+            onChange={(e) => setOptions((prev) => ({ ...prev, hasAlerts: e.target.checked }))}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="SLO Badges"
+            checked={options.hasSlos ?? false}
+            onChange={(e) => setOptions((prev) => ({ ...prev, hasSlos: e.target.checked }))}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

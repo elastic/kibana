@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import {
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+  buildMockMitreSubtechniqueSummary,
+} from '../../../../../../common/detection_engine/mitre/mitre_entity_builders.mock';
+import type {
+  MitreTacticSummary,
+  MitreTechniqueSummary,
+  MitreSubtechniqueSummary,
+} from '@kbn/security-mitre-attack-common';
 import type { CoverageOverviewDashboard } from '../dashboard';
 import type { CoverageOverviewMitreSubTechnique } from '../mitre_subtechnique';
 import type { CoverageOverviewMitreTactic } from '../mitre_tactic';
@@ -52,65 +62,59 @@ export const getMockCoverageOverviewDashboard = (): CoverageOverviewDashboard =>
     disabledRules: [],
     availableRules: [],
   },
+  invalidlyMappedRules: {
+    enabledRules: [],
+    disabledRules: [],
+  },
   metrics: {
     totalRulesCount: 3,
     totalEnabledRulesCount: 1,
   },
 });
 
-export const getMockCoverageOverviewTactics = () => [
-  {
-    name: 'Tactic 1',
+export const getMockCoverageOverviewTactics = (): MitreTacticSummary[] => [
+  buildMockMitreTacticSummary({
     id: 'TA001',
+    name: 'Tactic 1',
     reference: 'https://some-link/TA001',
-    label: 'Tactic 1',
-    value: 'tactic1',
-  },
-  {
-    name: 'Tactic 2',
+    position: 0,
+  }),
+  buildMockMitreTacticSummary({
     id: 'TA002',
+    name: 'Tactic 2',
     reference: 'https://some-link/TA002',
-    label: 'Tactic 2',
-    value: 'tactic2',
-  },
+    position: 1,
+  }),
 ];
 
-export const getMockCoverageOverviewTechniques = () => [
-  {
-    name: 'Technique 1',
+export const getMockCoverageOverviewTechniques = (): MitreTechniqueSummary[] => [
+  buildMockMitreTechniqueSummary({
     id: 'T001',
+    name: 'Technique 1',
     reference: 'https://some-link/T001',
-    tactics: ['tactic-1'],
-    label: 'Technique 1',
-    value: 'technique1',
-  },
-  {
-    name: 'Technique 2',
+    tactic_ids: ['TA001'],
+  }),
+  buildMockMitreTechniqueSummary({
     id: 'T002',
+    name: 'Technique 2',
     reference: 'https://some-link/T002',
-    tactics: ['tactic-1', 'tactic-2'],
-    label: 'Technique 2',
-    value: 'technique2',
-  },
+    tactic_ids: ['TA001', 'TA002'],
+  }),
 ];
 
-export const getMockCoverageOverviewSubtechniques = () => [
-  {
-    name: 'Subtechnique 1',
+export const getMockCoverageOverviewSubtechniques = (): MitreSubtechniqueSummary[] => [
+  buildMockMitreSubtechniqueSummary({
     id: 'T001.001',
+    name: 'Subtechnique 1',
     reference: 'https://some-link/T001/001',
-    tactics: ['tactic-1'],
-    techniqueId: 'T001',
-    label: 'Subtechnique 1',
-    value: 'subtechnique1',
-  },
-  {
-    name: 'Subtechnique 2',
+    tactic_ids: ['TA001'],
+    technique_id: 'T001',
+  }),
+  buildMockMitreSubtechniqueSummary({
     id: 'T001.002',
+    name: 'Subtechnique 2',
     reference: 'https://some-link/T001/002',
-    tactics: ['tactic-1'],
-    techniqueId: 'T001',
-    label: 'Subtechnique 2',
-    value: 'subtechnique2',
-  },
+    tactic_ids: ['TA001'],
+    technique_id: 'T001',
+  }),
 ];

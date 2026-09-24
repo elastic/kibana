@@ -15,7 +15,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '@elastic/esql/types';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 
 interface SelectedJoin {
   joinCmd: ESQLAstJoinCommand;

@@ -70,9 +70,15 @@ export const unwrapKbnConfigSchema = (schema: unknown): joi.Schema => {
   return schema.getSchema();
 };
 
-export const convert = (kbnConfigSchema: unknown, { sharedSchemas, env }: ConvertOptions = {}) => {
+export const convert = (
+  kbnConfigSchema: unknown,
+  { sharedSchemas, env, onCollision }: ConvertOptions = {}
+) => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  const { result, shared } = parse({ schema, ctx: createCtx({ sharedSchemas, env }) });
+  const { result, shared } = parse({
+    schema,
+    ctx: createCtx({ sharedSchemas, env, onCollision }),
+  });
   return { schema: result, shared };
 };
 
@@ -138,7 +144,7 @@ const convertObjectMembersToParameterObjects = (
     return {
       name: schemaKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter ? !paramSchema.optional : isSubSchemaRequired,
+      required: isPathParameter || isSubSchemaRequired,
       schema: finalSchema,
       description,
     };

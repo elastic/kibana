@@ -15,7 +15,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { ConfigType } from './config';
 import {
@@ -33,10 +32,6 @@ import { defineRoutes } from './routes';
 import type { ClientInstanciator } from './saved_objects';
 import { SavedObjectsEncryptionExtension, setupSavedObjects } from './saved_objects';
 
-export interface PluginsSetup {
-  security?: SecurityPluginSetup;
-}
-
 export interface EncryptedSavedObjectsPluginSetup {
   /**
    * Indicates if Saved Object encryption is possible. Requires an encryption key to be explicitly set via `xpack.encryptedSavedObjects.encryptionKey`.
@@ -45,11 +40,6 @@ export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   createMigration: CreateEncryptedSavedObjectsMigrationFn;
   createModelVersion: CreateEsoModelVersionFn;
-}
-
-export interface EncryptedSavedObjectsPluginStart {
-  isEncryptionError: (error: Error) => boolean;
-  getClient: ClientInstanciator;
   /**
    * This function is exposed for Core migration testing purposes only.
    */
@@ -59,12 +49,16 @@ export interface EncryptedSavedObjectsPluginStart {
   ) => SavedObjectsEncryptionExtension;
 }
 
+export interface EncryptedSavedObjectsPluginStart {
+  isEncryptionError: (error: Error) => boolean;
+  getClient: ClientInstanciator;
+}
+
 /**
  * Represents EncryptedSavedObjects Plugin instance that will be managed by the Kibana plugin system.
  */
 export class EncryptedSavedObjectsPlugin
-  implements
-    Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart, PluginsSetup>
+  implements Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart>
 {
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
@@ -74,7 +68,7 @@ export class EncryptedSavedObjectsPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, _deps: PluginsSetup): EncryptedSavedObjectsPluginSetup {
+  public setup(core: CoreSetup): EncryptedSavedObjectsPluginSetup {
     const config = this.initializerContext.config.get<ConfigType>();
     const canEncrypt = config.encryptionKey !== undefined;
     if (!canEncrypt) {
@@ -171,14 +165,6 @@ export class EncryptedSavedObjectsPlugin
           return serviceForMigration;
         }
       ),
-    };
-  }
-
-  public start() {
-    this.logger.debug('Starting plugin');
-    return {
-      isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getClient: (options = {}) => this.savedObjectsSetup(options),
       __testCreateDangerousExtension: (
         typeRegistry: ISavedObjectTypeRegistry,
         typeRegistrationOverrides?: EncryptedSavedObjectTypeRegistration[]
@@ -192,6 +178,14 @@ export class EncryptedSavedObjectsPlugin
           getCurrentUser: async () => undefined,
         });
       },
+    };
+  }
+
+  public start() {
+    this.logger.debug('Starting plugin');
+    return {
+      isEncryptionError: (error: Error) => error instanceof EncryptionError,
+      getClient: (options = {}) => this.savedObjectsSetup(options),
     };
   }
 

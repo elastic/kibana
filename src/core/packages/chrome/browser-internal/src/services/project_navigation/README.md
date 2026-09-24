@@ -5,7 +5,7 @@ This service manages the side navigation's state using a decoupled, plugin-based
 ## Architecture at a Glance
 
 - **Plugins for Stateful Deployment**: Register navigation trees via the `addSolutionNavigation` service from `@kbn/shared-navigation-plugin`.
-- **Serverless Plugins**: Register navigation trees via the `initNavigation` method from the serverless plugin's start contract.
+- **Serverless Plugins**: Register navigation trees via the `initNavigation` method from the navigation plugin's start contract (`@kbn/navigation-plugin/public`), which seeds the user's stored customization before registering the tree.
 - **`ProjectNavigationService`**: Manages the source-of-truth nav state and logic.
 - **`ChromeService`**: Orchestrates the UI and bridges the service layer with React.
 
@@ -57,7 +57,7 @@ This service has three primary responsibilities:
 The service does not contain any UI. Instead, it processes navigation trees registered by plugins. This allows the navigation to be extended and customized by different parts of Kibana.
 
 - **Plugins for Stateful Deployment**: Register navigation trees via the `addSolutionNavigation` service from `@kbn/shared-navigation-plugin`.
-- **Serverless Plugins**: Register navigation trees via the `initNavigation` method from the serverless plugin's start contract.
+- **Serverless Plugins**: Register navigation trees via the `initNavigation` method from the navigation plugin's start contract (`@kbn/navigation-plugin/public`), which seeds the user's stored customization before registering the tree.
 
 - **How it works**: Plugins register their components, and the `ChromeService` selects the appropriate one to render based on the current context.
 
@@ -70,7 +70,7 @@ This is the most common function of the service. It determines the currently act
 - **UI Consumption**: The `ChromeService` subscribes to this stream using the `useObservable` hook and passes the result directly to the Navigation component as props.
 - **Detection Algorithm**: The active node is found by the `findActiveNodes` utility, which uses two methods:
   1.  **Custom Logic (`getIsActive`)**: A node can define its own function for complex activation logic.
-  2.  **Longest URL Match**: As a fallback, the utility finds the most specific link by matching the longest URL prefix.
+  2.  **Longest URL Match**: As a fallback, the utility finds the most specific link by matching the longest URL prefix. App-level links (id without `:`) match `baseUrl`, so they stay active on every path under that app — not only the `defaultPath` stored on `url`. Deep links still match `url`.
 
 #### Breadcrumbs Generation
 

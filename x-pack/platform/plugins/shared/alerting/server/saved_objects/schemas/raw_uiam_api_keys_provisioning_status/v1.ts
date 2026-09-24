@@ -6,17 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-export enum UiamApiKeyProvisioningStatus {
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  SKIPPED = 'skipped',
-}
-
-export enum UiamApiKeyProvisioningEntityType {
-  RULE = 'rule',
-  TASK = 'task',
-}
+import {
+  UiamApiKeyProvisioningEntityType,
+  UiamApiKeyProvisioningStatus,
+} from '@kbn/uiam-api-keys-provisioning-status';
 
 const entityType = schema.oneOf([
   schema.literal(UiamApiKeyProvisioningEntityType.RULE),

@@ -14,15 +14,17 @@ import {
   generateCosmosDBApiRequestHeaders,
   MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
-  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
-  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
-  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
   MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL,
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
+  MOCK_IDP_GATEWAY_SHARED_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from '@kbn/mock-idp-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -48,7 +50,14 @@ const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
 
 export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`;
 
-const MAX_HEALTHCHECK_RETRIES = 30;
+const DOCKER_HEALTHCHECK_RETRIES = 30;
+const CONTAINER_READY_CHECK_INTERVAL_MS = 2_000;
+// Keep the outer waiter longer than Docker's health window (about 153s)
+// so slow CI hosts don't fail while Docker still reports the container as starting.
+const CONTAINER_STARTUP_TIMEOUT_MS = 3 * 60 * 1000;
+const MAX_CONTAINER_READY_CHECK_RETRIES = Math.ceil(
+  CONTAINER_STARTUP_TIMEOUT_MS / CONTAINER_READY_CHECK_INTERVAL_MS
+);
 
 const ENV_DEFAULTS = {
   UIAM_COSMOS_DB_PORT: '8081',
@@ -73,7 +82,7 @@ const SHARED_DOCKER_PARAMS = [
   '--health-timeout',
   '2s',
   '--health-retries',
-  `${MAX_HEALTHCHECK_RETRIES}`,
+  `${DOCKER_HEALTHCHECK_RETRIES}`,
   '--health-start-period',
   '3s',
 ];
@@ -92,6 +101,13 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
     params: [
       '--net',
       'elastic',
+
+      // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
+      // when total stack RSS approaches Docker VM limit.
+      '--memory',
+      '1g',
+      '--memory-swap',
+      '1g',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
@@ -113,7 +129,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       'LOG_LEVEL=error',
 
       '--health-cmd',
-      'curl -sk http://127.0.0.1:8080/ready | grep -q "\\"overall\\": true"',
+      `curl -sk http://127.0.0.1:8080/ready | grep -q '"overall": true' && [ "$(curl -sk -o /dev/null -w '%{http_code}' https://127.0.0.1:8081/)" = "200" ]`,
     ],
     cmdParams: ['--protocol', 'https', '--port', '8081'],
   },
@@ -123,6 +139,15 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
     params: [
       '--net',
       'elastic',
+
+      // The Quarkus base image launches the JVM with `-XX:MaxRAMPercentage=80.0`
+      // and no Xmx, so without an explicit cgroup limit the JVM reserves up to
+      // 80% of the Docker VM's memory as heap (~6.4GB on the 8GB default).
+      // Pair this with JAVA_OPTS_APPEND below to bound heap predictably.
+      '--memory',
+      '2g',
+      '--memory-swap',
+      '2g',
 
       '--volume',
       `${SERVERLESS_UIAM_ENTRYPOINT_PATH}:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z`,
@@ -141,6 +166,9 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
 
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
+
+      '--env',
+      'JAVA_OPTS_APPEND=-Xms256m -Xmx1g',
 
       '--env',
       'uiam.apikey.convert.validation.endpoint.enabled=false',
@@ -189,6 +217,16 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--env',
       `uiam.cosmos.container.apikey=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}`,
       '--env',
+      `uiam.cosmos.container.oauth_authorization_code=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES}`,
+      '--env',
+      `uiam.cosmos.container.oauth_client=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS}`,
+      '--env',
+      `uiam.cosmos.container.oauth_app_connection=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}`,
+      '--env',
+      `uiam.cosmos.container.organization_service_account=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS}`,
+      '--env',
+      'uiam.cosmos.organization_service_account.enabled=true',
+      '--env',
       `uiam.cosmos.container.token_invalidation=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION}`,
       '--env',
       `uiam.cosmos.container.users=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS}`,
@@ -197,7 +235,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--env',
       'uiam.cosmos.gateway_connection_mode=true',
       '--env',
-      `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+      `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET},${MOCK_IDP_GATEWAY_SHARED_SECRET}`,
       '--env',
       `uiam.tokens.jwt.signature.secrets=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
       '--env',
@@ -223,6 +261,12 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--net',
     'elastic',
 
+    // See note on the `uiam` container memory limits above.
+    '--memory',
+    '2g',
+    '--memory-swap',
+    '2g',
+
     '--volume',
     `${SERVERLESS_UIAM_ENTRYPOINT_PATH}:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z`,
 
@@ -240,6 +284,9 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
 
     '--entrypoint',
     '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
+
+    '--env',
+    'JAVA_OPTS_APPEND=-Xms256m -Xmx1g',
 
     '--env',
     'uiam.apikey.convert.validation.endpoint.enabled=false',
@@ -296,7 +343,7 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--env',
     'uiam.cosmos.gateway_connection_mode=true',
     '--env',
-    `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+    `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET},${MOCK_IDP_GATEWAY_SHARED_SECRET}`,
     '--env',
     `uiam.tokens.jwt.signature.secrets=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
     '--env',
@@ -358,7 +405,7 @@ export async function runUiamContainer(log: ToolingLog, container: UiamContainer
   const { stdout: containerId } = await execa('docker', dockerCommand);
 
   let isHealthy = false;
-  let healthcheckRetries = 0;
+  let readyCheckRetries = 0;
   while (!isHealthy) {
     let currentStatus;
     try {
@@ -379,15 +426,15 @@ export async function runUiamContainer(log: ToolingLog, container: UiamContainer
     }
 
     log.info(chalk.bold(`Waiting for "${container.name}" container (${currentStatus})…`));
-    await setTimeoutAsync(2000);
+    await setTimeoutAsync(CONTAINER_READY_CHECK_INTERVAL_MS);
 
-    healthcheckRetries++;
-    if (healthcheckRetries >= MAX_HEALTHCHECK_RETRIES) {
+    readyCheckRetries++;
+    if (readyCheckRetries >= MAX_CONTAINER_READY_CHECK_RETRIES) {
       await tryExportLogs(container.name, log);
       throw new Error(
-        `The "${
-          container.name
-        }" container failed to start within the expected time. Last known status: ${currentStatus}. Check the logs with ${chalk.bold(
+        `The "${container.name}" container failed to start within ${
+          CONTAINER_STARTUP_TIMEOUT_MS / 1000
+        } seconds. Last known status: ${currentStatus}. Check the logs with ${chalk.bold(
           `docker logs -f ${container.name}`
         )}`
       );
@@ -436,23 +483,32 @@ export async function initializeUiamContainers(log: ToolingLog) {
     );
   }
 
-  // 2. Create collections with their respective partition keys.
-  const collections: Array<{ name: string; partitionKeyPath: string }> = [
-    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS, partitionKeyPath: '/id' },
-    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS, partitionKeyPath: '/id' },
-    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION, partitionKeyPath: '/id' },
-    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS, partitionKeyPath: '/creator_id' },
+  // 2. Create collections.
+  // Partition key paths must match the UIAM service's CosmosDB repository expectations.
+  const collections: Array<{ id: string; partitionKeyPath: string }> = [
+    { id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS, partitionKeyPath: '/id' },
+    { id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS, partitionKeyPath: '/id' },
+    { id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION, partitionKeyPath: '/id' },
     {
-      name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
+      id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
+      partitionKeyPath: '/creator_id',
+    },
+    {
+      id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
       partitionKeyPath: '/id',
     },
     {
-      name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
+      id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
       partitionKeyPath: '/client_id',
     },
+    {
+      id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS,
+      partitionKeyPath: '/id',
+    },
   ];
+
   for (const collection of collections) {
-    log.info(chalk.bold(`Creating a Cosmos DB collection (${collection.name})…`));
+    log.info(chalk.bold(`Creating a Cosmos DB collection (${collection.id})…`));
 
     const collectionRes = await fetch(
       `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls`,
@@ -464,7 +520,7 @@ export async function initializeUiamContainers(log: ToolingLog) {
           `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}`
         ),
         body: JSON.stringify({
-          id: collection.name,
+          id: collection.id,
           partitionKey: { paths: [collection.partitionKeyPath], kind: 'Hash' },
         }),
         dispatcher: fetchDispatcher,
@@ -472,12 +528,12 @@ export async function initializeUiamContainers(log: ToolingLog) {
     );
 
     if (collectionRes.status === 201) {
-      log.info(chalk.green(`✓ Collection (${collection.name}) created successfully`));
+      log.info(chalk.green(`✓ Collection (${collection.id}) created successfully`));
     } else if (collectionRes.status === 409) {
-      log.info(chalk.yellow(`✓ Collection (${collection.name}) already exists`));
+      log.info(chalk.yellow(`✓ Collection (${collection.id}) already exists`));
     } else {
       throw new Error(
-        `Failed to create collection (${collection.name}): ${
+        `Failed to create collection (${collection.id}): ${
           collectionRes.status
         } ${await collectionRes.text()}`
       );

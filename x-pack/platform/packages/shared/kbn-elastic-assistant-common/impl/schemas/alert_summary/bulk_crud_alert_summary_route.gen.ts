@@ -25,65 +25,160 @@ import {
 } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
 
+/**
+ * The reason an alert summary was skipped during a bulk action.
+ */
 export const AlertSummaryBulkActionSkipReason = lazySchema(() =>
   z.literal('ALERT_SUMMARY_NOT_MODIFIED')
 );
 export type AlertSummaryBulkActionSkipReason = z.infer<typeof AlertSummaryBulkActionSkipReason>;
 
+/**
+ * Details about an alert summary that was skipped during a bulk action.
+ */
 export const AlertSummaryBulkActionSkipResult = lazySchema(() =>
   z.object({
-    id: z.string(),
-    alertId: z.string().optional(),
+    /**
+     * The ID of the skipped alert summary.
+     */
+    id: z.string().describe('The ID of the skipped alert summary.'),
+    /**
+     * The ID of the alert associated with the skipped summary.
+     */
+    alertId: z
+      .string()
+      .optional()
+      .describe('The ID of the alert associated with the skipped summary.'),
     skip_reason: AlertSummaryBulkActionSkipReason,
   })
 );
 export type AlertSummaryBulkActionSkipResult = z.infer<typeof AlertSummaryBulkActionSkipResult>;
 
+/**
+ * Details about an alert summary that encountered an error during a bulk action.
+ */
 export const AlertSummaryDetailsInError = lazySchema(() =>
   z.object({
-    alertId: z.string().optional(),
-    id: z.string(),
+    /**
+     * The ID of the alert associated with the errored summary.
+     */
+    alertId: z
+      .string()
+      .optional()
+      .describe('The ID of the alert associated with the errored summary.'),
+    /**
+     * The ID of the alert summary that encountered an error.
+     */
+    id: z.string().describe('The ID of the alert summary that encountered an error.'),
   })
 );
 export type AlertSummaryDetailsInError = z.infer<typeof AlertSummaryDetailsInError>;
 
+/**
+ * A normalized error object returned when one or more alert summaries fail during a bulk action.
+ */
 export const NormalizedAlertSummaryError = lazySchema(() =>
   z.object({
-    message: z.string(),
-    status_code: z.number().int(),
-    err_code: z.string().optional(),
-    alert_summaries: z.array(AlertSummaryDetailsInError),
+    /**
+     * A human-readable description of the error.
+     */
+    message: z.string().describe('A human-readable description of the error.'),
+    /**
+     * The HTTP status code associated with the error.
+     */
+    status_code: z.number().int().describe('The HTTP status code associated with the error.'),
+    /**
+     * A machine-readable error code.
+     */
+    err_code: z.string().optional().describe('A machine-readable error code.'),
+    /**
+     * The alert summaries that encountered this error.
+     */
+    alert_summaries: z
+      .array(AlertSummaryDetailsInError)
+      .describe('The alert summaries that encountered this error.'),
   })
 );
 export type NormalizedAlertSummaryError = z.infer<typeof NormalizedAlertSummaryError>;
 
+/**
+ * An alert summary created by the Elastic Assistant for a specific security alert.
+ */
 export const AlertSummaryResponse = lazySchema(() =>
   z.object({
     id: NonEmptyString,
     alertId: NonEmptyString,
     timestamp: NonEmptyTimestamp.optional(),
-    summary: z.string(),
-    recommendedActions: z.string().optional(),
+    /**
+     * The AI-generated summary of the alert.
+     */
+    summary: z.string().describe('The AI-generated summary of the alert.'),
+    /**
+     * AI-generated recommended actions for responding to the alert.
+     */
+    recommendedActions: z
+      .string()
+      .optional()
+      .describe('AI-generated recommended actions for responding to the alert.'),
     replacements: Replacements,
-    updatedAt: z.string().optional(),
-    updatedBy: z.string().optional(),
-    createdAt: z.string().optional(),
-    createdBy: z.string().optional(),
-    users: z.array(User).optional(),
+    /**
+     * The timestamp when the alert summary was last updated.
+     */
+    updatedAt: z
+      .string()
+      .optional()
+      .describe('The timestamp when the alert summary was last updated.'),
+    /**
+     * The user who last updated the alert summary.
+     */
+    updatedBy: z.string().optional().describe('The user who last updated the alert summary.'),
+    /**
+     * The timestamp when the alert summary was created.
+     */
+    createdAt: z.string().optional().describe('The timestamp when the alert summary was created.'),
+    /**
+     * The user who created the alert summary.
+     */
+    createdBy: z.string().optional().describe('The user who created the alert summary.'),
+    /**
+     * The users associated with this alert summary.
+     */
+    users: z.array(User).optional().describe('The users associated with this alert summary.'),
     /**
      * Kibana space
      */
-    namespace: z.string().optional(),
+    namespace: z.string().optional().describe('Kibana space'),
   })
 );
 export type AlertSummaryResponse = z.infer<typeof AlertSummaryResponse>;
 
+/**
+ * The results of a bulk action on alert summaries.
+ */
 export const AlertSummaryBulkCrudActionResults = lazySchema(() =>
   z.object({
-    updated: z.array(AlertSummaryResponse),
-    created: z.array(AlertSummaryResponse),
-    deleted: z.array(z.string()),
-    skipped: z.array(AlertSummaryBulkActionSkipResult),
+    /**
+     * Alert summaries that were successfully updated.
+     */
+    updated: z
+      .array(AlertSummaryResponse)
+      .describe('Alert summaries that were successfully updated.'),
+    /**
+     * Alert summaries that were successfully created.
+     */
+    created: z
+      .array(AlertSummaryResponse)
+      .describe('Alert summaries that were successfully created.'),
+    /**
+     * IDs of alert summaries that were successfully deleted.
+     */
+    deleted: z.array(z.string()).describe('IDs of alert summaries that were successfully deleted.'),
+    /**
+     * Alert summaries that were skipped because no changes were needed.
+     */
+    skipped: z
+      .array(AlertSummaryBulkActionSkipResult)
+      .describe('Alert summaries that were skipped because no changes were needed.'),
   })
 );
 export type AlertSummaryBulkCrudActionResults = z.infer<typeof AlertSummaryBulkCrudActionResults>;

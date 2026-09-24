@@ -10,7 +10,7 @@ import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 /**
  * Mock flyout api
  */
-export const mockFlyoutApi: ExpandableFlyoutApi = {
+export const mockFlyoutApi: jest.Mocked<ExpandableFlyoutApi> = {
   openFlyout: jest.fn(),
   openRightPanel: jest.fn(),
   openLeftPanel: jest.fn(),

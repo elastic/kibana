@@ -9,6 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "exclude": [
@@ -33,6 +34,13 @@
     "@kbn/deeplinks-management",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
+    "@kbn/alerting-v2-utils",
+    "@kbn/deeplinks-workflows",
+    "@kbn/deeplinks-evals",
+    "@kbn/scout-oblt",
     "@kbn/workflows-management-plugin",
+    "@kbn/significant-events-plugin",
+    "@kbn/nightshift-shared",
+    "@kbn/navigation-plugin",
   ]
 }

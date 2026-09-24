@@ -12,7 +12,8 @@ import { AddPrebuiltRulesTableContextProvider } from './add_prebuilt_rules_table
 
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+import { useSecuritySolutionInitialization } from '../../../../../common/components/initialization/use_security_solution_initialization';
+import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../../../common/api/initialization';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
@@ -65,12 +66,18 @@ jest.mock(
         },
       },
     }),
+    useInvalidateFetchPrebuiltRulesStatusQuery: jest.fn().mockReturnValue(jest.fn()),
   })
 );
 
-jest.mock('../../../../rule_management/logic/use_upgrade_security_packages', () => ({
-  useIsUpgradingSecurityPackages: jest.fn().mockImplementation(() => false),
-}));
+jest.mock(
+  '../../../../../common/components/initialization/use_security_solution_initialization',
+  () => ({
+    useSecuritySolutionInitialization: jest.fn().mockReturnValue({
+      'init-prebuilt-rules': { loading: false, result: { status: 'ready' } },
+    }),
+  })
+);
 
 jest.mock(
   '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review',
@@ -100,6 +107,12 @@ jest.mock(
 jest.mock('../../../../../common/components/user_privileges');
 
 describe('AddPrebuiltRulesTable', () => {
+  afterEach(() => {
+    (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
+      [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: false, result: { status: 'ready' } },
+    });
+  });
+
   it('disables `Install all` button if user has no write permissions', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
@@ -133,7 +146,9 @@ describe('AddPrebuiltRulesTable', () => {
       },
     });
 
-    (useIsUpgradingSecurityPackages as jest.Mock).mockReturnValueOnce(true);
+    (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
+      [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: true },
+    });
 
     render(
       <QueryClientProvider client={new QueryClient()}>

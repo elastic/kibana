@@ -16,7 +16,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { buildAlertAssigneesFilter } from '../../alerts_table/default_config';
-import { buildConnectorIdFilter } from '../table/filtering_configs';
+import { buildConnectorIdFilter, buildAttackTypeFilter } from '../table/filtering_configs';
 import { AttacksSummaryPanel } from './attacks_summary_panel';
 import { AttacksTrendsPanel } from './attacks_trends_panel';
 import { AttacksCountPanel } from './attacks_count_panel';
@@ -34,6 +34,8 @@ export interface KPIsSectionProps {
   assignees: AssigneesIdsSelection[];
   /** Selected connector IDs to filter by */
   selectedConnectorNames: string[];
+  /** Selected types to filter by */
+  selectedTypes: string[];
   /** DataView for the attacks page */
   dataView: DataView;
 }
@@ -43,7 +45,13 @@ export interface KPIsSectionProps {
  * Supports view selection (Summary, Trends, Count, Treemap).
  */
 export const KPIsSection = memo(
-  ({ pageFilters, assignees, selectedConnectorNames, dataView }: KPIsSectionProps) => {
+  ({
+    pageFilters,
+    assignees,
+    selectedConnectorNames,
+    selectedTypes,
+    dataView,
+  }: KPIsSectionProps) => {
     const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
       ATTACKS_KPI_SECTION_PANEL_ID
     );
@@ -65,8 +73,9 @@ export const KPIsSection = memo(
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
         ...buildConnectorIdFilter(selectedConnectorNames),
+        ...buildAttackTypeFilter(selectedTypes),
       ],
-      [globalFilters, pageFilters, assignees, selectedConnectorNames]
+      [globalFilters, pageFilters, assignees, selectedConnectorNames, selectedTypes]
     );
 
     const title = useMemo(

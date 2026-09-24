@@ -23,20 +23,82 @@ export interface ErrorInsightParams {
   environment?: string;
 }
 
+export interface LogInsightParams {
+  index: string;
+  id: string;
+}
+
+const EVENT_PREFIX = 'event: ';
+const DATA_PREFIX = 'data: ';
+
+/**
+ * The AI insight endpoints return SSE (Server-Sent Events) streams.
+ * This parses the raw SSE text into the summary and context fields.
+ */
+function parseSseResponse(raw: unknown): AiInsightResponse {
+  const text = typeof raw === 'string' ? raw : String(raw);
+
+  const events = text
+    .split(/\n\n/)
+    .map((block) => {
+      const lines = block.split('\n').map((line) => line.trim());
+      const eventLine = lines.find((line) => line.startsWith(EVENT_PREFIX));
+      const dataLine = lines.find((line) => line.startsWith(DATA_PREFIX));
+
+      if (!eventLine || !dataLine) return null;
+
+      try {
+        return {
+          type: eventLine.slice(EVENT_PREFIX.length).trim(),
+          data: JSON.parse(dataLine.slice(DATA_PREFIX.length)) as Record<string, unknown>,
+        };
+      } catch {
+        return null;
+      }
+    })
+    .filter((event): event is { type: string; data: Record<string, unknown> } => event !== null);
+
+  const contextEvent = events.find((e) => e.type === 'context');
+  const messageEvent = events.find((e) => e.type === 'chatCompletionMessage');
+
+  const summary = (messageEvent?.data?.content as string) || '';
+  const context = (contextEvent?.data?.context as string) || '';
+
+  if (!summary) {
+    const chunks = events
+      .filter((e) => e.type === 'chatCompletionChunk')
+      .map((e) => (e.data?.content as string) || '')
+      .join('');
+    return { summary: chunks, context };
+  }
+
+  return { summary, context };
+}
+
 export class AiInsightClient {
   constructor(private readonly fetch: HttpHandler) {}
 
   async getAlertInsight(params: AlertInsightParams): Promise<AiInsightResponse> {
-    return this.fetch('/internal/observability_agent_builder/ai_insights/alert', {
+    const raw = await this.fetch('/internal/observability_agent_builder/ai_insights/alert', {
       method: 'POST',
       body: JSON.stringify(params),
-    }) as Promise<AiInsightResponse>;
+    });
+    return parseSseResponse(raw);
   }
 
   async getErrorInsight(params: ErrorInsightParams): Promise<AiInsightResponse> {
-    return this.fetch('/internal/observability_agent_builder/ai_insights/error', {
+    const raw = await this.fetch('/internal/observability_agent_builder/ai_insights/error', {
       method: 'POST',
       body: JSON.stringify(params),
-    }) as Promise<AiInsightResponse>;
+    });
+    return parseSseResponse(raw);
+  }
+
+  async getLogInsight(params: LogInsightParams): Promise<AiInsightResponse> {
+    const raw = await this.fetch('/internal/observability_agent_builder/ai_insights/log', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+    return parseSseResponse(raw);
   }
 }

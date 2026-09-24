@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { partition, sum } from 'lodash';
+import { noop, partition, sum } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -44,6 +44,7 @@ import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_ma
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
 import { sendGapDetectedTelemetryEvent } from './utils/telemetry/send_gap_detected_telemetry_event';
+import { createSecurityRuleParamsAuthorizer } from './utils/authorize_rule_response_actions';
 import type { RuleParams } from '../rule_schema';
 import {
   SECURITY_FROM,
@@ -111,9 +112,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     scheduleNotificationResponseActionsService,
     endpointAppContextService,
     getEntityStore,
+    getRulesAuthz,
+    getOsqueryResponseActionsAuthzChecker,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
+    // Rule preview must stay non-operational, similar to regular actions
+    const responseActionsService = isPreview ? noop : scheduleNotificationResponseActionsService;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({
       ruleDataClient,
       logger,
@@ -122,6 +127,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
     return persistenceRuleType({
       ...type,
+      // Authorize privileged params on every rule write path, including the generic
+      // Alerting APIs.
+      authorize: {
+        params: createSecurityRuleParamsAuthorizer({
+          endpointAppContextService,
+          getRulesAuthz,
+          getOsqueryResponseActionsAuthzChecker,
+        }),
+      },
       cancelAlertsOnRuleTimeout: false,
       useSavedObjectReferences: {
         extractReferences: (params) => extractReferences({ logger, params }),
@@ -195,6 +209,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ruleRevision: rule.revision,
               ruleType: rule.ruleTypeId,
               spaceId,
+              cpsData: options.cpsData,
             },
           });
 
@@ -280,18 +295,23 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // as `index`
           agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
 
-          const { skipExecution, warnings, frozenIndicesQueriedCount } =
-            await runExecutionValidation({
-              params,
-              inputIndex,
-              ruleName: rule.name,
-              scopedClusterClient: services.scopedClusterClient,
-              runtimeMappings,
-              primaryTimestamp,
-              secondaryTimestamp,
-              ruleExecutionLogger,
-              isServerless: isServerless ?? false,
-            });
+          const {
+            skipExecution,
+            warnings,
+            frozenIndicesQueriedCount,
+            dateNanosTimestampFields,
+            mixedTimestampFields,
+          } = await runExecutionValidation({
+            params,
+            inputIndex,
+            ruleName: rule.name,
+            scopedClusterClient: services.scopedClusterClient,
+            runtimeMappings,
+            primaryTimestamp,
+            secondaryTimestamp,
+            ruleExecutionLogger,
+            isServerless: isServerless ?? false,
+          });
 
           warnings.forEach((warningMessage) => ruleExecutionLogger.warn(warningMessage));
 
@@ -400,6 +420,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   state: runState,
                   sharedParams: {
                     completeRule,
+                    // Only pass analytics for real runs so preview executions report no telemetry.
+                    analytics: isPreview ? undefined : analytics,
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,
@@ -414,6 +436,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     mergeStrategy,
                     primaryTimestamp,
                     secondaryTimestamp,
+                    dateNanosTimestampFields,
+                    mixedTimestampFields,
                     ruleExecutionLogger,
                     aggregatableTimestampField,
                     alertTimestampOverride,
@@ -427,7 +451,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     ignoreFieldsRegexes,
                     eventsTelemetry,
                     licensing,
-                    scheduleNotificationResponseActionsService,
+                    scheduleNotificationResponseActionsService: responseActionsService,
+                    cpsData: options.cpsData,
                   },
                 });
 
@@ -482,18 +507,19 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
             const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
 
+            // Using Math.ceil() to prevent the event log from showing 0ms for sub-millisecond durations.
             ruleExecutionLogger.logMetrics({
               total_search_duration_ms:
                 result.searchAfterTimes.length > 0
-                  ? Math.round(sum(result.searchAfterTimes.map(Number)))
+                  ? Math.ceil(sum(result.searchAfterTimes.map(Number)))
                   : undefined,
               total_indexing_duration_ms:
                 result.bulkCreateTimes.length > 0
-                  ? Math.round(sum(result.bulkCreateTimes.map(Number)))
+                  ? Math.ceil(sum(result.bulkCreateTimes.map(Number)))
                   : undefined,
               total_enrichment_duration_ms:
                 result.enrichmentTimes.length > 0
-                  ? Math.round(sum(result.enrichmentTimes.map(Number)))
+                  ? Math.ceil(sum(result.enrichmentTimes.map(Number)))
                   : undefined,
               frozen_indices_queried_count: frozenIndicesQueriedCount,
               alerts_candidate_count: result.alertsCandidateCount,

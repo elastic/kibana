@@ -6,12 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { ATTACHMENT_SUGGESTIONS_LIMIT, STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type { Attachment } from '../../../lib/streams/attachments/types';
 import { ATTACHMENT_TYPES } from '../../../lib/streams/attachments/types';
-import { assertAttachmentsAccess } from '../../utils/assert_attachments_access';
-
 const attachmentTypeSchema = z.enum(ATTACHMENT_TYPES);
 
 export interface SuggestAttachmentsResponse {
@@ -30,21 +29,25 @@ const suggestAttachmentsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      streamName: z.string(),
+      streamName: z.string().max(MAX_STREAM_NAME_LENGTH),
     }),
     query: z
       .object({
-        query: z.optional(z.string()),
-        attachmentTypes: z.optional(z.union([attachmentTypeSchema, z.array(attachmentTypeSchema)])),
-        tags: z.optional(z.union([z.string(), z.array(z.string())])),
+        query: z.optional(z.string().max(1000)),
+        attachmentTypes: z.optional(
+          z.union([
+            attachmentTypeSchema,
+            z.array(attachmentTypeSchema).max(ATTACHMENT_TYPES.length),
+          ])
+        ),
+        tags: z.optional(z.union([z.string().max(256), z.array(z.string().max(256)).max(100)])),
       })
       .optional(),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<SuggestAttachmentsResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
 
     await streamsClient.ensureStream(params.path.streamName);
 

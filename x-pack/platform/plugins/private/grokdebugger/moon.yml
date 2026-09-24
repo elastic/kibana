@@ -27,8 +27,10 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/code-editor'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/scout'
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -40,6 +42,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

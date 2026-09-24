@@ -21,3 +21,12 @@ export interface EsConfigApiResponse {
    */
   allHosts?: string[];
 }
+
+/**
+ * Maps a Kibana API path template (e.g. "/api/spaces/space/{id}") to its
+ * operations, keyed by lowercase HTTP method, with the OpenAPI `operationId`
+ * as the value. Used to build "Open API reference" deep links for `kbn:`
+ * requests in Console. Generated from the Kibana OpenAPI bundle, see
+ * `server/lib/spec_definitions/kibana_api_doc_links`.
+ */
+export type KibanaApiDocLinksMap = Record<string, Record<string, string>>;

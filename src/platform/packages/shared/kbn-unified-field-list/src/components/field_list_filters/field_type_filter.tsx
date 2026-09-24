@@ -120,18 +120,6 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
     [euiTheme.size.m, euiTheme.size.xs]
   );
 
-  const itemStyle = useMemo(
-    () => css`
-      font-size: ${euiTheme.size.m};
-      padding: ${euiTheme.size.s} ${euiTheme.size.m};
-
-      & + & {
-        border-top: 1px solid ${euiTheme.colors.lightestShade};
-      }
-    `,
-    [euiTheme]
-  );
-
   useEffect(() => {
     // calculate counts only if user opened the popover
     if (!isOpen || !allFields?.length) {
@@ -170,7 +158,11 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
       aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.popoverAriaLabel', {
         defaultMessage: 'Field type filter',
       })}
-      panelProps={{ css: { width: euiTheme.base * 18 } }}
+      panelProps={{
+        css: { width: euiTheme.base * 18 },
+        // The panel is portaled out of the sidebar, so tests need a handle on it.
+        'data-test-subj': `${testSubj}Panel`,
+      }}
       panelPaddingSize="none"
       anchorPosition="rightUp"
       display="block"
@@ -217,6 +209,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
             )}
           </EuiFlexGroup>
         </EuiPopoverTitle>
+        {/* NOTE: This should use an EuiSelectable, EuiContextMenu is for menu actions not selections */}
         {availableFieldTypes.length > 0 ? (
           <EuiContextMenuPanel
             data-test-subj={`${testSubj}Options`}
@@ -244,7 +237,6 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                   key={type}
                   icon={isSelected ? 'check' : 'empty'}
                   data-test-subj={`typeFilter-${type}`}
-                  css={itemStyle}
                   onClick={() => {
                     onChange(
                       selectedFieldTypes.includes(type)

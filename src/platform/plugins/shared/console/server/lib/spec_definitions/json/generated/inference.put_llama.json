@@ -18,6 +18,36 @@
         "chat_completion"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "llama"
+        ]
+      },
+      "service_settings": {
+        "url": "",
+        "model_id": "",
+        "max_input_tokens": "",
+        "similarity": {
+          "__one_of": [
+            "cosine",
+            "dot_product",
+            "l2_norm"
+          ]
+        },
+        "rate_limit": {
+          "requests_per_minute": ""
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

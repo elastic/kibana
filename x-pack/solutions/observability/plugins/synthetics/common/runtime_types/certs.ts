@@ -5,65 +5,28 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { SchemaOutput } from './schema_output';
+import {
+  GetCertsParamsType,
+  CertMonitorType,
+  CertType,
+  CertResultType,
+  CertFacetCountType,
+  CertFacetsType,
+} from './zod/certs';
 
-export const GetCertsParamsType = t.partial({
-  pageIndex: t.number,
-  search: t.string,
-  notValidBefore: t.string,
-  notValidAfter: t.string,
-  from: t.string,
-  to: t.string,
-  sortBy: t.string,
-  direction: t.string,
-  size: t.number,
-  filters: t.unknown,
-  monitorIds: t.array(t.string),
-});
+export {
+  GetCertsParamsType,
+  CertMonitorType,
+  CertType,
+  CertResultType,
+  CertFacetCountType,
+  CertFacetsType,
+};
 
-export type GetCertsParams = t.TypeOf<typeof GetCertsParamsType>;
-
-export const CertMonitorType = t.partial({
-  name: t.string,
-  id: t.string,
-  configId: t.string,
-  url: t.string,
-});
-
-export const CertType = t.intersection([
-  t.type({
-    monitors: t.array(CertMonitorType),
-    sha256: t.string,
-    configId: t.string,
-    monitorName: t.string,
-    monitorId: t.string,
-    monitorType: t.string,
-    locationId: t.string,
-    locationName: t.string,
-    '@timestamp': t.string,
-  }),
-  t.partial({
-    not_after: t.string,
-    not_before: t.string,
-    common_name: t.string,
-    issuer: t.string,
-    sha1: t.string,
-    monitorUrl: t.string,
-    hostName: t.string,
-    serviceName: t.string,
-    errorMessage: t.string,
-    errorStackTrace: t.union([t.string, t.null]),
-    labels: t.record(t.string, t.string),
-    tags: t.array(t.string),
-    monitorTags: t.array(t.string),
-  }),
-]);
-
-export const CertResultType = t.type({
-  certs: t.array(CertType),
-  total: t.number,
-});
-
-export type Cert = t.TypeOf<typeof CertType>;
-export type CertMonitor = t.TypeOf<typeof CertMonitorType>;
-export type CertResult = t.TypeOf<typeof CertResultType>;
+export type GetCertsParams = SchemaOutput<typeof GetCertsParamsType>;
+export type CertFacetCount = SchemaOutput<typeof CertFacetCountType>;
+export type CertFacets = SchemaOutput<typeof CertFacetsType>;
+export type Cert = SchemaOutput<typeof CertType>;
+export type CertMonitor = SchemaOutput<typeof CertMonitorType>;
+export type CertResult = SchemaOutput<typeof CertResultType>;

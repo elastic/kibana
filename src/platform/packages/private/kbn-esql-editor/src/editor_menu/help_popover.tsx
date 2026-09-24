@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -34,13 +35,21 @@ import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import { prettifyQueryTemplate } from '@kbn/esql-language/src/commands/registry/options/recommended_queries/utils';
 import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import { reportEsqlError } from '../report_error';
 import type { ESQLEditorDeps } from '../types';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { helpLabel } from './menu_i18n';
 
 export const HelpPopover: React.FC<{
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
-}> = ({ onESQLDocsFlyoutVisibilityChanged }) => {
+  /** Size for the docs flyout. Pass a named size when embedded in another flyout. */
+  docsFlyoutSize?: EuiFlyoutProps['size'];
+  /**
+   * Hides the recommended-queries section (and skips deriving it). Use when the embedder
+   * can't apply a picked query — i.e. no `submitEsqlQuery` action is wired.
+   */
+  hideRecommendedQueries?: boolean;
+}> = ({ onESQLDocsFlyoutVisibilityChanged, docsFlyoutSize, hideRecommendedQueries }) => {
   const kibana = useKibana<ESQLEditorDeps>();
   const { core, data } = kibana.services;
   const { docLinks, http, chrome, analytics } = core;
@@ -79,7 +88,7 @@ export const HelpPopover: React.FC<{
 
   useEffect(() => {
     let isMounted = true;
-    if (!isESQLMenuPopoverOpen) {
+    if (!isESQLMenuPopoverOpen || hideRecommendedQueries) {
       return () => {
         isMounted = false;
       };
@@ -128,7 +137,7 @@ export const HelpPopover: React.FC<{
     return () => {
       isMounted = false;
     };
-  }, [data.dataViews, http, isESQLMenuPopoverOpen]);
+  }, [data.dataViews, http, isESQLMenuPopoverOpen, hideRecommendedQueries]);
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField, dataviewName } =
     dataviewDerived;
@@ -157,7 +166,7 @@ export const HelpPopover: React.FC<{
           lastFetchedQueries.current = extensions.recommendedQueries;
         }
       } catch (error) {
-        // Do nothing if the extensions are not available
+        reportEsqlError(error, { errorType: 'HelpExtensionsFetch' });
       }
     };
 
@@ -169,9 +178,14 @@ export const HelpPopover: React.FC<{
   }, [activeSolutionId, http, queryForRecommendedQueries]);
 
   const toggleLanguageComponent = useCallback(() => {
+    if (actions?.editorIsInline) {
+      actions.toggleLanguageComponent();
+      setIsESQLMenuPopoverOpen(false);
+      return;
+    }
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
     setIsESQLMenuPopoverOpen(false);
-  }, [isLanguageComponentOpen]);
+  }, [actions, isLanguageComponentOpen]);
 
   const onHelpMenuVisibilityChange = useCallback(
     (status: boolean) => {
@@ -238,7 +252,7 @@ export const HelpPopover: React.FC<{
               </EuiContextMenuItem>
             ),
           },
-          ...(Boolean(recommendedQueries.length)
+          ...(!hideRecommendedQueries && Boolean(recommendedQueries.length)
             ? [
                 {
                   name: i18n.translate('esqlEditor.menu.exampleQueries', {
@@ -280,6 +294,7 @@ export const HelpPopover: React.FC<{
     actions,
     categorizationField,
     dataviewName,
+    hideRecommendedQueries,
     queryForRecommendedQueries,
     solutionsRecommendedQueries,
     timeFieldName,
@@ -322,12 +337,15 @@ export const HelpPopover: React.FC<{
           <EuiContextMenu initialPanelId={0} panels={esqlContextMenuPanels} />
         </div>
       </EuiPopover>
-      <LanguageDocumentationFlyout
-        searchInDescription
-        linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
-        isHelpMenuOpen={isLanguageComponentOpen}
-        onHelpMenuVisibilityChange={onHelpMenuVisibilityChange}
-      />
+      {!actions?.editorIsInline && (
+        <LanguageDocumentationFlyout
+          searchInDescription
+          linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
+          isHelpMenuOpen={isLanguageComponentOpen}
+          onHelpMenuVisibilityChange={onHelpMenuVisibilityChange}
+          size={docsFlyoutSize}
+        />
+      )}
     </>
   );
 };

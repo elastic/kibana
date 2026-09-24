@@ -12,6 +12,7 @@ import {
   UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
   PREBUILT_RULE_CUSTOMIZATION,
   PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
+  ENDPOINT_CUSTOM_YARA_SIGNATURES,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
@@ -30,6 +31,7 @@ import {
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
   AttackDiscoveryUpsellingPageLazy,
+  AttacksUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
@@ -79,6 +81,11 @@ export const upsellingPages: UpsellingPages = [
     pageName: SecurityPageName.attackDiscovery,
     pli: ProductFeatureKey.attackDiscovery,
     component: () => <AttackDiscoveryUpsellingPageLazy />,
+  },
+  {
+    pageName: SecurityPageName.attacks,
+    pli: ProductFeatureKey.attackDiscovery,
+    component: () => <AttacksUpsellingPageLazy />,
   },
   {
     pageName: SecurityPageName.siemMigrationsRules,
@@ -188,6 +195,13 @@ export const upsellingMessages: UpsellingMessages = [
     message: PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION(
       getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
       'feature tier'
+    ),
+  },
+  {
+    id: 'endpoint_custom_yara_signatures',
+    pli: ProductFeatureKey.endpointCustomYaraSignatures,
+    message: ENDPOINT_CUSTOM_YARA_SIGNATURES(
+      getProductTypeByPLI(ProductFeatureKey.endpointCustomYaraSignatures) ?? ''
     ),
   },
 ];

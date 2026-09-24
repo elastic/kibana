@@ -1,0 +1,46 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          searchExecutionsResponseExample:
+            description: 'Example paginated list of workflow-level executions'
+            value:
+              results:
+                - spaceId: default
+                  id: exec-a1b2c3d4-e5f6-7890
+                  status: completed
+                  isTestRun: false
+                  startedAt: '2025-11-20T12:00:00.000Z'
+                  finishedAt: '2025-11-20T12:00:03.000Z'
+                  duration: 3000
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  workflowName: Example Workflow
+                  tags:
+                    - reporting
+                  managed: false
+                  triggeredBy: manual
+                  executedBy: elastic
+                  error: null
+              page: 1
+              size: 25
+              total: 1
+  400:
+    description: 'Indicates a bad request, such as invalid KQL syntax'
+    content:
+      application/json:
+        examples:
+          searchExecutionsBadRequestExample:
+            description: 'Example response when the kql parameter contains invalid syntax'
+            value:
+              message: 'Invalid KQL: Expected AND, OR, or end of input but "f" found.'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/workflow/executions?page=1&size=25&trackTotalHits=true&kql=startedAt%20%3E%3D%20%22now-15m%22&sortField=startedAt&sortOrder=desc" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/workflow/executions?from=0&size=25&trackTotalHits=true&kql=startedAt >= "now-15m"&sortField=startedAt&sortOrder=desc

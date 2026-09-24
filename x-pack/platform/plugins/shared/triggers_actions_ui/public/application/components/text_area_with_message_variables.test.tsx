@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { TextAreaWithMessageVariables } from './text_area_with_message_variables';
 
 describe('TextAreaWithMessageVariables', () => {
@@ -26,18 +27,18 @@ describe('TextAreaWithMessageVariables', () => {
 
   beforeEach(() => jest.resetAllMocks());
 
-  test('renders variables with double braces by default', () => {
-    const wrapper = mountWithIntl(<TextAreaWithMessageVariables {...props} />);
+  test('renders variables with double braces by default', async () => {
+    render(<TextAreaWithMessageVariables {...props} />);
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('fooAddVariableButton'));
+    await userEvent.click(screen.getByTestId('variableMenuButton-myVar'));
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{myVar}}', props.index);
   });
 
-  test('renders variables with triple braces when specified', () => {
-    const wrapper = mountWithIntl(
+  test('renders variables with triple braces when specified', async () => {
+    render(
       <TextAreaWithMessageVariables
         {...props}
         messageVariables={[
@@ -50,8 +51,8 @@ describe('TextAreaWithMessageVariables', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('fooAddVariableButton'));
+    await userEvent.click(screen.getByTestId('variableMenuButton-myVar'));
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{{myVar}}}', props.index);

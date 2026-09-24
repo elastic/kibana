@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useSendMessage } from '../../../../context/send_message/send_message_context';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 
 interface ConversationActionButtonProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
-  resetToPendingMessage: () => void;
+  isSubmitting?: boolean;
 }
 
 const labels = {
@@ -29,9 +31,9 @@ const labels = {
 export const ConversationActionButton: React.FC<ConversationActionButtonProps> = ({
   onSubmit,
   isSubmitDisabled,
-  resetToPendingMessage,
+  isSubmitting = false,
 }) => {
-  const { canCancel, cancel } = useSendMessage();
+  const { canCancel, cancel, isCancelling } = useConversationStream();
   const { euiTheme } = useEuiTheme();
 
   const cancelButtonStyles = css`
@@ -39,29 +41,41 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
   `;
 
   return canCancel ? (
-    <EuiButtonIcon
-      aria-label={labels.cancel}
-      data-test-subj="agentBuilderConversationInputCancelButton"
-      iconType="stopFill"
-      size="s"
-      color="text"
-      css={cancelButtonStyles}
-      onClick={() => {
-        if (canCancel) {
-          cancel();
-          resetToPendingMessage();
-        }
-      }}
-    />
+    <EuiToolTip content={labels.cancel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={labels.cancel}
+        data-test-subj="agentBuilderConversationInputCancelButton"
+        iconType="stopFill"
+        size="s"
+        color="text"
+        css={cancelButtonStyles}
+        isLoading={isCancelling}
+        disabled={isCancelling}
+        onClick={cancel}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.CANCEL,
+          detail: 'conversation',
+        })}
+      />
+    </EuiToolTip>
   ) : (
-    <EuiButtonIcon
-      aria-label={labels.submit}
-      data-test-subj="agentBuilderConversationInputSubmitButton"
-      iconType="sortUp"
-      display="fill"
-      size="s"
-      disabled={isSubmitDisabled}
-      onClick={onSubmit}
-    />
+    <EuiToolTip content={labels.submit} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={labels.submit}
+        data-test-subj="agentBuilderConversationInputSubmitButton"
+        iconType="sortUp"
+        display="fill"
+        size="s"
+        disabled={isSubmitDisabled}
+        isLoading={isSubmitting}
+        onClick={onSubmit}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.SUBMIT,
+          detail: 'conversation',
+        })}
+      />
+    </EuiToolTip>
   );
 };

@@ -27,6 +27,10 @@ export const SCOUT_TEST_EVENTS_INDEX_PATTERN =
 export const SCOUT_TEST_EVENTS_DATA_STREAM_NAME =
   process.env.SCOUT_TEST_EVENTS_DATA_STREAM_NAME || `${SCOUT_TEST_EVENTS_TEMPLATE_NAME}-kibana`;
 
+// Playwright attachment name used to pass browser console errors from the scout page
+// fixture (@kbn/scout) to Scout reporters (@kbn/scout-reporting).
+export const BROWSER_CONSOLE_ERRORS_ATTACHMENT = 'browser-console-errors';
+
 export enum ScoutTestRunConfigCategory {
   UI_TEST = 'ui-test',
   API_TEST = 'api-test',

@@ -5,25 +5,10 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
+import { buildEpisodeActionsQuery as buildEpisodeActionsQueryCommon } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeActionRow } from '@kbn/alerting-v2-common-queries';
 
-export interface AlertEpisodeAction {
-  episode_id: string;
-  rule_id: string | null;
-  group_hash: string | null;
-  last_ack_action: string | null;
-}
+export type AlertEpisodeAction = EpisodeActionRow;
 
-export const buildEpisodeActionsQuery = (episodeIds: string[]) => {
-  const episodeIdLiterals = episodeIds.map((id) => esql.str(id));
-
-  // prettier-ignore
-  return esql.from(ALERT_ACTIONS_DATA_STREAM)
-    .where`episode_id IN (${episodeIdLiterals})`
-    .where`action_type IN ("ack", "unack")`
-    .pipe`STATS
-      last_ack_action = LAST(action_type, @timestamp)
-      BY episode_id, rule_id, group_hash`
-    .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action');
-};
+export const buildEpisodeActionsQuery = (spaceId: string, episodeIds: string[]) =>
+  buildEpisodeActionsQueryCommon(spaceId, episodeIds);

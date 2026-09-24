@@ -11,15 +11,6 @@ import { useLensAttributes } from '../../common/components/visualization_actions
 
 import { getRiskScoreDonutAttributes } from './risk_score_donut';
 
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
-
 jest.mock('../../common/utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {

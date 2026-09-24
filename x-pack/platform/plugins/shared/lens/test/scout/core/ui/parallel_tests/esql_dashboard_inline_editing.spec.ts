@@ -1,0 +1,183 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
+import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
+
+const setEsqlQueryAndRun = async (
+  dashboard: PageObjects['dashboard'],
+  page: ScoutPage,
+  codeEditor: KibanaCodeEditorWrapper,
+  query: string
+) => {
+  await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+  await codeEditor.setCodeEditorValue(query);
+  const searchButton = page.testSubj.locator('ESQLEditor-run-query-button');
+  await expect(searchButton).toBeEnabled();
+  await searchButton.click();
+  await dashboard.waitForRenderComplete();
+};
+
+spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful-classic' }, () => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    await scoutSpace.uiSettings.set({
+      'dateFormat:tz': 'UTC',
+      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
+    });
+  });
+
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsPrivilegedUser();
+    const { dashboard } = pageObjects;
+
+    await dashboard.openTryEsqlDashboard();
+    await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+    await dashboard.waitForRenderComplete();
+  });
+
+  spaceTest.afterAll(async ({ scoutSpace }) => {
+    await scoutSpace.uiSettings.unset('dateFormat:tz', 'timepicker:timeDefaults');
+    await scoutSpace.savedObjects.cleanStandardList();
+  });
+
+  spaceTest(
+    'should keep the table type when the user adds a limit via Try ESQL',
+    async ({ pageObjects, page }) => {
+      const { dashboard, lens } = pageObjects;
+      const codeEditor = new KibanaCodeEditorWrapper(page);
+
+      await spaceTest.step('set ESQL query and validate the chart type is table', async () => {
+        await setEsqlQueryAndRun(dashboard, page, codeEditor, 'from logstash-*');
+        expect(await lens.getChartSwitchType()).toBe('Table');
+      });
+
+      await spaceTest.step('remove all auto-loaded columns and add bytes', async () => {
+        await lens.workspace.removeAllDimensions('lnsDatatable_metrics');
+
+        await page.testSubj
+          .locator('lnsDatatable_metrics')
+          .getByTestId('lns-empty-dimension')
+          .click();
+        await expect(
+          page.testSubj.locator('lns-indexPattern-dimensionContainerClose')
+        ).toBeVisible();
+
+        const fieldCombo = page.components.comboBox('text-based-dimension-field');
+        const fieldSearchInput = page.testSubj
+          .locator('text-based-dimension-field')
+          .getByTestId('comboBoxSearchInput');
+
+        // The field list is fetched asynchronously (ES|QL `| limit 0`). Wait for it
+        // here, then close the dropdown: EuiComboBox arms a `closeOnScroll` listener
+        // 500ms after opening, and a dropdown left open that long can be closed by
+        // any ancestor scroll (including Playwright's scroll-into-view before a click).
+        await expect
+          .poll(() => fieldCombo.getAllVisibleOptions(), { timeout: 10_000 })
+          .not.toStrictEqual([]);
+        await fieldSearchInput.blur();
+
+        // Select via keyboard so no option row has to be scrolled into view or hit-tested.
+        await fieldSearchInput.click();
+        await fieldSearchInput.fill('bytes');
+        await expect.poll(() => fieldCombo.getAllVisibleOptions()).toContain('bytes');
+        // ArrowDown skips the "Available fields" group label and lands on `bytes`.
+        await fieldSearchInput.press('ArrowDown');
+        await fieldSearchInput.press('Enter');
+        await expect.poll(() => fieldCombo.getSelectedOptions()).toStrictEqual(['bytes']);
+        await lens.closeDimensionEditor();
+      });
+
+      await spaceTest.step(
+        'add limit to query and verify table type and bytes column persist',
+        async () => {
+          await setEsqlQueryAndRun(dashboard, page, codeEditor, 'from logstash-* | limit 100');
+          await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
+
+          const bytesDimension = page.testSubj
+            .locator('lnsDatatable_metrics > lns-dimensionTrigger-textBased')
+            .filter({ hasText: /^bytes$/ });
+          await expect(bytesDimension).toBeVisible();
+        }
+      );
+    }
+  );
+
+  spaceTest(
+    'should add a limit without changing the chart type or the color',
+    async ({ pageObjects, page }) => {
+      const { dashboard, lens } = pageObjects;
+      const codeEditor = new KibanaCodeEditorWrapper(page);
+
+      await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
+        await setEsqlQueryAndRun(
+          dashboard,
+          page,
+          codeEditor,
+          'from logstash-* | stats maxB = max(bytes) by geo.dest'
+        );
+        await dashboard.waitForPanelsToLoad(1);
+
+        // Wait for flyout to be ready before switching to line chart
+        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+        await lens.switchToVisualization('line', { search: 'Line' });
+        await dashboard.waitForPanelsToLoad(1);
+
+        // Anchor on the Y dimension first so the config panel is known to have
+        // rendered the new suggestion before checking the split state.
+        const yDimensionTrigger = page.testSubj.locator(
+          'lnsXY_yDimensionPanel > lns-dimensionTrigger-textBased'
+        );
+        await expect(yDimensionTrigger).toHaveText(/maxB/);
+
+        // The ES|QL suggestion may assign `geo.dest` to "Break down by"; a split
+        // dimension disables the series color picker, so remove it if present
+        // (parity with the original FTR test, which removed the split panel).
+        await lens.workspace.removeAllDimensions('lnsXY_splitDimensionPanel');
+        const splitTriggers = page.testSubj.locator(
+          'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
+        );
+        await expect(splitTriggers).toHaveCount(0);
+        await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Line');
+
+        // change the color to red
+        await yDimensionTrigger.click();
+        const colorPickerInput = lens.dimensions.dimensionColorPicker;
+        // A disabled color picker means a split dimension is still present; fail
+        // fast with a clear assertion instead of a fill-retry timeout.
+        await expect(colorPickerInput).toBeEnabled();
+        await colorPickerInput.fill('');
+        await colorPickerInput.fill('#ff0000');
+        await expect(colorPickerInput).toHaveValue('#FF0000');
+
+        await lens.closeDimensionEditor();
+        await applyLensInlineEditorAndWaitClosed({ lens });
+      });
+
+      await spaceTest.step(
+        'add limit and verify line chart type and red color persist',
+        async () => {
+          await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+          await expect(lens.workspace.inlineEditor).toBeVisible();
+
+          await setEsqlQueryAndRun(
+            dashboard,
+            page,
+            codeEditor,
+            'from logstash-* | stats maxB = max(bytes) by geo.dest | limit 10'
+          );
+
+          await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Line');
+
+          await page.testSubj.click('lnsXY_yDimensionPanel > lns-dimensionTrigger-textBased');
+          await expect(lens.dimensions.dimensionColorPicker).toHaveValue('#FF0000');
+        }
+      );
+    }
+  );
+});

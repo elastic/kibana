@@ -53,15 +53,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickContextMenu();
         await PageObjects.console.clickCopyToLanguageButton();
 
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
+        await retry.try(async () => {
+          const resultToast = await toasts.getElementByIndex(1);
+          const toastText = await resultToast.getVisibleText();
 
-        if (toastText.includes('Write permission denied')) {
-          log.debug('Write permission denied, skipping test');
-          return;
-        }
+          if (toastText.includes('Write permission denied')) {
+            log.debug('Write permission denied, skipping test');
+            return;
+          }
 
-        expect(toastText).to.be('Request copied to clipboard as curl');
+          expect(toastText).to.be('Request copied to clipboard as curl');
+        });
 
         const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
         if (canReadClipboard) {
@@ -85,10 +87,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickContextMenu();
         await PageObjects.console.clickCopyToLanguageButton();
 
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
-
-        expect(toastText).to.be('Requests copied to clipboard as curl');
+        await retry.try(async () => {
+          const resultToast = await toasts.getElementByIndex(1);
+          const toastText = await resultToast.getVisibleText();
+          expect(toastText).to.be('Requests copied to clipboard as curl');
+        });
 
         // Check if the clipboard has the curl request
         if (canReadClipboard) {
@@ -142,15 +145,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickContextMenu();
         await PageObjects.console.changeLanguageAndCopy('javascript');
 
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
+        await retry.try(async () => {
+          const resultToast = await toasts.getElementByIndex(1);
+          const toastText = await resultToast.getVisibleText();
 
-        if (toastText.includes('Write permission denied')) {
-          log.debug('Write permission denied, skipping test');
-          return;
-        }
+          if (toastText.includes('Write permission denied')) {
+            log.debug('Write permission denied, skipping test');
+            return;
+          }
 
-        expect(toastText).to.be('Request copied to clipboard as JavaScript');
+          expect(toastText).to.be('Request copied to clipboard as JavaScript');
+        });
 
         const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
         if (canReadClipboard) {
@@ -266,13 +271,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should auto indent when auto indent button is clicked', async () => {
       await PageObjects.console.clearEditorText();
-      await PageObjects.console.enterText('GET _search\n{"query": {"match_all": {}}}');
+      await PageObjects.console.enterText(
+        'GET _search\n{"query": {\n# match every document\n"match_all": {}}}'
+      );
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickAutoIndentButton();
       // Retry until the request is auto indented
       await retry.try(async () => {
         const request = await PageObjects.console.getEditorText();
-        expect(request).to.be.eql('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
+        expect(request).to.be.eql(
+          [
+            'GET _search',
+            '{',
+            '  "query": {',
+            '    # match every document',
+            '    "match_all": {}',
+            '  }',
+            '}',
+          ].join('\n')
+        );
       });
     });
 

@@ -45,6 +45,14 @@ export const ACTIONS_OPEN_IN_DISCOVER_LABEL = i18n.translate(
   }
 );
 
+/** --- Edit assignee action --- */
+export const ACTIONS_EDIT_ASSIGNEE_LABEL = i18n.translate(
+  'xpack.alertingV2.episodesUi.actions.editAssignee',
+  {
+    defaultMessage: 'Edit assignee',
+  }
+);
+
 /** --- Resolve action --- */
 export const RESOLVE_ACTION_ACTIVATE = i18n.translate(
   'xpack.alertingV2.episodesUi.resolveAction.activate',
@@ -89,79 +97,6 @@ export const SNOOZE_ACTION_POPOVER_ARIA_LABEL = i18n.translate(
   }
 );
 
-/** --- Snooze form --- */
-export const SNOOZE_FORM_MINUTES = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.minutes',
-  {
-    defaultMessage: 'Minutes',
-  }
-);
-
-export const SNOOZE_FORM_HOURS = i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.hours', {
-  defaultMessage: 'Hours',
-});
-
-export const SNOOZE_FORM_DAYS = i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.days', {
-  defaultMessage: 'Days',
-});
-
-export const SNOOZE_FORM_PRESET_1H = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.preset.1h',
-  {
-    defaultMessage: '1 hour',
-  }
-);
-
-export const SNOOZE_FORM_PRESET_3H = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.preset.3h',
-  {
-    defaultMessage: '3 hours',
-  }
-);
-
-export const SNOOZE_FORM_PRESET_8H = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.preset.8h',
-  {
-    defaultMessage: '8 hours',
-  }
-);
-
-export const SNOOZE_FORM_PRESET_1D = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.preset.1d',
-  {
-    defaultMessage: '1 day',
-  }
-);
-
-export const SNOOZE_FORM_TITLE = i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.title', {
-  defaultMessage: 'Snooze notifications',
-});
-
-export const SNOOZE_FORM_DURATION_VALUE_ARIA_LABEL = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.durationValueAriaLabel',
-  {
-    defaultMessage: 'Snooze duration value',
-  }
-);
-
-export const SNOOZE_FORM_UNIT_SELECT_ARIA_LABEL = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.unitSelectAriaLabel',
-  {
-    defaultMessage: 'Snooze duration unit',
-  }
-);
-
-export const SNOOZE_FORM_APPLY = i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.apply', {
-  defaultMessage: 'Apply',
-});
-
-export const SNOOZE_FORM_COMMONLY_USED = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.commonlyUsed',
-  {
-    defaultMessage: 'Commonly used',
-  }
-);
-
 /** --- Tag badges (list cell) --- */
 export const TAGS_MORE_BADGE_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.episodesUi.tags.moreTags.ariaLabel',
@@ -181,14 +116,14 @@ export const TAGS_MORE_POPOVER_ARIA_LABEL = i18n.translate(
 export const TAGS_ACTION_EDIT_TAGS = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.editTags',
   {
-    defaultMessage: 'Edit Tags',
+    defaultMessage: 'Edit alert tags',
   }
 );
 
 export const TAGS_ACTION_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
   {
-    defaultMessage: 'Edit Tags',
+    defaultMessage: 'Edit alert tags',
   }
 );
 
@@ -277,5 +212,162 @@ export const TAGS_ACTION_SELECT_NONE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.selectNone',
   {
     defaultMessage: 'Select none',
+  }
+);
+
+/** --- Bulk snooze modal --- */
+export const BULK_SNOOZE_MODAL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkSnoozeModal.title',
+  {
+    defaultMessage: 'Snooze selected episodes',
+  }
+);
+
+/** --- Bulk tags modal --- */
+export const BULK_TAGS_MODAL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.title',
+  {
+    defaultMessage: 'Set alert tags for selected episodes',
+  }
+);
+
+export const BULK_TAGS_MODAL_REPLACE_WARNING = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.replaceWarning',
+  {
+    defaultMessage:
+      'These alert tags will replace any existing alert tags on all selected episodes.',
+  }
+);
+
+export const BULK_TAGS_MODAL_COMBOBOX_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.comboboxPlaceholder',
+  {
+    defaultMessage: 'Add tags',
+  }
+);
+
+export const BULK_TAGS_MODAL_CANCEL = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const BULK_TAGS_MODAL_SAVE = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.save',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+/** --- Edit episode assignee panel --- */
+export const ASSIGNEE_PANEL_EMPTY_LIST_TITLE = (totalEpisodes: number) =>
+  i18n.translate('xpack.alertingV2.episodes.assignees.panel.emptyListTitle', {
+    defaultMessage:
+      'The selected {totalEpisodes, plural, =1 {episode does} other {episodes do}} not have any assigned users',
+    values: { totalEpisodes },
+  });
+
+export const ASSIGNEE_PANEL_EMPTY_LIST_HELP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.emptyListHelp',
+  {
+    defaultMessage: 'Search to assign users.',
+  }
+);
+
+export const ASSIGNEE_PANEL_NO_MATCHES_USER_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noMatchesUserTitle',
+  {
+    defaultMessage: "User doesn't exist or is unavailable",
+  }
+);
+
+export const ASSIGNEE_PANEL_NO_MATCHES_MODIFY_SEARCH = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noMatchesModifySearch',
+  {
+    defaultMessage: "Modify your search or check the user's privileges.",
+  }
+);
+
+export const ASSIGNEE_PANEL_NO_MATCHES_LEARN_PRIVILEGES = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noMatchesLearnPrivileges',
+  {
+    defaultMessage: 'Learn what privileges grant access to cases.',
+  }
+);
+
+export const ASSIGNEE_PANEL_CURRENT_PROFILE_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.currentProfileErrorTitle',
+  {
+    defaultMessage: 'Could not load current assignee',
+  }
+);
+
+export const ASSIGNEE_PANEL_SUGGEST_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.suggestErrorTitle',
+  {
+    defaultMessage: 'Could not search users',
+  }
+);
+
+export const ASSIGNEE_PANEL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.title',
+  {
+    defaultMessage: 'Edit assignee',
+  }
+);
+
+export const ASSIGNEE_PANEL_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.searchPlaceholder',
+  {
+    defaultMessage: 'Search users',
+  }
+);
+
+export const ASSIGNEE_PANEL_NO_ASSIGNEE_OPTION = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noAssigneeOption',
+  {
+    defaultMessage: 'No assignee',
+  }
+);
+
+export const ASSIGNEE_PANEL_APPLY = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.apply',
+  {
+    defaultMessage: 'Apply',
+  }
+);
+
+export const ASSIGNEE_PANEL_MODAL_ARIA_LABEL = (totalEpisodes: number) =>
+  i18n.translate('xpack.alertingV2.episodes.assignees.panel.modalAriaLabel', {
+    defaultMessage: 'Edit assignee of {totalEpisodes, plural, =1 {# episode} other {# episodes}}',
+    values: { totalEpisodes },
+  });
+
+export const ASSIGNEE_ADD_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.addButtonAriaLabel',
+  {
+    defaultMessage: 'Add assignee',
+  }
+);
+
+export const ASSIGNEE_ADD_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.addButtonTooltip',
+  {
+    defaultMessage: 'Assign this alert',
+  }
+);
+
+export const ASSIGNEE_CHANGE_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.changeButtonAriaLabel',
+  {
+    defaultMessage: 'Change assignee',
+  }
+);
+
+export const ASSIGNEE_CHANGE_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.changeButtonTooltip',
+  {
+    defaultMessage: 'Change or remove the assignee',
   }
 );

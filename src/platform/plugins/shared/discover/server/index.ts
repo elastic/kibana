@@ -40,17 +40,15 @@ export interface DiscoverServerPluginStart {
 }
 
 export { config } from './config';
+export { discoverSessionApiResponseSchema } from './api/schema';
+export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
-  DiscoverSessionClassicTab,
-  DiscoverSessionEsqlTab,
-  DiscoverSessionTab,
-  DiscoverSessionPanelOverrides,
-  DiscoverSessionEmbeddableByValueProps,
-  DiscoverSessionEmbeddableByReferenceProps,
-  DiscoverSessionEmbeddableByValueState,
-  DiscoverSessionEmbeddableByReferenceState,
-  DiscoverSessionEmbeddableState,
-} from './embeddable';
+  DiscoverSessionApiResponse,
+  DiscoverSessionSanitizeResponse,
+  DiscoverSessionWarning,
+  DiscoverSessionGetResponse,
+} from './api/schema';
+export type { DiscoverSessionSanitizeRequest } from './api/session_sanitize';
 
 export const plugin = async (context: PluginInitializerContext) => {
   const { DiscoverServerPlugin } = await import('./plugin');

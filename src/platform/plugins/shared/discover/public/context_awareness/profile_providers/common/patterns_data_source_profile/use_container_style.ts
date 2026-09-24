@@ -32,7 +32,7 @@ export function useContainerStyle(defaultRowHeight?: number) {
       WebkitLineClamp: rowHeight,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      transform: `translateY(calc(${euiTheme.size.m} / 4))`, // we apply this transform so that the component appears vertically centered
+      transform: `translateY(calc(${euiTheme.size.m} / 4))`,
     };
   }, [euiTheme, defaultRowHeight]);
 }

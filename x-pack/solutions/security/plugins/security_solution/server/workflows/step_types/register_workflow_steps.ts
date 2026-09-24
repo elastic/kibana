@@ -6,28 +6,47 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { CoreStart } from '@kbn/core/server';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
-import {
-  REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-  REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
-} from '../../../common/constants';
+import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
+import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
+import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
+import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
+import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
+import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
+import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
+import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
+import { createRuleExceptionStepDefinition } from './create_rule_exception_step/create_rule_exception_step';
+import { createExceptionListItemStepDefinition } from './create_exception_list_item_step/create_exception_list_item_step';
+import { createNoteStepDefinition } from './create_note_step/create_note_step';
+import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
+import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
+import { updateNoteStepDefinition } from './update_note_step/update_note_step';
+import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
+import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 
 /**
- * Registers all security workflow steps with the workflowsExtensions plugin
+ * Registers all security workflow steps with the workflowsExtensions plugin.
  */
-export const registerWorkflowSteps = async (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  coreStart: CoreStart
-): Promise<void> => {
-  const registerAlertValidationStepsEnabled = await coreStart.featureFlags.getBooleanValue(
-    REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-    REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
-  );
-
-  if (registerAlertValidationStepsEnabled) {
-    workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
-    workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
-  }
+export const registerWorkflowSteps = (
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+): void => {
+  workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
+  workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
+  workflowsExtensions.registerStepDefinition(setAlertStatusStepDefinition);
+  workflowsExtensions.registerStepDefinition(setAlertTagsStepDefinition);
+  workflowsExtensions.registerStepDefinition(assignAlertStepDefinition);
+  workflowsExtensions.registerStepDefinition(assignAttackStepDefinition);
+  workflowsExtensions.registerStepDefinition(setAttackStatusStepDefinition);
+  workflowsExtensions.registerStepDefinition(setAttackTagsStepDefinition);
+  workflowsExtensions.registerStepDefinition(enableRuleStepDefinition);
+  workflowsExtensions.registerStepDefinition(disableRuleStepDefinition);
+  workflowsExtensions.registerStepDefinition(createRuleExceptionStepDefinition);
+  workflowsExtensions.registerStepDefinition(createExceptionListItemStepDefinition);
+  workflowsExtensions.registerStepDefinition(createNoteStepDefinition);
+  workflowsExtensions.registerStepDefinition(deleteNoteStepDefinition);
+  workflowsExtensions.registerStepDefinition(getNotesStepDefinition);
+  workflowsExtensions.registerStepDefinition(updateNoteStepDefinition);
+  workflowsExtensions.registerStepDefinition(createRuleStepDefinition);
+  workflowsExtensions.registerStepDefinition(patchRuleStepDefinition);
 };

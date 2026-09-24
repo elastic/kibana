@@ -137,6 +137,7 @@ export class TimePickerPageObject extends FtrService {
       // The component's toTestSubj replaces all whitespace with underscores
       const presetTestSubj = `dateRangePickerPresetItem-${option.replace(/\s+/g, '_')}`;
       await this.testSubjects.exists(presetTestSubj, { timeout: 5000 });
+      await this.testSubjects.scrollIntoView(presetTestSubj);
       await this.testSubjects.click(presetTestSubj);
       await this.testSubjects.missingOrFail('dateRangePickerPopoverPanel', { timeout: 5000 });
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -178,29 +179,57 @@ export class TimePickerPageObject extends FtrService {
       await input.clearValue();
       await input.type(value);
     } else {
-      await this.testSubjects.setValue(dataTestSubj, value);
+      await this.testSubjects.setValue(dataTestSubj, value, { clearWithKeyboard: true });
     }
 
     await this.testSubjects.pressEnter(dataTestSubj);
   }
 
+  /**
+   * Reveals the legacy SuperDatePicker's start/end date popover buttons.
+   *
+   * The picker hides those buttons whenever it is collapsed (a single "Show
+   * dates" button, shown for pretty relative ranges) or disabled by its consumer
+   * (rendered as a disabled display node). The disabled state can be transient —
+   * e.g. Discover in ES|QL mode disables the picker until the ad-hoc data view's
+   * time field resolves asynchronously. Retry until the popover buttons are
+   * actually shown so callers can rely on them being present.
+   */
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
-    await this.retry.tryForTime(5000, async () => {
-      const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton', {
-        timeout: 50,
-      });
-      if (isShowDatesButton) {
-        await this.testSubjects.moveMouseTo('superDatePickerShowDatesButton');
-        await this.testSubjects.click('superDatePickerShowDatesButton', 50);
-      }
-      await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });
-      // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
-      if (isShowDatesButton) {
+
+    await this.retry.waitForWithTimeout(
+      'start and end date popover buttons to be shown',
+      20000,
+      async () => {
+        // Already expanded: the popover buttons are present.
+        if (
+          await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 50 })
+        ) {
+          return true;
+        }
+        // Otherwise the picker is collapsed to a single "Show dates" button. In
+        // ES|QL mode that button is rendered disabled while the time field is
+        // resolved asynchronously, so wait until it exists and is enabled before
+        // expanding it.
+        if (!(await this.testSubjects.exists('superDatePickerShowDatesButton', { timeout: 50 }))) {
+          return false;
+        }
+        const showDatesButton = await this.testSubjects.find('superDatePickerShowDatesButton');
+        if (!(await showDatesButton.isEnabled())) {
+          return false;
+        }
+        await showDatesButton.moveMouseTo();
+        await showDatesButton.click();
+        // Close the start date popover which opens automatically
+        await this.testSubjects.existOrFail('superDatePickerstartDatePopoverButton', {
+          timeout: 1000,
+        });
         await this.testSubjects.click('superDatePickerstartDatePopoverButton');
+        return true;
       }
-    });
+    );
   }
 
   /**
@@ -240,11 +269,31 @@ export class TimePickerPageObject extends FtrService {
     const tz = await this.getConfiguredTimezone();
     // Try the legacy format first; fall back to moment's auto-detection
     // so callers can pass dates in any format (e.g. custom dateFormat).
-    const parsed = moment.tz(fromTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
-    const expectedFromISO = (parsed.isValid() ? parsed : moment.tz(fromTime, tz)).toISOString();
+    const parsedFrom = moment.tz(fromTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
+    const parsedTo = moment.tz(toTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
+    const expectedFromISO = (
+      parsedFrom.isValid() ? parsedFrom : moment.tz(fromTime, tz)
+    ).toISOString();
+    const expectedToISO = (parsedTo.isValid() ? parsedTo : moment.tz(toTime, tz)).toISOString();
     await this.retry.waitFor(`date range to be set to ${rangeText}`, async () => {
-      await this.testSubjects.click('dateRangePickerControlButton');
-      await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 });
+      // Tooltips can sometimes hide the picker, so move mouse directly to it instead of direct click
+      const picker = await this.testSubjects.find('dateRangePickerControlButton');
+
+      // In ES|QL mode the picker stays disabled until the time field has been resolved asynchronously.
+      // Wait for it to be enabled.
+      if (!(await picker.isEnabled())) {
+        this.log.debug('dateRangePickerControlButton is disabled, waiting for it to be enabled');
+        return false;
+      }
+
+      await picker.moveMouseTo();
+      await picker.click();
+
+      if (!(await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 }))) {
+        this.log.debug('dateRangePickerInput did not appear after opening the picker, retrying');
+        return false;
+      }
+
       await this.inputValue('dateRangePickerInput', rangeText);
       // Pressing Enter in inputValue applies the range and closes the popover.
       // Verify the button reflects the new range.
@@ -256,7 +305,8 @@ export class TimePickerPageObject extends FtrService {
       this.log.debug(
         `Validating date range - expected ISO: '${expectedFromISO}', actual: '${actualRange}'`
       );
-      return actualRange != null && actualRange.includes(expectedFromISO);
+      const expectedRange = `${expectedFromISO} to ${expectedToISO}`;
+      return actualRange === expectedRange;
     });
     // Ensure the popover is fully closed before returning, so it doesn't
     // overlay other elements and intercept clicks.
@@ -267,10 +317,9 @@ export class TimePickerPageObject extends FtrService {
   }
 
   private async setAbsoluteRangeLegacyPicker(fromTime: string, toTime: string) {
-    await this.showStartEndTimes();
-
     // set to time
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
+      await this.showStartEndTimes();
       await this.testSubjects.click('superDatePickerendDatePopoverButton');
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
@@ -285,6 +334,7 @@ export class TimePickerPageObject extends FtrService {
 
     // set from time
     await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
+      await this.showStartEndTimes();
       await this.testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
@@ -318,6 +368,15 @@ export class TimePickerPageObject extends FtrService {
   }
 
   public async isOff() {
+    // The new picker renders a hidden `kbnQueryBar-datePicker-disabled` span
+    // whenever the time filter is off (no-time-field data view, isDisabled
+    // prop, or auto-refresh-only mode); the legacy picker renders it visibly
+    // inside the SuperDatePicker's isDisabled.display node.
+    if (await this.testSubjects.exists('kbnQueryBar-datePicker-disabled', { allowHidden: true })) {
+      return true;
+    }
+    // Legacy auto-refresh-only mode doesn't render the span; the
+    // SuperDatePicker collapses to a readOnly EuiAutoRefresh control instead.
     return await this.find.existsByCssSelector('.euiAutoRefresh .euiFormControlLayout-readOnly');
   }
 
@@ -517,7 +576,8 @@ export class TimePickerPageObject extends FtrService {
 
   public async getShowDatesButtonText() {
     if (await this.isNewDateRangePicker()) {
-      return (await this.testSubjects.getAttribute('dateRangePickerControlButton', 'value')) ?? '';
+      const valueDisplay = await this.testSubjects.find('dateRangePickerValueDisplay');
+      return await valueDisplay.getVisibleText();
     }
     const button = await this.testSubjects.find('superDatePickerShowDatesButton');
     const text = await button.getVisibleText();

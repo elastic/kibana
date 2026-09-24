@@ -34,7 +34,10 @@ const subLinks: LinkItem[] = [
     }),
     landingIcon: IconAgent,
     path: SIEM_MIGRATIONS_MANAGE_PATH,
-    capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    capabilities: [
+      [`dashboard_v2.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+      [RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+    ],
     skipUrlState: true,
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
@@ -95,7 +98,6 @@ export const links: LinkItem = {
   ],
   links: subLinks,
   skipUrlState: true,
-  globalNavPosition: 13,
   categories: [
     {
       label: i18n.translate('xpack.securitySolution.appLinks.category.automaticMigrations', {

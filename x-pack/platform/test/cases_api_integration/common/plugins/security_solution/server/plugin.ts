@@ -38,6 +38,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     cases.registerCloseReasonValidator('securitySolutionFixture', async (closeReason) =>
       DEFAULT_CLOSE_REASONS.has(closeReason)
     );
+    // Behave like the security solution owner so unified alert/event attachments
+    // resolve to `security.*` types once the attachments feature flag is on.
+    cases.registerOwnerPrefix('securitySolutionFixture', 'security');
   }
 
   public start() {}

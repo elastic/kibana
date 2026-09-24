@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -15,6 +16,7 @@ import type { IDetectionRulesClient } from '../../../rule_management/logic/detec
 export const createPrebuiltRules = (
   detectionRulesClient: IDetectionRulesClient,
   rules: PrebuiltRuleAsset[],
+  changeTracking?: SecurityRuleChangeTracking<never>,
   logger?: Logger
 ) => {
   return withSecuritySpan('createPrebuiltRules', async () => {
@@ -27,6 +29,13 @@ export const createPrebuiltRules = (
       executor: async (rule) => {
         return detectionRulesClient.createPrebuiltRule({
           params: rule,
+          changeTracking: {
+            ...changeTracking,
+            metadata: {
+              bulkCount: rules.length,
+              ...changeTracking?.metadata,
+            },
+          },
         });
       },
     });

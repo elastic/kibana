@@ -10,9 +10,12 @@
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
+import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
+import { enrichErrorMessage } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
-import { getPathAtOffset } from '../../../../common/lib/yaml';
-import { enrichErrorMessage } from '../../../../common/lib/zod';
+import { connectorParamsSchemaResolver } from '../../../../common/lib/connector_params_schema_resolver';
+
+const ARRAY_MIN_ITEMS_ERROR_PREFIX = 'Array has too few items.';
 
 /**
  * Formats Monaco YAML validation markers with enriched error messages.
@@ -31,6 +34,13 @@ export function formatMonacoYamlMarker(
   // Update severity for yaml-schema errors to make them more visible
   if (marker.source?.startsWith('yaml-schema:')) {
     newMarker.severity = monaco.MarkerSeverity.Error;
+  }
+
+  if (marker.message === 'Property inputs is not allowed.' && marker.startColumn === 1) {
+    return {
+      ...newMarker,
+      message: 'The "inputs" must be defined under a manual trigger, not at the root level.',
+    };
   }
 
   // JSON Schema `pattern` errors lose the Zod error message during conversion.
@@ -64,10 +74,11 @@ export function formatMonacoYamlMarker(
     const { message: enrichedMessage, enriched } = enrichErrorMessage(
       yamlPath,
       marker.message ?? '',
-      'unknown', // Monaco YAML errors don't have Zod error codes
+      marker.message?.startsWith(ARRAY_MIN_ITEMS_ERROR_PREFIX) ? 'too_small' : 'unknown',
       {
         schema: workflowYamlSchemaLoose,
         yamlDocument: yamlDocument ?? undefined,
+        connectorParamsSchemaResolver,
       }
     );
 
@@ -91,12 +102,14 @@ export function formatMonacoYamlMarker(
 function shouldEnrichMarker(message: string | undefined): boolean {
   if (!message) return false;
 
+  const hasArrayMinimumError = message.startsWith(ARRAY_MIN_ITEMS_ERROR_PREFIX);
+
   // Numeric enum patterns (e.g., "Expected 0 | 1 | 2")
   const hasNumericEnumPattern =
     /Expected "\d+(\s*\|\s*\d+)*"/.test(message) ||
     /Incorrect type\. Expected "\d+(\s*\|\s*\d+)*"/.test(message) ||
     /Expected \\\\"?\d+(\s*\|\s*\d+)*\\\\"?/.test(message) ||
-    /Expected \d+(\s*\|\s*\d+)*(?!\w)/.test(message) ||
+    /Expected \d+(\s*\|\s*\d+)+(?!\w)/.test(message) ||
     /Invalid enum value\. Expected \d+(\s*\|\s*\d+)*/.test(message) ||
     /Value must be one of: \d+(\s*,\s*\d+)*/.test(message);
 
@@ -108,5 +121,7 @@ function shouldEnrichMarker(message: string | undefined): boolean {
   // Connector enum patterns
   const hasConnectorEnumPattern = message.includes('Expected ".none" | ".cases-webhook"');
 
-  return hasNumericEnumPattern || hasFieldTypeError || hasConnectorEnumPattern;
+  return (
+    hasArrayMinimumError || hasNumericEnumPattern || hasFieldTypeError || hasConnectorEnumPattern
+  );
 }

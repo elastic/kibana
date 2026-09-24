@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { parse, stringify } from 'yaml';
+import { parse } from 'yaml';
 
 import type { ESAssetMetadata } from '../../../../common/types';
+
 import { PackagePolicyValidationError } from '../../../../common/errors';
+
+import { toYaml } from './yaml_utils';
 
 const MANAGED_BY_DEFAULT = 'fleet';
 
@@ -48,10 +51,9 @@ export function appendMetadataToIngestPipeline({
       // YML and return the resulting YML
       const parsedPipelineContent = parse(pipeline.contentForInstallation);
       parsedPipelineContent._meta = meta;
-
       return {
         ...pipeline,
-        contentForInstallation: `---\n${stringify(parsedPipelineContent)}`,
+        contentForInstallation: `---\n${toYaml(parsedPipelineContent)}`,
       };
     }
 

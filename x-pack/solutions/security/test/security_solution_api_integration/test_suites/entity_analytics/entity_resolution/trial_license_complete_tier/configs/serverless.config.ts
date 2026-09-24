@@ -23,6 +23,8 @@ export default createTestConfig({
       securitySolutionEnableExperimental
     )}`,
   ],
+  // Entity analytics tests do not exercise prebuilt-rule management endpoints.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('..')],
   junit: {
     reportName:

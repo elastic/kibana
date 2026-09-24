@@ -32,14 +32,17 @@ export const getGlobalExecutionSummarySchema = schema.object(
 
 const positiveNumber = schema.number({ min: 0 });
 
-export const getGlobalExecutionSummaryResponseBodySchema = schema.object({
-  executions: schema.object({
-    total: positiveNumber,
-    success: positiveNumber,
-  }),
-  latestExecutionSummary: schema.object({
-    success: positiveNumber,
-    failure: positiveNumber,
-    warning: positiveNumber,
-  }),
-});
+export const getGlobalExecutionSummaryResponseBodySchema = schema.object(
+  {
+    executions: schema.object({
+      total: positiveNumber,
+      success: positiveNumber,
+    }),
+    latestExecutionSummary: schema.object({
+      success: positiveNumber,
+      failure: positiveNumber,
+      warning: positiveNumber,
+    }),
+  },
+  { meta: { id: 'global_execution_summary_response' } }
+);

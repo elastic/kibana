@@ -24,7 +24,7 @@ evaluate.describe('Suite name', { tag: tags.serverless.observability.complete },
 
   evaluate('test name', async ({ executorClient, connector }) => {
     await executorClient.runExperiment(
-      { dataset, task },
+      { datasets: [dataset], task },
       evaluators
     );
   });
@@ -150,12 +150,12 @@ Available from `evaluators.traceBasedEvaluators`:
 
 These read from the tracing ES cluster and require EDOT to be running.
 
-### RAG Evaluators
+### IR Evaluators
 
-For retrieval-augmented generation with ground truth:
+For information retrieval quality with ground truth (Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K):
 
 ```ts
-import { createPrecisionAtKEvaluator, createRecallAtKEvaluator, createF1AtKEvaluator } from '@kbn/evals';
+import { createIrEvaluators } from '@kbn/evals';
 ```
 
 See [evaluator-patterns.md](references/evaluator-patterns.md) for full examples.
@@ -202,7 +202,7 @@ export function createEvaluateDataset({
   return async ({ dataset }) => {
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task: async ({ input }) => {
           const response = await chatClient.converse({ messages: [{ message: input.question }] });
           return { messages: response.messages, steps: response.steps };

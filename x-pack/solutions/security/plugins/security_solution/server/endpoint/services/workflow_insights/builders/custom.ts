@@ -16,6 +16,7 @@ import {
   WorkflowInsightSourceType,
   WorkflowInsightTargetType,
 } from '../../../../../common/endpoint/types/workflow_insights';
+import { toExternalDocLink } from '../../../../../common/endpoint/utils/external_doc_link';
 
 const groupSeparator = ':::';
 
@@ -28,6 +29,24 @@ function getMessage(insightType: WorkflowInsightType): string {
   }
 }
 
+function getPolicyResponseFailureDisplayName(group: string): string | undefined {
+  const [actionName, actionMessage] = group.split(groupSeparator);
+
+  if (actionName && actionMessage) {
+    return `${actionName}: ${actionMessage}`;
+  }
+
+  return actionMessage || actionName || undefined;
+}
+
+function getDisplayName(insightType: WorkflowInsightType, group: string): string | undefined {
+  if (insightType === WorkflowInsightType.enum.policy_response_failure) {
+    return getPolicyResponseFailureDisplayName(group);
+  }
+
+  return group.split(groupSeparator)[1];
+}
+
 export async function buildCustomWorkflowInsights({
   defendInsights,
   options,
@@ -38,7 +57,7 @@ export async function buildCustomWorkflowInsights({
   return defendInsights
     .filter((insight) => insight.remediation && insight.remediation.message)
     .map((insight) => {
-      const displayName = insight.group.split(groupSeparator)[1];
+      const displayName = getDisplayName(insightType, insight.group);
       const workflowInsight: SecurityWorkflowInsight = {
         '@timestamp': currentTime,
         message: getMessage(insightType),
@@ -67,7 +86,7 @@ export async function buildCustomWorkflowInsights({
         },
         remediation: {
           descriptive: (insight.remediation?.message as string) ?? '',
-          link: (insight.remediation?.link as string) ?? '',
+          link: toExternalDocLink(insight.remediation?.link),
         },
       };
 

@@ -66,8 +66,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
-import { from } from 'rxjs';
-import { map } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, from, map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
@@ -76,7 +76,12 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+  type ApmSharedPluginStart,
+} from '@kbn/apm-shared/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type {
@@ -89,10 +94,7 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import {
-  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
-  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from '../common/cps_feature_flag';
+import type { APMClientV2 } from '@kbn/apm-api-shared';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -105,9 +107,14 @@ import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
-import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
-import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
+import { registerEmbeddables } from './embeddable/register_embeddables';
+import {
+  registerServiceMapAttachment,
+  registerServiceMapContextAttachment,
+} from './agent_builder/attachment_types';
+import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
+import { createServiceFlyoutRenderer } from './components/shared/service_flyout/service_flyout_feature';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -142,10 +149,34 @@ export interface ApmServices {
 
 export interface ApmInternalServices {
   cpsManager?: ICPSManager;
+  callApmApi: APMClientV2;
 }
 
-export const [getApmInternalServices, setApmInternalServices] =
+const [getApmInternalServices, publishApmInternalServices] =
   createGetterSetter<ApmInternalServices>('ApmInternalServices', false);
+
+export { getApmInternalServices };
+
+const cpsManager$ = new BehaviorSubject<ICPSManager | undefined>(undefined);
+
+/**
+ * Publishes the internal services and notifies `apmCpsManager$` subscribers.
+ */
+export const setApmInternalServices = (services: ApmInternalServices): void => {
+  publishApmInternalServices(services);
+  cpsManager$.next(services.cpsManager);
+};
+
+/** Reads the currently published CPS manager, which is only set while the APM CPS flag is enabled. */
+export const getApmCpsManager = (): ICPSManager | undefined => cpsManager$.getValue();
+
+/**
+ * Emits the published CPS manager, so consumers that rendered before the CPS flag resolved
+ * resubscribe to it instead of caching its absence for their whole lifetime.
+ */
+export const apmCpsManager$: Observable<ICPSManager | undefined> = cpsManager$.pipe(
+  distinctUntilChanged()
+);
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
@@ -185,13 +216,14 @@ export interface ApmPluginStartDeps {
   apmSourcesAccess: ApmSourceAccessPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
-  share?: SharePublicStart;
+  share: SharePublicStart;
   notifications: NotificationsStart;
   discoverShared: DiscoverSharedPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   slo?: SLOPublicStart;
   cps?: CPSPluginStart;
+  apmShared: ApmSharedPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -233,6 +265,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
+  private cpsEnabledSubscription?: Subscription;
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
@@ -302,49 +335,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       )
     );
 
-    const getApmDataHelper = async () => {
-      const { fetchObservabilityOverviewPageData, getHasData } = await import(
-        './services/rest/apm_observability_overview_fetchers'
-      );
-      const { fetchSpanLinks } = await import('./services/rest/span_links');
-      const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
-      const { fetchRootSpanByTraceId } = await import(
-        './services/rest/fetch_trace_root_span_by_trace_id'
-      );
-      const { fetchSpan } = await import('./services/rest/fetch_span');
-      const { fetchLatencyOverallTransactionDistribution } = await import(
-        './services/rest/fetch_latency_overall_transaction_distribution'
-      );
-      const { fetchLatencyOverallSpanDistribution } = await import(
-        './services/rest/fetch_latency_overall_span_distribution'
-      );
-      const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
-
-      const { createCallApmApi } = await import('./services/rest/create_call_apm_api');
-
-      // have to do this here as well in case app isn't mounted yet
-      createCallApmApi(core);
-
-      return {
-        fetchObservabilityOverviewPageData,
-        getHasData,
-        hasFleetApmIntegrations,
-        fetchSpanLinks,
-        fetchErrorsByTraceId,
-        fetchRootSpanByTraceId,
-        fetchSpan,
-        fetchLatencyOverallTransactionDistribution,
-        fetchLatencyOverallSpanDistribution,
-      };
-    };
-
     this.telemetry.setup({ analytics: core.analytics });
 
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
     pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
       'apm_fleet_server_status_check',
       async () => {
-        const { hasFleetApmIntegrations } = await getApmDataHelper();
+        const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
         return hasFleetApmIntegrations();
       }
     );
@@ -365,31 +362,35 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.getHasData();
+        const { getHasData } = await import('./services/rest/apm_observability_overview_fetchers');
+        return await getHasData();
       },
       fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.fetchObservabilityOverviewPageData(params);
+        const { fetchObservabilityOverviewPageData } = await import(
+          './services/rest/apm_observability_overview_fetchers'
+        );
+        return await fetchObservabilityOverviewPageData(params);
       },
     });
 
     plugins.exploratoryView.register({
       appName: 'apm',
       hasData: async () => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.getHasData();
+        const { getHasData } = await import('./services/rest/apm_observability_overview_fetchers');
+        return await getHasData();
       },
       fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.fetchObservabilityOverviewPageData(params);
+        const { fetchObservabilityOverviewPageData } = await import(
+          './services/rest/apm_observability_overview_fetchers'
+        );
+        return await fetchObservabilityOverviewPageData(params);
       },
     });
 
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-span-links',
       fetchSpanLinks: async (params, signal) => {
-        const { fetchSpanLinks } = await getApmDataHelper();
+        const { fetchSpanLinks } = await import('./services/rest/span_links');
         return fetchSpanLinks(params, signal);
       },
     });
@@ -397,7 +398,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-errors',
       fetchErrorsByTraceId: async (params, signal) => {
-        const { fetchErrorsByTraceId } = await getApmDataHelper();
+        const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
         return fetchErrorsByTraceId(params, signal);
       },
     });
@@ -405,7 +406,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-root-span-by-trace-id',
       fetchRootSpanByTraceId: async (params, signal) => {
-        const { fetchRootSpanByTraceId } = await getApmDataHelper();
+        const { fetchRootSpanByTraceId } = await import(
+          './services/rest/fetch_trace_root_span_by_trace_id'
+        );
         return fetchRootSpanByTraceId(params, signal);
       },
     });
@@ -413,7 +416,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-span',
       fetchSpan: async (params, signal) => {
-        const { fetchSpan } = await getApmDataHelper();
+        const { fetchSpan } = await import('./services/rest/fetch_span');
         return fetchSpan(params, signal);
       },
     });
@@ -421,7 +424,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-latency-overall-transaction-distribution',
       fetchLatencyOverallTransactionDistribution: async (params, signal) => {
-        const { fetchLatencyOverallTransactionDistribution } = await getApmDataHelper();
+        const { fetchLatencyOverallTransactionDistribution } = await import(
+          './services/rest/fetch_latency_overall_transaction_distribution'
+        );
         return fetchLatencyOverallTransactionDistribution(params, signal);
       },
     });
@@ -429,7 +434,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-latency-overall-span-distribution',
       fetchLatencyOverallSpanDistribution: async (params, signal) => {
-        const { fetchLatencyOverallSpanDistribution } = await getApmDataHelper();
+        const { fetchLatencyOverallSpanDistribution } = await import(
+          './services/rest/fetch_latency_overall_span_distribution'
+        );
         return fetchLatencyOverallSpanDistribution(params, signal);
       },
     });
@@ -461,24 +468,38 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'service-groups-list',
           title: serviceGroupsTitle,
           path: '/service-groups',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
         {
           id: 'services',
           title: servicesTitle,
           path: '/services',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
         {
           id: 'traces',
           title: tracesTitle,
           path: '/traces',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
-        { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
+        {
+          id: 'service-map',
+          title: serviceMapTitle,
+          path: '/service-map',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
-        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
+        {
+          id: 'settings',
+          title: apmSettingsTitle,
+          path: '/settings',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
         {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
@@ -510,19 +531,21 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    import('./components/alerting/rule_types/register_apm_rule_types').then(
-      ({ registerApmRuleTypes }) => {
-        registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup);
-      }
-    );
-    import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {
-      registerEmbeddables({
-        coreSetup: core,
-        pluginsSetup: plugins,
-        config,
-        kibanaEnvironment,
-        observabilityRuleTypeRegistry,
-      });
+    registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup, {
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+      telemetry,
+    });
+    registerEmbeddables({
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+      telemetry,
     });
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
@@ -533,25 +556,44 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    const { fleet, discoverShared } = plugins;
+    const { fleet } = plugins;
 
-    if (
-      core.featureFlags.getBooleanValue(
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-service-flyout',
+      renderServiceFlyout: createServiceFlyoutRenderer({
+        share: plugins.share,
+        core,
+        lens: plugins.lens,
+        dataViews: plugins.dataViews,
+        alerting: plugins.alerting,
+        telemetryClient: this.telemetry.start(),
+      }),
+    });
+
+    const apmInternalServices: ApmInternalServices = {
+      callApmApi: plugins.apmShared.callApmApi,
+    };
+
+    this.cpsEnabledSubscription = core.featureFlags
+      .getBooleanValue$(
         OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
         OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
       )
-    ) {
-      plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
-      setApmInternalServices({
-        cpsManager: plugins.cps?.cpsManager,
+      .subscribe((isCpsEnabled) => {
+        // Registering DISABLED matches the access the CPS manager resolves for an unregistered app,
+        // so the picker follows the flag when it is turned off after having been on.
+        plugins.cps?.cpsManager?.registerAppAccess('apm', () =>
+          isCpsEnabled ? ProjectRoutingAccess.EDITABLE : ProjectRoutingAccess.DISABLED
+        );
+        setApmInternalServices({
+          ...apmInternalServices,
+          cpsManager: isCpsEnabled ? plugins.cps?.cpsManager : undefined,
+        });
       });
-    } else {
-      setApmInternalServices({});
-    }
+
     if (plugins.agentBuilder) {
-      import('./agent_builder/attachment_types').then(({ registerServiceMapAttachment }) => {
-        registerServiceMapAttachment(plugins.agentBuilder!.attachments);
-      });
+      registerServiceMapAttachment(plugins.agentBuilder.attachments);
+      registerServiceMapContextAttachment(plugins.agentBuilder.attachments);
     }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
@@ -559,16 +601,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       mod.registerAssistantFunctions({
         registerRenderFunction,
       });
-    });
-
-    discoverShared.features.registry.register({
-      id: 'observability-focused-trace-waterfall',
-      render: createLazyFocusedTraceWaterfallRenderer({ core }),
-    });
-
-    discoverShared.features.registry.register({
-      id: 'observability-full-trace-waterfall',
-      render: createLazyFullTraceWaterfallRenderer({ core }),
     });
 
     if (fleet) {
@@ -606,5 +638,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         tabs: [{ title: 'APM Agents', Component: getLazyApmAgentsTabExtension() }],
       });
     }
+  }
+
+  public stop() {
+    this.cpsEnabledSubscription?.unsubscribe();
   }
 }

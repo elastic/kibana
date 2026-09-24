@@ -9,7 +9,7 @@
 
 import type { EuiSelectableOption } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
-import type { WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import type { WorkflowsSearchParams, WorkflowStatsDto } from '@kbn/workflows/types/v1';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 
 export function useWorkflowStats() {
@@ -22,12 +22,15 @@ export function useWorkflowStats() {
   });
 }
 
-export function useWorkflowFiltersOptions(fields: string[]) {
+export function useWorkflowFiltersOptions(
+  fields: string[],
+  managed?: WorkflowsSearchParams['managed']
+) {
   const api = useWorkflowsApi();
 
   return useQuery<Record<string, Array<EuiSelectableOption>>>({
     networkMode: 'always',
-    queryKey: ['workflows', 'aggs', fields],
-    queryFn: () => api.getAggs({ fields }),
+    queryKey: ['workflows', 'aggs', fields, managed],
+    queryFn: () => api.getAggs({ fields, managed }),
   });
 }

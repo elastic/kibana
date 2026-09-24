@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const connectorResponseSchema = schema.object({
+const connectorResponseFields = {
   id: schema.string({
     meta: {
       description: 'The identifier for the connector.',
@@ -23,7 +23,9 @@ export const connectorResponseSchema = schema.object({
     meta: { description: 'The connector type identifier.' },
   }),
   is_missing_secrets: schema.maybe(
-    schema.boolean({ meta: { description: 'Indicates whether the connector is missing secrets.' } })
+    schema.boolean({
+      meta: { description: 'Indicates whether the connector is missing secrets.' },
+    })
   ),
   is_preconfigured: schema.boolean({
     meta: {
@@ -47,94 +49,148 @@ export const connectorResponseSchema = schema.object({
       },
     })
   ),
-});
+};
 
-const connectorResponseWithReferencesCountSchema = connectorResponseSchema.extends({
+const isInboundEventsEnabledResponseField = {
+  is_inbound_events_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Indicates whether this connector can receive inbound events. Always true for inbound-only connectors. For connectors that also send actions, true after inbound events have been turned on.',
+      },
+    })
+  ),
+};
+
+const referencedByCountField = {
   referenced_by_count: schema.number({
     meta: {
       description:
         'The number of saved objects that reference the connector. If is_preconfigured is true, this value is not calculated.',
     },
   }),
-});
+};
 
-export const getAllConnectorsResponseSchema = schema.arrayOf(
-  connectorResponseWithReferencesCountSchema
-);
-
-export const connectorTypeResponseSchema = schema.object({
-  id: schema.string({
-    meta: {
-      description: 'The identifier for the connector.',
-    },
-  }),
-  name: schema.string({
-    meta: {
-      description: 'The name of the connector type.',
-    },
-  }),
-  enabled: schema.boolean({
-    meta: {
-      description: 'Indicates whether the connector is enabled.',
-    },
-  }),
-  enabled_in_config: schema.boolean({
-    meta: {
-      description: 'Indicates whether the connector is enabled in the Kibana configuration.',
-    },
-  }),
-  enabled_in_license: schema.boolean({
-    meta: {
-      description: 'Indicates whether the connector is enabled through the license.',
-    },
-  }),
-  minimum_license_required: schema.oneOf(
-    [
-      schema.literal('basic'),
-      schema.literal('standard'),
-      schema.literal('gold'),
-      schema.literal('platinum'),
-      schema.literal('enterprise'),
-      schema.literal('trial'),
-    ],
+/** Connector response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
+export const getConnectorResponseSchema = (includeInboundEventsField: boolean) =>
+  schema.object(
     {
-      meta: {
-        description: 'The minimum license required to enable the connector.',
-      },
-    }
-  ),
-  supported_feature_ids: schema.arrayOf(schema.string(), {
-    meta: {
-      description: 'The list of supported features',
+      ...connectorResponseFields,
+      ...(includeInboundEventsField ? isInboundEventsEnabledResponseField : {}),
     },
-  }),
-  is_system_action_type: schema.boolean({
-    meta: { description: 'Indicates whether the action is a system action.' },
-  }),
-  sub_feature: schema.maybe(
-    schema.oneOf([schema.literal('endpointSecurity')], {
-      meta: {
-        description: 'Indicates the sub-feature type the connector is grouped under.',
-      },
+    { meta: { id: 'connector_response' } }
+  );
+
+/** Get-all connectors response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
+export const getGetAllConnectorsResponseSchema = (includeInboundEventsField: boolean) =>
+  // codeql[js/kibana/unbounded-array-in-schema] Response schema for the connector list; Kibana builds the array, it is not request input
+  schema.arrayOf(
+    getConnectorResponseSchema(includeInboundEventsField).extends(referencedByCountField, {
+      meta: { id: 'connector_response_with_references_count' },
     })
-  ),
-  is_deprecated: schema.boolean({
-    meta: { description: 'Indicates whether the connector type is deprecated.' },
-  }),
-  allow_multiple_system_actions: schema.maybe(
-    schema.boolean({
+  );
+
+/** Flag-on schema so TypeOf includes the optional field. */
+export const connectorResponseSchema = getConnectorResponseSchema(true);
+
+/** Flag-on schema so TypeOf includes the optional field. */
+export const getAllConnectorsResponseSchema = getGetAllConnectorsResponseSchema(true);
+
+export const connectorTypeResponseSchema = schema.object(
+  {
+    id: schema.string({
       meta: {
-        description:
-          'Indicates whether multiple instances of the same system action connector can be used in a single rule.',
+        description: 'The identifier for the connector.',
       },
-    })
-  ),
-  source: schema.oneOf([schema.literal('yml'), schema.literal('spec'), schema.literal('stack')], {
-    meta: {
-      description: 'The source of the connector type definition.',
-    },
-  }),
-});
+    }),
+    name: schema.string({
+      meta: {
+        description: 'The name of the connector type.',
+      },
+    }),
+    enabled: schema.boolean({
+      meta: {
+        description: 'Indicates whether the connector is enabled.',
+      },
+    }),
+    enabled_in_config: schema.boolean({
+      meta: {
+        description: 'Indicates whether the connector is enabled in the Kibana configuration.',
+      },
+    }),
+    enabled_in_license: schema.boolean({
+      meta: {
+        description: 'Indicates whether the connector is enabled through the license.',
+      },
+    }),
+    minimum_license_required: schema.oneOf(
+      [
+        schema.literal('basic'),
+        schema.literal('standard'),
+        schema.literal('gold'),
+        schema.literal('platinum'),
+        schema.literal('enterprise'),
+        schema.literal('trial'),
+      ],
+      {
+        meta: {
+          description: 'The minimum license required to enable the connector.',
+        },
+      }
+    ),
+    supported_feature_ids: schema.arrayOf(schema.string(), {
+      meta: {
+        description: 'The list of supported features',
+      },
+    }),
+    is_system_action_type: schema.boolean({
+      meta: { description: 'Indicates whether the action is a system action.' },
+    }),
+    sub_feature: schema.maybe(
+      schema.oneOf([schema.literal('endpointSecurity')], {
+        meta: {
+          description: 'Indicates the sub-feature type the connector is grouped under.',
+        },
+      })
+    ),
+    is_deprecated: schema.boolean({
+      meta: { description: 'Indicates whether the connector type is deprecated.' },
+    }),
+    allow_multiple_system_actions: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Indicates whether multiple instances of the same system action connector can be used in a single rule.',
+        },
+      })
+    ),
+    source: schema.oneOf([schema.literal('yml'), schema.literal('spec'), schema.literal('stack')], {
+      meta: {
+        description: 'The source of the connector type definition.',
+      },
+    }),
+    description: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Description of the connector type.',
+        },
+      })
+    ),
+    is_experimental: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Indicates whether the connector type is in technical preview.',
+        },
+      })
+    ),
+    is_testable: schema.boolean({
+      meta: {
+        description: 'Indicates whether the connector type supports testing.',
+      },
+    }),
+  },
+  { meta: { id: 'connector_type_response' } }
+);
 
 export const getAllConnectorTypesResponseSchema = schema.arrayOf(connectorTypeResponseSchema);
 
@@ -188,4 +244,114 @@ export const connectorExecuteResponseSchema = schema.object({
       },
     })
   ),
+  error_name: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'When the status is error, identifies the error class name so consumers can branch on specific error types (e.g. ConnectorAuthorizationError).',
+      },
+    })
+  ),
+  error_meta: schema.maybe(
+    schema.recordOf(schema.string(), schema.any(), {
+      meta: {
+        description:
+          'When the status is error, carries structured metadata describing the failure (e.g. the auth method and reason for a ConnectorAuthorizationError).',
+      },
+    })
+  ),
+});
+
+export const connectorAuthStatusResponseSchema = schema.recordOf(
+  schema.string(),
+  schema.object({
+    user_auth_status: schema.oneOf(
+      [
+        schema.literal('connected'),
+        schema.literal('not_connected'),
+        schema.literal('not_applicable'),
+      ],
+      {
+        meta: {
+          description: 'The authentication status of the current user for this connector.',
+        },
+      }
+    ),
+  }),
+  {
+    meta: {
+      description: 'A map of connector IDs to their user authentication status.',
+    },
+  }
+);
+
+export const getConnectorSpecResponseBodySchema = schema.object({
+  metadata: schema.object(
+    {
+      id: schema.string({
+        meta: {
+          description: 'The connector type identifier (same shape as an action type id).',
+        },
+      }),
+      display_name: schema.string({
+        meta: {
+          description: 'Human-readable label for this connector type.',
+        },
+      }),
+      description: schema.string({
+        meta: {
+          description: 'Short summary of what this connector type is used for.',
+        },
+      }),
+      minimum_license: schema.string({
+        meta: {
+          description: 'Minimum Elastic license tier required to use this connector type.',
+        },
+      }),
+      supported_feature_ids: schema.arrayOf(schema.string(), {
+        maxSize: 100,
+        meta: {
+          description:
+            'Kibana feature identifiers this connector type supports (for example alerting or workflows).',
+        },
+      }),
+      icon: schema.maybe(
+        schema.string({
+          meta: {
+            description: 'Optional icon key or URL for this connector type in the UI.',
+          },
+        })
+      ),
+      docs_url: schema.maybe(
+        schema.string({
+          meta: {
+            description: 'Optional link to documentation for this connector type.',
+          },
+        })
+      ),
+      is_technical_preview: schema.maybe(
+        schema.boolean({
+          meta: {
+            description: 'When true, this connector type is offered as a technical preview.',
+          },
+        })
+      ),
+    },
+    {
+      meta: {
+        description: 'Connector spec metadata (snake_case HTTP shape).',
+      },
+    }
+  ),
+  schema: schema.recordOf(schema.string(), schema.any(), {
+    meta: {
+      description:
+        'JSON Schema envelope for the connector form (top-level `config` and `secrets` shapes)',
+    },
+  }),
+  is_testable: schema.boolean({
+    meta: {
+      description: 'When true, this connector type supports the reserved test sub-action.',
+    },
+  }),
 });

@@ -119,13 +119,26 @@ export default function (providerContext: FtrProviderContext) {
   const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_LATEST_INDEX);
   const scoresIndex = new EsIndexDataProvider(es, BENCHMARK_SCORES_INDEX);
 
-  // Failing: See https://github.com/elastic/kibana/issues/257006
-  describe.skip('Vulnerability Dashboard API', async () => {
+  describe('Vulnerability Dashboard API', async () => {
     beforeEach(async () => {
       await vulnerabilitiesIndex.deleteAll();
       await scoresIndex.deleteAll();
       await waitForPluginInitialized({ retry, logger, supertest });
-      await scoresIndex.addBulk(scoresVulnerabilitiesMock, false);
+      // The scores data stream has a default ingest pipeline that overwrites @timestamp with
+      // `_ingest.timestamp`. We bypass it (pipeline: '_none') and stamp the mock with yesterday
+      // so it lands in a separate daily bucket from any trend doc findings_stats_task writes
+      // today on a fresh Kibana boot.
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const scoresBulkResp = await es.bulk({
+        index: BENCHMARK_SCORES_INDEX,
+        pipeline: '_none',
+        refresh: 'wait_for',
+        operations: scoresVulnerabilitiesMock.flatMap((doc) => [
+          { create: { _index: BENCHMARK_SCORES_INDEX } },
+          { ...doc, '@timestamp': yesterday },
+        ]),
+      });
+      expect(scoresBulkResp.errors).to.be(false);
       await vulnerabilitiesIndex.addBulk(vulnerabilitiesLatestMock, false);
     });
 
@@ -142,8 +155,11 @@ export default function (providerContext: FtrProviderContext) {
 
       // @timestamp and event are real time calculated fields, we need to remove them in order to remove inconsistencies between mock and actual result
       const cleanedBody = removeRealtimeCalculatedFields(body);
+      // date_histogram orders buckets _key asc; our yesterday-stamped mock is the first bucket.
+      // findings_stats_task may add a today bucket which we ignore.
+      const ourTrendBucket = cleanedBody.vulnTrends[0];
 
-      expect(cleanedBody).to.eql({
+      expect({ ...cleanedBody, vulnTrends: [ourTrendBucket] }).to.eql({
         cnvmStatistics: {
           criticalCount: 0,
           highCount: 1,

@@ -49,6 +49,7 @@ import {
   DATA_STREAM_TYPE_VAR_NAME,
   USE_APM_VAR_NAME,
 } from '../../../../../../../../../common/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../../common/constants/epm';
 
 import type { StreamAdvancedVarsConfig } from './package_policy_input_config';
 import { PackagePolicyInputConfig } from './package_policy_input_config';
@@ -167,6 +168,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   isSingleInputAndStreams?: boolean;
   isEditPage?: boolean;
   isUpgrade?: boolean;
+  isAgentless?: boolean;
   varGroupSelections?: Record<string, string>;
 }> = memo(
   ({
@@ -180,11 +182,17 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     isSingleInputAndStreams = false,
     isEditPage = false,
     isUpgrade = false,
+    isAgentless = false,
     varGroupSelections = {},
   }) => {
     const theme = useEuiTheme();
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
+
+    const conditionFieldAllowed =
+      !isAgentless && packagePolicyInput.type !== OTEL_COLLECTOR_INPUT_TYPE;
+
+    const showConditionField = packagePolicyInput.enabled && conditionFieldAllowed;
 
     const inputVarGroups = packageInput.var_groups?.length ? packageInput.var_groups : undefined;
 
@@ -334,6 +342,11 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       inputValidationResults,
     ]);
 
+    // Render the input config section only when there is actual content to show:
+    // input-level vars, the condition field, or consolidated stream advanced vars.
+    const showInputConfig =
+      Boolean(packageInput.vars?.length) || showConditionField || shouldConsolidateAdvancedSections;
+
     const topLevelDescription = showTopLevelDescription && (
       <EuiText size="s" color="subdued">
         <ReactMarkdown>{String(inputStreams[0]?.packageInputStream?.description)}</ReactMarkdown>
@@ -408,28 +421,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       <>
         {/* Header / input-level toggle */}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          {isSingleInputAndStreams ? (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3
-                      data-test-subj="PackagePolicy.InputStreamConfig.title"
-                      style={
-                        isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
-                      }
-                    >
-                      {packageInput.title || packageInput.type}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {inputReleaseBadge && <EuiFlexItem grow={false}>{inputReleaseBadge}</EuiFlexItem>}
-                {migrationTooltip}
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              {showTopLevelDescription && topLevelDescription}
-            </EuiFlexItem>
-          ) : (
+          {
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 data-test-subj="PackagePolicy.InputStreamConfig.Switch"
@@ -486,7 +478,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               <EuiSpacer size="s" />
               {showTopLevelDescription && topLevelDescription}
             </EuiFlexItem>
-          )}
+          }
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {/* Bubble up deprecation warning when collapsed and input has deprecated features */}
@@ -519,7 +511,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   </EuiText>
                 </EuiFlexItem>
               ) : null}
-              {(!isSingleInputAndStreams || packageInfo.type === 'input') && (
+              {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color={hasErrors ? 'danger' : 'primary'}
@@ -545,20 +537,16 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     }
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-              )}
+              }
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
         {/* Spacing if we are showing rest of content */}
-        {isShowingStreams &&
-        hasInputStreams &&
-        ((packageInput.vars && packageInput.vars.length) || !shouldConsolidateAdvancedSections) ? (
-          <EuiSpacer size="m" />
-        ) : null}
+        {isShowingStreams && hasInputStreams && showInputConfig ? <EuiSpacer size="m" /> : null}
 
         {/* Input level policy */}
-        {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
+        {isShowingStreams && showInputConfig ? (
           <>
             <PackagePolicyInputConfig
               data-test-subj="PackagePolicy.InputConfig"
@@ -569,12 +557,13 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               inputValidationResults={inputValidationResults}
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
+              showConditionField={showConditionField}
               varGroups={inputVarGroups}
               varGroupSelections={inputVarGroupSelections}
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
-              showDescriptionColumn={!isSingleInputAndStreams}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
               sections={packageInput.sections}
+              isUpgrade={isUpgrade}
             />
             {hasInputStreams &&
             !shouldConsolidateAdvancedSections &&
@@ -599,7 +588,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     hasStreamToggle={hasStreamToggle}
                     packagePolicyInputStream={packagePolicyInputStream!}
                     inputPolicyTemplate={packagePolicyInput.policy_template}
-                    showDescriptionColumn={!isSingleInputAndStreams}
                     isUpgrade={isUpgrade}
                     updatePackagePolicyInputStream={(
                       updatedStream: Partial<PackagePolicyInputStream>
@@ -642,6 +630,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     }
                     forceShowErrors={forceShowErrors}
                     isEditPage={isEditPage}
+                    showConditionField={packagePolicyInputStream!.enabled && conditionFieldAllowed}
                     varGroupSelections={varGroupSelections}
                   />
                   {index !== inputStreams.length - 1 ? (

@@ -8,7 +8,6 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 import type { Stats } from '../stats';
@@ -68,7 +67,7 @@ export function createIndexDocRecordsStream(
     );
 
     if (errors.length) {
-      throw new AggregateError(errors);
+      throw new AggregateError(errors, errors.join('\n'));
     }
 
     for (const doc of docs) {

@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { GROUP_TITLE } from './group_fields';
 import { ORDER_BY_TITLE } from '../sort_menu';
 
@@ -92,8 +93,11 @@ export const GroupMenu = ({ groupOptions, orderByOptions, groupField }: Props) =
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('xpack.synthetics.groupMenu.popoverAriaLabel', {
+        defaultMessage: 'Group options',
+      })}
     >
-      <EuiContextMenuPanel size="s" items={items} style={{ minWidth: 160 }} />
+      <EuiContextMenuPanel items={items} css={{ minWidth: 160 }} />
     </EuiPopover>
   );
 };
@@ -111,7 +115,6 @@ const ContextMenuItem = ({
 
   return (
     <EuiContextMenuItem
-      size="s"
       key={option.value}
       icon={getIconType(option.checked)}
       onClick={() => {

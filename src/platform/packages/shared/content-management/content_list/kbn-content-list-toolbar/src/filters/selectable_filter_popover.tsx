@@ -76,6 +76,13 @@ export interface SelectableFilterPopoverProps<T extends object = Record<string, 
    * @default false
    */
   singleSelection?: boolean;
+  /**
+   * Hides the search box in the popover. Useful when the option count is
+   * small enough (e.g. 2–3) that searching adds no value.
+   *
+   * @default false
+   */
+  hideSearch?: boolean;
   /** Whether the options are loading. */
   isLoading?: boolean;
   /** Empty state message to display. */
@@ -154,6 +161,7 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
   options,
   renderOption,
   singleSelection = false,
+  hideSearch = false,
   isLoading,
   emptyMessage,
   noMatchesMessage,
@@ -197,19 +205,30 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
     lastModifierRef.current = isExcludeModifier(e);
   }, []);
 
-  // Only count values that match an available option so the badge doesn't
-  // reflect unresolved or stale query clauses (e.g. `tag:NonExistent`).
-  const validOptionValues = useMemo(() => new Set(options.map((o) => o.value ?? o.key)), [options]);
-  const activeCount = useMemo(
-    () => Object.keys(selection).filter((value) => validOptionValues.has(value)).length,
-    [selection, validOptionValues]
+  // The badge count is derived from the parsed query (`selection`), so it must
+  // be available before `options` resolves — facets are typically fetched
+  // lazily on first popover open. Until that happens, show the raw count of
+  // active clauses so URL-hydrated filters render immediately on page load.
+  // Once `options` is non-empty, drop unresolved or stale clauses (e.g.
+  // `tag:NonExistent`) so the badge matches what the popover actually shows.
+  const validOptionValues = useMemo(
+    () => new Set(options.flatMap((option) => [option.key, option.value ?? option.key])),
+    [options]
   );
+  const activeCount = useMemo(() => {
+    const selectedKeys = Object.keys(selection);
+    if (options.length === 0) {
+      return selectedKeys.length;
+    }
+    return selectedKeys.filter((value) => validOptionValues.has(value)).length;
+  }, [selection, validOptionValues, options.length]);
 
   // Build selectable options with view rendering.
   const selectableOptions = useMemo((): Array<InternalSelectableOption<T>> => {
     return options.map((option) => {
-      const value = option.value ?? option.key;
-      const state: FilterType | undefined = selection[value];
+      const queryValue = option.value ?? option.key;
+      const selectedValue = selection[queryValue] ? queryValue : option.key;
+      const state: FilterType | undefined = selection[queryValue] ?? selection[option.key];
       const checked = getCheckedState(state);
       const isActive = checked !== undefined;
       const count = option.count ?? 0;
@@ -217,7 +236,7 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
       return {
         key: option.key,
         label: option.label,
-        value,
+        value: isActive ? selectedValue : queryValue,
         checked,
         data: option.data,
         count,
@@ -294,20 +313,23 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
           emptyMessage={emptyMessage}
           noMatchesMessage={noMatchesMessage}
           onChange={handleSelectChange}
-          searchable
-          searchProps={{ compressed: true }}
+          {...(hideSearch
+            ? { searchable: false as const }
+            : { searchable: true as const, searchProps: { compressed: true } })}
           data-test-subj={`${dataTestSubj}-list`}
           aria-label={title}
         >
           {(list, search) => (
             <>
               {singleSelection ? (
-                <EuiPanel hasShadow={false} paddingSize="s">
-                  {search}
-                </EuiPanel>
+                !hideSearch && (
+                  <EuiPanel hasShadow={false} paddingSize="s">
+                    {search}
+                  </EuiPanel>
+                )
               ) : (
                 <FilterPopoverHeader
-                  search={search}
+                  search={hideSearch ? undefined : search}
                   activeCount={activeCount}
                   onClear={clearAll}
                   data-test-subj={`${dataTestSubj}-clear`}

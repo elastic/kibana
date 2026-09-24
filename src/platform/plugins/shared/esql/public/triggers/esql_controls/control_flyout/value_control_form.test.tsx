@@ -11,7 +11,7 @@ import React from 'react';
 import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
@@ -24,27 +24,29 @@ import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
 } from '@kbn/controls-constants';
+import { setupEuiMatchers } from '@elastic/eui/lib/test/rtl/matchers';
 
 jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
   return {
     getESQLResults: jest.fn().mockResolvedValue({
       response: {
         columns: [
           {
             name: 'field',
-            id: 'field',
-            meta: {
-              type: 'keyword',
-            },
+            type: 'keyword',
           },
         ],
-        values: [],
+        values: [['v1'], ['v2']],
       },
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
+    getVariableNamePrefix: actual.getVariableNamePrefix,
+    ESQLValuesPreview: actual.ESQLValuesPreview,
+    appendStatsByToQuery: actual.appendStatsByToQuery,
   };
 });
 
@@ -82,6 +84,10 @@ describe('ValueControlForm', () => {
     telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
     telemetryService: new ESQLEditorTelemetryService(services.core.analytics),
   };
+
+  beforeAll(() => {
+    setupEuiMatchers();
+  });
 
   describe('Interval type', () => {
     it('should default correctly if no initial state is given for an interval variable type', async () => {
@@ -242,7 +248,7 @@ describe('ValueControlForm', () => {
         );
 
         // values preview panel should be rendered
-        expect(await findByTestId('esqlValuesPreview')).toBeInTheDocument();
+        expect(await findByTestId('esqlValuesPreviewStrings')).toBeInTheDocument();
       });
 
       it('should be able to change in fields type', async () => {
@@ -363,6 +369,52 @@ describe('ValueControlForm', () => {
         );
 
         expect(await findByTestId('esqlNoValuesForControlCallout')).toBeInTheDocument();
+      });
+
+      it('should disable the save button until the values preview is successfully validated', async () => {
+        const { getByTestId } = render(
+          <IntlProvider locale="en">
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+              />
+            </KibanaContextProvider>
+          </IntlProvider>
+        );
+
+        const saveButton = getByTestId('saveEsqlControlsFlyoutButton');
+        expect(saveButton).toBeEuiDisabled();
+
+        await waitFor(() => {
+          expect(saveButton).not.toBeEuiDisabled();
+        });
+      });
+    });
+
+    describe('Multi values type', () => {
+      it('should default to "Values from a query" and enable the type dropdown for MULTI_VALUES', async () => {
+        const { findByTestId } = render(
+          <KibanaContextProvider services={services}>
+            <IntlProvider locale="en">
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.MULTI_VALUES}
+                queryString="FROM foo | WHERE MV_CONTAINS(field, "
+                esqlVariables={[]}
+              />
+            </IntlProvider>
+          </KibanaContextProvider>
+        );
+
+        expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
+        expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(
+          `Values from a query`
+        );
+
+        const typeDropdown = await findByTestId('esqlControlTypeDropdown');
+        expect(typeDropdown).not.toBeDisabled();
       });
     });
   });

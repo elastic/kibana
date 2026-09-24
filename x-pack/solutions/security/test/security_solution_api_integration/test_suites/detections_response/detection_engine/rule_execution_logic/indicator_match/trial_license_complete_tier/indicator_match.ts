@@ -12,14 +12,10 @@ import expect from 'expect';
 
 import {
   ALERT_REASON,
-  ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_RULE_NAMESPACE,
-  ALERT_RULE_UPDATED_AT,
-  ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
-  VERSION,
   ALERT_WORKFLOW_TAGS,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -54,9 +50,16 @@ import {
   stopAllManualRuns,
   waitForBackfillExecuted,
   setAdvancedSettings,
+  removeRandomValuedPropertiesFromAlert,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
+
+// Entity fields for the auditbeat record with ancestor _id = '7yJ-B2kBR346wHgnhlMn'.
+const ENRICHMENT_HOST_ID = '2ce8b1e7d69e4a1d9c6bcddc473da9d9';
+const ENRICHMENT_HOST_NAME = 'zeek-sensor-amsterdam';
+const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
 
 const createThreatMatchRule = ({
   name = 'Query with a rule id',
@@ -171,6 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const isServerless = config.get('serverless');
   const utils = getService('securitySolutionUtils');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
@@ -223,9 +227,9 @@ export default ({ getService }: FtrProviderContext) => {
       if (!fullAlert) {
         return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).toEqual({
-        ...fullAlert,
-        '@timestamp': fullAlert['@timestamp'],
+      const normalizedAlert = removeRandomValuedPropertiesFromAlert(fullAlert);
+      expect(normalizedAlert).toEqual({
+        ...normalizedAlert,
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
           hostname: 'zeek-sensor-amsterdam',
@@ -322,14 +326,11 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_REASON]:
           'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
-        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_STATUS]: 'active',
-        [ALERT_UUID]: fullAlert[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_WORKFLOW_TAGS]: [],
         [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
         [SPACE_IDS]: ['default'],
-        [VERSION]: fullAlert[VERSION],
         threat: {
           enrichments: get(fullAlert, 'threat.enrichments'),
         },
@@ -359,9 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat: [],
           to: 'now',
           type: 'threat_match',
-          updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
           updated_by: username,
-          uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });
@@ -405,9 +404,9 @@ export default ({ getService }: FtrProviderContext) => {
       if (!fullAlert) {
         return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).toEqual({
-        ...fullAlert,
-        '@timestamp': fullAlert['@timestamp'],
+      const normalizedAlert = removeRandomValuedPropertiesFromAlert(fullAlert);
+      expect(normalizedAlert).toEqual({
+        ...normalizedAlert,
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
           hostname: 'zeek-sensor-amsterdam',
@@ -504,12 +503,9 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_REASON]:
           'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
-        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_STATUS]: 'active',
-        [ALERT_UUID]: fullAlert[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [SPACE_IDS]: ['default'],
-        [VERSION]: fullAlert[VERSION],
         threat: {
           enrichments: get(fullAlert, 'threat.enrichments'),
         },
@@ -539,9 +535,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat: [],
           to: 'now',
           type: 'threat_match',
-          updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
           updated_by: username,
-          uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });
@@ -2460,11 +2454,22 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Critical', calculated_score_norm: 70 },
+              },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched with host risk score', async () => {
@@ -2504,15 +2509,23 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        // Note: user.name in this auditbeat record is 'root'. Entity Store V2's LOCAL_NAMESPACE_EXCLUDED_USER_NAMES
+        // list includes 'root', so the local-namespace gate fails and getEuidFromObject() returns
+        // undefined for alerts where user.name === 'root'. User enrichment is therefore skipped by
+        // the detection engine for system accounts; only host enrichment is tested here.
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
+              asset: { criticality: 'low_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched alert with criticality_level', async () => {
@@ -2546,7 +2559,6 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(fullAlert?.['host.asset.criticality']).toEqual('low_impact');
-        expect(fullAlert?.['user.asset.criticality']).toEqual('extreme_impact');
       });
     });
 

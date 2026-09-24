@@ -48,9 +48,15 @@ post:
             properties:
               acknowledged:
                 type: boolean
+          examples:
+            updateFieldsMetadataResponse:
+              $ref: '../components/examples/update_field_metadata_response.yaml'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            updateFieldsMetadataBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

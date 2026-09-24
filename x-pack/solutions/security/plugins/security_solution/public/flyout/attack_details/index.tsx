@@ -13,16 +13,18 @@ import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 
 import { PanelFooter } from './footer';
 import { PanelContent } from './content';
-import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../flyout_v2/attack/main/constants/local_storage';
 import { AttackDetailsRightPanelKey } from './constants/panel_keys';
 import type { AttackDetailsPanelTabType } from './tabs';
+import { allTabs as tabsDisplayed } from './tabs';
 import { useKibana } from '../../common/lib/kibana';
 
-import { useTabs } from './hooks/use_tabs';
+import { useTabs } from '../../flyout_v2/shared/hooks/use_tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useAttackDetailsContext } from './context';
 import { PanelHeader } from './header';
-import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
+import { AttackHeaderActions } from './components/header_actions';
+import { RemoteDocumentCallout } from '../../flyout_v2/document/main/components/remote_document_callout';
 
 export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
 export { ATTACK_PREVIEW_BANNER } from './context';
@@ -38,7 +40,11 @@ export const AttackDetailsRightPanel: React.FC<Partial<AttackDetailsProps>> = me
 
   const expandDetails = useNavigateToAttackDetailsLeftPanel();
 
-  const { tabsDisplayed, selectedTabId } = useTabs({ path });
+  const { selectedTabId } = useTabs<AttackDetailsPanelPaths>({
+    validTabIds: tabsDisplayed.map((tab) => tab.id),
+    storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+    initialTabId: path?.tab,
+  });
 
   const setSelectedTabId = useCallback(
     (tabId: AttackDetailsPanelTabType['id']) => {
@@ -52,7 +58,7 @@ export const AttackDetailsRightPanel: React.FC<Partial<AttackDetailsProps>> = me
       });
 
       // saving which tab is currently selected in the right panel in local storage
-      storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
+      storage.set(FLYOUT_STORAGE_KEYS.SELECTED_TAB, tabId);
     },
     [attackId, indexName, openRightPanel, storage]
   );
@@ -60,7 +66,11 @@ export const AttackDetailsRightPanel: React.FC<Partial<AttackDetailsProps>> = me
   return (
     <>
       <RemoteDocumentCallout hit={hit} />
-      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+      <FlyoutNavigation
+        flyoutIsExpandable={true}
+        expandDetails={expandDetails}
+        actions={<AttackHeaderActions />}
+      />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

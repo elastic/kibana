@@ -54,15 +54,15 @@ jest.mock('../../use_attack_discovery_bulk', () => ({
 }));
 
 jest.mock('./use_add_to_case', () => ({
-  useAddToNewCase: jest.fn(() => ({ disabled: false, onAddToNewCase: jest.fn() })),
-}));
-
-jest.mock('./use_add_to_existing_case', () => ({
-  useAddToExistingCase: jest.fn(() => ({ onAddToExistingCase: jest.fn() })),
+  useAddToCase: jest.fn(() => ({ disabled: false, onAddToCase: jest.fn() })),
 }));
 
 jest.mock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => ({
-  useViewInAiAssistant: jest.fn(() => ({ showAssistantOverlay: jest.fn(), disabled: false })),
+  useViewInAiAssistant: jest.fn(() => ({
+    showAssistantOverlay: jest.fn(),
+    disabled: false,
+    isAssistantVisible: true,
+  })),
 }));
 
 jest.mock('./use_update_alerts_status', () => ({
@@ -84,6 +84,14 @@ jest.mock(
 );
 
 const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+
+jest.mock('../use_attack_discovery_attachment', () => ({
+  useAttackDiscoveryAttachment: jest.fn(() => jest.fn()),
+}));
+
+jest.mock('../../../../agent_builder/hooks/use_report_add_to_chat', () => ({
+  useReportAddToChat: jest.fn(() => jest.fn()),
+}));
 
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
@@ -138,7 +146,7 @@ describe('TakeAction', () => {
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
   });
 
-  it('renders the Add to new case action', () => {
+  it('renders the Add to case action', () => {
     render(
       <TestProviders>
         <TakeAction {...defaultProps} />
@@ -148,18 +156,6 @@ describe('TakeAction', () => {
     openPopover();
 
     expect(screen.getByTestId('addToCase')).toBeInTheDocument();
-  });
-
-  it('renders the Add to existing case action', () => {
-    render(
-      <TestProviders>
-        <TakeAction {...defaultProps} />
-      </TestProviders>
-    );
-
-    openPopover();
-
-    expect(screen.getByTestId('addToExistingCase')).toBeInTheDocument();
   });
 
   it('renders the View in AI Assistant action', () => {
@@ -172,6 +168,29 @@ describe('TakeAction', () => {
     openPopover();
 
     expect(screen.getByTestId('viewInAiAssistant')).toBeInTheDocument();
+  });
+
+  it('renders explicitly ordered action groups with icons and separators', () => {
+    render(
+      <TestProviders>
+        <TakeAction {...defaultProps} />
+      </TestProviders>
+    );
+    openPopover();
+
+    expect(
+      screen.getAllByRole('menuitem').map((item) => item.getAttribute('data-test-subj'))
+    ).toEqual([
+      'markAsOpen',
+      'markAsAcknowledged',
+      'markAsClosed',
+      'addToCase',
+      'viewInAiAssistant',
+    ]);
+    expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(2);
+    screen.getAllByRole('menuitem').forEach((item) => {
+      expect(item.querySelector('[data-euiicon-type]')).not.toBeNull();
+    });
   });
 
   it('renders the Add to chat action disabled when license is invalid', () => {
@@ -328,6 +347,8 @@ describe('TakeAction', () => {
 
   describe('actions when multiple alerts are selected', () => {
     const alerts = getMockAttackDiscoveryAlerts(); // <-- multiple alerts
+    alerts[0].alertWorkflowStatus = 'open';
+    alerts[1].alertWorkflowStatus = 'closed';
     const testCases = [
       {
         testId: 'markAsAcknowledged',
@@ -471,24 +492,18 @@ describe('TakeAction', () => {
   });
 
   describe('case interactions', () => {
-    const mockOnAddToNewCase = jest.fn();
-    const mockOnAddToExistingCase = jest.fn();
+    const mockOnAddToCase = jest.fn();
 
     beforeEach(() => {
-      const { useAddToNewCase } = jest.requireMock('./use_add_to_case');
-      const { useAddToExistingCase } = jest.requireMock('./use_add_to_existing_case');
+      const { useAddToCase } = jest.requireMock('./use_add_to_case');
 
-      useAddToNewCase.mockReturnValue({
+      useAddToCase.mockReturnValue({
         disabled: false,
-        onAddToNewCase: mockOnAddToNewCase,
-      });
-
-      useAddToExistingCase.mockReturnValue({
-        onAddToExistingCase: mockOnAddToExistingCase,
+        onAddToCase: mockOnAddToCase,
       });
     });
 
-    it('calls onAddToNewCase when clicking add to new case', async () => {
+    it('calls onAddToCase when clicking add to case', async () => {
       render(
         <TestProviders>
           <TakeAction {...defaultProps} />
@@ -499,7 +514,7 @@ describe('TakeAction', () => {
       fireEvent.click(screen.getByTestId('addToCase'));
 
       await waitFor(() => {
-        expect(mockOnAddToNewCase).toHaveBeenCalledWith({
+        expect(mockOnAddToCase).toHaveBeenCalledWith({
           alertIds: expect.any(Array),
           markdownComments: expect.any(Array),
           replacements: undefined,
@@ -507,21 +522,24 @@ describe('TakeAction', () => {
       });
     });
 
-    it('calls onAddToExistingCase when clicking add to existing case', () => {
+    it('refreshes attack discoveries after adding to a case', () => {
+      const refetchFindAttackDiscoveries = jest.fn();
+
       render(
         <TestProviders>
-          <TakeAction {...defaultProps} />
+          <TakeAction
+            {...defaultProps}
+            refetchFindAttackDiscoveries={refetchFindAttackDiscoveries}
+          />
         </TestProviders>
       );
 
-      openPopover();
-      fireEvent.click(screen.getByTestId('addToExistingCase'));
-
-      expect(mockOnAddToExistingCase).toHaveBeenCalledWith({
-        alertIds: expect.any(Array),
-        markdownComments: expect.any(Array),
-        replacements: undefined,
-      });
+      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+      expect(useAddToCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          onSuccess: refetchFindAttackDiscoveries,
+        })
+      );
     });
   });
 
@@ -561,19 +579,14 @@ describe('TakeAction', () => {
         },
       });
 
-      const { useAddToNewCase } = jest.requireMock('./use_add_to_case');
-      useAddToNewCase.mockReturnValue({
+      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+      useAddToCase.mockReturnValue({
         disabled: true,
-        onAddToNewCase: jest.fn(),
-      });
-
-      const { useAddToExistingCase } = jest.requireMock('./use_add_to_existing_case');
-      useAddToExistingCase.mockReturnValue({
-        onAddToExistingCase: jest.fn(),
+        onAddToCase: jest.fn(),
       });
     });
 
-    it('disables case actions when the user lacks permissions', () => {
+    it('does not render case actions when the user lacks permissions', () => {
       render(
         <TestProviders>
           <TakeAction {...defaultProps} />
@@ -582,11 +595,7 @@ describe('TakeAction', () => {
 
       openPopover();
 
-      const addToCaseButton = screen.getByTestId('addToCase');
-      const addToExistingCaseButton = screen.getByTestId('addToExistingCase');
-
-      expect(addToCaseButton).toBeDisabled();
-      expect(addToExistingCaseButton).toBeDisabled();
+      expect(screen.queryByTestId('addToCase')).not.toBeInTheDocument();
     });
   });
 
@@ -600,6 +609,7 @@ describe('TakeAction', () => {
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: false,
+        isAssistantVisible: true,
       });
     });
 
@@ -610,6 +620,7 @@ describe('TakeAction', () => {
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: true,
+        isAssistantVisible: true,
       });
 
       render(
@@ -622,6 +633,26 @@ describe('TakeAction', () => {
       const viewInAiAssistantButton = screen.getByTestId('viewInAiAssistant');
 
       expect(viewInAiAssistantButton).toBeDisabled();
+    });
+
+    it('does not render view in AI assistant when isAssistantVisible is false', () => {
+      const { useViewInAiAssistant } = jest.requireMock(
+        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
+      );
+      useViewInAiAssistant.mockReturnValue({
+        showAssistantOverlay: mockShowAssistantOverlay,
+        disabled: false,
+        isAssistantVisible: false,
+      });
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      openPopover();
+      expect(screen.queryByTestId('viewInAiAssistant')).not.toBeInTheDocument();
     });
   });
 

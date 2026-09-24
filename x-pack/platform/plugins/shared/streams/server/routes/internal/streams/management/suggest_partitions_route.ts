@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { partitionStream } from '@kbn/streams-ai';
-import { Streams } from '@kbn/streams-schema';
-import { conditionSchema } from '@kbn/streamlang';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
+import type { Condition } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
@@ -18,6 +18,7 @@ import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { boundedConditionSchema } from '../../../utils/bounded_condition_schema';
 
 export interface SuggestPartitionsParams {
   path: {
@@ -28,22 +29,26 @@ export interface SuggestPartitionsParams {
     start: number;
     end: number;
     user_prompt?: string;
-    existing_partitions?: Array<{ name: string; condition: z.infer<typeof conditionSchema> }>;
-    refinement_history?: string[];
+    existing_partitions?: Array<{ name: string; condition: Condition }>;
   };
 }
 
 export const suggestPartitionsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
-    connector_id: z.string(),
+    connector_id: z.string().max(256),
     start: z.number(),
     end: z.number(),
     user_prompt: z.string().max(2000).optional(),
     existing_partitions: z
-      .array(z.object({ name: z.string(), condition: conditionSchema }))
+      .array(
+        z.object({
+          name: z.string().max(MAX_STREAM_NAME_LENGTH),
+          condition: boundedConditionSchema,
+        })
+      )
+      .max(100)
       .optional(),
-    refinement_history: z.array(z.string().max(2000)).max(10).optional(),
   }),
 }) satisfies z.Schema<SuggestPartitionsParams>;
 
@@ -74,10 +79,8 @@ export const suggestPartitionsRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { inferenceClient, scopedClusterClient, streamsClient, getFeatureClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({ request });
+    const { inferenceClient, scopedClusterClient, streamsClient } = scopedClients;
 
     const { connector_id: connectorId } = params.body;
 
@@ -97,10 +100,13 @@ export const suggestPartitionsRoute = createServerRoute({
       signal: getRequestAbortSignal(request),
       userPrompt: params.body.user_prompt,
       existingPartitions: params.body.existing_partitions,
-      refinementHistory: params.body.refinement_history,
       getFeatures: async (filters) => {
-        const featureClient = await getFeatureClient();
-        const { hits } = await featureClient.getFeatures(params.path.name, filters);
+        const { getKnowledgeIndicatorClient } = scopedClients;
+        if (!getKnowledgeIndicatorClient) {
+          return [];
+        }
+        const kiClient = await getKnowledgeIndicatorClient();
+        const { hits } = await kiClient.getFeatures(params.path.name, filters);
         return hits;
       },
     });

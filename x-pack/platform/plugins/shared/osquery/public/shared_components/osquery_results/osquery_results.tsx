@@ -12,7 +12,7 @@ import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import { useKibana } from '../../common/lib/kibana';
 
 import type { OsqueryActionResultsProps } from './types';
-import { OsqueryResult } from './osquery_result';
+import { OsqueryActionResult } from './osquery_result';
 import type { ServicesWrapperProps } from '../services_wrapper';
 import ServicesWrapper from '../services_wrapper';
 
@@ -30,19 +30,20 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
     <div data-test-subj={'osquery-results'}>
       {actionItems?.map((item) => {
         const actionId = item.fields?.action_id?.[0];
-        const queryId = item.fields?.['queries.action_id']?.[0];
-        const startDate = item.fields?.['@timestamp'][0];
+        const startDate = item.fields?.['@timestamp']?.[0];
 
         return (
-          <OsqueryResult
-            key={actionId}
-            actionId={actionId}
-            queryId={queryId}
-            startDate={startDate}
-            ruleName={ruleName}
-            ecsData={ecsData}
-            addToTimeline={addToTimeline}
-          />
+          <React.Fragment key={actionId}>
+            <EuiSpacer size="s" />
+            <OsqueryActionResult
+              actionId={actionId}
+              startDate={startDate}
+              ruleName={ruleName}
+              ecsData={ecsData}
+              addToTimeline={addToTimeline}
+            />
+            <EuiSpacer size="s" />
+          </React.Fragment>
         );
       })}
       <EuiSpacer size="s" />

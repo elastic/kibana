@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { getErrorBudgetEmbeddableSchema } from './error_budget_schema';
 
@@ -19,8 +20,8 @@ describe('error budget schema validation', () => {
       hide_title: false,
     };
 
-    expect(() => errorBudgetSchema.validate(validState)).not.toThrow();
-    const result = errorBudgetSchema.validate(validState);
+    expect(() => errorBudgetSchema.parse(validState)).not.toThrow();
+    const result = errorBudgetSchema.parse(validState);
     expect(result).toMatchObject({
       slo_id: 'test-slo-id',
       slo_instance_id: 'test-instance-id',
@@ -34,8 +35,8 @@ describe('error budget schema validation', () => {
       slo_id: 'test-slo-id',
     };
 
-    expect(() => errorBudgetSchema.validate(minimalState)).not.toThrow();
-    const result = errorBudgetSchema.validate(minimalState);
+    expect(() => errorBudgetSchema.parse(minimalState)).not.toThrow();
+    const result = errorBudgetSchema.parse(minimalState);
     expect(result).toMatchObject({
       slo_id: 'test-slo-id',
       slo_instance_id: '*',
@@ -48,8 +49,8 @@ describe('error budget schema validation', () => {
       slo_instance_id: 'instance-abc',
     };
 
-    expect(() => errorBudgetSchema.validate(state)).not.toThrow();
-    const result = errorBudgetSchema.validate(state);
+    expect(() => errorBudgetSchema.parse(state)).not.toThrow();
+    const result = errorBudgetSchema.parse(state);
     expect(result).toMatchObject({
       slo_id: 'test-slo-id',
       slo_instance_id: 'instance-abc',
@@ -63,8 +64,8 @@ describe('error budget schema validation', () => {
       hide_title: true,
     };
 
-    expect(() => errorBudgetSchema.validate(state)).not.toThrow();
-    const result = errorBudgetSchema.validate(state);
+    expect(() => errorBudgetSchema.parse(state)).not.toThrow();
+    const result = errorBudgetSchema.parse(state);
     expect(result).toMatchObject({
       slo_id: 'test-slo-id',
       title: 'My Custom Title',
@@ -77,7 +78,10 @@ describe('error budget schema validation', () => {
       slo_instance_id: 'test-instance-id',
     };
 
-    expect(() => errorBudgetSchema.validate(invalidState)).toThrow(/slo_id/);
+    expectPrettyError(errorBudgetSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
+      "✖ Invalid input: expected string, received undefined
+        → at slo_id"
+    `);
   });
 
   it('should default slo_instance_id to * when omitted', () => {
@@ -85,7 +89,7 @@ describe('error budget schema validation', () => {
       slo_id: 'test-slo-id',
     };
 
-    const result = errorBudgetSchema.validate(state);
+    const result = errorBudgetSchema.parse(state);
     expect(result.slo_instance_id).toBe('*');
   });
 });

@@ -14,6 +14,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_DELAYED,
   ALERT_STATUS_RECOVERED,
+  ALERT_TRACKED,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -27,10 +28,12 @@ import type { IIndexPatternString } from '../../../alerts_service/resource_insta
 import type { TrackedAADAlerts } from '../../types';
 import { buildOngoingAlert } from './build_ongoing_alert';
 import { buildNewAlert } from './build_new_alert';
+import { buildGraduatedAlert } from './build_graduated_alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import { buildDelayedAlert } from './build_delayed_alert';
 import type { LegacyAlertsClient } from '../../legacy_alerts_client';
+import { getRecoveredAlertIdsToStopTracking } from '../../../lib/flapping/optimize_task_state_for_flapping';
 
 interface AlertBuilderOpts<
   State extends AlertInstanceState,
@@ -184,22 +187,45 @@ export class AlertBuilder<
         continue;
       }
       if (activeAlert) {
-        const trackedAlert = this.trackedAlerts.get(activeAlert.getUuid());
-        if (!!trackedAlert && get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
+        const uuid = activeAlert.getUuid();
+        const trackedActive = this.trackedAlerts.active[uuid];
+        const trackedDelayed = this.trackedAlerts.delayed[uuid];
+
+        if (trackedActive) {
           const isImproving = isAlertImproving<
             AlertData,
             State,
             Context,
             ActionGroupIds,
             RecoveryActionGroupId
-          >(trackedAlert, activeAlert, this.ruleType.actionGroups);
+          >(trackedActive, activeAlert, this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
-              alert: trackedAlert,
+              alert: trackedActive,
               legacyAlert: activeAlert,
               rule: this.rule,
               ruleData: this.alertRuleData,
               isImproving,
+              runTimestamp: this.runTimestampString,
+              timestamp: this.currentTime,
+              payload: this.reportedAlerts[id],
+              kibanaVersion: this.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
+            })
+          );
+        } else if (trackedDelayed) {
+          // The alert is graduating from `delayed` to `active`. The delayed
+          // predecessor doc carries the rule type fields reported during the
+          // delayed runs, which the graduated builder merges in. This keeps
+          // the resulting active doc complete even when the executor does
+          // not report a fresh payload on the run that triggers graduation
+          // (e.g. flap-hold reactivation).
+          activeAlertsToIndex.push(
+            buildGraduatedAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
+              alert: trackedDelayed,
+              legacyAlert: activeAlert,
+              rule: this.rule,
+              ruleData: this.alertRuleData,
               runTimestamp: this.runTimestampString,
               timestamp: this.currentTime,
               payload: this.reportedAlerts[id],
@@ -232,41 +258,87 @@ export class AlertBuilder<
   }
 
   private buildRecoveredAlerts(): Array<Alert & AlertData> {
-    const { rawRecoveredAlerts } = this.legacyAlertsClient.getRawAlertInstancesForState();
+    const { rawActiveAlerts, rawRecoveredAlerts } =
+      this.legacyAlertsClient.getRawAlertInstancesForState();
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_RECOVERED);
+    const trackedRecoveredAlerts =
+      this.legacyAlertsClient.getProcessedAlerts('trackedRecoveredAlerts');
+    // Any recovered alert that optimizeTaskStateForFlapping will drop from task
+    // state must be written tracked: false now. Otherwise the AAD query keeps
+    // returning it and nothing will persist it again.
+    const stopTrackingIds = new Set(
+      getRecoveredAlertIdsToStopTracking(
+        trackedRecoveredAlerts,
+        this.legacyAlertsClient.getMaxAlertLimit()
+      )
+    );
+
+    const delayedAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_DELAYED);
 
     const recoveredAlertsToIndex = [];
     for (const id of keys(rawRecoveredAlerts)) {
-      const trackedAlert = this.trackedAlerts.getById(id);
+      const uuid = rawRecoveredAlerts[id].meta?.uuid;
+      const trackedAlert = uuid ? this.trackedAlerts.get(uuid) : undefined;
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (trackedAlert) {
+        const alertDoc = recoveredAlerts[id]
+          ? buildRecoveredAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
+              alert: trackedAlert,
+              legacyAlert: recoveredAlerts[id],
+              rule: this.rule,
+              ruleData: this.alertRuleData,
+              runTimestamp: this.runTimestampString,
+              timestamp: this.currentTime,
+              payload: this.reportedAlerts[id],
+              recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
+              kibanaVersion: this.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
+            })
+          : buildUpdatedRecoveredAlert<AlertData>({
+              alert: trackedAlert,
+              legacyRawAlert: rawRecoveredAlerts[id],
+              runTimestamp: this.runTimestampString,
+              timestamp: this.currentTime,
+              rule: this.rule,
+              recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
+            });
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
-            ? buildRecoveredAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>(
-                {
-                  alert: trackedAlert,
-                  legacyAlert: recoveredAlerts[id],
-                  rule: this.rule,
-                  ruleData: this.alertRuleData,
-                  runTimestamp: this.runTimestampString,
-                  timestamp: this.currentTime,
-                  payload: this.reportedAlerts[id],
-                  recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
-                  kibanaVersion: this.kibanaVersion,
-                  dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
-                }
-              )
-            : buildUpdatedRecoveredAlert<AlertData>({
-                alert: trackedAlert,
-                legacyRawAlert: rawRecoveredAlerts[id],
-                runTimestamp: this.runTimestampString,
-                timestamp: this.currentTime,
-                rule: this.rule,
-              })
+          stopTrackingIds.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
+        );
+      } else {
+        this.logger.error(
+          `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - existing alert document not found ${this.ruleInfoMessage}.`,
+          this.logTags
         );
       }
     }
+
+    const keepUuids = new Set<string>();
+    for (const raw of values(rawActiveAlerts)) {
+      if (raw.meta?.uuid) {
+        keepUuids.add(raw.meta.uuid);
+      }
+    }
+    for (const raw of values(rawRecoveredAlerts)) {
+      if (raw.meta?.uuid) {
+        keepUuids.add(raw.meta.uuid);
+      }
+    }
+    for (const delayedAlert of values(delayedAlerts)) {
+      keepUuids.add(delayedAlert.getUuid());
+    }
+    // Tracked AAD docs that are not in this run's working set will never be
+    // rebuilt. Flip tracked to false so they stop matching the tracked query.
+    // Status and lifecycle fields are left unchanged; status-aware orphan
+    // reconciliation is a follow-up.
+    for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
+      if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
+        continue;
+      }
+      recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
+    }
+
     return recoveredAlertsToIndex;
   }
 
@@ -277,8 +349,13 @@ export class AlertBuilder<
       delayedAlertsToIndex.push(
         buildDelayedAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
           legacyAlert: delayedAlert,
-          timestamp: this.currentTime,
           rule: this.rule,
+          ruleData: this.alertRuleData,
+          payload: this.reportedAlerts[delayedAlert.getId()],
+          runTimestamp: this.runTimestampString,
+          timestamp: this.currentTime,
+          kibanaVersion: this.kibanaVersion,
+          dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
         })
       );
     }

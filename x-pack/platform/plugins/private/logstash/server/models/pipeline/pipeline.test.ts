@@ -36,7 +36,7 @@ describe('pipeline', () => {
         const testFromUpstreamJsonError = () => {
           return Pipeline.fromUpstreamJSON(badJSON);
         };
-        expect(testFromUpstreamJsonError).toThrowError(
+        expect(testFromUpstreamJsonError).toThrow(
           /upstreamPipeline argument must contain pipeline id as a key/i
         );
       });

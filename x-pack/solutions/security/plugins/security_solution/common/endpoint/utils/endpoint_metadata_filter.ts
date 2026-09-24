@@ -27,19 +27,23 @@ export function buildBaseEndpointMetadataFilter(policyIds?: string[]): QueryDslQ
     { exists: { field: 'united.endpoint.agent.id' } },
     { exists: { field: 'united.agent.agent.id' } },
     // agent is enrolled
-    {
-      term: {
-        'united.agent.active': {
-          value: true,
-        },
-      },
-    },
+    { term: { 'united.agent.active': { value: true } } },
   ];
 
   // Only include policy filter if policyIds are explicitly provided
   if (policyIds) {
     baseFilters.push({
-      terms: { 'united.agent.policy_id': uniq(policyIds) },
+      bool: {
+        should: [
+          { terms: { 'united.agent.policy_id': uniq(policyIds) } },
+          // Wildcard match needed due to change made in Fleet in support of Agent specific policies
+          // See https://github.com/elastic/ingest-dev/issues/8624
+          ...uniq(policyIds).map((policyId) => {
+            return { wildcard: { 'united.agent.policy_id': { value: `${policyId}#*` } } };
+          }),
+        ],
+        minimum_should_match: 1,
+      },
     });
   }
 

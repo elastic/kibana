@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const DOT_PREFIX_RE = /(.).+?\./g;
-
 /**
  * Convert a dot.notated.string into a short
  * version (d.n.string)
@@ -16,5 +14,16 @@ const DOT_PREFIX_RE = /(.).+?\./g;
  * @return {unknown}
  */
 export function shortenDottedString(input: unknown) {
-  return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
+  if (typeof input !== 'string' || input.indexOf('.') === -1) {
+    return input;
+  }
+
+  const split = input.split('.');
+  return split.reduce((acc, part, i) => {
+    if (i === split.length - 1) {
+      return acc + part;
+    }
+    // charAt returns '' for empty segments (consecutive/leading dots), preserving them as-is
+    return acc + part.charAt(0) + '.';
+  }, '');
 }

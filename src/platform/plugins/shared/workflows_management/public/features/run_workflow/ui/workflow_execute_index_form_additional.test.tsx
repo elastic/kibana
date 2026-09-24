@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   createCommonMockServices,
@@ -32,6 +34,12 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <EuiProvider>
+    <I18nProvider>{children}</I18nProvider>
+  </EuiProvider>
+);
+
 describe('WorkflowExecuteIndexForm - additional coverage', () => {
   const mockSetValue = jest.fn();
   const mockSetErrors = jest.fn();
@@ -53,7 +61,7 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       },
       dataViews: { ...baseMock.dataViews, ...mockDataViews },
       data: { ...baseMock.data, ...mockData },
-      fieldFormats: { ...baseMock.fieldFormats, ...mockData.fieldFormats },
+      fieldFormats: fieldFormatsMock,
       ...overrides,
     };
 
@@ -74,13 +82,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       setupMocks();
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors="Something went wrong"
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -92,13 +100,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       setupMocks();
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -114,13 +122,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       mockDataViews.getIdsWithTitle.mockRejectedValueOnce(new Error('Network error'));
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -131,24 +139,21 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
     it('should call setErrors when search subscription emits an error', async () => {
       const { mockData } = setupMocks();
 
-      // Override the search mock to emit an error
+      // Override the search mock to reject the fetch promise
       mockData.search.search.mockReturnValue({
         pipe: jest.fn().mockReturnValue({
-          subscribe: jest.fn(({ error: errorCb }: { error: (err: Error) => void }) => {
-            errorCb(new Error('Search failed'));
-            return { unsubscribe: jest.fn() };
-          }),
+          toPromise: jest.fn().mockRejectedValue(new Error('Search failed')),
         }),
       });
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -160,13 +165,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       const { mockDataViews } = setupMocks();
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       // Wait for initial load
@@ -200,13 +205,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       ]);
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -224,13 +229,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       ]);
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -244,13 +249,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       mockDataViews.getIdsWithTitle.mockResolvedValueOnce([]);
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -265,13 +270,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       setupMocks({ dataViews: undefined });
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       // Should render without crashing
@@ -285,21 +290,18 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
 
       mockData.search.search.mockReturnValue({
         pipe: jest.fn().mockReturnValue({
-          subscribe: jest.fn(({ error: errorCb }: { error: (err: unknown) => void }) => {
-            errorCb('string error');
-            return { unsubscribe: jest.fn() };
-          }),
+          toPromise: jest.fn().mockRejectedValue('string error'),
         }),
       });
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -311,13 +313,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       setupMocks({ data: undefined });
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       // Should render without crash

@@ -7,36 +7,87 @@
 
 import React from 'react';
 import { Metadata } from './metadata';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { ContextProviders } from '../../context_providers';
+import { useMetadataStateContext } from '../../hooks/use_metadata_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
+import { useDataViewsContext } from '../../hooks/use_data_views';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_request_time';
-import { useInfraMLCapabilitiesContext } from '../../../../containers/ml/infra_ml_capabilities';
 
-jest.mock('../../../../containers/metrics_source');
-jest.mock('../../hooks/use_metadata');
+jest.mock('../../hooks/use_metadata_state');
+jest.mock('../../hooks/use_asset_details_render_props');
+jest.mock('../../hooks/use_asset_details_url_state');
 jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_reload_request_time');
-jest.mock('../../../../containers/ml/infra_ml_capabilities');
+jest.mock('../../../../pages/metrics/hosts/hooks/use_unified_search');
+jest.mock('../../hooks/use_data_views');
 
-const useInfraMLCapabilitiesContextMock = useInfraMLCapabilitiesContext as jest.MockedFunction<
-  typeof useInfraMLCapabilitiesContext
+const useMetadataStateContextMock = useMetadataStateContext as jest.MockedFunction<
+  typeof useMetadataStateContext
 >;
-
+const useAssetDetailsRenderPropsContextMock =
+  useAssetDetailsRenderPropsContext as jest.MockedFunction<
+    typeof useAssetDetailsRenderPropsContext
+  >;
+const useAssetDetailsUrlStateMock = useAssetDetailsUrlState as jest.MockedFunction<
+  typeof useAssetDetailsUrlState
+>;
 const useKibanaMock = useKibanaContextForPlugin as jest.MockedFunction<
   typeof useKibanaContextForPlugin
 >;
-const useRequestTimeContextMock = useReloadRequestTimeContext as jest.MockedFunction<
-  typeof useReloadRequestTimeContext
+const useUnifiedSearchContextMock = useUnifiedSearchContext as jest.MockedFunction<
+  typeof useUnifiedSearchContext
+>;
+const useDataViewsContextMock = useDataViewsContext as jest.MockedFunction<
+  typeof useDataViewsContext
 >;
 
-const mockUseKibana = () => {
+const defaultRenderProps = {
+  entity: { id: 'host-1', name: 'host-1', type: 'host' as const },
+  overrides: { metadata: { showActionsColumn: true } },
+  schema: 'ecs' as const,
+  renderMode: { mode: 'page' as const },
+  loading: false,
+};
+
+const mockRenderPropsContext = (overrides: Partial<typeof defaultRenderProps> = {}) => {
+  useAssetDetailsRenderPropsContextMock.mockReturnValue({
+    ...defaultRenderProps,
+    ...overrides,
+  } as ReturnType<typeof useAssetDetailsRenderPropsContext>);
+};
+
+const mockUrlState = (urlState: Record<string, unknown> | null = null) => {
+  useAssetDetailsUrlStateMock.mockReturnValue([urlState, jest.fn()] as ReturnType<
+    typeof useAssetDetailsUrlState
+  >);
+};
+
+const mockMetadataState = (props: Partial<ReturnType<typeof useMetadataStateContext>> = {}) => {
+  const defaults: ReturnType<typeof useMetadataStateContext> = {
+    loading: false,
+    error: null,
+    metadata: {
+      id: 'host-1',
+      name: 'host-1',
+      features: [],
+      info: {
+        host: {
+          os: {
+            name: 'Ubuntu',
+          },
+        },
+      },
+    },
+    refresh: jest.fn(),
+  };
+  useMetadataStateContextMock.mockReturnValue({ ...defaults, ...props });
+};
+
+const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...coreMock.createStart(),
@@ -45,77 +96,37 @@ const mockUseKibana = () => {
   } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
 };
 
-const mockRequestTimeContext = () => {
-  useRequestTimeContextMock.mockReturnValue({
-    updateReloadRequestTime: jest.fn(),
-    reloadRequestTime: 0,
-  });
+const mockUnifiedSearch = () => {
+  useUnifiedSearchContextMock.mockReturnValue({
+    searchCriteria: { filters: [] },
+  } as unknown as ReturnType<typeof useUnifiedSearchContext>);
 };
 
-const mockUseInfraMLCapabilitiesContext = () => {
-  useInfraMLCapabilitiesContextMock.mockReturnValue({
-    updateTopbarMenuVisibilityBySchema: jest.fn(),
-  } as unknown as ReturnType<typeof useInfraMLCapabilitiesContext>);
-};
-
-const mockUseMetadata = (props: any = {}) => {
-  const defaultMetadata = {
-    id: 'host-1',
-    name: 'host-1',
-    features: [],
-    info: {
-      host: {
-        os: {
-          name: 'Ubuntu',
-        },
-      },
-    },
-  };
-  (useMetadata as jest.Mock).mockReturnValue({
-    loading: false,
-    error: null,
-    metadata: props.metadata ?? defaultMetadata,
-    ...props,
-  });
+const mockDataViews = () => {
+  useDataViewsContextMock.mockReturnValue({
+    metrics: { dataView: {} },
+  } as unknown as ReturnType<typeof useDataViewsContext>);
 };
 
 const renderHostMetadata = () =>
   render(
     <I18nProvider>
-      <ContextProviders
-        entityType="host"
-        entityId="host-1"
-        entityName="host-1"
-        overrides={{
-          metadata: {
-            showActionsColumn: true,
-          },
-        }}
-        dateRange={{
-          from: '2023-04-09T11:07:49Z',
-          to: '2023-04-09T11:23:49Z',
-        }}
-        renderMode={{
-          mode: 'page',
-        }}
-      >
-        <Metadata />
-      </ContextProviders>
-    </I18nProvider>,
-    { wrapper: EuiThemeProvider }
+      <Metadata />
+    </I18nProvider>
   );
 
 describe('Single Host Metadata (Hosts View)', () => {
   beforeAll(() => {
-    (useSourceContext as jest.Mock).mockReturnValue({ sourceId: '123' });
-    mockUseKibana();
-    mockRequestTimeContext();
-    mockUseInfraMLCapabilitiesContext();
     jest.useFakeTimers();
   });
 
   beforeEach(() => {
-    mockUseMetadata();
+    mockRenderPropsContext();
+    mockUrlState();
+    mockMetadataState();
+    mockKibana();
+    mockUnifiedSearch();
+    mockDataViews();
   });
 
   afterAll(() => {
@@ -124,14 +135,14 @@ describe('Single Host Metadata (Hosts View)', () => {
   });
 
   it('should show an error if fetching the metadata returns error', async () => {
-    mockUseMetadata({ error: 'Internal server error' });
+    mockMetadataState({ error: 'Internal server error' });
     const result = await waitFor(() => renderHostMetadata());
 
     expect(result.queryByTestId('infraAssetDetailsMetadataErrorCallout')).toBeInTheDocument();
   });
 
-  it('should show an no data message if fetching the metadata returns an empty array', async () => {
-    mockUseMetadata({
+  it('should show a no data message if fetching the metadata returns an empty array', async () => {
+    mockMetadataState({
       metadata: {
         id: 'host-1',
         name: 'host-1',
@@ -140,12 +151,11 @@ describe('Single Host Metadata (Hosts View)', () => {
     });
     const result = await waitFor(() => renderHostMetadata());
 
-    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraAssetDetailsMetadataNoData')).toBeInTheDocument();
   });
 
   it('should show the metadata table if metadata is returned', async () => {
-    mockUseMetadata({
+    mockMetadataState({
       metadata: {
         id: 'host-1',
         name: 'host-1',
@@ -161,23 +171,21 @@ describe('Single Host Metadata (Hosts View)', () => {
     });
     const result = await waitFor(() => renderHostMetadata());
 
-    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraAssetDetailsMetadataTable')).toBeInTheDocument();
   });
 
   it('should return loading text if loading', async () => {
-    mockUseMetadata({
+    mockMetadataState({
       loading: true,
-      metadata: undefined, // No metadata when loading
+      metadata: undefined,
     });
     const result = await waitFor(() => renderHostMetadata());
 
-    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraAssetDetailsMetadataLoading')).toBeInTheDocument();
   });
 
   it('should pin and unpin metadata field', async () => {
-    mockUseMetadata({
+    mockMetadataState({
       metadata: {
         id: 'host-1',
         name: 'host-1',
@@ -194,63 +202,77 @@ describe('Single Host Metadata (Hosts View)', () => {
     });
     const result = await waitFor(() => renderHostMetadata());
 
-    // Wait for the table to render
     await waitFor(() => {
       expect(result.queryByTestId('infraAssetDetailsMetadataTable')).toBeInTheDocument();
     });
 
-    // Find the pin button - it should be in the table rows
     const addPinButtons = result.getAllByTestId('infraAssetDetailsMetadataAddPin');
     expect(addPinButtons.length).toBeGreaterThan(0);
 
-    // Pin a field (click the first pin button)
-    const addPinButton = addPinButtons[0];
-    addPinButton.click();
+    addPinButtons[0].click();
 
-    // Wait for the remove pin button to appear
     await waitFor(() => {
       const removePinButtons = result.getAllByTestId('infraAssetDetailsMetadataRemovePin');
       expect(removePinButtons.length).toBeGreaterThan(0);
     });
 
-    // Unpin the field
     const removePinButton = result.getAllByTestId('infraAssetDetailsMetadataRemovePin')[0];
     removePinButton.click();
 
-    // Wait for the add pin button to appear again
     await waitFor(() => {
       const addPinButtonsAfterUnpin = result.getAllByTestId('infraAssetDetailsMetadataAddPin');
       expect(addPinButtonsAfterUnpin.length).toBeGreaterThan(0);
     });
   });
 
-  it('should filter metadata table with search', async () => {
-    mockUseMetadata({
-      metadata: {
-        id: 'host-1',
-        name: 'host-1',
-        features: [],
-        info: {
-          host: {
-            os: {
-              name: 'Ubuntu',
-            },
-            hostname: 'host-1',
+  it('should filter metadata rows when metadataSearch is set in url state', async () => {
+    const metadata = {
+      id: 'host-1',
+      name: 'host-1',
+      features: [],
+      info: {
+        host: {
+          os: {
+            name: 'Ubuntu',
           },
-          cloud: {
-            provider: 'aws',
-          },
+          hostname: 'host-1',
+        },
+        cloud: {
+          provider: 'aws',
         },
       },
-    });
+    };
+    mockMetadataState({ metadata });
+
     const result = await waitFor(() => renderHostMetadata());
 
-    const searchInput = result.getByTestId('infraAssetDetailsMetadataSearchBarInput');
-    expect(searchInput).toBeInTheDocument();
+    await waitFor(() => {
+      expect(result.queryByTestId('infraAssetDetailsMetadataTable')).toBeInTheDocument();
+    });
 
-    // Type search term
-    searchInput.setAttribute('value', 'host');
-    // Note: Actual filtering logic would be tested in integration/e2e tests
-    // This test verifies the search input is present and can be interacted with
+    expect(
+      result.queryByTestId('infraAssetDetailsMetadataField.cloud.provider')
+    ).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataField.host.os.name')).toBeInTheDocument();
+    expect(
+      result.queryByTestId('infraAssetDetailsMetadataField.host.hostname')
+    ).toBeInTheDocument();
+
+    mockUrlState({ metadataSearch: 'cloud' });
+    result.rerender(
+      <I18nProvider>
+        <Metadata />
+      </I18nProvider>
+    );
+
+    expect(
+      result.queryByTestId('infraAssetDetailsMetadataField.cloud.provider')
+    ).toBeInTheDocument();
+    expect(
+      result.queryByTestId('infraAssetDetailsMetadataField.host.os.name')
+    ).not.toBeInTheDocument();
+    expect(
+      result.queryByTestId('infraAssetDetailsMetadataField.host.hostname')
+    ).not.toBeInTheDocument();
   });
 });

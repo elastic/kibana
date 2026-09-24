@@ -227,6 +227,9 @@ export const AgentStatusFilter: React.FC<{
       onDismiss={dismissInactiveAgentsCallout}
     >
       <EuiPopover
+        aria-label={i18n.translate('xpack.fleet.agentList.statusFilterAriaLabel', {
+          defaultMessage: 'Status filter',
+        })}
         ownFocus
         zIndex={Number(euiTheme.levels.header) - 1}
         button={
@@ -245,14 +248,13 @@ export const AgentStatusFilter: React.FC<{
         }
         isOpen={isStatusFilterOpen}
         closePopover={() => updateIsStatusFilterOpen(false)}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           options={options}
           onChange={onOptionsChange}
           data-test-subj="agentList.agentStatusFilterOptions"
           listProps={{
-            paddingSize: 's',
             style: {
               minWidth: 140,
             },

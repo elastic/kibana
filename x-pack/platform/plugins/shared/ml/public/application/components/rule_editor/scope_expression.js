@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiPopover,
   EuiSelect,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
@@ -71,12 +72,12 @@ export class ScopeExpression extends Component {
     updateScope(fieldName, filterId, filterType, event.target.checked);
   };
 
-  renderFilterListPopover() {
+  renderFilterListPopover(titleId) {
     const { filterId, filterType, filterListIds } = this.props;
 
     return (
       <div>
-        <EuiPopoverTitle>
+        <EuiPopoverTitle id={titleId}>
           <FormattedMessage
             id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
             defaultMessage="Is"
@@ -130,6 +131,7 @@ export class ScopeExpression extends Component {
 
   render() {
     const { fieldName, filterId, filterType, enabled, filterListIds } = this.props;
+    const filterTypeTitleId = htmlIdGenerator()('filterTypeTitle');
 
     return (
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -162,6 +164,7 @@ export class ScopeExpression extends Component {
           <EuiFlexItem grow={false}>
             <EuiPopover
               id="operatorValuePopover"
+              aria-labelledby={filterTypeTitleId}
               button={
                 <EuiExpression
                   description={
@@ -183,7 +186,7 @@ export class ScopeExpression extends Component {
               ownFocus
               anchorPosition="downLeft"
             >
-              {this.renderFilterListPopover()}
+              {this.renderFilterListPopover(filterTypeTitleId)}
             </EuiPopover>
           </EuiFlexItem>
         )}

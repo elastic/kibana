@@ -120,7 +120,7 @@
             }
           }
         },
-        "x-code-samples": [
+        "x-codeSamples": [
           {
             "label": "curl",
             "lang": "curl",
@@ -1285,6 +1285,1182 @@
         }
       }
     },
+    "/api/cases/templates": {
+      "get": {
+        "summary": "Get all case templates",
+        "operationId": "getCaseTemplatesDefaultSpace",
+        "description": "Returns a paginated list of case templates. Requires the Cases feature to be enabled in the space.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/template_sort_field"
+          },
+          {
+            "$ref": "#/components/parameters/sort_order"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "$ref": "#/components/parameters/owner_filter"
+          },
+          {
+            "$ref": "#/components/parameters/template_tags"
+          },
+          {
+            "$ref": "#/components/parameters/template_author"
+          },
+          {
+            "$ref": "#/components/parameters/template_is_enabled"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/get_case_templates_response"
+                },
+                "examples": {
+                  "getCaseTemplatesResponse": {
+                    "$ref": "#/components/examples/get_case_templates_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a case template",
+        "operationId": "createCaseTemplateDefaultSpace",
+        "description": "Creates a case template from a YAML definition. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. Set `dry_run=true` to run the full validation (body, YAML definition, name uniqueness, authorization) without creating anything. Requires the Cases feature to be enabled in the space.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dry_run",
+            "description": "When true, validates the request without creating the template and returns `{\"valid\": true}`.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/template_write_request"
+              },
+              "examples": {
+                "createCaseTemplateRequest": {
+                  "$ref": "#/components/examples/template_write_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call. Returns the created template, or `{\"valid\": true}` for a dry run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/template_v2_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/template_dry_run_response"
+                    }
+                  ]
+                },
+                "examples": {
+                  "createCaseTemplateResponse": {
+                    "$ref": "#/components/examples/get_case_template_response"
+                  },
+                  "dryRunResponse": {
+                    "$ref": "#/components/examples/template_dry_run_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 templates per owner, max 200 fields per template).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_template_limit"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have the manage templates privilege for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A template with the same name already exists for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response409": {
+                    "$ref": "#/components/examples/response_409"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/templates/{template_id}": {
+      "get": {
+        "summary": "Get a case template by ID",
+        "operationId": "getCaseTemplateDefaultSpace",
+        "description": "Returns the details of a case template. Requires the Cases feature to be enabled in the space.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/template_id"
+          },
+          {
+            "$ref": "#/components/parameters/template_version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/template_v2_response"
+                },
+                "examples": {
+                  "getCaseTemplateResponse": {
+                    "$ref": "#/components/examples/get_case_template_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The template was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a case template",
+        "operationId": "updateCaseTemplateDefaultSpace",
+        "description": "Fully replaces a case template. Every accepted update creates a new template version; previous versions stay retrievable with the `version` query parameter of the get template API, and cases keep the version they were created with. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. Set `dry_run=true` to run the full validation without writing. Requires the Cases feature to be enabled in the space.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/template_id"
+          },
+          {
+            "in": "query",
+            "name": "dry_run",
+            "description": "When true, validates the request without updating the template and returns `{\"valid\": true}`.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/template_write_request"
+              },
+              "examples": {
+                "updateCaseTemplateRequest": {
+                  "$ref": "#/components/examples/template_write_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call. Returns the new template version, or `{\"valid\": true}` for a dry run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/template_v2_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/template_dry_run_response"
+                    }
+                  ]
+                },
+                "examples": {
+                  "updateCaseTemplateResponse": {
+                    "$ref": "#/components/examples/get_case_template_response"
+                  },
+                  "dryRunResponse": {
+                    "$ref": "#/components/examples/template_dry_run_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 fields per template).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_template_limit"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have the manage templates privilege for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The template was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A template with the same name already exists for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response409": {
+                    "$ref": "#/components/examples/response_409"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a case template",
+        "operationId": "deleteCaseTemplateDefaultSpace",
+        "description": "Soft-deletes a case template (all versions). Existing cases keep their pinned template reference; the template stops appearing in the case creation flow and in find responses. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/template_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The template was deleted."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have the manage templates privilege for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The template was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/field_definitions": {
+      "get": {
+        "summary": "Get all field definitions",
+        "operationId": "getCaseFieldDefinitionsDefaultSpace",
+        "description": "Returns a paginated list of field definitions (field library entries) for the given owner. Requires the Cases feature to be enabled in the space.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "owner",
+            "description": "The application that owns the field definitions (for example `cases`, `observability`, or `securitySolution`). Required.\n",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "maxLength": 50
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "maxItems": 10
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "isGlobal",
+            "description": "When true, returns only global field definitions (rendered on every case). When false, returns all definitions. Omit to return all.\n",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "in": "query",
+            "name": "sortField",
+            "description": "The field to sort by. When omitted, results are sorted by `fieldDefinitionId` ascending and `sortOrder` is ignored.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "owner",
+                "isGlobal",
+                "displayOrder"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/sort_order"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "description": "A case-insensitive substring to match against each definition's `name` and `description` fields. Definitions where neither field contains the substring are excluded.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/get_case_field_definitions_response"
+                },
+                "examples": {
+                  "getCaseFieldDefinitionsResponse": {
+                    "$ref": "#/components/examples/get_case_field_definitions_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid. For example, the `owner` query parameter is missing or `page`/`perPage` are not integers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_invalid_template"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have permission to read field definitions for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a field definition",
+        "operationId": "createCaseFieldDefinitionDefaultSpace",
+        "description": "Creates a field definition in the field library. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dry_run",
+            "description": "When true, runs authorization, body, and name-uniqueness validation without creating the field definition. Returns `{ \"valid\": true }` on success.\n",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/field_definition_write_request"
+              },
+              "examples": {
+                "createCaseFieldDefinitionRequest": {
+                  "$ref": "#/components/examples/field_definition_write_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call. Returns the created field definition, or `{ \"valid\": true }` when `dry_run=true`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/field_definition_response"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "valid"
+                      ],
+                      "properties": {
+                        "valid": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "examples": {
+                  "createCaseFieldDefinitionResponse": {
+                    "$ref": "#/components/examples/get_case_field_definition_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body is invalid, the YAML definition is malformed, the `name` does not match the YAML definition's `name`, or the owner already has 200 field definitions.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_invalid_template"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have the manage templates privilege for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A field definition with the same name already exists for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response409": {
+                    "$ref": "#/components/examples/response_409"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/field_definitions/{field_definition_id}": {
+      "get": {
+        "summary": "Get a field definition by ID",
+        "operationId": "getCaseFieldDefinitionDefaultSpace",
+        "description": "Returns a single field definition by its ID. Requires the Cases feature to be enabled in the space.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/field_definition_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call. Returns the field definition.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/field_definition_response"
+                },
+                "examples": {
+                  "getCaseFieldDefinitionResponse": {
+                    "$ref": "#/components/examples/get_case_field_definition_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have permission to read field definitions for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The field definition was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a field definition",
+        "operationId": "updateCaseFieldDefinitionDefaultSpace",
+        "description": "Updates editable attributes of a field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified. Setting `isGlobal` to `false` when the field is linked to an active custom field in the Cases configuration returns `409`; otherwise demotion is allowed. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/field_definition_id"
+          },
+          {
+            "in": "query",
+            "name": "dry_run",
+            "description": "When true, runs authorization, body, and identity-immutability validation without updating the field definition. Returns `{ \"valid\": true }` on success.\n",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/field_definition_put_request"
+              },
+              "examples": {
+                "updateCaseFieldDefinitionRequest": {
+                  "$ref": "#/components/examples/field_definition_write_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call. Returns the updated field definition, or `{ \"valid\": true }` when `dry_run=true`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/field_definition_response"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "valid"
+                      ],
+                      "properties": {
+                        "valid": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "examples": {
+                  "updateCaseFieldDefinitionResponse": {
+                    "$ref": "#/components/examples/get_case_field_definition_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body is invalid, the YAML definition is malformed, the `name` does not match the YAML definition's `name`, or the owner would be changed.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_invalid_template"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have the manage templates privilege for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The field definition was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A field's name or type cannot be changed after creation, or a global field cannot be demoted while linked to an active custom field.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "description": "Identity-immutable conflict — name or type was changed.",
+                      "type": "object",
+                      "required": [
+                        "statusCode",
+                        "error",
+                        "message",
+                        "attributes"
+                      ],
+                      "properties": {
+                        "statusCode": {
+                          "type": "integer"
+                        },
+                        "error": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "required": [
+                            "code",
+                            "changed"
+                          ],
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "enum": [
+                                "field_identity_immutable"
+                              ]
+                            },
+                            "changed": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "$ref": "#/components/schemas/response_4xx"
+                    }
+                  ]
+                },
+                "examples": {
+                  "response409": {
+                    "$ref": "#/components/examples/response_409"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a field definition",
+        "operationId": "deleteCaseFieldDefinitionDefaultSpace",
+        "description": "Deletes a field definition. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. A field definition cannot be deleted while it is referenced by an active template or linked to an active custom field in the Cases configuration. Requires the Cases feature to be enabled in the space.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/field_definition_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The field definition was deleted."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have the manage templates privilege for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The field definition was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The field definition is referenced by one or more active templates, or is linked to an active custom field in the Cases configuration.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response409": {
+                    "$ref": "#/components/examples/response_409"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/fields": {
+      "get": {
+        "summary": "Get the fields applicable to a case",
+        "operationId": "getApplicableFieldsDefaultSpace",
+        "description": "Returns the fields you can write to a case's `extended_fields` when creating a case for the given owner. Includes the owner's global (library-wide) fields and, when `templateId` is supplied, that template's fields. Migrated legacy custom fields appear as `global` fields. Requires the Cases feature to be enabled in the space.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "owner",
+            "description": "The application that owns the cases (for example `cases`, `observability`, or `securitySolution`).",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 30
+            },
+            "example": "cases"
+          },
+          {
+            "in": "query",
+            "name": "templateId",
+            "description": "The identifier of a template to include the template's fields in the response.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 36
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/applicable_fields_response"
+                },
+                "examples": {
+                  "getCaseApplicableFieldsResponse": {
+                    "$ref": "#/components/examples/get_case_applicable_fields_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid, for example when the `templateId` does not exist for the owner or its definition is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_invalid_template"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have access to the requested owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/cases/{caseId}": {
       "get": {
         "summary": "Get case information",
@@ -1327,6 +2503,83 @@
                 "examples": {
                   "response401": {
                     "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/{caseId}/fields": {
+      "get": {
+        "summary": "Get the fields applicable to an existing case",
+        "operationId": "getCaseApplicableFieldsDefaultSpace",
+        "description": "Returns the fields you can write to the case's `extended_fields`. The case determines the owner and any applied template. The response includes the owner's global fields (library-wide) and, if the case has a template, that template's fields. Requires the Cases feature to be enabled in the space.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/applicable_fields_response"
+                },
+                "examples": {
+                  "getCaseApplicableFieldsResponse": {
+                    "$ref": "#/components/examples/get_case_applicable_fields_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have access to the case.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The case was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
                   }
                 }
               }
@@ -2291,6 +3544,103 @@
           "example": "3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9"
         }
       },
+      "template_sort_field": {
+        "in": "query",
+        "name": "sortField",
+        "description": "Determines which field is used to sort the results.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "templateId",
+            "name",
+            "templateVersion",
+            "owner",
+            "deletedAt",
+            "author",
+            "usageCount",
+            "fieldCount",
+            "lastUsedAt",
+            "isDefault",
+            "isLatest"
+          ],
+          "default": "name"
+        },
+        "example": "name"
+      },
+      "template_tags": {
+        "in": "query",
+        "name": "tags",
+        "description": "Filters the returned templates by tags.",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/string"
+            },
+            {
+              "$ref": "#/components/schemas/string_array"
+            }
+          ]
+        },
+        "example": "tag-1"
+      },
+      "template_author": {
+        "in": "query",
+        "name": "author",
+        "description": "Filters the returned templates by author username.",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/string"
+            },
+            {
+              "$ref": "#/components/schemas/string_array"
+            }
+          ]
+        },
+        "example": "elastic"
+      },
+      "template_is_enabled": {
+        "in": "query",
+        "name": "isEnabled",
+        "description": "Filters the returned templates by their enabled state.",
+        "schema": {
+          "type": "boolean"
+        },
+        "example": true
+      },
+      "template_id": {
+        "in": "path",
+        "name": "template_id",
+        "description": "The identifier for the template.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "maxLength": 36
+        },
+        "example": "9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42"
+      },
+      "template_version": {
+        "in": "query",
+        "name": "version",
+        "description": "The version number of the template to retrieve. If omitted, the latest version is returned.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "example": 1
+      },
+      "field_definition_id": {
+        "in": "path",
+        "name": "field_definition_id",
+        "description": "The identifier for the field definition.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "maxLength": 36
+        }
+      },
       "case_id": {
         "in": "path",
         "name": "caseId",
@@ -2344,7 +3694,8 @@
               "status",
               "tags",
               "title",
-              "user"
+              "user",
+              "workflow"
             ],
             "example": "create_case"
           }
@@ -2800,6 +4151,17 @@
         "type": "string",
         "maxLength": 160
       },
+      "case_extended_fields": {
+        "title": "Case extended fields",
+        "type": "object",
+        "x-state": "Technical preview; added in 9.5.0",
+        "description": "Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).\n",
+        "maxProperties": 500,
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 30000
+        }
+      },
       "create_case_request": {
         "title": "Create case request",
         "description": "The create case API request body varies depending on the type of connector.",
@@ -2903,6 +4265,29 @@
                 }
               }
             }
+          },
+          "extended_fields": {
+            "$ref": "#/components/schemas/case_extended_fields"
+          },
+          "template": {
+            "type": "object",
+            "nullable": true,
+            "x-state": "Technical preview",
+            "description": "A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).\n",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The template identifier. Retrieve template ids with `GET /api/cases/templates`."
+              },
+              "version": {
+                "type": "integer",
+                "description": "The template version to apply. Omit to use (and pin) the latest version.\n",
+                "minimum": 1
+              }
+            }
           }
         }
       },
@@ -2936,180 +4321,6 @@
           "full_name",
           "username"
         ]
-      },
-      "case_response_created_by_properties": {
-        "title": "Case response properties for created_by",
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
-          },
-          "profile_uid": {
-            "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
-          }
-        },
-        "required": [
-          "email",
-          "full_name",
-          "username"
-        ]
-      },
-      "case_response_pushed_by_properties": {
-        "title": "Case response properties for pushed_by",
-        "type": "object",
-        "nullable": true,
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
-          },
-          "profile_uid": {
-            "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
-          }
-        },
-        "required": [
-          "email",
-          "full_name",
-          "username"
-        ]
-      },
-      "case_response_updated_by_properties": {
-        "title": "Case response properties for updated_by",
-        "type": "object",
-        "nullable": true,
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
-          },
-          "profile_uid": {
-            "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
-          }
-        },
-        "required": [
-          "email",
-          "full_name",
-          "username"
-        ]
-      },
-      "actions_comment_response_properties": {
-        "title": "Case response properties for actions comments",
-        "type": "object",
-        "required": [
-          "type"
-        ],
-        "properties": {
-          "actions": {
-            "type": "object",
-            "properties": {
-              "targets": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "endpointId": {
-                      "type": "string",
-                      "example": 1
-                    },
-                    "hostname": {
-                      "type": "string",
-                      "example": "host-01"
-                    }
-                  }
-                }
-              },
-              "type": {
-                "type": "string",
-                "example": "isolate"
-              }
-            }
-          },
-          "comment": {
-            "type": "string",
-            "example": "Isolating the host from the case UI."
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2022-05-13T09:16:17.416Z"
-          },
-          "created_by": {
-            "$ref": "#/components/schemas/case_response_created_by_properties"
-          },
-          "id": {
-            "type": "string",
-            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
-          },
-          "owner": {
-            "$ref": "#/components/schemas/owner"
-          },
-          "pushed_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "example": null
-          },
-          "pushed_by": {
-            "$ref": "#/components/schemas/case_response_pushed_by_properties"
-          },
-          "type": {
-            "type": "string",
-            "example": "actions",
-            "enum": [
-              "actions"
-            ]
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "example": null
-          },
-          "updated_by": {
-            "$ref": "#/components/schemas/case_response_updated_by_properties"
-          },
-          "version": {
-            "type": "string",
-            "example": "WzIwNDMxLDFd"
-          }
-        }
       },
       "alert_comment_response_properties": {
         "title": "Add case comment response properties for alerts",
@@ -3273,6 +4484,98 @@
             "example": "WzMwNDgsMV0="
           }
         }
+      },
+      "case_response_created_by_properties": {
+        "title": "Case response properties for created_by",
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "full_name": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "example": "elastic",
+            "nullable": true
+          },
+          "profile_uid": {
+            "type": "string",
+            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
+      },
+      "case_response_pushed_by_properties": {
+        "title": "Case response properties for pushed_by",
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "full_name": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "example": "elastic",
+            "nullable": true
+          },
+          "profile_uid": {
+            "type": "string",
+            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
+      },
+      "case_response_updated_by_properties": {
+        "title": "Case response properties for updated_by",
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "full_name": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "example": "elastic",
+            "nullable": true
+          },
+          "profile_uid": {
+            "type": "string",
+            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
       },
       "event_comment_response_properties": {
         "title": "Case response properties for event comments",
@@ -3559,9 +4862,6 @@
             "items": {
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/actions_comment_response_properties"
-                },
-                {
                   "$ref": "#/components/schemas/alert_comment_response_properties"
                 },
                 {
@@ -3574,10 +4874,9 @@
               "discriminator": {
                 "propertyName": "type",
                 "mapping": {
-                  "actions": "actions_comment_response_properties.yaml",
-                  "alert": "alert_comment_response_properties.yaml",
-                  "event": "event_comment_response_properties.yaml",
-                  "user": "user_comment_response_properties.yaml"
+                  "alert": "#/components/schemas/alert_comment_response_properties",
+                  "event": "#/components/schemas/event_comment_response_properties",
+                  "user": "#/components/schemas/user_comment_response_properties"
                 }
               }
             }
@@ -3610,13 +4909,13 @@
             "discriminator": {
               "propertyName": "type",
               "mapping": {
-                ".none": "connector_properties_none.yaml",
-                ".cases-webhook": "connector_properties_cases_webhook.yaml",
-                ".jira": "connector_properties_jira.yaml",
-                ".resilient": "connector_properties_resilient.yaml",
-                ".servicenow": "connector_properties_servicenow.yaml",
-                ".servicenow-sir": "connector_properties_servicenow_sir.yaml",
-                ".swimlane": "connector_properties_swimlane.yaml"
+                ".none": "#/components/schemas/connector_properties_none",
+                ".cases-webhook": "#/components/schemas/connector_properties_cases_webhook",
+                ".jira": "#/components/schemas/connector_properties_jira",
+                ".resilient": "#/components/schemas/connector_properties_resilient",
+                ".servicenow": "#/components/schemas/connector_properties_servicenow",
+                ".servicenow-sir": "#/components/schemas/connector_properties_servicenow_sir",
+                ".swimlane": "#/components/schemas/connector_properties_swimlane"
               }
             }
           },
@@ -3672,6 +4971,14 @@
             "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
             "nullable": true,
             "example": 120
+          },
+          "extended_fields": {
+            "type": "object",
+            "x-state": "Technical preview; added in 9.5.0",
+            "description": "The case's stored field values, keyed by storage key (for example `priority_as_keyword`).\n",
+            "additionalProperties": {
+              "type": "string"
+            }
           },
           "external_service": {
             "$ref": "#/components/schemas/external_service"
@@ -3882,6 +5189,9 @@
                 },
                 "description": {
                   "$ref": "#/components/schemas/case_description"
+                },
+                "extended_fields": {
+                  "$ref": "#/components/schemas/case_extended_fields"
                 },
                 "id": {
                   "description": "The identifier for the case.",
@@ -4356,6 +5666,477 @@
           }
         }
       },
+      "template_v2_response": {
+        "type": "object",
+        "description": "A case template (v2).",
+        "required": [
+          "templateId",
+          "name",
+          "owner",
+          "definition",
+          "definitionString",
+          "templateVersion",
+          "deletedAt",
+          "isLatest",
+          "latestVersion"
+        ],
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "maxLength": 36,
+            "description": "The unique identifier of the template, shared across all versions."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "The display name of the template."
+          },
+          "owner": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "The owning solution (e.g. cases, observability, securitySolution)."
+          },
+          "definition": {
+            "description": "The parsed template definition."
+          },
+          "definitionString": {
+            "type": "string",
+            "maxLength": 30000,
+            "description": "The raw YAML definition string."
+          },
+          "templateVersion": {
+            "type": "integer",
+            "description": "The version number of this template revision."
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date the template was soft-deleted, or null if active."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 30000,
+            "description": "A human-readable description of the template."
+          },
+          "tags": {
+            "$ref": "#/components/schemas/template_tags"
+          },
+          "author": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "The username of the template author."
+          },
+          "usageCount": {
+            "type": "integer",
+            "description": "The number of times this template has been used to create a case."
+          },
+          "fieldCount": {
+            "type": "integer",
+            "description": "The number of fields defined in the template."
+          },
+          "fieldDefinitions": {
+            "type": "array",
+            "description": "Metadata about each field defined in the template.",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "label",
+                "type",
+                "control"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 256
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 256
+                },
+                "type": {
+                  "type": "string",
+                  "maxLength": 50
+                },
+                "control": {
+                  "type": "string",
+                  "maxLength": 50
+                }
+              }
+            }
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the template was last used to create a case."
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Whether this is the default template for its owner."
+          },
+          "isLatest": {
+            "type": "boolean",
+            "description": "Whether this is the latest version of the template."
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Whether the template is enabled."
+          },
+          "latestVersion": {
+            "type": "integer",
+            "description": "The latest version number of this template."
+          }
+        }
+      },
+      "get_case_templates_response": {
+        "type": "object",
+        "description": "Response returned by the get all case templates API.",
+        "required": [
+          "templates",
+          "page",
+          "perPage",
+          "total"
+        ],
+        "properties": {
+          "templates": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/template_v2_response"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "fieldSearchMatches"
+                  ],
+                  "properties": {
+                    "fieldSearchMatches": {
+                      "type": "boolean",
+                      "description": "Whether the search query matched a field name in this template."
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "The page number of the returned results."
+          },
+          "perPage": {
+            "type": "integer",
+            "description": "The number of results per page."
+          },
+          "total": {
+            "type": "integer",
+            "description": "The total number of templates matching the query."
+          }
+        }
+      },
+      "template_write_request": {
+        "title": "Template write request",
+        "description": "The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes. The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update, and `dry_run`).\n",
+        "type": "object",
+        "required": [
+          "owner",
+          "definition"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "The template identity name, unique per owner (case-insensitive). May be omitted when the YAML definition provides a case-default title (`name:`), which is then used as the identity name.\n"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owner"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 30000,
+            "description": "The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.\n",
+            "example": "name: Security incident\nseverity: high\ntags: [security]\nfields:\n  - name: priority\n    label: Priority\n    type: keyword\n    control: SELECT_BASIC\n    metadata:\n      options: [low, medium, high]\n      default: medium\n  - $ref: risk_score\n"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "A description of the template."
+          },
+          "tags": {
+            "$ref": "#/components/schemas/template_tags"
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Disabled templates are hidden from the case creation flow."
+          }
+        }
+      },
+      "template_dry_run_response": {
+        "title": "Template write dry run response",
+        "description": "Returned instead of the template when the request was sent with `dry_run=true`.",
+        "type": "object",
+        "required": [
+          "valid"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Always `true` — validation failures return a 4xx error instead.",
+            "enum": [
+              true
+            ]
+          }
+        }
+      },
+      "field_definition_response": {
+        "title": "Field definition response",
+        "description": "A field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated custom field, is not included in the public API response.\n",
+        "type": "object",
+        "required": [
+          "fieldDefinitionId",
+          "name",
+          "definition",
+          "owner"
+        ],
+        "properties": {
+          "fieldDefinitionId": {
+            "type": "string",
+            "maxLength": 36,
+            "description": "Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.\n"
+          },
+          "name": {
+            "type": "string",
+            "description": "The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.\n"
+          },
+          "definition": {
+            "type": "string",
+            "description": "The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.\n"
+          },
+          "owner": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "The application that owns this field definition."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional human-readable description of the field's purpose."
+          },
+          "isGlobal": {
+            "type": "boolean",
+            "description": "When true, this field is rendered in every case regardless of which template the case uses.\n"
+          },
+          "displayOrder": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Position of a global field in the case details view. Assigned by the server and changed via the Field Library reorder controls.\n"
+          }
+        }
+      },
+      "get_case_field_definitions_response": {
+        "title": "Get case field definitions response",
+        "description": "A paginated list of reusable field definitions.",
+        "type": "object",
+        "required": [
+          "fieldDefinitions",
+          "page",
+          "perPage",
+          "total"
+        ],
+        "properties": {
+          "fieldDefinitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/field_definition_response"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The current page number."
+          },
+          "perPage": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "The number of items per page."
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The total number of field definitions matching the query (before pagination)."
+          }
+        }
+      },
+      "field_definition_write_request": {
+        "title": "Field definition write request",
+        "description": "The body for creating or updating a field definition.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.\n\nIdentity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified.\n",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "owner",
+          "definition"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n"
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "description": "The application that owns this field definition."
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 30000,
+            "description": "The field definition as a YAML string describing a single field (type, label, control, metadata).",
+            "example": "name: priority\nlabel: Priority\ntype: keyword\ncontrol: SELECT_BASIC\nmetadata:\n  options: [low, medium, high]\n  default: medium\n"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Optional human-readable description of the field's purpose."
+          },
+          "isGlobal": {
+            "type": "boolean",
+            "description": "When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n"
+          }
+        }
+      },
+      "field_definition_put_request": {
+        "title": "Field definition PUT request",
+        "description": "The body for updating a field definition.\n\nIdentity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified.\n\nUnlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds 30 000 characters, so that field definitions created through internal tooling remain modifiable. When the submitted `definition` differs from the stored value, the 30 000-character limit is enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the definition is changed.\n",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "owner",
+          "definition"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "description": "The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.\n"
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "description": "The application that owns this field definition."
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 1000000,
+            "description": "The field definition as a YAML string describing a single field (type, label, control, metadata).",
+            "example": "name: priority\nlabel: Priority\ntype: keyword\ncontrol: SELECT_BASIC\nmetadata:\n  options: [low, medium, high]\n  default: medium\n"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Optional human-readable description of the field's purpose."
+          },
+          "isGlobal": {
+            "type": "boolean",
+            "description": "When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n"
+          }
+        }
+      },
+      "applicable_fields_response": {
+        "type": "object",
+        "description": "The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.\n",
+        "required": [
+          "fields"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "name",
+                "label",
+                "type",
+                "control",
+                "required",
+                "requiredOnClose",
+                "displayOnly",
+                "source",
+                "isGlobal"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "description": "The storage key to write in the case `extended_fields` map. Follows the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`).\n",
+                  "example": "priority_as_keyword"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The field name as authored in the field definition.",
+                  "example": "priority"
+                },
+                "label": {
+                  "type": "string",
+                  "description": "The human-readable label. Falls back to `name` when no label is authored.",
+                  "example": "Priority"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The storage type: `keyword`, `integer`, `long`, `boolean`, or `date`.",
+                  "example": "keyword"
+                },
+                "control": {
+                  "type": "string",
+                  "description": "The UI control for the field, such as `INPUT_TEXT`, `INPUT_NUMBER`, `SELECT_BASIC`, `TOGGLE`, or `MARKDOWN`.\n",
+                  "example": "SELECT_BASIC"
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether a value must be supplied at write time."
+                },
+                "requiredOnClose": {
+                  "type": "boolean",
+                  "description": "Whether the field must be filled before the case can be closed."
+                },
+                "displayOnly": {
+                  "type": "boolean",
+                  "description": "When `true` the field is display-only (for example a `MARKDOWN` block): it is returned so the full form shape is visible, but it holds no value and its `key` cannot be written to `extended_fields`.\n"
+                },
+                "options": {
+                  "type": "array",
+                  "description": "The allowed values for `SELECT_BASIC`, `RADIO_GROUP`, and `CHECKBOX_GROUP` fields.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "defaultValue": {
+                  "type": "string",
+                  "description": "The default value, as a string, when the field definition declares one."
+                },
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "global",
+                    "template"
+                  ],
+                  "description": "Where the field comes from: `global` for a library-wide (`isGlobal`) definition writable on any case, or `template` for a field contributed by the applied template.\n"
+                },
+                "isGlobal": {
+                  "type": "boolean",
+                  "description": "Whether the field is a global (library-wide) definition."
+                }
+              }
+            }
+          }
+        }
+      },
       "case_response_get_case": {
         "title": "Get case response",
         "description": "Case details returned by the get case API. The comments property is not included in the response. Use the find case comments API to retrieve comments. totalComment reflects the actual number of user comments.\n",
@@ -4429,13 +6210,13 @@
             "discriminator": {
               "propertyName": "type",
               "mapping": {
-                ".none": "connector_properties_none.yaml",
-                ".cases-webhook": "connector_properties_cases_webhook.yaml",
-                ".jira": "connector_properties_jira.yaml",
-                ".resilient": "connector_properties_resilient.yaml",
-                ".servicenow": "connector_properties_servicenow.yaml",
-                ".servicenow-sir": "connector_properties_servicenow_sir.yaml",
-                ".swimlane": "connector_properties_swimlane.yaml"
+                ".none": "#/components/schemas/connector_properties_none",
+                ".cases-webhook": "#/components/schemas/connector_properties_cases_webhook",
+                ".jira": "#/components/schemas/connector_properties_jira",
+                ".resilient": "#/components/schemas/connector_properties_resilient",
+                ".servicenow": "#/components/schemas/connector_properties_servicenow",
+                ".servicenow-sir": "#/components/schemas/connector_properties_servicenow_sir",
+                ".swimlane": "#/components/schemas/connector_properties_swimlane"
               }
             }
           },
@@ -4718,8 +6499,8 @@
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "alert": "add_alert_comment_request_properties.yaml",
-            "user": "add_user_comment_request_properties.yaml"
+            "alert": "#/components/schemas/add_alert_comment_request_properties",
+            "user": "#/components/schemas/add_user_comment_request_properties"
           }
         }
       },
@@ -4824,8 +6605,8 @@
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "alert": "update_alert_comment_request_properties.yaml",
-            "user": "update_user_comment_request_properties.yaml"
+            "alert": "#/components/schemas/update_alert_comment_request_properties",
+            "user": "#/components/schemas/update_user_comment_request_properties"
           }
         }
       },
@@ -5258,6 +7039,168 @@
           }
         }
       },
+      "payload_workflow": {
+        "type": "object",
+        "description": "The payload for a workflow user action, recorded when a user runs a workflow from a case.",
+        "required": [
+          "workflow"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "description": "Identifies the workflow that was run.",
+            "required": [
+              "id",
+              "name",
+              "executionId"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The workflow ID."
+              },
+              "name": {
+                "type": "string",
+                "description": "The workflow name at the time the run was triggered."
+              },
+              "executionId": {
+                "type": "string",
+                "description": "The execution ID returned by the Workflows engine."
+              }
+            }
+          },
+          "origin": {
+            "description": "The context from which the workflow was triggered.",
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "cases.case"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "The case ID."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "cases.observable"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "The observable ID."
+                  },
+                  "typeKey": {
+                    "type": "string",
+                    "description": "The observable type key."
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "The observable value."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "cases.observables"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "The case ID."
+                  },
+                  "count": {
+                    "type": "number",
+                    "description": "The number of selected observables."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id",
+                  "attachmentType"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "cases.attachment"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "The attachment target ID."
+                  },
+                  "attachmentType": {
+                    "type": "string",
+                    "description": "The normalized registered attachment type."
+                  },
+                  "index": {
+                    "type": "string",
+                    "description": "The Elasticsearch index the target document lives in."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id",
+                  "attachmentType"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "cases.attachments"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "The case ID."
+                  },
+                  "attachmentType": {
+                    "type": "string",
+                    "description": "The normalized registered attachment type."
+                  },
+                  "count": {
+                    "type": "number",
+                    "description": "The number of selected attachment targets."
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
       "user_actions_find_response_properties": {
         "type": "object",
         "required": [
@@ -5361,6 +7304,9 @@
               },
               {
                 "$ref": "#/components/schemas/payload_user_comment"
+              },
+              {
+                "$ref": "#/components/schemas/payload_workflow"
               }
             ]
           },
@@ -5387,7 +7333,8 @@
               "severity",
               "status",
               "tags",
-              "title"
+              "title",
+              "workflow"
             ],
             "example": "create_case"
           }
@@ -6046,6 +7993,189 @@
           "tag 1",
           "tag 2"
         ]
+      },
+      "get_case_templates_response": {
+        "summary": "A paginated list of case templates.",
+        "value": {
+          "page": 1,
+          "perPage": 20,
+          "total": 1,
+          "templates": [
+            {
+              "templateId": "9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42",
+              "name": "My Template",
+              "owner": "cases",
+              "definition": {},
+              "definitionString": "fields: []",
+              "templateVersion": 1,
+              "deletedAt": null,
+              "isLatest": true,
+              "latestVersion": 1,
+              "fieldSearchMatches": false
+            }
+          ]
+        }
+      },
+      "template_write_request": {
+        "summary": "Create or fully replace a case template.",
+        "value": {
+          "name": "Security incident",
+          "owner": "cases",
+          "definition": "name: Security incident\nseverity: high\ntags: [security]\nfields:\n  - name: priority\n    label: Priority\n    type: keyword\n    control: SELECT_BASIC\n    metadata:\n      options: [low, medium, high]\n      default: medium\n",
+          "description": "Default template for security incidents.",
+          "tags": [
+            "security"
+          ],
+          "isEnabled": true
+        }
+      },
+      "get_case_template_response": {
+        "summary": "A case template.",
+        "value": {
+          "templateId": "9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42",
+          "name": "My Template",
+          "owner": "cases",
+          "definition": {},
+          "definitionString": "fields: []",
+          "templateVersion": 1,
+          "deletedAt": null,
+          "isLatest": true,
+          "latestVersion": 1
+        }
+      },
+      "template_dry_run_response": {
+        "summary": "Dry-run validation succeeded without writing.",
+        "value": {
+          "valid": true
+        }
+      },
+      "response_400_template_limit": {
+        "summary": "A template resource limit was exceeded.",
+        "value": {
+          "error": "Bad Request",
+          "message": "A template cannot define more than 200 fields.",
+          "statusCode": 400
+        }
+      },
+      "response_403": {
+        "summary": "The user does not have access to the requested resource.",
+        "value": {
+          "error": "Forbidden",
+          "message": "Unauthorized to access cases",
+          "statusCode": 403
+        }
+      },
+      "response_409": {
+        "summary": "A resource conflict occurred.",
+        "value": {
+          "error": "Conflict",
+          "message": "Template name \"Security incident\" already exists for owner \"cases\"",
+          "statusCode": 409
+        }
+      },
+      "response_404": {
+        "summary": "The requested resource was not found.",
+        "value": {
+          "error": "Not Found",
+          "message": "Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found",
+          "statusCode": 404
+        }
+      },
+      "get_case_field_definitions_response": {
+        "summary": "A paginated list of reusable field definitions.",
+        "value": {
+          "fieldDefinitions": [
+            {
+              "fieldDefinitionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "name": "priority",
+              "owner": "cases",
+              "definition": "name: priority\nlabel: Priority\ntype: keyword\ncontrol: SELECT_BASIC\nmetadata:\n  options: [low, medium, high]\n  default: medium\n",
+              "description": "Ticket priority level.",
+              "isGlobal": false
+            }
+          ],
+          "page": 1,
+          "perPage": 20,
+          "total": 1
+        }
+      },
+      "response_400_invalid_template": {
+        "summary": "The request is invalid.",
+        "value": {
+          "error": "Bad Request",
+          "message": "Template [invalid-template-id] not found for owner [cases]",
+          "statusCode": 400
+        }
+      },
+      "field_definition_write_request": {
+        "summary": "Create or update a reusable field definition.",
+        "value": {
+          "name": "priority",
+          "owner": "cases",
+          "definition": "name: priority\nlabel: Priority\ntype: keyword\ncontrol: SELECT_BASIC\nmetadata:\n  options: [low, medium, high]\n  default: medium\n",
+          "description": "Ticket priority level.",
+          "isGlobal": false
+        }
+      },
+      "get_case_field_definition_response": {
+        "summary": "A reusable field definition.",
+        "value": {
+          "fieldDefinitionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "name": "priority",
+          "owner": "cases",
+          "definition": "name: priority\nlabel: Priority\ntype: keyword\ncontrol: SELECT_BASIC\nmetadata:\n  options: [low, medium, high]\n  default: medium\n",
+          "description": "Ticket priority level.",
+          "isGlobal": false
+        }
+      },
+      "get_case_applicable_fields_response": {
+        "summary": "Fields applicable to a case",
+        "value": {
+          "fields": [
+            {
+              "key": "priority_as_keyword",
+              "name": "priority",
+              "label": "Priority",
+              "type": "keyword",
+              "control": "SELECT_BASIC",
+              "required": true,
+              "requiredOnClose": false,
+              "displayOnly": false,
+              "options": [
+                "low",
+                "medium",
+                "high"
+              ],
+              "defaultValue": "medium",
+              "source": "global",
+              "isGlobal": true
+            },
+            {
+              "key": "rollout_notes_as_keyword",
+              "name": "rollout_notes",
+              "label": "Rollout notes",
+              "type": "keyword",
+              "control": "TEXTAREA",
+              "required": false,
+              "requiredOnClose": true,
+              "displayOnly": false,
+              "source": "template",
+              "isGlobal": false
+            },
+            {
+              "key": "instructions_as_keyword",
+              "name": "instructions",
+              "label": "Instructions",
+              "type": "keyword",
+              "control": "MARKDOWN",
+              "required": false,
+              "requiredOnClose": false,
+              "displayOnly": true,
+              "source": "template",
+              "isGlobal": false
+            }
+          ]
+        }
       },
       "get_case_response": {
         "summary": "Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.",

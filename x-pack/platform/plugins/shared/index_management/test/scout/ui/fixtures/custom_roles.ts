@@ -27,4 +27,51 @@ export const CUSTOM_ROLES: Record<string, KibanaRole> = {
       },
     ],
   },
+
+  /**
+   * Narrow role that mirrors the FTR `index_management_user` definition exactly
+   * (cluster privileges only, `advancedSettings:read` Kibana feature).
+   * Used for the management sidebar smoke test to produce the same sidebar composition
+   * as the original FTR test without granting broad Kibana `base:['read']` access.
+   */
+  indexManagementCapabilityCheck: {
+    elasticsearch: {
+      cluster: ['monitor', 'manage_index_templates', 'manage_enrich'],
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        base: [],
+        feature: {
+          advancedSettings: ['read'],
+          dashboard: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+
+  // Read-only enrich access (FTR `index_management_monitor_enrich_only`): can see enrich policies
+  // but not create or delete them.
+  monitorEnrichOnly: {
+    elasticsearch: {
+      cluster: ['monitor_enrich'],
+      indices: [{ names: ['*'], privileges: ['all'] }],
+    },
+    kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
+  },
+
+  // No enrich access (FTR `index_management_monitor_only`): the enrich policies tab is not shown.
+  monitorOnly: {
+    elasticsearch: {
+      cluster: ['monitor'],
+      indices: [{ names: ['*'], privileges: ['all'] }],
+    },
+    kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
+  },
 };

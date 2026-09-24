@@ -16,7 +16,7 @@ describe('validateConnectorId', () => {
   it('throws when value exceeds max length', () => {
     const tooLong = 'a'.repeat(CONNECTOR_ID_MAX_LENGTH + 1);
     expect(() => validateConnectorId(tooLong)).toThrow(
-      `Connector ID must be ${CONNECTOR_ID_MAX_LENGTH} characters or less.`
+      `Connector ID must be ${CONNECTOR_ID_MAX_LENGTH} characters or less`
     );
   });
 

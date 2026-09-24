@@ -8,4 +8,5 @@
  */
 
 export { runHeapSnapshotAnalyzerCli } from './src/run_cli';
+export { runRequireCacheAnalyzerCli } from './src/run_require_cache_cli';
 export { getHeapTrackPreloadPath } from './src/preload_path';

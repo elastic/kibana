@@ -8,17 +8,22 @@
  */
 
 import { getSampleDashboardState } from '../../mocks';
-import { coreServices } from '../../services/kibana_services';
 import { saveDashboard } from './save_dashboard';
-import type { DashboardState } from '../../../server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
+const mockShowDashboardSavedToast = jest.fn();
+
 jest.mock('../../dashboard_client', () => ({
   dashboardClient: {
     create: (dashboardState: DashboardState) => mockCreate(dashboardState),
     update: (id: string, dashboardState: DashboardState) => mockUpdate(id, dashboardState),
   },
+}));
+
+jest.mock('./show_dashboard_saved_toast', () => ({
+  showDashboardSavedToast: (params: unknown) => mockShowDashboardSavedToast(params),
 }));
 
 describe('Save dashboard state', () => {
@@ -38,12 +43,15 @@ describe('Save dashboard state', () => {
       saveOptions: {},
     });
 
-    expect(result.id).toBe('Boogaloo');
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "id": "Boogaloo",
+      }
+    `);
     expect(mockUpdate).toHaveBeenCalledWith('Boogaloo', dashboardState);
-    expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-      title: `Dashboard 'BOO' was saved`,
-      className: 'eui-textBreakWord',
-      'data-test-subj': 'saveDashboardSuccess',
+    expect(mockShowDashboardSavedToast).toHaveBeenCalledWith({
+      savedDashboardId: 'Boogaloo',
+      dashboardTitle: 'BOO',
     });
   });
 
@@ -58,10 +66,14 @@ describe('Save dashboard state', () => {
       saveOptions: { saveAsCopy: true },
     });
 
-    expect(result.id).toBe('newlyGeneratedId');
-    expect(result.redirectRequired).toBe(true);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "id": "newlyGeneratedId",
+        "redirectRequired": true,
+      }
+    `);
     expect(mockCreate).toHaveBeenCalled();
-    expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalled();
+    expect(mockShowDashboardSavedToast).toHaveBeenCalled();
   });
 
   it('should return an error when the save fails.', async () => {
@@ -75,7 +87,10 @@ describe('Save dashboard state', () => {
       saveOptions: { saveAsCopy: true },
     });
 
-    expect(result.id).toBeUndefined();
-    expect(result.error).toBe('Whoops');
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": "Whoops",
+      }
+    `);
   });
 });

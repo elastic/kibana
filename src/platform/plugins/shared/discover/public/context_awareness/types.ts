@@ -8,6 +8,8 @@
  */
 
 import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
@@ -19,9 +21,9 @@ import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ChartSectionProps,
   UnifiedHistogramTopPanelHeightContext,
@@ -29,14 +31,9 @@ import type {
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
-import type {
-  DiscoverAppState,
-  UpdateESQLQueryActionPayload,
-} from '../application/main/state_management/redux';
+import type { DiscoverAppState } from '../application/main/state_management/redux';
 
-export type UpdateESQLQueryFn = (
-  queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
-) => void;
+export type UpdateESQLQueryFn = (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 
 /**
  * Supports extending the Discover app menu
@@ -79,16 +76,6 @@ export interface FieldListExtension {
  */
 export interface AppMenuExtensionParams {
   /**
-   * Available actions for the app menu
-   */
-  actions: {
-    /**
-     * Updates the ad hoc data views list
-     * @param adHocDataViews The new ad hoc data views to set
-     */
-    updateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
-  };
-  /**
    * True if Discover is in ESQL mode
    */
   isEsqlMode: boolean;
@@ -122,23 +109,10 @@ export interface OpenInNewTabParams {
    * The time range to open in the new tab
    */
   timeRange?: TimeRange;
-}
-
-export interface ChartSectionConfigurationExtensionParams {
   /**
-   * Available actions for the chart section configuration
+   * Whether the new tab should use approximate ES|QL execution
    */
-  actions: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: UpdateESQLQueryFn;
-  };
+  esqlApproximation?: boolean;
 }
 
 /**
@@ -199,39 +173,9 @@ export interface DocViewerExtension {
 }
 
 /**
- * Parameters passed to the additional cell actions extension
- */
-export interface AdditionalCellActionsParams {
-  /**
-   * Available actions for the additional cell actions extension
-   */
-  actions?: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-  };
-}
-
-/**
  * Parameters passed to the doc viewer extension
  */
 export interface DocViewerExtensionParams {
-  /**
-   * Available actions for the doc viewer extension
-   */
-  actions: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: UpdateESQLQueryFn;
-  };
   /**
    * The record being displayed in the doc viewer
    */
@@ -253,7 +197,8 @@ export interface RowIndicatorExtensionParams {
  */
 export interface DefaultAppStateColumn {
   /**
-   * The field name of the column
+   * The field name of the column.
+   * Use `'_source'` for the Summary column - it is always treated as a valid profile column.
    */
   name: string;
   /**
@@ -277,7 +222,9 @@ export interface DefaultAppStateExtensionParams {
  */
 export interface DefaultAppStateExtension {
   /**
-   * The columns to display in the data grid
+   * The columns to display in the data grid.
+   * Include `{ name: '_source' }` (usually last; omit `width` for auto-width) to show Summary
+   * alongside other default fields. Users can still pin or unpin Summary from the Columns popover.
    */
   columns?: DefaultAppStateColumn[];
   /**
@@ -299,6 +246,10 @@ export interface DefaultAppStateExtension {
    * The state for data table visibility toggle
    */
   hideTable?: boolean;
+  /**
+   * The state for field list sidebar visibility toggle
+   */
+  hideSidebar?: boolean;
 }
 
 /**
@@ -322,18 +273,32 @@ export interface ModifiedVisAttributesExtensionParams {
 }
 
 /**
+ * Grid search result context for cell renderers that issue follow-up searches
+ * (e.g. change-point Summary sparklines). Independent of the Discover chart section.
+ */
+export interface CellRenderersSearchContext {
+  query?: Query | AggregateQuery;
+  /**
+   * Dashboard / parent KQL or lucene query, distinct from the saved ES|QL `query`.
+   */
+  filterQuery?: Query | AggregateQuery;
+  table?: Datatable;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+  esqlVariables?: ESQLControlVariable[];
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
+  isApproximate?: boolean;
+  /**
+   * Stable per completed grid-result identity; changes on refresh so series caches invalidate.
+   */
+  requestId?: number;
+}
+
+/**
  * Parameters passed to the cell renderers extension
  */
 export interface CellRenderersExtensionParams {
-  /**
-   * Available actions for cell renderers
-   */
-  actions: {
-    /**
-     * Adds a filter to the current search in data view mode, or a where clause in ESQL mode
-     */
-    addFilter?: DocViewFilterFn;
-  };
   /**
    * The current data view
    */
@@ -346,27 +311,20 @@ export interface CellRenderersExtensionParams {
    * The current row height mode applied to the data grid component
    */
   rowHeight: number | undefined;
+  /**
+   * Completed (or last) grid search inputs used by follow-up cell fetches.
+   */
+  searchContext?: CellRenderersSearchContext;
+  /**
+   * True while the grid's primary search is in flight.
+   */
+  isDataLoading?: boolean;
 }
 
 /**
  * Parameters passed to the row controls extension
  */
 export interface RowControlsExtensionParams {
-  /**
-   * Available actions for row controls
-   */
-  actions: {
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: UpdateESQLQueryFn;
-    /**
-     * Sets the expanded document, which is displayed in a flyout
-     * @param record - The record to display in the flyout
-     * @param options.initialTabId - The tabId to display in the flyout
-     */
-    setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
-  };
   /**
    * The current data view
    */
@@ -455,6 +413,55 @@ export interface AdditionalCellAction {
 }
 
 /**
+ * Parameters passed to the deep-analysis playbook extension
+ */
+export interface DeepAnalysisPlaybookExtensionParams {
+  /**
+   * The current data view, if any
+   */
+  dataView: DataView | undefined;
+  /**
+   * The current query
+   */
+  query: AggregateQuery | Query | undefined;
+  /**
+   * The columns of the current ES|QL query result, if any
+   */
+  columns?: Array<{ name: string; type?: string }>;
+}
+
+/**
+ * A per-shape contribution to the agent-builder deep-analysis playbook.
+ * Returning `undefined` means "no contribution" — the server playbook
+ * falls back to inferring analysis strategy from column names and types.
+ */
+export interface DeepAnalysisPlaybookExtension {
+  /**
+   * Stable shape identifier, e.g. 'logs' | 'traces' | 'metrics'
+   */
+  shapeId: string;
+  /**
+   * Human-readable shape label, e.g. "Application & infrastructure logs"
+   */
+  shapeLabel: string;
+  /**
+   * Field names that characterize this shape. Intersected against the
+   * actual attachment columns server-side so the agent never sees
+   * fields that don't exist in the result.
+   */
+  characteristicFields: string[];
+  /**
+   * Short guidance (≤600 chars) describing what "deep analysis" means for
+   * this shape — what to group by, what to avoid, what's interesting.
+   */
+  guidance: string;
+  /**
+   * Optional short bullets (≤5 entries) to seed the Drill-Down Queries section.
+   */
+  interestingSignals?: string[];
+}
+
+/**
  * The core profile interface for Discover context awareness.
  * Each of the available methods map to a specific extension point in the Discover application.
  */
@@ -506,9 +513,7 @@ export interface Profile {
    * This allows modifying the chart section with a custom component
    * @returns The custom configuration for the chart
    */
-  getChartSectionConfiguration: (
-    params: ChartSectionConfigurationExtensionParams
-  ) => ChartSectionConfiguration;
+  getChartSectionConfiguration: () => ChartSectionConfiguration;
 
   /**
    * Data grid
@@ -543,7 +548,7 @@ export interface Profile {
    * Gets additional cell actions to show within expanded cell popovers in the data grid
    * @returns The additional cell actions to show in the data grid
    */
-  getAdditionalCellActions: (params: AdditionalCellActionsParams) => AdditionalCellAction[];
+  getAdditionalCellActions: () => AdditionalCellAction[];
 
   /**
    * Allows setting the pagination mode and its configuration
@@ -584,6 +589,21 @@ export interface Profile {
    * @returns The doc viewer extension
    */
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+
+  /**
+   * Deep analysis (agent-builder)
+   */
+
+  /**
+   * Contributes per-shape guidance to the Discover deep-analysis agent-builder skill.
+   * The contribution is attached to the ES|QL query results sent to the agent so
+   * the playbook can prioritise shape-relevant fields and aggregations.
+   * @param params The deep-analysis playbook extension parameters
+   * @returns The shape-specific playbook contribution, or `undefined` for the default behaviour
+   */
+  getDeepAnalysisPlaybook: (
+    params: DeepAnalysisPlaybookExtensionParams
+  ) => DeepAnalysisPlaybookExtension | undefined;
 
   /**
    * App Menu (Top Nav actions)

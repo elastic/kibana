@@ -6,54 +6,55 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import type { EvaluationRunDatasetExample } from '@kbn/evals-common';
-import { ExampleScoresTable } from '.';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import type {
+  EvaluationExperimentDatasetExample,
+  GetEvaluationExperimentExampleDetailsResponse,
+} from '@kbn/evals-common';
+import { useExperimentExampleDetails } from '../../hooks/use_evals_api';
+import { ExampleScoresTable, getVerdictBadgeColor } from '.';
+
+jest.mock('../../hooks/use_evals_api');
+
+const mockUseExperimentExampleDetails = jest.mocked(useExperimentExampleDetails);
 
 const buildScore = ({
-  timestamp,
+  timestamp = '2026-03-02T12:00:00.000Z',
   traceId,
-  evaluatorName,
-  evaluatorScore,
+  evaluatorName = 'Criteria',
+  evaluatorScore = 0.9,
   evaluatorLabel,
   evaluatorExplanation,
   evaluatorMetadata,
   evaluatorTraceId,
-  repetitionIndex,
-  exampleInput,
-  taskOutput,
+  evaluatorModelId = 'evaluator-model-1',
+  repetitionIndex = 0,
 }: {
-  timestamp: string;
+  timestamp?: string;
   traceId?: string | null;
-  evaluatorName: string;
+  evaluatorName?: string;
   evaluatorScore?: number | null;
   evaluatorLabel?: string | null;
   evaluatorExplanation?: string | null;
   evaluatorMetadata?: Record<string, unknown> | null;
   evaluatorTraceId?: string | null;
-  repetitionIndex: number;
-  exampleInput?: Record<string, unknown> | null;
-  taskOutput?: Record<string, unknown> | null;
-}): EvaluationRunDatasetExample['scores'][number] => ({
+  evaluatorModelId?: string;
+  repetitionIndex?: number;
+} = {}): EvaluationExperimentDatasetExample['scores'][number] => ({
   '@timestamp': timestamp,
-  run_id: 'run-1',
   experiment_id: 'experiment-1',
   example: {
     id: 'example-1',
-    index: 2,
-    input: exampleInput ?? null,
+    index: 0,
     dataset: {
       id: 'dataset-1',
-      name: 'dataset name',
+      name: 'Dataset 1',
     },
   },
   task: {
     trace_id: traceId,
     repetition_index: repetitionIndex,
-    output: taskOutput ?? null,
-    model: {
-      id: 'task-model-1',
-    },
+    model: { id: 'task-model-1' },
   },
   evaluator: {
     name: evaluatorName,
@@ -62,245 +63,288 @@ const buildScore = ({
     explanation: evaluatorExplanation,
     metadata: evaluatorMetadata,
     trace_id: evaluatorTraceId,
-    model: {
-      id: 'evaluator-model-1',
-    },
+    model: evaluatorModelId ? { id: evaluatorModelId } : undefined,
   },
-  run_metadata: {
-    total_repetitions: 1,
+  metadata: {
+    total_repetitions: 2,
   },
-  environment: {},
 });
 
+const buildExample = (
+  exampleId: string,
+  scores: EvaluationExperimentDatasetExample['scores'] = [buildScore()],
+  exampleIndex = 0,
+  previews?: EvaluationExperimentDatasetExample['previews']
+): EvaluationExperimentDatasetExample => ({
+  example_id: exampleId,
+  example_index: exampleIndex,
+  scores,
+  previews,
+});
+
+const buildDetails = (repetitionIndex: number): GetEvaluationExperimentExampleDetailsResponse => ({
+  example: {
+    input: { prompt: `input-r${repetitionIndex + 1}` },
+  },
+  task: {
+    output: { completion: `output-r${repetitionIndex + 1}` },
+  },
+});
+
+const defaultProps = {
+  experimentId: 'experiment-1',
+  datasetId: 'dataset-1',
+  executionId: 'execution-1',
+  onTraceClick: jest.fn(),
+};
+
+const renderTable = (
+  examples: EvaluationExperimentDatasetExample[],
+  props: Partial<React.ComponentProps<typeof ExampleScoresTable>> = {}
+) => render(<ExampleScoresTable {...defaultProps} examples={examples} {...props} />);
+
 describe('ExampleScoresTable', () => {
-  it('renders repetition navigation and inline JSON previews for multi-repetition rows', () => {
-    const onTraceClick = jest.fn();
-    const examples: EvaluationRunDatasetExample[] = [
-      {
-        example_id: 'example-id-0000000000000001',
-        example_index: 2,
-        scores: [
-          buildScore({
-            timestamp: '2026-03-02T12:00:00.000Z',
-            traceId: '6d8639157ac4141c0000000000000001',
-            evaluatorName: 'Criteria',
-            evaluatorScore: 0.95,
-            repetitionIndex: 0,
-            exampleInput: { prompt: 'input-r1' },
-            taskOutput: { completion: 'output-r1' },
-          }),
-          buildScore({
-            timestamp: '2026-03-02T12:00:02.000Z',
-            traceId: '6d8639157ac4141c0000000000000002',
-            evaluatorName: 'Criteria',
-            evaluatorScore: 0.1,
-            repetitionIndex: 1,
-            exampleInput: { prompt: 'input-r2' },
-            taskOutput: { completion: 'output-r2' },
-          }),
-        ],
-      },
-    ];
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseExperimentExampleDetails.mockImplementation(
+      (_experimentId, _datasetId, _exampleId, repetitionIndex, _executionId, options) =>
+        ({
+          data: options?.enabled ? buildDetails(repetitionIndex) : undefined,
+          isLoading: false,
+          error: null,
+        } as ReturnType<typeof useExperimentExampleDetails>)
+    );
+  });
 
-    render(
-      <ExampleScoresTable
-        examples={examples}
-        onExampleClick={jest.fn()}
-        onTraceClick={onTraceClick}
-      />
+  it('renders every example without an example paginator', () => {
+    const examples = Array.from({ length: 26 }, (_, index) =>
+      buildExample(`example-${index + 1}`, [buildScore()], index)
     );
 
-    expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
+    const { container } = renderTable(examples);
 
-    const pagination = screen.getByRole('navigation', {
-      name: 'Select repetition for example example-id-0000000000000001',
-    });
-    expect(pagination).toBeInTheDocument();
+    expect(container.querySelectorAll('[id^="evalsExampleRow-"]')).toHaveLength(26);
+    expect(
+      screen.queryByRole('navigation', { name: 'Example result pages' })
+    ).not.toBeInTheDocument();
+  });
 
+  it('shows bounded previews and eager evaluator details, then loads full repetition content on request', () => {
+    const truncatedInputPreview = `"${'x'.repeat(2047)}`;
+    const example = buildExample(
+      'example-1',
+      [
+        buildScore({
+          traceId: 'task-trace-0',
+          evaluatorTraceId: 'evaluator-trace-0',
+          evaluatorExplanation: 'explanation-r1',
+          evaluatorMetadata: { reason: 'reason-r1' },
+          repetitionIndex: 0,
+        }),
+        buildScore({
+          timestamp: '2026-03-02T12:00:01.000Z',
+          traceId: 'task-trace-1',
+          evaluatorTraceId: 'evaluator-trace-1',
+          evaluatorScore: 0.2,
+          evaluatorExplanation: 'explanation-r2',
+          evaluatorMetadata: { reason: 'reason-r2' },
+          repetitionIndex: 1,
+        }),
+      ],
+      0,
+      [
+        {
+          repetition_index: 0,
+          input: { content: truncatedInputPreview, truncated: true },
+          output: { content: '{"completion":"preview-output"}', truncated: false },
+        },
+        {
+          repetition_index: 1,
+          input: { content: '{"prompt":"preview-input-r2"}', truncated: false },
+          output: { content: '{"completion":"preview-output-r2"}', truncated: false },
+        },
+      ]
+    );
+
+    renderTable([example]);
+
+    expect(screen.queryByText(/input-r1/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/output-r1/)).not.toBeInTheDocument();
+    expect(screen.getByText(truncatedInputPreview)).toBeInTheDocument();
+    expect(screen.getByText('{"completion":"preview-output"}')).toBeInTheDocument();
+    expect(screen.queryByText(/Preview truncated/)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View full input' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+    expect(
+      mockUseExperimentExampleDetails.mock.calls.every(([, , , , , options]) => !options?.enabled)
+    ).toBe(true);
+
+    const evaluatorAccordion = screen.getByLabelText('Toggle details for evaluator Criteria');
+    fireEvent.click(evaluatorAccordion.querySelector('.euiAccordion__button') as HTMLButtonElement);
+    expect(screen.getByText('explanation-r1')).toBeInTheDocument();
+    expect(screen.getByText(/"reason": "reason-r1"/)).toBeInTheDocument();
+    expect(
+      mockUseExperimentExampleDetails.mock.calls.every(([, , , , , options]) => !options?.enabled)
+    ).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'View full input' }));
     expect(screen.getByText(/"prompt": "input-r1"/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hide full input' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+    expect(screen.getByText('{"completion":"preview-output"}')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide full input' }));
+    expect(screen.queryByText(/"prompt": "input-r1"/)).not.toBeInTheDocument();
+    expect(screen.getByText(truncatedInputPreview)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'View full input' }));
+    expect(screen.getByText(/"prompt": "input-r1"/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'View full output' }));
     expect(screen.getByText(/"completion": "output-r1"/)).toBeInTheDocument();
-    expect(screen.getByText('Criteria:')).toBeInTheDocument();
-    expect(screen.getByText('0.95')).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: 'Open trace 6d8639157ac4141c0000000000000001',
-      })
-    );
-    expect(onTraceClick).toHaveBeenCalledWith(
-      '6d8639157ac4141c0000000000000001',
-      'example-id-0000000000000001'
-    );
-
-    const nextPageButton = screen.getByRole('button', { name: 'Next page' });
-    fireEvent.click(nextPageButton);
-    expect(screen.getByText('0.10')).toBeInTheDocument();
-
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: 'Open trace 6d8639157ac4141c0000000000000002',
-      })
-    );
-    expect(onTraceClick).toHaveBeenCalledWith(
-      '6d8639157ac4141c0000000000000002',
-      'example-id-0000000000000001'
-    );
-  });
-
-  it('does not render repetition pagination for single-repetition rows', () => {
-    const examples: EvaluationRunDatasetExample[] = [
-      {
-        example_id: 'example-id-single-repetition',
-        example_index: 0,
-        scores: [
-          buildScore({
-            timestamp: '2026-03-02T12:00:00.000Z',
-            traceId: '6d8639157ac4141c0000000000000100',
-            evaluatorName: 'Criteria',
-            evaluatorScore: 0.5,
-            repetitionIndex: 0,
-            exampleInput: { prompt: 'single-input' },
-            taskOutput: { completion: 'single-output' },
-          }),
-        ],
-      },
-    ];
-
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
-
-    expect(
-      screen.queryByRole('navigation', {
-        name: 'Select repetition for example example-id-single-repetition',
-      })
-    ).not.toBeInTheDocument();
-    expect(screen.getByText('example-id-singl...')).toBeInTheDocument();
-  });
-
-  it('renders evaluator label as a badge when present', () => {
-    const examples: EvaluationRunDatasetExample[] = [
-      {
-        example_id: 'example-with-label',
-        example_index: 0,
-        scores: [
-          buildScore({
-            timestamp: '2026-03-02T12:00:00.000Z',
-            evaluatorName: 'Factuality',
-            evaluatorScore: 0.8,
-            evaluatorLabel: 'ACCURATE',
-            repetitionIndex: 0,
-          }),
-        ],
-      },
-    ];
-
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
-
-    expect(screen.getByText('Factuality:')).toBeInTheDocument();
-    expect(screen.getByText('0.80')).toBeInTheDocument();
-    expect(screen.getByText('ACCURATE')).toBeInTheDocument();
-  });
-
-  it('shows explanation and metadata when accordion is expanded', () => {
-    const examples: EvaluationRunDatasetExample[] = [
-      {
-        example_id: 'example-with-details',
-        example_index: 0,
-        scores: [
-          buildScore({
-            timestamp: '2026-03-02T12:00:00.000Z',
-            evaluatorName: 'Relevance',
-            evaluatorScore: 0.9,
-            evaluatorExplanation: 'The response is highly relevant.',
-            evaluatorMetadata: { reason: 'matches topic' },
-            repetitionIndex: 0,
-          }),
-        ],
-      },
-    ];
-
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
-
-    expect(screen.getByText('Relevance:')).toBeInTheDocument();
-    expect(screen.getByText('0.90')).toBeInTheDocument();
-
-    const accordion = screen.getByLabelText('Toggle details for evaluator Relevance');
-    const accordionButton = accordion.querySelector('.euiAccordion__button') as HTMLButtonElement;
-    fireEvent.click(accordionButton);
-
-    expect(screen.getByText('Explanation')).toBeInTheDocument();
-    expect(screen.getByText('The response is highly relevant.')).toBeInTheDocument();
-    expect(screen.getByText('Metadata')).toBeInTheDocument();
-    expect(screen.getByText(/"reason": "matches topic"/)).toBeInTheDocument();
-  });
-
-  it('shows evaluator trace button when evaluator trace_id is present', () => {
-    const onTraceClick = jest.fn();
-    const examples: EvaluationRunDatasetExample[] = [
-      {
-        example_id: 'example-with-eval-trace',
-        example_index: 0,
-        scores: [
-          buildScore({
-            timestamp: '2026-03-02T12:00:00.000Z',
-            evaluatorName: 'Criteria',
-            evaluatorScore: 0.7,
-            evaluatorTraceId: 'eval-trace-abc123',
-            repetitionIndex: 0,
-          }),
-        ],
-      },
-    ];
-
-    render(
-      <ExampleScoresTable
-        examples={examples}
-        onExampleClick={jest.fn()}
-        onTraceClick={onTraceClick}
-      />
-    );
-
-    const accordion = screen.getByLabelText('Toggle details for evaluator Criteria');
-    const accordionButton = accordion.querySelector('.euiAccordion__button') as HTMLButtonElement;
-    fireEvent.click(accordionButton);
-
-    const viewTraceButton = screen.getByRole('button', {
-      name: 'View trace for evaluator Criteria',
+    const repetitionPagination = screen.getByRole('navigation', {
+      name: 'Select repetition for example example-1',
     });
-    fireEvent.click(viewTraceButton);
+    fireEvent.click(within(repetitionPagination).getByRole('button', { name: 'Next page' }));
 
-    expect(onTraceClick).toHaveBeenCalledWith('eval-trace-abc123', 'example-with-eval-trace');
-  });
+    expect(screen.getByText('{"prompt":"preview-input-r2"}')).toBeInTheDocument();
+    expect(screen.getByText('{"completion":"preview-output-r2"}')).toBeInTheDocument();
+    expect(screen.queryByText(truncatedInputPreview)).not.toBeInTheDocument();
+    expect(screen.queryByText('{"completion":"preview-output"}')).not.toBeInTheDocument();
+    expect(screen.queryByText(/"prompt": "input-r2"/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/"completion": "output-r2"/)).not.toBeInTheDocument();
+    expect(screen.getByText('explanation-r2')).toBeInTheDocument();
 
-  it('does not render accordion when no details are available', () => {
-    const examples: EvaluationRunDatasetExample[] = [
-      {
-        example_id: 'example-no-details',
-        example_index: 0,
-        scores: [
-          buildScore({
-            timestamp: '2026-03-02T12:00:00.000Z',
-            evaluatorName: 'SimpleScore',
-            evaluatorScore: 1.0,
-            repetitionIndex: 0,
-          }),
-        ],
-      },
-    ];
-
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
+    fireEvent.click(screen.getByRole('button', { name: 'View full output' }));
+    expect(screen.getByText(/"completion": "output-r2"/)).toBeInTheDocument();
+    expect(mockUseExperimentExampleDetails).toHaveBeenCalledWith(
+      'experiment-1',
+      'dataset-1',
+      'example-1',
+      1,
+      'execution-1',
+      { enabled: true }
     );
 
-    expect(screen.getByText('SimpleScore:')).toBeInTheDocument();
-    expect(screen.getByText('1.00')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'View full input' }));
+    expect(screen.getByText(/"prompt": "input-r2"/)).toBeInTheDocument();
+  });
+
+  it('keeps task and evaluator trace actions available from score documents', () => {
+    const onTraceClick = jest.fn();
+    renderTable(
+      [
+        buildExample('example-with-traces', [
+          buildScore({
+            traceId: 'task-trace-summary',
+            evaluatorTraceId: 'evaluator-trace-summary',
+          }),
+        ]),
+      ],
+      { onTraceClick }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open trace task-trace-summary' }));
+    expect(onTraceClick).toHaveBeenCalledWith('task-trace-summary', 'example-with-traces');
+
+    const evaluatorAccordion = screen.getByLabelText('Toggle details for evaluator Criteria');
+    fireEvent.click(evaluatorAccordion.querySelector('.euiAccordion__button') as HTMLButtonElement);
+    fireEvent.click(screen.getByRole('button', { name: 'View trace for evaluator Criteria' }));
+    expect(onTraceClick).toHaveBeenCalledWith('evaluator-trace-summary', 'example-with-traces');
     expect(
-      screen.queryByLabelText('Toggle details for evaluator SimpleScore')
-    ).not.toBeInTheDocument();
+      mockUseExperimentExampleDetails.mock.calls.every(([, , , , , options]) => !options?.enabled)
+    ).toBe(true);
+  });
+
+  it('shows score labels, verdicts, and judge attribution from score documents', () => {
+    renderTable([
+      buildExample('example-mixed-judges', [
+        buildScore({
+          evaluatorName: 'correctness.factuality',
+          evaluatorScore: 0.71,
+          evaluatorLabel: 'PARTIAL',
+          evaluatorModelId: 'openai-gpt-5.6-luna',
+        }),
+        buildScore({
+          evaluatorName: 'correctness.relevance',
+          evaluatorScore: 0.5,
+          evaluatorModelId: 'openai-gpt-5.6-luna',
+        }),
+        buildScore({
+          evaluatorName: 'groundedness',
+          evaluatorScore: 1,
+          evaluatorModelId: 'google-gemini-3.5-flash',
+        }),
+      ]),
+    ]);
+
+    expect(screen.getByText('correctness')).toBeInTheDocument();
+    expect(screen.getByText('factuality:')).toBeInTheDocument();
+    expect(screen.getByText('0.71')).toBeInTheDocument();
+    expect(screen.getByText('PARTIAL')).toBeInTheDocument();
+    expect(screen.getByText('judged by openai-gpt-5.6-luna')).toBeInTheDocument();
+    expect(screen.getByText('judged by google-gemini-3.5-flash')).toBeInTheDocument();
+  });
+
+  it('shows lazy-detail errors without hiding summary scores', () => {
+    mockUseExperimentExampleDetails.mockImplementation(
+      (_experimentId, _datasetId, _exampleId, _repetitionIndex, _executionId, options) =>
+        ({
+          data: undefined,
+          isLoading: false,
+          error: options?.enabled ? new Error('detail unavailable') : null,
+        } as ReturnType<typeof useExperimentExampleDetails>)
+    );
+    renderTable([buildExample('example-error')]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'View full input' }));
+
+    expect(
+      screen.getByText(/Failed to load details: Error: detail unavailable/)
+    ).toBeInTheDocument();
+    expect(screen.getByText('Criteria:')).toBeInTheDocument();
+    expect(screen.getByText('0.90')).toBeInTheDocument();
+  });
+
+  it('shows a loading state while requested details are pending', () => {
+    mockUseExperimentExampleDetails.mockImplementation(
+      (_experimentId, _datasetId, _exampleId, _repetitionIndex, _executionId, options) =>
+        ({
+          data: undefined,
+          isLoading: Boolean(options?.enabled),
+          error: null,
+        } as ReturnType<typeof useExperimentExampleDetails>)
+    );
+    const { container } = renderTable([buildExample('example-loading')]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'View full output' }));
+
+    expect(
+      container.querySelector('[data-test-subj="evalsExampleDetailsLoading"]')
+    ).toBeInTheDocument();
+  });
+
+  describe('getVerdictBadgeColor', () => {
+    it('colors scored verdicts by score and label-only verdicts by keyword', () => {
+      expect(getVerdictBadgeColor('correctness-analysis', 0)).toEqual('danger');
+      expect(getVerdictBadgeColor('accurate', 0.6)).toEqual('warning');
+      expect(getVerdictBadgeColor('correct', null)).toEqual('success');
+      expect(getVerdictBadgeColor('not-grounded', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('partial-match', null)).toEqual('warning');
+      expect(getVerdictBadgeColor('something-bespoke', null)).toEqual('hollow');
+    });
+
+    it('leaves measurements uncolored and neutral sentinels gray', () => {
+      expect(getVerdictBadgeColor('tokens', 40118)).toEqual('hollow');
+      expect(getVerdictBadgeColor('drift', -3)).toEqual('hollow');
+      expect(getVerdictBadgeColor('unavailable', 0)).toEqual('default');
+      expect(getVerdictBadgeColor('N/A', 0)).toEqual('default');
+      expect(getVerdictBadgeColor('fixture-error', null)).toEqual('default');
+    });
   });
 });

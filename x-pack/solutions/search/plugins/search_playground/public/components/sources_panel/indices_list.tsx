@@ -31,7 +31,6 @@ export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick
             wrapText
             color="primary"
             label={index}
-            size="s"
             data-test-subj="indicesInAccordian"
             extraAction={{
               alwaysShow: true,

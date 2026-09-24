@@ -6,26 +6,25 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useMemo } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { isSharedConversation } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
-import { newConversationId, createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
-import { useIsSendingMessage } from './use_is_sending_message';
 import { useAgentBuilderServices } from './use_agent_builder_service';
-import { storageKeys } from '../storage_keys';
-import { useSendMessage } from '../context/send_message/send_message_context';
-import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
+import { useLastAgentId } from './use_last_agent_id';
+import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
+
+const POLL_INTERVAL_MS = 5_000;
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
-  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
-  const isSendingMessage = useIsSendingMessage();
+  const queryKey = queryKeys.conversations.byId(conversationId ?? '');
+
+  const isThisConversationStreaming = useIsCurrentConversationStreaming();
 
   const {
     data: conversation,
@@ -36,9 +35,10 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    // Disable query if we are on a new conversation or if there is a message currently being sent
-    // Otherwise a refetch will overwrite our optimistic updates
-    enabled: Boolean(conversationId) && !isSendingMessage,
+    // While this client streams into the conversation the live events are the source of truth and
+    // the saved document lags behind them by design; reading it mid-run only produces disagreements
+    // (a second copy of the pending message before `execution_started` for example).
+    enabled: Boolean(conversationId) && !isThisConversationStreaming,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -52,9 +52,25 @@ export const useConversation = () => {
       }
       return failureCount < 3;
     },
+    // Refetching an errored query (no cached success) resets status `error` → `loading`,
+    // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
+    retryOnMount: false,
+    // Shared conversations can be written to by other participants, so poll for their rounds.
+    refetchInterval: (data) =>
+      isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };
+};
+
+export const useConversationPermissions = (): ConversationPermissions => {
+  const { conversation } = useConversation();
+
+  return {
+    rename: conversation?.permissions.rename ?? false,
+    delete: conversation?.permissions.delete ?? false,
+    update_access_control: conversation?.permissions.update_access_control ?? false,
+  };
 };
 
 export const useConversationStatus = () => {
@@ -84,90 +100,50 @@ export const useConversationError = () => {
   };
 };
 
-const useGetNewConversationAgentId = () => {
-  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
-  const validateAgentId = useValidateAgentId();
-
-  // Ensure we always return a string
-  return (): string => {
-    const isAgentIdValid = validateAgentId(agentIdStorage);
-    if (isAgentIdValid) {
-      return agentIdStorage;
-    }
-    return agentBuilderDefaultAgentId;
-  };
-};
-
 export const useAgentId = () => {
   const { conversation } = useConversation();
   const context = useConversationContext();
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
-  const getNewConversationAgentId = useGetNewConversationAgentId();
+  const { agentId: lastAgentId } = useLastAgentId();
 
-  // For new conversations, URL (context.agentId) is the source of truth
   if (isNewConversation) {
-    return context.agentId ?? getNewConversationAgentId();
+    return context.agentId ?? lastAgentId;
   }
 
-  // For existing conversations, use the conversation's stored agent_id
   if (conversation?.agent_id) {
     return conversation.agent_id;
   }
 
-  // Fallback to context (URL) for edge cases
   return context.agentId;
 };
 
 export const useConversationTitle = () => {
   const { conversation, isLoading } = useConversation();
-  return { title: conversation?.title ?? '', isLoading };
+  return {
+    title: conversation?.title ?? '',
+    isLoading,
+  };
 };
 
-export const useConversationRounds = () => {
-  const { conversation } = useConversation();
-  const { pendingMessage, error, errorSteps } = useSendMessage();
+export const useConversationReadOnly = () => {
+  const conversationId = useConversationId();
+  const { conversation, isFetching } = useConversation();
 
-  const conversationRounds = useMemo(() => {
-    const rounds = conversation?.rounds ?? [];
-    if (Boolean(error) && pendingMessage) {
-      const pendingRound = createNewRound({
-        userMessage: pendingMessage,
-        roundId: '',
-        steps: errorSteps,
-      });
-      return [...rounds, pendingRound];
-    }
-    return rounds;
-  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
-
-  return conversationRounds;
-};
-
-// Returns a flattened list of all steps across all rounds.
-// CAUTION: This uses `conversationRounds.length` as useMemo key to prevent re-renders during streaming. This will return stale data for the last round. It will only contain the complete set of steps up until the previous round.
-export const useStepsFromPrevRounds = () => {
-  const conversationRounds = useConversationRounds();
-
-  return useMemo(() => {
-    return conversationRounds.flatMap(({ steps }) => steps);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationRounds.length]); // only depend on length to avoid re-renders during streaming
+  return {
+    isReadOnly: conversation?.read_only ?? false,
+    // Not `isLoading`: v4 reports it for disabled queries too.
+    isLoading: Boolean(conversationId) && !conversation && isFetching,
+  };
 };
 
 export const useHasActiveConversation = () => {
   const hasPersistedConversation = useHasPersistedConversation();
-  const conversationRounds = useConversationRounds();
-  return hasPersistedConversation || conversationRounds.length > 0;
+  const { conversation } = useConversation();
+  return hasPersistedConversation || (conversation?.events?.length ?? 0) > 0;
 };
 
 export const useHasPersistedConversation = () => {
   const conversationId = useConversationId();
   return Boolean(conversationId);
-};
-
-export const useIsAwaitingPrompt = () => {
-  const conversationRounds = useConversationRounds();
-  const lastRound = conversationRounds.at(-1);
-  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
 };

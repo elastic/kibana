@@ -46,7 +46,6 @@ export const MarkAsUntrackedAlertAction = typedMemo(
       <EuiContextMenuItem
         data-test-subj="untrackAlert"
         key="untrackAlert"
-        size="s"
         onClick={handleUntrackAlert}
       >
         {i18n.translate('xpack.triggersActionsUI.alertsTable.actions.untrack', {

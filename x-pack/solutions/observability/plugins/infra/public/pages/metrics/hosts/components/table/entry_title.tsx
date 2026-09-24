@@ -37,7 +37,6 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const providerName = cloudProvider ?? 'Unknown';
   return (
     <EuiToolTip
-      delay="long"
       anchorClassName="eui-displayBlock"
       content={i18n.translate('xpack.infra.hostsViewPage.table.nameTooltip', {
         defaultMessage: '{providerName}: {name}',

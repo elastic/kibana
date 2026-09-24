@@ -31,6 +31,7 @@ import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { TransferAction } from '../../../../../plugin_imports/embeddable_editor_service';
 import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
+import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 
 jest.mock('./discover_session_save_dashboard_modal', () => ({
   DiscoverSessionSaveDashboardModal: jest.fn(() => null),
@@ -58,13 +59,11 @@ const defaultPersistedDiscoverSession = createDiscoverSessionMock({
 const getOnSaveProps = (
   props?: Partial<Parameters<DiscoverSessionSaveDashboardModalProps['onSave']>[0]>
 ): Parameters<DiscoverSessionSaveDashboardModalProps['onSave']>[0] => ({
-  isTitleDuplicateConfirmed: false,
   newCopyOnSave: false,
   newDescription: 'description',
   newTags: [],
   newTimeRestore: false,
   newTitle: 'title',
-  onTitleDuplicate: jest.fn(),
   ...props,
 });
 
@@ -198,6 +197,20 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(modalProps?.hideDashboardOptions).toBe(false);
     });
 
+    it('should show dashboard options after enabling Save As for an existing session', async () => {
+      const { modalProps } = await setup({});
+      expect(modalProps?.hideDashboardOptions).toBe(true);
+
+      await act(async () => {
+        modalProps?.onCopyOnSaveChange?.(true);
+      });
+
+      const updatedModalProps = MockModal.mock.lastCall?.[0] as
+        | DiscoverSessionSaveDashboardModalProps
+        | undefined;
+      expect(updatedModalProps?.hideDashboardOptions).toBe(false);
+    });
+
     it('should show dashboard options for a new session (non-embedded)', async () => {
       const { modalProps } = await setup({ persistedDiscoverSession: false });
       expect(modalProps?.hideDashboardOptions).toBe(false);
@@ -219,6 +232,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
       expect(modalProps).toEqual({
         description: 'description',
+        hasLibraryItemWithTitle: expect.any(Function),
         hideDashboardOptions: true,
         initialTags: [],
         initialTimeRestore: false,
@@ -246,6 +260,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
       expect(modalProps).toEqual({
         description: 'description',
+        hasLibraryItemWithTitle: expect.any(Function),
         hideDashboardOptions: true,
         initialTags: [],
         initialTimeRestore: false,
@@ -274,6 +289,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
       expect(modalProps).toEqual({
         description: 'description',
+        hasLibraryItemWithTitle: expect.any(Function),
         hideDashboardOptions: false,
         initialTags: [],
         initialTimeRestore: false,
@@ -298,6 +314,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
       expect(modalProps).toEqual({
         description: undefined,
+        hasLibraryItemWithTitle: expect.any(Function),
         hideDashboardOptions: false,
         initialTags: [],
         initialTimeRestore: false,
@@ -351,6 +368,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
             serializedSearchSource: { index: dataViewMock.id },
           },
         }),
+        tabType: undefined,
       });
 
       const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -362,6 +380,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
             serializedSearchSource: { index: dataViewMockWithTimeField.id },
           },
         }),
+        tabType: undefined,
       });
 
       const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -373,6 +392,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
             serializedSearchSource: { index: { title: 'adhoc' } },
           },
         }),
+        tabType: undefined,
       });
 
       const adHocDataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -387,6 +407,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
             timeRestore: true,
           },
         }),
+        tabType: undefined,
       });
 
       it("should set isTimeBased to false if no tab's data view is time based", async () => {
@@ -438,12 +459,14 @@ describe('DiscoverSessionSaveModalContainer', () => {
         currentDataView: dataViewMock,
         services,
         tab: getTabStateMock({ id: 'noTimeRestoreTab', attributes: { timeRestore: false } }),
+        tabType: undefined,
       });
 
       const timeRestoreTab = fromTabStateToSavedObjectTab({
         currentDataView: dataViewMock,
         services,
         tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
+        tabType: undefined,
       });
 
       let { modalProps } = await setup({
@@ -636,6 +659,40 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
     });
 
+    it('should include the resolved profile state when navigating to a newly saved session', async () => {
+      const services = createDiscoverServicesMock();
+      services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const { modalProps, toolkit } = await setup({
+        persistedDiscoverSession: false,
+        services,
+      });
+      const tabId = toolkit.getCurrentTab().id;
+
+      toolkit.internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: { ...TEST_PROFILE_STATE_DEF.defaultState, urlValue: 'picked-value' },
+        })
+      );
+
+      await act(async () => {
+        await modalProps?.onSave(getOnSaveProps());
+      });
+
+      expect(navigateSpy).toHaveBeenCalledWith({
+        savedSearchId: 'new-session',
+        tab: { id: tabId },
+        profileState: {
+          testProfileState: {
+            persistentValue: TEST_PROFILE_STATE_DEF.defaultState.persistentValue,
+            urlValue: 'picked-value',
+          },
+        },
+      });
+    });
+
     it('should navigate to dashboard when dashboardId is set', async () => {
       const services = createDiscoverServicesMock();
       const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
@@ -651,6 +708,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
         app: 'dashboards',
         path: '#/view/dashboard-123',
+        newPanel: false,
         state: { savedObjectId: 'the-saved-search-id' },
       });
     });
@@ -670,6 +728,51 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
         app: 'dashboards',
         path: '#/create',
+        newPanel: false,
+        state: { savedObjectId: 'the-saved-search-id' },
+      });
+    });
+
+    it('should navigate to a dashboard when dashboardId is set for Save As', async () => {
+      const services = createDiscoverServicesMock();
+      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const { modalProps } = await setup({
+        initialCopyOnSave: true,
+        isEmbedded: true,
+        services,
+      });
+
+      await act(async () => {
+        await modalProps?.onSave(
+          getOnSaveProps({ dashboardId: 'dashboard-123', newCopyOnSave: true })
+        );
+      });
+
+      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
+        app: 'dashboards',
+        path: '#/view/dashboard-123',
+        newPanel: true,
+        state: { savedObjectId: 'the-saved-search-id' },
+      });
+    });
+
+    it('should navigate to a dashboard when dashboardId is set to "new" for Save As', async () => {
+      const services = createDiscoverServicesMock();
+      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const { modalProps } = await setup({
+        initialCopyOnSave: true,
+        isEmbedded: true,
+        services,
+      });
+
+      await act(async () => {
+        await modalProps?.onSave(getOnSaveProps({ dashboardId: 'new', newCopyOnSave: true }));
+      });
+
+      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
+        app: 'dashboards',
+        path: '#/create',
+        newPanel: true,
         state: { savedObjectId: 'the-saved-search-id' },
       });
     });

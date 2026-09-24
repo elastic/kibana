@@ -6,111 +6,164 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { INFERENCE_LOCAL_TAGS } from '../../scout_test_tags';
 import { test } from '../fixtures';
 import { eisEndpointsMockData } from '../fixtures/mock_data/eis_endpoints';
 import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mocks';
 
-test.describe(
-  'EIS Models Page',
-  { tag: ['@local-stateful-classic', '@local-stateful-search', '@local-serverless-search'] },
-  () => {
-    test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-      await mockInferenceEndpoints(page, eisEndpointsMockData);
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.eisModels.goto();
+test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
+  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+    await mockInferenceEndpoints(page, eisEndpointsMockData);
+    await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.eisModels.goto();
+  });
+
+  test.afterEach(async ({ page }) => {
+    await unmockInferenceEndpoints(page);
+  });
+
+  test('displays page header', async ({ pageObjects }) => {
+    await expect(pageObjects.eisModels.pageHeader).toBeVisible();
+  });
+
+  test('renders model cards from mock data', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('correct number of model cards are displayed', async () => {
+      await expect(eisModels.allModelCards).toHaveCount(5);
     });
 
-    test.afterEach(async ({ page }) => {
+    await test.step('each model card is visible with expected name', async () => {
+      await expect(eisModels.modelCard('Anthropic Claude Sonnet 3.7')).toBeVisible();
+      await expect(eisModels.modelCard('OpenAI GPT-4.1')).toBeVisible();
+      await expect(eisModels.modelCard('Google Gemini 2.5 Pro')).toBeVisible();
+      await expect(eisModels.modelCard('Elastic ELSER v2')).toBeVisible();
+    });
+
+    await test.step('deprecated model is shown by default and the EOL model is not', async () => {
+      await expect(eisModels.modelCard('OpenAI GPT-3.5')).toBeVisible();
+      await expect(eisModels.modelCard('OpenAI Davinci')).toBeHidden();
+    });
+  });
+
+  test('search filters model cards', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('all model cards are visible before search', async () => {
+      await expect(eisModels.allModelCards).toHaveCount(5);
+    });
+
+    await test.step('typing a search term reduces the card count', async () => {
+      await eisModels.search('Anthropic');
+      await expect(eisModels.allModelCards).toHaveCount(1);
+      await expect(eisModels.modelCard('Anthropic Claude Sonnet 3.7')).toBeVisible();
+    });
+
+    await test.step('clearing search restores all cards', async () => {
+      await eisModels.clearSearch();
+      await expect(eisModels.allModelCards).toHaveCount(5);
+    });
+  });
+
+  test('model family filter filters cards by provider', async ({ page, pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('open model family filter popover', async () => {
+      await eisModels.modelFamilyFilter.click();
+    });
+
+    await test.step('select Anthropic provider and close popover', async () => {
+      await page.getByRole('option', { name: 'Anthropic' }).click();
+      await eisModels.modelFamilyFilter.click();
+    });
+
+    await test.step('only Anthropic model card is shown', async () => {
+      await expect(eisModels.allModelCards).toHaveCount(1);
+      await expect(eisModels.modelCard('Anthropic Claude Sonnet 3.7')).toBeVisible();
+    });
+  });
+
+  test('renders status badges on deprecated and EOL model cards', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('deprecated model card renders the deprecated badge without any toggle', async () => {
+      await expect(eisModels.modelCard('OpenAI GPT-3.5')).toBeVisible();
+      await expect(eisModels.modelStatusBadge('OpenAI GPT-3.5', 'deprecated')).toBeVisible();
+      await expect(eisModels.modelStatusBadge('OpenAI GPT-3.5', 'eol')).toBeHidden();
+    });
+
+    await test.step('EOL model card renders the EOL badge once end-of-life models are shown', async () => {
+      await eisModels.showEndOfLifeModels();
+      await expect(eisModels.modelCard('OpenAI Davinci')).toBeVisible();
+      await expect(eisModels.modelStatusBadge('OpenAI Davinci', 'eol')).toBeVisible();
+      await expect(eisModels.modelStatusBadge('OpenAI Davinci', 'deprecated')).toBeHidden();
+    });
+
+    await test.step('GA model cards render no status badge', async () => {
+      await expect(
+        eisModels.modelStatusBadge('Anthropic Claude Sonnet 3.7', 'deprecated')
+      ).toBeHidden();
+      await expect(eisModels.modelStatusBadge('Anthropic Claude Sonnet 3.7', 'eol')).toBeHidden();
+      await expect(eisModels.modelStatusBadge('OpenAI GPT-4.1', 'deprecated')).toBeHidden();
+      await expect(eisModels.modelStatusBadge('OpenAI GPT-4.1', 'eol')).toBeHidden();
+    });
+  });
+
+  test('shows empty state when no models match search', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('search for non-existent model', async () => {
+      await eisModels.search('nonexistent-model-xyz');
+    });
+
+    await test.step('no models found prompt is displayed', async () => {
+      await expect(eisModels.noModelsFound).toBeVisible();
+      await expect(eisModels.allModelCards).toHaveCount(0);
+    });
+  });
+
+  test('renders Blocked badge on model card denied by region policy', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('mock Anthropic model as denied by region policy', async () => {
       await unmockInferenceEndpoints(page);
+      await mockInferenceEndpoints(
+        page,
+        eisEndpointsMockData.map((endpoint) =>
+          endpoint.service_settings?.model_id === 'anthropic-claude-3.7-sonnet'
+            ? {
+                ...endpoint,
+                metadata: { ...endpoint.metadata, denied_by_region_policy: true },
+              }
+            : endpoint
+        )
+      );
+      await eisModels.goto();
     });
 
-    test('displays page header and documentation link', async ({ pageObjects }) => {
-      await expect(pageObjects.eisModels.pageHeader).toBeVisible();
-      await expect(pageObjects.eisModels.documentationLink).toBeVisible();
+    await test.step('show outside-region models and verify Blocked badge', async () => {
+      await eisModels.showModelsOutsideRegionPreferences();
+      await expect(eisModels.modelBlockedBadge('Anthropic Claude Sonnet 3.7')).toBeVisible();
     });
 
-    test('renders model cards from mock data', async ({ pageObjects }) => {
-      const { eisModels } = pageObjects;
+    await test.step('non-blocked model cards have no Blocked badge', async () => {
+      await expect(eisModels.modelBlockedBadge('OpenAI GPT-4.1')).toBeHidden();
+    });
+  });
 
-      await test.step('correct number of model cards are displayed', async () => {
-        await expect(eisModels.allModelCards).toHaveCount(4);
-      });
+  test('renders preview badge on preview model card', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
 
-      await test.step('each model card is visible with expected name', async () => {
-        await expect(eisModels.modelCard('Anthropic Claude Sonnet 3.7')).toBeVisible();
-        await expect(eisModels.modelCard('OpenAI GPT-4.1')).toBeVisible();
-        await expect(eisModels.modelCard('Google Gemini 2.5 Pro')).toBeVisible();
-        await expect(eisModels.modelCard('Elastic ELSER v2')).toBeVisible();
-      });
+    await test.step('show preview models', async () => {
+      await eisModels.showPreviewModels();
     });
 
-    test('search filters model cards', async ({ pageObjects }) => {
-      const { eisModels } = pageObjects;
-
-      await test.step('all model cards are visible before search', async () => {
-        await expect(eisModels.allModelCards).toHaveCount(4);
-      });
-
-      await test.step('typing a search term reduces the card count', async () => {
-        await eisModels.searchBar.fill('Anthropic');
-        await expect(eisModels.allModelCards).toHaveCount(1);
-        await expect(eisModels.modelCard('Anthropic Claude Sonnet 3.7')).toBeVisible();
-      });
-
-      await test.step('clearing search restores all cards', async () => {
-        await eisModels.searchBar.clear();
-        await expect(eisModels.allModelCards).toHaveCount(4);
-      });
+    await test.step('preview model card is visible with preview badge', async () => {
+      await expect(eisModels.modelCard('Elastic Preview Model')).toBeVisible();
+      await expect(eisModels.modelStatusBadge('Elastic Preview Model', 'preview')).toBeVisible();
     });
-
-    test('task type filter buttons filter model cards', async ({ pageObjects }) => {
-      const { eisModels } = pageObjects;
-
-      await test.step('all model cards visible before filtering', async () => {
-        await expect(eisModels.allModelCards).toHaveCount(4);
-      });
-
-      await test.step('clicking LLM filter excludes embedding-only model', async () => {
-        await eisModels.taskTypeFilter('LLM').click();
-        await expect(eisModels.allModelCards).toHaveCount(3);
-        await expect(eisModels.modelCard('Elastic ELSER v2')).toBeHidden();
-      });
-
-      await test.step('clicking LLM filter again deselects and restores all cards', async () => {
-        await eisModels.taskTypeFilter('LLM').click();
-        await expect(eisModels.allModelCards).toHaveCount(4);
-      });
-    });
-
-    test('model family filter filters cards by provider', async ({ page, pageObjects }) => {
-      const { eisModels } = pageObjects;
-
-      await test.step('open model family filter popover', async () => {
-        await eisModels.modelFamilyFilter.getByRole('button').click();
-      });
-
-      await test.step('select Anthropic provider and close popover', async () => {
-        await page.getByRole('option', { name: 'Anthropic' }).click();
-        await eisModels.modelFamilyFilter.getByRole('button').click();
-      });
-
-      await test.step('only Anthropic model card is shown', async () => {
-        await expect(eisModels.allModelCards).toHaveCount(1);
-        await expect(eisModels.modelCard('Anthropic Claude Sonnet 3.7')).toBeVisible();
-      });
-    });
-
-    test('shows empty state when no models match search', async ({ pageObjects }) => {
-      const { eisModels } = pageObjects;
-
-      await test.step('search for non-existent model', async () => {
-        await eisModels.searchBar.fill('nonexistent-model-xyz');
-      });
-
-      await test.step('no models found prompt is displayed', async () => {
-        await expect(eisModels.noModelsFound).toBeVisible();
-        await expect(eisModels.allModelCards).toHaveCount(0);
-      });
-    });
-  }
-);
+  });
+});

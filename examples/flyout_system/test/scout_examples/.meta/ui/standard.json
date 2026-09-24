@@ -1,30 +1,33 @@
 {
-  "sha1": "67b0f178aca54362429ec918024e8e136f04fd3c",
+  "sha1": "519ac2043a1a4527710763a377b3cc43416d7ea6",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
-      "id": "41a78a77f1ad1c5-f17c8832d70b41f",
-      "title": "Flyout System - EuiFlyout component Session J: open main flyout, open child flyout A, both remain visible",
+      "id": "41a78a77f1ad1c5-ecdbe6ac98de04b",
+      "title": "Flyout System - FlyoutTemplate component Session J: open main flyout, open child flyout A, both remain visible",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
-        "line": 19,
+        "line": 20,
         "column": 7
       }
     },
     {
-      "id": "41a78a77f1ad1c5-b201acb79cc68d7",
-      "title": "Flyout System - EuiFlyout component Back button: navigate from Session X overlay back to Session J push flyout",
+      "id": "41a78a77f1ad1c5-3db28af08559440",
+      "title": "Flyout System - FlyoutTemplate component Back button: navigate from Session X overlay back to Session J push flyout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
-        "line": 40,
-        "column": 7
+        "line": 36,
+        "column": 13
       }
     }
   ]

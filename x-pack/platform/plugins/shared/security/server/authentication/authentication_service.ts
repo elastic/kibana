@@ -19,7 +19,7 @@ import type {
   Logger,
   LoggerFactory,
 } from '@kbn/core/server';
-import type { APIKeysType } from '@kbn/core-security-server';
+import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
@@ -36,14 +36,17 @@ import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
+import { UiamOAuth } from './oauth';
+import { UiamSystemIdentity } from './system_identity';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
-import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
+import { KIBANA_AUTH_FULL_HEADER, NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import type { ServiceAccountsServiceStart } from '../service_accounts';
 import type { Session } from '../session_management';
 import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
@@ -57,6 +60,7 @@ interface AuthenticationServiceSetupParams {
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
+  getServiceAccounts: () => ServiceAccountsServiceStart | null;
 }
 
 interface AuthenticationServiceStartParams {
@@ -87,9 +91,11 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'invalidate'
     | 'validate'
     | 'grantAsInternalUser'
+    | 'cloneAsInternalUser'
     | 'invalidateAsInternalUser'
     | 'uiam'
   >;
+  oauth: UiamOAuthType | null;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
@@ -109,6 +115,7 @@ export class AuthenticationService {
     license,
     elasticsearch,
     customBranding,
+    getServiceAccounts,
   }: AuthenticationServiceSetupParams) {
     this.license = license;
 
@@ -327,16 +334,30 @@ export class AuthenticationService {
         `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
       );
 
+      // Fake requests never carry a session, so the re-authentication machinery below cannot help
+      // them (and its BWC header-scrubbing must never touch them). The one recoverable case is a
+      // request bound to a service account, whose credential Kibana minted and can mint again;
+      // everything else — API-key fakes from task manager/alerting, external user-created
+      // credentials — is deliberately left to its owner.
+      if (request.isFakeRequest) {
+        const authHeaders = await getServiceAccounts()
+          ?.backend.reauthenticateFakeRequest(request)
+          .catch(() => null);
+        return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
+      }
+
       let authenticationResult;
       const originalHeaders = request.headers;
       try {
         // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
         // headers returned during authentication stage. We should remove these headers before re-authentication to not
         // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
+        // Additionally, we explicitly include KIBANA_AUTH_FULL_HEADER header to skip any authentication optimizations
+        // and make sure re-authentication is performed in full scope.
         (request.headers as Record<string, unknown>) = Object.fromEntries(
-          Object.entries(originalHeaders).filter(
-            ([headerName]) => headerName.toLowerCase() !== 'authorization'
-          )
+          Object.entries(originalHeaders)
+            .filter(([headerName]) => headerName.toLowerCase() !== 'authorization')
+            .concat([[KIBANA_AUTH_FULL_HEADER, 'true']])
         );
         authenticationResult = await this.authenticator.reauthenticate(request);
       } catch (err) {
@@ -388,6 +409,9 @@ export class AuthenticationService {
     uiam,
     userActivity,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
+    const getCurrentUser = (request: KibanaRequest) =>
+      http.auth.get<AuthenticatedUser>(request).state ?? null;
+
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
@@ -403,8 +427,34 @@ export class AuthenticationService {
           logger: this.logger.get('api-key-uiam'),
           license: this.license,
           uiam,
+          getCurrentUser,
         })
       : null;
+
+    const uiamOAuth = uiam
+      ? new UiamOAuth({
+          logger: this.logger.get('oauth-uiam'),
+          license: this.license,
+          uiam,
+        })
+      : null;
+
+    // UIAM derives Kibana's own identity from the mTLS client certificate alone, so the capability
+    // only exists when that certificate is configured. `xpack.security.uiam.ssl.certificate` and
+    // `.key` are optional, and without them every mint fails with a UIAM 401.
+    const canMintSystemIdentityTokens = Boolean(
+      config.uiam?.ssl.certificate && config.uiam.ssl.key
+    );
+    if (uiam && !canMintSystemIdentityTokens) {
+      this.logger.debug(
+        'UIAM is enabled without a client certificate (`xpack.security.uiam.ssl.certificate` and `.key`), so Kibana cannot mint tokens for its own identity.'
+      );
+    }
+
+    const systemIdentity =
+      uiam && canMintSystemIdentityTokens
+        ? new UiamSystemIdentity({ logger: this.logger.get('system-identity'), uiam })
+        : undefined;
 
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
@@ -416,9 +466,6 @@ export class AuthenticationService {
 
       return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
     };
-
-    const getCurrentUser = (request: KibanaRequest) =>
-      http.auth.get<AuthenticatedUser>(request).state ?? null;
 
     this.session = session;
     const authenticator = (this.authenticator = new Authenticator({
@@ -450,6 +497,7 @@ export class AuthenticationService {
         create: apiKeys.create.bind(apiKeys),
         update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
+        cloneAsInternalUser: apiKeys.cloneAsInternalUser.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
@@ -458,9 +506,30 @@ export class AuthenticationService {
               grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
               invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
               convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
+              getInternalCallerAttestationHeaders:
+                uiamAPIKeys.getInternalCallerAttestationHeaders.bind(uiamAPIKeys),
+              isOwnClientAuthentication: uiamAPIKeys.isOwnClientAuthentication.bind(uiamAPIKeys),
+              isExternalApiKey: uiamAPIKeys.isExternalApiKey.bind(uiamAPIKeys),
             }
           : null,
       },
+
+      oauth: uiamOAuth
+        ? {
+            createClient: uiamOAuth.createClient.bind(uiamOAuth),
+            listClients: uiamOAuth.listClients.bind(uiamOAuth),
+            updateClient: uiamOAuth.updateClient.bind(uiamOAuth),
+            revokeClient: uiamOAuth.revokeClient.bind(uiamOAuth),
+            deleteClient: uiamOAuth.deleteClient.bind(uiamOAuth),
+            listConnections: uiamOAuth.listConnections.bind(uiamOAuth),
+            updateConnection: uiamOAuth.updateConnection.bind(uiamOAuth),
+            revokeConnection: uiamOAuth.revokeConnection.bind(uiamOAuth),
+            deleteConnection: uiamOAuth.deleteConnection.bind(uiamOAuth),
+            resolveUsers: uiamOAuth.resolveUsers.bind(uiamOAuth),
+          }
+        : null,
+
+      systemIdentity,
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
         const providerIdentifier =

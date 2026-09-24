@@ -186,18 +186,42 @@ describe('MigrationReadyPanel', () => {
       });
     });
 
-    it('should render missing resources warning when there are missing resources', async () => {
-      renderReadyPanel(mockMigrationStatsReady);
+    it.each([
+      [
+        MigrationSource.SPLUNK,
+        'Migration of 6 rules is created and ready to start. You can also upload the missing macros & lookups for more accurate results.',
+      ],
+      [
+        MigrationSource.QRADAR,
+        'Migration of 6 rules is created and ready to start. You can also upload the missing reference sets for more accurate results.',
+      ],
+      [
+        MigrationSource.SENTINEL,
+        'Migration of 6 rules is created and ready to start. You can also upload the missing watchlists for more accurate results.',
+      ],
+    ])('should render missing resources warning for %s', async (vendor, expectedDescription) => {
+      renderReadyPanel({ ...mockMigrationStatsReady, vendor });
       await waitFor(() => {
         expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-          'Migration of 6 rules is created and ready to start. You can also upload the missing macros & lookups for more accurate results.'
+          expectedDescription
         );
       });
     });
 
-    it('should render missing resources button', async () => {
-      renderReadyPanel(mockMigrationStatsReady);
-      expect(screen.getByTestId('ruleMigrationMissingResourcesButton')).toBeVisible();
+    it.each([
+      [MigrationSource.SPLUNK, 'Upload missing macros and lookup lists.'],
+      [MigrationSource.QRADAR, 'Upload missing reference sets'],
+      [MigrationSource.SENTINEL, 'Upload missing watchlists'],
+    ])('should render missing resources button aria label for %s', async (vendor, ariaLabel) => {
+      renderReadyPanel({ ...mockMigrationStatsReady, vendor });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('ruleMigrationMissingResourcesButton')).toBeVisible();
+      });
+      expect(screen.getByTestId('ruleMigrationMissingResourcesButton')).toHaveAttribute(
+        'aria-label',
+        ariaLabel
+      );
     });
   });
 });

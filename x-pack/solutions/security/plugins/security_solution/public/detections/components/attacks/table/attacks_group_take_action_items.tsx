@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenu } from '@elastic/eui';
 import {
   type AttackDiscoveryAlert,
   getAttackDiscoveryMarkdown,
@@ -24,10 +22,14 @@ import { useAttackWorkflowStatusContextMenuItems } from '../../../hooks/attacks/
 import type { AttackWithWorkflowStatus } from '../../../hooks/attacks/bulk_actions/types';
 import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items';
 import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
+import { useAttackExploreInAttacksContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_explore_in_attacks_context_menu_items';
 import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
 import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
 import type { AttacksActionTelemetrySource } from '../../../../common/lib/telemetry/events/attacks/types';
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
+import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import { AttacksActionMenu } from './attacks_action_menu';
+import { ATTACK_DISCOVERY_ACTION_IDS } from '../../../../common/constants/action_ids';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -37,8 +39,6 @@ interface AttacksGroupTakeActionItemsProps {
   onActionSuccess?: () => void;
   /** Whether to include the AI assistant action in the menu (default true) */
   showAiAssistantAction?: boolean;
-  /** Optional size for the context menu for flyout */
-  size?: 's' | 'm';
   /** Telemetry source for action events (e.g. flyout vs table) */
   telemetrySource: AttacksActionTelemetrySource;
   /**
@@ -58,7 +58,6 @@ export function AttacksGroupTakeActionItems({
   closePopover,
   onActionSuccess,
   showAiAssistantAction = true,
-  size,
   telemetrySource,
   isRemoteDocument,
 }: AttacksGroupTakeActionItemsProps) {
@@ -137,6 +136,14 @@ export function AttacksGroupTakeActionItems({
     telemetrySource,
   });
 
+  const { items: exploreInAttacksItems } = useAttackExploreInAttacksContextMenuItems({
+    attack,
+    closePopover,
+  });
+
+  const isInSecurityApp = useIsInSecurityApp();
+  const navigationItems = isInSecurityApp ? investigateInTimelineItems : exploreInAttacksItems;
+
   const attacksWithCase = useMemo(
     () => [
       {
@@ -150,11 +157,11 @@ export function AttacksGroupTakeActionItems({
     [attack, baseAttackProps]
   );
 
-  const { items: casesItems } = useAttackCaseContextMenuItems({
+  const { items: casesItems, panels: casePanels } = useAttackCaseContextMenuItems({
     closePopover,
-    title: attack.title,
     attacksWithCase,
     telemetrySource,
+    title: attack.title,
   });
   const { items: viewInAiAssistantItems } = useAttackViewInAiAssistantContextMenuItems({
     attack,
@@ -197,7 +204,7 @@ export function AttacksGroupTakeActionItems({
         ? [
             {
               'data-test-subj': 'addToDataset',
-              key: 'addToDataset',
+              key: ATTACK_DISCOVERY_ACTION_IDS.addToDataset,
               name: addToDatasetAction.label,
               onClick: addToDatasetAction.onClick,
             },
@@ -206,43 +213,23 @@ export function AttacksGroupTakeActionItems({
     [addToDatasetAction]
   );
 
-  const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(
-    () => ({
-      id: 0,
-      items: isRemoteDocument
-        ? [...investigateInTimelineItems]
-        : [
-            ...casesItems,
-            ...workflowItems,
-            ...tagsItems,
-            ...assignItems,
-            ...runWorkflowItems,
-            ...(showAiAssistantAction ? viewInAiAssistantItems : []),
-            ...datasetItems,
-            ...investigateInTimelineItems,
-          ],
-    }),
-    [
-      isRemoteDocument,
-      runWorkflowItems,
-      workflowItems,
-      assignItems,
-      tagsItems,
-      investigateInTimelineItems,
-      casesItems,
-      showAiAssistantAction,
-      viewInAiAssistantItems,
-      datasetItems,
-    ]
+  return (
+    <AttacksActionMenu
+      assigneeItems={assignItems}
+      assigneePanels={assignPanels}
+      caseItems={casesItems}
+      casePanels={casePanels}
+      datasetItems={datasetItems}
+      isRemoteDocument={isRemoteDocument}
+      navigationItems={navigationItems}
+      runWorkflowItems={runWorkflowItems}
+      runWorkflowPanels={runWorkflowPanels}
+      showAiAssistantAction={showAiAssistantAction}
+      statusItems={workflowItems}
+      statusPanels={workflowPanels}
+      tagItems={tagsItems}
+      tagPanels={tagsPanels}
+      viewInAiAssistantItems={viewInAiAssistantItems}
+    />
   );
-
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () =>
-      isRemoteDocument
-        ? [defaultPanel]
-        : [defaultPanel, ...runWorkflowPanels, ...workflowPanels, ...assignPanels, ...tagsPanels],
-    [isRemoteDocument, runWorkflowPanels, workflowPanels, assignPanels, defaultPanel, tagsPanels]
-  );
-
-  return <EuiContextMenu size={size} initialPanelId={defaultPanel.id} panels={panels} />;
 }

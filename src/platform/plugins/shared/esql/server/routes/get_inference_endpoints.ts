@@ -10,7 +10,7 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 
 import { schema } from '@kbn/config-schema';
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 export const registerGetInferenceEndpointsRoute = (
   router: IRouter,

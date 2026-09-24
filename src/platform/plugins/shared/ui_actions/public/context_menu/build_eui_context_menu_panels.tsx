@@ -11,6 +11,7 @@ import * as React from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '../types';
@@ -42,7 +43,7 @@ type ItemDescriptor = EuiContextMenuPanelItemDescriptor & {
 type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   _order?: number;
   _level?: number;
-  _icon?: string;
+  _icon?: IconType;
   items: ItemDescriptor[];
 };
 
@@ -180,7 +181,7 @@ export async function buildContextMenuForActions({
       href: action.getHref ? await action.getHref(context) : undefined,
       _order: action.order || 0,
       _title: action.getDisplayName(context),
-      disabled: action.disabled,
+      disabled: action.isDisabled?.(context),
     });
   });
   await Promise.all(promises);

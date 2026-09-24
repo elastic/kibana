@@ -22,13 +22,13 @@ export async function saveKnowledgeBaseContentToIndex({
   pkgName,
   pkgVersion,
   knowledgeBaseContent,
-  abortController,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   pkgName: string;
   pkgVersion: string;
   knowledgeBaseContent: KnowledgeBaseItem[];
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<string[]> {
   // Always delete existing documents for this package (regardless of version)
   // This ensures we only have one set of docs per package
@@ -69,11 +69,7 @@ export async function saveKnowledgeBaseContentToIndex({
             operations,
             refresh: 'wait_for',
           },
-          abortController
-            ? {
-                signal: abortController.signal,
-              }
-            : undefined
+          signal ? { signal } : undefined
         ),
       { logger: appContextService.getLogger() }
     ).catch((error) => {
@@ -121,7 +117,7 @@ export async function saveKnowledgeBaseContentToIndex({
 export async function getPackageKnowledgeBaseFromIndex(
   esClient: ElasticsearchClient,
   pkgName: string,
-  abortController?: AbortController
+  signal?: AbortSignal
 ): Promise<KnowledgeBaseItem[]> {
   try {
     const query = {
@@ -134,11 +130,7 @@ export async function getPackageKnowledgeBaseFromIndex(
         query,
         size: DEFAULT_SIZE,
       },
-      abortController
-        ? {
-            signal: abortController.signal,
-          }
-        : undefined
+      signal ? { signal } : undefined
     );
 
     return response.hits.hits.map((hit: any) => ({
@@ -159,7 +151,7 @@ export async function getPackageKnowledgeBaseFromIndex(
 export async function deletePackageKnowledgeBase(
   esClient: ElasticsearchClient,
   pkgName: string,
-  abortController?: AbortController
+  signal?: AbortSignal
 ) {
   const query = {
     match: { package_name: pkgName },
@@ -171,11 +163,7 @@ export async function deletePackageKnowledgeBase(
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query,
       },
-      abortController
-        ? {
-            signal: abortController.signal,
-          }
-        : undefined
+      signal ? { signal } : undefined
     )
     .catch((error) => {
       const logger = appContextService.getLogger();

@@ -48,7 +48,12 @@ export function AggRow(props: AggRowProps) {
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} color={iconColor} css={{ marginTop: euiTheme.size.xs }} />
+          <EuiIcon
+            type={iconType}
+            color={iconColor}
+            css={{ marginTop: euiTheme.size.xs }}
+            aria-hidden={true}
+          />
         </EuiFlexItem>
         <EuiFlexItem css={aggRowChildrenStyles(euiTheme)}>{props.children}</EuiFlexItem>
 

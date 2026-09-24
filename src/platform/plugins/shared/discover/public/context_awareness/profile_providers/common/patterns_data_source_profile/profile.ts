@@ -16,12 +16,13 @@ import {
 } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { createElement } from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import { getSparklineCellRenderer } from './sparkline_cell_renderer';
+import { SparklineCellRenderer } from '../sparkline_data_source_profile/sparkline_cell_renderer';
 
 const DOC_LIMIT = 10000;
 
@@ -36,7 +37,7 @@ export const createPatternsDataSourceProfileProvider = (
     getCellRenderers:
       (prev, { context }) =>
       (params) => {
-        const { rowHeight } = params;
+        const { rowHeight, density } = params;
         const { patternColumns, sparklineColumns } = context;
         if (!patternColumns || patternColumns.length === 0) {
           return prev(params);
@@ -58,12 +59,7 @@ export const createPatternsDataSourceProfileProvider = (
           (acc, column) =>
             Object.assign(acc, {
               [column]: (props: DataGridCellValueElementProps) =>
-                getSparklineCellRenderer(
-                  services.charts,
-                  props.row.flattened[props.columnId],
-                  props.isDetails,
-                  rowHeight
-                ),
+                createElement(SparklineCellRenderer, { ...props, services, density }),
             }),
           {}
         );
@@ -75,10 +71,10 @@ export const createPatternsDataSourceProfileProvider = (
         };
       },
     getAdditionalCellActions:
-      (prev, { context }) =>
-      (params) => {
+      (prev, { context, toolkit }) =>
+      () => {
         return [
-          ...prev(params),
+          ...prev(),
           {
             id: 'patterns-action-view-docs-in-discover',
             getDisplayName: () =>
@@ -94,7 +90,7 @@ export const createPatternsDataSourceProfileProvider = (
               }
               return patternColumns.includes(field.name);
             },
-            execute: (executeContext) => {
+            execute: async (executeContext) => {
               const index = executeContext.dataView?.getIndexPattern();
               if (
                 !isOfAggregateQueryType(executeContext.query) ||
@@ -116,8 +112,8 @@ export const createPatternsDataSourceProfileProvider = (
                 esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
               };
 
-              if (params.actions?.openInNewTab) {
-                params.actions.openInNewTab({
+              if (toolkit.actions.openInNewTab) {
+                await toolkit.actions.openInNewTab({
                   query,
                   timeRange: executeContext.timeRange,
                 });

@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AuthMode } from '@kbn/connector-specs';
+import { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import type { TokenResponseOptions } from './request_oauth_token';
@@ -85,6 +86,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     connectorId,
     logger,
     connectorTokenClient,
+    authMethod: OAUTH_AUTHORIZATION_CODE_AUTH_ID,
     forceRefresh,
     isPerUser,
     profileUid,

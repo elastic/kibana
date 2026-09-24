@@ -7,25 +7,29 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
-import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import { ToolOrigin, ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
 import type {
   ToolProvider,
   ExecutableTool,
   ScopedRunner,
-  BuiltinToolDefinition,
+  InternalBuiltinToolDefinition,
 } from '@kbn/agent-builder-server';
 import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
+import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
-import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
-import { getStoreTools } from '../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
+
+export interface SelectToolsResult {
+  staticTools: ExecutableToolWithOrigin[];
+  dynamicTools: ExecutableToolWithOrigin[];
+}
 
 export const selectTools = async ({
   conversation,
@@ -35,11 +39,10 @@ export const selectTools = async ({
   request,
   toolProvider,
   agentConfiguration,
+  aiIndicesEnabled,
   attachmentsService,
-  filestore,
   spaceId,
   runner,
-  experimentalFeatures,
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
@@ -48,12 +51,11 @@ export const selectTools = async ({
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
-  filestore: IFileStore;
   agentConfiguration: AgentConfiguration;
+  aiIndicesEnabled: boolean;
   spaceId: string;
   runner: ScopedRunner;
-  experimentalFeatures: ExperimentalFeatures;
-}) => {
+}): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
   // create tool selection for attachments types
@@ -76,11 +78,6 @@ export const selectTools = async ({
     runner,
   });
 
-  // create tools for filesystem (only if feature is enabled)
-  const filestoreTools = experimentalFeatures.filestore
-    ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
-    : [];
-
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
     selection: [
@@ -89,19 +86,21 @@ export const selectTools = async ({
       ...(agentConfiguration.enable_elastic_capabilities
         ? [{ tool_ids: defaultAgentToolIds }]
         : []),
+      ...(aiIndicesEnabled && (agentConfiguration.ai_indices?.length ?? 0) > 0
+        ? [{ tool_ids: Object.values(contextEngineAiIndexTools) }]
+        : []),
     ],
     toolProvider,
     request,
   });
 
   const staticTools = [
-    ...versionedAttachmentBoundTools,
-    ...versionedAttachmentTools,
-    ...staticRegistryTools,
-    ...filestoreTools,
+    ...withOrigin(versionedAttachmentBoundTools, ToolOrigin.inline),
+    ...withOrigin(versionedAttachmentTools, ToolOrigin.internal),
+    ...withOrigin(staticRegistryTools, ToolOrigin.registry),
   ];
 
-  const dedupedStaticTools = new Map<string, ExecutableTool>();
+  const dedupedStaticTools = new Map<string, ExecutableToolWithOrigin>();
   for (const tool of staticTools) {
     dedupedStaticTools.set(tool.id, tool);
   }
@@ -127,9 +126,15 @@ export const selectTools = async ({
 
   return {
     staticTools: [...dedupedStaticTools.values()],
-    dynamicTools: [...dynamicRegistryTools, ...dynamicInlineTools],
+    dynamicTools: [
+      ...withOrigin(dynamicRegistryTools, ToolOrigin.registry),
+      ...withOrigin(dynamicInlineTools, ToolOrigin.inline),
+    ],
   };
 };
+
+const withOrigin = (tools: ExecutableTool[], origin: ToolOrigin): ExecutableToolWithOrigin[] =>
+  tools.map((tool) => ({ ...tool, origin }));
 
 /**
  * Creates executable tools for managing versioned conversation attachments.
@@ -161,7 +166,7 @@ export const builtinToolToExecutable = ({
   tool,
   runner,
 }: {
-  tool: BuiltinToolDefinition;
+  tool: InternalBuiltinToolDefinition;
   runner: ScopedRunner;
 }): ExecutableTool => {
   return {
@@ -171,8 +176,10 @@ export const builtinToolToExecutable = ({
     tags: tool.tags,
     configuration: {},
     readonly: true,
+    experimental: tool.experimental ?? false,
     getSchema: () => tool.schema,
     summarizeToolReturn: tool.summarizeToolReturn,
+    maxResultTokens: tool.maxResultTokens,
     execute: async (params) => {
       return runner.runInternalTool({
         ...params,
@@ -183,6 +190,7 @@ export const builtinToolToExecutable = ({
           tags: tool.tags,
           configuration: {},
           readonly: true,
+          experimental: tool.experimental ?? false,
           confirmation: { askUser: 'never' },
           isAvailable: async () => ({ status: 'available' as const }),
           getSchema: () => tool.schema,

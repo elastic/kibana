@@ -22,11 +22,14 @@ import {
   EuiSplitPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import type { Filter } from '@kbn/es-query';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import type { Connector, ElasticsearchIndex } from '@kbn/search-connectors';
 import { ConnectorStatus } from '@kbn/search-connectors';
 
@@ -103,6 +106,22 @@ const noPolicyLabel = i18n.translate('xpack.contentConnectors.connectorStats.noP
   defaultMessage: 'No policy found',
 });
 
+const LOGS_DATA_VIEW_ID = 'logs-*';
+
+const buildLogsPhraseFilter = (key: string, value: string): Filter => ({
+  meta: {
+    alias: null,
+    disabled: false,
+    index: LOGS_DATA_VIEW_ID,
+    key,
+    negate: false,
+    params: { query: value },
+    type: FILTERS.PHRASE,
+  },
+  query: { match_phrase: { [key]: value } },
+  $state: { store: FilterStateStore.APP_STATE },
+});
+
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
   connector,
   indexData,
@@ -130,34 +149,10 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
 
   const navigateToDiscoverPayload = agentlessAgentExists
     ? {
-        dataViewId: 'logs-*',
+        dataViewId: LOGS_DATA_VIEW_ID,
         filters: [
-          {
-            meta: {
-              key: 'labels.connector_id',
-              index: 'logs-*',
-              type: 'phrase',
-              params: connector.id,
-            },
-            query: {
-              match_phrase: {
-                'labels.connector_id': connector.id,
-              },
-            },
-          },
-          {
-            meta: {
-              key: 'elastic_agent.id',
-              index: 'logs-*',
-              type: 'phrase',
-              params: connector.id,
-            },
-            query: {
-              match_phrase: {
-                'elastic_agent.id': agentlessOverview.agent.id,
-              },
-            },
-          },
+          buildLogsPhraseFilter('labels.connector_id', connector.id),
+          buildLogsPhraseFilter('elastic_agent.id', agentlessOverview.agent.id),
         ],
         timeRange: {
           from: 'now-6h',
@@ -183,7 +178,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
             >
               {connectorDefinition && connectorDefinition.iconPath && (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={connectorDefinition.iconPath} size="xl" />
+                  <EuiIcon type={connectorDefinition.iconPath} size="xl" aria-hidden={true} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
@@ -216,18 +211,28 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiCopy textToCopy={connector.id}>
                       {(copy) => (
-                        <EuiButtonIcon
-                          onClick={copy}
-                          color="text"
-                          iconType="copy"
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
                             {
                               defaultMessage: 'Copy Connector ID',
                             }
                           )}
-                          data-test-subj="copyConnectorIdButton"
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            onClick={copy}
+                            color="text"
+                            iconType="copy"
+                            aria-label={i18n.translate(
+                              'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
+                              {
+                                defaultMessage: 'Copy Connector ID',
+                              }
+                            )}
+                            data-test-subj="copyConnectorIdButton"
+                          />
+                        </EuiToolTip>
                       )}
                     </EuiCopy>
                   </EuiFlexItem>
@@ -238,6 +243,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   connector.status
                 ) && connector.index_name ? (
                   <EuiButtonEmptyTo
+                    data-test-subj="contentConnectorsConnectorStatsConfigureEmptyButton"
                     size="s"
                     to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
                       connectorId: connector.id,
@@ -248,6 +254,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   </EuiButtonEmptyTo>
                 ) : (
                   <EuiButtonTo
+                    data-test-subj="contentConnectorsConnectorStatsConfigureButton"
                     color="primary"
                     size="s"
                     fill
@@ -307,7 +314,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="documents" />
+                    <EuiIcon type="documents" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
@@ -325,6 +332,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmptyTo
+                  data-test-subj="contentConnectorsConnectorStatsSeeDocumentsButton"
                   isDisabled={!(connector.index_name && indexData)}
                   size="s"
                   to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
@@ -361,6 +369,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiLink
+                  data-test-subj="contentConnectorsConnectorStatsLink"
                   target={'_blank'}
                   external={false}
                   href={http?.basePath.prepend(
@@ -384,6 +393,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-test-subj="contentConnectorsConnectorStatsElasticConnectorsButton"
                     isDisabled={!connector.service_type}
                     iconType="plugs"
                     color="text"
@@ -428,6 +438,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 <EuiFlexItem grow={false}>
                   {agentlessAgentExists && (
                     <EuiButtonEmpty
+                      data-test-subj="contentConnectorsConnectorStatsHostOverviewButton"
                       isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
                       size="s"
                       href={http?.basePath.prepend(
@@ -445,6 +456,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 <EuiFlexItem grow={false}>
                   {agnetlessPolicyExists ? (
                     <EuiButtonEmpty
+                      data-test-subj="contentConnectorsConnectorStatsManagePolicyButton"
                       isDisabled={!agentlessOverview || !agentlessOverview.policy.id}
                       size="s"
                       href={http?.basePath.prepend(

@@ -17,14 +17,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
           class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
             data-test-subj="networkEvents"
           >
             <div
               class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
             >
               <div
-                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+                class="euiFlexGroup e1ida87w0 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -35,26 +35,30 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                     <div
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
-                      <button
-                        aria-label="Open"
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-                        data-test-subj="query-toggle-stat"
-                        title="Open"
-                        type="button"
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id_euiToolTipAnchor"
                       >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="chevronSingleDown"
-                        />
-                      </button>
+                        <button
+                          aria-label="Open"
+                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                          data-test-subj="query-toggle-stat"
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="chevronSingleDown"
+                          />
+                        </button>
+                      </span>
                     </div>
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs e1ida87w3"
                       >
                         Network events
                       </h6>
@@ -66,7 +70,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -99,14 +103,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
           class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
             data-test-subj="dnsQueries"
           >
             <div
               class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
             >
               <div
-                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+                class="euiFlexGroup e1ida87w0 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -117,26 +121,30 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                     <div
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
-                      <button
-                        aria-label="Open"
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-                        data-test-subj="query-toggle-stat"
-                        title="Open"
-                        type="button"
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id_euiToolTipAnchor"
                       >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="chevronSingleDown"
-                        />
-                      </button>
+                        <button
+                          aria-label="Open"
+                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                          data-test-subj="query-toggle-stat"
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="chevronSingleDown"
+                          />
+                        </button>
+                      </span>
                     </div>
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs e1ida87w3"
                       >
                         DNS queries
                       </h6>
@@ -148,7 +156,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -188,14 +196,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
           class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
             data-test-subj="uniqueFlowId"
           >
             <div
               class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
             >
               <div
-                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+                class="euiFlexGroup e1ida87w0 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -206,26 +214,30 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                     <div
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
-                      <button
-                        aria-label="Open"
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-                        data-test-subj="query-toggle-stat"
-                        title="Open"
-                        type="button"
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id_euiToolTipAnchor"
                       >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="chevronSingleDown"
-                        />
-                      </button>
+                        <button
+                          aria-label="Open"
+                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                          data-test-subj="query-toggle-stat"
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="chevronSingleDown"
+                          />
+                        </button>
+                      </span>
                     </div>
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs e1ida87w3"
                       >
                         Unique flow IDs
                       </h6>
@@ -237,7 +249,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -270,14 +282,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
           class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
             data-test-subj="tlsHandshakes"
           >
             <div
               class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
             >
               <div
-                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+                class="euiFlexGroup e1ida87w0 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -288,26 +300,30 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                     <div
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
-                      <button
-                        aria-label="Open"
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-                        data-test-subj="query-toggle-stat"
-                        title="Open"
-                        type="button"
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id_euiToolTipAnchor"
                       >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="chevronSingleDown"
-                        />
-                      </button>
+                        <button
+                          aria-label="Open"
+                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                          data-test-subj="query-toggle-stat"
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="chevronSingleDown"
+                          />
+                        </button>
+                      </span>
                     </div>
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs e1ida87w3"
                       >
                         TLS handshakes
                       </h6>
@@ -319,7 +335,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -354,14 +370,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
     >
       <div
-        class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+        class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
         data-test-subj="uniqueIps"
       >
         <div
           class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
         >
           <div
-            class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+            class="euiFlexGroup e1ida87w0 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -372,26 +388,30 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
-                  <button
-                    aria-label="Open"
-                    class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-                    data-test-subj="query-toggle-stat"
-                    title="Open"
-                    type="button"
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id_euiToolTipAnchor"
                   >
-                    <span
-                      aria-hidden="true"
-                      class="euiButtonIcon__icon"
-                      color="inherit"
-                      data-euiicon-type="chevronSingleDown"
-                    />
-                  </button>
+                    <button
+                      aria-label="Open"
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                      data-test-subj="query-toggle-stat"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="chevronSingleDown"
+                      />
+                    </button>
+                  </span>
                 </div>
                 <div
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h6
-                    class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                    class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs e1ida87w3"
                   >
                     Unique private IPs
                   </h6>
@@ -403,15 +423,16 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
             class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+              class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
+                  class="euiFlexItem e1ida87w1 emotion-euiFlexItem-growZero-FlexItem"
                 >
                   <span
+                    aria-hidden="true"
                     color="#EE72A6"
                     data-euiicon-type="waypoint"
                     data-test-subj="stat-icon"
@@ -429,10 +450,10 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
                 >
                   <p
-                    class="euiTitle ee8xehw1 emotion-euiTitle-m-StatValue"
+                    class="euiTitle e1ida87w2 emotion-euiTitle-m-StatValue"
                     data-test-subj="stat-title"
                   >
                     source
@@ -441,15 +462,16 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
               </div>
             </div>
             <div
-              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+              class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
+                  class="euiFlexItem e1ida87w1 emotion-euiFlexItem-growZero-FlexItem"
                 >
                   <span
+                    aria-hidden="true"
                     color="#61A2FF"
                     data-euiicon-type="waypoint"
                     data-test-subj="stat-icon"
@@ -467,10 +489,10 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
                 >
                   <p
-                    class="euiTitle ee8xehw1 emotion-euiTitle-m-StatValue"
+                    class="euiTitle e1ida87w2 emotion-euiTitle-m-StatValue"
                     data-test-subj="stat-title"
                   >
                     destination
@@ -486,14 +508,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+              class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
             >
               <div
                 data-test-subj="mock-lens-embeddable"
               />
             </div>
             <div
-              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+              class="euiFlexItem e1ida87w1 emotion-euiFlexItem-grow-1-FlexItem"
             >
               <div
                 data-test-subj="mock-lens-embeddable"

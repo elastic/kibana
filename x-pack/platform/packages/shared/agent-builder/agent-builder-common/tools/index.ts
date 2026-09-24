@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
+export {
+  ToolType,
+  ToolOrigin,
+  type ToolDefinition,
+  type ToolDefinitionWithSchema,
+  type ToolConfirmationPolicyMode,
+  type ToolConfirmationPolicy,
+} from './definition';
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
-  platformStreamsSigEventsTools,
+  platformCoreCasesTools,
+  platformSignificantEventsTools,
+  contextEngineAiIndexTools,
   attachmentTools,
-  filestoreTools,
   internalTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
@@ -19,7 +27,6 @@ export {
   isInternalTool,
   isExcludedFromFilestore,
   isAttachmentTool,
-  isFilestoreTool,
 } from './constants';
 export {
   type ByIdsToolSelection,

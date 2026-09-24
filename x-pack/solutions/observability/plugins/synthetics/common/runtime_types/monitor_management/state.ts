@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import type { Mixed } from 'io-ts';
 import { useLogicalAndFields } from '../../constants/filters_fields_with_logical_and';
+import { MONITOR_STATUS_ENUM } from '../../constants/monitor_management';
 
 const useLogicalAndFileLiteral = useLogicalAndFields.map((f) => t.literal(f)) as unknown as [
   Mixed,
@@ -23,12 +24,19 @@ const FetchMonitorQueryArgsCommon = {
   monitorTypes: t.array(t.string),
   projects: t.array(t.string),
   schedules: t.array(t.string),
+  remoteNames: t.array(t.string),
   monitorQueryIds: t.array(t.string),
   configIds: t.array(t.string),
   sortField: t.string,
   sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
   showFromAllSpaces: t.boolean,
   useLogicalAndFor: t.array(t.union(useLogicalAndFileLiteral)),
+  // Date-range window for the overview list. When `[dateRangeStart, dateRangeEnd]`
+  // are present, the server scopes each monitor's status to that window (and
+  // surfaces monitors with no run in the window as `pending`). The range strings
+  // accept datemath (e.g. `now-24h`) or ISO timestamps.
+  dateRangeStart: t.string,
+  dateRangeEnd: t.string,
 };
 
 export const FetchMonitorManagementListQueryArgsCodec = t.partial({
@@ -44,6 +52,16 @@ export type FetchMonitorManagementListQueryArgs = t.TypeOf<
 
 export const FetchMonitorOverviewQueryArgsCodec = t.partial({
   ...FetchMonitorQueryArgsCommon,
+  includeHeartbeatMonitors: t.boolean,
+  page: t.number,
+  perPage: t.number,
+  statusFilter: t.union([
+    t.literal(MONITOR_STATUS_ENUM.UP),
+    t.literal(MONITOR_STATUS_ENUM.DOWN),
+    t.literal(MONITOR_STATUS_ENUM.PENDING),
+    t.literal(MONITOR_STATUS_ENUM.STALE),
+    t.literal(MONITOR_STATUS_ENUM.DISABLED),
+  ]),
 });
 
 export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;

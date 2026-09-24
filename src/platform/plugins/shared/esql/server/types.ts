@@ -8,13 +8,25 @@
  */
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ESQLExtensionsRegistry } from './extensions_registry';
 
 export interface EsqlServerPluginSetup {
   getExtensionsRegistry: () => ESQLExtensionsRegistry;
 }
 
+// Should be SearchInferenceEndpointsPluginStart from @kbn/search-inference-endpoints/server but I cant use it due to circular dependency.
+export interface FastInferenceEndpointsProvider {
+  endpoints: {
+    getForFeature: (
+      featureId: string,
+      request: KibanaRequest
+    ) => Promise<{ endpoints: Array<{ connectorId: string; isRecommended?: boolean }> }>;
+  };
+}
+
 export interface EsqlServerPluginStart {
   inference: InferenceServerStart;
   actions: ActionsPluginStart;
+  searchInferenceEndpoints?: FastInferenceEndpointsProvider;
 }

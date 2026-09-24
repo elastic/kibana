@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Store, Unsubscribe } from 'redux';
+import type { Store, Unsubscribe } from 'redux-v4';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { getLastUpdatedLazy } from './methods';
 import type { TimelinesStartPlugins, TimelinesUIStart } from './types';

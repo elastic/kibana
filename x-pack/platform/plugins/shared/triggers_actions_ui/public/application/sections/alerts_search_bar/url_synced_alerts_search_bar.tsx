@@ -6,9 +6,15 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo, memo } from 'react';
-import type { BoolQuery, Filter } from '@kbn/es-query';
+import type { BoolQuery, Filter, Query } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { SPACE_IDS } from '@kbn/rule-data-utils';
+import type {
+  FilterControlConfig,
+  FilterGroupHandler,
+} from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../..';
@@ -73,8 +79,23 @@ export interface UrlSyncedAlertsSearchBarProps
   > {
   showFilterControls?: boolean;
   urlStorageKey?: string;
+  filterControlsStorageKey?: string;
+  /**
+   * Filters emitted by the filter controls. Owned by the parent page so that
+   * it can gate the alerts table on the controls being initialized.
+   */
+  filterControls?: Filter[];
+  /**
+   * Setter for the filter controls output filters.
+   */
+  onFilterControlsChange?: (filterControls: Filter[]) => void;
+  /**
+   * Fires with the control group handle once the controls have initialized.
+   */
+  onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
   onFilterSelected?: (filters: Filter[]) => void;
+  defaultFilterControls?: FilterControlConfig[];
 }
 
 /**
@@ -84,8 +105,13 @@ export const UrlSyncedAlertsSearchBar = ({
   ruleTypeIds,
   showFilterControls = false,
   urlStorageKey = ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
+  filterControlsStorageKey: filterControlsStorageKeyProp = 'alertsSearchBar',
+  filterControls,
+  onFilterControlsChange = () => {},
+  onControlApiAvailable,
   onEsQueryChange,
   onFilterSelected,
+  defaultFilterControls,
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
@@ -108,16 +134,14 @@ export const UrlSyncedAlertsSearchBar = ({
     // KQL bar filters
     filters,
     onFiltersChange,
-    // Controls bar filters
-    controlFilters,
-    onControlFiltersChange,
     // Time range
     rangeFrom,
     onRangeFromChange,
     rangeTo,
     onRangeToChange,
     // Controls bar configuration
-    filterControls,
+    filterControls: filterControlsConfig,
+    onFilterControlsChange: onFilterControlsConfigChange,
     // Saved KQL query
     savedQuery,
     setSavedQuery,
@@ -139,7 +163,7 @@ export const UrlSyncedAlertsSearchBar = ({
             from: rangeFrom,
           },
           kuery,
-          filters: [...filters, ...controlFilters],
+          filters: [...filters, ...(filterControls ?? [])],
         })
       );
 
@@ -151,7 +175,7 @@ export const UrlSyncedAlertsSearchBar = ({
       onKueryChange('');
     }
   }, [
-    controlFilters,
+    filterControls,
     filters,
     kuery,
     onEsQueryChange,
@@ -174,14 +198,42 @@ export const UrlSyncedAlertsSearchBar = ({
   );
 
   const filterControlsStorageKey = useMemo(
-    () => ['alertsSearchBar', spaceId, 'filterControls'].filter(Boolean).join('.'),
-    [spaceId]
+    () => [filterControlsStorageKeyProp, spaceId, 'filterControls'].filter(Boolean).join('.'),
+    [filterControlsStorageKeyProp, spaceId]
   );
 
   const resetFilters = useCallback(() => {
     new Storage(window.localStorage).remove(filterControlsStorageKey);
     window.location.reload();
   }, [filterControlsStorageKey]);
+
+  const spaceFilter = useMemo<Filter[]>(() => {
+    if (!spaceId) return [];
+    return [
+      {
+        meta: {
+          type: FILTERS.PHRASE,
+          key: SPACE_IDS,
+          params: { query: spaceId },
+          disabled: false,
+          negate: false,
+        },
+        query: { match_phrase: { [SPACE_IDS]: spaceId } },
+      },
+    ];
+  }, [spaceId]);
+
+  const controlFiltersWithSpace = useMemo(
+    () => [...(filterControls ?? []), ...spaceFilter],
+    [filterControls, spaceFilter]
+  );
+
+  const queryFilter = useMemo<Query | undefined>(
+    () => (kuery ? { query: kuery, language: 'kuery' } : undefined),
+    [kuery]
+  );
+
+  const timeRange = useMemo(() => ({ from: rangeFrom, to: rangeTo }), [rangeFrom, rangeTo]);
 
   return (
     <>
@@ -205,12 +257,18 @@ export const UrlSyncedAlertsSearchBar = ({
             dataViewSpec={{
               id: 'unified-alerts-dv',
               title: '.alerts-*',
+              timeFieldName: '@timestamp',
             }}
             spaceId={spaceId}
-            controlsUrlState={filterControls}
-            filters={controlFilters}
-            onFiltersChange={onControlFiltersChange}
+            controlsUrlState={filterControlsConfig}
+            setControlsUrlState={onFilterControlsConfigChange}
+            filters={controlFiltersWithSpace}
+            onFiltersChange={onFilterControlsChange}
+            onInit={onControlApiAvailable}
             storageKey={filterControlsStorageKey}
+            defaultControls={defaultFilterControls}
+            query={queryFilter}
+            timeRange={timeRange}
             services={{
               http,
               notifications,

@@ -6,21 +6,25 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { isArray } from 'lodash';
 import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type { ChatAgentEvent, ConversationRound } from '@kbn/agent-builder-common/chat';
-import { isToolCallStep } from '@kbn/agent-builder-common/chat';
+import type { BackgroundAgentCompleteStep, ChatAgentEvent } from '@kbn/agent-builder-common/chat';
+import {
+  isBackgroundAgentCompleteStep,
+  isReasoningStep,
+  isSubagentRosterUpdatedStep,
+} from '@kbn/agent-builder-common/chat';
 import {
   createBrowserToolCallEvent,
   createMessageEvent,
   createPromptRequestEvent,
   createReasoningEvent,
   createTextChunkEvent,
-  createBackgroundAgentCompleteEvent,
   createThinkingCompleteEvent,
+  createBackgroundAgentCompleteEvent,
+  createSubagentRosterUpdatedEvent,
   createToolCallEvent,
   createToolResultEvent,
   extractTextContent,
@@ -28,55 +32,114 @@ import {
   matchEvent,
   matchGraphName,
   matchName,
-  toolIdentifierFromToolCall,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
-import type { RunToolReturn } from '@kbn/agent-builder-server';
-import { createErrorResult } from '@kbn/agent-builder-server';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
-import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
+import { createUserQuestionAskedEvent } from '@kbn/agent-builder-common/chat';
 import type { StateType } from './state';
-import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
-import type { ToolCallResult } from './actions';
-import {
-  isAnswerAction,
-  isBackgroundExecutionCompleteAction,
-  isExecuteToolAction,
-  isStructuredAnswerAction,
-  isToolCallAction,
-  isToolPromptAction,
-} from './actions';
-import type { InternalEvent } from './events';
-import { createFinalStateEvent } from './events';
+import { steps, tags } from './constants';
+import type { RunStepUpdate } from './step_state';
+import type { ResearchOutcome, ToolOutcome, ToolRenderStateUpdate } from './transient_state';
 
-export type ConvertedEvents = ChatAgentEvent | InternalEvent;
+/** What a `researchAgent` node returns, as seen on its `on_chain_end` event. */
+interface ResearchNodeOutput {
+  steps?: RunStepUpdate[];
+  toolRenderState?: ToolRenderStateUpdate;
+  researchOutcome?: ResearchOutcome;
+}
+
+/** What an `executeTool` node returns, as seen on its `on_chain_end` event. */
+interface ExecuteToolNodeOutput {
+  steps?: RunStepUpdate[];
+  toolOutcome?: ToolOutcome;
+}
+
+/**
+ * Reasoning and tool call events for the step updates emitted by a research turn. Dedicated-lifecycle
+ * calls (e.g. ask_user_question) have no `tool_call` event: their lifecycle is the prompt request.
+ */
+const stepUpdatesToEvents = (
+  updates: RunStepUpdate[],
+  renderState: ToolRenderStateUpdate
+): ChatAgentEvent[] => {
+  const events: ChatAgentEvent[] = [];
+  for (const update of updates) {
+    if (update.type === 'append' && isReasoningStep(update.step)) {
+      events.push(
+        createReasoningEvent(update.step.reasoning, {
+          toolCallId: update.step.tool_call_id,
+          toolCallGroupId: update.step.tool_call_group_id,
+        })
+      );
+    } else if (update.type === 'append_tool_call') {
+      const { step } = update;
+      const kind = renderState[step.tool_call_id]?.kind ?? 'server';
+      if (kind === 'browser') {
+        events.push(
+          createBrowserToolCallEvent({
+            toolId: step.tool_id,
+            toolCallId: step.tool_call_id,
+            params: step.params,
+          })
+        );
+      } else if (kind === 'server') {
+        events.push(
+          createToolCallEvent({
+            toolId: step.tool_id,
+            toolCallId: step.tool_call_id,
+            params: step.params,
+            toolCallGroupId: step.tool_call_group_id,
+            toolOrigin: step.tool_origin,
+            toolType: step.tool_type,
+          })
+        );
+      }
+    }
+  }
+  return events;
+};
+
+const stripStepType = ({ type, ...execution }: BackgroundAgentCompleteStep) => execution;
+
+const NODE_NAMES: ReadonlySet<string> = new Set(Object.values(steps));
+
+/**
+ * True for the `on_chain_end` of one of *our* nodes running in the *root* graph of this run.
+ * Node names are reused by nested graphs (a sub-agent runs this same graph; tool-internal graphs
+ * have their own names) and inherited metadata is not enough to tell them apart, so this checks:
+ * - `metadata.graphName`,
+ * - `event.name === metadata.langgraph_node` (the node's own run, not a runnable inside it — the
+ *   same test LangGraph uses in its stream handlers),
+ * - a single-segment `langgraph_checkpoint_ns` (LangGraph joins nested namespaces with `|`; any
+ *   graph invoked under one of our nodes with an inherited config gets a `parent|child` namespace).
+ */
+const isRootGraphNodeEnd = (event: LangchainStreamEvent, graphName: string): boolean => {
+  if (event.event !== 'on_chain_end' || !NODE_NAMES.has(event.name)) return false;
+  if (!matchGraphName(event, graphName)) return false;
+  const { langgraph_node: node, langgraph_checkpoint_ns: namespace } = event.metadata ?? {};
+  if (node !== event.name) return false;
+  return typeof namespace !== 'string' || !namespace.includes('|');
+};
 
 export const convertGraphEvents = ({
   graphName,
-  toolManager,
-  pendingRound,
   logger,
   startTime,
+  structuredOutput,
 }: {
   graphName: string;
-  toolManager: ToolManager;
-  pendingRound: ConversationRound | undefined;
   logger: Logger;
   startTime: Date;
-}): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
+  structuredOutput: boolean;
+}): OperatorFunction<LangchainStreamEvent, ChatAgentEvent> => {
   return (streamEvents$) => {
-    const toolCallIdToIdMap = new Map<string, string>();
+    // message identifier for emitted chunks
+    let messageId = uuidv4();
 
-    if (pendingRound) {
-      const toolCalls = pendingRound.steps.filter(isToolCallStep);
-      toolCalls.forEach((toolCall) => {
-        toolCallIdToIdMap.set(toolCall.tool_call_id, toolCall.tool_id);
-      });
-    }
-
-    const messageId = uuidv4();
-
-    let isThinkingComplete = false;
+    // Tracks the timestamp of the first text chunk of the current research turn.
+    // Used to backdate `thinkingCompleteEvent` to the first chunk of the terminal turn
+    let currentTurnFirstChunkAt: number | undefined;
 
     return streamEvents$.pipe(
       mergeMap((event) => {
@@ -84,130 +147,112 @@ export const convertGraphEvents = ({
           return EMPTY;
         }
 
-        // stream answering text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, tags.answerAgent)) {
+        // reset per-turn first-chunk tracker at the start of each research turn
+        if (matchEvent(event, 'on_chain_start') && matchName(event, steps.researchAgent)) {
+          // reset per-turn first-chunk tracker at the start of each research turn
+          currentTurnFirstChunkAt = undefined;
+          // reset message id between research turns
+          messageId = uuidv4();
+          return EMPTY;
+        }
+
+        // streaming text chunks for the UI (answering + research)
+        if (
+          matchEvent(event, 'on_chat_model_stream') &&
+          (hasTag(event, tags.answerAgent) || hasTag(event, tags.researchAgent))
+        ) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            const events: ConvertedEvents[] = [];
-            if (!isThinkingComplete) {
-              // Emit thinking complete event when first chunk arrives
-              events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
-              isThinkingComplete = true;
+            if (
+              !structuredOutput &&
+              hasTag(event, tags.researchAgent) &&
+              currentTurnFirstChunkAt === undefined
+            ) {
+              currentTurnFirstChunkAt = Date.now();
             }
-            events.push(createTextChunkEvent(textContent, { messageId }));
-            return of(...events);
+            return of(createTextChunkEvent(textContent, { messageId }));
           }
         }
 
-        // emit tool calls for research agent steps
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.researchAgent)) {
-          const events: ConvertedEvents[] = [];
-          const addedActions = (event.data.output as StateType).mainActions;
-          const nextAction = addedActions[addedActions.length - 1];
+        // emit reasoning and tool call events for research agent turns
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.researchAgent)) {
+          const output = event.data.output as ResearchNodeOutput;
+          const events: ChatAgentEvent[] = stepUpdatesToEvents(
+            output.steps ?? [],
+            output.toolRenderState ?? {}
+          );
 
-          if (isToolCallAction(nextAction)) {
-            const {
-              tool_calls: toolCalls,
-              tool_call_group_id: toolCallGroupId,
-              message: messageText = '',
-            } = nextAction;
-            if (toolCalls.length > 0) {
-              if (messageText.trim().length > 0) {
-                events.push(createReasoningEvent(messageText, { toolCallGroupId }));
-              }
-
-              for (const toolCall of toolCalls) {
-                const toolId = toolIdentifierFromToolCall(toolCall, toolManager.getToolIdMapping());
-                const { toolCallId, args: toolCallArgs, reasoning } = toolCall;
-
-                if (reasoning && reasoning.trim().length > 0) {
-                  events.push(createReasoningEvent(reasoning, { toolCallId, toolCallGroupId }));
-                }
-
-                toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-
-                const isBrowserTool = toolId.startsWith(BROWSER_TOOL_PREFIX);
-                if (isBrowserTool) {
-                  events.push(
-                    createBrowserToolCallEvent({
-                      toolId: toolId.replace(BROWSER_TOOL_PREFIX, ''),
-                      toolCallId,
-                      params: toolCallArgs,
-                    })
-                  );
-                } else {
-                  events.push(
-                    createToolCallEvent({
-                      toolId,
-                      toolCallId,
-                      params: toolCallArgs,
-                      toolCallGroupId,
-                    })
-                  );
-                }
-              }
-            }
+          // Backdated thinking-complete: when the research agent's terminal turn
+          // is a handover in non-structured mode, emit thinkingCompleteEvent with
+          // the timestamp of the first chunk of that turn. Falls back to "now" if
+          // no chunk timestamp was captured.
+          if (!structuredOutput && output.researchOutcome?.type === 'handover') {
+            const firstChunkOffset =
+              currentTurnFirstChunkAt !== undefined
+                ? currentTurnFirstChunkAt - startTime.getTime()
+                : Date.now() - startTime.getTime();
+            events.push(createThinkingCompleteEvent(firstChunkOffset));
           }
 
           return of(...events);
         }
 
-        // emit messages for answering step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.answerAgent)) {
-          const events: ConvertedEvents[] = [];
-
-          // process last emitted message
-          const answerActions = (event.data.output as StateType).answerActions;
-          const lastAction = answerActions[answerActions.length - 1];
-
-          if (isStructuredAnswerAction(lastAction)) {
-            const messageEvent = createMessageEvent(lastAction.data, {
-              messageId,
-            });
-            events.push(messageEvent);
-          } else if (isAnswerAction(lastAction)) {
-            const messageEvent = createMessageEvent(lastAction.message, {
-              messageId,
-            });
-            events.push(messageEvent);
+        // emit messageEvent at finalize: state.finalAnswer is the canonical answer
+        // (string for non-structured, object for structured)
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.finalize)) {
+          const finalState = event.data.output as StateType;
+          const finalAnswer = finalState.finalAnswer;
+          if (finalAnswer !== undefined && finalAnswer !== null && finalAnswer !== '') {
+            return of(createMessageEvent(finalAnswer, { messageId }));
           }
-
-          return of(...events);
+          return EMPTY;
         }
 
         // emit tool result events and/or prompt request events
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.executeTool)) {
-          const addedActions = (event.data.output as StateType).mainActions;
-          const resultEvents: ConvertedEvents[] = [];
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.executeTool)) {
+          const output = event.data.output as ExecuteToolNodeOutput;
+          const updates = output.steps ?? [];
+          const resultEvents: ChatAgentEvent[] = [];
 
-          for (const action of addedActions) {
-            if (isExecuteToolAction(action)) {
-              for (const toolResult of action.tool_results) {
-                const toolId = toolCallIdToIdMap.get(toolResult.toolCallId);
-                const toolReturn = extractToolReturn(toolResult);
+          for (const update of updates) {
+            if (update.type === 'resolve_tool_call') {
+              resultEvents.push(
+                createToolResultEvent({
+                  toolCallId: update.toolCallId,
+                  toolId: update.toolId,
+                  results: update.results,
+                })
+              );
+            }
+          }
+
+          if (output.toolOutcome?.type === 'interrupted') {
+            for (const { prompt, toolCallId } of output.toolOutcome.prompts) {
+              resultEvents.push(
+                createPromptRequestEvent({
+                  prompt,
+                  source: {
+                    type: AgentPromptRequestSourceType.toolCall,
+                    tool_call_id: toolCallId,
+                  },
+                })
+              );
+
+              if (isAskUserQuestionPrompt(prompt)) {
                 resultEvents.push(
-                  createToolResultEvent({
-                    toolCallId: toolResult.toolCallId,
-                    toolId: toolId ?? 'unknown',
-                    results: toolReturn.results ?? [],
+                  createUserQuestionAskedEvent({
+                    prompt_id: prompt.id,
+                    questions: prompt.questions,
                   })
                 );
               }
             }
+          }
 
-            if (isToolPromptAction(action)) {
-              for (const { prompt, tool_call_id } of action.prompts) {
-                resultEvents.push(
-                  createPromptRequestEvent({
-                    prompt,
-                    source: {
-                      type: AgentPromptRequestSourceType.toolCall,
-                      tool_call_id,
-                    },
-                  })
-                );
-              }
+          for (const update of updates) {
+            if (update.type === 'append' && isSubagentRosterUpdatedStep(update.step)) {
+              resultEvents.push(createSubagentRosterUpdatedEvent(update.step.roster));
             }
           }
 
@@ -217,13 +262,13 @@ export const convertGraphEvents = ({
         }
 
         // emit background execution complete events
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.checkBackgroundWork)) {
-          const addedActions = (event.data.output as Partial<StateType>).mainActions ?? [];
-          const bgEvents: ConvertedEvents[] = [];
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.checkBackgroundWork)) {
+          const output = event.data.output as { steps?: RunStepUpdate[] };
+          const bgEvents: ChatAgentEvent[] = [];
 
-          for (const action of addedActions) {
-            if (isBackgroundExecutionCompleteAction(action)) {
-              bgEvents.push(createBackgroundAgentCompleteEvent(action.execution));
+          for (const update of output.steps ?? []) {
+            if (update.type === 'append' && isBackgroundAgentCompleteStep(update.step)) {
+              bgEvents.push(createBackgroundAgentCompleteEvent(stripStepType(update.step)));
             }
           }
 
@@ -232,36 +277,8 @@ export const convertGraphEvents = ({
           }
         }
 
-        if (matchEvent(event, 'on_chain_end') && matchName(event, graphName)) {
-          const finalState = event.data.output as StateType;
-          return of(createFinalStateEvent(finalState));
-        }
-
         return EMPTY;
       })
     );
   };
-};
-
-export const extractToolReturn = (message: ToolCallResult): RunToolReturn => {
-  if (message.artifact) {
-    if (!isArray(message.artifact.results)) {
-      throw new Error(
-        `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
-          message.artifact
-        )}`
-      );
-    }
-
-    return message.artifact as RunToolReturn;
-  } else {
-    // langchain tool validation error (such as schema errors) are out of our control and don't emit artifacts...
-    if (message.content.startsWith('Error:')) {
-      return {
-        results: [createErrorResult(message.content)],
-      };
-    } else {
-      throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);
-    }
-  }
 };

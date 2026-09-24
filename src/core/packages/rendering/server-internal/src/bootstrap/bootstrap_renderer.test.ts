@@ -10,7 +10,7 @@
 import {
   renderTemplateMock,
   getPluginsBundlePathsMock,
-  getJsDependencyPathsMock,
+  getRspackDependencyPathsMock,
 } from './bootstrap_renderer.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -72,7 +72,7 @@ describe('bootstrapRenderer', () => {
 
     getPluginsBundlePathsMock.mockReturnValue(new Map());
     renderTemplateMock.mockReturnValue('__rendered__');
-    getJsDependencyPathsMock.mockReturnValue([]);
+    getRspackDependencyPathsMock.mockReturnValue([]);
     uiSettingsClient.get.mockImplementation(getClientGetMockImplementation());
 
     renderer = bootstrapRendererFactory({
@@ -87,7 +87,7 @@ describe('bootstrapRenderer', () => {
   afterEach(() => {
     getPluginsBundlePathsMock.mockReset();
     renderTemplateMock.mockReset();
-    getJsDependencyPathsMock.mockReset();
+    getRspackDependencyPathsMock.mockReset();
     themeName$.complete();
   });
 
@@ -427,11 +427,7 @@ describe('bootstrapRenderer', () => {
     });
   });
 
-  // here
-  it('calls getJsDependencyPaths with the correct parameters', async () => {
-    const pluginsBundlePaths = new Map<string, unknown>();
-
-    getPluginsBundlePathsMock.mockReturnValue(pluginsBundlePaths);
+  it('calls getRspackDependencyPaths with the correct parameters', async () => {
     const request = httpServerMock.createKibanaRequest();
 
     await renderer({
@@ -439,15 +435,16 @@ describe('bootstrapRenderer', () => {
       uiSettingsClient,
     });
 
-    expect(getJsDependencyPathsMock).toHaveBeenCalledTimes(1);
-    expect(getJsDependencyPathsMock).toHaveBeenCalledWith(
+    expect(getRspackDependencyPathsMock).toHaveBeenCalledTimes(1);
+    expect(getRspackDependencyPathsMock).toHaveBeenCalledWith(
       '/base-path/buildShaShort/bundles',
-      pluginsBundlePaths
+      [],
+      expect.any(Array)
     );
   });
 
   it('calls renderTemplate with the correct parameters', async () => {
-    getJsDependencyPathsMock.mockReturnValue(['path-1', 'path-2']);
+    getRspackDependencyPathsMock.mockReturnValue(['path-1', 'path-2']);
 
     const request = httpServerMock.createKibanaRequest();
 
@@ -462,6 +459,7 @@ describe('bootstrapRenderer', () => {
       colorMode: 'light',
       jsDependencyPaths: ['path-1', 'path-2'],
       publicPathMap: expect.any(String),
+      useHMR: expect.any(Boolean),
     });
   });
 });

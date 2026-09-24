@@ -54,6 +54,7 @@ export const createMockOsqueryContext = (): OsqueryAppContext => {
       getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default' }),
     },
     getStartServices: jest.fn().mockResolvedValue([mockCoreStart, {}, {}]),
+    isCpsActive: jest.fn().mockResolvedValue(false),
   } as unknown as OsqueryAppContext;
 };
 
@@ -165,7 +166,7 @@ export const createMockSearchStrategy = (actionResultsResponse?: ActionResultsSt
   jest.fn(
     (
       request: { factoryQueryType: string; [key: string]: unknown },
-      options: { abortSignal?: AbortSignal; strategy: string }
+      options: { abortSignal?: AbortSignal; strategy: string | symbol }
     ) => {
       if (request.factoryQueryType === OsqueryQueries.actionResults) {
         return of(actionResultsResponse || createMockActionResultsResponse());

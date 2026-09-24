@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import {
+  AgentBuilderErrorCode,
+  AgentExecutionMode,
+  createRequestAbortedError,
+} from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
 import type { AttachmentServiceStart } from '../attachments';
@@ -21,6 +25,7 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
   get: jest.fn(),
   updateStatus: jest.fn(),
   appendEvents: jest.fn(),
+  updateHeartbeat: jest.fn(),
   peek: jest.fn(),
   readEvents: jest.fn(),
   find: jest.fn().mockResolvedValue([]),
@@ -29,6 +34,11 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
 jest.mock('./persistence', () => ({
   createAgentExecutionClient: () => mockExecutionClient,
 }));
+
+const conflictError = () =>
+  Object.assign(new Error('version conflict'), {
+    statusCode: 409,
+  });
 
 // Mock execution_runner module
 const mockHandleAgentExecution = jest.fn();
@@ -48,15 +58,26 @@ jest.mock('./task/abort_monitor', () => ({
   })),
 }));
 
+// Mock heartbeat reporter
+jest.mock('./task/heartbeat_reporter', () => ({
+  HeartbeatReporter: jest.fn().mockImplementation(() => ({
+    start: jest.fn(),
+    stop: jest.fn(),
+  })),
+}));
+
 const mockTaskManagerSchedule = jest.fn();
+const mockTaskManagerEnsureScheduled = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
+import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
 
 describe('AgentExecutionService', () => {
   const logger = loggerMock.create();
   const elasticsearch = elasticsearchServiceMock.createStart();
   const taskManager = {
     schedule: mockTaskManagerSchedule,
+    ensureScheduled: mockTaskManagerEnsureScheduled,
   } as any;
 
   const uiSettings = {
@@ -72,9 +93,17 @@ describe('AgentExecutionService', () => {
   } as any;
 
   const attachmentsService: AttachmentServiceStart = {
-    validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
+    validateAttachmentInputs: jest.fn().mockImplementation(async (attachments) =>
+      attachments?.map((attachment: { type: string; data: unknown }) => ({
+        id: 'attachment-1',
+        type: attachment.type,
+        data: attachment.data,
+      }))
+    ),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn().mockReturnValue([]),
+    createStateManager: jest.fn(),
+    mergeAttachmentInputs: jest.fn(),
   };
 
   const service = createAgentExecutionService({
@@ -94,6 +123,14 @@ describe('AgentExecutionService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (attachmentsService.validateAttachmentInputs as jest.Mock).mockImplementation(
+      async (attachments) =>
+        attachments?.map((attachment: { type: string; data: unknown }) => ({
+          id: 'attachment-1',
+          type: attachment.type,
+          data: attachment.data,
+        }))
+    );
     mockExecutionClient.create.mockResolvedValue({
       executionId: 'test-id',
       '@timestamp': new Date().toISOString(),
@@ -135,14 +172,35 @@ describe('AgentExecutionService', () => {
         })
       );
 
-      expect(mockTaskManagerSchedule).toHaveBeenCalledWith(
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: 'agent-builder:run-agent',
           params: { executionId: result.executionId },
           scope: ['agent-builder'],
         }),
-        { request }
+        { request, cloneApiKey: true }
       );
+    });
+  });
+
+  describe('executeAgent with a caller-provided executionId', () => {
+    it('throws when an execution with the same id already exists, regardless of its status', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          executionId: 'exec-1',
+          params: {
+            agentId: 'agent-1',
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toThrow('Execution with id exec-1 already exists');
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
     });
   });
 
@@ -178,7 +236,7 @@ describe('AgentExecutionService', () => {
       );
 
       // Should NOT have scheduled a TM task
-      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
 
       // Should have updated status to running
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
@@ -199,10 +257,9 @@ describe('AgentExecutionService', () => {
     });
 
     it('validates attachments and throws on invalid attachment', async () => {
-      (attachmentsService.validate as jest.Mock).mockResolvedValue({
-        valid: false,
-        error: 'boom',
-      });
+      (attachmentsService.validateAttachmentInputs as jest.Mock).mockRejectedValue(
+        new Error('Attachment validation failed: boom')
+      );
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -220,6 +277,10 @@ describe('AgentExecutionService', () => {
         })
       ).rejects.toThrow('Attachment validation failed: boom');
 
+      expect(attachmentsService.validateAttachmentInputs).toHaveBeenCalledWith(
+        [{ type: 'some_type', data: { foo: 'bar' } }],
+        request
+      );
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
     });
 
@@ -258,6 +319,94 @@ describe('AgentExecutionService', () => {
     });
   });
 
+  describe('executeAgent (local mode) — execution status alignment', () => {
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 10));
+
+    it('records aborted (not failed) when the live stream errors with RequestAbortedError', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const aborted = createRequestAbortedError('Converse request was aborted');
+      mockHandleAgentExecution.mockResolvedValue(throwError(() => aborted));
+      mockCollectAndWriteEvents.mockRejectedValue(aborted);
+
+      const { executionId } = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
+      });
+      await settle();
+
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        executionId,
+        ExecutionStatus.aborted,
+        { error: expect.objectContaining({ code: AgentBuilderErrorCode.requestAborted }) }
+      );
+    });
+
+    it('records failed when the live stream errors with any other error', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const failure = new Error('llm exploded');
+      mockHandleAgentExecution.mockResolvedValue(throwError(() => failure));
+      mockCollectAndWriteEvents.mockRejectedValue(failure);
+
+      const { executionId } = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
+      });
+      await settle();
+
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        executionId,
+        ExecutionStatus.failed,
+        { error: expect.objectContaining({ message: 'llm exploded' }) }
+      );
+    });
+
+    it('records failed with the error when the setup rejects before the stream exists, then rethrows', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockHandleAgentExecution.mockRejectedValue(new Error('registry down'));
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+          useTaskManager: false,
+        })
+      ).rejects.toThrow('registry down');
+
+      const statuses = mockExecutionClient.updateStatus.mock.calls.map(([, status]) => status);
+      expect(statuses).toEqual([ExecutionStatus.running, ExecutionStatus.failed]);
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        expect.any(String),
+        ExecutionStatus.failed,
+        { error: expect.objectContaining({ message: 'registry down' }) }
+      );
+    });
+
+    it('records aborted when the setup rejects with RequestAbortedError', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockHandleAgentExecution.mockRejectedValue(createRequestAbortedError('stop'));
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+          useTaskManager: false,
+        })
+      ).rejects.toThrow();
+
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        expect.any(String),
+        ExecutionStatus.aborted,
+        { error: expect.objectContaining({ code: AgentBuilderErrorCode.requestAborted }) }
+      );
+    });
+  });
+
   describe('executeAgent (auto-detection)', () => {
     it('should run locally when request.isFakeRequest is true', async () => {
       const request = httpServerMock.createKibanaRequest();
@@ -276,7 +425,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should NOT schedule a TM task
-      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
       // Should have updated status to running (local path)
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         result.executionId,
@@ -296,7 +445,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should have scheduled a TM task
-      expect(mockTaskManagerSchedule).toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalled();
       // Should NOT have called handleAgentExecution (remote path)
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
     });
@@ -314,7 +463,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should have scheduled a TM task despite fakeRequest
-      expect(mockTaskManagerSchedule).toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalled();
     });
 
     it('should honour explicit useTaskManager=false for a regular request', async () => {
@@ -332,13 +481,19 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should NOT schedule a TM task
-      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
       // Should have run locally
       expect(mockHandleAgentExecution).toHaveBeenCalled();
     });
   });
 
   describe('abortExecution', () => {
+    afterEach(() => {
+      // the wait-for-terminal tests install persistent peek/readEvents answers
+      mockExecutionClient.peek.mockReset();
+      mockExecutionClient.readEvents.mockReset();
+    });
+
     it('should update status to aborted for running execution', async () => {
       mockExecutionClient.get.mockResolvedValue({
         executionId: 'exec-1',
@@ -352,21 +507,110 @@ describe('AgentExecutionService', () => {
         events: [],
       });
 
-      await service.abortExecution('exec-1');
+      mockExecutionClient.peek.mockResolvedValue({
+        status: ExecutionStatus.aborted,
+        eventCount: 1,
+      });
+      mockExecutionClient.readEvents.mockResolvedValue({
+        status: ExecutionStatus.aborted,
+        events: [{ type: 'execution_aborted', id: 'r1::execution_aborted' } as never],
+      });
+
+      const result = await service.abortExecution('exec-1');
 
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         'exec-1',
-        ExecutionStatus.aborted
+        ExecutionStatus.aborted,
+        { abortReason: { source: 'api' } }
       );
+      expect(result).toEqual({ acknowledged: true, terminalPersisted: true });
     });
 
-    it('should throw for non-existent execution', async () => {
+    it('waits for the terminal event to land on the execution document, reading only new events', async () => {
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-1',
+        status: ExecutionStatus.running,
+        eventCount: 3,
+      } as never);
+      mockExecutionClient.peek
+        .mockResolvedValueOnce({ status: ExecutionStatus.aborted, eventCount: 3 })
+        .mockResolvedValueOnce({ status: ExecutionStatus.aborted, eventCount: 5 });
+      mockExecutionClient.readEvents.mockResolvedValue({
+        status: ExecutionStatus.aborted,
+        events: [
+          { type: 'tool_call' } as never,
+          { type: 'execution_aborted', id: 'r1::execution_aborted' } as never,
+        ],
+      });
+
+      const result = await service.abortExecution('exec-1');
+
+      expect(result.terminalPersisted).toBe(true);
+      expect(mockExecutionClient.readEvents).toHaveBeenCalledTimes(1);
+      expect(mockExecutionClient.readEvents).toHaveBeenCalledWith('exec-1', 3);
+    });
+
+    it('does not wait when asked not to, or when the execution had not started', async () => {
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-1',
+        status: ExecutionStatus.running,
+        eventCount: 0,
+      } as never);
+      expect(await service.abortExecution('exec-1', { waitForTerminal: false })).toEqual({
+        acknowledged: true,
+        terminalPersisted: false,
+      });
+      expect(mockExecutionClient.peek).not.toHaveBeenCalled();
+
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-2',
+        status: ExecutionStatus.scheduled,
+        eventCount: 0,
+      } as never);
+      expect(await service.abortExecution('exec-2')).toEqual({
+        acknowledged: true,
+        terminalPersisted: false,
+      });
+      expect(mockExecutionClient.peek).not.toHaveBeenCalled();
+    });
+
+    it('reports terminalPersisted=false when the record never lands within the bound', async () => {
+      jest.useFakeTimers();
+      try {
+        mockExecutionClient.get.mockResolvedValue({
+          executionId: 'exec-1',
+          status: ExecutionStatus.running,
+          eventCount: 0,
+        } as never);
+        mockExecutionClient.peek.mockResolvedValue({
+          status: ExecutionStatus.aborted,
+          eventCount: 0,
+        });
+
+        const promise = service.abortExecution('exec-1');
+        await jest.advanceTimersByTimeAsync(ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS + 1000);
+
+        expect(await promise).toEqual({ acknowledged: true, terminalPersisted: false });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('did not record its interruption')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('should warn and no-op for a non-existent execution', async () => {
       mockExecutionClient.get.mockResolvedValue(undefined);
 
-      await expect(service.abortExecution('exec-1')).rejects.toThrow('Execution exec-1 not found');
+      await expect(service.abortExecution('exec-1')).resolves.toEqual({
+        acknowledged: false,
+        terminalPersisted: false,
+      });
+      expect(mockExecutionClient.updateStatus).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('should throw when trying to abort a completed execution', async () => {
+    it('should quietly no-op for a terminal execution', async () => {
       mockExecutionClient.get.mockResolvedValue({
         executionId: 'exec-1',
         '@timestamp': new Date().toISOString(),
@@ -379,8 +623,70 @@ describe('AgentExecutionService', () => {
         events: [],
       });
 
-      await expect(service.abortExecution('exec-1')).rejects.toThrow(
-        'Cannot abort execution exec-1 with status completed'
+      await expect(service.abortExecution('exec-1')).resolves.toEqual({
+        acknowledged: false,
+        terminalPersisted: false,
+      });
+      expect(mockExecutionClient.updateStatus).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('abort reasons', () => {
+    it('records the reason given to abortExecution', async () => {
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-1',
+        status: ExecutionStatus.running,
+      } as never);
+
+      await service.abortExecution('exec-1', {
+        reason: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+        waitForTerminal: false,
+      });
+
+      expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
+        'exec-1',
+        ExecutionStatus.aborted,
+        { abortReason: { source: 'api', actor: { id: 'u1', username: 'alice' } } }
+      );
+    });
+
+    it('records a caller abort when the provided signal fires, cascading the original actor', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+      const abortController = new AbortController();
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+          parentExecutionId: 'parent-1',
+        },
+        useTaskManager: false,
+        abortSignal: abortController.signal,
+      });
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'test-id',
+        status: ExecutionStatus.running,
+      } as never);
+
+      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // the client mock's create() answers with a fixed id, so match the aborted id loosely
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        expect.any(String),
+        ExecutionStatus.aborted,
+        {
+          abortReason: {
+            source: 'caller',
+            parent_execution_id: 'parent-1',
+            actor: { id: 'u1', username: 'alice' },
+          },
+        }
       );
     });
   });
@@ -453,6 +759,59 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.create).toHaveBeenCalledWith(
         expect.objectContaining({ metadata: undefined })
       );
+    });
+  });
+
+  describe('executeAgent with an idempotency key', () => {
+    const executeWithKey = (executionIdempotencyKey: string) =>
+      service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        executionId: 'exec-1',
+        metadata: { execution_idempotency_key: executionIdempotencyKey },
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+    it('returns the existing execution without scheduling a new task on replay', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 3,
+      });
+
+      const result = await executeWithKey('Ev123');
+
+      expect(result.executionId).toBe('exec-1');
+      expect(result.events$).toBeDefined();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('re-issues the schedule on replay when the existing execution never got a task', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.scheduled,
+        eventCount: 0,
+      });
+
+      const result = await executeWithKey('Ev123');
+
+      expect(result.executionId).toBe('exec-1');
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'agent-exec-1',
+          taskType: 'agent-builder:run-agent',
+          params: { executionId: 'exec-1' },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('rethrows create errors that are not duplicate-execution errors', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(executeWithKey('Ev123')).rejects.toThrow('boom');
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
     });
   });
 

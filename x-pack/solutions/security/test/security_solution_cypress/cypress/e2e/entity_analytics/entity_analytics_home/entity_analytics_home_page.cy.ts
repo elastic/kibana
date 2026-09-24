@@ -15,6 +15,7 @@ import {
   ENTITIES_TABLE_GRID,
   TIMELINE_ACTION,
 } from '../../../screens/entity_analytics/entity_analytics_home';
+import { interceptEntityStoreStatus } from '../../../tasks/entity_analytics/entity_analytics_home';
 
 describe(
   'Entity Analytics page',
@@ -22,11 +23,7 @@ describe(
     tags: ['@ess'],
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
-        ],
+        kbnServerArgs: ['--uiSettings.overrides.securitySolution:entityStoreEnableV2=true'],
       },
     },
   },
@@ -36,6 +33,7 @@ describe(
     });
 
     beforeEach(() => {
+      interceptEntityStoreStatus('running');
       login();
       // Set grouping to "none" so the flat EntitiesDataTable renders.
       // Default "Resolution" grouping renders GroupWrapper, which doesn't
@@ -47,7 +45,7 @@ describe(
         )
       );
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.url().should('include', ENTITY_ANALYTICS_HOME_PAGE_URL);
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
     });
 
     after(() => {

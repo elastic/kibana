@@ -8,8 +8,9 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getAllAttachmentsStepCommonDefinition } from '../../../common/workflows/steps/get_all_attachments';
+import { toLegacyAttachmentResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
-import { getCasesClientFromStepsContext } from './utils';
+import { getCasesClientFromStepsContext, safeParseCaseForWorkflowOutput } from './utils';
 
 export const getAllAttachmentsStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -17,15 +18,23 @@ export const getAllAttachmentsStepDefinition = (
   createServerStepDefinition({
     ...getAllAttachmentsStepCommonDefinition,
     handler: async (context) => {
-      const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-      const attachments = await casesClient.attachments.getAll({
-        caseID: context.input.case_id,
-      });
+      try {
+        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
+        const attachments = await casesClient.attachments.getAll({
+          caseID: context.input.case_id,
+        });
 
-      const output = getAllAttachmentsStepCommonDefinition.outputSchema.parse({
-        attachments,
-      });
+        // The client is unified-only; the output schema mirrors the public (legacy) wire
+        // shape, so unified comments must be converted back or they'd silently mismatch
+        // the schema and fall through `safeParseCaseForWorkflowOutput`'s raw fallback.
+        const output = safeParseCaseForWorkflowOutput(
+          getAllAttachmentsStepCommonDefinition.outputSchema,
+          { attachments: attachments.map(toLegacyAttachmentResponse) }
+        );
 
-      return { output };
+        return { output };
+      } catch (error) {
+        return { error };
+      }
     },
   });

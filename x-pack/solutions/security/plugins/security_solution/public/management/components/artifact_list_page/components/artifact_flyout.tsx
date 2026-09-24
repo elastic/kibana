@@ -43,12 +43,16 @@ import type {
 import { ManagementPageLoader } from '../../management_page_loader';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
-import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
-import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
+import {
+  addDisabledArtifactTag,
+  createExceptionListItemForCreate,
+  removeDisabledArtifactTag,
+} from '../../../../../common/endpoint/service/artifacts/utils';
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
 import { useGetArtifact } from '../../../hooks/artifacts';
 import { ArtifactConfirmModal } from './artifact_confirm_modal';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useCreateOrUpdateArtifact } from '../hooks/use_artifact_update_or_create';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -67,6 +71,14 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutCreateSubmitButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.flyoutCreateSubmitButtonLabel',
     { defaultMessage: 'Add' }
+  ),
+  flyoutCreateAndEnableSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.flyoutCreateAndEnableSubmitButtonLabel',
+    { defaultMessage: 'Create and enable' }
+  ),
+  flyoutCreateWithoutEnablingSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.flyoutCreateWithoutEnablingSubmitButtonLabel',
+    { defaultMessage: 'Create without enabling' }
   ),
   flyoutEditSubmitButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.flyoutEditSubmitButtonLabel',
@@ -163,10 +175,6 @@ export interface ArtifactFlyoutProps {
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
   onSuccess(): void;
   onClose(): void;
-  submitHandler?: (
-    item: ArtifactFormComponentOnChangeCallbackProps['item'],
-    mode: ArtifactFormComponentProps['mode']
-  ) => Promise<ExceptionListItemSchema>;
   /**
    * If the artifact data is provided and it matches the id in the URL, then it will not be
    * retrieved again via the API
@@ -176,6 +184,11 @@ export interface ArtifactFlyoutProps {
   labels?: Partial<typeof ARTIFACT_FLYOUT_LABELS>;
   'data-test-subj'?: string;
   size?: EuiFlyoutSize;
+  /**
+   * When true, create mode shows two submit buttons: create-and-enable (primary) and
+   * create-without-enabling (secondary). Edit mode is unchanged.
+   */
+  canCreateArtifactAsDisabled?: boolean;
 }
 
 /**
@@ -188,10 +201,10 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     FormComponent,
     onSuccess,
     onClose,
-    submitHandler,
     labels: _labels = {},
     'data-test-subj': dataTestSubj,
     size = 'm',
+    canCreateArtifactAsDisabled = false,
   }) => {
     const {
       docLinks: {
@@ -223,33 +236,18 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         ..._labels,
       };
     }, [_labels]);
-    // TODO:PT Refactor internal/external state into the `useWithArtifactSubmitData()` hook
-    const [externalIsSubmittingData, setExternalIsSubmittingData] = useState<boolean>(false);
-    const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
-      IHttpFetchError | undefined
-    >(undefined);
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
     const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
 
-    const {
-      isLoading: internalIsSubmittingData,
-      mutateAsync: submitData,
-      error: internalSubmitError,
-    } = useWithArtifactSubmitData(apiClient, formMode);
+    const [submitError, setSubmitError] = useState<IHttpFetchError | undefined>(undefined);
+    const { isLoading: isSubmittingData, createOrUpdateArtifact } =
+      useCreateOrUpdateArtifact(apiClient);
 
     const { mutateAsync: markInsightAsRemediated } = useMarkInsightAsRemediated(
       sourceInsight?.back_url
     );
-
-    const isSubmittingData = useMemo(() => {
-      return submitHandler ? externalIsSubmittingData : internalIsSubmittingData;
-    }, [externalIsSubmittingData, internalIsSubmittingData, submitHandler]);
-
-    const submitError = useMemo(() => {
-      return submitHandler ? externalSubmitHandlerError : internalSubmitError;
-    }, [externalSubmitHandlerError, internalSubmitError, submitHandler]);
 
     const {
       isRefetching: isLoadingItemForEdit,
@@ -300,10 +298,16 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [isSubmittingData, onClose, setUrlParams, urlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
-      ({ item: updatedItem, isValid, confirmModalLabels }) => {
+      ({
+        item: updatedItem,
+        additionalEntries: updatedAdditionalEntries,
+        isValid,
+        confirmModalLabels,
+      }) => {
         if (isMounted()) {
           setFormState({
             item: updatedItem,
+            additionalEntries: updatedAdditionalEntries,
             isValid,
             confirmModalLabels,
           });
@@ -327,7 +331,9 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             return;
           }
         } catch {
-          setSourceInsight(null);
+          if (isMounted()) {
+            setSourceInsight(null);
+          }
         }
 
         if (isMounted()) {
@@ -351,51 +357,84 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       ]
     );
 
-    const handleSubmitClick = useCallback(() => {
-      if (submitHandler) {
-        setExternalIsSubmittingData(true);
+    const submitItem = useCallback(
+      (itemToSubmit: ArtifactFormComponentOnChangeCallbackProps['item']) => {
+        if (formState.confirmModalLabels) {
+          setShowConfirmModal(true);
+        } else if (createOrUpdateArtifact) {
+          createOrUpdateArtifact(itemToSubmit, formState.additionalEntries)
+            .then((createdOrUpdatedItems) => {
+              if (isMounted()) {
+                return handleSuccess(createdOrUpdatedItems[0]);
+              }
+            })
+            .catch((err) => {
+              if (isMounted()) {
+                setSubmitError(err);
+              }
+            });
+        }
+      },
+      [
+        formState.confirmModalLabels,
+        formState.additionalEntries,
+        handleSuccess,
+        createOrUpdateArtifact,
+        isMounted,
+      ]
+    );
 
-        submitHandler(formState.item, formMode)
-          .then(handleSuccess)
-          .catch((submitHandlerError) => {
-            if (isMounted()) {
-              setExternalSubmitHandlerError(submitHandlerError);
-            }
-          })
-          .finally(() => {
-            if (isMounted()) {
-              setExternalIsSubmittingData(false);
-            }
-          });
-      } else if (formState.confirmModalLabels) {
-        setShowConfirmModal(true);
-      } else {
-        submitData(formState.item).then(handleSuccess);
-      }
-    }, [
-      formMode,
-      formState.item,
-      formState.confirmModalLabels,
-      handleSuccess,
-      isMounted,
-      submitData,
-      submitHandler,
-    ]);
+    const handleSubmitClick = useCallback(() => {
+      submitItem(formState.item);
+    }, [formState.item, submitItem]);
+
+    const handleCreateAndEnableSubmitClick = useCallback(() => {
+      const itemToSubmit = {
+        ...formState.item,
+        tags: removeDisabledArtifactTag(formState.item.tags ?? []),
+      };
+      setFormState((prev) => ({ ...prev, item: itemToSubmit }));
+
+      submitItem(itemToSubmit);
+    }, [formState.item, submitItem]);
+
+    const handleCreateWithoutEnablingSubmitClick = useCallback(() => {
+      const itemToSubmit = {
+        ...formState.item,
+        tags: addDisabledArtifactTag(formState.item.tags ?? []),
+      };
+      setFormState((prev) => ({ ...prev, item: itemToSubmit }));
+
+      submitItem(itemToSubmit);
+    }, [formState.item, submitItem]);
 
     const confirmModalOnSuccess = useCallback(
-      () => submitData(formState.item).then(handleSuccess),
-      [submitData, formState.item, handleSuccess]
+      () =>
+        createOrUpdateArtifact?.(formState.item, formState.additionalEntries)
+          .then((createdOrUpdatedItems) => {
+            if (isMounted()) {
+              return handleSuccess(createdOrUpdatedItems[0]);
+            }
+          })
+          .catch((err) => {
+            if (isMounted()) {
+              setSubmitError(err);
+            }
+          }),
+      [
+        createOrUpdateArtifact,
+        formState.additionalEntries,
+        formState.item,
+        handleSuccess,
+        isMounted,
+      ]
     );
 
     const confirmModal = useMemo(() => {
       if (formState.confirmModalLabels) {
-        const { title, body, confirmButton, cancelButton } = formState.confirmModalLabels;
         return (
           <ArtifactConfirmModal
-            title={title}
-            body={body}
-            confirmButton={confirmButton}
-            cancelButton={cancelButton}
+            labels={formState.confirmModalLabels}
             onSuccess={confirmModalOnSuccess}
             onCancel={() => setShowConfirmModal(false)}
             data-test-subj="artifactConfirmModal"
@@ -458,6 +497,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     return (
       <EuiFlyout
+        session="never"
         size={size}
         onClose={handleFlyoutClose}
         data-test-subj={dataTestSubj}
@@ -491,6 +531,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
               onChange={handleFormComponentOnChange}
               disabled={isSubmittingData}
               item={formState.item}
+              additionalEntries={formState.additionalEntries}
               error={submitError ?? undefined}
               mode={formMode}
             />
@@ -509,17 +550,43 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj={getTestId('submitButton')}
-                  fill
-                  disabled={!formState.isValid || isSubmittingData}
-                  onClick={handleSubmitClick}
-                  isLoading={isSubmittingData}
-                >
-                  {isEditFlow
-                    ? labels.flyoutEditSubmitButtonLabel
-                    : labels.flyoutCreateSubmitButtonLabel}
-                </EuiButton>
+                {canCreateArtifactAsDisabled && !isEditFlow ? (
+                  <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj={getTestId('submitWithoutEnablingButton')}
+                        disabled={!formState.isValid || isSubmittingData}
+                        onClick={handleCreateWithoutEnablingSubmitClick}
+                        isLoading={isSubmittingData}
+                      >
+                        {labels.flyoutCreateWithoutEnablingSubmitButtonLabel}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj={getTestId('submitButton')}
+                        fill
+                        disabled={!formState.isValid || isSubmittingData}
+                        onClick={handleCreateAndEnableSubmitClick}
+                        isLoading={isSubmittingData}
+                      >
+                        {labels.flyoutCreateAndEnableSubmitButtonLabel}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <EuiButton
+                    data-test-subj={getTestId('submitButton')}
+                    fill
+                    disabled={!formState.isValid || isSubmittingData}
+                    onClick={handleSubmitClick}
+                    isLoading={isSubmittingData}
+                  >
+                    {isEditFlow
+                      ? labels.flyoutEditSubmitButtonLabel
+                      : labels.flyoutCreateSubmitButtonLabel}
+                  </EuiButton>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>

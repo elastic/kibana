@@ -11,6 +11,9 @@ export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExce
 
 export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
+export const ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN =
+  '[data-test-subj="add-endpoint-exception-confirm-button"]';
+
 export const FIELD_INPUT =
   '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxSearchInput"]';
 
@@ -128,6 +131,17 @@ export const EXCEPTION_CARD_ITEM_CONDITIONS =
 // Exception flyout components
 export const EXCEPTION_ITEM_NAME_INPUT = 'input[data-test-subj="exceptionFlyoutNameInput"]';
 
+export const ENDPOINT_EXCEPTION_ITEM_NAME_INPUT =
+  'input[data-test-subj="endpointExceptions-form-name-input"]';
+
+export const ENDPOINT_EXCEPTION_CARD = '[data-test-subj="endpointExceptionsListPage-card"]';
+
+export const ENDPOINT_EXCEPTION_CARD_HEADER_TITLE =
+  '[data-test-subj="endpointExceptionsListPage-card-header-title"]';
+
+export const ENDPOINT_EXCEPTION_CARD_CONDITIONS =
+  '[data-test-subj="endpointExceptionsListPage-card-criteriaConditions-condition"]';
+
 export const ADD_TO_SHARED_LIST_RADIO_LABEL = '[data-test-subj="addToListsRadioOption"] label';
 
 export const ADD_TO_SHARED_LIST_RADIO_INPUT = 'input[id="add_to_lists"]';
@@ -235,5 +249,11 @@ export const EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE =
   '[data-test-subj="exceptionItemCardHeaderActionItemdelete"]';
 
 export const EXECPTION_ITEM_CARD_HEADER_TITLE = '[data-test-subj="exceptionItemCardHeaderTitle"]';
+
+export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL =
+  '[data-test-subj="exceptionItemDeleteConfirmModal"]';
+
+export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL_CONFIRM_BTN =
+  '[data-test-subj="exceptionItemDeleteConfirmModal"] [data-test-subj="confirmModalConfirmButton"]';
 
 export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';

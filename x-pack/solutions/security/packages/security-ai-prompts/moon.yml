@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-ai-prompts'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-generative-ai'
+  defaultOwner: '@elastic/security-threat-hunting'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/security-ai-prompts'
   description: Moon project for @kbn/security-ai-prompts
   channel: ''
-  owner: '@elastic/security-generative-ai'
+  owner: '@elastic/security-threat-hunting'
   sourceRoot: x-pack/solutions/security/packages/security-ai-prompts
 dependsOn:
   - '@kbn/core-saved-objects-api-server'

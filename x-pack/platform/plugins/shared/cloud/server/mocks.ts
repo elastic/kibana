@@ -27,6 +27,9 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       url: undefined,
       secretToken: undefined,
     },
+    managedOtlp: {
+      url: undefined,
+    },
     onboarding: {},
     isServerlessEnabled: false,
     serverless: {
@@ -37,6 +40,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       orchestratorTarget: undefined,
     },
     isInTrial: jest.fn().mockReturnValue(false),
+    trialDaysLeft: jest.fn().mockReturnValue(undefined),
   };
 }
 
@@ -46,6 +50,7 @@ function createStartMock(): jest.Mocked<CloudStart> {
     projectsUrl: 'projects-url',
     baseUrl: 'base-url',
     isInTrial: jest.fn().mockReturnValue(false),
+    trialDaysLeft: jest.fn().mockReturnValue(undefined),
   };
 }
 

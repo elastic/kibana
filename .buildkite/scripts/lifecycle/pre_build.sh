@@ -4,12 +4,12 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-if [[ "${GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]] && [[ "${ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
+if [[ "${KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]] && [[ "${ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
   "$(dirname "${0}")/commit_status_start.sh"
 fi
 
 
-ts-node "$(dirname "${0}")/ci_stats_start.ts"
+node "$(dirname "${0}")/ci_stats_start.ts"
 
 # We resolve the latest manifest URL at the beginning of the build to ensure that all steps in the build will use the same manifest
 # Otherwise, the manifest could change if a step is running around the time that a new one is promoted

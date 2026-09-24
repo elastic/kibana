@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
 import { HeaderPage } from '../../../../common/components/header_page';
 
@@ -14,6 +15,8 @@ import { CoverageOverviewTacticPanel } from './tactic_panel';
 import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
+import { CoverageOverviewInvalidMitreRulesCallout } from './invalid_mitre_rules_callout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const CoverageOverviewHeaderComponent = () => (
   <HeaderPage
@@ -30,34 +33,59 @@ const CoverageOverviewHeader = React.memo(CoverageOverviewHeaderComponent);
 
 const CoverageOverviewDashboardComponent = () => {
   const {
-    state: { data },
+    state: { data, isLoading, isMitreError },
   } = useCoverageOverviewDashboardContext();
+  const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
+    'mitreAttackUpdatesUIEnabled'
+  );
 
   return (
     <>
       <CoverageOverviewHeader />
+      {isMitreAttackUpdatesUIEnabled && <CoverageOverviewInvalidMitreRulesCallout />}
       <CoverageOverviewFiltersPanel />
       <EuiSpacer />
-      <EuiFlexGroup gutterSize="m" className="eui-xScroll" tabIndex={0}>
-        {data?.mitreTactics.map((tactic) => (
-          <EuiFlexGroup
-            data-test-subj={`coverageOverviewTacticGroup-${tactic.id}`}
-            direction="column"
-            key={tactic.id}
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={false}>
-              <CoverageOverviewTacticPanel tactic={tactic} />
-            </EuiFlexItem>
-
-            {tactic.techniques.map((technique, techniqueKey) => (
-              <EuiFlexItem grow={false} key={`${technique.id}-${techniqueKey}`}>
-                <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
+      {isLoading ? (
+        <EuiFlexGroup justifyContent="center" data-test-subj="coverageOverviewLoadingSpinner">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : isMitreError ? (
+        <KbnDangerCallout
+          announceOnMount
+          title={i18n.COVERAGE_OVERVIEW_MITRE_ERROR_TITLE}
+          data-test-subj="coverageOverviewMitreErrorCallout"
+        >
+          <p>{i18n.COVERAGE_OVERVIEW_MITRE_ERROR_BODY}</p>
+        </KbnDangerCallout>
+      ) : (
+        <EuiFlexGroup
+          gutterSize="m"
+          className="eui-xScroll"
+          tabIndex={0}
+          data-test-subj="coverageOverviewMatrix"
+        >
+          {data?.mitreTactics.map((tactic) => (
+            <EuiFlexGroup
+              data-test-subj={`coverageOverviewTacticGroup-${tactic.id}`}
+              direction="column"
+              key={tactic.id}
+              gutterSize="s"
+            >
+              <EuiFlexItem grow={false}>
+                <CoverageOverviewTacticPanel tactic={tactic} />
               </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        ))}
-      </EuiFlexGroup>
+
+              {tactic.techniques.map((technique, techniqueKey) => (
+                <EuiFlexItem grow={false} key={`${technique.id}-${techniqueKey}`}>
+                  <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          ))}
+        </EuiFlexGroup>
+      )}
     </>
   );
 };

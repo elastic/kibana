@@ -6,6 +6,7 @@
  */
 
 import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { REPORT_TABLE_ID } from '@kbn/reporting-common';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -30,27 +31,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
-    await retry.tryForTime(60 * 1000, async () => {
+    await retry.tryForTime(120 * 1000, async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('reportingManagement');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('reportingPageHeader', { timeout: 2000 });
+      await testSubjects.existOrFail(REPORT_TABLE_ID, { timeout: 30 * 1000 });
     });
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/246637
-  // FLAKY: https://github.com/elastic/kibana/issues/246638
-  describe.skip('Reporting Management app', () => {
+  describe('Reporting Management app', () => {
     let job: ReportApiJSON;
     let path: string;
 
     before('initialize saved object archive', async () => {
-      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
-      internalReqHeader = samlAuth.getInternalRequestHeader();
-
       // add test saved search object
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
+
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin', {
+        forceNewSession: true,
+      });
+      internalReqHeader = samlAuth.getInternalRequestHeader();
 
       // generate a test report to ensure the user is able to see it in the listing
       ({ job, path } = await reportingAPI.createReportJobInternal(

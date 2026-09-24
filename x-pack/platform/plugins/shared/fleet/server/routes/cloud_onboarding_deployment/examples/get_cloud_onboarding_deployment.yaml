@@ -1,0 +1,56 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getCloudOnboardingDeploymentExample:
+            description: 'A cloud onboarding deployment that has succeeded'
+            value:
+              item:
+                id: 'onboarding-deployment-id-1'
+                provider: 'aws'
+                connectorId: 'cloud-connector-id-1'
+                mechanisms:
+                  - 'managed_integration'
+                deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
+                deploymentName: 'elastic-aws-onboarding'
+                services:
+                  - 'cloudwatch_metrics'
+                  - 'cloudtrail'
+                status: 'succeeded'
+                attemptCount: 1
+                serviceVars:
+                  cloudwatch_metrics:
+                    - regions:
+                        - 'us-east-1'
+                        - 'eu-west-1'
+                      namespace: 'AWS/EC2'
+                  cloudtrail:
+                    - regions:
+                        - 'us-east-1'
+                      s3_bucket_arn: 'arn:aws:s3:::my-cloudtrail-bucket'
+                packagePolicyIds:
+                  - 'package-policy-id-1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundResponseExample:
+            description: 'The requested cloud onboarding deployment does not exist'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found'

@@ -147,3 +147,10 @@ export const INSUFFICIENT_PRIVILEGES = i18n.translate(
     defaultMessage: "Agent Builder 'All' privileges are required to manage documentation",
   }
 );
+
+export const getModelDeploymentTimeoutSuggestion = (inferenceId: string) =>
+  i18n.translate('genAiSettings.documentation.error.modelDeploymentTimeoutSuggestion', {
+    defaultMessage:
+      'The ML model deployment for {inferenceId} timed out. ML nodes may not have enough memory, or you may have adaptive allocation enabled with 0 minimum allocation, which could cause the model to not start within the expected time when scaling. Use the trained model stats API to verify its state, then retry once the model has started.',
+    values: { inferenceId },
+  });

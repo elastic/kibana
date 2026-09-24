@@ -6,6 +6,7 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "allow_no_match": "__flag__",
+      "basic": "__flag__",
       "from": "",
       "size": [
         "100"

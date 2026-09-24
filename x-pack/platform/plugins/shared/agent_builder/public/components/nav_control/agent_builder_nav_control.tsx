@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiShowFor, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
+import { EuiShowFor, EuiToolTip, EuiWindowEvent, type EuiToolTipRef } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -31,13 +31,13 @@ export function AgentBuilderNavControl() {
 
   const { show: hasShowPrivilege } = useUiPrivileges();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const tooltipRef = useRef<EuiToolTip>(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(true);
+  const sidebarApp = chrome.sidebar.getApp('agentBuilder');
 
   useEffect(() => {
-    const sub = chrome.sidebar.getCurrentAppId$().subscribe((appId) => {
-      const isOpen = appId === 'agentBuilder';
+    const sub = sidebarApp.isOpen$().subscribe((isOpen) => {
       setIsSidebarOpen((prev) => {
         if (prev && !isOpen) {
           setTooltipVisible(true);
@@ -50,7 +50,7 @@ export function AgentBuilderNavControl() {
     });
 
     return () => sub.unsubscribe();
-  }, [chrome.sidebar]);
+  }, [sidebarApp]);
 
   const handleClick = useCallback(() => {
     tooltipRef.current?.hideToolTip();

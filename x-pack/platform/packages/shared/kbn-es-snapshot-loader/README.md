@@ -29,7 +29,7 @@ For URL repositories, Elasticsearch must be started with `path.repo` configured 
 When starting Elasticsearch for development, configure snapshot repository path:
 
 ```bash
-yarn es snapshot --E path.repo="/tmp/es-snapshots"
+pnpm es snapshot --E path.repo="/tmp/es-snapshots"
 ```
 
 ### GCS Repository
@@ -153,7 +153,15 @@ node scripts/es_snapshot_loader restore \
   --es-url http://elastic:changeme@localhost:9200 \
   --indices "optional-index-*" \
   --allow-no-matches
+
+# Restore to local serverless Elasticsearch
+node scripts/es_snapshot_loader restore \
+  --snapshot-url file:///path/to/snapshot \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --index-settings "index.auto_expand_replicas=0-1"
 ```
+
+Local serverless Elasticsearch users should pass `index.auto_expand_replicas=0-1`. This setting creates the searchable replica. `--index-settings` is opt-in. Omitting it preserves the existing restore request and timing behavior.
 
 ### Replay
 
@@ -185,7 +193,16 @@ node scripts/es_snapshot_loader replay \
   --snapshot-url file:///path/to/snapshot \
   --kibana-url http://localhost:5601 \
   --patterns "logs-*,metrics-*,traces-*"
+
+# Replay to local serverless Elasticsearch
+node scripts/es_snapshot_loader replay \
+  --snapshot-url file:///path/to/snapshot \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --patterns "logs-*,metrics-*,traces-*" \
+  --index-settings "index.auto_expand_replicas=0-1"
 ```
+
+Local serverless Elasticsearch users should pass `index.auto_expand_replicas=0-1` so each temporary restored index has a searchable replica before replay queries it. Omitting `--index-settings` preserves the existing replay request and timing behavior.
 
 ### Common Options
 
@@ -219,6 +236,7 @@ Notes:
 | `--rename-pattern`      | Regex applied to index names during restore (ES `rename_pattern`). Must pair with `--rename-replacement` |
 | `--rename-replacement`  | Replacement string for renamed indices (ES `rename_replacement`). Must pair with `--rename-pattern`      |
 | `--allow-no-matches`    | When set, a restore that matches no indices succeeds silently instead of throwing an error        |
+| `--index-settings`      | Comma-separated `key=value` index settings applied during restore                                 |
 
 ### Replay-specific Options
 
@@ -226,6 +244,7 @@ Notes:
 | --------------- | ------------------------------------------------------------------------------------- |
 | `--patterns`    | Comma-separated data stream patterns to replay (required)                              |
 | `--concurrency` | Number of indices to reindex in parallel (default: all at once)                       |
+| `--index-settings` | Comma-separated `key=value` settings applied to temporary restored indices          |
 
 ## Programmatic API
 
@@ -240,6 +259,7 @@ const result = await restoreSnapshot({
   repository: createUrlRepository('file:///path/to/snapshot'),
   snapshotName: 'my-snapshot-2025-12-01',
   indices: ['my-index-*'],
+  indexSettings: { 'index.auto_expand_replicas': '0-1' }, // local serverless Elasticsearch
 });
 
 if (result.success) {
@@ -280,6 +300,7 @@ const result = await replaySnapshot({
   snapshotName: 'my-snapshot-2025-12-01',
   patterns: ['logs-*', 'metrics-*', 'traces-*'],
   concurrency: 5, // optional: limit parallel reindex operations
+  indexSettings: { 'index.auto_expand_replicas': '0-1' }, // local serverless Elasticsearch
 });
 
 if (result.success) {
@@ -344,6 +365,10 @@ describe('my test suite', () => {
 - FS repositories:
   - Elasticsearch must have `path.repo` configured in `elasticsearch.yml`
   - The configured `--fs-location` must be included under the allowed `path.repo` paths
+- Local serverless Elasticsearch:
+  - Pass `--index-settings "index.auto_expand_replicas=0-1"` to create the searchable replica
+  - The loader waits up to 120 seconds for opted-in restored indices to become active
+  - Omit `--index-settings` to preserve the existing restore request and timing behavior
 
 ### For Create
 
@@ -362,6 +387,16 @@ describe('my test suite', () => {
 - Without these templates, replay may create regular indices instead of data streams
 - To check templates:
   - `GET _index_template/*?filter_path=index_templates.name,index_templates.index_template.index_patterns,index_templates.index_template.data_stream`
+
+## Repository Verification
+
+By default, `register()` skips Elasticsearch's repository verification step (`verify: false`). This allows read-only credentials (e.g. a GCS service account with only `Storage Object Viewer`) to work without needing write access.
+
+When creating snapshots, pass `verify: true` to `register()` to catch misconfigurations early — the `createSnapshot` utility does this automatically. If you're building a custom write flow using the repository strategies directly, opt in explicitly:
+
+```typescript
+await repository.register({ esClient, log, repoName, verify: true });
+```
 
 ## How Replay Works
 

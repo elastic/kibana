@@ -11,6 +11,7 @@ import type { FleetRequestHandlerContext } from '../..';
 
 import { xpackMocks } from '../../mocks';
 import {
+  BulkChangeAgentsPrivilegeLevelResponseSchema,
   BulkMigrateAgentsResponseSchema,
   ChangeAgentPrivilegeLevelResponseSchema,
   DeleteAgentResponseSchema,
@@ -24,6 +25,7 @@ import {
   ListAgentUploadsResponseSchema,
   MigrateSingleAgentResponseSchema,
   PostBulkActionResponseSchema,
+  PostBulkAgentRollbackResponseSchema,
   PostNewAgentActionResponseSchema,
   PostRetrieveAgentsByActionsResponseSchema,
 } from '../../types/rest_spec/agent';
@@ -537,5 +539,27 @@ describe('schema validation', () => {
     });
     const validationResp = ChangeAgentPrivilegeLevelResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('bulk action dry-run response { count } passes PostBulkActionResponseSchema', () => {
+    const dryRunResponse = { count: 42 };
+    expect(PostBulkActionResponseSchema.validate(dryRunResponse)).toEqual(dryRunResponse);
+  });
+
+  it('bulk migrate dry-run response { count } passes BulkMigrateAgentsResponseSchema', () => {
+    const dryRunResponse = { count: 7 };
+    expect(BulkMigrateAgentsResponseSchema.validate(dryRunResponse)).toEqual(dryRunResponse);
+  });
+
+  it('bulk privilege level change dry-run response { count } passes BulkChangeAgentsPrivilegeLevelResponseSchema', () => {
+    const dryRunResponse = { count: 3 };
+    expect(BulkChangeAgentsPrivilegeLevelResponseSchema.validate(dryRunResponse)).toEqual(
+      dryRunResponse
+    );
+  });
+
+  it('bulk rollback dry-run response { count } passes PostBulkAgentRollbackResponseSchema', () => {
+    const dryRunResponse = { count: 15 };
+    expect(PostBulkAgentRollbackResponseSchema.validate(dryRunResponse)).toEqual(dryRunResponse);
   });
 });

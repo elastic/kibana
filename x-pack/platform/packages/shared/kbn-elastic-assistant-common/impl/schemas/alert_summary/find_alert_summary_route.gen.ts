@@ -27,31 +27,52 @@ export const FindAlertSummarySortFieldEnum = FindAlertSummarySortField.enum;
 
 export const FindAlertSummaryRequestQuery = lazySchema(() =>
   z.object({
-    fields: ArrayFromString(z.string()).optional(),
     /**
-     * Search query
+     * A list of fields to include in the response. If omitted, all fields are returned.
      */
-    filter: z.string().optional(),
+    fields: ArrayFromString(z.string())
+      .optional()
+      .describe(
+        'A list of fields to include in the response. If omitted, all fields are returned.'
+      ),
     /**
-     * Connector id used for prompt lookup
+     * Search query to filter alert summaries.
      */
-    connector_id: z.string(),
+    filter: z.string().optional().describe('Search query to filter alert summaries.'),
     /**
-     * Field to sort by
+     * Connector id used for prompt lookup.
      */
-    sort_field: FindAlertSummarySortField.optional(),
+    connector_id: z.string().describe('Connector id used for prompt lookup.'),
     /**
-     * Sort order
+     * Field to sort by.
      */
-    sort_order: SortOrder.optional(),
+    sort_field: FindAlertSummarySortField.optional().describe('Field to sort by.'),
     /**
-     * Page number
+     * Sort order, either `asc` for ascending or `desc` for descending.
      */
-    page: z.coerce.number().int().min(1).optional().default(1),
+    sort_order: SortOrder.optional().describe(
+      'Sort order, either `asc` for ascending or `desc` for descending.'
+    ),
     /**
-     * Alert Summary per page
+     * Page number for paginated results. Defaults to 1.
      */
-    per_page: z.coerce.number().int().min(0).optional().default(20),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .default(1)
+      .describe('Page number for paginated results. Defaults to 1.'),
+    /**
+     * Number of alert summaries to return per page. Defaults to 20.
+     */
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .default(20)
+      .describe('Number of alert summaries to return per page. Defaults to 20.'),
   })
 );
 export type FindAlertSummaryRequestQuery = z.infer<typeof FindAlertSummaryRequestQuery>;
@@ -62,7 +83,7 @@ export const FindAlertSummaryResponse = lazySchema(() =>
     /**
      * Prompt to use to generate new alert summary
      */
-    prompt: z.string(),
+    prompt: z.string().describe('Prompt to use to generate new alert summary'),
     page: z.number().int(),
     perPage: z.number().int(),
     total: z.number().int(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ensureSpaceIdExists } from '../common/spaces';
 import { getRuntimeServices, startRuntimeServices, stopRuntimeServices } from './runtime';
 import { checkDependencies } from './pre_check';

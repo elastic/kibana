@@ -53,9 +53,7 @@ export const esqlChart: LensAttributes = {
       },
     },
     filters: [],
-    query: {
-      esql: 'FROM kibana_sample_data_ecommerce \n| EVAL buckets = DATE_TRUNC(12 hours, order_date)\n  | STATS count = COUNT(*) BY buckets /* try out different intervals */',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       legend: {
         isVisible: true,
@@ -167,9 +165,7 @@ export const esqlChartWithBreakdownColorMapping: LensAttributes = {
         },
       },
     },
-    query: {
-      esql: 'FROM kibana_sample_data_ecommerce \n| EVAL buckets = DATE_TRUNC(12 hours, order_date)  | STATS count = COUNT(*) BY buckets, category',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       ...(esqlChart.state.visualization as Record<string, unknown>),
       layers: [
@@ -268,9 +264,7 @@ export const esqlXYWithCollapseByBreakdown: LensAttributes = {
       },
     },
     filters: [],
-    query: {
-      esql: 'FROM kibana_sample_data_logs | LIMIT 1000\n',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       legend: {
         isVisible: true,

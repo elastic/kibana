@@ -13,7 +13,7 @@ import type { IntegrationCardItem } from '../../home/card_utils';
 
 import { useBrowseIntegrationHook } from '.';
 import { useUrlFilters } from './url_filters';
-import { useUrlCategories, useSetUrlCategory } from './url_categories';
+import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
 
 jest.mock('../../home/hooks/use_available_packages');
 jest.mock('./url_filters');
@@ -32,6 +32,7 @@ describe('useBrowseIntegrationHook', () => {
       category: '',
       subCategory: undefined,
     });
+    (useUrlDefaultCategories as jest.Mock).mockReturnValue([]);
     (useSetUrlCategory as jest.Mock).mockReturnValue(mockSetUrlCategory);
   });
 
@@ -55,13 +56,13 @@ describe('useBrowseIntegrationHook', () => {
       isLoadingAppendCustomIntegrations: false,
       eprPackageLoadingError: undefined,
       eprCategoryLoadingError: undefined,
-      filteredCards: cards,
+      allCards: cards,
       availableSubCategories: [],
     });
   };
 
   describe('Deprecated filter', () => {
-    it('Return only deprecated integrations when status includes deprecated', () => {
+    it('returns all integrations, including deprecated, when status includes deprecated', () => {
       const cards = [
         { id: '1', name: 'Integration 1', isDeprecated: false },
         { id: '2', name: 'Integration 2', isDeprecated: true },
@@ -80,14 +81,11 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      expect(result.current.filteredCards).toHaveLength(2);
-      expect(result.current.filteredCards).toEqual([
-        { id: '2', name: 'Integration 2', isDeprecated: true },
-        { id: '3', name: 'Integration 3', isDeprecated: true },
-      ]);
+      expect(result.current.filteredCards).toHaveLength(4);
+      expect(result.current.filteredCards).toEqual(cards);
     });
 
-    it('Return all integrations when status is undefined', () => {
+    it('hides deprecated integrations by default when status is undefined', () => {
       const cards = [
         { id: '1', name: 'Integration 1', isDeprecated: false },
         { id: '2', name: 'Integration 2', isDeprecated: true },
@@ -105,10 +103,9 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      expect(result.current.filteredCards).toHaveLength(3);
+      expect(result.current.filteredCards).toHaveLength(2);
       expect(result.current.filteredCards).toEqual([
         { id: '1', name: 'Integration 1', isDeprecated: false },
-        { id: '2', name: 'Integration 2', isDeprecated: true },
         { id: '3', name: 'Integration 3', isDeprecated: false },
       ]);
     });
@@ -131,22 +128,22 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      // Should include integrations without isDeprecated property (treated as non-deprecated)
-      expect(result.current.filteredCards).toHaveLength(3);
+      // Should include integrations without isDeprecated property (treated as non-deprecated),
+      // but hide the one that is explicitly deprecated (default hide-deprecated behavior).
+      expect(result.current.filteredCards).toHaveLength(2);
       expect(result.current.filteredCards).toEqual([
         { id: '1', name: 'Integration 1' },
-        { id: '2', name: 'Integration 2', isDeprecated: true },
         { id: '3', name: 'Integration 3' },
       ]);
     });
   });
 
   describe('Sorting', () => {
-    it('sorts integrations A-Z when sort=a-z', () => {
+    it('sorts integrations A-Z by title when sort=a-z', () => {
       const cards = [
-        { id: '1', name: 'Zebra' },
-        { id: '2', name: 'Apache' },
-        { id: '3', name: 'MySQL' },
+        { id: '1', name: 'zebra', title: 'Zebra Integration' },
+        { id: '2', name: 'apache', title: 'Apache HTTP Server' },
+        { id: '3', name: 'mysql', title: 'MySQL Database' },
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
@@ -160,14 +157,18 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      expect(result.current.filteredCards.map((c) => c.name)).toEqual(['Apache', 'MySQL', 'Zebra']);
+      expect(result.current.filteredCards.map((c) => c.title)).toEqual([
+        'Apache HTTP Server',
+        'MySQL Database',
+        'Zebra Integration',
+      ]);
     });
 
-    it('sorts integrations Z-A when sort=z-a', () => {
+    it('sorts integrations Z-A by title when sort=z-a', () => {
       const cards = [
-        { id: '1', name: 'Zebra' },
-        { id: '2', name: 'Apache' },
-        { id: '3', name: 'MySQL' },
+        { id: '1', name: 'zebra', title: 'Zebra Integration' },
+        { id: '2', name: 'apache', title: 'Apache HTTP Server' },
+        { id: '3', name: 'mysql', title: 'MySQL Database' },
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
@@ -181,7 +182,11 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      expect(result.current.filteredCards.map((c) => c.name)).toEqual(['Zebra', 'MySQL', 'Apache']);
+      expect(result.current.filteredCards.map((c) => c.title)).toEqual([
+        'Zebra Integration',
+        'MySQL Database',
+        'Apache HTTP Server',
+      ]);
     });
   });
 
@@ -320,13 +325,122 @@ describe('useBrowseIntegrationHook', () => {
     });
   });
 
-  describe('Combined filters', () => {
-    it('applies deprecated filter and sorting together', () => {
+  describe('Stale-state regression (issue #265510)', () => {
+    it('shows correct results after category changes when initial URL has a category', () => {
+      // Simulate hard refresh with ?category=apm: useAvailablePackages returns allCards
+      // (all packages, no pre-filtering). useBrowseIntegrationHook applies category
+      // from live URL. When URL changes to security, security cards must be visible.
       const cards = [
-        { id: '1', name: 'Zebra', isDeprecated: false },
-        { id: '2', name: 'Apache', isDeprecated: true },
-        { id: '3', name: 'MySQL', isDeprecated: false },
-        { id: '4', name: 'Nginx', isDeprecated: true },
+        { id: 'apm-1', name: 'apm', title: 'APM', categories: ['apm'] },
+        { id: 'security-1', name: 'security', title: 'Security App', categories: ['security'] },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+
+      // Simulate URL now showing security category (user changed from apm)
+      (useUrlCategories as jest.Mock).mockReturnValue({
+        category: 'security',
+        subCategory: undefined,
+      });
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Must show security cards, not 0 results
+      expect(result.current.filteredCards).toHaveLength(1);
+      expect(result.current.filteredCards[0].categories).toContain('security');
+    });
+
+    it('shows non-agentless packages after agentless filter is removed', () => {
+      // Simulate hard refresh with ?setupMethod=agentless: useAvailablePackages returns
+      // allCards (all packages). When user removes the agentless filter, non-agentless
+      // packages must become visible.
+      const cards = [
+        {
+          id: 'regular-1',
+          name: 'nginx',
+          title: 'Nginx',
+          categories: ['web'],
+          supportsAgentless: false,
+          type: 'integration',
+        },
+        {
+          id: 'agentless-1',
+          name: 'aws',
+          title: 'AWS',
+          categories: ['cloud'],
+          supportsAgentless: true,
+          type: 'integration',
+        },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+
+      // URL no longer has setupMethod filter (user removed it)
+      (useUrlCategories as jest.Mock).mockReturnValue({
+        category: '',
+        subCategory: undefined,
+      });
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        setupMethod: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Both cards must be visible when agentless filter is removed
+      expect(result.current.filteredCards).toHaveLength(2);
+    });
+  });
+
+  describe('Multi-category (AND) filter', () => {
+    it('shows only cards that belong to ALL selected default categories (intersection)', () => {
+      const cards = [
+        {
+          id: '1',
+          name: 'both',
+          title: 'Both',
+          categories: ['observability', 'opentelemetry'],
+        },
+        { id: '2', name: 'obs-only', title: 'Obs only', categories: ['observability'] },
+        { id: '3', name: 'otel-only', title: 'OTel only', categories: ['opentelemetry'] },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlDefaultCategories as jest.Mock).mockReturnValue(['observability', 'opentelemetry']);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Only the card present in BOTH categories should remain
+      expect(result.current.filteredCards).toHaveLength(1);
+      expect(result.current.filteredCards[0].name).toBe('both');
+    });
+  });
+
+  describe('Combined filters', () => {
+    it('includes deprecated integrations and sorts a-z when status includes deprecated', () => {
+      const cards = [
+        { id: '1', name: 'zebra', title: 'Zebra Integration', isDeprecated: false },
+        { id: '2', name: 'apache', title: 'Apache HTTP Server', isDeprecated: true },
+        { id: '3', name: 'mysql', title: 'MySQL Database', isDeprecated: false },
+        { id: '4', name: 'nginx', title: 'Nginx Web Server', isDeprecated: true },
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
@@ -340,8 +454,157 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
+      expect(result.current.filteredCards).toHaveLength(4);
+      expect(result.current.filteredCards.map((c) => c.title)).toEqual([
+        'Apache HTTP Server',
+        'MySQL Database',
+        'Nginx Web Server',
+        'Zebra Integration',
+      ]);
+    });
+  });
+
+  describe('Content pack filter', () => {
+    it('hides content packs by default (showContent falsy)', () => {
+      const cards = [
+        { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
+        {
+          id: '2',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
+        { id: '3', name: 'redis', title: 'Redis', type: 'integration', categories: ['database'] },
+        {
+          id: '4',
+          name: 'redis-content',
+          title: 'Redis Content',
+          type: 'content',
+          categories: ['database'],
+        },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
       expect(result.current.filteredCards).toHaveLength(2);
-      expect(result.current.filteredCards.map((c) => c.name)).toEqual(['Apache', 'Nginx']);
+      expect(result.current.filteredCards.map((c) => c.name)).toEqual(['nginx', 'redis']);
+    });
+
+    it('shows content packs when showContent is true', () => {
+      const cards = [
+        { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
+        {
+          id: '2',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
+        { id: '3', name: 'redis', title: 'Redis', type: 'integration', categories: ['database'] },
+        {
+          id: '4',
+          name: 'redis-content',
+          title: 'Redis Content',
+          type: 'content',
+          categories: ['database'],
+        },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: true,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards).toHaveLength(4);
+      expect(result.current.filteredCards.map((c) => c.name)).toEqual([
+        'nginx',
+        'nginx-content',
+        'redis',
+        'redis-content',
+      ]);
+    });
+
+    it('updates category counts to exclude content packs when showContent is false', () => {
+      const cards = [
+        { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
+        {
+          id: '2',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
+      ];
+
+      const allCategories = [
+        { id: '', title: 'All categories', count: 2 },
+        { id: 'web', title: 'Web', count: 2 },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[], { allCategories });
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Content pack hidden → counts drop by 1
+      expect(result.current.mainCategories).toEqual([
+        { id: '', title: 'All categories', count: 1 },
+        { id: 'web', title: 'Web', count: 1 },
+      ]);
+    });
+
+    it('keeps non-content packages (input type) visible when showContent is false', () => {
+      const cards = [
+        { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
+        { id: '2', name: 'custom', title: 'Custom Input', type: 'input', categories: ['web'] },
+        {
+          id: '3',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards).toHaveLength(2);
+      expect(result.current.filteredCards.map((c) => c.type)).toEqual(['integration', 'input']);
     });
   });
 });

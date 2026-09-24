@@ -14,9 +14,10 @@ export async function getHostedPolicies(
   soClient: SavedObjectsClientContract,
   agents: Agent[]
 ): Promise<{ [key: string]: boolean }> {
-  // get any policy ids from upgradable agents
+  // get any policy ids from upgradable agents; `policy_base_id` is always the base id, so agents
+  // on a version-specific variant (`my-policy#9.2`) are looked up by the base policy id.
   const policyIdsToGet = new Set(
-    agents.filter((agent) => agent.policy_id).map((agent) => agent.policy_id!)
+    agents.filter((agent) => agent.policy_base_id).map((agent) => agent.policy_base_id!)
   );
 
   // get the agent policies for those ids
@@ -33,5 +34,8 @@ export async function getHostedPolicies(
 }
 
 export function isHostedAgent(hostedPolicies: { [key: string]: boolean }, agent: Agent) {
-  return agent.policy_id && hostedPolicies[agent.policy_id];
+  // `hostedPolicies` is keyed by base policy id (see getHostedPolicies above), so match on
+  // `policy_base_id` — agents on version-specific variants (`my-policy#9.2`) are correctly
+  // identified as hosted.
+  return agent.policy_base_id && hostedPolicies[agent.policy_base_id];
 }

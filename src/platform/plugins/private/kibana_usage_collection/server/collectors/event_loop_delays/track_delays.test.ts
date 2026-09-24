@@ -33,9 +33,9 @@ describe('startTrackingEventLoopDelaysUsage', () => {
       }
     );
 
-    expect(eventLoopDelaysMonitor.collect).toBeCalledTimes(0);
+    expect(eventLoopDelaysMonitor.collect).toHaveBeenCalledTimes(0);
     jest.advanceTimersByTime(collectionStartDelay);
-    expect(eventLoopDelaysMonitor.collect).toBeCalledTimes(1);
+    expect(eventLoopDelaysMonitor.collect).toHaveBeenCalledTimes(1);
   });
 
   it('stores event loop delays every collectionInterval duration', () => {
@@ -52,13 +52,13 @@ describe('startTrackingEventLoopDelaysUsage', () => {
       }
     );
 
-    expect(mockInternalRepository.create).toBeCalledTimes(0);
+    expect(mockInternalRepository.create).toHaveBeenCalledTimes(0);
     jest.advanceTimersByTime(collectionStartDelay);
-    expect(mockInternalRepository.create).toBeCalledTimes(1);
+    expect(mockInternalRepository.create).toHaveBeenCalledTimes(1);
     jest.advanceTimersByTime(collectionInterval);
-    expect(mockInternalRepository.create).toBeCalledTimes(2);
+    expect(mockInternalRepository.create).toHaveBeenCalledTimes(2);
     jest.advanceTimersByTime(collectionInterval);
-    expect(mockInternalRepository.create).toBeCalledTimes(3);
+    expect(mockInternalRepository.create).toHaveBeenCalledTimes(3);
   });
 
   it('resets eventLoopDelaysMonitor every histogramReset duration', () => {
@@ -78,11 +78,11 @@ describe('startTrackingEventLoopDelaysUsage', () => {
       }
     );
 
-    expect(eventLoopDelaysMonitor.reset).toBeCalledTimes(0);
+    expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(0);
     jest.advanceTimersByTime(collectionInterval * 5);
-    expect(eventLoopDelaysMonitor.reset).toBeCalledTimes(1);
+    expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(1);
     jest.advanceTimersByTime(collectionInterval * 5);
-    expect(eventLoopDelaysMonitor.reset).toBeCalledTimes(2);
+    expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(2);
   });
 
   it('stops monitoring event loop delays once stopMonitoringEventLoop$.next is called', () => {
@@ -92,8 +92,8 @@ describe('startTrackingEventLoopDelaysUsage', () => {
       stopMonitoringEventLoop$,
       eventLoopDelaysMonitor
     );
-    expect(eventLoopDelaysMonitor.stop).toBeCalledTimes(0);
+    expect(eventLoopDelaysMonitor.stop).toHaveBeenCalledTimes(0);
     stopMonitoringEventLoop$.next();
-    expect(eventLoopDelaysMonitor.stop).toBeCalledTimes(1);
+    expect(eventLoopDelaysMonitor.stop).toHaveBeenCalledTimes(1);
   });
 });

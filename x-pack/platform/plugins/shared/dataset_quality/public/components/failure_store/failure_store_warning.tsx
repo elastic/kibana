@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiLink, EuiCallOut } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useKibanaContextForPlugin } from '../../utils';
 
 export const FailureStoreWarning = () => {
@@ -43,11 +44,5 @@ export const FailureStoreWarning = () => {
     />
   );
 
-  return (
-    <EuiCallOut
-      title={noAccessToFailureStoreWarningDescription}
-      color="warning"
-      iconType="warning"
-    />
-  );
+  return <KbnWarningCallout title={noAccessToFailureStoreWarningDescription} />;
 };

@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { DefaultItemAction, EuiButtonIconProps } from '@elastic/eui';
-import type { ContentListItem } from '@kbn/content-list-provider';
+import type { ActionId, ContentListItem, KnownActionId } from '@kbn/content-list-provider';
 import type { BuilderContext } from '../column/types';
 
 /**
@@ -28,13 +28,25 @@ export type ActionBuilderContext = BuilderContext;
 /**
  * Props for the `Action` component (custom actions).
  *
- * Custom actions are identified by `props.id` and provide their own
- * behavior. Pre-built actions (like `Action.Edit`) have dedicated
- * preset components with their own props interfaces.
+ * Custom actions are purely declarative: behavior is supplied at the
+ * provider level via `itemConfig.actions[id]`. The `id` prop ties the JSX
+ * declaration to the matching config entry.
+ *
+ * Built-in IDs ({@link KnownActionId}) are intentionally excluded —
+ * use `Action.Edit` or `Action.Delete` for those so preset defaults
+ * (read-only gating, danger color, etc.) are applied. The content editor
+ * (`Action.ContentEditor`) is also intentionally excluded; its handler
+ * lives on `features.contentEditor.open` rather than on `item.actions`,
+ * so a custom `<Action id="contentEditor" />` cannot wire it up.
  */
 export interface ActionProps {
-  /** Unique identifier for the action. */
-  id: string;
+  /**
+   * Unique identifier for the action. Must NOT be one of the built-in
+   * IDs (`'edit'`, `'delete'`) or `'contentEditor'` — use the matching
+   * preset (`Action.Edit`, `Action.Delete`, `Action.ContentEditor`) for
+   * those.
+   */
+  id: Exclude<ActionId, KnownActionId | 'contentEditor'>;
   /** Display name for the action (shown in menu and tooltip). */
   name: string | ((item: ContentListItem) => ReactNode);
   /** Accessible description for the action. */
@@ -45,10 +57,6 @@ export interface ActionProps {
   type?: 'icon' | 'button';
   /** Icon/button color (matches EUI button color palette). */
   color?: EuiButtonIconProps['color'];
-  /** Click handler. */
-  onClick?: (item: ContentListItem) => void;
-  /** Link href (string or function returning href per item). */
-  href?: string | ((item: ContentListItem) => string);
   /** Whether the action is enabled for a given item. */
   enabled?: (item: ContentListItem) => boolean;
   /** Whether the action is available (visible) for a given item. */
@@ -61,13 +69,13 @@ export interface ActionProps {
  * Namespace interface for `Action` sub-components.
  *
  * The base `Action` accepts {@link ActionProps}; pre-built actions
- * are properties (e.g., `Action.Edit`, `Action.Delete`, `Action.Inspect`).
+ * are properties (e.g., `Action.Edit`, `Action.Delete`, `Action.ContentEditor`).
  */
 export interface ActionNamespace {
   (props: ActionProps): ReactNode;
   Edit: (props: EditActionProps) => ReactNode;
   Delete: (props: DeleteActionProps) => ReactNode;
-  Inspect: (props: InspectActionProps) => ReactNode;
+  ContentEditor: (props: ContentEditorActionProps) => ReactNode;
 }
 
 /**
@@ -91,9 +99,22 @@ export interface DeleteActionProps {
 }
 
 /**
- * Props for the `Action.Inspect` preset component.
+ * Props for the `Action.ContentEditor` preset component.
+ *
+ * Renders the content editor (view details) row icon. Behavior is wired
+ * at the provider level via `features.contentEditor.open` — the action
+ * has no direct binding on `item.actions`. When `open` is not configured,
+ * the action returns `undefined` and the table omits the icon entirely.
  */
-export interface InspectActionProps {
-  /** Custom label for the inspect action. Defaults to `'View {itemTitle} details'`. */
+export interface ContentEditorActionProps {
+  /**
+   * Custom label for the content editor action. Defaults to `'View details'`.
+   *
+   * Pass a function to derive the label from the item (e.g.
+   * `'View {itemTitle} details'`); the default deliberately omits the
+   * item title to keep the icon-button affordance terse.
+   */
   label?: string | ((item: ContentListItem) => ReactNode);
+  /** Per-item guard. When provided, disables the action for items where this returns `false`. */
+  enabled?: (item: ContentListItem) => boolean;
 }

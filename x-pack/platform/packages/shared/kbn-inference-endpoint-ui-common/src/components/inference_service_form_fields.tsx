@@ -32,7 +32,7 @@ import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { FieldType, isMapWithStringValues } from '../types/types';
+import { FieldType, isMapWithStringValues, isStringArray } from '../types/types';
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
@@ -40,6 +40,7 @@ import {
 } from './providers/render_service_provider/service_provider';
 import type { ServiceProviderKeys } from '../constants';
 import {
+  CHAT_COMPLETION_TASK_TYPE,
   DEFAULT_TASK_TYPE,
   INTERNAL_OVERRIDE_FIELDS,
   serviceProviderLinkComponents,
@@ -58,6 +59,8 @@ import {
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import { MoreOptionsFields } from './more_options_fields';
 import { AdditionalOptionsFields } from './additional_options_fields';
+import { InferenceEndpointIdField } from './inference_endpoint_id_field';
+import { TaskTypeSelectField } from './task_type_select_field';
 import { AuthenticationFormItems } from './configuration/authentication_form_items';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
 import {
@@ -300,6 +303,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           inferenceId,
           providerConfig: newProviderConfig,
           taskTypeConfig: newTaskTypeConfig,
+          ...(taskType !== CHAT_COMPLETION_TASK_TYPE ? { contextWindowLength: '' } : {}),
         },
         secrets: {
           providerSecrets: newSecrets,
@@ -507,7 +511,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   useEffect(() => {
     if (config?.provider && config?.taskType && isEdit) {
       const newProvider = updatedProviders?.find((p) => p.service === config.provider);
-      // Update connector providerSchema
 
       const overrides = getOverrides(newProvider);
       const newProviderSchema: ConfigEntryView[] = newProvider
@@ -515,6 +518,10 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
+        const availableTaskTypes = allowedTaskTypes
+          ? newProvider.task_types.filter((t) => (allowedTaskTypes as string[]).includes(t))
+          : newProvider.task_types;
+        setTaskTypeOptions(getTaskTypeOptions(availableTaskTypes));
       }
       setSelectedTaskType(config.taskType);
     }
@@ -522,9 +529,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     config?.provider,
     config?.taskType,
     isEdit,
-    selectedTaskType,
     updatedProviders,
     getOverrides,
+    allowedTaskTypes,
   ]);
 
   useEffect(() => {
@@ -564,6 +571,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               typeof configValue === 'number' ||
               typeof configValue === 'boolean' ||
               (typeof configValue === 'object' && isMapWithStringValues(configValue)) ||
+              isStringArray(configValue) ||
               configValue === null ||
               configValue === undefined
             ) {
@@ -573,7 +581,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           return itemValue;
         })
       : [];
-
     setProviderSettingsFormFields(existingConfiguration.filter((p) => p.required && !p.sensitive));
     setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
     setAuthenticationFormFields(existingConfiguration.filter((p) => p.sensitive));
@@ -600,26 +607,23 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               isInvalid={isInvalid}
               error={errorMessage}
             >
-              <>
-                <EuiSpacer size="s" />
-                <EuiInputPopover
-                  id={'providerInputPopoverId'}
-                  fullWidth
-                  input={selectInput}
-                  isOpen={isProviderPopoverOpen}
-                  closePopover={closeProviderPopover}
-                  className="rightArrowIcon"
-                >
-                  <SelectableProvider
-                    currentSolution={currentSolution}
-                    providers={updatedProviders ?? []}
-                    onClosePopover={closeProviderPopover}
-                    onProviderChange={onProviderChange}
-                    onSolutionFilterChange={toggleAndApplyFilter}
-                    solutionFilter={solutionFilter}
-                  />
-                </EuiInputPopover>
-              </>
+              <EuiInputPopover
+                id={'providerInputPopoverId'}
+                fullWidth
+                input={selectInput}
+                isOpen={isProviderPopoverOpen}
+                closePopover={closeProviderPopover}
+                className="rightArrowIcon"
+              >
+                <SelectableProvider
+                  currentSolution={currentSolution}
+                  providers={updatedProviders ?? []}
+                  onClosePopover={closeProviderPopover}
+                  onProviderChange={onProviderChange}
+                  onSolutionFilterChange={toggleAndApplyFilter}
+                  solutionFilter={solutionFilter}
+                />
+              </EuiInputPopover>
             </EuiFormRow>
           );
           return formRow;
@@ -627,7 +631,21 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       </UseField>
       {config?.provider ? (
         <>
-          <EuiHorizontalRule margin="m" />
+          {/* AUTHENTICATION */}
+          {authenticationFormFields.length > 0 && (
+            <>
+              <EuiHorizontalRule margin="l" />
+              <AuthenticationFormItems
+                isLoading={false}
+                items={authenticationFormFields}
+                setConfigEntry={onSetProviderConfigEntry}
+                isEdit={isEdit}
+                isPreconfigured={isPreconfigured}
+                reenterSecretsOnEdit={reenterSecretsOnEdit}
+              />
+            </>
+          )}
+          <EuiHorizontalRule margin="l" />
           {/* SETTINGS */}
           <EuiTitle size="xxs" data-test-subj="settings-label">
             <h4>
@@ -649,40 +667,34 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             isPreconfigured={isPreconfigured}
             isInternalProvider={isInternalProvider}
           />
+          <TaskTypeSelectField
+            taskType={config.taskType}
+            taskTypeOptions={taskTypeOptions}
+            onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
+            isEdit={isEdit}
+          />
           <EuiSpacer size="s" />
-          {optionalProviderFormFields.length > 0 ? (
-            <>
-              <MoreOptionsFields
-                optionalProviderFormFields={optionalProviderFormFields}
-                onSetProviderConfigEntry={onSetProviderConfigEntry}
-                isEdit={isEdit}
-              />
-              <EuiHorizontalRule margin="m" />
-            </>
-          ) : null}
-          {/* AUTHENTICATION */}
-          {authenticationFormFields.length > 0 ? (
-            <>
-              <AuthenticationFormItems
-                isLoading={false}
-                items={authenticationFormFields}
-                setConfigEntry={onSetProviderConfigEntry}
-                isEdit={isEdit}
-                isPreconfigured={isPreconfigured}
-                reenterSecretsOnEdit={reenterSecretsOnEdit}
-              />
-              <EuiHorizontalRule margin="m" />
-            </>
-          ) : null}
+          {optionalProviderFormFields.length > 0 && (
+            <MoreOptionsFields
+              optionalProviderFormFields={optionalProviderFormFields}
+              onSetProviderConfigEntry={onSetProviderConfigEntry}
+              isEdit={isEdit}
+            />
+          )}
           {/* ADDITIONAL OPTIONS */}
           <AdditionalOptionsFields
             config={config}
-            onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
-            taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
+            taskTypeOptions={taskTypeOptions}
             isEdit={isEdit}
             allowContextWindowLength={allowContextWindowLength}
             allowTemperature={allowTemperature}
+          />
+          {/* INFERENCE ENDPOINT ID & API REFERENCE */}
+          <InferenceEndpointIdField
+            config={config}
+            selectedTaskType={selectedTaskType}
+            isEdit={isEdit}
           />
           {/* HIDDEN VALIDATION */}
           <ProviderSecretHiddenField

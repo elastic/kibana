@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { config } from './plugin';
+import { config } from './config';
 
 export async function plugin() {
   const { Plugin } = await import('./plugin');

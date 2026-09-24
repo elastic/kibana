@@ -37,6 +37,7 @@ export const mockSiemMigrationsDataResourcesClient = {
     next: jest.fn().mockResolvedValue([]),
     all: jest.fn().mockResolvedValue([]),
   }),
+  getMapping: jest.fn().mockResolvedValue({}),
 } as unknown as jest.Mocked<SiemMigrationsDataResourcesClient>;
 export const MockSiemMigrationsDataResourcesClient = jest
   .fn()

@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { REVIEW_RULE_DEPRECATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
@@ -14,6 +14,7 @@ import {
   createRuleAssetSavedObject,
   createDeprecatedPrebuiltRuleAssetSavedObjects,
   deleteAllPrebuiltRuleAssets,
+  getCustomQueryRuleParams,
   installPrebuiltRules,
   reviewRuleDeprecation,
 } from '../../../../utils';
@@ -150,6 +151,21 @@ export default ({ getService }: FtrProviderContext): void => {
         const response = await reviewRuleDeprecation(es, supertest);
         expect(response.rules).toEqual([]);
       });
+
+      it('ignores installed custom rules whose rule_id matches a deprecated asset', async () => {
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'Custom rule' })
+        );
+
+        await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+          { rule_id: 'rule-1', version: 2 },
+        ]);
+
+        const response = await reviewRuleDeprecation(es, supertest);
+        expect(response.rules).toEqual([]);
+      });
     });
 
     describe('With ids filter', () => {
@@ -187,6 +203,21 @@ export default ({ getService }: FtrProviderContext): void => {
           ids: [installedRuleId],
         });
 
+        expect(response.rules).toEqual([]);
+      });
+
+      it('ignores a custom rule looked up by SO id whose rule_id matches a deprecated asset', async () => {
+        const customRule = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'Custom rule' })
+        );
+
+        await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+          { rule_id: 'rule-1', version: 2 },
+        ]);
+
+        const response = await reviewRuleDeprecation(es, supertest, { ids: [customRule.id] });
         expect(response.rules).toEqual([]);
       });
 

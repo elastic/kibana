@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -24,12 +25,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { OutputFormInputsType } from './use_output_form';
 
-export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFormInputsType }> = (
-  props
-) => {
-  const { inputs } = props;
+export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
+  inputs,
+}) => {
   const {
-    props: { onChange },
+    props: { onChange, disabled },
     value: keyValuePairs,
     formRowProps: { error: errors },
   } = inputs.kafkaHeadersInput;
@@ -66,9 +66,10 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
     [keyValuePairs, onChange]
   );
 
-  const deleteButtonDisabled = keyValuePairs.length === 1;
+  const deleteButtonDisabled = disabled || keyValuePairs.length === 1;
   const addKeyValuePairButtonDisabled =
-    keyValuePairs.length === 1 && (keyValuePairs[0].key === '' || keyValuePairs[0].value === '');
+    disabled ||
+    (keyValuePairs.length === 1 && (keyValuePairs[0].key === '' || keyValuePairs[0].value === ''));
 
   const displayErrors = (errorMessages?: string[]) => {
     return errorMessages?.length
@@ -127,6 +128,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
+                  isDisabled={disabled}
                   label={
                     <FormattedMessage
                       id="xpack.fleet.settings.editOutputFlyout.kafkaHeaderKeyInputLabel"
@@ -150,6 +152,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
+                  isDisabled={disabled}
                   label={
                     <FormattedMessage
                       id="xpack.fleet.settings.editOutputFlyout.kafkaHeaderValueInputLabel"
@@ -170,16 +173,23 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
               </EuiFlexItem>
 
               <EuiFlexItem grow={false} style={{ marginTop: 28 }}>
-                <EuiButtonIcon
-                  data-test-subj={`settingsOutputsFlyout.kafkaHeadersDeleteButton${index}`}
-                  color="text"
-                  onClick={() => deleteKeyValuePair(index)}
-                  iconType="cross"
-                  disabled={deleteButtonDisabled}
-                  aria-label={i18n.translate('xpack.fleet.kafkaHeadersInput.deleteButton', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.fleet.kafkaHeadersInput.deleteButton', {
                     defaultMessage: 'Delete row',
                   })}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj={`settingsOutputsFlyout.kafkaHeadersDeleteButton${index}`}
+                    color="text"
+                    onClick={() => deleteKeyValuePair(index)}
+                    iconType="cross"
+                    disabled={deleteButtonDisabled}
+                    aria-label={i18n.translate('xpack.fleet.kafkaHeadersInput.deleteButton', {
+                      defaultMessage: 'Delete row',
+                    })}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>

@@ -8,6 +8,7 @@
 import type { Ref } from 'react';
 import React from 'react';
 import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { ControllerRenderProps } from 'react-hook-form';
 import type {
   EuiFieldTextProps,
@@ -30,6 +31,8 @@ import {
   EuiButtonGroup,
   EuiComboBox,
   EuiTextArea,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { MonitorSpacesProps } from '../fields/monitor_spaces';
 import { MonitorSpaces } from '../fields/monitor_spaces';
@@ -41,6 +44,7 @@ import type { SourceFieldProps } from '../fields/source_field';
 import { SourceField } from '../fields/source_field';
 import type { FormattedComboBoxProps as DefaultFormattedComboBoxProps } from '../fields/combo_box';
 import { FormattedComboBox as DefaultFormattedComboBox } from '../fields/combo_box';
+import { MonitorTagsComboBox as DefaultMonitorTagsComboBox } from '../fields/monitor_tags_combo_box';
 import type { CodeEditorProps as DefaultCodeEditorProps } from '../fields/code_editor';
 import { JSONEditor as DefaultJSONEditor } from '../fields/code_editor';
 import type { MonitorTypeRadioGroupProps } from '../fields/monitor_type_radio_group';
@@ -115,9 +119,43 @@ export const FormattedComboBox = React.forwardRef<unknown, DefaultFormattedCombo
   (props, _ref) => <DefaultFormattedComboBox {...props} />
 );
 
+export const MonitorTagsComboBox = React.forwardRef<unknown, DefaultFormattedComboBoxProps>(
+  (props, _ref) => <DefaultMonitorTagsComboBox {...props} />
+);
+
 export const ComboBox = React.forwardRef<unknown, EuiComboBoxProps<unknown>>((props, _ref) => (
   <EuiComboBox {...omit(props, ['isServiceManaged'])} />
 ));
+
+export const LocationsComboBox = React.forwardRef<unknown, EuiComboBoxProps<unknown>>(
+  (props, _ref) => {
+    const { selectedOptions, options } = props;
+    const optionIds = new Set((options ?? []).map((o) => o.id));
+    const unavailableLocations = (selectedOptions ?? []).filter(
+      (sel) =>
+        !(sel as unknown as { isServiceManaged?: boolean }).isServiceManaged &&
+        !optionIds.has(sel.id)
+    );
+
+    return (
+      <>
+        <EuiComboBox {...omit(props, ['isServiceManaged'])} />
+        {unavailableLocations.length > 0 && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="danger">
+              {i18n.translate('xpack.synthetics.monitorConfig.locations.notInSpaceWarning', {
+                defaultMessage:
+                  '{count, plural, one {# private location is} other {# private locations are}} not available in all spaces this monitor is shared to. Share the {count, plural, one {location} other {locations}} to all monitor spaces, or remove {count, plural, one {it} other {them}} from the monitor.',
+                values: { count: unavailableLocations.length },
+              })}
+            </EuiText>
+          </>
+        )}
+      </>
+    );
+  }
+);
 
 export const JSONEditor = React.forwardRef<unknown, DefaultCodeEditorProps>((props, _ref) => (
   <DefaultJSONEditor {...props} />

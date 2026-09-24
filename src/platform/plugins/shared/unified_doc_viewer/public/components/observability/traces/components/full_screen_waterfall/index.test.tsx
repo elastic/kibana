@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FullTraceWaterfallProps } from '@kbn/apm-types';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { FullScreenWaterfall, type FullScreenWaterfallProps } from '.';
+import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
-import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { FlyoutHistoryKeyContext } from '../../../../doc_viewer_flyout/flyout_history_key_context';
 
 const testHistoryKey = Symbol('testHistoryKey');
@@ -21,14 +22,6 @@ const renderWithHistoryKey = (ui: React.ReactElement) =>
   render(
     <FlyoutHistoryKeyContext.Provider value={testHistoryKey}>{ui}</FlyoutHistoryKeyContext.Provider>
   );
-
-jest.mock('./waterfall_flyout/span_flyout', () => ({
-  spanFlyoutId: 'spanDetailFlyout',
-}));
-
-jest.mock('./waterfall_flyout/logs_flyout', () => ({
-  logsFlyoutId: 'logsFlyout',
-}));
 
 let capturedDocFlyoutHasAnimation: boolean | undefined;
 
@@ -44,7 +37,7 @@ jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
     capturedDocFlyoutHasAnimation = hasAnimation;
     return (
       <div
-        data-test-subj={type === 'spanDetailFlyout' ? 'spanFlyout' : 'logsFlyout'}
+        data-test-subj={type === 'span' ? 'spanFlyout' : 'logsFlyout'}
         data-trace-id={traceId}
         data-span-id={docId}
         data-id={docId}
@@ -81,16 +74,14 @@ describe('FullScreenWaterfall', () => {
   beforeAll(() => {
     setUnifiedDocViewerServices({
       ...mockUnifiedDocViewerServices,
-      discoverShared: {
-        features: {
-          registry: {
-            getById: () => ({
-              render: (props: any) => {
-                capturedWaterfallProps = props;
-                return <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>;
-              },
-            }),
-          },
+      apmShared: {
+        ...mockUnifiedDocViewerServices.apmShared,
+        TraceWaterfallWithFetching: (props: FullTraceWaterfallProps) => {
+          capturedWaterfallProps = props;
+          return React.createElement(
+            mockUnifiedDocViewerServices.apmShared.TraceWaterfallWithFetching,
+            props
+          );
         },
       },
     } as unknown as UnifiedDocViewerServices);
@@ -117,14 +108,14 @@ describe('FullScreenWaterfall', () => {
   it('renders the full trace waterfall immediately on standard open', () => {
     renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} />);
 
-    expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
+    expect(screen.getByTestId('trace-waterfall-with-fetching')).toBeInTheDocument();
   });
 
   describe('when service name is undefined', () => {
     it('renders the full trace waterfall', () => {
       renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} serviceName={undefined} />);
 
-      expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
+      expect(screen.getByTestId('trace-waterfall-with-fetching')).toBeInTheDocument();
     });
   });
 
@@ -135,7 +126,7 @@ describe('FullScreenWaterfall', () => {
           {...defaultProps}
           skipOpenAnimation={true}
           docId="transaction-doc-1"
-          activeFlyoutType="spanDetailFlyout"
+          activeFlyoutType="span"
         />
       );
 
@@ -148,7 +139,7 @@ describe('FullScreenWaterfall', () => {
           {...defaultProps}
           skipOpenAnimation={false}
           docId="transaction-doc-1"
-          activeFlyoutType="spanDetailFlyout"
+          activeFlyoutType="span"
         />
       );
 
@@ -161,7 +152,7 @@ describe('FullScreenWaterfall', () => {
           {...defaultProps}
           skipOpenAnimation={true}
           docId="transaction-doc-1"
-          activeFlyoutType="spanDetailFlyout"
+          activeFlyoutType="span"
         />
       );
 

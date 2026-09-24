@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import type { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
+import type { EntityType } from '@kbn/entity-store/common';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { waitFor } from '@kbn/detections-response-ftr-services';
 import expect from '@kbn/expect';
-import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import { ENTITY_LATEST, ENTITY_STORE_ROUTES, getEntitiesAlias } from '@kbn/entity-store/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 import { dataViewRouteHelpersFactory } from './data_view';
+import { entityMaintainerRouteHelpersFactory } from './entity_maintainers';
 
 export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
 ) => {
-  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
@@ -46,11 +45,15 @@ export const EntityStoreUtils = (
     if (namespace !== 'default') {
       settingsUrl = `/s/${namespace}${settingsUrl}`;
     }
+
+    // Temporarily enable V2 so the uninstall API isn't blocked by the
+    // feature flag middleware (which returns 403 when V2 is disabled).
+    // A previous test's cleanup may have already disabled V2.
     await supertest
       .post(settingsUrl)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
       .expect(200);
 
     // Use the supported uninstall API so maintainers are removed via
@@ -71,37 +74,29 @@ export const EntityStoreUtils = (
       log.debug(`Entity store not installed, skipping uninstall during cleanup: ${e.message}`);
     }
 
-    const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
-
-    // @ts-expect-error body is any
-    const engineTypes = body.engines.map((engine) => engine.type);
-
-    log.info(`Cleaning engines: ${engineTypes.join(', ')}`);
-    try {
-      await Promise.all(
-        engineTypes.map((entityType: 'user' | 'host') =>
-          entityAnalyticsApi.deleteEntityEngine(
-            { params: { entityType }, query: { data: true } },
-            namespace
-          )
-        )
-      );
-    } catch (e) {
-      log.warning(`Error deleting engines: ${e.message}`);
-    }
+    // Disable V2 to leave a clean slate for the next test.
+    await supertest
+      .post(settingsUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .expect(200);
   };
 
   const initEntityEngineForEntityType = async (entityType: EntityType) => {
     log.info(
       `Initializing engine for entity type ${entityType} in namespace ${namespace || 'default'}`
     );
-    const res = await entityAnalyticsApi.initEntityEngine(
-      {
-        params: { entityType },
-        body: {},
-      },
-      namespace
-    );
+    let installUrl = '/api/security/entity_store/install';
+    if (namespace !== 'default') {
+      installUrl = `/s/${namespace}${installUrl}`;
+    }
+    const res = await supertest
+      .post(installUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .send({ entityTypes: [entityType] });
 
     if (res.status !== 200) {
       log.error(`Failed to initialize engine for entity type ${entityType}`);
@@ -118,7 +113,16 @@ export const EntityStoreUtils = (
       `Engines to start for entity types: ${entityTypes.join(', ')}`,
       60_000,
       async () => {
-        const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
+        let statusUrl = '/api/security/entity_store/status';
+        if (namespace !== 'default') {
+          statusUrl = `/s/${namespace}${statusUrl}`;
+        }
+        const { body } = await supertest
+          .get(statusUrl)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .set('elastic-api-version', '2023-10-31')
+          .expect(200);
         if (body.engines.every((engine: any) => engine.status === 'started')) {
           return true;
         }
@@ -135,9 +139,19 @@ export const EntityStoreUtils = (
       `Engine for entity type ${entityType} to be in status ${status}`,
       60_000,
       async () => {
-        const { body } = await entityAnalyticsApi
-          .getEntityEngine({ params: { entityType } }, namespace)
+        let statusUrl = '/api/security/entity_store/status';
+        if (namespace !== 'default') {
+          statusUrl = `/s/${namespace}${statusUrl}`;
+        }
+        const { body: statusBody } = await supertest
+          .get(statusUrl)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .set('elastic-api-version', '2023-10-31')
           .expect(200);
+        const body = statusBody.engines.find((e: { type: string }) => e.type === entityType) ?? {
+          status: 'not_found',
+        };
         log.debug(`Engine status for ${entityType}: ${body.status}`);
 
         if (status !== 'error' && body.status === 'error') {
@@ -150,8 +164,17 @@ export const EntityStoreUtils = (
     );
   };
 
-  const enableEntityStore = async (body: InitEntityStoreRequestBodyInput = {}) => {
-    const res = await entityAnalyticsApi.initEntityStore({ body }, namespace);
+  const enableEntityStore = async (body: Record<string, unknown> = {}) => {
+    let installUrl = '/api/security/entity_store/install';
+    if (namespace !== 'default') {
+      installUrl = `/s/${namespace}${installUrl}`;
+    }
+    const res = await supertest
+      .post(installUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .send(body);
     if (res.status !== 200) {
       log.error(`Failed to enable entity store`);
       log.error(JSON.stringify(res.body));
@@ -258,12 +281,30 @@ export const EntityStoreUtils = (
     if (namespace !== 'default') {
       settingsUrl = `/s/${namespace}${settingsUrl}`;
     }
-    await supertest
-      .post(settingsUrl)
-      .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
-      .expect(200);
+
+    await retry.waitForWithTimeout(
+      'entityStoreEnableV2 uiSetting to read back as enabled',
+      60_000,
+      async () => {
+        // Try to enable
+        await supertest
+          .post(settingsUrl)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
+          .expect(200);
+
+        // Check that it worked
+        const settingsRes = await supertest
+          .get(settingsUrl)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .expect(200);
+        return (
+          settingsRes.body?.settings?.['securitySolution:entityStoreEnableV2']?.userValue === true
+        );
+      }
+    );
 
     let url = '/api/security/entity_store/install';
     if (namespace !== 'default') {
@@ -290,7 +331,8 @@ export const EntityStoreUtils = (
       dataViewPattern = 'logs-*',
       waitForEntities = true,
       entityTypes = ['user', 'host'],
-      maintainerAutoStart = false,
+      stopMaintainerAfterInstall = true,
+      maintainerAutoStart: _ignoredAutoStart,
       ...installBody
     } = body;
     const installRequestBody = { ...installBody, entityTypes };
@@ -302,8 +344,15 @@ export const EntityStoreUtils = (
       `Engines to start for entity types: ${entityTypes.join(', ')}`,
       60_000,
       async () => {
-        const { body: enginesBody } = await entityAnalyticsApi
-          .listEntityEngines(namespace)
+        let statusUrl = '/api/security/entity_store/status';
+        if (namespace !== 'default') {
+          statusUrl = `/s/${namespace}${statusUrl}`;
+        }
+        const { body: enginesBody } = await supertest
+          .get(statusUrl)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .set('elastic-api-version', '2023-10-31')
           .expect(200);
         if (enginesBody.engines.every((engine: any) => engine.status === 'started')) {
           return true;
@@ -340,19 +389,57 @@ export const EntityStoreUtils = (
       await waitForEntityStoreEntities({ es, log, count: 1, namespace });
     }
 
-    let maintainersUrl = '/internal/security/entity_store/entity_maintainers/init';
-    if (namespace !== 'default') {
-      maintainersUrl = `/s/${namespace}${maintainersUrl}`;
+    // Install schedules the risk-score maintainer with enabled: true.
+    // Wait for any TM auto-run to complete, then stop the task so tests
+    // can set up preconditions before triggering scoring via the sync
+    // run_now route. The run_now route calls ensureRiskScoreSetup before
+    // scoring, so resources are created on first use even if we stop the
+    // maintainer before its first TM execution. Tests that need the
+    // maintainer running (e.g. async lifecycle tests) pass
+    // stopMaintainerAfterInstall: false to skip this block.
+    if (stopMaintainerAfterInstall) {
+      const maintainerRoutes = entityMaintainerRouteHelpersFactory(
+        supertest,
+        namespace !== 'default' ? namespace : undefined
+      );
+
+      // Wait for any TM auto-run to finish BEFORE stopping. Install
+      // schedules the task with enabled=true so TM may auto-run it
+      // immediately. Calling stopMaintainer (bulkUpdateState) while TM
+      // is mid-execution causes a version_conflict_engine_exception on
+      // TM's write-back, permanently wedging the task in "running" state.
+      let lastSeenRuns = -1;
+      await retry.waitForWithTimeout(
+        'risk-score maintainer to be idle before stop after install',
+        60_000,
+        async () => {
+          const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
+          const maintainer = response.body.maintainers.find(
+            (m: { id: string; runs: number; nextRunAt?: string | null }) => m.id === 'risk-score'
+          );
+          if (!maintainer) return false;
+
+          const nextRunAt = (maintainer as { nextRunAt?: string | null }).nextRunAt;
+          const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
+          if (!isNextRunInFuture) {
+            lastSeenRuns = -1;
+            return false;
+          }
+
+          const runs = maintainer.runs;
+          if (runs === lastSeenRuns) return true;
+          lastSeenRuns = runs;
+          return false;
+        }
+      );
+
+      try {
+        await maintainerRoutes.stopMaintainer('risk-score');
+      } catch (e) {
+        log.debug(`stopMaintainer after install failed (may not be registered yet): ${e.message}`);
+      }
     }
 
-    const maintainersRes = await supertest
-      .post(maintainersUrl)
-      .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
-      .set('elastic-api-version', '2')
-      .send({ autoStart: maintainerAutoStart });
-
-    expect([200, 201]).to.contain(maintainersRes.status);
     return res;
   };
 

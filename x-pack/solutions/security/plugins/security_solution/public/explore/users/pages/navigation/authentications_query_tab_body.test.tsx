@@ -12,6 +12,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { AuthenticationsQueryTabBody } from './authentications_query_tab_body';
 import { UsersType } from '../../store/model';
 import { useAuthentications } from '../../../containers/authentications';
+import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 
 jest.mock('../../../containers/authentications');
 jest.mock('../../../../common/containers/query_toggle');
@@ -19,6 +20,9 @@ jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/components/visualization_actions/actions');
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
+jest.mock('../../../../common/components/matrix_histogram', () => ({
+  MatrixHistogram: jest.fn(() => null),
+}));
 
 describe('Authentications query tab body', () => {
   const mockUseAuthentications = useAuthentications as jest.Mock;
@@ -67,5 +71,77 @@ describe('Authentications query tab body', () => {
       </TestProviders>
     );
     expect(mockUseAuthentications.mock.calls[0][0].skip).toEqual(true);
+  });
+
+  describe('histogram filterQuery', () => {
+    const mockMatrixHistogram = MatrixHistogram as unknown as jest.Mock;
+
+    const getHistogramFilterQuery = () =>
+      mockMatrixHistogram.mock.calls[0][0].filterQuery as string;
+
+    it('adds user.name exists clause when no filterQuery and no userName', () => {
+      render(
+        <TestProviders>
+          <AuthenticationsQueryTabBody {...defaultProps} />
+        </TestProviders>
+      );
+      expect(JSON.parse(getHistogramFilterQuery())).toEqual({
+        exists: { field: 'user.name' },
+      });
+    });
+
+    it('adds host.name exists clause when no filterQuery and userName is set', () => {
+      render(
+        <TestProviders>
+          <AuthenticationsQueryTabBody {...defaultProps} userName="test-user" />
+        </TestProviders>
+      );
+      expect(JSON.parse(getHistogramFilterQuery())).toEqual({
+        exists: { field: 'host.name' },
+      });
+    });
+
+    it('combines filterQuery with user.name exists clause when no userName', () => {
+      const baseQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
+      render(
+        <TestProviders>
+          <AuthenticationsQueryTabBody {...defaultProps} filterQuery={JSON.stringify(baseQuery)} />
+        </TestProviders>
+      );
+      expect(JSON.parse(getHistogramFilterQuery())).toEqual({
+        bool: { filter: [baseQuery, { exists: { field: 'user.name' } }] },
+      });
+    });
+
+    it('combines filterQuery with host.name exists clause when userName is set', () => {
+      const baseQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
+      render(
+        <TestProviders>
+          <AuthenticationsQueryTabBody
+            {...defaultProps}
+            filterQuery={JSON.stringify(baseQuery)}
+            userName="test-user"
+          />
+        </TestProviders>
+      );
+      expect(JSON.parse(getHistogramFilterQuery())).toEqual({
+        bool: { filter: [baseQuery, { exists: { field: 'host.name' } }] },
+      });
+    });
+
+    it('combines a complex filterQuery with user.name exists clause', () => {
+      const complexFilterQuery =
+        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"term":{"user.email":"tyshawn.dellaquila@acmecrm.com"}},{"bool":{"should":[{"term":{"event.module":"okta"}},{"prefix":{"data_stream.dataset":"okta"}},{"term":{"event.module":"entityanalytics_okta"}},{"prefix":{"data_stream.dataset":"entityanalytics_okta"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}';
+      render(
+        <TestProviders>
+          <AuthenticationsQueryTabBody {...defaultProps} filterQuery={complexFilterQuery} />
+        </TestProviders>
+      );
+      expect(JSON.parse(getHistogramFilterQuery())).toEqual({
+        bool: {
+          filter: [JSON.parse(complexFilterQuery), { exists: { field: 'user.name' } }],
+        },
+      });
+    });
   });
 });

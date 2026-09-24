@@ -1,0 +1,56 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useCallback } from 'react';
+import type { ComponentProps, FC, ReactNode } from 'react';
+
+import { useNestedMenu } from './use_nested_menu';
+import { SecondaryMenu } from '../secondary_menu';
+
+export interface PrimaryMenuItemProps
+  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'children' | 'isHighlighted'> {
+  children: ReactNode;
+  hasSubmenu?: boolean;
+  isCurrent?: boolean;
+  isHighlighted?: boolean;
+  onClick?: () => void;
+}
+
+export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
+  children,
+  hasSubmenu = false,
+  id,
+  isCurrent,
+  isHighlighted = false,
+  onClick,
+  ...props
+}) => {
+  const { goToPanel } = useNestedMenu();
+
+  const handleClick = useCallback(() => {
+    if (hasSubmenu) {
+      goToPanel(id, id);
+    } else {
+      onClick?.();
+    }
+  }, [hasSubmenu, id, goToPanel, onClick]);
+
+  return (
+    <SecondaryMenu.Item
+      id={id}
+      isHighlighted={isHighlighted}
+      isCurrent={isCurrent}
+      onClick={handleClick}
+      hasSubmenu={hasSubmenu}
+      {...props}
+    >
+      {children}
+    </SecondaryMenu.Item>
+  );
+};

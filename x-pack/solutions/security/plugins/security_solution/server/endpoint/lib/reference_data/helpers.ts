@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import pRetry from 'p-retry';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import { ReferenceDataClient } from './reference_data_client';
-import { REF_DATA_KEYS } from './constants';
+import { REF_DATA_KEYS, REFERENCE_DATA_SAVED_OBJECT_TYPE } from './constants';
 import type { OptInStatusMetadata } from './types';
-import { stringify } from '../../utils/stringify';
 
 /**
  * Reads the Endpoint Exceptions per-policy opt-in status from Reference Data.
@@ -40,22 +41,49 @@ export const getIsEndpointExceptionsPerPolicyEnabled = async (
  * It has to be called during plugin.start() to ensure that the data used to decide
  * whether opt-in should be enabled or not is not initialized yet on new deployments.
  *
- * @param soClient soClient with write access to REFERENCE_DATA_SAVED_OBJECT_TYPE
+ * @param savedObjectsServiceStart SavedObjectsServiceStart
  * @param experimentalFeatures
  * @param logger
  */
 export const initializeEndpointExceptionsPerPolicyOptInStatus = async (
-  soClient: SavedObjectsClientContract,
+  savedObjectsServiceStart: SavedObjectsServiceStart,
   experimentalFeatures: ExperimentalFeatures,
-  logger: Logger
+  _logger: Logger
 ): Promise<void> => {
-  const referenceDataClient = new ReferenceDataClient(soClient, experimentalFeatures, logger);
+  const logger = _logger.get('initEndpointExceptionsPerPolicyOptIn');
 
-  const result = await referenceDataClient.get<OptInStatusMetadata>(
-    REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
-  );
+  await pRetry(
+    async () => {
+      const soClient = new SavedObjectsClient(
+        savedObjectsServiceStart.createInternalRepository([REFERENCE_DATA_SAVED_OBJECT_TYPE])
+      );
 
-  logger.debug(
-    `Initialized Endpoint Exceptions per-policy opt-in status to: ${stringify(result.metadata)}`
-  );
+      const referenceDataClient = new ReferenceDataClient(soClient, experimentalFeatures, logger);
+
+      const result = await referenceDataClient.get<OptInStatusMetadata>(
+        REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
+      );
+
+      logger.info(
+        `Endpoint Exceptions per-policy opt-in status is '${result.metadata.status}'${
+          result.metadata.reason ? ` (reason: '${result.metadata.reason}').` : '.'
+        }`
+      );
+    },
+    {
+      retries: 5,
+      minTimeout: 1000,
+      maxTimeout: 3000,
+
+      onFailedAttempt: (error) => {
+        logger.debug(
+          `Attempt ${error.attemptNumber} to initialize Endpoint Exceptions per-policy opt-in status failed. There are ${error.retriesLeft} retries left. Error: ${error.message}`
+        );
+      },
+    }
+  ).catch((error) => {
+    logger.error(
+      `Error initializing Endpoint Exceptions per-policy opt-in status: ${error.message}`
+    );
+  });
 };

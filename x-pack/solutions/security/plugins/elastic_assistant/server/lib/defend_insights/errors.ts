@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export class InvalidDefendInsightTypeError extends Error {
-  constructor() {
-    super('invalid defend insight type');
-  }
-}
+export { InvalidDefendInsightTypeError } from '@kbn/discoveries';

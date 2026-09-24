@@ -18,7 +18,9 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
+  ALERT_TRACKED,
   ALERT_UUID,
+  SPACE_IDS,
 } from '@kbn/rule-data-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClientContext } from '../../rules_client';
@@ -63,6 +65,8 @@ const getUntrackQuery = (
   params: SetAlertsToUntrackedParamsWithDep,
   alertStatus: AlertStatus
 ): QueryDslQueryContainer => {
+  const { spaceId } = params;
+
   const statusTerms: Array<{ term: Record<string, { value: string }> }> = [
     {
       term: {
@@ -71,12 +75,26 @@ const getUntrackQuery = (
     },
   ];
 
+  // Restrict untracking to alerts that belong to the active space only.
+  //
+  // Note we intentionally do NOT include the all-spaces wildcard ('*') here, unlike the
+  // read-side `getSpacesFilter` in rule_registry. Reading globally visible alerts across
+  // spaces is legitimate, but mutating them is not: the only rule types that write '*'
+  // alerts are internally managed (e.g. Streams "Significant Events"), whose alerts are
+  // point-in-time occurrence records that back an internal feature and are never meant to
+  // be untracked by users. Matching '*' here would let a caller in one space mutate a
+  // document shared by every space. Please keep this divergence from the read path.
+  //
+  // When spaceId is absent (internal cleanup calls), no space filter is applied.
+  const spaceFilter = spaceId ? { terms: { [SPACE_IDS]: [spaceId] } } : undefined;
+
   if (params.isUsingQuery) {
     const { query } = params;
+    const filterClauses = [...(spaceFilter ? [spaceFilter] : []), ...(query ?? [])];
     return {
       bool: {
         must: statusTerms,
-        ...(query ? { filter: query } : {}),
+        ...(filterClauses.length > 0 ? { filter: filterClauses } : {}),
       },
     };
   } else {
@@ -112,6 +130,7 @@ const getUntrackQuery = (
             },
           },
         ],
+        ...(spaceFilter ? { filter: [spaceFilter] } : {}),
       },
     };
   }
@@ -283,8 +302,10 @@ if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'
   ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
   ctx._source.${ALERT_END} = '${now.toISOString()}';
   ctx._source.${ALERT_TIME_RANGE}.lte = '${now.toISOString()}';
+  ctx._source.${ALERT_TRACKED} = false;
 } else {
   ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}';
   ctx._source['${ALERT_END}'] = '${now.toISOString()}';
   ctx._source['${ALERT_TIME_RANGE}'].lte = '${now.toISOString()}';
+  ctx._source['${ALERT_TRACKED}'] = false;
 }`;

@@ -13,8 +13,6 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
 } from '@elastic/eui';
-import type { Theme } from '@emotion/react';
-import { css } from '@emotion/react';
 import { useField } from 'formik';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -22,6 +20,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { betaBadgeStyle } from './beta_badge_style';
 import { FormLabel } from './form_label';
 
 export interface ContrastKeyPadMenuProps {
@@ -34,12 +33,6 @@ interface ContrastKeyPadItem {
   label: string;
   icon: string;
 }
-
-const betaBadgeCSS = ({ euiTheme }: Theme) => css`
-  padding: calc(${euiTheme.size.xxs} * 1.5);
-  border: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
-  border-radius: 50%;
-`;
 
 export const ContrastKeyPadMenu: FunctionComponent<ContrastKeyPadMenuProps> = ({
   name,
@@ -58,7 +51,7 @@ export const ContrastKeyPadMenu: FunctionComponent<ContrastKeyPadMenuProps> = ({
         isDisabled={isDisabled}
         onChange={() => helpers.setValue(id)}
       >
-        <EuiIcon type={icon} size="l" />
+        <EuiIcon type={icon} size="l" aria-hidden={true} />
       </EuiKeyPadMenuItem>
     );
   };
@@ -80,7 +73,7 @@ export const ContrastKeyPadMenu: FunctionComponent<ContrastKeyPadMenuProps> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <div css={betaBadgeCSS}>
+                <div css={betaBadgeStyle}>
                   <EuiIconTip
                     aria-label={i18n.translate(
                       'xpack.security.formComponents.contrastKeyPadMenu.betaBadge',

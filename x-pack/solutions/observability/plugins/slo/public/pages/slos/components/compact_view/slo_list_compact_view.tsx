@@ -41,6 +41,10 @@ import {
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
+import {
+  SloBurnRateWindowColumnHeader,
+  type SloBurnRateWindow,
+} from '../common/slo_burn_rate_window_column_header';
 import { SLOGroupings } from '../common/slo_groupings';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
@@ -96,6 +100,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       sloList,
     });
 
+  const [burnRateWindow, setBurnRateWindow] = useState<SloBurnRateWindow>('5m');
+  const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
+
   const isRemote = (slo: SLOWithSummaryResponse) => !!slo.remote;
   const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
     !!slo.remote && slo.remote.kibanaUrl !== '';
@@ -107,6 +114,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         <EuiIcon
           type="external"
           size="s"
+          aria-hidden={true}
           css={{
             marginLeft: '10px',
           }}
@@ -434,6 +442,39 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
             isLoading={historicalSummaryLoading}
           />
         );
+      },
+    },
+    {
+      name: (
+        <SloBurnRateWindowColumnHeader
+          burnRateWindow={burnRateWindow}
+          onBurnRateWindowChange={setBurnRateWindow}
+          isPopoverOpen={isBurnRatePopoverOpen}
+          setIsPopoverOpen={setIsBurnRatePopoverOpen}
+          buttonTestSubj="sloListCompactBurnRateWindowSelector"
+          popoverAriaLabel={i18n.translate(
+            'xpack.slo.sloListCompactView.burnRate.windowSelectorAriaLabel',
+            {
+              defaultMessage: 'Select burn rate window',
+            }
+          )}
+          burnRateLabel={i18n.translate('xpack.slo.sloListCompactView.columns.burnRate', {
+            defaultMessage: 'Burn rate',
+          })}
+        />
+      ),
+      width: '160px',
+      render: (slo: SLOWithSummaryResponse) => {
+        if (slo.summary.status === 'NO_DATA') {
+          return NOT_AVAILABLE_LABEL;
+        }
+        const { fiveMinuteBurnRate, oneHourBurnRate, oneDayBurnRate } = slo.summary;
+        const windowValue = {
+          '5m': fiveMinuteBurnRate,
+          '1h': oneHourBurnRate,
+          '1d': oneDayBurnRate,
+        }[burnRateWindow];
+        return <EuiText size="s">{`${numeral(windowValue).format('0.[00]')}x`}</EuiText>;
       },
     },
 

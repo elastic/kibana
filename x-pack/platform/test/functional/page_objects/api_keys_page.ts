@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
 
   return {
@@ -79,6 +80,17 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async isPromptPage() {
+      // The grid shows a "Loading API keys…" state first, then settles on either the
+      // empty prompt (apiKeysCreatePromptButton) or the populated table
+      // (apiKeysCreateTableButton). Wait for one to render before deciding, otherwise a
+      // check made mid-load wrongly reports "not prompt" and the caller clicks a button
+      // that never appears.
+      await retry.waitFor('API keys grid to finish loading', async () => {
+        return (
+          (await testSubjects.exists('apiKeysCreatePromptButton')) ||
+          (await testSubjects.exists('apiKeysCreateTableButton'))
+        );
+      });
       return await testSubjects.exists('apiKeysCreatePromptButton');
     },
 
@@ -144,8 +156,8 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async getFlyoutTitleText() {
-      const header = await find.byClassName('euiFlyoutHeader');
-      return header.getVisibleText();
+      await testSubjects.existOrFail('apiKeyFlyoutTitle');
+      return await testSubjects.getVisibleText('apiKeyFlyoutTitle');
     },
 
     async getFlyoutApiKeyStatus() {
@@ -154,8 +166,15 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async getApiKeyUpdateSuccessToast() {
-      const toast = await testSubjects.find('updateApiKeySuccessToast');
-      return toast.getVisibleText();
+      let text = '';
+      await retry.try(async () => {
+        const toast = await testSubjects.find('updateApiKeySuccessToast');
+        text = await toast.getVisibleText();
+        if (!text) {
+          throw new Error('Toast text not yet rendered');
+        }
+      });
+      return text;
     },
 
     async clickExpiryFilters(type: 'active' | 'expired') {

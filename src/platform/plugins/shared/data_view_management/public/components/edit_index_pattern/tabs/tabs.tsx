@@ -316,6 +316,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     anchorPosition="downCenter"
                     data-test-subj="indexedFieldTypeFilterDropdown-popover"
                     aria-label={filterAriaLabel}
+                    panelPaddingSize="s"
                     button={
                       <EuiFilterButton
                         aria-label={filterAriaLabel}
@@ -351,6 +352,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     anchorPosition="downCenter"
                     data-test-subj="schemaFieldTypeFilterDropdown-popover"
                     aria-label={schemaAriaLabel}
+                    panelPaddingSize="s"
                     button={
                       <EuiFilterButton
                         aria-label={schemaAriaLabel}
@@ -401,7 +403,6 @@ export const Tabs: React.FC<TabsProps> = ({
                     isLoading={isRefreshing}
                     isDisabled={isRefreshing}
                     size="m"
-                    color="success"
                     className="eui-fullWidth"
                   >
                     {refreshAriaLabel}
@@ -570,11 +571,9 @@ export const Tabs: React.FC<TabsProps> = ({
               <EuiSpacer size="m" />
               <RelationshipsTable
                 basePath={http.basePath}
-                id={indexPattern.id!}
                 capabilities={application.capabilities}
                 relationships={relationships}
                 allowedTypes={allowedTypes}
-                navigateToUrl={application.navigateToUrl}
                 getDefaultTitle={savedObjectsManagement.getDefaultTitle}
                 getSavedObjectLabel={savedObjectsManagement.getSavedObjectLabel}
                 savedObjectsTagging={savedObjectsTagging}

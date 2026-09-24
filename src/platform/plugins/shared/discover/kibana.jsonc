@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/discover-plugin",
   "owner": [
-    "@elastic/kibana-data-discovery"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -52,15 +52,16 @@
       "apmSourcesAccess",
       "fileUpload",
       "cps",
-      "alertingVTwo"
+      "alertingVTwo",
+      "feedback"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "presentationPanel",
       "presentationUtil",
-      "esql"
+      "esql",
+      "share"
     ],
     "extraPublicDirs": [
       "common"

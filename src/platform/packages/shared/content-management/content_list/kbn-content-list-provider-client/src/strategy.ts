@@ -17,13 +17,15 @@ import type {
   ContentListItem,
 } from '@kbn/content-list-provider';
 import {
-  TAG_FILTER_ID,
   getIncludeExcludeFlag,
   MANAGED_USER_FILTER,
   NO_CREATOR_USER_FILTER,
   getCreatorKey,
 } from '@kbn/content-list-provider';
 import type { TableListViewFindItemsFn } from './types';
+import type { ContentListFilterMap } from './filters';
+import { matchesFilterValue } from './filters';
+import type { ContentListSortFieldMap } from './sorting';
 
 // Re-export for consumers that import from strategy.
 export { MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER, getCreatorKey };
@@ -44,6 +46,13 @@ type DecoratedItem = UserContentCommonSchema & Record<string, unknown>;
 export type ItemDecorator = (
   items: UserContentCommonSchema[]
 ) => Promise<UserContentCommonSchema[]>;
+
+/** Callback passed to {@link ClientStrategy.subscribe}; called whenever the items snapshot changes. */
+export type ItemsSnapshotListener = () => void;
+type DynamicConfig<T> = T | (() => T);
+
+const resolveConfig = <T>(config: DynamicConfig<T> | undefined): T | undefined =>
+  typeof config === 'function' ? (config as () => T)() : config;
 
 /**
  * Return type from {@link createClientStrategy}.
@@ -75,6 +84,8 @@ export interface ClientStrategy {
   onRefresh: () => Promise<void>;
   /** Returns the full (unfiltered, decorated) item set from the most recent fetch. */
   getItems: () => UserContentCommonSchema[];
+  /** Subscribe to full item snapshot changes. */
+  subscribe: (listener: ItemsSnapshotListener) => () => void;
 }
 
 /**
@@ -139,11 +150,13 @@ const getUserContentFieldValue = (
 const sortItems = (
   items: UserContentCommonSchema[],
   field: string,
-  direction: 'asc' | 'desc'
+  direction: 'asc' | 'desc',
+  customSorts: ContentListSortFieldMap = {}
 ): UserContentCommonSchema[] => {
   return [...items].sort((a, b) => {
-    const aValue = getUserContentFieldValue(a, field);
-    const bValue = getUserContentFieldValue(b, field);
+    const customSort = customSorts[field];
+    const aValue = customSort?.getValue?.(a) ?? getUserContentFieldValue(a, field);
+    const bValue = customSort?.getValue?.(b) ?? getUserContentFieldValue(b, field);
 
     if (aValue === null && bValue === null) {
       return 0;
@@ -189,11 +202,12 @@ const asIncludeExclude = (value: ActiveFilters[string]): IncludeExcludeFilter | 
     ? (value as IncludeExcludeFilter)
     : undefined;
 
+const RESERVED_FILTER_KEYS = new Set<string>(['search']);
+
 /**
  * Apply client-side filters to the item set.
  *
- * - Tag filters use `filters[TAG_FILTER_ID]` (include/exclude arrays of tag IDs).
- * - Creator filters use `filters.createdBy` (include/exclude arrays of UIDs + sentinels).
+ * - Field filters use registered dimensions.
  * - Boolean flag filters (e.g. `starred`) are detected generically via
  *   {@link getIncludeExcludeFlag} and matched against `item[key]`.
  *
@@ -202,49 +216,44 @@ const asIncludeExclude = (value: ActiveFilters[string]): IncludeExcludeFilter | 
  */
 export const filterItems = (
   items: UserContentCommonSchema[],
-  filters: ActiveFilters
+  filters: ActiveFilters,
+  customFilters: ContentListFilterMap = {}
 ): UserContentCommonSchema[] => {
   let result = items as DecoratedItem[];
-
-  const tagFilter = asIncludeExclude(filters[TAG_FILTER_ID]);
-  if (tagFilter) {
-    const { include, exclude } = tagFilter;
-    if (include?.length) {
-      const includeSet = new Set(include);
-      result = result.filter((item) =>
-        item.references?.some((ref) => ref.type === 'tag' && includeSet.has(ref.id))
-      );
-    }
-    if (exclude?.length) {
-      const excludeSet = new Set(exclude);
-      result = result.filter(
-        (item) => !item.references?.some((ref) => ref.type === 'tag' && excludeSet.has(ref.id))
-      );
-    }
-  }
-
-  const userFilter = asIncludeExclude(filters.createdBy);
-  if (userFilter) {
-    const { include, exclude } = userFilter;
-    if (include?.length) {
-      const includeSet = new Set(include);
-      result = result.filter((item) => includeSet.has(getCreatorKey(item)));
-    }
-    if (exclude?.length) {
-      const excludeSet = new Set(exclude);
-      result = result.filter((item) => !excludeSet.has(getCreatorKey(item)));
-    }
-  }
 
   // Flag keys must match the decorated property name set by the `ItemDecorator`
   // (e.g. `starred` in `ActiveFilters` corresponds to `item.starred`).
   for (const [key, value] of Object.entries(filters)) {
+    if (RESERVED_FILTER_KEYS.has(key)) {
+      continue;
+    }
+
     const flag = getIncludeExcludeFlag(value);
     if (flag) {
       result = result.filter((item) => {
         const v = item[key];
         return flag.state === 'include' ? v === true : v !== true;
       });
+      continue;
+    }
+
+    const customFilter = customFilters[key];
+    const fieldFilter = asIncludeExclude(value);
+    if (!customFilter || !fieldFilter) {
+      continue;
+    }
+
+    const { include, exclude } = fieldFilter;
+    if (include?.length) {
+      result = result.filter((item) =>
+        include.some((filterValue) => matchesFilterValue(item, customFilter, filterValue))
+      );
+    }
+    if (exclude?.length) {
+      result = result.filter(
+        (item) =>
+          !exclude.some((filterValue) => matchesFilterValue(item, customFilter, filterValue))
+      );
     }
   }
 
@@ -311,25 +320,41 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
  *
  * @param tableListViewFindItems - The consumer's existing `findItems` function.
  * @param decorate - Optional callback that enriches raw items with external data.
+ * @param listingLimit - Maximum number of items to fetch from the server per request.
  * @returns A {@link ClientStrategy} with `findItems`, `onInvalidate`, `onRefresh`, and `getItems`.
  */
 export const createClientStrategy = (
   tableListViewFindItems: TableListViewFindItemsFn,
-  decorate?: ItemDecorator
+  decorate?: ItemDecorator,
+  listingLimit?: number,
+  customFilters?: DynamicConfig<ContentListFilterMap>,
+  customSorts?: DynamicConfig<ContentListSortFieldMap>
 ): ClientStrategy => {
   let rawItems: UserContentCommonSchema[] = [];
   let decoratedItems: UserContentCommonSchema[] = [];
   let lastSearchQuery: string | undefined;
+  const listeners = new Set<ItemsSnapshotListener>();
+
+  const notify = () => {
+    for (const listener of Array.from(listeners)) {
+      listener();
+    }
+  };
 
   const applyDecoration = async () => {
     decoratedItems = decorate ? await decorate(rawItems) : rawItems;
+    notify();
   };
 
   const findItemsFn: FindItemsFn = async (params: FindItemsParams): Promise<FindItemsResult> => {
     const { searchQuery, filters, sort, page, signal } = params;
 
     if (lastSearchQuery !== searchQuery) {
-      const result = await tableListViewFindItems(searchQuery, undefined, signal);
+      const result = await tableListViewFindItems(
+        searchQuery,
+        listingLimit !== undefined ? { listingLimit } : undefined,
+        signal
+      );
       if (signal?.aborted) {
         throw new DOMException('The operation was aborted.', 'AbortError');
       }
@@ -338,10 +363,10 @@ export const createClientStrategy = (
       lastSearchQuery = searchQuery;
     }
 
-    let items = filterItems(decoratedItems, filters);
+    let items = filterItems(decoratedItems, filters, resolveConfig(customFilters));
 
     if (sort?.field) {
-      items = sortItems(items, sort.field, sort.direction ?? 'asc');
+      items = sortItems(items, sort.field, sort.direction ?? 'asc', resolveConfig(customSorts));
     }
 
     const start = page.index * page.size;
@@ -357,6 +382,7 @@ export const createClientStrategy = (
     lastSearchQuery = undefined;
     rawItems = [];
     decoratedItems = [];
+    notify();
   };
 
   const onRefresh = async () => {
@@ -368,5 +394,11 @@ export const createClientStrategy = (
     onInvalidate,
     onRefresh,
     getItems: () => decoratedItems,
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
   };
 };

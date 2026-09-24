@@ -7,9 +7,8 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { cloneDeep, merge } from 'lodash';
-import type { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import type { KbnClient } from '@kbn/test';
+import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import type { BulkRequest, DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CreatePackagePolicyResponse,
@@ -21,7 +20,7 @@ import { agentPolicyRouteService, packagePolicyRouteService } from '@kbn/fleet-p
 import type { DeepPartial } from 'utility-types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { startMetadataTransforms, stopMetadataTransforms } from '../utils/transforms';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../format_http_error';
 import { EndpointError } from '../errors';
 import { usageTracker } from './usage_tracker';
 import { EndpointDocGenerator } from '../generate_data';
@@ -315,7 +314,7 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
     (await kbnClient.request({
       path: '/api/status',
       method: 'GET',
-    })) as AxiosResponse
+    })) as KbnClientResponse<{ version: { number: string } }>
   ).data.version.number;
 
   if (!version) {
@@ -444,7 +443,7 @@ export const indexEndpointHostForPolicy = async ({
         method: 'GET',
         headers: { 'elastic-api-version': '2023-10-31' },
       })
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
       .then((res) => res.data.item),
   ]);
 
@@ -527,7 +526,7 @@ export const indexEndpointHostForPolicy = async ({
       op_type: 'create',
       refresh: 'wait_for',
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 
   response.hosts.push(hostMetadataDoc);
   response.metadataIndex = METADATA_DATASTREAM;

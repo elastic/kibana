@@ -7,10 +7,13 @@
 
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { PERFORM_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
-  BOOTSTRAP_PREBUILT_RULES_URL,
-  PERFORM_RULE_INSTALLATION_URL,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+  INITIALIZE_SECURITY_SOLUTION_URL,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
+} from '@kbn/security-solution-plugin/common/api/initialization';
 import {
   ELASTIC_SECURITY_RULE_ID,
   PREBUILT_RULES_PACKAGE_NAME,
@@ -19,7 +22,7 @@ import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plug
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import type { createDeprecatedRuleAssetSavedObject } from '../../helpers/rules';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import { IS_SERVERLESS } from '../../env_var_names_constants';
+import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../../env_var_names_constants';
 import { refreshSavedObjectIndices, rootRequest } from './common';
 
 export const getPrebuiltRulesStatus = () => {
@@ -112,13 +115,66 @@ export const bulkCreateRuleAssets = ({
   cy.task('bulkInsert', buildBulkIndexBody(index, rules));
 };
 
-/* Prevent the installation of the `security_detection_engine` package from Fleet
-/* by intercepting the request and returning a mock empty object as response
-/* Used primarily to prevent the unwanted installation of "real" prebuilt rules
-/* during e2e tests, and allow for manual installation of mock rules instead. */
+/**
+ * Flows that install Fleet packages. These are the ones we want to mock out
+ * so the real packages are never pulled during e2e tests.
+ */
+const MOCK_PACKAGE_FLOW_RESULTS: Record<string, object> = {
+  [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: {
+    status: 'ready',
+    payload: {
+      name: 'security_detection_engine',
+      version: '0.0.0',
+      install_status: 'already_installed',
+    },
+  },
+  [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]: {
+    status: 'ready',
+    payload: { name: 'endpoint', version: '0.0.0', install_status: 'already_installed' },
+  },
+  [INITIALIZATION_FLOW_INIT_AI_PROMPTS]: {
+    status: 'ready',
+    payload: { name: 'security_ai_prompts', version: '0.0.0', install_status: 'already_installed' },
+  },
+};
+
+/* Prevent the installation of Fleet packages (prebuilt rules, endpoint, AI
+/* prompts) by stripping them from the initialization request and returning mock
+/* results. Non-package flows (list indices, data views, etc.) are forwarded to
+/* the real server so the necessary infrastructure is still created. */
 export const preventPrebuiltRulesPackageInstallation = () => {
   cy.log('Prevent prebuilt rules package installation');
-  cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, { packages: [] });
+  cy.intercept('POST', INITIALIZE_SECURITY_SOLUTION_URL, (req) => {
+    const requestedFlows: string[] = req.body?.flows ?? [];
+    const mockedFlows = requestedFlows.filter((id) => id in MOCK_PACKAGE_FLOW_RESULTS);
+    const serverFlows = requestedFlows.filter((id) => !(id in MOCK_PACKAGE_FLOW_RESULTS));
+
+    if (serverFlows.length === 0) {
+      // Every requested flow is mocked — reply immediately without hitting the server
+      const flows: Record<string, object> = {};
+      for (const id of mockedFlows) {
+        flows[id] = MOCK_PACKAGE_FLOW_RESULTS[id];
+      }
+      req.reply({ flows });
+      return;
+    }
+
+    // Forward only non-package flows to the server, then merge mock package
+    // results into the real response. `req.on('response')` is used instead of
+    // `req.continue(callback)` because the callback form raises a test failure
+    // when the upstream connection is canceled mid-response (e.g., the test
+    // navigates away before init finishes) — see cypress-io/cypress#26248. The
+    // event-emitter style simply does not fire on cancellation, absorbing the
+    // transient error silently.
+    req.body.flows = serverFlows;
+    req.on('response', (res) => {
+      if (res.body && typeof res.body === 'object' && res.body.flows) {
+        for (const id of mockedFlows) {
+          res.body.flows[id] = MOCK_PACKAGE_FLOW_RESULTS[id];
+        }
+      }
+    });
+  });
 };
 
 const installByUploadPrebuiltRulesPackage = (packagePath: string): Cypress.Chainable => {
@@ -149,9 +205,25 @@ const installByUploadPrebuiltRulesPackage = (packagePath: string): Cypress.Chain
 /**
  * Installs a prepared mock prebuilt rules package `security_detection_engine`.
  * Installing it up front prevents installing the real package when making API requests.
+ *
+ * On MKI (`CLOUD_SERVERLESS`) Fleet rejects that upload because the name exists in
+ * the registry, and `kbnTestServerArgs` are not applied. Leave the environment
+ * package in place. Specs that need mock-specific assets are tagged
+ * `@skipInServerlessMKI`.
  */
 export const installMockPrebuiltRulesPackage = (): Cypress.Chainable => {
+  if (Cypress.env(CLOUD_SERVERLESS)) {
+    cy.log('Skipping mock prebuilt rules package upload on MKI');
+    return cy.wrap(undefined);
+  }
+
   cy.log('Install mock prebuilt rules package');
+
+  // On shared stacks a previous spec may have installed the real package from
+  // the registry (e.g. install_via_fleet.cy.ts). Fleet rejects uploads that
+  // would replace a registry-installed package, so remove any existing
+  // installation before uploading the mock.
+  deletePrebuiltRulesFleetPackage();
 
   return installByUploadPrebuiltRulesPackage(
     'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip'

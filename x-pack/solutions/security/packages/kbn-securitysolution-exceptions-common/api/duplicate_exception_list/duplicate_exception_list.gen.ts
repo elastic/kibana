@@ -24,12 +24,27 @@ import {
 
 export const DuplicateExceptionListRequestQuery = lazySchema(() =>
   z.object({
-    list_id: ExceptionListHumanId,
-    namespace_type: ExceptionNamespaceType,
+    /**
+     * The `list_id` of the existing exception list to copy (source list).
+     */
+    list_id: ExceptionListHumanId.describe(
+      'The `list_id` of the existing exception list to copy (source list).'
+    ),
+    /**
+     * Scope in which the source list is defined (`single` = current space, `agnostic` = all spaces).
+     */
+    namespace_type: ExceptionNamespaceType.describe(
+      'Scope in which the source list is defined (`single` = current space, `agnostic` = all spaces).'
+    ),
     /**
      * Determines whether to include expired exceptions in the duplicated list. Expiration date defined by `expire_time`.
      */
-    include_expired_exceptions: z.enum(['true', 'false']).default('true'),
+    include_expired_exceptions: z
+      .enum(['true', 'false'])
+      .default('true')
+      .describe(
+        'Determines whether to include expired exceptions in the duplicated list. Expiration date defined by `expire_time`.'
+      ),
   })
 );
 export type DuplicateExceptionListRequestQuery = z.infer<typeof DuplicateExceptionListRequestQuery>;

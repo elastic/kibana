@@ -11,12 +11,14 @@ import type {
   BaseConnectorContract,
   ConnectorContractUnion,
   ConnectorTypeInfo,
+  CustomTriggerSchemaInput,
   StepDeprecationInfo,
   StepPropertyHandler,
 } from '@kbn/workflows';
 import {
   builtInStepDefinitions,
   DEPRECATED_STEP_METADATA,
+  generateLightweightYamlSchema,
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
@@ -95,6 +97,54 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
   return z.any();
 }
 
+const getSubActionMetadata = (
+  actionTypeId: string,
+  subActionName: string
+): Pick<BaseConnectorContract, 'description' | 'documentation' | 'examples'> | undefined => {
+  if (actionTypeId !== '.xsoar') {
+    return undefined;
+  }
+
+  if (subActionName === 'getPlaybooks') {
+    return {
+      description: 'Retrieve XSOAR playbooks visible to the connector.',
+      examples: {
+        snippet: `- name: get_xsoar_playbooks
+  type: xsoar.getPlaybooks
+  connector-id: <connector-id>`,
+      },
+    };
+  }
+
+  if (subActionName === 'run') {
+    return {
+      description: 'Create an XSOAR incident and optionally associate it with a playbook.',
+      examples: {
+        params: {
+          name: 'Suspicious login detected',
+          playbookId: '<xsoar-playbook-id>',
+          body: '{"details":"Investigate suspicious login activity.","type":"Unclassified"}',
+        },
+        snippet: `- name: create_xsoar_incident
+  type: xsoar.run
+  connector-id: <connector-id>
+  with:
+    name: Suspicious login detected
+    playbookId: <xsoar-playbook-id>
+    createInvestigation: true
+    severity: 2
+    body: |
+      {
+        "details": "Investigate suspicious login activity.",
+        "type": "Unclassified"
+      }`,
+      },
+    };
+  }
+
+  return undefined;
+};
+
 /**
  * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
  */
@@ -102,28 +152,25 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
   return stepSchemas
     .getAllRegisteredStepDefinitions()
     .map((stepDefinition): BaseConnectorContract => {
+      // Match the convention used by every other connector source: summary is the
+      // short label, description is the longer behavioral explanation.
       const definition = {
         type: stepDefinition.id,
         paramsSchema: stepDefinition.inputSchema,
         outputSchema: stepDefinition.outputSchema,
         configSchema: stepDefinition.configSchema,
         deprecation: stepDefinition.deprecation,
-        summary: null,
-        description: null,
+        summary: stepDefinition.label,
+        description: stepDefinition.description,
+        documentation: stepDefinition.documentation?.url,
+        examples: stepDefinition.documentation?.examples
+          ? { snippet: stepDefinition.documentation.examples.join('\n') }
+          : undefined,
       };
 
-      if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-        // Only public step definitions have documentation and examples
-        return {
-          ...definition,
-          description: stepDefinition.label, // Short title-like text
-          summary: stepDefinition.description ?? null, // Explanation of the step behavior
-          documentation: stepDefinition.documentation?.url,
-          examples: stepDefinition.documentation?.examples
-            ? { snippet: stepDefinition.documentation?.examples.join('\n') }
-            : undefined,
-          editorHandlers: stepDefinition.editorHandlers,
-        };
+      // Editor handlers are the one field the server definition does not carry.
+      if ('editorHandlers' in stepDefinition) {
+        return { ...definition, editorHandlers: stepDefinition.editorHandlers };
       }
       return definition;
     });
@@ -136,9 +183,13 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
 function convertDynamicConnectorsToContractsInternal(
   connectorTypes: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {
+  const { inboundOnlyConnectorTypeIds } = getConnectorSchemas();
   const connectorContracts: ConnectorContractUnion[] = [];
   Object.values(connectorTypes).forEach((connectorType) => {
     if (connectorType.enabled === false) {
+      return;
+    }
+    if (inboundOnlyConnectorTypeIds.has(connectorType.actionTypeId)) {
       return;
     }
     try {
@@ -157,9 +208,11 @@ function convertDynamicConnectorsToContractsInternal(
 
           const paramsSchema = getSubActionParamsSchema(connectorType.actionTypeId, subAction.name);
           const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, subAction.name);
+          const metadata = getSubActionMetadata(connectorType.actionTypeId, subAction.name);
 
           connectorContracts.push({
             actionTypeId: connectorType.actionTypeId,
+            displayName: connectorType.displayName,
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
@@ -167,6 +220,7 @@ function convertDynamicConnectorsToContractsInternal(
             outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,
             instances: connectorType.instances,
+            ...metadata,
           });
         });
       } else {
@@ -177,6 +231,7 @@ function convertDynamicConnectorsToContractsInternal(
 
         connectorContracts.push({
           actionTypeId: connectorType.actionTypeId,
+          displayName: connectorType.displayName,
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
@@ -191,6 +246,7 @@ function convertDynamicConnectorsToContractsInternal(
       // Return a basic connector contract as fallback
       connectorContracts.push({
         actionTypeId: connectorType.actionTypeId,
+        displayName: connectorType.displayName,
         type: connectorType.actionTypeId,
         summary: connectorType.displayName,
         paramsSchema: z.any(),
@@ -207,6 +263,10 @@ function convertDynamicConnectorsToContractsInternal(
 // Export types for schema results
 export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
+
+export interface WorkflowZodSchemaOptions {
+  lightweight?: boolean;
+}
 
 // NOTE: The former `WORKFLOW_ZOD_SCHEMA` / `WORKFLOW_ZOD_SCHEMA_LOOSE`
 // module-level constants were removed in favour of `getWorkflowZodSchema()` /
@@ -401,11 +461,22 @@ export function getAllConnectorsWithDynamic(
 
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  registeredTriggerIds: string[] = []
+  registeredTriggers: CustomTriggerSchemaInput[] = [],
+  options: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
+  if (options.lightweight) {
+    return generateLightweightYamlSchema(registeredTriggers);
+  }
+
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
+  return getWorkflowZodSchemaFromConnectors(allConnectors, registeredTriggers);
 };
+
+/** Same schema from an already-resolved list, for callers that need the list too. */
+export const getWorkflowZodSchemaFromConnectors = (
+  allConnectors: ConnectorContractUnion[],
+  registeredTriggers: CustomTriggerSchemaInput[] = []
+): z.ZodType => generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> = {}

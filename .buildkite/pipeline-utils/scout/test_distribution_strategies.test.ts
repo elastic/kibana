@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import type { ScoutTestTrack } from './test_tracks';
+import type { ScoutTestTrack } from './test_tracks.ts';
 
 let mockKibanaDir: string;
 
@@ -18,7 +18,7 @@ const mockUploadSteps = jest.fn();
 const mockUploadArtifacts = jest.fn();
 const mockSetMetadata = jest.fn();
 
-jest.mock('../buildkite', () => ({
+jest.mock('../buildkite/index.ts', () => ({
   BuildkiteClient: jest.fn().mockImplementation(() => ({
     uploadSteps: mockUploadSteps,
     uploadArtifacts: mockUploadArtifacts,
@@ -26,22 +26,22 @@ jest.mock('../buildkite', () => ({
   })),
 }));
 
-jest.mock('../agent_images', () => ({
+jest.mock('../agent_images.ts', () => ({
   expandAgentQueue: (queueName: string) => ({ queue: queueName }),
 }));
 
-jest.mock('../pr_labels', () => ({
+jest.mock('../pr_labels.ts', () => ({
   collectEnvFromLabels: () => ({}),
 }));
 
-jest.mock('../utils', () => ({
+jest.mock('../utils.ts', () => ({
   getKibanaDir: () => mockKibanaDir,
 }));
 
 const mockDefinitionsAll = jest.fn();
 const mockDefinitionsLoadFromPath = jest.fn();
 
-jest.mock('./test_tracks', () => ({
+jest.mock('./test_tracks.ts', () => ({
   scoutTestTrack: {
     definitions: {
       all: () => mockDefinitionsAll(),
@@ -50,7 +50,7 @@ jest.mock('./test_tracks', () => ({
   },
 }));
 
-jest.mock('./paths', () => ({
+jest.mock('./paths.ts', () => ({
   get SCOUT_OUTPUT_ROOT() {
     return path.join(mockKibanaDir, '.scout');
   },
@@ -59,7 +59,7 @@ jest.mock('./paths', () => ({
   },
 }));
 
-import { scoutTestDistributionStrategies } from './test_distribution_strategies';
+import { scoutTestDistributionStrategies } from './test_distribution_strategies.ts';
 
 const createMockTrackDefinition = (tracks: ScoutTestTrack[]) => ({ tracks });
 
@@ -259,11 +259,11 @@ describe('scoutTestDistributionStrategies', () => {
 
       await scoutTestDistributionStrategies.lanes();
 
-      expect(mockSetMetadata.mock.calls).toEqual([
-        ['cancel_on_gate_failure:scout_test_lane_1', 'true'],
-        ['cancel_on_gate_failure:scout_test_lane_2', 'true'],
-      ]);
-      expect(mockSetMetadata.mock.invocationCallOrder[1]).toBeLessThan(
+      expect(mockSetMetadata).toHaveBeenCalledWith(
+        'cancel_on_gate_failure_batch:scout_lanes',
+        JSON.stringify(['scout_test_lane_1', 'scout_test_lane_2'])
+      );
+      expect(mockSetMetadata.mock.invocationCallOrder[0]).toBeLessThan(
         mockUploadSteps.mock.invocationCallOrder[0]
       );
     });

@@ -18,7 +18,10 @@ import type {
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+} from '@kbn/management-settings-ids';
 import {
   createClient as createInferenceClient,
   createClientWithoutRequest,
@@ -129,10 +132,19 @@ export class InferencePlugin
     this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
     this.tokenUsageLogger.setEsClient(core.elasticsearch.client.asInternalUser);
 
-    const internalRepository = core.savedObjects.createInternalRepository();
-    const internalClient = new SavedObjectsClient(internalRepository);
-    const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
-    installTokenUsageDashboard(savedObjectsImporter, this.logger).catch((e) => {
+    const installDashboardIfTokenUsageTrackingEnabled = async () => {
+      const internalRepository = core.savedObjects.createInternalRepository();
+      const internalClient = new SavedObjectsClient(internalRepository);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(internalClient);
+      const isEnabled = await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING);
+      if (!isEnabled) {
+        return;
+      }
+      const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
+      await installTokenUsageDashboard(savedObjectsImporter, this.logger);
+    };
+
+    installDashboardIfTokenUsageTrackingEnabled().catch((e) => {
       this.logger.error(`Failed to install token usage dashboard: ${e.message}`);
     });
 
@@ -228,6 +240,32 @@ export class InferencePlugin
       };
     };
 
+    const createDefaultConnectorOnlyCheck = (request: KibanaRequest) => {
+      return async () => {
+        const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+        return await uiSettingsClient.get<boolean>(
+          GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+          { request }
+        );
+      };
+    };
+
+    const createDefaultConnectorIdGetter = (request: KibanaRequest) => {
+      return async () => {
+        const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+        const defaultConnector = await loadDefaultConnector({
+          actions: pluginsStart.actions,
+          request,
+          esClient: core.elasticsearch.client.asInternalUser,
+          uiSettingsClient,
+          logger: this.logger,
+        });
+        return defaultConnector?.connectorId;
+      };
+    };
+
     const createTokenUsageTrackingEnabledCheck = (request: KibanaRequest) => {
       return async () => {
         try {
@@ -251,6 +289,8 @@ export class InferencePlugin
           endpointIdCache: this.endpointIdCache,
           tokenUsageLogger: this.tokenUsageLogger,
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
+          isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
+          getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -269,6 +309,8 @@ export class InferencePlugin
           logger: this.logger,
           tokenUsageLogger: this.tokenUsageLogger,
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
+          isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
+          getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
         });
       },
 
@@ -283,10 +325,13 @@ export class InferencePlugin
       },
       getDefaultConnector: async (request: KibanaRequest) => {
         const esClient = core.elasticsearch.client.asInternalUser;
+        const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
         return loadDefaultConnector({
           actions: pluginsStart.actions,
           request,
           esClient,
+          uiSettingsClient,
           logger: this.logger,
         });
       },
@@ -324,6 +369,12 @@ export class InferencePlugin
       getInferenceEndpointById: async (inferenceId: string) => {
         const esClient = core.elasticsearch.client.asInternalUser;
         return getInferenceEndpointById({ inferenceId, esClient });
+      },
+      installTokenUsageDashboard: async () => {
+        const internalRepository = core.savedObjects.createInternalRepository();
+        const internalClient = new SavedObjectsClient(internalRepository);
+        const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
+        await installTokenUsageDashboard(savedObjectsImporter, this.logger);
       },
     };
   }

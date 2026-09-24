@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parse, stringify } from 'yaml';
+import { parse } from 'yaml';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { RegistryDataStream } from '../../../../types';
 import { getPathParts } from '../../archive';
 
 import { getPipelineNameForDatastream } from '../../../../../common/services';
+
+import { toYaml } from '../yaml_utils';
 
 import type { PipelineInstall, RewriteSubstitution } from './types';
 
@@ -136,7 +138,7 @@ export function addCustomPipelineAndLocalRoutingRulesProcessor(
     );
     return {
       ...pipeline,
-      contentForInstallation: `---\n${stringify(parsedPipelineContent, { singleQuote: true })}`,
+      contentForInstallation: `---\n${toYaml(parsedPipelineContent)}`,
     };
   }
 

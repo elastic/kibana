@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
+import {
+  getAlertUrlErrorCount,
+  getAlertUrlTransaction,
+} from '../../../../common/utils/formatters/alert_url';
 import {
   anomalyMessage,
   anomalyRecoveryMessage,
@@ -24,6 +27,7 @@ import type { AlertParams } from './anomaly_rule_type';
 import { getDescriptionFields } from './get_description_fields';
 import {
   createLazyApmComponentWithContext,
+  type ApmAlertingSetupDeps,
   type ApmCoreSetup,
 } from '../utils/create_lazy_component_with_context';
 
@@ -32,10 +36,26 @@ const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
 
+const getAlertFieldValue = (value: unknown): string | undefined => {
+  if (value == null) {
+    return undefined;
+  }
+
+  const unwrapped = Array.isArray(value) ? value[0] : value;
+  return unwrapped == null ? undefined : String(unwrapped);
+};
+
 export function registerApmRuleTypes(
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  coreSetup: ApmCoreSetup
+  coreSetup: ApmCoreSetup,
+  setupDeps?: ApmAlertingSetupDeps
 ) {
+  const alertDetailsAppSection = createLazyApmComponentWithContext(
+    coreSetup,
+    () => import('../ui_components/alert_details_app_section'),
+    setupDeps
+  );
+
   observabilityRuleTypeRegistry.register({
     id: ApmRuleType.ErrorCount,
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
@@ -45,9 +65,8 @@ export function registerApmRuleTypes(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlErrorCount(
-          // TODO:fix SERVICE_NAME when we move it to initializeIndex
-          String(fields[SERVICE_NAME]![0]),
-          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0])
+          getAlertFieldValue(fields[SERVICE_NAME]),
+          getAlertFieldValue(fields[SERVICE_ENVIRONMENT])
         ),
       };
     },
@@ -59,6 +78,7 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
     defaultRecoveryMessage: errorCountRecoveryMessage,
@@ -76,10 +96,9 @@ export function registerApmRuleTypes(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlTransaction(
-          // TODO:fix SERVICE_NAME when we move it to initializeIndex
-          String(fields[SERVICE_NAME]![0]),
-          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-          String(fields[TRANSACTION_TYPE]![0])
+          getAlertFieldValue(fields[SERVICE_NAME]),
+          getAlertFieldValue(fields[SERVICE_ENVIRONMENT]),
+          getAlertFieldValue(fields[TRANSACTION_TYPE])
         ),
       };
     },
@@ -91,10 +110,7 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: createLazyApmComponentWithContext(
-      coreSetup,
-      () => import('../ui_components/alert_details_app_section')
-    ),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
     defaultRecoveryMessage: transactionDurationRecoveryMessage,
@@ -111,10 +127,9 @@ export function registerApmRuleTypes(
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        // TODO:fix SERVICE_NAME when we move it to initializeIndex
-        String(fields[SERVICE_NAME]![0]),
-        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE]![0])
+        getAlertFieldValue(fields[SERVICE_NAME]),
+        getAlertFieldValue(fields[SERVICE_ENVIRONMENT]),
+        getAlertFieldValue(fields[TRANSACTION_TYPE])
       ),
     }),
     iconClass: 'bell',
@@ -125,10 +140,7 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: createLazyApmComponentWithContext(
-      coreSetup,
-      () => import('../ui_components/alert_details_app_section')
-    ),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
     defaultRecoveryMessage: transactionErrorRateRecoveryMessage,
@@ -145,10 +157,9 @@ export function registerApmRuleTypes(
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        // TODO:fix SERVICE_NAME when we move it to initializeIndex
-        String(fields[SERVICE_NAME]![0]),
-        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE]![0])
+        getAlertFieldValue(fields[SERVICE_NAME]),
+        getAlertFieldValue(fields[SERVICE_ENVIRONMENT]),
+        getAlertFieldValue(fields[TRANSACTION_TYPE])
       ),
     }),
     iconClass: 'bell',
@@ -157,6 +168,7 @@ export function registerApmRuleTypes(
     },
     ruleParamsExpression: lazy(() => import('./anomaly_rule_type')),
     validate: validateAnomalyRule,
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
     defaultRecoveryMessage: anomalyRecoveryMessage,

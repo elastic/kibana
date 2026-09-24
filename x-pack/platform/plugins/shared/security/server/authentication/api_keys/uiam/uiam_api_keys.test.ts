@@ -7,12 +7,13 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 
@@ -29,7 +30,17 @@ describe('UiamAPIKeys', () => {
   >;
   let mockLicense: jest.Mocked<SecurityLicense>;
   let mockUiam: jest.Mocked<UiamServicePublic>;
+  let mockGetCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
   let logger: Logger;
+
+  /** Mimics what Elasticsearch reports for a request authenticated with a UIAM API key. */
+  const authenticatedWithApiKey = (internal: boolean) =>
+    mockGetCurrentUser.mockReturnValue(
+      mockAuthenticatedUser({
+        authentication_type: 'api_key',
+        api_key: { id: 'key-id', name: 'key-name', managed_by: 'cloud', internal },
+      }) as AuthenticatedUser
+    );
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
@@ -44,18 +55,39 @@ describe('UiamAPIKeys', () => {
     mockUiam = {
       getAuthenticationHeaders: jest.fn(),
       getClientAuthentication: jest.fn(),
+      getInternalCallerAttestationHeaders: jest.fn(),
       refreshSessionTokens: jest.fn(),
       invalidateSessionTokens: jest.fn(),
       grantApiKey: jest.fn(),
       revokeApiKey: jest.fn(),
       convertApiKeys: jest.fn(),
       exchangeOAuthToken: jest.fn(),
+      createServiceAccount: jest.fn(),
+      listServiceAccounts: jest.fn(),
+      getServiceAccount: jest.fn(),
+      exchangeServiceAccountToken: jest.fn(),
+      authenticateAsKibana: jest.fn(),
+      createOAuthClient: jest.fn(),
+      listOAuthClients: jest.fn(),
+      updateOAuthClient: jest.fn(),
+      revokeOAuthClient: jest.fn(),
+      deleteOAuthClient: jest.fn(),
+      listOAuthConnections: jest.fn(),
+      updateOAuthConnection: jest.fn(),
+      revokeOAuthConnection: jest.fn(),
+      deleteOAuthConnection: jest.fn(),
+      resolveUsers: jest.fn(),
     };
+
+    // Defaults to a session-authenticated user, which is not an API key and therefore still needs
+    // Kibana's client authentication.
+    mockGetCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser() as AuthenticatedUser);
 
     uiamApiKeys = new UiamAPIKeys({
       logger,
       license: mockLicense,
       uiam: mockUiam,
+      getCurrentUser: mockGetCurrentUser,
     });
   });
 
@@ -128,7 +160,8 @@ describe('UiamAPIKeys', () => {
         {
           name: 'test-key',
           expiration: '7d',
-        }
+        },
+        undefined
       );
 
       expect(logger.debug).toHaveBeenCalledWith('Trying to grant an API key');
@@ -160,8 +193,66 @@ describe('UiamAPIKeys', () => {
         }),
         {
           name: 'test-key',
-        }
+        },
+        undefined
       );
+    });
+
+    // UIAM requires Kibana's client authentication for everything except external API keys, which
+    // it rejects outright when it's present.
+    describe('client authentication', () => {
+      const grantWith = async (request: KibanaRequest) => {
+        mockUiam.grantApiKey.mockResolvedValue({
+          id: 'new_key_id',
+          key: 'essu_new_key_value',
+          description: 'My Test Key',
+        });
+
+        await uiamApiKeys.grant(request, { name: 'test-key' });
+
+        return mockUiam.grantApiKey.mock.calls[0][2];
+      };
+
+      it('forwards the incoming secret', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: 'Bearer essu_ephemeral_token',
+            'x-client-authentication': 'upstream-shared-secret',
+          },
+        });
+
+        expect(await grantWith(request)).toEqual({ sharedSecret: 'upstream-shared-secret' });
+      });
+
+      it('is omitted for an external API key', async () => {
+        authenticatedWithApiKey(false);
+
+        expect(
+          await grantWith(createMockRequest('ApiKey essu_external_credential_123'))
+        ).toBeNull();
+      });
+
+      it('defers to Kibana client authentication for an internal API key', async () => {
+        authenticatedWithApiKey(true);
+
+        expect(
+          await grantWith(createMockRequest('ApiKey essu_internal_credential_123'))
+        ).toBeUndefined();
+      });
+
+      it('defers to Kibana client authentication for an inbound access token carrying none', async () => {
+        expect(await grantWith(createMockRequest('Bearer essu_access_token_123'))).toBeUndefined();
+      });
+
+      it('defers to Kibana client authentication for a fake request, which carries an internal API key', async () => {
+        mockGetCurrentUser.mockReturnValue(null);
+
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'ApiKey essu_internal_credential_123' },
+        });
+
+        expect(await grantWith(request)).toBeUndefined();
+      });
     });
 
     it('logs and throws error when UIAM API key grant fails', async () => {
@@ -215,7 +306,8 @@ describe('UiamAPIKeys', () => {
         {
           name: 'test-bearer-key',
           expiration: '30d',
-        }
+        },
+        undefined
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
     });
@@ -269,7 +361,7 @@ describe('UiamAPIKeys', () => {
         previously_invalidated_api_keys: [],
         error_count: 0,
       });
-      expect(mockUiam.revokeApiKey).toHaveBeenCalledWith('key_id_123', 'essu_uiam_credential_123');
+      expect(mockUiam.revokeApiKey).toHaveBeenCalledWith(request, 'key_id_123');
       expect(logger.debug).toHaveBeenCalledWith('Trying to invalidate API key key_id_123');
       expect(logger.debug).toHaveBeenCalledWith('API key key_id_123 was invalidated successfully');
     });
@@ -414,6 +506,54 @@ describe('UiamAPIKeys', () => {
       await expect(uiamApiKeys.convert(['es-api-key'])).rejects.toThrow('UIAM service error');
 
       expect(logger.error).toHaveBeenCalledWith('Failed to convert API keys: UIAM service error');
+    });
+  });
+
+  describe('isOwnClientAuthentication()', () => {
+    beforeEach(() => {
+      mockUiam.getClientAuthentication.mockReturnValue({
+        scheme: 'SharedSecret',
+        value: 'kibana-shared-secret',
+      });
+    });
+
+    it("returns true for Kibana's own shared secret", () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('kibana-shared-secret')).toBe(true);
+      expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith();
+    });
+
+    it('returns false for an upstream relay secret', () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('upstream-secret')).toBe(false);
+    });
+
+    it('returns false when the presented value has a different length', () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('short')).toBe(false);
+    });
+  });
+
+  describe('isExternalApiKey()', () => {
+    it('returns true for a user-created UIAM API key', () => {
+      authenticatedWithApiKey(false);
+      const request = httpServerMock.createKibanaRequest();
+
+      expect(uiamApiKeys.isExternalApiKey(request)).toBe(true);
+      expect(mockGetCurrentUser).toHaveBeenCalledWith(request);
+    });
+
+    it('returns false for an internally minted UIAM API key', () => {
+      authenticatedWithApiKey(true);
+
+      expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
+    });
+
+    it('returns false for a session user', () => {
+      expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
+    });
+
+    it('returns false when there is no current user', () => {
+      mockGetCurrentUser.mockReturnValue(null);
+
+      expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
     });
   });
 

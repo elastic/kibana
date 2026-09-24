@@ -43,7 +43,7 @@ export const ScriptLibraryFilterPopover = memo(
       () => (
         <EuiFilterButton
           data-test-subj={getTestId(`${filterName}-filter-popoverButton`)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={onButtonClick}
           isSelected={isPopoverOpen}
           numFilters={numFilters}

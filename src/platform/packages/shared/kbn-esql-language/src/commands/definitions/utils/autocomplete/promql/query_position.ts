@@ -15,7 +15,7 @@ import type {
   PromQLLabel,
   PromQLSelector,
 } from '@elastic/esql';
-import { TRAILING_COMMA_REGEX } from '../../shared';
+import { endsWithComma } from '../../regex';
 import type { PromQLFunctionParamType } from '../../../types';
 import type { CursorMatch, PromqlDetailedPosition } from './types';
 import {
@@ -84,6 +84,12 @@ export function getQueryPosition(
   };
 
   // Text-based fast paths (operator trailing, label map fallback)
+  const labelMapFallback = getLabelMapTextFallbackPosition(text, cursor);
+
+  if (labelMapFallback) {
+    return labelMapFallback;
+  }
+
   const trailingBinaryOperator = textBeforeCursor.match(PROMQL_TRAILING_BINARY_OP_REGEX)?.[1];
 
   if (trailingBinaryOperator) {
@@ -92,12 +98,6 @@ export function getQueryPosition(
     if (signatureTypes.length) {
       return { type: 'after_operator', signatureTypes };
     }
-  }
-
-  const labelMapFallback = getLabelMapTextFallbackPosition(text, cursor);
-
-  if (labelMapFallback) {
-    return labelMapFallback;
   }
 
   // AST-based binary operator resolution
@@ -113,6 +113,10 @@ export function getQueryPosition(
   if (!match) {
     if (lastChar === '(' || lastChar === '=') {
       return { type: 'inside_function_args', signatureTypes: getSignatureTypes() };
+    }
+
+    if (cursor > root.location.max) {
+      return resolveAfterQueryPosition(root, cursor, text, textBeforeCursor);
     }
 
     return resolveTopLevelPosition(root, cursor, text, undefined, textBeforeCursor);
@@ -132,7 +136,7 @@ export function getQueryPosition(
       node.type === 'identifier' &&
       parent?.type === 'label-map' &&
       innermostFunc &&
-      TRAILING_COMMA_REGEX.test(textBeforeCursor);
+      endsWithComma(textBeforeCursor);
 
     if (!skipLabel) {
       const labelPos = resolveLabelPosition(match, cursor, textBeforeCursor, getSignatureTypes());
@@ -212,9 +216,13 @@ export function getQueryPosition(
 
   // Top-level: complete expression or can add grouping
   const topLevelPosition = resolveTopLevelPosition(root, cursor, text, undefined, textBeforeCursor);
+  const afterQueryPosition =
+    cursor > root.location.max
+      ? resolveAfterQueryPosition(root, cursor, text, textBeforeCursor)
+      : undefined;
 
   if (topLevelPosition.canAddGrouping || isAfterCompleteExpression(root, cursor)) {
-    return topLevelPosition;
+    return afterQueryPosition ?? topLevelPosition;
   }
 
   // Function args: rate(|), rate(metric, |)
@@ -248,6 +256,35 @@ export function getQueryPosition(
 
   // Default: top-level query position
   return resolveTopLevelPosition(root, cursor, text, undefined, textBeforeCursor);
+}
+
+/* Determines if cursor is after a complete top-level query expression. */
+function resolveAfterQueryPosition(
+  root: PromQLAstQueryExpression,
+  cursor: number,
+  text: string,
+  textBeforeCursorArg?: string
+): PromqlDetailedPosition {
+  const topLevelPosition = resolveTopLevelPosition(
+    root,
+    cursor,
+    text,
+    undefined,
+    textBeforeCursorArg
+  );
+  const { expression } = root;
+  const isBareMetricSelector =
+    expression?.type === 'selector' &&
+    expression.metric &&
+    !expression.labelMap &&
+    !expression.duration &&
+    !getPromqlFunctionDefinition(expression.metric.name);
+
+  return {
+    ...topLevelPosition,
+    type: 'after_query',
+    ...(isBareMetricSelector ? { selector: expression } : {}),
+  };
 }
 
 /* Determines if cursor is at a top-level position where grouping or operators can follow. */

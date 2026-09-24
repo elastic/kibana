@@ -128,6 +128,7 @@ export default function (providerContext: FtrProviderContext) {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN, roleArn);
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
@@ -359,13 +360,13 @@ export default function (providerContext: FtrProviderContext) {
           AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN,
           tempAccessSessionToken
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
+          await cisIntegration.clickPolicyToBeEdited(integrationName);
           expect(
             (await cisIntegration.getValueInEditPage(
               AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID

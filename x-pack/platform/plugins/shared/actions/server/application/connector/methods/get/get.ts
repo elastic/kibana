@@ -13,6 +13,9 @@ import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit
 import { isConnectorDeprecated } from '../../lib';
 import type { GetParams } from './types';
 import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
+import { getAuthMode } from '../../lib/get_auth_mode';
+import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
+import { readInboundEventsEnabled } from '../../../../inbound/inbound_events_enabled';
 
 export async function get({
   context,
@@ -51,6 +54,7 @@ export async function get({
   }
 
   let connector: Connector;
+  let hasIdentity = false;
 
   if (foundInMemoryConnector !== undefined) {
     context.auditLogger?.log(
@@ -70,6 +74,8 @@ export async function get({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
       id,
     });
+    const authMode = getAuthMode(result.attributes.authMode as Connector['authMode'] | undefined);
+    hasIdentity = hasInboundEventIdentityAttributes(result.attributes);
 
     context.auditLogger?.log(
       connectorAuditEvent({
@@ -88,9 +94,7 @@ export async function get({
       isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
       isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
-      authMode: result.attributes.authMode
-        ? (result.attributes.authMode as Connector['authMode'])
-        : 'shared',
+      authMode,
     };
   }
 
@@ -99,6 +103,14 @@ export async function get({
     connectorSchema.validate(connector);
   } catch (e) {
     context.logger.warn(`Error validating connector: ${connector.id}, ${e}`);
+  }
+
+  const isInboundEventsEnabled = readInboundEventsEnabled({
+    actionTypeId: connector.actionTypeId,
+    hasIdentity,
+  });
+  if (isInboundEventsEnabled !== undefined) {
+    connector.isInboundEventsEnabled = isInboundEventsEnabled;
   }
 
   return connector;

@@ -10,7 +10,7 @@ import { EuiExpression, EuiPopover } from '@elastic/eui';
 
 type ExpressionColor = 'subdued' | 'primary' | 'success' | 'accent' | 'warning' | 'danger';
 interface Props {
-  title: React.ReactNode;
+  title: string;
   value: React.ReactNode;
   children?: React.ReactNode;
   color?: ExpressionColor;
@@ -26,6 +26,7 @@ export function PopoverExpression(props: Props) {
       isOpen={popoverOpen}
       anchorPosition="downLeft"
       closePopover={() => setPopoverOpen(false)}
+      aria-label={title}
       button={
         <EuiExpression
           data-test-subj={dataTestSubj}

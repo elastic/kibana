@@ -126,7 +126,6 @@ export function transformHealthServiceProvider({
         return (
           await esClient.transform.getTransformStats({
             transform_id: transformIdsString,
-            // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
             basic: true,
             size: transformIds.size,
           })
@@ -136,7 +135,6 @@ export function transformHealthServiceProvider({
         return (
           (
             await esClient.transform.getTransformStats({
-              // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
               basic: true,
               transform_id: '_all',
               size: TRANSFORM_PAGE_SIZE,
@@ -166,7 +164,7 @@ export function transformHealthServiceProvider({
                 details: issue.details,
                 count: issue.count,
                 ...(issue.first_occurrence
-                  ? { first_occurrence: dateFormatter.convert(issue.first_occurrence) }
+                  ? { first_occurrence: dateFormatter.convertToText(issue.first_occurrence) }
                   : {}),
               };
             }),

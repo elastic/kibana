@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../lib/kibana';
 import type { DataProvider } from '../../timelines/components/timeline/data_providers/data_provider';

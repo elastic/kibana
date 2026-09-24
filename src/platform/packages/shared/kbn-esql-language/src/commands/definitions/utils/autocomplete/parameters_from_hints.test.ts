@@ -87,6 +87,9 @@ export async function getSuggestionsForHint(
   formerContext?: ICommandContext,
   callbacks: ESQLCallbacks = {}
 ) {
+  if (!hint.entityType) {
+    throw new Error('Hint must have an entityType to resolve suggestions');
+  }
   const resolversEntry = parametersFromHintsResolvers[hint.entityType];
 
   if (!resolversEntry) {

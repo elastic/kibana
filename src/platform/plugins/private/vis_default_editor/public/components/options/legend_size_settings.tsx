@@ -99,6 +99,9 @@ export const LegendSizeSettings = ({
       options={options}
       onChange={onLegendSizeOptionChange}
       disabled={!isVerticalLegend}
+      aria-label={i18n.translate('visDefaultEditor.options.legendSizeSetting.selectAriaLabel', {
+        defaultMessage: 'Legend size',
+      })}
     />
   );
 
@@ -120,7 +123,6 @@ export const LegendSizeSettings = ({
             defaultMessage: 'Requires legend to be right or left aligned',
           })}
           position="top"
-          delay="regular"
           display="block"
         >
           {legendSizeSelect}

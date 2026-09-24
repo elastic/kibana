@@ -7,10 +7,10 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import { registerAgentBuilderTools } from './register_tools';
 import { STREAMS_READ_TOOL_IDS, STREAMS_WRITE_TOOL_IDS } from './tool_ids';
-import { STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID } from './register_tools';
-import { createMockGetScopedClients } from './test_helpers';
+import { createMockGetScopedClients } from '../utils/test_helpers';
 import type { StreamsServer } from '../../types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 
@@ -21,6 +21,11 @@ const createMockServer = (): Pick<StreamsServer, 'isServerless' | 'core'> => ({
     security: {},
   } as StreamsServer['core'],
 });
+
+const mockAvailability: ToolAvailabilityConfig = {
+  cacheMode: 'space',
+  handler: jest.fn().mockResolvedValue({ status: 'available' }),
+};
 
 describe('registerAgentBuilderTools', () => {
   const telemetry = {
@@ -37,6 +42,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      availability: mockAvailability,
     });
 
     const registeredIds = agentBuilder.tools.register.mock.calls.map((call) => call[0].id);
@@ -47,7 +53,6 @@ describe('registerAgentBuilderTools', () => {
     for (const id of STREAMS_WRITE_TOOL_IDS) {
       expect(registeredIds).toContain(id);
     }
-    expect(registeredIds).toContain(STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID);
   });
 
   it('registers tools with non-empty descriptions and schemas', () => {
@@ -60,12 +65,31 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      availability: mockAvailability,
     });
 
     for (const [tool] of agentBuilder.tools.register.mock.calls) {
       expect(tool.description).toBeTruthy();
       expect(tool).toHaveProperty('schema');
       expect((tool as { schema: unknown }).schema).toBeDefined();
+    }
+  });
+
+  it('attaches availability to every registered tool', () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
+    const { getScopedClients } = createMockGetScopedClients();
+
+    registerAgentBuilderTools({
+      agentBuilder,
+      getScopedClients,
+      server: createMockServer() as StreamsServer,
+      logger: loggerMock.create(),
+      telemetry,
+      availability: mockAvailability,
+    });
+
+    for (const [tool] of agentBuilder.tools.register.mock.calls) {
+      expect(tool.availability).toBe(mockAvailability);
     }
   });
 
@@ -79,6 +103,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      availability: mockAvailability,
     });
 
     expect(agentBuilder.tools.register).not.toHaveBeenCalled();

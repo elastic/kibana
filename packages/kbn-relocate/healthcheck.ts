@@ -66,9 +66,9 @@ const checkIfResourceExists = (baseDir: string, reference: string): boolean => {
 
 const getAllFiles = (
   dirPath: string,
-  arrayOfFiles: fs.Dirent[] = [],
+  arrayOfFiles: string[] = [],
   extensions?: string[]
-): fs.Dirent[] => {
+): string[] => {
   const files = fs.readdirSync(dirPath, { withFileTypes: true });
 
   files.forEach((file) => {
@@ -77,12 +77,10 @@ const getAllFiles = (
       !EXCLUDED_FOLDERS.some((folder) => filePath.startsWith(join(BASE_FOLDER, folder))) &&
       !EXCLUDED_FOLDER_NAMES.includes(file.name)
     ) {
-      if (fs.statSync(filePath).isDirectory()) {
-        arrayOfFiles = getAllFiles(filePath, arrayOfFiles);
-      } else {
-        if (!extensions || extensions.find((ext) => file.name.endsWith(ext))) {
-          arrayOfFiles.push(file);
-        }
+      if (file.isDirectory()) {
+        arrayOfFiles = getAllFiles(filePath, arrayOfFiles, extensions);
+      } else if (!extensions || extensions.find((ext) => file.name.endsWith(ext))) {
+        arrayOfFiles.push(filePath);
       }
     }
   });
@@ -95,14 +93,14 @@ export const findBrokenReferences = async (log: ToolingLog) => {
   const moduleNames = packages.map((pkg) => pkg.directory.split('/').pop()!);
   const files = getAllFiles(BASE_FOLDER, [], EXTENSIONS);
 
-  for (const file of files) {
-    const fileBrokenReferences = [];
-    const filePath = join(file.path, file.name);
+  for (const filePath of files) {
+    const fileBrokenReferences: string[] = [];
+    const baseDir = path.dirname(filePath);
     const content = fs.readFileSync(filePath, 'utf-8');
     const references = findPaths(content);
 
     for (const ref of references) {
-      if (isModuleReference(moduleNames, ref) && !checkIfResourceExists(file.path, ref)) {
+      if (isModuleReference(moduleNames, ref) && !checkIfResourceExists(baseDir, ref)) {
         fileBrokenReferences.push(ref);
       }
     }
@@ -116,9 +114,8 @@ export const findBrokenReferences = async (log: ToolingLog) => {
 export const findBrokenLinks = async (log: ToolingLog) => {
   const files = getAllFiles(BASE_FOLDER);
 
-  for (const file of files) {
-    const fileBrokenLinks = [];
-    const filePath = join(file.path, file.name);
+  for (const filePath of files) {
+    const fileBrokenLinks: string[] = [];
     const content = fs.readFileSync(filePath, 'utf-8');
     const references = findUrls(content);
 

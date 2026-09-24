@@ -30,7 +30,7 @@ jest.mock('@kbn/langchain/server/tracers/langsmith', () => ({
 jest.mock('../../../routes/utils', () => ({
   getLlmType: jest.fn().mockReturnValue('mock-llm-type'),
 }));
-jest.mock('../graphs/default_defend_insights_graph/prompts', () => ({
+jest.mock('../prompts', () => ({
   getDefendInsightsPrompt: jest.fn().mockReturnValue({
     default: 'default',
     refine: 'refine',
@@ -50,7 +50,7 @@ describe('evaluateDefendInsights', () => {
     jest.clearAllMocks();
   });
 
-  it('should create graphs and call runDefendInsightsEvaluations with expected params', async () => {
+  describe('graph creation and evaluation', () => {
     const mockGraph = { mock: 'graph' };
     const mockGetDefaultDefendInsightsGraph = jest.fn().mockReturnValue(mockGraph);
 
@@ -80,85 +80,98 @@ describe('evaluateDefendInsights', () => {
     const mockEsClientInternalUser = {} as unknown as ElasticsearchClient;
     const mockGetInferenceConnectorById = jest.fn();
 
-    await evaluateDefendInsights({
-      actionsClient: mockActionsClient,
-      getInferenceConnectorById: mockGetInferenceConnectorById,
-      defendInsightsGraphs: mockGraphMetadata,
-      anonymizationFields: [],
-      connectors: mockConnectors,
-      connectorTimeout: 1000,
-      datasetName: 'test-dataset',
-      esClient: mockEsClient,
-      soClient: mockSoClient,
-      esClientInternalUser: mockEsClientInternalUser,
-      evaluationId: 'eval-1',
-      evaluatorConnectorId: 'eval-connector',
-      langSmithApiKey: 'api-key',
-      langSmithProject: 'project-name',
-      logger: mockLogger as unknown as Logger,
-      runName: 'test-run',
-      size: 10,
+    beforeEach(async () => {
+      await evaluateDefendInsights({
+        actionsClient: mockActionsClient,
+        getInferenceConnectorById: mockGetInferenceConnectorById,
+        defendInsightsGraphs: mockGraphMetadata,
+        anonymizationFields: [],
+        connectors: mockConnectors,
+        connectorTimeout: 1000,
+        datasetName: 'test-dataset',
+        esClient: mockEsClient,
+        soClient: mockSoClient,
+        esClientInternalUser: mockEsClientInternalUser,
+        evaluationId: 'eval-1',
+        evaluatorConnectorId: 'eval-connector',
+        langSmithApiKey: 'api-key',
+        langSmithProject: 'project-name',
+        logger: mockLogger as unknown as Logger,
+        runName: 'test-run',
+        size: 10,
+      });
     });
 
-    expect(getLlmType).toHaveBeenCalledWith(InferenceConnectorType.OpenAI);
-    expect(getLangSmithTracer).toHaveBeenCalledWith({
-      apiKey: 'api-key',
-      projectName: 'project-name',
-      logger: mockLogger,
+    it('calls getLlmType with connector action type', () => {
+      expect(getLlmType).toHaveBeenCalledWith('.gen-ai');
     });
-    expect(ActionsClientLlm).toHaveBeenCalledWith({
-      actionsClient: mockActionsClient,
-      connectorId: '1',
-      llmType: 'mock-llm-type',
-      logger: mockLogger,
-      temperature: 0,
-      timeout: 1000,
-      traceOptions: {
+
+    it('calls getLangSmithTracer with correct params', () => {
+      expect(getLangSmithTracer).toHaveBeenCalledWith({
+        apiKey: 'api-key',
         projectName: 'project-name',
-        tracers: ['mockTracer'],
-      },
-      model: undefined,
+        logger: mockLogger,
+      });
     });
 
-    expect(mockGetDefaultDefendInsightsGraph).toHaveBeenCalledWith({
-      insightType: DefendInsightType.enum.incompatible_antivirus,
-      endpointIds: [],
-      esClient: mockEsClient,
-      llm: expect.any(Object),
-      kbDataClient: null,
-      logger: mockLogger,
-      size: 10,
-      anonymizationFields: [],
-      prompts: {
-        default: 'default',
-        refine: 'refine',
-        continue: 'continue',
-        group: 'group',
-        events: 'events',
-        eventsId: 'eventsId',
-        eventsEndpointId: 'eventsEndpointId',
-        eventsValue: 'eventsValue',
-      },
+    it('creates ActionsClientLlm with correct params', () => {
+      expect(ActionsClientLlm).toHaveBeenCalledWith({
+        actionsClient: mockActionsClient,
+        connectorId: '1',
+        llmType: 'mock-llm-type',
+        logger: mockLogger,
+        temperature: 0,
+        timeout: 1000,
+        traceOptions: {
+          projectName: 'project-name',
+          tracers: ['mockTracer'],
+        },
+      });
     });
 
-    expect(runDefendInsightsEvaluations).toHaveBeenCalledWith({
-      evaluatorConnectorId: 'eval-connector',
-      datasetName: 'test-dataset',
-      graphs: [
-        expect.objectContaining({
-          connector: mockConnectors[0],
-          graph: mockGraph,
-          llmType: 'mock-llm-type',
-          name: 'test-run - Test Connector - eval-1 - Defend Insights',
-          traceOptions: {
-            projectName: 'project-name',
-            tracers: ['mockTracer'],
-          },
-        }),
-      ],
-      insightType: 'incompatible_antivirus',
-      langSmithApiKey: 'api-key',
-      logger: mockLogger,
+    it('calls getDefaultDefendInsightsGraph with correct params', () => {
+      expect(mockGetDefaultDefendInsightsGraph).toHaveBeenCalledWith({
+        insightType: DefendInsightType.enum.incompatible_antivirus,
+        endpointIds: [],
+        esClient: mockEsClient,
+        llm: expect.any(Object),
+        kbDataClient: null,
+        logger: mockLogger,
+        size: 10,
+        anonymizationFields: [],
+        prompts: {
+          default: 'default',
+          refine: 'refine',
+          continue: 'continue',
+          group: 'group',
+          events: 'events',
+          eventsId: 'eventsId',
+          eventsEndpointId: 'eventsEndpointId',
+          eventsValue: 'eventsValue',
+        },
+      });
+    });
+
+    it('calls runDefendInsightsEvaluations with correct params', () => {
+      expect(runDefendInsightsEvaluations).toHaveBeenCalledWith({
+        evaluatorConnectorId: 'eval-connector',
+        datasetName: 'test-dataset',
+        graphs: [
+          expect.objectContaining({
+            connector: mockConnectors[0],
+            graph: mockGraph,
+            llmType: 'mock-llm-type',
+            name: 'test-run - Test Connector - eval-1 - Defend Insights',
+            traceOptions: {
+              projectName: 'project-name',
+              tracers: ['mockTracer'],
+            },
+          }),
+        ],
+        insightType: 'incompatible_antivirus',
+        langSmithApiKey: 'api-key',
+        logger: mockLogger,
+      });
     });
   });
 });

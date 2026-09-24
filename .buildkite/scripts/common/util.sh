@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
+SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
@@ -36,6 +37,30 @@ should_enable_fips() {
   is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"
 }
 
+# Buildkite checkouts push with the Buildkite GitHub App credential, which has limited scopes. It cannot push to workflows for example.
+# Use an isolated git config so gh can provide GITHUB_TOKEN credentials for this push without changing global auth.
+push_as_github_token() {
+  local required_env_var
+
+  for required_env_var in GITHUB_TOKEN GITHUB_PR_OWNER GITHUB_PR_REPO GITHUB_PR_BRANCH; do
+    if [[ -z "${!required_env_var:-}" ]]; then
+      echo "Missing required environment variable for GITHUB_TOKEN push: $required_env_var" >&2
+      exit 1
+    fi
+  done
+
+  (
+    git_config_global="$(mktemp)"
+    trap 'rm -f "$git_config_global"' EXIT
+
+
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" gh auth setup-git --hostname github.com --force
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" git push \
+      "https://github.com/${GITHUB_PR_OWNER}/${GITHUB_PR_REPO}.git" \
+      "HEAD:${GITHUB_PR_BRANCH}"
+  )
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -43,6 +68,7 @@ check_for_changed_files() {
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
   CUSTOM_FIX_MESSAGE="${3:-Changes from $1}"
+  FORCE_GITHUB_TOKEN_PUSH_ARG="${4:-}"
   GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
 
   if [ "$GIT_CHANGES" ]; then
@@ -65,7 +91,11 @@ check_for_changed_files() {
         echo "$CUSTOM_FIX_MESSAGE" >> "$COLLECT_COMMITS_MARKER_FILE"
       else
         echo "Auto-committing and pushing these changes."
-        git push
+        if [[ "${FORCE_GITHUB_TOKEN_PUSH:-}" == "true" || "$FORCE_GITHUB_TOKEN_PUSH_ARG" == "true" ]]; then
+          push_as_github_token
+        else
+          git push
+        fi
       fi
       exit 1
     else
@@ -134,18 +164,309 @@ set_git_merge_base() {
   GITHUB_PR_MERGE_BASE="$(buildkite-agent meta-data get merge-base --default '')"
 
   if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
-    git fetch origin "$GITHUB_PR_TARGET_BRANCH"
-    GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD)"
+    if git fetch origin "$GITHUB_PR_TARGET_BRANCH" 2>/dev/null; then
+      GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+    fi
+
+    if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+      local compare_target="${GITHUB_PR_HEAD_SHA:-}"
+      local github_token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
+      local compare_ref
+
+      if [[ ! "$compare_target" && "${GITHUB_PR_OWNER:-}" && "${GITHUB_PR_BRANCH:-}" ]]; then
+        compare_target="${GITHUB_PR_OWNER}:${GITHUB_PR_BRANCH}"
+      fi
+
+      if [[ ! "$compare_target" ]]; then
+        echo "Failed to resolve PR merge base: PR head ref is not available for gh api fallback" >&2
+        return 1
+      fi
+
+      echo "Falling back to GitHub compare API for PR merge-base"
+      compare_ref="$(
+        jq -rn \
+          --arg base "$GITHUB_PR_TARGET_BRANCH" \
+          --arg head "$compare_target" \
+          '$base + "..." + $head | @uri'
+      )"
+
+      GITHUB_PR_MERGE_BASE="$(
+        curl -fsSL \
+          -H 'Accept: application/vnd.github+json' \
+          -H "Authorization: Bearer ${github_token}" \
+          "https://api.github.com/repos/${GITHUB_PR_BASE_OWNER}/${GITHUB_PR_BASE_REPO}/compare/${compare_ref}" |
+          jq -r '.merge_base_commit.sha // empty' || true
+      )"
+    fi
+
+    if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+      echo "Failed to resolve PR merge base" >&2
+      return 1
+    fi
+
     buildkite-agent meta-data set merge-base "$GITHUB_PR_MERGE_BASE"
   fi
 
   export GITHUB_PR_MERGE_BASE
 }
 
+# Sets the GitHub stack root merge base, falling back to the current PR merge base.
+set_git_stack_merge_base() {
+  GITHUB_PR_STACK_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
+  GITHUB_PR_STACK_MERGE_BASE="$GITHUB_PR_MERGE_BASE"
+  export GITHUB_PR_STACK_TARGET_BRANCH
+  export GITHUB_PR_STACK_MERGE_BASE
+
+  local github_token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
+  local stack_target_branch
+  local stack_merge_base
+
+  if [[ -z "$github_token" || -z "${GITHUB_PR_BASE_OWNER:-}" || -z "${GITHUB_PR_BASE_REPO:-}" ]] || ! command -v gh >/dev/null 2>&1; then
+    return
+  fi
+
+  if ! stack_target_branch="$(
+    GH_TOKEN="$github_token" gh api graphql \
+      -f owner="$GITHUB_PR_BASE_OWNER" \
+      -f repo="$GITHUB_PR_BASE_REPO" \
+      -F number="$GITHUB_PR_NUMBER" \
+      -f query='query($owner: String!, $repo: String!, $number: Int!) { repository(owner: $owner, name: $repo) { pullRequest(number: $number) { stack { baseRefName } } } }' \
+      --jq '.data.repository.pullRequest.stack.baseRefName // empty' 2>/dev/null
+  )" || [[ -z "$stack_target_branch" ]]; then
+    return
+  fi
+
+  if git fetch origin "$stack_target_branch" 2>/dev/null; then
+    stack_merge_base="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+  fi
+
+  if [[ -z "$stack_merge_base" ]]; then
+    echo "Failed to resolve stack merge base; falling back to PR merge base" >&2
+    return
+  fi
+
+  GITHUB_PR_STACK_TARGET_BRANCH="$stack_target_branch"
+  GITHUB_PR_STACK_MERGE_BASE="$stack_merge_base"
+  export GITHUB_PR_STACK_TARGET_BRANCH
+  export GITHUB_PR_STACK_MERGE_BASE
+}
+
+# For merge-queue builds (gh-readonly-queue/* branches), resolves the merge base
+# against the target branch and the list of first-parent commits this merge group
+# will add to the target branch when it lands. These are reported to ci-stats so
+# a single queue build can act as the metrics baseline for every commit it covers.
+set_merge_queue_git_info() {
+  local merge_queue_target_head
+
+  MERGE_QUEUE_MERGE_BASE="$(buildkite-agent meta-data get merge-queue-merge-base --default '')"
+  MERGE_QUEUE_COVERED_COMMITS="$(buildkite-agent meta-data get merge-queue-covered-commits --default '')"
+
+  if [[ ! "$MERGE_QUEUE_MERGE_BASE" || ! "$MERGE_QUEUE_COVERED_COMMITS" ]]; then
+    if ! git fetch origin "$MERGE_QUEUE_TARGET_BRANCH" 2>/dev/null; then
+      echo "Failed to fetch $MERGE_QUEUE_TARGET_BRANCH to resolve merge queue git info" >&2
+      return 1
+    fi
+
+    merge_queue_target_head="$(git rev-parse FETCH_HEAD)"
+    MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD "$merge_queue_target_head" 2>/dev/null || true)"
+
+    if [[ ! "$MERGE_QUEUE_MERGE_BASE" && "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+      echo "Deepening shallow checkout to resolve merge queue git info"
+      if ! git fetch --unshallow origin "$MERGE_QUEUE_TARGET_BRANCH" "$BUILDKITE_COMMIT" 2>/dev/null; then
+        echo "Failed to deepen checkout to resolve merge queue git info" >&2
+        return 1
+      fi
+
+      MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD "$merge_queue_target_head" 2>/dev/null || true)"
+    fi
+
+    if [[ ! "$MERGE_QUEUE_MERGE_BASE" ]]; then
+      echo "Failed to resolve merge queue merge base" >&2
+      return 1
+    fi
+
+    # first-parent commits between the merge base and the queue-branch head are
+    # the exact commits GitHub fast-forwards onto the target branch on success
+    MERGE_QUEUE_COVERED_COMMITS="$(git rev-list --first-parent "$MERGE_QUEUE_MERGE_BASE..HEAD" | paste -sd, -)"
+
+    buildkite-agent meta-data set merge-queue-merge-base "$MERGE_QUEUE_MERGE_BASE"
+    buildkite-agent meta-data set merge-queue-covered-commits "$MERGE_QUEUE_COVERED_COMMITS"
+  fi
+
+  export MERGE_QUEUE_MERGE_BASE
+  export MERGE_QUEUE_COVERED_COMMITS
+}
+
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
-  retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+  retry 3 1 timeout 10m buildkite-agent artifact download "$@"
+}
+
+GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
+download_tmp_artifact() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3" fallback="${4:-true}"
+  local region use_gcs=false
+
+  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
+    if [[ "${BUILDKITE_AGENT_GCP_REGION:-}" == "$region" ]]; then
+      use_gcs=true
+      break
+    fi
+  done
+
+  if [[ "$use_gcs" == "true" ]]; then
+    local expected_sha256
+    expected_sha256="$(tmp_artifact_expected_sha256 "$artifact_name" "$build_id")"
+
+    if [[ -z "$expected_sha256" ]]; then
+      echo "No recorded checksum for ${artifact_name} (build ${build_id}), skipping GCS download."
+    elif "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" \
+      && gcloud storage cp \
+        "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
+        "${dest_dir}/${artifact_name}"; then
+      if [[ "$(sha256_of "${dest_dir}/${artifact_name}")" == "$expected_sha256" ]]; then
+        return 0
+      fi
+      echo "Checksum mismatch for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id}), discarding it." >&2
+      rm -f "${dest_dir}/${artifact_name}"
+    else
+      echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
+    fi
+  fi
+
+  if [[ "$fallback" != "true" ]]; then
+    return 1
+  fi
+
+  echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
+  download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
+}
+
+upload_tmp_artifact() {
+  local local_path="$1" artifact_name="$2" build_id="$3"
+  local region pids=() failures=0 sha256
+
+  # Downloads only trust GCS objects matching the checksum recorded in the producing build's meta-data
+  if ! sha256="$(sha256_of "$local_path")" || ! buildkite-agent meta-data set "tmp-artifact-sha256:${artifact_name}" "$sha256"; then
+    echo "Failed to record checksum for ${artifact_name}; skipping GCS upload. Same-region downloads will fall back to the buildkite artifact." >&2
+    return 0
+  fi
+
+  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"; then
+    echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
+    return 0
+  fi
+
+  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
+    upload_tmp_artifact_to_region "$local_path" "$artifact_name" "$build_id" "$region" &
+    pids+=("$!")
+  done
+
+  for pid in "${pids[@]}"; do
+    if ! wait "$pid"; then
+      failures=$((failures + 1))
+    fi
+  done
+
+  if [[ "$failures" -gt 0 ]]; then
+    echo "GCS upload of ${artifact_name} failed for ${failures}/${#GCS_CI_ARTIFACT_REGIONS[@]} bucket(s); same-region downloads will fall back to the buildkite artifact." >&2
+  fi
+
+  return 0
+}
+
+upload_tmp_artifact_to_region() (
+  local local_path="$1" artifact_name="$2" build_id="$3" region="$4"
+  local config_dir
+
+  config_dir="$(mktemp -d -t gcloud-upload-XXXXXX)"
+  trap 'rm -rf "$config_dir"' EXIT
+  cp -a "${CLOUDSDK_CONFIG:-$HOME/.config/gcloud}/." "$config_dir/"
+
+  retry 3 5 env "CLOUDSDK_CONFIG=$config_dir" gcloud storage cp \
+    "$local_path" \
+    "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
+)
+
+# Artifacts of other builds are checked against the checksum Buildkite recorded for their buildkite artifact
+tmp_artifact_expected_sha256() {
+  local artifact_name="$1" build_id="$2"
+
+  if [[ "$build_id" == "${BUILDKITE_BUILD_ID:-}" ]]; then
+    buildkite-agent meta-data get "tmp-artifact-sha256:${artifact_name}" --default '' 2>/dev/null || true
+  else
+    buildkite-agent artifact shasum --sha256 --build "$build_id" "$artifact_name" 2>/dev/null || true
+  fi
+}
+
+sha256_of() {
+  local file_sha256
+  file_sha256="$(sha256sum "$1")" || return 1
+  echo "${file_sha256%% *}"
+}
+
+# Restores a moon cache archive into ./.moon/cache, only if it passes validate_moon_cache_archive.
+extract_moon_cache() {
+  local archive="$1" staging_dir
+
+  if ! validate_moon_cache_archive "$archive"; then
+    echo "Skipping moon cache restore." >&2
+    return 1
+  fi
+
+  mkdir -p ./.moon
+  staging_dir="$(mktemp -d ./.moon/cache-restore.XXXXXX)"
+  if ! tar -xf "$archive" --zstd --no-same-owner --no-same-permissions -C "$staging_dir"; then
+    rm -rf "$staging_dir"
+    echo "Failed to extract ${archive}, skipping moon cache restore." >&2
+    return 1
+  fi
+
+  rm -rf ./.moon/cache
+  mv "$staging_dir/.moon/cache" ./.moon/cache
+  rm -rf "$staging_dir"
+}
+
+# Checks that a moon cache archive only contains regular files and directories under .moon/cache.
+validate_moon_cache_archive() {
+  local archive="$1" entries names
+
+  # `tar -tv` prints one line per entry, starting with its type and permissions (e.g. "-rw-r--r--")
+  if ! entries="$(tar -tvf "$archive" --zstd)"; then
+    echo "Unable to list ${archive}." >&2
+    return 1
+  fi
+
+  # `tar -t` prints only the entry paths
+  if ! names="$(tar -tf "$archive" --zstd)"; then
+    echo "Unable to list ${archive}." >&2
+    return 1
+  fi
+
+  # Only regular files ("-") and directories ("d") are allowed: no symlinks, devices or fifos
+  if grep -qv '^[-d]' <<< "$entries"; then
+    echo "${archive} contains entries that are not regular files or directories." >&2
+    return 1
+  fi
+
+  # Some tar implementations list hard links with a regular file type and a " link to <target>" suffix
+  if grep -q ' link to ' <<< "$entries"; then
+    echo "${archive} contains hard links." >&2
+    return 1
+  fi
+
+  # Every entry must be .moon/cache itself or live inside it (relative path, no leading "/" or "./")
+  if grep -qvE '^\.moon/cache(/|$)' <<< "$names"; then
+    echo "${archive} contains entries outside .moon/cache." >&2
+    return 1
+  fi
+
+  # No entry may contain a ".." path segment
+  if grep -qE '(^|/)\.\.(/|$)' <<< "$names"; then
+    echo "${archive} contains parent-directory path segments." >&2
+    return 1
+  fi
 }
 
 print_if_dry_run() {
@@ -226,4 +547,19 @@ force_clean_ports() {
 clean_cached_images() {
   docker images -q | sort -u | xargs -r docker rmi -f || true
   docker image prune -af || true
+}
+
+# Move the first existing source dir onto dest (no-op if none exist).
+copy_first_available() {
+  local dest="$1"
+  shift
+  local src
+  for src in "$@"; do
+    if [[ -d "$src" ]]; then
+      echo "Using $src as a starting point"
+      mkdir -p "$(dirname "$dest")"
+      mv "$src" "$dest"
+      return 0
+    fi
+  done
 }

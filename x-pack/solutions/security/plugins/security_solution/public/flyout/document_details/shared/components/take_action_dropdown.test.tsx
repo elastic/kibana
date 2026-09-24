@@ -69,7 +69,7 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true, hasIndexWrite: true }),
   })
 );
 jest.mock('../../../../cases/components/use_insert_timeline');
@@ -106,7 +106,6 @@ describe('take action dropdown', () => {
       dataFormattedForFieldBrowser: mockAlertDetailsData as TimelineEventsDetailsItem[],
       dataAsNestedObject: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
-      isHostIsolationPanelOpen: false,
       onAddEventFilterClick: jest.fn(),
       onAddExceptionTypeClick: jest.fn(),
       onAddIsolationStatusClick: jest.fn(),
@@ -129,7 +128,6 @@ describe('take action dropdown', () => {
             helpers: {
               canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
               getRuleIdFromEvent: () => null,
-              getObservablesFromEcs: jest.fn().mockReturnValue([]),
             },
           },
           osquery: {
@@ -196,17 +194,10 @@ describe('take action dropdown', () => {
         .find(`button[data-test-subj="${FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}"]`)
         .simulate('click');
     });
-    test('should render "Add to existing case"', async () => {
+    test('should render "Add to case"', async () => {
       await waitFor(() => {
-        expect(
-          wrapper.find('[data-test-subj="add-to-existing-case-action"]').first().text()
-        ).toEqual('Add to existing case');
-      });
-    });
-    test('should render "Add to new case"', async () => {
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').first().text()).toEqual(
-          'Add to new case'
+        expect(wrapper.find('[data-test-subj="add-to-case-action"]').first().text()).toEqual(
+          'Add to case'
         );
       });
     });
@@ -249,11 +240,11 @@ describe('take action dropdown', () => {
         );
       });
     });
-    test('should render "Investigate in timeline"', async () => {
+    test('should render "Investigate in Timeline"', async () => {
       await waitFor(() => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').first().text()
-        ).toEqual('Investigate in timeline');
+        ).toEqual('Investigate in Timeline');
       });
     });
     test('should render "Run Osquery"', async () => {
@@ -287,7 +278,7 @@ describe('take action dropdown', () => {
   });
 
   describe('privileges', () => {
-    test('should not render "Investigate in timeline" when the user does not have timeline privileges', async () => {
+    test('should not render "Investigate in Timeline" when the user does not have timeline privileges', async () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: false },
@@ -603,7 +594,7 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').exists()
         ).toBeTruthy();
-        expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').exists()).toBeFalsy();
+        expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeFalsy();
         expect(wrapper.find('[data-test-subj="acknowledged-alert-status"]').exists()).toBeFalsy();
         expect(
           wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').exists()
@@ -628,9 +619,7 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').exists()
         ).toBeTruthy();
-        expect(
-          wrapper.find('[data-test-subj="add-to-existing-case-action"]').exists()
-        ).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
         expect(wrapper.find('[data-test-subj="acknowledged-alert-status"]').exists()).toBeTruthy();
       });
     });

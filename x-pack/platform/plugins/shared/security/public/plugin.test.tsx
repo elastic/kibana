@@ -39,7 +39,11 @@ describe('Security Plugin', () => {
           licensing: licensingMock.createSetup(),
         })
       ).toEqual({
-        authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
+        authc: {
+          getCurrentUser: expect.any(Function),
+          areAPIKeysEnabled: expect.any(Function),
+          isUIAMEnabled: expect.any(Function),
+        },
         authz: {
           isRoleManagementEnabled: expect.any(Function),
           roles: expect.any(Object),
@@ -73,7 +77,11 @@ describe('Security Plugin', () => {
 
       expect(setupManagementServiceMock).toHaveBeenCalledTimes(1);
       expect(setupManagementServiceMock).toHaveBeenCalledWith({
-        authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
+        authc: {
+          getCurrentUser: expect.any(Function),
+          areAPIKeysEnabled: expect.any(Function),
+          isUIAMEnabled: expect.any(Function),
+        },
         license: {
           isLicenseAvailable: expect.any(Function),
           getLicenseType: expect.any(Function),
@@ -130,6 +138,7 @@ describe('Security Plugin', () => {
           "authc": Object {
             "areAPIKeysEnabled": [Function],
             "getCurrentUser": [Function],
+            "isUIAMEnabled": [Function],
           },
           "authz": Object {
             "isRoleManagementEnabled": [Function],
@@ -156,6 +165,16 @@ describe('Security Plugin', () => {
           },
           "userProfiles": Object {
             "bulkGet": [Function],
+            "dataUpdates$": Observable {
+              "source": Subject {
+                "closed": false,
+                "currentObservers": null,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+            },
             "enabled$": Observable {
               "operator": [Function],
               "source": Observable {
@@ -236,6 +255,30 @@ describe('Security Plugin', () => {
       });
 
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
+    });
+
+    // Security also runs on anonymous pages, where the management plugin is absent but the
+    // security delegate registered during setup is still reachable.
+    it('captures capabilities for the security delegate even when the management plugin is absent', () => {
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+      const coreSetupMock = getCoreSetupMock();
+      plugin.setup(coreSetupMock, { licensing: licensingMock.createSetup() });
+
+      const [delegate] = coreSetupMock.security.registerSecurityDelegate.mock.calls[0];
+      expect(delegate.serviceAccounts.canCreate()).toBe(false);
+
+      const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        service_accounts: { save: true },
+      };
+
+      plugin.start(coreStart, {
+        dataViews: {} as DataViewsPublicPluginStart,
+        features: {} as FeaturesPluginStart,
+      });
+
+      expect(delegate.serviceAccounts.canCreate()).toBe(true);
     });
 
     it('calls UserProfileAPIClient start() to fetch the user profile', () => {

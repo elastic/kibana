@@ -24,11 +24,54 @@ import {
   MANUAL_SUBFOLDER,
   OVERRIDES_SUBFOLDER,
   API_DOCS_LINK,
+  AUTOCOMPLETE_ATOMIC_RULE_KEYS,
 } from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
 
 export interface SpecDefinitionsDependencies {
   endpointsAvailability: EndpointsAvailability;
+}
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+// A rule is atomic when the compiler does not descend into its plain-object
+// fields: arrays, primitives, and objects carrying a meta key above. Atomic
+// rules are replaced wholesale so curated constructs stay authoritative and
+// generated/override shape mismatches can never produce a grafted hybrid.
+const isAtomicRule = (value: unknown): boolean =>
+  !isPlainObject(value) || AUTOCOMPLETE_ATOMIC_RULE_KEYS.some((key) => key in value);
+
+// Merge a curated override rule onto its generated counterpart the way the body
+// compiler reads them: recurse into plain-object field maps in curated order,
+// append generated-only fields, and replace atomic rules wholesale so a curated
+// construct (e.g. a whole-body __scope_link) stays authoritative and a
+// generated/override shape mismatch can never graft curated keys onto an array.
+// A record override always yields a record (its own value or a merged map), so
+// the endpoint-body call site stays typed without a cast.
+function mergeAutocompleteRules(
+  generated: unknown,
+  override: Record<string, unknown>
+): Record<string, unknown>;
+function mergeAutocompleteRules(generated: unknown, override: unknown): unknown;
+function mergeAutocompleteRules(generated: unknown, override: unknown): unknown {
+  if (isAtomicRule(generated) || isAtomicRule(override)) {
+    return override;
+  }
+  const generatedObject = generated as Record<string, unknown>;
+  const overrideObject = override as Record<string, unknown>;
+  const entries = Object.entries(overrideObject).map(([key, overrideValue]) => [
+    key,
+    Object.hasOwn(generatedObject, key)
+      ? mergeAutocompleteRules(generatedObject[key], overrideValue)
+      : overrideValue,
+  ]);
+  for (const [key, generatedValue] of Object.entries(generatedObject)) {
+    if (!Object.hasOwn(overrideObject, key)) {
+      entries.push([key, generatedValue]);
+    }
+  }
+  return Object.fromEntries(entries);
 }
 
 export class SpecDefinitionsService {
@@ -133,7 +176,29 @@ export class SpecDefinitionsService {
       const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
       const loadedDefinition: EndpointDefinition = JSON.parse(readFileSync(file, 'utf8'));
       if (overrideFile) {
-        merge(loadedDefinition, JSON.parse(readFileSync(overrideFile, 'utf8')));
+        const loadedOverride: EndpointDefinition = JSON.parse(readFileSync(overrideFile, 'utf8'));
+        // body rules are merged structurally, matching how the body compiler
+        // (public/lib/autocomplete/body_completer.ts) reads the rule tree:
+        //   - a plain-object rule is a set of field rules whose non-meta keys
+        //     become suggestions, so the override deep-merges into the generated
+        //     object and generated-only fields keep surfacing as the spec grows
+        //   - a rule the compiler treats as atomic — an array, a primitive, or an
+        //     object carrying __scope_link/__one_of/__any_of (whose
+        //     sibling keys the compiler ignores) — is replaced wholesale by the
+        //     curated value, so shape mismatches can never graft curated keys onto
+        //     a generated array and drop them during serialization
+        Object.entries(loadedOverride).forEach(([endpointName, endpointDescription]) => {
+          const generatedRules = loadedDefinition[endpointName]?.data_autocomplete_rules;
+          const overrideRules = endpointDescription.data_autocomplete_rules;
+          if (overrideRules && generatedRules) {
+            endpointDescription.data_autocomplete_rules = mergeAutocompleteRules(
+              generatedRules,
+              overrideRules
+            );
+            delete loadedDefinition[endpointName].data_autocomplete_rules;
+          }
+        });
+        merge(loadedDefinition, loadedOverride);
       }
       this.addToJsonDefinitions({ loadedDefinition, jsonDefinitions });
     });

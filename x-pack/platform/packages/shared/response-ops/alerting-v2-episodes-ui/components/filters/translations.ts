@@ -19,23 +19,23 @@ export const INLINE_FILTER_POPOVER_ARIA_LABEL = i18n.translate(
 export const TAG_FILTER_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.tagFilter.ariaLabel',
   {
-    defaultMessage: 'Tag filter',
+    defaultMessage: 'Alert tags filter',
   }
 );
 
 export const TAG_FILTER_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.tagFilter.label', {
-  defaultMessage: 'Tags',
+  defaultMessage: 'Alert tags',
 });
 
 export const TAG_FILTER_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.alertingV2EpisodesUi.tagFilter.searchPlaceholder',
   {
-    defaultMessage: 'Search tags…',
+    defaultMessage: 'Search alert tags…',
   }
 );
 
 export const TAG_FILTER_NO_MATCH = i18n.translate('xpack.alertingV2EpisodesUi.tagFilter.noMatch', {
-  defaultMessage: 'No tags in this time range',
+  defaultMessage: 'No alert tags in this time range',
 });
 
 /** --- Rule filter --- */
@@ -61,6 +61,42 @@ export const RULE_FILTER_NO_MATCH = i18n.translate(
   'xpack.alertingV2EpisodesUi.ruleFilter.noMatch',
   {
     defaultMessage: 'No matching rules',
+  }
+);
+
+/** --- Assignee filter --- */
+export const ASSIGNEE_FILTER_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.ariaLabel',
+  {
+    defaultMessage: 'Assignee filter',
+  }
+);
+
+export const ASSIGNEE_FILTER_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.label',
+  {
+    defaultMessage: 'Assignee',
+  }
+);
+
+export const ASSIGNEE_FILTER_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.searchPlaceholder',
+  {
+    defaultMessage: 'Search users...',
+  }
+);
+
+export const ASSIGNEE_FILTER_NO_MATCH = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.noMatch',
+  {
+    defaultMessage: 'No matching users',
+  }
+);
+
+export const ASSIGNEE_FILTER_BULK_GET_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.bulkGetErrorTitle',
+  {
+    defaultMessage: 'Failed to load assignee profiles',
   }
 );
 
@@ -108,5 +144,34 @@ export const STATUS_FILTER_NO_MATCH = i18n.translate(
   'xpack.alertingV2EpisodesUi.statusFilter.noMatch',
   {
     defaultMessage: 'No matching statuses',
+  }
+);
+
+/** --- Severity filter --- */
+export const SEVERITY_FILTER_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severityFilter.ariaLabel',
+  {
+    defaultMessage: 'Severity filter',
+  }
+);
+
+export const SEVERITY_FILTER_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severityFilter.label',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const SEVERITY_FILTER_NONE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severityFilter.noneLabel',
+  {
+    defaultMessage: 'No severity',
+  }
+);
+
+export const SEVERITY_FILTER_NO_MATCH = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severityFilter.noMatch',
+  {
+    defaultMessage: 'No matching severities',
   }
 );

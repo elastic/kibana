@@ -15,6 +15,7 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
   TrustedDeviceValidator,
+  CustomYaraSignaturesValidator,
 } from '../validators';
 
 export const getExceptionsPreDeleteItemHandler = (
@@ -76,6 +77,15 @@ export const getExceptionsPreDeleteItemHandler = (
       await new BlocklistValidator(endpointAppContextService, request).validatePreDeleteItem(
         exceptionItem
       );
+      return data;
+    }
+
+    // Validate YARA signatures
+    if (CustomYaraSignaturesValidator.isCustomYaraSignature({ listId })) {
+      await new CustomYaraSignaturesValidator(
+        endpointAppContextService,
+        request
+      ).validatePreDeleteItem(exceptionItem);
       return data;
     }
 

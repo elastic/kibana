@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import type { Subject } from 'rxjs';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
@@ -86,12 +86,19 @@ const SingleMonitorView = () => {
   const monitor = monitorsSortedByStatus.length === 1 ? monitorsSortedByStatus[0] : undefined;
 
   useEffect(() => {
-    if (monitor && !trendData[monitor.configId + monitor.locationId]) {
+    if (!monitor) return;
+    // Trends are cached per `${configId}${locationId}`. Only fetch the
+    // locations that aren't already in the cache so multi-location monitors
+    // don't get skipped after the first location resolves.
+    const missingLocationIds = monitor.locations
+      .filter((loc) => trendData[monitor.configId + loc.id] === undefined)
+      .map((loc) => loc.id);
+    if (missingLocationIds.length) {
       dispatch(
         trendStatsBatch.get([
           {
             configId: monitor.configId,
-            locationId: monitor.locationId,
+            locationIds: missingLocationIds,
             schedule: monitor.schedule,
           },
         ])
@@ -121,6 +128,9 @@ const MonitorsOverviewList = ({
   view: OverviewView;
 }) => {
   const dispatch = useDispatch();
+
+  useOverviewStatus({ scopeStatusByLocation: true });
+
   useEffect(() => {
     if (!filters) return;
     dispatch(

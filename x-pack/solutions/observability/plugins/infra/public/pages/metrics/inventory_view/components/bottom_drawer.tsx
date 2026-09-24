@@ -146,16 +146,16 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType, loading }: P
 const BottomActionContainer = styled.div`
   position: sticky;
   bottom: 0;
-  left: 0;
+  flex-shrink: 0;
   background: ${(props) => props.theme.euiTheme.colors.backgroundBasePlain};
-  width: calc(100% + ${(props) => props.theme.euiTheme.size.l} * 2);
-  margin-left: -${(props) => props.theme.euiTheme.size.l};
-`; // Additional width comes from the padding on the EuiPageBody and inner nodes container
+  width: calc(100% + (${(props) => props.theme.euiTheme.size.base} * 2));
+  margin-left: -${(props) => props.theme.euiTheme.size.base};
+`;
 
 const BottomPanel = styled(EuiPanel)`
   padding: ${(props) => props.theme.euiTheme.size.l} 0;
 `;
 
 const StickyPanel = styled(EuiPanel)`
-  padding: 0 ${(props) => props.theme.euiTheme.size.l};
+  padding: 0 ${(props) => props.theme.euiTheme.size.base};
 `;

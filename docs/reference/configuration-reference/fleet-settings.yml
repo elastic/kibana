@@ -42,10 +42,10 @@ groups:
 
       - setting: xpack.fleet.createArtifactsBulkBatchSize
         description: |
-          Allow to configure batch size for creating and updating Fleet user artifacts.  Examples include creation of Trusted Applications and Endpoint Exceptions in Security. It is available in {{ecloud}} 8.9.0 and later versions.
+          Allow to configure batch size for creating and updating Fleet user artifacts. Examples include creation of Trusted Applications and Endpoint Exceptions in Security.
         datatype: int
         applies_to:
-          stack: ga
+          stack: ga 8.9
           ech: ga
           self: ga
 
@@ -356,6 +356,25 @@ groups:
               Optional. Extra config for that output.
             datatype: string
 
+          - setting: "[n].otel_exporter_config_yaml"
+            description: |
+              Optional. Extra YAML configuration that {{fleet}} merges into the {{es}} OpenTelemetry exporter of any OTel-based agent policy that uses this output. The endpoint and authentication settings always take precedence over values set here. Available for `elasticsearch` and `remote_elasticsearch` outputs.
+            datatype: string
+            applies_to:
+              stack: preview 9.5
+              ech: preview
+              self: preview
+
+          - setting: "[n].otel_disable_beatsauth"
+            description: |
+              Optional. If `true`, {{fleet}} skips the `beatsauth` extension and passes only the endpoint and any settings from `otel_exporter_config_yaml` to the {{es}} OpenTelemetry exporter. Available for `elasticsearch` and `remote_elasticsearch` outputs.
+            datatype: bool
+            default: false
+            applies_to:
+              stack: preview 9.5
+              ech: preview
+              self: preview
+
           - setting: "[n].proxy_id"
             description: |
               Optional. Unique ID of a proxy to access the output.
@@ -482,11 +501,9 @@ groups:
       - setting: xpack.fleet.enableExperimental
         description: |
           List of experimental feature flag to enable in Fleet.
-          It is available in {{ecloud}} 8.6.0 and later versions.
-          Deprecated beginning in 9.3.0.
         datatype: string
         applies_to:
-          - "stack: deprecated 9.3.0"
+          - "stack: ga 8.6, deprecated 9.3"
           - "ech: ga"
           - "self: ga"
         deprecation_details: "From 9.3.0 onwards, use `xpack.fleet.experimentalFeatures` to explicitly enable or disable experimental features."
@@ -534,6 +551,16 @@ groups:
         default: "['30m', '1h', '2h', '4h', '8h', '16h', '24h']"
         applies_to:
           stack: ga 9.1
+          ech: ga
+          self: ga
+
+      - setting: xpack.fleet.versionSpecificPolicyAssignment.taskInterval
+        description: |
+          Configure the interval at which {{fleet}} reassigns agents to the matching [version-specific agent policy](docs-content://reference/fleet/version-specific-agent-policies.md).
+        datatype: string
+        default: "1m"
+        applies_to:
+          stack: ga 9.4
           ech: ga
           self: ga
 

@@ -7,6 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 
@@ -31,12 +32,19 @@ jest.mock('../../../hooks/use_last_agent_id', () => ({
   getLastAgentId: () => 'test-agent',
 }));
 
+jest.mock('../../../context/active_space_context', () => ({
+  useActiveSpaceId: () => 'default',
+}));
+
 jest.mock('../../../hooks/use_conversation_list', () => ({
   useConversationList: () => ({ conversations: [], isLoading: false, refresh: jest.fn() }),
 }));
 
-jest.mock('../../../hooks/use_feature_flags', () => ({
-  useFeatureFlags: () => ({ experimental: false }),
+jest.mock('../../../hooks/use_route_access_config', () => ({
+  useRouteAccessConfig: () => ({
+    featureFlags: { experimental: false },
+    capabilities: { isUIAMEnabled: false },
+  }),
 }));
 
 jest.mock('./shared/sidebar_header', () => ({
@@ -48,13 +56,33 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
   default: () => [undefined, jest.fn()],
 }));
 
+jest.mock('../../../context/streaming/streaming_context', () => ({
+  useStreamingContext: () => ({
+    activeStreams: new Set(),
+    byConversationId: {},
+  }),
+}));
+
+jest.mock('../../../hooks/use_conversation_list_mutations', () => ({
+  useConversationListMutations: () => ({
+    deleteConversation: jest.fn(),
+    renameConversation: jest.fn(),
+    markAsRead: jest.fn(),
+    markAsUnread: jest.fn(),
+    markAsPinned: jest.fn(),
+    markAsUnpinned: jest.fn(),
+  }),
+}));
+
 import { UnifiedSidebar } from './unified_sidebar';
 
 const renderSidebar = (path: string) =>
   render(
-    <MemoryRouter initialEntries={[path]}>
-      <UnifiedSidebar isCondensed={false} onToggleCondensed={jest.fn()} />
-    </MemoryRouter>
+    <EuiProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <UnifiedSidebar isCondensed={false} onToggleCondensed={jest.fn()} />
+      </MemoryRouter>
+    </EuiProvider>
   );
 
 describe('UnifiedSidebar', () => {

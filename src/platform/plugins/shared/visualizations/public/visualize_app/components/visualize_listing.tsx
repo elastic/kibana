@@ -18,6 +18,7 @@ import useMount from 'react-use/lib/useMount';
 import { useLocation, useParams } from 'react-router-dom';
 
 import type { Reference } from '@kbn/content-management-utils';
+import { AppHeader, type AppHeaderMenu, type AppHeaderTab } from '@kbn/app-header';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   TabbedTableListView,
@@ -45,15 +46,16 @@ import {
   deleteListItems,
   updateBasicSoAttributes,
 } from '../../utils/saved_objects_utils/update_basic_attributes';
-import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import type { VisualizeServices } from '../types';
+import { getReadOnlyBadge } from '../utils';
 import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
 import {
   toTableListViewSavedObject,
   type VisualizeUserContent,
 } from '../../utils/to_table_list_view_saved_object';
+import { hasLibraryItemWithTitle } from '../../utils/saved_objects_utils';
 
 const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
   defaultMessage: 'Visualize library',
@@ -197,33 +199,29 @@ const useTableListViewProps = (
         {
           type: 'warning',
           async fn(value, id) {
-            if (id) {
-              const content = visualizedUserContent.current?.find((c) => c.id === id);
-              if (content) {
-                try {
-                  await checkForDuplicateTitle(
-                    {
-                      id,
-                      title: value,
-                      lastSavedTitle: content.title,
-                    },
-                    false,
-                    false,
-                    () => {}
-                  );
-                } catch (e) {
-                  return i18n.translate(
-                    'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
-                    {
-                      defaultMessage: 'Saving "{value}" creates a duplicate title.',
-                      values: {
-                        value,
-                      },
-                    }
-                  );
-                }
-              }
+            if (!id) return;
+
+            const content = visualizedUserContent.current?.find((c) => c.id === id);
+            if (!content) return;
+
+            if (value.toLowerCase() === content.title.toLowerCase()) {
+              return;
             }
+
+            let hasDuplicateTitle = false;
+            try {
+              hasDuplicateTitle = await hasLibraryItemWithTitle(value);
+            } catch (e) {
+              // ignore error checking for duplicate title
+            }
+            return hasDuplicateTitle
+              ? i18n.translate('visualizations.visualizeListingDeleteErrorTitle.duplicateWarning', {
+                  defaultMessage: 'Saving "{value}" creates a duplicate title.',
+                  values: {
+                    value,
+                  },
+                })
+              : undefined;
           },
         },
       ],
@@ -297,6 +295,7 @@ export const VisualizeListing = () => {
       kbnUrlStateStorage,
       listingViewRegistry,
       serverless,
+      visualizeCapabilities,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -350,6 +349,7 @@ export const VisualizeListing = () => {
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
+  const { createItem, ...listTableProps } = tableViewProps;
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
     const calloutMessage = (
@@ -406,11 +406,11 @@ export const VisualizeListing = () => {
               getOnClickTitle={(item) =>
                 item.attributes.readOnly || item.error
                   ? undefined
-                  : () => tableViewProps.editItem?.(item)
+                  : () => listTableProps.editItem?.(item)
               }
               getDetailViewLink={getVisualizeListItemLink}
               tableCaption={visualizeLibraryPageTitle}
-              {...tableViewProps}
+              {...listTableProps}
               onFetchSuccess={propsFromParent.onFetchSuccess}
               setPageDataTestSubject={propsFromParent.setPageDataTestSubject}
             />
@@ -424,7 +424,7 @@ export const VisualizeListing = () => {
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    tableViewProps,
+    listTableProps,
     getVisualizeListItemLink,
   ]);
 
@@ -434,16 +434,63 @@ export const VisualizeListing = () => {
   );
 
   const { activeTab } = useParams<{ activeTab: string }>();
+  const selectedTabId = activeTab ?? visualizeTab.id;
+
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map((tab) => ({
+        id: tab.id,
+        label: tab.title,
+        isSelected: tab.id === selectedTabId,
+        'data-test-subj': `${tab.id}ListingTab`,
+        href: `#/${tab.id}`,
+        onClick: () => {
+          history.push(`/${tab.id}`);
+        },
+      })),
+    [history, selectedTabId, tabs]
+  );
+
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (selectedTabId !== visualizeTab.id || !createItem) {
+      return undefined;
+    }
+    return {
+      primaryActionItem: {
+        id: 'create',
+        iconType: 'plusCircle',
+        label: i18n.translate('visualizations.listing.createVisualizationButtonLabel', {
+          defaultMessage: 'Create visualization',
+        }),
+        testId: 'newItemButton',
+        run: createItem,
+      },
+    };
+  }, [createItem, selectedTabId, visualizeTab.id]);
+
+  const badges = useMemo(
+    () => (visualizeCapabilities.save ? undefined : [getReadOnlyBadge()]),
+    [visualizeCapabilities.save]
+  );
 
   return (
-    <TabbedTableListView
-      headingId="visualizeListingHeading"
-      title={visualizeLibraryPageTitle}
-      tabs={tabs}
-      activeTabId={activeTab}
-      changeActiveTab={(id) => {
-        application.navigateToUrl(`#/${id}`);
-      }}
-    />
+    <>
+      <AppHeader
+        title={visualizeLibraryPageTitle}
+        tabs={headerTabs}
+        menu={menu}
+        badges={badges}
+        sticky={false}
+      />
+      <TabbedTableListView
+        headingId="visualizeListingHeading"
+        hideTabs
+        tabs={tabs}
+        activeTabId={activeTab}
+        changeActiveTab={(id) => {
+          application.navigateToUrl(`#/${id}`);
+        }}
+      />
+    </>
   );
 };

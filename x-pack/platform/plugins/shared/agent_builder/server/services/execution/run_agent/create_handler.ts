@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AgentHandlerFn } from '@kbn/agent-builder-server';
 import type { InternalAgentDefinition } from '../../agents/agent_registry';
 import { runAgent } from './run_agent';
@@ -14,37 +15,36 @@ import { runAgent } from './run_agent';
  */
 export const createAgentHandler = ({
   agent,
+  effectiveConfiguration,
 }: {
   agent: InternalAgentDefinition;
+  effectiveConfiguration: AgentConfiguration;
 }): AgentHandlerFn => {
   return async (
     {
       agentParams: {
         nextInput,
         conversation,
-        capabilities,
+        origin,
+        author,
         browserApiTools,
         structuredOutput,
         outputSchema,
         configurationOverrides,
-        action,
         executionId,
+        roundId,
       },
       runId,
       abortSignal,
     },
     context
   ) => {
-    const effectiveConfiguration = {
-      ...agent.configuration,
-      ...(configurationOverrides || {}),
-    };
-
     const { round } = await runAgent(
       {
         nextInput,
         conversation,
-        capabilities,
+        origin,
+        author,
         runId,
         abortSignal,
         agentId: agent.id,
@@ -53,8 +53,8 @@ export const createAgentHandler = ({
         structuredOutput,
         outputSchema,
         configurationOverrides,
-        action,
         executionId,
+        roundId,
       },
       context
     );

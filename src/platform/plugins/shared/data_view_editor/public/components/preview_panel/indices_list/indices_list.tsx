@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { Pager } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
 
 export interface IndicesListProps {
@@ -164,7 +163,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
                 </EuiBadge>
               );
 
-              return tag.key === INDEX_PATTERN_TYPE.ROLLUP ? (
+              return tag.key === 'rollup' ? (
                 <>
                   &nbsp;<RollupDeprecationTooltip>{badge}</RollupDeprecationTooltip>
                 </>

@@ -13,7 +13,7 @@ import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import {
   createKbnUrlStateStorage,
   Storage,
@@ -121,7 +121,6 @@ export async function getLensServices(
     eventAnnotationService,
     uiActions: startDependencies.uiActions,
     lensDocumentService: new LensDocumentService(coreStart.http),
-    presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
     charts: startDependencies.charts,
@@ -320,8 +319,8 @@ export async function mountApp(
       }, [initialInput, props.history, redirectCallback]);
       useEffect(() => {
         (async () => {
-          const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-          if (!hasUserDataView) {
+          const hasDataView = await data.dataViews.hasData.hasDataView().catch(() => false);
+          if (!hasDataView) {
             setEditorState('no_data');
             return;
           }

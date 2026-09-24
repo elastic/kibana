@@ -16,7 +16,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type { CallToolInput, CrawlInput, ExtractInput, MapInput, SearchInput } from './types';
@@ -41,27 +41,31 @@ export const TavilyConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/tavily-action-type`,
   },
 
   auth: {
     types: ['bearer'],
   },
 
-  schema: z.object({
-    serverUrl: UISchemas.url()
-      .default(TAVILY_MCP_SERVER_URL)
-      .describe('Tavily MCP Server URL')
-      .meta({
-        widget: 'text',
-        placeholder: 'https://mcp.tavily.com/mcp/',
-        label: i18n.translate('connectorSpecs.tavily.config.serverUrl.label', {
-          defaultMessage: 'MCP Server URL',
+  schema: lazySchema(() =>
+    z.object({
+      serverUrl: UISchemas.url()
+        .default(TAVILY_MCP_SERVER_URL)
+        .describe('Tavily MCP Server URL')
+        .meta({
+          widget: 'text',
+          placeholder: 'https://mcp.tavily.com/mcp/',
+          hidden: true,
+          label: i18n.translate('connectorSpecs.tavily.config.serverUrl.label', {
+            defaultMessage: 'MCP Server URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.tavily.config.serverUrl.helpText', {
+            defaultMessage: 'The URL of the Tavily MCP server.',
+          }),
         }),
-        helpText: i18n.translate('connectorSpecs.tavily.config.serverUrl.helpText', {
-          defaultMessage: 'The URL of the Tavily MCP server.',
-        }),
-      }),
-  }),
+    })
+  ),
 
   validateUrls: {
     fields: ['serverUrl'],
@@ -70,6 +74,7 @@ export const TavilyConnector: ConnectorSpec = {
   actions: {
     tavilySearch: {
       isTool: true,
+      scope: 'read',
       description:
         'Search the web for current information on any topic using Tavily. Returns a list of relevant web pages with titles, URLs, snippets, and relevance scores. Use this when you need up-to-date information, news, or answers to factual questions that may not be in your training data.',
       input: SearchInputSchema,
@@ -85,6 +90,7 @@ export const TavilyConnector: ConnectorSpec = {
 
     tavilyExtract: {
       isTool: true,
+      scope: 'read',
       description:
         'Extract and retrieve the full text content from one or more web page URLs using Tavily. Use this when you have specific URLs and need to read their content — for example, to summarize an article, answer questions about a page, or process structured data from a known source. Prefer this over tavilySearch when you already know the exact URLs.',
       input: ExtractInputSchema,
@@ -99,6 +105,7 @@ export const TavilyConnector: ConnectorSpec = {
 
     tavilyCrawl: {
       isTool: true,
+      scope: 'read',
       description:
         'Crawl a website starting from a root URL, following links and extracting page content with configurable depth and breadth. Returns the text content of each discovered page. Use this when you need to ingest content from an entire site or section — for example, to build a knowledge base from documentation, scan a product catalog, or audit a set of pages. For just a list of URLs without content, use tavilyMap instead.',
       input: CrawlInputSchema,
@@ -116,6 +123,7 @@ export const TavilyConnector: ConnectorSpec = {
 
     tavilyMap: {
       isTool: true,
+      scope: 'read',
       description:
         "Map a website's structure by returning a list of URLs discovered starting from a base URL, without fetching page content. Use this to understand the shape of a site, find relevant sub-pages to later extract or crawl, or enumerate available resources. For retrieving actual page content, use tavilyCrawl instead.",
       input: MapInputSchema,
@@ -132,6 +140,7 @@ export const TavilyConnector: ConnectorSpec = {
 
     listTools: {
       isTool: true,
+      scope: 'read',
       description:
         'List all tools available on the Tavily MCP server. Use this to discover available capabilities.',
       input: ListToolsInputSchema,
@@ -145,6 +154,7 @@ export const TavilyConnector: ConnectorSpec = {
 
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Call any tool on the Tavily MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
       input: CallToolInputSchema,
@@ -160,13 +170,11 @@ export const TavilyConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to Tavily MCP server. ${tools.length} tools available.`,
-        };
+        await mcp.listTools();
+        return {};
       });
     },
+    enabled: true,
   },
 
   skill: [

@@ -1,0 +1,102 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { AlertEpisodeMetadataTable } from './metadata_table';
+
+const mockHit = { id: 'h1', raw: { _id: 'h1' }, flattened: {} } as unknown as DataTableRecord;
+const mockDataView = createStubDataView({ spec: { id: 'test-*', title: 'test-*' } });
+
+describe('AlertEpisodeMetadataTable', () => {
+  it('renders the provided table render function output', () => {
+    const renderTable = jest.fn(() => <div data-test-subj="mockTable" />);
+    render(
+      <AlertEpisodeMetadataTable
+        hit={mockHit}
+        dataView={mockDataView}
+        renderTable={renderTable}
+        isStale={false}
+      />
+    );
+    expect(screen.getByTestId('mockTable')).toBeInTheDocument();
+    expect(renderTable).toHaveBeenCalledWith({ hit: mockHit, dataView: mockDataView });
+  });
+
+  it('makes the rendered document viewer fill the scrollable flex item', () => {
+    render(
+      <AlertEpisodeMetadataTable
+        hit={mockHit}
+        dataView={mockDataView}
+        renderTable={() => <div data-test-subj="mockTable" />}
+        isStale={false}
+      />
+    );
+
+    expect(screen.getByTestId('mockTable').parentElement).toHaveStyleRule('block-size', '100%', {
+      target: '>*',
+    });
+  });
+
+  it('pads the document viewer control rows selected by their accessible controls', () => {
+    render(
+      <AlertEpisodeMetadataTable
+        hit={mockHit}
+        dataView={mockDataView}
+        renderTable={() => <div data-test-subj="mockTable" />}
+        isStale={false}
+        controlsPaddingSize="m"
+      />
+    );
+
+    const tableContainer = screen.getByTestId('mockTable').parentElement;
+    expect(tableContainer).toHaveStyleRule('padding-inline', '12px', {
+      target: ">*>:has(input[type='search'])",
+    });
+    expect(tableContainer).toHaveStyleRule('padding-inline', '12px', {
+      target: ">*>:has([role='switch'])",
+    });
+    expect(tableContainer).toHaveStyleRule('box-sizing', 'border-box', {
+      target: ">*>:has(input[type='search'])",
+    });
+    expect(tableContainer).toHaveStyleRule('max-inline-size', '100%', {
+      target: ">*>:has(input[type='search'])",
+    });
+  });
+
+  it('renders the stale-data callout when isStale is true', () => {
+    render(
+      <AlertEpisodeMetadataTable
+        hit={mockHit}
+        dataView={mockDataView}
+        renderTable={() => null}
+        isStale
+        dataTimestamp="2026-05-05T00:00:00Z"
+        dateFormat="MMM D, YYYY"
+      />
+    );
+    expect(screen.getByTestId('alertingV2EpisodeMetadataTabStaleCallout')).toBeInTheDocument();
+  });
+
+  it('applies the requested margin directly to the stale-data callout', () => {
+    render(
+      <AlertEpisodeMetadataTable
+        hit={mockHit}
+        dataView={mockDataView}
+        renderTable={() => null}
+        isStale
+        calloutMarginSize="m"
+      />
+    );
+
+    const callout = screen.getByTestId('alertingV2EpisodeMetadataTabStaleCallout');
+    expect(callout).toHaveStyleRule('margin-block-start', '12px');
+    expect(callout).toHaveStyleRule('margin-inline', '12px');
+  });
+});

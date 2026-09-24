@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, setLazySchemaDisabled } from '@kbn/zod';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
@@ -13,7 +13,7 @@ import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionTypeConfig, Services } from '../types';
-import { connectorsSpecs } from '@kbn/connector-specs';
+import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');
@@ -49,6 +49,7 @@ describe('Connector type config checks', () => {
   let actionTypeRegistry: ActionTypeRegistry;
 
   beforeAll(async () => {
+    setLazySchemaDisabled(true);
     const setupResult = await setupTestServers();
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
@@ -59,6 +60,7 @@ describe('Connector type config checks', () => {
   });
 
   afterAll(async () => {
+    setLazySchemaDisabled(false);
     if (kibanaServer) {
       await kibanaServer.stop();
     }
@@ -68,7 +70,10 @@ describe('Connector type config checks', () => {
   });
 
   test('ensure connector types list up to date', () => {
-    const connectorSpecIds = Object.values(connectorsSpecs).map(({ metadata }) => metadata.id);
+    const inboundEventsEnabled = actionTypeRegistry.getUtils().isInboundEventsEnabled();
+    const connectorSpecIds = Object.values(connectorsSpecs)
+      .filter((spec) => inboundEventsEnabled || !isInboundOnlyConnectorSpec(spec))
+      .map(({ metadata }) => metadata.id);
     expect([...connectorTypes, ...connectorSpecIds].sort()).toEqual(
       actionTypeRegistry.getAllTypes().sort()
     );

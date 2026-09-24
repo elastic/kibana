@@ -19,7 +19,7 @@ export function Label({ value, prepend, append }: Props) {
   return (
     <EuiTextColor color={color}>
       {prepend}
-      {icon && <EuiIcon type={icon} size="s" color={color} />}
+      {icon && <EuiIcon type={icon} size="s" color={color} aria-hidden={true} />}
       {label}
       {append}
     </EuiTextColor>

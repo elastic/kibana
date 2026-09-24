@@ -121,13 +121,53 @@ describe('TextBasedDimensionEditor', () => {
         { esql: 'FROM my_data | limit 0' },
         {},
         { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
+        expect.any(AbortController),
         undefined,
-        undefined, // No index patterns
-        defaultProps.esqlVariables
+        defaultProps.esqlVariables,
+        undefined
       );
     });
 
     expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
+  });
+
+  it('passes isApproximate to fetchFieldsFromESQLExpression', async () => {
+    render(<TextBasedDimensionEditor {...defaultProps} isApproximate={true} />);
+    await waitToLoad();
+
+    await waitFor(() => {
+      expect(fetchFieldsFromESQLExpression).toHaveBeenCalledWith(
+        { esql: 'FROM my_data | limit 0' },
+        {},
+        { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
+        expect.any(AbortController),
+        undefined,
+        defaultProps.esqlVariables,
+        true
+      );
+    });
+  });
+
+  it('does not refetch when the parent re-renders with a new indexPatterns reference for the same query', async () => {
+    const { rerender } = render(<TextBasedDimensionEditor {...defaultProps} />);
+    await waitToLoad();
+
+    // Simulate the parent rebuilding `indexPatterns` with the same content; only the
+    // extracted time field name is a dependency of the fetch, so no refetch should happen.
+    rerender(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        indexPatterns={{ ...defaultProps.indexPatterns }}
+      />
+    );
+    rerender(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        indexPatterns={{ ...defaultProps.indexPatterns }}
+      />
+    );
+
+    expect(fetchFieldsFromESQLExpression).toHaveBeenCalledTimes(1);
   });
 
   it('should set inMetricDimension when selecting a field in a metric dimension', async () => {

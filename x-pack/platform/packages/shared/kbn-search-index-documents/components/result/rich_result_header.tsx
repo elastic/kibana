@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
-  EuiPopoverTitle,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -99,7 +98,7 @@ const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
         )}
         data-test-subj="copyTextToClipboardButton"
         color="text"
-        iconType="copy"
+        iconType={isTextCopied ? 'check' : 'copy'}
         onClick={onClick}
         onBlur={onBlur}
       />
@@ -115,36 +114,33 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
+  const metaDataLabel = i18n.translate(
+    'xpack.searchIndexDocuments.result.richHeader.metadata.icon.ariaLabel',
+    { defaultMessage: 'Document metadata for {id}', values: { id } }
+  );
 
   const metaDataIcon = (
-    <EuiButtonIcon
-      display="empty"
-      size="s"
-      iconType="info"
-      color="primary"
-      data-test-subj="documentMetadataButton"
-      onClick={(e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        setPopoverIsOpen(!popoverIsOpen);
-      }}
-      aria-label={i18n.translate(
-        'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
-        {
-          defaultMessage: 'Metadata for document: {id}',
-          values: { id },
-        }
-      )}
-    />
+    <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="info"
+        color="text"
+        data-test-subj="documentMetadataButton"
+        onClick={(e: React.MouseEvent<HTMLElement>) => {
+          e.stopPropagation();
+          setPopoverIsOpen(!popoverIsOpen);
+        }}
+        aria-label={metaDataLabel}
+      />
+    </EuiToolTip>
   );
 
   return (
-    <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
-      <EuiPopoverTitle>
-        <FormattedMessage
-          id="xpack.searchIndexDocuments.result.compactCard.header.metadata.title"
-          defaultMessage="Document metadata"
-        />
-      </EuiPopoverTitle>
+    <EuiPopover
+      button={metaDataIcon}
+      isOpen={popoverIsOpen}
+      closePopover={closePopover}
+      aria-label={metaDataLabel}
+    >
       <EuiFlexGroup
         gutterSize="s"
         direction="column"
@@ -185,7 +181,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
                 ? i18n.translate(
                     'xpack.searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
                     {
-                      defaultMessage: 'You do not have permision to delete documents',
+                      defaultMessage: 'You do not have permission to delete documents',
                     }
                   )
                 : undefined
@@ -229,7 +225,7 @@ const Score: React.FC<{ score: MetaDataProps['score'] }> = ({ score }) => {
         gutterSize="s"
       >
         <EuiFlexItem grow>
-          <EuiIcon type="chartGauge" size="m" />
+          <EuiIcon type="chartGauge" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiPanel
@@ -277,28 +273,26 @@ export const RichResultHeader: React.FC<Props> = ({
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <EuiText>
-                <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-                  <EuiFlexItem>
-                    {onTitleClick ? (
-                      <EuiLink onClick={onTitleClick} color="text">
-                        <EuiTitle size="s">
-                          <h4>{title}</h4>
-                        </EuiTitle>
-                      </EuiLink>
-                    ) : (
-                      <EuiTitle size="s">
+              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+                <EuiFlexItem>
+                  {onTitleClick ? (
+                    <EuiLink onClick={onTitleClick} color="text">
+                      <EuiTitle size="xxs">
                         <h4>{title}</h4>
                       </EuiTitle>
-                    )}
-                  </EuiFlexItem>
-                  {!!metaData && (
-                    <EuiFlexItem grow={false}>
-                      <MetadataPopover {...metaData} showScore={showScore} />
-                    </EuiFlexItem>
+                    </EuiLink>
+                  ) : (
+                    <EuiTitle size="xxs">
+                      <h4>{title}</h4>
+                    </EuiTitle>
                   )}
-                </EuiFlexGroup>
-              </EuiText>
+                </EuiFlexItem>
+                {!!metaData && (
+                  <EuiFlexItem grow={false}>
+                    <MetadataPopover {...metaData} showScore={showScore} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

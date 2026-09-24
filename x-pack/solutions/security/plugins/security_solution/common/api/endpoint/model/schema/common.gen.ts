@@ -40,25 +40,25 @@ export type PageSize = z.infer<typeof PageSize>;
 /**
  * A start date in ISO 8601 format or Date Math format.
  */
-export const StartDate = lazySchema(() => z.string());
+export const StartDate = lazySchema(() => z.string().max(64));
 export type StartDate = z.infer<typeof StartDate>;
 
 /**
  * An end date in ISO format or Date Math format.
  */
-export const EndDate = lazySchema(() => z.string());
+export const EndDate = lazySchema(() => z.string().max(64));
 export type EndDate = z.infer<typeof EndDate>;
 
 /**
  * Agent ID
  */
-export const AgentId = lazySchema(() => z.string());
+export const AgentId = lazySchema(() => z.string().max(256));
 export type AgentId = z.infer<typeof AgentId>;
 
 /**
  * A KQL string.
  */
-export const Kuery = lazySchema(() => z.string());
+export const Kuery = lazySchema(() => z.string().max(30000));
 export type Kuery = z.infer<typeof Kuery>;
 
 /**
@@ -101,7 +101,7 @@ export const SortFieldEnum = SortField.enum;
  * A list of agent IDs. Max of 250.
  */
 export const AgentIds = lazySchema(() =>
-  z.union([z.array(z.string().min(1)).min(1).max(250), z.string().min(1)])
+  z.union([z.array(z.string().min(1).max(256)).min(1).max(250), z.string().min(1).max(256)])
 );
 export type AgentIds = z.infer<typeof AgentIds>;
 
@@ -143,7 +143,7 @@ export type Timeout = z.infer<typeof Timeout>;
 /**
  * The status of a response action.
  */
-export const Status = lazySchema(() => z.enum(['failed', 'pending', 'successful']));
+export const Status = lazySchema(() => z.enum(['failed', 'pending', 'successful', 'canceled']));
 export type Status = z.infer<typeof Status>;
 export type StatusEnum = typeof Status.enum;
 export const StatusEnum = Status.enum;
@@ -158,7 +158,7 @@ export type Statuses = z.infer<typeof Statuses>;
  * A list of user IDs. Max of 50.
  */
 export const UserIds = lazySchema(() =>
-  z.union([z.array(z.string().min(1)).min(1).max(50), z.string().min(1)])
+  z.union([z.array(z.string().min(1).max(256)).min(1).max(50), z.string().min(1).max(256)])
 );
 export type UserIds = z.infer<typeof UserIds>;
 
@@ -166,7 +166,7 @@ export type UserIds = z.infer<typeof UserIds>;
  * A list of action IDs that should include the complete output of the action. Max of 50.
  */
 export const WithOutputs = lazySchema(() =>
-  z.union([z.array(z.string().min(1)).min(1).max(50), z.string().min(1)])
+  z.union([z.array(z.string().min(1).max(256)).min(1).max(50), z.string().min(1).max(256)])
 );
 export type WithOutputs = z.infer<typeof WithOutputs>;
 
@@ -187,13 +187,13 @@ export type Types = z.infer<typeof Types>;
 /**
  * List of endpoint IDs (cannot contain empty strings). Max of 250.
  */
-export const EndpointIds = lazySchema(() => z.array(z.string().min(1)).min(1).max(250));
+export const EndpointIds = lazySchema(() => z.array(z.string().min(1).max(256)).min(1).max(250));
 export type EndpointIds = z.infer<typeof EndpointIds>;
 
 /**
  * Optional comment
  */
-export const Comment = lazySchema(() => z.string());
+export const Comment = lazySchema(() => z.string().max(30000));
 export type Comment = z.infer<typeof Comment>;
 
 /**
@@ -218,11 +218,23 @@ export const BaseActionSchema = lazySchema(() =>
     /**
      * If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
      */
-    alert_ids: z.array(z.string().min(1)).min(1).max(50).optional(),
+    alert_ids: z
+      .array(z.string().min(1).max(256))
+      .min(1)
+      .max(50)
+      .optional()
+      .describe(
+        'If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.'
+      ),
     /**
      * The IDs of cases where the action taken will be logged. Max of 50.
      */
-    case_ids: z.array(z.string().min(1)).min(1).max(50).optional(),
+    case_ids: z
+      .array(z.string().min(1).max(256))
+      .min(1)
+      .max(50)
+      .optional()
+      .describe('The IDs of cases where the action taken will be logged. Max of 50.'),
     comment: Comment.optional(),
     parameters: Parameters.optional(),
     agent_type: AgentTypes.optional(),
@@ -242,7 +254,10 @@ export const ProtectionUpdatesNoteResponse = lazySchema(() =>
     /**
      * A note associated with the protection updates for the given package policy.
      */
-    note: z.string().optional(),
+    note: z
+      .string()
+      .optional()
+      .describe('A note associated with the protection updates for the given package policy.'),
   })
 );
 export type ProtectionUpdatesNoteResponse = z.infer<typeof ProtectionUpdatesNoteResponse>;
@@ -252,45 +267,57 @@ export const ResponseActionDetails = lazySchema(() =>
     /**
      * The response action ID
      */
-    id: z.string().uuid().optional(),
+    id: z.string().uuid().optional().describe('The response action ID'),
     command: Command,
     agentType: AgentTypes.optional(),
     /**
      * Whether the response action is expired
      */
-    isExpired: z.boolean().optional(),
+    isExpired: z.boolean().optional().describe('Whether the response action is expired'),
     /**
      * Whether the response action is complete
      */
-    isComplete: z.boolean().optional(),
+    isComplete: z.boolean().optional().describe('Whether the response action is complete'),
     /**
      * Whether the response action was successful
      */
-    wasSuccessful: z.boolean().optional(),
+    wasSuccessful: z.boolean().optional().describe('Whether the response action was successful'),
+    /**
+     * Whether the response action was canceled
+     */
+    wasCanceled: z.boolean().optional().describe('Whether the response action was canceled'),
     /**
      * The response action status
      */
-    status: z.string().optional(),
+    status: z.string().optional().describe('The response action status'),
     /**
      * The response action start time
      */
-    startedAt: z.string().datetime().optional(),
+    startedAt: z.string().datetime().optional().describe('The response action start time'),
     /**
      * The response action completion time
      */
-    completedAt: z.string().datetime().optional(),
+    completedAt: z.string().datetime().optional().describe('The response action completion time'),
     /**
      * The user who created the response action
      */
-    createdBy: z.string().optional(),
+    createdBy: z.string().optional().describe('The user who created the response action'),
     /**
      * The agent IDs for the hosts that the response action was sent to
      */
-    agents: z.array(z.string().uuid()).optional(),
+    agents: z
+      .array(z.string().uuid())
+      .optional()
+      .describe('The agent IDs for the hosts that the response action was sent to'),
     /**
      * The parameters of the response action. Content different depending on the response action command
      */
-    parameters: z.object({}).optional(),
+    parameters: z
+      .object({})
+      .optional()
+      .describe(
+        'The parameters of the response action. Content different depending on the response action command'
+      ),
     /**
      * An object containing the host names associated with the agent IDs the response action was sent to
      */
@@ -301,10 +328,13 @@ export const ResponseActionDetails = lazySchema(() =>
           /**
            * The host name
            */
-          name: z.string().optional(),
+          name: z.string().optional().describe('The host name'),
         })
       )
-      .optional(),
+      .optional()
+      .describe(
+        'An object containing the host names associated with the agent IDs the response action was sent to'
+      ),
     /**
      * The state of the response action for each agent ID that it was sent to
      */
@@ -315,18 +345,35 @@ export const ResponseActionDetails = lazySchema(() =>
           /**
            * Whether the response action is completed for the agent ID
            */
-          isCompleted: z.boolean().optional(),
+          isCompleted: z
+            .boolean()
+            .optional()
+            .describe('Whether the response action is completed for the agent ID'),
           /**
            * Whether the response action was successful for the agent ID
            */
-          wasSuccessful: z.boolean().optional(),
+          wasSuccessful: z
+            .boolean()
+            .optional()
+            .describe('Whether the response action was successful for the agent ID'),
+          /**
+           * Whether the response action was canceled for the agent ID
+           */
+          wasCanceled: z
+            .boolean()
+            .optional()
+            .describe('Whether the response action was canceled for the agent ID'),
           /**
            * The date and time the response action was completed for the agent ID
            */
-          completedAt: z.string().optional(),
+          completedAt: z
+            .string()
+            .optional()
+            .describe('The date and time the response action was completed for the agent ID'),
         })
       )
-      .optional(),
+      .optional()
+      .describe('The state of the response action for each agent ID that it was sent to'),
     /**
       * The outputs of the response action for each agent ID that it was sent to. Content different depending on the
 response action command and will only be present for agents that have responded to the response action
@@ -340,10 +387,17 @@ response action command and will only be present for agents that have responded 
           /**
            * The response action output content for the agent ID. Exact format depends on the response action command.
            */
-          content: z.union([z.object({}), z.string()]),
+          content: z
+            .union([z.object({}), z.string()])
+            .describe(
+              'The response action output content for the agent ID. Exact format depends on the response action command.'
+            ),
         })
       )
-      .optional(),
+      .optional()
+      .describe(
+        'The outputs of the response action for each agent ID that it was sent to. Content different depending on the\nresponse action command and will only be present for agents that have responded to the response action\n'
+      ),
   })
 );
 export type ResponseActionDetails = z.infer<typeof ResponseActionDetails>;

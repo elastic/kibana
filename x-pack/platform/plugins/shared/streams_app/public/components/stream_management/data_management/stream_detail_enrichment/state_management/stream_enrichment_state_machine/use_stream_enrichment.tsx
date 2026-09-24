@@ -106,6 +106,9 @@ export const useStreamEnrichmentEvents = () => {
       refreshSimulation: () => {
         service.send({ type: 'simulation.refresh' });
       },
+      fetchMoreMatchingSamples: () => {
+        service.send({ type: 'simulation.fetchMore' });
+      },
       filterSimulationByCondition: (conditionId: string) => {
         service.send({ type: 'simulation.filterByCondition', conditionId });
       },

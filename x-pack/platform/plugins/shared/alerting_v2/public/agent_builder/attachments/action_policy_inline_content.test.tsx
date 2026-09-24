@@ -1,0 +1,84 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { ActionPolicyInlineContent } from './action_policy_inline_content';
+
+const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
+  id: 'att-1',
+  type: ACTION_POLICY_ATTACHMENT_TYPE,
+  versions: [],
+  current_version: 1,
+  origin: overrides.origin,
+  data: {
+    name: 'My Policy',
+    description: 'A test policy',
+    destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
+    matcher: { expression: 'episode_status: "active"' },
+    groupingMode: 'per_episode' as const,
+    throttle: { strategy: 'on_status_change' as const },
+    enabled: overrides.enabled,
+  } as any,
+});
+
+describe('ActionPolicyInlineContent', () => {
+  it('shows draft status when no origin', () => {
+    render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
+    expect(screen.getByText('draft')).toBeDefined();
+  });
+
+  it('shows enabled status when origin is set and enabled is undefined', () => {
+    render(
+      <ActionPolicyInlineContent
+        attachment={createAttachment({ origin: 'policy-123' })}
+        isSidebar={false}
+      />
+    );
+    expect(screen.getByText('enabled')).toBeDefined();
+  });
+
+  it('shows disabled status when origin is set and enabled is false', () => {
+    render(
+      <ActionPolicyInlineContent
+        attachment={createAttachment({ origin: 'policy-123', enabled: false })}
+        isSidebar={false}
+      />
+    );
+    expect(screen.getByText('disabled')).toBeDefined();
+  });
+
+  it('renders the matcher summary', () => {
+    render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
+    expect(screen.getByText(/expr:\s*episode_status:\s*"active"/)).toBeDefined();
+  });
+
+  it('renders "matches all" when matcher is null', () => {
+    const attachment = createAttachment();
+    attachment.data.matcher = null;
+    render(<ActionPolicyInlineContent attachment={attachment} isSidebar={false} />);
+    expect(screen.getByText(/matches all/)).toBeDefined();
+  });
+
+  it('renders the destination count', () => {
+    render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
+    expect(screen.getByText('1 destination')).toBeDefined();
+  });
+
+  it('renders the throttle strategy badge', () => {
+    render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
+    expect(screen.getByText('on_status_change')).toBeDefined();
+  });
+
+  it('does not render throttle badge when strategy is absent', () => {
+    const attachment = createAttachment();
+    attachment.data.throttle = {};
+    render(<ActionPolicyInlineContent attachment={attachment} isSidebar={false} />);
+    expect(screen.queryByText('on_status_change')).toBeNull();
+  });
+});

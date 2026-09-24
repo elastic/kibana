@@ -33,13 +33,14 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../../common/constants/action_ids';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
   onInvestigateInTimelineAlertClick?: () => void;
 }
 
-const detectionExceptionList = (ecsData: Ecs): ExceptionListId[] => {
+export const detectionExceptionList = (ecsData: Ecs): ExceptionListId[] => {
   let exceptionsList = getField(ecsData, ALERT_RULE_EXCEPTIONS_LIST) ?? [];
   let detectionExceptionsList: ExceptionListId[] = [];
   try {
@@ -67,6 +68,12 @@ const detectionExceptionList = (ecsData: Ecs): ExceptionListId[] => {
   } catch (error) {
     // do nothing, just fail silently as parametersObject is initialized
   }
+
+  if (!Array.isArray(exceptionsList)) {
+    exceptionsList =
+      exceptionsList != null && typeof exceptionsList === 'object' ? [exceptionsList] : [];
+  }
+
   detectionExceptionsList = exceptionsList.reduce(
     (acc: ExceptionListId[], next: string | object) => {
       // parsed rule.parameters returns an object else use the default string representation
@@ -199,7 +206,7 @@ export const useInvestigateInTimeline = ({
       canInvestigateInTimeline
         ? [
             {
-              key: 'investigate-in-timeline-action-item',
+              key: INVESTIGATE_IN_TIMELINE_ACTION_ID,
               'data-test-subj': 'investigate-in-timeline-action-item',
               disabled: ecsRowData == null,
               onClick: investigateInTimelineAlertClick,

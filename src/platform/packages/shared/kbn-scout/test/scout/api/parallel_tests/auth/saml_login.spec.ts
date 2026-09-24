@@ -10,15 +10,19 @@
 import { apiTest, tags } from '../../../../../src/playwright';
 import { expect } from '../../../../../api';
 
-apiTest.describe(`SAML Auth fixture`, { tag: tags.deploymentAgnostic }, () => {
-  apiTest(`should create a session for 'admin' role`, async ({ samlAuth }) => {
-    const credentials = await samlAuth.asInteractiveUser('admin');
-    expect(credentials.cookieValue).toBeDefined();
-  });
+apiTest.describe(
+  `SAML Auth fixture`,
+  { tag: [...tags.deploymentAgnostic, ...tags.serverless.observability.logs_essentials] },
+  () => {
+    apiTest(`should create a session for 'admin' role`, async ({ samlAuth }) => {
+      const credentials = await samlAuth.asInteractiveUser('admin');
+      expect(credentials.cookieValue).toBeDefined();
+    });
 
-  apiTest(`should create API Key for 'admin' role`, async ({ requestAuth }) => {
-    const adminApiCredentials = await requestAuth.getApiKey('admin');
-    expect(adminApiCredentials.apiKey.id).toBeDefined();
-    expect(adminApiCredentials.apiKey.name).toBeDefined();
-  });
-});
+    apiTest(`should create API Key for 'admin' role`, async ({ requestAuth }) => {
+      const adminApiCredentials = await requestAuth.getApiKey('admin');
+      expect(adminApiCredentials.apiKey.id).toBeDefined();
+      expect(adminApiCredentials.apiKey.name).toBeDefined();
+    });
+  }
+);

@@ -202,8 +202,10 @@ export const createAppContextStartContractMock = (
     autoInstallContentPackagesTask: {} as any,
     alertingStart: {
       getRulesClientWithRequest: jest.fn(),
+      getRulesClientWithRequestInSpace: jest.fn(),
     } as any,
     reportingStart: reportingMock.createStart(),
+    featureFlags: coreMock.createStart().featureFlags,
     lockManagerService: {
       withLock: jest
         .fn()
@@ -261,6 +263,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     listIds: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
+    bulkUpdatePartial: jest.fn(),
     bulkUpgrade: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
@@ -307,6 +310,7 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     delete: jest.fn().mockReturnValue(Promise.resolve()),
     getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
     getByIds: jest.fn().mockReturnValue(Promise.resolve()),
+    bumpRevision: jest.fn().mockReturnValue(Promise.resolve()),
     turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
@@ -320,7 +324,14 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
 export const createMockAgentlessPoliciesService = (): jest.Mocked<AgentlessPoliciesService> => {
   return {
     createAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    updateAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
     deleteAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    getAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve(null)),
+    listAgentlessPolicies: jest
+      .fn()
+      .mockReturnValue(Promise.resolve({ items: [], total: 0, page: 1, perPage: 20 })),
+    bulkUpgradeAgentlessPolicies: jest.fn().mockReturnValue(Promise.resolve([])),
+    getAgentlessPolicyUpgradeDryRunDiff: jest.fn().mockReturnValue(Promise.resolve([])),
   };
 };
 

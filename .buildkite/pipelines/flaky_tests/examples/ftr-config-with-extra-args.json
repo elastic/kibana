@@ -1,0 +1,8 @@
+[
+  {
+    "type": "ftrConfig",
+    "ftrConfig": "x-pack/solutions/security/test/security_solution_api_integration/config.ts",
+    "count": 25,
+    "ftrExtraArgs": "--include test_suites/detection_engine/my_test.ts"
+  }
+]

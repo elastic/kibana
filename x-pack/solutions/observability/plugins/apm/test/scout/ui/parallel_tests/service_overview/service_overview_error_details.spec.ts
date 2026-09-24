@@ -18,6 +18,76 @@ test.describe(
       await browserAuth.loginAsViewer();
     });
 
+    test('opbeans-java overview errors table is populated', async ({
+      page,
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await serviceDetailsPage.overviewTab.goToTab({
+        serviceName: testData.SERVICE_OPBEANS_JAVA,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+
+      await test.step('errors table shows the mock error', async () => {
+        await serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.waitFor({
+          state: 'visible',
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(page.getByText(testData.ERROR_MESSAGE)).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+    });
+
+    test('opbeans-java overview "View errors" link navigates to the errors page', async ({
+      page,
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await serviceDetailsPage.overviewTab.goToTab({
+        serviceName: testData.SERVICE_OPBEANS_JAVA,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+
+      await test.step('click View errors link', async () => {
+        const viewErrorsLink = serviceDetailsPage.overviewTab.getViewErrorsLink();
+        await viewErrorsLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await viewErrorsLink.click();
+      });
+
+      await test.step('navigated to errors page', async () => {
+        await expect(page).toHaveURL(new RegExp(`/${testData.SERVICE_OPBEANS_JAVA}/errors`), {
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+    });
+
+    test('opbeans-java overview clicking an error navigates to the error detail page', async ({
+      page,
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await serviceDetailsPage.overviewTab.goToTab({
+        serviceName: testData.SERVICE_OPBEANS_JAVA,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+
+      await test.step('click on the mock error link', async () => {
+        const errorLink = page.getByRole('link', { name: testData.ERROR_MESSAGE });
+        await errorLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await errorLink.click();
+      });
+
+      await test.step('navigated to the error detail page', async () => {
+        await expect(page).toHaveURL(new RegExp(`/${testData.SERVICE_OPBEANS_JAVA}/errors/`), {
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(page.getByTestId('errorDistribution')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+    });
+
     test('OTEL service navigates to errors page from overview', async ({
       page,
       pageObjects: { serviceDetailsPage },
@@ -80,9 +150,12 @@ test.describe(
       });
 
       await test.step('Click on error link to go to detail page', async () => {
-        const errorLink = page.getByTestId('apmErrorDetailsLink');
+        const errorLink = page.getByRole('link', { name: 'boom' });
         await errorLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
         await errorLink.click();
+        await page.waitForURL(new RegExp(`/services/${testData.SERVICE_OTEL_SENDOTLP}/errors/`), {
+          timeout: EXTENDED_TIMEOUT,
+        });
         await page
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
@@ -127,27 +200,35 @@ test.describe(
       });
 
       await test.step('Verify error is visible in errors table', async () => {
-        await expect(page.getByRole('link', { name: 'ResponseError', exact: true })).toBeVisible();
-        await page
-          .getByRole('link', { name: 'ResponseError', exact: true })
-          .scrollIntoViewIfNeeded();
-
-        await expect(page.getByRole('link', { name: 'ResponseError', exact: true })).toBeInViewport(
+        await serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.waitFor({
+          state: 'visible',
+          timeout: EXTENDED_TIMEOUT,
+        });
+        const errorLink = serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.getByRole(
+          'link',
           {
-            timeout: EXTENDED_TIMEOUT,
+            name: testData.EDOT_ERROR_MESSAGE,
           }
         );
+        await expect(errorLink).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('Click on error link and wait for navigation', async () => {
-        await page.getByRole('link', { name: 'ResponseError', exact: true }).click();
+        const errorLink = serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.getByRole(
+          'link',
+          { name: testData.EDOT_ERROR_MESSAGE }
+        );
+        await errorLink.click();
+        await page.waitForURL(new RegExp(`/services/${testData.SERVICE_EDOT_ADSERVICE}/errors/`), {
+          timeout: EXTENDED_TIMEOUT,
+        });
         await page
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('Verify navigated to error detail page', async () => {
-        await expect(page.getByText(testData.EDOT_ERROR_MESSAGE)).toBeVisible({
+        await expect(page.getByRole('heading', { name: /Error group/ })).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
@@ -163,10 +244,27 @@ test.describe(
         rangeTo: testData.END_DATE,
       });
 
-      await test.step('Click on error link to go to detail page', async () => {
-        const errorLink = page.getByRole('link', { name: 'ResponseError', exact: true });
+      await test.step('Wait for errors table to load', async () => {
+        await serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.waitFor({
+          state: 'visible',
+          timeout: EXTENDED_TIMEOUT,
+        });
+        const errorLink = serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.getByRole(
+          'link',
+          { name: testData.EDOT_ERROR_MESSAGE }
+        );
         await errorLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      });
+
+      await test.step('Click on error link to go to detail page', async () => {
+        const errorLink = serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.getByRole(
+          'link',
+          { name: testData.EDOT_ERROR_MESSAGE }
+        );
         await errorLink.click();
+        await page.waitForURL(new RegExp(`/services/${testData.SERVICE_EDOT_ADSERVICE}/errors/`), {
+          timeout: EXTENDED_TIMEOUT,
+        });
         await page
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });

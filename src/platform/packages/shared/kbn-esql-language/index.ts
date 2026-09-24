@@ -11,6 +11,9 @@ export * from './src/constants';
 export * from './src/commands';
 export * from './src/language';
 
+// Used by the ES|QL definition generation scripts in @kbn/esql-scripts
+export { Location } from './src/commands/registry/types';
+
 // temporary export to ease migration
 export { getNoValidCallSignatureError } from './src/commands/definitions/utils/validation/utils';
 // temporary export to ease migration

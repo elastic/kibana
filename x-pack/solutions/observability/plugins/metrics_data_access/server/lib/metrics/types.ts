@@ -16,6 +16,15 @@ const NumberOrNullRT = rt.union([rt.number, rt.null]);
 
 export const BasicMetricValueRT = rt.type({ value: NumberOrNullRT });
 
+// `stats_bucket` pipeline agg used by semconv CPU/memory presence guards.
+export const StatsBucketTypeRT = rt.type({
+  count: rt.number,
+  min: NumberOrNullRT,
+  max: NumberOrNullRT,
+  avg: NumberOrNullRT,
+  sum: NumberOrNullRT,
+});
+
 export const NormalizedMetricValueRT = rt.intersection([
   BasicMetricValueRT,
   rt.type({ normalized_value: NumberOrNullRT }),
@@ -53,6 +62,7 @@ export const MetricValueTypeRT = rt.union([
   PercentilesKeyedTypeRT,
   TopMetricsTypeRT,
   MaxPeriodFilterExistsTypeRT,
+  StatsBucketTypeRT,
 ]);
 export type MetricValueType = rt.TypeOf<typeof MetricValueTypeRT>;
 

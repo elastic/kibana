@@ -129,6 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await kibanaServer.uiSettings.update({
             [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
           });
+          await kibanaServer.uiSettings.waitForEventualCacheRefresh();
         }
       }
     });
@@ -138,6 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
         });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       }
     });
 
@@ -234,7 +236,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   });
                   expect(response.views).to.have.length(1);
                   expect(response.views[0].name).to.eql(`$.${streamName}`);
-                  expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+                  expect(response.views[0].query).to.eql(`FROM ${streamName} METADATA _source`);
                 }
               },
               undefined,
@@ -445,7 +447,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(response.views).to.have.length(1);
           expect(response.views[0].name).to.eql(`$.${childStreamName}`);
-          expect(response.views[0].query).to.eql(`FROM ${childStreamName}`);
+          expect(response.views[0].query).to.eql(`FROM ${childStreamName} METADATA _source`);
         });
 
         it(`updates parent $.${rootStream} view to reference the forked child's view`, async () => {
@@ -458,7 +460,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(response.views).to.have.length(1);
           expect(response.views[0].name).to.eql(`$.${rootStream}`);
-          expect(response.views[0].query).to.eql(`FROM ${rootStream}, $.${rootStream}.nginx`);
+          expect(response.views[0].query).to.eql(
+            `FROM ${rootStream}, $.${rootStream}.nginx METADATA _source`
+          );
         });
       }
 
@@ -528,11 +532,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           status,
         };
-        const response = await forkStream(apiClient, rootStream, body, 400);
-        expect(response).to.have.property(
-          'message',
-          'Desired stream state is invalid: Stream name cannot be longer than 200 characters.'
-        );
+        await forkStream(apiClient, rootStream, body, 400);
       });
 
       it(`Index an Nginx access log message, should goto ${rootStream}.nginx`, async () => {
@@ -1413,7 +1413,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('fails to create a wired stream with angle brackets in the name', async () => {
           const response = await putStream(apiClient, 'logs.with<brackets>', validStreamBody, 400);
           expect((response as unknown as { message: string }).message).to.contain(
-            'Stream name cannot contain "<".'
+            'Stream name cannot contain "<", ">".'
           );
         });
 

@@ -7,7 +7,7 @@
 
 import type { StreamlangUIBranch } from '@kbn/streamlang';
 import type { FieldDefinition } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { isDraftStream, Streams } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
 import type { AssignArgs } from 'xstate';
 import type {
@@ -139,6 +139,10 @@ export const spawnDataSource = <
   const { spawn, context, self } = assignArgs;
   const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
 
+  const isDraft =
+    Streams.WiredStream.Definition.is(context.definition.stream) &&
+    isDraftStream(context.definition.stream);
+
   return spawn('dataSourceMachine', {
     id: dataSourceWithUIAttributes.id,
     input: {
@@ -146,6 +150,7 @@ export const spawnDataSource = <
       streamName: context.definition.stream.name,
       streamType: getStreamTypeFromDefinition(context.definition.stream),
       dataSource: dataSourceWithUIAttributes,
+      isDraft,
     },
   });
 };

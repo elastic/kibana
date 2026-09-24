@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxObject, ObjectScope } from '@elastic/eui-test-helpers';
 import type { Page } from '@playwright/test';
+import type {
+  EuiBasicTableObject,
+  EuiDataGridObject,
+  EuiDraggableObject,
+  EuiGlobalToastListObject,
+  EuiSelectableObject,
+  EuiSuperSelectObject,
+} from '../../../../eui_components';
 import type { RunA11yScanOptions } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 
@@ -132,6 +141,31 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the drag operation is complete.
      */
     dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>;
+  };
+
+  /**
+   * Factory accessors for EUI Component Objects from `@elastic/eui-test-helpers`,
+   * pre-bound to this page. By default a Component Object is scoped to the whole
+   * page; pass an optional `scope` (a `Locator` or another Component Object) to
+   * target an instance inside a specific subtree — e.g. one combo box in a flyout
+   * when several share the same `data-test-subj`.
+   *
+   * @example
+   * await page.components.comboBox('dataViewSelector').setSelectedOptions(['logs-*']);
+   * await page.components.comboBox('roleComboBox', flyout).clear();
+   */
+  components: {
+    comboBox: (testSubj: string, scope?: ObjectScope) => EuiComboBoxObject;
+    dataGrid: (testSubj: string, scope?: ObjectScope) => EuiDataGridObject;
+    superSelect: (testSubj: string, scope?: ObjectScope) => EuiSuperSelectObject;
+    selectable: (testSubj: string, scope?: ObjectScope) => EuiSelectableObject;
+    basicTable: (testSubj: string, scope?: ObjectScope) => EuiBasicTableObject;
+    draggable: (testSubj: string, scope?: ObjectScope) => EuiDraggableObject;
+    /**
+     * Drives the global toast list (`EuiGlobalToastListObject`); `testSubj`
+     * defaults to `globalToastList`, the subj Kibana core sets on the list.
+     */
+    toast: (testSubj?: string, scope?: ObjectScope) => EuiGlobalToastListObject;
   };
 };
 

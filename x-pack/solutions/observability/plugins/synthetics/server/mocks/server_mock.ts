@@ -48,6 +48,21 @@ export const getServerMock = () => {
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
+    coreStart: {
+      savedObjects: {
+        createInternalRepository: jest.fn().mockReturnValue({
+          createPointInTimeFinder: jest.fn().mockImplementation(() => ({
+            close: jest.fn(async () => {}),
+            find: jest.fn().mockReturnValue({
+              async *[Symbol.asyncIterator]() {
+                yield { saved_objects: [] };
+              },
+            }),
+          })),
+          get: jest.fn(),
+        }),
+      },
+    },
   } as unknown as SyntheticsServerSetup;
 
   return serverMock;

@@ -44,14 +44,12 @@ properties:
     maxItems: 10000
     items:
       oneOf:
-        - $ref: 'actions_comment_response_properties.yaml'
         - $ref: 'alert_comment_response_properties.yaml'
         - $ref: 'event_comment_response_properties.yaml'
         - $ref: 'user_comment_response_properties.yaml'
       discriminator:
         propertyName: type
         mapping:
-          actions: 'actions_comment_response_properties.yaml'
           alert: 'alert_comment_response_properties.yaml'
           event: 'event_comment_response_properties.yaml'
           user: 'user_comment_response_properties.yaml'
@@ -100,6 +98,14 @@ properties:
       zero.
     nullable: true
     example: 120
+  extended_fields:
+    type: object
+    x-state: Technical preview; added in 9.5.0
+    description: >
+      The case's stored field values, keyed by storage key (for example
+      `priority_as_keyword`).
+    additionalProperties:
+      type: string
   external_service:
     $ref: 'external_service.yaml'
   id:

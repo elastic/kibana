@@ -79,7 +79,7 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
             </EuiLink>
           </EuiFlexItem>
         )}
-        <EuiToolTip delay="long" content={first}>
+        <EuiToolTip content={first}>
           <p className="eui-textTruncate" tabIndex={0}>
             {first}
           </p>

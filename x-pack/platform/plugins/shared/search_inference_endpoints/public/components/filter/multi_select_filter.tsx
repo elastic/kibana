@@ -19,6 +19,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import _ from 'lodash';
 import { optionCountStyles } from './styles';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 export interface MultiSelectFilterOption {
   key: string;
@@ -48,6 +50,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
   const euiThemeContext = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
+  const usageTracker = useUsageTracker();
   const options: MultiSelectFilterOption[] = _.uniqBy(
     rawOptions.map(({ key, label }) => ({
       label,
@@ -64,13 +67,12 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
       aria-label={ariaLabel}
       button={
         <EuiFilterButton
-          iconType={'arrowDown'}
+          iconType={'chevronSingleDown'}
           onClick={toggleIsPopoverOpen}
           isSelected={isPopoverOpen}
           numFilters={options.length}
           hasActiveFilters={selectedOptionKeys.length > 0}
           numActiveFilters={selectedOptionKeys.length}
-          aria-label={buttonLabel}
         >
           <EuiText size="s" className="eui-textTruncate">
             {buttonLabel}
@@ -91,9 +93,14 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
         emptyMessage={i18n.translate('xpack.searchInferenceEndpoints.filter.emptyMessage', {
           defaultMessage: 'No options',
         })}
-        onChange={onChange}
+        onChange={(newOptions) => {
+          const filter = dataTestSubj ?? 'unknown';
+          usageTracker.count([EventType.FILTER_APPLIED, `${EventType.FILTER_APPLIED}_${filter}`]);
+          onChange(newOptions);
+        }}
         singleSelection={false}
         renderOption={renderOption}
+        listProps={{ paddingSize: 's' }}
       >
         {(list, search) => (
           <div>

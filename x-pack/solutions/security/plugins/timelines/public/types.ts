@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import type { SensorAPI } from '@hello-pangea/dnd';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';

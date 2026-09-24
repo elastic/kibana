@@ -20,7 +20,10 @@ import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
+import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
+import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
+import { attachInboundEventsEnabled } from '../../../../inbound/inbound_events_enabled';
 import type { GetAllUnsecuredParams } from './types/params';
 
 interface GetAllHelperOpts {
@@ -72,7 +75,8 @@ export async function getAllUnsecured({
   spaceId,
   connectorTypeRegistry,
 }: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
-  const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
+  const isUnsetOrDefaultSpace = !spaceId || spaceId === 'default';
+  const namespace = isUnsetOrDefaultSpace ? undefined : spaceId;
 
   return await getAllHelper({
     esClient,
@@ -96,9 +100,13 @@ async function getAllHelper({
   savedObjectsClient,
   connectorTypeRegistry,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
+  const connectorIdsWithIdentity = new Set<string>();
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) => {
+    if (hasInboundEventIdentityAttributes(rawAction.attributes)) {
+      connectorIdsWithIdentity.add(rawAction.id);
+    }
     const connector = connectorFromSavedObject(
       rawAction,
       isConnectorDeprecated(rawAction.attributes),
@@ -129,8 +137,8 @@ async function getAllHelper({
         isDeprecated: isConnectorDeprecated(connector),
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
+        authMode: getAuthMode(connector.authMode),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
-        authMode: connector.authMode ? connector.authMode : 'shared',
       };
     }),
   ].sort((a, b) => a.name.localeCompare(b.name));
@@ -143,7 +151,10 @@ async function getAllHelper({
 
   validateConnectors(connectors, logger);
 
-  return connectors;
+  return attachInboundEventsEnabled({
+    connectors,
+    connectorIdsWithIdentity,
+  });
 }
 
 const validateConnectors = (connectors: ConnectorWithExtraFindData[], logger: Logger) => {
@@ -191,7 +202,7 @@ export async function getAllSystemConnectors({
         isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
           systemConnector.actionTypeId
         ),
-        authMode: systemConnector.authMode ? systemConnector.authMode : 'shared',
+        authMode: getAuthMode(systemConnector.authMode),
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -204,7 +215,10 @@ export async function getAllSystemConnectors({
 
   validateConnectors(connectors, context.logger);
 
-  return connectors;
+  return attachInboundEventsEnabled({
+    connectors,
+    connectorIdsWithIdentity: new Set(),
+  });
 }
 
 async function injectExtraFindData({

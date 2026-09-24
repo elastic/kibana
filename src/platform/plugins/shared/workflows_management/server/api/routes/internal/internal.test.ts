@@ -7,17 +7,74 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { KQLSyntaxError } from '@kbn/es-query';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import type { SearchTriggerEventLogResult } from '@kbn/workflows-ui';
+import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { registerInternalRoutes } from '.';
+import { workflowHistoryQuerySchema } from './get_workflow_history';
+import {
+  WORKFLOW_CHANGE_HISTORY_UNAVAILABLE_MESSAGE,
+  WorkflowChangeHistoryDisabledError,
+} from '../../../lib/workflow_change_history_disabled_error';
+import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
+import {
+  WORKFLOW_HISTORY_PAGINATION_EXCEEDED_MESSAGE,
+  WorkflowHistoryPaginationError,
+} from '../../../lib/workflow_history_pagination_error';
+import { ManagedWorkflowUpdateForbiddenError } from '../../managed_workflow_errors';
+import type { RouteDependencies } from '../types';
 
 describe('Internal Routes', () => {
-  let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
-  let mockGetWorkflowExecutionEngine: jest.Mock;
-  let mockEngine: { isEventDrivenExecutionEnabled: jest.Mock };
-  let mockApi: { disableAllWorkflows: jest.Mock };
+  type MockRouteHandler = (
+    context: typeof mockContext,
+    request: ReturnType<typeof httpServerMock.createKibanaRequest>,
+    response: ReturnType<typeof httpServerMock.createResponseFactory>
+  ) => Promise<unknown>;
+
+  /** Matches {@link registerTriggerEventsLogRoutes} → execution engine `searchTriggerEventLog`. */
+  interface TriggerEventLogSearchCall {
+    spaceId: string;
+    kql?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    size?: number;
+  }
+
+  let routeHandlers: Record<string, { handler: MockRouteHandler }>;
+  let mockApi: {
+    disableAllWorkflows: jest.MockedFunction<
+      (spaceId: string, request: unknown) => Promise<unknown>
+    >;
+    getHistoryForWorkflow: jest.Mock;
+    restoreWorkflowVersion: jest.Mock;
+  };
+  let mockAudit: {
+    logWorkflowAccessed: jest.Mock;
+    logWorkflowUpdated: jest.Mock;
+    logWorkflowRestored: jest.Mock;
+  };
+  let mockTriggerEventsIsEnabled: boolean;
+  let mockSearch: jest.Mock;
+  const mockSearchTriggerEventLog = jest.fn<
+    Promise<SearchTriggerEventLogResult>,
+    [TriggerEventLogSearchCall]
+  >();
 
   const mockContext = {
+    workflows: Promise.resolve({
+      isWorkflowsAvailable: true,
+      emitEvent: jest.fn(),
+      managedWorkflows: {
+        install: jest.fn(),
+        uninstall: jest.fn(),
+        getWorkflowStatus: jest.fn(),
+        execute: jest.fn(),
+      },
+    }),
     licensing: Promise.resolve({
       license: {
         isAvailable: true,
@@ -26,23 +83,59 @@ describe('Internal Routes', () => {
         type: 'enterprise',
       },
     }),
+    core: Promise.resolve({
+      elasticsearch: { client: { asInternalUser: {} } },
+      uiSettings: { client: {} },
+    }),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
+    mockTriggerEventsIsEnabled = true;
+    mockSearchTriggerEventLog.mockResolvedValue({
+      hits: [],
+      total: 0,
+      page: 1,
+      size: 10,
+    });
+    mockApi = {
+      disableAllWorkflows: jest.fn(),
+      getHistoryForWorkflow: jest.fn(),
+      restoreWorkflowVersion: jest.fn(),
+    };
+    mockAudit = {
+      logWorkflowAccessed: jest.fn(),
+      logWorkflowUpdated: jest.fn(),
+      logWorkflowRestored: jest.fn(),
+    };
+    mockSearch = jest.fn().mockResolvedValue({
+      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    });
 
-    mockEngine = { isEventDrivenExecutionEnabled: jest.fn() };
-    mockGetWorkflowExecutionEngine = jest.fn().mockResolvedValue(mockEngine);
-    mockApi = { disableAllWorkflows: jest.fn() };
+    const mockWorkflowsService = {
+      getWorkflowsExecutionEngine: jest.fn().mockImplementation(async () => ({
+        triggerEvents: {
+          isEnabled: mockTriggerEventsIsEnabled,
+          searchTriggerEventLog: mockSearchTriggerEventLog,
+        },
+      })),
+      getCoreStart: jest.fn().mockResolvedValue({
+        elasticsearch: {
+          client: {
+            asInternalUser: {
+              search: mockSearch,
+            },
+          },
+        },
+      }),
+    };
 
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest
-        .fn()
-        .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
-          routeHandlers[`${method}:${path}`] = { handler };
-          return { addVersion: jest.fn() };
-        }),
+      addVersion: jest.fn().mockImplementation((_config: unknown, handler: MockRouteHandler) => {
+        routeHandlers[`${method}:${path}`] = { handler };
+        return { addVersion: jest.fn() };
+      }),
     });
 
     const mockRouter = {
@@ -58,18 +151,29 @@ describe('Internal Routes', () => {
             createVersionedRoute('POST', config.path)
           ),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    };
 
-    registerInternalRoutes(
-      {
-        router: mockRouter as any,
-        api: mockApi as any,
-        logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as any,
-        spaces: {} as any,
-        audit: {} as any,
-      },
-      mockGetWorkflowExecutionEngine
-    );
+    const logger: Logger = {
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+    } as unknown as Logger;
+
+    const routeDependencies: RouteDependencies = {
+      router: mockRouter,
+      api: mockApi,
+      workflowsService: mockWorkflowsService,
+      logger,
+      spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+      audit: mockAudit,
+    } as unknown as RouteDependencies;
+
+    registerInternalRoutes(routeDependencies);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should register the config route handler', () => {
@@ -78,57 +182,400 @@ describe('Internal Routes', () => {
   });
 
   it('should return eventDrivenExecutionEnabled true when engine returns true', async () => {
-    mockEngine.isEventDrivenExecutionEnabled.mockReturnValue(true);
+    mockTriggerEventsIsEnabled = true;
 
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest();
 
     await routeHandlers[`GET:/internal/workflows/config`].handler(mockContext, request, response);
 
-    expect(mockGetWorkflowExecutionEngine).toHaveBeenCalledTimes(1);
-    expect(mockEngine.isEventDrivenExecutionEnabled).toHaveBeenCalledTimes(1);
     expect(response.ok).toHaveBeenCalledWith({
       body: { eventDrivenExecutionEnabled: true },
     });
   });
 
   it('should return eventDrivenExecutionEnabled false when engine returns false', async () => {
-    mockEngine.isEventDrivenExecutionEnabled.mockReturnValue(false);
+    mockTriggerEventsIsEnabled = false;
 
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest();
 
     await routeHandlers[`GET:/internal/workflows/config`].handler(mockContext, request, response);
 
-    expect(mockGetWorkflowExecutionEngine).toHaveBeenCalledTimes(1);
-    expect(mockEngine.isEventDrivenExecutionEnabled).toHaveBeenCalledTimes(1);
     expect(response.ok).toHaveBeenCalledWith({
       body: { eventDrivenExecutionEnabled: false },
     });
   });
 
-  it('should register the disable_all_workflows route handler', () => {
-    expect(routeHandlers[`POST:/internal/workflows/disable_all_workflows`]).toBeDefined();
-    expect(routeHandlers[`POST:/internal/workflows/disable_all_workflows`].handler).toEqual(
-      expect.any(Function)
-    );
+  it('should register the disable route handler', () => {
+    expect(routeHandlers[`POST:/internal/workflows/disable`]).toBeDefined();
+    expect(routeHandlers[`POST:/internal/workflows/disable`].handler).toEqual(expect.any(Function));
   });
 
-  it('should call api.disableAllWorkflows across all spaces', async () => {
-    mockApi.disableAllWorkflows.mockResolvedValue({ total: 3, disabled: 3, failures: [] });
+  it('should register trigger event log search routes', () => {
+    expect(routeHandlers[`POST:/internal/workflows/trigger_events/_search`]).toBeDefined();
+  });
+
+  it('should register the workflow history route handler', () => {
+    expect(routeHandlers[`GET:/internal/workflows/workflow/{id}/history`]).toBeDefined();
+  });
+
+  it('should register the workflow restore route handler', () => {
+    expect(
+      routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`]
+    ).toBeDefined();
+  });
+
+  it('should call api.getHistoryForWorkflow with page/per_page defaults', async () => {
+    const history = { page: 1, perPage: 20, total: 1, items: [{ id: 'event-1' }] };
+    mockApi.getHistoryForWorkflow.mockResolvedValue(history);
 
     const response = httpServerMock.createResponseFactory();
-    const request = httpServerMock.createKibanaRequest();
+    const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
 
-    await routeHandlers[`POST:/internal/workflows/disable_all_workflows`].handler(
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
       mockContext,
       request,
       response
     );
 
-    expect(mockApi.disableAllWorkflows).toHaveBeenCalledWith();
+    expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+      page: 1,
+      perPage: 20,
+    });
+    expect(response.ok).toHaveBeenCalledWith({ body: history });
+  });
+
+  it('should pass through page and per_page query params', async () => {
+    mockApi.getHistoryForWorkflow.mockResolvedValue({ page: 2, perPage: 5, total: 0, items: [] });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1' },
+      query: { page: 2, per_page: 5 },
+    });
+
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+      page: 2,
+      perPage: 5,
+    });
+  });
+
+  it('returns bad request when change history is not initialized', async () => {
+    mockApi.getHistoryForWorkflow.mockRejectedValue(new WorkflowChangeHistoryDisabledError());
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: WORKFLOW_CHANGE_HISTORY_UNAVAILABLE_MESSAGE,
+        attributes: {
+          code: 'HISTORY_DISABLED',
+        },
+      },
+    });
+    expect(mockAudit.logWorkflowAccessed).toHaveBeenCalledWith(request, {
+      id: 'wf-1',
+      error: expect.any(WorkflowChangeHistoryDisabledError),
+    });
+  });
+
+  it('returns bad request when history pagination exceeds the result window', async () => {
+    mockApi.getHistoryForWorkflow.mockRejectedValue(new WorkflowHistoryPaginationError());
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1' },
+      query: { page: 101, per_page: 100 },
+    });
+
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+      page: 101,
+      perPage: 100,
+    });
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: WORKFLOW_HISTORY_PAGINATION_EXCEEDED_MESSAGE,
+      },
+    });
+    expect(mockAudit.logWorkflowAccessed).toHaveBeenCalledWith(request, {
+      id: 'wf-1',
+      error: expect.any(WorkflowHistoryPaginationError),
+    });
+  });
+
+  it('should call api.restoreWorkflowVersion and return the restored workflow', async () => {
+    const restored = {
+      id: 'wf-1',
+      version: 8,
+      lastUpdatedAt: '2026-01-02T00:00:00.000Z',
+      lastUpdatedBy: 'alice',
+      enabled: true,
+      valid: true,
+      validationErrors: [],
+    };
+    mockApi.restoreWorkflowVersion.mockResolvedValue(restored);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1', eventId: 'event-v3' },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.restoreWorkflowVersion).toHaveBeenCalledWith(
+      'wf-1',
+      'event-v3',
+      'default',
+      request
+    );
+    expect(response.ok).toHaveBeenCalledWith({ body: restored });
+    expect(mockAudit.logWorkflowRestored).toHaveBeenCalledWith(request, {
+      id: 'wf-1',
+      eventId: 'event-v3',
+      version: 8,
+    });
+    expect(mockAudit.logWorkflowUpdated).not.toHaveBeenCalled();
+  });
+
+  it('returns bad request when restore is requested before change history is initialized', async () => {
+    mockApi.restoreWorkflowVersion.mockRejectedValue(new WorkflowChangeHistoryDisabledError());
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1', eventId: 'event-v3' },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: WORKFLOW_CHANGE_HISTORY_UNAVAILABLE_MESSAGE,
+        attributes: {
+          code: 'HISTORY_DISABLED',
+        },
+      },
+    });
+    expect(mockAudit.logWorkflowRestored).toHaveBeenCalledWith(request, {
+      id: 'wf-1',
+      eventId: 'event-v3',
+      error: expect.any(WorkflowChangeHistoryDisabledError),
+    });
+  });
+
+  it('returns not found when the history event does not exist', async () => {
+    mockApi.restoreWorkflowVersion.mockRejectedValue(
+      new WorkflowHistoryEventNotFoundError('wf-1', 'missing-event')
+    );
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1', eventId: 'missing-event' },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalledWith({
+      body: {
+        message: "Change history event 'missing-event' not found for workflow 'wf-1'.",
+      },
+    });
+    expect(mockAudit.logWorkflowRestored).toHaveBeenCalledWith(request, {
+      id: 'wf-1',
+      eventId: 'missing-event',
+      error: expect.any(WorkflowHistoryEventNotFoundError),
+    });
+  });
+
+  it('returns forbidden when restoring a managed workflow', async () => {
+    mockApi.restoreWorkflowVersion.mockRejectedValue(new ManagedWorkflowUpdateForbiddenError());
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'managed-wf', eventId: 'event-v3' },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.forbidden).toHaveBeenCalledWith({
+      body: {
+        message: 'Managed workflows cannot be edited. You can only enable or disable them.',
+      },
+    });
+  });
+
+  it('returns conflict when restore hits an OCC write conflict', async () => {
+    mockApi.restoreWorkflowVersion.mockRejectedValue(
+      new WorkflowConflictError('Workflow was updated by another user.', 'wf-1')
+    );
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1', eventId: 'event-v3' },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.conflict).toHaveBeenCalledWith({
+      body: {
+        error: 'Conflict',
+        message: 'Workflow was updated by another user.',
+        statusCode: 409,
+        workflowId: 'wf-1',
+      },
+    });
+  });
+
+  it('returns not found when the workflow does not exist', async () => {
+    mockApi.restoreWorkflowVersion.mockRejectedValue(new WorkflowNotFoundError('missing'));
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'missing', eventId: 'event-v3' },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalledWith({
+      body: {
+        message: 'Workflow with id "missing" not found.',
+      },
+    });
+  });
+
+  it('forwards trigger event log search params to the execution engine', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      body: { kql: 'triggerId : x', page: 2, size: 25 },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearchTriggerEventLog).toHaveBeenCalledWith({
+      spaceId: 'default',
+      kql: 'triggerId : x',
+      from: undefined,
+      to: undefined,
+      page: 2,
+      size: 25,
+    });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { hits: [], total: 0, page: 1, size: 10 },
+    });
+  });
+
+  it('forwards payload.* KQL to the execution engine unchanged', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      body: { kql: 'payload.workflow.status : failed', page: 1, size: 10 },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearchTriggerEventLog).toHaveBeenCalledWith({
+      spaceId: 'default',
+      kql: 'payload.workflow.status : failed',
+      from: undefined,
+      to: undefined,
+      page: 1,
+      size: 10,
+    });
+  });
+
+  it('returns 400 when trigger event log search throws KQLSyntaxError', async () => {
+    const kqlError = new KQLSyntaxError(
+      {
+        message: 'Expected',
+        expected: null,
+        found: '',
+        location: { start: { offset: 0 } },
+      } as ConstructorParameters<typeof KQLSyntaxError>[0],
+      'bad:'
+    );
+    mockSearchTriggerEventLog.mockRejectedValueOnce(kqlError);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: {} });
+
+    await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: kqlError.shortMessage },
+    });
+  });
+
+  it('should call api.disableAllWorkflows scoped to the request space', async () => {
+    mockApi.disableAllWorkflows.mockResolvedValue({ total: 3, disabled: 3, failures: [] });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest();
+
+    await routeHandlers[`POST:/internal/workflows/disable`].handler(mockContext, request, response);
+
+    expect(mockApi.disableAllWorkflows).toHaveBeenCalledWith('default', request);
     expect(response.ok).toHaveBeenCalledWith({
       body: { total: 3, disabled: 3, failures: [] },
     });
+  });
+
+  it('rejects non-integer workflow history page values at route validation', () => {
+    expect(() => workflowHistoryQuerySchema.validate({ page: 1.5 })).toThrow(
+      'page must be an integer'
+    );
   });
 });

@@ -18,6 +18,9 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionResultsArgs {
   edges: ResultEdges;
+  total: number;
+  // Scheduled route derives these from agent cardinality; the live route uses
+  // `doc_count`, correct only because live queries emit one doc per agent.
   aggregations: {
     totalRowCount: number;
     totalResponded: number;
@@ -136,6 +139,7 @@ export const useActionResults = ({
         if (isScheduled) {
           return {
             edges: response.edges as ResultEdges,
+            total: response.total ?? response.edges.length,
             aggregations: response.aggregations,
             inspect: response.inspect || { dsl: [], response: [] },
           };
@@ -160,13 +164,14 @@ export const useActionResults = ({
 
         return {
           edges: mergedEdges,
+          total: agentIds?.length ?? 0,
           aggregations: response.aggregations,
           inspect: response.inspect || { dsl: [], response: [] },
         };
       },
       initialData: {
         edges: [],
-        total: 0,
+        total: isScheduled ? 0 : agentIds?.length ?? 0,
         currentPage: 0,
         pageSize: limit,
         totalPages: 0,

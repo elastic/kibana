@@ -6,7 +6,7 @@
  */
 
 import { compose, lifecycle, withHandlers, withProps, withState } from 'react-recompose';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
 import { getNodes, getPageById, isWriteable } from '../../../state/selectors/workpad';

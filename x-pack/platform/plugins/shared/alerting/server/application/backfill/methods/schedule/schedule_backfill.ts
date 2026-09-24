@@ -157,7 +157,6 @@ export async function scheduleBackfill(
           logger: context.logger,
           ruleType,
           references,
-          omitGeneratedValues: false,
         },
         (connectorId: string) => actionsClient.isSystemAction(connectorId)
       );

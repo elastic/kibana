@@ -110,6 +110,7 @@ export const ScriptLibraryFilter = memo<ScriptLibraryFilterProps>(
                 }
               : undefined
           }
+          listProps={{ paddingSize: 's' }}
         >
           {(list, search) => (
             <div

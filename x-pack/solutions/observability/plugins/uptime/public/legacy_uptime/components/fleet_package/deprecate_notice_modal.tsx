@@ -21,7 +21,7 @@ export const DeprecateNoticeModal = ({ onCancel }: { onCancel: () => void }) => 
       titleProps={{ id: modalTitleId }}
       title={
         <>
-          {HEADER_TEXT} <EuiIcon type="popper" />
+          {HEADER_TEXT} <EuiIcon type="popper" aria-hidden={true} />
         </>
       }
       onCancel={onCancel}

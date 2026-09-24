@@ -27,4 +27,21 @@ describe('validateCasesWebhookConfig', () => {
       `"OAuth2 authentication is not supported for cases webhook connector"`
     );
   });
+
+  it('throws an error for OAuth2 password grant auth type', () => {
+    const configObject: CasesWebhookPublicConfigurationType = {
+      createCommentUrl: 'https://example.com/create-comment',
+      createIncidentUrl: 'https://example.com/create-incident',
+      viewIncidentUrl: 'https://example.com/view-incident',
+      getIncidentUrl: 'https://example.com/get-incident',
+      updateIncidentUrl: 'https://example.com/update-incident',
+      authType: AuthType.OAuth2Password,
+    } as unknown as CasesWebhookPublicConfigurationType;
+
+    expect(() =>
+      validateCasesWebhookConfig(configObject, {} as ValidatorServices)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"OAuth2 authentication is not supported for cases webhook connector"`
+    );
+  });
 });

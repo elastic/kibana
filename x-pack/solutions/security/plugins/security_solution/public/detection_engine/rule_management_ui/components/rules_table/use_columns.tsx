@@ -10,13 +10,11 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { columnPresetActions } from '@kbn/shared-ux-column-presets';
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
@@ -38,7 +36,7 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { PopoverItems } from '../../../../common/components/popover_items';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+import { useUiSetting$ } from '../../../../common/lib/kibana';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
@@ -453,41 +451,6 @@ export const SEARCH_DURATION_COLUMN = {
   maxWidth: '11em',
 };
 
-export const useGapDurationColumn = () => {
-  const docLinks = useKibana().services.docLinks;
-
-  return {
-    field: 'execution_summary.last_execution.metrics.execution_gap_duration_s',
-    name: i18n.COLUMN_GAP,
-    nameTooltip: {
-      content: (
-        <FormattedMessage
-          defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
-          id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
-          values={{
-            seeDocs: (
-              <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
-                {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
-              </EuiLink>
-            ),
-          }}
-        />
-      ),
-      icon: 'question',
-    },
-    render: (value: number | undefined) => (
-      <EuiText data-test-subj="gap" size="s">
-        {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
-      </EuiText>
-    ),
-    sortable: true,
-    truncateText: true,
-    minWidth: '11em',
-    width: '11em',
-    maxWidth: '12em',
-  };
-};
-
 const GapFillStatusTooltip = ({
   totalInProgressDurationMs,
   totalUnfilledDurationMs,
@@ -621,7 +584,6 @@ export const useMonitoringColumns = ({
     isLoadingJobs,
     mlJobs,
   });
-  const gapDurationColumn = useGapDurationColumn();
   const gapStatusColumn = useGapStatusColumn();
 
   return useMemo(
@@ -633,20 +595,12 @@ export const useMonitoringColumns = ({
       INDEXING_DURATION_COLUMN,
       SEARCH_DURATION_COLUMN,
       gapStatusColumn,
-      gapDurationColumn,
       TOTAL_UNFILLED_DURATION_COLUMN,
       executionStatusColumn,
       LAST_EXECUTION_COLUMN,
       enabledColumn,
       actionsColumn,
     ],
-    [
-      actionsColumn,
-      enabledColumn,
-      executionStatusColumn,
-      gapDurationColumn,
-      showRelatedIntegrations,
-      gapStatusColumn,
-    ]
+    [actionsColumn, enabledColumn, executionStatusColumn, showRelatedIntegrations, gapStatusColumn]
   );
 };

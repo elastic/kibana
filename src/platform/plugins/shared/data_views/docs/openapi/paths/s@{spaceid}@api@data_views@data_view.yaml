@@ -42,9 +42,15 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/data_view_response_object.yaml'
+          examples:
+            createDataViewResponse:
+              $ref: '../components/examples/create_data_view_response.yaml'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            createDataViewBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

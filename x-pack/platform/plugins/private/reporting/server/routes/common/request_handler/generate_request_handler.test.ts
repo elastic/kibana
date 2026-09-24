@@ -170,7 +170,7 @@ describe('Handle request to generate', () => {
       });
 
       const { _id, created_at, ...snapObj } = report;
-      expect(snapObj.payload.version).toBe('7.14.0');
+      expect(snapObj.payload.version).toBe(reportingCore.getKibanaPackageInfo().version);
     });
   });
 
@@ -269,17 +269,7 @@ describe('Handle request to generate', () => {
         await handler.getJobParams();
       } catch (err) {
         expect(err.statusCode).toBe(400);
-        expect(err.body).toMatchInlineSnapshot(`
-          "invalid params: [
-            {
-              \\"code\\": \\"custom\\",
-              \\"path\\": [
-                \\"browserTimezone\\"
-              ],
-              \\"message\\": \\"Invalid timezone\\"
-            }
-          ]"
-        `);
+        expect(err.body).toEqual('invalid params: browserTimezone: Invalid timezone');
       }
     });
 

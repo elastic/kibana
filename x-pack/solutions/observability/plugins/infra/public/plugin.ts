@@ -68,6 +68,58 @@ import {
 import type { LogsAppRoutes, LogsRoute } from './pages/logs/routes';
 import { getLogsAppRoutes } from './pages/logs/routes';
 
+// !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
+export const getInfraDeepLinks = ({
+  metricsExplorerEnabled,
+}: {
+  metricsExplorerEnabled: boolean;
+}): AppDeepLink[] => {
+  const visibleIn: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
+
+  return [
+    {
+      id: 'inventory',
+      title: inventoryTitle,
+      path: '/inventory',
+      visibleIn,
+    },
+    {
+      id: 'hosts',
+      title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+        defaultMessage: 'Hosts',
+      }),
+      path: '/hosts',
+      visibleIn,
+    },
+    ...(metricsExplorerEnabled
+      ? [
+          {
+            id: 'metrics-explorer',
+            title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+              defaultMessage: 'Metrics Explorer',
+            }),
+            path: '/explorer',
+            visibleIn,
+          },
+        ]
+      : []),
+    {
+      id: 'settings',
+      title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+        defaultMessage: 'Settings',
+      }),
+      path: '/settings',
+      visibleIn: ['globalSearch'],
+    },
+    {
+      id: 'assetDetails',
+      title: '', // Internal deep link, not shown in the UI. Title is dynamically set in the app.
+      path: '/detail',
+      visibleIn: [],
+    },
+  ];
+};
+
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
@@ -215,56 +267,6 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
-    // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
-    const getInfraDeepLinks = ({
-      metricsExplorerEnabled,
-    }: {
-      metricsExplorerEnabled: boolean;
-    }): AppDeepLink[] => {
-      const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
-
-      return [
-        {
-          id: 'inventory',
-          title: inventoryTitle,
-          path: '/inventory',
-          visibleIn,
-        },
-        {
-          id: 'hosts',
-          title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-            defaultMessage: 'Hosts',
-          }),
-          path: '/hosts',
-          visibleIn,
-        },
-        ...(metricsExplorerEnabled
-          ? [
-              {
-                id: 'metrics-explorer',
-                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                  defaultMessage: 'Metrics Explorer',
-                }),
-                path: '/explorer',
-              },
-            ]
-          : []),
-        {
-          id: 'settings',
-          title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-            defaultMessage: 'Settings',
-          }),
-          path: '/settings',
-        },
-        {
-          id: 'assetDetails',
-          title: '', // Internal deep link, not shown in the UI. Title is dynamically set in the app.
-          path: '/detail',
-          visibleIn: [],
-        },
-      ];
-    };
-
     core.application.register({
       id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
@@ -319,7 +321,9 @@ export class Plugin implements InfraClientPluginClass {
         OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
       )
     ) {
-      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.EDITABLE);
+      // The logs app starts disabled and will later register its own picker access from within its page providers
+      // (useInfraMlCpsPickerAccess), where the ML CPS capability of Elasticsearch is known after resolving asynchronously;
+      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.DISABLED);
       plugins.cps?.cpsManager?.registerAppAccess('metrics', () => ProjectRoutingAccess.EDITABLE);
     }
 

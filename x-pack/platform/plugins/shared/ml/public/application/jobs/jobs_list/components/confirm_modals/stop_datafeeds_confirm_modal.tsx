@@ -20,8 +20,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
-import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 import { stopDatafeeds } from '../utils';
 import { ManagedJobsWarningCallout } from './managed_jobs_warning_callout';

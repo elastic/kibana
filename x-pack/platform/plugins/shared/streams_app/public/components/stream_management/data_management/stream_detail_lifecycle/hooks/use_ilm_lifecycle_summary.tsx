@@ -22,13 +22,14 @@ import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 import type { DataStreamStats } from './use_data_stream_stats';
-import { EditPolicyModal } from '../downsampling/edit_policy_modal/edit_policy_modal';
-import { CreatePolicyModal } from '../downsampling/create_new_policy_modal/create_new_policy_modal';
-import { EditIlmPhasesFlyout } from '../downsampling/edit_ilm_phases_flyout';
+import { useLifecycleAfterSave } from '../common/hooks/lifecycle_after_save';
+import { EditPolicyModal } from '../data_phases/edit_policy_modal/edit_policy_modal';
+import { CreatePolicyModal } from '../data_phases/create_new_policy_modal/create_new_policy_modal';
+import { EditIlmPhasesFlyout } from '../data_phases/edit_ilm_phases_flyout';
 import {
   createMapFormValuesToIlmPolicyPhases,
   mapIlmPolicyPhasesToFormValues,
-} from '../downsampling/edit_ilm_phases_flyout/form';
+} from '../data_phases/edit_ilm_phases_flyout/form';
 import type { LifecyclePhase } from '../common/data_lifecycle/lifecycle_types';
 import { useSnapshotRepositories } from './use_snapshot_repositories';
 import {
@@ -58,6 +59,7 @@ interface UseIlmLifecycleSummaryProps {
 interface UseIlmLifecycleSummaryResult {
   phases: LifecyclePhase[];
   loading: boolean;
+  policyMissing: boolean;
   onRemovePhase?: (phaseName: string) => void;
   onRemoveDownsampleStep?: (stepNumber: number) => void;
   onEditPhase?: (phaseName: PhaseName) => void;
@@ -87,6 +89,7 @@ export const useIlmLifecycleSummary = ({
       },
     },
   } = useKibana();
+  const { notifyAfterSave } = useLifecycleAfterSave();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const { signal } = useAbortController();
 
@@ -200,6 +203,7 @@ export const useIlmLifecycleSummary = ({
       });
       await Promise.resolve(refreshDefinition?.());
       refreshIlmStats();
+      notifyAfterSave();
       handleCancelModal();
     } catch (error) {
       notifications.toasts.addError(error as Error, {
@@ -295,6 +299,7 @@ export const useIlmLifecycleSummary = ({
 
       await Promise.resolve(refreshDefinition?.());
       refreshIlmStats();
+      notifyAfterSave();
       handleCancelModal();
       closeEditFlyout();
     } catch (error) {
@@ -375,6 +380,7 @@ export const useIlmLifecycleSummary = ({
 
       await Promise.resolve(refreshDefinition?.());
       refreshIlmStats();
+      notifyAfterSave();
       handleCancelModal();
       closeEditFlyout();
     } catch (error) {
@@ -441,6 +447,17 @@ export const useIlmLifecycleSummary = ({
 
   const handleFlyoutSave = async (nextPhases: IlmPolicyPhases) => {
     if (!isIlm) return;
+
+    // Applying with no configuration changes must not prompt the "save as new policy"
+    // confirmation modal — just close the flyout. `editFlyoutCanonicalInitialPhases` is the
+    // form round-tripped baseline, so it is directly comparable to the flyout's `onSave` output.
+    if (
+      uiState.editFlyoutCanonicalInitialPhases &&
+      isEqual(nextPhases, uiState.editFlyoutCanonicalInitialPhases)
+    ) {
+      closeEditFlyout();
+      return;
+    }
 
     try {
       await fetchPolicies();
@@ -510,6 +527,7 @@ export const useIlmLifecycleSummary = ({
     <>
       {uiState.activeModal === 'delete' && uiState.deleteContext && (
         <EditPolicyModal
+          policyName={policyName}
           affectedResources={affectedResources}
           isManaged={uiState.deleteContext?.isManaged}
           isProcessing={uiState.isProcessing}
@@ -521,6 +539,7 @@ export const useIlmLifecycleSummary = ({
 
       {uiState.activeModal === 'edit' && uiState.editContext && (
         <EditPolicyModal
+          policyName={policyName}
           affectedResources={affectedResources}
           isManaged={uiState.editContext.isManaged}
           isProcessing={uiState.isProcessing}
@@ -580,6 +599,7 @@ export const useIlmLifecycleSummary = ({
   return {
     phases,
     loading: isIlm && ilmLoading,
+    policyMissing: isIlm ? ilmStatsValue?.policy_missing ?? false : false,
     onRemovePhase: isIlm ? handleRemovePhase : undefined,
     onRemoveDownsampleStep: isIlm ? handleRemoveIlmDownsampleStep : undefined,
     onEditPhase: isIlm ? (phaseName) => openEditFlyout({ phaseName }) : undefined,

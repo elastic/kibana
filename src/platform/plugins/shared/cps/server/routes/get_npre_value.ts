@@ -25,10 +25,9 @@ export const registerGetNpreValueRoute = (
       },
       security: {
         authz: {
-          requiredPrivileges: [
-            // this will end up being just read_project_routing but it is not implemented yet.
-            'cluster:monitor/project_routing/get',
-          ],
+          enabled: false,
+          reason:
+            'NPRE values are not sensitive and are fetched as the Kibana internal user so that users without the read_project_routing cluster privilege can still resolve them',
         },
       },
     },

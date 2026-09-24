@@ -9,9 +9,10 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
+import { isMissingValue, NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord } from '../../types';
-import { formatFieldValue } from './format_value';
+import { formatFieldValueText } from './format_value';
 
 interface ConvertedResult {
   formattedString: string;
@@ -53,17 +54,20 @@ export const convertValueToString = ({
 
   const formatted = valuesArray
     .map((subValue) => {
-      const formattedValue = formatFieldValue(
-        subValue,
-        dataTableRecord.raw,
+      // Copy and CSV should carry what the grid shows, and the grid renders missing values as
+      // a dash. Returned before escaping: NULL_PLACEHOLDER is our own constant rather than document
+      // content, so the CSV formula guard would only turn a leading "-" into "'-" for nothing.
+      if (isMissingValue(subValue)) {
+        return NULL_PLACEHOLDER;
+      }
+
+      const formattedValue = formatFieldValueText({
+        value: subValue,
         fieldFormats,
         dataView,
-        dataViewField,
-        'text',
-        {
-          skipFormattingInStringifiedJSON: disableMultiline,
-        }
-      );
+        field: dataViewField,
+        options: { skipFormattingInStringifiedJSON: disableMultiline },
+      });
 
       if (typeof formattedValue === 'string') {
         withFormula = withFormula || cellHasFormulas(formattedValue);

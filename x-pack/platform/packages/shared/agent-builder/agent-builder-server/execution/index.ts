@@ -7,6 +7,7 @@
 
 export type {
   BaseExecutionParams,
+  ExecutionConversationOrigin,
   ConversationExecutionParams,
   StandaloneExecutionParams,
   AgentExecutionParams,
@@ -20,5 +21,7 @@ export type {
   FollowExecutionOptions,
   FindExecutionsFilter,
   FindExecutionsOptions,
+  AbortExecutionOptions,
+  AbortExecutionResult,
   AgentExecutionService,
 } from './types';

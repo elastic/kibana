@@ -92,8 +92,14 @@ export class Client {
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Create `.lists` and `.items` data streams in the relevant space.
-   */
+    * **DEPRECATED.** `deprecated: true` is set on this operation. Value list backing data streams for the space
+are now created as part of supported workflows; calling this explicitly is rarely required.
+**WARNING:** Do not use for new integrations. Prefer the UI or the list and list-item APIs after confirming
+indices exist with `GET /api/lists/index`.
+
+Creates the `.lists` and `.items` data streams in the current Kibana space.
+
+    */
   async createListIndex() {
     this.log.info(`${new Date().toISOString()} Calling API CreateListIndex`);
     return this.kbnClient
@@ -331,6 +337,12 @@ You can import items to a new or existing list.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Returns the caller's authentication state and the Elasticsearch `cluster`, `index`, and `application`
+privileges for `.lists` and `.items` data streams in the current Kibana space. Use this to decide which list
+APIs (`read` vs `all` operations) are available before you create or import lists.
+
+    */
   async readListPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API ReadListPrivileges`);
     return this.kbnClient

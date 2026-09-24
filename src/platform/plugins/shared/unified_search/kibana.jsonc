@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/unified-search-plugin",
   "owner": [
-    "@elastic/kibana-presentation"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -27,7 +27,9 @@
       "kql"
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "esql",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaUtils",

@@ -41,7 +41,7 @@ import {
 } from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
-import { CpsMlRuleCallout } from '../../components/cps_ml_rule_callout/callout';
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 
 const RulesPageContent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -72,7 +72,9 @@ const RulesPageContent = () => {
 
   const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled('aiRuleCreationEnabled');
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
+  const { isEsqlRuleTypeEnabled } = useEsqlAvailability();
+  const isAiRuleCreationAvailable =
+    aiRuleCreationEnabled && isAgentBuilderEnabled && isEsqlRuleTypeEnabled;
   const deprecatedRulesCallout = useDeprecatedRulesTableCallout();
 
   if (
@@ -96,7 +98,6 @@ const RulesPageContent = () => {
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
-      <CpsMlRuleCallout />
       <MlJobCompatibilityCallout />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <RuleImportModal

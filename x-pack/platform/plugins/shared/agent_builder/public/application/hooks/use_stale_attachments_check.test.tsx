@@ -27,10 +27,17 @@ jest.mock('react-use/lib/useEvent', () => ({
   default: jest.fn(),
 }));
 
+const mockActiveStreams = new Map<string, unknown>();
+
+jest.mock('../context/streaming/streaming_context', () => ({
+  useStreamingContext: () => ({ activeStreams: mockActiveStreams }),
+}));
+
 describe('useStaleAttachments', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAddErrorToast.mockClear();
+    mockActiveStreams.clear();
     jest.useFakeTimers();
   });
 
@@ -46,6 +53,69 @@ describe('useStaleAttachments', () => {
     });
 
     expect(mockCheckStale).not.toHaveBeenCalled();
+  });
+
+  it('does not call checkStale when the conversation is actively streaming', async () => {
+    mockActiveStreams.set('streaming-conv', { type: 'send', agentReasoning: null });
+
+    renderHook(() => useStaleAttachments('streaming-conv'));
+
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+
+    expect(mockCheckStale).not.toHaveBeenCalled();
+  });
+
+  it('does not call checkStale when conversationId switches from undefined to a new ID while streaming', async () => {
+    const newConversationId = '098d3181-5c84-491b-9a2d-eeca44a4ffea';
+
+    const { rerender } = renderHook(
+      ({ conversationId }: { conversationId: string | undefined }) =>
+        useStaleAttachments(conversationId),
+      { initialProps: { conversationId: undefined as string | undefined } }
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+    expect(mockCheckStale).not.toHaveBeenCalled();
+
+    mockActiveStreams.set(newConversationId, { type: 'send', agentReasoning: null });
+    rerender({ conversationId: newConversationId });
+
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+
+    expect(mockCheckStale).not.toHaveBeenCalled();
+  });
+
+  it('calls checkStale once the stream completes for a new conversation', async () => {
+    const newConversationId = 'new-conv-id';
+    mockCheckStale.mockResolvedValue({ attachments: [] });
+
+    mockActiveStreams.set(newConversationId, { type: 'send', agentReasoning: null });
+
+    const { result } = renderHook(
+      ({ conversationId }: { conversationId: string | undefined }) =>
+        useStaleAttachments(conversationId),
+      { initialProps: { conversationId: newConversationId as string | undefined } }
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+    expect(mockCheckStale).not.toHaveBeenCalled();
+
+    mockActiveStreams.delete(newConversationId);
+
+    await act(async () => {
+      result.current.scheduleStaleCheck();
+      jest.advanceTimersByTime(400);
+    });
+
+    expect(mockCheckStale).toHaveBeenCalledWith(newConversationId);
   });
 
   it('calls checkStale after debounce when conversationId is set', async () => {

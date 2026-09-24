@@ -153,12 +153,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
           const newValue = (formAction.value || '') + (suffix ? suffix : '');
-          await testSubjects.setValue(formAction.selector, newValue);
-          await testSubjects.getAttribute(formAction.selector, 'value').then((value) => {
-            if (value !== newValue) {
-              return testSubjects.setValue(formAction.selector, newValue);
-            }
-          });
+          await testSubjects.setValue(formAction.selector, newValue, { clearWithKeyboard: true });
         } else if (formAction.type === 'clear') {
           await (
             await (await testSubjects.find(formAction.selector)).findByCssSelector('button')
@@ -190,7 +185,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       if (options?.policyId) {
         await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
         await testSubjects.click(
-          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}-checkbox`
+          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}`
         );
       }
 
@@ -211,7 +206,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       if (options?.policyId) {
         await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
         await testSubjects.click(
-          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}-checkbox`
+          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}`
         );
       }
 
@@ -241,7 +236,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it(`should be able to add a new ${testData.title} entry`, async () => {
           await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
-          // Check new artifact is in the list
+
+          // Check new artifact is in the list (wait for list to be updated)
+          await retry.waitForWithTimeout('entry is added to list', 20000, async () => {
+            const currentValue = await testSubjects.getVisibleText(
+              testData.create.checkResults[0].selector
+            );
+            return currentValue === testData.create.checkResults[0].value;
+          });
+
           for (const checkResult of testData.create.checkResults) {
             expect(await testSubjects.getVisibleText(checkResult.selector)).to.equal(
               checkResult.value

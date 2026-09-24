@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isRecord, parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { generateWorkflowId } from '../../../../common/lib/import';
-import { isRecord } from '../../../../common/lib/type_guards';
-import { parseYamlToJSONWithoutValidation } from '../../../../common/lib/yaml';
 
 export interface WorkflowPreview {
   id: string;

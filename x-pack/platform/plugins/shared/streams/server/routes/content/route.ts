@@ -7,17 +7,45 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod/v4';
-import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
-import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
-import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
+import type {
+  ContentPack,
+  ContentPackStream,
+  ContentPackIncludedObjects,
+} from '@kbn/content-packs-schema';
+import {
+  MAX_STREAM_NAME_LENGTH,
+  Streams,
+  emptyAssets,
+  getInheritedFieldsFromAncestors,
+} from '@kbn/streams-schema';
+
+// Use z.lazy() so the OAS serializer sees a $ref (no static depth unrolling).
+// Bounds are enforced at runtime: destination string length and routing array count.
+const boundedIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.lazy(() =>
+  z.union([
+    z.object({ objects: z.object({ all: z.strictObject({}) }) }),
+    z.object({
+      objects: z.strictObject({
+        mappings: z.boolean(),
+        routing: z
+          .array(
+            boundedIncludedObjectsSchema.and(
+              z.object({ destination: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) })
+            )
+          )
+          .max(200),
+      }),
+    }),
+  ])
+) as z.Schema<ContentPackIncludedObjects>;
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { QueryLink } from '../../../common/queries';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 import { generateArchive, parseArchive } from '../../lib/content';
+import { exportContentRequest } from '../../oas_examples';
 import {
   prepareStreamsForExport,
   prepareStreamsForImport,
@@ -35,21 +63,41 @@ const exportContentRoute = createServerRoute({
   options: {
     access: 'public',
     summary: 'Export stream content',
-    description: 'Exports the content associated to a stream.',
+    description:
+      'Exports a content pack with the stream structure (routing, mappings, and processing). Significant-event queries are not included.',
     availability: {
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              exportContent: { value: exportContentRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content pack archive for the stream.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the stream to export content from.'),
     }),
     body: z.object({
-      name: z.string(),
-      description: z.string(),
-      version: z.string(),
-      include: contentPackIncludedObjectsSchema,
+      name: z.string().max(256),
+      description: z.string().max(1000),
+      version: z.string().max(100),
+      include: boundedIncludedObjectsSchema,
     }),
   }),
   security: {
@@ -60,7 +108,7 @@ const exportContentRoute = createServerRoute({
   async handler({ params, request, response, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { getQueryClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -72,11 +120,6 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
-    const queryClient = await getQueryClient();
-    const queryLinks = await queryClient.getStreamToQueryLinksMap([
-      params.path.name,
-      ...descendants.map((stream) => stream.name),
-    ]);
     const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
 
     const exportedTree = asTree({
@@ -97,7 +140,7 @@ const exportContentRoute = createServerRoute({
           );
         }
 
-        return asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] });
+        return asContentPackEntry({ stream });
       }),
     });
 
@@ -118,10 +161,8 @@ const exportContentRoute = createServerRoute({
 
 function asContentPackEntry({
   stream,
-  queryLinks,
 }: {
   stream: Streams.WiredStream.Definition;
-  queryLinks: QueryLink[];
 }): ContentPackStream {
   return {
     type: 'stream' as const,
@@ -131,11 +172,13 @@ function asContentPackEntry({
         ...omit(stream, ['name', 'updated_at']),
         ingest: {
           ...stream.ingest,
-          processing: omit(stream.ingest.processing, 'updated_at'),
+          processing: omit(
+            stream.ingest.processing,
+            'updated_at'
+          ) as Streams.WiredStream.UpsertRequest['stream']['ingest']['processing'],
         },
       },
       ...emptyAssets,
-      queries: queryLinks.map(({ query }) => query),
     },
   };
 }
@@ -145,7 +188,8 @@ const importContentRoute = createServerRoute({
   options: {
     access: 'public',
     summary: 'Import content into a stream',
-    description: 'Links content objects to a stream.',
+    description:
+      'Imports stream structure (routing, mappings, and processing) from a content pack into a stream.',
     availability: {
       since: '9.1.0',
       stability: 'experimental',
@@ -155,15 +199,40 @@ const importContentRoute = createServerRoute({
       maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,
       output: 'stream',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'multipart/form-data': {
+            examples: {
+              importContent: {
+                value: {
+                  include: JSON.stringify({ objects: { all: {} } }),
+                  content: '<binary zip archive>',
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content was imported into the stream successfully.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the stream to import content into.'),
     }),
     body: z.object({
       include: z
         .string()
-        .transform((value) => contentPackIncludedObjectsSchema.parse(JSON.parse(value))),
+        .max(MAX_CONTENT_PACK_SIZE_BYTES)
+        .transform((value) => boundedIncludedObjectsSchema.parse(JSON.parse(value))),
       content: z.instanceof(Readable),
     }),
   }),
@@ -175,7 +244,7 @@ const importContentRoute = createServerRoute({
   async handler({ params, request, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { getQueryClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -185,18 +254,11 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const descendants = await streamsClient.getDescendants(params.path.name);
-    const queryClient = await getQueryClient();
-    const queryLinks = await queryClient.getStreamToQueryLinksMap([
-      params.path.name,
-      ...descendants.map(({ name }) => name),
-    ]);
 
     const existingTree = asTree({
       root: params.path.name,
       include: { objects: { all: {} } },
-      streams: [root, ...descendants].map((stream) =>
-        asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] })
-      ),
+      streams: [root, ...descendants].map((stream) => asContentPackEntry({ stream })),
     });
 
     const incomingTree = asTree({
@@ -233,7 +295,7 @@ const previewContentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH),
     }),
     body: z.object({
       content: z.instanceof(Readable),

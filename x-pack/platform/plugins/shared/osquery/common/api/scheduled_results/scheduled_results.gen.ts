@@ -25,29 +25,88 @@ import {
 } from '../model/schema/common_attributes.gen';
 import { GetScheduledActionResultsResponse } from './get_scheduled_action_results.gen';
 import { GetScheduledQueryResultsResponse } from './get_scheduled_query_results.gen';
+import { ExportFormat, ExportRequestBody, ExportJsonResponse } from '../export/export_results.gen';
 
+export const OsqueryExportScheduledQueryResultsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The output format of the exported file.
+     */
+    format: ExportFormat.describe('The output format of the exported file.'),
+  })
+);
+export type OsqueryExportScheduledQueryResultsRequestQuery = z.infer<
+  typeof OsqueryExportScheduledQueryResultsRequestQuery
+>;
+export type OsqueryExportScheduledQueryResultsRequestQueryInput = z.input<
+  typeof OsqueryExportScheduledQueryResultsRequestQuery
+>;
+
+export const OsqueryExportScheduledQueryResultsRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The schedule ID of the scheduled query.
+     */
+    scheduleId: z.string().describe('The schedule ID of the scheduled query.'),
+    /**
+     * The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.
+     */
+    executionCount: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.'
+      ),
+  })
+);
+export type OsqueryExportScheduledQueryResultsRequestParams = z.infer<
+  typeof OsqueryExportScheduledQueryResultsRequestParams
+>;
+export type OsqueryExportScheduledQueryResultsRequestParamsInput = z.input<
+  typeof OsqueryExportScheduledQueryResultsRequestParams
+>;
+
+export const OsqueryExportScheduledQueryResultsRequestBody = lazySchema(() => ExportRequestBody);
+export type OsqueryExportScheduledQueryResultsRequestBody = z.infer<
+  typeof OsqueryExportScheduledQueryResultsRequestBody
+>;
+export type OsqueryExportScheduledQueryResultsRequestBodyInput = z.input<
+  typeof OsqueryExportScheduledQueryResultsRequestBody
+>;
+
+/**
+* A JSON object with `_meta` (export metadata) and `results` (all result rows). Rows are held in memory before writing; prefer `ndjson` for large exports.
+
+*/
+export const OsqueryExportScheduledQueryResultsResponse = lazySchema(() => ExportJsonResponse);
+export type OsqueryExportScheduledQueryResultsResponse = z.infer<
+  typeof OsqueryExportScheduledQueryResultsResponse
+>;
 export const OsqueryGetScheduledActionResultsRequestQuery = lazySchema(() =>
   z.object({
     /**
      * The kuery to filter the results by.
      */
-    kuery: KueryOrUndefined.optional(),
+    kuery: KueryOrUndefined.optional().describe('The kuery to filter the results by.'),
     /**
      * The page number to return. The default is 1.
      */
-    page: PageOrUndefined.optional(),
+    page: PageOrUndefined.optional().describe('The page number to return. The default is 1.'),
     /**
      * The number of results to return per page. The default is 20.
      */
-    pageSize: PageSizeOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional().describe(
+      'The number of results to return per page. The default is 20.'
+    ),
     /**
      * The field that is used to sort the results.
      */
-    sort: SortOrUndefined.optional(),
+    sort: SortOrUndefined.optional().describe('The field that is used to sort the results.'),
     /**
      * Specifies the sort order.
      */
-    sortOrder: SortOrderOrUndefined.optional(),
+    sortOrder: SortOrderOrUndefined.optional().describe('Specifies the sort order.'),
   })
 );
 export type OsqueryGetScheduledActionResultsRequestQuery = z.infer<
@@ -62,11 +121,11 @@ export const OsqueryGetScheduledActionResultsRequestParams = lazySchema(() =>
     /**
      * The schedule ID of the scheduled query.
      */
-    scheduleId: z.string(),
+    scheduleId: z.string().describe('The schedule ID of the scheduled query.'),
     /**
      * The execution count for this scheduled query run.
      */
-    executionCount: z.number().int(),
+    executionCount: z.number().int().describe('The execution count for this scheduled query run.'),
   })
 );
 export type OsqueryGetScheduledActionResultsRequestParams = z.infer<
@@ -87,27 +146,32 @@ export const OsqueryGetScheduledQueryResultsRequestQuery = lazySchema(() =>
     /**
      * The kuery to filter the results by.
      */
-    kuery: KueryOrUndefined.optional(),
+    kuery: KueryOrUndefined.optional().describe('The kuery to filter the results by.'),
     /**
      * The page number to return. The default is 1.
      */
-    page: PageOrUndefined.optional(),
+    page: PageOrUndefined.optional().describe('The page number to return. The default is 1.'),
     /**
      * The number of results to return per page. The default is 20.
      */
-    pageSize: PageSizeOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional().describe(
+      'The number of results to return per page. The default is 20.'
+    ),
     /**
      * The field that is used to sort the results.
      */
-    sort: SortOrUndefined.optional(),
+    sort: SortOrUndefined.optional().describe('The field that is used to sort the results.'),
     /**
      * Specifies the sort order.
      */
-    sortOrder: SortOrderOrUndefined.optional(),
+    sortOrder: SortOrderOrUndefined.optional().describe('Specifies the sort order.'),
     /**
      * The start date filter (ISO 8601) to narrow down results.
      */
-    startDate: z.string().optional(),
+    startDate: z
+      .string()
+      .optional()
+      .describe('The start date filter (ISO 8601) to narrow down results.'),
   })
 );
 export type OsqueryGetScheduledQueryResultsRequestQuery = z.infer<
@@ -122,11 +186,11 @@ export const OsqueryGetScheduledQueryResultsRequestParams = lazySchema(() =>
     /**
      * The schedule ID of the scheduled query.
      */
-    scheduleId: z.string(),
+    scheduleId: z.string().describe('The schedule ID of the scheduled query.'),
     /**
      * The execution count for this scheduled query run.
      */
-    executionCount: z.number().int(),
+    executionCount: z.number().int().describe('The execution count for this scheduled query run.'),
   })
 );
 export type OsqueryGetScheduledQueryResultsRequestParams = z.infer<

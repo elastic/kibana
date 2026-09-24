@@ -8,29 +8,10 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 import { GoogleLink, ReputationLink } from '../../../../../../common/components/links';
 import * as i18n from './translations';
-
-const Badge = styled(EuiBadge)`
-  vertical-align: top;
-` as unknown as typeof EuiBadge;
-
-Badge.displayName = 'Badge';
-
-const TokensFlexItem = styled(EuiFlexItem)`
-  margin-left: 3px;
-`;
-
-TokensFlexItem.displayName = 'TokensFlexItem';
-
-const LinkFlexItem = styled(EuiFlexItem)`
-  margin-left: 6px;
-`;
-
-LinkFlexItem.displayName = 'LinkFlexItem';
 
 type StringRenderer = (value: string) => string;
 
@@ -63,13 +44,13 @@ export const ZeekElement = React.memo<{
   stringRenderer?: StringRenderer;
 }>(({ field, value, scopeId, stringRenderer = defaultStringRenderer }) =>
   value != null ? (
-    <TokensFlexItem grow={false}>
+    <EuiFlexItem grow={false} css={{ marginLeft: '3px' }}>
       <CellActionsRenderer field={field} value={String(value)} scopeId={scopeId}>
-        <Badge iconType="tag" color="hollow" title="">
+        <EuiBadge iconType="tag" color="hollow" title="" css={{ verticalAlign: 'top' }}>
           {stringRenderer(String(value))}
-        </Badge>
+        </EuiBadge>
       </CellActionsRenderer>
-    </TokensFlexItem>
+    </EuiFlexItem>
   ) : null
 );
 
@@ -84,19 +65,19 @@ export const Link = React.memo<LinkProps>(({ value, link }) => {
   if (value != null) {
     if (link != null) {
       return (
-        <LinkFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ marginLeft: '6px' }}>
           <div>
             <GoogleLink link={link}>{value}</GoogleLink>
           </div>
-        </LinkFlexItem>
+        </EuiFlexItem>
       );
     } else {
       return (
-        <LinkFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ marginLeft: '6px' }}>
           <div>
             <GoogleLink link={value} />
           </div>
-        </LinkFlexItem>
+        </EuiFlexItem>
       );
     }
   } else {
@@ -112,7 +93,7 @@ interface TotalVirusLinkShaProps {
 
 export const TotalVirusLinkSha = React.memo<TotalVirusLinkShaProps>(({ value }) =>
   value != null ? (
-    <LinkFlexItem grow={false}>
+    <EuiFlexItem grow={false} css={{ marginLeft: '6px' }}>
       <div>
         <ReputationLink
           domain={value}
@@ -121,7 +102,7 @@ export const TotalVirusLinkSha = React.memo<TotalVirusLinkShaProps>(({ value }) 
           data-test-subj="reputationLinkSha"
         />
       </div>
-    </LinkFlexItem>
+    </EuiFlexItem>
   ) : null
 );
 

@@ -105,7 +105,7 @@ const openActionsMenu = async () => {
 
 const getMenuItemNames = () => {
   // EuiContextMenu items are buttons with class euiContextMenuItem, excluding the title and actions button
-  const menuItems = screen.getAllByRole('button').filter((button) => {
+  const menuItems = screen.getAllByRole('menuitem').filter((button) => {
     const isContextMenuItem = button.classList.contains('euiContextMenuItem');
     const isTitle = button.getAttribute('data-test-subj') === 'contextMenuPanelTitle';
     const isActionsButton = button.getAttribute('data-test-subj') === 'streamsAppActionsButton';
@@ -200,6 +200,25 @@ describe('FieldActionsCell', () => {
       expect(actions).not.toContain('Unmap field');
     });
 
+    it('should NOT show Unmap action for built-in fields on a root stream', async () => {
+      const builtInField: MappedSchemaField = {
+        name: '@timestamp',
+        parent: 'logs.otel',
+        status: 'mapped',
+        type: 'date',
+      };
+
+      renderWithContext(builtInField as SchemaEditorField, [builtInField as SchemaEditorField], {
+        stream: createMockWiredStream('logs.otel'),
+      });
+      await openActionsMenu();
+
+      const actions = getMenuItemNames();
+      expect(actions).toContain('View field');
+      expect(actions).toContain('Edit field');
+      expect(actions).not.toContain('Unmap field');
+    });
+
     it('should call onFieldUpdate without description when Clear description is clicked', async () => {
       const fieldWithDescription: MappedSchemaField = {
         name: 'message',
@@ -212,7 +231,7 @@ describe('FieldActionsCell', () => {
       const { mockOnFieldUpdate } = renderWithContext(fieldWithDescription as SchemaEditorField);
       await openActionsMenu();
 
-      const clearDescriptionButton = screen.getByRole('button', { name: 'Clear description' });
+      const clearDescriptionButton = screen.getByRole('menuitem', { name: 'Clear description' });
       await user.click(clearDescriptionButton);
 
       expect(mockOnFieldUpdate).toHaveBeenCalledWith({
@@ -322,7 +341,7 @@ describe('FieldActionsCell', () => {
       const { mockOnFieldUpdate } = renderWithContext(fieldWithDescription as SchemaEditorField);
       await openActionsMenu();
 
-      const clearDescriptionButton = screen.getByRole('button', { name: 'Clear description' });
+      const clearDescriptionButton = screen.getByRole('menuitem', { name: 'Clear description' });
       await user.click(clearDescriptionButton);
 
       expect(mockOnFieldUpdate).toHaveBeenCalledWith({
@@ -382,7 +401,7 @@ describe('FieldActionsCell', () => {
       const { mockOnFieldUpdate } = renderWithContext(fieldWithDescription as SchemaEditorField);
       await openActionsMenu();
 
-      const clearDescriptionButton = screen.getByRole('button', { name: 'Clear description' });
+      const clearDescriptionButton = screen.getByRole('menuitem', { name: 'Clear description' });
       await user.click(clearDescriptionButton);
 
       expect(mockOnFieldUpdate).toHaveBeenCalledWith({

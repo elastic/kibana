@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -24,8 +24,8 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type {
   EuiBasicTableColumn,
   EuiSearchBarProps,
@@ -131,13 +131,16 @@ export const ManageIntegrationsTable: React.FC<{
     userProfile: userProfileService,
   } = useStartServices();
 
+  const hasReportedView = useRef(false);
   useEffect(() => {
-    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
-      'automatic_import_manage_integrations_table_viewed',
-      {}
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!isLoading && !hasReportedView.current) {
+      (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+        'automatic_import_manage_integrations_table_viewed',
+        {}
+      );
+      hasReportedView.current = true;
+    }
+  }, [isLoading, automaticImport]);
 
   const integrationsWithActions = useMemo(() => {
     return integrations.map((item) => {
@@ -265,6 +268,7 @@ export const ManageIntegrationsTable: React.FC<{
           title: string;
           version?: string;
           dataStreams: DataStreamResponse[];
+          categories?: string[];
         };
       }>(`/api/automatic_import/integrations/${encodeURIComponent(integrationId)}`, {
         version: '1',
@@ -275,6 +279,7 @@ export const ManageIntegrationsTable: React.FC<{
         title: integrationResponse.title,
         version: integrationResponse.version,
         dataStreams: integrationResponse.dataStreams ?? [],
+        categories: integrationResponse.categories,
       };
     },
     [http]
@@ -741,7 +746,7 @@ export const ManageIntegrationsTable: React.FC<{
             )}
             button={
               <EuiFilterButton
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 data-test-subj="manageIntegrationsActionsFilterBtn"
                 onClick={() => setIsActionsFilterOpen(!isActionsFilterOpen)}
                 isSelected={isActionsFilterOpen}
@@ -772,7 +777,7 @@ export const ManageIntegrationsTable: React.FC<{
             )}
             button={
               <EuiFilterButton
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 data-test-subj="manageIntegrationsStatusFilterBtn"
                 onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
                 isSelected={isStatusFilterOpen}
@@ -855,7 +860,7 @@ export const ManageIntegrationsTable: React.FC<{
               <span tabIndex={0}>
                 <EuiButton
                   size="s"
-                  iconType="exportAction"
+                  iconType="upload"
                   isLoading={isBulkInstalling}
                   isDisabled={!canBulkInstall}
                   onClick={handleBulkInstall}
@@ -889,10 +894,8 @@ export const ManageIntegrationsTable: React.FC<{
 
   if (isError) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
-        color="danger"
-        iconType="error"
         title={
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.errorTitle"

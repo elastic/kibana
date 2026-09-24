@@ -8,33 +8,41 @@
 import { injectable } from 'inversify';
 import { get } from 'lodash';
 import objectHash from 'object-hash';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { RuleCatalog } from '../state';
 import type {
+  ActionGroup,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  NotificationGroup,
 } from '../types';
 
 @injectable()
 export class BuildGroupsStep implements DispatcherStep {
   public readonly name = 'build_groups';
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { matched = [] } = state;
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { matched = [], rules = RuleCatalog.empty() } = state;
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched, rules);
 
     return { type: 'continue', data: { groups } };
   }
 }
 
-export function buildNotificationGroups(matched: readonly MatchedPair[]): NotificationGroup[] {
-  const groupMap = new Map<string, NotificationGroup>();
+export function buildActionGroups(
+  matched: readonly MatchedPair[],
+  rules: RuleCatalog = RuleCatalog.empty()
+): ActionGroup[] {
+  const groupMap = new Map<string, ActionGroup>();
 
   for (const { episode, policy } of matched) {
     let groupKey: Record<string, unknown>;
-    switch (policy.groupingMode ?? 'per_episode') {
+    switch (policy.groupingMode) {
       case 'per_episode':
         groupKey = {
           groupHash: episode.group_hash,
@@ -51,23 +59,30 @@ export function buildNotificationGroups(matched: readonly MatchedPair[]): Notifi
         break;
     }
 
-    const notificationGroupId = objectHash({
+    const actionGroupId = objectHash({
       policyId: policy.id,
       groupKey,
     });
 
-    if (!groupMap.has(notificationGroupId)) {
-      groupMap.set(notificationGroupId, {
-        id: notificationGroupId,
+    if (!groupMap.has(actionGroupId)) {
+      groupMap.set(actionGroupId, {
+        id: actionGroupId,
         spaceId: policy.spaceId,
         policyId: policy.id,
         destinations: policy.destinations,
         groupKey,
         episodes: [],
+        rules: {},
       });
     }
 
-    groupMap.get(notificationGroupId)!.episodes.push(episode);
+    const group = groupMap.get(actionGroupId)!;
+    group.episodes.push(episode);
+    const ruleId = episode.rule_id;
+    const rule = rules.forEpisode(episode);
+    if (rule && ruleId != null) {
+      group.rules[ruleId] = { name: rule.name };
+    }
   }
 
   return [...groupMap.values()];

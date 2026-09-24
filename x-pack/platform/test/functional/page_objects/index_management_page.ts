@@ -11,76 +11,17 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
   const retry = getService('retry');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'appMenu']);
 
   const browser = getService('browser');
   return {
-    async sectionHeadingText() {
-      return await testSubjects.getVisibleText('appTitle');
-    },
-
     async expectToBeOnIndexManagement() {
-      const headingText = await testSubjects.getVisibleText('appTitle');
+      const headingText = await testSubjects.getVisibleText('appHeaderTitle');
       expect(headingText).to.be('Index Management');
     },
 
-    async reloadIndices() {
-      await testSubjects.click('reloadIndicesButton');
-    },
-    async reloadIndicesButton() {
-      return await testSubjects.find('reloadIndicesButton');
-    },
     async toggleHiddenIndices() {
       await testSubjects.click('checkboxToggles-includeHiddenIndices');
-    },
-
-    async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
-      const policyDetailsLinks = await testSubjects.findAll('enrichPolicyDetailsLink');
-      await policyDetailsLinks[indexOfRow].click();
-    },
-
-    async clickIndexTemplate(name: string): Promise<void> {
-      const indexTemplateLinks = await testSubjects.findAll('templateDetailsLink');
-
-      for (const link of indexTemplateLinks) {
-        if ((await link.getVisibleText()).includes(name)) {
-          await link.click();
-          return;
-        }
-      }
-    },
-
-    async clickBulkEditDataRetention(dataStreamNames: string[]): Promise<void> {
-      for (const dsName of dataStreamNames) {
-        const checkbox = await testSubjects.find(`checkboxSelectRow-${dsName}`);
-        if (!(await checkbox.isSelected())) {
-          await checkbox.click();
-        }
-      }
-      await testSubjects.click('dataStreamActionsPopoverButton');
-      await testSubjects.click('bulkEditDataRetentionButton');
-    },
-
-    async clickIndexTemplateNameLink(name: string): Promise<void> {
-      await find.clickByLinkText(name);
-    },
-
-    async clickDataStreamNameLink(name: string): Promise<void> {
-      await find.clickByLinkText(name);
-    },
-
-    async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
-      const deleteButons = await testSubjects.findAll('deletePolicyButton');
-      await deleteButons[indexOfRow].click();
-    },
-
-    async clickExecuteEnrichPolicyAt(indexOfRow: number): Promise<void> {
-      const executeButtons = await testSubjects.findAll('executePolicyButton');
-      await executeButtons[indexOfRow].click();
-    },
-
-    async clickConfirmModalButton(): Promise<void> {
-      await testSubjects.click('confirmModalConfirmButton');
     },
 
     async clickIndexDetailsTab(tabName: string): Promise<void> {
@@ -94,8 +35,8 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
     async clickIndexAt(indexOfRow: number): Promise<void> {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
-      await retry.waitFor('details page title to show up', async () => {
-        return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
+      await retry.waitFor('details page content to show up', async () => {
+        return (await testSubjects.isDisplayed('indexDetailsContent')) === true;
       });
     },
 
@@ -107,7 +48,7 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async clickContextMenu() {
-      await testSubjects.click('indexActionsContextMenuButton');
+      await pageObjects.appMenu.clickMenuItem('indexActionsContextMenuButton');
     },
 
     async getIndexList() {
@@ -152,36 +93,18 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(tab);
     },
 
-    async changeMappingsEditorTab(
-      tab: 'mappedFields' | 'runtimeFields' | 'dynamicTemplates' | 'advancedOptions'
-    ) {
-      const index = [
-        'mappedFields',
-        'runtimeFields',
-        'dynamicTemplates',
-        'advancedOptions',
-      ].indexOf(tab);
-
-      const tabs = await testSubjects.findAll('formTab');
-      await tabs[index].click();
-    },
-
-    async clickNextButton() {
-      await testSubjects.click('nextButton');
-    },
-
     indexDetailsPage: {
       async openIndexDetailsPage(indexOfRow: number) {
         const indexList = await testSubjects.findAll('indexTableIndexNameLink');
         await indexList[indexOfRow].click();
-        await retry.waitFor('index details page title to show up', async () => {
-          return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
+        await retry.waitFor('index details page content to show up', async () => {
+          return (await testSubjects.isDisplayed('indexDetailsContent')) === true;
         });
       },
       async expectIndexDetailsPageIsLoaded() {
         await testSubjects.existOrFail('indexDetailsTab-overview');
         await testSubjects.existOrFail('indexDetailsContent');
-        await testSubjects.existOrFail('indexDetailsBackToIndicesButton');
+        await testSubjects.existOrFail('appHeaderBack');
       },
       async expectUrlShouldChangeTo(tabId: string) {
         const url = await browser.getCurrentUrl();
@@ -223,10 +146,6 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
     async setCreateIndexName(value: string) {
       await testSubjects.existOrFail('createIndexNameFieldText');
       await testSubjects.setValue('createIndexNameFieldText', value);
-    },
-    async setCreateIndexMode(value: string) {
-      await testSubjects.existOrFail('indexModeField');
-      await testSubjects.selectValue('indexModeField', value);
     },
     async clickCreateIndexSaveButton() {
       await testSubjects.existOrFail('createIndexSaveButton');

@@ -210,6 +210,39 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'user_agent') {
+      const targetField = step.to || 'user_agent';
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.userAgentProcessorDescription',
+        {
+          defaultMessage: 'Extracts user agent info from "{from}" to "{to}"',
+          values: {
+            from: step.from,
+            to: targetField,
+          },
+        }
+      );
+    } else if (step.action === 'uri_parts') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.uriPartsProcessorDescription',
+        {
+          defaultMessage: 'Parses "{from}" into URI components under "{prefix}"',
+          values: {
+            from: step.from,
+            prefix: step.to || 'url',
+          },
+        }
+      );
+    } else if (step.action === 'registered_domain') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.registeredDomainProcessorDescription',
+        {
+          defaultMessage: 'Extracts domain parts from "{expression}"',
+          values: {
+            expression: step.expression,
+          },
+        }
+      );
     } else {
       const { action, parentId, customIdentifier, ignore_failure, ...rest } = step;
       // Remove 'where' if it exists (some processors have it, some don't)

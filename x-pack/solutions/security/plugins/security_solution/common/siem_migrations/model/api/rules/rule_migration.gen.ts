@@ -31,6 +31,7 @@ import {
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
+import { CreateSentinelRulesBody } from '../../vendor/rules/sentinel.gen';
 import { EnhanceQRadarRule } from '../../vendor/rules/qradar.gen';
 import {
   LangSmithOptions,
@@ -57,7 +58,7 @@ export const CreateQRadarRuleMigrationRulesRequestBody = lazySchema(() =>
     /**
      * The QRadar rules XML export content
      */
-    xml: z.string().min(1),
+    xml: z.string().min(1).describe('The QRadar rules XML export content'),
   })
 );
 export type CreateQRadarRuleMigrationRulesRequestBody = z.infer<
@@ -72,7 +73,7 @@ export const CreateRuleMigrationRequestBody = lazySchema(() =>
     /**
      * The rule migration name
      */
-    name: NonEmptyString,
+    name: NonEmptyString.describe('The rule migration name'),
   })
 );
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
@@ -83,7 +84,7 @@ export const CreateRuleMigrationResponse = lazySchema(() =>
     /**
      * The migration id created.
      */
-    migration_id: NonEmptyString,
+    migration_id: NonEmptyString.describe('The migration id created.'),
   })
 );
 export type CreateRuleMigrationResponse = z.infer<typeof CreateRuleMigrationResponse>;
@@ -106,6 +107,28 @@ export type CreateRuleMigrationRulesRequestBody = z.infer<
 >;
 export type CreateRuleMigrationRulesRequestBodyInput = z.input<
   typeof CreateRuleMigrationRulesRequestBody
+>;
+
+export const CreateSentinelRuleMigrationRulesRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
+export type CreateSentinelRuleMigrationRulesRequestParams = z.infer<
+  typeof CreateSentinelRuleMigrationRulesRequestParams
+>;
+export type CreateSentinelRuleMigrationRulesRequestParamsInput = z.input<
+  typeof CreateSentinelRuleMigrationRulesRequestParams
+>;
+
+export const CreateSentinelRuleMigrationRulesRequestBody = lazySchema(
+  () => CreateSentinelRulesBody
+);
+export type CreateSentinelRuleMigrationRulesRequestBody = z.infer<
+  typeof CreateSentinelRuleMigrationRulesRequestBody
+>;
+export type CreateSentinelRuleMigrationRulesRequestBodyInput = z.input<
+  typeof CreateSentinelRuleMigrationRulesRequestBody
 >;
 
 export const DeleteRuleMigrationRequestParams = lazySchema(() =>
@@ -180,11 +203,11 @@ export const GetRuleMigrationPrivilegesResponse = lazySchema(() =>
       /**
        * The index name of the privilege missing
        */
-      indexName: z.string(),
+      indexName: z.string().describe('The index name of the privilege missing'),
       /**
        * The index privileges level missing
        */
-      privileges: z.array(z.string()),
+      privileges: z.array(z.string()).describe('The index privileges level missing'),
     })
   )
 );
@@ -277,7 +300,7 @@ export const GetRuleMigrationRulesResponse = lazySchema(() =>
     /**
      * The total number of rules in migration.
      */
-    total: z.number(),
+    total: z.number().describe('The total number of rules in migration.'),
     data: z.array(RuleMigrationRule),
   })
 );
@@ -331,7 +354,7 @@ export const InstallMigrationRulesRequestBody = lazySchema(() =>
     /**
      * Indicates whether installed rules should be enabled
      */
-    enabled: z.boolean().optional(),
+    enabled: z.boolean().optional().describe('Indicates whether installed rules should be enabled'),
   })
 );
 export type InstallMigrationRulesRequestBody = z.infer<typeof InstallMigrationRulesRequestBody>;
@@ -344,7 +367,9 @@ export const InstallMigrationRulesResponse = lazySchema(() =>
     /**
      * Indicates the number of successfully installed migration rules.
      */
-    installed: z.number(),
+    installed: z
+      .number()
+      .describe('Indicates the number of successfully installed migration rules.'),
   })
 );
 export type InstallMigrationRulesResponse = z.infer<typeof InstallMigrationRulesResponse>;
@@ -377,7 +402,7 @@ export const RuleMigrationEnhanceRuleResponse = lazySchema(() =>
     /**
      * whether the update was applied successfully
      */
-    updated: z.boolean(),
+    updated: z.boolean().describe('whether the update was applied successfully'),
   })
 );
 export type RuleMigrationEnhanceRuleResponse = z.infer<typeof RuleMigrationEnhanceRuleResponse>;
@@ -395,12 +420,16 @@ export const StartRuleMigrationRequestBody = lazySchema(() =>
     /**
      * Settings applicable to current rule migration task execution.
      */
-    settings: RuleMigrationTaskExecutionSettings,
+    settings: RuleMigrationTaskExecutionSettings.describe(
+      'Settings applicable to current rule migration task execution.'
+    ),
     langsmith_options: LangSmithOptions.optional(),
     /**
      * The optional indicator to retry the rule translation based on this filter criteria.
      */
-    retry: RuleMigrationRetryFilter.optional(),
+    retry: RuleMigrationRetryFilter.optional().describe(
+      'The optional indicator to retry the rule translation based on this filter criteria.'
+    ),
     /**
      * Selected rules to retry migration on.
      */
@@ -408,7 +437,8 @@ export const StartRuleMigrationRequestBody = lazySchema(() =>
       .object({
         ids: z.array(NonEmptyString),
       })
-      .optional(),
+      .optional()
+      .describe('Selected rules to retry migration on.'),
   })
 );
 export type StartRuleMigrationRequestBody = z.infer<typeof StartRuleMigrationRequestBody>;
@@ -419,7 +449,11 @@ export const StartRuleMigrationResponse = lazySchema(() =>
     /**
      * Indicates the migration has been started. `false` means the migration does not need to be started.
      */
-    started: z.boolean(),
+    started: z
+      .boolean()
+      .describe(
+        'Indicates the migration has been started. `false` means the migration does not need to be started.'
+      ),
   })
 );
 export type StartRuleMigrationResponse = z.infer<typeof StartRuleMigrationResponse>;
@@ -437,7 +471,7 @@ export const StopRuleMigrationResponse = lazySchema(() =>
     /**
      * Indicates the migration has been stopped.
      */
-    stopped: z.boolean(),
+    stopped: z.boolean().describe('Indicates the migration has been stopped.'),
   })
 );
 export type StopRuleMigrationResponse = z.infer<typeof StopRuleMigrationResponse>;
@@ -457,11 +491,11 @@ export const UpdateRuleMigrationRequestBody = lazySchema(() =>
     /**
      * The rule migration name
      */
-    name: NonEmptyString.optional(),
+    name: NonEmptyString.optional().describe('The rule migration name'),
     /**
      * The index pattern to update
      */
-    index_pattern: NonEmptyString.optional(),
+    index_pattern: NonEmptyString.optional().describe('The index pattern to update'),
   })
 );
 export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
@@ -485,7 +519,7 @@ export const UpdateRuleMigrationIndexPatternRequestBody = lazySchema(() =>
     /**
      * The index pattern to update
      */
-    index_pattern: NonEmptyString,
+    index_pattern: NonEmptyString.describe('The index pattern to update'),
   })
 );
 export type UpdateRuleMigrationIndexPatternRequestBody = z.infer<
@@ -500,7 +534,7 @@ export const UpdateRuleMigrationIndexPatternResponse = lazySchema(() =>
     /**
      * Indicates the number of rules that have been updated.
      */
-    updated: z.number(),
+    updated: z.number().describe('Indicates the number of rules that have been updated.'),
   })
 );
 export type UpdateRuleMigrationIndexPatternResponse = z.infer<
@@ -534,7 +568,7 @@ export const UpdateRuleMigrationRulesResponse = lazySchema(() =>
     /**
      * Indicates rules migrations have been updated.
      */
-    updated: z.boolean(),
+    updated: z.boolean().describe('Indicates rules migrations have been updated.'),
   })
 );
 export type UpdateRuleMigrationRulesResponse = z.infer<typeof UpdateRuleMigrationRulesResponse>;
@@ -566,7 +600,7 @@ export const UpsertRuleMigrationResourcesResponse = lazySchema(() =>
     /**
      * The request has been processed correctly.
      */
-    acknowledged: z.boolean(),
+    acknowledged: z.boolean().describe('The request has been processed correctly.'),
   })
 );
 export type UpsertRuleMigrationResourcesResponse = z.infer<

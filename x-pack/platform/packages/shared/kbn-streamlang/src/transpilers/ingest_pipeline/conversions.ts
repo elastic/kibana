@@ -30,6 +30,7 @@ import { processSortProcessor } from './processors/sort_processor';
 import { processJsonExtractProcessor } from './processors/json_extract_processor';
 import { processEnrichProcessor } from './processors/enrich_processor';
 import { processJoinProcessor } from './processors/join_processor';
+import { processRegisteredDomainProcessor } from './processors/registered_domain_processor';
 
 export async function convertStreamlangDSLActionsToIngestPipelineProcessors(
   actionSteps: StreamlangProcessorDefinition[],
@@ -123,6 +124,12 @@ export async function convertStreamlangDSLActionsToIngestPipelineProcessors(
       return processEnrichProcessor(
         processorWithCompiledConditions as Parameters<typeof processEnrichProcessor>[0],
         resolver
+      );
+    }
+
+    if (action === 'registered_domain') {
+      return processRegisteredDomainProcessor(
+        processorWithCompiledConditions as Parameters<typeof processRegisteredDomainProcessor>[0]
       );
     }
 

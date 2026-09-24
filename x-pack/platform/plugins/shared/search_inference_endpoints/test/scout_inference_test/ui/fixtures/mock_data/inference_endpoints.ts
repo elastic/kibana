@@ -66,4 +66,32 @@ export const mockInferenceEndpoints = [
       display: { name: 'Google Gemini 2.5 Pro', model_creator: 'Google' },
     },
   },
+  {
+    inference_id: '.mock-openai-gpt-3.5-chat_completion-g4c7',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'openai-gpt-3.5' },
+    metadata: {
+      heuristics: {
+        properties: ['multilingual'],
+        status: 'deprecated',
+        end_of_life_date: '2099-01-01',
+      },
+      display: { name: 'OpenAI GPT-3.5', model_creator: 'OpenAI' },
+    },
+  },
+  {
+    inference_id: '.mock-openai-davinci-chat_completion-h2d5',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'openai-davinci' },
+    metadata: {
+      heuristics: {
+        properties: ['multilingual'],
+        status: 'deprecated',
+        end_of_life_date: '2020-01-01',
+      },
+      display: { name: 'OpenAI Davinci', model_creator: 'OpenAI' },
+    },
+  },
 ];

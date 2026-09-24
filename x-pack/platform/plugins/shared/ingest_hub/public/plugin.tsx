@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { INGEST_HUB_APP_ID } from '@kbn/deeplinks-observability';
 import type { Observable } from 'rxjs';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type {
   IngestHubSetup,
@@ -26,6 +26,7 @@ import type {
   IngestFlow,
 } from './types';
 import { INGEST_HUB_ENABLED_FLAG } from '../common/constants';
+import { registerOnboardingApp } from './onboarding';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
@@ -74,7 +75,7 @@ export class IngestHubPlugin
       title: i18n.translate('xpack.ingestHub.appTitle', {
         defaultMessage: 'Ingest Hub',
       }),
-      euiIconType: 'launch',
+      euiIconType: 'rocket',
       appRoute: '/app/ingest-hub',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: from(startServicesPromise).pipe(
@@ -82,7 +83,7 @@ export class IngestHubPlugin
           coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
             map((enabled): AppUpdater => {
               return () => ({
-                visibleIn: enabled ? ['sideNav', 'globalSearch'] : [],
+                visibleIn: enabled ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
               });
             })
           )
@@ -90,7 +91,9 @@ export class IngestHubPlugin
       ),
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await startServicesPromise;
-        const isEnabled = coreStart.featureFlags.getBooleanValue(INGEST_HUB_ENABLED_FLAG, false);
+        const isEnabled = await firstValueFrom(
+          coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false)
+        );
         const { element, history } = params;
 
         if (!isEnabled) {
@@ -107,6 +110,8 @@ export class IngestHubPlugin
         return () => root.unmount();
       },
     });
+
+    registerOnboardingApp(coreSetup, startServicesPromise, this.context.env.packageInfo.version);
 
     return {};
   }

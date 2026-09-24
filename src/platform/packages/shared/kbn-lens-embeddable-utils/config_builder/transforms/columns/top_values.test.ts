@@ -102,6 +102,20 @@ describe('Top Values Transforms', () => {
       expect(result.params.excludeIsRegex).toBe(false);
     });
 
+    it('should preserve numeric includes and excludes verbatim', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['destination.port'],
+        limit: 5,
+        includes: { as_regex: false, values: [443] },
+        excludes: { as_regex: false, values: [22, 23, 53] },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.include).toEqual([443]);
+      expect(result.params.exclude).toEqual([22, 23, 53]);
+    });
+
     it('should handle orderBy column type', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
@@ -214,6 +228,85 @@ describe('Top Values Transforms', () => {
         params: { value: 500 },
       });
     });
+
+    it('should handle custom rank_by with count operation without a field', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['status'],
+        limit: 5,
+        rank_by: {
+          type: 'custom',
+          operation: 'count',
+          direction: 'desc',
+        },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.orderBy).toEqual({ type: 'custom' });
+      expect(result.params.orderDirection).toBe('desc');
+      expect(result.params.orderAgg).toEqual({
+        operationType: 'count',
+        sourceField: '___records___',
+        dataType: 'number',
+        isBucketed: false,
+        label: '',
+      });
+    });
+
+    it('should handle custom rank_by with count operation with a field', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['status'],
+        limit: 5,
+        rank_by: {
+          type: 'custom',
+          operation: 'count',
+          field: 'bytes',
+          direction: 'asc',
+        },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.orderBy).toEqual({ type: 'custom' });
+      expect(result.params.orderDirection).toBe('asc');
+      expect(result.params.orderAgg).toEqual({
+        operationType: 'count',
+        sourceField: 'bytes',
+        dataType: 'number',
+        isBucketed: false,
+        label: '',
+      });
+    });
+
+    it('should derive parentFormat from the number of fields', () => {
+      const single = fromTermsLensApiToLensState(
+        { operation: 'terms', fields: ['status'], limit: 5 },
+        getMetricColumnIdByIndex
+      );
+      expect(single.params.parentFormat).toEqual({ id: 'terms' });
+
+      const multi = fromTermsLensApiToLensState(
+        { operation: 'terms', fields: ['status', 'region'], limit: 5 },
+        getMetricColumnIdByIndex
+      );
+      expect(multi.params.parentFormat).toEqual({ id: 'multi_terms' });
+    });
+
+    it('should read a persisted format', () => {
+      const result = fromTermsLensApiToLensState(
+        {
+          operation: 'terms',
+          fields: ['bytes'],
+          limit: 5,
+          format: { type: 'number', decimals: 2, compact: false },
+        },
+        getMetricColumnIdByIndex
+      );
+      expect(result.params.format).toEqual({
+        id: 'number',
+        params: { decimals: 2, compact: false },
+      });
+    });
   });
 
   describe('fromTermsLensStateToAPI', () => {
@@ -309,6 +402,35 @@ describe('Top Values Transforms', () => {
         as_regex: false,
         values: ['inactive'],
       });
+    });
+
+    it('should emit numeric includes and excludes without stringifying them', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'destination.port',
+        customLabel: false,
+        label: 'Top 5 values for destination.port',
+        isBucketed: true,
+        dataType: 'number',
+        params: {
+          secondaryFields: [],
+          size: 5,
+          accuracyMode: false,
+          include: [443],
+          includeIsRegex: false,
+          exclude: [22, 23, 53],
+          excludeIsRegex: false,
+          otherBucket: false,
+          missingBucket: false,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.includes).toEqual({ as_regex: false, values: [443] });
+      expect(result.excludes).toEqual({ as_regex: false, values: [22, 23, 53] });
     });
 
     it('should handle orderBy column type', () => {
@@ -469,6 +591,69 @@ describe('Top Values Transforms', () => {
       });
     });
 
+    it('should handle custom orderBy with count operation on all documents', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'status',
+        customLabel: false,
+        label: 'Top 5 values for status',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          size: 5,
+          orderBy: { type: 'custom' },
+          orderDirection: 'desc',
+          orderAgg: {
+            operationType: 'count',
+            sourceField: '___records___',
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+          },
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.rank_by).toEqual({
+        type: 'custom',
+        operation: 'count',
+        direction: 'desc',
+      });
+    });
+
+    it('should handle custom orderBy with count operation on a specific field', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'status',
+        customLabel: false,
+        label: 'Top 5 values for status',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          size: 5,
+          orderBy: { type: 'custom' },
+          orderDirection: 'asc',
+          orderAgg: {
+            operationType: 'count',
+            sourceField: 'bytes',
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+          },
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.rank_by).toEqual({
+        type: 'custom',
+        operation: 'count',
+        field: 'bytes',
+        direction: 'asc',
+      });
+    });
+
     it('should handle grouping other values', () => {
       const input: TermsIndexPatternColumn = {
         operationType: 'terms',
@@ -498,6 +683,55 @@ describe('Top Values Transforms', () => {
       expect(result.other_bucket).toEqual({
         include_documents_without_field: false,
       });
+    });
+
+    it('should emit a persisted format', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'bytes',
+        customLabel: false,
+        label: '',
+        isBucketed: true,
+        dataType: 'number',
+        params: {
+          secondaryFields: [],
+          size: 5,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          parentFormat: { id: 'terms' },
+          format: { id: 'number', params: { decimals: 2 } },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.format).toEqual({ type: 'number', decimals: 2 });
+    });
+  });
+
+  describe('round-trip', () => {
+    it('should round-trip a multi-field terms column with a format (parentFormat multi_terms)', () => {
+      const original: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'geo.src',
+        customLabel: false,
+        label: '',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          secondaryFields: ['geo.dest'],
+          size: 5,
+          orderBy: { type: 'column', columnId: 'metricCol1' },
+          orderDirection: 'desc',
+          parentFormat: { id: 'multi_terms' },
+          format: { id: 'number', params: { decimals: 2 } },
+        },
+      };
+
+      const api = fromTermsLensStateToAPI(original, columns);
+      const roundTripped = fromTermsLensApiToLensState(api, (index: number) => columns[index]?.id);
+
+      expect(roundTripped.params.parentFormat).toEqual({ id: 'multi_terms' });
+      expect(roundTripped.params.format).toEqual({ id: 'number', params: { decimals: 2 } });
     });
   });
 });

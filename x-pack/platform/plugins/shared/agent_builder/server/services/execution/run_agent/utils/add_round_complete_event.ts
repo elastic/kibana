@@ -7,131 +7,242 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
-import { map, merge, share, toArray } from 'rxjs';
+import { map, merge, shareReplay, toArray } from 'rxjs';
 import type {
+  ChatAgentEvent,
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
+  ConversationRoundAuthor,
   ConversationRoundStep,
-  ReasoningEvent,
-  ToolCallEvent,
-  ReasoningStep,
-  ToolCallStep,
-  ToolProgressEvent,
-  ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
-  CompactionStep,
-  BackgroundAgentCompleteEvent,
-  BackgroundAgentCompleteStep,
 } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
+import { EventActorType } from '@kbn/agent-builder-common';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ChatEventType,
-  ConversationRoundStepType,
   ConversationRoundStatus,
   isMessageCompleteEvent,
   isThinkingCompleteEvent,
-  isToolCallEvent,
-  isToolResultEvent,
-  isToolProgressEvent,
   isPromptRequestEvent,
-  isReasoningEvent,
   isToolCallStep,
-  isBackgroundAgentCompleteEvent,
+  isUserQuestionAnsweredEvent,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES,
 } from '@kbn/agent-builder-common';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
+import type { ConversationStateManager, ModelProvider } from '@kbn/agent-builder-server/runner';
 import type {
-  ConversationInternalState,
-  RoundModelUsageStats,
-} from '@kbn/agent-builder-common/chat';
-import type {
-  ConversationStateManager,
-  ModelProvider,
-  ModelProviderStats,
-} from '@kbn/agent-builder-server/runner';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+  AttachmentChange,
+  AttachmentStateManager,
+} from '@kbn/agent-builder-server/attachments';
+import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import { getCurrentTraceId } from '../../../../tracing';
-import type { ConvertedEvents } from '../convert_graph_events';
-import { isFinalStateEvent } from '../events';
-import type { CompactedConversation } from './conversation_compactor';
+import { userMessageActor } from '../../../conversation/client/rounds_to_events';
+import type { RunStateSnapshot, RunTracker } from '../run_tracker';
+import { persistableSteps } from '../step_state';
+import { formatAttachmentsMetadata } from './attachment_presentation';
+import type { PendingTurn } from './conversation_turn';
+import { getModelUsage } from './round_summary';
+import { applyResumeResolution } from '../../../conversation/client/merge_rounds';
+import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 
-type SourceEvents = ConvertedEvents;
+type SourceEvents = ChatAgentEvent;
 
-type StepEvents = ReasoningEvent | ToolCallEvent | BackgroundAgentCompleteEvent;
-
-const isStepEvent = (event: SourceEvents): event is StepEvents => {
-  return isReasoningEvent(event) || isToolCallEvent(event) || isBackgroundAgentCompleteEvent(event);
+/**
+ * `chat_input` (attachments sent with the message) and `execution` (made by tools) attachment
+ * events for a run, stamped with the round's initial execution id. Shared by the success and the
+ * interruption paths.
+ */
+export const buildAttachmentEvents = ({
+  conversation,
+  round,
+  chatInputChanges,
+  executionChanges,
+  agentId,
+  createdAt,
+}: {
+  conversation: Conversation | undefined;
+  round: Pick<ConversationRound, 'id' | 'author' | 'origin'>;
+  chatInputChanges: AttachmentChange[];
+  executionChanges: AttachmentChange[];
+  agentId: string;
+  createdAt: string;
+}) => {
+  const executionId = `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`;
+  return [
+    ...attachmentChangesToEvents(chatInputChanges, {
+      source: 'chat_input',
+      actor: userMessageActor(conversation, round),
+      execution_id: executionId,
+      created_at: createdAt,
+    }),
+    ...attachmentChangesToEvents(executionChanges, {
+      source: 'execution',
+      actor: { type: EventActorType.agent, id: agentId },
+      execution_id: executionId,
+      created_at: createdAt,
+    }),
+  ];
 };
 
 export const addRoundCompleteEvent = ({
-  pendingRound,
+  pendingTurn,
+  tracker,
   userInput,
+  origin,
+  author,
   startTime,
   endTime,
   getConversationState,
   modelProvider,
+  mainConnectorId,
   stateManager,
   attachmentStateManager,
   configurationOverrides,
-  compactionResult,
   roundId: providedRoundId,
+  getWorkspaceId,
+  chatInputChanges,
+  agentId,
+  conversation,
 }: {
-  pendingRound: ConversationRound | undefined;
+  /** The turn being resumed, when this execution is a HITL resume. */
+  pendingTurn: PendingTurn | undefined;
+  /** The out-of-band tool events LangGraph never saw and the resume seed (see `RunTracker`). */
+  tracker: RunTracker;
   userInput: RoundInput;
+  /**
+   * External origin that initiated this execution. Stamps `origin.type` on newly created
+   * rounds; resumed rounds keep their original origin.
+   */
+  origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external author, or the Kibana user for public
+   * conversations). Stamped on newly created rounds; resumed rounds keep their original author.
+   */
+  author?: ConversationRoundAuthor;
   startTime: Date;
   modelProvider: ModelProvider;
+  /**
+   * Connector id of the model driving the agent graph for this round. Used to
+   * attribute `model_usage` to the right connector.
+   */
+  mainConnectorId: string;
   stateManager: ConversationStateManager;
   getConversationState: () => ConversationInternalState;
   attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
-  /** Result of the compaction pipeline; used to build the compaction step and audit trail */
-  compactionResult?: CompactedConversation;
   /** Optional pre-generated round ID. If not provided, a new UUID is generated. */
   roundId?: string;
+  /** Returns the workspace_id used in this round, if any */
+  getWorkspaceId?: () => string | undefined;
+  /**
+   * Attachment changes caused by the incoming message (drained from the state manager right after
+   * `prepareConversation`). Emitted as `chat_input` attachment events.
+   */
+  chatInputChanges: AttachmentChange[];
+  /** Agent running this round; actor of the `execution` attachment events. */
+  agentId: string;
+  /**
+   * Existing conversation, when this round is on an already-persisted one. Undefined for CREATE.
+   * Used to resolve the `chat_input` actor's fallback to the conversation owner when the round
+   * carries no author.
+   */
+  conversation: Conversation | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
-    const shared$ = events$.pipe(share());
+    const shared$ = events$.pipe(shareReplay());
     return merge(
       shared$,
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
           const attachmentRefs = attachmentStateManager.getAccessedRefs();
-          const round = pendingRound
-            ? resumeRound({
-                pendingRound,
-                events,
-                input: userInput,
-                startTime,
-                endTime,
-                modelProvider,
-                attachmentRefs,
-                configurationOverrides,
-                compactionResult,
-              })
-            : createRound({
-                roundId: providedRoundId,
-                events,
-                input: userInput,
-                startTime,
-                endTime,
-                modelProvider,
-                attachmentRefs,
-                configurationOverrides,
-                compactionResult,
-              });
+          const finalGraphState = tracker.finalState();
+          const fullSteps = resolveRoundSteps({ tracker, finalGraphState });
 
-          round.state = buildRoundState({ round, events, stateManager });
+          let round: ConversationRound;
+          let resumeExecution: { follow_up_round: ConversationRound } | undefined;
+          if (pendingTurn) {
+            const resumed = resumeRound({
+              pendingTurn,
+              tracker,
+              finalGraphState,
+              fullSteps,
+              events,
+              input: userInput,
+              startTime,
+              endTime,
+              modelProvider,
+              mainConnectorId,
+              attachmentRefs,
+              configurationOverrides,
+            });
+            round = resumed.round;
+            resumeExecution = { follow_up_round: resumed.followUpRound };
+          } else {
+            round = createRound({
+              roundId: providedRoundId,
+              steps: fullSteps,
+              events,
+              input: userInput,
+              origin,
+              author,
+              startTime,
+              endTime,
+              modelProvider,
+              mainConnectorId,
+              attachmentRefs,
+              configurationOverrides,
+            });
+          }
 
+          round.state = buildRoundState({ round, events, finalGraphState, stateManager });
+          // exec_k's terminated carries the same resume state as the folded round.
+          if (resumeExecution) {
+            resumeExecution.follow_up_round.state = round.state;
+          }
+
+          if (round.input.attachment_refs && round.input.attachment_refs.length > 0) {
+            const attachmentContext = formatAttachmentsMetadata(
+              round.input.attachment_refs,
+              attachmentStateManager
+            );
+            if (attachmentContext) {
+              round.input = { ...round.input, attachment_context: attachmentContext };
+              if (resumeExecution) {
+                resumeExecution.follow_up_round.input = {
+                  ...resumeExecution.follow_up_round.input,
+                  attachment_context: attachmentContext,
+                };
+              }
+            }
+          }
+
+          const attachmentEvents = buildAttachmentEvents({
+            conversation,
+            round,
+            chatInputChanges,
+            executionChanges: attachmentStateManager.drainChanges(),
+            agentId,
+            createdAt: (endTime ?? new Date()).toISOString(),
+          });
+
+          const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
               round,
-              resumed: pendingRound !== undefined,
+              resumed: pendingTurn !== undefined,
+              ...(resumeExecution ? { resume_execution: resumeExecution } : {}),
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
+              ...(attachmentEvents.length > 0 ? { attachment_events: attachmentEvents } : {}),
+              ...(workspaceId ? { workspace_id: workspaceId } : {}),
             },
           };
 
@@ -142,174 +253,108 @@ export const addRoundCompleteEvent = ({
   };
 };
 
+/**
+ * The round's full steps: the final graph `steps` channel plus what LangGraph never saw (progress on
+ * a call interrupted by a prompt, an unconsumed `todo_write`), minus the runtime-only browser /
+ * dedicated-lifecycle calls.
+ */
+const resolveRoundSteps = ({
+  tracker,
+  finalGraphState,
+}: {
+  tracker: RunTracker;
+  finalGraphState: RunStateSnapshot;
+}): ConversationRoundStep[] =>
+  persistableSteps(tracker.attachUnseen(finalGraphState.steps), finalGraphState.toolRenderState);
+
 const resumeRound = ({
-  pendingRound,
+  pendingTurn,
+  tracker,
+  finalGraphState,
+  fullSteps,
   events,
   input,
   startTime,
   endTime = new Date(),
   modelProvider,
+  mainConnectorId,
   attachmentRefs,
   configurationOverrides,
-  compactionResult,
 }: {
-  pendingRound: ConversationRound;
+  pendingTurn: PendingTurn;
+  tracker: RunTracker;
+  finalGraphState: RunStateSnapshot;
+  fullSteps: ConversationRoundStep[];
   events: SourceEvents[];
   input: RoundInput;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
-  compactionResult?: CompactedConversation;
-}): ConversationRound => {
-  // Replay tool events for all pending steps (those with empty results)
-  const pendingSteps = pendingRound.steps
-    .filter(isToolCallStep)
-    .filter((step) => step.results.length === 0);
+}): { round: ConversationRound; followUpRound: ConversationRound } => {
+  // ask_user_question answers from the replayed answered events, keyed by prompt_id.
+  const answers = new Map(
+    events
+      .filter(isUserQuestionAnsweredEvent)
+      .map((event) => [event.data.prompt_id, event.data.answers] as const)
+  );
 
-  for (const step of pendingSteps) {
-    const toolCallId = step.tool_call_id;
-    const toolResults = events
-      .filter(isToolResultEvent)
-      .filter(({ data }) => data.tool_call_id === toolCallId);
-    const toolProgressions = events
-      .filter(isToolProgressEvent)
-      .filter(({ data }) => data.tool_call_id === toolCallId);
-
-    step.results = toolResults.flatMap(({ data }) => data.results);
-    step.progression = [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)];
-  }
-
-  const followUp = createRound({
+  // The resume execution (exec_k): the steps this execution owns — the resolved paused calls (with
+  // only the progression observed since the pause), the new steps and a rewritten todos step.
+  const followUpRound = createRound({
+    steps: tracker.executionProjection(finalGraphState),
     events,
     input,
     startTime,
     endTime,
     modelProvider,
+    mainConnectorId,
     attachmentRefs,
     configurationOverrides,
-    compactionResult,
   });
 
-  return mergeRounds(pendingRound, followUp);
-};
-
-const mergeRounds = (previous: ConversationRound, next: ConversationRound): ConversationRound => {
-  let traceId: string[] | undefined;
-  if (previous.trace_id || next.trace_id) {
-    traceId = [
-      ...(previous.trace_id
-        ? Array.isArray(previous.trace_id)
-          ? previous.trace_id
-          : [previous.trace_id]
-        : []),
-      ...(next.trace_id ? (Array.isArray(next.trace_id) ? next.trace_id : [next.trace_id]) : []),
-    ];
-  }
-
-  const mergedRound: ConversationRound = {
-    id: previous.id,
-    status: next.status,
-    pending_prompts: next.pending_prompts,
-    state: undefined, // state is recomputed after the merge
-    input: mergeRoundInput(previous.input, next.input),
-    steps: [...previous.steps, ...next.steps],
-    trace_id: traceId,
-    started_at: previous.started_at,
-    time_to_first_token: previous.time_to_first_token + next.time_to_first_token,
-    time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
-    model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
-    response: next.response,
-    configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
+  // Input / attachment / usage / timing / trace / overrides merge semantics come from the legacy
+  // compat round; the logical steps come from the graph rather than from re-merging step lists.
+  const round: ConversationRound = {
+    ...applyResumeResolution(pendingTurn.compatRound, followUpRound, answers),
+    steps: fullSteps,
   };
 
-  return mergedRound;
-};
-
-const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => {
-  const mergedRefs = mergeAttachmentRefs(previous.attachment_refs, next.attachment_refs);
-  return {
-    ...previous,
-    ...next,
-    message: next.message || previous.message,
-    ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
-  };
-};
-
-const mergeAttachmentRefs = (
-  previous?: AttachmentVersionRef[],
-  next?: AttachmentVersionRef[]
-): AttachmentVersionRef[] | undefined => {
-  if (!previous?.length && !next?.length) return undefined;
-  const merged = new Map<string, AttachmentVersionRef>();
-  for (const ref of previous ?? []) {
-    merged.set(
-      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
-      ref
-    );
-  }
-  for (const ref of next ?? []) {
-    merged.set(
-      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
-      ref
-    );
-  }
-  return Array.from(merged.values());
+  return { round, followUpRound };
 };
 
 const createRound = ({
   roundId: providedRoundId,
+  steps,
   events,
   input,
+  origin,
+  author,
   startTime,
   endTime = new Date(),
   modelProvider,
+  mainConnectorId,
   attachmentRefs,
   configurationOverrides,
-  compactionResult,
 }: {
   roundId?: string;
+  steps: ConversationRoundStep[];
   events: SourceEvents[];
   input: RoundInput;
+  origin?: ExecutionConversationOrigin;
+  author?: ConversationRoundAuthor;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
-  compactionResult?: CompactedConversation;
 }): ConversationRound => {
-  const toolResults = events.filter(isToolResultEvent);
-  const toolProgressions = events.filter(isToolProgressEvent);
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
-  const stepEvents = events.filter(isStepEvent);
   const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
   const promptRequestEvents = events.filter(isPromptRequestEvent);
-
-  const eventToStep = (event: StepEvents): ConversationRoundStep[] => {
-    if (isToolCallEvent(event)) {
-      const toolCall = event.data;
-      const toolResult = toolResults.find(
-        (result) => result.data.tool_call_id === toolCall.tool_call_id
-      );
-      const toolProgress = toolProgressions.filter(
-        (progressEvent) => progressEvent.data.tool_call_id === toolCall.tool_call_id
-      );
-
-      return [createToolCallStep({ toolCall: event, toolResult, toolProgress })];
-    }
-    if (isReasoningEvent(event)) {
-      if (event.data.transient !== true) {
-        return [createReasoningStep(event)];
-      } else {
-        return [];
-      }
-    }
-    if (isBackgroundAgentCompleteEvent(event)) {
-      return [createBackgroundAgentStep(event)];
-    }
-    throw new Error(`Unknown event type: ${(event as any).type}`);
-  };
 
   const lastMessage = messages.length ? messages[messages.length - 1] : undefined;
   const hasPromptRequests = promptRequestEvents.length > 0;
@@ -323,20 +368,6 @@ const createRound = ({
     ? thinkingCompleteEvent.data.time_to_first_token
     : timeToLastToken;
 
-  const steps: ConversationRoundStep[] = [];
-
-  if (compactionResult?.compactionTriggered && compactionResult.summary) {
-    const compactionStep: CompactionStep = {
-      type: ConversationRoundStepType.compaction,
-      token_count_before: compactionResult.tokensBefore ?? 0,
-      token_count_after: compactionResult.tokensAfter ?? 0,
-      summarized_round_count: compactionResult.summary.summarized_round_count,
-    };
-    steps.push(compactionStep);
-  }
-
-  steps.push(...stepEvents.flatMap(eventToStep));
-
   const round: ConversationRound = {
     id: providedRoundId ?? uuidv4(),
     status: hasPromptRequests
@@ -346,14 +377,18 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
-      ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
+      ...(attachmentRefs.length > 0
+        ? { attachment_refs: mergeAttachmentRefs(input.attachment_refs, attachmentRefs) }
+        : {}),
     },
     steps,
+    ...(origin ? { origin: { type: origin.type } } : {}),
+    ...(author ? { author } : {}),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
-    model_usage: getModelUsage(modelProvider.getUsageStats()),
+    model_usage: getModelUsage(modelProvider.getUsageStats(), mainConnectorId),
     response: lastMessage
       ? {
           message: lastMessage.message_content,
@@ -366,83 +401,29 @@ const createRound = ({
   return round;
 };
 
-const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
-  return {
-    type: ConversationRoundStepType.reasoning,
-    reasoning: event.data.reasoning,
-    tool_call_id: event.data.tool_call_id,
-    tool_call_group_id: event.data.tool_call_group_id,
-  };
-};
-
-const createBackgroundAgentStep = (
-  event: BackgroundAgentCompleteEvent
-): BackgroundAgentCompleteStep => {
-  return {
-    type: ConversationRoundStepType.backgroundAgentComplete,
-    ...event.data.execution,
-  };
-};
-
-const createToolCallStep = ({
-  toolCall,
-  toolResult,
-  toolProgress,
-}: {
-  toolCall: ToolCallEvent;
-  toolProgress: ToolProgressEvent[];
-  toolResult?: ToolResultEvent;
-}): ToolCallStep => {
-  return {
-    type: ConversationRoundStepType.toolCall,
-    tool_id: toolCall.data.tool_id,
-    params: toolCall.data.params,
-    tool_call_id: toolCall.data.tool_call_id,
-    progression: toolProgress.map(({ data: { message, metadata } }) => ({
-      message,
-      metadata,
-    })),
-    results: toolResult?.data.results ?? [],
-    tool_call_group_id: toolCall.data.tool_call_group_id,
-  };
-};
-
-const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
-  let inputTokens = 0;
-  let outputTokens = 0;
-  for (const call of stats.calls) {
-    inputTokens += call.tokens?.prompt ?? 0;
-    outputTokens += call.tokens?.completion ?? 0;
-  }
-  const modelFromResponse = stats.calls.find((call) => call.model)?.model;
-
-  return {
-    // we don't support multi-models yet, so we can just pick from the first call
-    connector_id: stats.calls.length ? stats.calls[0].connectorId : 'unknown',
-    llm_calls: stats.calls.length,
-    input_tokens: inputTokens,
-    output_tokens: outputTokens,
-    ...(modelFromResponse ? { model: modelFromResponse } : {}),
-  };
-};
-
 const buildRoundState = ({
   round,
   events,
+  finalGraphState,
   stateManager,
 }: {
   round: ConversationRound;
   events: SourceEvents[];
+  finalGraphState: RunStateSnapshot;
   stateManager: ConversationStateManager;
 }): RoundState | undefined => {
-  const finalGraphState = events.find(isFinalStateEvent)!.data.state;
   const promptRequestEvents = events.filter(isPromptRequestEvent).map((event) => event.data);
 
   if (promptRequestEvents.length === 0) {
     return undefined;
   }
 
-  const nodes = promptRequestEvents.map((promptRequest) => {
+  // ask_user_question prompts don't need a node-state snapshot as they are stored as steps.
+  const toolCallPromptRequests = promptRequestEvents.filter(
+    (event) => !isAskUserQuestionPrompt(event.prompt)
+  );
+
+  const nodes = toolCallPromptRequests.map((promptRequest) => {
     const toolCallId = promptRequest.source.tool_call_id;
     const toolCall = round.steps
       .filter(isToolCallStep)
@@ -475,17 +456,4 @@ const buildRoundState = ({
   };
 
   return state;
-};
-
-const mergeModelUsage = (
-  a: RoundModelUsageStats,
-  b: RoundModelUsageStats
-): RoundModelUsageStats => {
-  return {
-    connector_id: a.connector_id,
-    llm_calls: a.llm_calls + b.llm_calls,
-    input_tokens: a.input_tokens + b.input_tokens,
-    output_tokens: a.output_tokens + b.output_tokens,
-    model: a.model ?? b.model,
-  };
 };

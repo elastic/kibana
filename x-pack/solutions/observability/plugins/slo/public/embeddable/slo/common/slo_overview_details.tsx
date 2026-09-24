@@ -45,6 +45,10 @@ export function SloOverviewDetailsContent({
   const { telemetry } = usePluginContext();
   const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
 
+  useEffect(() => {
+    setSelectedTabId(initialTabId);
+  }, [initialTabId, slo.id, slo.instanceId]);
+
   const handleTabChange = useCallback(
     (tabId: SloTabId) => {
       setSelectedTabId(tabId);

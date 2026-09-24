@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../../../common/lib/kibana';

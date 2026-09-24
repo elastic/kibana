@@ -22,6 +22,7 @@ const {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
@@ -35,7 +36,6 @@ const {
   GRAPH_IPS_POPOVER_IP_ID,
   PREVIEW_SECTION_BANNER_PANEL,
   GRAPH_GROUPED_NODE_TEST_ID,
-  GRAPH_CALLOUT_TEST_ID,
   GRAPH_NODE_ENTITY_DETAILS_ID,
   GRAPH_NODE_ENTITY_TAG_TEXT_ID,
   GRAPH_NODE_ENTITY_TAG_COUNT_ID,
@@ -154,9 +154,13 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
 
   async showEntityDetails(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+    const itemId = (await this.testSubjects.exists(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID))
+      ? GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
+      : GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID;
+    await this.testSubjects.click(itemId);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
+
   async showEntityRelationships(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
     await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
@@ -291,27 +295,6 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
       const ipText = await popoverContent.getVisibleText();
       expect(ipText).to.contain(expectedIp);
     }
-  }
-
-  async isCalloutVisible(): Promise<boolean> {
-    return await this.testSubjects.exists(GRAPH_CALLOUT_TEST_ID, {
-      timeout: 5000,
-    });
-  }
-
-  async assertCalloutVisible(): Promise<void> {
-    await this.testSubjects.existOrFail(GRAPH_CALLOUT_TEST_ID, {
-      timeout: 10000,
-    });
-  }
-
-  async dismissCallout(): Promise<void> {
-    await this.retry.try(async () => {
-      const callout = await this.testSubjects.find(GRAPH_CALLOUT_TEST_ID);
-      const dismissButton = await callout.findByTestSubject('euiDismissCalloutButton');
-      await dismissButton.click();
-      await this.testSubjects.missingOrFail(GRAPH_CALLOUT_TEST_ID);
-    });
   }
 
   async assertNodeEntityTag(nodeId: string, expectedTagValue: string): Promise<void> {

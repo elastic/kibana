@@ -6,8 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { conditionSchema, isNeverCondition } from '@kbn/streamlang';
-import { routingStatus } from '@kbn/streams-schema';
+import { isNeverCondition } from '@kbn/streamlang';
+import { MAX_STREAM_NAME_LENGTH, routingStatus } from '@kbn/streams-schema';
+import { boundedConditionSchema } from '../../utils/bounded_condition_schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -33,6 +34,11 @@ export const forkStreamsRoute = createServerRoute({
           },
         },
       },
+      responses: {
+        200: {
+          description: 'The stream was forked successfully.',
+        },
+      },
     }),
   },
   security: {
@@ -42,11 +48,14 @@ export const forkStreamsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the parent stream to fork from.'),
     }),
     body: z.object({
-      stream: z.object({ name: z.string() }),
-      where: conditionSchema,
+      stream: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+      where: boundedConditionSchema,
       status: routingStatus.optional(),
       draft: z.boolean().optional(),
     }),
@@ -82,6 +91,20 @@ export const resyncStreamsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Streams were resynced successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {

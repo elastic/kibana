@@ -6,6 +6,7 @@
  */
 
 import { act, fireEvent, render } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -112,15 +113,15 @@ const renderTransaction = async (transaction: Record<string, any>) => {
     }
   );
 
-  await act(async () => {
-    fireEvent.click(rendered.getByText('Investigate'));
-  });
+  fireEvent.click(rendered.getByTestId('apmActionMenuButtonInvestigateButton'));
+
+  await waitForEuiPopoverOpen();
 
   return rendered;
 };
 
 const expectLogsLocatorToBeCalled = () => {
-  expect(logsLocatorMock.getRedirectUrl).toBeCalled();
+  expect(logsLocatorMock.getRedirectUrl).toHaveBeenCalled();
 };
 
 let useAdHocApmDataViewSpy: jest.SpyInstance;
@@ -183,7 +184,7 @@ describe('TransactionActionMenu ', () => {
     it('renders the pod metrics link', async () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithKubernetesData);
 
-      expect((getByText('Pod metrics').parentElement as HTMLAnchorElement).href).toEqual(
+      expect((getByText('Pod metrics').closest('a') as HTMLAnchorElement).href).toEqual(
         'http://localhost/node-mock/pod/pod123456abcdef?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
@@ -213,7 +214,7 @@ describe('TransactionActionMenu ', () => {
     it('renders the Container metrics link', async () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithContainerData);
 
-      expect((getByText('Container metrics').parentElement as HTMLAnchorElement).href).toEqual(
+      expect((getByText('Container metrics').closest('a') as HTMLAnchorElement).href).toEqual(
         'http://localhost/node-mock/container/container123456abcdef?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
@@ -243,7 +244,7 @@ describe('TransactionActionMenu ', () => {
     it('renders the Host metrics link', async () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithHostData);
 
-      expect((getByText('Host metrics').parentElement as HTMLAnchorElement).href).toEqual(
+      expect((getByText('Host metrics').closest('a') as HTMLAnchorElement).href).toEqual(
         'http://localhost/node-mock/host/227453131a17?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
@@ -265,7 +266,7 @@ describe('TransactionActionMenu ', () => {
     it('renders the uptime link', async () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithUrlAndDomain);
 
-      expect((getByText('Status').parentElement as HTMLAnchorElement).href).toEqual(
+      expect((getByText('Status').closest('a') as HTMLAnchorElement).href).toEqual(
         'http://localhost/basepath/app/uptime?dateRangeStart=now-24h&dateRangeEnd=now&search=url.domain:%22example.com%22'
       );
     });

@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import { isString } from 'lodash';
 import { authTypeSpecs } from '../..';
+import { getAuthModeForAuthTypeId, isKibanaManagedAuthTypeId } from '../auth_mode_by_auth_type_id';
 import type { AuthTypeDef, NormalizedAuthType } from '../connector_spec';
 
 export const AUTH_TYPE_DISCRIMINATOR = 'authType';
@@ -28,6 +29,11 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let authTypeId: string | undefined;
   let defaults: Record<string, unknown> | undefined;
   let meta: Record<string, Record<string, unknown>> | undefined;
+  let fields: Record<string, z.ZodType> | undefined;
+
+  let labelOverride: string | undefined;
+  let isRecommendedOverride: boolean | undefined;
+  let isLegacyOverride: boolean | undefined;
 
   if (isString(authTypeDef)) {
     authTypeId = authTypeDef as string;
@@ -36,6 +42,10 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     authTypeId = def.type;
     defaults = def.defaults;
     meta = def?.overrides?.meta;
+    fields = def.overrides?.fields;
+    labelOverride = def.overrides?.label;
+    isRecommendedOverride = def.isRecommended;
+    isLegacyOverride = def.isLegacy;
   }
 
   if (!authTypeId) {
@@ -68,6 +78,17 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     schemaToUse = authType.normalizeSchema(defaults);
   }
 
+  if (fields) {
+    for (const [key, fieldSchema] of Object.entries(fields)) {
+      if (schemaToUse.shape[key]) {
+        schemaToUse.shape[key] = fieldSchema.meta({
+          ...schemaToUse.shape[key].meta(),
+          ...fieldSchema.meta(),
+        });
+      }
+    }
+  }
+
   if (meta) {
     Object.keys(meta).forEach((key) => {
       if (schemaToUse.shape[key]) {
@@ -79,12 +100,24 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   }
 
   // add the authType discriminator key
+  const schemaMeta = {
+    ...existingMeta,
+    // Surface the auth type's mode (per-user vs shared) so the UI can label how
+    // credentials are scoped. Resolved via the canonical helper, which is the single
+    // source of truth for the missing-authMode → 'shared' default.
+    authMode: getAuthModeForAuthTypeId(authTypeId),
+    ...(labelOverride !== undefined ? { label: labelOverride } : {}),
+    ...(isRecommendedOverride !== undefined ? { isRecommended: isRecommendedOverride } : {}),
+    ...(isLegacyOverride !== undefined ? { isLegacy: isLegacyOverride } : {}),
+    ...(isKibanaManagedAuthTypeId(authTypeId) ? { isKibanaManaged: true } : {}),
+  };
+
   return {
     id: authTypeId,
     schema: schemaToUse
       .extend({
         [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
       })
-      .meta(existingMeta),
+      .meta(schemaMeta),
   };
 };

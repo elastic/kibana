@@ -42,6 +42,32 @@ describe('esql fields helpers', () => {
       expect(isESQLColumnSortable(sourceField)).toBeFalsy();
     });
 
+    it('returns false for flattened fields', () => {
+      const flattenedField = {
+        id: 'my_flattened',
+        name: 'my_flattened',
+        meta: {
+          type: 'flattened',
+          esType: 'flattened',
+        },
+        isNull: false,
+      } as DatatableColumn;
+      expect(isESQLColumnSortable(flattenedField)).toBeFalsy();
+    });
+
+    it('returns false for number_range fields', () => {
+      const rangeField = {
+        id: 'my_range',
+        name: 'my_range',
+        meta: {
+          type: 'number_range',
+          esType: 'double_range',
+        },
+        isNull: false,
+      } as DatatableColumn;
+      expect(isESQLColumnSortable(rangeField)).toBeFalsy();
+    });
+
     it('returns false for counter fields', () => {
       const tsdbField = {
         id: 'tsbd_counter',
@@ -96,6 +122,32 @@ describe('esql fields helpers', () => {
       expect(isESQLColumnGroupable(tsdbField)).toBeFalsy();
     });
 
+    it('returns false for flattened fields', () => {
+      const flattenedField = {
+        id: 'my_flattened',
+        name: 'my_flattened',
+        meta: {
+          type: 'flattened',
+          esType: 'flattened',
+        },
+        isNull: false,
+      } as DatatableColumn;
+      expect(isESQLColumnGroupable(flattenedField)).toBeFalsy();
+    });
+
+    it('returns false for number_range fields', () => {
+      const rangeField = {
+        id: 'my_range',
+        name: 'my_range',
+        meta: {
+          type: 'number_range',
+          esType: 'double_range',
+        },
+        isNull: false,
+      } as DatatableColumn;
+      expect(isESQLColumnGroupable(rangeField)).toBeFalsy();
+    });
+
     it('returns true for everything else', () => {
       const keywordField = {
         id: 'sortable',
@@ -130,6 +182,32 @@ describe('esql fields helpers', () => {
         type: 'number',
         esTypes: ['long'],
         timeSeriesMetric: 'counter',
+        searchable: true,
+        aggregatable: false,
+        isNull: false,
+      };
+
+      expect(isESQLFieldGroupable(fieldSpec)).toBeFalsy();
+    });
+
+    it('returns false for flattened fields', () => {
+      const fieldSpec: FieldSpec = {
+        name: 'my_flattened',
+        type: 'flattened',
+        esTypes: ['flattened'],
+        searchable: true,
+        aggregatable: false,
+        isNull: false,
+      };
+
+      expect(isESQLFieldGroupable(fieldSpec)).toBeFalsy();
+    });
+
+    it('returns false for number_range fields', () => {
+      const fieldSpec: FieldSpec = {
+        name: 'my_range',
+        type: 'number_range',
+        esTypes: ['double_range'],
         searchable: true,
         aggregatable: false,
         isNull: false,

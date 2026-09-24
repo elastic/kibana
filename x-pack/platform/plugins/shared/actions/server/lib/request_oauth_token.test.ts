@@ -31,6 +31,25 @@ describe('requestOAuthToken', () => {
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
   });
 
+  test.each(['bearer', 'BEARER', 'Bearer'])(
+    'preserves token type %s when no override is supplied',
+    async (tokenType) => {
+      axiosInstanceMock.mockResolvedValueOnce({
+        status: 200,
+        data: { access_token: 'token', token_type: tokenType },
+      });
+      await expect(
+        requestOAuthToken(
+          'https://test',
+          'client_credentials',
+          actionsConfigMock.create(),
+          mockLogger,
+          {}
+        )
+      ).resolves.toMatchObject({ tokenType, accessToken: 'token' });
+    }
+  );
+
   test('making a token request with the required options', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
@@ -257,6 +276,34 @@ describe('requestOAuthToken', () => {
       expiresIn: 3600,
       refreshToken: 'refresh-token-456',
       refreshTokenExpiresIn: 86400,
+    });
+  });
+
+  test('accepts a 201 response as success, matching providers like CrowdStrike', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 201,
+      data: {
+        token_type: 'bearer',
+        access_token: 'crowdstrike-token-123',
+        expires_in: 1799,
+      },
+    });
+
+    const result = await requestOAuthToken<TestOAuthRequestParams>(
+      'https://test',
+      'client_credentials',
+      configurationUtilities,
+      mockLogger,
+      { client_id: 'id', client_secret: 'secret' }
+    );
+
+    expect(result).toEqual({
+      tokenType: 'bearer',
+      accessToken: 'crowdstrike-token-123',
+      expiresIn: 1799,
+      refreshToken: undefined,
+      refreshTokenExpiresIn: undefined,
     });
   });
 

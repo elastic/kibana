@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import {
   createV2HostRiskEnrichments,
@@ -42,18 +42,17 @@ import { getRiskIndex } from '../../../../../../common/search_strategy';
 const resolveV2Enrichments = async <T extends DetectionAlertLatest>(
   opts: EnrichmentOptions<T>
 ): Promise<Array<Promise<EventsMapByEnrichments>>> => {
-  const { services, spaceId, logger, entityStoreCrudClient } = opts;
+  const { services, spaceId, entityStoreCrudClient } = opts;
 
   if (entityStoreCrudClient === undefined) {
-    logger.warn(
-      'Enrichments: entityStoreCrudClient is not available, skipping entity store enrichments'
-    );
     return [];
   }
 
+  // Alias, not the concrete neutral name: un-migrated deployments still hold the
+  // legacy `.entities.v2.latest.security_{space}` index, which only the alias covers.
   const entityStoreIndexExists = await isIndexExist({
     services,
-    index: getLatestEntitiesIndexName(spaceId),
+    index: getEntitiesAlias(ENTITY_LATEST, spaceId),
   });
 
   if (!entityStoreIndexExists) {

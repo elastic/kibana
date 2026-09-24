@@ -18,7 +18,10 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const DeletePrivMonUserRequestParams = lazySchema(() =>
   z.object({
-    id: z.string(),
+    /**
+     * The document ID of the monitored user to delete
+     */
+    id: z.string().describe('The document ID of the monitored user to delete'),
   })
 );
 export type DeletePrivMonUserRequestParams = z.infer<typeof DeletePrivMonUserRequestParams>;
@@ -29,11 +32,14 @@ export const DeletePrivMonUserResponse = lazySchema(() =>
     /**
      * Indicates if the deletion was successful
      */
-    acknowledged: z.boolean().optional(),
+    acknowledged: z.boolean().optional().describe('Indicates if the deletion was successful'),
     /**
      * A message providing additional information about the deletion status
      */
-    message: z.string().optional(),
+    message: z
+      .string()
+      .optional()
+      .describe('A message providing additional information about the deletion status'),
   })
 );
 export type DeletePrivMonUserResponse = z.infer<typeof DeletePrivMonUserResponse>;

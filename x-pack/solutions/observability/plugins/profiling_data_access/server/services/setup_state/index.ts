@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { CloudSetupStateType } from '../../../common/cloud_setup';
 import type { SetupStateType } from '../../../common/setup';
 import type { RegisterServicesParams } from '../register_services';
@@ -34,11 +34,9 @@ export async function getSetupState({
 > {
   const kibanaInternalProfilingESClient = createProfilingEsClient({
     esClient: esClient.asInternalUser,
-    useDefaultAuth: false,
   });
   const profilingESClient = createProfilingEsClient({
     esClient: esClient.asCurrentUser,
-    useDefaultAuth: false,
   });
 
   if (isServerless) {

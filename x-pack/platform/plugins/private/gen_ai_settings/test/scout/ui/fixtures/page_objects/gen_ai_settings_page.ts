@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -28,9 +29,9 @@ export class GenAiSettingsPage {
       await this.page.gotoApp('management/ai/genAiSettings');
       await this.page.testSubj.waitForSelector('genAiSettingsPage', {
         state: 'visible',
-        timeout: 3_000,
+        timeout: 10_000,
       });
-    }).toPass({ timeout: 30_000, intervals: [500, 1_000, 2_000] });
+    }).toPass({ timeout: 70_000, intervals: [500, 1_000, 2_000] });
   }
 
   /**
@@ -44,7 +45,7 @@ export class GenAiSettingsPage {
    * Get the GenAI Settings page title element
    */
   getGenAiSettingsPageTitle() {
-    return this.page.testSubj.locator('genAiSettingsTitle');
+    return this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
   }
 
   /**

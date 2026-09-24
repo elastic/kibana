@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
-import type { ResolvedInferenceEndpoints } from './types';
-
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from './types';
 
 /**
  * Returns the resolved inference endpoints for a feature.
@@ -30,19 +24,21 @@ const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
  * @param getConnectorById - Function that returns a connector by ID.
  * @param featureId - The feature to resolve endpoints for.
  * @param logger - Logger instance for warnings.
+ * @param opts - Optional resolution options (see {@link GetForFeatureOptions}).
  */
 export const getForFeature = async (
   registry: InferenceFeatureRegistry,
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   getConnectorById: (id: string) => Promise<InferenceConnector>,
   featureId: string,
-  logger: Logger
+  logger: Logger,
+  opts?: GetForFeatureOptions
 ): Promise<ResolvedInferenceEndpoints> => {
   const {
     ids,
     warnings: resolveWarnings,
     soEntryFound,
-  } = await resolveEndpointIds(registry, soClient, featureId, logger);
+  } = await resolveEndpointIds(registry, soClient, featureId, logger, opts);
   if (ids.length === 0) {
     return { endpoints: [], warnings: resolveWarnings, soEntryFound };
   }
@@ -51,83 +47,6 @@ export const getForFeature = async (
     endpoints: result.endpoints,
     warnings: [...resolveWarnings, ...result.warnings],
     soEntryFound,
-  };
-};
-
-/**
- * Resolves endpoints for a feature and layers on the global default AI connector
- * configured via advanced settings (`GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR` and
- * `GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY`).
- *
- * - When `defaultOnly` is set, only the default connector is returned (or an empty list).
- * - When the feature has no admin-configured SO override, the default connector is
- *   prepended to the resolved endpoints.
- * - When an SO override exists for the feature, the default is ignored.
- *
- * Kept in sync with the HTTP route at `GET /internal/search_inference_endpoints/connectors`.
- */
-export const getForFeatureWithDefault = async ({
-  registry,
-  soClient,
-  uiSettingsClient,
-  getConnectorById,
-  featureId,
-  logger,
-}: {
-  registry: InferenceFeatureRegistry;
-  soClient: ISavedObjectsRepository;
-  uiSettingsClient: IUiSettingsClient;
-  getConnectorById: (id: string) => Promise<InferenceConnector>;
-  featureId: string;
-  logger: Logger;
-}): Promise<ResolvedInferenceEndpoints> => {
-  const [defaultConnectorId, defaultConnectorOnly] = await Promise.all([
-    uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR),
-    uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY),
-  ]);
-
-  const hasDefault =
-    typeof defaultConnectorId === 'string' &&
-    defaultConnectorId.length > 0 &&
-    defaultConnectorId !== NO_DEFAULT_CONNECTOR;
-
-  const fetchDefault = async (): Promise<InferenceConnector | undefined> => {
-    if (!hasDefault) return undefined;
-    try {
-      return await getConnectorById(defaultConnectorId);
-    } catch (e) {
-      logger.warn(`Failed to load default connector "${defaultConnectorId}": ${e.message}`);
-      return undefined;
-    }
-  };
-
-  if (defaultConnectorOnly) {
-    const defaultConnector = await fetchDefault();
-    return {
-      endpoints: defaultConnector ? [defaultConnector] : [],
-      warnings: [],
-      soEntryFound: false,
-    };
-  }
-
-  const result = await getForFeature(registry, soClient, getConnectorById, featureId, logger);
-
-  if (result.soEntryFound || !hasDefault) {
-    return result;
-  }
-
-  const defaultConnector = await fetchDefault();
-  if (!defaultConnector) {
-    return result;
-  }
-
-  return {
-    endpoints: [
-      defaultConnector,
-      ...result.endpoints.filter((c) => c.connectorId !== defaultConnector.connectorId),
-    ],
-    warnings: result.warnings,
-    soEntryFound: false,
   };
 };
 
@@ -181,7 +100,8 @@ export const resolveFeatureEndpointIds = (
   registry: InferenceFeatureRegistry,
   soFeaturesMap: Map<string, InferenceSettingsAttributes['features'][number]>,
   featureId: string,
-  logger: Logger
+  logger: Logger,
+  opts?: GetForFeatureOptions
 ): ResolvedEndpointIds => {
   let current = registry.get(featureId);
   if (!current) {
@@ -269,9 +189,11 @@ export const resolveFeatureEndpointIds = (
   }
 
   return {
-    ids: recEntry?.recommendedEndpoints ?? [
-      defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
-    ],
+    ids:
+      recEntry?.recommendedEndpoints ??
+      (opts?.onlyReturnConfigured
+        ? []
+        : [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION]),
     warnings: [],
     soEntryFound: false,
   };
@@ -279,17 +201,18 @@ export const resolveFeatureEndpointIds = (
 
 const resolveEndpointIds = async (
   registry: InferenceFeatureRegistry,
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   featureId: string,
-  logger: Logger
+  logger: Logger,
+  opts?: GetForFeatureOptions
 ): Promise<ResolvedEndpointIds> => {
   const soFeatures = await readSettingsFeatures(soClient, logger);
   const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
-  return resolveFeatureEndpointIds(registry, soFeaturesMap, featureId, logger);
+  return resolveFeatureEndpointIds(registry, soFeaturesMap, featureId, logger, opts);
 };
 
 const readSettingsFeatures = async (
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<InferenceSettingsAttributes['features']> => {
   try {

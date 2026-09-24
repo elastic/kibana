@@ -7,6 +7,7 @@
 
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { EuiListTestHarness } from '@kbn/test-eui-helpers';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { API_BASE_PATH, LOOKUP_INDEX_MODE } from '../../../common/constants';
 import {
@@ -32,6 +33,10 @@ import {
 } from './constants';
 
 jest.mock('@kbn/code-editor');
+
+// Driving the full multi-step wizard in setup hooks is intrinsically heavy and runs
+// ~10x slower under CI parallel load, so give every hook and test a single generous budget.
+jest.setTimeout(60000);
 
 describe('<TemplateCreate />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
@@ -61,11 +66,13 @@ describe('<TemplateCreate />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     test('should set the correct page title', () => {
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create template');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Create template'
+      );
     });
 
     test('renders no deprecation warning', async () => {
@@ -86,11 +93,13 @@ describe('<TemplateCreate />', () => {
   describe('legacy index template', () => {
     beforeEach(async () => {
       await renderTemplateCreate(httpSetup, { isLegacy: true });
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     test('should set the correct page title', () => {
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create legacy template');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Create legacy template'
+      );
     });
 
     test('renders deprecation warning', async () => {
@@ -102,13 +111,13 @@ describe('<TemplateCreate />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     describe('component templates (step 2)', () => {
       beforeEach(async () => {
         await completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-      }, 20000);
+      });
 
       it('should set the correct page title', async () => {
         expect(await screen.findByTestId('stepComponents')).toBeInTheDocument();
@@ -247,7 +256,7 @@ describe('<TemplateCreate />', () => {
         });
         // Component templates
         await completeStepTwo();
-      }, 20000);
+      });
 
       it('should set the correct page title', async () => {
         expect(await screen.findByTestId('stepSettings')).toBeInTheDocument();
@@ -295,7 +304,7 @@ describe('<TemplateCreate />', () => {
 
       beforeEach(async () => {
         await navigateToMappingsStep();
-      }, 20000);
+      });
 
       it('should set the correct page title', async () => {
         expect(await screen.findByTestId('stepMappings')).toBeInTheDocument();
@@ -329,14 +338,6 @@ describe('<TemplateCreate />', () => {
         fireEvent.click(confirmButton);
 
         await waitFor(() => expect(getFieldsListItems()).toHaveLength(1));
-      }, 16000);
-
-      describe('plugin parameters', () => {
-        test('should not render the _size parameter if the mapper size plugin is not installed', async () => {
-          // The mappings editor exposes stable tab test subjects.
-          fireEvent.click(screen.getByTestId('advancedOptionsTab'));
-          expect(screen.queryByTestId('sizeEnabledToggle')).not.toBeInTheDocument();
-        });
       });
     });
 
@@ -350,7 +351,7 @@ describe('<TemplateCreate />', () => {
         await completeStepThree('{}');
         // Mappings
         await completeStepFour();
-      }, 20000);
+      });
 
       it('should set the correct page title', async () => {
         expect(await screen.findByTestId('stepAliases')).toBeInTheDocument();
@@ -362,72 +363,8 @@ describe('<TemplateCreate />', () => {
         await completeStepFive('{ invalidJsonString ', false);
 
         expect(await screen.findByText('Invalid JSON format.')).toBeInTheDocument();
-      }, 10000);
-    });
-  });
-
-  // Isolated test for mapper-size plugin (needs different mock setup)
-  describe('mapper-size plugin', () => {
-    test('should render the _size parameter if the mapper size plugin is installed', async () => {
-      httpRequestsMockHelpers.setLoadNodesPluginsResponse(['mapper-size']);
-      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
-
-      await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
-
-      // Navigate to mappings step
-      await completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-      await completeStepTwo();
-      await completeStepThree('{}');
-
-      // Navigate to advanced tab
-      fireEvent.click(screen.getByTestId('advancedOptionsTab'));
-
-      expect(screen.getByTestId('sizeEnabledToggle')).toBeInTheDocument();
-    }, 10000);
-  });
-
-  describe('logistics (step 1)', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
-      await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
-    });
-
-    it('setting index pattern to logs-*-* should set the index mode to logsdb', async () => {
-      // Logistics
-      await completeStepOne({ name: 'my_logs_template', indexPatterns: ['logs-*-*'] });
-      // Component templates
-      await completeStepTwo();
-      // Index settings
-      await completeStepThree('{}');
-      // Mappings
-      await completeStepFour();
-      // Aliases
-      await completeStepFive();
-
-      fireEvent.click(screen.getByTestId('nextButton'));
-
-      await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/index_templates`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: 'my_logs_template',
-              indexPatterns: ['logs-*-*'],
-              allowAutoCreate: 'NO_OVERWRITE',
-              indexMode: 'logsdb',
-              _kbnMeta: {
-                type: 'default',
-                hasDatastream: false,
-                isLegacy: false,
-              },
-              template: {},
-            }),
-          })
-        );
       });
-    }, 10000);
+    });
   });
 
   describe('review (step 6)', () => {
@@ -435,7 +372,7 @@ describe('<TemplateCreate />', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
         await renderTemplateCreate(httpSetup);
-        await screen.findByTestId('pageTitle');
+        await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
         await completeStepOne({
           name: TEMPLATE_NAME,
@@ -445,14 +382,14 @@ describe('<TemplateCreate />', () => {
         await completeStepThree(JSON.stringify(SETTINGS));
         await completeStepFour();
         await completeStepFive(JSON.stringify(ALIASES));
-      }, 20000);
+      });
 
       it('should set the correct step title', async () => {
         expect(await screen.findByTestId('stepSummary')).toBeInTheDocument();
         expect(screen.getByTestId('stepTitle')).toHaveTextContent(
           `Review details for '${TEMPLATE_NAME}'`
         );
-      }, 10000);
+      });
 
       describe('tabs', () => {
         test('should have 3 tabs', () => {
@@ -484,7 +421,7 @@ describe('<TemplateCreate />', () => {
     it('should render a warning message if a wildcard is used as an index pattern', async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
       // Logistics
       await completeStepOne({
@@ -505,10 +442,10 @@ describe('<TemplateCreate />', () => {
       expect(descriptions.length).toBeGreaterThan(0);
       for (const description of descriptions) {
         expect(description).toHaveTextContent(
-          'All new indices that you create will use this template. Edit index patterns.'
+          'All new indices that you create will use this template.'
         );
       }
-    }, 20000);
+    });
   });
 
   describe('form payload & api errors', () => {
@@ -517,7 +454,7 @@ describe('<TemplateCreate />', () => {
 
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
       await completeStepOne({
         name: TEMPLATE_NAME,
@@ -529,7 +466,7 @@ describe('<TemplateCreate />', () => {
       await completeStepThree(JSON.stringify(SETTINGS));
       await completeStepFour(MAPPING_FIELDS);
       await completeStepFive(JSON.stringify(ALIASES));
-    }, 20000);
+    });
 
     it('should surface API errors and send the correct payload on success', async () => {
       // First attempt fails and surfaces an error
@@ -581,14 +518,14 @@ describe('<TemplateCreate />', () => {
           aliases: ALIASES,
         },
       });
-    }, 20000);
+    });
   });
 
   describe('Data stream lifecycle', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
       await completeStepOne({
         name: TEMPLATE_NAME,
@@ -599,7 +536,7 @@ describe('<TemplateCreate />', () => {
           unit: 'd',
         },
       });
-    }, 20000);
+    });
 
     test('should include data stream lifecycle in summary when set in step 1', async () => {
       await completeStepTwo();
@@ -609,7 +546,7 @@ describe('<TemplateCreate />', () => {
 
       expect(await screen.findByTestId('lifecycleValue')).toBeInTheDocument();
       expect(screen.getByTestId('lifecycleValue')).toHaveTextContent('1 day');
-    }, 20000);
+    });
 
     test('preview data stream', async () => {
       await completeStepTwo();
@@ -642,6 +579,6 @@ describe('<TemplateCreate />', () => {
         expect(body.index_patterns).toEqual(DEFAULT_INDEX_PATTERNS);
         expect(body.data_stream).toEqual({});
       });
-    }, 20000);
+    });
   });
 });

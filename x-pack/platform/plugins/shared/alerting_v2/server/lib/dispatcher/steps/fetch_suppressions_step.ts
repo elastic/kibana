@@ -8,13 +8,15 @@
 import { inject, injectable } from 'inversify';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { getAlertEpisodeSuppressionsQuery } from '../queries';
+import { getAlertEpisodeSuppressionsQueries } from '../queries';
+import { EpisodeScan, SuppressionIndex } from '../state';
 import type {
   AlertEpisodeSuppression,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
 } from '../types';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 @injectable()
 export class FetchSuppressionsStep implements DispatcherStep {
@@ -24,16 +26,28 @@ export class FetchSuppressionsStep implements DispatcherStep {
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { episodes } = state;
-    if (!episodes || episodes.length === 0) {
-      return { type: 'continue', data: { suppressions: [] } };
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { scan = EpisodeScan.empty() } = state;
+    if (scan.isEmpty()) {
+      return { type: 'continue', data: { suppressions: SuppressionIndex.empty() } };
     }
 
-    const suppressions = await this.queryService.executeQueryRows<AlertEpisodeSuppression>({
-      query: getAlertEpisodeSuppressionsQuery(episodes).query,
-    });
+    const { signal } = state.input;
 
-    return { type: 'continue', data: { suppressions } };
+    const queries = getAlertEpisodeSuppressionsQueries(scan.episodes);
+    const responses = await Promise.all(
+      queries.map((request) =>
+        this.queryService.executeQueryRows<AlertEpisodeSuppression>({
+          query: request.query,
+          abortSignal: signal,
+        })
+      )
+    );
+    const suppressions = responses.flat();
+
+    return { type: 'continue', data: { suppressions: SuppressionIndex.of(suppressions) } };
   }
 }

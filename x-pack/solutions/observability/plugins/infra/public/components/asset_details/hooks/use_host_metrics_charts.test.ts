@@ -6,6 +6,7 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { HostMetricTypes } from '../charts/types';
 import {
   useHostKpiCharts,
@@ -15,6 +16,8 @@ import {
 } from './use_host_metrics_charts';
 
 const indexPattern = 'metrics-*';
+const SCHEMAS: DataSchemaFormat[] = ['ecs', 'semconv'];
+
 const getHostChartsExpectedOrder = (metric: HostMetricTypes, overview: boolean): string[] => {
   switch (metric) {
     case 'cpu':
@@ -37,48 +40,50 @@ const getHostChartsExpectedOrder = (metric: HostMetricTypes, overview: boolean):
 };
 
 describe('useHostCharts', () => {
-  describe.each<[HostMetricTypes]>([['cpu'], ['memory'], ['network'], ['disk'], ['log']])(
-    '%s',
-    (item) => {
-      test.each<[HostMetricTypes]>([[item]])(
-        'should return an array of charts with correct order for metric "%s"',
-        async (metric) => {
-          const expectedOrder = getHostChartsExpectedOrder(metric, false);
+  describe.each<DataSchemaFormat>(SCHEMAS)('schema=%s', (schema) => {
+    describe.each<[HostMetricTypes]>([['cpu'], ['memory'], ['network'], ['disk'], ['log']])(
+      '%s',
+      (item) => {
+        test.each<[HostMetricTypes]>([[item]])(
+          'should return an array of charts with correct order for metric "%s"',
+          async (metric) => {
+            const expectedOrder = getHostChartsExpectedOrder(metric, false);
 
-          const { result } = renderHook(() => useHostCharts({ indexPattern, metric }));
-          await waitFor(() => new Promise((resolve) => resolve(null)));
+            const { result } = renderHook(() => useHostCharts({ indexPattern, metric, schema }));
+            await waitFor(() => new Promise((resolve) => resolve(null)));
 
-          const { charts } = result.current;
+            const { charts } = result.current;
 
-          expect(charts).toHaveLength(expectedOrder.length);
+            expect(charts).toHaveLength(expectedOrder.length);
 
-          charts.forEach((chart, index) => {
-            expect(chart).toHaveProperty('id', expectedOrder[index]);
-          });
-        }
-      );
+            charts.forEach((chart, index) => {
+              expect(chart).toHaveProperty('id', expectedOrder[index]);
+            });
+          }
+        );
 
-      test.each<[HostMetricTypes]>([[item]])(
-        'should return an array of charts with correct order for metric "%s" - overview',
-        async (metric) => {
-          const expectedOrder = getHostChartsExpectedOrder(metric, true);
+        test.each<[HostMetricTypes]>([[item]])(
+          'should return an array of charts with correct order for metric "%s" - overview',
+          async (metric) => {
+            const expectedOrder = getHostChartsExpectedOrder(metric, true);
 
-          const { result } = renderHook(() =>
-            useHostCharts({ indexPattern, metric, overview: true })
-          );
-          await waitFor(() => new Promise((resolve) => resolve(null)));
+            const { result } = renderHook(() =>
+              useHostCharts({ indexPattern, metric, overview: true, schema })
+            );
+            await waitFor(() => new Promise((resolve) => resolve(null)));
 
-          const { charts } = result.current;
+            const { charts } = result.current;
 
-          expect(charts).toHaveLength(expectedOrder.length);
+            expect(charts).toHaveLength(expectedOrder.length);
 
-          charts.forEach((chart, index) => {
-            expect(chart).toHaveProperty('id', expectedOrder[index]);
-          });
-        }
-      );
-    }
-  );
+            charts.forEach((chart, index) => {
+              expect(chart).toHaveProperty('id', expectedOrder[index]);
+            });
+          }
+        );
+      }
+    );
+  });
 });
 
 describe('useKubernetesCharts', () => {
@@ -119,19 +124,39 @@ describe('useKubernetesCharts', () => {
 });
 
 describe('useHostKpiCharts', () => {
-  it('should return an array of charts with correct order', async () => {
-    const { result } = renderHook(() => useHostKpiCharts({ indexPattern, schema: 'ecs' }));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+  // Subtitles are derived from the resolved Lens formula via `getSubtitleFromFormula`.
+  // ECS and semconv expose different formula shapes, so the same chart slug can yield
+  // a different subtitle depending on the schema (e.g. semconv `diskUsage` starts with
+  // `1 - sum(...)` which matches neither the avg nor max pattern).
+  const expectedKpiBySchema: Record<DataSchemaFormat, Array<{ id: string; subtitle: string }>> = {
+    ecs: [
+      { id: 'cpuUsage', subtitle: 'Average' },
+      { id: 'normalizedLoad1m', subtitle: 'Average' },
+      { id: 'memoryUsage', subtitle: 'Average' },
+      { id: 'diskUsage', subtitle: 'Max' },
+    ],
+    semconv: [
+      { id: 'cpuUsage', subtitle: 'Average' },
+      { id: 'normalizedLoad1m', subtitle: 'Average' },
+      { id: 'memoryUsage', subtitle: 'Average' },
+      { id: 'diskUsage', subtitle: '' },
+    ],
+  };
 
-    const expectedOrder = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
+  describe.each<DataSchemaFormat>(SCHEMAS)('schema=%s', (schema) => {
+    it('should return an array of charts with correct order and schema-resolved subtitles', async () => {
+      const { result } = renderHook(() => useHostKpiCharts({ indexPattern, schema }));
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(result.current).toHaveLength(expectedOrder.length);
+      const expected = expectedKpiBySchema[schema];
 
-    result.current.forEach((chart, index) => {
-      expect(chart).toHaveProperty('id', expectedOrder[index]);
-      // diskUsage should have subtitle 'Max'
-      expect(chart).toHaveProperty('subtitle', index === 3 ? 'Max' : 'Average');
-      expect(chart).toHaveProperty('decimals', 1);
+      expect(result.current).toHaveLength(expected.length);
+
+      result.current.forEach((chart, index) => {
+        expect(chart).toHaveProperty('id', expected[index].id);
+        expect(chart).toHaveProperty('subtitle', expected[index].subtitle);
+        expect(chart).toHaveProperty('decimals', 1);
+      });
     });
   });
 
@@ -141,7 +166,9 @@ describe('useHostKpiCharts', () => {
       getSubtitle: () => 'Custom Subtitle',
     };
 
-    const { result } = renderHook(() => useHostKpiCharts({ indexPattern, ...options }));
+    const { result } = renderHook(() =>
+      useHostKpiCharts({ indexPattern, schema: 'ecs', ...options })
+    );
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toHaveLength(4);
@@ -255,6 +282,36 @@ describe('getSubtitleFromFormula', () => {
 
     it('should not match avg/average if it is part of a longer word', () => {
       expect(getSubtitleFromFormula('averaging(system.cpu.user.pct)')).toBe('');
+    });
+  });
+
+  describe('semconv formula shapes', () => {
+    it('classifies the semconv cpuUsage formula as "Average"', () => {
+      expect(
+        getSubtitleFromFormula("1-average(metrics.system.cpu.utilization,kql='state: idle')")
+      ).toBe('Average');
+    });
+
+    it('classifies the semconv normalizedLoad1m formula as "Average"', () => {
+      expect(
+        getSubtitleFromFormula(
+          'average(metrics.system.cpu.load_average.1m) / max(metrics.system.cpu.logical.count)'
+        )
+      ).toBe('Average');
+    });
+
+    it('classifies the semconv memoryUsage formula as "Average"', () => {
+      expect(getSubtitleFromFormula("average(system.memory.utilization, kql='state: used')")).toBe(
+        'Average'
+      );
+    });
+
+    it('returns empty string for the semconv diskUsage formula (sum-based, neither avg nor max first)', () => {
+      expect(
+        getSubtitleFromFormula(
+          "1 - sum(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)"
+        )
+      ).toBe('');
     });
   });
 });

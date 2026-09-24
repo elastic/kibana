@@ -77,7 +77,7 @@ run(
     if (brokenRefs.length > 0) {
       if (process.env.KBN_TS_TYPE_CHECK_BOOTSTRAP_RETRIED === '1') {
         throw createFailError(
-          'Broken TypeScript project references remain after `yarn kbn bootstrap`. Fix manually: yarn kbn bootstrap'
+          'Broken TypeScript project references remain after `pnpm kbn bootstrap`. Fix manually: pnpm kbn bootstrap'
         );
       }
 
@@ -91,13 +91,13 @@ run(
       log.warning('');
       log.warning(
         '[Bootstrap] This usually happens after switching branches. ' +
-          'Running yarn kbn bootstrap to repair...'
+          'Running pnpm kbn bootstrap to repair...'
       );
 
       try {
-        await execa('yarn', ['kbn', 'bootstrap'], { cwd: REPO_ROOT, stdio: 'inherit' });
+        await execa('pnpm', ['kbn', 'bootstrap'], { cwd: REPO_ROOT, stdio: 'inherit' });
       } catch {
-        log.error('[Bootstrap] Bootstrap failed. Fix it manually: yarn kbn bootstrap');
+        log.error('[Bootstrap] Bootstrap failed. Fix it manually: pnpm kbn bootstrap');
         throw createFailError('Bootstrap failed');
       }
 
@@ -130,17 +130,23 @@ run(
     } else {
       await updateRootRefsConfig(log);
 
-      if (!projectFilter) {
-        const strategy = await resolveRestoreStrategy(log, TS_PROJECTS);
-        if (strategy.shouldRestore && strategy.bestSha) {
-          await restoreTSBuildArtifacts(log, strategy.bestSha, {
-            staleProjects: strategy.staleProjects,
-            prNumber: strategy.prNumber,
-            prTipSha: strategy.prTipSha,
-            skipCacheServer: !strategy.cacheServerAvailable,
-          });
-          didRestore = true;
-        }
+      // Restore is decided from repo-wide staleness vs the local artifact state,
+      // independent of which project(s) we ultimately check — so it applies to
+      // `--project` runs too. This matters most for heavy closures (e.g. the
+      // synthetics plugin pulls in ~930 upstream projects): on a cold cache a
+      // scoped run would otherwise build the whole closure from scratch instead
+      // of restoring it from GCS. The HEAD artifacts-state write stays gated on
+      // `!projectFilter` below, so a scoped run never falsely marks every project
+      // fresh.
+      const strategy = await resolveRestoreStrategy(log, TS_PROJECTS);
+      if (strategy.shouldRestore && strategy.bestSha) {
+        await restoreTSBuildArtifacts(log, strategy.bestSha, {
+          staleProjects: strategy.staleProjects,
+          prNumber: strategy.prNumber,
+          prTipSha: strategy.prTipSha,
+          skipCacheServer: !strategy.cacheServerAvailable,
+        });
+        didRestore = true;
       }
     }
 

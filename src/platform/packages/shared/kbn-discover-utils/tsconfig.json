@@ -18,6 +18,7 @@
     "@kbn/data-view-utils",
     "@kbn/es-query",
     "@kbn/esql-types",
+    "@kbn/field-formats-common",
     "@kbn/field-formats-plugin",
     "@kbn/field-types",
     "@kbn/i18n",
@@ -30,6 +31,12 @@
     "@kbn/apm-types",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-http-browser",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/resizable-layout",
+    "@kbn/search-errors",
+    "@kbn/utility-types",
+    "@kbn/esql-language",
+    "@kbn/cps"
   ]
 }

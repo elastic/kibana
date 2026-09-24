@@ -15,12 +15,20 @@ import type {
   GcpCloudConnectorVars,
   CloudConnectorVars,
 } from '../../../common/types';
+import { isCloudProvider } from '../../../common/types';
+import {
+  getIacTemplateUrlFromVarGroupSelection,
+  getAwsConsoleHostFromArn,
+  isCloudFormationStackArn,
+  parseAwsRegionFromArn,
+} from '../../../common/services/cloud_connectors';
 
 import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,
   GcpCloudConnectorCredentials,
   CloudConnectorCredentials,
+  CloudProviders,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
 import {
@@ -197,11 +205,43 @@ export const getTemplateUrlFromPackageInfo = (
   }
 };
 
+/**
+ * Searches a package for the cloud connectors IAC template URL without a specific
+ * policy template name or var_group selection. Selects whichever option in each
+ * var_group has a cloud provider (the newer AWS-package format).
+ *
+ * TODO: When multiple selected services support federated identity, a combined
+ * CloudFormation template will be needed rather than a single per-package URL.
+ */
+export const getAnyCloudConnectorIacTemplateUrl = (
+  packageInfo: PackageInfo | undefined
+): string | undefined => {
+  const varGroups = packageInfo?.var_groups;
+  if (!varGroups?.length) return undefined;
+  // Build a synthetic selection that picks the cloud connector option in each var_group.
+  const selections: Record<string, string> = {};
+  for (const group of varGroups) {
+    const cloudOption = group.options.find((o) => isCloudProvider(o.provider));
+    if (cloudOption) selections[group.name] = cloudOption.name;
+  }
+  return getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
+};
+
 export const getCloudConnectorRemoteRoleTemplate = ({
   cloud,
   accountType,
   iacTemplateUrl,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
+  if (!iacTemplateUrl) return undefined;
+
+  // URLs without substitution tokens need no cloud identifiers — return as-is.
+  if (
+    !iacTemplateUrl.includes(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR) &&
+    !iacTemplateUrl.includes(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR)
+  ) {
+    return iacTemplateUrl;
+  }
+
   let elasticResourceId: string | undefined;
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
@@ -214,7 +254,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     elasticResourceId = kibanaComponentId;
   }
 
-  if (!elasticResourceId || !accountType || !iacTemplateUrl) return undefined;
+  if (!elasticResourceId || !accountType) return undefined;
 
   return iacTemplateUrl
     .replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
@@ -481,10 +521,6 @@ export const isCloudConnectorReusableEnabled = (
     if (templateName === 'asset_inventory') {
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
     }
-
-    if (templateName === 'aws') {
-      return true;
-    }
   } else if (provider === AZURE_PROVIDER) {
     if (templateName === 'cspm') {
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION);
@@ -501,7 +537,11 @@ export const isCloudConnectorReusableEnabled = (
     }
   }
 
-  return false;
+  // Any other integration reaching this point uses Fleet's var_groups UI, which only
+  // renders cloud connector setup when the package manifest declares identity
+  // federation support — so reuse is enabled for every valid provider without
+  // requiring per-package registration in Kibana.
+  return isCloudProvider(provider);
 };
 
 /**
@@ -525,3 +565,106 @@ export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
 
 export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars: boolean) =>
   hasInvalidRequiredVars && !value;
+
+// IaC launch URL helpers
+
+const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
+
+/** Returns true when a URL carries a `templateURL=` query parameter. */
+export const hasTemplateUrlParam = (url: string | undefined): boolean =>
+  Boolean(url && TEMPLATE_URL_PARAM_REGEX.test(url));
+
+export interface IacLaunchUrlParams {
+  provider: CloudProviders;
+  /** Static quick-create URL from the package manifest (token-substituted). */
+  staticUrl: string | undefined;
+  /** Pre-signed artifact URL from IaCP — embeds credentials, never persist it. */
+  artifactUrl: string;
+  /**
+   * Provider deployment identity; AWS: CloudFormation stack ARN. When set, the result is a
+   * stack-update deep link. A malformed ARN (no parseable region) returns undefined.
+   */
+  deploymentId?: string;
+}
+
+/**
+ * Per-provider seam for turning a rendered artifact into a console launch URL.
+ * Only AWS is implemented: IaCP has no Azure/GCP blueprints yet.
+ */
+export const getIacLaunchUrl = ({
+  provider,
+  staticUrl,
+  artifactUrl,
+  deploymentId,
+}: IacLaunchUrlParams): string | undefined => {
+  if (provider !== AWS_PROVIDER) {
+    return undefined;
+  }
+  const encodedArtifact = encodeURIComponent(artifactUrl);
+  if (deploymentId) {
+    // Only a CloudFormation stack ARN can be updated: a region alone does not make one (a
+    // CloudWatch Logs ARN has a region too), so the same validator the fields and the API use
+    // gates the link. A malformed value, a non-stack ARN, or a partition with no public console
+    // means there is no stack to link to; do not fall through to the quick-create path or a new
+    // stack would be created.
+    const region = parseAwsRegionFromArn(deploymentId);
+    const host = getAwsConsoleHostFromArn(deploymentId);
+    if (!isCloudFormationStackArn(deploymentId) || !region || !host) {
+      return undefined;
+    }
+    // Console deep link on the ARN's own partition (GovCloud and China have their own console
+    // hosts). AWS does not document this format; it must be verified manually against the
+    // console before shipping.
+    return `https://${host}/cloudformation/home?region=${region}#/stacks/update/template?stackId=${encodeURIComponent(
+      deploymentId
+    )}&templateURL=${encodedArtifact}`;
+  }
+  if (!staticUrl || !hasTemplateUrlParam(staticUrl)) {
+    return undefined;
+  }
+  return staticUrl.replace(TEMPLATE_URL_PARAM_REGEX, `templateURL=${encodedArtifact}`);
+};
+
+/** Stack ARN field copy shared by the wizard's connector form and the AWS onboarding setup. */
+export const STACK_ARN_LABEL = i18n.translate('xpack.fleet.cloudConnector.aws.stackArnLabel', {
+  defaultMessage: 'CloudFormation stack ARN',
+});
+
+export const STACK_ARN_HELP_TEXT = i18n.translate('xpack.fleet.cloudConnector.aws.stackArnHelp', {
+  defaultMessage:
+    'Copy the StackId output of the stack you just created so Kibana can link straight to it.',
+});
+
+/** Shared by the wizard's stack ARN field and the flyout's Deployment ID field. */
+export const INVALID_STACK_ARN_MESSAGE = i18n.translate(
+  'xpack.fleet.cloudConnector.aws.stackArnInvalid',
+  {
+    defaultMessage:
+      'Enter a CloudFormation stack ARN, for example arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/…',
+  }
+);
+
+/**
+ * True for a non-empty value that is not a CloudFormation stack ARN (any other regional ARN, such
+ * as a CloudWatch Logs group, is rejected too); whitespace is ignored so a pasted value is judged
+ * as it will be saved. Same rule as the connector API's `iac_deployment_id`.
+ */
+export const isStackArnInvalid = (stackArn: string | undefined): boolean => {
+  const trimmed = stackArn?.trim() ?? '';
+  return trimmed !== '' && !isCloudFormationStackArn(trimmed);
+};
+
+/** Read-only link to the deployed stack; needs no render. */
+export const getAwsStackConsoleUrl = (deploymentId: string | undefined): string | undefined => {
+  const region = parseAwsRegionFromArn(deploymentId);
+  const host = getAwsConsoleHostFromArn(deploymentId);
+  // A stored legacy value may predate validation; never link a non-stack ARN as a stack.
+  if (!deploymentId || !isCloudFormationStackArn(deploymentId) || !region || !host) {
+    return undefined;
+  }
+  // Console deep link on the ARN's own partition. AWS does not document this format; it must be
+  // verified manually against the console before shipping.
+  return `https://${host}/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${encodeURIComponent(
+    deploymentId
+  )}`;
+};

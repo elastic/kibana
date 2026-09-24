@@ -16,7 +16,7 @@ jest.mock('../lib/kibana');
 
 // Mock the fallback JSON so tests are deterministic and don't read from disk.
 // Path must match `v${FALLBACK_ECS_VERSION}.json` from common/constants.
-jest.mock('../schemas/ecs/v9.2.0.json', () => [
+jest.mock('../../../common/schemas/ecs/v9.2.0.json', () => [
   {
     field: '@timestamp',
     type: 'date',

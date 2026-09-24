@@ -8,12 +8,10 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverMainContentProps } from './discover_main_content';
@@ -34,12 +32,12 @@ jest.mock('../../../../components/view_mode_toggle', () => ({
 }));
 
 jest.mock('./discover_documents', () => ({
-  DiscoverDocuments: jest.fn(({ viewModeToggle }) => (
+  DiscoverDocuments: jest.fn(({ renderViewModeToggle }) => (
     <div
       data-test-subj="discoverDocumentsMock"
-      data-has-view-mode-toggle={String(Boolean(viewModeToggle))}
+      data-has-view-mode-toggle={String(Boolean(renderViewModeToggle))}
     >
-      {viewModeToggle}
+      {renderViewModeToggle?.()}
     </div>
   )),
 }));
@@ -127,10 +125,6 @@ const renderComponent = async ({
     columns: [],
     viewMode,
     onAddFilter: jest.fn(),
-    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
-      isCollapsed: false,
-      toggle: jest.fn(),
-    }),
     isChartAvailable,
   };
 

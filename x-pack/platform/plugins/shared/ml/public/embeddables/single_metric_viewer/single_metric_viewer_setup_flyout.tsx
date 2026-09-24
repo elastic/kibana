@@ -11,12 +11,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
+import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { SingleMetricViewerEmbeddableUserInput } from '..';
+import { ML_STORAGE_KEYS } from '@kbn/ml-common-types/storage';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
 import type { MlApi } from '../../application/services/ml_api_service';
-import { ML_STORAGE_KEYS } from '../../../common/types/storage';
-import type { SingleMetricViewerEmbeddableInput } from './types';
 
 export function EmbeddableSingleMetricViewerUserInput({
   coreStart,
@@ -29,9 +28,9 @@ export function EmbeddableSingleMetricViewerUserInput({
   coreStart: CoreStart;
   services: { data: DataPublicPluginStart; share?: SharePluginStart };
   mlApi: MlApi;
-  onConfirm: (state: SingleMetricViewerEmbeddableUserInput) => void;
+  onConfirm: (state: SingleMetricViewerEmbeddableState) => void;
   onCancel: () => void;
-  input?: Partial<SingleMetricViewerEmbeddableInput>;
+  input?: Partial<SingleMetricViewerEmbeddableState>;
 }) {
   const { data, share } = services;
   const timefilter = data.query.timefilter.timefilter;

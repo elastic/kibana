@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { ALERTING_V2_RULE_LIBRARY_LOCATOR } from '@kbn/alerting-v2-constants';
+
 export const LOCATORS_IDS = {
   APM_LOCATOR: 'APM_LOCATOR',
   DASHBOARD_APP: 'DASHBOARD_APP_LOCATOR',
   DISCOVER_APP_LOCATOR: 'DISCOVER_APP_LOCATOR',
+  ALERTING_V2_RULE_LIBRARY: ALERTING_V2_RULE_LIBRARY_LOCATOR,
 } as const;
 
 // Dashboards ids
@@ -17,5 +20,6 @@ export const DASHBOARD_LOCATORS_IDS = {
   ELASTIC_AGENT_AGENT_INFO: 'elastic_agent-0600ffa0-6b5e-11ed-98de-67bdecd21824',
   ELASTIC_AGENT_AGENT_METRICS: 'elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395',
   ELASTIC_AGENT_INTEGRATIONS: 'elastic_agent-1a4e7280-6b5e-11ed-98de-67bdecd21824',
-  OTEL_INTERNAL_TELEMETRY: 'otel_internal_telemetry-9d120e25-539a-41b0-8b27-47a937342f3d',
+  OTEL_COLLECTOR_INTERNAL_TELEMETRY:
+    'otel_collector_internal_telemetry-4c979b50-19eb-411c-8cfd-6ffe37fb0092',
 } as const;

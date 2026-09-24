@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import type { Filter, KueryNode } from '@kbn/es-query';
 import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
 
+import { prepareKQLStringParam } from '../../../../common/utils/kql';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import {
   DataProviderTypeEnum,
@@ -125,7 +126,13 @@ export const replaceTemplateFieldFromQuery = (
       return valueToChange.reduce((newQuery, vtc) => {
         const newValue = getStringArray(vtc.field, eventData);
         if (newValue.length) {
-          return newQuery.replace(vtc.valueToChange, newValue[0]);
+          const quotedPlaceholder = `"${vtc.valueToChange}"`;
+          const replacement = prepareKQLStringParam(newValue[0]);
+
+          if (newQuery.includes(quotedPlaceholder)) {
+            return newQuery.replace(quotedPlaceholder, replacement);
+          }
+          return newQuery.replace(vtc.valueToChange, replacement);
         } else {
           return newQuery;
         }

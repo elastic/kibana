@@ -67,6 +67,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
         params: {
           type: 'flattened',
+          ignore_above: 4096,
         },
         // NO NEED TO BE INDEXED
         // frequency: {

@@ -64,6 +64,7 @@ describe('user activity injected context', () => {
       authentication_type: 'realm',
       elastic_cloud_user: false,
       profile_uid: 'test_profile_uid',
+      http_authentication_scheme: null,
     };
 
     const httpSetup = await server.setup({
@@ -79,7 +80,7 @@ describe('user activity injected context', () => {
     const router = httpSetup.createRouter('');
     router.post(
       {
-        path: '/s/{spaceId}/api/user_activity_injected_context/_track',
+        path: '/api/user_activity_injected_context/_track',
         security: {
           authz: {
             enabled: false,
@@ -91,7 +92,7 @@ describe('user activity injected context', () => {
       async (context, request, response) => {
         userActivity.trackUserAction({
           message: 'ua-test',
-          event: { action: 'ua_test_action' as any, type: 'user' },
+          event: { action: 'ua_test_action' as any, type: ['user'] },
           object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
           metadata: { a: 1, b: '2', c: { d: true } },
         });
@@ -117,13 +118,16 @@ describe('user activity injected context', () => {
 
     expect(meta).toMatchObject({
       message: 'ua-test',
-      event: { action: 'ua_test_action', type: 'user' },
+      event: { action: 'ua_test_action', type: ['user'], outcome: 'unknown' },
       object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
       metadata: { a: 1, b: '2', c: { d: true } },
-      kibana: { space: { id: 'myspace' } },
+      kibana: { space: { id: 'myspace' }, session: { id: 'some-redacted-sid' } },
       http: { request: { referrer } },
-      session: { id: 'some-redacted-sid' },
       client: {
+        ip: expect.any(String),
+        address: expect.any(String),
+      },
+      source: {
         ip: expect.any(String),
         address: expect.any(String),
       },
@@ -134,5 +138,6 @@ describe('user activity injected context', () => {
         roles: ['superuser'],
       },
     });
+    expect(meta).not.toHaveProperty('session');
   });
 });

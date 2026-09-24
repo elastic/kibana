@@ -48,7 +48,7 @@ function renderActions({ agent, agentPolicy }: { agent: Agent; agentPolicy?: Age
 
 /**
  * Helper to navigate into a submenu panel in the hierarchical menu.
- * Waits briefly for panel transition to complete.
+ * Waits for the submenu panel to actually commit rather than a fixed delay.
  */
 async function navigateToSubmenu(
   utils: ReturnType<typeof renderActions>['utils'],
@@ -57,8 +57,9 @@ async function navigateToSubmenu(
   const submenuButton = utils.getByText(submenuText).closest('button');
   if (submenuButton) {
     fireEvent.click(submenuButton);
-    // Wait a bit for panel transition
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // The child panel renders a back-navigation title button, so waiting for it
+    // guarantees the incoming panel and its items have committed to the DOM.
+    await utils.findByTestId('contextMenuPanelTitleButton');
   }
 }
 

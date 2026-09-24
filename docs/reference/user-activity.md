@@ -2,7 +2,7 @@
 navigation_title: User activity
 applies_to:
   deployment:
-    self: ga 9.4
+    self: preview 9.5
 ---
 
 # User activity
@@ -34,7 +34,7 @@ user_activity:
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
-When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, user, session, ...}`.
+When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, error, user, kibana.session.id, kibana.space.id, ...}`.
 
 ### Filters
 
@@ -54,6 +54,46 @@ Each filter has:
 :::::{include} user-activity/_snippets/user-activity-actions-list.md
 :::::
 
+## Dashboard event fields
+
+All dashboard actions include the [common log fields](#logs-schema) and populate `object.id`, `object.name`, `object.type`, and `object.tags`. The `object.type` value is `dashboard`, and `object.tags` contains the dashboard tag names.
+
+### Dashboard view
+
+`dashboard_view` sets `event.type` to `["access"]`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration`, measured in nanoseconds, records each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs.
+
+### Dashboard refresh
+
+`dashboard_refresh` sets `event.type` to `["access"]`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration` is measured in nanoseconds. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise.
+
+Each automatic refresh produces a separate `dashboard_refresh` event. Short refresh intervals can therefore increase the volume of user activity logs.
+
+The action also populates the following metadata fields:
+
+| **Field** | **Description** |
+| --- | --- |
+| `metadata.time_range` | (Optional) Dashboard time range at the time of the refresh. |
+| `metadata.refresh_interval` | (Optional) Auto-refresh interval in milliseconds. This field is omitted when auto-refresh is paused. |
+| `metadata.query` | (Optional) Dashboard query, including its expression and language. The language is `kql` or `lucene`. |
+| `metadata.filters` | (Optional) List of dashboard filters. |
+| `metadata.panel_count` | Number of panels on the dashboard. |
+| `metadata.errors` | List of panels with blocking errors. Each item contains the panel ID in `panel_id` and the error message in `error`. The list is empty when no panels return blocking errors. |
+
+:::::{note}
+Dashboard query expressions and filter values are recorded without redaction. Manage access to and retention of user activity logs according to your organization's data-handling requirements.
+:::::
+
+When `metadata.errors` is not empty, `error.type` is `panel_errors` and `error.message` contains the error list as JSON.
+
+:::::{image} images/dashboard_user_activity_errors.png
+:alt: Discover results for dashboard refresh events with blocking panel errors
+:screenshot:
+:::::
+
+:::::{note}
+This example uses a custom `user-activity-logs` index. User activity events are emitted through the configured logging appenders and are not indexed automatically. To explore them in Discover, route the events to {{es}} using your existing log collection pipeline. Your index or data stream name depends on that configuration.
+:::::
+
 ## Logs schema
 
 User activity events are written as JSON log entries. When using the JSON logging layout, these entries are ECS-compatible (see [Elastic Common Schema (ECS)](ecs://reference/index.md)) and may include additional non-ECS fields used by Kibana (for example, `kibana.space.id` and `object.*`).
@@ -70,7 +110,8 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | **Field** | **Description** |
 | --- | --- |
 | `event.action` | Human readable standardized description of the action performed. Refer to [Available actions](#available-actions) for a list of possible values. |
-| `event.type` | Human readable standardized categorization of actions performed. |
+| `event.type` | Array of human readable standardized categorizations of the action performed. |
+| `event.outcome` | Denotes whether the event represents a success or a failure from the perspective of the entity that produced the event: `success`, `failure`, or `unknown`. Defaults to `unknown` when the producer does not report an outcome. |
 | `event.start` | (Optional) ISO8601 timestamp of the event start time. |
 | `event.end` | (Optional) ISO8601 timestamp of the event end time. |
 | `event.duration` | (Optional) Duration (in ns) between the event start and end timestamps. |
@@ -85,7 +126,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 
 | **Field** | **Description** |
 | --- | --- |
-| `session.id` | Redacted id of the session. |
+| `kibana.session.id` | Redacted id of the session. |
 
 ### Space fields
 
@@ -103,7 +144,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | `user.roles` | Kibana roles of the user at the time of the action. |
 
 :::::{note}
-Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthenticated requests. For these events, the `user.*` and `session.id` fields may not be populated. The identity of the user can still be determined from the `object.*` fields.
+Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthenticated requests. For these events, the `user.*` and `kibana.session.id` fields may not be populated. The identity of the user can still be determined from the `object.*` fields.
 :::::
 
 ### Client and HTTP fields
@@ -112,6 +153,8 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 | --- | --- |
 | `client.ip` | IP address of the client that performed the action. |
 | `client.address` | Copy of `client.ip` for OpenTelemetry compliance. |
+| `source.ip` | Copy of `client.ip` (ECS defines `client` as a role-annotated copy of `source`). |
+| `source.address` | Copy of `client.ip` (ECS defines `client` as a role-annotated copy of `source`). |
 | `http.request.referrer` | Referrer associated with the request that triggered the action. |
 
 ### Object fields
@@ -127,7 +170,16 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 
 | **Field** | **Description** |
 | --- | --- |
-| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. |
+| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. For dashboard refresh metadata, refer to [Dashboard event fields](#dashboard-event-fields). |
+
+### Error fields
+
+| **Field** | **Description** |
+| --- | --- |
+| `error.type` | (Optional) The type of the error, for example the class name of the exception. |
+| `error.message` | (Optional) Error message. |
+| `error.stack_trace` | (Optional) The stack trace of this error in plain text. |
+| `error.code` | (Optional) Error code describing the error. |
 
 ### Service fields
 

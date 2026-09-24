@@ -65,17 +65,19 @@ export const PrivilegesWarningIconWrapper = ({
       attachToAnchor={true}
       anchorPosition="downCenter"
       button={
-        <EuiButtonIcon
-          data-test-subj={`datasetQualityInsufficientPrivileges-${title}`}
-          aria-label={insufficientPrivilegesText}
-          title={insufficientPrivilegesText}
-          iconType="warning"
-          color={iconColor}
-          onClick={handleButtonClick}
-        />
+        <EuiToolTip content={insufficientPrivilegesText} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={`datasetQualityInsufficientPrivileges-${title}`}
+            aria-label={insufficientPrivilegesText}
+            iconType="warning"
+            color={iconColor}
+            onClick={handleButtonClick}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
+      aria-label={insufficientPrivilegesText}
     >
       {insufficientPrivilegesText} {/* <LearnMoreLink /> TODO: Add docs link when available */}
     </EuiPopover>

@@ -10,11 +10,10 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import type { CasesOwner, CasesService } from '../types';
 import { useCaseActions } from './use_case_actions';
-import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
+import { ADD_TO_CASE } from '../translations';
 
 /**
- * Returns "Add to existing case" and "Add to new case" context menu items
- * for the alerts table actions popover.
+ * Returns an "Add to case" context menu item.
  *
  * Returns an empty array if the cases service is unavailable or the user lacks permissions.
  */
@@ -22,21 +21,23 @@ export const useCaseAlertActionItems = ({
   alert,
   cases,
   refresh,
+  onAddToCase,
   onActionExecuted,
   owner = ['cases'],
 }: {
   alert: Alert;
   cases?: CasesService;
   refresh: () => void;
+  onAddToCase?: (opts: { isNewCase: boolean }) => void;
   onActionExecuted?: () => void;
   owner?: CasesOwner[];
 }): React.ReactElement[] => {
   const userCasesPermissions = cases?.helpers.canUseCases(owner);
 
-  const { handleAddToExistingCaseClick, handleAddToNewCaseClick } = useCaseActions({
+  const { handleAddToCaseClick } = useCaseActions({
     alerts: [alert],
     cases,
-    onAddToCase: refresh,
+    onAddToCase: onAddToCase ?? refresh,
   });
 
   return useMemo(() => {
@@ -46,33 +47,21 @@ export const useCaseAlertActionItems = ({
 
     return [
       <EuiContextMenuItem
-        data-test-subj="add-to-existing-case-action"
-        key="addToExistingCase"
+        data-test-subj="add-to-case-action"
+        key="addToCase"
+        icon="briefcase"
         onClick={() => {
-          handleAddToExistingCaseClick();
+          handleAddToCaseClick();
           onActionExecuted?.();
         }}
-        size="s"
       >
-        {ADD_TO_EXISTING_CASE}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        data-test-subj="add-to-new-case-action"
-        key="addToNewCase"
-        onClick={() => {
-          handleAddToNewCaseClick();
-          onActionExecuted?.();
-        }}
-        size="s"
-      >
-        {ADD_TO_NEW_CASE}
+        {ADD_TO_CASE}
       </EuiContextMenuItem>,
     ];
   }, [
     userCasesPermissions?.createComment,
     userCasesPermissions?.read,
-    handleAddToExistingCaseClick,
-    handleAddToNewCaseClick,
+    handleAddToCaseClick,
     onActionExecuted,
   ]);
 };

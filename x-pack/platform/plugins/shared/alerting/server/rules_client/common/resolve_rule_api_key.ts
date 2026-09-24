@@ -1,0 +1,84 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { withSpan } from '@kbn/apm-utils';
+import type { RulesClientContext, CreateAPIKeyResult } from '../types';
+
+export interface ResolvedAPIKey {
+  createdAPIKey: CreateAPIKeyResult | null;
+  isAuthTypeApiKey: boolean;
+}
+
+export interface RuleApiKeyOwnership {
+  apiKeyCreatedByUser?: boolean | null;
+}
+
+const cloneKey = async (context: RulesClientContext, name: string): Promise<ResolvedAPIKey> => {
+  return { createdAPIKey: await context.cloneAPIKey(name), isAuthTypeApiKey: false };
+};
+
+const grantKey = async (
+  context: RulesClientContext,
+  name: string,
+  refresh?: boolean | 'wait_for'
+): Promise<ResolvedAPIKey> => {
+  const createdAPIKey = await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
+    context.createAPIKey(name, refresh)
+  );
+  return { createdAPIKey, isAuthTypeApiKey: false };
+};
+
+export interface ResolveRuleAPIKeyOptions {
+  apiKeyOwnership?: RuleApiKeyOwnership;
+  cloneApiKey?: boolean;
+  refresh?: boolean | 'wait_for';
+}
+
+export const resolveRuleAPIKey = async (
+  context: RulesClientContext,
+  name: string,
+  enabled: boolean,
+  { apiKeyOwnership, cloneApiKey, refresh }: ResolveRuleAPIKeyOptions = {}
+): Promise<ResolvedAPIKey> => {
+  if (!enabled) {
+    return { createdAPIKey: null, isAuthTypeApiKey: false };
+  }
+
+  const isApiKeyAuth = context.isAuthenticationTypeAPIKey();
+
+  // The client-level flag and the per-call option both declare the caller's API key as borrowed:
+  // the rule must be minted its own key instead of persisting the caller's. Only an explicitly
+  // user-owned key (apiKeyCreatedByUser === true) overrides the declaration — the user chose to
+  // run the rule on their own credential. A rule created disabled stores no key and a null
+  // ownership (as do pre-ownership legacy rules), so enabling it must still honor the
+  // declaration; requiring the absence of an ownership object here would persist the borrowed
+  // credential on that path. Without API-key authentication there is no key to clone
+  // (cloneAsInternalUser would throw), so the declaration is a no-op and the rule is granted a
+  // framework key as usual below.
+  const callerKeyIsBorrowed =
+    (Boolean(cloneApiKey) || Boolean(context.cloneApiKeysOnCreate)) &&
+    apiKeyOwnership?.apiKeyCreatedByUser !== true &&
+    isApiKeyAuth;
+  const frameworkManaged = apiKeyOwnership?.apiKeyCreatedByUser === false;
+
+  if (callerKeyIsBorrowed) {
+    return cloneKey(context, name);
+  }
+
+  if (frameworkManaged) {
+    return isApiKeyAuth ? cloneKey(context, name) : grantKey(context, name, refresh);
+  }
+
+  if (isApiKeyAuth) {
+    return {
+      createdAPIKey: context.getAuthenticationAPIKey(`${name}-user-created`),
+      isAuthTypeApiKey: true,
+    };
+  }
+
+  return grantKey(context, name, refresh);
+};

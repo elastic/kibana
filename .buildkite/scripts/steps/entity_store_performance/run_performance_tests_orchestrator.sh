@@ -54,7 +54,7 @@ ES_ZONES=$(echo "$DEPLOYMENT_JSON" | jq -r '[.resources.elasticsearch[0].info.to
 # Count total instances
 ES_NODE_COUNT=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].info.topology.instances | length // 0')
 # Create node details string
-ES_NODE_DETAILS=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].info.topology.instances[]? | "\(.instance_name): \(.memory.instance_capacity // 0)MB (\(.zone // "unknown") zone, \(.instance_configuration.id // "unknown"))"' | tr '\n' '; ')
+ES_NODE_DETAILS=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].info.topology.instances[]? | "\(.instance_name): \(.memory.instance_capacity // 0)MB"' | tr '\n' '; ')
 
 # Export for reporting script
 export ES_HARDWARE_PROFILE
@@ -161,7 +161,7 @@ echo "Node.js version: $(node --version)"
 
 # Install dependencies
 echo "--- Install dependencies"
-yarn install
+pnpm install
 
 # Export variables for test execution script
 export SECURITY_DOCS_GEN_DIR

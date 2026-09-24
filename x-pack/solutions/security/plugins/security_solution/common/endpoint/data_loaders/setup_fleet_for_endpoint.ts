@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosResponse } from 'axios';
-import type { KbnClient } from '@kbn/test';
+import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import type {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
@@ -49,7 +48,7 @@ export const setupFleetForEndpoint = usageTracker.track(
           headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
           method: 'POST',
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
+        .catch(wrapErrorAndRejectPromise)) as KbnClientResponse<PostFleetSetupResponse>;
 
       if (!setupResponse.data.isInitialized) {
         log.error(new Error(JSON.stringify(setupResponse.data, null, 2)));
@@ -70,7 +69,7 @@ export const setupFleetForEndpoint = usageTracker.track(
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
+        .catch(wrapErrorAndRejectPromise)) as KbnClientResponse<PostFleetSetupResponse>;
 
       if (!setupResponse.data.isInitialized) {
         log.error(new Error(JSON.stringify(setupResponse, null, 2)));
@@ -117,7 +116,7 @@ export const installOrUpgradeEndpointFleetPackage = usageTracker.track(
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
+        .catch(wrapErrorAndRejectPromise)) as KbnClientResponse<BulkInstallPackagesResponse>;
 
       logger.debug(`Fleet bulk install response:`, installEndpointPackageResp.data);
 

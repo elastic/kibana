@@ -128,6 +128,25 @@ describe('buildStateSubscribe', () => {
     expect(dataState.refetch$.next).toHaveBeenCalled();
   });
 
+  it('should call refetch$ if esqlApproximation has changed in ES|QL mode', async () => {
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          esqlApproximation: true,
+        },
+      })
+    );
+
+    expect(dataState.refetch$.next).toHaveBeenCalled();
+  });
+
+  it('should not call refetch$ if esqlApproximation has changed in non-ES|QL mode', async () => {
+    await getSubscribeFn()(getNextState({ appState: { esqlApproximation: true } }));
+
+    expect(dataState.refetch$.next).not.toHaveBeenCalled();
+  });
+
   it('should not call refetch$ if filters have changed', async () => {
     await getSubscribeFn()(
       getNextState({
@@ -143,6 +162,36 @@ describe('buildStateSubscribe', () => {
     );
 
     expect(dataState.refetch$.next).not.toHaveBeenCalled();
+  });
+
+  it('should not fetch when switching to ES|QL while uninitialized', async () => {
+    dataState.data$.main$.next({ fetchStatus: FetchStatus.UNINITIALIZED });
+
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          query: { esql: 'FROM logs' },
+        },
+      })
+    );
+
+    expect(dataState.refetch$.next).not.toHaveBeenCalled();
+  });
+
+  it('should fetch when switching to ES|QL after data has been loaded', async () => {
+    dataState.data$.main$.next({ fetchStatus: FetchStatus.COMPLETE });
+
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          query: { esql: 'FROM logs' },
+        },
+      })
+    );
+
+    expect(dataState.refetch$.next).toHaveBeenCalled();
   });
 
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
@@ -164,17 +213,18 @@ describe('buildStateSubscribe', () => {
 
     await getSubscribeFn()(getNextState({ appState: { dataSource: newDataSource } }));
 
-    expect(dataState.reset).toBeCalledTimes(1);
+    expect(dataState.reset).toHaveBeenCalledTimes(1);
 
     toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.resetAppState)({
-        appState: {
+      toolkit.injectCurrentTab(internalStateActions.initializeTabState)({
+        initialAppState: {
           dataSource: newDataSource,
         },
+        initialProfileState: toolkit.getCurrentTab().profileState,
       })
     );
 
     await getSubscribeFn()(getNextState({ appState: { dataSource: newDataSource } }));
-    expect(dataState.reset).toBeCalledTimes(1);
+    expect(dataState.reset).toHaveBeenCalledTimes(1);
   });
 });

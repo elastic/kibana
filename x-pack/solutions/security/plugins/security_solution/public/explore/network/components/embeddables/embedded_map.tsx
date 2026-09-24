@@ -8,30 +8,20 @@
 // embedded map v2
 
 import { EuiAccordion, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useMemo, useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import type { Filter, Query } from '@kbn/es-query';
-import { isEqual } from 'lodash/fp';
 import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
-import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
-import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getLayerList } from './map_config';
-import { sourcererSelectors } from '../../../../sourcerer/store';
-import type { State } from '../../../../common/store';
-import type { SourcererDataView } from '../../../../sourcerer/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
@@ -109,82 +99,21 @@ export const EmbeddedMapComponent = ({
   const { services } = useKibana();
   const { storage } = services;
 
-  const [isError, setIsError] = useState(false);
-  const [isIndexError, setIsIndexError] = useState(false);
   const [storageValue, setStorageValue] = useState(storage.get(NETWORK_MAP_VISIBLE) ?? true);
 
-  const { addError } = useAppToasts();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(PageScope.explore);
-  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
-  const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
-  const selectedPatterns = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedPatterns(state, PageScope.default);
-  });
-
-  const isFieldInIndexPattern = useIsFieldInIndexPattern();
-
-  const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
-  const [availableDataViews, setAvailableDataViews] = useState<SourcererDataView[]>([]);
-
-  const experimentalDataViewLayerList = useMemo(
+  const { dataView } = useDataView(PageScope.explore);
+  const dataViewLayerList = useMemo(
     () =>
-      experimentalDataView.id && experimentalDataView.getIndexPattern()
+      dataView.id && dataView.getIndexPattern()
         ? getLayerList({ euiTheme }, [
             {
-              id: experimentalDataView.id,
-              title: experimentalDataView.getIndexPattern(),
+              id: dataView.id,
+              title: dataView.getIndexPattern(),
             },
           ])
         : [],
-    [euiTheme, experimentalDataView]
+    [euiTheme, dataView]
   );
-
-  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
-  useEffect(() => {
-    if (newDataViewPickerEnabled) return;
-
-    let canceled = false;
-
-    const fetchData = async () => {
-      try {
-        const apiResponse = await Promise.all(
-          availableDataViews.map(async ({ title }) => isFieldInIndexPattern(title))
-        );
-        // ensures only index patterns with maps fields are passed
-        const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
-        if (!canceled) {
-          setLayerList(getLayerList({ euiTheme }, goodDataViews));
-        }
-      } catch (e) {
-        if (!canceled) {
-          setLayerList([]);
-          addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
-          setIsError(true);
-        }
-      }
-    };
-    if (availableDataViews.length) {
-      fetchData();
-    }
-    return () => {
-      canceled = true;
-    };
-  }, [addError, availableDataViews, euiTheme, isFieldInIndexPattern, newDataViewPickerEnabled]);
-
-  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
-  useEffect(() => {
-    if (newDataViewPickerEnabled) return;
-
-    const dataViews = kibanaDataViews.filter((dataView) =>
-      selectedPatterns.includes(dataView.title)
-    );
-    if (selectedPatterns.length > 0 && dataViews.length === 0) {
-      setIsIndexError(true);
-    }
-    setAvailableDataViews((prevViews) => (isEqual(prevViews, dataViews) ? prevViews : dataViews));
-  }, [kibanaDataViews, selectedPatterns, newDataViewPickerEnabled]);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
@@ -210,36 +139,32 @@ export const EmbeddedMapComponent = ({
         <MapToolTip />
       </InPortal>
       <EmbeddableMapWrapper>
-        <EmbeddableMapRatioHolder className="siemEmbeddable__map" maintainRatio={!isIndexError} />
-        {isIndexError ? (
-          <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
-        ) : (
-          <EmbeddableMap>
-            <services.maps.Map
-              // eslint-disable-next-line react/display-name
-              getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
-                <OutPortal node={portalNode} {...tooltipProps} />}
-              mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
-              layerList={newDataViewPickerEnabled ? experimentalDataViewLayerList : layerList}
-              filters={appliedFilters}
-              query={query}
-              onApiAvailable={(api: MapApi) => {
-                // Wire up to app refresh action
-                setQuery({
-                  id: 'embeddedMap', // Scope to page type if using map elsewhere
-                  inspect: null,
-                  loading: false,
-                  refetch: () => api.reload(),
-                });
-              }}
-            />
-          </EmbeddableMap>
-        )}
+        <EmbeddableMapRatioHolder className="siemEmbeddable__map" maintainRatio={true} />
+        <EmbeddableMap>
+          <services.maps.Map
+            // eslint-disable-next-line react/display-name
+            getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
+              <OutPortal node={portalNode} {...tooltipProps} />}
+            mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
+            layerList={dataViewLayerList}
+            filters={appliedFilters}
+            query={query}
+            onApiAvailable={(api: MapApi) => {
+              // Wire up to app refresh action
+              setQuery({
+                id: 'embeddedMap', // Scope to page type if using map elsewhere
+                inspect: null,
+                loading: false,
+                refetch: () => api.reload(),
+              });
+            }}
+          />
+        </EmbeddableMap>
       </EmbeddableMapWrapper>
     </Embeddable>
   );
 
-  return isError ? null : (
+  return (
     <StyledEuiAccordion
       data-test-subj="EmbeddedMapComponent"
       onToggle={setDefaultMapVisibility}

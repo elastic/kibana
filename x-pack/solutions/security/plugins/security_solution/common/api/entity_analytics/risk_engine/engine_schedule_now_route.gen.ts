@@ -31,5 +31,11 @@ export const RiskEngineScheduleNowErrorResponse = lazySchema(() =>
 );
 export type RiskEngineScheduleNowErrorResponse = z.infer<typeof RiskEngineScheduleNowErrorResponse>;
 
+export const ScheduleRiskEngineNowRequestBody = lazySchema(() => z.object({}));
+export type ScheduleRiskEngineNowRequestBody = z.infer<typeof ScheduleRiskEngineNowRequestBody>;
+export type ScheduleRiskEngineNowRequestBodyInput = z.input<
+  typeof ScheduleRiskEngineNowRequestBody
+>;
+
 export const ScheduleRiskEngineNowResponse = lazySchema(() => RiskEngineScheduleNowResponse);
 export type ScheduleRiskEngineNowResponse = z.infer<typeof ScheduleRiskEngineNowResponse>;

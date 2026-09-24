@@ -39,7 +39,7 @@ const IconView = (props: { value?: string; label: string; icon?: IconType }) => 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type={props.icon ?? props.value} />
+        <EuiIcon type={props.icon ?? props.value} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>{props.label}</EuiFlexItem>
     </EuiFlexGroup>

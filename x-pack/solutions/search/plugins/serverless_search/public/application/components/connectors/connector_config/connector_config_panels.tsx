@@ -42,7 +42,7 @@ export const ConnectorConfigurationPanels: React.FC<ConnectorConfigurationPanels
         <ConnectorConfigurationComponent
           isDisabled={!canManageConnectors}
           connector={connector}
-          hasPlatinumLicense={false}
+          hasPlatinumLicense={true}
           isLoading={isLoading}
           saveConfig={mutate}
         />

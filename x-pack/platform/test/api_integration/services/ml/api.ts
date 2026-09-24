@@ -11,21 +11,22 @@ import type { ProvidedType } from '@kbn/test';
 import type { TypeOf } from '@kbn/config-schema';
 import fs from 'fs';
 import type { Calendar } from '@kbn/ml-plugin/server/models/calendar';
-import type { Annotation } from '@kbn/ml-plugin/common/types/annotations';
+import type { Annotation } from '@kbn/ml-common-types/annotations';
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
 import {
   type DataFrameAnalyticsConfig,
   type DataFrameTaskStateType,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '@kbn/ml-plugin/common/constants/index_patterns';
-import type { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
+import type { PutTrainedModelConfig } from '@kbn/ml-common-types/trained_models';
 import { getCommonRequestHeader } from './common_api';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

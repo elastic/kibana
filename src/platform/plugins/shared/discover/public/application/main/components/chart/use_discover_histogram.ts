@@ -25,8 +25,7 @@ import type { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
 import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { getEsqlDatatableFromDocuments } from '../../../../utils/get_esql_datatable_from_documents';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -37,10 +36,7 @@ import {
   selectTabCombinedFilters,
   useAppStateSelector,
 } from '../../state_management/redux';
-import type {
-  DataDocumentsMsg,
-  DiscoverLatestFetchDetails,
-} from '../../state_management/discover_data_state_container';
+import type { DiscoverLatestFetchDetails } from '../../state_management/discover_data_state_container';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   type InitialUnifiedHistogramLayoutProps,
@@ -54,7 +50,6 @@ import {
 import { useDataState } from '../../hooks/use_data_state';
 import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
-const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchParamsExternal> = [
   'externalVisContext',
   'breakdownField',
@@ -207,6 +202,7 @@ export const useDiscoverHistogram = (
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation);
   const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
@@ -229,17 +225,19 @@ export const useDiscoverHistogram = (
       breakdownField,
       timeInterval,
       esqlVariables,
+      isApproximate: esqlApproximation,
       controlsState: getDefinedControlGroupState(currentTabControlState),
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
-    };
+    } satisfies UnifiedHistogramFetchParamsExternal;
   }, [
     breakdownField,
     timeInterval,
     currentTabControlState,
     dataView,
     esqlVariables,
+    esqlApproximation,
     filters,
     inspectorAdapters.requests,
     isEsqlMode,
@@ -255,7 +253,7 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
-      const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
+      const { table, esqlQueryColumns } = getEsqlDatatableFromDocuments({
         documentsValue: documents$.getValue(),
         isEsqlMode,
       });
@@ -445,11 +443,11 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
         return changes;
       }
 
-      if (prev?.lensRequestAdapter !== curr.lensRequestAdapter) {
+      if (!prev || prev.lensRequestAdapter !== curr.lensRequestAdapter) {
         changes.lensRequestAdapter = curr.lensRequestAdapter;
       }
 
-      if (prev?.chartHidden !== curr.chartHidden) {
+      if (!prev || prev.chartHidden !== curr.chartHidden) {
         changes.hideChart = curr.chartHidden;
       }
 
@@ -465,33 +463,3 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
     distinctUntilChanged((prev, curr) => prev.status === curr.status && prev.result === curr.result)
   );
 };
-
-function getUnifiedHistogramTableForEsql({
-  documentsValue,
-  isEsqlMode,
-}: {
-  documentsValue: DataDocumentsMsg | undefined;
-  isEsqlMode: boolean;
-}) {
-  if (
-    !isEsqlMode ||
-    !documentsValue?.result ||
-    ![FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus)
-  ) {
-    return {
-      table: undefined,
-      esqlQueryColumns: EMPTY_ESQL_COLUMNS,
-    };
-  }
-
-  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
-  return {
-    table: {
-      type: 'datatable' as const,
-      rows: documentsValue.result.map((r) => r.raw),
-      columns: esqlQueryColumns,
-      meta: { type: ESQL_TABLE_TYPE },
-    },
-    esqlQueryColumns,
-  };
-}
