@@ -562,8 +562,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
-      // Monaco 0.54.0: Use monacoEditor service to set an invalid query
-      await monacoEditor.setCodeEditorValue('{"query":{"foo":""}}');
+      await monacoEditor.clearCodeEditorValue('queryJsonEditor');
+      await monacoEditor.simulateTyping('queryJsonEditor', '{"query":{"foo":""}}');
 
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');

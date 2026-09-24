@@ -63,6 +63,7 @@ export class MonacoEditorService extends FtrService {
    * Replaces the entire editor content and moves the cursor to the end.
    * @param triggerSuggest - Whether to trigger autocomplete after setting the value (default: true).
    *   Pass false for setup/context text where you don't want completions to fire.
+   * @deprecated Use {@link simulateTyping} instead.
    */
   public async typeCodeEditorValue(value: string, testSubjId: string, triggerSuggest = true) {
     await this.waitCodeEditorReady(testSubjId);
