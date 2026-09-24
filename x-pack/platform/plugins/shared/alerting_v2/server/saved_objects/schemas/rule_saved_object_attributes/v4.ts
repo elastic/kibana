@@ -9,6 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV3 } from './v3';
 
 export const ruleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV3.extends({
-  createdBy: schema.nullable(schema.object({ profile_uid: schema.string() })),
-  updatedBy: schema.nullable(schema.object({ profile_uid: schema.string() })),
+  createdBy: schema.nullable(schema.object({ profile_uid: schema.nullable(schema.string()) })),
+  updatedBy: schema.nullable(schema.object({ profile_uid: schema.nullable(schema.string()) })),
 });

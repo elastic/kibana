@@ -48,17 +48,20 @@ export type TagsResponse = z.infer<typeof tagsResponseSchema>;
  * full names change while a profile ID does not.
  *
  * The object shape (rather than a bare ID) exists so identity can be described
- * in more detail later. Today every attributed write has a profile, and a write
- * without one — an API key, or an unactivated profile — is reported as `null`.
- * Describing such an actor positively (a service account, say) means relaxing
- * `profile_uid` to optional, which is deferred until there is a caller for it.
+ * in more detail later. `profile_uid` is nullable so the three states stay
+ * distinct: a `null` actor is a write with no user behind it (a background
+ * task, say), `{ profile_uid: null }` is a user whose profile could not be
+ * resolved, and a populated `profile_uid` is a fully attributed write.
  *
  * Deliberately not `.strict()`: additional identity fields are expected to be
  * added, and older clients should tolerate them.
  */
 export const actorSchema = z
   .object({
-    profile_uid: z.string().describe('User profile ID of the actor.'),
+    profile_uid: z
+      .string()
+      .nullable()
+      .describe('User profile ID of the actor, or `null` when it cannot be resolved.'),
   })
   .describe('Identity that performed the write.')
   .meta({ id: 'alerting_actor' });

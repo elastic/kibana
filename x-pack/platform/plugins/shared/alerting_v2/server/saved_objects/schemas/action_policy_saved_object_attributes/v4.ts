@@ -10,8 +10,8 @@ import { actionPolicySavedObjectAttributesSchemaV3 } from './v3';
 
 export const actionPolicySavedObjectAttributesSchemaV4 =
   actionPolicySavedObjectAttributesSchemaV3.extends({
-    createdBy: schema.nullable(schema.object({ profile_uid: schema.string() })),
-    updatedBy: schema.nullable(schema.object({ profile_uid: schema.string() })),
+    createdBy: schema.nullable(schema.object({ profile_uid: schema.nullable(schema.string()) })),
+    updatedBy: schema.nullable(schema.object({ profile_uid: schema.nullable(schema.string()) })),
   });
 
 export type ActionPolicySavedObjectAttributesV4 = ReturnType<
