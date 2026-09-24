@@ -219,6 +219,38 @@ describe('SavedObjectInvestigationSweepRepository', () => {
       });
     });
 
+    it('limits concurrent deletes across spaces', async () => {
+      const { repository, savedObjects } = createRepository();
+      savedObjects.createPointInTimeFinder.mockReturnValue(
+        createFinder([
+          findResponse(
+            Array.from({ length: 11 }, (_, index) =>
+              foundInvestigation({ id: `inv-${index}`, namespaces: [`team-${index}`] })
+            )
+          ),
+        ])
+      );
+      let activeDeletes = 0;
+      let maxActiveDeletes = 0;
+      const deleteGate = Promise.withResolvers<void>();
+      savedObjects.bulkDelete.mockImplementation(async (objects) => {
+        activeDeletes++;
+        maxActiveDeletes = Math.max(maxActiveDeletes, activeDeletes);
+        if (activeDeletes === 10) {
+          deleteGate.resolve();
+        }
+        await deleteGate.promise;
+        activeDeletes--;
+        return {
+          statuses: objects.map(({ id, type }) => ({ id, type, success: true })),
+        };
+      });
+
+      await repository.deleteAllAcrossSpaces();
+
+      expect(maxActiveDeletes).toBe(10);
+    });
+
     it('continues deleting later pages after a per-object failure', async () => {
       const { repository, savedObjects, logger } = createRepository();
       savedObjects.createPointInTimeFinder.mockReturnValue(

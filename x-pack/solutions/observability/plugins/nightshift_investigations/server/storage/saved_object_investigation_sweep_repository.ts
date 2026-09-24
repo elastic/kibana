@@ -7,6 +7,7 @@
 
 import type { ISavedObjectsRepository, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
+import { asyncMapWithLimit } from '@kbn/std';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
 import { buildInvestigationFilter } from './build_investigation_filter';
 import { InvestigationStaleWriteError } from './errors';
@@ -21,6 +22,7 @@ import type {
 } from './types';
 
 const DELETE_BATCH_SIZE = 1000;
+const MAX_CONCURRENT_SPACE_DELETES = 10;
 
 export interface SavedObjectInvestigationSweepRepositoryDeps {
   /** Unscoped, so a single search covers every space. */
@@ -112,8 +114,10 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
           bySpace.set(spaceId, ids);
         }
 
-        const results = await Promise.all(
-          [...bySpace].map(async ([spaceId, ids]) => {
+        const results = await asyncMapWithLimit(
+          [...bySpace],
+          MAX_CONCURRENT_SPACE_DELETES,
+          async ([spaceId, ids]) => {
             try {
               const { statuses } = await this.savedObjects.bulkDelete(
                 ids.map((id) => ({ type: NIGHTSHIFT_INVESTIGATION_SO_TYPE, id })),
@@ -142,7 +146,7 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
                 failures: ids.map((id) => ({ id, spaceId, error: message })),
               };
             }
-          })
+          }
         );
 
         for (const result of results) {
