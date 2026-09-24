@@ -7,6 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -33,6 +34,9 @@ const createWorker = (overrides: Partial<Worker> & Pick<Worker, 'id' | 'name'>):
   ...overrides,
 });
 
+/** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
+const RULE_TUNING_EXTRAS = { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 14 };
+
 const ruleTuning = createWorker({
   id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   name: 'Rule Tuning',
@@ -40,7 +44,7 @@ const ruleTuning = createWorker({
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
     autonomy: 'manual',
     scheduleInterval: '2h',
-    extras: { analysisWindowDays: 14 },
+    extras: RULE_TUNING_EXTRAS,
   },
 });
 
@@ -62,13 +66,15 @@ describe('useWatchSettingsDraft', () => {
 
     act(() => {
       result.current.updateEnabled(ruleTuning, true);
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
     });
 
     expect(result.current.isDirty).toBe(true);
     expect(result.current.resolve(ruleTuning)).toMatchObject({
       enabled: true,
-      settings: { extras: { analysisWindowDays: 7 } },
+      settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
       dirty: true,
     });
     expect(mutateAsync).not.toHaveBeenCalled();
@@ -80,7 +86,7 @@ describe('useWatchSettingsDraft', () => {
     expect(result.current.isDirty).toBe(false);
     expect(result.current.resolve(ruleTuning)).toMatchObject({
       enabled: false,
-      settings: { extras: { analysisWindowDays: 14 } },
+      settings: { extras: RULE_TUNING_EXTRAS },
       dirty: false,
     });
   });
@@ -93,7 +99,9 @@ describe('useWatchSettingsDraft', () => {
     );
 
     act(() => {
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
     });
 
     // Someone else saved a new interval while this draft was open.
@@ -112,7 +120,10 @@ describe('useWatchSettingsDraft', () => {
     expect(mutateAsync).toHaveBeenCalledTimes(1);
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: 1,
+      },
     });
   });
 
@@ -121,7 +132,9 @@ describe('useWatchSettingsDraft', () => {
     const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning]));
 
     act(() => {
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
     });
     await act(async () => {
       await result.current.save();
@@ -130,7 +143,7 @@ describe('useWatchSettingsDraft', () => {
     expect(result.current.resolve(ruleTuning)).toMatchObject({
       dirty: true,
       error: 'conflict',
-      settings: { extras: { analysisWindowDays: 7 } },
+      settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
     });
 
     // A retry still carries the original revision; nothing is silently re-based.
@@ -140,7 +153,10 @@ describe('useWatchSettingsDraft', () => {
     });
     expect(mutateAsync).toHaveBeenLastCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: 1,
+      },
     });
   });
 
@@ -166,8 +182,12 @@ describe('useWatchSettingsDraft', () => {
     const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning]));
 
     act(() => {
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 14 } });
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
+      result.current.updateSettings(ruleTuning, {
+        extras: RULE_TUNING_EXTRAS,
+      });
     });
 
     expect(result.current.isDirty).toBe(false);
@@ -177,7 +197,9 @@ describe('useWatchSettingsDraft', () => {
     const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCreation]));
 
     act(() => {
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 31 } });
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 31 },
+      });
       result.current.updateEnabled(ruleCreation, true);
     });
 
@@ -191,7 +213,10 @@ describe('useWatchSettingsDraft', () => {
     const persistedRuleTuning: Worker = {
       ...ruleTuning,
       settingsRevision: 2,
-      settings: { ...ruleTuning.settings, extras: { analysisWindowDays: 7 } },
+      settings: {
+        ...ruleTuning.settings,
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      },
     };
     const SAVE_FAILURE = 'Worker settings are temporarily unavailable; try again';
 
@@ -209,7 +234,9 @@ describe('useWatchSettingsDraft', () => {
       );
 
       act(() => {
-        rendered.result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+        rendered.result.current.updateSettings(ruleTuning, {
+          extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+        });
         rendered.result.current.updateEnabled(ruleCreation, true);
       });
       await act(async () => {
@@ -219,7 +246,10 @@ describe('useWatchSettingsDraft', () => {
       expect(mutateAsync).toHaveBeenCalledTimes(2);
       expect(mutateAsync).toHaveBeenNthCalledWith(1, {
         workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-        patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+        patch: {
+          settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+          settingsRevision: 1,
+        },
       });
       expect(mutateAsync).toHaveBeenNthCalledWith(2, {
         workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
@@ -234,7 +264,7 @@ describe('useWatchSettingsDraft', () => {
       const { result, rerender } = await saveWithOneFailure();
 
       expect(result.current.resolve(persistedRuleTuning)).toMatchObject({
-        settings: { extras: { analysisWindowDays: 7 } },
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
         dirty: false,
         error: undefined,
       });
@@ -280,6 +310,7 @@ describe('useWatchSettingsDraft', () => {
         error: undefined,
       });
       expect(result.current.resolve(persistedRuleTuning).settings.extras).toEqual({
+        ...RULE_TUNING_EXTRAS,
         analysisWindowDays: 7,
       });
       expect(mutateAsync).toHaveBeenCalledTimes(2);

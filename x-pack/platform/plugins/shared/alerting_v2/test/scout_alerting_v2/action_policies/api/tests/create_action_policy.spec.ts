@@ -67,8 +67,8 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.description).toBe(body.description);
       expect(response.body.destinations).toStrictEqual(body.destinations);
       expect(response.body.matcher).toMatchObject(body.matcher);
-      // The API key is server-side only and must never be exposed over the wire.
-      expect(response.body.auth.apiKey).toBeUndefined();
+      // API key ownership is server-side only and must never be exposed over the wire.
+      expect(response.body.auth).toBeUndefined();
     }
   );
 

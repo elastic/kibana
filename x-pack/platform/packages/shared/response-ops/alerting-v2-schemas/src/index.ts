@@ -10,6 +10,7 @@ export * from './rule_attachment_schema';
 export * from './error_response_schema';
 export * from './constants';
 export {
+  actorSchema,
   durationSchema,
   entityIdSchema,
   ENTITY_ID_NOTE,
@@ -17,7 +18,7 @@ export {
   tagsResponseSchema,
   tagsSchema,
 } from './common';
-export type { TagsResponse } from './common';
+export type { Actor, TagsResponse } from './common';
 export {
   validateDuration,
   validateMaxDuration,

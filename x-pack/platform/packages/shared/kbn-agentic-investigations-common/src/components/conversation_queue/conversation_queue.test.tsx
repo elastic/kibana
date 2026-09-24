@@ -20,6 +20,7 @@ const investigation: Investigation = {
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
   pendingProposalCount: 1,
+  assignees: [],
   recommendedAction: 'respond',
   events: [],
 };
@@ -34,6 +35,7 @@ const queueElement = (props: Partial<React.ComponentProps<typeof ConversationQue
     onClickCard={jest.fn()}
     onOpenChat={jest.fn()}
     onClickRecommendedAction={jest.fn()}
+    renderAssignees={() => null}
     {...props}
   />
 );

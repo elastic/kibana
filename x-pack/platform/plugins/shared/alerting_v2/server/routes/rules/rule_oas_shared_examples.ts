@@ -58,9 +58,9 @@ export const RULE_RESPONSE: RuleResponse = {
     ...SAMPLE_RULE_DATA.metadata,
     version: 1,
   },
-  created_by: 'elastic',
+  created_by: { profile_uid: 'u_elastic_0' },
   created_at: '2026-01-15T12:00:00.000Z',
-  updated_by: 'elastic',
+  updated_by: { profile_uid: 'u_elastic_0' },
   updated_at: '2026-01-15T12:00:00.000Z',
 };
 

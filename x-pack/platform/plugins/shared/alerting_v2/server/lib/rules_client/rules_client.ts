@@ -388,14 +388,14 @@ export class RulesClient {
     data,
     id,
     enabled,
-    userProfileUid,
+    actor,
     nowIso,
     version,
   }: {
     data: CreateRuleData;
     id?: string;
     enabled: boolean;
-    userProfileUid: string | null;
+    actor: RuleSavedObjectAttributes['createdBy'];
     nowIso: string;
     version: number;
   }): PreparedRule {
@@ -404,9 +404,9 @@ export class RulesClient {
 
     const attrs = transformCreateRuleBodyToRuleSoAttributes(data, {
       enabled,
-      createdBy: userProfileUid,
+      createdBy: actor,
       createdAt: nowIso,
-      updatedBy: userProfileUid,
+      updatedBy: actor,
       updatedAt: nowIso,
       version,
     });
@@ -609,14 +609,14 @@ export class RulesClient {
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const prepared = this.prepareRuleForCreate({
       data: parsed,
       id: params.options?.id,
       enabled: true,
-      userProfileUid,
+      actor,
       nowIso,
       version: this.getNextVersion(),
     });
@@ -649,7 +649,7 @@ export class RulesClient {
   public async bulkCreateRules(params: BulkCreateRulesParams): Promise<BulkCreateRulesResponse> {
     const parsed = this.parseRuleData(bulkCreateRulesRequestSchema, params, 'create');
     const { spaceId } = this.getSpaceContext();
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
     const ruleVersion = this.getNextVersion();
 
@@ -664,7 +664,7 @@ export class RulesClient {
             data,
             id,
             enabled,
-            userProfileUid,
+            actor,
             nowIso,
             version: ruleVersion,
           })
@@ -716,7 +716,7 @@ export class RulesClient {
       this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const {
@@ -739,7 +739,7 @@ export class RulesClient {
 
     const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
-      updatedBy: userProfileUid,
+      updatedBy: actor,
       updatedAt: nowIso,
       version: ruleVersion,
     });
@@ -934,14 +934,14 @@ export class RulesClient {
       references,
     } = await this.getExistingRule(id);
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
-      updatedBy: userProfileUid,
+      updatedBy: actor,
       updatedAt: nowIso,
       metadata: { ...existingAttrs.metadata, version: ruleVersion },
     };
@@ -988,7 +988,7 @@ export class RulesClient {
       references,
     } = await this.getExistingRule(id);
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     // Disabling an already-disabled rule is intentionally not short-circuited: it
@@ -998,7 +998,7 @@ export class RulesClient {
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
-      updatedBy: userProfileUid,
+      updatedBy: actor,
       updatedAt: nowIso,
       metadata: { ...existingAttrs.metadata, version: ruleVersion },
     };
@@ -1228,7 +1228,7 @@ export class RulesClient {
     }
 
     const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const itemsToUpdate: Array<{
@@ -1253,7 +1253,7 @@ export class RulesClient {
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: true,
-        updatedBy: userProfileUid,
+        updatedBy: actor,
         updatedAt: nowIso,
         metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
@@ -1349,7 +1349,7 @@ export class RulesClient {
     }
 
     const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const itemsToUpdate: Array<{
@@ -1374,7 +1374,7 @@ export class RulesClient {
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: false,
-        updatedBy: userProfileUid,
+        updatedBy: actor,
         updatedAt: nowIso,
         metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
@@ -1499,14 +1499,14 @@ export class RulesClient {
 
     // Keys rotated — stamp the audit metadata so the rotation is attributable to
     // the current user. Per-rule save failures are reported as errors.
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const itemsToUpdate = rotatedCandidates.map((candidate) => ({
       id: candidate.id,
       attrs: {
         ...candidate.attrs,
-        updatedBy: userProfileUid,
+        updatedBy: actor,
         updatedAt: nowIso,
       } satisfies RuleSavedObjectAttributes,
       version: candidate.version,
@@ -1794,7 +1794,7 @@ export class RulesClient {
     }
 
     const { spaceId } = this.getSpaceContext();
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const {
@@ -1810,7 +1810,7 @@ export class RulesClient {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
-      updatedBy: userProfileUid,
+      updatedBy: actor,
       updatedAt: nowIso,
       version: ruleVersion,
     });
