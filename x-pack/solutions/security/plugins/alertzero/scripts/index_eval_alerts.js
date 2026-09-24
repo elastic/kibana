@@ -18,7 +18,7 @@
  *   --es      Elasticsearch base URL (default: http://localhost:9200)
  *   --kibana  Kibana base URL (default: http://localhost:5601)
  *   --space   Kibana space id (default: default)
- *   --run     After indexing, trigger the Worker immediately (no curl needed)
+ *   --run     After indexing, trigger one Worker run per rule immediately (no curl needed)
  *   --clean   Delete all previously indexed eval alerts instead of creating new ones
  */
 
@@ -422,69 +422,87 @@ async function indexAlerts() {
     doc['kibana.alert.rule.rule_id'] = `eval-rule-${tmpl.label}`;
 
     await esRequest('PUT', `/${INDEX}/_doc/${alertUuid}`, doc);
-    indexed.push({ id: alertUuid, label: tmpl.label, expected: tmpl.expected });
+    indexed.push({
+      id: alertUuid,
+      label: tmpl.label,
+      expected: tmpl.expected,
+      ruleUuid: doc['kibana.alert.rule.uuid'],
+    });
     process.stdout.write(`  ✓ ${id}  (expected: ${tmpl.expected})\n`);
   }
 
   console.log(`\nIndexed ${indexed.length} alerts with run prefix: ${runId}`);
 
-  const payload = {
-    inputs: {
-      event: {
-        triggerType: 'alert',
-        alertIds: indexed.map(({ id }) => ({ _id: id, _index: INDEX })),
+  // The analysis sub-workflow rejects Worker batches spanning multiple rule UUIDs (its
+  // enrichment anchors on the first alert's rule), and a real alert trigger only ever
+  // delivers one rule's alerts. Mirror that: one Worker run per rule.
+  const alertsByRule = new Map();
+  for (const alert of indexed) {
+    alertsByRule.set(alert.ruleUuid, [...(alertsByRule.get(alert.ruleUuid) ?? []), alert]);
+  }
+  const payloads = [...alertsByRule.values()].map((alerts) => ({
+    label: alerts[0].label,
+    body: {
+      inputs: {
+        event: {
+          triggerType: 'alert',
+          alertIds: alerts.map(({ id }) => ({ _id: id, _index: INDEX })),
+        },
       },
     },
-  };
+  }));
 
-  // Write payload to a temp file — avoids multiline -d quoting issues on paste
-  const payloadFile = path.join(os.tmpdir(), 'alert-triage-payload.json');
-  fs.writeFileSync(payloadFile, JSON.stringify(payload, null, 2));
-
-  // The workflow UI's Run dialog wraps whatever it is given under `inputs` itself, so
-  // pasting the API body above produces inputs.inputs.event. Alert preprocessing reads
-  // inputs.event, so it silently skips, event.alerts is never built, and attach_alerts
-  // fails with "expected array to have >=1 items". Write the unwrapped form separately.
-  const uiPayloadFile = path.join(os.tmpdir(), 'alert-triage-payload-ui.json');
-  fs.writeFileSync(uiPayloadFile, JSON.stringify(payload.inputs, null, 2));
-
-  console.log('\n── Worker trigger ───────────────────────────────────────────────────────');
+  console.log(
+    `\n── Worker trigger (${payloads.length} runs, one per rule) ─────────────────────────`
+  );
 
   if (RUN) {
     // Trigger directly via Node fetch — no curl, no quoting issues
-    console.log('Triggering Worker run via Kibana API…');
-    const runRes = await fetch(`${KB_URL}/api/workflows/workflow/${WORKER_ID}/run`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'kbn-xsrf': 'true',
-        'elastic-api-version': '2023-10-31',
-        Authorization: 'Basic ' + Buffer.from(AUTH).toString('base64'),
-      },
-      body: JSON.stringify(payload),
-    });
-    const runJson = await runRes.json();
-    if (!runRes.ok) throw new Error(`Run API ${runRes.status}: ${JSON.stringify(runJson)}`);
-    const execId = runJson.workflowExecutionId;
-    console.log(`  ✓ Execution started: ${execId}`);
-    console.log(`  Watch live: ${KB_URL}/app/workflows/executions/${execId}`);
+    console.log('Triggering Worker runs via Kibana API…');
+    for (const { label, body } of payloads) {
+      const runRes = await fetch(`${KB_URL}/api/workflows/workflow/${WORKER_ID}/run`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'kbn-xsrf': 'true',
+          'elastic-api-version': '2023-10-31',
+          Authorization: 'Basic ' + Buffer.from(AUTH).toString('base64'),
+        },
+        body: JSON.stringify(body),
+      });
+      const runJson = await runRes.json();
+      if (!runRes.ok) throw new Error(`Run API ${runRes.status}: ${JSON.stringify(runJson)}`);
+      const execId = runJson.workflowExecutionId;
+      console.log(`  ✓ ${label}: ${KB_URL}/app/workflows/executions/${execId}`);
+    }
     console.log(`\n  Poll for result:`);
     console.log(
-      `  curl -u elastic:changeme '${KB_URL}/api/workflows/executions/${execId}' -H 'elastic-api-version: 2023-10-31'`
+      `  curl -u elastic:changeme '${KB_URL}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
     );
   } else {
-    // Print a curl that reads from the temp file — reliable across terminal widths
-    console.log(`API body written to:   ${payloadFile}`);
-    console.log(`UI Run body written to: ${uiPayloadFile}`);
+    // Write payloads to temp files — avoids multiline -d quoting issues on paste.
+    // The workflow UI's Run dialog wraps whatever it is given under `inputs` itself, so
+    // pasting the API body produces inputs.inputs.event. Alert preprocessing reads
+    // inputs.event, so it silently skips, event.alerts is never built, and attach_alerts
+    // fails with "expected array to have >=1 items". Write the unwrapped form separately.
+    for (const { label, body } of payloads) {
+      const payloadFile = path.join(os.tmpdir(), `alert-triage-payload-${label}.json`);
+      const uiPayloadFile = path.join(os.tmpdir(), `alert-triage-payload-ui-${label}.json`);
+      fs.writeFileSync(payloadFile, JSON.stringify(body, null, 2));
+      fs.writeFileSync(uiPayloadFile, JSON.stringify(body.inputs, null, 2));
+      console.log(`\n  ${label}`);
+      console.log(`    API body:    ${payloadFile}`);
+      console.log(`    UI Run body: ${uiPayloadFile}`);
+    }
     console.log(`\ncurl -u elastic:changeme -XPOST \\`);
     console.log(`  '${KB_URL}/api/workflows/workflow/${WORKER_ID}/run' \\`);
     console.log(`  -H 'kbn-xsrf: true' \\`);
     console.log(`  -H 'elastic-api-version: 2023-10-31' \\`);
     console.log(`  -H 'content-type: application/json' \\`);
-    console.log(`  --data-binary @${payloadFile}`);
-    console.log(`\n  Or trigger and watch in one go:`);
+    console.log(`  --data-binary @<API body file>`);
+    console.log(`\n  Or trigger all runs in one go:`);
     console.log(`  node ${path.resolve(__filename)} --run`);
-    console.log(`\n  Running from the workflow UI instead? Paste ${uiPayloadFile}`);
+    console.log(`\n  Running from the workflow UI instead? Paste a UI Run body file`);
     console.log(`  (the dialog adds the "inputs" wrapper itself — pasting the API body`);
     console.log(`   double-nests it, alert preprocessing skips, and attach_alerts fails).`);
   }
