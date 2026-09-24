@@ -67,6 +67,9 @@ export const FlakyTestBranchStatsSchema = z.object({
   buildFailRate: z.number(),
   /** Absent when the test never failed on this branch. */
   lastFailedAt: z.optional(z.coerce.date()),
+  /** The build of that failure and its Buildkite job; `<url>#<jobId>` opens the job's log. */
+  lastFailedBuildUrl: z.optional(z.string()),
+  lastFailedJobId: z.optional(z.string()),
   /** Most recent execution, i.e. run that was not skipped; absent when every run was skipped. */
   latestExecutionAt: z.optional(z.coerce.date()),
   latestRun: z.optional(FlakyTestBranchLatestRunSchema),
@@ -88,6 +91,9 @@ export const FlakyTestTargetStatsSchema = z.object({
   buildFailRate: z.number(),
   /** Absent when the test never failed on this target. */
   lastFailedAt: z.optional(z.coerce.date()),
+  /** The build of that failure and its Buildkite job; `<url>#<jobId>` opens the job's log. */
+  lastFailedBuildUrl: z.optional(z.string()),
+  lastFailedJobId: z.optional(z.string()),
 });
 export type FlakyTestTargetStats = z.infer<typeof FlakyTestTargetStatsSchema>;
 

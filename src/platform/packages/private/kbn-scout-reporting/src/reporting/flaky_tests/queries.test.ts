@@ -120,7 +120,10 @@ describe('buildBranchStatsQuery', () => {
       'builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL))'
     );
     expect(query).toContain(
-      'latest_execution_at = MAX(CASE(is_execution == 1, @timestamp, NULL)), ' +
+      'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)), ' +
+        'last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1, ' +
+        'last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1, ' +
+        'latest_execution_at = MAX(CASE(is_execution == 1, @timestamp, NULL)), ' +
         'latest_status = LAST(status, @timestamp), latest_at = MAX(@timestamp), ' +
         'latest_build_url = LAST(buildkite.build.url, @timestamp), ' +
         'latest_job_id = LAST(buildkite.job_id, @timestamp)'
@@ -204,6 +207,8 @@ describe('fetchBranchStats', () => {
         builds: 10,
         failed_builds: 5,
         last_failed_at: '2026-09-06T00:00:00.000Z',
+        last_failed_build_url: 'https://b/1',
+        last_failed_job_id: 'job-1',
         ...latest('flaky', '2026-09-06T00:00:00.000Z', 'https://b/1'),
         latest_job_id: 'job-1',
       },
@@ -270,6 +275,8 @@ describe('fetchBranchStats', () => {
         failedBuilds: 5,
         buildFailRate: 0.5,
         lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+        lastFailedBuildUrl: 'https://b/1',
+        lastFailedJobId: 'job-1',
         latestExecutionAt: new Date('2026-09-06T00:00:00.000Z'),
         latestRun: {
           status: 'flaky',
@@ -605,7 +612,9 @@ describe('buildTargetStatsQuery', () => {
     expect(query).toContain(
       'STATS builds = COUNT_DISTINCT(buildkite.build.id), ' +
         'failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)), ' +
-        'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)) ' +
+        'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)), ' +
+        'last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1, ' +
+        'last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1 ' +
         'BY test.id, test_run.target.mode, test_run.target.type'
     );
     expect(query).toContain(
@@ -666,6 +675,8 @@ describe('fetchTargetStats', () => {
               builds: 20,
               failed_builds: 5,
               last_failed_at: '2026-09-06T00:00:00.000Z',
+              last_failed_build_url: 'https://b/7',
+              last_failed_job_id: 'job-7',
             },
           ],
         }),
@@ -709,6 +720,8 @@ describe('fetchTargetStats', () => {
         failedBuilds: 5,
         buildFailRate: 0.25,
         lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+        lastFailedBuildUrl: 'https://b/7',
+        lastFailedJobId: 'job-7',
       },
       {
         mode: 'stateful-classic',

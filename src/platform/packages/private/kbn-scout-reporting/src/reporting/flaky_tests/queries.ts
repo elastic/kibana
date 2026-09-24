@@ -174,6 +174,8 @@ export const buildBranchStatsQuery = (
     'STATS builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL)),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
+      ' last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1,' +
+      ' last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1,' +
       ' latest_execution_at = MAX(CASE(is_execution == 1, @timestamp, NULL)),' +
       ' latest_status = LAST(status, @timestamp),' +
       ' latest_at = MAX(@timestamp),' +
@@ -361,6 +363,8 @@ export const fetchBranchStats = async (
         builds: number;
         failed_builds: number;
         last_failed_at: string | null;
+        last_failed_build_url: string | null;
+        last_failed_job_id: string | null;
         latest_execution_at: string | null;
         latest_status: string | null;
         latest_at: string | null;
@@ -380,6 +384,8 @@ export const fetchBranchStats = async (
       failedBuilds: record.failed_builds,
       buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,
       lastFailedAt: record.last_failed_at ? new Date(record.last_failed_at) : undefined,
+      lastFailedBuildUrl: record.last_failed_build_url || undefined,
+      lastFailedJobId: record.last_failed_job_id || undefined,
       latestExecutionAt: record.latest_execution_at
         ? new Date(record.latest_execution_at)
         : undefined,
@@ -461,7 +467,7 @@ export const fetchBranchCounts = async (
  * Per-target build counts for the given tests of one execution model, any branch in scope. The
  * target is the Scout deployment the test ran against (`stateful-classic`, `serverless-search`,
  * ...) and where it ran (`local` or `cloud`); frameworks without a Scout target record the mode
- * `unknown`. Counts only, over the same executions as the per-branch counts, so it stays cheap.
+ * `unknown`. Over the same executions as the per-branch counts, plus the last failed build.
  */
 export const buildTargetStatsQuery = (
   scope: FlakyTestQueryScope,
@@ -480,7 +486,9 @@ export const buildTargetStatsQuery = (
     `EVAL failed = ${model.failedExpression}`,
     'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
-      ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL))' +
+      ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
+      ' last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1,' +
+      ' last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1' +
       ' BY test.id, test_run.target.mode, test_run.target.type',
     'RENAME test.id AS test_id, test_run.target.mode AS target_mode, test_run.target.type AS target_type',
     `LIMIT ${ESQL_ROW_LIMIT}`,
@@ -509,6 +517,8 @@ export const fetchTargetStats = async (
         builds: number;
         failed_builds: number;
         last_failed_at: string | null;
+        last_failed_build_url: string | null;
+        last_failed_job_id: string | null;
       }>(es, buildTargetStatsQuery(scope, frameworks, testIds))
     )
   );
@@ -523,6 +533,8 @@ export const fetchTargetStats = async (
       failedBuilds: record.failed_builds,
       buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,
       lastFailedAt: record.last_failed_at ? new Date(record.last_failed_at) : undefined,
+      lastFailedBuildUrl: record.last_failed_build_url || undefined,
+      lastFailedJobId: record.last_failed_job_id || undefined,
     });
     byTest.set(record.test_id, stats);
   }
