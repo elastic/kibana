@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
+import type { ConversationsStart } from '@kbn/agent-builder-server';
 import type { AlertZeroSpaceIdResolver } from '../types';
 import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
@@ -18,6 +19,7 @@ import { registerUpdateWorkerRoute } from './workers/update_worker';
 import { registerGetProposalsByCategoryRoute } from './proposals/get_proposals_by_category';
 import { registerGetClosedProposalsRoute } from './proposals/get_closed_proposals';
 import { registerListActionsRoute } from './actions/list_actions';
+import { registerGetInvestigationsCountRoute } from './investigations/get_investigations_count';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -27,6 +29,7 @@ export interface RouteDependencies {
   getWorkersService: () => WorkersService;
   getConversationProposalsService: () => ConversationProposalsService;
   getActionsService: () => ActionsService;
+  getAgentBuilderConversations: () => ConversationsStart;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {
@@ -37,4 +40,5 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetProposalsByCategoryRoute(deps);
   registerGetClosedProposalsRoute(deps);
   registerListActionsRoute(deps);
+  registerGetInvestigationsCountRoute(deps);
 };

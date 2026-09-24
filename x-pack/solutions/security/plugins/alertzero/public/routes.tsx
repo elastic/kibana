@@ -17,10 +17,10 @@ import {
   NAV_STREAMS,
   NAV_THREAT_HUNT,
 } from './components/app_chrome/translations';
-import { ConversationsPage } from './pages/conversations';
 import { EscalationsPage } from './pages/escalations';
 import { SettingsPage } from './pages/settings';
 import { WatchesRoutes } from './pages/watches/routes';
+import { LandingPage } from './pages/landing_page';
 
 /**
  * Renders the escalations page only when the current user has the `showEscalations`
@@ -45,7 +45,7 @@ const EscalationsRoute: React.FC = () => {
  */
 export const AlertZeroRoutes: React.FC = () => (
   <Routes>
-    <Route path="/" exact component={ConversationsPage} />
+    <Route path="/" exact component={LandingPage} />
     <Route path="/escalations" component={EscalationsRoute} />
     <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
     <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />
