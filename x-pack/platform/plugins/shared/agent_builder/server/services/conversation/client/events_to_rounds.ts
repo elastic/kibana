@@ -169,6 +169,9 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
     rounds.push(round);
   }
 
+  // Last-event-wins: reconcileEvents appends round_feedback events in stored (append) order,
+  // so the final set() for each round_id is always the most recently submitted vote,
+  // regardless of created_at clock skew between Kibana nodes.
   const feedbackByRoundId = new Map<string, RoundFeedbackEvent['data']>();
   for (const event of events) {
     if (event.type === TimelineEventType.roundFeedback) {
