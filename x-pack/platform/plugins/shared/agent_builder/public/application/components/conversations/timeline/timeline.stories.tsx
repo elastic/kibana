@@ -8,6 +8,7 @@
 import React, { useCallback, useReducer, useState } from 'react';
 import {
   EuiAccordion,
+  EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,11 +16,17 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ChatEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import type { ChatEvent, ConversationEvent, TimelineEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
-import { STORY_INLINE_ATTACHMENT_TYPE } from '../../../__storybook__/agent_builder_services';
+import {
+  STORY_CUSTOM_EVENT_TYPE,
+  STORY_CUSTOM_EVENT_WITH_HEADER_TYPE,
+  STORY_INLINE_ATTACHMENT_TYPE,
+  storyAgent,
+  storyNoteEventDefinition,
+} from '../../../__storybook__/agent_builder_services';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { Timeline } from './timeline';
 import { DevSseEmitter } from './dev_sse_emitter';
@@ -32,8 +39,10 @@ import { createExecutionStepEvent } from './items/execution_step.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
 import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
 import { createVersionedAttachment } from './items/versioned_attachment.factory';
+import { createCustomEvent } from './items/custom_event.factory';
 import {
   createAttachmentItem,
+  createCustomEventItem,
   createUserMessageItem,
   createCompletedTurnItem,
   createFailedTurnItem,
@@ -113,6 +122,12 @@ const inlineAttachmentItem = createAttachmentItem({
   version: 1,
 });
 
+const customEventItem = createCustomEventItem({
+  key: 'story-custom-event',
+  event: createCustomEvent({ id: 'story-custom-event', type: STORY_CUSTOM_EVENT_TYPE }),
+  definition: storyNoteEventDefinition,
+});
+
 const meta: Meta<typeof Timeline> = {
   title: 'Conversations/Timeline/Timeline',
   component: Timeline,
@@ -125,6 +140,9 @@ const meta: Meta<typeof Timeline> = {
       </AgentBuilderStorybookProvider>
     ),
   ],
+  args: {
+    agent: storyAgent,
+  },
 };
 export default meta;
 
@@ -137,6 +155,7 @@ export const FullConversation: Story = {
       createUserMessageItem(),
       createCompletedTurnItem(),
       inlineAttachmentItem,
+      customEventItem,
       createUserMessageItem({
         key: 'pending-1',
         isPending: true,
@@ -219,15 +238,94 @@ export const AbortedExecution: Story = {
   },
 };
 
+/** An event written over the API, which reaches the timeline on the next refetch, not over SSE. */
+interface StoredEvent {
+  event: ConversationEvent;
+  /** How many live events existed when it was added, so it keeps its place in click order. */
+  afterLiveEvents: number;
+}
+
+const mergeStoredEvents = (
+  liveEvents: ConversationEvent[],
+  storedEvents: StoredEvent[]
+): ConversationEvent[] => {
+  const merged: ConversationEvent[] = [];
+  let liveIndex = 0;
+  for (const { event, afterLiveEvents } of storedEvents) {
+    merged.push(...liveEvents.slice(liveIndex, afterLiveEvents), event);
+    liveIndex = Math.max(liveIndex, afterLiveEvents);
+  }
+  return [...merged, ...liveEvents.slice(liveIndex)];
+};
+
 const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
   const [liveState, dispatch] = useReducer(sseToEvents, undefined, emptyLiveEventsState);
   const emit = useCallback((event: ChatEvent) => dispatch(event), []);
+  const [storedEvents, setStoredEvents] = useState<StoredEvent[]>([]);
+  const [addedAttachments, setAddedAttachments] = useState<VersionedAttachment[]>([]);
 
-  const events = [...seedEvents, ...liveState.events];
-  const { attachmentsService } = useAgentBuilderServices();
+  const store = (event: ConversationEvent) =>
+    setStoredEvents((previous) => [
+      ...previous,
+      { event, afterLiveEvents: liveState.events.length },
+    ]);
+
+  const addAttachment = () => {
+    const count = addedAttachments.length + 1;
+    const attachmentId = `story-added-attachment-${count}`;
+    const createdAt = new Date().toISOString();
+    setAddedAttachments((previous) => [
+      ...previous,
+      createVersionedAttachment({
+        id: attachmentId,
+        type: STORY_INLINE_ATTACHMENT_TYPE,
+        versions: [
+          {
+            version: 1,
+            data: { text: `Attachment ${count}, added from the story.` },
+            created_at: createdAt,
+            content_hash: `story-added-hash-${count}`,
+          },
+        ],
+      }),
+    ]);
+    store(
+      createAttachmentAddedEvent({
+        id: `${attachmentId}::attachment_added`,
+        created_at: createdAt,
+        data: {
+          attachment_id: attachmentId,
+          attachment_type: STORY_INLINE_ATTACHMENT_TYPE,
+          current_version: 1,
+          render_inline: true,
+          source: 'http_api',
+        },
+      })
+    );
+  };
+
+  const addCustomEvent = (type: string) => {
+    const count =
+      storedEvents.filter(({ event }) =>
+        [STORY_CUSTOM_EVENT_TYPE, STORY_CUSTOM_EVENT_WITH_HEADER_TYPE].includes(event.type)
+      ).length + 1;
+    store(
+      createCustomEvent({
+        id: `story-added-custom-event-${count}`,
+        type,
+        created_at: new Date().toISOString(),
+        data: { title: `Note ${count}`, text: 'Added from the story.' },
+      })
+    );
+  };
+
+  const events = [...seedEvents, ...mergeStoredEvents(liveState.events, storedEvents)];
+  const attachments = [...seedAttachments, ...addedAttachments];
+  const { attachmentsService, conversationEventsService } = useAgentBuilderServices();
   const items = resolveTimelineItems(buildItems(events), {
-    attachments: seedAttachments,
+    attachments,
     attachmentsService,
+    conversationEventsService,
   });
 
   return (
@@ -236,8 +334,35 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
         <DevSseEmitter emit={emit} reset={onReset} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" iconType="document" onClick={addAttachment}>
+              Add inline attachment
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="editorComment"
+              onClick={() => addCustomEvent(STORY_CUSTOM_EVENT_TYPE)}
+            >
+              Add custom event
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="editorComment"
+              onClick={() => addCustomEvent(STORY_CUSTOM_EVENT_WITH_HEADER_TYPE)}
+            >
+              Add custom event (with header)
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiPanel hasBorder paddingSize="l">
-          <Timeline items={items} conversationAttachments={seedAttachments} />
+          <Timeline items={items} agent={storyAgent} conversationAttachments={attachments} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

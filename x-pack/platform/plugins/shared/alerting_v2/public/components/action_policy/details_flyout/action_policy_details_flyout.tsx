@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
-import { resolveDisplayName } from '../../../utils/resolve_display_name';
+import { collectActorUids, resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
 import { BadgeList } from '../badge_list';
 import { isSnoozed } from '../is_snoozed';
@@ -83,9 +83,7 @@ export const ActionPolicyDetailsFlyout = ({
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
-  const metadataUids = [policy.created_by, policy.updated_by].filter((uid): uid is string =>
-    Boolean(uid)
-  );
+  const metadataUids = collectActorUids([policy.created_by, policy.updated_by]);
 
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
 

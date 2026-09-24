@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { SPAN_ID, TRACE_ID } from '../../../common/es_fields/apm';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
@@ -27,12 +28,14 @@ import { compactMap } from '../../utils/compact_map';
  */
 export async function getUnprocessedOtelErrors({
   logsClient,
+  logger,
   traceId,
   docId,
   start,
   end,
 }: {
   logsClient: LogsClient;
+  logger: Logger;
   traceId: string;
   docId?: string;
   start: number;
@@ -47,5 +50,15 @@ export async function getUnprocessedOtelErrors({
     fields: [...requiredOtelFields, ...optionalOtelFields],
   });
 
-  return compactMap(response.hits.hits, (hit) => toUnprocessedOtelError(hit, { traceId }));
+  return compactMap(response.hits.hits, (hit) => {
+    const error = toUnprocessedOtelError(hit, { traceId });
+    if (!error) {
+      logger.debug(
+        `[get_unprocessed_otel_errors] Skipping document id [${hit._id ?? 'unknown'}] from index [${
+          hit._index ?? 'unknown'
+        }]: missing required fields`
+      );
+    }
+    return error;
+  });
 }
