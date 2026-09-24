@@ -367,14 +367,19 @@ describe('ConversationsPage decisions', () => {
     });
   });
 
-  it('stays open and shows Applied once the mutation succeeds, rather than closing', async () => {
+  it('stays open and keeps showing Applying once the mutation succeeds, rather than closing', async () => {
     renderPage('/');
     openApproval();
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
     // The decision's own outcome now shows in place — the modal never auto-closes, so a
-    // refusal (expired deadline, someone decided first) reads the same way: still open.
-    await waitFor(() => expect(approvalDialog().getByText('Applied')).toBeInTheDocument());
+    // refusal (expired deadline, someone decided first) reads the same way: still open. Approving
+    // only resumes the gate workflow, whose action still runs afterward, so this must not yet
+    // claim "Applied" — only a refetched, real decision can.
+    await waitFor(() =>
+      expect(approvalDialog().getAllByText('Applying').length).toBeGreaterThan(0)
+    );
+    expect(approvalDialog().queryByText('Applied')).not.toBeInTheDocument();
     expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
   });
 

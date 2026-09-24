@@ -7,6 +7,7 @@
 
 import type { ApprovalProposal } from './types';
 import type { ApprovalDecision } from './approval_content';
+import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 /**
@@ -53,11 +54,29 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
     return undefined;
   }
   return {
-    status: proposal.decision === 'approved' ? 'applied' : 'declined',
+    status: approvedStatusFor(proposal),
     actorName,
     decidedAt: proposal.decidedAt,
     reason: proposal.rationale,
   };
+};
+
+/**
+ * Approving only resumes the gate workflow — the action it starts still runs afterward, so a
+ * `decision: 'approved'` proposal can read back `executing` or `failed` as well as `succeeded`.
+ * Declining has no action to run, so it settles as soon as it is decided.
+ */
+const approvedStatusFor = (proposal: ApprovalProposal): Exclude<ApprovalPhase, 'pending'> => {
+  if (proposal.decision !== 'approved') {
+    return 'declined';
+  }
+  if (proposal.status === 'failed') {
+    return 'failed';
+  }
+  if (proposal.status === 'pending' || proposal.status === 'executing') {
+    return 'applying';
+  }
+  return 'applied';
 };
 
 /**

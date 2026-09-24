@@ -86,16 +86,19 @@ describe('ProposedActionButton', () => {
     ).toBeGreaterThanOrEqual(2);
   });
 
-  it('commits the approval and shows the modal applying, then applied, without closing it', async () => {
+  it('commits the approval and keeps showing Applying without closing the modal', async () => {
     renderButton();
     fireEvent.click(screen.getByTestId('proposedAction'));
 
     fireEvent.click(screen.getByTestId('proposedAction-modal-confirm'));
 
     expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
+    // Approving only resumes the gate workflow — the action it starts still runs afterward, so
+    // resolving that call must not yet claim "Applied". Only a refetched, real decision can.
     await waitFor(() => {
-      expect(within(screen.getByRole('dialog')).getByText('Applied')).toBeInTheDocument();
+      expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
     });
+    expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 

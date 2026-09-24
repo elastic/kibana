@@ -117,7 +117,7 @@ describe('ApprovalModal', () => {
     expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it('shows an Applying state while onConfirm is in flight, then Applied once it resolves', async () => {
+  it('stays Applying once onConfirm resolves, since only the gate resume has completed', async () => {
     let resolveConfirm: () => void = () => {};
     const onConfirm = jest.fn(
       () =>
@@ -136,8 +136,74 @@ describe('ApprovalModal', () => {
     await act(async () => {
       resolveConfirm();
     });
-    await waitFor(() => expect(screen.getByText('Applied')).toBeInTheDocument());
+
+    // Approving only resumes the gate workflow — the action it starts still runs afterward, so
+    // resolving that call must not yet claim success. Only a refetched, real `decision` can.
+    expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
+    expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     expect(screen.getAllByText(/Ava/).length).toBeGreaterThan(0);
+  });
+
+  it('keeps showing Applying for a recorded decision whose action is still executing', () => {
+    renderModal({
+      proposal: {
+        ...mockProposal,
+        decision: 'approved',
+        decidedBy: { fullName: 'Ava', username: 'ava', email: null },
+        decidedAt: '2024-01-01T17:20:00.000Z',
+        status: 'executing',
+      },
+    });
+
+    expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
+    expect(screen.queryByText('Applied')).not.toBeInTheDocument();
+  });
+
+  it('shows Applied only once the refetched proposal confirms the action succeeded', () => {
+    const decidedBy = { fullName: 'Ava', username: 'ava', email: null };
+    const { rerender } = renderModal({
+      proposal: {
+        ...mockProposal,
+        decision: 'approved',
+        decidedBy,
+        decidedAt: '2024-01-01T17:20:00.000Z',
+        status: 'executing',
+      },
+    });
+    expect(screen.queryByText('Applied')).not.toBeInTheDocument();
+
+    rerender(
+      <ApprovalModal
+        {...baseProps}
+        proposal={{
+          ...mockProposal,
+          decision: 'approved',
+          decidedBy,
+          decidedAt: '2024-01-01T17:20:00.000Z',
+          status: 'succeeded',
+        }}
+      />
+    );
+
+    // The badge's own short label and the banner's own full title.
+    expect(screen.getByText('Applied')).toBeInTheDocument();
+    expect(screen.getByText('Applied successfully')).toBeInTheDocument();
+  });
+
+  it('shows a Failed outcome when the action the approval started did not succeed', () => {
+    renderModal({
+      proposal: {
+        ...mockProposal,
+        decision: 'approved',
+        decidedBy: { fullName: 'Ava', username: 'ava', email: null },
+        decidedAt: '2024-01-01T17:20:00.000Z',
+        status: 'failed',
+      },
+    });
+
+    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.getByText('Action failed')).toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
   });
 
   it('reverts to pending and shows an error when onConfirm rejects', async () => {

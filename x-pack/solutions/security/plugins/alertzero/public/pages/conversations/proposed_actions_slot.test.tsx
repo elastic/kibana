@@ -143,7 +143,7 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('No proposed actions for this investigation.')).toBeInTheDocument();
   });
 
-  it('approves with the proposal id and its own action input, then shows Applied without closing', async () => {
+  it('approves with the proposal id and its own action input, keeping the modal open on Applying', async () => {
     mockUseConversationProposals.mockReturnValue({
       data: { proposals: [mockProposal], total: 1 },
       isLoading: false,
@@ -159,9 +159,12 @@ describe('ProposedActionsSlot', () => {
       id: 'proposal-1',
       body: { actionInput: undefined },
     });
+    // Approving only resumes the gate workflow — the action it starts still runs afterward, so
+    // resolving that call must not yet claim "Applied". Only a refetched, real decision can.
     await waitFor(() => {
-      expect(within(screen.getByRole('dialog')).getByText('Applied')).toBeInTheDocument();
+      expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
     });
+    expect(within(screen.getByRole('dialog')).queryByText('Applied')).not.toBeInTheDocument();
   });
 
   it('surfaces a toast and keeps the modal open for retry when approving fails', async () => {

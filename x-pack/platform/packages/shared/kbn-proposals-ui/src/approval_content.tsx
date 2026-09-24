@@ -24,6 +24,7 @@ import {
   getApprovalOutcomeBadge,
   getApprovalOutcomeBanner,
   type ApprovalOutcomeStatus,
+  type ApprovalPhase,
 } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
@@ -51,9 +52,15 @@ export interface ApprovalAction {
   'data-test-subj'?: string;
 }
 
-/** A proposal already decided — by this component's own click, or before this render existed. */
+/**
+ * A proposal already decided — by this component's own click, or before this render existed.
+ * `status` admits `'applying'`/`'failed'` alongside the two the caller can request via
+ * `outcomeStatus`: approving only resumes the gate workflow, whose post-gate steps run the
+ * action and can still leave a decided proposal `executing` or `failed` once the real, refetched
+ * proposal is what supplies this — nothing optimistic ever claims either.
+ */
 export interface ApprovalDecision {
-  status: ApprovalOutcomeStatus;
+  status: Exclude<ApprovalPhase, 'pending'>;
   actorName: string;
   /** ISO 8601 timestamp. */
   decidedAt: string;
@@ -155,20 +162,24 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         return;
       }
       const startedAt = new Date().toISOString();
+      const isDeclining = primaryAction.outcomeStatus === 'declined';
       setTransientSince(startedAt);
-      setTransientPhase(primaryAction.outcomeStatus === 'declined' ? 'declining' : 'applying');
+      setTransientPhase(isDeclining ? 'declining' : 'applying');
       try {
         await primaryAction.onClick();
-        setOptimisticDecision({
-          status: primaryAction.outcomeStatus,
-          actorName,
-          decidedAt: startedAt,
-        });
+        if (isDeclining) {
+          // Declining settles as soon as the call returns — there is no action afterward that
+          // could still fail, so this is the real outcome, not an optimistic guess at one.
+          setOptimisticDecision({ status: 'declined', actorName, decidedAt: startedAt });
+          setTransientPhase('idle');
+        }
+        // Approving only resumes the gate workflow; the action it starts still runs afterward and
+        // can fail. Deliberately left `transientPhase: 'applying'` rather than optimistically
+        // claiming `'applied'` — only the real, refetched `decision` prop can say it succeeded.
       } catch (err) {
         setActionError(
           err instanceof Error ? err.message : APPROVAL_MODAL_TRANSLATIONS.actionErrorTitle
         );
-      } finally {
         setTransientPhase('idle');
       }
     }, [primaryAction, actorName]);

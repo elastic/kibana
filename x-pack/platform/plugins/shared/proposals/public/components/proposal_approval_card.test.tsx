@@ -291,7 +291,7 @@ describe('ProposalApprovalCard', () => {
   });
 
   describe('already-decided proposal', () => {
-    it('passes a decision to ApprovalContent for an approved proposal, rather than its own callout', () => {
+    it('passes an applying decision for an approved proposal whose action is still executing', () => {
       setupMocks(
         baseProposal({
           decision: 'approved',
@@ -301,7 +301,35 @@ describe('ProposalApprovalCard', () => {
         })
       );
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      // Approving only resumes the gate workflow — while the action it started is still
+      // `executing`, this must not yet claim it applied.
+      expect(getByTestId('approval-decision')).toHaveTextContent('applying:ava');
+    });
+
+    it('passes an applied decision for an approved proposal once its action has succeeded', () => {
+      setupMocks(
+        baseProposal({
+          decision: 'approved',
+          status: 'succeeded',
+          decidedAt: '2026-01-02T00:00:00.000Z',
+          decidedBy: { username: 'ava', fullName: null, email: null },
+        })
+      );
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('approval-decision')).toHaveTextContent('applied:ava');
+    });
+
+    it('passes a failed decision for an approved proposal whose action did not succeed', () => {
+      setupMocks(
+        baseProposal({
+          decision: 'approved',
+          status: 'failed',
+          decidedAt: '2026-01-02T00:00:00.000Z',
+          decidedBy: { username: 'ava', fullName: null, email: null },
+        })
+      );
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('approval-decision')).toHaveTextContent('failed:ava');
     });
 
     it('passes a declined decision for a dismissed proposal, with its rationale as the reason', () => {

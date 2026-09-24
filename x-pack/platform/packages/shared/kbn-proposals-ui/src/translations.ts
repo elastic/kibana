@@ -32,6 +32,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   declinedBadge: i18n.translate('xpack.proposals.approvalModal.declinedBadge', {
     defaultMessage: 'Declined',
   }),
+  failedBadge: i18n.translate('xpack.proposals.approvalModal.failedBadge', {
+    defaultMessage: 'Failed',
+  }),
   applyingBadge: i18n.translate('xpack.proposals.approvalModal.applyingBadge', {
     defaultMessage: 'Applying',
   }),
@@ -55,6 +58,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   decliningBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.decliningTitle', {
     defaultMessage: 'Declining',
+  }),
+  failedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.failedTitle', {
+    defaultMessage: 'Action failed',
   }),
   inProgressHint: i18n.translate('xpack.proposals.approvalModal.outcome.inProgressHint', {
     defaultMessage: 'Typically takes 3-5 minutes.',
