@@ -20,6 +20,7 @@ import type {
   AggregationsAggregate,
   IlmExplainLifecycleRequest,
   OpenPointInTimeResponse,
+  QueryDslQueryContainer,
   SearchRequest,
   SearchResponse,
   SearchRequest as ESSearchRequest,
@@ -79,6 +80,7 @@ import type {
   ValueListItemsResponseAggregation,
   ValueListExceptionListResponseAggregation,
   ValueListIndicatorMatchResponseAggregation,
+  ValueListStorageResponseAggregation,
   Nullable,
   EndpointMetricsAggregation,
   EndpointMetricsAbstract,
@@ -1255,6 +1257,15 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
     };
+    // The names a rule can use to read a lookup list as a threat index: each list's alias
+    // (`.items-<space>-<id>`, under the `.items` prefix) and concrete index, taken from the
+    // locators in `.lists-*`. A prefix on `.items` alone would count alias readers as legacy.
+    const lookupAccessNames = await this.fetchLookupListAccessNames();
+    const readsLookupList: QueryDslQueryContainer[] =
+      lookupAccessNames.length > 0
+        ? [{ terms: { 'alert.params.threatIndex': lookupAccessNames } }]
+        : [];
+    // indicator-match rules whose threat index is the shared `.items-<space>` stream
     const indicatorMatchRuleQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: this.getIndexForType?.('alert'),
@@ -1263,6 +1274,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       query: {
         bool: {
           must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
+          must_not: readsLookupList,
         },
       },
       aggs: {
@@ -1273,25 +1285,96 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
     };
-    const [listMetrics, itemMetrics, exceptionListMetrics, indicatorMatchMetrics] =
-      await Promise.all([
-        this.esClient().search(listQuery),
-        this.esClient().search(itemQuery),
-        this.esClient().search(exceptionListQuery),
-        this.esClient().search(indicatorMatchRuleQuery),
-      ]);
+    // indicator-match rules whose threat index is a lookup list's alias or concrete index
+    const indicatorMatchLookupRuleQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: this.getIndexForType?.('alert'),
+      ignore_unavailable: true,
+      size: 0,
+      query: {
+        bool: {
+          minimum_should_match: 1,
+          should: [{ prefix: { 'alert.params.threatIndex': '.value-list' } }, ...readsLookupList],
+        },
+      },
+      aggs: {
+        vl_used_in_indicator_match_rule_count: {
+          cardinality: {
+            field: 'alert.params.ruleId',
+          },
+        },
+      },
+    };
+    // Count lookup lists from the container itself (`.lists-*`), which the internal
+    // telemetry user can read, filtering on the `storage.type` descriptor. Counting the
+    // per-list `.value-list-*` indices directly returns zero here, because the internal
+    // user has no privileges on that index pattern.
+    const storageQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: '.lists-*',
+      ignore_unavailable: true,
+      size: 0,
+      query: { term: { 'storage.type': 'lookup_index' } },
+      aggs: {
+        lookup_list_count: {
+          cardinality: {
+            field: 'name',
+          },
+        },
+      },
+    };
+    const [
+      listMetrics,
+      itemMetrics,
+      exceptionListMetrics,
+      indicatorMatchMetrics,
+      indicatorMatchLookupMetrics,
+      storageMetrics,
+    ] = await Promise.all([
+      this.esClient().search(listQuery),
+      this.esClient().search(itemQuery),
+      this.esClient().search(exceptionListQuery),
+      this.esClient().search(indicatorMatchRuleQuery),
+      this.esClient().search(indicatorMatchLookupRuleQuery),
+      this.esClient().search(storageQuery),
+    ]);
     const listMetricsResponse = listMetrics as unknown as ValueListResponseAggregation;
     const itemMetricsResponse = itemMetrics as unknown as ValueListItemsResponseAggregation;
     const exceptionListMetricsResponse =
       exceptionListMetrics as unknown as ValueListExceptionListResponseAggregation;
     const indicatorMatchMetricsResponse =
       indicatorMatchMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
+    const indicatorMatchLookupMetricsResponse =
+      indicatorMatchLookupMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
+    const storageMetricsResponse = storageMetrics as unknown as ValueListStorageResponseAggregation;
     return {
       listMetricsResponse,
       itemMetricsResponse,
       exceptionListMetricsResponse,
       indicatorMatchMetricsResponse,
+      indicatorMatchLookupMetricsResponse,
+      storageMetricsResponse,
     };
+  }
+
+  /** Every alias and concrete index name recorded in the storage locators of lookup value lists. */
+  private async fetchLookupListAccessNames(): Promise<string[]> {
+    const response = await this.esClient().search({
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: '.lists-*',
+      ignore_unavailable: true,
+      size: 0,
+      query: { term: { 'storage.type': 'lookup_index' } },
+      aggs: {
+        alias: { terms: { field: 'storage.locator.alias', size: 10000 } },
+        index: { terms: { field: 'storage.locator.index', size: 10000 } },
+      },
+    });
+    const keysOf = (aggregation: unknown): string[] => {
+      const buckets = (aggregation as { buckets?: Array<{ key?: unknown }> } | undefined)?.buckets;
+      return Array.isArray(buckets) ? buckets.map((bucket) => String(bucket.key)) : [];
+    };
+    return [...keysOf(response.aggregations?.alias), ...keysOf(response.aggregations?.index)];
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {

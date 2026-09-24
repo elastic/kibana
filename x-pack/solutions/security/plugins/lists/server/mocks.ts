@@ -18,7 +18,9 @@ const createSetupMock = (): jest.Mocked<ListPluginSetup> => {
   const mock: jest.Mocked<ListPluginSetup> = {
     getExceptionListClient: jest.fn().mockReturnValue(getExceptionListClientMock()),
     getListClient: jest.fn().mockReturnValue(getListClientMock()),
+    isValueListLookupIndex: jest.fn().mockReturnValue(false),
     registerExtension: jest.fn(),
+    registerValueListRuleScanner: jest.fn(),
   };
   return mock;
 };

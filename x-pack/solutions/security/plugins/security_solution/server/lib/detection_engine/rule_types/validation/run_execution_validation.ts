@@ -28,6 +28,11 @@ export interface RunExecutionValidationParams {
   secondaryTimestamp: string | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   isServerless: boolean;
+  /**
+   * Whether a threat index name is a value list's lookup index, which carries no
+   * timestamp field on purpose (a list is read whole, not by time window).
+   */
+  isValueListLookupIndex?: (indexName: string) => boolean;
 }
 
 export interface RunExecutionValidationResult {
@@ -56,6 +61,7 @@ export const runExecutionValidation = async (
     secondaryTimestamp,
     ruleExecutionLogger,
     isServerless,
+    isValueListLookupIndex,
   } = options;
 
   const warnings: string[] = [];
@@ -130,6 +136,7 @@ export const runExecutionValidation = async (
           timestampField: primaryTimestamp,
           timestampFieldCapsResponse: threatFieldCapsResponse,
           ruleExecutionLogger,
+          isTimestampOptional: isValueListLookupIndex,
         });
         if (missingThreatTimestampWarning) {
           warnings.push(missingThreatTimestampWarning);
