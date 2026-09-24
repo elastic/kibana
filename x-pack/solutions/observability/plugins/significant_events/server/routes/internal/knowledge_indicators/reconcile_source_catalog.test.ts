@@ -43,8 +43,9 @@ const makeSourcesClient = (sources: NightshiftSource[]): SourcesClient =>
 describe('reconcileSourceCatalog', () => {
   const cancel = jest.fn().mockResolvedValue(null);
 
-  const makeKiClient = (reconcileIds: string[]) => ({
+  const makeKiClient = (reconcileIds: string[], ownedRuleIds: string[] = reconcileIds) => ({
     setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
+    findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue(ownedRuleIds),
     getStreamNamesToReconcile: jest.fn().mockResolvedValue(reconcileIds),
     deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
     deleteAllQueries: jest.fn().mockResolvedValue(undefined),
@@ -65,8 +66,11 @@ describe('reconcileSourceCatalog', () => {
       request,
     });
 
-    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('disabled-source', false);
     expect(cancel).toHaveBeenCalledWith({ streamName: 'disabled-source', request });
+    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('disabled-source', false);
+    expect(cancel.mock.invocationCallOrder[0]).toBeLessThan(
+      kiClient.setSourceRulesEnabled.mock.invocationCallOrder[0]
+    );
     expect(kiClient.deleteOwnedRules).not.toHaveBeenCalled();
   });
 
@@ -86,7 +90,7 @@ describe('reconcileSourceCatalog', () => {
   });
 
   it('does not re-enable rules while maintenance is paused', async () => {
-    const kiClient = makeKiClient([]);
+    const kiClient = makeKiClient([], ['enabled-source', 'disabled-source']);
     await reconcileSourceCatalog({
       sourcesClient: makeSourcesClient([
         makeSource({ id: 'enabled-source' }),
@@ -104,7 +108,7 @@ describe('reconcileSourceCatalog', () => {
   });
 
   it('skips cancel when no onboarding client is available', async () => {
-    const kiClient = makeKiClient([]);
+    const kiClient = makeKiClient([], ['disabled-source']);
     await reconcileSourceCatalog({
       sourcesClient: makeSourcesClient([makeSource({ id: 'disabled-source', enabled: false })]),
       kiClient,
@@ -114,6 +118,20 @@ describe('reconcileSourceCatalog', () => {
 
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('disabled-source', false);
     expect(cancel).not.toHaveBeenCalled();
+  });
+
+  it('cancels a disabled source that owns no rules without toggling rules', async () => {
+    const kiClient = makeKiClient([], []);
+    await reconcileSourceCatalog({
+      sourcesClient: makeSourcesClient([makeSource({ id: 'disabled-source', enabled: false })]),
+      kiClient,
+      onboardingClient: { cancel },
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    expect(cancel).toHaveBeenCalledWith({ streamName: 'disabled-source', request });
+    expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
   });
 
   it('retires knowledge for an id that is no longer in the catalog', async () => {

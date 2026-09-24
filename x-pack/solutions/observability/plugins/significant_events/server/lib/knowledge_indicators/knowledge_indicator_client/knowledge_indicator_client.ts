@@ -200,6 +200,11 @@ export class KnowledgeIndicatorClient {
     return [...new Set([...withIndicators, ...withOwnedRules])];
   }
 
+  /** Source ids that still have a Nightshift-owned rule. One tag-prefix lookup. */
+  findStreamNamesWithOwnedRules(): Promise<string[]> {
+    return this.orchestrator.findStreamNamesWithOwnedRules();
+  }
+
   findIndicators(
     sources: string | string[],
     query: string,

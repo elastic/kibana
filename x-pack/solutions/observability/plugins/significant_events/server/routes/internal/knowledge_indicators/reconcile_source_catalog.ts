@@ -23,6 +23,7 @@ interface OnboardingClient {
 type CatalogKiClient = Pick<
   KnowledgeIndicatorClient,
   | 'setSourceRulesEnabled'
+  | 'findStreamNamesWithOwnedRules'
   | 'getStreamNamesToReconcile'
   | 'deleteOwnedRules'
   | 'deleteAllQueries'
@@ -54,8 +55,10 @@ export async function retireSourceKnowledge({
 
 /**
  * Aligns owned rules and onboarding with the source catalog.
- * Disabled sources have their rules disabled and any running onboarding cancelled.
- * Enabled sources have their rules enabled, unless maintenance is paused.
+ * A disabled source has its onboarding cancelled before its owned rules are disabled,
+ * so a running run cannot create a rule after the disable snapshot.
+ * Enabled sources that own rules have those rules enabled, unless maintenance is paused.
+ * Sources with no owned rules are left alone apart from that cancel.
  * Ids that still have knowledge indicators or owned rules but no catalog row are retired.
  */
 export async function reconcileSourceCatalog({
@@ -73,17 +76,20 @@ export async function reconcileSourceCatalog({
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
   const sources = await listAllSources(sourcesClient);
   const catalogIds = new Set(sources.map((source) => source.id));
+  const ownedRuleSourceIds = new Set(await kiClient.findStreamNamesWithOwnedRules());
   const maintenanceState = await maintenanceService.getState({ request });
 
   for (const source of sources) {
     if (!source.enabled) {
-      await kiClient.setSourceRulesEnabled(source.id, false);
       if (onboardingClient) {
         await onboardingClient.cancel({ streamName: source.id, request });
       }
+      if (ownedRuleSourceIds.has(source.id)) {
+        await kiClient.setSourceRulesEnabled(source.id, false);
+      }
       continue;
     }
-    if (maintenanceState !== 'paused') {
+    if (maintenanceState !== 'paused' && ownedRuleSourceIds.has(source.id)) {
       await kiClient.setSourceRulesEnabled(source.id, true);
     }
   }
