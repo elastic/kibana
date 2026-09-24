@@ -18,12 +18,12 @@ import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
 /** Elasticsearch rejects document ids longer than 512 bytes. */
-const MAX_DOCUMENT_ID_LENGTH = 512;
+const MAX_DOCUMENT_ID_BYTES = 512;
 /** Elasticsearch rejects index names longer than 255 bytes. */
-const MAX_INDEX_NAME_LENGTH = 255;
+const MAX_INDEX_NAME_BYTES = 255;
 
-const isBoundedString = (value: unknown, maxLength: number): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= maxLength;
+const isBoundedString = (value: unknown, maxBytes: number): value is string =>
+  typeof value === 'string' && value.length > 0 && Buffer.byteLength(value, 'utf8') <= maxBytes;
 
 /**
  * Validates `event.documentIds` before anything reaches Elasticsearch. The run routes accept
@@ -41,8 +41,8 @@ const parseDocumentSelections = (documentIds: unknown): DocumentSelection[] => {
     const _id = record?._id;
     const _index = record?._index;
     if (
-      !isBoundedString(_id, MAX_DOCUMENT_ID_LENGTH) ||
-      !isBoundedString(_index, MAX_INDEX_NAME_LENGTH)
+      !isBoundedString(_id, MAX_DOCUMENT_ID_BYTES) ||
+      !isBoundedString(_index, MAX_INDEX_NAME_BYTES)
     ) {
       throw new WorkflowTriggerInputError(
         'Every inputs.event.documentIds entry must be an object with non-empty string "_id" and "_index" properties.'

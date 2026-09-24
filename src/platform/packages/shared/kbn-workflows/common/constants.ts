@@ -104,10 +104,10 @@ export const WORKFLOW_GRAPH_FOCUS_TRIGGER = '__trigger';
 /**
  * Maximum number of alerts or documents a single run-workflow selection may carry.
  *
- * Selections travel as `(id, index)` pairs, so the ceiling is the request payload: a pair
- * serializes to roughly 120 bytes and Kibana's default `server.maxPayload` is 1 MB. This bound
- * leaves ample headroom while matching Security's existing bulk-selection limits. The server
+ * Selections travel as `(id, index)` pairs, so the ceiling is the request payload. With ids up to
+ * 512 bytes and index names up to 255, a pair serializes to at most about 790 bytes, so a full
+ * selection stays near 790 KB, inside Kibana's default 1 MB `server.maxPayload`. The server
  * enforces it during trigger preprocessing and the UI reads the same number to warn a user
  * before a larger selection is trimmed.
  */
-export const MAX_RUN_WORKFLOW_DOCS = 2000;
+export const MAX_RUN_WORKFLOW_DOCS = 1000;
