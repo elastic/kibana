@@ -19,6 +19,10 @@ export const knowledgeIndicatorsManagementSkill = defineSkillType({
   name: 'knowledge-indicators-management',
   basePath: 'skills/platform/streams',
   description,
+  selectorInstructions:
+    'Use to set up, discover, or manage Knowledge Indicators (KIs) in Streams — persistent monitoring features that track metric anomalies, thresholds, or behavioral deviations over time in Kibana AI Indices. ' +
+    'Use when the user wants to create or configure a monitoring feature for detecting anomalies or significant patterns. ' +
+    'Do NOT use when the user is querying or managing existing Elastic ML anomaly detection jobs — use anomaly-detection for that.',
   content,
   getRegistryTools: () => [
     SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,

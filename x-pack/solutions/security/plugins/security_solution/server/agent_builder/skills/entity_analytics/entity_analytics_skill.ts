@@ -389,6 +389,10 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
       'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, get_entity_risk_score_history (risk-over-time chart), temporal relationship history (first/last seen, ever related to), resolve a watchlist name to its id (get_watchlist_id) to find its members, risk and criticality. ' +
       'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_risk_score_history` (emitted by get_entity_risk_score_history); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, paste its `renderTag` verbatim in markdown (required for Preview/Canvas UI). ' +
       'Risk history, alert contributions, watchlists, behaviors, discovering risky entities, relationship event history.',
+    selectorInstructions:
+      'Security entity investigations: entity store search, entity risk scores and risk history, watchlists, entity relationship history, and Security-specific ML anomaly detection jobs. ' +
+      'Use for any entity risk or entity investigation task in the Security solution context. ' +
+      'For general-purpose Elastic ML anomaly detection (Observability/metrics), use the anomaly-detection skill instead.',
     content: `
 # Entity Analysis Guide
 

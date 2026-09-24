@@ -165,7 +165,10 @@ export const selectRelevantSkills = async ({
         });
 
         const catalog = skills
-          .map((skill) => `- ${skill.id}: ${skill.name} — ${skill.description}`)
+          .map(
+            (skill) =>
+              `- ${skill.id}: ${skill.name} — ${skill.selectorInstructions ?? skill.description}`
+          )
           .join('\n');
 
         const userContent = context.recentContext

@@ -27,6 +27,11 @@ export const createAnomalyDetectionSkill = () =>
     name: 'anomaly-detection',
     basePath: 'skills/ml/anomaly_detection',
     description,
+    selectorInstructions:
+      'Use for Elastic ML anomaly detection job operations: investigate anomaly scores, explain results, create/manage jobs, debug datafeed issues. ' +
+      'Covers Observability and general-purpose metric anomaly detection. ' +
+      'Do NOT use for Security-specific ML jobs or entity risk scores — use entity-analytics for those. ' +
+      'Do NOT use when the user wants to set up a new persistent monitoring feature or Knowledge Indicator — use knowledge-indicators-management for that.',
     experimental: true,
     content: skillContent,
     referencedContent: [

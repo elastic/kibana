@@ -44,6 +44,9 @@ export const createElasticDefendPolicyManagementSkill = ({
       'detect and prevent modes; event collection and advanced settings; policy baselines and comparisons; proposed configuration changes; ' +
       'policy-level rollout planning; and aggregate assigned-versus-applied counts for a named policy. ' +
       'Apply this scope separately to each task in a combined request.',
+    selectorInstructions:
+      'Use to inspect, compare, or change Elastic Defend integration policy settings: malware/ransomware/behavior protection modes, event collection, advanced settings, policy baselines, rollout status. ' +
+      'Do NOT use when the user is reporting that a policy setting is not working, not enforcing, or not taking effect on endpoints — use elastic-defend-configuration-troubleshooting for those symptom-based requests.',
     content: `# Elastic Defend Policy Management
 
 ## When to use this skill
