@@ -2771,6 +2771,21 @@ describe('getFullAgentPolicy', () => {
       expect(policy!.secret_references).toEqual([{ id: 'safe-id' }]);
     });
   });
+
+  it('should pass spaceId option to agentPolicyService.get', async () => {
+    mockAgentPolicy({ revision: 1 });
+
+    await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy', {
+      spaceId: 'my-space',
+    });
+
+    expect(mockedAgentPolicyService.get).toHaveBeenCalledWith(
+      expect.anything(),
+      'agent-policy',
+      true,
+      { spaceId: 'my-space' }
+    );
+  });
 });
 
 describe('getFullMonitoringSettings', () => {
