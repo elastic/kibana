@@ -30,6 +30,7 @@ export const FileUpload: FunctionComponent<Props> = ({
 }) => (
   <EuiFilePicker
     aria-label={SELECT_FILE_LABEL}
+    initialPromptText={SELECT_FILE_LABEL}
     compressed
     id={id}
     className={className}

@@ -164,6 +164,7 @@ export const ArgumentFileSelector = memo<
         {state.isPopoverOpen && (
           <EuiFilePicker
             aria-label={SELECT_FILE_LABEL}
+            initialPromptText={SELECT_FILE_LABEL}
             id={filePickerUUID}
             onChange={handleFileSelection}
             fullWidth
