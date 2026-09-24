@@ -124,6 +124,14 @@ interface Options {
 // had no equivalent socket-connect cutoff. Restore that headroom.
 const FETCH_CONNECT_TIMEOUT_MS = 60_000;
 
+// undici's default `headersTimeout`/`bodyTimeout` is 300s. Requests that
+// legitimately run longer (e.g. an evaluation harness pointed at a slow model
+// endpoint) fail at the transport with `HeadersTimeoutError` before any
+// application-level budget is consulted. Env-configurable; defaults unchanged.
+const FETCH_HEADERS_TIMEOUT_MS =
+  Number(process.env.KBN_CLIENT_HEADERS_TIMEOUT_MS ?? '') || 300_000;
+const FETCH_BODY_TIMEOUT_MS = Number(process.env.KBN_CLIENT_BODY_TIMEOUT_MS ?? '') || 300_000;
+
 export class KbnClientRequester {
   // `url` retains any `user:pass@` from the original config - `resolveUrl()` is
   // a public API used by FTR tests (e.g. http connector tests) that pluck
@@ -131,7 +139,7 @@ export class KbnClientRequester {
   private readonly url: string;
   private readonly urlForFetch: string;
   private readonly authorization?: string;
-  private readonly dispatcher: Dispatcher | null;
+  private readonly dispatcher: Dispatcher;
 
   constructor(private readonly log: ToolingLog, options: Options) {
     this.url = options.url;
@@ -149,16 +157,23 @@ export class KbnClientRequester {
     }
     this.urlForFetch = parsed.toString();
 
-    this.dispatcher =
-      parsed.protocol === 'https:'
-        ? new Agent({
-            connect: {
+    // Attached for both protocols. Previously only the `https:` branch created a
+    // dispatcher, so `http:` callers silently ran on undici's bare defaults
+    // (10s `connect.timeout`, 300s `headersTimeout`/`bodyTimeout`) with no way to
+    // override them. TLS options remain https-only.
+    this.dispatcher = new Agent({
+      connect: {
+        ...(parsed.protocol === 'https:'
+          ? {
               ca: options.certificateAuthorities,
               rejectUnauthorized: false,
-              timeout: FETCH_CONNECT_TIMEOUT_MS,
-            },
-          })
-        : null;
+            }
+          : {}),
+        timeout: FETCH_CONNECT_TIMEOUT_MS,
+      },
+      headersTimeout: FETCH_HEADERS_TIMEOUT_MS,
+      bodyTimeout: FETCH_BODY_TIMEOUT_MS,
+    });
   }
 
   public resolveUrl(relativeUrl = '/') {
@@ -221,7 +236,7 @@ export class KbnClientRequester {
           headers,
           body,
           signal: options.signal,
-          ...(this.dispatcher ? { dispatcher: this.dispatcher } : {}),
+          dispatcher: this.dispatcher,
         } as RequestInit);
 
         if (!response.ok) {

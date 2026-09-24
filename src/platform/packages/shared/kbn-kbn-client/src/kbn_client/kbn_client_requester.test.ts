@@ -191,3 +191,81 @@ describe('KbnClientRequester.request()', () => {
     expect(headers['content-type']).toBe('application/json');
   });
 });
+
+describe('KbnClientRequester transport configuration', () => {
+  const log = new ToolingLog();
+
+  interface AgentConfiguration {
+    headersTimeout?: number;
+    bodyTimeout?: number;
+    connect?: { timeout?: number; rejectUnauthorized?: boolean };
+  }
+
+  // undici exposes no public accessor for a dispatcher's resolved configuration —
+  // it is stored under a module-private `options` symbol. Read that symbol off the
+  // dispatcher instance itself rather than off a separately imported `Agent`, since
+  // module identity is not guaranteed to match (see `isolateModules` below).
+  const configurationOf = (requester: KbnClientRequester): AgentConfiguration => {
+    const { dispatcher } = requester as unknown as { dispatcher: object };
+    const optionsSymbol = Object.getOwnPropertySymbols(dispatcher).find(
+      (symbol) => symbol.description === 'options'
+    );
+    if (!optionsSymbol) {
+      throw new Error('undici dispatcher does not expose an `options` symbol');
+    }
+    return (dispatcher as Record<symbol, AgentConfiguration>)[optionsSymbol];
+  };
+
+  const requesterFor = (url: string) => new KbnClientRequester(log, { url });
+
+  // The dispatcher used to be created only for the `https:` protocol, which left
+  // `http:` callers (a local Kibana) on undici's unconfigurable 300s default.
+  it('creates the dispatcher for both http and https', () => {
+    expect(configurationOf(requesterFor('http://localhost:5620'))).toBeDefined();
+    expect(configurationOf(requesterFor('https://localhost:5620'))).toBeDefined();
+  });
+
+  it('applies undici-compatible defaults: 60s connect, 300s headers/body', () => {
+    expect(configurationOf(requesterFor('http://localhost:5620'))).toMatchObject({
+      headersTimeout: 300_000,
+      bodyTimeout: 300_000,
+      connect: { timeout: 60_000 },
+    });
+  });
+
+  it('keeps the TLS options on the https path only', () => {
+    expect(configurationOf(requesterFor('https://localhost:5620')).connect).toMatchObject({
+      rejectUnauthorized: false,
+    });
+    expect(configurationOf(requesterFor('http://localhost:5620')).connect).not.toHaveProperty(
+      'rejectUnauthorized'
+    );
+  });
+
+  // The timeout constants are read at module load, so the environment has to be
+  // set before the module is (re)loaded.
+  const loadRequesterWithEnv = (env: Record<string, string>) => {
+    const previousEnv = { ...process.env };
+    process.env = { ...previousEnv, ...env };
+    let loaded!: typeof import('./kbn_client_requester');
+    jest.isolateModules(() => {
+      loaded = jest.requireActual<typeof import('./kbn_client_requester')>(
+        './kbn_client_requester'
+      );
+    });
+    process.env = previousEnv;
+    return loaded.KbnClientRequester;
+  };
+
+  it('honours KBN_CLIENT_HEADERS_TIMEOUT_MS and KBN_CLIENT_BODY_TIMEOUT_MS', () => {
+    const Requester = loadRequesterWithEnv({
+      KBN_CLIENT_HEADERS_TIMEOUT_MS: '900000',
+      KBN_CLIENT_BODY_TIMEOUT_MS: '900000',
+    });
+
+    expect(configurationOf(new Requester(log, { url: 'http://localhost:5620' }))).toMatchObject({
+      headersTimeout: 900_000,
+      bodyTimeout: 900_000,
+    });
+  });
+});
