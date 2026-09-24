@@ -26,6 +26,7 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { useInputDraft } from '../../../hooks/use_input_draft';
 
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
@@ -112,6 +113,12 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
 jest.mock('../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
 }));
+jest.mock('../../../hooks/use_current_user', () => ({
+  useCurrentUser: jest.fn().mockReturnValue({ currentUser: { user: { username: 'test-user' } }, isLoading: false }),
+}));
+jest.mock('../../../hooks/use_input_draft', () => ({
+  useInputDraft: jest.fn().mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft: jest.fn() }),
+}));
 jest.mock('@kbn/agent-builder-browser', () => ({
   ConversationInputShell: ({
     children,
@@ -145,6 +152,7 @@ const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
 const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
 const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
+const mockedUseInputDraft = jest.mocked(useInputDraft);
 
 const submitMessage = jest.fn();
 const sendUserMessage = jest.fn();
@@ -380,6 +388,76 @@ describe('ConversationInput', () => {
       fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
 
       expect(removeAttachment).toHaveBeenCalledWith(0);
+    });
+  });
+
+  describe('draft persistence', () => {
+    it('hydrates the editor with a saved draft on mount', () => {
+      mockedUseInputDraft.mockReturnValue({
+        draft: 'saved draft text',
+        saveDraft: jest.fn(),
+        clearDraft: jest.fn(),
+      });
+
+      render(<ConversationInput />);
+
+      expect(editorController.setContent).toHaveBeenCalledWith('saved draft text');
+    });
+
+    it('does not hydrate draft when initialMessage is present', () => {
+      mockedUseInputDraft.mockReturnValue({
+        draft: 'stale draft',
+        saveDraft: jest.fn(),
+        clearDraft: jest.fn(),
+      });
+      mockedUseConversationContext.mockReturnValue({
+        attachments: [],
+        upsertAttachments: jest.fn(),
+        removeAttachment: jest.fn(),
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+        initialMessage: 'pre-filled message',
+        autoSendInitialMessage: false,
+      } as never);
+
+      render(<ConversationInput />);
+
+      expect(editorController.setContent).not.toHaveBeenCalledWith('stale draft');
+    });
+
+    it('clears the draft on submit via the default path', () => {
+      const clearDraft = jest.fn();
+      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
+
+      render(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(clearDraft).toHaveBeenCalledTimes(1);
+    });
+
+    it('clears the draft on submit with trigger mode Never', async () => {
+      const clearDraft = jest.fn();
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
+
+      render(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-agent-toggle'));
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      await waitFor(() => expect(clearDraft).toHaveBeenCalledTimes(1));
+    });
+
+    it('clears the editor when switching to a conversation with no saved draft', () => {
+      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft: jest.fn() });
+
+      const { rerender } = render(<ConversationInput />);
+      editorController.clear.mockClear();
+
+      mockedUseConversationId.mockReturnValue('conv-2');
+      rerender(<ConversationInput />);
+
+      expect(editorController.clear).toHaveBeenCalledTimes(1);
     });
   });
 });

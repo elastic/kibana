@@ -9,10 +9,12 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ConversationInputShell, formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
+import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useInputDraft } from '../../../hooks/use_input_draft';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
@@ -106,9 +108,35 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const agentId = useAgentId();
   const conversationId = useConversationId();
 
+  const { currentUser } = useCurrentUser();
+  const username = currentUser?.user.username;
+
+  const { draft, saveDraft, clearDraft } = useInputDraft({ username, agentId, conversationId });
+
+  const messageEditorControllerRef = useRef<
+    ReturnType<typeof useMessageEditor>['controller'] | null
+  >(null);
+  const saveDraftDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleContentChange = useCallback(() => {
+    if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
+    saveDraftDebounceRef.current = setTimeout(() => {
+      const content = messageEditorControllerRef.current?.getContent() ?? '';
+      saveDraft(content);
+    }, 300);
+  }, [saveDraft]);
+
   const { messageEditor, controller: messageEditorController } = useMessageEditor({
     onEditorFocus,
+    onContentChange: handleContentChange,
   });
+  messageEditorControllerRef.current = messageEditorController;
+
+  useEffect(() => {
+    return () => {
+      if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
+    };
+  }, [agentId, conversationId]);
+
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
@@ -194,6 +222,34 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   ]);
 
+  const draftHydratedRef = useRef(false);
+  const isConvSwitchRef = useRef(false);
+  useEffect(() => {
+    if (isConvSwitchRef.current) {
+      messageEditorControllerRef.current?.clear();
+    }
+    isConvSwitchRef.current = true;
+    draftHydratedRef.current = false;
+  }, [agentId, conversationId]);
+  useEffect(() => {
+    if (draftHydratedRef.current) return;
+    if (isConversationReadOnly) return;
+    if (initialMessage) {
+      draftHydratedRef.current = true;
+      return;
+    }
+    if (!draft) return;
+    draftHydratedRef.current = true;
+    messageEditorController.setContent(draft);
+  }, [
+    draft,
+    agentId,
+    conversationId,
+    initialMessage,
+    isConversationReadOnly,
+    messageEditorController,
+  ]);
+
   // Skip auto-focus while a HITL prompt is open, it should own focus instead
   useEffect(() => {
     if (isAwaitingPrompt || isConversationReadOnly) return;
@@ -227,6 +283,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
+          clearDraft();
           messageEditorController.clear();
           onSubmit?.();
         })
@@ -240,6 +297,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     } else {
       submitMessage(content);
     }
+    clearDraft();
     messageEditorController.clear();
     onSubmit?.();
   };
