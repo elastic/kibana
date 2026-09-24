@@ -131,7 +131,7 @@ export class MapsPage {
     // visible before that, so gate both branches on this signal.
     await this.page.waitForFunction(
       () =>
-        document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas') !== null,
+        Boolean(document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas')),
       undefined,
       { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
     );
