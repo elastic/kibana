@@ -54,7 +54,9 @@ export async function getUnprocessedOtelErrors({
     const error = toUnprocessedOtelError(hit, { traceId });
     if (!error) {
       logger.debug(
-        `[get_unprocessed_otel_errors] Skipping document id [${hit._id ?? 'unknown'}] from index [${hit._index ?? 'unknown'}]: missing required fields`
+        `[get_unprocessed_otel_errors] Skipping document id [${hit._id ?? 'unknown'}] from index [${
+          hit._index ?? 'unknown'
+        }]: missing required fields`
       );
     }
     return error;
