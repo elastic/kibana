@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiLoadingSpinner, type EuiBadgeProps, type IconType } from '@elastic/eui';
-import { DETAILS_FLYOUT_LABELS } from './translations';
+import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 export interface ProposedActionStatusBadgeProps {
   color?: EuiBadgeProps['color'];
@@ -20,7 +20,7 @@ export interface ProposedActionStatusBadgeProps {
 export const ProposedActionStatusBadge = ({
   color = 'primary',
   iconType = 'clock',
-  label = DETAILS_FLYOUT_LABELS.proposedAction.needsReviewBadge,
+  label = APPROVAL_MODAL_TRANSLATIONS.needsReviewBadge,
   isLoading = false,
 }: ProposedActionStatusBadgeProps) => (
   <EuiBadge color={color} iconType={isLoading ? undefined : iconType}>

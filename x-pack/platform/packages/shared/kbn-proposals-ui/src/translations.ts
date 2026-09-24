@@ -23,31 +23,46 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   alwaysAllowAriaLabel: i18n.translate('xpack.proposals.approvalModal.alwaysAllow.ariaLabel', {
     defaultMessage: 'Always allow this action',
   }),
-  reversible: i18n.translate('xpack.alertzero.approvalModal.caption.reversible', {
-    defaultMessage: 'Reversible',
+  needsReviewBadge: i18n.translate('xpack.proposals.approvalModal.needsReviewBadge', {
+    defaultMessage: 'Needs review',
   }),
-  irreversible: i18n.translate('xpack.alertzero.approvalModal.caption.irreversible', {
-    defaultMessage: 'Irreversible',
+  appliedBadge: i18n.translate('xpack.proposals.approvalModal.appliedBadge', {
+    defaultMessage: 'Applied',
   }),
-  appliedBannerTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.appliedTitle', {
-    defaultMessage: 'Applied successfully',
-  }),
-  declinedBannerTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.declinedTitle', {
+  declinedBadge: i18n.translate('xpack.proposals.approvalModal.declinedBadge', {
     defaultMessage: 'Declined',
   }),
-  applyingBannerTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.applyingTitle', {
+  applyingBadge: i18n.translate('xpack.proposals.approvalModal.applyingBadge', {
     defaultMessage: 'Applying',
   }),
-  decliningBannerTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.decliningTitle', {
+  decliningBadge: i18n.translate('xpack.proposals.approvalModal.decliningBadge', {
     defaultMessage: 'Declining',
   }),
-  inProgressHint: i18n.translate('xpack.alertzero.approvalModal.outcome.inProgressHint', {
+  reversible: i18n.translate('xpack.proposals.approvalModal.caption.reversible', {
+    defaultMessage: 'Reversible',
+  }),
+  irreversible: i18n.translate('xpack.proposals.approvalModal.caption.irreversible', {
+    defaultMessage: 'Irreversible',
+  }),
+  appliedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.appliedTitle', {
+    defaultMessage: 'Applied successfully',
+  }),
+  declinedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.declinedTitle', {
+    defaultMessage: 'Declined',
+  }),
+  applyingBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.applyingTitle', {
+    defaultMessage: 'Applying',
+  }),
+  decliningBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.decliningTitle', {
+    defaultMessage: 'Declining',
+  }),
+  inProgressHint: i18n.translate('xpack.proposals.approvalModal.outcome.inProgressHint', {
     defaultMessage: 'Typically takes 3-5 minutes.',
   }),
-  actionErrorTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.actionError', {
+  actionErrorTitle: i18n.translate('xpack.proposals.approvalModal.outcome.actionError', {
     defaultMessage: 'Could not record the decision. Try again.',
   }),
-  currentActorFallback: i18n.translate('xpack.alertzero.approvalModal.outcome.currentActor', {
+  currentActorFallback: i18n.translate('xpack.proposals.approvalModal.outcome.currentActor', {
     defaultMessage: 'You',
   }),
 });

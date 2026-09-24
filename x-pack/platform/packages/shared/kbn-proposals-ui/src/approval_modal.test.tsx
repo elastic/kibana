@@ -51,7 +51,11 @@ describe('ApprovalModal', () => {
 
   it('builds the header caption from the category and reversibility, matching the flyout row', () => {
     renderModal({
-      proposal: { ...mockProposal, category: 'configure', action: { reversible: true } },
+      proposal: {
+        ...mockProposal,
+        category: 'configure',
+        action: { name: 'Apply monitored exception', reversible: true },
+      },
     });
     expect(screen.getByText('configure • Reversible')).toBeInTheDocument();
   });
@@ -153,7 +157,7 @@ describe('ApprovalModal', () => {
       proposal: {
         ...mockProposal,
         decision: 'dismissed',
-        decidedBy: { fullName: 'Bonnie Fishel' },
+        decidedBy: { username: 'bfishel', fullName: 'Bonnie Fishel', email: null },
         decidedAt: '2024-01-01T17:20:00.000Z',
         rationale: 'Already reported elsewhere (duplicate)',
       },

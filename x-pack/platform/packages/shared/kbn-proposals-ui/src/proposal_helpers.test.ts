@@ -47,14 +47,19 @@ describe('getProposalTone', () => {
 describe('getProposalCaption', () => {
   it('joins category and reversibility', () => {
     expect(
-      getProposalCaption(proposal({ category: 'configure', action: { reversible: true } }))
+      getProposalCaption(
+        proposal({ category: 'configure', action: { name: 'Isolate host', reversible: true } })
+      )
     ).toBe('configure • Reversible');
   });
 
   it("prefers the action's own category over the proposal's", () => {
     expect(
       getProposalCaption(
-        proposal({ category: 'configure', action: { category: 'response', reversible: false } })
+        proposal({
+          category: 'configure',
+          action: { name: 'Isolate host', category: 'response', reversible: false },
+        })
       )
     ).toBe('response • Irreversible');
   });
@@ -64,7 +69,9 @@ describe('getProposalCaption', () => {
   });
 
   it('omits category when neither the proposal nor its action declares one', () => {
-    expect(getProposalCaption(proposal({ action: { reversible: true } }))).toBe('Reversible');
+    expect(
+      getProposalCaption(proposal({ action: { name: 'Isolate host', reversible: true } }))
+    ).toBe('Reversible');
   });
 
   it('is undefined when there is neither a category nor a reversibility flag', () => {

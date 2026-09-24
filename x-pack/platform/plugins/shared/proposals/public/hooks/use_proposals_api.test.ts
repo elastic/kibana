@@ -159,7 +159,7 @@ describe('useConversationProposals', () => {
     // Decided proposals matter here too — the investigation's own history, not just what still
     // needs a human — so unlike `usePendingProposals` this carries no `status` filter.
     expect(http.get).toHaveBeenCalledWith(PROPOSALS_INTERNAL_URL, {
-      version: AGENTIC_INVESTIGATIONS_API_VERSION,
+      version: PROPOSALS_API_VERSION,
       query: { conversationId: 'conv-42', excludeSuperseded: true },
     });
   });

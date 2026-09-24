@@ -87,7 +87,7 @@ export const useConversationProposals = (
     queryKey: queryKeys.proposals.forConversation(conversationId),
     queryFn: async (): Promise<ListProposalsResponse> =>
       services.http!.get<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        version: PROPOSALS_API_VERSION,
         query: { conversationId, excludeSuperseded: true },
       }),
     keepPreviousData: true,

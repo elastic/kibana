@@ -9,13 +9,15 @@ import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import { ApprovalModal, getProposalTitle, type ApprovalProposal } from '@kbn/proposals-ui';
+import {
+  ApprovalModal,
+  getProposalTitle,
+  ProposedActionStatusBadge,
+  type ApprovalProposal,
+  type ProposedActionStatusBadgeProps,
+} from '@kbn/proposals-ui';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
-import {
-  ProposedActionStatusBadge,
-  type ProposedActionStatusBadgeProps,
-} from './needs_review_badge';
 
 export interface ProposedActionButtonProps {
   /** Same shape the card's recommended-action menu item reads its proposal from. */

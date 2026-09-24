@@ -15,6 +15,10 @@ export {
 } from './src/approval_content';
 export type { ApprovalOutcomeStatus } from './src/approval_outcome';
 export {
+  ProposedActionStatusBadge,
+  type ProposedActionStatusBadgeProps,
+} from './src/needs_review_badge';
+export {
   getProposalCaption,
   getProposalDecision,
   getProposalTitle,

@@ -6,7 +6,6 @@
  */
 
 import type { EuiBadgeProps, IconType } from '@elastic/eui';
-import { DETAILS_FLYOUT_LABELS } from '../../details/translations';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 /** What a primary action resolves to once its promise settles. */
@@ -41,28 +40,28 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
       return {
         color: 'success',
         iconType: 'check',
-        label: DETAILS_FLYOUT_LABELS.proposedAction.appliedBadge,
+        label: APPROVAL_MODAL_TRANSLATIONS.appliedBadge,
         isLoading: false,
       };
     case 'declined':
       return {
         color: 'default',
         iconType: 'cross',
-        label: DETAILS_FLYOUT_LABELS.proposedAction.dismissedBadge,
+        label: APPROVAL_MODAL_TRANSLATIONS.declinedBadge,
         isLoading: false,
       };
     case 'applying':
       return {
         color: 'primary',
         iconType: 'clock',
-        label: DETAILS_FLYOUT_LABELS.proposedAction.applyingBadge,
+        label: APPROVAL_MODAL_TRANSLATIONS.applyingBadge,
         isLoading: true,
       };
     case 'declining':
       return {
         color: 'primary',
         iconType: 'clock',
-        label: DETAILS_FLYOUT_LABELS.proposedAction.decliningBadge,
+        label: APPROVAL_MODAL_TRANSLATIONS.decliningBadge,
         isLoading: true,
       };
     default:

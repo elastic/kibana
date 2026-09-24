@@ -97,7 +97,7 @@ describe('ProposedActionButton', () => {
       ...mockProposal,
       status: 'succeeded',
       decision: 'approved',
-      decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel' },
+      decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel', email: null },
       decidedAt: '2024-01-01T17:20:00.000Z',
     };
 

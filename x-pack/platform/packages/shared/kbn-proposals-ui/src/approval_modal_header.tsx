@@ -19,7 +19,7 @@ import {
 import {
   ProposedActionStatusBadge,
   type ProposedActionStatusBadgeProps,
-} from '../../details/needs_review_badge';
+} from './needs_review_badge';
 
 interface ApprovalModalHeaderProps {
   /**
