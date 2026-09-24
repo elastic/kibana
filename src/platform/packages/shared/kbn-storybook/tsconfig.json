@@ -25,6 +25,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-user-profile-browser",
     "@kbn/node-libs-browser-webpack-plugin",
+    "@kbn/rspack-optimizer",
   ],
   "exclude": [
     "target/**/*",

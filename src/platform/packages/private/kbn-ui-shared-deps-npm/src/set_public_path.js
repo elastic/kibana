@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-
-require('@kbn/dev/build_package/build_package');
+/* eslint-disable camelcase, no-undef */
+__webpack_public_path__ = window.__kbnPublicPath__['kbn-ui-shared-deps-npm'];

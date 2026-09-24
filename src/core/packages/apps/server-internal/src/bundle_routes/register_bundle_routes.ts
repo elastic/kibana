@@ -49,8 +49,7 @@ export function registerBundleRoutes({
   // will store the most recently used hashes.
   const fileHashCache = new FileHashCache();
 
-  // Shared deps bundles are built by webpack (see kbn-ui-shared-deps-npm/src) and
-  // loaded before the Rspack bundles
+  // Shared deps are emitted by the main Rspack bundle build and loaded before plugin bundles.
   const sharedNpmDepsPath = '/bundles/kbn-ui-shared-deps-npm/';
   registerRouteForBundle(router, {
     publicPath: staticAssets.prependPublicUrl(sharedNpmDepsPath) + '/',

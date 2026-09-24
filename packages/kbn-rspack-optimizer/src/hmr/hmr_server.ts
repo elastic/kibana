@@ -123,6 +123,14 @@ export class HmrServer {
     }
   }
 
+  broadcastReload(files?: string[]): void {
+    this.lastState = { reload: true, files };
+    const payload = `data: ${JSON.stringify(this.lastState)}\n\n`;
+    for (const client of this.clients) {
+      client.write(payload);
+    }
+  }
+
   broadcastErrors(errors: string[]): void {
     this.lastState = { errors };
     const payload = `data: ${JSON.stringify(this.lastState)}\n\n`;

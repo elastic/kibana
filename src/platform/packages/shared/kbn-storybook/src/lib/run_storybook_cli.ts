@@ -13,6 +13,8 @@ import { build } from '@storybook/core-server';
 import type { CLIOptions, BuilderOptions, LoadOptions } from '@storybook/types';
 import type { Flags } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { runSharedBuild } from '@kbn/rspack-optimizer';
 import * as constants from './constants';
 
 type StorybookCliOptions = CLIOptions & BuilderOptions & LoadOptions & { mode: 'dev' | 'static' };
@@ -38,11 +40,13 @@ export async function buildStorybook({
   configDir,
   name,
   site = false,
+  sharedBundlesPrebuilt = false,
   loglevel = 'info',
 }: {
   configDir: string;
   name: string;
   site?: boolean;
+  sharedBundlesPrebuilt?: boolean;
   loglevel?: StorybookCliOptions['loglevel'];
 }) {
   const config: StorybookCliOptions = {
@@ -60,6 +64,18 @@ export async function buildStorybook({
     process.env.NODE_ENV = 'development';
   }
 
+  const sharedBuild = sharedBundlesPrebuilt
+    ? undefined
+    : await runSharedBuild({
+        repoRoot: REPO_ROOT,
+        dist: site,
+        watch: !site,
+      });
+  if (sharedBuild && !sharedBuild.success) {
+    await sharedBuild.close?.();
+    throw new Error(`Shared frontend build failed: ${sharedBuild.errors?.join(', ')}`);
+  }
+
   try {
     // Some transitive deps of addon-docs are ESM and not loading properly
     // See: https://github.com/storybookjs/storybook/issues/29467
@@ -67,6 +83,7 @@ export async function buildStorybook({
     await build(config);
   } finally {
     require('fix-esm').unregister();
+    await sharedBuild?.close?.();
   }
 }
 
@@ -79,6 +96,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         configDir,
         name,
         site: Boolean(flags.site),
+        sharedBundlesPrebuilt: Boolean(flags['shared-bundles-prebuilt']),
         loglevel: getLogLevelFromFlags(flags),
       });
 
@@ -87,7 +105,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
     },
     {
       flags: {
-        boolean: ['site'],
+        boolean: ['site', 'shared-bundles-prebuilt'],
       },
       description: `
         Run the storybook examples for ${name}

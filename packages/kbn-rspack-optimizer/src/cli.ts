@@ -16,6 +16,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 import { KIBANA_GROUPS, type KibanaGroup } from '@kbn/projects-solutions-groups';
 import { runBuild, type BuildOptions } from './run_build';
+import { runSharedBuild } from './run_shared_build';
 import { reportOptimizerTimings } from './report_optimizer_timings';
 import {
   validateLimitsForAllBundles,
@@ -45,6 +46,11 @@ export function runRspackCli(options: CliOptions = {}): void {
       const dist = flags.dist ?? false;
       if (typeof dist !== 'boolean') {
         throw createFlagError('expected --dist to have no value');
+      }
+
+      const sharedOnly = flags['shared-only'] ?? false;
+      if (typeof sharedOnly !== 'boolean') {
+        throw createFlagError('expected --shared-only to have no value');
       }
 
       const examples = flags.examples ?? false;
@@ -170,6 +176,27 @@ export function runRspackCli(options: CliOptions = {}): void {
           ? Path.resolve(flags['output-root'])
           : REPO_ROOT;
 
+      if (sharedOnly) {
+        const result = await runSharedBuild({
+          repoRoot: REPO_ROOT,
+          outputRoot,
+          watch,
+          dist,
+          log,
+        });
+        if (result.close) {
+          addCleanupTask(() => {
+            result.close?.().catch(() => {});
+          });
+        }
+        if (!result.success) {
+          await result.close?.();
+          throw new Error(`Shared frontend build failed: ${result.errors?.join(', ')}`);
+        }
+        await result.done;
+        return;
+      }
+
       const inspectWorkers = flags['inspect-workers'] as boolean;
 
       // When profiling, spawn a special worker that does not run the prototype hardening
@@ -259,6 +286,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           'update-limits',
           'validate-limits',
           'inspect-workers',
+          'shared-only',
         ],
         string: [
           'themes',
@@ -288,6 +316,7 @@ export function runRspackCli(options: CliOptions = {}): void {
             --dist                    Build for distribution (minified, no source maps)
             --examples                Include example plugins
             --test-plugins            Include test plugins
+            --shared-only             Build only shared frontend bundles
             --themes <tags>           Comma-separated theme tags to build (default: all)
             --plugin-groups <groups>  Comma-separated plugin groups to build (default: all).
                                       Mirrors the server's plugins.allowlistPluginGroups setting.

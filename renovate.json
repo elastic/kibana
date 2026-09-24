@@ -40,7 +40,6 @@
         "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
-        "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
         "val-loader",
@@ -1919,7 +1918,7 @@
     },
     {
       "groupName": "minify",
-      "matchDepNames": ["gulp-brotli", "terser-webpack-plugin"],
+      "matchDepNames": ["gulp-brotli"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

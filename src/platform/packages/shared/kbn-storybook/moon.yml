@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/core-analytics-browser'
   - '@kbn/core-user-profile-browser'
   - '@kbn/node-libs-browser-webpack-plugin'
+  - '@kbn/rspack-optimizer'
 tags:
   - shared-common
   - package
