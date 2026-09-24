@@ -2987,6 +2987,7 @@ describe('Agent policy', () => {
 
   describe('deployPolicies', () => {
     beforeEach(() => {
+      jest.restoreAllMocks();
       mockedGetFullAgentPolicy.mockReset();
     });
 

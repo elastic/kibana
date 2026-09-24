@@ -700,7 +700,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       expect(mockedReassignAgents).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        { agentIds: ['agent-1', 'agent-2'], showInactive: true },
+        { agentIds: ['agent-1', 'agent-2'], showInactive: true, spaceId: '*' },
         'policy-1'
       );
       expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
