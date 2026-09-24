@@ -356,8 +356,8 @@ steps:
       # confidence_score, rationale, contributing_factors }. `id` is the model's echo of the
       # alert id, so this list is for internal pairing only — never export it to a caller.
       all_verdicts: []
-      # The caller-facing verdict list emitted by workflow.output, accumulated in
-      # apply_verdicts and keyed on the real alert id rather than the model's echo:
+      # The caller-facing verdict list emitted by workflow.output, merged once per batch in
+      # classify_alert_batches and keyed on the real alert id rather than the model's echo:
       # { alert_id, classification, confidence_score, rationale, contributing_factors,
       #   host_name, user_name }.
       output_verdicts: []
@@ -518,24 +518,6 @@ steps:
       # every alert is re-analyzed.
       pending_filter_expr: '{% if consts.override_previous %}false{% else %}a.kibana.alert.workflow_tags contains "{{ variables.tag_prefix }}"{% endif %}'
 
-  # The alert set under analysis. `workflow.execute` passes only `inputs` — a child run has
-  # no trigger event at all — so a caller-supplied set is the only way this workflow can be
-  # driven by anything other than its own alert trigger. Defaults to the trigger's alerts,
-  # which keeps the standalone path unchanged.
-  - name: set_alert_set
-    type: data.set
-    with:
-      alert_set: "${{ event.alerts }}"
-
-  - name: use_caller_alerts_if_provided
-    type: if
-    condition: "${{ inputs.calledByWorker == true }}"
-    steps:
-      - name: apply_caller_alerts
-        type: data.set
-        with:
-          alert_set: "${{ inputs.alerts }}"
-
   # Worker supplies an explicit alert set and expects a complete structured result for it.
   # The standalone "already analyzed" tag filter would drop tagged alerts on retry (e.g.
   # after a mid-run failure) and leave those ids out of workflow.output. Bypass dedup on
@@ -575,8 +557,8 @@ steps:
       - name: compute_caller_alert_id_counts
         type: data.set
         with:
-          caller_alert_count: "${{ variables.alert_set.size }}"
-          caller_unique_alert_id_count: "${{ variables.alert_set | map: '_id' | uniq | size }}"
+          caller_alert_count: "${{ inputs.alerts.size }}"
+          caller_unique_alert_id_count: "${{ inputs.alerts | map: '_id' | uniq | size }}"
       - name: fail_if_duplicate_caller_alert_ids
         type: if
         condition: "${{ variables.caller_alert_count != variables.caller_unique_alert_id_count }}"
@@ -589,7 +571,7 @@ steps:
                 inputs.alerts contained duplicate ids.
 
   # All enrichment (prevalence, noise, close history, rule metadata, AI prompt) anchors on
-  # alert_set[0].kibana.alert.rule.uuid. Mixed-rule batches would analyze remaining alerts
+  # inputs.alerts[0].kibana.alert.rule.uuid. Mixed-rule batches would analyze remaining alerts
   # with the wrong rule context. Fail loud so the caller is forced to split by rule before
   # invoking the workflow.
   - name: reject_multi_rule_caller_alerts
@@ -599,7 +581,7 @@ steps:
       - name: compute_caller_unique_rule_count
         type: data.set
         with:
-          caller_unique_rule_uuid_count: "${{ variables.alert_set | map: 'kibana.alert.rule.uuid' | uniq | size }}"
+          caller_unique_rule_uuid_count: "${{ inputs.alerts | map: 'kibana.alert.rule.uuid' | uniq | size }}"
       - name: fail_if_multi_rule_caller_alerts
         type: if
         condition: "${{ variables.caller_unique_rule_uuid_count > 1 }}"
@@ -615,7 +597,7 @@ steps:
   # Rule context for enrichment queries / logs
   # ---------------------------------------------------------------------------
   # Standalone (alert trigger) reads event.rule. Worker/manual child runs have no
-  # trigger event, so derive from the first alert in alert_set. Worker batches are
+  # trigger event, so derive from the first caller alert. Worker batches are
   # guaranteed single-rule by the reject_multi_rule_caller_alerts gate above.
   - name: set_rule_context
     type: data.set
@@ -627,17 +609,29 @@ steps:
     type: if
     condition: "${{ inputs.calledByWorker == true }}"
     steps:
-      - name: apply_rule_from_alert_set
+      - name: apply_rule_from_caller_alerts
         type: data.set
         with:
-          rule_id: "{{ variables.alert_set[0].kibana.alert.rule.uuid }}"
-          rule_name: "{{ variables.alert_set[0].kibana.alert.rule.name }}"
+          rule_id: "{{ inputs.alerts[0].kibana.alert.rule.uuid }}"
+          rule_name: "{{ inputs.alerts[0].kibana.alert.rule.name }}"
 
+  # Alerts are read inline from event.alerts (standalone) or inputs.alerts (Worker) and never
+  # stored in a step output, which would subject them to max-step-size and duplicate them in state.
   - name: set_alert_counts
     type: data.set
     with:
-      total_alert_count: "${{ variables.alert_set | size }}"
-      pending_alert_count: "${{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | size }}"
+      total_alert_count: "${{ event.alerts | size }}"
+      pending_alert_count: "${{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | size }}"
+
+  - name: count_caller_alerts
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: apply_caller_alert_counts
+        type: data.set
+        with:
+          total_alert_count: "${{ inputs.alerts | size }}"
+          pending_alert_count: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | size }}"
 
   # ---------------------------------------------------------------------------
   # Runtime guard
@@ -676,7 +670,16 @@ steps:
       - name: set_enrichment_anchor
         type: data.set
         with:
-          anchor_timestamp: '{{ variables.alert_set[0]["@timestamp"] }}'
+          anchor_timestamp: '{{ event.alerts[0]["@timestamp"] }}'
+
+      - name: anchor_on_caller_alerts
+        type: if
+        condition: "${{ inputs.calledByWorker == true }}"
+        steps:
+          - name: apply_caller_enrichment_anchor
+            type: data.set
+            with:
+              anchor_timestamp: '{{ inputs.alerts[0]["@timestamp"] }}'
 
       # Close history: how often this rule's alerts have been closed and
       # the distribution of close reasons (e.g. false_positive, resolved).
@@ -1019,7 +1022,8 @@ steps:
       # the total alert count), so workflow-execution state stays proportional to batch size.
       - name: classify_alert_batches
         type: foreach
-        foreach: "{{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
+        foreach: >-
+          {% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% endif %}
         steps:
 
           # -----------------------------------------------------------------
@@ -1648,6 +1652,71 @@ steps:
                   resolved_connector_id: >-
                     {% if variables.resolved_connector_id == '' %}{{ steps.runAgent_step.output.metadata.usage.connectorId }}{% else %}{{ variables.resolved_connector_id }}{% endif %}
 
+              # -------------------------------------------------------------------
+              # Accumulate the verdicts a caller receives via workflow.output
+              # (Worker path only — gated on calledByWorker so standalone runs skip this)
+              # -------------------------------------------------------------------
+              # Built per batch into a list reset each iteration, then merged once: every
+              # data.set persists its full value, so pushing each alert onto the run-wide list
+              # would store it O(n²) times across the execution.
+              - name: accumulate_batch_output_verdicts_gate
+                type: if
+                condition: "${{ inputs.calledByWorker == true }}"
+                steps:
+                  - name: reset_batch_output_verdicts
+                    type: data.set
+                    with:
+                      batch_output_verdicts: []
+
+                  - name: build_batch_output_verdicts
+                    type: foreach
+                    foreach: "{{ foreach.item | json }}"
+                    steps:
+                      # Count, not emptiness, decides the branch (see select_alert_verdict).
+                      - name: select_batch_alert_verdict
+                        type: data.set
+                        with:
+                          batch_alert_verdict: "${{ variables.batch_verdicts | where: 'id', foreach.item._id | first }}"
+                          batch_alert_verdict_count: "${{ variables.batch_verdicts | where: 'id', foreach.item._id | size }}"
+
+                      # Keyed on foreach.item._id — the real alert id — never on the model's
+                      # echoed `id`. A caller acts on these: the Alert Triage Worker tags, notes
+                      # and closes by this field, so passing the raw model output through would
+                      # let a fabricated id close an unrelated alert. An alert with no verdict is
+                      # skipped here and reported via missing_alert_ids by apply_verdicts.
+                      - name: accumulate_worker_output_verdict
+                        type: if
+                        condition: "${{ variables.batch_alert_verdict_count > 0 }}"
+                        steps:
+                          - name: build_output_verdict
+                            type: data.set
+                            with:
+                              output_verdict:
+                                alert_id: "{{ foreach.item._id }}"
+                                classification: "{{ variables.batch_alert_verdict.classification }}"
+                                confidence_score: "${{ variables.batch_alert_verdict.confidence_score }}"
+                                rationale: "{{ variables.batch_alert_verdict.rationale }}"
+                                contributing_factors: "${{ variables.batch_alert_verdict.contributing_factors }}"
+                                # Entity the alert belongs to, carried so a caller can group verdicts by
+                                # host/user without re-reading the alerts. Read from the alert document,
+                                # never from the model's reply. `__missing__` keeps grouping total (an
+                                # alert with no host still belongs in exactly one group) and cannot
+                                # collide with a real ECS host/user named "unknown". Truncate to the
+                                # workflow.output / Zod maxLength (512) so a long caller-supplied name
+                                # cannot fail emit after tags/notes are already written.
+                                host_name: "{{ foreach.item.host.name | default: '__missing__' | truncate: 512, '' }}"
+                                user_name: "{{ foreach.item.user.name | default: '__missing__' | truncate: 512, '' }}"
+
+                          - name: accumulate_output_verdict
+                            type: data.set
+                            with:
+                              batch_output_verdicts: "${{ variables.batch_output_verdicts | push: variables.output_verdict }}"
+
+                  - name: merge_batch_output_verdicts
+                    type: data.set
+                    with:
+                      output_verdicts: "${{ variables.output_verdicts | concat: variables.batch_output_verdicts }}"
+
               # Keep the model's batch_summary (Worker path only) when at least one of its
               # verdicts matched this batch, and say so when it covers only part of the batch;
               # a summary with no matched verdicts would describe results the caller never sees.
@@ -1707,7 +1776,8 @@ steps:
 
       - name: apply_verdicts
         type: foreach
-        foreach: "{{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | json }}"
+        foreach: >-
+          {% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% endif %}
         steps:
           - name: select_alert_verdict
             type: data.set
@@ -1765,43 +1835,6 @@ steps:
                 with:
                   missing_alert_ids: "${{ variables.missing_alert_ids | push: foreach.item._id }}"
             else:
-
-              # -------------------------------------------------------------------
-              # Accumulate the verdict a caller receives via workflow.output
-              # (Worker path only — gated on calledByWorker so standalone runs skip this)
-              # -------------------------------------------------------------------
-              # Keyed on foreach.item._id — the real alert id — never on the model's echoed
-              # `id`. A caller acts on these: the Alert Triage Worker tags, notes and closes
-              # by this field, so passing the raw model output through would let a fabricated
-              # id close an unrelated alert. Reached only from this else branch, so a verdict
-              # matching no real alert is dropped rather than exported.
-              - name: accumulate_worker_output_verdict
-                type: if
-                condition: "${{ inputs.calledByWorker == true }}"
-                steps:
-                  - name: build_output_verdict
-                    type: data.set
-                    with:
-                      output_verdict:
-                        alert_id: "{{ foreach.item._id }}"
-                        classification: "{{ variables.alert_verdict.classification }}"
-                        confidence_score: "${{ variables.alert_verdict.confidence_score }}"
-                        rationale: "{{ variables.alert_verdict.rationale }}"
-                        contributing_factors: "${{ variables.alert_verdict.contributing_factors }}"
-                        # Entity the alert belongs to, carried so a caller can group verdicts by
-                        # host/user without re-reading the alerts. Read from the alert document,
-                        # never from the model's reply. `__missing__` keeps grouping total (an
-                        # alert with no host still belongs in exactly one group) and cannot
-                        # collide with a real ECS host/user named "unknown". Truncate to the
-                        # workflow.output / Zod maxLength (512) so a long caller-supplied name
-                        # cannot fail emit after tags/notes are already written.
-                        host_name: "{{ foreach.item.host.name | default: '__missing__' | truncate: 512, '' }}"
-                        user_name: "{{ foreach.item.user.name | default: '__missing__' | truncate: 512, '' }}"
-
-                  - name: accumulate_output_verdict
-                    type: data.set
-                    with:
-                      output_verdicts: "${{ variables.output_verdicts | push: variables.output_verdict }}"
 
               # -------------------------------------------------------------------
               # Write the verdict note to the alert timeline
@@ -2113,7 +2146,7 @@ steps:
         type: data.set
         if: "${{ inputs.calledByWorker == true }}"
         with:
-          missing_alert_ids: "${{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | map: '_id' }}"
+          missing_alert_ids: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | map: '_id' }}"
 
   # ---------------------------------------------------------------------------
   # Emit structured output for callers (Worker path)
