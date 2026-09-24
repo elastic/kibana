@@ -186,6 +186,12 @@ export const ALERTING_LOG_CODES = {
    */
   HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
     'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
+  /**
+   * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
+   * limit, so rows past it were dropped. Episodes whose ack, snooze or
+   * deactivate state was in the dropped rows may be dispatched.
+   */
+  FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED: 'FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED',
   // ──────────────── Action policy API key invalidation ───────────────
   /**
    * A delete refused to remove one or more action policies because their API
@@ -489,6 +495,12 @@ export const ALERTING_LOG_CODES = {
   STORAGE_BULK_INDEX_FAILED: 'STORAGE_BULK_INDEX_FAILED',
   /** An ES|QL query issued by the plugin failed to execute. */
   QUERY_ESQL_EXECUTION_FAILED: 'QUERY_ESQL_EXECUTION_FAILED',
+  /**
+   * The `alertingV2.esqlResponseFormat` feature flag resolved to a format name
+   * that is not in the response format registry. Queries keep running on the
+   * default format; the flag's variations need correcting.
+   */
+  QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN: 'QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN',
 
   // ────────────────────────────── Resources ──────────────────────────
   /**

@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import type { RuleTuningWorkerExtras } from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
@@ -45,6 +46,21 @@ const getManagedYaml = (workflowId: string): string => {
     return definition.yamlTemplate(registration.settings.createDefaultValues());
   }
   throw new Error(`Managed workflow definition "${workflowId}" has no YAML source`);
+};
+
+const renderRuleTuningWorker = (extras: RuleTuningWorkerExtras): string => {
+  const definition = getManagedWorkflowDefinition(
+    ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID
+  );
+  if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+    throw new Error('Rule Tuning worker definition has no YAML template');
+  }
+  return definition.yamlTemplate({
+    settingsVersion: 1,
+    autonomyLevel: 'assisted',
+    scheduleInterval: '6h',
+    extras,
+  });
 };
 
 interface NestedStep {
@@ -99,8 +115,50 @@ describe('detection rule workflows', () => {
       expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID);
       expect(calls[0].with?.inputs).toEqual({
         autonomy_level: '{{ consts.worker_settings.autonomy }}',
-        analysis_window_days: 14,
+        analysis_window_days: '${{ consts.worker_settings.extras.analysisWindowDays }}',
+        min_fp_count: '${{ consts.worker_settings.extras.fpCountThreshold }}',
+        min_fp_rate_pct: '${{ consts.worker_settings.extras.fpRateThresholdPct }}',
       });
+    });
+
+    // The sweep's own consts are fallbacks for a manual run, so a saved setting only
+    // takes effect if the wrapper renders it into the dispatch inputs.
+    it('forwards the saved analysis window and both FP thresholds to the sweep', () => {
+      const saved = { analysisWindowDays: 21, fpCountThreshold: 4, fpRateThresholdPct: 80 };
+      const rendered = parse(renderRuleTuningWorker(saved)) as WorkflowYaml;
+      const [dispatch] = flattenSteps(rendered.steps as unknown as NestedStep[]);
+
+      // consts.worker_settings is the single place the saved values are rendered into...
+      expect((rendered.consts as Record<string, Record<string, unknown>>).worker_settings).toEqual({
+        settingsVersion: 1,
+        autonomy: 'assisted',
+        scheduleInterval: '6h',
+        extras: saved,
+      });
+
+      // ...and every sweep input is an expression over it. Evaluating them the way the engine
+      // does catches a mistyped consts path or a `{{ }}` that would stringify a number, which
+      // matching the literal expression text would let through.
+      const engine = createWorkflowLiquidEngine();
+      const resolve = (expression: unknown) =>
+        engine.evalValueSync(
+          String(expression)
+            .trim()
+            .replace(/^\$?\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          { consts: rendered.consts }
+        );
+      const inputs = dispatch.with?.inputs as Record<string, unknown>;
+
+      expect(resolve(inputs.autonomy_level)).toBe('assisted');
+      expect(resolve(inputs.analysis_window_days)).toBe(21);
+      expect(resolve(inputs.min_fp_count)).toBe(4);
+      expect(resolve(inputs.min_fp_rate_pct)).toBe(80);
+      // `${{ }}` keeps the number type the sweep's integer inputs require; `{{ }}` would not.
+      for (const key of ['analysis_window_days', 'min_fp_count', 'min_fp_rate_pct']) {
+        expect(inputs[key]).toMatch(/^\$\{\{/);
+      }
     });
   });
 
@@ -205,10 +263,12 @@ describe('detection rule workflows', () => {
         'propose_query',
         'propose_risk_score',
         'propose_exception',
+        'propose_threshold',
+        'propose_schedule',
         'propose_manual',
       ]);
 
-      const [entry, action, settings, exception, manual] = proposals;
+      const [entry, action, settings, exception, threshold, schedule, manual] = proposals;
       const entryInputs = entry.with?.inputs as Record<string, unknown>;
       const actionInputs = action.with?.inputs as Record<string, unknown>;
       const settingsInputs = settings.with?.inputs as Record<string, unknown>;
@@ -267,17 +327,26 @@ describe('detection rule workflows', () => {
         'query',
         'risk_score',
         'exception',
+        'threshold',
+        'schedule',
       ]);
       expect(
         (fork.cases ?? []).map(({ steps: armSteps }) => armSteps.map(({ name }) => name))
-      ).toEqual([['propose_query'], ['propose_risk_score'], ['propose_exception']]);
+      ).toEqual([
+        ['propose_query'],
+        ['propose_risk_score'],
+        ['propose_exception'],
+        ['incomplete_threshold_output', 'propose_threshold'],
+        ['propose_schedule'],
+      ]);
       // The manual proposal is the default arm, so an unrecognised change type
       // still reaches the analyst.
       expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
 
       expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
-      // The switch already guards the arms.
-      for (const proposal of [action, settings, exception, manual]) {
+      // The switch already guards the arms; propose_threshold also has a step-level
+      // guard (incomplete_threshold_output) verified by the case-arm assertion above.
+      for (const proposal of [action, settings, exception, threshold, schedule, manual]) {
         expect(proposal).not.toHaveProperty('if');
       }
       for (const proposal of proposals) {
@@ -731,6 +800,8 @@ describe('detection rule workflows', () => {
           'propose_query',
           'propose_risk_score',
           'propose_exception',
+          'propose_threshold',
+          'propose_schedule',
           'propose_manual',
         ]);
         const [, previews] = children;
