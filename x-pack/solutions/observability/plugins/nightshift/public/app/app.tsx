@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
@@ -25,6 +25,7 @@ import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
+import { useInvestigationAvailability } from '../hooks/use_investigation_availability';
 import { useInvestigationSections } from '../hooks/use_investigation_sections';
 import {
   InvestigationList,
@@ -33,6 +34,7 @@ import {
 import { InvestigationDetailFlyout } from '../investigation/investigation_detail_flyout';
 import { isInvestigationSectionVisible } from '../investigation/investigation_section';
 import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
+import { StartInvestigationPanel } from '../investigation/start_investigation_panel';
 import {
   clearNightshiftInvestigationIdParam,
   getNightshiftInvestigationIdFromSearch,
@@ -92,6 +94,14 @@ export function NightshiftApp(): React.ReactElement {
   );
 
   const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
+  const { canStartInvestigation } = useInvestigationAvailability();
+  const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
+
+  const toggleStartInvestigation = useCallback(
+    () => setIsStartInvestigationOpen((isOpen) => !isOpen),
+    []
+  );
+  const closeStartInvestigation = useCallback(() => setIsStartInvestigationOpen(false), []);
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -216,7 +226,16 @@ export function NightshiftApp(): React.ReactElement {
         isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
         showAllEventsHref={showAllEventsHref}
+        onStartInvestigationClick={canStartInvestigation ? toggleStartInvestigation : undefined}
+        isStartInvestigationOpen={isStartInvestigationOpen}
       />
+
+      {isStartInvestigationOpen && (
+        <>
+          <EuiSpacer size="l" />
+          <StartInvestigationPanel onClose={closeStartInvestigation} />
+        </>
+      )}
 
       <EuiSpacer size="l" />
 

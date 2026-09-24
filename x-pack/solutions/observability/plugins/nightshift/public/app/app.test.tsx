@@ -14,11 +14,24 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import { useInvestigationSections } from '../hooks/use_investigation_sections';
+import { useInvestigationAvailability } from '../hooks/use_investigation_availability';
 import { useKibana } from '../hooks/use_kibana';
 
 jest.mock('../hooks/use_investigation_sections');
+jest.mock('../hooks/use_investigation_availability');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
+
+jest.mock('../investigation/start_investigation_panel', () => ({
+  START_INVESTIGATION_PANEL_ID: 'nightshiftStartInvestigationPanel',
+  StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="nightshiftStartInvestigationPanel">
+      <button onClick={onClose} type="button">
+        Cancel investigation
+      </button>
+    </div>
+  ),
+}));
 
 jest.mock('../investigation/investigation_detail_flyout', () => ({
   InvestigationDetailFlyout: ({
@@ -39,6 +52,7 @@ jest.mock('../investigation/investigation_detail_flyout', () => ({
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
+const mockUseInvestigationAvailability = useInvestigationAvailability as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
 
 const investigation: ListInvestigationItem = {
@@ -159,6 +173,7 @@ describe('NightshiftApp', () => {
     refetchAll.mockClear();
     scrollIntoView.mockClear();
     mockUsePageReady.mockClear();
+    mockUseInvestigationAvailability.mockReturnValue({ canStartInvestigation: true });
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -375,5 +390,30 @@ describe('NightshiftApp', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByText('Flyout: investigation-1')).not.toBeInTheDocument();
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('');
+  });
+
+  it('opens and closes the start investigation panel from the header', () => {
+    renderApp();
+
+    const startButton = screen.getByTestId('o11yNightshiftAppStartInvestigationButton');
+    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
+
+    fireEvent.click(startButton);
+    expect(screen.getByTestId('nightshiftStartInvestigationPanel')).toBeInTheDocument();
+    expect(startButton).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel investigation' }));
+    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
+  });
+
+  it('hides the start investigation button when the user cannot start investigations', () => {
+    mockUseInvestigationAvailability.mockReturnValue({ canStartInvestigation: false });
+
+    renderApp();
+
+    expect(
+      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toBeInTheDocument();
   });
 });
