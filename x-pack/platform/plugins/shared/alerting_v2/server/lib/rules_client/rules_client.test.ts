@@ -175,7 +175,7 @@ describe('RulesClient', () => {
           attrs: expect.objectContaining({
             metadata: expect.objectContaining({ name: 'rule-1' }),
             enabled: true,
-            createdBy: 'elastic_profile_uid',
+            createdBy: { profile_uid: 'elastic_profile_uid' },
           }),
           references: [],
         }),
@@ -196,8 +196,8 @@ describe('RulesClient', () => {
           id: 'rule-id-1',
           metadata: expect.objectContaining({ name: 'rule-1' }),
           enabled: true,
-          created_by: 'elastic_profile_uid',
-          updated_by: 'elastic_profile_uid',
+          created_by: { profile_uid: 'elastic_profile_uid' },
+          updated_by: { profile_uid: 'elastic_profile_uid' },
           created_at: '2025-01-01T00:00:00.000Z',
           updated_at: '2025-01-01T00:00:00.000Z',
         })
@@ -1476,9 +1476,9 @@ describe('RulesClient', () => {
             attrs: expect.objectContaining({
               metadata: expect.objectContaining({ name: 'rule-1' }),
               enabled: true,
-              createdBy: 'elastic_profile_uid',
+              createdBy: { profile_uid: 'elastic_profile_uid' },
               createdAt: '2025-01-01T00:00:00.000Z',
-              updatedBy: 'elastic_profile_uid',
+              updatedBy: { profile_uid: 'elastic_profile_uid' },
               updatedAt: '2025-01-01T00:00:00.000Z',
             }),
             references: [],
@@ -1541,7 +1541,7 @@ describe('RulesClient', () => {
         const existing: RuleSavedObjectAttributes = {
           ...baseSoAttrs,
           enabled: false,
-          createdBy: 'previous-creator',
+          createdBy: { profile_uid: 'previous-creator' },
           createdAt: '2024-06-01T00:00:00.000Z',
           metadata: { name: 'before' },
         };
@@ -1565,9 +1565,9 @@ describe('RulesClient', () => {
           attrs: expect.objectContaining({
             metadata: expect.objectContaining({ name: 'after' }),
             enabled: false,
-            createdBy: 'previous-creator',
+            createdBy: { profile_uid: 'previous-creator' },
             createdAt: '2024-06-01T00:00:00.000Z',
-            updatedBy: 'elastic_profile_uid',
+            updatedBy: { profile_uid: 'elastic_profile_uid' },
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
           version: 'WzEsMV0=',
@@ -2496,7 +2496,7 @@ describe('RulesClient', () => {
           id: 'rule-1',
           attrs: expect.objectContaining({
             enabled: true,
-            updatedBy: 'elastic_profile_uid',
+            updatedBy: { profile_uid: 'elastic_profile_uid' },
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
         }),
@@ -2732,7 +2732,7 @@ describe('RulesClient', () => {
           id: 'rule-1',
           attrs: expect.objectContaining({
             enabled: false,
-            updatedBy: 'elastic_profile_uid',
+            updatedBy: { profile_uid: 'elastic_profile_uid' },
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
         }),
@@ -2863,7 +2863,7 @@ describe('RulesClient', () => {
           id: 'rule-1',
           attrs: expect.objectContaining({
             enabled: true,
-            updatedBy: 'elastic_profile_uid',
+            updatedBy: { profile_uid: 'elastic_profile_uid' },
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
         }),

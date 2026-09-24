@@ -50,10 +50,9 @@ export const ACTION_POLICY_RESPONSE: ActionPolicyResponse = {
   grouping_mode: 'per_episode',
   throttle: { strategy: 'on_status_change', interval: null },
   snoozed_until: null,
-  auth: { owner: 'elastic', created_by_user: true },
-  created_by: 'elastic',
+  created_by: { profile_uid: 'u_elastic_0' },
   created_at: '2026-01-15T12:00:00.000Z',
-  updated_by: 'elastic',
+  updated_by: { profile_uid: 'u_elastic_0' },
   updated_at: '2026-01-15T12:00:00.000Z',
 };
 

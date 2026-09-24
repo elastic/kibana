@@ -180,10 +180,9 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
   snoozed_until: null,
-  auth: { owner: 'elastic', created_by_user: false },
-  created_by: 'elastic_profile_uid',
+  created_by: { profile_uid: 'elastic_profile_uid' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'elastic_profile_uid',
+  updated_by: { profile_uid: 'elastic_profile_uid' },
   updated_at: '2026-01-02T03:04:05.000Z',
   ...overrides,
 });

@@ -466,7 +466,7 @@ describe('manageRuleTool', () => {
             data: {
               id: 'rule-persisted-id',
               kind: 'alert',
-              metadata: { name: 'Existing', owner: 'observability' },
+              metadata: { name: 'Existing' },
             },
           },
         ],
@@ -497,7 +497,7 @@ describe('manageRuleTool', () => {
             data: {
               id: 'rule-in-memory-id',
               kind: 'alert',
-              metadata: { name: 'Draft', owner: 'observability' },
+              metadata: { name: 'Draft' },
             },
           },
         ],

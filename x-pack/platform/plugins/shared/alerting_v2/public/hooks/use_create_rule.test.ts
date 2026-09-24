@@ -33,9 +33,9 @@ const mockRuleResponse: RuleResponse = {
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-  created_by: 'test-user',
+  created_by: { profile_uid: 'test-user' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'test-user',
+  updated_by: { profile_uid: 'test-user' },
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
