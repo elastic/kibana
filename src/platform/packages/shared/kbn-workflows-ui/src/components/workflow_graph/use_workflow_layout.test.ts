@@ -139,65 +139,30 @@ describe('useWorkflowLayout', () => {
       // so isMerge was false and all six bent at their own smooth-step midpoints,
       // forming a broad horizontal band far above the join node.
       //
-      // Topology (reduced): route(if) → then: [a(if)→yes/no, b(if)→yes/no, c(if)→yes/no]
-      //                               → else: [d(if) → then: [loop(foreach)→inner], else: [e]]
-      //                     summary (sibling)
-      // Ids are slugged by IdAllocator / toSlugIdentifier: underscores → dashes.
+      // Topology: route(switch, 5 cases + default) → leaf_a … leaf_e, leaf_default
+      //           summary (sibling)
+      // 5 cases + 1 default = 6 real paths, no bypass lane → toHaveLength(6).
       const workflow = minimal({
         steps: [
           {
             name: 'route',
-            type: 'if',
-            condition: 'x',
-            steps: [
-              {
-                name: 'branch_a',
-                type: 'if',
-                condition: 'a',
-                steps: [{ name: 'branch_a_yes', type: 'http' }],
-                else: [{ name: 'branch_a_no', type: 'http' }],
-              },
-              {
-                name: 'branch_b',
-                type: 'if',
-                condition: 'b',
-                steps: [{ name: 'branch_b_yes', type: 'http' }],
-                else: [{ name: 'branch_b_no', type: 'http' }],
-              },
-              {
-                name: 'branch_c',
-                type: 'if',
-                condition: 'c',
-                steps: [{ name: 'branch_c_yes', type: 'http' }],
-                else: [{ name: 'branch_c_no', type: 'http' }],
-              },
+            type: 'switch',
+            expression: 'x',
+            cases: [
+              { match: 'a', steps: [{ name: 'leaf_a', type: 'http' }] },
+              { match: 'b', steps: [{ name: 'leaf_b', type: 'http' }] },
+              { match: 'c', steps: [{ name: 'leaf_c', type: 'http' }] },
+              { match: 'd', steps: [{ name: 'leaf_d', type: 'http' }] },
+              { match: 'e', steps: [{ name: 'leaf_e', type: 'http' }] },
             ],
-            else: [
-              {
-                name: 'branch_d',
-                type: 'if',
-                condition: 'd',
-                steps: [
-                  {
-                    name: 'loop',
-                    type: 'foreach',
-                    foreach: 'items',
-                    steps: [{ name: 'inner', type: 'http' }],
-                  },
-                ],
-                else: [{ name: 'branch_e', type: 'http' }],
-              },
-            ],
+            default: [{ name: 'leaf_default', type: 'http' }],
           },
           { name: 'summary', type: 'http' },
         ] as unknown as WorkflowYaml['steps'],
       });
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));
       const fanInEdges = result.current.edges.filter((e) => e.target === 'summary');
-      // 6 leaves: branch_a_yes, branch_a_no, branch_b_yes, branch_b_no,
-      //           branch_c_yes (or branch_c_no), loop (foreach), branch_e
-      // Exact count depends on dedupe, but must be > 1 and all isMerge.
-      expect(fanInEdges.length).toBeGreaterThan(1);
+      expect(fanInEdges).toHaveLength(6);
       expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
         true
       );
