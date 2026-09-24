@@ -9,7 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
-import { listAgentConnectors } from './agent_connectors';
+import { authorizeConnector } from './connector_authorization';
 import { writeConnectorManifest } from './connector_manifest';
 import { writeElasticManifest } from './elastic_manifest';
 
@@ -46,21 +46,20 @@ export const createSandboxWorkspaceManager = ({
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
-      const canReadTelemetry = Boolean(
-        telemetryConnectorId &&
-          callContext.allowedConnectorIds.includes(telemetryConnectorId) &&
-          (await listAgentConnectors(callContext, getActionsClient)).some(
-            ({ id }) => id === telemetryConnectorId
-          )
+      const telemetryAuthorization = telemetryConnectorId
+        ? await authorizeConnector(telemetryConnectorId, callContext, actions)
+        : undefined;
+      const canUseTelemetry = Boolean(
+        telemetryAuthorization && !('errorMessage' in telemetryAuthorization)
       );
       const currentKey = JSON.stringify({
         connectorIds: [...callContext.allowedConnectorIds].sort(),
-        canReadTelemetry,
+        canUseTelemetry,
       });
       const lastKey = lastConnectorIds.get(session);
       if (!session.isReset && lastKey === currentKey) return;
 
-      if (telemetryConnectorId && !canReadTelemetry) {
+      if (telemetryConnectorId && !canUseTelemetry) {
         lastConnectorIds.delete(session);
         // Clear previously seeded hints on revocation; a failed clear must block file access.
         const [result] = await session.writeFiles([
@@ -74,7 +73,7 @@ export const createSandboxWorkspaceManager = ({
 
       try {
         await writeConnectorManifest({ session, callContext, getActionsClient, logger });
-        if (telemetryConnectorId && canReadTelemetry) {
+        if (telemetryConnectorId && canUseTelemetry) {
           await writeElasticManifest({
             session,
             connectorId: telemetryConnectorId,

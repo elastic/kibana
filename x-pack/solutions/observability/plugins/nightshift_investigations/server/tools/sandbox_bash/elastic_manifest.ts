@@ -63,10 +63,11 @@ export const writeElasticManifest = async ({
 }): Promise<void> => {
   logger.debug(`Writing Elasticsearch manifest`);
 
-  await session.writeFiles([
+  const [result] = await session.writeFiles([
     {
       path: '/workspace/elastic.md',
       content: Buffer.from(renderElasticManifest(connectorId, { readableIndices }), 'utf8'),
     },
   ]);
+  if (!result?.success) throw new Error('Failed to write sandbox telemetry guidance');
 };

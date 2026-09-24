@@ -43,7 +43,7 @@ describe('renderElasticManifest', () => {
 
 describe('writeElasticManifest', () => {
   it('writes the manifest to /workspace/elastic.md', async () => {
-    const writeFiles = jest.fn().mockResolvedValue(undefined);
+    const writeFiles = jest.fn().mockResolvedValue([{ bytes_written: 100, success: true }]);
     const session = { writeFiles } as unknown as SandboxSession;
 
     await writeElasticManifest({
@@ -58,4 +58,18 @@ describe('writeElasticManifest', () => {
     const [files] = writeFiles.mock.calls[0];
     expect(files[0].content.toString('utf8')).toContain('# Elasticsearch telemetry');
   });
+  it.each([{ results: [] }, { results: [{ bytes_written: 0, success: false }] }])(
+    'rejects an unsuccessful per-file response %j',
+    async ({ results }) => {
+      const writeFiles = jest.fn().mockResolvedValue(results);
+      const session = { writeFiles } as unknown as SandboxSession;
+      await expect(
+        writeElasticManifest({
+          session,
+          connectorId: 'telemetry',
+          logger: loggingSystemMock.createLogger(),
+        })
+      ).rejects.toThrow('Failed to write sandbox telemetry guidance');
+    }
+  );
 });

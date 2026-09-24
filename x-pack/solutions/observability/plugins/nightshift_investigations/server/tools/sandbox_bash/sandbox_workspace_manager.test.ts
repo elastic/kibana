@@ -6,11 +6,14 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  actionsMock,
+  actionsClientMock,
+  actionsAuthorizationMock,
+} from '@kbn/actions-plugin/server/mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 import { createSandboxWorkspaceManager } from './sandbox_workspace_manager';
-
-jest.mock('./agent_connectors', () => ({ listAgentConnectors: jest.fn() }));
 
 jest.mock('./connector_manifest', () => ({
   writeConnectorManifest: jest.fn().mockResolvedValue(undefined),
@@ -19,7 +22,6 @@ jest.mock('./elastic_manifest', () => ({
   writeElasticManifest: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { listAgentConnectors } from './agent_connectors';
 import { writeConnectorManifest } from './connector_manifest';
 import { writeElasticManifest } from './elastic_manifest';
 
@@ -74,11 +76,7 @@ describe('createSandboxWorkspaceManager', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest
-      .mocked(listAgentConnectors)
-      .mockImplementation(async ({ allowedConnectorIds }) =>
-        allowedConnectorIds.map((id) => ({ id, name: id, actionTypeId: '.webhook' }))
-      );
+    mockWriteElasticManifest.mockResolvedValue(undefined);
     logger = loggingSystemMock.createLogger();
     manager = createSandboxWorkspaceManager({ getDeps: () => ({}), logger });
   });
@@ -185,10 +183,30 @@ describe('createSandboxWorkspaceManager', () => {
 
   describe('telemetryConnectorId', () => {
     let managerWithTelemetry: ReturnType<typeof createSandboxWorkspaceManager>;
+    let actions: ReturnType<typeof actionsMock.createStart>;
+    let actionsClient: ReturnType<typeof actionsClientMock.create>;
+    let authorization: ReturnType<typeof actionsAuthorizationMock.create>;
 
     beforeEach(() => {
+      actions = actionsMock.createStart();
+      actionsClient = actionsClientMock.create();
+      authorization = actionsAuthorizationMock.create();
+      const connector = {
+        id: 'elasticsearch-telemetry',
+        name: 'Telemetry',
+        actionTypeId: '.webhook',
+        config: {},
+        isPreconfigured: true,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+      };
+      actionsClient.get.mockResolvedValue(connector);
+      actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
+      actions.getActionsAuthorizationWithRequest.mockReturnValue(authorization);
+      actions.inMemoryConnectors = [{ ...connector, secrets: {} }];
       managerWithTelemetry = createSandboxWorkspaceManager({
-        getDeps: () => ({}),
+        getDeps: () => ({ actions }),
         telemetryConnectorId: 'elasticsearch-telemetry',
         logger,
       });
@@ -209,7 +227,7 @@ describe('createSandboxWorkspaceManager', () => {
     it('passes the configured readable indices to the telemetry manifest', async () => {
       const session = createSessionMock(false);
       const configuredManager = createSandboxWorkspaceManager({
-        getDeps: () => ({}),
+        getDeps: () => ({ actions }),
         telemetryConnectorId: 'elasticsearch-telemetry',
         telemetryReadableIndices: 'Read remote-a:logs-service-*',
         logger,
@@ -304,7 +322,7 @@ describe('createSandboxWorkspaceManager', () => {
       const session = createSessionMock(false);
       const callContext = createCallContext(['elasticsearch-telemetry']);
       await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
-      jest.mocked(listAgentConnectors).mockResolvedValueOnce([]);
+      actionsClient.get.mockRejectedValueOnce(new Error('read denied'));
       mockWriteElasticManifest.mockClear();
       await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
       expect(mockWriteElasticManifest).not.toHaveBeenCalled();
@@ -322,6 +340,34 @@ describe('createSandboxWorkspaceManager', () => {
         managerWithTelemetry.ensureWorkspaceReady({ session, callContext })
       ).resolves.toBeUndefined();
       expect(session.writeFiles).toHaveBeenCalledTimes(2);
+    });
+    it('does not seed hints when connector execution is denied despite read access', async () => {
+      const session = createSessionMock(false);
+      authorization.ensureAuthorized.mockRejectedValueOnce(new Error('execute denied'));
+      await managerWithTelemetry.ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['elasticsearch-telemetry']),
+      });
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        actionTypeId: '.webhook',
+      });
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
+      expect(session.writeFiles).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries a telemetry manifest after the sandbox reports an unsuccessful write', async () => {
+      const session = createSessionMock(false);
+      const callContext = createCallContext(['elasticsearch-telemetry']);
+      mockWriteElasticManifest.mockImplementation(
+        jest.requireActual<typeof import('./elastic_manifest')>('./elastic_manifest')
+          .writeElasticManifest
+      );
+      jest.mocked(session.writeFiles).mockResolvedValueOnce([{ bytes_written: 0, success: false }]);
+      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
+      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
+      expect(session.writeFiles).toHaveBeenCalledTimes(2);
+      expect(loggingSystemMock.collect(logger).warn).toHaveLength(1);
     });
   });
 });
