@@ -29,9 +29,9 @@ import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
 
 /**
- * Factory query types whose DSL is always constrained by an `action_id` or a
- * `schedule_id`, and which may therefore also match the agent-carried
- * `action_data.space_id` (see {@link buildSpaceIdFilter}).
+ * Factory query types constrained by an `action_id` and reading documents that
+ * can actually carry `action_data`, and which may therefore also match the
+ * agent-carried `action_data.space_id` (see {@link buildSpaceIdFilter}).
  *
  * SECURITY: that id binding is the authorization gate — a caller can only supply
  * such an id if they obtained it from a space-stamped, Kibana-written action
@@ -43,11 +43,18 @@ import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
  * (opaque `baseFilter` KQL), so named-space live-query export remains a known
  * gap; `actionDetails` is an id-bound lookup of Kibana-written action metadata
  * on `ACTIONS_INDEX`, not agent `action_data`.
+ *
+ * `scheduledActionResults` is deliberately absent even though it is `schedule_id`
+ * bound. `action_data` only exists on documents produced by a Fleet action, and
+ * scheduled pack executions never create one — their `space_id` travels in the
+ * agent policy (`routes/pack/utils.ts`), which is not subject to Fleet Server's
+ * per-field action whitelist, so those documents already carry the top-level
+ * field. Allowlisting it would widen a space-isolation decision to an
+ * agent-writable field in exchange for a clause that can never match.
  */
 export const ID_BOUND_FACTORY_QUERY_TYPES: readonly FactoryQueryTypes[] = [
   OsqueryQueries.results,
   OsqueryQueries.actionResults,
-  OsqueryQueries.scheduledActionResults,
 ];
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(

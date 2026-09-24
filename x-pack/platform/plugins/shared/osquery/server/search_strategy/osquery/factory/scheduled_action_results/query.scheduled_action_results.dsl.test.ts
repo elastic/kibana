@@ -130,10 +130,9 @@ describe('buildScheduledActionResultsQuery', () => {
   });
 
   it('scopes the aggregation by space_id when spaceId is provided', () => {
-    const options: ScheduledActionResultsRequestOptions & { matchActionDataSpaceId?: boolean } = {
+    const options: ScheduledActionResultsRequestOptions = {
       ...defaultOptions,
       spaceId: 'my-space',
-      matchActionDataSpaceId: true,
     };
 
     const result = buildScheduledActionResultsQuery(options);
@@ -153,25 +152,16 @@ describe('buildScheduledActionResultsQuery', () => {
     const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
     const filter = responsesBySchedule.filter as Record<string, Record<string, TermFilter[]>>;
     const mustFilters = filter.bool.must;
-    // Id-bound read: also matches the agent-carried action_data.space_id.
-    expect(mustFilters).toContainEqual({
-      bool: {
-        should: [
-          { term: { space_id: 'my-space' } },
-          { term: { 'action_data.space_id': 'my-space' } },
-        ],
-      },
-    });
+    expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
   });
 
   it('matches default space OR missing space_id when spaceId is "default"', () => {
     // osquerybeat-written scheduled responses may not carry a space_id field;
     // in the default space we must match those legacy docs too (mirrors the
     // history aggregation in buildScheduledResponsesQuery).
-    const options: ScheduledActionResultsRequestOptions & { matchActionDataSpaceId?: boolean } = {
+    const options: ScheduledActionResultsRequestOptions = {
       ...defaultOptions,
       spaceId: 'default',
-      matchActionDataSpaceId: true,
     };
 
     const result = buildScheduledActionResultsQuery(options);
@@ -181,7 +171,6 @@ describe('buildScheduledActionResultsQuery', () => {
         should: [
           { term: { space_id: 'default' } },
           { bool: { must_not: { exists: { field: 'space_id' } } } },
-          { term: { 'action_data.space_id': 'default' } },
         ],
       },
     };
@@ -208,7 +197,6 @@ describe('buildScheduledActionResultsQuery', () => {
       ...defaultOptions,
       spaceId: 'default',
       matchMissingSpaceId: false,
-      matchActionDataSpaceId: true,
     });
 
     const aggs = result.aggs as Record<string, Record<string, unknown>>;
@@ -217,42 +205,22 @@ describe('buildScheduledActionResultsQuery', () => {
     const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
     const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
 
-    // The action_data fallback is orthogonal to matchMissingSpaceId: it is a
-    // present, exact-valued term, so it survives while the missing-field
-    // allowance is dropped.
-    expect(mustFilters).toContainEqual({
-      bool: {
-        should: [
-          { term: { space_id: 'default' } },
-          { term: { 'action_data.space_id': 'default' } },
-        ],
-      },
-    });
+    expect(mustFilters).toContainEqual({ term: { space_id: 'default' } });
     expect(JSON.stringify(mustFilters)).not.toContain('exists');
   });
 
-  it('omits action_data.space_id from aggregations when matchActionDataSpaceId is false', () => {
+  // Scheduled executions come from the agent policy, not a Fleet action, so these
+  // documents have no `action_data` and already carry the top-level `space_id`.
+  // The builder must therefore never emit the less-trusted field, even if a caller
+  // forwards the strategy's flag.
+  it('never scopes on action_data.space_id, even when the flag is forwarded', () => {
     const result = buildScheduledActionResultsQuery({
       ...defaultOptions,
       spaceId: 'my-space',
-      matchActionDataSpaceId: false,
-    });
+      matchActionDataSpaceId: true,
+    } as ScheduledActionResultsRequestOptions);
 
-    const aggs = result.aggs as Record<string, Record<string, unknown>>;
-    const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
-    const innerAggs = globalAggs.aggs as Record<string, Record<string, unknown>>;
-    const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
-    const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
-
-    expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
-    expect(mustFilters).not.toContainEqual({
-      bool: {
-        should: [
-          { term: { space_id: 'my-space' } },
-          { term: { 'action_data.space_id': 'my-space' } },
-        ],
-      },
-    });
+    expect(JSON.stringify(result)).not.toContain('action_data');
   });
 
   it('does not scope the top-level query (centralized in the search strategy)', () => {

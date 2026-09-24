@@ -655,7 +655,16 @@ describe('buildActionResultsQuery', () => {
         bool: {
           should: [
             { term: { space_id: 'default' } },
-            { bool: { must_not: { exists: { field: 'space_id' } } } },
+            // A response carrying action_data.space_id belongs to a known space, so
+            // the missing-field allowance must not treat it as unstamped.
+            {
+              bool: {
+                must_not: [
+                  { exists: { field: 'space_id' } },
+                  { exists: { field: 'action_data.space_id' } },
+                ],
+              },
+            },
             { term: { 'action_data.space_id': 'default' } },
           ],
         },

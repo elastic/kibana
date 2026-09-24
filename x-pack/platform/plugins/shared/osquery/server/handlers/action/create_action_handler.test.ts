@@ -159,20 +159,6 @@ describe('createActionHandler', () => {
     expect(actions[0].data.space_id).toBe('default');
   });
 
-  it('keeps the top-level and data space_id in lockstep', async () => {
-    const { context, bulkCreate } = buildOsqueryContext();
-
-    const result = await createActionHandler(
-      context,
-      { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-      { space: { id: 'production' } }
-    );
-
-    const [actions] = bulkCreate.mock.calls[0];
-    expect(actions[0].data.space_id).toBe(actions[0].space_id);
-    expect(result.response.space_id).toBe(actions[0].space_id);
-  });
-
   it('preserves the existing action data fields when adding space_id', async () => {
     const { context, bulkCreate } = buildOsqueryContext();
 

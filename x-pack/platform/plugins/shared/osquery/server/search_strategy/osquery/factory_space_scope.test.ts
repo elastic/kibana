@@ -6,6 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
+import { omit } from 'lodash';
 import { Direction } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import type {
@@ -95,22 +96,39 @@ const getFilterClauses = (dsl: ISearchRequestParams): unknown[] => {
 const filterContainsSpaceId = (dsl: ISearchRequestParams): boolean =>
   JSON.stringify(getFilterClauses(dsl)).includes('space_id');
 
-const hasTermOn = (node: unknown, fields: readonly string[]): boolean => {
+const ID_BINDING_FIELDS = ['action_id', 'schedule_id'] as const;
+
+const hasTerm = (
+  node: unknown,
+  fields: readonly string[],
+  matchesValue: (value: unknown) => boolean
+): boolean => {
   if (node == null || typeof node !== 'object') {
     return false;
   }
 
   if (Array.isArray(node)) {
-    return node.some((item) => hasTermOn(item, fields));
+    return node.some((item) => hasTerm(item, fields, matchesValue));
   }
 
   const record = node as Record<string, unknown>;
   if ('term' in record && record.term != null && typeof record.term === 'object') {
-    return fields.some((field) => field in (record.term as Record<string, unknown>));
+    const term = record.term as Record<string, unknown>;
+    if (fields.some((field) => field in term && matchesValue(term[field]))) {
+      return true;
+    }
   }
 
-  return Object.values(record).some((value) => hasTermOn(value, fields));
+  return Object.values(record).some((value) => hasTerm(value, fields, matchesValue));
 };
+
+const hasTermKeyOn = (node: unknown, fields: readonly string[]): boolean =>
+  hasTerm(node, fields, () => true);
+
+// Key presence alone is not the security property: `{ term: { action_id: undefined } }`
+// carries the key and binds nothing.
+const hasTermWithValueOn = (node: unknown, fields: readonly string[]): boolean =>
+  hasTerm(node, fields, (value) => typeof value === 'string' && value.length > 0);
 
 const collectGlobalAggs = (node: unknown, found: Array<Record<string, unknown>> = []) => {
   if (node == null || typeof node !== 'object') {
@@ -224,21 +242,43 @@ describe('osquery search strategy space scoping invariant', () => {
   // Hit-level enablement is asserted through osquerySearchStrategyProvider in
   // index.test.ts so this file does not re-implement the allowlist decision.
   describe('action_data.space_id fallback is confined to id-bound reads', () => {
-    it('pins ID_BOUND_FACTORY_QUERY_TYPES to the three id-bound agent-doc factory types', () => {
+    // `scheduledActionResults` is intentionally absent: scheduled executions come
+    // from the agent policy rather than a Fleet action, so their responses have no
+    // `action_data` to read the space from.
+    it('pins ID_BOUND_FACTORY_QUERY_TYPES to the two Fleet-action-backed factory types', () => {
       expect([...ID_BOUND_FACTORY_QUERY_TYPES]).toEqual([
         OsqueryQueries.results,
         OsqueryQueries.actionResults,
-        OsqueryQueries.scheduledActionResults,
       ]);
     });
 
-    it('only allowlists factory types whose builder always filters on an action or schedule id', () => {
+    it('binds every allowlisted factory type to the id the request supplies', () => {
       expect(ID_BOUND_FACTORY_QUERY_TYPES.length).toBeGreaterThan(0);
 
       for (const factoryQueryType of ID_BOUND_FACTORY_QUERY_TYPES) {
         const dsl = osqueryFactory[factoryQueryType].buildDsl(baseRequest(factoryQueryType));
 
-        expect(hasTermOn(dsl.query, ['action_id', 'schedule_id'])).toBe(true);
+        expect(hasTermWithValueOn(dsl.query, ID_BINDING_FIELDS)).toBe(true);
+      }
+    });
+
+    // The builders emit the id term unconditionally instead of validating the id, so
+    // an id-less request produces `{ term: { action_id: undefined } }`. Serialization
+    // drops the value and ES rejects the resulting empty term, so such a read fails
+    // closed rather than widening to every action. Nothing in the builders states
+    // that, so assert it here: the id term must never simply disappear.
+    it('fails closed rather than dropping the id term when the request supplies no id', () => {
+      for (const factoryQueryType of ID_BOUND_FACTORY_QUERY_TYPES) {
+        const dsl = osqueryFactory[factoryQueryType].buildDsl(
+          omit(baseRequest(factoryQueryType), [
+            'actionId',
+            'scheduleId',
+            'executionCount',
+          ]) as StrategyRequestType<FactoryQueryTypes>
+        );
+
+        expect(hasTermKeyOn(dsl.query, ID_BINDING_FIELDS)).toBe(true);
+        expect(hasTermWithValueOn(dsl.query, ID_BINDING_FIELDS)).toBe(false);
       }
     });
 

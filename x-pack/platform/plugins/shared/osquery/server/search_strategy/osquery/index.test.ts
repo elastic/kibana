@@ -238,11 +238,20 @@ describe('osquerySearchStrategyProvider space scoping', () => {
   it('injects the default-space clause (term OR missing field) when spaceId is "default"', async () => {
     const filter = await runResultsSearch('default');
 
+    // The missing-field allowance also excludes action_data.space_id: a document
+    // carrying it belongs to a known space, so the default space must not read it.
     expect(filter).toContainEqual({
       bool: {
         should: [
           { term: { space_id: 'default' } },
-          { bool: { must_not: { exists: { field: 'space_id' } } } },
+          {
+            bool: {
+              must_not: [
+                { exists: { field: 'space_id' } },
+                { exists: { field: 'action_data.space_id' } },
+              ],
+            },
+          },
           { term: { 'action_data.space_id': 'default' } },
         ],
       },
@@ -272,7 +281,14 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       bool: {
         should: [
           { term: { space_id: 'default' } },
-          { bool: { must_not: { exists: { field: 'space_id' } } } },
+          {
+            bool: {
+              must_not: [
+                { exists: { field: 'space_id' } },
+                { exists: { field: 'action_data.space_id' } },
+              ],
+            },
+          },
           { term: { 'action_data.space_id': 'default' } },
         ],
       },
@@ -616,7 +632,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       }
     );
 
-    it.each([OsqueryQueries.actionResults, OsqueryQueries.scheduledActionResults])(
+    it.each([OsqueryQueries.actionResults])(
       'applies the same action_data.space_id decision to "%s" hits and global aggregations',
       async (factoryQueryType) => {
         const params = await searchViaProvider(factoryQueryType);
@@ -632,6 +648,27 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         }
       }
     );
+
+    // Scheduled executions come from the agent policy, not a Fleet action, so their
+    // responses have no `action_data` and already carry the top-level `space_id`.
+    // Both scopes must stay on the trusted field only.
+    it('keeps scheduledActionResults hits and global aggregations off action_data.space_id', async () => {
+      const params = await searchViaProvider(OsqueryQueries.scheduledActionResults);
+      const filter = params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+
+      const globalAggs = collectGlobalAggs(params.aggs);
+      expect(globalAggs.length).toBeGreaterThan(0);
+
+      for (const globalAgg of globalAggs) {
+        expect(globalAggMustClauses(globalAgg)).toContainEqual({
+          term: { space_id: 'my-space' },
+        });
+      }
+
+      expect(JSON.stringify(params)).not.toContain('action_data');
+    });
 
     it('applies action_data.space_id to both actionResults dual-index searches', async () => {
       // Dual-index selection runs a second enforceSpaceScope on the data-stream

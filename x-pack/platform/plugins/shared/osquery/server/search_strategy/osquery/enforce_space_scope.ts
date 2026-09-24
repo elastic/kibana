@@ -22,16 +22,17 @@ import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
  * top-level `query` filter this helper scopes. The hit context and that global
  * aggregation context are therefore two independent filter scopes — this helper
  * cannot reach the latter, so those builders inject `buildSpaceIdFilter` with
- * the same `matchMissingSpaceId` / `matchActionDataSpaceId` flags this helper
- * received. Same flags, two scopes: this one scopes the returned hits
- * (`_source`), the builder scopes the counts (`rows_count` / responded /
- * success / error) so they match the hits.
+ * the same flags this helper received. Same flags, two scopes: this one scopes
+ * the returned hits (`_source`), the builder scopes the counts (`rows_count` /
+ * responded / success / error) so they match the hits.
  *
  * `matchActionDataSpaceId` additionally matches the agent-carried
  * `action_data.space_id` (see {@link buildSpaceIdFilter}). It is only safe on
  * reads already bound to an `action_id` or `schedule_id`. The search strategy
  * enables it from `ID_BOUND_FACTORY_QUERY_TYPES` and passes that decision into
- * both this helper and the global-agg builders so the two scopes cannot drift.
+ * both this helper and `action_results` — the one global-agg builder on that
+ * allowlist — so the two scopes cannot drift. `scheduled_action_results` is not
+ * allowlisted and scopes its aggregation on the top-level field only.
  */
 export const enforceSpaceScope = (
   dsl: ISearchRequestParams,

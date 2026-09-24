@@ -20,6 +20,13 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
  * responses) may not carry the field. Named spaces match the `space_id` term
  * exactly and never include field-less documents.
  *
+ * When `matchActionDataSpaceId` is enabled, that missing-field allowance also
+ * requires `action_data.space_id` to be absent. A document carrying it was
+ * emitted for a known space, so counting it as field-less would let the default
+ * space read named-space results. The exclusion is deliberately tied to the
+ * flag: a flag-off reader has no `action_data.space_id` clause to match such a
+ * document with, so excluding it there would hide legitimate documents instead.
+ *
  * `matchMissingSpaceId: false` drops that allowance. Equating "no field" with
  * "default space" only holds while the search is confined to one project. A
  * pack config saved without the per-query `space_id` (see #272411) keeps
@@ -47,7 +54,9 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
  * This flag is orthogonal to `matchMissingSpaceId` and stays valid when it is
  * `false`: `action_data.space_id` is a present, exact-valued term carrying real
  * provenance, so it does not share the ambiguity of a missing field under CPS
- * fan-out. Do not collapse the two.
+ * fan-out. It is no worse than the top-level field — `my-space` in one project
+ * still collides with `my-space` in a linked one, on either field. Do not
+ * collapse the two.
  */
 export const buildSpaceIdFilter = (
   spaceId: string,
@@ -56,12 +65,21 @@ export const buildSpaceIdFilter = (
     matchActionDataSpaceId = false,
   }: { matchMissingSpaceId?: boolean; matchActionDataSpaceId?: boolean } = {}
 ): estypes.QueryDslQueryContainer => {
-  // Clauses are combined with `should`, which defaults to minimum_should_match: 1
-  // in the filter context these clauses are always used in.
+  // Clauses are combined with `should`. ES defaults `minimum_should_match` to 1
+  // only while a bool has no `must` and no `filter` clause — that is structural,
+  // not a property of the surrounding context, and this bool carries `should` and
+  // nothing else. Adding a `must` or `filter` here would flip the default to 0 and
+  // make space scoping optional; `build_space_id_filter.test.ts` guards that.
   const shouldClauses: estypes.QueryDslQueryContainer[] = [{ term: { space_id: spaceId } }];
 
   if (spaceId === DEFAULT_SPACE_ID && matchMissingSpaceId) {
-    shouldClauses.push({ bool: { must_not: { exists: { field: 'space_id' } } } });
+    shouldClauses.push({
+      bool: {
+        must_not: matchActionDataSpaceId
+          ? [{ exists: { field: 'space_id' } }, { exists: { field: 'action_data.space_id' } }]
+          : { exists: { field: 'space_id' } },
+      },
+    });
   }
 
   if (matchActionDataSpaceId) {
