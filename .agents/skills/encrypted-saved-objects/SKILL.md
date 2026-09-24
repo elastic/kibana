@@ -15,7 +15,7 @@ An Encrypted Saved Object (ESO) is a Saved Object type registered with the ESO S
 
 The ESO Service encrypts using the `xpack.encryptedSavedObjects.encryptionKey` Kibana config setting. In development, a static key is auto-configured.
 
-**Definitive reference:** `docs/extend/key-concepts/security/encrypted-saved-objects.md`
+**Definitive reference:** `dev_docs/key_concepts/encrypted_saved_objects.mdx`
 
 ## When to Use ESOs
 
@@ -307,8 +307,8 @@ When working with ESO-related code, verify:
 
 ## References
 
-- [Encrypted Saved Objects dev docs](docs/extend/key-concepts/security/encrypted-saved-objects.md)
+- [Encrypted Saved Objects dev docs](dev_docs/key_concepts/encrypted_saved_objects.mdx)
 - [Secure Saved Objects (Elastic docs)](https://www.elastic.co/guide/en/kibana/current/xpack-security-secure-saved-objects.html)
-- [Model Versions tutorial](docs/extend/key-concepts/saved-objects/create.md)
+- [Model Versions tutorial](dev_docs/tutorials/saved_objects.mdx)
 - [ESO Model Version example plugin](examples/eso_model_version_example/server/plugin.ts)
 - ESO plugin source: `x-pack/platform/plugins/shared/encrypted_saved_objects/`
