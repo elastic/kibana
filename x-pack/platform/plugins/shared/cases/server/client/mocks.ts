@@ -184,7 +184,9 @@ const createFieldDefinitionsSubClientMock = (): FieldDefinitionsSubClientMock =>
     getFieldDefinitions: jest.fn(),
     getFieldDefinition: jest.fn(),
     createFieldDefinition: jest.fn(),
+    validateCreateFieldDefinition: jest.fn(),
     updateFieldDefinition: jest.fn(),
+    validateUpdateFieldDefinition: jest.fn(),
     deleteFieldDefinition: jest.fn(),
   });
 };
