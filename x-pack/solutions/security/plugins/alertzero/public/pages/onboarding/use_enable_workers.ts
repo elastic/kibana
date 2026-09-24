@@ -29,7 +29,9 @@ export const useEnableWorkers = (
 
     try {
       await Promise.all(
-        idsToUpdate.map((id) => updateWorker({ workerId: id, patch: { enabled: workerEnabled[id] } }))
+        idsToUpdate.map((id) =>
+          updateWorker({ workerId: id, patch: { enabled: workerEnabled[id] } })
+        )
       );
     } catch {
       // errors surfaced via toast in useUpdateWorker.onError
