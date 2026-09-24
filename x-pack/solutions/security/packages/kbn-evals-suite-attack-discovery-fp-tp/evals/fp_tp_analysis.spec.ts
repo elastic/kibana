@@ -67,6 +67,7 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
   // Set only once the sample is installed, so teardown never deletes the managed workflow.
   let installedSampleWorkflowId: string | undefined;
   let restoreInferenceSettings: (() => Promise<void>) | undefined;
+  let restoreEntityExtraction: (() => Promise<void>) | undefined;
   // Cleanups that failed inside a task; afterAll retries them.
   const pendingCleanups = new Set<() => Promise<void>>();
 
@@ -90,7 +91,7 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
         featureId: FP_TP_INFERENCE_FEATURE_ID,
         endpointId: connector.id,
       });
-      await ensureFpTpSeedPrerequisites(kbnRequestFromFetch(fetch));
+      restoreEntityExtraction = await ensureFpTpSeedPrerequisites(kbnRequestFromFetch(fetch));
       await waitForConversationsReady(fetch);
     }
   );
@@ -100,6 +101,9 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
       log.info(`Retrying ${pendingCleanups.size} FP/TP fixture cleanups`);
       await Promise.allSettled([...pendingCleanups].map((cleanup) => cleanup()));
     }
+    await restoreEntityExtraction?.().catch((error: Error) =>
+      log.warning(`Could not restart Entity Store extraction: ${error.message}`)
+    );
     await restoreInferenceSettings?.().catch((error: Error) =>
       log.warning(`Could not restore inference settings: ${error.message}`)
     );

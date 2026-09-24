@@ -117,6 +117,35 @@ describe('ensureFpTpSeedPrerequisites', () => {
       'Failed to stop Entity Store extraction (500): boom'
     );
   });
+
+  describe('the returned restore function', () => {
+    const startCall = expect.objectContaining({
+      method: 'PUT',
+      path: '/api/security/entity_store/start',
+    });
+
+    it('returns after restarting extraction that was running', async () => {
+      const kbnRequest = jest
+        .fn()
+        .mockResolvedValue({ statusCode: 200, body: { status: 'running' } });
+      const restore = await ensureFpTpSeedPrerequisites(kbnRequest);
+
+      await restore();
+
+      expect(kbnRequest).toHaveBeenCalledWith(startCall);
+    });
+
+    it('returns without starting extraction that was already stopped', async () => {
+      const kbnRequest = jest
+        .fn()
+        .mockResolvedValue({ statusCode: 200, body: { status: 'stopped' } });
+      const restore = await ensureFpTpSeedPrerequisites(kbnRequest);
+
+      await restore();
+
+      expect(kbnRequest).not.toHaveBeenCalledWith(startCall);
+    });
+  });
 });
 
 describe('seedFixture', () => {

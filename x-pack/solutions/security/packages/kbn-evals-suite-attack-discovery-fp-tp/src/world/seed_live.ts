@@ -163,10 +163,13 @@ const readEntityStoreStatus = async (
   return (status.body as { status?: string } | undefined)?.status;
 };
 
-const waitForEntityStoreInstalled = async (kbnRequest: FpTpLiveKbnRequest): Promise<void> => {
+/** Installs the Entity Store if needed and returns its status from before this call. */
+const waitForEntityStoreInstalled = async (
+  kbnRequest: FpTpLiveKbnRequest
+): Promise<string | undefined> => {
   const initial = await readEntityStoreStatus(kbnRequest);
   if (initial === 'running' || initial === 'stopped') {
-    return;
+    return initial;
   }
 
   if (initial !== 'installing') {
@@ -188,7 +191,7 @@ const waitForEntityStoreInstalled = async (kbnRequest: FpTpLiveKbnRequest): Prom
   const deadline = Date.now() + ENTITY_STORE_READY_TIMEOUT_MS;
   while (Date.now() < deadline) {
     if ((await readEntityStoreStatus(kbnRequest)) === 'running') {
-      return;
+      return initial;
     }
     await sleep(ENTITY_STORE_POLL_INTERVAL_MS);
   }
@@ -197,16 +200,19 @@ const waitForEntityStoreInstalled = async (kbnRequest: FpTpLiveKbnRequest): Prom
   );
 };
 
-const stopEntityExtraction = async (kbnRequest: FpTpLiveKbnRequest): Promise<void> => {
+const setEntityExtraction = async (
+  kbnRequest: FpTpLiveKbnRequest,
+  action: 'start' | 'stop'
+): Promise<void> => {
   const response = await kbnRequest({
     method: 'PUT',
-    path: '/api/security/entity_store/stop',
+    path: `/api/security/entity_store/${action}`,
     version: ENTITY_API_VERSION,
     body: {},
   });
   if (response.statusCode >= 400) {
     throw new Error(
-      `Failed to stop Entity Store extraction (${response.statusCode}): ${kbnErrorMessage(
+      `Failed to ${action} Entity Store extraction (${response.statusCode}): ${kbnErrorMessage(
         response.body
       )}`
     );
@@ -218,14 +224,18 @@ const stopEntityExtraction = async (kbnRequest: FpTpLiveKbnRequest): Promise<voi
  * Entity Store with log extraction stopped. Extraction would otherwise build
  * entities from the seeded events, so a world without entities would not stay
  * that way. Call once before seeding, not per seed, so concurrent seeds don't
- * race the install.
+ * race the install. Returns a function that restarts extraction if it was
+ * running before this call.
  */
 export const ensureFpTpSeedPrerequisites = async (
   kbnRequest: FpTpLiveKbnRequest
-): Promise<void> => {
+): Promise<() => Promise<void>> => {
   await ensureDetectionAlertsIndex(kbnRequest);
-  await waitForEntityStoreInstalled(kbnRequest);
-  await stopEntityExtraction(kbnRequest);
+  const initialStatus = await waitForEntityStoreInstalled(kbnRequest);
+  await setEntityExtraction(kbnRequest, 'stop');
+  return initialStatus === 'running'
+    ? () => setEntityExtraction(kbnRequest, 'start')
+    : async () => undefined;
 };
 
 const deleteEntity = async (kbnRequest: FpTpLiveKbnRequest, entityId: string): Promise<void> => {

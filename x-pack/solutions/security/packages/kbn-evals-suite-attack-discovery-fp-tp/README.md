@@ -29,7 +29,7 @@ Situations follow the contract: U1 lookalike, U2 benign alerts, U3 invented chai
 
 Each example's metadata carries its scenario, situation, and evidence state, so reports can be sliced by any of them. Every task seeds its documents under a fresh run marker and suffix (`uniquify`), so repetitions and examples never share a document, and deletes them when it ends.
 
-Setup stops Entity Store log extraction (`PUT /api/security/entity_store/stop`) and leaves it stopped. Otherwise the store builds entities from the seeded raw events, and a world seeded without entities (`tp-entities-missing`) would gain them mid-run. Cleanup also deletes any entity on a seeded host. Run `PUT /api/security/entity_store/start` to resume extraction on a stack you keep using.
+Setup stops Entity Store log extraction (`PUT /api/security/entity_store/stop`) for the duration of the suite. Otherwise the store builds entities from the seeded raw events, and a world seeded without entities (`tp-entities-missing`) would gain them mid-run. Cleanup also deletes any entity on a seeded host. Teardown restarts extraction if it was running before the suite started. If a run is killed before teardown, run `PUT /api/security/entity_store/start` to resume it.
 
 ## Layout
 
