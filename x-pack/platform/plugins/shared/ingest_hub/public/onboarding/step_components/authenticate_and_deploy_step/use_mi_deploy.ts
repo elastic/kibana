@@ -284,8 +284,8 @@ export function useMiDeploy({
         }
 
         if (plan.targets.length === 0) {
-          setIsDeploying(false);
           if (cleanupFailed) {
+            setIsDeploying(false);
             // Cleanup did not fully succeed — keep the section actionable so the user can retry.
             updateDetectAndReviewStep({ isDeploying: false });
             return { cleanupFailed: true };
@@ -294,6 +294,8 @@ export function useMiDeploy({
           // pendingCleanupPolicyIds only after the SO write is confirmed. A transient SO failure
           // leaves the pending map populated so the next Deploy attempt retries the SO update
           // rather than silently losing the cleanup state.
+          // setIsDeploying stays true until the SO write settles so isMiDone does not flip true
+          // while the PUT is in flight, which would enable Next before the write is confirmed.
           let soWriteSucceeded = true;
           if (
             onboardingDeploymentId &&
@@ -309,9 +311,11 @@ export function useMiDeploy({
               policyIdsByInstance: Object.fromEntries(survivingEntries),
             });
           }
-          if (soWriteSucceeded) {
-            updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
-          }
+          setIsDeploying(false);
+          updateDetectAndReviewStep({
+            isDeploying: false,
+            ...(soWriteSucceeded ? { pendingCleanupPolicyIds: {} } : {}),
+          });
           await persistPendingIacTemplate();
           return { cleanupFailed: false };
         }

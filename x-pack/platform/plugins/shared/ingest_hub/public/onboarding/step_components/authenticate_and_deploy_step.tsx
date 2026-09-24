@@ -285,6 +285,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // stack metadata changed. Without this, a formerly-failed MI+ECF SO that had MI removed
         // would remain 'failed' even though ECF stacks are in place.
         status: 'succeeded',
+        // Always replace services — when reusing an existing SO (existingId set, e.g. the sole
+        // MI service failed before policy creation and the user then switches to ECF), the SO
+        // still holds the old MI service list. Without this, reopening the deployment URL
+        // restores the wrong service selection.
+        services: selectedServiceIds,
         ...(!ecfStacksUnchanged ? { ecfStacks } : {}),
       });
       setIsSavingSO(false);

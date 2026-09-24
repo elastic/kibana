@@ -186,6 +186,9 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   ]);
 
   const isCleanupOnly = useMemo(() => {
+    // Failed instances always need a retry deploy — credentials are required. Treat them as
+    // new untracked targets so the credential gate stays on even when pending cleanup exists.
+    if (failedInstances.length > 0) return false;
     const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
     const liveStalePolicyIds = buildLiveStalePolicyIds(
       detectAndReviewStep.policyIdsByInstance ?? {},
@@ -205,6 +208,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       )
     );
   }, [
+    failedInstances,
     deployGroups,
     detectAndReviewStep.policyIdsByInstance,
     detectAndReviewStep.serviceStatuses,
