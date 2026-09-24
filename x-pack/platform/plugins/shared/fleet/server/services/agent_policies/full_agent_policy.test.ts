@@ -2786,7 +2786,6 @@ describe('getFullAgentPolicy', () => {
       { spaceId: 'my-space' }
     );
   });
-
 });
 
 describe('getFullMonitoringSettings', () => {
