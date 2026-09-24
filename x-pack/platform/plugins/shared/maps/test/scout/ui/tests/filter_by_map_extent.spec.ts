@@ -33,7 +33,8 @@ test.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    test.afterAll(async ({ kbnClient, uiSettings }) => {
+    test.afterAll(async ({ kbnClient, esArchiver, uiSettings }) => {
+      await esArchiver.unload(ES_ARCHIVE_MAPS_DATA);
       await kbnClient.savedObjects.cleanStandardList();
       await uiSettings.unset('defaultIndex');
     });
