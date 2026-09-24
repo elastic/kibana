@@ -23,6 +23,7 @@ import { createExecutionStepEvent } from './items/execution_step.factory';
 import { createPromptResponseEvent } from './items/prompt_response_event.factory';
 import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
 import { createAttachmentUpdatedEvent } from './items/attachment_updated_event.factory';
+import { createCustomEvent } from './items/custom_event.factory';
 import type { ConversationEvent } from '@kbn/agent-builder-common';
 import type { ExecutionStreamingEvent, TimelineDisplayEvent } from '../../../../services/events';
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
@@ -783,18 +784,71 @@ describe('groupTimelineEvents with events outside the built-in set', () => {
   const started = createExecutionStartedEvent({ id: 'es-1', execution_id: 'exec-1' });
   const terminated = createExecutionTerminatedEvent({ id: 'et-1', execution_id: 'exec-1' });
 
-  it('accepts a custom event type and ignores it', () => {
-    const custom: ConversationEvent = {
-      id: 'note-1',
-      type: 'text_note',
-      created_at: '2026-09-03T11:17:45.000Z',
-      actor: { type: EventActorType.user, id: 'u1' },
-      data: { text: 'hello' },
-    };
+  it('emits an unresolved custom event item keyed by the event id', () => {
+    const custom = createCustomEvent({ id: 'note-1' });
 
-    const items = buildItems([user, custom, started, terminated]);
+    const items = buildItems([user, started, terminated, custom]);
 
-    expect(items.map((item) => item.kind)).toEqual(['userMessage', 'agentTurn']);
+    expect(items).toHaveLength(3);
+    expect(items[2]).toEqual({ kind: 'customEvent', key: 'note-1', event: custom });
+  });
+
+  it('keeps array order, so a custom event between two turns sits between them', () => {
+    const custom = createCustomEvent({ id: 'note-1' });
+    const user2 = createUserMessageEvent({ id: 'user-2' });
+    const started2 = createExecutionStartedEvent({ id: 'es-2', execution_id: 'exec-2' });
+    const terminated2 = createExecutionTerminatedEvent({ id: 'et-2', execution_id: 'exec-2' });
+
+    const items = buildItems([user, started, terminated, custom, user2, started2, terminated2]);
+
+    expect(items.map((item) => item.key)).toEqual([
+      'user-1',
+      'exec-1',
+      'note-1',
+      'user-2',
+      'exec-2',
+    ]);
+  });
+
+  it('places a custom event that fell mid-execution after the whole execution', () => {
+    const custom = createCustomEvent({ id: 'note-1' });
+    const step = createExecutionStepEvent({ id: 'step-1', execution_id: 'exec-1' });
+    const step2 = createExecutionStepEvent({ id: 'step-2', execution_id: 'exec-1' });
+
+    const items = buildItems([user, started, step, custom, step2, terminated]);
+
+    expect(items.map((item) => item.key)).toEqual(['user-1', 'exec-1', 'note-1']);
+    expect(items[1].kind === 'agentTurn' && items[1].steps).toHaveLength(2);
+  });
+
+  it('still marks the pending user message when a custom event follows it', () => {
+    const custom = createCustomEvent({ id: 'note-1' });
+
+    const items = buildItems([user, custom], 'user-1');
+
+    expect(items[0]).toEqual({ kind: 'userMessage', key: 'user-1', event: user, isPending: true });
+    expect(items[1].kind).toBe('customEvent');
+  });
+
+  it('still leaves a paused run awaiting the prompt when a custom event follows it', () => {
+    const prompts: PromptRequest[] = [
+      { id: 'p1', type: AgentPromptType.ask_user_question, questions: [] },
+    ];
+    const paused = createExecutionPausedEvent({
+      id: 'et-1',
+      execution_id: 'exec-1',
+      data: {
+        outcome: { type: 'prompt_requested', prompts },
+        model_usage: { connector_id: '', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+        time_to_first_token: 0,
+        time_to_last_token: 0,
+      },
+    });
+
+    const items = buildItems([user, started, paused, createCustomEvent({ id: 'note-1' })]);
+
+    expect(items.map((item) => item.kind)).toEqual(['userMessage', 'agentTurn', 'customEvent']);
+    expect(items[1].kind === 'agentTurn' && items[1].status).toBe('awaiting_prompt');
   });
 });
 
