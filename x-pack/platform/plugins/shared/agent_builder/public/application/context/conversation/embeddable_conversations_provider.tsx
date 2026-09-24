@@ -21,6 +21,7 @@ import { removeAttachmentFromList } from './remove_attachment_from_list';
 import { removeAttachmentById } from './remove_attachment_by_id';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { StreamingProvider } from '../streaming/streaming_context';
+import { ConversationStreamService } from '../../../services/events';
 import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
@@ -87,6 +88,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
+  const conversationStreamService = useMemo(
+    () => new ConversationStreamService(services.eventsService),
+    [services.eventsService]
+  );
 
   const kibanaServices = useMemo(
     () => ({
@@ -292,7 +297,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <AgentBuilderServicesContext.Provider value={services}>
-            <StreamingProvider>
+            <StreamingProvider conversationStreamService={conversationStreamService}>
               <PinnedConversationProvider baseValue={conversationContextValue}>
                 {children}
               </PinnedConversationProvider>
