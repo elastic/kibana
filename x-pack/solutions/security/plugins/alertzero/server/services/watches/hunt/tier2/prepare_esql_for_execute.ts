@@ -9,16 +9,17 @@
  * Upserts `METADATA _index` onto the first FROM source list and appends `_index`
  * to any KEEP that would otherwise drop it. No-op when `_index` is already present.
  *
- * Intentionally string-based (no AST dep): the Tier 2 generator emits simple
- * FROM | WHERE | KEEP | LIMIT pipelines, and the golden-string unit test pins
- * the transformations this helper must preserve.
+ * Only the FROM clause is rewritten. The rest of the pipeline (string literals,
+ * comment lines, newlines) is left byte-identical aside from KEEP column lists.
  */
 export const injectMetadataIndex = (query: string): string => {
   const trimmed = query.trim();
-  const pipeIdx = trimmed.search(/\s\|/);
-  const fromPart = (pipeIdx === -1 ? trimmed : trimmed.slice(0, pipeIdx)).trim();
-  const rest = pipeIdx === -1 ? '' : trimmed.slice(pipeIdx).trim(); // starts with |
+  // First pipeline pipe, with or without surrounding whitespace (FROM logs-*| WHERE …).
+  const firstPipe = trimmed.search(/\|/);
+  const fromRaw = firstPipe === -1 ? trimmed : trimmed.slice(0, firstPipe);
+  const rest = firstPipe === -1 ? '' : trimmed.slice(firstPipe); // starts with |
 
+  const fromPart = fromRaw.trim();
   if (!/^FROM\s+/i.test(fromPart)) {
     return trimmed;
   }
@@ -45,6 +46,7 @@ export const injectMetadataIndex = (query: string): string => {
   }
 
   const withKeep = rest.replace(/(\|\s*KEEP\s+)([^|]+)/gi, (full, prefix: string, cols: string) => {
+    const trailingWs = cols.match(/\s*$/)?.[0] ?? '';
     const columns = cols
       .split(',')
       .map((c) => c.trim())
@@ -52,10 +54,12 @@ export const injectMetadataIndex = (query: string): string => {
     if (columns.some((c) => c === '_index' || c === '*')) {
       return full;
     }
-    return `${prefix}${[...columns, '_index'].join(', ')} `;
+    return `${prefix}${[...columns, '_index'].join(', ')}${trailingWs}`;
   });
 
-  return `${nextFrom} ${withKeep}`.replace(/\s+/g, ' ').trim();
+  // Keep the original whitespace (or lack of it) between FROM and the first `|`.
+  const spacer = fromRaw.match(/\s*$/)?.[0] ?? '';
+  return `${nextFrom}${spacer}${withKeep}`;
 };
 
 /**

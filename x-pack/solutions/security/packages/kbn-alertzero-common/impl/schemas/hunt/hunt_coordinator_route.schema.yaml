@@ -196,6 +196,48 @@ paths:
                               enum: [critical, high, medium, low]
                             risk_score:
                               type: number
+                            execution:
+                              type: object
+                              required: [executed, row_count, hit]
+                              properties:
+                                executed:
+                                  type: boolean
+                                  description: >-
+                                    True when dry-run passed and an execute call
+                                    was attempted.
+                                row_count:
+                                  type: integer
+                                  minimum: 0
+                                  description: >-
+                                    Rows remaining after the required-index
+                                    filter.
+                                hit:
+                                  type: boolean
+                                  description: >-
+                                    True when at least one required-index row
+                                    was returned.
+                            affected_hosts:
+                              type: array
+                              description: >-
+                                Distinct host.name values from required-index
+                                rows, capped at 20.
+                              items:
+                                type: string
+                            affected_users:
+                              type: array
+                              description: >-
+                                Distinct user.name values from required-index
+                                rows, capped at 20.
+                              items:
+                                type: string
+                            affected_hosts_truncated:
+                              type: boolean
+                              description: >-
+                                True when more than 20 distinct hosts were seen.
+                            affected_users_truncated:
+                              type: boolean
+                              description: >-
+                                True when more than 20 distinct users were seen.
                       indexed_behaviors:
                         type: array
                         items:

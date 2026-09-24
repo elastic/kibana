@@ -127,6 +127,22 @@ describe('huntBehavior', () => {
     expect(result.dropped_unknown_ids).toContain('T9999999');
   });
 
+  it('returns indexed_behaviors id as reportId:techniqueId', async () => {
+    const model = buildMockModel({
+      extractionResult: {
+        candidates: [
+          { technique_id: 'T1566', evidence_quote: 'spear phishing', llm_confidence: 0.8 },
+        ],
+      },
+      esqlRules: [],
+    });
+    const result = await huntBehavior(model, logger, {
+      text: 'report',
+      report_id: 'rpt-001',
+    });
+    expect(result.indexed_behaviors[0].id).toBe('rpt-001:T1566');
+  });
+
   it('returns hasHit false when no window is provided (dry-run only)', async () => {
     const esClient = {
       esql: {
@@ -414,5 +430,154 @@ describe('huntBehavior', () => {
       report_id: 'rpt-001',
     });
     expect(result.indexed_behaviors[0].technique_id).toBe('T1566');
+  });
+
+  it('returns hasHit false when rows lack an _index column', async () => {
+    const esClient = {
+      esql: {
+        query: jest
+          .fn()
+          .mockResolvedValueOnce({ columns: [], values: [] })
+          .mockResolvedValueOnce({
+            columns: [{ name: 'count' }],
+            values: [[3]],
+          }),
+      },
+    } as unknown as ElasticsearchClient;
+    const model = buildMockModel({
+      extractionResult: { candidates: [t1078Candidate] },
+    });
+    const result = await huntBehavior(
+      model,
+      logger,
+      {
+        text: 'report',
+        window: { from: 'now-30d', to: 'now' },
+        required_indices: ['logs-aws.*'],
+        row_limit: 25,
+      },
+      esClient
+    );
+    expect(result.hasHit).toBe(false);
+  });
+
+  it('returns a warning when rows lack an _index column', async () => {
+    const warn = jest.spyOn(logger, 'warn');
+    const esClient = {
+      esql: {
+        query: jest
+          .fn()
+          .mockResolvedValueOnce({ columns: [], values: [] })
+          .mockResolvedValueOnce({
+            columns: [{ name: 'count' }],
+            values: [[3]],
+          }),
+      },
+    } as unknown as ElasticsearchClient;
+    const model = buildMockModel({
+      extractionResult: { candidates: [t1078Candidate] },
+    });
+    await huntBehavior(
+      model,
+      logger,
+      {
+        text: 'report',
+        window: { from: 'now-30d', to: 'now' },
+        required_indices: ['logs-aws.*'],
+        row_limit: 25,
+      },
+      esClient
+    );
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('no _index column'));
+  });
+
+  it('returns LIMIT rewritten from size when size wins over row_limit', async () => {
+    const query = jest
+      .fn()
+      .mockResolvedValueOnce({ columns: [], values: [] })
+      .mockResolvedValueOnce({ columns: [{ name: '_index' }], values: [] });
+    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+    const model = buildMockModel({
+      extractionResult: { candidates: [t1078Candidate] },
+    });
+    await huntBehavior(
+      model,
+      logger,
+      {
+        text: 'report',
+        window: { from: 'now-30d', to: 'now' },
+        required_indices: ['logs-aws.*'],
+        row_limit: 100,
+        size: 7,
+      },
+      esClient
+    );
+    expect(query).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        query: expect.stringMatching(/\|\s*LIMIT 7\b/),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('returns affected_hosts_truncated when more than 20 hosts are present', async () => {
+    const hosts = Array.from({ length: 21 }, (_, i) => `host-${i}`);
+    const esClient = {
+      esql: {
+        query: jest
+          .fn()
+          .mockResolvedValueOnce({ columns: [], values: [] })
+          .mockResolvedValueOnce({
+            columns: [{ name: '_index' }, { name: 'host.name' }],
+            values: hosts.map((h) => ['logs-aws.cloudtrail-default', h]),
+          }),
+      },
+    } as unknown as ElasticsearchClient;
+    const model = buildMockModel({
+      extractionResult: { candidates: [t1078Candidate] },
+    });
+    const result = await huntBehavior(
+      model,
+      logger,
+      {
+        text: 'report',
+        window: { from: 'now-30d', to: 'now' },
+        required_indices: ['logs-aws.*'],
+        row_limit: 50,
+      },
+      esClient
+    );
+    expect(result.behaviors[0].affected_hosts).toHaveLength(20);
+  });
+
+  it('returns the truncation flag when more than 20 hosts are present', async () => {
+    const hosts = Array.from({ length: 21 }, (_, i) => `host-${i}`);
+    const esClient = {
+      esql: {
+        query: jest
+          .fn()
+          .mockResolvedValueOnce({ columns: [], values: [] })
+          .mockResolvedValueOnce({
+            columns: [{ name: '_index' }, { name: 'host.name' }],
+            values: hosts.map((h) => ['logs-aws.cloudtrail-default', h]),
+          }),
+      },
+    } as unknown as ElasticsearchClient;
+    const model = buildMockModel({
+      extractionResult: { candidates: [t1078Candidate] },
+    });
+    const result = await huntBehavior(
+      model,
+      logger,
+      {
+        text: 'report',
+        window: { from: 'now-30d', to: 'now' },
+        required_indices: ['logs-aws.*'],
+        row_limit: 50,
+      },
+      esClient
+    );
+    expect(result.behaviors[0].affected_hosts_truncated).toBe(true);
   });
 });
