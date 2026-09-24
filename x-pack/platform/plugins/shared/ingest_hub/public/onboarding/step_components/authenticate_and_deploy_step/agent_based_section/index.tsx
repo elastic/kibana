@@ -201,20 +201,6 @@ export function AgentBasedSection({
   const validation = agentPolicyFormValidation(newAgentPolicy);
   const isPolicyFormValid = Object.keys(validation).length === 0;
 
-  // ── Next-button readiness ─────────────────────────────────────────────────
-  // Tells the parent step whether its Next button should be enabled.
-  const isNextReady = isPolicyCreated
-    ? true // policy exists; Next will attach package policies to it
-    : agentHostsMode === 'existing'
-    ? selectedAgentPolicyIds.length > 0
-    : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
-
-  const onNextReadyChangeRef = useRef(onNextReadyChange);
-  onNextReadyChangeRef.current = onNextReadyChange;
-  useEffect(() => {
-    onNextReadyChangeRef.current?.(isNextReady);
-  }, [isNextReady]);
-
   // ── Accordion collapse ───────────────────────────────────────────────────
   const [accordionCollapsed, setAccordionCollapsed] = useState(false);
 
@@ -259,6 +245,37 @@ export function AgentBasedSection({
   );
 
   const isEmpty = !isPoliciesLoading && policyOptions.length === 0;
+
+  // A persisted selection can point at a policy the picker no longer lists (e.g. agentless);
+  // drop it so it is neither counted for Next nor sent to deploy.
+  useEffect(() => {
+    if (agentHostsMode !== 'existing' || isPoliciesLoading || !policiesData) return;
+    if (selectedPolicyOptions.length === selectedAgentPolicyIds.length) return;
+    setAgentBasedDeployment({
+      selectedAgentPolicyIds: selectedPolicyOptions.map(({ value }) => value),
+    });
+  }, [
+    agentHostsMode,
+    isPoliciesLoading,
+    policiesData,
+    selectedPolicyOptions,
+    selectedAgentPolicyIds,
+    setAgentBasedDeployment,
+  ]);
+
+  // ── Next-button readiness ─────────────────────────────────────────────────
+  // Tells the parent step whether its Next button should be enabled.
+  const isNextReady = isPolicyCreated
+    ? true // policy exists; Next will attach package policies to it
+    : agentHostsMode === 'existing'
+    ? selectedPolicyOptions.length > 0
+    : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
+
+  const onNextReadyChangeRef = useRef(onNextReadyChange);
+  onNextReadyChangeRef.current = onNextReadyChange;
+  useEffect(() => {
+    onNextReadyChangeRef.current?.(isNextReady);
+  }, [isNextReady]);
 
   // ── Flyout ────────────────────────────────────────────────────────────────
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);

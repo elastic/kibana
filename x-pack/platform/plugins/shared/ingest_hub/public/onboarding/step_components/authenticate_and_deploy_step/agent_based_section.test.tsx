@@ -129,6 +129,7 @@ function setupMocks({
 interface RenderOptions {
   serviceCount?: number;
   onDeploy?: jest.Mock;
+  onNextReadyChange?: jest.Mock;
   isDeploying?: boolean;
   isDone?: boolean;
   hasFailed?: boolean;
@@ -144,6 +145,7 @@ function renderSection(props: RenderOptions = {}) {
         <AgentBasedSection
           serviceCount={props.serviceCount ?? 2}
           onDeploy={onDeploy}
+          onNextReadyChange={props.onNextReadyChange}
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
           hasFailed={props.hasFailed ?? false}
@@ -326,6 +328,57 @@ describe('AgentBasedSection', () => {
       });
       renderSection();
       expect(screen.getByPlaceholderText('No agent policies available')).toBeDisabled();
+    });
+
+    it('drops stored selections that are no longer listed once policies load', () => {
+      const setAgentBasedDeployment = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['regular', 'agentless'],
+        setAgentBasedDeployment,
+      });
+      mockUseGetAgentPoliciesQuery.mockReturnValue({
+        data: { items: [regularPolicy, agentlessPolicy] },
+        isLoading: false,
+      });
+      renderSection();
+      expect(setAgentBasedDeployment).toHaveBeenCalledWith({ selectedAgentPolicyIds: ['regular'] });
+    });
+
+    it('keeps stored selections while policies are still loading', () => {
+      const setAgentBasedDeployment = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['regular'],
+        setAgentBasedDeployment,
+      });
+      mockUseGetAgentPoliciesQuery.mockReturnValue({ data: undefined, isLoading: true });
+      renderSection();
+      expect(setAgentBasedDeployment).not.toHaveBeenCalledWith(
+        expect.objectContaining({ selectedAgentPolicyIds: expect.anything() })
+      );
+    });
+
+    it('is not ready for Next when the only stored selection is hidden', () => {
+      const onNextReadyChange = jest.fn();
+      setupMocks({ agentHostsMode: 'existing', selectedAgentPolicyIds: ['agentless'] });
+      mockUseGetAgentPoliciesQuery.mockReturnValue({
+        data: { items: [agentlessPolicy] },
+        isLoading: false,
+      });
+      renderSection({ onNextReadyChange });
+      expect(onNextReadyChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('is ready for Next when a listed policy is selected', () => {
+      const onNextReadyChange = jest.fn();
+      setupMocks({ agentHostsMode: 'existing', selectedAgentPolicyIds: ['regular'] });
+      mockUseGetAgentPoliciesQuery.mockReturnValue({
+        data: { items: [regularPolicy] },
+        isLoading: false,
+      });
+      renderSection({ onNextReadyChange });
+      expect(onNextReadyChange).toHaveBeenLastCalledWith(true);
     });
   });
 
