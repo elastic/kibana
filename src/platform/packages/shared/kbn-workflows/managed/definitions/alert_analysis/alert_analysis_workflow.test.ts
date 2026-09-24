@@ -2061,7 +2061,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       with: { grouped_counts_summary: string };
     };
     expect(summaryStep.with.grouped_counts_summary).toContain('all_host_names | slice: 0, 50');
-    expect(summaryStep.with.grouped_counts_summary).toContain("truncate: 10000, ''");
+    expect(summaryStep.with.grouped_counts_summary).toContain("truncate: 10000, ' [truncated]'");
 
     // Short names so all 50 capped hosts fit under the 10000-char truncate; otherwise the
     // char cap alone would hide whether the host slice ran.
@@ -2094,6 +2094,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const longSummary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
       variables: { output_verdicts: longVerdicts },
     });
+    // 50 hosts × ~210 chars each exceeds 10000 — truncation suffix must appear so the
+    // caller knows the summary is partial (not silently cut mid-sentence).
     expect(longSummary.length).toBeLessThanOrEqual(10000);
+    expect(longSummary).toContain('[truncated]');
   });
 });
