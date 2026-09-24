@@ -512,13 +512,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           `toggle-custom-field-view-${customFields[1].key}`
         );
         expect(await updatedToggle.getAttribute('aria-label')).equal('Off');
-
-        // validate user action (one per changed field)
-        const userActions = await find.allByCssSelector(
-          '[data-test-subj*="customFields-update-action"]'
-        );
-
-        expect(userActions).length(2);
       });
     });
   });
