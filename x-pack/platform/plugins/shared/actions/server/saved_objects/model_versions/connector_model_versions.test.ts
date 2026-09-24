@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
 import type {
   SavedObjectModelTransformationContext,
   SavedObjectsFullModelVersion,
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { rawConnectorSchemaV3, rawConnectorSchemaV4 } from '../schemas/raw_connector';
 import { connectorModelVersions } from './connector_model_versions';
 import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
 
@@ -172,6 +176,201 @@ describe('Connector Model Versions', () => {
           namespaceType: 'single',
         })
       ).toBe(mockDocument);
+    });
+  });
+
+  describe('version 4', () => {
+    it('decrypts with the v3 registration before reading apiKey', () => {
+      expect(encryptedSavedObjects.createModelVersion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputType: actionEncryptedRegistrationV3,
+          outputType: actionEncryptedRegistrationV3,
+        })
+      );
+    });
+
+    const version4 = versions['4'] as SavedObjectsFullModelVersion;
+    const context: SavedObjectModelTransformationContext = {
+      log: {
+        get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }),
+      } as unknown as Logger,
+      modelVersion: 4,
+      namespaceType: 'single',
+    };
+
+    it('backfills the unencrypted inbound identity presence flag', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'old-connector',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.datadog',
+          name: 'legacy',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toEqual({
+        ...mockDocument,
+        attributes: {
+          ...mockDocument.attributes,
+          hasInboundEventIdentity: false,
+        },
+      });
+    });
+
+    it('backfills true when encrypted inbound identity is already stored', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'dual-with-identity',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.datadog',
+          name: 'legacy dual',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          apiKey: 'ciphertext-api-key',
+          uiamApiKey: null,
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toEqual({
+        ...mockDocument,
+        attributes: {
+          ...mockDocument.attributes,
+          hasInboundEventIdentity: true,
+        },
+      });
+    });
+
+    it('backfills true when only a UIAM inbound identity is stored', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'dual-with-uiam',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.datadog',
+          name: 'legacy dual',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          apiKey: null,
+          uiamApiKey: 'ciphertext-uiam-key',
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toEqual({
+        ...mockDocument,
+        attributes: {
+          ...mockDocument.attributes,
+          hasInboundEventIdentity: true,
+        },
+      });
+    });
+
+    it('does not treat an empty apiKey as inbound identity', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'empty-identity',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.webhook',
+          name: 'Webhook Connector with empty identity fields',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          apiKey: '',
+          uiamApiKey: null,
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toEqual({
+        ...mockDocument,
+        attributes: {
+          ...mockDocument.attributes,
+          hasInboundEventIdentity: false,
+        },
+      });
+    });
+
+    it('does not overwrite an existing presence flag', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'enabled-connector',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.datadog',
+          name: 'enabled',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          hasInboundEventIdentity: true,
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toBe(mockDocument);
+    });
+
+    it('migrates the 10.4.0 action fixtures from v3 documents', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const fixturePath = join(
+        __dirname,
+        '../../../../../../../../packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/action/10.4.0.json'
+      );
+      const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as {
+        '10.3.0': Array<Record<string, unknown>>;
+        '10.4.0': Array<Record<string, unknown>>;
+      };
+
+      expect(fixture['10.3.0']).toHaveLength(fixture['10.4.0'].length);
+      fixture['10.3.0'].forEach((previous, index) => {
+        expect(rawConnectorSchemaV3.validate(previous)).toEqual(previous);
+        const migrated = backfillFn!(
+          {
+            id: `fixture-${index}`,
+            type: 'action',
+            attributes: previous,
+            references: [],
+          },
+          context
+        );
+        expect(migrated.attributes).toEqual(fixture['10.4.0'][index]);
+        expect(rawConnectorSchemaV4.validate(fixture['10.4.0'][index])).toEqual(
+          fixture['10.4.0'][index]
+        );
+      });
     });
   });
 });

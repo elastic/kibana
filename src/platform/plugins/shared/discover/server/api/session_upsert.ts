@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import { asCodeIdSchema, getMeta } from '@kbn/as-code-shared-schemas';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiData, DiscoverSessionApiResponse } from './schema';
+import type { DiscoverSessionApiResponse } from './schema';
 import { transformDiscoverSessionIn, transformDiscoverSessionOut } from './transforms';
 
 export const upsertDiscoverSession = async (
@@ -25,20 +26,10 @@ export const upsertDiscoverSession = async (
 }> => {
   const { core } = await requestContext.resolve(['core']);
   const { attributes, references } = transformDiscoverSessionIn(data);
-  let resolvedId = id;
 
-  // Check whether the session exists (standard or legacy) so the ID is validated only when creating it.
+  // Check the exact ID; legacy URL aliases are resolved on read, not on write.
   try {
-    const result = await core.savedObjects.client.resolve<DiscoverSessionAttributes>(
-      SavedSearchType,
-      id
-    );
-
-    if (result.outcome === 'conflict') {
-      throw SavedObjectsErrorHelpers.createConflictError(SavedSearchType, id);
-    }
-
-    resolvedId = result.saved_object.id;
+    await core.savedObjects.client.get<DiscoverSessionAttributes>(SavedSearchType, id);
   } catch (error) {
     // Only a missing session indicates creation; propagate all other lookup errors.
     if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -51,7 +42,7 @@ export const upsertDiscoverSession = async (
 
   const updateResponse = await core.savedObjects.client.update<DiscoverSessionAttributes>(
     SavedSearchType,
-    resolvedId,
+    id,
     attributes,
     {
       upsert: attributes,
