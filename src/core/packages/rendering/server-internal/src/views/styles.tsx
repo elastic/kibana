@@ -42,17 +42,19 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
   if (theme === 'borealis') {
     return {
       light: {
-        pageBackground: '#FFFFFF', // colors.backgroundBasePlain
+        // keep in sync with updateRootBackground in src/core/packages/theme/browser-internal/src/theme_service.ts
+        pageBackground: '#ECF1F9', // colors.body
         welcomeText: '#516381', // colors.subduedText
-        progress: '#ECF1F9', // colors.lightestShade
+        progress: '#E3E8F2', // shade20, a step darker than the page so the track stays visible
         progressBefore: '#0B64DD', // colors.primary
         errorTitleText: '#111C2C', // colors.textHeading
         errorButtonText: '#FFFFFF', // colors.textInverse
       },
       dark: {
-        pageBackground: '#111C2C',
+        // keep in sync with updateRootBackground in src/core/packages/theme/browser-internal/src/theme_service.ts
+        pageBackground: '#07101F', // colors.body
         welcomeText: '#98A8C3',
-        progress: '#172336',
+        progress: '#172336', // colors.lightestShade
         progressBefore: '#61A2FF',
         errorTitleText: '#E3E8F2', // colors.textHeading
         errorButtonText: '#07101F', // colors.textInverse
