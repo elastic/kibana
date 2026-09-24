@@ -29,6 +29,7 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
 
       this.#authc = {
         getCurrentUser: () => this.securityStart.authc.getCurrentUser(this.request),
+        getPrincipal: () => this.securityStart.authc.getPrincipal(this.request),
         apiKeys: {
           areAPIKeysEnabled: () => this.securityStart.authc.apiKeys.areAPIKeysEnabled(),
           create: (createParams) =>
