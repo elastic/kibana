@@ -92,6 +92,21 @@ describe('InlineAttachmentWithActions', () => {
     jest.clearAllMocks();
   });
 
+  it('tags the card with the attachment id and version it draws', () => {
+    const { container } = render(
+      <InlineAttachmentWithActions
+        attachment={createAttachment('v3', 3)}
+        attachmentsService={mockAttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    const card = container.querySelector('[data-attachment-id]');
+    expect(card).toHaveAttribute('data-attachment-id', 'attachment-1');
+    expect(card).toHaveAttribute('data-attachment-version', '3');
+  });
+
   it('shows a fallback instead of crashing when renderInlineContent throws', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
 

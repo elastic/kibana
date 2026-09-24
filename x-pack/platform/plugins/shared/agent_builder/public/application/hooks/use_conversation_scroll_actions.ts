@@ -10,6 +10,11 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 const AT_BOTTOM_THRESHOLD = 50;
 const SMOOTH_SCROLL_TIMEOUT_MS = 2000;
 
+export interface ScrollToAttachmentTarget {
+  id: string;
+  version?: number;
+}
+
 const isAtBottom = (el: HTMLElement) =>
   el.scrollHeight - el.scrollTop - el.clientHeight <= AT_BOTTOM_THRESHOLD;
 
@@ -191,6 +196,30 @@ export const useConversationScrollActions = ({
     setShowScrollButton(hasContentBelow());
   }, [cancelSmoothScroll, hasContentBelow]);
 
+  // Scrolls the latest inline event of the attachment (of that version, when given) to the top of
+  // the view and stops following the bottom so later growth does not pull the view away.
+  const scrollToAttachment = useCallback(
+    ({ id, version }: ScrollToAttachmentTarget): boolean => {
+      if (!scrollContainer || !timelineContent) return false;
+      const target = Array.from(
+        timelineContent.querySelectorAll<HTMLElement>('[data-attachment-id]')
+      ).findLast(
+        ({ dataset }) =>
+          dataset.attachmentId === id &&
+          (version === undefined || dataset.attachmentVersion === String(version))
+      );
+      if (!target) return false;
+      stopFollowingBottom();
+      const top =
+        target.getBoundingClientRect().top -
+        scrollContainer.getBoundingClientRect().top +
+        scrollContainer.scrollTop;
+      scrollContainer.scrollTo({ top, behavior: 'smooth' });
+      return true;
+    },
+    [scrollContainer, timelineContent, stopFollowingBottom]
+  );
+
   const onMessageSent = useCallback(() => {
     if (!scrollContainer) return;
     stuckToBottomRef.current = true;
@@ -204,5 +233,6 @@ export const useConversationScrollActions = ({
     stopFollowingBottom,
     smoothScrollToBottom,
     stickToBottom,
+    scrollToAttachment,
   };
 };

@@ -22,6 +22,7 @@ import { TimelineConnector } from './timeline/timeline_connector';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
+import { useScrollToAttachment } from '../../hooks/use_scroll_to_attachment';
 import { useAnchoredItemKey } from '../../hooks/use_anchored_item_key';
 import { useOnMessageFromOtherParticipant } from '../../hooks/use_on_message_from_other_participant';
 import { useConversationStatus } from '../../hooks/use_conversation';
@@ -54,6 +55,8 @@ export const Conversation: React.FC<{}> = () => {
     upsertAttachments,
     initialMessage,
     autoSendInitialMessage,
+    scrollToAttachment: scrollToAttachmentTarget,
+    clearScrollToAttachment,
   } = useConversationContext();
   const isPendingAutoSend = Boolean(initialMessage && autoSendInitialMessage);
   const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
@@ -72,6 +75,7 @@ export const Conversation: React.FC<{}> = () => {
     stopFollowingBottom,
     smoothScrollToBottom,
     stickToBottom,
+    scrollToAttachment,
   } = useConversationScrollActions({
     scrollContainer,
     scrollContainerHeight,
@@ -110,6 +114,14 @@ export const Conversation: React.FC<{}> = () => {
       });
     }
   }, [stickToBottom, isFetched, conversationId]);
+
+  useScrollToAttachment({
+    isFetched,
+    conversationId,
+    target: scrollToAttachmentTarget,
+    scrollToAttachment,
+    clearTarget: clearScrollToAttachment,
+  });
 
   const containerStyles = css`
     ${fullWidthAndHeightStyles}

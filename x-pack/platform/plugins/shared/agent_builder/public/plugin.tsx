@@ -78,8 +78,7 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
-import { appPaths } from './application/utils/app_paths';
-import { searchParamNames } from './application/search_param_names';
+import { buildFullscreenConversationPath } from './application/utils/build_fullscreen_conversation_path';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -364,13 +363,11 @@ export class AgentBuilderPlugin
           openSidebarConversation: (conversationId) => {
             openSidebarInternal({ conversationId });
           },
-          openFullscreenConversation: ({ conversationId, agentId, openDetails }) => {
+          openFullscreenConversation: (options) => {
             agentBuilderSidebar.close();
-            const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
-            const path = openDetails
-              ? `${basePath}?${searchParamNames.openConversationDetails}=true`
-              : basePath;
-            return core.application.navigateToApp(AGENTBUILDER_APP_ID, { path });
+            return core.application.navigateToApp(AGENTBUILDER_APP_ID, {
+              path: buildFullscreenConversationPath(options),
+            });
           },
         },
       }),
