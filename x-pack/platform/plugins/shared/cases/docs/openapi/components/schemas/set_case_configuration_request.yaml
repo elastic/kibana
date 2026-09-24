@@ -37,6 +37,8 @@ properties:
     description: >
       Indicates whether observables are automatically extracted from alerts when they are added to new cases.
       When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.
+      For owners that do not support observable extraction (currently Observability), setting this to `true`
+      has no effect on case creation; new cases for those owners always use `false`.
   owner:
     $ref: 'owner.yaml'
   templates:
