@@ -20,6 +20,7 @@ import { getLocationFromClassname, getReportNameFromClassname } from './get_fail
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi, GithubIssueComment } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+import { withTestHistoryDashboardLink } from './test_history_dashboard';
 
 function redactHostnameSuffix(text: string, suffix: string): string {
   const escaped = suffix.replace(/\./g, '\\.');
@@ -209,7 +210,10 @@ function createJUnitBody(
     metadata['test.type'] = failure.testType;
   }
 
-  return updateIssueMetadata(bodyContent.join('\n'), metadata);
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), metadata),
+    failure
+  );
 }
 
 /**
@@ -265,12 +269,15 @@ function createScoutBody(
     }
   }
 
-  return updateIssueMetadata(bodyContent.join('\n'), {
-    'test.class': failure.classname,
-    'test.name': failure.name,
-    'test.failCount': 1,
-    'test.type': 'scout',
-  });
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), {
+      'test.class': failure.classname,
+      'test.name': failure.name,
+      'test.failCount': 1,
+      'test.type': 'scout',
+    }),
+    failure
+  );
 }
 
 async function createJUnitFailureIssue(
@@ -379,9 +386,12 @@ async function updateJUnitFailureIssue(
   failure?: TestFailure
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = failure
+    ? withTestHistoryDashboardLink(
+        updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+        failure
+      )
+    : updateIssueMetadata(issue.github.body, { 'test.failCount': newCount });
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
@@ -410,9 +420,10 @@ async function updateScoutFailureIssue(
   failure: ScoutTestFailureExtended
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = withTestHistoryDashboardLink(
+    updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+    failure
+  );
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
