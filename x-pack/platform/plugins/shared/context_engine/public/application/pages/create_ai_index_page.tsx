@@ -17,10 +17,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { DEFAULT_AI_INDEX_TYPE, MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AiIndexDescriptionField } from '../components/ai_index_description_field';
 import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
@@ -90,6 +92,7 @@ export const CreateAiIndexPage = () => {
           event.preventDefault();
           navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
         }}
+        element={CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage}
         pageTitle={createPageTitle}
         description={createPageDescription}
       />
@@ -179,7 +182,11 @@ export const CreateAiIndexPage = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <TraceSelector value={trace} onChange={setTrace} />
+          <TraceSelector
+            value={trace}
+            onChange={setTrace}
+            ebtElement={CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePageTraceSelector}
+          />
         </EuiPanel>
 
         <EuiSpacer size="l" />
@@ -199,6 +206,10 @@ export const CreateAiIndexPage = () => {
               onClick={createAndContinue}
               isLoading={isCreating}
               isDisabled={dest === undefined || !descriptionValidation.valid}
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage,
+                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexCreate.CREATE,
+              })}
             >
               {i18n.translate('xpack.contextEngine.createAiIndex.continueButton', {
                 defaultMessage: 'Create AI index',

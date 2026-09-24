@@ -116,6 +116,93 @@ describe('discover session API transforms', () => {
       expect(transformed).toEqual(discoverSessionApiData);
     });
 
+    it.each([
+      {
+        scenario: 'a missing Data View reference',
+        filters: [
+          {
+            meta: { indexRefName: 'missing-filter-view' },
+            query: { exists: { field: 'bytes' } },
+          },
+        ],
+      },
+      { scenario: 'a malformed filter', filters: [null] },
+    ])('ignores unused ES|QL filters with $scenario', ({ filters }) => {
+      const { attributes, references } = transformDiscoverSessionIn(apiData);
+      const esqlTab = attributes.tabs[1];
+      const searchSource = parseSearchSourceJSON(
+        esqlTab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      const searchSourceJSON = JSON.stringify({ ...searchSource, filter: filters });
+      const updatedTab = {
+        ...esqlTab,
+        attributes: {
+          ...esqlTab.attributes,
+          kibanaSavedObjectMeta: { searchSourceJSON },
+        },
+      };
+
+      const { sessionState, warnings } = transformDiscoverSessionOut(
+        { ...attributes, tabs: [updatedTab] },
+        references
+      );
+
+      expect(sessionState.tabs[0].data_source).toStrictEqual(apiData.tabs[1].data_source);
+      expect(sessionState.tabs[0]).not.toHaveProperty('filters');
+      expect(sessionState.tabs[0]).not.toHaveProperty('query');
+      expect(warnings).toStrictEqual([]);
+      expect(updatedTab.attributes.kibanaSavedObjectMeta.searchSourceJSON).toBe(searchSourceJSON);
+      expect(discoverSessionApiDataSchema.parse(sessionState)).toStrictEqual(sessionState);
+    });
+
+    it('still rejects a classic tab with a missing filter reference', () => {
+      const { attributes, references } = transformDiscoverSessionIn(apiData);
+      const classicTab = attributes.tabs[0];
+      const searchSource = parseSearchSourceJSON(
+        classicTab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      const searchSourceJSON = JSON.stringify({
+        ...searchSource,
+        filter: [
+          {
+            meta: { indexRefName: 'missing-filter-view' },
+            query: { exists: { field: 'bytes' } },
+          },
+        ],
+      });
+      const updatedTab = {
+        ...classicTab,
+        attributes: {
+          ...classicTab.attributes,
+          kibanaSavedObjectMeta: { searchSourceJSON },
+        },
+      };
+
+      expect(() =>
+        transformDiscoverSessionOut({ ...attributes, tabs: [updatedTab] }, references)
+      ).toThrow('Could not find reference for missing-filter-view');
+    });
+
+    it('still rejects a classic tab with a missing data source reference', () => {
+      const { attributes } = transformDiscoverSessionIn(apiData);
+      const [classicTab] = attributes.tabs;
+      const searchSourceJSON = JSON.stringify({
+        query: { language: 'kuery', query: '' },
+        indexRefName: 'missing-data-view',
+      });
+      const updatedTab = {
+        ...classicTab,
+        attributes: {
+          ...classicTab.attributes,
+          kibanaSavedObjectMeta: { searchSourceJSON },
+        },
+      };
+
+      expect(() => transformDiscoverSessionOut({ ...attributes, tabs: [updatedTab] })).toThrow(
+        'Could not find reference for missing-data-view'
+      );
+    });
+
     it('omits the inline data view ID from self filters and preserves foreign filter IDs', () => {
       const [classicTab] = discoverSessionAttributes.tabs;
       const searchSource = parseSearchSourceJSON(
