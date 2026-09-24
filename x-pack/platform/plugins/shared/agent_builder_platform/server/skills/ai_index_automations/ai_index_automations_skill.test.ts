@@ -337,8 +337,10 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/cleanup is not optional/);
     });
 
-    it('notes that a data stream leaves the tag as the only handle on pilot output', () => {
-      expect(content).toMatch(/createKi` refuses `ki_id`/);
+    it('notes that omitting ki_id leaves the tag as the only handle on pilot output', () => {
+      expect(content).toMatch(
+        /only handle you will have on what the pilot wrote when `ki_id` is omitted/
+      );
     });
 
     it('puts the pilot tag where the templates build the indicator, not on the write step', () => {
@@ -385,7 +387,9 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('states the createKi id rules that make a re-run idempotent', () => {
       expect(content).toMatch(/Passing the same `ki_id` again replaces the indicator/);
-      expect(content).toMatch(/On a data-stream destination `ki_id` is rejected/);
+      expect(content).toMatch(
+        /On a data-stream destination the same `ki_id` appends a new\s+revision/
+      );
     });
 
     it('bounds what a KI attribute can hold, since indicators carry ES|QL in one', () => {

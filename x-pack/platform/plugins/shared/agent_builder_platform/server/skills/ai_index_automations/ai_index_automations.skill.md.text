@@ -83,7 +83,7 @@ absent.
   type: context-engine.createKi
   with:
     ai_index_id: 'my-ai-index' # required
-    ki_id: 'logs-index-profile' # optional, index-backed destinations only
+    ki_id: 'logs-index-profile' # optional; stable id, generated when omitted
     verifiers: # optional; the write is skipped when any fails
       - esql-valid-syntax
       - esql-valid-runtime
@@ -99,8 +99,8 @@ absent.
 ```
 
 Passing the same `ki_id` again replaces the indicator, which is the whole of what makes a re-run
-idempotent rather than duplicative. On a data-stream destination `ki_id` is rejected outright and
-Elasticsearch generates the ids.
+idempotent rather than duplicative. On a data-stream destination the same `ki_id` appends a new
+revision instead, and `updateKi` and `deleteKi` act on the newest one.
 
 **`context-engine.updateKi`** takes `ai_index_id` and `ki_id` plus a `ki` carrying only the fields to
 change, and outputs `id` and `result` (`updated` or `noop`). It fails when the indicator does not
@@ -421,9 +421,8 @@ unique to this attempt. In the templates the indicator is built in a single `dat
 tag goes on that step's `ki.tags` list — the one place all of them read from — not on
 `context-engine.createKi`, which takes the assembled document rather than building it.
 
-That tag is the only handle you will have on what the pilot wrote: on a data-stream destination
-`createKi` refuses `ki_id` and Elasticsearch generates the ids, so there is nothing else to find
-them by.
+That tag is the only handle you will have on what the pilot wrote when `ki_id` is omitted:
+Elasticsearch generates the ids, so there is nothing else to find them by.
 
 Bound the run to a handful of documents while you are iterating. The templates put that bound in
 `consts` — `max_entities`, `max_documents`, `corpus_filter` — so it is one edit to narrow and one
