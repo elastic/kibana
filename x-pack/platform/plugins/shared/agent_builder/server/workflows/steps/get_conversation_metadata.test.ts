@@ -54,6 +54,59 @@ describe('getConversationMetadataStepDefinition', () => {
     expect(result).toEqual({
       output: {
         metadata: { status: 'open', severity: 'high' },
+        can_attach: false,
+      },
+    });
+  });
+
+  it('reports owner access as the ability to attach', async () => {
+    const { getConversationClient } = createWorkflowStepConversationClientMock({
+      get: jest.fn().mockResolvedValue({
+        id: 'conv-1',
+        metadata: {},
+        permissions: { rename: true, delete: true, update_access_control: true },
+      }),
+    });
+
+    const definition = getConversationMetadataStepDefinition({
+      getConversationClient,
+      getAgentRegistry,
+      isExperimentalEnabled: experimentalEnabled,
+    });
+    const result = await definition.handler(
+      createStepHandlerContext({ input: { conversation_id: 'conv-1' } })
+    );
+
+    expect(result).toEqual({
+      output: {
+        metadata: {},
+        can_attach: true,
+      },
+    });
+  });
+
+  it('does not treat an admin who can rename a public conversation as able to attach', async () => {
+    const { getConversationClient } = createWorkflowStepConversationClientMock({
+      get: jest.fn().mockResolvedValue({
+        id: 'conv-1',
+        metadata: { status: 'open' },
+        permissions: { rename: true, delete: true, update_access_control: false },
+      }),
+    });
+
+    const definition = getConversationMetadataStepDefinition({
+      getConversationClient,
+      getAgentRegistry,
+      isExperimentalEnabled: experimentalEnabled,
+    });
+    const result = await definition.handler(
+      createStepHandlerContext({ input: { conversation_id: 'conv-1' } })
+    );
+
+    expect(result).toEqual({
+      output: {
+        metadata: { status: 'open' },
+        can_attach: false,
       },
     });
   });
@@ -79,6 +132,7 @@ describe('getConversationMetadataStepDefinition', () => {
     expect(result).toEqual({
       output: {
         metadata: {},
+        can_attach: false,
       },
     });
   });
