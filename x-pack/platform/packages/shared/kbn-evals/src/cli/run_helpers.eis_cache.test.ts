@@ -62,6 +62,7 @@ describe('resolveEvalRunContext EIS cache guard', () => {
   beforeEach(() => {
     log = new ToolingLog();
     jest.spyOn(log, 'info');
+    jest.spyOn(log, 'warning');
     delete process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS;
   });
 
@@ -120,5 +121,95 @@ describe('resolveEvalRunContext EIS cache guard', () => {
     await call();
 
     expect(process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS).toBe('provided');
+  });
+
+  it('checks the required ids when the payload was exported from the cache', async () => {
+    // Interactive `start` runs ensureEvalInit first, which exports a fresh cache
+    // into KIBANA_TESTING_INFERENCE_ENDPOINTS. Resolving the run context then saw
+    // "env var is set" and skipped the required-id check entirely, so an
+    // incomplete cache still produced per-test 404s.
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(
+      JSON.stringify({ 'eis-something-else': { inferenceId: 'x' } })
+    ).toString('base64');
+
+    await expect(call()).rejects.toThrow(/does not define eis-test-connector/);
+  });
+
+  it('accepts an env payload that defines every required connector', async () => {
+    const connectors = { 'eis-test-connector': { inferenceId: 'test' } };
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(
+      JSON.stringify(connectors)
+    ).toString('base64');
+
+    await expect(call()).resolves.toMatchObject({
+      evaluationConnectorId: 'eis-test-connector',
+      requiresEisCcm: true,
+    });
+  });
+
+  it('leaves an unparseable env payload to loadInferenceEndpoints to reject', async () => {
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = 'provided';
+
+    await expect(call()).resolves.toMatchObject({
+      evaluationConnectorId: 'eis-test-connector',
+    });
+  });
+
+  it('warns instead of throwing for a dry run with an unusable cache', async () => {
+    // `start --dry-run` starts no server and runs no Playwright: it only prints
+    // the invocation, so a missing cache must not abort the preview.
+    mockReadCachedEisConnectors.mockReturnValue(undefined);
+    mockGetEisCacheStatus.mockReturnValue('missing');
+
+    await expect(
+      resolveEvalRunContext({
+        repoRoot: '/repo',
+        log,
+        flagsReader: buildFlagsReader(),
+        dryRun: true,
+      })
+    ).resolves.toMatchObject({ evaluationConnectorId: 'eis-test-connector' });
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Continuing because this is a dry run')
+    );
+    expect(process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS).toBeUndefined();
+  });
+
+  it('warns instead of throwing for a dry run with an incomplete cache', async () => {
+    mockReadCachedEisConnectors.mockReturnValue({ 'eis-something-else': { inferenceId: 'x' } });
+    mockGetEisCacheStatus.mockReturnValue('fresh');
+
+    await expect(
+      resolveEvalRunContext({
+        repoRoot: '/repo',
+        log,
+        flagsReader: buildFlagsReader(),
+        dryRun: true,
+      })
+    ).resolves.toMatchObject({ evaluationConnectorId: 'eis-test-connector' });
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Continuing because this is a dry run')
+    );
+  });
+
+  it('warns instead of throwing for a dry run whose payload lacks a required id', async () => {
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(
+      JSON.stringify({ 'eis-something-else': { inferenceId: 'x' } })
+    ).toString('base64');
+
+    await expect(
+      resolveEvalRunContext({
+        repoRoot: '/repo',
+        log,
+        flagsReader: buildFlagsReader(),
+        dryRun: true,
+      })
+    ).resolves.toMatchObject({ evaluationConnectorId: 'eis-test-connector' });
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Continuing because this is a dry run')
+    );
   });
 });

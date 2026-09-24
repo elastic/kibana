@@ -53,7 +53,13 @@ export const startCmd: Command<void> = {
       exportProfile,
       datasetsProfile,
       requiresEisCcm,
-    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
+    } = await resolveEvalRunContext({
+      repoRoot,
+      log,
+      flagsReader,
+      profile,
+      dryRun: flagsReader.boolean('dry-run'),
+    });
 
     const skipServer = flagsReader.boolean('skip-server');
 

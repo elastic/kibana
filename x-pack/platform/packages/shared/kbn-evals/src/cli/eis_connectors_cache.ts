@@ -23,6 +23,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { validateInferenceEndpointEntry } from '../utils/inference_endpoint_definition';
 
 interface CachedEisConnectors {
   connectors: Record<string, object>;
@@ -38,6 +39,17 @@ export type EisCacheStatus = 'fresh' | 'expired' | 'missing' | 'malformed';
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/**
+ * Every cached entry is exported as an inference endpoint definition, so an entry
+ * that `loadInferenceEndpoints()` would reject (null, scalar, or missing
+ * `inferenceId`/`provider`/`taskType`/`name`) has to fail here as `malformed`
+ * rather than surfacing as a Playwright startup crash.
+ */
+const connectorsAreUsable = (connectors: Record<string, unknown>): boolean =>
+  Object.entries(connectors).every(
+    ([id, definition]) => validateInferenceEndpointEntry(id, definition) === undefined
+  );
+
 const parseCachedEntry = (cachePath: string): CachedEisConnectors | undefined => {
   try {
     const raw = fs.readFileSync(cachePath, 'utf-8');
@@ -49,6 +61,7 @@ const parseCachedEntry = (cachePath: string): CachedEisConnectors | undefined =>
     if (
       !isPlainObject(connectors) ||
       Object.keys(connectors).length === 0 ||
+      !connectorsAreUsable(connectors) ||
       typeof fetchedAtMs !== 'number' ||
       !Number.isFinite(fetchedAtMs)
     ) {
