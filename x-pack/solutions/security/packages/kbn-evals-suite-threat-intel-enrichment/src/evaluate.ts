@@ -8,33 +8,54 @@
 import { evaluate as base } from '@kbn/evals';
 import { ThreatIntelClient } from './clients/threat_intel_client';
 
-// The threat_intel routes resolve their model server-side. In this eval config
-// `searchInferenceEndpoints` is disabled, so `resolveScopedModel` falls back to
-// this advanced setting. Pointing it at the per-project connector is what makes
-// the EIS/LiteLLM matrix actually exercise each model under test.
-const GEN_AI_DEFAULT_CONNECTOR_SETTING = 'genAiSettings:defaultAIConnector';
+// Paths and feature ids are inlined rather than imported from plugins/packages:
+// packages expose a single public entry point, and this suite already follows
+// that pattern for the threat_intel routes.
+const INFERENCE_SETTINGS_URL = '/internal/search_inference_endpoints/settings';
+const ALERTZERO_FAST_FEATURE_ID = 'alertzero_fast';
+const ALERTZERO_REASONING_FEATURE_ID = 'alertzero_reasoning';
+
+const INTERNAL_API_HEADERS = {
+  'elastic-api-version': '1',
+  'x-elastic-internal-origin': 'Kibana',
+};
 
 /**
  * Extends the base `@kbn/evals` fixture with a worker-scoped `ThreatIntelClient`
  * that posts directly to the threat_intel enrichment routes, plus an auto
- * fixture that points the default GenAI connector at the model under test.
- * Everything else (executorClient, inferenceClient, connector, evaluators, log)
- * comes from the base fixture unchanged.
+ * fixture that pins AlertZero Fast/Reasoning Model Settings to the model under
+ * test. Everything else (executorClient, inferenceClient, connector, evaluators,
+ * log) comes from the base fixture unchanged.
  */
 export const evaluate = base.extend<
   {},
   {
     threatIntelClient: ThreatIntelClient;
-    defaultConnectorForThreatIntel: void;
+    modelSettingsForThreatIntel: void;
   }
 >({
-  defaultConnectorForThreatIntel: [
+  modelSettingsForThreatIntel: [
     async ({ kbnClient, connector, log }, use) => {
       log.info(
-        `[threat-intel-evals] Setting ${GEN_AI_DEFAULT_CONNECTOR_SETTING}=${connector.id} so enrichment routes resolve the model under test`
+        `[threat-intel-evals] Pinning Model Settings ` +
+          `${ALERTZERO_FAST_FEATURE_ID}/${ALERTZERO_REASONING_FEATURE_ID}=${connector.id}`
       );
-      await kbnClient.uiSettings.update({
-        [GEN_AI_DEFAULT_CONNECTOR_SETTING]: connector.id,
+      await kbnClient.request({
+        path: INFERENCE_SETTINGS_URL,
+        method: 'PUT',
+        body: {
+          features: [
+            {
+              feature_id: ALERTZERO_FAST_FEATURE_ID,
+              endpoints: [{ id: connector.id }],
+            },
+            {
+              feature_id: ALERTZERO_REASONING_FEATURE_ID,
+              endpoints: [{ id: connector.id }],
+            },
+          ],
+        },
+        headers: INTERNAL_API_HEADERS,
       });
       await use();
     },
@@ -42,7 +63,7 @@ export const evaluate = base.extend<
   ],
 
   threatIntelClient: [
-    async ({ kbnClient, log, defaultConnectorForThreatIntel }, use) => {
+    async ({ kbnClient, log, modelSettingsForThreatIntel }, use) => {
       await use(new ThreatIntelClient(kbnClient, log));
     },
     { scope: 'worker' },
