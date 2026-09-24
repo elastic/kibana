@@ -24,6 +24,14 @@ triggers:
   - type: manual
     inputs:
       properties:
+        autonomy_level:
+          type: string
+          enum: [manual, assisted]
+          default: assisted
+          description: >-
+            Detection Watch autonomy level of the dispatching worker, forwarded to
+            every review it launches. "manual" makes each review wait for an analyst
+            before diagnosis.
         min_fp_count:
           type: integer
           # Floor of 2: a single-FP group makes ES|QL return alert_ids as a scalar,
@@ -67,8 +75,10 @@ outputs:
     type: boolean
 consts:
   # Worker settings. Scheduled runs carry no inputs, so every use goes through
-  # `inputs.x | default: consts.x`; a manual run can override any of them.
-  analysis_window_days: 14
+  # `inputs.x | default: consts.x`. The per-space Rule Tuning worker forwards
+  # analysis_window_days, min_fp_count and min_fp_rate_pct from its settings, so
+  # these three are reached only by a manual run that omits them.
+  analysis_window_days: 7
   min_fp_count: 10
   min_fp_rate_pct: 50
   max_rules_per_sweep: 10
@@ -179,10 +189,12 @@ steps:
         | EVAL alert_id = SUBSTRING(recent_keys, 19)
         | STATS fp_count = MAX(fp_count),
             last_fp_at = MAX(last_fp_at),
-            alert_ids = VALUES(alert_id)
+            alert_ids = VALUES(alert_id),
+            total_count = MAX(total_count),
+            fp_rate_count = MAX(fp_rate_count)
           BY `kibana.alert.rule.uuid`
         | SORT fp_count DESC
-        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids
+        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids, total_count, fp_rate_count
     on-failure:
       continue: true
 
@@ -250,6 +262,9 @@ steps:
             fp_count: "${{ foreach.item.1 }}"
             last_fp_at: "{{ foreach.item.2 }}"
             alert_ids: "${{ foreach.item.3 }}"
+            total_alert_count: "${{ foreach.item.4 }}"
+            total_fp_count: "${{ foreach.item.5 }}"
+            autonomy_level: "{{ inputs.autonomy_level | default: 'assisted' }}"
             analysis_window_days: "${{ inputs.analysis_window_days | default: consts.analysis_window_days }}"
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"

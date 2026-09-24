@@ -5,70 +5,87 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonEmpty, EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { AiButtonIcon } from '@kbn/ui-ai-components';
 import { type Investigation } from '../../types';
-import { getActionButtonIconProps } from '../helpers';
-import { CONVERSATION_CARD_ACTIONS } from './translations';
-import { BaseActions, type BaseActionsProps } from '../actions';
+import { BaseActions, hasAvailableActions, type BaseActionsProps } from '../actions';
+import { createCardLinkClickHandler } from '../actions/card_link_click';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
 export interface ConversationsActionsGroupProps {
   investigation: Investigation;
   onClickRecommendedAction?: ({ id }: { id: Investigation['id'] }) => void;
 
   onClickAction: BaseActionsProps['onClickAction'];
+  /** Opens this investigation's chat. Supplied by the caller, which owns the route. */
+  onOpenChat: () => void;
+  /**
+   * URL the chat control points at, so it behaves as a link. Optional because the caller may not
+   * be able to resolve one; the control still works as a button without it.
+   */
+  chatHref?: string;
+  /** When true escalation actions are shown. Requires the manage escalations capability. */
+  canManageEscalations?: boolean;
 }
 
+/**
+ * The card's trailing controls: opening the chat, which an analyst does constantly, and
+ * the menu holding everything that changes the record — including the recommended
+ * action, so the card surfaces navigation rather than a decision.
+ */
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onClickRecommendedAction, onClickAction }) => {
+  ({
+    investigation,
+    onClickRecommendedAction,
+    onClickAction,
+    onOpenChat,
+    chatHref,
+    canManageEscalations,
+  }) => {
     const { euiTheme } = useEuiTheme();
+    const handleChatClick = useMemo(() => createCardLinkClickHandler(onOpenChat), [onOpenChat]);
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive direction="row">
-        <EuiFlexItem grow={false} alignItems="center" justifyContent="flexStart">
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
+        <EuiFlexItem grow={false}>
+          <AiButtonIcon
+            variant="empty"
+            size="s"
+            iconType="productAgent"
+            withToolTip
+            aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
+            href={chatHref}
+            onClick={handleChatClick}
+            data-test-subj="conversationCardOpenInChat"
+          />
+        </EuiFlexItem>
+        {hasAvailableActions(investigation, canManageEscalations) && (
+          <>
+            <span
+              aria-hidden="true"
+              css={css({
+                width: '1px',
+                height: euiTheme.size.base,
+                background: euiTheme.colors.backgroundLightText,
+                marginLeft: euiTheme.size.s,
+                marginRight: euiTheme.size.xs,
+                [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+                  display: 'none',
+                },
+              })}
+            />
             <EuiFlexItem grow={false}>
-              <EuiIcon
-                size="s"
-                type={getActionButtonIconProps(investigation).type}
-                color={getActionButtonIconProps(investigation).color}
-                aria-hidden={true}
+              <BaseActions
+                investigation={investigation}
+                onClickAction={onClickAction}
+                onClickRecommendedAction={onClickRecommendedAction}
+                canManageEscalations={canManageEscalations}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color={getActionButtonIconProps(investigation).color}
-                flush="both"
-                size="xs"
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                  onClickRecommendedAction?.({
-                    id: investigation.id,
-                  });
-                }}
-              >
-                {investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <span
-          aria-hidden="true"
-          css={css({
-            width: '1px',
-            height: euiTheme.size.base,
-            background: euiTheme.colors.backgroundLightText,
-            marginLeft: euiTheme.size.s,
-            marginRight: euiTheme.size.xs,
-            [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
-              display: 'none',
-            },
-          })}
-        />
-        <EuiFlexItem grow={false}>
-          <BaseActions investigation={investigation} onClickAction={onClickAction} />
-        </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
     );
   }

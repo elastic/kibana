@@ -8,18 +8,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+import { EuiSkeletonText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '@kbn/react-hooks';
-import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import {
   ContentListFooter,
   ContentListTable,
@@ -30,18 +20,16 @@ import {
 } from '@kbn/content-list';
 import type { ContentListItem } from '@kbn/content-list';
 import {
-  TAG_FILTER_ID,
   useContentListItems,
   useContentListSelection,
   useContentListState,
 } from '@kbn/content-list-provider';
-import { filter, useFieldQueryFilter } from '@kbn/content-list-toolbar';
+import { filter } from '@kbn/content-list-toolbar';
 import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
 import { ActionPolicySnoozeButton } from '../../../components/action_policy/action_policy_snooze_button';
 import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
-import { useFetchTags } from '../../../hooks/use_fetch_tags';
-import { resolveDisplayName } from '../../../utils/resolve_display_name';
+import { collectActorUids, resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
 import { ActionPoliciesBulkActions } from './action_policies_bulk_actions';
 import { ActionPolicyActionsCell } from './action_policy_actions_cell';
@@ -78,14 +66,6 @@ interface Props {
   enablePolicy: (id: string) => void;
   disablePolicy: (id: string) => void;
 }
-
-const TAG_SEARCH_DEBOUNCE_MS = 300;
-/** Keeps the search field and the cap hint readable when tag names are short. */
-const TAGS_POPOVER_MIN_WIDTH = 320;
-
-const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.actionPoliciesList.filter.tags.title', {
-  defaultMessage: 'Tags',
-});
 
 const ENABLED_FILTER_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.filter.enabled.title',
@@ -147,8 +127,7 @@ export const ActionPoliciesTableContent = ({
     [policyToViewId, items]
   );
   const updatedByUids = useMemo(
-    () =>
-      items.map((item) => toPolicy(item).updated_by).filter((uid): uid is string => Boolean(uid)),
+    () => collectActorUids(items.map((item) => toPolicy(item).updated_by)),
     [items]
   );
   const { data: updatedByProfileByUid, isLoading: isProfileLoading } = useBulkGetUserProfiles({
@@ -164,7 +143,6 @@ export const ActionPoliciesTableContent = ({
       <RefetchConnector onReady={onRefetchReady} />
       <ContentListToolbar>
         <ContentListToolbar.Filters>
-          <TagsFilter />
           <EnabledFilter />
         </ContentListToolbar.Filters>
       </ContentListToolbar>
@@ -180,25 +158,6 @@ export const ActionPoliciesTableContent = ({
           maxWidth="400px"
         />
         <DestinationsColumn />
-        <Column
-          id="tags"
-          name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.tags', {
-            defaultMessage: 'Tags',
-          })}
-          render={(item) => {
-            const { tags } = toPolicy(item);
-            if (!tags?.length) return null;
-            return (
-              <EuiFlexGroup gutterSize="xs" wrap>
-                {tags.map((tag) => (
-                  <EuiFlexItem grow={false} key={tag}>
-                    <EuiBadge color="hollow">{tag}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            );
-          }}
-        />
         <Column.UpdatedAt />
         <Column
           id="updatedBy"
@@ -212,9 +171,7 @@ export const ActionPoliciesTableContent = ({
                   <EuiSkeletonText lines={1} />
                 </div>
               );
-            return (
-              <>{resolveDisplayName(updatedBy, updatedByProfileByUidRef.current, updatedBy)}</>
-            );
+            return <>{resolveDisplayName(updatedBy, updatedByProfileByUidRef.current)}</>;
           }}
         />
         <Column
@@ -401,83 +358,6 @@ const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsPro
     />
   );
 };
-
-const TagsFilterComponent = ({
-  query,
-  onChange,
-}: {
-  query?: Query;
-  onChange?: (query: Query) => void;
-}) => {
-  const [tagSearch, setTagSearch] = useState('');
-  const debouncedTagSearch = useDebouncedValue(tagSearch, TAG_SEARCH_DEBOUNCE_MS);
-  const { selection } = useFieldQueryFilter({
-    fieldName: TAG_FILTER_ID,
-    query,
-    onChange,
-  });
-  const { data: tagNames = [], isLoading } = useFetchTags({
-    search: debouncedTagSearch || undefined,
-  });
-
-  const options = useMemo(() => {
-    // Selected tags outside the capped result set would otherwise disappear
-    // from the popover, leaving an active filter the user cannot untick.
-    const apiTagSet = new Set(tagNames);
-    const orphans = Object.keys(selection)
-      .filter((tag) => !apiTagSet.has(tag))
-      .map((tag) => ({ key: tag, label: tag }));
-    return [...orphans, ...tagNames.map((tag) => ({ key: tag, label: tag }))];
-  }, [tagNames, selection]);
-
-  const showCapGuidance = tagNames.length >= TAGS_RESPONSE_LIMIT;
-
-  return (
-    <SelectableFilterPopover
-      fieldName={TAG_FILTER_ID}
-      title={TAGS_FILTER_TITLE}
-      query={query}
-      onChange={onChange}
-      options={options}
-      isLoading={isLoading}
-      panelMinWidth={TAGS_POPOVER_MIN_WIDTH}
-      hideSearch
-      headerContent={
-        <EuiFieldSearch
-          compressed
-          value={tagSearch}
-          onChange={(event) => setTagSearch(event.target.value)}
-          placeholder={i18n.translate(
-            'xpack.alertingV2.actionPoliciesList.filter.tags.searchPlaceholder',
-            { defaultMessage: 'Search tags' }
-          )}
-          data-test-subj="actionPoliciesTagsFilterSearch"
-        />
-      }
-      footerContent={
-        showCapGuidance ? (
-          <EuiText size="xs" color="subdued" data-test-subj="actionPoliciesTagsFilterCapGuidance">
-            {i18n.translate('xpack.alertingV2.actionPoliciesList.filter.tags.capGuidance', {
-              defaultMessage: 'Showing first {cap} most-used, type to search',
-              values: { cap: TAGS_RESPONSE_LIMIT },
-            })}
-          </EuiText>
-        ) : undefined
-      }
-      renderOption={(option, { isActive }) => (
-        <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
-      )}
-      data-test-subj="actionPoliciesTagsFilter"
-    />
-  );
-};
-
-const TagsFilter = filter.createComponent({
-  resolve: () => ({
-    type: 'custom_component' as const,
-    component: TagsFilterComponent,
-  }),
-});
 
 const EnabledFilterComponent = ({
   query,

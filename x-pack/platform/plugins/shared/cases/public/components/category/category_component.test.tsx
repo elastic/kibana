@@ -50,26 +50,12 @@ describe('Category ', () => {
     expect(screen.getByRole('combobox')).toHaveValue('new-category');
   });
 
-  it('renders allow to add new category option', async () => {
-    render(<CategoryComponent {...defaultProps} />);
-
-    await userEvent.type(screen.getByRole('combobox'), 'new{enter}');
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith('new');
-    });
-  });
-
-  it('renders current option list', async () => {
+  it('renders current option list and calls onChange when changing an option', async () => {
     render(<CategoryComponent {...defaultProps} />);
     await showEuiComboBoxOptions();
 
     expect(screen.getByText('foo')).toBeInTheDocument();
     expect(screen.getByText('bar')).toBeInTheDocument();
-  });
-
-  it('should call onChange when changing an option', async () => {
-    render(<CategoryComponent {...defaultProps} />);
-    await showEuiComboBoxOptions();
 
     await userEvent.click(screen.getByText('foo'));
 

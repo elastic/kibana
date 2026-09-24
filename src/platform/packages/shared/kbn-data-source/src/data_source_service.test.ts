@@ -169,12 +169,15 @@ describe('DataSourceService', () => {
         resultColumns: [],
         timeFieldName: '@timestamp',
       });
-      const second = await EsqlSource.create({
-        query: 'FROM logs-*',
-        resultColumns: [],
-        timeFieldName: '@timestamp',
-      });
+      const second = first.withColumns([
+        {
+          id: 'message',
+          name: 'message',
+          meta: { type: 'string' },
+        },
+      ]);
       expect(first.id).toBe(second.id);
+      expect(first).not.toBe(second);
 
       service.registerEsqlSource(first);
       service.registerEsqlSource(second);

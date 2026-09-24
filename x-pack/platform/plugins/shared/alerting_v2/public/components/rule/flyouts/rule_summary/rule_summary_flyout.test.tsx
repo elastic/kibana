@@ -1,0 +1,482 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { EuiHealthProps } from '@elastic/eui';
+import { RuleSummaryFlyout } from './rule_summary_flyout';
+import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
+import type { RuleApiResponse } from '../../../../services/rules_api';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
+import { AlertingV2RulesLocatorDefinition } from '../../../../locators';
+
+const mockLocators = createMockLocators();
+
+// Real `EuiHealth` renders its `color` prop as an icon fill with no queryable text or
+// data-test-subj of its own, so the color mapping (e.g. success vs. danger) has no way to be
+// asserted through the public DOM without this. Forwards every other prop untouched.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiHealth: ({ color, children, ...rest }: EuiHealthProps) => (
+      <div {...rest} data-health-color={color}>
+        {children}
+      </div>
+    ),
+  };
+});
+
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  useRuleAutoAttach: jest.fn(),
+}));
+
+jest.mock('../../../../hooks/use_rule_audit_metadata', () => ({
+  useRuleAuditMetadata: () => ({
+    createdByDisplay: 'Alice',
+    createdAtFormatted: 'Mar 1, 2026',
+    updatedByDisplay: 'Bob',
+    updatedAtFormatted: 'Mar 4, 2026',
+  }),
+}));
+
+const mockUseFetchRuleExecutions = jest.fn();
+jest.mock('../../../../hooks/use_fetch_rule_executions', () => ({
+  useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
+}));
+
+jest.mock('../../../../services/user_capabilities', () => ({
+  UserCapabilities: 'UserCapabilities',
+}));
+
+jest.mock('@kbn/core-di-browser', () => {
+  const canRead = jest.fn(() => true);
+  return {
+    useService: (token: unknown) => {
+      if (token === 'http') {
+        return { basePath: { prepend: (p: string) => `/base${p}` } };
+      }
+      if (token === 'UserCapabilities') {
+        return { canRead, canWrite: () => true };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+    mockCanRead: canRead,
+  };
+});
+
+const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
+  mockCanRead: jest.Mock;
+};
+
+jest.mock('../../rule_conditions', () => ({
+  RuleConditions: ({ variant }: { variant?: string }) => (
+    <div data-test-subj="mockRuleConditions" data-variant={variant} />
+  ),
+}));
+
+jest.mock('../../../rule_details/overview/artifacts/dashboard_artifacts_subsection', () => ({
+  DashboardArtifactsSubsection: () => <div data-test-subj="mockDashboardArtifacts" />,
+}));
+
+jest.mock('../../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => ({
+  ActionPoliciesArtifactsSubsection: () => <div data-test-subj="mockActionPoliciesArtifacts" />,
+}));
+
+jest.mock('../../rule_summary/rule_summary_runbook_card', () => ({
+  RuleSummaryRunbookCard: () => <div data-test-subj="mockRunbookCard" />,
+}));
+
+const baseRule: RuleApiResponse = {
+  id: 'rule-1',
+  kind: 'alert',
+  enabled: true,
+  metadata: { name: 'My Rule', description: 'A rule description', version: 1 },
+  artifacts: [],
+  time_field: '@timestamp',
+  schedule: { every: '5m' },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM logs-* | LIMIT 1' },
+  },
+  created_by: { profile_uid: 'alice@example.com' },
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: { profile_uid: 'bob@example.com' },
+  updated_at: '2026-03-04T12:00:00.000Z',
+};
+
+const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
+
+const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
+  const props: RuleSummaryFlyoutProps = {
+    rule: baseRule,
+    onClose: jest.fn(),
+    onEdit: jest.fn(),
+    onClone: jest.fn(),
+    onDelete: jest.fn(),
+    onToggleEnabled: jest.fn(),
+    onRun: jest.fn(),
+    session: 'never',
+    ...overrides,
+  };
+
+  const utils = render(
+    <MockLocatorProvider locators={mockLocators}>
+      <I18nProvider>
+        <RuleSummaryFlyout {...props} />
+      </I18nProvider>
+    </MockLocatorProvider>
+  );
+
+  return { ...utils, props };
+};
+
+describe('RuleSummaryFlyout', () => {
+  beforeEach(() => {
+    mockCanRead.mockImplementation(() => true);
+    mockUseFetchRuleExecutions.mockReturnValue({
+      data: { items: [], total: 0, page: 1, per_page: 1 },
+      isLoading: false,
+      isError: false,
+    });
+  });
+
+  it('renders the template flyout with header, accordion sections, and take action', () => {
+    renderFlyout();
+
+    expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutHeader')).toHaveTextContent('My Rule');
+    expect(screen.getByTestId('ruleSummaryAbout')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDescription')).toHaveTextContent('A rule description');
+    expect(screen.getByTestId('ruleSummaryInvestigation')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryActionPolicies')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
+    expect(screen.getByTestId('mockRuleConditions')).toHaveAttribute('data-variant', 'summary');
+    expect(screen.getByTestId('mockDashboardArtifacts')).toBeInTheDocument();
+    expect(screen.getByTestId('mockActionPoliciesArtifacts')).toBeInTheDocument();
+    expect(screen.getByTestId('mockRunbookCard')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleSummaryFlyoutFooterCloseButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockRuleMetadata')).not.toBeInTheDocument();
+  });
+
+  it('omits action policies when the user cannot read them', () => {
+    mockCanRead.mockImplementation((capability: string) => capability !== 'actionPolicies');
+    renderFlyout();
+
+    expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockActionPoliciesArtifacts')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
+  });
+
+  it('shows last-update timestamp and audit info blocks in the header', () => {
+    renderFlyout();
+
+    expect(screen.getByText('Mar 4, 2026')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutCreatedByBlock')).toHaveTextContent('Alice');
+    expect(screen.getByTestId('ruleSummaryFlyoutUpdatedByBlock')).toHaveTextContent('Bob');
+  });
+
+  describe('Last execution info block', () => {
+    it('requests the single most recent execution for the rule', () => {
+      renderFlyout();
+
+      expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith({
+        ruleIds: ['rule-1'],
+        perPage: 1,
+        sort: 'startedAt',
+        sortOrder: 'desc',
+        enabled: true,
+      });
+    });
+
+    it('omits the block and disables the fetch when the user cannot read execution history', () => {
+      mockCanRead.mockImplementation((capability: string) => capability !== 'executionHistory');
+      renderFlyout();
+
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionBlock')).not.toBeInTheDocument();
+      expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
+
+    it('shows a success health dot when the last execution succeeded', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: { items: [{ outcome: 'success' }], total: 1, page: 1, per_page: 1 },
+        isLoading: false,
+        isError: false,
+      });
+      renderFlyout();
+
+      const status = screen.getByTestId('ruleSummaryFlyoutLastExecutionStatus');
+      expect(status).toHaveTextContent('Succeeded');
+      expect(status).toHaveAttribute('data-health-color', 'success');
+    });
+
+    it('shows a danger health dot when the last execution failed', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: { items: [{ outcome: 'failure' }], total: 1, page: 1, per_page: 1 },
+        isLoading: false,
+        isError: false,
+      });
+      renderFlyout();
+
+      const status = screen.getByTestId('ruleSummaryFlyoutLastExecutionStatus');
+      expect(status).toHaveTextContent('Failed');
+      expect(status).toHaveAttribute('data-health-color', 'danger');
+    });
+
+    it('shows a placeholder when the rule has no executions yet', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionBlock')).toHaveTextContent('-');
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionStatus')).not.toBeInTheDocument();
+    });
+
+    it('shows an unavailable indicator when the request fails, distinct from no executions', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+      });
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionError')).toHaveTextContent(
+        'Unavailable'
+      );
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionStatus')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionBlock')).not.toHaveTextContent('-');
+    });
+
+    it('shows a spinner while the fetch is in flight', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+      });
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionSpinner')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionStatus')).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls onClose when the flyout close button is clicked', () => {
+    const { props } = renderFlyout();
+
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+    expect(props.onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render any rule actions in the header', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('ruleSummaryFlyoutQuickEditButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
+  });
+
+  it('toggles enabled from the header switch', () => {
+    const { props } = renderFlyout();
+
+    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutEnabledSwitch'));
+
+    expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('replaces the switch with a spinner while the toggle is in flight', () => {
+    renderFlyout({ isToggleLoading: true });
+
+    expect(screen.getByTestId('ruleSummaryFlyoutEnabledSpinner')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleSummaryFlyoutEnabledSwitch')).not.toBeInTheDocument();
+  });
+
+  describe('Take action menu', () => {
+    const openMenu = () => fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
+
+    it('opens the View details item with a locator-built rule details href', () => {
+      const { rulesLocators } = mockLocators;
+      renderFlyout();
+      openMenu();
+
+      expect(rulesLocators.useUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' }, undefined, [
+        'rule-1',
+      ]);
+      expect(screen.getByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
+        'href',
+        '/mock-locator-url'
+      );
+    });
+
+    it('View details params resolve to management rule details URL', async () => {
+      renderFlyout();
+      openMenu();
+
+      const { rulesLocators } = mockLocators;
+      const useUrlCall = jest
+        .mocked(rulesLocators.useUrl)
+        .mock.calls.find(([p]) => p.ruleId === 'rule-1');
+      const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
+      expect(location).toMatchObject({
+        app: 'management',
+        path: '/alertingV2/rules/rule-1',
+      });
+    });
+
+    it('forwards the raw rule id to the details locator', () => {
+      const { rulesLocators } = mockLocators;
+      renderFlyout({
+        rule: { ...baseRule, id: 'rule with spaces/and slash' },
+      });
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
+
+      expect(rulesLocators.useUrl).toHaveBeenCalledWith(
+        {
+          ruleId: 'rule with spaces/and slash',
+        },
+        undefined,
+        ['rule with spaces/and slash']
+      );
+      expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute(
+        'href',
+        '/mock-locator-url'
+      );
+    });
+
+    it('rule id with special characters resolves to a properly encoded management URL', async () => {
+      renderFlyout({
+        rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
+      });
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
+
+      const { rulesLocators } = mockLocators;
+      const useUrlCall = jest
+        .mocked(rulesLocators.useUrl)
+        .mock.calls.find(([p]) => p.ruleId === 'rule with spaces/and slash');
+      const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
+      expect(location).toMatchObject({
+        app: 'management',
+        path: '/alertingV2/rules/rule%20with%20spaces%2Fand%20slash',
+      });
+    });
+
+    it('forwards write action callbacks with the rule', () => {
+      const { props } = renderFlyout({ onUpdateApiKey: jest.fn() });
+      openMenu();
+
+      fireEvent.click(screen.getByTestId('editRule-rule-1'));
+      expect(props.onEdit).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
+      expect(props.onClone).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+      expect(props.onRun).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+      expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('updateRuleApiKey-rule-1'));
+      expect(props.onUpdateApiKey).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
+      expect(props.onDelete).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('renders the actions in grouped order separated by dividers', () => {
+      renderFlyout({ onUpdateApiKey: jest.fn() });
+      openMenu();
+
+      const expectedOrder = [
+        'viewRuleDetails-rule-1',
+        'runRule-rule-1',
+        'editRule-rule-1',
+        'cloneRule-rule-1',
+        'toggleEnabledRule-rule-1',
+        'updateRuleApiKey-rule-1',
+        'deleteRule-rule-1',
+      ];
+      const panel = screen.getByTestId('viewRuleDetails-rule-1').closest('.euiContextMenuPanel');
+
+      const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
+        .map((element) => element.getAttribute('data-test-subj'))
+        .filter((testId) => expectedOrder.includes(testId ?? ''));
+      expect(renderedOrder).toEqual(expectedOrder);
+
+      // Two dividers: after Clone, and after Update API key.
+      expect(panel?.querySelectorAll('hr')).toHaveLength(2);
+    });
+
+    it('omits the update API key action when onUpdateApiKey is not provided', () => {
+      renderFlyout();
+      openMenu();
+
+      expect(screen.queryByTestId('updateRuleApiKey-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('shows only read actions when canWrite is false', () => {
+      renderFlyout({ canWrite: false, onViewChangeHistory: jest.fn() });
+      openMenu();
+
+      expect(screen.getByTestId('viewRuleDetails-rule-1')).toBeInTheDocument();
+      expect(screen.getByTestId('viewChangeHistoryRule-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('shows View change history in the read group when onViewChangeHistory is provided', () => {
+      const onViewChangeHistory = jest.fn();
+      renderFlyout({ onViewChangeHistory });
+      openMenu();
+
+      const changeHistory = screen.getByTestId('viewChangeHistoryRule-rule-1');
+      expect(changeHistory).toBeInTheDocument();
+
+      // View change history sits in the second group, after Clone and before Delete.
+      const panel = changeHistory.closest('.euiContextMenuPanel');
+      const readGroup = [
+        'viewRuleDetails-rule-1',
+        'editRule-rule-1',
+        'cloneRule-rule-1',
+        'viewChangeHistoryRule-rule-1',
+        'deleteRule-rule-1',
+      ];
+      const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
+        .map((element) => element.getAttribute('data-test-subj'))
+        .filter((testId) => readGroup.includes(testId ?? ''));
+      expect(renderedOrder).toEqual(readGroup);
+
+      fireEvent.click(changeHistory);
+      expect(onViewChangeHistory).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('omits View change history when onViewChangeHistory is not provided', () => {
+      renderFlyout();
+      openMenu();
+
+      expect(screen.queryByTestId('viewChangeHistoryRule-rule-1')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Agent Builder auto-attach', () => {
+    it('passes the loaded rule to useRuleAutoAttach', () => {
+      renderFlyout();
+
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
+    });
+  });
+});

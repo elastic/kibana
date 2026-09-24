@@ -21,19 +21,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { TraceWaterfall, createEsTraceFetcher, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import React, { useMemo } from 'react';
 import { buildAgentBuilderTracesIndexName } from '../../../../common/constants';
 import type { Signal } from '../../../../common/http_api/signals';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
-import {
-  humanizeQueryKind,
-  humanizeTagType,
-  signalTitle,
-  SIGNAL_STATUS_ERROR,
-} from './signal_format';
+import { humanizeQueryKind, tagLabel, signalTitle, SIGNAL_STATUS_ERROR } from './signal_format';
 
 const traceContainerStyle = css`
   height: 360px;
@@ -125,7 +122,7 @@ export const SignalDetailFlyout = ({
       title: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.field.agent', {
         defaultMessage: 'Agent',
       }),
-      description: `${signalData.agent.name} (${signalData.agent.class})`,
+      description: signalData.agent.name,
     },
     {
       title: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.field.producer', {
@@ -189,7 +186,7 @@ export const SignalDetailFlyout = ({
           {signal.tags.map((tag) => (
             <EuiFlexItem grow={false} key={tag}>
               <EuiBadge color="hollow" data-test-subj="contextSignalDetailTag">
-                {humanizeTagType(tag)}
+                {tagLabel(tag)}
               </EuiBadge>
             </EuiFlexItem>
           ))}
@@ -203,6 +200,10 @@ export const SignalDetailFlyout = ({
               isDisabled={!hasPrevious}
               onClick={() => onNavigate(index - 1)}
               data-test-subj="contextSignalDetailPreviousButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyoutSignalDetail,
+                action: CONTEXT_ENGINE_UI_EBT.action.signals.PREVIOUS,
+              })}
             >
               {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.previousButton', {
                 defaultMessage: 'Previous',
@@ -225,6 +226,10 @@ export const SignalDetailFlyout = ({
               isDisabled={!hasNext}
               onClick={() => onNavigate(index + 1)}
               data-test-subj="contextSignalDetailNextButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyoutSignalDetail,
+                action: CONTEXT_ENGINE_UI_EBT.action.signals.NEXT,
+              })}
             >
               {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.nextButton', {
                 defaultMessage: 'Next',

@@ -12,6 +12,7 @@ import {
   IMMUTABLE_RULE_FIELDS,
   isNoDataQueryConsistentWithStrategy,
   isNoDataQueryProvidedForStrategy,
+  isRecoveryTransitionConsistentWithStrategy,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isSignalQueryBreachOnly,
@@ -230,9 +231,9 @@ export function transformCreateRuleBodyToRuleSoAttributes(
   data: CreateRuleData,
   serverFields: {
     enabled: boolean;
-    createdBy: string | null;
+    createdBy: RuleSavedObjectAttributes['createdBy'];
     createdAt: string;
-    updatedBy: string | null;
+    updatedBy: RuleSavedObjectAttributes['updatedBy'];
     updatedAt: string;
     version: number;
   }
@@ -243,7 +244,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     metadata: {
       name: data.metadata.name,
       description: data.metadata.description,
-      owner: data.metadata.owner,
       tags: data.metadata.tags,
       builder_type: data.metadata.builder_type,
       version,
@@ -312,7 +312,11 @@ function resolveBuilderType(
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
   updateData: UpdateRuleData,
-  serverFields: { updatedBy: string | null; updatedAt: string; version: number }
+  serverFields: {
+    updatedBy: RuleSavedObjectAttributes['updatedBy'];
+    updatedAt: string;
+    version: number;
+  }
 ): RuleSavedObjectAttributes {
   const { version, ...restServerFields } = serverFields;
   return {
@@ -413,6 +417,13 @@ export function validateMergedRuleAttributes(
       code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
+    {
+      valid: isRecoveryTransitionConsistentWithStrategy(attrs),
+      message:
+        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+      code: ALERTING_ERROR_CODES.INVALID_STATE_TRANSITION_CONFIG,
+      details: { rule_id: ruleId },
+    },
   ];
 
   for (const invariant of invariants) {
@@ -440,7 +451,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     metadata: {
       name: attrs.metadata.name,
       description: attrs.metadata.description,
-      owner: attrs.metadata.owner,
       tags: attrs.metadata.tags,
       builder_type: attrs.metadata.builder_type,
       version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,

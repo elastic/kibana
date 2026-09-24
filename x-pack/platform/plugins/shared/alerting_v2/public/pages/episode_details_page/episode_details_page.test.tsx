@@ -20,11 +20,15 @@ import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fet
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
-import { TestProviders } from '../../test_utils/test_providers';
+import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
+import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
+import { createMockLocators, TestProviders } from '../../test_utils/test_providers';
 import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { EpisodeDetailsPage } from './episode_details_page';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
+
+const mockLocators = createMockLocators();
 
 const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
@@ -61,7 +65,6 @@ jest.mock('@kbn/core-di-browser', () => {
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
   useParams: jest.fn(),
 }));
 
@@ -74,6 +77,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions', () => 
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions'),
   useFetchGroupActions: jest.fn(),
 }));
 
@@ -101,7 +105,9 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/related_section', () 
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section', () => ({
-  AlertEpisodeRuleOverviewPanelSection: () => <div data-test-subj="stubRuleOverviewPanelSection" />,
+  AlertEpisodeRuleOverviewPanelSection: jest.fn(() => (
+    <div data-test-subj="stubRuleOverviewPanelSection" />
+  )),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/runbook_section', () => ({
@@ -117,7 +123,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_sec
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
-  AlertEpisodeMetadataSection: () => <div data-test-subj="stubMetadataSection" />,
+  AlertEpisodeMetadataSection: jest.fn(() => <div data-test-subj="stubMetadataSection" />),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_section', () => ({
@@ -138,7 +144,9 @@ const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);
 const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
 const mockUseFetchRule = jest.mocked(useFetchRule);
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
+const mockMetadataSection = jest.mocked(AlertEpisodeMetadataSection);
 const mockUseEpisodeAutoAttach = jest.mocked(useEpisodeAutoAttach);
+const mockRuleOverviewPanelSection = jest.mocked(AlertEpisodeRuleOverviewPanelSection);
 
 type EpisodeQueryResult = ReturnType<typeof useFetchEpisodeQuery>;
 type FetchRuleResult = ReturnType<typeof useFetchRule>;
@@ -195,7 +203,7 @@ const episodeId = 'ep-1';
 const renderPage = () =>
   render(
     <MockChromeContextProvider>
-      <TestProviders>
+      <TestProviders locators={mockLocators}>
         <MemoryRouter>
           <EpisodeDetailsPage />
         </MemoryRouter>
@@ -228,7 +236,7 @@ beforeEach(() => {
   mockUseFetchGroupActions.mockReturnValue({
     data: new Map([
       [
-        'group-1',
+        'rule-1:group-1',
         {
           groupHash: 'group-1',
           ruleId: 'rule-1',
@@ -271,20 +279,101 @@ describe('EpisodeDetailsPage', () => {
     expect(screen.getByTestId('stubTimelineHeatmapsSection')).toBeInTheDocument();
   });
 
+  it('passes a host-aware getRuleDetailsHref to the rule overview panel', () => {
+    renderPage();
+
+    expect(mockRuleOverviewPanelSection).toHaveBeenCalledWith(
+      expect.objectContaining({ getRuleDetailsHref: expect.any(Function) }),
+      expect.anything()
+    );
+    const { getRuleDetailsHref } = mockRuleOverviewPanelSection.mock.calls[0][0] as {
+      getRuleDetailsHref: (ruleId: string) => string;
+    };
+    expect(getRuleDetailsHref('rule-1')).toBe('/mock-locator-url');
+    expect(mockLocators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+  });
+
   it('renders the app header title, tabs, back link, and badges', () => {
+    const { episodesLocators } = mockLocators;
     renderPage();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rule A');
     expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabOverview')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabMetadata')).toBeInTheDocument();
+    expect(episodesLocators.useUrl).toHaveBeenCalledWith({});
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
-      '/app/management/alertingV2/episodes'
+      '/mock-locator-url'
     );
     // Badge label/color mapping per status and severity is covered by get_episode_header_badges.test.ts;
     // this just proves the header is wired up to badges at all.
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(
       'Active'
+    );
+  });
+
+  it('prefers rule-scoped group actions for group-derived header state', () => {
+    mockUseFetchGroupActions.mockReturnValue({
+      data: new Map([
+        [
+          'rule-1:group-1',
+          {
+            groupHash: 'group-1',
+            ruleId: 'rule-1',
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            lastSnoozeAction: null,
+            snoozeExpiry: null,
+            tags: [],
+            lastSnoozeActor: null,
+            lastDeactivateActor: null,
+          },
+        ],
+        [
+          ':group-1',
+          {
+            groupHash: 'group-1',
+            ruleId: null,
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+            lastSnoozeAction: null,
+            snoozeExpiry: null,
+            tags: [],
+            lastSnoozeActor: null,
+            lastDeactivateActor: null,
+          },
+        ],
+      ]),
+    } as unknown as ReturnType<typeof useFetchGroupActions>);
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(
+      'Inactive'
+    );
+  });
+
+  it('uses legacy group actions without a rule id for group-derived header state', () => {
+    mockUseFetchGroupActions.mockReturnValue({
+      data: new Map([
+        [
+          ':group-1',
+          {
+            groupHash: 'group-1',
+            ruleId: null,
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            lastSnoozeAction: null,
+            snoozeExpiry: null,
+            tags: [],
+            lastSnoozeActor: null,
+            lastDeactivateActor: null,
+          },
+        ],
+      ]),
+    } as unknown as ReturnType<typeof useFetchGroupActions>);
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(
+      'Inactive'
     );
   });
 
@@ -300,6 +389,21 @@ describe('EpisodeDetailsPage', () => {
     expect(
       screen.getByTestId('alertingV2EpisodeDetailsMainTabActionPolicyHistory')
     ).toBeInTheDocument();
+  });
+
+  it('activates the document viewer flex layout on the metadata tab', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByTestId('alertingV2EpisodeDetailsMainTabMetadata'));
+
+    const metadataSection = screen.getByTestId('stubMetadataSection');
+    expect(metadataSection.parentElement).toHaveStyleRule('block-size', '100%');
+    expect(metadataSection.parentElement).toHaveStyleRule('min-block-size', '0');
+    expect(metadataSection.parentElement?.parentElement).toHaveStyleRule('min-block-size', '0');
+    expect(mockMetadataSection).toHaveBeenCalledWith(
+      expect.objectContaining({ decreaseAvailableHeightBy: Number.MAX_SAFE_INTEGER }),
+      expect.anything()
+    );
   });
 
   it('shows the action policy history content when its tab is selected', async () => {
@@ -465,6 +569,11 @@ describe('EpisodeDetailsPage', () => {
     renderPage();
 
     expect(screen.getByTestId('episodeDetailsErrorPrompt')).toBeInTheDocument();
+    expect(mockLocators.episodesLocators.useUrl).toHaveBeenCalledWith({});
+    expect(screen.getByTestId('episodeDetailsErrorBackButton')).toHaveAttribute(
+      'href',
+      '/mock-locator-url'
+    );
   });
 
   it('renders the error prompt when the episode query errors', () => {
@@ -519,7 +628,7 @@ describe('EpisodeDetailsPage', () => {
     it('passes the next episode when the episode id changes', () => {
       const { rerender } = render(
         <MockChromeContextProvider>
-          <TestProviders>
+          <TestProviders locators={mockLocators}>
             <MemoryRouter>
               <EpisodeDetailsPage />
             </MemoryRouter>
@@ -536,7 +645,7 @@ describe('EpisodeDetailsPage', () => {
 
       rerender(
         <MockChromeContextProvider>
-          <TestProviders>
+          <TestProviders locators={mockLocators}>
             <MemoryRouter>
               <EpisodeDetailsPage />
             </MemoryRouter>

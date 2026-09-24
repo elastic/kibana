@@ -19,6 +19,7 @@ import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
+import { formatMatcher } from '../common/format_matcher';
 
 interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
@@ -36,7 +37,7 @@ const formatActionPolicyDescription = (
     workflowIds.length > 0
       ? `${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`
       : 'none';
-  const matcherSnippet = data.matcher ? `"${data.matcher}"` : 'match all (catch-all)';
+  const matcherSnippet = data.matcher ? formatMatcher(data.matcher) : 'match all (catch-all)';
   const grouping = data.grouping_mode ?? 'per_episode';
   const throttle = data.throttle?.strategy ?? 'none';
 
@@ -46,8 +47,7 @@ Destinations: ${destinationSummary}
 Matcher: ${matcherSnippet}
 Grouping: ${grouping}
 Throttle: ${throttle}
-${data.description ? `Description: ${data.description}` : ''}
-${data.tags?.length ? `Tags: ${data.tags.join(', ')}` : ''}`.trim();
+${data.description ? `Description: ${data.description}` : ''}`.trim();
 };
 
 export const createActionPolicyAttachmentType = ({

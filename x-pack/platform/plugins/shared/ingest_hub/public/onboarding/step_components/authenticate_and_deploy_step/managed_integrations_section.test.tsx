@@ -27,6 +27,14 @@ jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
 
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn(),
+}));
+
+jest.mock('./static_keys_replace_view', () => ({
+  StaticKeysReplaceView: jest.fn(),
+}));
+
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useGetPackageInfoByKeyQuery,
@@ -34,7 +42,13 @@ import {
   LazyAwsIdentityFederationSetup,
   LazyAwsStaticKeysForm,
 } from '@kbn/fleet-plugin/public';
+import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useLocation } from 'react-router-dom';
+import { StaticKeysReplaceView } from './static_keys_replace_view';
+
+const mockUseLocation = useLocation as jest.Mock;
+const MockStaticKeysReplaceView = StaticKeysReplaceView as unknown as jest.Mock;
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
@@ -47,27 +61,67 @@ const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 
 import { ManagedIntegrationsSection } from './managed_integrations_section';
 
+const IAC_INTEGRATIONS: RenderIacTemplateIntegration[] = [
+  { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
+];
+
 function setupMocks({
   cloud = undefined,
   setConnectorId = jest.fn(),
+  setStaticKeys = jest.fn(),
+  setPendingIacTemplate = jest.fn(),
   connectorId = undefined,
-}: { cloud?: object; setConnectorId?: jest.Mock; connectorId?: string } = {}) {
+  authMethod = undefined,
+  searchParams = '',
+}: {
+  cloud?: object;
+  setConnectorId?: jest.Mock;
+  setStaticKeys?: jest.Mock;
+  setPendingIacTemplate?: jest.Mock;
+  connectorId?: string;
+  authMethod?: 'identity_federation' | 'static_keys';
+  searchParams?: string;
+} = {}) {
   mockUseKibana.mockReturnValue({ services: { cloud } });
   mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: undefined });
   mockGetAnyCloudConnectorIacTemplateUrl.mockReturnValue(undefined);
+  mockUseLocation.mockReturnValue({ search: searchParams });
   mockUseOnboardingFlow.mockReturnValue({
     setConnectorId,
-    authenticateAndDeployStep: { connectorId },
+    setStaticKeys,
+    setPendingIacTemplate,
+    authenticateAndDeployStep: { connectorId, authMethod },
+    awsServicesMap: new Map([
+      [
+        'guardduty',
+        {
+          id: 'guardduty',
+          packageName: 'aws',
+          dataStreams: ['guardduty'],
+          inputs: ['aws-s3', 'httpjson'],
+          identityFederationSupported: true,
+        },
+      ],
+    ]),
   });
 
   MockIdentityFederation.mockImplementation(
     ({
       onReadyChange,
       onConnectorIdChange,
+      onIacTemplateRecorded,
       initialConnectorId: initId,
     }: {
       onReadyChange?: (v: boolean) => void;
       onConnectorIdChange?: (id: string | undefined, name?: string) => void;
+      onIacTemplateRecorded?: (
+        iac: {
+          iac_key: string;
+          iac_blueprint_id?: string;
+          iac_blueprint_version?: string;
+        },
+        launchedFor: { cloudConnectorId: string; integrations: RenderIacTemplateIntegration[] }
+      ) => void;
       initialConnectorId?: string;
     }) => (
       <div data-test-subj="identity-federation">
@@ -75,14 +129,58 @@ function setupMocks({
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
         <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
+        <button
+          onClick={() =>
+            onIacTemplateRecorded?.(
+              {
+                iac_key: 'sha256:new',
+                iac_blueprint_id: 'federated-identity',
+                iac_blueprint_version: '1.0.0',
+              },
+              { cloudConnectorId: 'launched-for-connector', integrations: IAC_INTEGRATIONS }
+            )
+          }
+        >
+          record-template
+        </button>
       </div>
     )
   );
 
   MockStaticKeys.mockImplementation(
-    ({ onReadyChange }: { onReadyChange?: (v: boolean) => void }) => (
+    ({
+      onReadyChange,
+      onFieldsChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onFieldsChange?: (f: unknown) => void;
+    }) => (
       <div data-test-subj="static-keys">
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
+        <button
+          onClick={() => onFieldsChange?.({ access_key_id: 'AKIA', secret_access_key: 'secret' })}
+        >
+          fire-fields
+        </button>
+      </div>
+    )
+  );
+
+  MockStaticKeysReplaceView.mockImplementation(
+    ({
+      onReadyChange,
+      onFieldsChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onFieldsChange?: (f: unknown) => void;
+    }) => (
+      <div data-test-subj="static-keys-replace-view">
+        <button onClick={() => onReadyChange?.(true)}>replace-ready</button>
+        <button
+          onClick={() => onFieldsChange?.({ access_key_id: 'NEW', secret_access_key: 'newsecret' })}
+        >
+          replace-fields
+        </button>
       </div>
     )
   );
@@ -92,6 +190,7 @@ function renderSection(
   props: {
     serviceCount?: number;
     showIdentityFederation?: boolean;
+    iacIntegrations?: RenderIacTemplateIntegration[];
     onDeploy?: () => void;
     isDeploying?: boolean;
     isDone?: boolean;
@@ -104,6 +203,7 @@ function renderSection(
         <ManagedIntegrationsSection
           serviceCount={props.serviceCount ?? 3}
           showIdentityFederation={props.showIdentityFederation ?? true}
+          iacIntegrations={props.iacIntegrations ?? IAC_INTEGRATIONS}
           onDeploy={props.onDeploy ?? jest.fn()}
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
@@ -238,6 +338,33 @@ describe('ManagedIntegrationsSection', () => {
     });
   });
 
+  describe('Federated Identity template details', () => {
+    // The Existing Identity check hands the rendered key here instead of writing the connector;
+    // it is parked on the flow for the post-Deploy write.
+    it('parks the rendered template details tagged with the identity and set the render was launched for, not the ones selected', () => {
+      // The render is asynchronous: the user may select another identity or change the enabled
+      // inputs before it lands. The flow carries 'persisted-connector' now, but the details belong
+      // to the identity and set whose Update started the render; Deploy only writes them when
+      // both match.
+      const setPendingIacTemplate = jest.fn();
+      setupMocks({ setPendingIacTemplate, connectorId: 'persisted-connector' });
+      renderSection({ showIdentityFederation: true });
+
+      act(() => {
+        fireEvent.click(screen.getByText('record-template'));
+      });
+
+      expect(setPendingIacTemplate).toHaveBeenCalledTimes(1);
+      expect(setPendingIacTemplate).toHaveBeenCalledWith({
+        connectorId: 'launched-for-connector',
+        integrationsKey: JSON.stringify(IAC_INTEGRATIONS),
+        iac_key: 'sha256:new',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
+    });
+  });
+
   describe('initialConnectorId restoration', () => {
     it('passes persisted connectorId as initialConnectorId to AwsIdentityFederationSetup', () => {
       setupMocks({ connectorId: 'persisted-connector' });
@@ -325,6 +452,7 @@ describe('ManagedIntegrationsSection', () => {
               <ManagedIntegrationsSection
                 serviceCount={3}
                 showIdentityFederation={true}
+                iacIntegrations={IAC_INTEGRATIONS}
                 onDeploy={jest.fn()}
                 isDeploying={false}
                 isDone={true}
@@ -366,6 +494,56 @@ describe('ManagedIntegrationsSection', () => {
     it('renders plural "services" label for count > 1', () => {
       renderSection({ serviceCount: 5 });
       expect(screen.getByText('5 services')).toBeInTheDocument();
+    });
+  });
+
+  describe('static-keys edit mode (isStaticKeysEditMode)', () => {
+    it('shows StaticKeysReplaceView when ?deploymentId= in URL and no connectorId', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByTestId('static-keys-replace-view')).toBeInTheDocument();
+      expect(screen.queryByTestId('static-keys')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
+    });
+
+    it('shows LazyAwsStaticKeysForm (not replace view) when no deploymentId in URL', () => {
+      setupMocks({ searchParams: '', connectorId: undefined });
+      renderSection({ showIdentityFederation: false });
+      expect(screen.getByTestId('static-keys')).toBeInTheDocument();
+      expect(screen.queryByTestId('static-keys-replace-view')).not.toBeInTheDocument();
+    });
+
+    it('initialises preferredMethod to access_keys on static-keys resume', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: true });
+      const radio = screen.getByRole('radio', { name: /access keys/i }) as HTMLInputElement;
+      expect(radio.checked).toBe(true);
+    });
+
+    it('onFieldsChange on StaticKeysReplaceView calls setStaticKeys', () => {
+      const setStaticKeys = jest.fn();
+      setupMocks({
+        searchParams: '?deploymentId=dep-123',
+        authMethod: 'static_keys',
+        setStaticKeys,
+      });
+      renderSection({ showIdentityFederation: true });
+      fireEvent.click(screen.getByText('replace-fields'));
+      expect(setStaticKeys).toHaveBeenCalledWith({
+        access_key_id: 'NEW',
+        secret_access_key: 'newsecret',
+      });
+    });
+
+    it('onFieldsChange on LazyAwsStaticKeysForm calls setStaticKeys', () => {
+      const setStaticKeys = jest.fn();
+      setupMocks({ searchParams: '', connectorId: undefined, setStaticKeys });
+      renderSection({ showIdentityFederation: false });
+      fireEvent.click(screen.getByText('fire-fields'));
+      expect(setStaticKeys).toHaveBeenCalledWith({
+        access_key_id: 'AKIA',
+        secret_access_key: 'secret',
+      });
     });
   });
 });

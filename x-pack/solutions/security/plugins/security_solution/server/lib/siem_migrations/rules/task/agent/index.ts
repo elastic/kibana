@@ -6,3 +6,4 @@
  */
 
 export { getRuleMigrationAgent } from './graph';
+export { getRuleMigrationAgentV2 } from './graph_v2';

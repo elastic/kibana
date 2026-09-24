@@ -22,7 +22,6 @@ describe('rule_request_mappers', () => {
     metadata: {
       name: 'Test Rule',
       enabled: true,
-      owner: 'test-owner',
       tags: ['tag1', 'tag2'],
     },
     timeField: '@timestamp',
@@ -40,7 +39,7 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(baseFormValues);
 
       expect(result).toEqual({
-        metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1', 'tag2'] },
+        metadata: { name: 'Test Rule', tags: ['tag1', 'tag2'] },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
         query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
@@ -91,7 +90,6 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
-        recovering_count: 0,
       });
     });
 
@@ -106,7 +104,7 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 5, recovering_count: 0 });
+      expect(result.state_transition).toEqual({ pending_count: 5 });
       expect(result.state_transition).not.toHaveProperty('pending_timeframe');
     });
 
@@ -122,10 +120,11 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toBeUndefined();
     });
 
-    it('emits pending_count: 0 and recovering_count: 0 for alert kind when both modes are immediate', () => {
+    it('emits pending_count: 0 and recovering_count: 0 for an alert with recovery enabled when both modes are immediate', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        recoveryStrategy: 'no_breach',
         stateTransition: {},
       };
 
@@ -134,7 +133,19 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
     });
 
-    it('emits pending_count: 0 and recovering_count: 0 for alert kind when stateTransition is undefined', () => {
+    it('omits recovering_count for an alert when recovery is disabled and both modes are immediate', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        stateTransition: {},
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition).toEqual({ pending_count: 0 });
+    });
+
+    it('omits recovering_count for an alert when recovery is disabled and stateTransition is undefined', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
@@ -142,13 +153,29 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
+      expect(result.state_transition).toEqual({ pending_count: 0 });
+    });
+
+    it('omits recovering fields when recovery_strategy is "none" even if recovering values are set', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        recoveryStrategy: 'none',
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'duration',
+        stateTransition: { recoveringCount: 3, recoveringTimeframe: '5m' },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition).toEqual({ pending_count: 0 });
     });
 
     it('emits pending_count: 0 when alert delay mode is immediate even if pendingCount is stale', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        recoveryStrategy: 'no_breach',
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: {
@@ -169,6 +196,7 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        recoveryStrategy: 'no_breach',
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'duration',
         stateTransition: { recoveringCount: 4, recoveringTimeframe: '15m' },
@@ -187,6 +215,7 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        recoveryStrategy: 'no_breach',
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 3 },
@@ -202,6 +231,7 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        recoveryStrategy: 'no_breach',
         stateTransitionAlertDelayMode: 'breaches',
         stateTransitionRecoveryDelayMode: 'duration',
         stateTransition: {
@@ -227,7 +257,6 @@ describe('rule_request_mappers', () => {
           name: 'My Rule',
           enabled: false,
           description: 'A description',
-          owner: 'owner',
           tags: [],
         },
       };
@@ -237,7 +266,6 @@ describe('rule_request_mappers', () => {
       expect(result.metadata).toEqual({
         name: 'My Rule',
         description: 'A description',
-        owner: 'owner',
       });
       expect(result.metadata).not.toHaveProperty('enabled');
       expect(result.metadata).not.toHaveProperty('tags');
@@ -551,7 +579,6 @@ describe('rule_request_mappers', () => {
       expect(result.kind).toBe('signal');
       expect(result.metadata).toEqual({
         name: 'Test Rule',
-        owner: 'test-owner',
         tags: ['tag1', 'tag2'],
       });
       expect(result.time_field).toBe('@timestamp');
@@ -670,7 +697,6 @@ describe('rule_request_mappers', () => {
 
       expect(result.metadata).toEqual({
         name: 'Test Rule',
-        owner: 'test-owner',
         tags: ['tag1', 'tag2'],
       });
       expect(result.time_field).toBe('@timestamp');
@@ -746,7 +772,6 @@ describe('rule_request_mappers', () => {
       enabled: true,
       metadata: {
         name: 'Test Rule',
-        owner: 'test-owner',
         tags: ['tag1'],
       },
       time_field: '@timestamp',
@@ -768,7 +793,6 @@ describe('rule_request_mappers', () => {
       expect(result.metadata).toEqual({
         name: 'Test Rule',
         enabled: true,
-        owner: 'test-owner',
         tags: ['tag1'],
       });
       expect(result.stateTransitionAlertDelayMode).toBe('immediate');
@@ -1006,10 +1030,11 @@ describe('rule_request_mappers', () => {
         breach: { query: 'FROM logs-* | STATS count() BY host' },
       });
       expect(createPayload.grouping).toEqual({ fields: ['host.name'] });
+      // baseRuleResponse has no recovery_strategy, so recovery is disabled and the
+      // inert recovering_count is not emitted.
       expect(createPayload.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
-        recovering_count: 0,
       });
     });
   });

@@ -9,7 +9,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../../common/constants';
+import { MAX_IAC_RENDER_INTEGRATIONS } from '../../../../common/types/rest_spec/iac_provisioner';
 import { apiTest, testData } from '../fixtures';
+
+const { VALID_RENDER_BODY } = testData;
 
 /**
  * API coverage for the internal IaC Provisioner render route.
@@ -47,11 +50,7 @@ apiTest.describe(
 
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-          body: {
-            provider: 'aws',
-            flow: 'cloud_connector',
-            integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
-          },
+          body: VALID_RENDER_BODY,
           responseType: 'json',
         });
 
@@ -66,7 +65,24 @@ apiTest.describe(
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
           provider: 'aws',
-          integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
+          workflow: 'federated_identity',
+          integrations: VALID_RENDER_BODY.integrations,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+    });
+
+    apiTest('returns 400 when workflow is missing', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
+
+      const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+        body: {
+          provider: 'aws',
+          flow: 'cloud_connector',
+          integrations: VALID_RENDER_BODY.integrations,
         },
         responseType: 'json',
       });
@@ -80,8 +96,7 @@ apiTest.describe(
       const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
-          provider: 'aws',
-          flow: 'cloud_connector',
+          ...VALID_RENDER_BODY,
           integrations: [],
         },
         responseType: 'json',
@@ -91,18 +106,17 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns 400 when more than 10 integrations are sent',
+      'returns 400 when more integrations than the render limit are sent',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
 
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
           body: {
-            provider: 'aws',
-            flow: 'cloud_connector',
-            integrations: Array.from({ length: 11 }, (_, i) => ({
+            ...VALID_RENDER_BODY,
+            integrations: Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS + 1 }, (_, i) => ({
               name: `pkg_${i}`,
-              policyTemplates: ['tpl'],
+              policyTemplates: [{ name: 'tpl', enabledInputs: ['input'] }],
             })),
           },
           responseType: 'json',
@@ -113,17 +127,37 @@ apiTest.describe(
     );
 
     apiTest(
+      'accepts exactly the render limit of integrations and reaches the handler',
+      async ({ apiClient, samlAuth }) => {
+        // The boundary itself must pass schema validation: a stale lower cap would answer 400
+        // here, while a payload of unknown packages that reaches the handler answers 404.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
+
+        const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
+          headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+          body: {
+            ...VALID_RENDER_BODY,
+            integrations: Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS }, (_, i) => ({
+              name: `this_package_does_not_exist_${i}`,
+              policyTemplates: [{ name: 'tpl', enabledInputs: ['input'] }],
+            })),
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(404);
+        expect(response.body.message).toContain('this_package_does_not_exist');
+      }
+    );
+
+    apiTest(
       'returns 404 for an authorized request naming an unknown package',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
 
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-          body: {
-            provider: 'aws',
-            flow: 'cloud_connector',
-            integrations: [{ name: 'this_package_does_not_exist', policyTemplates: ['whatever'] }],
-          },
+          body: VALID_RENDER_BODY,
           responseType: 'json',
         });
 

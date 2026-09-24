@@ -1,5 +1,5 @@
 {
-  "sha1": "8f7ce3a09b5c9b43e65247c38dab034c7d637fad",
+  "sha1": "b3e364e4c193c9610b64fe042a1c13d8316b3bfb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -24,7 +24,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.setup.ts",
-        "line": 47,
+        "line": 55,
         "column": 5
       }
     },
@@ -137,6 +137,215 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/date_nanos_mixed.spec.ts",
         "line": 28,
         "column": 23
+      }
+    },
+    {
+      "id": "99b156606a173cd-ef103b49efde01e",
+      "title": "Discover app - accessibility has no automated a11y violations on the main page or after starting a new search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 31,
+        "column": 23
+      }
+    },
+    {
+      "id": "99b156606a173cd-5ea7b01d898f8d2",
+      "title": "Discover app - accessibility has no automated a11y violations in the save flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 37,
+        "column": 29
+      }
+    },
+    {
+      "id": "99b156606a173cd-a5581524b2a9e0c",
+      "title": "Discover app - accessibility has no automated a11y violations in the top nav overlays",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "99b156606a173cd-02f828082c25579",
+      "title": "Discover app - accessibility has no automated a11y violations in the histogram interval selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 112,
+        "column": 47
+      }
+    },
+    {
+      "id": "99b156606a173cd-d2b7927e9ba6fff",
+      "title": "Discover app - accessibility has no automated a11y violations in the field statistics view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 120,
+        "column": 11
+      }
+    },
+    {
+      "id": "99b156606a173cd-056864d6f4b48e8",
+      "title": "Discover app - accessibility has no automated a11y violations in the field editor opened from the sidebar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 126,
+        "column": 13
+      }
+    },
+    {
+      "id": "36010fca82c109c-a24da44fb7bfb4f",
+      "title": "Discover by-value session dashboard editing discards edits when cancelling a by-value panel edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 21,
+        "column": 35
+      }
+    },
+    {
+      "id": "36010fca82c109c-6796ac910365984",
+      "title": "Discover by-value session dashboard editing keeps the library session unchanged when editing a by-value panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 34,
+        "column": 25
+      }
+    },
+    {
+      "id": "36010fca82c109c-77a46234531c598",
+      "title": "Discover by-value session dashboard editing opens a normal Discover session when saving a by-value edit as new",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 63,
+        "column": 15
+      }
+    },
+    {
+      "id": "7df104855764c8e-f4db7af9bba3c57",
+      "title": "Discover session dashboard filter actions propagates embeddable cell actions to the dashboard filter bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_filter_actions.spec.ts",
+        "line": 31,
+        "column": 53
+      }
+    },
+    {
+      "id": "d3cc86bf46b2cb3-41c3d67e462a43f",
+      "title": "Discover session panel interactions surfaces an invalid KQL error in a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_interactions.spec.ts",
+        "line": 27,
+        "column": 33
+      }
+    },
+    {
+      "id": "d3cc86bf46b2cb3-2169dcf36842d37",
+      "title": "Discover session panel interactions persists rows per page after saving and reloading a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_interactions.spec.ts",
+        "line": 35,
+        "column": 80
+      }
+    },
+    {
+      "id": "a4d2eecd9e86c4a-5d3afc68384d956",
+      "title": "Discover linked session dashboard editing resets to a normal Discover session after leaving a dashboard edit session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_linked_editing.spec.ts",
+        "line": 21,
+        "column": 35
+      }
+    },
+    {
+      "id": "a4d2eecd9e86c4a-e1c11c2dfd695f0",
+      "title": "Discover linked session dashboard editing saves a linked session edit and returns to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_linked_editing.spec.ts",
+        "line": 32,
+        "column": 65
+      }
+    },
+    {
+      "id": "a4d2eecd9e86c4a-24be8364bbf1c34",
+      "title": "Discover linked session dashboard editing opens a normal Discover session when saving a linked edit as new",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_linked_editing.spec.ts",
+        "line": 53,
+        "column": 36
       }
     },
     {
@@ -365,7 +574,7 @@
     {
       "id": "fe34af9a42f72c8-ee5129ba3bf4fb8",
       "title": "histogram session persists hide/show of the histogram on a saved session",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -379,13 +588,13 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
         "line": 57,
-        "column": 25
+        "column": 5
       }
     },
     {
       "id": "fe34af9a42f72c8-0f924eaa59f134e",
       "title": "histogram session does not keep a hidden histogram after visiting Dashboard",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -398,14 +607,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
-        "line": 74,
-        "column": 18
+        "line": 75,
+        "column": 24
       }
     },
     {
       "id": "fe34af9a42f72c8-c22337a0b174568",
       "title": "histogram session reverts breakdown, interval, and visibility on a saved session",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -419,13 +628,13 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
         "line": 96,
-        "column": 5
+        "column": 25
       }
     },
     {
       "id": "fe34af9a42f72c8-699c0239120cd5d",
       "title": "histogram session persists the chart interval on a saved session",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -439,13 +648,13 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
         "line": 120,
-        "column": 5
+        "column": 25
       }
     },
     {
       "id": "fe34af9a42f72c8-a45ff8bdeb8c9d0",
       "title": "histogram session clears the chart interval on a saved session",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -459,7 +668,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
         "line": 127,
-        "column": 9
+        "column": 22
       }
     },
     {
@@ -538,8 +747,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
-        "line": 59,
-        "column": 20
+        "line": 63,
+        "column": 18
       }
     },
     {
@@ -558,7 +767,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
-        "line": 88,
+        "line": 92,
         "column": 25
       }
     },
@@ -578,8 +787,48 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
-        "line": 107,
+        "line": 111,
         "column": 11
+      }
+    },
+    {
+      "id": "e63dc63a751efba-4b6cb42aaa57ae0",
+      "title": "histogram recovers the histogram after an empty time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
+        "line": 122,
+        "column": 5
+      }
+    },
+    {
+      "id": "e63dc63a751efba-97566dbbe775245",
+      "title": "histogram keeps a narrowed histogram time range after save and reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
+        "line": 145,
+        "column": 25
       }
     },
     {
@@ -895,6 +1144,19 @@
       }
     },
     {
+      "id": "afc4eaebb20dbf9-b29513722402475",
+      "title": "Discover saved queries - accessibility has no automated a11y violations across the saved query lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/saved_queries_accessibility.spec.ts",
+        "line": 51,
+        "column": 5
+      }
+    },
+    {
       "id": "13f370e4ae504b7-d0060d150395e69",
       "title": "Discover app - saved searches should customize time range on dashboards",
       "expectedStatus": "passed",
@@ -1167,6 +1429,106 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/value_suggestions.spec.ts",
         "line": 38,
         "column": 31
+      }
+    },
+    {
+      "id": "fc345810e00ce81-99241b2825e1659",
+      "title": "Discover field visualization opens a field in Lens with its suggested dimensions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 21,
+        "column": 62
+      }
+    },
+    {
+      "id": "fc345810e00ce81-1a967194d22c5a4",
+      "title": "Discover field visualization preserves filters when visualizing a field in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 27,
+        "column": 56
+      }
+    },
+    {
+      "id": "fc345810e00ce81-9cace5d69607ce2",
+      "title": "Discover field visualization preserves the query when visualizing a field in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 43,
+        "column": 80
+      }
+    },
+    {
+      "id": "fc345810e00ce81-b1451f0b0148f03",
+      "title": "Discover field visualization opens the histogram breakdown in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 46,
+        "column": 21
+      }
+    },
+    {
+      "id": "fc345810e00ce81-4a9a42db690384e",
+      "title": "Discover field visualization preserves an ad hoc data view when opening the histogram in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 61,
+        "column": 38
       }
     },
     {

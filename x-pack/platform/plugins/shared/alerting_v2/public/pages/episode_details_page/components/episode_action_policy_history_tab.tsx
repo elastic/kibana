@@ -6,18 +6,12 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import {
-  EuiPanel,
-  EuiSpacer,
-  useEuiMinBreakpoint,
-  type CriteriaWithPagination,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, useEuiMinBreakpoint } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyDetailsFlyoutContainer } from '../../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { useFetchExecutionHistory } from '../../../hooks/use_fetch_execution_history';
-import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
 import {
   ExecutionHistoryErrorState,
   ExecutionHistorySearchBar,
@@ -58,7 +52,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
     search: searchParam,
     outcome: outcomeParam,
     episodeIds: [episodeId],
-    startDate: episodeStart,
+    from: episodeStart,
   });
 
   const onSearchChange = useCallback((value: string) => {
@@ -71,18 +65,14 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
     setPage(0);
   }, []);
 
-  const onTableChange = useCallback(
-    ({ page: tablePage }: CriteriaWithPagination<PolicyExecutionHistoryItem>) => {
-      if (tablePage) {
-        setPage(tablePage.index);
-        setPerPage(tablePage.size);
-      }
-    },
-    [setPage, setPerPage]
-  );
+  const onChangePage = useCallback((pageIndex: number) => setPage(pageIndex), []);
+  const onChangeItemsPerPage = useCallback((size: number) => {
+    setPerPage(size);
+    setPage(0);
+  }, []);
 
   const items = data?.items ?? [];
-  const totalEvents = data?.total_events ?? 0;
+  const totalEvents = data?.total ?? 0;
   const isFiltered = searchParam !== undefined || outcome !== DEFAULT_OUTCOME;
 
   return (
@@ -118,10 +108,11 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
             )}
             items={items}
             loading={isFetching}
-            pageIndex={page}
-            pageSize={perPage}
-            totalItemCount={totalEvents}
-            onChange={onTableChange}
+            page={page}
+            perPage={perPage}
+            total={totalEvents}
+            onChangePage={onChangePage}
+            onChangeItemsPerPage={onChangeItemsPerPage}
             onPolicyClick={setPolicyToViewId}
             noItemsMessage={isFiltered ? <FilteredEmptyState /> : <PoliciesEmptyState />}
             showEpisodeColumns={false}

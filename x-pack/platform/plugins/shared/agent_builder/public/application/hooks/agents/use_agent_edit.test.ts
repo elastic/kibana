@@ -91,6 +91,14 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     });
   });
 
+  it('defaults a brand-new agent to no connectors', () => {
+    const { result } = renderHook(() =>
+      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+    );
+
+    expect(result.current.state.configuration.connector_ids).toEqual([]);
+  });
+
   it('strips access control entries, created_by and avatar_icon from the create payload when cloning', async () => {
     const cloneData: AgentEditState = {
       id: 'cloned-agent',
@@ -98,7 +106,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       description: 'A clone of an existing agent',
       access_control: {
         access_mode: AgentAccessControlMode.Private,
-        entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
+        entries: [{ type: 'user', id: 'u_alice', role: AgentAccessControlRole.Editor }],
       },
       labels: ['support'],
       avatar_color: '#FFFFFF',
@@ -168,7 +176,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       description: 'An existing agent',
       access_control: {
         access_mode: AgentAccessControlMode.Shared,
-        entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
+        entries: [{ type: 'user', id: 'u_alice', role: AgentAccessControlRole.Editor }],
       },
       labels: [],
       avatar_color: '',
@@ -205,8 +213,8 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       access_control: {
         access_mode: AgentAccessControlMode.Private,
         entries: [
-          { type: 'user', name: 'bob', role: AgentAccessControlRole.User },
-          { type: 'user', name: 'alice', role: AgentAccessControlRole.Editor },
+          { type: 'user', id: 'u_bob', role: AgentAccessControlRole.User },
+          { type: 'user', id: 'u_alice', role: AgentAccessControlRole.Editor },
         ],
       },
       labels: [],
@@ -219,7 +227,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       ...mockAgent,
       access_control: {
         access_mode: AgentAccessControlMode.Private,
-        entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
+        entries: [{ type: 'user', id: 'u_alice', role: AgentAccessControlRole.Editor }],
       },
     };
 
@@ -237,7 +245,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
 
     expect(mockUpdateAccessControl).toHaveBeenCalledTimes(1);
     expect(mockUpdateAccessControl).toHaveBeenCalledWith('existing-agent', {
-      entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
+      entries: [{ type: 'user', id: 'u_alice', role: AgentAccessControlRole.Editor }],
     });
     expect(mockUpdate).toHaveBeenCalledTimes(1);
     expect(mockUpdate.mock.invocationCallOrder[0]).toBeLessThan(
@@ -247,6 +255,61 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       access_mode: AgentAccessControlMode.Private,
     });
     expect(mockUpdate.mock.calls[0][1].access_control).not.toHaveProperty('entries');
+  });
+
+  it('strips the server-stamped added_at from the access control update payload', async () => {
+    mockAgent = {
+      id: 'existing-agent',
+      name: 'Existing Agent',
+      description: 'An existing agent',
+      access_control: {
+        access_mode: AgentAccessControlMode.Private,
+        entries: [
+          {
+            type: 'user',
+            id: 'u_alice',
+            role: AgentAccessControlRole.User,
+            added_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+      labels: [],
+      avatar_color: '',
+      avatar_symbol: '',
+      configuration: baseConfiguration,
+    };
+
+    const updateData: AgentEditState = {
+      ...mockAgent,
+      access_control: {
+        access_mode: AgentAccessControlMode.Private,
+        entries: [
+          {
+            type: 'user',
+            id: 'u_alice',
+            role: AgentAccessControlRole.Editor,
+            added_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+    };
+
+    const { result } = renderHook(() =>
+      useAgentEdit({
+        editingAgentId: 'existing-agent',
+        onSaveSuccess: jest.fn(),
+        onSaveError: jest.fn(),
+      })
+    );
+
+    await act(async () => {
+      await result.current.submit(updateData);
+    });
+
+    expect(mockUpdateAccessControl).toHaveBeenCalledWith('existing-agent', {
+      entries: [{ type: 'user', id: 'u_alice', role: AgentAccessControlRole.Editor }],
+    });
+    expect(mockUpdateAccessControl.mock.calls[0][1].entries[0]).not.toHaveProperty('added_at');
   });
 
   it('exposes permissions separately from editable form state', async () => {

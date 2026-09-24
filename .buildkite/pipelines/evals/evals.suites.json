@@ -89,9 +89,9 @@
       "id": "significant-events",
       "name": "Significant Events",
       "slackChannel": "#significant-events-alerts",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-significant-events/playwright.config.ts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/playwright.config.ts",
       "tags": [
-        "platform",
+        "observability",
         "significant-events"
       ],
       "ciLabels": [
@@ -136,6 +136,22 @@
         "eis/openai-gpt-5.6-terra",
         "eis/openai-gpt-oss-120b"
       ]
+    },
+    {
+      "id": "nightshift-investigations",
+      "name": "Nightshift Investigations",
+      "slackChannel": "#nightshift-alerts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "serverConfigSet": "evals_nightshift_investigations",
+      "scoutHook": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh",
+      "tags": [
+        "observability",
+        "nightshift-investigations"
+      ],
+      "ciLabels": [
+        "evals:nightshift-investigations"
+      ],
+      "stepTimeoutInMinutes": 60
     },
     {
       "id": "llm-tasks",
@@ -286,6 +302,19 @@
         "evals:lead-generation"
       ],
       "serverConfigSet": "evals_lead_generation"
+    },
+    {
+      "id": "threat-intel-enrichment",
+      "name": "Threat Intel Enrichment",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment/playwright.config.ts",
+      "tags": [
+        "security",
+        "threat-intel-enrichment"
+      ],
+      "ciLabels": [
+        "evals:threat-intel-enrichment"
+      ],
+      "serverConfigSet": "evals_threat_intel"
     },
     {
       "id": "workflows",

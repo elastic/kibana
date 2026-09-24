@@ -28,7 +28,11 @@ export {
   connectorSpecHasEvents,
   connectorTypeHasInboundEvents,
 } from './src/connector_spec_has_events';
-export { isInboundOnlyConnectorSpec } from './src/is_inbound_only_connector_spec';
+export {
+  isInboundOnlyConnectorSpec,
+  connectorTypeIsInboundOnly,
+} from './src/is_inbound_only_connector_spec';
+export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
 export { ingestTokenHashSchema } from './src/ingest_token_hash_schema';
 export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
@@ -94,7 +98,6 @@ export {
 } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
-export { clientTypes } from './src/lib/clients';
 export type {
   ClientTypeSpec,
   BuildContext,
@@ -104,4 +107,6 @@ export type {
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,
+  HostTarget,
+  PlatformServices,
 } from './src/lib/clients';

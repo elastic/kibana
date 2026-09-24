@@ -8,10 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { useRouteMatch } from 'react-router-dom';
 import { ExecutionHistoryPage } from '../pages/execution_history_page/execution_history_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
-export const ExecutionHistoryApp = ({ basePath = '' }: { basePath?: string }) => {
+export const ExecutionHistoryApp = () => {
+  const { path } = useRouteMatch();
   return (
     <RequireAlertingPrivilege
       features={['executionHistory']}
@@ -20,7 +22,7 @@ export const ExecutionHistoryApp = ({ basePath = '' }: { basePath?: string }) =>
       })}
     >
       <Routes>
-        <Route exact path={`${basePath}/`}>
+        <Route exact path={path}>
           <ExecutionHistoryPage />
         </Route>
       </Routes>
