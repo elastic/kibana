@@ -384,6 +384,10 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.attack_discovery',
   'security.attack_discovery.verdict',
 
+  // Security Solution – AlertZero (Hunt Watch)
+  // gated behind xpack.alertzero.enabled
+  'security.threat',
+
   // Observability
   'observability.ai_insight',
   'observability.error',
@@ -398,6 +402,11 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Observability – APM
   'observability.service-map',
   'observability.service-map-context',
+
+  // ML
+  'ml.anomaly_swimlane',
+  'ml.anomaly_charts',
+  'ml.single_metric_viewer',
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',

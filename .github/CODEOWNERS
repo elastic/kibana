@@ -1338,6 +1338,7 @@ x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-
 x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/service_accounts @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security
@@ -1437,7 +1438,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
-x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
@@ -3214,6 +3215,8 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @ela
 /x-pack/solutions/security/plugins/security_solution/server/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel @elastic/security-investigations
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/threat_intel @elastic/security-investigations
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_threat_intel @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
