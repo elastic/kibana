@@ -23,8 +23,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type { TraceSpan } from '@kbn/llm-trace-waterfall';
+import { downloadFileAs } from '@kbn/share-plugin/public';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { triggerDownload } from '../../../../utils/download';
 
 const labels = {
   title: i18n.translate('xpack.agentBuilder.response.traceFlyout.title', {
@@ -68,7 +68,10 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans,
           .toLowerCase()
       : 'trace';
     const envelope = { ...(traceId ? { trace_id: traceId } : {}), spans };
-    triggerDownload(`trace-${slug}.json`, JSON.stringify(envelope, null, 2));
+    downloadFileAs(`trace-${slug}.json`, {
+      content: JSON.stringify(envelope, null, 2),
+      type: 'application/json',
+    });
   }, [traceId, spans]);
 
   return (

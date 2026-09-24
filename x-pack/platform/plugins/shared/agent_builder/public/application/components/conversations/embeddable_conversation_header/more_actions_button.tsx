@@ -14,7 +14,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
+import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useAgentId, useConversation, useConversationTitle } from '../../../hooks/use_conversation';
@@ -25,7 +26,6 @@ import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useLoadTraceFromFile } from '../../../hooks/use_load_trace_from_file';
-import { triggerDownload } from '../../../utils/download';
 import { TraceFlyout } from '../timeline/response/trace_flyout';
 
 const labels = {
@@ -112,8 +112,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       conversationTitle
         .replace(/[^\p{L}\p{N}]+/gu, '-') // replace non-alphanumeric chars (unicode-aware) with hyphens
         .replace(/^-|-$/g, '') // strip leading/trailing hyphens
-        .toLowerCase() || 'conversation';
-    triggerDownload(`${slug}.json`, JSON.stringify({ conversation }, null, 2));
+        .toLowerCase() || DEFAULT_CONVERSATION_TITLE;
+    downloadFileAs(`${slug}.json`, {
+      content: JSON.stringify({ conversation }, null, 2),
+      type: 'application/json',
+    });
   }, [conversationTitle, conversation]);
 
   const handleLoadTrace = useCallback(() => {
