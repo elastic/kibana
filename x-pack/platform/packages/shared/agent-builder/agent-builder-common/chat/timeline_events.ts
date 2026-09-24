@@ -96,7 +96,6 @@ export enum TimelineEventType {
   attachmentAdded = 'attachment_added',
   attachmentUpdated = 'attachment_updated',
   attachmentDeleted = 'attachment_deleted',
-  // User feedback
   roundFeedback = 'round_feedback',
 }
 

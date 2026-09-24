@@ -172,10 +172,10 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
   const feedbackByRoundId = new Map<string, RoundFeedbackEvent['data']>();
   for (const event of events) {
     if (event.type === TimelineEventType.roundFeedback) {
-      feedbackByRoundId.set(
-        (event as RoundFeedbackEvent).data.round_id,
-        (event as RoundFeedbackEvent).data
-      );
+      const data = event.data as RoundFeedbackEvent['data'] | null | undefined;
+      if (data && typeof data === 'object' && typeof data.round_id === 'string') {
+        feedbackByRoundId.set(data.round_id, data);
+      }
     }
   }
 
