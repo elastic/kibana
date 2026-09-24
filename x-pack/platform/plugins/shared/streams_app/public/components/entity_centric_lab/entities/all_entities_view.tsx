@@ -914,18 +914,8 @@ const AllEntitiesViewInner = ({
   // control, so this stays at the built-in Category → Type default there.
   const [groupBy, setGroupBy] = useEntitiesGroupBy();
 
-  // When landing on the Kubernetes page with the global default grouping
-  // (Category → Type), swap to a more useful K8s default (Cluster → Type).
-  const k8sDefaultAppliedRef = useRef(false);
-  useEffect(() => {
-    if (categoryScope === 'kubernetes' && isElasticOn && isDefaultGroupBy(groupBy) && !k8sDefaultAppliedRef.current) {
-      k8sDefaultAppliedRef.current = true;
-      setGroupBy(['k8s:cluster', 'type']);
-    }
-    if (categoryScope !== 'kubernetes') {
-      k8sDefaultAppliedRef.current = false;
-    }
-  }, [categoryScope, isElasticOn, groupBy, setGroupBy]);
+  // Previously the Kubernetes page auto-swapped to Cluster → Type grouping
+  // in ElasticOn; now all categories use the uniform Category → Type default.
 
   // "Group by" fields offered on this page (core + category-scoped attributes)
   // and the resolved defs for the active selection. `customGroupBy` is only set

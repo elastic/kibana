@@ -443,7 +443,6 @@ function createNavTree({
     databasesCategoryNode,
     storageCategoryNode,
     networkingCategoryNode,
-    servicesCategoryNode,
     functionsCategoryNode,
     middlewaresCategoryNode,
     llmsCategoryNode,
@@ -469,8 +468,6 @@ function createNavTree({
   // Filter the saved views by the panel search query (Latest only).
   const filteredSavedViews = savedViews.filter((view) => {
     if (!matchesLatestSearch(view.name)) return false;
-    // ElasticOn parks APM Services; hide views that would deep-link there.
-    if (elasticOnEnabled && view.category === 'services') return false;
     return true;
   });
   // ElasticOn: surface the session-landing default first and mark it with a star
@@ -655,14 +652,6 @@ function createNavTree({
       getIsActive: categoryGetIsActive('/app/streams/entities/storage'),
     },
     {
-      id: 'entityCentricLab-entitiesServices',
-      link: 'streams:entitiesServices' as const,
-      title: i18n.translate('xpack.observability.obltNav.latest.services', {
-        defaultMessage: 'APM Services',
-      }),
-      getIsActive: categoryGetIsActive('/app/streams/entities/services'),
-    },
-    {
       id: 'entityCentricLab-entitiesFunctions',
       link: 'streams:entitiesFunctions' as const,
       title: i18n.translate('xpack.observability.obltNav.latest.functions', {
@@ -707,6 +696,19 @@ function createNavTree({
         defaultMessage: 'Other',
       }),
       getIsActive: categoryGetIsActive('/app/streams/entities/other'),
+    },
+  ].filter((child) => matchesLatestSearch(child.title));
+
+  // APM Services sits in its own section at the bottom (visually separated)
+  // because it's a specialised app link rather than an infrastructure category.
+  const latestApmServicesChildren = [
+    {
+      id: 'entityCentricLab-entitiesServices',
+      link: 'streams:entitiesServices' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.services', {
+        defaultMessage: 'APM Services',
+      }),
+      getIsActive: categoryGetIsActive('/app/streams/entities/services'),
     },
   ].filter((child) => matchesLatestSearch(child.title));
 
@@ -852,7 +854,7 @@ function createNavTree({
   // dividers bracketing them.
   // ElasticOn is infra-first: APM Services is omitted; drop "Other" catch-all.
   // Cloud services are distributed into Hosts / Functions / Storage.
-  // Explicit order: Hosts, Kubernetes, Databases, Storage, APM Services, Functions, Networking, Messaging, AI/ML.
+  // Explicit order: Hosts, Kubernetes, Databases, Storage, Functions, Networking, Messaging, AI/ML, [separator], APM Services.
   const elasticOnCategoryChildren = [
     ...latestCategoryChildrenTop,
     ...latestCategoryChildrenMiddle,
@@ -883,6 +885,9 @@ function createNavTree({
         ...(savedViewsSection ? [savedViewsSection] : []),
         ...(latestEntitiesAllSection.children.length > 0 ? [latestEntitiesAllSection] : []),
         ...(elasticOnCategoryChildren.length > 0 ? [{ children: elasticOnCategoryChildren }] : []),
+        ...(latestApmServicesChildren.length > 0
+          ? [{ children: latestApmServicesChildren }]
+          : []),
         ...(isPhase1Nav ? [] : [manageEntityTypesSection]),
       ]
     : latestEnabled
@@ -903,12 +908,18 @@ function createNavTree({
         ...(latestCategoryChildrenBottom.length > 0
           ? [{ children: latestCategoryChildrenBottom }]
           : []),
+        ...(latestApmServicesChildren.length > 0
+          ? [{ children: latestApmServicesChildren }]
+          : []),
         ...(isPhase1Nav ? [] : [manageEntityTypesSection]),
       ]
     : [
         entitiesAllSection,
         {
           children: entityCentricCategoryChildren,
+        },
+        {
+          children: [servicesCategoryNode],
         },
         ...(isPhase1Nav ? [] : [manageEntityTypesSection]),
       ];
