@@ -106,30 +106,25 @@ export const registerHuntCoordinatorRoute = ({
                 });
           const model = modelOutcome?.ok ? modelOutcome.model : undefined;
 
-          const result = await huntCoordinator(
-            { esClient, reportsEsClient },
-            model,
-            logger,
-            {
-              report_id,
-              spaceId,
-              text,
-              iocs,
-              techniques,
-              time_range,
-              size,
-              max_assets,
-              llm_confidence_threshold,
-              tier2_when,
-              max_tier2_sample_events,
-              trigger,
-              technology: technologyInput.technology,
-              // The Worker fan-out supplies a run id so one sweep's children share it,
-              // which is what the packaging barrier and conclusion dedupe key off. Only
-              // mint one when the caller has no sweep to tie the run to.
-              run_id: run_id ?? randomUUID(),
-            }
-          );
+          const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
+            report_id,
+            spaceId,
+            text,
+            iocs,
+            techniques,
+            time_range,
+            size,
+            max_assets,
+            llm_confidence_threshold,
+            tier2_when,
+            max_tier2_sample_events,
+            trigger,
+            technology: technologyInput.technology,
+            // The Worker fan-out supplies a run id so one sweep's children share it,
+            // which is what the packaging barrier and conclusion dedupe key off. Only
+            // mint one when the caller has no sweep to tie the run to.
+            run_id: run_id ?? randomUUID(),
+          });
 
           // SSE entries ride the response only on a confirmed hit for a named
           // report; the hunt child fans out over them with ai.attachment.add.
