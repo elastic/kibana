@@ -2046,14 +2046,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const summaryStep = findStepByName(workflow.steps, 'build_generated_summary') as {
       with: { generated_summary: string };
     };
-    // 20 × 101 chars (+ spaces) exceeds 2000; truncate: 2000, '' must keep emit valid.
+    // 20 × 101 chars (+ spaces) exceeds 2000; truncate must keep emit valid and signal truncation.
     const batchSummaries = Array.from({ length: 20 }, () => 'x'.repeat(101));
     const rendered = engine.parseAndRenderSync(summaryStep.with.generated_summary, {
       variables: { batch_summaries: batchSummaries },
     });
 
-    expect(rendered.length).toBe(2000);
-    expect(summaryStep.with.generated_summary).toContain("truncate: 2000, ''");
+    expect(rendered.length).toBeLessThanOrEqual(2000);
+    expect(rendered).toContain('[truncated]');
+    expect(summaryStep.with.generated_summary).toContain("truncate: 2000, ' [truncated]'");
   });
 
   it('caps unique hosts at 50 before building grouped_counts_summary, then truncates to 10000 chars', () => {

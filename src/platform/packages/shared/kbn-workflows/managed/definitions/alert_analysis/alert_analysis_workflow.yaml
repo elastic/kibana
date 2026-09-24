@@ -1962,7 +1962,7 @@ steps:
           - name: build_generated_summary
             type: data.set
             with:
-              generated_summary: "{{ variables.batch_summaries | compact | join: ' ' | truncate: 2000, '' }}"
+              generated_summary: "{{ variables.batch_summaries | compact | join: ' ' | truncate: 2000, ' [truncated]' }}"
 
           # Build one entity row per unique host, then per unique user, collecting
           # per-entity verdict counts. The Worker passes this to the security.impact
