@@ -375,26 +375,17 @@ export const getAnyCloudConnectorIacTemplateUrl = (
   return getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
 };
 
-/**
- * Whether `packageName` is one of the aws packages whose Identity Federation option launches the
- * Elastic Workload Identity template. The package version is not consulted.
- */
+/** Whether the package's Identity Federation option launches the Workload Identity template. */
 export const isAwsWorkloadIdentityTemplatePackage = (packageName: string | undefined): boolean =>
   !!packageName && AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES.includes(packageName);
 
 export interface GetAwsIdentityFederationTemplateUrlParams {
-  /** `fleet.awsIdentityFederationEnabled` (Serverless on, ECH off). */
   isWorkloadIdentityTemplateEnabled: boolean;
   packageName: string | undefined;
-  /** URL from the package's `iac_template_url`; returned unchanged when the override does not apply. */
   iacTemplateUrl: string | undefined;
 }
 
-/**
- * Picks the quick-create URL for the aws packages' Identity Federation option: the hardcoded
- * Elastic Workload Identity template while the flag is on and the package is one that moved to
- * it, otherwise whatever the package declares.
- */
+/** Returns the Workload Identity template URL when enabled for the package, otherwise the package's own URL. */
 export const getAwsIdentityFederationTemplateUrl = ({
   isWorkloadIdentityTemplateEnabled,
   packageName,

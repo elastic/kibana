@@ -8,11 +8,7 @@
 import type { IacProvisionerRenderFlow } from '../../telemetry/iac_provisioner_events';
 import type { AWS_CLOUD_PROVIDER } from '../models/cloud_connector';
 
-/**
- * IaCP workflow name for the AWS Identity Federation connector. Selects the
- * `aws/workload_identity_federation` blueprint lineage (Elastic Workload
- * Identity); the former `federated_identity` lineage was withdrawn from IaCP.
- */
+/** IaCP workflow name for the AWS Identity Federation connector (`aws/workload_identity_federation` blueprint). */
 export const IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW = 'workload_identity_federation' as const;
 
 /**

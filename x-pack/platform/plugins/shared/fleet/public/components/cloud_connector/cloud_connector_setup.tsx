@@ -34,11 +34,7 @@ export interface CloudConnectorSetupProps {
   templateName: string;
   /** Optional account type. When undefined, defaults to 'single-account'. */
   accountType?: AccountType;
-  /**
-   * Optional IaC template URL from var_group selection. When provided, overrides template URL from packageInfo.policy_templates.
-   * For the aws packages that moved to the Workload Identity template it is in turn replaced by
-   * the hardcoded WII URL while `fleet.awsIdentityFederationEnabled` is on.
-   */
+  /** Optional IaC template URL from var_group selection. When provided, overrides template URL from packageInfo.policy_templates. */
   iacTemplateUrl?: string;
 }
 

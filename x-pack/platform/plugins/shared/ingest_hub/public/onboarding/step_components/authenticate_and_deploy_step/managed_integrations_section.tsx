@@ -135,8 +135,6 @@ export function ManagedIntegrationsSection({
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
   );
-  // While `fleet.awsIdentityFederationEnabled` is on: the aws package's Identity Federation
-  // option launches the hardcoded Workload Identity template instead of its iac_template_url.
   const iacTemplateUrl = useAwsIdentityFederationTemplateUrl({
     packageName: awsPackageResponse?.item?.name,
     iacTemplateUrl: packageIacTemplateUrl,

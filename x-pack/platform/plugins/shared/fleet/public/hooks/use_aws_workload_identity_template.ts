@@ -11,14 +11,7 @@ import { getAwsIdentityFederationTemplateUrl } from '../components/cloud_connect
 
 import { useDisabledIdentityFederationProviders } from './use_disabled_identity_federation_providers';
 
-/**
- * Whether the aws packages' Identity Federation option should launch the hardcoded Elastic
- * Workload Identity CloudFormation template instead of the package's `iac_template_url`.
- *
- * Driven by the existing `fleet.awsIdentityFederationEnabled` LaunchDarkly flag (on in
- * Serverless, off on ECH): the same switch that shows the aws Identity Federation option also
- * points it at the Workload Identity template. Reacts to a flag flip without a reload.
- */
+/** Whether the aws Identity Federation option launches the Workload Identity template, per `fleet.awsIdentityFederationEnabled`. */
 export function useAwsWorkloadIdentityTemplateEnabled(): boolean {
   const disabledProviders = useDisabledIdentityFederationProviders();
   return !disabledProviders.includes('aws');
@@ -26,15 +19,10 @@ export function useAwsWorkloadIdentityTemplateEnabled(): boolean {
 
 export interface UseAwsIdentityFederationTemplateUrlParams {
   packageName: string | undefined;
-  /** URL from the package's `iac_template_url`. */
   iacTemplateUrl: string | undefined;
 }
 
-/**
- * The quick-create URL the aws Identity Federation option should launch for this package:
- * the hardcoded Workload Identity template when the flag is on and the package moved to it,
- * otherwise `iacTemplateUrl` unchanged.
- */
+/** The template URL the aws Identity Federation option should launch for the package. */
 export function useAwsIdentityFederationTemplateUrl({
   packageName,
   iacTemplateUrl,

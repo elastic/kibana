@@ -39,19 +39,11 @@ export type ElasticCloudEnvironment =
   | typeof ELASTIC_CLOUD_ENVIRONMENT_STAGING
   | typeof ELASTIC_CLOUD_ENVIRONMENT_QA;
 
-/**
- * Quick-create URL of the Elastic Workload Identity (WII) CloudFormation template for the aws
- * packages' Identity Federation option (elastic/integrations#21331). Used in place of the
- * package's `iac_template_url` while `fleet.awsIdentityFederationEnabled` is on; the
- * tokens are filled by `getCloudConnectorRemoteRoleTemplate` like any package-provided URL.
- */
+/** Quick-create URL of the Elastic Workload Identity CloudFormation template for the aws packages' Identity Federation option. */
 export const AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL =
   'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticCloudProvider=CLOUD_PROVIDER&param_ElasticCloudRegion=CLOUD_REGION&param_ElasticCloudEnvironment=CLOUD_ENVIRONMENT&param_ElasticResourceType=RESOURCE_TYPE&param_ElasticResourceId=RESOURCE_ID';
 
-/**
- * Packages whose Identity Federation option launches the WII template. Any installed version
- * qualifies: the template is a property of Kibana and the agentless runtime, not of the package.
- */
+/** Packages whose Identity Federation option launches the Workload Identity template, regardless of version. */
 export const AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES: readonly string[] = [
   'aws',
   'aws_bedrock',

@@ -44,9 +44,6 @@ export const SUPPORTS_IDENTITY_FEDERATION_VAR_NAME = 'supports_identity_federati
 // LaunchDarkly kill switch (evaluated via `core.featureFlags`) for AWS identity federation in
 // var_groups: when false, var_group options with `provider: aws` (the aws `identity_federation`
 // credential_type option) are hidden from the package policy form. Default true.
-// While on, the aws packages listed in `AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES`
-// also launch the hardcoded Elastic Workload Identity CloudFormation template instead of their
-// `iac_template_url` (see `useAwsWorkloadIdentityTemplateEnabled`).
 // Sibling flags for azure/gcp will be added as those packages migrate to var_groups.
 export const AWS_IDENTITY_FEDERATION_ENABLED_FLAG = 'fleet.awsIdentityFederationEnabled';
 
