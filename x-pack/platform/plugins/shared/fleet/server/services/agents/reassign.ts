@@ -14,7 +14,6 @@ import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
-  FleetError,
 } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
