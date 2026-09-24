@@ -20,9 +20,6 @@ import { streamToAnalysisTarget } from '../../../../lib/significant_events/strea
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
 
-export const MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
-const MAX_EXISTING_QUERY_DESCRIPTION_LENGTH = 200;
-
 const getFeaturesSchema = z.object({
   target_id: z.string().max(MAX_ID_LENGTH).describe('Target identifier for KI feature lookup.'),
   feature_types: z
@@ -71,33 +68,19 @@ export const createGetFeaturesTool = ({
         const stream = await scopedClients.streamsClient.getStream(targetId);
         const target = streamToAnalysisTarget(stream);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-        const [{ hits }, { [target.id]: existingLinks }] = await Promise.all([
-          kiClient.getFeatures(target.id, {
-            type: featureTypes,
-            minConfidence,
-            limit,
-            excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
-          }),
-          kiClient.getStreamToQueryLinksMap([target.id]),
-        ]);
+        const { hits } = await kiClient.getFeatures(target.id, {
+          type: featureTypes,
+          minConfidence,
+          limit,
+          excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
+        });
         const features = hits.map(toFeatureForLlmContext);
-        const existingQueries = existingLinks
-          .map(({ query }) => ({
-            id: query.id,
-            title: query.title,
-            type: query.type,
-            severity_score: query.severity_score,
-            description: query.description.slice(0, MAX_EXISTING_QUERY_DESCRIPTION_LENGTH),
-            esql: query.esql.query,
-          }))
-          .sort((a, b) => (b.severity_score ?? 0) - (a.severity_score ?? 0))
-          .slice(0, MAX_EXISTING_QUERIES_FOR_CONTEXT);
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { features, count: features.length, existing_queries: existingQueries },
+              data: { features, count: features.length },
             },
           ],
         };

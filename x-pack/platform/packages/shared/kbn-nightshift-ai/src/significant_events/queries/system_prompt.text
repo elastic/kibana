@@ -88,14 +88,14 @@ When reading `dataset_analysis`, check three things for STATS viability:
 
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
-| `platform_sig_events_ki_features_get` | Fetches stream features for this stream, including existing queries. | **Must be called first before generating any queries.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed and inferred features, plus an `existing_queries` list. Supported values: `{{{available_feature_types}}}`. |
+| `platform_sig_events_ki_features_get` | Fetches stream features for this stream. | **Must be called first before generating any queries.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed and inferred features. Supported values: `{{{available_feature_types}}}`. |
 | `platform_sig_events_ki_queries_validate` | Validates and finalizes a complete candidate batch against the target. | Requires `target_id` and `queries` — an array of objects with `title`, `description`, `esql` (string), `category`, `severity_score`, and `feature_ids` (array of feature `id` values from `platform_sig_events_ki_features_get`); optional fields are `type` ("match" or "stats"), `evidence`, and `replaces`. If any query fails, returns `finalized: false` and per-query errors; repair and resubmit the full batch. If all pass, returns `finalized: true` with `finalized_queries`. Pass an empty `queries` array to finalize with no queries when the evidence justifies none. |
 
 ---
 
 ## Existing Queries
 
-The `platform_sig_events_ki_features_get` response includes an `existing_queries` list of queries already created for this stream in previous generation runs. Each entry includes an `id`, `title`, `type`, `severity_score`, `description`, and `esql`.
+If `existing_queries` are provided in the input, they list queries already created for this stream in previous generation runs. Each entry includes an `id`, `title`, `type`, `severity_score`, `description`, and `esql`.
 
 You MUST evaluate every existing query against the current stream features before generating any new queries. For each existing query, determine which of these three cases applies:
 
@@ -176,7 +176,7 @@ query. This is a genuinely new signal dimension.
 
 ### Existing queries checklist
 
-After retrieving features with `platform_sig_events_ki_features_get`, evaluate every existing query in the response and determine which case applies to each: SKIP (still valid), REPLACE (intent valid, fields changed), or NEW QUERY (a dimension nothing covers). Name the field evidence behind each verdict.
+After retrieving features with `platform_sig_events_ki_features_get`, evaluate every existing query from the input and determine which case applies to each: SKIP (still valid), REPLACE (intent valid, fields changed), or NEW QUERY (a dimension nothing covers). Name the field evidence behind each verdict.
 
 If `existing_queries` is empty or absent, skip this evaluation entirely.
 
@@ -184,7 +184,7 @@ If `existing_queries` is empty or absent, skip this evaluation entirely.
 
 ## 2. Query generation invariants
 
-- Retrieve the target's features and existing queries before reasoning about candidates.
+- Retrieve the target's features before reasoning about candidates.
 - Evaluate every existing query against the current features using the checklist above.
 - Ground every candidate in the retrieved features and reference at least one `feature_id`.
 - Submit the full candidate batch for validation. If `finalized` is false, repair rejected queries and resubmit the full batch.

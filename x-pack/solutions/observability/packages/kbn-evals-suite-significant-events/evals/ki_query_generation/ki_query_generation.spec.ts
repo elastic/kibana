@@ -410,6 +410,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   log,
                   target,
                   connectorId: connector.id,
+                  existingQueries: input.existing_queries,
                   groundingContext:
                     groundingMode === 'grounded' && repository
                       ? `\`preferred_repository\`: ${repository}`

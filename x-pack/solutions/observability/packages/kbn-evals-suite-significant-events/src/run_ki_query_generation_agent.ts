@@ -11,6 +11,7 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   EMPTY_TOKENS,
   type AnalysisTarget,
+  type ExistingQuerySummary,
   type QueryAttempt,
   type SignificantEventsToolUsage,
 } from '@kbn/nightshift-ai';
@@ -27,6 +28,7 @@ export interface RunKIQueryGenerationAgentParams {
   log: ToolingLog;
   target: AnalysisTarget;
   connectorId: string;
+  existingQueries?: ExistingQuerySummary[];
   groundingContext?: string;
 }
 
@@ -44,12 +46,18 @@ const normalizedToolId = (toolId: string): string => toolId.replaceAll('.', '_')
 
 export const buildKIQueryGenerationEvalUserMessage = ({
   target,
+  existingQueries,
   groundingContext,
 }: {
   target: AnalysisTarget;
+  existingQueries?: ExistingQuerySummary[];
   groundingContext?: string;
 }): string =>
-  [buildKIQueryGenerationUserMessage(target), QUERY_INTENT_EVAL_INSTRUCTIONS, groundingContext]
+  [
+    buildKIQueryGenerationUserMessage(target, existingQueries),
+    QUERY_INTENT_EVAL_INSTRUCTIONS,
+    groundingContext,
+  ]
     .filter((part): part is string => Boolean(part))
     .join('\n\n');
 
@@ -233,6 +241,7 @@ export async function runKIQueryGenerationAgent({
   log,
   target,
   connectorId,
+  existingQueries,
   groundingContext,
 }: RunKIQueryGenerationAgentParams): Promise<RunKIQueryGenerationAgentResult> {
   const agentBuilderClient = createAgentBuilderClient({ fetch, log, connectorId });
@@ -240,7 +249,11 @@ export async function runKIQueryGenerationAgent({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
     title: `KI query generation: ${target.name}`,
   });
-  const userMessage = buildKIQueryGenerationEvalUserMessage({ target, groundingContext });
+  const userMessage = buildKIQueryGenerationEvalUserMessage({
+    target,
+    existingQueries,
+    groundingContext,
+  });
   const result = await agentBuilderClient.converse({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
     conversationId: conversation.id,

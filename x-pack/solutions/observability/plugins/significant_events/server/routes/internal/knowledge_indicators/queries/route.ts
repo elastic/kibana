@@ -656,6 +656,7 @@ const generateQueriesRoute = createServerRoute({
       throw new Error('Agent Builder is required to generate significant events queries');
     }
 
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const result = await generateKIQueries(
       {
         streamName,
@@ -663,6 +664,7 @@ const generateQueriesRoute = createServerRoute({
       },
       {
         streamsClient,
+        kiClient,
         agentBuilder: server.agentBuilder,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         request,

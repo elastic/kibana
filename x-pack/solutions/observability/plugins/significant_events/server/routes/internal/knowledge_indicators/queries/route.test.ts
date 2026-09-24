@@ -484,6 +484,7 @@ describe('generateQueriesRoute', () => {
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {},
         licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
       }),
       server: {
         core: {

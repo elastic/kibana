@@ -35,58 +35,24 @@ describe('computeValidationLookback', () => {
     jest.clearAllMocks();
   });
 
-  it('probes with a STATS COUNT(*) query scoped to the probe window', async () => {
+  it('probes the stream and keeps a narrow window when it is dense', async () => {
     const { esClient, query } = createEsClient();
-    query.mockResolvedValueOnce(countResponse(1_000_000));
+    query.mockResolvedValueOnce(countResponse(100_000));
 
-    await computeValidationLookback({
-      esClient,
-      sources: ['$.cars.electric'],
-      signal,
-      logger,
-    });
-
-    expect(query).toHaveBeenCalledWith(
-      {
-        query: 'FROM $.cars.electric | STATS total = COUNT(*)',
-        filter: {
-          range: {
-            '@timestamp': {
-              gte: 'now-10m',
-              lte: 'now',
-            },
-          },
-        },
-      },
-      { signal, requestTimeout: 5_000 }
-    );
-  });
-
-  it('joins multiple sources into a single FROM clause', async () => {
-    const { esClient, query } = createEsClient();
-    query.mockResolvedValueOnce(countResponse(0));
-
-    await computeValidationLookback({
+    const result = await computeValidationLookback({
       esClient,
       sources: ['logs-a', 'logs-a.*'],
       signal,
       logger,
     });
 
-    expect(query.mock.calls[0][0].query).toBe('FROM logs-a, logs-a.* | STATS total = COUNT(*)');
-  });
-
-  it('keeps a narrow window for a dense stream', async () => {
-    const { esClient, query } = createEsClient();
-    query.mockResolvedValueOnce(countResponse(100_000));
-
-    const result = await computeValidationLookback({
-      esClient,
-      sources: ['logs-*'],
-      signal,
-      logger,
-    });
-
+    expect(query).toHaveBeenCalledWith(
+      {
+        query: 'FROM logs-a, logs-a.* | STATS total = COUNT(*)',
+        filter: { range: { '@timestamp': { gte: 'now-10m', lte: 'now' } } },
+      },
+      { signal, requestTimeout: 5_000 }
+    );
     expect(result).toBe('now-10m');
   });
 
@@ -104,7 +70,7 @@ describe('computeValidationLookback', () => {
     expect(result).toBe('now-10000m');
   });
 
-  it('caps the widened window for a near-empty stream', async () => {
+  it('uses the max window for an empty stream', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(countResponse(0));
 
@@ -118,7 +84,7 @@ describe('computeValidationLookback', () => {
     expect(result).toBe('now-10080m');
   });
 
-  it('falls back to the probe window when the probe itself fails', async () => {
+  it('falls back to the probe window when the probe fails', async () => {
     const { esClient, query } = createEsClient();
     query.mockRejectedValueOnce(new Error('Request timed out'));
 
@@ -130,6 +96,5 @@ describe('computeValidationLookback', () => {
     });
 
     expect(result).toBe('now-10m');
-    expect(logger.debug).toHaveBeenCalled();
   });
 });

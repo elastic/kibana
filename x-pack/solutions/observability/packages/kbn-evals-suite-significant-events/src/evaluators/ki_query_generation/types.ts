@@ -82,7 +82,6 @@ export const getToolUsageFromOutput = (
 ): SignificantEventsToolUsage | undefined =>
   output && !Array.isArray(output) ? output.toolUsage : undefined;
 
-/** Reads adapted validation attempts, preserving absent diagnostics as `undefined`. */
 export const getQueryAttempts = (output: unknown): QueryAttempt[] | undefined =>
   output &&
   typeof output === 'object' &&

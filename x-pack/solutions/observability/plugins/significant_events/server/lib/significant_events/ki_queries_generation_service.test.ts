@@ -32,6 +32,25 @@ const makeDeps = (
   streamsClient: {
     getStream: jest.fn().mockResolvedValue(definition),
   } as unknown as GenerateKIQueriesDependencies['streamsClient'],
+  kiClient: {
+    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
+      'logs.test': [
+        {
+          query: {
+            id: 'query-1',
+            title: 'Error rate',
+            type: 'stats',
+            severity_score: 65,
+            description: 'Tracks error rate',
+            esql: {
+              query:
+                'FROM logs.test | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+            },
+          },
+        },
+      ],
+    }),
+  } as unknown as GenerateKIQueriesDependencies['kiClient'],
   agentBuilder: {} as AgentBuilderPluginStart,
   searchInferenceEndpoints: undefined,
   request: {} as GenerateKIQueriesDependencies['request'],
@@ -90,6 +109,20 @@ describe('generateKIQueries', () => {
       tokensUsed: { prompt: 10, completion: 20, total: 30, cached: 0 },
       connectorId: 'test-connector',
     });
+    expect(executeKIQueryGenerationAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        existingQueries: [
+          {
+            id: 'query-1',
+            title: 'Error rate',
+            type: 'stats',
+            severity_score: 65,
+            description: 'Tracks error rate',
+            esql: 'FROM logs.test | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+          },
+        ],
+      })
+    );
     expect(telemetry.trackSignificantEventsQueriesGenerated).toHaveBeenCalledWith(
       expect.objectContaining({
         count: 1,

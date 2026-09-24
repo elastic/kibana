@@ -27,8 +27,8 @@ Using the results:
 Run these steps directly, in order. This sequence is fixed and short: do not use planning, to-do, or note-taking tools (e.g. `write_todos`) to track it — they only add tool calls that re-send the full feature context.
 
 1. **Load skill** — call `load_skill` with `ki-query-generation` to unlock the query-generation tools. Note which optional tools (`platform_sig_events_event_search`, `scs_*`) are present.
-2. **Fetch features** — call `platform_sig_events_ki_features_get` (without filters). The response includes stream features and an `existing_queries` list.
-3. **Evaluate existing queries** — for each entry in `existing_queries`, determine SKIP / REPLACE / NEW QUERY based on the current features (see the system prompt checklist).
+2. **Fetch features** — call `platform_sig_events_ki_features_get` (without filters).
+3. **Evaluate existing queries** — for each entry in the user message's `existing_queries` (if any), determine SKIP / REPLACE / NEW QUERY based on the current features (see the system prompt checklist).
 4. **Search prior events (when available)** — if `platform_sig_events_event_search` is available, call it for the current stream and use relevant assessment or investigation outcomes to avoid known-noisy query paths.
 5. **Verify against source (when available and useful)** — if `scs_*` tools are available and the features leave a specific source-code hypothesis unresolved, verify it with SCS as described above.
 6. **Generate candidates** — produce candidate queries grounded in the retrieved features. Every query must reference at least one `feature_id`.

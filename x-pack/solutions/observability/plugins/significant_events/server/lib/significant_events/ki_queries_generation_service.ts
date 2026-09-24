@@ -15,6 +15,7 @@ import {
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
@@ -25,6 +26,7 @@ export interface GenerateKIQueriesParams {
 
 export interface GenerateKIQueriesDependencies {
   streamsClient: StreamsClient;
+  kiClient: KnowledgeIndicatorClient;
   agentBuilder: AgentBuilderPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
   request: KibanaRequest;
@@ -40,6 +42,7 @@ export async function generateKIQueries(
   const { streamName, connectorId: connectorIdOverride } = params;
   const {
     streamsClient,
+    kiClient,
     agentBuilder,
     searchInferenceEndpoints,
     request,
@@ -60,6 +63,17 @@ export async function generateKIQueries(
   logger.debug(`Using connector ${connectorId} for query generation`);
 
   const definition = await streamsClient.getStream(streamName);
+  const { [definition.name]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
+    definition.name,
+  ]);
+  const existingQueries = existingLinks.map(({ query }) => ({
+    id: query.id,
+    title: query.title,
+    type: query.type,
+    severity_score: query.severity_score,
+    description: query.description,
+    esql: query.esql.query,
+  }));
 
   const startedAt = Date.now();
   const { queries, tokensUsed } = await executeKIQueryGenerationAgent({
@@ -67,6 +81,7 @@ export async function generateKIQueries(
     request,
     connectorId,
     definition,
+    existingQueries,
     signal,
     logger: logger.get('significant_events_queries_generation'),
   });
