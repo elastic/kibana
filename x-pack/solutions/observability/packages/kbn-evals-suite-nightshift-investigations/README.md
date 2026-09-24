@@ -54,24 +54,42 @@ node scripts/evals start \
   --judge eis-anthropic-claude-4-6-sonnet
 ```
 
-The CLI maps the profile's `sandbox` block to `SANDBOX_*` variables, forwards them to Scout and
-restarts Scout when they change. CI reads the same block from the ci-prod Vault.
+The suite owns its sandbox wiring through the `scoutHook` in its
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) entry,
+[`scout/scout_hook.sh`](scout/scout_hook.sh). The evals CLI (and `run_suite.sh` in CI) pipes the
+profile's evals config to it; the hook reads the `sandbox` block and exports the `SANDBOX_*`
+variables plus `SANDBOX_KIBANA_CONFIG`, which tells the `evals_nightshift_investigations` Scout
+config set to load [`scout/kibana.sandbox.yml`](scout/kibana.sandbox.yml). Kibana resolves the
+`${SANDBOX_*}` references in that file from its environment, so credentials never reach disk or
+process arguments. CI reads the same block from the ci-prod Vault. The hook needs `jq`.
 
 #### Other profiles or a different sandbox
 
 A profile backed by a local config file (for example `--profile local`, reading
-`scripts/vault/config.local.json` in `@kbn/evals`) needs its own `sandbox` block. Copy it from
-`config.example.json`: `host`, `port`, `apiKey`, `ssl.certificate`, `ssl.key` and optional
-`ssl.certificateAuthorities`, with PEM **contents** rather than paths.
+`scripts/vault/config.local.json` in `@kbn/evals`) needs its own `sandbox` block:
+
+```json
+"sandbox": {
+  "host": "sandbox-api.example.com",
+  "port": 9090,
+  "apiKey": "...",
+  "ssl": {
+    "certificate": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+    "key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+    "certificateAuthorities": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
+  }
+}
+```
+
+PEM fields hold certificate **contents**, not paths; `certificateAuthorities` is optional.
 
 Alternatively, export the variables yourself, for example to point at a sandbox you run locally:
-`SANDBOX_API_KEY`, plus `SANDBOX_CLIENT_CERT`/`SANDBOX_CLIENT_KEY` (PEM contents) or
-`SANDBOX_CLIENT_CERT_PATH`/`SANDBOX_CLIENT_KEY_PATH`; for a private CA also `SANDBOX_CA_CERT` or
-`SANDBOX_CA_CERT_PATH`. Profile values take precedence over exported ones. `SANDBOX_API_HOST` and
-`SANDBOX_API_PORT` default to `localhost:9090` (the probe port is not the gRPC endpoint). A
-self-hosted sandbox must accept these client certificates and allow sandbox-api to reach its
-containers; leave sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated
-conversations.
+`SANDBOX_API_KEY`, `SANDBOX_CLIENT_CERT` and `SANDBOX_CLIENT_KEY`, and for a private CA
+`SANDBOX_CA_CERT`, all as PEM contents (e.g. `export SANDBOX_CLIENT_CERT="$(cat tls.crt)"`).
+Profile values take precedence over exported ones. `SANDBOX_API_HOST` and `SANDBOX_API_PORT`
+default to `localhost:9090` (the probe port is not the gRPC endpoint). A self-hosted sandbox must
+accept these client certificates and allow sandbox-api to reach its containers; leave
+sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated conversations.
 
 #### What the run does
 
@@ -94,16 +112,13 @@ reads the saved report and conversation. Raw conversation rounds and tool argume
 retained without grader-specific formatting or truncation. Each persisted score links the agent's
 conversation trace; the placeholder has a separate evaluator trace.
 
-The `evals_nightshift_investigations` server config extends `evals_tracing` whenever sandbox
-credentials are present. Otherwise it is plain `evals_tracing`, so the smoke eval needs no sandbox
-credentials.
-It enables the investigation engine, its `nightshift.enabled` feature flag and
-sandbox, disables Cortex, and exports full Agent Builder
-payloads (user messages, system instructions, responses, tool arguments/results and conversation
-IDs) to the profile's configured destination. Sandbox credentials, PEM material and trace-exporter
-headers are passed in an owner-only temporary config, removed on exit and termination signals.
-Full payloads have the destination's access controls; use synthetic questions or data you are
-allowed to export there. Existing sandbox connector authorization remains unchanged.
+The `evals_nightshift_investigations` server config extends `evals_tracing` whenever the hook
+exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
+sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
+and sandbox, disables Cortex, and exports full Agent Builder payloads (user messages, system
+instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
+destination. Full payloads have the destination's access controls; use synthetic questions or data
+you are allowed to export there. Existing sandbox connector authorization remains unchanged.
 
 To run another file with the same loader and task:
 
@@ -146,8 +161,7 @@ Historical full-grader runs are not acceptance evidence for this runner. Graders
 metrics, automatic provisioning and generalized CI defaults are deferred.
 
 `evals start` restarts Scout automatically when connectors, the server config set,
-`TRACING_EXPORTERS`, `GCS_CREDENTIALS` or any `SANDBOX_*` value (from the profile or the shell,
-including the contents of files referenced by `*_PATH` variables) changes. Switching
+`TRACING_EXPORTERS`, `GCS_CREDENTIALS` or any variable the hook exports changes. Switching
 `NIGHTSHIFT_DATASETS` needs no restart: whenever sandbox credentials are present, Scout starts with
 the investigation engine and sandbox, and the smoke eval runs on that server too.
 
@@ -318,8 +332,9 @@ Registered in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/ev
 as `nightshift-investigations`.
 
 - **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
-  hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` exports it as
-  `SANDBOX_*` for this suite only, and Buildkite agents must be able to reach the sandbox-api host.
+  hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
+  `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the
+  sandbox-api host.
 - **On a PR:** add the `evals:nightshift-investigations` label. Without a `models:` label the
   suite uses its pinned `defaultModelGroups` connector; the investigations run the real agent, so
   add a `models:` label to choose which model investigates.

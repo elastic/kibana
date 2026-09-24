@@ -67,15 +67,6 @@ fi
 if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
   export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
 fi
-# Mirrors .buildkite/scripts/steps/evals/run_suite.sh, minus its EVAL_SERVER_CONFIG_SET gate, since locally you pick the suite.
-if [[ "$(jq -r 'has("sandbox")' <<<"$CONFIG_JSON")" == "true" ]]; then
-  export SANDBOX_API_HOST="$(jq -r '.sandbox.host // empty' <<<"$CONFIG_JSON")"
-  export SANDBOX_API_PORT="$(jq -r '.sandbox.port // empty' <<<"$CONFIG_JSON")"
-  export SANDBOX_API_KEY="$(jq -r '.sandbox.apiKey // empty' <<<"$CONFIG_JSON")"
-  export SANDBOX_CLIENT_CERT="$(jq -r '.sandbox.ssl.certificate // empty' <<<"$CONFIG_JSON")"
-  export SANDBOX_CLIENT_KEY="$(jq -r '.sandbox.ssl.key // empty' <<<"$CONFIG_JSON")"
-  export SANDBOX_CA_CERT="$(jq -r '.sandbox.ssl.certificateAuthorities // empty' <<<"$CONFIG_JSON")"
-fi
 
 # NOTE: bash `set -e` does not reliably fail the script for errors inside `$(...)` in all contexts.
 # Generate into a variable, then explicitly validate it, so we never feed empty/invalid data into JSON.parse below.
@@ -124,11 +115,6 @@ if [[ -n "${GCS_CREDENTIALS:-}" ]]; then
   echo "  GCS_CREDENTIALS=<set (service account JSON)>"
 else
   echo "  GCS_CREDENTIALS=<empty>"
-fi
-if [[ -n "${SANDBOX_API_KEY:-}" ]]; then
-  echo "  SANDBOX_API_HOST=${SANDBOX_API_HOST:-<empty>}:${SANDBOX_API_PORT:-<empty>} (key + mTLS PEMs <redacted>)"
-else
-  echo "  SANDBOX_*=<empty>"
 fi
 echo "  Generated connectors: $CONNECTOR_COUNT"
 

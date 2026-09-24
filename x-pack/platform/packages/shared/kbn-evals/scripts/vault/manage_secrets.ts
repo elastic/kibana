@@ -99,33 +99,6 @@ const configSchema = schema.object(
       )
     ),
     gcsDatasetAccessCredentials: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    /**
-     * Shared sandbox-api (gRPC, mTLS) used by suites that execute code.
-     * PEM fields hold certificate/key contents, not paths.
-     */
-    sandbox: schema.maybe(
-      schema.object(
-        {
-          host: schema.string({ minLength: 1 }),
-          port: schema.number({
-            min: 1,
-            max: 65535,
-            validate: (value) =>
-              Number.isInteger(value) ? undefined : 'must be an integer between 1 and 65535',
-          }),
-          apiKey: schema.string({ minLength: 1 }),
-          ssl: schema.object(
-            {
-              certificate: schema.string({ minLength: 1 }),
-              key: schema.string({ minLength: 1 }),
-              certificateAuthorities: schema.maybe(schema.string({ minLength: 1 })),
-            },
-            { unknowns: 'allow' }
-          ),
-        },
-        { unknowns: 'allow' }
-      )
-    ),
   },
   { unknowns: 'allow' }
 );

@@ -7,96 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { existsSync } from 'fs';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as tracing } from '../../evals_tracing/stateful/classic.stateful.config';
 
-/** Reads PEM contents from `<name>` (e.g. the evals vault profile) or the file at `<name>_PATH`. */
-const readPem = (name: string): string | undefined => {
-  const contents = process.env[name];
-  if (contents) return contents;
-  const path = process.env[`${name}_PATH`];
-  if (!path) return undefined;
-  try {
-    return readFileSync(path, 'utf8');
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    throw new Error(`Cannot read ${name}_PATH (${path}): ${reason}`);
+const createInvestigationConfig = (sandboxKibanaConfig: string): ScoutServerConfig => {
+  if (!existsSync(sandboxKibanaConfig)) {
+    throw new Error(`SANDBOX_KIBANA_CONFIG references a missing file: ${sandboxKibanaConfig}`);
   }
-};
-
-/** Parses `SANDBOX_API_PORT` from the shell or profile, defaulting to sandbox-api's gRPC port. */
-const readSandboxPort = (): number => {
-  const raw = process.env.SANDBOX_API_PORT;
-  if (!raw) return 9090;
-  const port = Number(raw);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error(`SANDBOX_API_PORT must be an integer between 1 and 65535, got "${raw}".`);
-  }
-  return port;
-};
-
-const createInvestigationConfig = (sandboxKey: string): ScoutServerConfig => {
-  const certificate = readPem('SANDBOX_CLIENT_CERT');
-  const key = readPem('SANDBOX_CLIENT_KEY');
-  const certificateAuthorities = readPem('SANDBOX_CA_CERT');
-  if (!certificate || !key) {
-    throw new Error(
-      'Sandbox-api mTLS needs SANDBOX_CLIENT_CERT and SANDBOX_CLIENT_KEY (PEM contents) or their *_PATH equivalents.'
-    );
-  }
-  // Validate every input before creating the temp directory and exit handlers below.
-  const port = readSandboxPort();
-
-  const exporterPrefix = '--telemetry.tracing.exporters=';
-  const parentArgs = tracing.kbnTestServer.serverArgs;
-  const exporterArg = parentArgs.find((arg) => arg.startsWith(exporterPrefix));
-  const exporters: Array<{ http?: { url: string; headers?: Record<string, string> } }> = exporterArg
-    ? JSON.parse(exporterArg.slice(exporterPrefix.length))
-    : [];
-
-  // Keep sandbox and trace-exporter credentials out of process arguments and logs.
-  const configDirectory = mkdtempSync(join(tmpdir(), 'nightshift-evals-'));
-  const removeConfigDirectory = () => rmSync(configDirectory, { recursive: true, force: true });
-  process.once('exit', removeConfigDirectory);
-  // A termination signal can end the process without an `exit` event: `signal-exit`, loaded through
-  // the process runner, re-raises the signal when it is the only listener. Listening here both
-  // cleans up and keeps it from doing that, so the CLI's own handler exits normally.
-  for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) {
-    process.once(signal, () => {
-      removeConfigDirectory();
-      if (process.listenerCount(signal) === 0) process.kill(process.pid, signal);
-    });
-  }
-  const sandboxConfig = {
-    ...(exporterArg ? { 'telemetry.tracing.exporters': exporters } : {}),
-    'xpack.sandbox': {
-      enabled: true,
-      host: process.env.SANDBOX_API_HOST || 'localhost',
-      port,
-      api_key: sandboxKey,
-      ssl: {
-        certificate,
-        key,
-        ...(certificateAuthorities ? { certificate_authorities: certificateAuthorities } : {}),
-      },
-    },
-  };
-  const sandboxConfigPath = join(configDirectory, 'sandbox.yml');
-  writeFileSync(sandboxConfigPath, JSON.stringify(sandboxConfig), { mode: 0o600 });
 
   return {
     ...tracing,
     kbnTestServer: {
       ...tracing.kbnTestServer,
       serverArgs: [
-        ...parentArgs.filter((arg) => !arg.startsWith(exporterPrefix)),
+        ...tracing.kbnTestServer.serverArgs,
         '--xpack.nightshift_investigations.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
-        `--config=${sandboxConfigPath}`,
+        `--config=${sandboxKibanaConfig}`,
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
         '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
@@ -108,21 +37,10 @@ const createInvestigationConfig = (sandboxKey: string): ScoutServerConfig => {
   };
 };
 
-// Keyed on credentials alone, never NIGHTSHIFT_DATASETS: the CLI restarts Scout when SANDBOX_*
-// changes but not when the selection does, and smoke runs on either server. The suite's Playwright
-// config decides which evals run and rejects investigation selections without credentials.
-const sandboxApiKey = process.env.SANDBOX_API_KEY;
-// Any other SANDBOX_* without the key is a typo or half-filled config, not a smoke-only run.
-const partialSandboxVars = Object.keys(process.env).filter(
-  (name) => name.startsWith('SANDBOX_') && name !== 'SANDBOX_API_KEY' && process.env[name]
-);
-if (!sandboxApiKey && partialSandboxVars.length > 0) {
-  throw new Error(
-    `${partialSandboxVars.sort().join(', ')} set without SANDBOX_API_KEY; set the key to use the ` +
-      'sandbox, or unset every SANDBOX_* variable to run only the smoke eval.'
-  );
-}
+// The suite's scout hook exports SANDBOX_KIBANA_CONFIG (and the SANDBOX_* credentials it reads) only
+// when sandbox credentials are configured. Without it only the smoke eval runs, on plain tracing.
+const sandboxKibanaConfig = process.env.SANDBOX_KIBANA_CONFIG;
 
-export const servers: ScoutServerConfig = sandboxApiKey
-  ? createInvestigationConfig(sandboxApiKey)
+export const servers: ScoutServerConfig = sandboxKibanaConfig
+  ? createInvestigationConfig(sandboxKibanaConfig)
   : tracing;

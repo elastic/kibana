@@ -15,15 +15,15 @@ import {
 } from '../run_helpers';
 import { buildPlaywrightArgs } from './playwright_args';
 
-const formatEnvPrefix = (overrides: Record<string, string>) =>
+const formatEnvPrefix = (overrides: Record<string, string>, redactedKeys: ReadonlySet<string>) =>
   Object.entries(overrides)
     .map(([key, value]) => {
       const isSensitive =
+        redactedKeys.has(key) ||
         key.includes('API_KEY') ||
         key.includes('CREDENTIALS') ||
         key.includes('TOKEN') ||
-        key === 'GCS_CREDENTIALS' ||
-        (key.startsWith('SANDBOX_') && key !== 'SANDBOX_API_HOST' && key !== 'SANDBOX_API_PORT');
+        key === 'GCS_CREDENTIALS';
       return `${key}=${isSensitive ? '[redacted]' : value}`;
     })
     .join(' ');
@@ -77,14 +77,15 @@ export const runSuiteCmd: Command<void> = {
       envOverrides.EVAL_SUITE_ID = suite.id;
     }
 
-    const { datasetsProfile, exportProfile, profileEnvOverrides } =
+    const { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv } =
       await resolveProfileEnvOverrides({
         repoRoot,
         log,
         flagsReader,
         profile: flagsReader.string('profile') ?? undefined,
+        suite,
       });
-    Object.assign(envOverrides, profileEnvOverrides);
+    Object.assign(envOverrides, profileEnvOverrides, suiteScoutEnv);
 
     log.info(`Profiles: datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`);
 
@@ -126,7 +127,10 @@ export const runSuiteCmd: Command<void> = {
       grepInvert: flagsReader.string('grep-invert'),
     });
 
-    const commandPreview = `${formatEnvPrefix(envOverrides)} node ${args.join(' ')}`.trim();
+    const commandPreview = `${formatEnvPrefix(
+      envOverrides,
+      new Set(Object.keys(suiteScoutEnv))
+    )} node ${args.join(' ')}`.trim();
     log.info(`Running: ${commandPreview}`);
 
     if (flagsReader.boolean('dry-run')) {

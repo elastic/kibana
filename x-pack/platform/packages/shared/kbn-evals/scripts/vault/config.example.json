@@ -40,15 +40,5 @@
     "client_id": "REPLACE_ME",
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
     "token_uri": "https://oauth2.googleapis.com/token"
-  },
-  "sandbox": {
-    "host": "REPLACE_ME",
-    "port": 9090,
-    "apiKey": "REPLACE_ME",
-    "ssl": {
-      "certificate": "-----BEGIN CERTIFICATE-----\nREPLACE_ME\n-----END CERTIFICATE-----\n",
-      "key": "-----BEGIN PRIVATE KEY-----\nREPLACE_ME\n-----END PRIVATE KEY-----\n",
-      "certificateAuthorities": "-----BEGIN CERTIFICATE-----\nREPLACE_ME\n-----END CERTIFICATE-----\n"
-    }
   }
 }

@@ -185,28 +185,6 @@ function validateTracingExporters(config) {
   }
 }
 
-function validateSandbox(config) {
-  const sandbox = config.sandbox;
-  if (sandbox === undefined || sandbox === null) return;
-
-  if (typeof sandbox !== 'object' || Array.isArray(sandbox)) {
-    die('Invalid kbn-evals CI config: "sandbox" must be an object when provided');
-  }
-  assertNonEmptyString(config, 'sandbox.host');
-  assertNonEmptyString(config, 'sandbox.apiKey');
-  assertNonEmptyString(config, 'sandbox.ssl.certificate');
-  assertNonEmptyString(config, 'sandbox.ssl.key');
-  if (!Number.isInteger(sandbox.port) || sandbox.port < 1 || sandbox.port > 65535) {
-    die('Invalid kbn-evals CI config: "sandbox.port" must be an integer between 1 and 65535');
-  }
-  const ca = sandbox.ssl.certificateAuthorities;
-  if (ca !== undefined && ca !== null && !isNonEmptyString(ca)) {
-    die(
-      'Invalid kbn-evals CI config: "sandbox.ssl.certificateAuthorities" must be a non-empty string when provided'
-    );
-  }
-}
-
 function validateConfigShape(config) {
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
     die('Invalid kbn-evals CI config: root must be a JSON object');
@@ -223,7 +201,6 @@ function validateConfigShape(config) {
   validateGcsCredentials(config);
   validateTracingEs(config);
   validateTracingExporters(config);
-  validateSandbox(config);
 }
 
 async function readStdin() {

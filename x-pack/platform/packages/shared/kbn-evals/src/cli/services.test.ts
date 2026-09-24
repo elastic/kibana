@@ -82,32 +82,20 @@ describe('isEdotStale', () => {
 describe('scoutEnvHash', () => {
   const base = { TRACING_EXPORTERS: '[]', GCS_CREDENTIALS: '{}' };
 
-  it('keeps the hash of stacks started without sandbox settings', () => {
-    expect(scoutEnvHash({ ...base, UNRELATED: 'x' })).toBe(scoutEnvHash(base));
+  it('keeps the hash of stacks started without scoutHook output', () => {
+    expect(scoutEnvHash({ ...base })).toBe(scoutEnvHash(base));
+    expect(scoutEnvHash(undefined)).toBe(scoutEnvHash({}));
   });
 
-  it('changes when a sandbox setting is added or changed', () => {
-    const withSandbox = scoutEnvHash({ ...base, SANDBOX_API_HOST: 'a' });
-    expect(withSandbox).not.toBe(scoutEnvHash(base));
-    expect(scoutEnvHash({ ...base, SANDBOX_API_HOST: 'b' })).not.toBe(withSandbox);
+  it('changes when a scoutHook variable is added or changed', () => {
+    const withHook = scoutEnvHash({ ...base, SUITE_KEY: 'a' });
+    expect(withHook).not.toBe(scoutEnvHash(base));
+    expect(scoutEnvHash({ ...base, SUITE_KEY: 'b' })).not.toBe(withHook);
   });
 
-  it('changes when a PEM file referenced by a *_PATH setting is replaced in place', () => {
-    const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-pem-'));
-    const certPath = Path.join(dir, 'tls.crt');
-    try {
-      Fs.writeFileSync(certPath, 'old');
-      const before = scoutEnvHash({ ...base, SANDBOX_CLIENT_CERT_PATH: certPath });
-      Fs.writeFileSync(certPath, 'renewed');
-      expect(scoutEnvHash({ ...base, SANDBOX_CLIENT_CERT_PATH: certPath })).not.toBe(before);
-    } finally {
-      Fs.rmSync(dir, { recursive: true, force: true });
-    }
-  });
-
-  it('ignores the order sandbox settings were provided in', () => {
-    expect(scoutEnvHash({ ...base, SANDBOX_API_KEY: 'k', SANDBOX_API_HOST: 'h' })).toBe(
-      scoutEnvHash({ ...base, SANDBOX_API_HOST: 'h', SANDBOX_API_KEY: 'k' })
+  it('ignores the order scoutHook variables were provided in', () => {
+    expect(scoutEnvHash({ ...base, B: 'k', A: 'h' })).toBe(
+      scoutEnvHash({ ...base, A: 'h', B: 'k' })
     );
   });
 });

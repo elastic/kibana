@@ -7,20 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync, rmSync } from 'fs';
-import { dirname, join } from 'path';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-
-const CLEANUP_EVENTS: readonly string[] = ['exit', 'SIGINT', 'SIGTERM', 'SIGHUP'];
-
-type Listener = (...args: unknown[]) => void;
-
-// `process` has per-event overloads, so go through the plain EventEmitter signatures instead.
-const emitter: NodeJS.EventEmitter = process;
-const listenersOf = (event: string): Listener[] =>
-  emitter
-    .listeners(event)
-    .filter((listener): listener is Listener => typeof listener === 'function');
 
 // `src/` packages cannot import `@kbn/nightshift-shared` (x-pack), so read the flag from its source
 // to fail if it is renamed again without this config set following (see #292333).
@@ -31,16 +20,10 @@ const NIGHTSHIFT_ENABLED_FLAG = /NIGHTSHIFT_ENABLED_FLAG = '([^']+)'/.exec(
   )
 )?.[1];
 
-const SANDBOX_ENV = {
-  SANDBOX_API_HOST: 'sandbox.example.com',
-  SANDBOX_API_PORT: '9443',
-  SANDBOX_API_KEY: 'key',
-  SANDBOX_CLIENT_CERT: 'CERT',
-  SANDBOX_CLIENT_KEY: 'KEY',
-  SANDBOX_CA_CERT: 'CA',
-};
-
-const configDirs = new Set<string>();
+const SANDBOX_KIBANA_CONFIG = join(
+  REPO_ROOT,
+  'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/kibana.sandbox.yml'
+);
 
 const loadConfig = (env: Record<string, string>) => {
   let loaded: typeof import('./classic.stateful.config') | undefined;
@@ -49,23 +32,13 @@ const loadConfig = (env: Record<string, string>) => {
     loaded = jest.requireActual('./classic.stateful.config');
   });
   if (!loaded) throw new Error('config failed to load');
-  const configArg = loaded.servers.kbnTestServer.serverArgs.find((arg: string) =>
-    arg.startsWith('--config=')
-  );
-  if (configArg) configDirs.add(dirname(configArg.slice('--config='.length)));
   return loaded;
 };
 
-afterAll(() => {
-  for (const dir of configDirs) rmSync(dir, { recursive: true, force: true });
-});
-
 describe('evals_nightshift_investigations config set', () => {
   const originalEnv = process.env;
-  let listenersBefore: Map<string, Listener[]>;
 
   beforeEach(() => {
-    listenersBefore = new Map(CLEANUP_EVENTS.map((event) => [event, listenersOf(event)]));
     process.env = { ...originalEnv };
     delete process.env.NIGHTSHIFT_DATASETS;
     for (const key of Object.keys(process.env)) {
@@ -73,23 +46,18 @@ describe('evals_nightshift_investigations config set', () => {
     }
   });
 
-  // Each investigation-config load writes a temp directory and registers exit/signal handlers;
-  // remove both so repeated loads neither leak directories nor exceed Node's listener limit.
   afterEach(() => {
-    for (const event of CLEANUP_EVENTS) {
-      const before = listenersBefore.get(event) ?? [];
-      for (const listener of listenersOf(event)) {
-        if (!before.includes(listener)) emitter.removeListener(event, listener);
-      }
-    }
     process.env = originalEnv;
   });
 
   // The config set must ignore NIGHTSHIFT_DATASETS: Scout is reused when only the selection changes.
   it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
-    'starts plain evals_tracing without sandbox credentials (NIGHTSHIFT_DATASETS=%s)',
+    'starts plain evals_tracing without the sandbox Kibana config (NIGHTSHIFT_DATASETS=%s)',
     (selection) => {
-      const { servers } = loadConfig(selection ? { NIGHTSHIFT_DATASETS: selection } : {});
+      const { servers } = loadConfig({
+        SANDBOX_API_KEY: 'key',
+        ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
+      });
       const { servers: tracing } = jest.requireActual(
         '../../evals_tracing/stateful/classic.stateful.config'
       );
@@ -97,99 +65,25 @@ describe('evals_nightshift_investigations config set', () => {
     }
   );
 
-  it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
-    'starts the investigation server with sandbox credentials (NIGHTSHIFT_DATASETS=%s)',
-    (selection) => {
-      const { servers } = loadConfig({
-        ...SANDBOX_ENV,
-        ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
-      });
-      expect(servers.kbnTestServer.serverArgs).toContain(
-        '--xpack.nightshift_investigations.enabled=true'
-      );
-    }
-  );
-
-  it('enables the investigation availability flag and engine by default with credentials', () => {
-    const { servers } = loadConfig(SANDBOX_ENV);
+  it('enables the investigation engine and loads the sandbox config with SANDBOX_KIBANA_CONFIG', () => {
+    const { servers } = loadConfig({ SANDBOX_KIBANA_CONFIG });
     const args = servers.kbnTestServer.serverArgs;
 
     expect(NIGHTSHIFT_ENABLED_FLAG).toBeTruthy();
     expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`);
     expect(args).toContain('--xpack.nightshift_investigations.enabled=true');
-  });
-
-  it('writes the sandbox connection to an owner-only config file instead of process args', () => {
-    const { servers } = loadConfig(SANDBOX_ENV);
-    const args = servers.kbnTestServer.serverArgs;
-    const configArg = args.find((arg: string) => arg.startsWith('--config='));
-    if (!configArg) throw new Error('expected a --config= server arg');
+    expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
+    expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
+      `--config=${SANDBOX_KIBANA_CONFIG}`,
+    ]);
     expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
-
-    const written = JSON.parse(readFileSync(configArg.slice('--config='.length), 'utf8'));
-    expect(written['xpack.sandbox']).toEqual({
-      enabled: true,
-      host: 'sandbox.example.com',
-      port: 9443,
-      api_key: 'key',
-      ssl: { certificate: 'CERT', key: 'KEY', certificate_authorities: 'CA' },
-    });
   });
 
-  it('requires mTLS certificates alongside the API key', () => {
-    expect(() => loadConfig({ SANDBOX_API_KEY: 'key' })).toThrow(
-      'Sandbox-api mTLS needs SANDBOX_CLIENT_CERT and SANDBOX_CLIENT_KEY'
-    );
-  });
-
-  it('rejects other sandbox settings without the API key instead of starting the plain server', () => {
-    const { SANDBOX_API_KEY, ...partial } = SANDBOX_ENV;
-    expect(() => loadConfig(partial)).toThrow(
-      'SANDBOX_API_HOST, SANDBOX_API_PORT, SANDBOX_CA_CERT, SANDBOX_CLIENT_CERT, SANDBOX_CLIENT_KEY set without SANDBOX_API_KEY'
-    );
-  });
-
-  it('rejects a lone *_PATH setting without the API key', () => {
-    expect(() => loadConfig({ SANDBOX_CLIENT_CERT_PATH: '/tmp/tls.crt' })).toThrow(
-      'SANDBOX_CLIENT_CERT_PATH set without SANDBOX_API_KEY'
-    );
-  });
-
-  it('treats empty sandbox variables as unset', () => {
-    // The CI export writes '' for absent optional fields such as the CA.
-    const { servers } = loadConfig({ SANDBOX_API_HOST: '', SANDBOX_CA_CERT: '' });
-    expect(servers.kbnTestServer.serverArgs).not.toContain(
-      '--xpack.nightshift_investigations.enabled=true'
-    );
-  });
-
-  it('defaults host and port when the shell exports them empty', () => {
-    const { servers } = loadConfig({ ...SANDBOX_ENV, SANDBOX_API_HOST: '', SANDBOX_API_PORT: '' });
-    const configArg = servers.kbnTestServer.serverArgs.find((arg: string) =>
-      arg.startsWith('--config=')
-    );
-    if (!configArg) throw new Error('expected a --config= server arg');
-    const written = JSON.parse(readFileSync(configArg.slice('--config='.length), 'utf8'));
-    expect(written['xpack.sandbox']).toMatchObject({ host: 'localhost', port: 9090 });
-  });
-
-  it.each(['abc', '0', '65536', '9090.5'])(
-    'rejects SANDBOX_API_PORT=%s before registering signal handlers',
-    (port) => {
-      // Only this config set registers signal handlers; the evals_tracing parent it imports may
-      // add its own `exit` handler (for GCS_CREDENTIALS), so signals are the precise check.
-      const signalListeners = process.listenerCount('SIGTERM');
-      expect(() => loadConfig({ ...SANDBOX_ENV, SANDBOX_API_PORT: port })).toThrow(
-        `SANDBOX_API_PORT must be an integer between 1 and 65535, got "${port}"`
-      );
-      expect(process.listenerCount('SIGTERM')).toBe(signalListeners);
-    }
-  );
-
-  it('names the variable and path when a PEM file cannot be read', () => {
-    const { SANDBOX_CLIENT_CERT, ...env } = SANDBOX_ENV;
+  it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', () => {
     expect(() =>
-      loadConfig({ ...env, SANDBOX_CLIENT_CERT_PATH: '/does/not/exist/tls.crt' })
-    ).toThrow('Cannot read SANDBOX_CLIENT_CERT_PATH (/does/not/exist/tls.crt): ');
+      loadConfig({ SANDBOX_KIBANA_CONFIG: '/does/not/exist/kibana.sandbox.yml' })
+    ).toThrow(
+      'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
+    );
   });
 });

@@ -485,19 +485,21 @@ echo "--- Disk usage before starting Scout"
 df -h .
 du -sh .es node_modules "${KIBANA_BUILD_LOCATION:-}" 2>/dev/null || true
 
-# Shared sandbox-api (mTLS) credentials, only for the suite whose server config set runs code in the
-# sandbox. CI starts Scout directly rather than through an evals profile, so map the block here.
-if [[ "${EVAL_SERVER_CONFIG_SET:-}" == "evals_nightshift_investigations" && -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
-  _kbn_evals_config_json="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d)"
-  if [[ "$(jq -r 'has("sandbox")' <<<"$_kbn_evals_config_json")" == "true" ]]; then
-    export SANDBOX_API_HOST="$(jq -r '.sandbox.host // empty' <<<"$_kbn_evals_config_json")"
-    export SANDBOX_API_PORT="$(jq -r '.sandbox.port // empty' <<<"$_kbn_evals_config_json")"
-    export SANDBOX_API_KEY="$(jq -r '.sandbox.apiKey // empty' <<<"$_kbn_evals_config_json")"
-    export SANDBOX_CLIENT_CERT="$(jq -r '.sandbox.ssl.certificate // empty' <<<"$_kbn_evals_config_json")"
-    export SANDBOX_CLIENT_KEY="$(jq -r '.sandbox.ssl.key // empty' <<<"$_kbn_evals_config_json")"
-    export SANDBOX_CA_CERT="$(jq -r '.sandbox.ssl.certificateAuthorities // empty' <<<"$_kbn_evals_config_json")"
+# A suite's `scoutHook` reads the evals config on stdin and prints `{ env }`, exported for Scout and
+# Playwright so the suite's server config set can read it.
+EVAL_SUITE_SCOUT_HOOK="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutHook // empty' 2>/dev/null || true)"
+if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
+  if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
+    _scout_hook_config="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d)"
+  else
+    _scout_hook_config='{}'
   fi
-  unset _kbn_evals_config_json
+  _scout_hook_output="$(printf '%s' "$_scout_hook_config" | bash "$EVAL_SUITE_SCOUT_HOOK")"
+  while IFS= read -r _scout_hook_name; do
+    [[ -z "$_scout_hook_name" ]] && continue
+    export "$_scout_hook_name=$(jq -r --arg name "$_scout_hook_name" '.env[$name]' <<<"$_scout_hook_output")"
+  done < <(jq -r '(.env // {}) | keys[]' <<<"$_scout_hook_output")
+  unset _scout_hook_config _scout_hook_output _scout_hook_name
 fi
 
 # Start Scout server in background (run Kibana from the distributable)
