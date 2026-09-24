@@ -18,10 +18,10 @@ const TOOLS: DecisionTreePromptTools = {
   viewFileTool: 'view_file_tool_id',
   strReplaceTool: 'str_replace_tool_id',
   writeFileTool: 'write_file_tool_id',
-  submitTool: 'submit_optimizer_result',
-  recordSystemTool: 'record_system_learning',
-  recordToolTool: 'record_tool_learning',
-  recordRemediationTool: 'record_remediation',
+  submitTool: 'nightshift_submit_optimizer_result',
+  recordSystemTool: 'nightshift_record_system_learning',
+  recordToolTool: 'nightshift_record_tool_learning',
+  recordRemediationTool: 'nightshift_record_remediation',
 };
 
 describe('selectTurnScript', () => {
@@ -104,10 +104,10 @@ describe('buildReinforcementSystemPrompt', () => {
     expect(prompt).toContain('view_file_tool_id');
     expect(prompt).toContain('str_replace_tool_id');
     expect(prompt).toContain('write_file_tool_id');
-    expect(prompt).toContain('submit_optimizer_result');
-    expect(prompt).toContain('record_system_learning');
-    expect(prompt).toContain('record_tool_learning');
-    expect(prompt).toContain('record_remediation');
+    expect(prompt).toContain('nightshift_submit_optimizer_result');
+    expect(prompt).toContain('nightshift_record_system_learning');
+    expect(prompt).toContain('nightshift_record_tool_learning');
+    expect(prompt).toContain('nightshift_record_remediation');
     expect(prompt).not.toMatch(
       /\{\{(view_file_tool|str_replace_tool|write_file_tool|submit_tool|record_system_tool|record_tool_tool|record_remediation_tool|decision_tree_directory|dropped_node_percent|retained_size_percent|merge_discipline|abstraction_rules|format_guide)\}\}/
     );
