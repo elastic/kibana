@@ -69,6 +69,7 @@ export const assetCriticalityDynamicInlineToolHandler = async (
         esClient: esClient.asCurrentUser,
         index: assetCriticalityIndexPattern,
         additionalContext: `${message}\n${defaultMessage}\n${queryExtraContext ?? ''}`,
+        execute: 'data',
       });
 
       if (esqlResponse.error) {

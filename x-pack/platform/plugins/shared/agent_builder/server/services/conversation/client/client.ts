@@ -19,15 +19,18 @@ import type {
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
 import {
+  type ConversationEvent,
   type CurrentUser,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAddEventInput,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
+  EventActorType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -39,12 +42,12 @@ import {
   isAgentUnavailableError,
   isAttachmentEvent,
   isConversationNotFoundError,
+  isExecutionTerminalEvent,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationSearchOptions,
   SerializedMetadataValue,
   MetadataFieldValue,
-  TimelineEvent,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
@@ -103,6 +106,11 @@ import {
   type Document,
 } from './converters';
 import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
+import {
+  materializeConversationEvents,
+  validateConversationEvents,
+} from '../../conversation_events';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
 // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
@@ -128,6 +136,10 @@ export interface ConversationClient {
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  addCustomEvents(request: {
+    id: string;
+    events: ConversationAddEventInput[];
+  }): Promise<ConversationEvent[]>;
   replaceRoundEvents(
     request: ReplaceRoundEventsRequest,
     options?: { access: ConversationAccess }
@@ -150,7 +162,8 @@ export interface ConversationClient {
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
   patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    options?: { access: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
 }
 
@@ -211,6 +224,7 @@ export const createClient = ({
   esClient,
   user,
   agentRegistry,
+  conversationEvents,
   eventEmitter,
 }: {
   space: string;
@@ -218,6 +232,7 @@ export const createClient = ({
   esClient: ElasticsearchClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
+  conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
@@ -227,10 +242,33 @@ export const createClient = ({
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
     eventEmitter,
   });
 };
+
+/**
+ * Thrown from inside an OCC `fields` callback to turn the write into a no-op: the stored document
+ * is returned as is. Used by the terminal guard of events writes (`skipIfTerminalExistsFor`).
+ */
+const WRITE_SKIPPED = Symbol('conversation write skipped');
+interface WriteSkipped {
+  [WRITE_SKIPPED]: true;
+  current: NormalizedConversation;
+}
+const skipWrite = (current: NormalizedConversation): WriteSkipped => ({
+  [WRITE_SKIPPED]: true,
+  current,
+});
+const isWriteSkipped = (value: unknown): value is WriteSkipped =>
+  typeof value === 'object' && value !== null && WRITE_SKIPPED in value;
+
+/** True when the stored events already end `executionId` with a terminal lifecycle event. */
+const hasTerminalEventFor = (current: NormalizedConversation, executionId: string): boolean =>
+  (current.events ?? []).some(
+    (event) => isExecutionTerminalEvent(event) && event.execution_id === executionId
+  );
 
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
@@ -238,6 +276,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
+  private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
   private readonly eventEmitter?: ScopedConversationEventEmitter;
 
@@ -247,6 +286,7 @@ class ConversationClientImpl implements ConversationClient {
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
     eventEmitter,
   }: {
@@ -255,6 +295,7 @@ class ConversationClientImpl implements ConversationClient {
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
+    conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
     eventEmitter?: ScopedConversationEventEmitter;
   }) {
@@ -263,6 +304,7 @@ class ConversationClientImpl implements ConversationClient {
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
+    this.conversationEvents = conversationEvents;
     this.logger = logger;
     this.eventEmitter = eventEmitter;
   }
@@ -271,7 +313,7 @@ class ConversationClientImpl implements ConversationClient {
    * Notifies the attachment-events listener with the attachment events that were just persisted.
    * Best-effort: listener failures are logged and never fail the write.
    */
-  private notifyAttachmentEvents(conversationId: string, writtenEvents: TimelineEvent[]): void {
+  private notifyAttachmentEvents(conversationId: string, writtenEvents: ConversationEvent[]): void {
     if (!this.eventEmitter) {
       return;
     }
@@ -608,11 +650,13 @@ class ConversationClientImpl implements ConversationClient {
       space: this.space,
     });
 
+    let indexed: { _seq_no?: number; _primary_term?: number };
     try {
-      await this.storage.getClient().index({
+      indexed = await this.storage.getClient().index({
         id,
         document: attributes,
         op_type: 'create',
+        refresh: true,
       });
     } catch (error) {
       if (isVersionConflictError(error)) {
@@ -620,6 +664,10 @@ class ConversationClientImpl implements ConversationClient {
       }
 
       throw error;
+    }
+
+    if (indexed._seq_no === undefined || indexed._primary_term === undefined) {
+      throw createInternalError(`Conversation ${id} was indexed without version metadata`);
     }
 
     this.notifyAttachmentEvents(id, conversation.events ?? []);
@@ -644,21 +692,55 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
+  async addCustomEvents({
+    id,
+    events: inputs,
+  }: {
+    id: string;
+    events: ConversationAddEventInput[];
+  }): Promise<ConversationEvent[]> {
+    const actor = {
+      type: EventActorType.user,
+      id: this.user.id ?? this.user.username,
+      ...(this.user.username ? { username: this.user.username } : {}),
+    };
+    const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
+    const materialized = materializeConversationEvents({
+      events: validatedEvents,
+      actor,
+      now: new Date(),
+    });
+    await this.appendEvents({ id, events: materialized });
+    return materialized;
+  }
+
   /** Appends timeline events onto a conversation.*/
   async appendEvents(
     request: AppendEventsRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
   ): Promise<Conversation> {
-    const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
+    const {
+      id: conversationId,
+      events,
+      title,
+      status,
+      state,
+      attachments,
+      workspaceId,
+      skipIfTerminalExistsFor,
+    } = request;
     const { access } = options;
 
     // `fields` may run more than once on OCC retry; the last run is the one that was written.
-    let writtenEvents: TimelineEvent[] = [];
+    let writtenEvents: ConversationEvent[] = [];
 
     const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
+        if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
+          throw skipWrite(current);
+        }
         const currentEvents = current.events ?? [];
         const existingIds = new Set(currentEvents.map((event) => event.id));
         const newEvents = events.filter((event) => !existingIds.has(event.id));
@@ -704,16 +786,20 @@ class ConversationClientImpl implements ConversationClient {
       state,
       attachments,
       workspaceId,
+      skipIfTerminalExistsFor,
     } = request;
     const { access } = options;
     const roundPrefix = `${roundId}::`;
 
-    let writtenEvents: TimelineEvent[] = [];
+    let writtenEvents: ConversationEvent[] = [];
 
     const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
+        if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
+          throw skipWrite(current);
+        }
         const currentEvents = current.events ?? [];
         const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
         const existingIds = new Set(nonRoundEvents.map((event) => event.id));
@@ -917,13 +1003,14 @@ class ConversationClientImpl implements ConversationClient {
 
   async patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    { access = 'owner' }: { access?: ConversationAccess } = {}
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
 
     const result = await this.writeConversation({
       conversationId,
-      access: 'owner',
+      access,
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(
@@ -1139,6 +1226,12 @@ class ConversationClientImpl implements ConversationClient {
 
       return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });
     } catch (error) {
+      if (isWriteSkipped(error)) {
+        return toConversationResponse({
+          conversation: error.current,
+          resolveTemplate: getTemplate,
+        });
+      }
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
         this.logger.warn(
@@ -1204,12 +1297,6 @@ class ConversationClientImpl implements ConversationClient {
       throw createBadRequestError('ACL entries are not supported when access_mode is "public"');
     }
 
-    if (entries.length > CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES) {
-      throw createBadRequestError(
-        `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`
-      );
-    }
-
     const addedAtById = new Map(
       normalizeConversationAccessControl(current.access_control).entries.map((entry) => [
         `${entry.type}:${entry.id}`,
@@ -1238,6 +1325,12 @@ export const validateAccessControlEntries = ({
   ownerId: string | undefined;
   addedAtById: Map<string, string>;
 }): ConversationAccessControlEntry[] => {
+  if (entries.length > CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES) {
+    throw createBadRequestError(
+      `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`
+    );
+  }
+
   const now = new Date().toISOString();
   const seen = new Set<string>();
   const normalizedEntries: ConversationAccessControlEntry[] = [];

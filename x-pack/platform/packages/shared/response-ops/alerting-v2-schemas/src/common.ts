@@ -8,19 +8,22 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { validateDuration, validateMaxDuration } from './validation';
-import { MAX_DURATION } from './constants';
+import { MAX_DURATION, MAX_DURATION_LENGTH } from './constants';
 
-const durationSchema = z.string().superRefine((value, ctx) => {
-  const formatError = validateDuration(value);
-  if (formatError) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: formatError });
-    return;
-  }
-  const maxError = validateMaxDuration(value, MAX_DURATION);
-  if (maxError) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: maxError });
-  }
-});
+const durationSchema = z
+  .string()
+  .max(MAX_DURATION_LENGTH, { abort: true })
+  .superRefine((value, ctx) => {
+    const formatError = validateDuration(value);
+    if (formatError) {
+      ctx.addIssue({ code: 'custom', message: formatError });
+      return;
+    }
+    const maxError = validateMaxDuration(value, MAX_DURATION);
+    if (maxError) {
+      ctx.addIssue({ code: 'custom', message: maxError });
+    }
+  });
 
 /**
  * Shared schema for tag arrays used across alerting v2 (rule metadata, action policies,
@@ -37,6 +40,33 @@ export const tagsResponseSchema = z
   .describe('Wrapped tags response.');
 
 export type TagsResponse = z.infer<typeof tagsResponseSchema>;
+
+/**
+ * Identity that performed a write, reported on `created_by` / `updated_by`.
+ *
+ * A user profile ID is recorded rather than a username because usernames and
+ * full names change while a profile ID does not.
+ *
+ * The object shape (rather than a bare ID) exists so identity can be described
+ * in more detail later. `profile_uid` is nullable so the three states stay
+ * distinct: a `null` actor is a write with no user behind it (a background
+ * task, say), `{ profile_uid: null }` is a user whose profile could not be
+ * resolved, and a populated `profile_uid` is a fully attributed write.
+ *
+ * Deliberately not `.strict()`: additional identity fields are expected to be
+ * added, and older clients should tolerate them.
+ */
+export const actorSchema = z
+  .object({
+    profile_uid: z
+      .string()
+      .nullable()
+      .describe('User profile ID of the actor, or `null` when it cannot be resolved.'),
+  })
+  .describe('Identity that performed the write.')
+  .meta({ id: 'alerting_actor' });
+
+export type Actor = z.infer<typeof actorSchema>;
 
 /** Make a schema optional while preserving its `.describe()` metadata. */
 const optionalWithDescription = <T extends z.ZodType>(schema: T) => {

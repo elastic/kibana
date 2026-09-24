@@ -1,0 +1,45 @@
+version: "1"
+name: Investigation journal note
+description: >
+  Appends a user_message to an Investigation conversation without running the
+  agent (`POST /api/chat/converse` with `trigger_mode: never`; elastic/kibana#290223).
+  AlertZero workers call this at inflection points so the Investigation reads as a
+  journal. A failed note continues rather than failing the caller.
+enabled: true
+tags:
+  - security
+  - alertzero
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        conversation_id:
+          type: string
+          maxLength: 256
+          description: Conversation id of the Investigation to append to.
+        message:
+          type: string
+          maxLength: 8000
+          description: Human-readable journal line persisted as a user_message.
+      required:
+        - conversation_id
+        - message
+      additionalProperties: false
+steps:
+  # kibana.request is sent verbatim, so the path is prefixed with the executing space.
+  - name: append_note
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+        headers:
+          kbn-xsrf: "true"
+          elastic-api-version: "2023-10-31"
+          Content-Type: application/json
+        body:
+          conversation_id: "{{ inputs.conversation_id }}"
+          input: "{{ inputs.message }}"
+          trigger_mode: never
+    on-failure:
+      continue: true
