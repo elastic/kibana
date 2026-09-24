@@ -14,7 +14,7 @@ import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { ChromeAppHeader, useIsChromeNextProjectHeader } from '../chrome_app_header';
+import { ChromeAppHeader, useIsProjectChromeStyle } from '../chrome_app_header';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -41,7 +41,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChromeStyle = useIsProjectChromeStyle();
   const { euiTheme } = useEuiTheme();
 
   const { getTopTabMenuItems, getAdditionalTabMenuItems, topNavMenuItems, shareAction } =
@@ -77,7 +77,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
-    if (isChromeNextProjectHeader) {
+    if (isProjectChromeStyle) {
       return (tabsBar) => {
         // Vertical rule separator.
         const tabsBarWithDelimiter = (
@@ -105,14 +105,14 @@ export const TabsView = (props: SingleTabViewProps) => {
         );
       };
     }
-  }, [isChromeNextProjectHeader, topNavMenuItems, shareAction, euiTheme]);
+  }, [isProjectChromeStyle, topNavMenuItems, shareAction, euiTheme]);
 
   const appendRight = useMemo(() => {
-    if (!isChromeNextProjectHeader) {
+    if (!isProjectChromeStyle) {
       return <AppMenuComponent config={topNavMenuItems} />;
     }
     return undefined;
-  }, [isChromeNextProjectHeader, topNavMenuItems]);
+  }, [isProjectChromeStyle, topNavMenuItems]);
 
   const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
     (droppedCount: number) => {
