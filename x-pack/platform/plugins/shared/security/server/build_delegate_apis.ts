@@ -58,11 +58,12 @@ export const buildSecurityApi = ({
   };
 
   const getPrincipal: CoreSecurityDelegateContract['authc']['getPrincipal'] = (request) => {
-    // Service-account-bound fake requests never pass through the authenticator, so `getCurrentUser`
-    // knows nothing about them; the backend that minted them does, and answers without I/O.
+    // Fake requests never pass through the authenticator. Only the ones the service accounts
+    // backend minted are known without I/O. The enrichment override is deliberately not
+    // classified: it names the user a request acts for, not the credential (usually an API key)
+    // that Elasticsearch authenticates it with.
     if (request.isFakeRequest) {
-      const principal = getServiceAccounts()?.backend.getFakeRequestPrincipal(request) ?? null;
-      if (principal) return principal;
+      return getServiceAccounts()?.backend.getFakeRequestPrincipal(request) ?? null;
     }
 
     const user = getCurrentUser(request);

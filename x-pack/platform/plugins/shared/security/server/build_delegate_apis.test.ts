@@ -134,30 +134,30 @@ describe('buildSecurityApi', () => {
       expect(authc.getCurrentUser).not.toHaveBeenCalled();
     });
 
-    it('classifies an enriched fake request as a user', () => {
-      const request = httpServerMock.createFakeKibanaRequest({});
+    // The enrichment names the user a fake request acts for, not the credential Elasticsearch
+    // authenticates it with, which for Task Manager requests is an API key.
+    it('returns null for an enriched fake request rather than classifying its bound user', () => {
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey dGFzay1rZXk6c2VjcmV0' },
+      });
       api.fakeRequestEnricher(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
 
-      expect(api.authc.getPrincipal(request)).toEqual({
-        type: 'user',
-        username: 'jdoe',
-        userProfileId: 'u_test_profile_123',
-      });
+      expect(api.authc.getPrincipal(request)).toBeNull();
+      expect(api.authc.getCurrentUser(request)).toMatchObject({ username: 'jdoe' });
+    });
+
+    it('returns null for a fake request that is not bound to a service account, without consulting authc', () => {
+      authc.getCurrentUser.mockReturnValue(securityMock.createMockAuthenticatedUser());
+
+      expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
       expect(authc.getCurrentUser).not.toHaveBeenCalled();
     });
 
-    it('returns null for a fake request that is neither bound to a service account nor enriched', () => {
-      authc.getCurrentUser.mockReturnValue(null);
-
-      expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
-    });
-
-    it('skips the service accounts backend when the feature is not enabled', () => {
+    it('returns null for fake requests when service accounts are not enabled', () => {
       serviceAccounts = null;
-      authc.getCurrentUser.mockReturnValue(null);
 
       expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
-      expect(authc.getCurrentUser).toHaveBeenCalledTimes(1);
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
     });
   });
 
