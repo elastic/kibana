@@ -16,13 +16,27 @@
   "components": {
     "Column": {
       "type": "object",
-      "description": "Arranges its children vertically. Maps to EuiFlexGroup with direction=column.",
+      "description": "Arranges its children vertically. Maps to EuiFlexGroup. Use 'grow' to let one child fill the leftover space, for example a search box in a toolbar.",
       "properties": {
         "component": {
           "const": "Column"
         },
         "children": {
           "$ref": "common_types.json#/$defs/ChildList"
+        },
+        "grow": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          ],
+          "description": "How children share leftover space: one number for all of them, or an array matching the children. 0 means take only what is needed."
         },
         "gap": {
           "type": "string",
@@ -67,13 +81,27 @@
     },
     "Row": {
       "type": "object",
-      "description": "Arranges its children horizontally. Maps to EuiFlexGroup with direction=row.",
+      "description": "Arranges its children horizontally. Maps to EuiFlexGroup. Use 'grow' to let one child fill the leftover space, for example a search box in a toolbar.",
       "properties": {
         "component": {
           "const": "Row"
         },
         "children": {
           "$ref": "common_types.json#/$defs/ChildList"
+        },
+        "grow": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          ],
+          "description": "How children share leftover space: one number for all of them, or an array matching the children. 0 means take only what is needed."
         },
         "gap": {
           "type": "string",
@@ -121,13 +149,26 @@
     },
     "Card": {
       "type": "object",
-      "description": "A bordered, padded container with an optional title. Maps to EuiPanel.",
+      "description": "A bordered, padded container. Give it a 'title' for a plain heading, or a 'header' child when the header needs actions beside the title. Maps to EuiPanel.",
       "properties": {
         "component": {
           "const": "Card"
         },
         "title": {
           "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "header": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "Replaces 'title'. Normally a Row with justify=spaceBetween holding the heading and its buttons."
+        },
+        "titleSize": {
+          "type": "string",
+          "enum": [
+            "xs",
+            "s",
+            "m"
+          ],
+          "default": "xs"
         },
         "child": {
           "$ref": "common_types.json#/$defs/Child"
@@ -486,7 +527,7 @@
     },
     "Button": {
       "type": "object",
-      "description": "A clickable button that dispatches an action.",
+      "description": "A clickable button that dispatches an action. variant 'icon' renders icon-only, using 'label' as its accessible name, so an icon button is never unlabelled.",
       "properties": {
         "component": {
           "const": "Button"
@@ -500,13 +541,35 @@
             "default",
             "primary",
             "danger",
-            "borderless"
+            "borderless",
+            "icon"
           ],
           "default": "default",
-          "description": "'primary' marks the main call to action; 'borderless' renders as a link."
+          "description": "'primary' marks the main call to action; 'borderless' renders as a link; 'icon' is icon-only and requires iconType."
         },
         "iconType": {
           "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "text",
+            "success",
+            "warning",
+            "danger",
+            "accent"
+          ],
+          "description": "Overrides the colour implied by variant. 'text' suits toolbar icon buttons."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "xs",
+            "s",
+            "m"
+          ],
+          "default": "m"
         },
         "disabled": {
           "$ref": "common_types.json#/$defs/DynamicBoolean"
@@ -527,7 +590,7 @@
     },
     "TextField": {
       "type": "object",
-      "description": "A text input. Bind 'value' to a data model path to capture what the user types.",
+      "description": "A text input. Bind 'value' to a data model path to capture what the user types. variant 'search' gives a clearable search box; set hideLabel for a bare input in a toolbar.",
       "properties": {
         "component": {
           "const": "TextField"
@@ -550,9 +613,19 @@
             "shortText",
             "longText",
             "number",
-            "obscured"
+            "obscured",
+            "search"
           ],
           "default": "shortText"
+        },
+        "hideLabel": {
+          "type": "boolean",
+          "default": false,
+          "description": "Drops the form row and uses 'label' as the accessible name instead."
+        },
+        "compressed": {
+          "type": "boolean",
+          "default": false
         },
         "disabled": {
           "$ref": "common_types.json#/$defs/DynamicBoolean"
@@ -589,7 +662,7 @@
     },
     "ChoicePicker": {
       "type": "object",
-      "description": "Select one option from a fixed list. Maps to EuiSelect.",
+      "description": "Select one option from a fixed list. Set inline for a toolbar pill that shows the label inside the control, or searchable when the list is long.",
       "properties": {
         "component": {
           "const": "ChoicePicker"
@@ -619,6 +692,23 @@
             ],
             "additionalProperties": false
           }
+        },
+        "inline": {
+          "type": "boolean",
+          "default": false,
+          "description": "Renders as a compact control with the label prepended, not a form row."
+        },
+        "searchable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Uses a type-to-filter combo box instead of a plain select."
+        },
+        "compressed": {
+          "type": "boolean",
+          "default": false
+        },
+        "placeholder": {
+          "$ref": "common_types.json#/$defs/DynamicString"
         },
         "disabled": {
           "$ref": "common_types.json#/$defs/DynamicBoolean"
@@ -870,6 +960,124 @@
       "required": [
         "component",
         "value"
+      ]
+    },
+    "Flyout": {
+      "type": "object",
+      "description": "A side panel showing the detail of one thing. Visibility is a data binding, exactly like Modal, so anything that writes the data model can open it. Maps to EuiFlyout.",
+      "properties": {
+        "component": {
+          "const": "Flyout"
+        },
+        "title": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "isOpen": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean",
+          "description": "Bind to a data model value; the flyout shows while it is truthy."
+        },
+        "child": {
+          "$ref": "common_types.json#/$defs/Child"
+        },
+        "footer": {
+          "$ref": "common_types.json#/$defs/Child"
+        },
+        "onClose": {
+          "$ref": "common_types.json#/$defs/Action",
+          "description": "Normally kbn.setData writing null to the path isOpen reads."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "m"
+        },
+        "paddingSize": {
+          "type": "string",
+          "enum": [
+            "none",
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "l"
+        }
+      },
+      "required": [
+        "component",
+        "title",
+        "isOpen",
+        "child",
+        "onClose"
+      ]
+    },
+    "Popover": {
+      "type": "object",
+      "description": "Content anchored to another component, for a menu or a small form. Visibility is a data binding like Modal \u2014 the anchor's own action opens it. Maps to EuiPopover.",
+      "properties": {
+        "component": {
+          "const": "Popover"
+        },
+        "anchor": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "The component the popover hangs off, normally a Button whose action opens it."
+        },
+        "isOpen": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        },
+        "child": {
+          "$ref": "common_types.json#/$defs/Child"
+        },
+        "footer": {
+          "$ref": "common_types.json#/$defs/Child"
+        },
+        "title": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "onBack": {
+          "$ref": "common_types.json#/$defs/Action",
+          "description": "When set, a back chevron is shown left of the title."
+        },
+        "onClose": {
+          "$ref": "common_types.json#/$defs/Action"
+        },
+        "anchorPosition": {
+          "type": "string",
+          "enum": [
+            "downLeft",
+            "downRight",
+            "downCenter",
+            "upLeft",
+            "upRight",
+            "leftCenter",
+            "rightCenter"
+          ],
+          "default": "downLeft"
+        },
+        "panelPaddingSize": {
+          "type": "string",
+          "enum": [
+            "none",
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "m"
+        },
+        "width": {
+          "type": "number",
+          "description": "Panel width in pixels."
+        }
+      },
+      "required": [
+        "component",
+        "anchor",
+        "isOpen",
+        "child",
+        "onClose"
       ]
     }
   },

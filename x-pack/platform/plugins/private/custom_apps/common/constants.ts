@@ -16,6 +16,15 @@ export const API_BASE_PATH = '/internal/custom_apps';
 export const SAMPLE_DATA_SET_ID = 'logs';
 export const SAMPLE_DATA_INDEX = 'kibana_sample_data_logs';
 
+/**
+ * Written by `scripts/k8s_otel_data.js`. The namespace suffix keeps the seed apart
+ * from a real EDOT collector's `-default` data streams.
+ */
+export const K8S_POD_METRICS_INDEX = 'metrics-kubeletstatsreceiver.otel-k8sdemo';
+export const K8S_CLUSTER_METRICS_INDEX = 'metrics-k8sclusterreceiver.otel-k8sdemo';
+export const K8S_LOGS_INDEX = 'logs-k8s.otel-k8sdemo';
+export const K8S_ALERTS_INDEX = 'k8sdemo_alert_status';
+
 /** Grid settings, matching the dashboard's so apps feel the same to use. */
 export const GRID_SETTINGS = {
   gutterSize: 8,

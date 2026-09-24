@@ -5,27 +5,15 @@
  * 2.0.
  */
 
-import type { A2uiMessage, ComponentDefinition, JsonValue } from '@kbn/a2ui-renderer';
 import type { CustomAppDefinition } from '../../common/app_definition';
 import { ACTION_SET_DATA, SAMPLE_DATA_INDEX } from '../../common/constants';
+import { kubernetesTemplate } from './kubernetes';
+import { surface } from './surface';
 
-export interface CustomAppTemplate {
-  id: string;
-  name: string;
-  description: string;
-  build: () => CustomAppDefinition;
-}
+export type { CustomAppTemplate } from './surface';
+import type { CustomAppTemplate } from './surface';
 
-const CATALOG_ID = 'elastic/kibana-eui/v1';
 const FROM = `FROM ${SAMPLE_DATA_INDEX}`;
-
-const surface = (
-  surfaceId: string,
-  components: ComponentDefinition[],
-  dataModel: Record<string, JsonValue> = {}
-): A2uiMessage[] => [
-  { version: 'v1.0', createSurface: { surfaceId, catalogId: CATALOG_ID, dataModel, components } },
-];
 
 /**
  * The title, description and time picker are panels rather than page chrome, so
@@ -383,6 +371,8 @@ export const CUSTOM_APP_TEMPLATES: CustomAppTemplate[] = [
     name: 'Web traffic',
     description:
       'Ten panels over the sample web logs: KPI tiles, time series, breakdowns and tables — all ES|QL.',
+    indexPattern: SAMPLE_DATA_INDEX,
     build: webTraffic,
   },
+  kubernetesTemplate,
 ];

@@ -6,7 +6,6 @@
  */
 
 import { customAppDefinitionSchema, getPanelIds } from '../../common/app_definition';
-import { SAMPLE_DATA_INDEX } from '../../common/constants';
 import { customAppCatalogSchema } from '../catalog';
 import { CUSTOM_APP_TEMPLATES } from '.';
 
@@ -46,15 +45,19 @@ describe.each(CUSTOM_APP_TEMPLATES.map((t) => [t.name, t] as const))(
       }
     });
 
-    it('queries the sample logs data set via ES|QL', () => {
+    it('drives every panel from ES|QL over its own data set', () => {
       const queries = Object.values(definition.queries ?? {}).flat();
       expect(queries.length).toBeGreaterThan(0);
       for (const query of queries) {
-        expect(query.query).toContain(SAMPLE_DATA_INDEX);
+        // A template may join a second index — the alert lookup, say — so this
+        // checks the template reads what it claims to, not that it reads only that.
+        expect(query.query).toMatch(/\bFROM\s+\S/);
         // The page time picker supplies the range; a query that pins its own
         // would silently ignore the picker.
         expect(query.query).not.toMatch(/\bWHERE\s+@timestamp\s*[<>]/i);
       }
+      const all = queries.map((query) => query.query).join('\n');
+      expect(all).toContain(template.indexPattern);
     });
 
     it('writes every query into a path some component binds to', () => {

@@ -249,4 +249,247 @@ describe('row actions and dialogs', () => {
     renderApp(components, { selected: { page: '/a' } });
     expect(screen.getByText('the detail')).toBeInTheDocument();
   });
+
+  describe('icon buttons', () => {
+    it('names an icon-only button from its label, so it is never unlabelled', () => {
+      renderApp([
+        {
+          id: 'root',
+          component: 'Button',
+          variant: 'icon',
+          iconType: 'gear',
+          label: 'Panel settings',
+          action: { event: { name: 'kbn.navigate', context: { appId: 'home' } } },
+        },
+      ]);
+
+      const button = screen.getByRole('button', { name: 'Panel settings' });
+      expect(button).toBeInTheDocument();
+      // Icon-only: the label is the accessible name, not visible text.
+      expect(button).toHaveTextContent('');
+    });
+
+    it('still dispatches its action', () => {
+      const onAction = jest.fn();
+      renderApp(
+        [
+          {
+            id: 'root',
+            component: 'Button',
+            variant: 'icon',
+            iconType: 'plusInCircle',
+            label: 'Add panel',
+            action: { event: { name: 'kbn.setData', context: { path: '/added', value: true } } },
+          },
+        ],
+        {},
+        onAction
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add panel' }));
+      expect(onAction).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'kbn.setData', context: { path: '/added', value: true } })
+      );
+    });
+  });
+
+  describe('toolbar-shaped inputs', () => {
+    it('drops the form row when a search field hides its label', () => {
+      renderApp(
+        [
+          {
+            id: 'root',
+            component: 'TextField',
+            variant: 'search',
+            hideLabel: true,
+            label: 'Search resources',
+            placeholder: 'health:unhealthy',
+            value: { path: '/filters/q' },
+          },
+        ],
+        { filters: { q: '' } }
+      );
+
+      const input = screen.getByRole('searchbox', { name: 'Search resources' });
+      expect(input).toBeEnabled();
+      // The label is the accessible name only — no visible form label.
+      expect(screen.queryByText('Search resources')).not.toBeInTheDocument();
+    });
+
+    it('writes what the user types into the bound path', () => {
+      renderApp(
+        [
+          {
+            id: 'root',
+            component: 'Column',
+            children: ['search', 'echo'],
+          },
+          {
+            id: 'search',
+            component: 'TextField',
+            variant: 'search',
+            hideLabel: true,
+            label: 'Search',
+            value: { path: '/filters/q' },
+          },
+          { id: 'echo', component: 'Text', text: { path: '/filters/q' } },
+        ],
+        { filters: { q: '' } }
+      );
+
+      fireEvent.change(screen.getByRole('searchbox', { name: 'Search' }), {
+        target: { value: 'checkout' },
+      });
+      expect(screen.getByText('checkout')).toBeInTheDocument();
+    });
+
+    it('prepends the label inside an inline ChoicePicker instead of above it', () => {
+      renderApp(
+        [
+          {
+            id: 'root',
+            component: 'ChoicePicker',
+            inline: true,
+            label: 'Group by',
+            value: { path: '/filters/groupBy' },
+            options: [
+              { label: 'Cluster', value: 'cluster' },
+              { label: 'Namespace', value: 'namespace' },
+            ],
+          },
+        ],
+        { filters: { groupBy: 'cluster' } }
+      );
+
+      const select = screen.getByRole('combobox', { name: 'Group by' });
+      expect(select).toHaveValue('cluster');
+      // Prepended, so it renders once as part of the control.
+      expect(screen.getAllByText('Group by')).toHaveLength(1);
+    });
+  });
+
+  describe('overlays', () => {
+    const flyout = (selected: unknown) => [
+      {
+        id: 'root',
+        component: 'Flyout',
+        title: 'Pod detail',
+        isOpen: {
+          call: 'not',
+          args: { value: { call: 'isEmpty', args: { value: { path: '/selected' } } } },
+        },
+        child: 'body',
+        onClose: { event: { name: 'kbn.setData', context: { path: '/selected', value: null } } },
+      },
+      { id: 'body', component: 'Text', text: { path: '/selected/pod' } },
+    ];
+
+    it('stays closed while its bound value is empty', () => {
+      renderApp(flyout(null), { selected: null });
+      expect(screen.queryByText('Pod detail')).not.toBeInTheDocument();
+    });
+
+    it('opens with the bound row once something selects it', () => {
+      renderApp(flyout({ pod: 'checkout-api-7c9f8' }), {
+        selected: { pod: 'checkout-api-7c9f8' },
+      });
+      // Asserted on content rather than the accessible name: Kibana's jest setup
+      // stubs `useGeneratedHtmlId` to a constant, so `aria-labelledby` does not
+      // resolve here. That is an artifact of the environment, not the component.
+      expect(screen.getByRole('heading', { name: 'Pod detail' })).toBeInTheDocument();
+      expect(screen.getByText('checkout-api-7c9f8')).toBeInTheDocument();
+      expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
+    });
+
+    it('dispatches onClose rather than closing itself', () => {
+      // Visibility is the data model's business, so the component must not hold
+      // its own open state — otherwise the binding and the UI can disagree.
+      const onAction = jest.fn();
+      renderApp(flyout({ pod: 'p' }), { selected: { pod: 'p' } }, onAction);
+
+      fireEvent.click(screen.getByRole('button', { name: /close/i }));
+      expect(onAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'kbn.setData',
+          context: { path: '/selected', value: null },
+        })
+      );
+    });
+
+    const popover = (open: boolean) => [
+      {
+        id: 'root',
+        component: 'Popover',
+        anchor: 'trigger',
+        isOpen: { path: '/ui/menuOpen' },
+        title: 'Add custom metric',
+        child: 'body',
+        onBack: { event: { name: 'kbn.setData', context: { path: '/ui/menuOpen', value: null } } },
+        onClose: { event: { name: 'kbn.setData', context: { path: '/ui/menuOpen', value: null } } },
+      },
+      {
+        id: 'trigger',
+        component: 'Button',
+        variant: 'icon',
+        iconType: 'boxesVertical',
+        label: 'More actions',
+        action: { event: { name: 'kbn.setData', context: { path: '/ui/menuOpen', value: true } } },
+      },
+      { id: 'body', component: 'Text', text: 'metric picker' },
+    ];
+
+    it('renders its anchor but not its content while closed', () => {
+      renderApp(popover(false), { ui: { menuOpen: false } });
+      expect(screen.getByRole('button', { name: 'More actions' })).toBeInTheDocument();
+      expect(screen.queryByText('metric picker')).not.toBeInTheDocument();
+    });
+
+    it('shows the content and a back chevron when bound open', () => {
+      renderApp(popover(true), { ui: { menuOpen: true } });
+      expect(screen.getByText('metric picker')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Add custom metric' })).toBeInTheDocument();
+    });
+  });
+
+  describe('layout escape hatches', () => {
+    it('lets one child take the leftover width via grow', () => {
+      const { container } = renderApp([
+        { id: 'root', component: 'Row', grow: [0, 1, 0], children: ['a', 'b', 'c'] },
+        { id: 'a', component: 'Badge', label: 'left' },
+        { id: 'b', component: 'Badge', label: 'middle' },
+        { id: 'c', component: 'Badge', label: 'right' },
+      ]);
+
+      // EUI only sizes direct EuiFlexItem children, so `grow` has to wrap them.
+      const items = container.querySelectorAll('.euiFlexItem');
+      expect(items).toHaveLength(3);
+      expect(screen.getByText('middle')).toBeInTheDocument();
+    });
+
+    it('wraps nothing when grow is absent, leaving existing layouts untouched', () => {
+      const { container } = renderApp([
+        { id: 'root', component: 'Row', children: ['a', 'b'] },
+        { id: 'a', component: 'Badge', label: 'one' },
+        { id: 'b', component: 'Badge', label: 'two' },
+      ]);
+
+      expect(container.querySelectorAll('.euiFlexItem')).toHaveLength(0);
+    });
+
+    it('renders a Card header child in place of its title', () => {
+      renderApp([
+        { id: 'root', component: 'Card', header: 'head', title: 'ignored', child: 'body' },
+        { id: 'head', component: 'Row', justify: 'spaceBetween', children: ['name', 'count'] },
+        { id: 'name', component: 'Text', text: 'k8s-eu-prod', variant: 'heading3' },
+        { id: 'count', component: 'Badge', label: '540' },
+        { id: 'body', component: 'Text', text: 'the grid' },
+      ]);
+
+      expect(screen.getByText('k8s-eu-prod')).toBeInTheDocument();
+      expect(screen.getByText('540')).toBeInTheDocument();
+      expect(screen.getByText('the grid')).toBeInTheDocument();
+      // A header replaces the title rather than stacking with it.
+      expect(screen.queryByText('ignored')).not.toBeInTheDocument();
+    });
+  });
 });

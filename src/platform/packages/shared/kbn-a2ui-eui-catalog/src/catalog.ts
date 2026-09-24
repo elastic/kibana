@@ -11,7 +11,16 @@ import type { Catalog } from '@kbn/a2ui-renderer';
 import catalogSchema from '../catalog.json';
 import { Card, Column, Divider, Row, Tabs } from './components/layout';
 import { Badge, Callout, Icon, Stat, Table, Text } from './components/display';
-import { Accordion, DescriptionList, Health, Link, Modal, Progress } from './components/feedback';
+import {
+  Accordion,
+  DescriptionList,
+  Flyout,
+  Health,
+  Link,
+  Modal,
+  Popover,
+  Progress,
+} from './components/feedback';
 import {
   Button,
   CheckBox,
@@ -43,6 +52,8 @@ const components = [
   Slider,
   DateTimeInput,
   Modal,
+  Flyout,
+  Popover,
   Accordion,
   Health,
   Link,

@@ -10,6 +10,7 @@
 import React from 'react';
 import {
   EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -18,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import type { CatalogComponent, ChildList } from '@kbn/a2ui-renderer';
-import { bool, objectArray, oneOf, optionalStr, str } from '../coerce';
+import { bool, num, objectArray, oneOf, optionalStr, str } from '../coerce';
 
 const GAPS = ['none', 'xs', 's', 'm', 'l', 'xl'] as const;
 
@@ -47,6 +48,25 @@ function flexProps(props: Record<string, unknown>) {
   };
 }
 
+/**
+ * EUI's flex sizing only applies to direct `EuiFlexItem` children, so a child
+ * rendered straight into the group can never take the leftover space. When `grow`
+ * is set each child is wrapped; when it is absent nothing is wrapped, which keeps
+ * existing documents rendering byte-for-byte as they did.
+ */
+function growChildren(children: React.ReactNode, grow: unknown): React.ReactNode {
+  if (grow === undefined || grow === null) return children;
+  const factors = Array.isArray(grow) ? grow : undefined;
+  return React.Children.toArray(children).map((child, index) => {
+    const factor = num(factors ? factors[index] : grow, 0);
+    return (
+      <EuiFlexItem key={index} grow={factor > 0 ? (Math.min(factor, 10) as 1) : false}>
+        {child}
+      </EuiFlexItem>
+    );
+  });
+}
+
 export const Column: CatalogComponent = {
   name: 'Column',
   render: ({ props, buildChild, accessibility }) => (
@@ -56,7 +76,7 @@ export const Column: CatalogComponent = {
       aria-label={accessibility?.label}
       {...flexProps(props)}
     >
-      {buildChild(props.children as ChildList)}
+      {growChildren(buildChild(props.children as ChildList), props.grow)}
     </EuiFlexGroup>
   ),
 };
@@ -71,15 +91,19 @@ export const Row: CatalogComponent = {
       aria-label={accessibility?.label}
       {...flexProps(props)}
     >
-      {buildChild(props.children as ChildList)}
+      {growChildren(buildChild(props.children as ChildList), props.grow)}
     </EuiFlexGroup>
   ),
 };
 
 export const Card: CatalogComponent = {
   name: 'Card',
-  render: ({ props, buildChild, accessibility }) => {
+  render: ({ props, rawProps, buildChild, accessibility }) => {
     const title = optionalStr(props.title);
+    // `rawProps` rather than `props`, so an absent header is distinguishable from
+    // one whose binding resolved to nothing.
+    const hasHeader = rawProps.header !== undefined && rawProps.header !== null;
+
     return (
       <EuiPanel
         paddingSize={oneOf(props.paddingSize, ['none', 's', 'm', 'l'] as const, 'm')}
@@ -87,13 +111,20 @@ export const Card: CatalogComponent = {
         hasShadow={false}
         aria-label={accessibility?.label}
       >
-        {title && (
+        {hasHeader ? (
           <>
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
+            {buildChild(props.header as string)}
             <EuiSpacer size="s" />
           </>
+        ) : (
+          title && (
+            <>
+              <EuiTitle size={oneOf(props.titleSize, ['xs', 's', 'm'] as const, 'xs')}>
+                <h3>{title}</h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+            </>
+          )
         )}
         {buildChild(props.child as string)}
       </EuiPanel>
