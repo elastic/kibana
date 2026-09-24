@@ -112,6 +112,7 @@ paths:
                   - tier1
                   - message
                   - next_step
+                  - hasConfirmedHit
                   - completedSuccessfully
                 properties:
                   status:
@@ -230,7 +231,9 @@ paths:
                         type: string
                       hasHit:
                         type: boolean
-                        enum: [false]
+                        description: >-
+                          True when any behavior's execute path found at least
+                          one row in a required index. Independent of Tier 1.
                       tier:
                         type: integer
                         enum: [2]
@@ -240,6 +243,13 @@ paths:
                     type: string
                   next_step:
                     type: string
+                  hasConfirmedHit:
+                    type: boolean
+                    description: >-
+                      True when Tier 1 confirmed a required-index hit or any
+                      Tier 2 behavior executed with a required-index hit.
+                      Callers that gate SSE emit or packaging on the hit bar
+                      must read this field, not tier1.hasConfirmedHit alone.
                   completedSuccessfully:
                     type: boolean
                     description: >-
