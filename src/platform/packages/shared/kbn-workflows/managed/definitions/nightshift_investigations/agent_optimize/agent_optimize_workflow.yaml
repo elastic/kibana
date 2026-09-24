@@ -90,4 +90,5 @@ steps:
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
-              recalled_ids: '{{ inputs.workflow_context.semantic_memory.recalled_ids }}'
+              # Preserve the array for the step's bounded Zod schema.
+              recalled_ids: '${{ inputs.workflow_context.semantic_memory.recalled_ids }}'

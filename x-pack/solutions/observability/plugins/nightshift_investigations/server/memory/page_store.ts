@@ -623,7 +623,16 @@ if (ctx.op == 'create' || ctx._source.attributes == null || ctx._source.attribut
             .join(', ')
       );
       if (bulk.errors) {
-        throw new Error('Memory counter bulk update failed for one or more items');
+        const reasons = (bulk.items ?? []).flatMap((item) =>
+          Object.values(item).flatMap((result) =>
+            result.error ? [`${result.error.type}: ${result.error.reason}`] : []
+          )
+        );
+        throw new Error(
+          `Memory counter bulk update failed for one or more items${
+            reasons.length > 0 ? `: ${reasons.join('; ')}` : ''
+          }`
+        );
       }
     },
 
