@@ -14,10 +14,7 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../../../author
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import {
-  addMissingUiamKeyTagIfNeeded,
-  API_KEY_ATTRIBUTES_TO_STRIP,
-} from '../../../../rules_client/common';
+import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import {
   updateMeta,
@@ -159,18 +156,9 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
         })
       : ({} as Awaited<ReturnType<typeof createNewAPIKeySet>>);
 
-    const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
-      attributes.tags,
-      existingApiKey ? attributes.uiamApiKey : apiKeyAttributes.uiamApiKey,
-      context.isServerless,
-      context.shouldGrantUiam,
-      context.apiKeyType
-    );
-
     const updateAttributes = updateMeta(context, {
       ...(existingApiKey ? attributes : omit(attributes, API_KEY_ATTRIBUTES_TO_STRIP)),
       ...apiKeyAttributes,
-      tags: tagsWithUiamCheck,
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
