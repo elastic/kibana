@@ -8,6 +8,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import Path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigFromFiles } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 
@@ -33,6 +34,10 @@ it('resolves credentials from the environment and preserves other preconfigured 
   try {
     const config = getConfigFromFiles([
       existingConfig,
+      Path.join(
+        REPO_ROOT,
+        'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/stateful/kibana.tracing.yml'
+      ),
       Path.join(__dirname, 'kibana.sandbox.yml'),
       Path.join(__dirname, 'kibana.telemetry.yml'),
     ]);

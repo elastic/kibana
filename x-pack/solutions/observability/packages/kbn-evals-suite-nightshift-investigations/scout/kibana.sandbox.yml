@@ -11,6 +11,3 @@ xpack.sandbox:
     certificate: ${SANDBOX_CLIENT_CERT}
     key: ${SANDBOX_CLIENT_KEY}
     certificate_authorities: ${SANDBOX_CA_CERT}
-
-# Scout moves the inherited exporter configuration into the environment to keep headers out of argv.
-telemetry.tracing.exporters: ${NIGHTSHIFT_TRACING_EXPORTERS}

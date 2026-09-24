@@ -62,7 +62,12 @@ describe('evals_nightshift_investigations config set', () => {
       const { servers: tracing } = jest.requireActual(
         '../../evals_tracing/stateful/classic.stateful.config'
       );
-      expect(servers.kbnTestServer.serverArgs).toEqual(tracing.kbnTestServer.serverArgs);
+      expect(servers.kbnTestServer.serverArgs).toEqual([
+        ...tracing.kbnTestServer.serverArgs.filter(
+          (arg: string) => !arg.startsWith('--telemetry.tracing.exporters=')
+        ),
+        `--config=${join(__dirname, 'kibana.tracing.yml')}`,
+      ]);
     }
   );
 
@@ -75,6 +80,7 @@ describe('evals_nightshift_investigations config set', () => {
     expect(args).toContain('--xpack.nightshift_investigations.enabled=true');
     expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
     expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
+      `--config=${join(__dirname, 'kibana.tracing.yml')}`,
       `--config=${SANDBOX_KIBANA_CONFIG}`,
     ]);
     expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
@@ -110,6 +116,18 @@ describe('evals_nightshift_investigations config set', () => {
     expect(servers.kbnTestServer.serverArgs).toContain(`--config=${telemetryConfig}`);
     expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('trace-test-key');
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
+  });
+
+  it('keeps exporter headers out of smoke-only process arguments', () => {
+    const exporters = JSON.stringify([
+      { http: { url: 'https://traces.example.com', headers: { Authorization: 'smoke-key' } } },
+    ]);
+    const { servers } = loadConfig({ TRACING_EXPORTERS: exporters });
+    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('smoke-key');
+    expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
+    expect(servers.kbnTestServer.serverArgs).toContain(
+      `--config=${join(__dirname, 'kibana.tracing.yml')}`
+    );
   });
 
   it('fails fast when the telemetry YAML is missing', () => {
