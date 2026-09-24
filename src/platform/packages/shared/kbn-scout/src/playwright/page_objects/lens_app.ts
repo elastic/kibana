@@ -200,42 +200,39 @@ export class LensApp {
       document.querySelector('[data-test-subj="lnsWorkspace"]')
     );
 
-    try {
-      await this.openSaveOptionsIfNeeded();
-      await this.saveButton.click();
-      await this.saveModal.waitFor({ state: 'visible' });
-      await this.savedObjectTitleInput.fill(title);
+    await this.openSaveOptionsIfNeeded();
+    await this.saveButton.click();
+    await this.saveModal.waitFor({ state: 'visible' });
+    await this.savedObjectTitleInput.fill(title);
 
-      // Prefer checking the radio input — label clicks race save-modal remounts.
-      if (options?.addToDashboard === 'existing') {
-        await this.page.locator('#existing-dashboard-option').check();
-        await this.page.testSubj.locator('open-dashboard-picker').click();
-        await this.page.testSubj
-          .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
-          .click();
-      } else if (options?.addToDashboard === 'new') {
-        if (options.saveAsNew !== undefined) {
-          await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
-        }
-        await this.page.locator('#new-dashboard-option').check();
-        if (options.saveToLibrary !== undefined) {
-          if (options.saveToLibrary) {
-            await this.addToLibraryCheckbox.check();
-          } else {
-            await this.addToLibraryCheckbox.uncheck();
-          }
-        }
-      } else if (options?.addToDashboard === 'none') {
-        await this.page.locator('#add-to-library-option').check();
+    // Prefer checking the radio input — label clicks race save-modal remounts.
+    if (options?.addToDashboard === 'existing') {
+      await this.page.locator('#existing-dashboard-option').check();
+      await this.page.testSubj.locator('open-dashboard-picker').click();
+      await this.page.testSubj
+        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
+        .click();
+    } else if (options?.addToDashboard === 'new') {
+      if (options.saveAsNew !== undefined) {
+        await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
       }
-
-      await this.confirmSaveButton.click();
-      await this.saveModal.waitFor({ state: 'hidden' });
-      await this.waitForPostSaveReload(savedObjectIdBeforeSave, workspaceBeforeSave);
-    } finally {
-      // Release the handle so the detached pre-save workspace can be garbage collected.
-      await workspaceBeforeSave.dispose();
+      await this.page.locator('#new-dashboard-option').check();
+      if (options.saveToLibrary !== undefined) {
+        if (options.saveToLibrary) {
+          await this.addToLibraryCheckbox.check();
+        } else {
+          await this.addToLibraryCheckbox.uncheck();
+        }
+      }
+    } else if (options?.addToDashboard === 'none') {
+      await this.page.locator('#add-to-library-option').check();
     }
+
+    await this.confirmSaveButton.click();
+    await this.saveModal.waitFor({ state: 'hidden' });
+    await this.waitForPostSaveReload(savedObjectIdBeforeSave, workspaceBeforeSave);
+    // Release the handle so the detached pre-save workspace can be garbage collected.
+    await workspaceBeforeSave.dispose();
   }
 
   /** Reads the `#/edit/<id>` saved object id from the in-page URL, if the editor shows one. */
