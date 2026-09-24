@@ -12,7 +12,7 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
-import { createKiVerifierRunner } from './ki_verifier_runner';
+import { createVerifyKi } from './verify_ki';
 import { ESQL_VALID_RUNTIME_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
 import type { KiVerifierWorkflowRunner } from '../ki_verification';
 import { mockKiStepTelemetry } from './test_utils';
@@ -111,7 +111,7 @@ describe('verify_ki workflow step', () => {
   const makeDefinition = (withWorkflows = true) =>
     createVerifyKiStepDefinition(
       coreSetup,
-      createKiVerifierRunner({
+      createVerifyKi({
         getAuditLogger: async (request) => {
           const [coreStart] = await coreSetup.getStartServices();
           return coreStart.security.audit.asScoped(request);

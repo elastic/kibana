@@ -7,7 +7,7 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { FeedbackAnalysisStepDependencies, KiStepDependencies } from './helpers';
-import type { KiVerifierRunner } from './ki_verifier_runner';
+import type { VerifyKi } from './verify_ki';
 import { getCreateKiStepDefinition } from './create_ki';
 import { getUpdateKiStepDefinition } from './update_ki';
 import { getDeleteKiStepDefinition } from './delete_ki';
@@ -18,16 +18,14 @@ import { getRecordImprovementsStepDefinition } from './record_improvements';
 export const registerStepDefinitions = ({
   workflowsExtensions,
   feedbackAnalysis,
-  runKiVerifiers,
+  verifyKi,
   ...deps
 }: KiStepDependencies & {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   feedbackAnalysis: FeedbackAnalysisStepDependencies;
-  runKiVerifiers: KiVerifierRunner;
+  verifyKi: VerifyKi;
 }): void => {
-  workflowsExtensions.registerStepDefinition(
-    getCreateKiStepDefinition({ ...deps, runKiVerifiers })
-  );
+  workflowsExtensions.registerStepDefinition(getCreateKiStepDefinition({ ...deps, verifyKi }));
   workflowsExtensions.registerStepDefinition(getUpdateKiStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getDeleteKiStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getFeedbackContextStepDefinition(feedbackAnalysis));

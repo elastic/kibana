@@ -33,14 +33,14 @@ export interface WorkflowVerifierStepDependencies {
   checkExecutePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
 }
 
-export interface KiVerifierRunnerDependencies {
+export interface VerifyKiDependencies {
   getAuditLogger: (request: KibanaRequest) => Promise<AuditLogger>;
   workflowVerifierDeps?: WorkflowVerifierStepDependencies;
   analyticsService: ContextEngineAnalyticsService;
   logger: Logger;
 }
 
-export interface RunKiVerifiersParams {
+export interface VerifyKiParams {
   context: Pick<StepHandlerContext, 'contextManager' | 'abortSignal'>;
   ki: KnowledgeIndicator;
   verifiers?: KiVerifierEntry[];
@@ -48,15 +48,15 @@ export interface RunKiVerifiersParams {
   totalTimeoutSec?: number;
 }
 
-export type KiVerifierRunner = (params: RunKiVerifiersParams) => Promise<KiVerificationSummary>;
+export type VerifyKi = (params: VerifyKiParams) => Promise<KiVerificationSummary>;
 
-/** Builds the verifier runner shared by the verifyKi and createKi steps. */
-export const createKiVerifierRunner = ({
+/** Verifies a KI on behalf of the verifyKi and createKi steps. */
+export const createVerifyKi = ({
   getAuditLogger,
   workflowVerifierDeps,
   analyticsService,
   logger,
-}: KiVerifierRunnerDependencies): KiVerifierRunner => {
+}: VerifyKiDependencies): VerifyKi => {
   const service = new KiVerificationService(createKiVerifierRegistry());
 
   return async ({

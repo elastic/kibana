@@ -29,11 +29,11 @@ const kiInput = {
 
 const enabled = async () => true;
 const allowed = async () => true;
-const runKiVerifiers = jest.fn();
+const verifyKi = jest.fn();
 
 describe('getCreateKiStepDefinition', () => {
   beforeEach(() => {
-    runKiVerifiers.mockReset();
+    verifyKi.mockReset();
   });
 
   it('indexes the KI into an index dest and returns the document id', async () => {
@@ -48,7 +48,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const result = await handler(context);
@@ -84,7 +84,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     await handler(context);
@@ -105,7 +105,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     await handler(context);
@@ -128,7 +128,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const result = await handler(context);
@@ -156,7 +156,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const result = await handler(context);
@@ -179,7 +179,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const result = await handler(context);
@@ -207,7 +207,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     await handler(context);
@@ -230,7 +230,7 @@ describe('getCreateKiStepDefinition', () => {
         getAiIndexService: () => service,
         isContextEngineEnabled: enabled,
         checkWritePrivilege: allowed,
-        runKiVerifiers,
+        verifyKi,
         ...mockKiStepTelemetry(),
       });
       const thrown = await handler(context).catch((e) => e);
@@ -256,7 +256,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const result = await handler(context);
@@ -289,7 +289,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const thrown = await handler(context).catch((e) => e);
@@ -321,7 +321,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const result = await handler(context);
@@ -348,7 +348,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const thrown = await handler(context).catch((e) => e);
@@ -372,7 +372,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: async () => false,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...telemetry,
     });
     const thrown = await handler(context).catch((e) => e);
@@ -396,7 +396,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const thrown = await handler(context).catch((e) => e);
@@ -423,7 +423,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...telemetry,
     });
     await handler(context);
@@ -453,7 +453,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...telemetry,
     });
     await handler(context);
@@ -475,7 +475,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: jest.fn().mockResolvedValue(false),
-      runKiVerifiers,
+      verifyKi,
       ...telemetry,
     });
     await handler(context).catch(() => {});
@@ -509,7 +509,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...telemetry,
     });
     await expect(handler(context)).rejects.toThrow('Request aborted');
@@ -538,7 +538,7 @@ describe('getCreateKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
-      runKiVerifiers,
+      verifyKi,
       ...mockKiStepTelemetry(),
     });
     const thrown = await handler(context).catch((e) => e);
@@ -555,7 +555,7 @@ describe('getCreateKiStepDefinition', () => {
     };
 
     it('runs the verifiers before writing and returns their results', async () => {
-      runKiVerifiers.mockResolvedValue(passed);
+      verifyKi.mockResolvedValue(passed);
       const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
@@ -567,12 +567,12 @@ describe('getCreateKiStepDefinition', () => {
         getAiIndexService: () => service,
         isContextEngineEnabled: enabled,
         checkWritePrivilege: allowed,
-        runKiVerifiers,
+        verifyKi,
         ...mockKiStepTelemetry(),
       });
       const result = await handler(context);
 
-      expect(runKiVerifiers).toHaveBeenCalledWith({
+      expect(verifyKi).toHaveBeenCalledWith({
         context,
         ki: kiInput,
         verifiers,
@@ -583,7 +583,7 @@ describe('getCreateKiStepDefinition', () => {
     });
 
     it('skips the write when verification fails', async () => {
-      runKiVerifiers.mockResolvedValue(failed);
+      verifyKi.mockResolvedValue(failed);
       const esClient = { index: jest.fn() };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
@@ -596,7 +596,7 @@ describe('getCreateKiStepDefinition', () => {
         getAiIndexService: () => service,
         isContextEngineEnabled: enabled,
         checkWritePrivilege: allowed,
-        runKiVerifiers,
+        verifyKi,
         ...telemetry,
       });
       const result = await handler(context);
@@ -622,14 +622,14 @@ describe('getCreateKiStepDefinition', () => {
         getAiIndexService: () => service,
         isContextEngineEnabled: enabled,
         checkWritePrivilege: jest.fn().mockResolvedValue(false),
-        runKiVerifiers,
+        verifyKi,
         ...mockKiStepTelemetry(),
       });
       const thrown = await handler(context).catch((e) => e);
 
       expect(thrown).toBeInstanceOf(ExecutionError);
       expect(thrown.type).toBe('PermissionError');
-      expect(runKiVerifiers).not.toHaveBeenCalled();
+      expect(verifyKi).not.toHaveBeenCalled();
       expect(esClient.index).not.toHaveBeenCalled();
     });
 
@@ -645,12 +645,12 @@ describe('getCreateKiStepDefinition', () => {
         getAiIndexService: () => service,
         isContextEngineEnabled: enabled,
         checkWritePrivilege: allowed,
-        runKiVerifiers,
+        verifyKi,
         ...mockKiStepTelemetry(),
       });
       const result = await handler(context);
 
-      expect(runKiVerifiers).not.toHaveBeenCalled();
+      expect(verifyKi).not.toHaveBeenCalled();
       expect(result.output).not.toHaveProperty('verification');
     });
 
@@ -659,7 +659,7 @@ describe('getCreateKiStepDefinition', () => {
         type: 'InputValidationError',
         message: 'Unknown verifier',
       });
-      runKiVerifiers.mockRejectedValue(cause);
+      verifyKi.mockRejectedValue(cause);
       const esClient = { index: jest.fn() };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
@@ -672,7 +672,7 @@ describe('getCreateKiStepDefinition', () => {
         getAiIndexService: () => service,
         isContextEngineEnabled: enabled,
         checkWritePrivilege: allowed,
-        runKiVerifiers,
+        verifyKi,
         ...telemetry,
       });
       const thrown = await handler(context).catch((e) => e);

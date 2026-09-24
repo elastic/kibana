@@ -11,12 +11,9 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
 import { isContextEngineEnabledInSpace } from '../utils/is_context_engine_enabled_in_space';
-import type { KiVerifierRunner } from './ki_verifier_runner';
+import type { VerifyKi } from './verify_ki';
 
-export const createVerifyKiStepDefinition = (
-  coreSetup: CoreSetup,
-  runKiVerifiers: KiVerifierRunner
-) =>
+export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, verifyKi: VerifyKi) =>
   createServerStepDefinition({
     ...VerifyKiStepCommonDefinition,
     handler: async (context) => {
@@ -40,7 +37,7 @@ export const createVerifyKiStepDefinition = (
         ai_index_id: aiIndexId,
         total_timeout_sec: totalTimeoutSec,
       } = context.input;
-      const summary = await runKiVerifiers({ context, ki, verifiers, aiIndexId, totalTimeoutSec });
+      const summary = await verifyKi({ context, ki, verifiers, aiIndexId, totalTimeoutSec });
       return { output: summary };
     },
   });

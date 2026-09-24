@@ -18,7 +18,7 @@ import {
   resolveOrCreateAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
-import type { KiVerifierRunner } from './ki_verifier_runner';
+import type { VerifyKi } from './verify_ki';
 
 export const getCreateKiStepDefinition = ({
   getAiIndexService,
@@ -26,8 +26,8 @@ export const getCreateKiStepDefinition = ({
   checkWritePrivilege,
   analyticsService,
   logger,
-  runKiVerifiers,
-}: KiStepDependencies & { runKiVerifiers: KiVerifierRunner }) =>
+  verifyKi,
+}: KiStepDependencies & { verifyKi: VerifyKi }) =>
   createServerStepDefinition({
     ...createKiStepCommonDefinition,
     handler: async (context) => {
@@ -45,7 +45,7 @@ export const getCreateKiStepDefinition = ({
           await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
           const verification = verifiers
-            ? await runKiVerifiers({ context, ki, verifiers, aiIndexId })
+            ? await verifyKi({ context, ki, verifiers, aiIndexId })
             : undefined;
           if (verification && !verification.passed) {
             return { output: { verification } };
