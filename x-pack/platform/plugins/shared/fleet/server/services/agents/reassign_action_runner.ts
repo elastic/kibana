@@ -6,6 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { Agent } from '../../types';
 
@@ -101,8 +102,11 @@ export async function reassignBatch(
   const total = options.total ?? givenAgents.length;
   const now = new Date().toISOString();
   // For cross-space task calls (spaceId === '*'), scope the action to the target policy's actual
-  // spaces rather than the wildcard, so the action is not exposed across all spaces.
-  const namespaces = spaceId && spaceId !== '*' ? [spaceId] : newAgentPolicy?.space_ids ?? [];
+  // spaces rather than the wildcard sentinel. ALL_SPACES_ID ('*') is not a concrete namespace
+  // and would make the action invisible in Fleet UI; fall back to DEFAULT_SPACE_ID.
+  const rawNamespaces =
+    spaceId && spaceId !== '*' ? [spaceId] : (newAgentPolicy?.space_ids ?? []);
+  const namespaces = rawNamespaces.map((id) => (id === '*' ? DEFAULT_SPACE_ID : id));
 
   await createAgentAction(esClient, soClient, {
     id: actionId,

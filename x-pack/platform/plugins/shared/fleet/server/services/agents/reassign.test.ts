@@ -6,7 +6,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -406,6 +406,15 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
     expect(result).toEqual({ count: 2 });
     expect(mockReassignBatch).not.toHaveBeenCalled();
     mockGetAgentsById.mockRestore();
+  });
+
+  it('throws when spaceId "*" is used with a non-default-space scoped soClient', async () => {
+    const { esClient, regularAgentPolicySO2 } = createClientMock();
+    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue('space-a') } as any;
+
+    await expect(
+      reassignAgents(scopedClient, esClient, { agentIds: ['agent-1'], spaceId: '*' }, regularAgentPolicySO2.id)
+    ).rejects.toThrow(FleetError);
   });
 
   it('with spaceId "*", passes skipNamespaceFilter to getAgentsById and spaceId to reassignBatch', async () => {

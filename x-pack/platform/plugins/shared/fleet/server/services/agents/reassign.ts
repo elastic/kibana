@@ -14,6 +14,7 @@ import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
+  FleetError,
 } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
@@ -110,6 +111,13 @@ export async function reassignAgents(
   },
   newAgentPolicyId: string
 ): Promise<{ actionId: string } | { count: number }> {
+  // '*' is only valid with an unscoped internal SO client. Reject it when the client is
+  // already scoped to a concrete space to prevent cross-space privilege escalation.
+  if (options.spaceId === '*' && soClient.getCurrentNamespace() !== undefined) {
+    throw new FleetError(
+      `spaceId '*' requires an unscoped SO client; got client scoped to '${soClient.getCurrentNamespace()}'`
+    );
+  }
   await verifyNewAgentPolicy(soClient, newAgentPolicyId, { spaceId: options.spaceId });
 
   const currentSpaceId = getCurrentNamespace(soClient);
