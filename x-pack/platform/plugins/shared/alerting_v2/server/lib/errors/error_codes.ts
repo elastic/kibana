@@ -186,6 +186,12 @@ export const ALERTING_LOG_CODES = {
    */
   HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
     'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
+  /**
+   * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
+   * limit, so rows past it were dropped. Episodes whose ack, snooze or
+   * deactivate state was in the dropped rows may be dispatched.
+   */
+  FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED: 'FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED',
   // ──────────────── Action policy API key invalidation ───────────────
   /**
    * A delete refused to remove one or more action policies because their API
