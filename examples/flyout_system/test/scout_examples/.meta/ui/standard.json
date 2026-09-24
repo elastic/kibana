@@ -1,137 +1,20 @@
 {
-  "sha1": "7993d79151ea9317248ffa7f342c89c154263c10",
+  "sha1": "2ec6f231e3a361dc4a7ffa8d84113f145f82a488",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "103ba36e67340e1-08cbca34d8319bc",
-      "title": "Flyout System - dialog focus accessibility opening a component flyout moves focus into the dialog with ownFocus false",
+      "id": "103ba36e67340e1-502aea016c28ad9",
+      "title": "Flyout System - dialog focus accessibility opening a service flyout moves focus into the dialog",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 29,
-        "column": 14
-      }
-    },
-    {
-      "id": "103ba36e67340e1-ef76d2745b150e3",
-      "title": "Flyout System - dialog focus accessibility closing a component flyout returns focus to its trigger with ownFocus false",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 44,
-        "column": 24
-      }
-    },
-    {
-      "id": "103ba36e67340e1-38ce465d188d030",
-      "title": "Flyout System - dialog focus accessibility opening a component flyout moves focus into the dialog with ownFocus true",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 29,
-        "column": 14
-      }
-    },
-    {
-      "id": "103ba36e67340e1-59076e9318028e5",
-      "title": "Flyout System - dialog focus accessibility closing a component flyout returns focus to its trigger with ownFocus true",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 44,
-        "column": 24
-      }
-    },
-    {
-      "id": "103ba36e67340e1-e0e9007472844b9",
-      "title": "Flyout System - dialog focus accessibility closing a component child flyout returns focus to the control that opened it",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 76,
-        "column": 19
-      }
-    },
-    {
-      "id": "103ba36e67340e1-0183650d9b117f2",
-      "title": "Flyout System - dialog focus accessibility opening a service flyout moves focus into the dialog with ownFocus false",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 29,
-        "column": 14
-      }
-    },
-    {
-      "id": "103ba36e67340e1-dcab13e11357ec6",
-      "title": "Flyout System - dialog focus accessibility closing a service flyout returns focus to its trigger with ownFocus false",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 44,
-        "column": 24
-      }
-    },
-    {
-      "id": "103ba36e67340e1-354b70edb33e2d5",
-      "title": "Flyout System - dialog focus accessibility opening a service flyout moves focus into the dialog with ownFocus true",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 29,
-        "column": 14
-      }
-    },
-    {
-      "id": "103ba36e67340e1-541d91683a1ed5a",
-      "title": "Flyout System - dialog focus accessibility closing a service flyout returns focus to its trigger with ownFocus true",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 44,
-        "column": 24
-      }
-    },
-    {
-      "id": "103ba36e67340e1-fa0d7310b96604d",
-      "title": "Flyout System - dialog focus accessibility closing a service child flyout returns focus to the control that opened it",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
-        "line": 76,
-        "column": 19
+        "line": 18,
+        "column": 43
       }
     },
     {
@@ -538,8 +421,8 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-12665fa792434a4",
-      "title": "Flyout System - header collapse accessibility the component header keeps aria-hidden and focusability in agreement during the collapse animation",
+      "id": "b1bb19297cb99af-1f49068c30c8614",
+      "title": "Flyout System - header collapse accessibility a scroll-collapsed component header has no accessibility violations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -551,8 +434,8 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-1f49068c30c8614",
-      "title": "Flyout System - header collapse accessibility a scroll-collapsed component header has no accessibility violations",
+      "id": "b1bb19297cb99af-c5ec45178cac4a4",
+      "title": "Flyout System - header collapse accessibility the component footer stays reachable by wheel at a reflow viewport",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -564,32 +447,6 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-017c523f7dc7e50",
-      "title": "Flyout System - header collapse accessibility the component header swallows the wheel when nothing in the flyout can scroll",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 170,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1bb19297cb99af-c5ec45178cac4a4",
-      "title": "Flyout System - header collapse accessibility the component footer stays reachable by wheel at a reflow viewport",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 202,
-        "column": 21
-      }
-    },
-    {
       "id": "b1bb19297cb99af-de2d1129634b59f",
       "title": "Flyout System - header collapse accessibility a permanently collapsed component child header still names its dialog",
       "expectedStatus": "passed",
@@ -598,8 +455,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 218,
-        "column": 29
+        "line": 170,
+        "column": 9
       }
     },
     {
@@ -681,8 +538,8 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-da289cba240c6a6",
-      "title": "Flyout System - header collapse accessibility the service header keeps aria-hidden and focusability in agreement during the collapse animation",
+      "id": "b1bb19297cb99af-08e18c8a55d4359",
+      "title": "Flyout System - header collapse accessibility a scroll-collapsed service header has no accessibility violations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -694,8 +551,8 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-08e18c8a55d4359",
-      "title": "Flyout System - header collapse accessibility a scroll-collapsed service header has no accessibility violations",
+      "id": "b1bb19297cb99af-4c1f8c2d29fb372",
+      "title": "Flyout System - header collapse accessibility the service footer stays reachable by wheel at a reflow viewport",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -707,8 +564,8 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-5be486773790384",
-      "title": "Flyout System - header collapse accessibility the service header swallows the wheel when nothing in the flyout can scroll",
+      "id": "b1bb19297cb99af-493d464132349d1",
+      "title": "Flyout System - header collapse accessibility a permanently collapsed service child header still names its dialog",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -720,32 +577,6 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-4c1f8c2d29fb372",
-      "title": "Flyout System - header collapse accessibility the service footer stays reachable by wheel at a reflow viewport",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 202,
-        "column": 21
-      }
-    },
-    {
-      "id": "b1bb19297cb99af-493d464132349d1",
-      "title": "Flyout System - header collapse accessibility a permanently collapsed service child header still names its dialog",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 218,
-        "column": 29
-      }
-    },
-    {
       "id": "b1bb19297cb99af-0b13e90976d8c12",
       "title": "Flyout System - header collapse accessibility the tab bar stays pinned and operable while the header is collapsed",
       "expectedStatus": "passed",
@@ -754,8 +585,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 234,
-        "column": 16
+        "line": 190,
+        "column": 9
       }
     },
     {
