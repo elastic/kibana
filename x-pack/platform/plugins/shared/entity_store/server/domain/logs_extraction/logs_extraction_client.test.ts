@@ -2478,6 +2478,34 @@ describe('LogsExtractionClient sampling wiring', () => {
     expect(extractionQueries()[0]).toContain('| SAMPLE 0.5');
   });
 
+  it('a raised effective cap does not suppress sampling - the trigger stays pinned to the default', async () => {
+    const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      nonPriorityLogExtractionConfig: { maxLogsPerWindow: 500_000 },
+    });
+    mockHighVolumeSequence(); // ~500K raw fits the raised cap, but projects far above the 100K default
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.');
+  });
+
+  it('a lowered effective cap below the default does not trigger sampling - the cap just fires', async () => {
+    const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      nonPriorityLogExtractionConfig: { maxLogsPerWindow: 20_000 },
+    });
+    // 5000 sampled → 50K raw → projection 90K, under the 100K default trigger but over the 20K cap
+    mockVolumeSequence(5000);
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    for (const query of extractionQueries()) {
+      expect(query).not.toContain('SAMPLE');
+    }
+    expect(result.success && result.logsCapApplied).toBe(true);
+  });
+
   it('the budget counts processed volume, so a sampled over-cap window does not fire the cap', async () => {
     const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
     mockHighVolumeSequence();
