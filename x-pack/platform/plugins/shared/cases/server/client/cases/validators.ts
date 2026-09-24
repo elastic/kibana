@@ -324,6 +324,7 @@ export const validateRequiredGlobalFields = ({
 export const validateCaseExtendedFields = async ({
   extendedFields,
   templateId,
+  templateVersion,
   globalFields,
   templatesService,
   fieldDefinitionsService,
@@ -333,6 +334,8 @@ export const validateCaseExtendedFields = async ({
 }: {
   extendedFields: Record<string, string>;
   templateId: string | null | undefined;
+  /** When set, pins validation to this exact template version instead of resolving latest. */
+  templateVersion?: number;
   globalFields: InlineField[];
   templatesService: TemplatesService;
   fieldDefinitionsService: FieldDefinitionsService;
@@ -361,9 +364,11 @@ export const validateCaseExtendedFields = async ({
   let resolvedTemplateFields = preResolvedTemplateFields;
 
   if (resolvedTemplateFields === undefined) {
-    const templateSO = await templatesService.getTemplate(templateId, undefined, {
-      includeDeleted: true,
-    });
+    const templateSO = await templatesService.getTemplate(
+      templateId,
+      templateVersion !== undefined ? String(templateVersion) : undefined,
+      { includeDeleted: true }
+    );
     if (!templateSO) {
       throw Boom.badRequest(`Template ${templateId} not found`);
     }
@@ -437,15 +442,54 @@ export const validateExtendedFieldsInRequest = async ({
       ? null
       : updateReq.template?.id ?? originalCase.attributes.template?.id;
 
+  // Pin to the explicitly requested version so validation uses the same template version
+  // that will be stored, not necessarily the latest.
+  const templateVersion =
+    updateReq.template === null
+      ? undefined
+      : updateReq.template?.version ?? originalCase.attributes.template?.version;
+
   await validateCaseExtendedFields({
     extendedFields: updateReq.extended_fields,
     templateId,
+    templateVersion,
     globalFields,
     templatesService,
     fieldDefinitionsService,
     owner: originalCase.attributes.owner,
     partial: true,
   });
+};
+
+/**
+ * Validates a template switch on update: verifies the exact `{ id, version }` exists,
+ * belongs to the same owner as the case, and is not deleted.
+ * Skips when the request does not include a non-null `template` (clear or no-op).
+ */
+export const validateTemplateInRequest = async ({
+  updateReq,
+  originalCase,
+  templatesService,
+}: {
+  updateReq: CasePatchRequest;
+  originalCase: CaseSavedObjectTransformed;
+  templatesService: TemplatesService;
+}): Promise<void> => {
+  // null = clear; undefined = no change — both are valid without further checks.
+  if (updateReq.template == null) return;
+
+  const { id, version } = updateReq.template;
+  const templateSO = await templatesService.getTemplate(id, String(version));
+
+  if (!templateSO) {
+    throw Boom.badRequest(`Template ${id} version ${version} not found`);
+  }
+
+  if (templateSO.attributes.owner !== originalCase.attributes.owner) {
+    throw Boom.badRequest(
+      `Template ${id} does not belong to owner ${originalCase.attributes.owner}`
+    );
+  }
 };
 
 /**

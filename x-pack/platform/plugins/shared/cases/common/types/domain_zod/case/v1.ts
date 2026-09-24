@@ -12,7 +12,7 @@ import {
   CaseStatus as BundledCaseStatusSchema,
   Settings,
 } from '../../../bundled-types.gen';
-import { CASE_EXTENDED_FIELDS } from '../../../constants';
+import { CASE_EXTENDED_FIELDS, CASE_EXTENDED_FIELDS_LABELS } from '../../../constants';
 import { ExternalServiceSchema } from '../external_service/v1';
 import { CaseAssigneesSchema, UserSchema } from '../user/v1';
 import { CaseConnectorSchema } from '../connector/v1';
@@ -94,6 +94,7 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   time_to_resolve: z.number().nullable().optional(),
   template: CaseTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+  [CASE_EXTENDED_FIELDS_LABELS]: z.record(z.string(), z.string()).optional(),
 });
 
 export const CaseSchema = CaseAttributesSchema.extend({

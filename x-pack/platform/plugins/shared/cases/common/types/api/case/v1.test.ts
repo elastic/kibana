@@ -61,6 +61,7 @@ import {
   CasesFindResponseSchema,
   CasesPatchRequestSchema,
   CasesSearchRequestSchema,
+  CaseUpdateRequestTemplateSchema,
 } from '../../api_zod/case/v1';
 import { CasesStatusRequestSchema, CasesStatusResponseSchema } from '../../api_zod/stats/v1';
 
@@ -1356,5 +1357,45 @@ describe('CasesBulkGetResponseRt', () => {
     const result = CasesBulkGetResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
+  });
+});
+
+describe('CaseUpdateRequestTemplateSchema', () => {
+  it('accepts a valid template reference', () => {
+    const result = CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 1 });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ id: 'tmpl-1', version: 1 });
+  });
+
+  it('accepts version > 1', () => {
+    const result = CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 42 });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ id: 'tmpl-1', version: 42 });
+  });
+
+  it('rejects version 0', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 0 }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a negative version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: -1 }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a non-integer version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 1.5 }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a missing version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1' }).success).toBe(false);
+  });
+
+  it('rejects a missing id', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ version: 1 }).success).toBe(false);
   });
 });

@@ -20,8 +20,8 @@ customFields:
   type: array
   deprecated: true
   description: >
-    Deprecated. Custom fields are superseded by the field library and the case `extended_fields`.
     Custom fields configuration details.
+    Deprecated. Use `extended_fields` instead.
   items:
     type: object
     properties:

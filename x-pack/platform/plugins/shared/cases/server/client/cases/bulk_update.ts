@@ -75,6 +75,7 @@ import {
   validateCustomFields,
   validateCaseExtendedFields,
   validateExtendedFieldsInRequest,
+  validateTemplateInRequest,
   validateExtendedFieldsOnClose,
   resolveTemplateFieldsForClose,
   resolveGlobalFields,
@@ -696,15 +697,16 @@ export const bulkUpdate = async (
     );
 
     await Promise.all(
-      casesToUpdate.map(({ updateReq, originalCase }) =>
+      casesToUpdate.flatMap(({ updateReq, originalCase }) => [
+        validateTemplateInRequest({ updateReq, originalCase, templatesService }),
         validateExtendedFieldsInRequest({
           updateReq,
           originalCase,
           templatesService,
           fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
-        })
-      )
+        }),
+      ])
     );
 
     // Pre-resolve template fields for cases transitioning to closed.
