@@ -22,7 +22,7 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * - nightshift.enabled — enables significant-events-* skill registration
  *
  * Skills NOT included (intentionally excluded from benchmark scope):
- * - workflow-authoring, rule-management, pci-compliance, observability.rca
+ * - workflow-authoring, rule-management, pci-compliance
  *
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_skill_selection
