@@ -94,6 +94,73 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('authc.getPrincipal', () => {
+    it('classifies the current user of a real request', () => {
+      const request = httpServerMock.createKibanaRequest();
+      authc.getCurrentUser.mockReturnValue(
+        securityMock.createMockAuthenticatedUser({
+          username: 'creator',
+          authentication_provider: { type: 'http', name: '__http__' },
+          api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
+        })
+      );
+
+      expect(api.authc.getPrincipal(request)).toEqual({
+        type: 'api_key',
+        apiKeyId: 'key-id',
+        variant: 'stack',
+      });
+      expect(authc.getCurrentUser).toHaveBeenCalledWith(request);
+      expect(serviceAccounts!.backend.getFakeRequestPrincipal).not.toHaveBeenCalled();
+    });
+
+    it('returns null when no user is authenticated', () => {
+      authc.getCurrentUser.mockReturnValue(null);
+
+      expect(api.authc.getPrincipal(httpServerMock.createKibanaRequest())).toBeNull();
+    });
+
+    it('answers a service-account-bound fake request from the backend without consulting authc', () => {
+      const request = httpServerMock.createFakeKibanaRequest({});
+      const principal = {
+        type: 'service_account' as const,
+        serviceAccountId: 'sa-id',
+        variant: 'uiam' as const,
+      };
+      serviceAccounts!.backend.getFakeRequestPrincipal.mockReturnValue(principal);
+
+      expect(api.authc.getPrincipal(request)).toBe(principal);
+      expect(serviceAccounts!.backend.getFakeRequestPrincipal).toHaveBeenCalledWith(request);
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
+    });
+
+    it('classifies an enriched fake request as a user', () => {
+      const request = httpServerMock.createFakeKibanaRequest({});
+      api.fakeRequestEnricher(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
+
+      expect(api.authc.getPrincipal(request)).toEqual({
+        type: 'user',
+        username: 'jdoe',
+        userProfileId: 'u_test_profile_123',
+      });
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
+    });
+
+    it('returns null for a fake request that is neither bound to a service account nor enriched', () => {
+      authc.getCurrentUser.mockReturnValue(null);
+
+      expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
+    });
+
+    it('skips the service accounts backend when the feature is not enabled', () => {
+      serviceAccounts = null;
+      authc.getCurrentUser.mockReturnValue(null);
+
+      expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
+      expect(authc.getCurrentUser).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('fakeRequestEnricher', () => {
     it('binds a profile_uid and username that are then surfaced via getCurrentUser', () => {
       const request = httpServerMock.createFakeKibanaRequest({});

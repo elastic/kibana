@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
   CoreSecurityDelegateContract,
   GrantUiamAPIKeyParams,
@@ -48,15 +49,30 @@ export const buildSecurityApi = ({
     return serviceAccounts;
   };
 
+  const getCurrentUser: CoreSecurityDelegateContract['authc']['getCurrentUser'] = (request) => {
+    if (request.isFakeRequest) {
+      const override = enrichment.getOverride(request);
+      if (override) return override;
+    }
+    return getAuthc().getCurrentUser(request);
+  };
+
+  const getPrincipal: CoreSecurityDelegateContract['authc']['getPrincipal'] = (request) => {
+    // Service-account-bound fake requests never pass through the authenticator, so `getCurrentUser`
+    // knows nothing about them; the backend that minted them does, and answers without I/O.
+    if (request.isFakeRequest) {
+      const principal = getServiceAccounts()?.backend.getFakeRequestPrincipal(request) ?? null;
+      if (principal) return principal;
+    }
+
+    const user = getCurrentUser(request);
+    return user ? getAuthenticatedPrincipal(user) : null;
+  };
+
   return {
     authc: {
-      getCurrentUser: (request) => {
-        if (request.isFakeRequest) {
-          const override = enrichment.getOverride(request);
-          if (override) return override;
-        }
-        return getAuthc().getCurrentUser(request);
-      },
+      getCurrentUser,
+      getPrincipal,
       getRedactedSessionId: async (request) => {
         const sid = await getSession().getSID(request);
         return sid ? getPrintableSessionId(sid) : undefined;
