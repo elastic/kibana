@@ -7,10 +7,10 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
-import type {
-  ListPolicyExecutionHistoryRequest,
-  ListPolicyExecutionHistoryResponse,
-  PolicyExecutionOutcomeFilter,
+import {
+  type ListPolicyExecutionHistoryRequest,
+  type ListPolicyExecutionHistoryResponse,
+  type PolicyExecutionOutcomeFilter,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
@@ -23,8 +23,10 @@ export interface ListExecutionHistoryUiParams {
   ruleIds?: string[];
   outcomes?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
-  startTime?: string;
-  endTime?: string;
+  from?: string;
+  to?: string;
+  sortField?: 'dispatchedAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const toListExecutionHistoryRequest = ({
@@ -34,10 +36,12 @@ export const toListExecutionHistoryRequest = ({
   ruleIds,
   outcomes,
   episodeIds,
-  startTime,
-  endTime,
+  from,
+  to,
+  sortField,
+  sortOrder,
   ...rest
-}: ListExecutionHistoryUiParams): Complete<ListPolicyExecutionHistoryRequest> => {
+}: ListExecutionHistoryUiParams): Complete<Partial<ListPolicyExecutionHistoryRequest>> => {
   assertAllFieldsMapped(rest);
   return {
     page,
@@ -46,8 +50,10 @@ export const toListExecutionHistoryRequest = ({
     rule_ids: ruleIds,
     outcomes,
     episode_ids: episodeIds,
-    start_time: startTime,
-    end_time: endTime,
+    from,
+    to,
+    sort_field: sortField === 'dispatchedAt' ? 'dispatched_at' : sortField,
+    sort_order: sortOrder,
   };
 };
 
@@ -58,8 +64,10 @@ interface UseFetchExecutionHistoryParams {
   ruleIds?: string[];
   outcomes?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
-  startTime?: string;
-  endTime?: string;
+  from?: string;
+  to?: string;
+  sortField?: 'dispatchedAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const useFetchExecutionHistory = ({
@@ -69,8 +77,10 @@ export const useFetchExecutionHistory = ({
   ruleIds,
   outcomes,
   episodeIds,
-  startTime,
-  endTime,
+  from,
+  to,
+  sortField,
+  sortOrder,
 }: UseFetchExecutionHistoryParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
 
@@ -82,8 +92,10 @@ export const useFetchExecutionHistory = ({
       ruleIds,
       outcomes,
       episodeIds,
-      startTime,
-      endTime,
+      from,
+      to,
+      sortField,
+      sortOrder,
     }),
     queryFn: () =>
       executionHistoryApi.listActionPolicyExecutions(
@@ -94,8 +106,10 @@ export const useFetchExecutionHistory = ({
           ruleIds,
           outcomes,
           episodeIds,
-          startTime,
-          endTime,
+          from,
+          to,
+          sortField,
+          sortOrder,
         })
       ),
     refetchOnWindowFocus: false,

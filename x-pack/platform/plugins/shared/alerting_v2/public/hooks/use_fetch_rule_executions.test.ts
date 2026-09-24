@@ -108,8 +108,8 @@ describe('toListRuleExecutionsRequest', () => {
         perPage: 50,
         ruleIds: ['rule-1'],
         outcomes: ['failure'],
-        startTime: '2026-01-01T00:00:00.000Z',
-        endTime: '2026-01-02T00:00:00.000Z',
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
         sortField: 'startedAt',
         sortOrder: 'asc',
       })
@@ -118,8 +118,8 @@ describe('toListRuleExecutionsRequest', () => {
       per_page: 50,
       rule_ids: ['rule-1'],
       outcomes: ['failure'],
-      start_time: '2026-01-01T00:00:00.000Z',
-      end_time: '2026-01-02T00:00:00.000Z',
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
       sort_field: 'started_at',
       sort_order: 'asc',
     });

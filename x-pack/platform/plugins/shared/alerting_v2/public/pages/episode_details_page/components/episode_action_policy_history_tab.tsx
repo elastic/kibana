@@ -52,7 +52,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
     search: searchParam,
     outcomes: outcomesParam,
     episodeIds: [episodeId],
-    startTime: episodeStart,
+    from: episodeStart,
   });
 
   const onSearchChange = useCallback((value: string) => {

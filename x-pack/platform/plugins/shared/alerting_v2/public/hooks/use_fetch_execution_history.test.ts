@@ -30,6 +30,7 @@ const item: PolicyExecutionHistoryItem = {
   episode_count: 1,
   action_group_count: 1,
   workflows: [],
+  error: null,
 };
 
 const createWrapper = () => {
@@ -169,8 +170,8 @@ describe('toListExecutionHistoryRequest', () => {
         ruleIds: ['rule-1', 'rule-2'],
         outcomes: ['success'],
         episodeIds: ['ep-1'],
-        startTime: '2026-01-01T00:00:00.000Z',
-        endTime: '2026-01-02T00:00:00.000Z',
+        sortField: 'dispatchedAt',
+        sortOrder: 'asc',
       })
     ).toEqual({
       page: 1,
@@ -179,8 +180,8 @@ describe('toListExecutionHistoryRequest', () => {
       rule_ids: ['rule-1', 'rule-2'],
       outcomes: ['success'],
       episode_ids: ['ep-1'],
-      start_time: '2026-01-01T00:00:00.000Z',
-      end_time: '2026-01-02T00:00:00.000Z',
+      sort_field: 'dispatched_at',
+      sort_order: 'asc',
     });
   });
 });

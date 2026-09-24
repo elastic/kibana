@@ -66,20 +66,20 @@ const sharedFilterFields = {
 export const listPolicyExecutionHistoryRequestSchema = z
   .object({
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
-      .optional()
+      .default(1)
       .describe('Page number (1-indexed). Defaults to 1.'),
     per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
-      .optional()
+      .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
       .describe(
         `Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}. Pass 0 for a count-only read.`
       ),
-    start_time: z.iso
+    from: z.iso
       .datetime()
       .optional()
       .describe(
         'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episode_ids — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.'
       ),
-    end_time: z.iso
+    to: z.iso
       .datetime()
       .optional()
       .describe('Inclusive ISO datetime upper bound on the event timestamp.'),
@@ -88,17 +88,21 @@ export const listPolicyExecutionHistoryRequestSchema = z
       .describe(
         'Episode filter. Narrows events to those referencing at least one of the provided episode ids.'
       ),
+    sort_field: z
+      .enum(['dispatched_at'])
+      .default('dispatched_at')
+      .describe('Sort field. Defaults to "dispatched_at".'),
+    sort_order: z
+      .enum(['asc', 'desc'])
+      .default('desc')
+      .describe('Sort direction. Defaults to "desc".'),
     ...sharedFilterFields,
   })
   .strict()
-  .refine(
-    ({ page = 1, per_page: perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE }) =>
-      page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW,
-    {
-      message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
-      path: ['page'],
-    }
-  );
+  .refine(({ page, per_page: perPage }) => page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
+    message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
+    path: ['page'],
+  });
 
 /**
  * Request-side params for the list endpoint (snake_case API contract). All
@@ -152,7 +156,12 @@ export const policyExecutionHistoryItemSchema = z
       ),
     workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
     failure_reason: dispatchFailureReasonSchema.optional(),
-    error: z.object({ message: z.string() }).optional(),
+    error: z
+      .object({
+        message: z.string(),
+        stack_trace: z.string().nullable(),
+      })
+      .nullable(),
   })
   .meta({ id: 'alerting_policy_execution_history_item' });
 
@@ -161,7 +170,9 @@ export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryIt
 export const searchMatchCountsSchema = z.object({
   policies: z.number().describe(`Policies matching the search. ${ESTIMATED_COUNT_NOTE}`),
   rules: z.number().describe(`Rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
-  cap: z.number().describe('Maximum number of policy/rule ids the server uses as a filter.'),
+  is_truncated: z
+    .boolean()
+    .describe('True when the server filter cap was reached and results may be truncated.'),
 });
 export type SearchMatchCounts = z.infer<typeof searchMatchCountsSchema>;
 
@@ -169,7 +180,6 @@ export const listPolicyExecutionHistoryResponseSchema = z
   .object({
     items: z.array(policyExecutionHistoryItemSchema),
     page: z.number().int().min(1),
-    // Allows 0 for count-only reads (per_page=0), unlike the rule executions response.
     per_page: z.number().int().min(0),
     total: z
       .number()
@@ -179,7 +189,7 @@ export const listPolicyExecutionHistoryResponseSchema = z
     search_matches: searchMatchCountsSchema
       .nullable()
       .describe(
-        'Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.'
+        'Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.'
       ),
   })
   .meta({ id: 'alerting_policy_execution_history_response' });

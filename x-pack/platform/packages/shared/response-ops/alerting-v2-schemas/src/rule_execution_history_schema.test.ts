@@ -67,12 +67,12 @@ describe('rule_execution_history_schema', () => {
         });
       });
 
-      it('does not inject rule_ids / outcomes / start_time / end_time when missing', () => {
+      it('does not inject rule_ids / outcomes / from / to when missing', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('rule_ids');
         expect(parsed).not.toHaveProperty('outcomes');
-        expect(parsed).not.toHaveProperty('start_time');
-        expect(parsed).not.toHaveProperty('end_time');
+        expect(parsed).not.toHaveProperty('from');
+        expect(parsed).not.toHaveProperty('to');
       });
     });
 
@@ -179,26 +179,26 @@ describe('rule_execution_history_schema', () => {
       });
     });
 
-    describe('start_time / end_time (ISO datetime)', () => {
+    describe('from / to (ISO datetime)', () => {
       it('accepts a Z-suffixed ISO datetime', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({
-          start_time: '2026-06-01T00:00:00Z',
-          end_time: '2026-06-02T00:00:00Z',
+          from: '2026-06-01T00:00:00Z',
+          to: '2026-06-02T00:00:00Z',
         });
-        expect(parsed.start_time).toBe('2026-06-01T00:00:00Z');
-        expect(parsed.end_time).toBe('2026-06-02T00:00:00Z');
+        expect(parsed.from).toBe('2026-06-01T00:00:00Z');
+        expect(parsed.to).toBe('2026-06-02T00:00:00Z');
       });
 
       it('rejects free-form date expressions', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ start_time: 'yesterday' }).success).toBe(
+        expect(listRuleExecutionsRequestSchema.safeParse({ from: 'yesterday' }).success).toBe(
           false
         );
-        expect(listRuleExecutionsRequestSchema.safeParse({ end_time: 'now' }).success).toBe(false);
+        expect(listRuleExecutionsRequestSchema.safeParse({ to: 'now' }).success).toBe(false);
       });
 
       it('rejects date-only strings without a time component', () => {
         expect(
-          listRuleExecutionsRequestSchema.safeParse({ start_time: '2026-06-01' }).success
+          listRuleExecutionsRequestSchema.safeParse({ from: '2026-06-01' }).success
         ).toBe(false);
       });
     });
@@ -273,8 +273,12 @@ describe('rule_execution_history_schema', () => {
         expect(parsed.per_page).toBe(25);
       });
 
-      it('rejects per_page below 1', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ per_page: 0 }).success).toBe(false);
+      it('accepts per_page=0 for a count-only read', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ per_page: 0 }).per_page).toBe(0);
+      });
+
+      it('rejects negative per_page', () => {
+        expect(listRuleExecutionsRequestSchema.safeParse({ per_page: -1 }).success).toBe(false);
       });
 
       it('rejects per_page above the maximum', () => {
@@ -308,14 +312,23 @@ describe('rule_execution_history_schema', () => {
         });
         expect(result.success).toBe(false);
       });
+
+      it('never trips the guard for a count-only read (per_page=0)', () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({
+            page: EXECUTION_HISTORY_MAX_RESULT_WINDOW,
+            per_page: 0,
+          }).success
+        ).toBe(true);
+      });
     });
 
     it('round-trips a fully populated query (with already-array fields)', () => {
       const input = {
         rule_ids: ['rule-x', 'rule-y'],
         outcomes: ['success', 'failure'] as const,
-        start_time: '2026-06-01T00:00:00Z',
-        end_time: '2026-06-02T00:00:00Z',
+        from: '2026-06-01T00:00:00Z',
+        to: '2026-06-02T00:00:00Z',
         sort_field: 'duration_ms' as const,
         sort_order: 'asc' as const,
         page: 2,
@@ -441,7 +454,7 @@ describe('rule_execution_history_schema', () => {
       ).toBe(false);
     });
 
-    it('rejects page or per_page below 1', () => {
+    it('rejects page below 1', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
@@ -450,13 +463,26 @@ describe('rule_execution_history_schema', () => {
           per_page: 20,
         }).success
       ).toBe(false);
+    });
 
+    it('accepts per_page=0 for a count-only read', () => {
+      expect(
+        listRuleExecutionsResponseSchema.safeParse({
+          items: [],
+          total: 42,
+          page: 1,
+          per_page: 0,
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects a negative per_page', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
           total: 0,
           page: 1,
-          per_page: 0,
+          per_page: -1,
         }).success
       ).toBe(false);
     });

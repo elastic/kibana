@@ -175,6 +175,7 @@ const buildItem = (
   episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
+  error: null,
   ...overrides,
 });
 
@@ -189,23 +190,21 @@ const buildResponse = (
   ...overrides,
 });
 
-/** The subset of `useFetchExecutionHistory`'s result that the policies tab reads. */
+/** The subset of `useFetchExecutionHistory`'s result that the page reads. */
 interface MockFetchResult {
   data: ListPolicyExecutionHistoryResponse;
   isFetching: boolean;
   isError: boolean;
-  refetch: typeof mockRefetch;
 }
 
 const mockFetchResult = (overrides: Partial<MockFetchResult> = {}) => {
-  const result: MockFetchResult = {
+  mockUseFetchExecutionHistory.mockReturnValue({
     data: buildResponse(),
     isFetching: false,
     isError: false,
     refetch: mockRefetch,
     ...overrides,
-  };
-  mockUseFetchExecutionHistory.mockReturnValue(result);
+  });
 };
 
 const mockNewEventsCount = (total: number) => {
@@ -369,7 +368,10 @@ describe('ExecutionHistoryPage', () => {
       mockFetchResult({
         data: buildResponse({
           items: [buildItem({ dispatched_at: '2026-05-05T10:00:00.000Z' })],
+          page: 1,
+          per_page: 50,
           total: 1,
+          search_matches: null,
         }),
       });
       renderPage();
@@ -380,7 +382,15 @@ describe('ExecutionHistoryPage', () => {
     });
 
     it('renders rows with policy, rule, and workflow names', async () => {
-      mockFetchResult({ data: buildResponse({ items: [buildItem()], total: 1 }) });
+      mockFetchResult({
+        data: {
+          items: [buildItem()],
+          page: 1,
+          per_page: 50,
+          total: 1,
+          search_matches: null,
+        },
+      });
       renderPage();
       await switchToPoliciesTab();
 
@@ -400,7 +410,10 @@ describe('ExecutionHistoryPage', () => {
               workflows: [{ id: 'wf-orphan', name: null }],
             }),
           ],
+          page: 1,
+          per_page: 50,
           total: 1,
+          search_matches: null,
         }),
       });
       renderPage();
@@ -431,7 +444,15 @@ describe('ExecutionHistoryPage', () => {
     });
 
     it('opens the flyout when the policy link is clicked and closes it on dismiss', async () => {
-      mockFetchResult({ data: buildResponse({ items: [buildItem()], total: 1 }) });
+      mockFetchResult({
+        data: {
+          items: [buildItem()],
+          page: 1,
+          per_page: 50,
+          total: 1,
+          search_matches: null,
+        },
+      });
       renderPage();
       await switchToPoliciesTab();
 
@@ -445,7 +466,15 @@ describe('ExecutionHistoryPage', () => {
     });
 
     it('opens the rule flyout when the rule link is clicked and closes it on dismiss', async () => {
-      mockFetchResult({ data: buildResponse({ items: [buildItem()], total: 1 }) });
+      mockFetchResult({
+        data: {
+          items: [buildItem()],
+          page: 1,
+          per_page: 50,
+          total: 1,
+          search_matches: null,
+        },
+      });
       renderPage();
       await switchToPoliciesTab();
 
@@ -459,7 +488,15 @@ describe('ExecutionHistoryPage', () => {
     });
 
     it('renders workflow pills as links to the workflows app', async () => {
-      mockFetchResult({ data: buildResponse({ items: [buildItem()], total: 1 }) });
+      mockFetchResult({
+        data: {
+          items: [buildItem()],
+          page: 1,
+          per_page: 50,
+          total: 1,
+          search_matches: null,
+        },
+      });
       renderPage();
       await switchToPoliciesTab();
 

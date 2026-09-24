@@ -21,6 +21,7 @@ export const LIST_ACTION_POLICY_EXECUTIONS_RESPONSE: ListPolicyExecutionHistoryR
       rules: [{ id: 'rule-1', name: 'Host CPU high' }],
       total_rule_count: 1,
       workflows: [{ id: 'workflow-1', name: 'Notify oncall' }],
+      error: null,
     },
   ],
   page: 1,

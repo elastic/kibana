@@ -53,11 +53,11 @@ export const listRuleExecutionsRequestSchema = z
   .object({
     rule_ids: ruleIdArraySchema.optional().describe(`Rule id filter. `),
     outcomes: outcomeArraySchema.optional().describe('Outcome filter. '),
-    start_time: z.iso
+    from: z.iso
       .datetime()
       .optional()
       .describe('Inclusive ISO datetime lower bound on event.start.'),
-    end_time: z.iso
+    to: z.iso
       .datetime()
       .optional()
       .describe('Inclusive ISO datetime upper bound on event.start.'),
@@ -69,12 +69,12 @@ export const listRuleExecutionsRequestSchema = z
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe(`Page number.`),
-    per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
+    per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
-      .describe(`Number of results per page.`),
+      .describe(`Number of results per page. Pass 0 for a count-only read.`),
   })
   .strict()
-  .refine(({ page, per_page }) => page * per_page <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
+  .refine(({ page, per_page: perPage }) => page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
     message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
     path: ['page'],
   });
@@ -125,7 +125,7 @@ export const listRuleExecutionsResponseSchema = z
       .nonnegative()
       .describe(`The number of rule executions matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().int().min(1),
-    per_page: z.number().int().min(1),
+    per_page: z.number().int().min(0),
   })
   .meta({ id: 'alerting_rule_executions_response' });
 

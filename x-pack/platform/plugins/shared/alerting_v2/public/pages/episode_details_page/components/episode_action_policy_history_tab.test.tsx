@@ -10,7 +10,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
-import type { ListPolicyExecutionHistoryResponse } from '@kbn/alerting-v2-schemas';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
 import { POLICY_EXECUTION_FIELDS } from '../../execution_history_page/data_view';
 import { EpisodeActionPolicyHistoryTab } from './episode_action_policy_history_tab';
@@ -121,37 +120,30 @@ const buildItem = (
   episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
+  error: null,
   ...overrides,
 });
 
-const buildResponse = (
-  overrides: Partial<ListPolicyExecutionHistoryResponse> = {}
-): ListPolicyExecutionHistoryResponse => ({
-  items: [],
-  page: 1,
-  per_page: 10,
-  total: 0,
-  search_matches: null,
-  ...overrides,
-});
-
-/** The subset of `useFetchExecutionHistory`'s result that this tab reads. */
-interface MockFetchResult {
-  data: ListPolicyExecutionHistoryResponse;
-  isFetching: boolean;
-  isError: boolean;
-  refetch: typeof mockRefetch;
-}
-
-const mockFetchResult = (overrides: Partial<MockFetchResult> = {}) => {
-  const result: MockFetchResult = {
-    data: buildResponse(),
+const mockFetchResult = (
+  overrides: Partial<{
+    data: {
+      items: PolicyExecutionHistoryItem[];
+      page: number;
+      perPage: number;
+      total: number;
+      searchMatches: null;
+    };
+    isFetching: boolean;
+    isError: boolean;
+  }> = {}
+) => {
+  mockUseFetchExecutionHistory.mockReturnValue({
+    data: { items: [], page: 1, perPage: 10, total: 0, searchMatches: null },
     isFetching: false,
     isError: false,
     refetch: mockRefetch,
     ...overrides,
-  };
-  mockUseFetchExecutionHistory.mockReturnValue(result);
+  });
 };
 
 const renderTab = (episodeStart?: string) =>
@@ -187,7 +179,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
       perPage: 10,
       outcomes: undefined,
       episodeIds: [EPISODE_ID],
-      startTime: '2026-01-01T00:00:00.000Z',
+      from: '2026-01-01T00:00:00.000Z',
     });
   });
 
@@ -212,7 +204,9 @@ describe('EpisodeActionPolicyHistoryTab', () => {
   });
 
   it('renders rows without the Episodes, Action groups, and Rules columns', () => {
-    mockFetchResult({ data: buildResponse({ items: [buildItem()], total: 1 }) });
+    mockFetchResult({
+      data: { items: [buildItem()], page: 1, perPage: 10, total: 1, searchMatches: null },
+    });
     renderTab();
 
     expect(screen.getByText('My Policy')).toBeInTheDocument();
@@ -242,7 +236,9 @@ describe('EpisodeActionPolicyHistoryTab', () => {
   });
 
   it('opens the policy flyout when the policy link is clicked and closes it on dismiss', async () => {
-    mockFetchResult({ data: buildResponse({ items: [buildItem()], total: 1 }) });
+    mockFetchResult({
+      data: { items: [buildItem()], page: 1, perPage: 10, total: 1, searchMatches: null },
+    });
     renderTab();
 
     expect(screen.queryByTestId('mockFlyout-policy-1')).not.toBeInTheDocument();

@@ -30,8 +30,9 @@ const DEFAULT_PAGE = 1;
 
 export interface FindActionPolicyExecutionEventsParams {
   spaceId: string;
-  startTime: string;
-  endTime?: string;
+  startDate: string;
+  endDate?: string;
+  sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;
   actions?: ActionPolicyEventAction[];
@@ -76,8 +77,9 @@ export class EventLogService implements EventLogServiceContract {
 
   public async findActionPolicyExecutionEvents({
     spaceId,
-    startTime,
-    endTime,
+    startDate,
+    endDate,
+    sortOrder,
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PAGE_SIZE,
     actions,
@@ -88,8 +90,9 @@ export class EventLogService implements EventLogServiceContract {
   }: FindActionPolicyExecutionEventsParams): Promise<FindActionPolicyExecutionEventsResult> {
     const body = buildFindActionPolicyEventsQuery({
       spaceId,
-      startTime,
-      endTime,
+      startDate,
+      endDate,
+      sortOrder,
       actions,
       policyIds,
       ruleIds,

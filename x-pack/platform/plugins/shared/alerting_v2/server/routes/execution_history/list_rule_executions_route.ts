@@ -33,8 +33,8 @@ import { listRuleExecutionsOasExamples } from './list_rule_executions_oas_exampl
 export const toListRuleExecutionsArgs = ({
   rule_ids: ruleIds,
   outcomes,
-  start_time: startTime,
-  end_time: endTime,
+  from: from,
+  to: to,
   sort_field: sortField,
   sort_order: sortOrder,
   page,
@@ -45,8 +45,8 @@ export const toListRuleExecutionsArgs = ({
   return {
     ruleIds,
     outcomes,
-    startTime,
-    endTime,
+    from,
+    to,
     sortField: sortField === 'started_at' ? 'startedAt' : 'duration',
     sortOrder,
     page,

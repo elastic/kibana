@@ -31,9 +31,11 @@ import {
 export interface BuildActionPolicyEventsQueryParams {
   spaceId: string;
   /** Inclusive lower bound applied to `@timestamp`. */
-  startTime: string;
-  /** Inclusive upper bound applied to `@timestamp`. */
-  endTime?: string;
+  startDate: string;
+  /** Inclusive upper bound applied to `@timestamp`. Unbounded when omitted. */
+  endDate?: string;
+  /** Sort direction on `@timestamp`. Defaults to `desc` (newest first). */
+  sortOrder?: 'asc' | 'desc';
   actions?: ActionPolicyEventAction[];
   policyIds?: string[];
   ruleIds?: string[];
@@ -95,8 +97,8 @@ export const buildFindActionPolicyEventsQuery = (
  * Authorization is intentionally *not* enforced at this layer. The route
  * privilege (`executionHistory.read`) is the sole gate; see spec §6.4.
  *
- * `track_total_hits: true` is set for the "new events since" badge, which counts
- * unseen events and would visibly saturate at the default 10,000.
+ * `track_total_hits: true` is set so callers see precise counts (the list
+ * `total` and the "new events since" badge depend on exact totals).
  */
 const buildBaseActionPolicyEventsQuery = (
   params: BuildActionPolicyEventsQueryParams
@@ -107,8 +109,8 @@ const buildBaseActionPolicyEventsQuery = (
     {
       range: {
         '@timestamp': {
-          gte: params.startTime,
-          ...(params.endTime ? { lte: params.endTime } : {}),
+          gte: params.startDate,
+          ...(params.endDate && { lte: params.endDate }),
         },
       },
     },
@@ -130,7 +132,7 @@ const buildBaseActionPolicyEventsQuery = (
 
   return {
     query: { bool: { filter: filters } },
-    sort: [{ '@timestamp': { order: 'desc' } }],
+    sort: [{ '@timestamp': { order: params.sortOrder ?? 'desc' } }],
     track_total_hits: true,
   };
 };

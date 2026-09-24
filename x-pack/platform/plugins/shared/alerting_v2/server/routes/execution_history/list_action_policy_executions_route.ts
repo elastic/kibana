@@ -36,8 +36,10 @@ export const toListExecutionHistoryArgs = ({
   rule_ids: ruleIds,
   outcomes,
   episode_ids: episodeIds,
-  start_time: startTime,
-  end_time: endTime,
+  from,
+  to,
+  sort_field: sortField,
+  sort_order: sortOrder,
   ...rest
 }: ListPolicyExecutionHistoryRequest): Complete<Omit<ListExecutionHistoryArgs, 'request'>> => {
   assertAllFieldsMapped(rest);
@@ -48,8 +50,10 @@ export const toListExecutionHistoryArgs = ({
     ruleIds,
     outcomes,
     episodeIds,
-    startTime,
-    endTime,
+    from,
+    to,
+    sortField,
+    sortOrder,
   };
 };
 
@@ -122,7 +126,7 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
   protected async execute() {
     const result = await this.executionHistoryClient.listExecutionHistory({
       request: this.request,
-      ...toListExecutionHistoryArgs(this.request.query ?? {}),
+      ...toListExecutionHistoryArgs(this.request.query),
     });
 
     return this.ctx.response.ok({ body: toListExecutionHistoryResponse(result) });

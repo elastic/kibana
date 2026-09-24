@@ -79,8 +79,10 @@ export const executionHistoryKeys = {
     ruleIds?: string[];
     outcomes?: PolicyExecutionOutcomeFilter;
     episodeIds?: string[];
-    startTime?: string;
-    endTime?: string;
+    from?: string;
+    to?: string;
+    sortField?: 'dispatchedAt';
+    sortOrder?: 'asc' | 'desc';
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
   newEventsSince: (
     since: string,

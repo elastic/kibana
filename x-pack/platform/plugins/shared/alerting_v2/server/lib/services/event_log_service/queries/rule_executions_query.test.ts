@@ -131,12 +131,12 @@ describe('buildRuleExecutionsQuery', () => {
     });
   });
 
-  it('adds a range filter on event.start when startTime/endTime are provided', () => {
+  it('adds a range filter on event.start when from/to are provided', () => {
     const filters = filtersOf(
       buildRuleExecutionsQuery({
         ...baseQuery,
-        startTime: '2026-06-01T00:00:00Z',
-        endTime: '2026-06-02T00:00:00Z',
+        from: '2026-06-01T00:00:00Z',
+        to: '2026-06-02T00:00:00Z',
       })
     );
     expect(filters).toEqual(
@@ -150,18 +150,18 @@ describe('buildRuleExecutionsQuery', () => {
     );
   });
 
-  it('honors a single-sided range (only startTime)', () => {
+  it('honors a single-sided range (only from)', () => {
     const filters = filtersOf(
-      buildRuleExecutionsQuery({ ...baseQuery, startTime: '2026-06-01T00:00:00Z' })
+      buildRuleExecutionsQuery({ ...baseQuery, from: '2026-06-01T00:00:00Z' })
     );
     expect(filters).toEqual(
       expect.arrayContaining([{ range: { 'event.start': { gte: '2026-06-01T00:00:00Z' } } }])
     );
   });
 
-  it('honors a single-sided range (only endTime)', () => {
+  it('honors a single-sided range (only to)', () => {
     const filters = filtersOf(
-      buildRuleExecutionsQuery({ ...baseQuery, endTime: '2026-06-02T00:00:00Z' })
+      buildRuleExecutionsQuery({ ...baseQuery, to: '2026-06-02T00:00:00Z' })
     );
     expect(filters).toEqual(
       expect.arrayContaining([{ range: { 'event.start': { lte: '2026-06-02T00:00:00Z' } } }])

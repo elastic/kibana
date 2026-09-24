@@ -15,8 +15,6 @@ import type {
 import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
-} from '../../server';
-import type {
   SearchEmbeddableByValueState,
   SearchEmbeddablePanelApiState,
   SearchEmbeddableState,

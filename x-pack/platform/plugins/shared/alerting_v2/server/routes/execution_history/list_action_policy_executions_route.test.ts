@@ -27,22 +27,22 @@ const item: PolicyExecutionHistoryItem = {
   episode_count: 1,
   action_group_count: 1,
   workflows: [],
+  error: null,
 };
 
-const emptyResult: ListExecutionHistoryResult = {
-  items: [],
-  page: 1,
-  perPage: 100,
-  total: 0,
-  searchMatches: null,
-};
 
 const createMocks = () => {
   const deps = createRouteDependencies();
   const executionHistoryClient: jest.Mocked<
     Pick<ActionPolicyExecutionHistoryClient, 'listExecutionHistory'>
   > = {
-    listExecutionHistory: jest.fn().mockResolvedValue(emptyResult),
+    listExecutionHistory: jest.fn().mockResolvedValue({
+      items: [],
+      page: 1,
+      perPage: 100,
+      total: 0,
+      searchMatches: null,
+    }),
   };
   return { deps, executionHistoryClient };
 };
@@ -72,8 +72,10 @@ describe('ListActionPolicyExecutionsRoute', () => {
       ruleIds: undefined,
       outcomes: ['throttled'],
       episodeIds: undefined,
-      startTime: undefined,
-      endTime: undefined,
+      from: undefined,
+      to: undefined,
+      sort: undefined,
+      sortOrder: undefined,
     });
   });
 
@@ -91,31 +93,31 @@ describe('ListActionPolicyExecutionsRoute', () => {
     );
   });
 
-  it('forwards start_time from the query to the client', async () => {
+  it('forwards from / to from the query to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      query: { start_time: '2026-01-01T00:00:00.000Z' },
+      query: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
     expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
-      expect.objectContaining({ startTime: '2026-01-01T00:00:00.000Z' })
+      expect.objectContaining({ from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' })
     );
   });
 
-  it('forwards end_time from the query to the client', async () => {
+  it('forwards sort_field / sort_order from the query to the client as sortField / sortOrder', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      query: { end_time: '2026-01-02T00:00:00.000Z' },
+      query: { sort_field: 'dispatched_at', sort_order: 'asc' },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
     expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
-      expect.objectContaining({ endTime: '2026-01-02T00:00:00.000Z' })
+      expect.objectContaining({ sortField: 'dispatched_at', sortOrder: 'asc' })
     );
   });
 
@@ -134,8 +136,10 @@ describe('ListActionPolicyExecutionsRoute', () => {
       ruleIds: undefined,
       outcomes: undefined,
       episodeIds: undefined,
-      startTime: undefined,
-      endTime: undefined,
+      from: undefined,
+      to: undefined,
+      sort: undefined,
+      sortOrder: undefined,
     });
   });
 
@@ -188,8 +192,10 @@ describe('toListExecutionHistoryArgs', () => {
         rule_ids: ['rule-1', 'rule-2'],
         outcomes: ['success'],
         episode_ids: ['ep-1'],
-        start_time: '2026-01-01T00:00:00.000Z',
-        end_time: '2026-01-02T00:00:00.000Z',
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+        sort_field: 'dispatched_at',
+        sort_order: 'asc',
       })
     ).toEqual({
       page: 1,
@@ -198,8 +204,10 @@ describe('toListExecutionHistoryArgs', () => {
       ruleIds: ['rule-1', 'rule-2'],
       outcomes: ['success'],
       episodeIds: ['ep-1'],
-      startTime: '2026-01-01T00:00:00.000Z',
-      endTime: '2026-01-02T00:00:00.000Z',
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+      sortField: 'dispatched_at',
+      sortOrder: 'asc',
     });
   });
 });

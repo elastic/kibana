@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
+  EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   EXECUTION_HISTORY_MAX_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
 } from '@kbn/alerting-v2-schemas';
@@ -83,17 +84,28 @@ apiTest.describe(
       expect(response.body.code).toBe('BAD_REQUEST');
     });
 
-    apiTest('validation: accepts a start_time lower bound', async ({ apiClient }) => {
+    apiTest('validation: rejects an unknown sort field', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ start_time: '2026-01-01T00:00:00.000Z' }),
+        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?sort=started_at`,
         { headers: readerHeaders }
       );
-      expect(response).toHaveStatusCode(200);
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
-    apiTest('validation: accepts an end_time upper bound', async ({ apiClient }) => {
+    apiTest('returns the schema defaults for page, per_page and total', async ({ apiClient }) => {
+      const response = await apiClient.get(getListExecutionHistoryUrl(), {
+        headers: readerHeaders,
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.page).toBe(1);
+      expect(response.body.per_page).toBe(EXECUTION_HISTORY_DEFAULT_PER_PAGE);
+      expect(typeof response.body.total).toBe('number');
+    });
+
+    apiTest('validation: accepts a `to` upper bound', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ end_time: '2026-01-02T00:00:00.000Z' }),
+        getListExecutionHistoryUrl({ to: '2026-01-02T00:00:00.000Z' }),
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(200);

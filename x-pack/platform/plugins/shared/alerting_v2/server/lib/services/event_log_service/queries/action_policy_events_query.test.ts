@@ -24,7 +24,7 @@ const filtersOf = (body: SearchRequest) =>
 const hasBoolShould = (filter: QueryDslQueryContainer | undefined) =>
   Boolean(filter?.bool && Array.isArray(filter.bool.should));
 
-const baseParams = { spaceId: 'default', startTime: SINCE } as const;
+const baseParams = { spaceId: 'default', startDate: SINCE } as const;
 
 /**
  * The shared filter and sort logic (see `buildBaseActionPolicyEventsQuery`) is
@@ -53,16 +53,16 @@ describe('action policy events queries', () => {
       );
     });
 
-    it('applies @timestamp >= startTime as a range filter', () => {
+    it('applies @timestamp >= startDate as a range filter', () => {
       const filters = filtersOf(buildShared());
       expect(filters).toEqual(
         expect.arrayContaining([{ range: { '@timestamp': { gte: SINCE } } }])
       );
     });
 
-    it('applies @timestamp <= endTime as well when provided', () => {
+    it('adds @timestamp <= endDate to the range filter when endDate is provided', () => {
       const until = '2026-05-05T00:00:00Z';
-      const filters = filtersOf(buildShared({ endTime: until }));
+      const filters = filtersOf(buildShared({ endDate: until }));
       expect(filters).toEqual(
         expect.arrayContaining([{ range: { '@timestamp': { gte: SINCE, lte: until } } }])
       );
@@ -300,9 +300,14 @@ describe('action policy events queries', () => {
       });
     });
 
-    it('sorts by @timestamp desc', () => {
+    it('sorts by @timestamp desc by default', () => {
       const body = buildShared();
       expect(body.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+    });
+
+    it('sorts by @timestamp asc when sortOrder=asc', () => {
+      const body = buildShared({ sortOrder: 'asc' });
+      expect(body.sort).toEqual([{ '@timestamp': { order: 'asc' } }]);
     });
 
     it('sets track_total_hits=true', () => {

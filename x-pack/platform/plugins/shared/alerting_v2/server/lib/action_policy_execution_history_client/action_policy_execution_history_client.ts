@@ -13,6 +13,7 @@ import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
+  type ListPolicyExecutionHistoryRequest,
   type PolicyExecutionHistoryItem,
   type RuleResponse,
   type PolicyExecutionOutcomeFilter,
@@ -38,7 +39,7 @@ import {
 import { toEventActions } from './outcome';
 
 // Default lower bound on the event timestamp when the caller does not pass an
-// explicit `start_time`.
+// explicit `from`.
 const DEFAULT_TIME_WINDOW_HOURS = 24;
 
 // Pagination defaults applied when the caller omits them
@@ -61,9 +62,17 @@ export interface ListExecutionHistoryArgs {
    * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
    * replaces the default rolling {@link DEFAULT_TIME_WINDOW_HOURS}-hour window.
    */
-  startTime?: string;
-  /** Inclusive ISO timestamp upper bound for `@timestamp`. */
-  endTime?: string;
+  from?: string;
+  /** Inclusive ISO timestamp upper bound for `@timestamp`. Unbounded when omitted. */
+  to?: string;
+  /**
+   * Sort field. `dispatched_at` is the only supported value and maps to
+   * `@timestamp`, which the event log query always sorts on; only `sortOrder`
+   * is forwarded.
+   */
+  sortField?: ListPolicyExecutionHistoryRequest['sort_field'];
+  /** Sort direction. Defaults to `desc` (newest first). */
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ListExecutionHistoryResult {
@@ -99,11 +108,12 @@ export class ActionPolicyExecutionHistoryClient {
     ruleIds,
     outcomes,
     episodeIds,
-    startTime,
-    endTime,
+    from,
+    to,
+    sortOrder,
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
-    const effectiveStartTime =
-      startTime ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    const effectiveFrom =
+      from ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
@@ -121,8 +131,9 @@ export class ActionPolicyExecutionHistoryClient {
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
       spaceId,
-      startTime: effectiveStartTime,
-      endTime,
+      startDate: effectiveFrom,
+      endDate: to,
+      sortOrder,
       page,
       perPage,
       actions: toEventActions(outcomes),
@@ -182,7 +193,11 @@ export class ActionPolicyExecutionHistoryClient {
       policyIds: [...policyIds],
       ruleIds: [...ruleIds],
       hasMatches: policyIds.size > 0 || ruleIds.size > 0,
-      matches: { policies: policies.total, rules: rules.total, cap: SEARCH_ID_CAP },
+      matches: {
+        policies: policies.total,
+        rules: rules.total,
+        is_truncated: policies.total > SEARCH_ID_CAP || rules.total > SEARCH_ID_CAP,
+      },
     };
   }
 
