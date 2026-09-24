@@ -35,6 +35,7 @@ describe('remember tool', () => {
       getSecurityStart: async () => undefined,
       generateId: () => 'logical-memory-id',
       generateSessionId: () => 'generated-session-id',
+      getCurrentDate: () => new Date('2026-09-24T12:00:00.000Z'),
     });
 
   const createContext = (conversationId: string | undefined, callSource?: 'mcp') => {
@@ -209,6 +210,7 @@ describe('remember tool', () => {
         '@timestamp': expect.any(String),
         id: 'logical-memory-id',
         updated_at: expect.any(String),
+        expires_at: '2026-12-23T12:00:00.000Z',
         type: 'memory.session_fact',
         title: params.title,
         description: params.description,
@@ -247,6 +249,18 @@ describe('remember tool', () => {
         },
       ],
     });
+  });
+
+  it('uses a caller-supplied expiration instead of the default', async () => {
+    await run({ ...params, expires_at: '2026-10-01T00:00:00.000Z' }, 'conversation-1');
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          expires_at: '2026-10-01T00:00:00.000Z',
+        }),
+      })
+    );
   });
 
   it('does not treat a caller-supplied id as a new memory id', async () => {
