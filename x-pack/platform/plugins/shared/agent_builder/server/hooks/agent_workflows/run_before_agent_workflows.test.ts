@@ -262,6 +262,20 @@ describe('runBeforeAgentWorkflows', () => {
   it('persists only bounded string recalled ids from workflow_context', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices } = createDeps();
+    const oversizedRecalledIds: Array<string | number> = [
+      'memory-1',
+      42,
+      'x'.repeat(WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH + 1),
+      ...Array.from(
+        { length: WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT },
+        (_, index) => `memory-${index + 2}`
+      ),
+    ];
+    Object.defineProperty(oversizedRecalledIds, WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT, {
+      get: () => {
+        throw new Error('normalization read beyond the bounded input window');
+      },
+    });
     executeWorkflowMock.mockResolvedValue({
       success: true,
       execution: {
@@ -272,15 +286,7 @@ describe('runBeforeAgentWorkflows', () => {
         output: {
           workflow_context: {
             semantic_memory: {
-              recalled_ids: [
-                'memory-1',
-                42,
-                'x'.repeat(WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH + 1),
-                ...Array.from(
-                  { length: WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT },
-                  (_, index) => `memory-${index + 2}`
-                ),
-              ],
+              recalled_ids: oversizedRecalledIds,
             },
           },
         },
@@ -295,7 +301,7 @@ describe('runBeforeAgentWorkflows', () => {
     });
 
     const recalledIds = result?.nextInput?.workflow_context?.semantic_memory?.recalled_ids;
-    expect(recalledIds).toHaveLength(WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT);
+    expect(recalledIds).toHaveLength(WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT - 1);
     expect(recalledIds?.[0]).toBe('memory-1');
     expect(recalledIds?.[1]).toHaveLength(WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH);
     expect(recalledIds?.every((id) => id.length <= WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH)).toBe(

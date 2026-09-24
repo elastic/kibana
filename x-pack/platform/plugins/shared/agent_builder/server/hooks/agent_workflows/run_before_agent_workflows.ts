@@ -84,12 +84,21 @@ const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined =
     return undefined;
   }
 
+  const recalledIds: string[] = [];
+  const inputCount = Math.min(
+    semanticMemory.recalled_ids.length,
+    WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT
+  );
+  for (let index = 0; index < inputCount; index++) {
+    const id = semanticMemory.recalled_ids[index];
+    if (typeof id === 'string') {
+      recalledIds.push(id.slice(0, WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH));
+    }
+  }
+
   return {
     semantic_memory: {
-      recalled_ids: semanticMemory.recalled_ids
-        .filter((id): id is string => typeof id === 'string')
-        .slice(0, WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT)
-        .map((id) => id.slice(0, WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH)),
+      recalled_ids: recalledIds,
     },
   };
 };
