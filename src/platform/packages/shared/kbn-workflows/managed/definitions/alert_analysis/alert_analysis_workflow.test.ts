@@ -2060,7 +2060,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
       with: { grouped_counts_summary: string };
     };
-    expect(summaryStep.with.grouped_counts_summary).toContain('uniq | slice: 0, 50');
+    expect(summaryStep.with.grouped_counts_summary).toContain('all_host_names | slice: 0, 50');
     expect(summaryStep.with.grouped_counts_summary).toContain("truncate: 10000, ''");
 
     // Short names so all 50 capped hosts fit under the 10000-char truncate; otherwise the
@@ -2079,6 +2079,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(summary).toContain('host-0');
     expect(summary).toContain('host-49');
     expect(summary).not.toContain('host-50');
+    // 80 verdicts, 80 unique hosts → 30 omitted; overflow note must appear
+    expect(summary).toContain('30 additional host(s) omitted from summary');
     expect(summary.length).toBeLessThanOrEqual(10000);
 
     const longHost = 'h'.repeat(200);

@@ -665,10 +665,14 @@ steps:
       # -----------------------------------------------------------------------
       # Rule-scoped enrichment (once per execution)
       # -----------------------------------------------------------------------
-      # Every alert in the trigger batch comes from the same rule execution, so these
-      # queries return the same answer for all of them. They are anchored on the first
-      # alert's timestamp — the alerts of one execution share a detection window, so the
-      # anchor is equivalent to the per-alert anchor it replaces.
+      # Enrichment is rule-scoped (same UUID, same 30d/7d/±24h windows for all alerts).
+      # The anchor is the first alert's timestamp. For standalone triggers all alerts share
+      # one rule execution window, so the anchor is equivalent to a per-alert anchor.
+      # For Worker batches the anchor may lag the newest alert by hours, but the query
+      # windows (30d close history, 7d/24h prevalence) are large enough that realistic
+      # batch spreads do not materially change the enrichment result. Running enrichment
+      # once per execution rather than once per alert avoids multiplying ES queries by
+      # batch size.
       - name: set_enrichment_anchor
         type: data.set
         with:
@@ -1936,7 +1940,8 @@ steps:
               # and can hit the engine render limit after tags/notes are already written.
               grouped_counts_summary: >-
                 {%- capture grouped_counts_summary_raw -%}
-                {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq | slice: 0, 50 -%}
+                {%- assign all_host_names = variables.output_verdicts | map: 'host_name' | uniq -%}
+                {%- assign hosts = all_host_names | slice: 0, 50 -%}
                 {%- for h in hosts -%}
                 {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
                 {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
@@ -1946,6 +1951,7 @@ steps:
                 {%- if fp > 0 %} {{ fp }} alert(s) for host {{ h }} classified as false positive.{% endif -%}
                 {%- if inc > 0 %} {{ inc }} alert(s) for host {{ h }} were inconclusive.{% endif -%}
                 {%- endfor -%}
+                {%- if all_host_names.size > 50 %} ({{ all_host_names.size | minus: 50 }} additional host(s) omitted from summary.){% endif -%}
                 {%- endcapture -%}
                 {{- grouped_counts_summary_raw | truncate: 10000, '' -}}
 
