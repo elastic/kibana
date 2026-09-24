@@ -22,7 +22,6 @@ describe('rule_request_mappers', () => {
     metadata: {
       name: 'Test Rule',
       enabled: true,
-      owner: 'test-owner',
       tags: ['tag1', 'tag2'],
     },
     timeField: '@timestamp',
@@ -40,7 +39,7 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(baseFormValues);
 
       expect(result).toEqual({
-        metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1', 'tag2'] },
+        metadata: { name: 'Test Rule', tags: ['tag1', 'tag2'] },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
         query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
@@ -258,7 +257,6 @@ describe('rule_request_mappers', () => {
           name: 'My Rule',
           enabled: false,
           description: 'A description',
-          owner: 'owner',
           tags: [],
         },
       };
@@ -268,7 +266,6 @@ describe('rule_request_mappers', () => {
       expect(result.metadata).toEqual({
         name: 'My Rule',
         description: 'A description',
-        owner: 'owner',
       });
       expect(result.metadata).not.toHaveProperty('enabled');
       expect(result.metadata).not.toHaveProperty('tags');
@@ -582,7 +579,6 @@ describe('rule_request_mappers', () => {
       expect(result.kind).toBe('signal');
       expect(result.metadata).toEqual({
         name: 'Test Rule',
-        owner: 'test-owner',
         tags: ['tag1', 'tag2'],
       });
       expect(result.time_field).toBe('@timestamp');
@@ -701,7 +697,6 @@ describe('rule_request_mappers', () => {
 
       expect(result.metadata).toEqual({
         name: 'Test Rule',
-        owner: 'test-owner',
         tags: ['tag1', 'tag2'],
       });
       expect(result.time_field).toBe('@timestamp');
@@ -777,7 +772,6 @@ describe('rule_request_mappers', () => {
       enabled: true,
       metadata: {
         name: 'Test Rule',
-        owner: 'test-owner',
         tags: ['tag1'],
       },
       time_field: '@timestamp',
@@ -799,7 +793,6 @@ describe('rule_request_mappers', () => {
       expect(result.metadata).toEqual({
         name: 'Test Rule',
         enabled: true,
-        owner: 'test-owner',
         tags: ['tag1'],
       });
       expect(result.stateTransitionAlertDelayMode).toBe('immediate');

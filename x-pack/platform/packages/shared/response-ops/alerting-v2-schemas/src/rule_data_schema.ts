@@ -13,7 +13,13 @@ import {
   composeEsqlQuery,
   validateComposedEsqlQuery,
 } from './validation';
-import { durationSchema, queryIntSchema, tagsResponseSchema, tagsSchema } from './common';
+import {
+  actorSchema,
+  durationSchema,
+  queryIntSchema,
+  tagsResponseSchema,
+  tagsSchema,
+} from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
@@ -81,7 +87,6 @@ export const metadataSchema = z
       .max(MAX_DESCRIPTION_LENGTH)
       .optional()
       .describe('Human-readable description of the rule.'),
-    owner: z.string().max(256).optional().describe('Owner of the rule.'),
     tags: tagsSchema
       .min(1)
       .optional()
@@ -764,9 +769,9 @@ export const ruleResponseSchema = createRuleDataBaseSchema
     id: z.string().describe('Unique rule identifier.'),
     metadata: ruleResponseMetadataSchema,
     enabled: z.boolean().describe('Whether the rule is enabled.'),
-    created_by: z.string().nullable().describe('User who created the rule.'),
+    created_by: actorSchema.nullable().describe('Actor who created the rule.'),
     created_at: z.string().describe('ISO timestamp when the rule was created.'),
-    updated_by: z.string().nullable().describe('User who last updated the rule.'),
+    updated_by: actorSchema.nullable().describe('Actor who last updated the rule.'),
     updated_at: z.string().describe('ISO timestamp when the rule was last updated.'),
     version: z
       .string()
