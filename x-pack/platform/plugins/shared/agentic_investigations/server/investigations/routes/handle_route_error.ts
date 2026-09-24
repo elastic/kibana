@@ -8,6 +8,7 @@
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import { WrongTemplateError } from '../../assignments/assignments_service';
+import { MissingDismissReasonError } from '../services/investigation_status_service';
 
 export const handleInvestigationRouteError = (
   error: unknown,
@@ -16,6 +17,10 @@ export const handleInvestigationRouteError = (
 ) => {
   if (error instanceof WrongTemplateError) {
     return response.notFound({ body: { message: error.message } });
+  }
+
+  if (error instanceof MissingDismissReasonError) {
+    return response.badRequest({ body: { message: error.message } });
   }
 
   if (isAgentBuilderError(error)) {

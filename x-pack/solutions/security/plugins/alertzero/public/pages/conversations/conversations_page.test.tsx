@@ -20,6 +20,8 @@ import {
   useAssignInvestigation,
   useUserProfiles,
   useSuggestUserProfiles,
+  useSetInvestigationStatus,
+  useInvestigationClosePreview,
 } from '@kbn/agentic-investigations-plugin/public';
 import {
   useProposalsByCategory,
@@ -44,6 +46,8 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useAssignInvestigation: jest.fn(),
   useUserProfiles: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
+  useSetInvestigationStatus: jest.fn(),
+  useInvestigationClosePreview: jest.fn(),
 }));
 jest.mock('@kbn/agentic-investigations-common', () => {
   const actual = jest.requireActual('@kbn/agentic-investigations-common');
@@ -80,6 +84,39 @@ jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
+// Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
+// affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
+// so the mutation assertions still hold.
+jest.mock('../../components/connected_status/connected_close_investigation_modal', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const agenticInvestigationsPublic = require('@kbn/agentic-investigations-plugin/public');
+  // eslint-disable-next-line react/display-name
+  const ConnectedCloseInvestigationModal = ({
+    investigation,
+    onClose,
+  }: {
+    investigation: { conversationId?: string; id?: string };
+    onClose: () => void;
+  }) => {
+    const { mutate } = agenticInvestigationsPublic.useSetInvestigationStatus();
+    return (
+      <div role="dialog" aria-label="Close this investigation?">
+        <button
+          onClick={() =>
+            mutate({
+              investigationId: investigation.conversationId ?? investigation.id,
+              body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
+            })
+          }
+        >
+          Close investigation
+        </button>
+        <button onClick={onClose}>Cancel</button>
+      </div>
+    );
+  };
+  return { ConnectedCloseInvestigationModal };
+});
 
 const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
 const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock;
@@ -91,6 +128,8 @@ const mockUseDismissProposal = useDismissProposal as jest.Mock;
 const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
+const mockUseSetInvestigationStatus = useSetInvestigationStatus as jest.Mock;
+const mockUseInvestigationClosePreview = useInvestigationClosePreview as jest.Mock;
 
 /** Records the fetchNextPage of each bucket, so a Show more click can be asserted. */
 const fetchNextPage: Record<string, jest.Mock> = {};
@@ -218,6 +257,7 @@ const renderPage = (
 
 const approveMutate = jest.fn();
 const dismissMutate = jest.fn();
+const setStatusMutate = jest.fn();
 const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
@@ -226,6 +266,11 @@ beforeEach(() => {
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
+  mockUseSetInvestigationStatus.mockReturnValue({ mutate: setStatusMutate, isLoading: false });
+  mockUseInvestigationClosePreview.mockReturnValue({
+    data: { pending_proposal_count: 0 },
+    isLoading: false,
+  });
   mockOpenCount(0);
 });
 
@@ -450,29 +495,20 @@ describe('ConversationsPage decisions', () => {
     );
   });
 
-  it('dismisses with the reason the analyst chose rather than a default', () => {
-    renderPage('/');
+  it('opens the close-investigation modal when the ⋮ Close action is triggered with manage capability', () => {
+    // canManageInvestigations must be true for renderCloseModal to be wired.
+    renderPage('/', { capabilities: { manageInvestigations: true } });
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
-    // The menu item is "Close investigation"; the modal it opens still dismisses the
-    // underlying proposal, which is the API operation and the confirm button's label.
     fireEvent.click(screen.getByText('Close investigation'));
 
-    // The actions popover is also a dialog, so the modal has to be named.
-    const dialog = within(screen.getByRole('dialog', { name: 'Action modal' }));
-    fireEvent.change(screen.getByTestId('alertZeroDismissReasonSelect'), {
-      target: { value: 'already_handled' },
-    });
-    // Rationale is required — the confirm button stays disabled without it.
-    fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Handled out of band.' } });
-    fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
+    expect(screen.getByRole('dialog', { name: 'Close this investigation?' })).toBeInTheDocument();
 
-    expect(dismissMutate).toHaveBeenCalledWith(
-      {
-        id: 'prop-1',
-        body: { dismissReason: 'already_handled', rationale: 'Handled out of band.' },
-      },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Close investigation' }));
+
+    expect(setStatusMutate).toHaveBeenCalledWith({
+      investigationId: 'inv-1',
+      body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
+    });
   });
 
   it('hides the actions menu trigger for a decided proposal when escalation is not available', () => {

@@ -60,3 +60,7 @@ export const ESCALATIONS_UI_CAPABILITY_MANAGE = 'manageEscalations' as const;
  */
 export const MAX_ESCALATIONS_PAGE_SIZE = 50;
 export const MAX_ESCALATIONS_RESULT_WINDOW = 10_000;
+
+export const ESCALATION_STATUS_URL = `${ESCALATIONS_INTERNAL_URL}/{id}/status` as const;
+export const ESCALATION_CLOSE_PREVIEW_URL =
+  `${ESCALATIONS_INTERNAL_URL}/{id}/_close_preview` as const;

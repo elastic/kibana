@@ -12,9 +12,12 @@ import type { Investigation } from '../../types';
 import { BaseActions, type CardActionType } from '../actions';
 import {
   InvestigationActionModals,
+  type CloseInvestigationModalRenderProps,
   type EscalationModalRenderProps,
 } from '../modals/investigation_action_modals';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+
+export type { CloseInvestigationModalRenderProps };
 
 export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
@@ -25,6 +28,11 @@ export interface ConversationDetailsFlyoutFooterProps {
    * Supplied by the caller who has access to Kibana HTTP hooks unavailable in this package.
    */
   onOpenEscalation?: (props: EscalationModalRenderProps) => React.ReactNode;
+  /**
+   * When provided, the "Close investigation" action renders a confirmation modal.
+   * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   */
+  onCloseInvestigation?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
 }
 
 interface ModalState {
@@ -42,6 +50,7 @@ export const ConversationDetailsFlyoutFooter = ({
   investigation,
   onOpenChat,
   onOpenEscalation,
+  onCloseInvestigation,
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
 
@@ -53,6 +62,10 @@ export const ConversationDetailsFlyoutFooter = ({
     },
     []
   );
+
+  const renderCloseModal = onCloseInvestigation
+    ? (props: CloseInvestigationModalRenderProps) => onCloseInvestigation(props)
+    : undefined;
 
   return (
     <>
@@ -89,6 +102,7 @@ export const ConversationDetailsFlyoutFooter = ({
         investigation={investigation}
         onCloseAction={closeModal}
         onCloseApproval={closeModal}
+        renderCloseModal={renderCloseModal}
         renderEscalationModal={onOpenEscalation}
       />
     </>

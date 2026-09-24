@@ -24,3 +24,4 @@ export {
   type EscalationFlyoutHeaderProps,
 } from './escalation_flyout_header';
 export { OverviewTab } from './details_flyout_tab_contents';
+export { StatusToggle, type StatusToggleProps } from './status_toggle';

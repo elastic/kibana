@@ -12,7 +12,7 @@
     "server": true,
     "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "features"],
     "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": ["security", "spaces"],
+    "optionalPlugins": ["security", "spaces", "proposals"],
     "extraPublicDirs": ["common"]
   }
 }

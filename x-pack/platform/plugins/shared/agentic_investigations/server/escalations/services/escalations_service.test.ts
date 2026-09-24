@@ -15,7 +15,6 @@ import { EscalationsService } from './escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
 import {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
-  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
 } from '../../../common/escalations/constants';
@@ -101,13 +100,31 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
     list: jest.fn(),
   };
 
+  // Minimal stub — only needed for setStatus / getClosePreview tests.
+  const investigationStatusService = {
+    getPreview: jest.fn().mockResolvedValue({ pending_proposal_count: 0 }),
+    setStatus: jest.fn().mockResolvedValue({
+      conversation_id: '',
+      status: 'closed',
+      dismissed_proposal_ids: [],
+      failed_proposal_ids: [],
+    }),
+  };
+
   const service = new EscalationsService({
     logger,
     getConversationClient,
     conversationTemplates,
+    getInvestigationStatusService: () => investigationStatusService as never,
   });
 
-  return { service, client, getConversationClient, conversationTemplates };
+  return {
+    service,
+    client,
+    getConversationClient,
+    conversationTemplates,
+    investigationStatusService,
+  };
 };
 
 describe('EscalationsService.create', () => {
@@ -412,67 +429,6 @@ describe('EscalationsService.update', () => {
     await service.update(request, 'escalation-1', { title: 'Renamed' });
 
     expect(client.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  it('calls patchMetadata with status when status is provided', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: { status: 'open' },
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { status: 'closed' });
-
-    expect(client.patchMetadata).toHaveBeenCalledWith(
-      'escalation-1',
-      expect.objectContaining({ status: 'closed' }),
-      { access: 'converse' }
-    );
-  });
-
-  it('issues exactly one patchMetadata call when linked_investigations and status are both present', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {
-          [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [],
-          status: 'open',
-        },
-      }),
-    });
-
-    await service.update(request, 'escalation-1', {
-      linked_investigations: ['inv-1'],
-      status: 'closed',
-    });
-
-    // A single OCC-protected write prevents partial application.
-    expect(client.patchMetadata).toHaveBeenCalledTimes(1);
-    expect(client.patchMetadata).toHaveBeenCalledWith(
-      'escalation-1',
-      expect.objectContaining({
-        [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: expect.arrayContaining(['inv-1']),
-        [ESCALATION_STATUS_FIELD]: 'closed',
-      }),
-      { access: 'converse' }
-    );
-  });
-
-  it('does not call client.update for a status-only update', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: { status: 'open' },
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { status: 'closed' });
-
-    expect(client.update).not.toHaveBeenCalled();
   });
 
   it('does not call client.update for a links-only update', async () => {

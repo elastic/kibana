@@ -19,7 +19,7 @@ import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type { RenderAssignees } from './types';
+import type { RenderAssignees, RenderStatus } from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -51,11 +51,13 @@ export const OverviewSlot = ({ conversation, attachmentsService }: OverviewSlotP
 
 export interface HeaderSlotProps extends InvestigationSlotProps {
   renderAssignees?: RenderAssignees;
+  renderStatus?: RenderStatus;
 }
 
 export const HeaderSlot = ({
   conversation,
   renderAssignees,
+  renderStatus,
   refetchConversation,
 }: HeaderSlotProps) => {
   const investigation = conversationToInvestigation(conversation);
@@ -68,21 +70,40 @@ export const HeaderSlot = ({
         refetchConversation,
       })
     : undefined;
+  const statusNode = renderStatus
+    ? renderStatus({
+        conversationId: conversation.id,
+        templateId: 'investigation',
+        status: investigation.status,
+        refetchConversation,
+      })
+    : undefined;
   return (
-    <ConversationDetailsFlyoutHeader investigation={investigation} assigneesNode={assigneesNode} />
+    <ConversationDetailsFlyoutHeader
+      investigation={investigation}
+      assigneesNode={assigneesNode}
+      statusNode={statusNode}
+    />
   );
 };
 
 export interface FooterSlotProps extends InvestigationSlotProps {
   onOpenChat: () => void;
   onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
+  onCloseInvestigation?: ConversationDetailsFlyoutFooterProps['onCloseInvestigation'];
 }
 
-export const FooterSlot = ({ conversation, onOpenChat, onOpenEscalation }: FooterSlotProps) => (
+export const FooterSlot = ({
+  conversation,
+  onOpenChat,
+  onOpenEscalation,
+  onCloseInvestigation,
+}: FooterSlotProps) => (
   <ConversationDetailsFlyoutFooter
     investigation={conversationToInvestigation(conversation)}
     onOpenChat={onOpenChat}
     onOpenEscalation={onOpenEscalation}
+    onCloseInvestigation={onCloseInvestigation}
   />
 );
 
@@ -94,11 +115,13 @@ export interface EscalationHeaderSlotProps {
   conversation: Conversation;
   refetchConversation?: () => Promise<void>;
   renderAssignees?: RenderAssignees;
+  renderStatus?: RenderStatus;
 }
 
 export const EscalationHeaderSlot = ({
   conversation,
   renderAssignees,
+  renderStatus,
   refetchConversation,
 }: EscalationHeaderSlotProps) => {
   const { status, assigneeUids } = conversationToEscalationHeader(conversation);
@@ -113,6 +136,15 @@ export const EscalationHeaderSlot = ({
       })
     : undefined;
 
+  const statusNode = renderStatus
+    ? renderStatus({
+        conversationId: conversation.id,
+        templateId: 'escalation',
+        status,
+        refetchConversation,
+      })
+    : undefined;
+
   return (
     <EscalationFlyoutHeader
       title={conversation.title}
@@ -120,6 +152,7 @@ export const EscalationHeaderSlot = ({
       status={status}
       assigneeUids={assigneeUids}
       assigneesNode={assigneesNode}
+      statusNode={statusNode}
     />
   );
 };

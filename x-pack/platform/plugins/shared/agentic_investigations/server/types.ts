@@ -11,6 +11,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
 import type { EscalationsService } from './escalations/services/escalations_service';
 
@@ -33,6 +34,7 @@ export interface AgenticInvestigationsStartDependencies {
    */
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  proposals?: ProposalsPluginStart;
   agentBuilder: AgentBuilderPluginStart;
 }
 

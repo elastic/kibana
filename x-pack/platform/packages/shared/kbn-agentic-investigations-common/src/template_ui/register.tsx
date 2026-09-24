@@ -11,7 +11,7 @@ import { EuiSkeletonText } from '@elastic/eui';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
-import type { RenderAssignees } from './types';
+import type { RenderAssignees, RenderStatus } from './types';
 
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
@@ -58,6 +58,16 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * unavailable in this package.
    */
   renderAssignees?: RenderAssignees;
+  /**
+   * When provided, the header renders an interactive status toggle instead of the read-only
+   * status badge. Supplied by the caller so the toggle can use HTTP hooks unavailable here.
+   */
+  renderStatus?: RenderStatus;
+  /**
+   * When provided, the "Close investigation" footer action renders a confirmation modal.
+   * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   */
+  renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
 }
 
 /**
@@ -74,6 +84,8 @@ export const registerAgenticInvestigationTemplateUI = ({
   icon,
   renderEscalationModal,
   renderAssignees,
+  renderStatus,
+  renderCloseInvestigationModal,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
@@ -103,6 +115,7 @@ export const registerAgenticInvestigationTemplateUI = ({
               <LazyHeaderSlot
                 conversation={conversation}
                 renderAssignees={renderAssignees}
+                renderStatus={renderStatus}
                 refetchConversation={refetchConversation}
               />
             </Suspense>
@@ -123,6 +136,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                   })
                 }
                 onOpenEscalation={renderEscalationModal}
+                onCloseInvestigation={renderCloseInvestigationModal}
               />
             </Suspense>
           );
@@ -148,6 +162,11 @@ export interface RegisterEscalationTemplateUIOptions {
    * See `RegisterAgenticInvestigationTemplateUIOptions.renderAssignees`.
    */
   renderAssignees?: RenderAssignees;
+  /**
+   * When provided, the header renders an interactive status toggle instead of the read-only
+   * status badge. Supplied by the caller so the toggle can use HTTP hooks unavailable here.
+   */
+  renderStatus?: RenderStatus;
 }
 
 /**
@@ -166,6 +185,7 @@ export const registerEscalationTemplateUI = ({
   name,
   icon,
   renderAssignees,
+  renderStatus,
 }: RegisterEscalationTemplateUIOptions): void => {
   conversationTemplates.registerTemplateUIDefinition(templateId, () => ({
     name,
@@ -179,6 +199,7 @@ export const registerEscalationTemplateUI = ({
             <LazyEscalationHeaderSlot
               conversation={conversation}
               renderAssignees={renderAssignees}
+              renderStatus={renderStatus}
               refetchConversation={refetchConversation}
             />
           </Suspense>

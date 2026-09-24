@@ -24,6 +24,12 @@ import type {
   ListEscalationsResponse,
   UpdateEscalationRequest,
 } from '../../../common/escalations/escalation';
+import type {
+  EscalationClosePreviewResponse,
+  SetEscalationStatusRequest,
+  SetEscalationStatusResponse,
+} from '../../../common/investigations/status';
+import type { InvestigationStatusService } from '../../investigations/services/investigation_status_service';
 import {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
@@ -63,6 +69,7 @@ export interface EscalationsServiceDeps {
   logger: Logger;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
   conversationTemplates: ConversationTemplatesStart;
+  getInvestigationStatusService: () => InvestigationStatusService;
 }
 
 export class EscalationsService {
@@ -71,11 +78,18 @@ export class EscalationsService {
     request: KibanaRequest
   ) => Promise<ConversationPublicClient>;
   private readonly conversationTemplates: ConversationTemplatesStart;
+  private readonly getInvestigationStatusService: () => InvestigationStatusService;
 
-  constructor({ logger, getConversationClient, conversationTemplates }: EscalationsServiceDeps) {
+  constructor({
+    logger,
+    getConversationClient,
+    conversationTemplates,
+    getInvestigationStatusService,
+  }: EscalationsServiceDeps) {
     this.logger = logger;
     this.getConversationClient = getConversationClient;
     this.conversationTemplates = conversationTemplates;
+    this.getInvestigationStatusService = getInvestigationStatusService;
   }
 
   async create(
@@ -190,10 +204,6 @@ export class EscalationsService {
       metadataUpdates[ESCALATION_LINKED_INVESTIGATIONS_FIELD] = union;
     }
 
-    if (body.status !== undefined) {
-      metadataUpdates[ESCALATION_STATUS_FIELD] = body.status;
-    }
-
     if (Object.keys(metadataUpdates).length > 0) {
       const { conversation } = await client.patchMetadata(escalationId, metadataUpdates, {
         access: 'converse',
@@ -206,6 +216,119 @@ export class EscalationsService {
     }
 
     return result;
+  }
+
+  async getClosePreview(
+    request: KibanaRequest,
+    escalationId: string
+  ): Promise<EscalationClosePreviewResponse> {
+    const client = await this.getConversationClient(request);
+    const current = await client.get(escalationId);
+    if (current.template_id !== ESCALATION_TEMPLATE_ID) {
+      throw new NotAnEscalationError(escalationId);
+    }
+
+    const linkedIds = (
+      current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []
+    ) as string[];
+    if (linkedIds.length === 0) {
+      return { open_investigations: [] };
+    }
+
+    const resolved = await client.bulkGet(linkedIds);
+    const openConversations = linkedIds
+      .map((id) => resolved.get(id))
+      .filter(
+        (conv): conv is NonNullable<typeof conv> =>
+          conv !== undefined && conv.metadata?.status !== 'closed'
+      );
+
+    const statusSvc = this.getInvestigationStatusService();
+    const openInvestigations = await Promise.all(
+      openConversations.map(async (conv) => {
+        const preview = await statusSvc.getPreview(request, conv.id);
+        return {
+          id: conv.id,
+          title: conv.title,
+          pending_proposal_count: preview.pending_proposal_count,
+        };
+      })
+    );
+
+    return { open_investigations: openInvestigations };
+  }
+
+  async setStatus(
+    request: KibanaRequest,
+    escalationId: string,
+    body: SetEscalationStatusRequest
+  ): Promise<SetEscalationStatusResponse> {
+    const client = await this.getConversationClient(request);
+    const current = await client.get(escalationId);
+    if (current.template_id !== ESCALATION_TEMPLATE_ID) {
+      throw new NotAnEscalationError(escalationId);
+    }
+
+    const closedInvestigationIds: string[] = [];
+    const skippedInvestigationIds: string[] = [];
+    const allDismissedProposalIds: string[] = [];
+    const allFailedProposalIds: string[] = [];
+
+    if (body.status === 'closed') {
+      const linkedIds = (
+        current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []
+      ) as string[];
+      if (linkedIds.length > 0) {
+        const resolved = await client.bulkGet(linkedIds);
+        const openIds = linkedIds.filter((id) => {
+          const conv = resolved.get(id);
+          return conv !== undefined && conv.metadata?.status !== 'closed';
+        });
+
+        const statusSvc = this.getInvestigationStatusService();
+        const results = await Promise.allSettled(
+          openIds.map((id) =>
+            statusSvc.setStatus(request, id, {
+              status: 'closed',
+              dismiss_reason: body.dismiss_reason,
+              rationale: body.rationale,
+            })
+          )
+        );
+
+        for (let i = 0; i < results.length; i++) {
+          const result = results[i];
+          const invId = openIds[i];
+          if (result.status === 'fulfilled') {
+            closedInvestigationIds.push(invId);
+            allDismissedProposalIds.push(...result.value.dismissed_proposal_ids);
+            allFailedProposalIds.push(...result.value.failed_proposal_ids);
+          } else {
+            this.logger.error(
+              `Failed to close investigation ${invId} while closing escalation ${escalationId}: ${
+                result.reason instanceof Error ? result.reason.message : String(result.reason)
+              }`
+            );
+            skippedInvestigationIds.push(invId);
+          }
+        }
+      }
+    }
+
+    const { conversation: updated } = await client.patchMetadata(
+      escalationId,
+      { [ESCALATION_STATUS_FIELD]: body.status },
+      { access: 'converse' }
+    );
+
+    return {
+      escalation_id: updated.id,
+      status: body.status,
+      closed_investigation_ids: closedInvestigationIds,
+      skipped_investigation_ids: skippedInvestigationIds,
+      dismissed_proposal_ids: allDismissedProposalIds,
+      failed_proposal_ids: allFailedProposalIds,
+    };
   }
 
   async list(

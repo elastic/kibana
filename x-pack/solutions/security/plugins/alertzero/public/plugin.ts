@@ -27,6 +27,8 @@ import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
   type RenderAssignees,
+  type RenderStatus,
+  type CloseInvestigationModalRenderProps,
 } from '@kbn/agentic-investigations-common';
 import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { getAlertZeroDeepLinks } from './deep_links';
@@ -184,9 +186,34 @@ export class AlertZeroPublicPlugin
       >;
     });
 
-    const { manageEscalations: canManageEscalations } = getAgenticInvestigationsCapabilities(
-      core.application.capabilities
-    );
+    // ---------------------------------------------------------------------------
+    // Status toggle (embedded in both investigation and escalation flyout headers)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedStatusToggle = makeLazyWithProviders(async () => {
+      const { ConnectedStatusToggle } = await import(
+        './components/connected_status/connected_status_toggle'
+      );
+      return ConnectedStatusToggle as React.ComponentType<
+        React.ComponentProps<typeof ConnectedStatusToggle>
+      >;
+    });
+
+    // ---------------------------------------------------------------------------
+    // Close investigation modal (used from the flyout footer and queue card actions)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedCloseInvestigationModal = makeLazyWithProviders(async () => {
+      const { ConnectedCloseInvestigationModal } = await import(
+        './components/connected_status/connected_close_investigation_modal'
+      );
+      return ConnectedCloseInvestigationModal as React.ComponentType<
+        React.ComponentProps<typeof ConnectedCloseInvestigationModal>
+      >;
+    });
+
+    const {
+      manageEscalations: canManageEscalations,
+      manageInvestigations: canManageInvestigations,
+    } = getAgenticInvestigationsCapabilities(core.application.capabilities);
 
     // ---------------------------------------------------------------------------
     // renderAssignees render prop — shared by both templates
@@ -198,12 +225,36 @@ export class AlertZeroPublicPlugin
         React.createElement(LazyConnectedAssignees, props)
       );
 
+    // ---------------------------------------------------------------------------
+    // renderStatus render prop — shared by both templates
+    // ---------------------------------------------------------------------------
+    const renderStatus: RenderStatus = (props) =>
+      React.createElement(
+        EscalationModalBoundary,
+        null,
+        React.createElement(LazyConnectedStatusToggle, props)
+      );
+
+    // ---------------------------------------------------------------------------
+    // renderCloseInvestigationModal — flyout footer close action
+    // ---------------------------------------------------------------------------
+    const renderCloseInvestigationModal = canManageInvestigations
+      ? (props: CloseInvestigationModalRenderProps) =>
+          React.createElement(
+            EscalationModalBoundary,
+            null,
+            React.createElement(LazyConnectedCloseInvestigationModal, props)
+          )
+      : undefined;
+
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
       renderAssignees,
+      renderStatus: canManageInvestigations ? renderStatus : undefined,
+      renderCloseInvestigationModal,
       renderEscalationModal: canManageEscalations
         ? (props) =>
             React.createElement(
@@ -220,6 +271,7 @@ export class AlertZeroPublicPlugin
       name: ESCALATION_TEMPLATE_NAME,
       icon: 'warning',
       renderAssignees,
+      renderStatus: canManageEscalations && canManageInvestigations ? renderStatus : undefined,
     });
 
     return {};

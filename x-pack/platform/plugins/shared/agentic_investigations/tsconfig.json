@@ -29,7 +29,9 @@
     "@kbn/core-http-browser",
     "@kbn/react-query",
     "@kbn/kibana-react-plugin",
-    "@kbn/user-profile-components"
+    "@kbn/user-profile-components",
+    "@kbn/proposals-plugin",
+    "@kbn/proposals-common"
   ],
   "exclude": ["target/**/*"]
 }

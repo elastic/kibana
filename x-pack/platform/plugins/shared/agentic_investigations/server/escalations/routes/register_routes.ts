@@ -11,6 +11,8 @@ import { registerCreateEscalationRoute } from './create_escalation';
 import { registerListEscalationsRoute } from './list_escalations';
 import { registerSuggestUsersRoute } from './suggest_users';
 import { registerUpdateEscalationRoute } from './update_escalation';
+import { registerSetEscalationStatusRoute } from './set_escalation_status';
+import { registerGetEscalationClosePreviewRoute } from './get_escalation_close_preview';
 
 export const registerEscalationRoutes = (deps: EscalationRouteDependencies) => {
   registerCreateEscalationRoute(deps);
@@ -18,4 +20,6 @@ export const registerEscalationRoutes = (deps: EscalationRouteDependencies) => {
   registerUpdateEscalationRoute(deps);
   registerSuggestUsersRoute(deps);
   registerAssignEscalationRoute(deps);
+  registerSetEscalationStatusRoute(deps);
+  registerGetEscalationClosePreviewRoute(deps);
 };

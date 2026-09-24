@@ -39,8 +39,10 @@ export {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,
+  ESCALATION_CLOSE_PREVIEW_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_STATUS_FIELD,
+  ESCALATION_STATUS_URL,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_SUGGEST_USERS_URL,
@@ -59,10 +61,26 @@ export {
 
 export {
   INVESTIGATION_ASSIGN_URL,
+  INVESTIGATION_CLOSE_PREVIEW_URL,
+  INVESTIGATION_STATUS_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
+
+export {
+  setInvestigationStatusRequestSchema,
+  setEscalationStatusRequestSchema,
+} from './investigations/status';
+
+export type {
+  SetInvestigationStatusRequest,
+  SetInvestigationStatusResponse,
+  InvestigationClosePreviewResponse,
+  SetEscalationStatusRequest,
+  SetEscalationStatusResponse,
+  EscalationClosePreviewResponse,
+} from './investigations/status';
 
 export {
   assignConversationRequestBodySchema,

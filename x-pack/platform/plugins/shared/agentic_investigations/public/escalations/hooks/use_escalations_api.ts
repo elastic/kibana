@@ -15,12 +15,16 @@ import {
   ESCALATION_ASSIGN_URL,
   ESCALATIONS_INTERNAL_URL,
   ESCALATION_BY_ID_URL,
+  ESCALATION_STATUS_URL,
+  ESCALATION_CLOSE_PREVIEW_URL,
 } from '../../../common';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
   ListEscalationsResponse,
-  UpdateEscalationRequest,
+  SetEscalationStatusRequest,
+  SetEscalationStatusResponse,
+  EscalationClosePreviewResponse,
 } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 import { escalationQueryKeys } from '../query_keys';
@@ -118,17 +122,44 @@ export const useAssignEscalation = () => {
   });
 };
 
-/** Patches an escalation. Invalidates the full escalations query key on success. */
-export const useUpdateEscalation = () => {
+/** Opens or closes an escalation (and its open linked investigations when closing). */
+export const useSetEscalationStatus = () => {
   const { services } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ escalationId, body }: { escalationId: string; body: UpdateEscalationRequest }) =>
-      services.http.patch(ESCALATION_BY_ID_URL.replace('{id}', encodeURIComponent(escalationId)), {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        body: JSON.stringify(body),
-      }),
+    mutationFn: ({
+      escalationId,
+      body,
+    }: {
+      escalationId: string;
+      body: SetEscalationStatusRequest;
+    }): Promise<SetEscalationStatusResponse> =>
+      services.http.put<SetEscalationStatusResponse>(
+        ESCALATION_STATUS_URL.replace('{id}', encodeURIComponent(escalationId)),
+        {
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+          body: JSON.stringify(body),
+        }
+      ),
     onSuccess: () => invalidateEscalations(queryClient),
+  });
+};
+
+/** Fetches a preview of what closing an escalation would affect (open linked investigations and their pending proposal counts). */
+export const useEscalationClosePreview = (
+  escalationId: string | undefined,
+  { enabled }: { enabled: boolean }
+) => {
+  const { services } = useKibana<CoreStart>();
+
+  return useQuery({
+    queryKey: [...escalationQueryKeys.all, 'closePreview', escalationId],
+    queryFn: (): Promise<EscalationClosePreviewResponse> =>
+      services.http.get<EscalationClosePreviewResponse>(
+        ESCALATION_CLOSE_PREVIEW_URL.replace('{id}', encodeURIComponent(escalationId!)),
+        { version: AGENTIC_INVESTIGATIONS_API_VERSION }
+      ),
+    enabled: enabled && Boolean(escalationId),
   });
 };
