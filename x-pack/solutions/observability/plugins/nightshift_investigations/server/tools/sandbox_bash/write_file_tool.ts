@@ -15,7 +15,7 @@ import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/ser
 import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
-export const SANDBOX_WRITE_FILE_TOOL_ID = 'write_file';
+export const SANDBOX_WRITE_FILE_TOOL_ID = 'nightshift_sandbox_write_file';
 
 const writeFileSchema = z.object({
   file_path: z
@@ -42,7 +42,7 @@ export const createSandboxWriteFileTool = ({
   id: SANDBOX_WRITE_FILE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Write (overwrite) a file in the sandbox. Parent directories are created automatically. Use str_replace for partial edits; use this tool for new files or complete rewrites.',
+    'Write (overwrite) a file in the sandbox. Parent directories are created automatically. Use nightshift_sandbox_str_replace for partial edits; use this tool for new files or complete rewrites.',
   tags: ['sandbox', 'file'],
   schema: writeFileSchema,
   annotations: {

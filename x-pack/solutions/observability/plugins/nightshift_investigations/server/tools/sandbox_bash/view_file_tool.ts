@@ -14,7 +14,7 @@ import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/ser
 import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
-export const SANDBOX_VIEW_FILE_TOOL_ID = 'view_file';
+export const SANDBOX_VIEW_FILE_TOOL_ID = 'nightshift_sandbox_view_file';
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
@@ -51,7 +51,7 @@ export const createSandboxViewFileTool = ({
   id: SANDBOX_VIEW_FILE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'View sandbox file contents with line numbers. ALWAYS use this instead of `cat`, `head`, `tail`, or `sed -n` in bash. Returns numbered lines for easy reference when editing with str_replace. View a specific range to keep output small — avoid reading entire large files. The default working directory is /workspace.',
+    'View sandbox file contents with line numbers. ALWAYS use this instead of `cat`, `head`, `tail`, or `sed -n` in nightshift_sandbox_bash. Returns numbered lines for easy reference when editing with nightshift_sandbox_str_replace. View a specific range to keep output small — avoid reading entire large files. The default working directory is /workspace.',
   tags: ['sandbox', 'file'],
   schema: viewFileSchema,
   annotations: {
