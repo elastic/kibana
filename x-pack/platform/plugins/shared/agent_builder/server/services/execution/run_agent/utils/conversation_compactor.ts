@@ -28,7 +28,7 @@ import {
   isLegacySummary,
   takeRoundsWithinBudget,
 } from './compaction_coverage';
-import { estimateMessagesTokens } from './estimate_conversation_tokens';
+import { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { prepareMessages } from './to_langchain_messages';
 import { serializeCompactionSummary } from './compaction_serialize';
@@ -50,12 +50,11 @@ export interface CompactConversationOptions {
   contextBudget: ContextBudget;
   /**
    * Per-round token counts for the rounds of `processedConversation.timeline`, in round order.
-   * Computed once upstream so the trigger, reporting and hard truncation share one estimate.
+   * Includes model context so the trigger, reporting and hard truncation reflect the agent prompt.
    */
   perRoundTokenCounts: number[];
   /**
-   * Transformer applied to tool results when rendering rounds for the summariser. Must be the
-   * instance `perRoundTokenCounts` were estimated with, so chunk sizing matches what is sent.
+   * Transformer applied to tool results when rendering rounds for the summariser.
    */
   resultTransformer: ToolCallResultTransformer;
   /**
@@ -261,7 +260,6 @@ export const compactConversation = async ({
     rounds,
     roundsToSummarize,
     covered,
-    tokensByRoundId,
     resultTransformer,
     chatModel,
     budget: contextBudget,
@@ -345,7 +343,6 @@ const summarizeOlderRounds = async ({
   rounds,
   roundsToSummarize,
   covered,
-  tokensByRoundId,
   resultTransformer,
   chatModel,
   budget,
@@ -359,7 +356,6 @@ const summarizeOlderRounds = async ({
   /** The prefix of `rounds` to summarise (never empty). */
   roundsToSummarize: Round[];
   covered: ReadonlySet<string>;
-  tokensByRoundId: ReadonlyMap<string, number>;
   resultTransformer: ToolCallResultTransformer;
   chatModel: InferenceChatModel;
   budget: ContextBudget;
@@ -373,10 +369,17 @@ const summarizeOlderRounds = async ({
   const programmatic = extractProgrammaticSummary(coveredRounds);
 
   try {
+    const summarizerTokenCounts = await estimatePerRoundTokens(
+      rawRounds.flatMap((round) => round.events).map(withoutModelContext),
+      resultTransformer
+    );
+    const summarizerTokensByRoundId = new Map(
+      rawRounds.map((round, index) => [round.id, summarizerTokenCounts[index] ?? 0] as const)
+    );
     const llmOutput = await generateLlmSummary({
       conversation,
       rawRounds,
-      tokensByRoundId,
+      summarizerTokensByRoundId,
       resultTransformer,
       programmatic,
       chatModel,
@@ -423,7 +426,7 @@ const summarizeOlderRounds = async ({
 const generateLlmSummary = async ({
   conversation,
   rawRounds,
-  tokensByRoundId,
+  summarizerTokensByRoundId,
   resultTransformer,
   programmatic,
   chatModel,
@@ -434,7 +437,7 @@ const generateLlmSummary = async ({
 }: {
   conversation: ProcessedConversation;
   rawRounds: Round[];
-  tokensByRoundId: ReadonlyMap<string, number>;
+  summarizerTokensByRoundId: ReadonlyMap<string, number>;
   resultTransformer: ToolCallResultTransformer;
   programmatic: { tool_calls_summary: CompactionToolCallSummary[]; agent_actions: string[] };
   chatModel: InferenceChatModel;
@@ -484,7 +487,7 @@ const generateLlmSummary = async ({
     const fixedTokens = estimateMessagesTokens(await renderRequest([], prior));
     let chunk = takeRoundsWithinBudget(
       remaining,
-      tokensByRoundId,
+      summarizerTokensByRoundId,
       budget.historyBudget - fixedTokens
     );
     let messages = await renderRequest(chunk, prior);
