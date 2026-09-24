@@ -190,14 +190,18 @@ export class MapsPage {
   }
 
   private async openSetViewPopover() {
-    if (!(await this.setViewForm.isVisible())) {
+    // timeout: 0 prevents waiting for the element to appear — the form only exists in
+    // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
+    if (!(await this.setViewForm.isVisible({ timeout: 0 }))) {
       await this.page.testSubj.click('toggleSetViewVisibilityButton');
       await this.setViewForm.waitFor({ state: 'visible' });
     }
   }
 
   private async closeSetViewPopover() {
-    if (await this.setViewForm.isVisible()) {
+    // timeout: 0 prevents waiting for the element to appear — the form only exists in
+    // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
+    if (await this.setViewForm.isVisible({ timeout: 0 })) {
       // In embedded contexts (e.g. dashboard), the toggle button does not reliably
       // close the popover, so use Escape instead.
       await this.setViewForm.press('Escape');
