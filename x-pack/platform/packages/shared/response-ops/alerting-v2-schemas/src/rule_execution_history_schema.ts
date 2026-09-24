@@ -71,14 +71,10 @@ export const listRuleExecutionsRequestSchema = z
       .describe(`Number of results per page. Pass 0 for a count-only read.`),
   })
   .strict()
-  .refine(
-    ({ page, per_page: perPage }) =>
-      (perPage !== 0 && page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW) || perPage === 0,
-    {
-      message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
-      path: ['page'],
-    }
-  );
+  .refine(({ page, per_page: perPage }) => page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
+    message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
+    path: ['page'],
+  });
 export type ListRuleExecutionsRequest = z.infer<typeof listRuleExecutionsRequestSchema>;
 
 export const ruleExecutionViewSchema = z

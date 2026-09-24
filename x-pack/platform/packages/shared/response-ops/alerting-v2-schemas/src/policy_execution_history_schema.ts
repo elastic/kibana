@@ -99,14 +99,10 @@ export const listPolicyExecutionHistoryRequestSchema = z
     ...sharedFilterFields,
   })
   .strict()
-  .refine(
-    ({ page, per_page: perPage }) =>
-      (perPage !== 0 && page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW) || perPage === 0,
-    {
-      message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
-      path: ['page'],
-    }
-  );
+  .refine(({ page, per_page: perPage }) => page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
+    message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
+    path: ['page'],
+  });
 
 type ParsedListRequest = z.infer<typeof listPolicyExecutionHistoryRequestSchema>;
 type DefaultedKeys = 'page' | 'per_page' | 'sort' | 'sort_order';
