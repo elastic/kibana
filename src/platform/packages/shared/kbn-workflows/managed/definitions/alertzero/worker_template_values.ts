@@ -39,53 +39,25 @@ export const renderScheduledWorkerYaml = (
     values.scheduleInterval
   );
 
-/** Rule Tuning settings the sweep reads; each is rendered into `consts.worker_settings.extras`. */
-const RULE_TUNING_EXTRAS_FIELDS = [
-  'analysisWindowDays',
-  'fpCountThreshold',
-  'fpRateThresholdPct',
-] as const;
-
 /**
  * Worker-specific settings are stored under `extras`, mirroring the Worker settings API, so a
- * settings save re-renders YAML and the per-space Worker can pass them to the sweep.
+ * settings save re-renders YAML and the per-space Worker can pass them to the sweep. The shape is
+ * declared once, in `RuleTuningWorkerExtras` in `@kbn/alertzero-common`; this mirrors it for typing.
  */
 export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateValues {
-  extras: Record<(typeof RULE_TUNING_EXTRAS_FIELDS)[number], number>;
+  extras: {
+    analysisWindowDays: number;
+    fpCountThreshold: number;
+    fpRateThresholdPct: number;
+  };
 }
-
-/**
- * Refuses to render when an `extras` field the sweep reads is missing.
- *
- * A missing field would otherwise resolve to nothing when the sweep input is read, so the
- * workflow would install cleanly and then misbehave at run time.
- *
- * Only one caller can reach here with a field missing. On startup the platform re-installs every
- * managed workflow by passing whatever is stored straight to this template, skipping the schema
- * check that the settings read and save paths run first. A document written before these settings
- * existed arrives intact; throwing leaves it that way instead of overwriting it with a broken
- * render.
- */
-const assertCompleteExtras = (extras: RuleTuningWorkerTemplateValues['extras']): void => {
-  for (const field of RULE_TUNING_EXTRAS_FIELDS) {
-    const value = extras?.[field];
-    if (typeof value !== 'number' || !Number.isFinite(value)) {
-      throw new Error(
-        `Rule Tuning worker settings are missing "extras.${field}". The stored document predates ` +
-          `this setting and has to be reset.`
-      );
-    }
-  }
-};
 
 export const renderRuleTuningWorkerYaml = (
   yaml: string,
   values: RuleTuningWorkerTemplateValues
-): string => {
-  assertCompleteExtras(values.extras);
+): string =>
   // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution.
-  return renderScheduledWorkerYaml(yaml, values).replaceAll(
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
     '__WORKER_EXTRAS__',
     JSON.stringify(values.extras)
   );
-};

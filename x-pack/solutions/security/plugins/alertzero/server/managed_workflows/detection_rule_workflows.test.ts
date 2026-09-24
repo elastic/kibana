@@ -6,7 +6,7 @@
  */
 
 import { parse } from 'yaml';
-import { RULE_TUNING_DEFAULT_EXTRAS } from '@kbn/alertzero-common';
+import type { RuleTuningWorkerExtras } from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
@@ -48,7 +48,7 @@ const getManagedYaml = (workflowId: string): string => {
   throw new Error(`Managed workflow definition "${workflowId}" has no YAML source`);
 };
 
-const renderRuleTuningWorker = (extras: Record<string, number>): string => {
+const renderRuleTuningWorker = (extras: RuleTuningWorkerExtras): string => {
   const definition = getManagedWorkflowDefinition(
     ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID
   );
@@ -149,18 +149,6 @@ describe('detection rule workflows', () => {
         min_fp_rate_pct: '${{ consts.worker_settings.extras.fpRateThresholdPct }}',
       });
     });
-
-    // Boot reconcile re-renders installed documents from persisted values without migrating them,
-    // so an un-upgraded copy has to stop here rather than install `min_fp_count: undefined`.
-    it.each(['analysisWindowDays', 'fpCountThreshold', 'fpRateThresholdPct'] as const)(
-      'refuses to render stored values missing %s',
-      (missing) => {
-        const extras: Record<string, number> = { ...RULE_TUNING_DEFAULT_EXTRAS };
-        delete extras[missing];
-
-        expect(() => renderRuleTuningWorker(extras)).toThrow(`extras.${missing}`);
-      }
-    );
   });
 
   describe('detection rule workflow definitions', () => {

@@ -231,8 +231,6 @@ The shared Watch page renders the interval control from the presence of `schedul
 
 AlertZero is not live. Declarations, schemas and template values may change without a compatibility path or migration. Persisted settings must validate against the current shape; when documents from earlier development builds do not, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
 
-Adding a required `extras` field is such a change: a document stored before the field fails the read, so its Worker projects as `unavailable` and settings saves are refused until the per-space Worker document is deleted and reinstalled. The Worker's `yamlTemplate` refuses to render a value set missing a field it needs, so the stale document is left intact rather than re-rendered by the startup reconcile. A migration path is tracked in [security-team#19312](https://github.com/elastic/security-team/issues/19312).
-
 ## Working-group contribution map
 
 | Area | Where to land |
