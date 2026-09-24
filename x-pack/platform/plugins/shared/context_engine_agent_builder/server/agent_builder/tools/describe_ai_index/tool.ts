@@ -10,6 +10,7 @@ import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
+import { AiIndexNotReadableError } from '@kbn/context-engine-plugin/server/ai_indices/errors';
 import { validateAiIndexId } from '@kbn/context-engine-plugin/common/validation';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -58,7 +59,7 @@ export const createDescribeAiIndexTool = (
       return { results: [{ type: ToolResultType.other, data: { response } }] };
     } catch (error) {
       const message = getErrorMessage(error);
-      if (error instanceof Error && error.name === 'AiIndexNotReadableError') {
+      if (error instanceof AiIndexNotReadableError) {
         context.logger.debug(`${contextEngineAiIndexTools.describeAiIndex}: ${message}`);
       } else {
         context.logger.error(
