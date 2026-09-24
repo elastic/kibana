@@ -270,7 +270,7 @@ describe('renderFlakySuiteIssueBody', () => {
   it('names what the config runs in the suite details, unless unknown', () => {
     const single = singleTestReport();
     expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
-      '| **Framework** | Scout (Playwright) |\n| **Category** | UI test |\n| **Config** |'
+      '| **Framework** | Scout (Playwright) |\n| **Category** | UI test |\n| **File** |'
     );
     const report = flakyReport([flakyTest({ configCategory: 'unknown' })]);
     const [suite] = groupIntoSuites(report.flaky, report.files);

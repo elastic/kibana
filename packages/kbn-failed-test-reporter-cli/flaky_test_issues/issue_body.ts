@@ -195,9 +195,9 @@ const suiteDetails = (suite: FlakySuite): string => {
   const framework = FRAMEWORK_LABELS[suite.framework].long;
   const category = suite.configCategory ? CATEGORY_LABELS[suite.configCategory] : undefined;
   const rows: string[][] = [
-    ['**File**', blobLink(suite.filePath)],
     ['**Framework**', framework],
     ...(category ? [['**Category**', `${category} test`]] : []),
+    ['**File**', blobLink(suite.filePath)],
     ...(suite.configPath ? [['**Config**', blobLink(suite.configPath)]] : []),
     ['**Owners**', suite.owners.length > 0 ? suite.owners.map(inlineCode).join(', ') : '-'],
   ];
