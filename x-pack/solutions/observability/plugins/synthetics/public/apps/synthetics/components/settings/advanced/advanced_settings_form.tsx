@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -57,6 +58,14 @@ export const AdvancedSettingsForm = () => {
     useCanManageClusterSettings();
 
   const isDisabled = !canEdit || !canManageClusterSettings;
+  const lacksClusterPrivilege = canEdit && !canManageClusterSettings && !privilegesLoading;
+
+  const withClusterPrivilegeTooltip = (control: React.ReactElement) =>
+    lacksClusterPrivilege ? (
+      <EuiToolTip content={CLUSTER_PRIVILEGE_REQUIRED}>{control}</EuiToolTip>
+    ) : (
+      control
+    );
 
   useEffect(() => {
     dispatch(getDynamicSettingsAction.get());
@@ -110,7 +119,7 @@ export const AdvancedSettingsForm = () => {
           <EuiSpacer size="m" />
         </>
       )}
-      {canEdit && !canManageClusterSettings && !privilegesLoading && (
+      {lacksClusterPrivilege && (
         <>
           <KbnInfoCallout
             announceOnMount
@@ -158,19 +167,21 @@ export const AdvancedSettingsForm = () => {
               : undefined
           }
         >
-          <EuiFieldNumber
-            isInvalid={!isFormValid}
-            data-test-subj="syntheticsSyncIntervalField"
-            value={syncInterval}
-            min={MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}
-            max={MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL}
-            step={1}
-            disabled={isDisabled}
-            isLoading={loading}
-            onChange={(e) => {
-              setSyncInterval(Number(e.target.value));
-            }}
-          />
+          {withClusterPrivilegeTooltip(
+            <EuiFieldNumber
+              isInvalid={!isFormValid}
+              data-test-subj="syntheticsSyncIntervalField"
+              value={syncInterval}
+              min={MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}
+              max={MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL}
+              step={1}
+              disabled={isDisabled}
+              isLoading={loading}
+              onChange={(e) => {
+                setSyncInterval(Number(e.target.value));
+              }}
+            />
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiSpacer size="m" />
@@ -190,17 +201,19 @@ export const AdvancedSettingsForm = () => {
           />
         }
       >
-        <EuiSwitch
-          data-test-subj="syntheticsRebalanceShardsEnabledSwitch"
-          label={i18n.translate('xpack.synthetics.settings.advanced.rebalanceShards.label', {
-            defaultMessage: 'Rebalance private location shards',
-          })}
-          checked={rebalanceShardsEnabled}
-          onChange={(e) => {
-            setRebalanceShardsEnabled(e.target.checked);
-          }}
-          disabled={isDisabled}
-        />
+        {withClusterPrivilegeTooltip(
+          <EuiSwitch
+            data-test-subj="syntheticsRebalanceShardsEnabledSwitch"
+            label={i18n.translate('xpack.synthetics.settings.advanced.rebalanceShards.label', {
+              defaultMessage: 'Rebalance private location shards',
+            })}
+            checked={rebalanceShardsEnabled}
+            onChange={(e) => {
+              setRebalanceShardsEnabled(e.target.checked);
+            }}
+            disabled={isDisabled}
+          />
+        )}
       </EuiDescribedFormGroup>
       <EuiSpacer />
       <EuiFlexGroup justifyContent="flexEnd">
@@ -244,6 +257,14 @@ export const AdvancedSettingsForm = () => {
     </EuiForm>
   );
 };
+
+const CLUSTER_PRIVILEGE_REQUIRED = i18n.translate(
+  'xpack.synthetics.settings.advanced.clusterPrivilegeTooltip',
+  {
+    defaultMessage:
+      'Applies to all spaces. Requires the "Can manage private locations" privilege in all spaces.',
+  }
+);
 
 const DISCARD_CHANGES = i18n.translate('xpack.synthetics.settings.advanced.discardChanges', {
   defaultMessage: 'Discard changes',

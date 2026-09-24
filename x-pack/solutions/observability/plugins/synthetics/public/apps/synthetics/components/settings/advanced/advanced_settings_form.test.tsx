@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
 import { render, makeSyntheticsPermissionsCore } from '../../../utils/testing/rtl_helpers';
 import { AdvancedSettingsForm } from './advanced_settings_form';
@@ -69,13 +69,22 @@ describe('AdvancedSettingsForm', () => {
     expect(getByTestId('syntheticsAdvancedSettingsApplyButton')).toBeDisabled();
   });
 
-  it('disables cluster-wide settings without the global private location privilege', () => {
+  it('disables cluster-wide settings without the global private location privilege', async () => {
     mockUseCanManageClusterSettings.mockReturnValue({ canManage: false, loading: false });
-    const { getByTestId } = render(<AdvancedSettingsForm />, { state: loadedSettingsState });
+    const { getByTestId, findByText } = render(<AdvancedSettingsForm />, {
+      state: loadedSettingsState,
+    });
 
     expect(getByTestId('syntheticsAdvancedSettingsClusterPrivilegeCallout')).toBeInTheDocument();
     expect(getByTestId('syntheticsRebalanceShardsEnabledSwitch')).toBeDisabled();
     expect(getByTestId('syntheticsSyncIntervalField')).toBeDisabled();
     expect(getByTestId('syntheticsAdvancedSettingsApplyButton')).toBeDisabled();
+
+    fireEvent.mouseOver(getByTestId('syntheticsRebalanceShardsEnabledSwitch'));
+    await waitFor(async () =>
+      expect(
+        await findByText(/Requires the "Can manage private locations" privilege in all spaces/)
+      ).toBeInTheDocument()
+    );
   });
 });
