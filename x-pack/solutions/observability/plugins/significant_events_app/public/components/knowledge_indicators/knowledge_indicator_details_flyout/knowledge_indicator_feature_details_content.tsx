@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
+import { useDeveloperMode } from '../../../hooks/use_developer_mode';
+import { DeveloperModeBadge } from '../../developer_mode_badge/developer_mode_badge';
 import { InfoPanel } from '../../info_panel';
 import { getConfidenceColor } from '../utils/get_confidence_color';
 
@@ -29,6 +31,7 @@ interface Props {
 }
 
 export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDiscover }: Props) {
+  const { isDeveloperMode } = useDeveloperMode();
   const listItems = useMemo(() => {
     const tags = feature.tags?.length ? feature.tags : [];
 
@@ -152,24 +155,28 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
           )}
         </InfoPanel>
       </EuiFlexItem>
-      <EuiFlexItem data-test-subj="significantEventsAppFeatureDetailsFlyoutMeta">
-        <InfoPanel title={META_LABEL}>
-          {hasMeta ? (
-            <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
-              {JSON.stringify(feature.meta ?? {}, null, 2)}
-            </EuiCodeBlock>
-          ) : (
-            <EuiText size="s">{NO_META_AVAILABLE}</EuiText>
-          )}
-        </InfoPanel>
-      </EuiFlexItem>
-      <EuiFlexItem data-test-subj="significantEventsAppFeatureDetailsFlyoutRawDocument">
-        <InfoPanel title={RAW_DOCUMENT_LABEL}>
-          <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
-            {JSON.stringify(feature, null, 2)}
-          </EuiCodeBlock>
-        </InfoPanel>
-      </EuiFlexItem>
+      {isDeveloperMode && (
+        <>
+          <EuiFlexItem data-test-subj="significantEventsAppFeatureDetailsFlyoutMeta">
+            <InfoPanel title={META_LABEL} headerRightContent={<DeveloperModeBadge />}>
+              {hasMeta ? (
+                <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
+                  {JSON.stringify(feature.meta ?? {}, null, 2)}
+                </EuiCodeBlock>
+              ) : (
+                <EuiText size="s">{NO_META_AVAILABLE}</EuiText>
+              )}
+            </InfoPanel>
+          </EuiFlexItem>
+          <EuiFlexItem data-test-subj="significantEventsAppFeatureDetailsFlyoutRawDocument">
+            <InfoPanel title={RAW_DOCUMENT_LABEL} headerRightContent={<DeveloperModeBadge />}>
+              <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
+                {JSON.stringify(feature, null, 2)}
+              </EuiCodeBlock>
+            </InfoPanel>
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 }

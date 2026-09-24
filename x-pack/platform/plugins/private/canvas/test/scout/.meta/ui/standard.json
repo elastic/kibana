@@ -1,5 +1,5 @@
 {
-  "sha1": "f6099bcca2c4ed7515039250b995a8ee39916dcc",
+  "sha1": "9001c467ccf95593d67437eed82ca1203a07269b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -338,7 +338,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/saved_object_resolve.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 9
       }
     },
@@ -351,7 +351,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/saved_object_resolve.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 20
       }
     },

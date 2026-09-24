@@ -185,6 +185,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(openFullscreenConversation).toHaveBeenCalledWith({
       conversationId: 'conversation-1',
       agentId: 'agent',
+      openDetails: true,
     });
   });
 });
