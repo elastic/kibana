@@ -124,6 +124,7 @@ export function useErrorGroupListData({
   );
 
   return {
+    searchQuery,
     setDebouncedSearchQuery,
     mainStatistics,
     mainStatisticsStatus,

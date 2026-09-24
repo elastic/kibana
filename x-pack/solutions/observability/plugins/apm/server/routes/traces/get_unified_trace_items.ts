@@ -60,27 +60,23 @@ import { fields, getUnifiedTraceItemsPaginated } from './get_unified_trace_items
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
   const groupedErrorsByDocId: Record<
     string,
-    Array<{ errorDocId: string; errorDocIndex?: string }>
+    Array<{ errorDocId: string; errorDocIndex?: string; source: 'apm' | 'unprocessedOtel' }>
   > = {};
 
-  unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
-    if (errorDoc.span?.id) {
+  // Key on span.id when present; fall back to transaction.id for classic APM errors that carry
+  // only a transaction ref (gap #1 from #290844). Both sources use the same logic.
+  const allErrors = [...unifiedTraceErrors.apmErrors, ...unifiedTraceErrors.unprocessedOtelErrors];
+  for (const errorDoc of allErrors) {
+    const docId = errorDoc.span?.id ?? errorDoc.transaction?.id;
+    if (docId) {
       const errorDocIndex = errorDoc.index;
-      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
+      (groupedErrorsByDocId[docId] ??= []).push({
         errorDocId: errorDoc.id,
+        source: errorDoc.source,
         ...(errorDocIndex ? { errorDocIndex } : {}),
       });
     }
-  });
-  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
-    if (errorDoc.span?.id) {
-      const errorDocIndex = errorDoc.index;
-      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
-        errorDocId: errorDoc.id,
-        ...(errorDocIndex ? { errorDocIndex } : {}),
-      });
-    }
-  });
+  }
 
   return groupedErrorsByDocId;
 }
