@@ -342,6 +342,31 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       return;
     }
 
+    // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
+    // so policyIdsByInstance has no stale entry and isAlreadyDeployed returns true. Without this
+    // reconciliation the SO services list and local failedInstances retain the removed service.
+    if (!isAgentBased) {
+      const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+      const staleFailedIds = new Set(failedInstances.filter((id) => !activeInstanceIds.has(id)));
+      if (staleFailedIds.size > 0) {
+        const remainingFailed = failedInstances.filter((id) => !staleFailedIds.has(id));
+        updateDetectAndReviewStep({
+          failedInstances: remainingFailed,
+          serviceStatuses: Object.fromEntries(
+            Object.entries(detectAndReviewStep.serviceStatuses).filter(
+              ([id]) => !staleFailedIds.has(id)
+            )
+          ),
+        });
+        if (detectAndReviewStep.onboardingDeploymentId) {
+          await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
+            services: selectedServiceIds,
+            status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
+          });
+        }
+      }
+    }
+
     onContinue();
   }, [
     miServiceIds.length,
@@ -351,6 +376,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isAgentBased,
     handleAgentDeployForNext,
     handleDeploy,
+    failedInstances,
+    deployGroups,
     ecfSectionProps,
     selectedServiceIds,
     serviceVars,
@@ -361,6 +388,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     detectAndReviewStep.ecfStacks,
     detectAndReviewStep.policyIdsByInstance,
     detectAndReviewStep.pendingCleanupPolicyIds,
+    detectAndReviewStep.serviceStatuses,
     createDeployment,
     updateDeployment,
     persistDeploymentId,
