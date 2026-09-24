@@ -164,10 +164,7 @@ const makeHook = (
   return { hook, assign, refresh };
 };
 
-const setup = (
-  items: TestItem[],
-  overrides: Parameters<typeof makeHook>[1] = {}
-) => {
+const setup = (items: TestItem[], overrides: Parameters<typeof makeHook>[1] = {}) => {
   const { core, queryClient } = makeProviders();
   const { hook, assign, refresh } = makeHook(items, overrides);
   const { rerender } = renderWithProviders(core, queryClient, hook, items);
@@ -193,7 +190,10 @@ describe('useAssigneePickers', () => {
   it('shows updating while the mutation is in flight', async () => {
     let resolveAssign!: () => void;
     const assign = jest.fn(
-      () => new Promise<{}>((res) => { resolveAssign = () => res({}); })
+      () =>
+        new Promise<{}>((res) => {
+          resolveAssign = () => res({});
+        })
     );
     const items = [makeItem('item-1')];
     setup(items, { assign });
@@ -201,7 +201,9 @@ describe('useAssigneePickers', () => {
     fireEvent.click(screen.getByTestId('assign-item-1'));
     expect(screen.getByTestId('updating-item-1')).toHaveTextContent('updating');
 
-    await act(async () => { resolveAssign(); });
+    await act(async () => {
+      resolveAssign();
+    });
     await waitFor(() => expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle'));
   });
 
@@ -216,7 +218,10 @@ describe('useAssigneePickers', () => {
   it('awaits refresh before clearing pending (regression: stuck picker)', async () => {
     let resolveRefresh!: () => void;
     const refresh = jest.fn(
-      () => new Promise<void>((res) => { resolveRefresh = () => res(); })
+      () =>
+        new Promise<void>((res) => {
+          resolveRefresh = () => res();
+        })
     );
     const items = [makeItem('item-1')];
     setup(items, { refresh });
@@ -227,7 +232,9 @@ describe('useAssigneePickers', () => {
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
     expect(screen.getByTestId('updating-item-1')).toHaveTextContent('updating');
 
-    await act(async () => { resolveRefresh(); });
+    await act(async () => {
+      resolveRefresh();
+    });
     await waitFor(() => expect(screen.getByTestId('updating-item-1')).toHaveTextContent('idle'));
   });
 
@@ -272,7 +279,9 @@ describe('useAssigneePickers', () => {
     const items = [makeItem('item-1', 'target-1')];
     setup(items, { refresh });
 
-    act(() => { assigneeSignal.bump('target-1'); });
+    act(() => {
+      assigneeSignal.bump('target-1');
+    });
 
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
   });
@@ -282,7 +291,9 @@ describe('useAssigneePickers', () => {
     const items = [makeItem('item-1', 'target-1')];
     setup(items, { refresh });
 
-    act(() => { assigneeSignal.bump('target-OTHER'); });
+    act(() => {
+      assigneeSignal.bump('target-OTHER');
+    });
 
     // Give React time to process the signal.
     await new Promise((r) => setTimeout(r, 50));
