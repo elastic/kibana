@@ -158,14 +158,19 @@ describe('buildSseData', () => {
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
     huntBehavior.mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
 
-    const coordinatorResult = await huntCoordinator(esClient, {} as never, logger, {
-      report_id: 'tr-aws-iam-assumerole-2026-07-28',
-      spaceId: 'default',
-      text: 'AssumeRole chain from a rarely used identity',
-      trigger: 'scheduled',
-      run_id: 'run-hunt-20260730T160000Z',
-      tier2_when: 'on_hits',
-    });
+    const coordinatorResult = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        report_id: 'tr-aws-iam-assumerole-2026-07-28',
+        spaceId: 'default',
+        text: 'AssumeRole chain from a rarely used identity',
+        trigger: 'scheduled',
+        run_id: 'run-hunt-20260730T160000Z',
+        tier2_when: 'on_hits',
+      }
+    );
 
     expect(coordinatorResult.status).toBe('tier1_and_tier2');
 
@@ -287,14 +292,19 @@ describe('buildSseData', () => {
       next_step: 'Lower threshold.',
     });
 
-    const coordinatorResult = await huntCoordinator(esClient, {} as never, logger, {
-      report_id: 'tr-hit-no-behaviors',
-      spaceId: 'default',
-      text: 'AssumeRole chain',
-      trigger: 'scheduled',
-      run_id: 'run-hunt-no-behaviors',
-      tier2_when: 'on_hits',
-    });
+    const coordinatorResult = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        report_id: 'tr-hit-no-behaviors',
+        spaceId: 'default',
+        text: 'AssumeRole chain',
+        trigger: 'scheduled',
+        run_id: 'run-hunt-no-behaviors',
+        tier2_when: 'on_hits',
+      }
+    );
 
     const entries = buildSseData(coordinatorResult, 'tr-hit-no-behaviors', { spaceId: 'default' });
 
@@ -330,13 +340,18 @@ describe('buildSseData', () => {
       next_step: 'n/a',
     });
 
-    const coordinatorResult = await huntCoordinator(esClient, {} as never, logger, {
-      report_id: 'tr-clean-2026-07-28',
-      spaceId: 'default',
-      trigger: 'scheduled',
-      run_id: 'run-hunt-clean',
-      tier2_when: 'on_hits',
-    });
+    const coordinatorResult = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        report_id: 'tr-clean-2026-07-28',
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-hunt-clean',
+        tier2_when: 'on_hits',
+      }
+    );
 
     const entries = buildSseData(coordinatorResult, 'tr-clean-2026-07-28', { spaceId: 'default' });
 
@@ -356,14 +371,19 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
     huntBehavior.mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
 
-    const coordinatorResult = await huntCoordinator(esClient, {} as never, logger, {
-      report_id: 'tr-aws-iam-assumerole-2026-07-28',
-      spaceId: 'default',
-      text: 'AssumeRole chain from a rarely used identity',
-      trigger: 'scheduled',
-      run_id: 'run-hunt-20260730T160000Z',
-      tier2_when: 'on_hits',
-    });
+    const coordinatorResult = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        report_id: 'tr-aws-iam-assumerole-2026-07-28',
+        spaceId: 'default',
+        text: 'AssumeRole chain from a rarely used identity',
+        trigger: 'scheduled',
+        run_id: 'run-hunt-20260730T160000Z',
+        tier2_when: 'on_hits',
+      }
+    );
 
     const [entry] = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', {
       spaceId: 'default',
