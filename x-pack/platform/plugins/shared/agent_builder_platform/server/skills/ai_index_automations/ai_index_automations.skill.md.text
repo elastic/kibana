@@ -137,7 +137,10 @@ Gate every write on this: an indicator carrying ES|QL that does not run is worse
 one, because retrieval surfaces it as though it worked.
 
 `attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
-single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry. A
+single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry. Step
+outputs cap separately at `max-step-size`, 10mb by default and settable per step or under
+`settings`; reading a large output in a later step is cheap, so what a prompt pays for a mapping or
+a sample is model tokens, not engine time. A
 `null` value omits the attribute: `esql: "${{ patterns | map: 'esql_example' | default: nil }}"`
 leaves `attributes.esql` out when the list is empty, and the verifiers skip an indicator without it.
 Never write an empty list or an empty string there; both fail verification. What the fields mean,
@@ -152,8 +155,8 @@ wrong contents, which is why they are worth knowing before you draft rather than
 **Anything that is not a string needs `${{ }}`, not `{{ }}`.** A plain `{{ }}` renders its value into
 a string: an object arrives as `[object Object]`, and `false` arrives as the string `"false"`, which
 is truthy and will pass an `if`. `${{ }}` evaluates the expression and preserves the type. Wherever a
-whole object, a number or a boolean is passed — a `foreach.item` handed to a step, a condition, a
-document body — it is `${{ }}`:
+whole object, a list, a number or a boolean is passed — a `foreach.item` handed to a step, the list
+a `foreach` iterates, a condition, a document body — it is `${{ }}`:
 
 ```yaml
 - name: write_report
@@ -194,14 +197,39 @@ output:
 and `on-failure:` for error handling. A `foreach` additionally takes `iteration-on-failure`, which
 is what keeps one bad record from ending a batch — worth setting on a loop that writes one
 indicator per document, where the alternative is losing every indicator after the first failure.
+A skipped iteration is not silent: its failed step stays in the execution history as a failed step
+execution, so the execution detail tree shows which records were skipped and why. A `fallback` under
+`iteration-on-failure` runs on each failure before the loop continues; the templates use one
+`console` step there to name the record.
 
 ```yaml
 - name: loop_documents
   type: foreach
-  foreach: '{{ steps.discover_documents.output.values | json }}'
+  foreach: '${{ steps.rows.output }}'
   steps: [] # ...
   iteration-on-failure:
     continue: true
+    fallback:
+      - name: log_iteration_failure
+        type: console
+        with:
+          message: 'Skipped document {{ foreach.item.doc_id }} after a step failed.'
+```
+
+**A `data.map` names the columns of an ES|QL result.** `elasticsearch.esql.query` outputs `columns`
+and `values`, and each row in `values` is a positional array in `KEEP` order. Mapping the rows once,
+outside the loop, is what lets the loop read `foreach.item.doc_id` rather than `foreach.item[0]`;
+`items` is the list, `with.fields` names each column, and `item` is the row being mapped:
+
+```yaml
+- name: rows
+  type: data.map
+  items: '${{ steps.discover_documents.output.values }}'
+  with:
+    fields:
+      doc_id: '${{ item[0] }}'
+      title: '${{ item[1] }}'
+      body: '${{ item[2] }}'
 ```
 
 ```yaml
@@ -243,7 +271,7 @@ rest. `{%- for x in ... -%}` loops build the `content` block, and `{%- assign x 
 
 | Filter | Use |
 |---|---|
-| `json` | Serialise a value — how a whole step output reaches a prompt, and how a list reaches `foreach` |
+| `json` | Serialise a value into text — how a whole step output reaches a prompt. A list reaches `foreach` typed, as `${{ }}`, with no filter |
 | `json_parse` | Turn a JSON string back into a value; how the unit template's `references`, built as a string with a conditional entry, reach the KI as a list |
 | `map: 'field'` | Pull one field out of a list of objects; how `attributes.esql` collects the runnable examples |
 | `size` | Length, for a `data.set` a condition can read |
@@ -284,7 +312,7 @@ the block almost line for line. Editing that block is most of the adaptation; th
 grounding is the rest.
 
 **Index/Table Metadata** (`type: index_metadata`) — template **`index-metadata-template`**. Fetch
-the mapping, sample documents, aggregate the distributions the profile will make claims about, then
+the field list, sample documents, aggregate the distributions the profile will make claims about, then
 an `ai.prompt` producing purpose, what the index does not contain, key fields, joins, when-to-use,
 and access patterns (each with a question type, an ES|QL template, a runnable example and what it
 returns). Sinks with `ki_id` set to the index name. Adapting it is the `consts` block plus one
@@ -488,8 +516,8 @@ than that and it returns bare ids and labels with no parameters at all — so a 
 you nothing and buys a chain of follow-up calls. Pass `stepType` with an exact id.
 
 The types these automations use are a closed set: `elasticsearch.esql.query`,
-`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `foreach`, `while`, `if`,
-`data.set` and `console`, alongside the `context-engine` steps written out above,
+`elasticsearch.search`, `ai.prompt`, `foreach`, `while`, `if`,
+`data.set`, `data.map` and `console`, alongside the `context-engine` steps written out above,
 which no lookup can return at all. Every one of them appears in the templates already wired up
 correctly, so a lookup is worth a call only for a step type you are adding that no template uses.
 

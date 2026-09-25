@@ -354,6 +354,49 @@ describe('aiIndexAutomationsSkill', () => {
       }
     });
 
+    it('hands every foreach its list typed, with no json round trip', () => {
+      const lists = templates().flatMap(({ name, content: yaml }) =>
+        [...yaml.matchAll(/^\s*foreach: (.+)$/gm)].map(([, value]) => ({ name, value }))
+      );
+
+      expect(lists.length).toBeGreaterThan(0);
+      for (const { name, value } of lists) {
+        expect({ name, value }).toEqual({
+          name,
+          value: expect.stringMatching(/^"\$\{\{ [^|]+\}\}"$/),
+        });
+      }
+    });
+
+    it('names ES|QL columns once with data.map instead of reading rows by position in the loop', () => {
+      const template = parsedTemplate(DOCUMENT_TEMPLATE_NAME);
+      const rows = stepNamed(template, 'rows');
+
+      expect(rows.type).toBe('data.map');
+      expect(Object.keys((rows.with?.fields as object) ?? {})).toEqual(['doc_id', 'title', 'body']);
+      expect(stepNamed(template, 'loop_documents')).toMatchObject({
+        foreach: '${{ steps.rows.output }}',
+      });
+      const yaml = templates().find(({ name }) => name === DOCUMENT_TEMPLATE_NAME)?.content ?? '';
+      expect(withoutComments(yaml)).not.toMatch(/foreach\.item\[/);
+    });
+
+    it('reads the field list with LIMIT 0 rather than the full mapping', () => {
+      for (const name of [DOCUMENT_TEMPLATE_NAME, INDEX_METADATA_TEMPLATE_NAME]) {
+        const template = parsedTemplate(name);
+        const fields = stepNamed(template, 'fetch_fields');
+
+        expect({ name, type: fields.type }).toEqual({ name, type: 'elasticsearch.esql.query' });
+        expect({ name, query: fields.with?.query }).toEqual({
+          name,
+          query: 'FROM {{ consts.source_index }} | LIMIT 0',
+        });
+        expect(templates().find((t) => t.name === name)?.content).toContain(
+          'steps.fetch_fields.output.columns | json'
+        );
+      }
+    });
+
     it('puts every top-level field it asks the model for into the KI', () => {
       for (const { name, content: yaml } of templates()) {
         for (const step of promptSteps(name)) {
@@ -480,7 +523,7 @@ describe('aiIndexAutomationsSkill', () => {
 
       expect(referenceUris(ki)).toEqual([
         'index://{{ consts.source_index }}',
-        'doc://{{ consts.source_index }}/{{ steps.document_context.output.doc_id }}',
+        'doc://{{ consts.source_index }}/{{ foreach.item.doc_id }}',
       ]);
     });
 
@@ -803,12 +846,12 @@ describe('aiIndexAutomationsSkill', () => {
       for (const stepType of [
         '`elasticsearch.esql.query`',
         '`elasticsearch.search`',
-        '`elasticsearch.request`',
         '`ai.prompt`',
         '`foreach`',
         '`while`',
         '`if`',
         '`data.set`',
+        '`data.map`',
         '`console`',
       ]) {
         expect(content).toContain(stepType);
@@ -819,12 +862,12 @@ describe('aiIndexAutomationsSkill', () => {
       const closedSet = [
         'elasticsearch.esql.query',
         'elasticsearch.search',
-        'elasticsearch.request',
         'ai.prompt',
         'foreach',
         'while',
         'if',
         'data.set',
+        'data.map',
         'console',
         'context-engine.createKi',
         'context-engine.verifyKi',

@@ -104,10 +104,16 @@ steps:
 
       - name: loop_units
         type: foreach
-        foreach: "{{ steps.discover_units.output.values | json }}"
-        # One unit that fails to profile should not cost the rest of the page.
+        foreach: "${{ steps.discover_units.output.values }}"
+        # One unit that fails to profile should not cost the rest of the page. The failed
+        # iteration stays in the execution history as a failed step; the fallback names the unit.
         iteration-on-failure:
           continue: true
+          fallback:
+            - name: log_iteration_failure
+              type: console
+              with:
+                message: "Skipped {{ consts.unit_key }} {{ foreach.item[0] }} after a step failed."
         steps:
           # `foreach.item[0]` is the unit key, the one column `discover_units` keeps.
           - name: unit_context

@@ -16,7 +16,7 @@ version: "1"
 # `attributes.esql` wiring are what make the KI retrievable and verified.
 name: Index metadata KI automation
 description: >
-  Profiles one index (mapping + random sample + grounding aggregations) into a single
+  Profiles one index (field list + random sample + grounding aggregations) into a single
   index_metadata Knowledge Indicator carrying verified, parameterized ES|QL access patterns.
 enabled: true
 
@@ -36,11 +36,12 @@ triggers:
   - type: manual
 
 steps:
-  - name: fetch_mapping
-    type: elasticsearch.request
+  # `LIMIT 0` returns the flat `columns` list, one `{ name, type }` per field ES|QL can see, at a
+  # fraction of the size of the nested mapping.
+  - name: fetch_fields
+    type: elasticsearch.esql.query
     with:
-      method: GET
-      path: /{{ consts.source_index }}/_mapping
+      query: "FROM {{ consts.source_index }} | LIMIT 0"
 
   # `random_score` rather than a plain match_all: repeated runs then see different records
   # instead of always the first-ingested ones.
@@ -86,11 +87,11 @@ steps:
 
         Index name: {{ consts.source_index }}
 
-        Elasticsearch mapping:
-        {{ steps.fetch_mapping.output | json }}
+        Fields and their types:
+        {{ steps.fetch_fields.output.columns | json }}
 
         Sample of ~20 random documents from the index:
-        {{ steps.sample_documents.output.hits.hits | json }}
+        {{ steps.sample_documents.output.hits.hits | map: '_source' | json }}
 
         Grounding aggregation — document count by {{ consts.category_field }}:
         {{ steps.esql_category_counts.output | json }}
@@ -107,8 +108,8 @@ steps:
         - purpose: what this index holds and what it is for.
         - does_not_contain: notable things this index does NOT have, so an agent does not
           mis-route a question to it.
-        - key_fields: the important fields in the mapping, each with its meaning based on the
-          mapping and the sample documents observed above.
+        - key_fields: the important fields in the field list, each with its meaning based on the
+          field list and the sample documents observed above.
         - joins: indices this is commonly correlated with, as "field -> target_index". Empty when
           it stands alone.
         - when_to_use: guidance on when an analyst or agent should query this index.
@@ -128,7 +129,7 @@ steps:
         ES|QL correctness rules for esql_template and esql_example — both are executed by the
         verifier, so both must be valid and runnable:
         - Start with `FROM {{ consts.source_index }}`; use `|` between commands; use real field
-          names only, taken from the mapping above.
+          names only, taken from the field list above.
         - Quote string literals with double quotes; do not quote numbers or booleans.
         - Boolean fields take `COUNT(*) WHERE field == true`, never SUM()/AVG()/MIN()/MAX(),
           which fail at runtime on a boolean. For a rate, divide that count by the total with

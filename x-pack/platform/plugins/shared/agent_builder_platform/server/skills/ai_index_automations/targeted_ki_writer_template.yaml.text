@@ -83,7 +83,7 @@ triggers:
 steps:
   - name: loop_kis
     type: foreach
-    foreach: "{{ consts.kis | json }}"
+    foreach: "${{ consts.kis }}"
     # One KI that fails verification must not stop the others from being written.
     iteration-on-failure:
       continue: true

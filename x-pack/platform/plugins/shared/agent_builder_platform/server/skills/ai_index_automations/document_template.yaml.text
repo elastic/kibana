@@ -9,7 +9,8 @@ version: "1"
 #      it is a whole ES|QL line, so it can carry several conditions, and setting it to an empty
 #      string takes the whole index.
 #   2. Add any further fields the summary should draw on to the `KEEP` in `discover_documents`,
-#      remembering that `KEEP` fixes the column order the `foreach` reads by position.
+#      and name each new column in `rows`, which turns the positional ES|QL row into an object
+#      the loop reads by field name.
 #   3. Tell the prompt what these documents are. "Support article" and "incident record" produce
 #      different summaries from the same text, and the model cannot tell which it is holding.
 #
@@ -48,12 +49,13 @@ triggers:
 steps:
   # Fetched once, outside the loop, and handed to every summary. Without it the model only ever
   # sees one document's text, so the access patterns it writes name fields that do not exist and
-  # the KI fails verification — which costs the whole per-document model call.
-  - name: fetch_mapping
-    type: elasticsearch.request
+  # the KI fails verification — which costs the whole per-document model call. `LIMIT 0` returns
+  # the flat `columns` list, one `{ name, type }` per field ES|QL can see, at a fraction of the
+  # size of the nested mapping; it is pasted into every per-document prompt, so size is tokens.
+  - name: fetch_fields
+    type: elasticsearch.esql.query
     with:
-      method: GET
-      path: /{{ consts.source_index }}/_mapping
+      query: "FROM {{ consts.source_index }} | LIMIT 0"
 
   - name: discover_documents
     type: elasticsearch.esql.query
@@ -65,22 +67,30 @@ steps:
         | KEEP _id, {{ consts.title_field }}, body
         | LIMIT {{ consts.max_documents }}
 
+  # ES|QL rows are positional arrays in `KEEP` order: _id, title, body. Naming the columns here
+  # once is what lets the loop read `foreach.item.doc_id` instead of `foreach.item[0]`.
+  - name: rows
+    type: data.map
+    items: "${{ steps.discover_documents.output.values }}"
+    with:
+      fields:
+        doc_id: "${{ item[0] }}"
+        title: "${{ item[1] }}"
+        body: "${{ item[2] }}"
+
   - name: loop_documents
     type: foreach
-    foreach: "{{ steps.discover_documents.output.values | json }}"
-    # One document that fails to summarise should not cost the rest of the batch.
+    foreach: "${{ steps.rows.output }}"
+    # One document that fails to summarise should not cost the rest of the batch. The failed
+    # iteration stays in the execution history as a failed step; the fallback names the document.
     iteration-on-failure:
       continue: true
+      fallback:
+        - name: log_iteration_failure
+          type: console
+          with:
+            message: "Skipped document {{ foreach.item.doc_id }} after a step failed."
     steps:
-      # Column order comes from the `KEEP` above: _id, title, body. Changing that list moves
-      # these indices.
-      - name: document_context
-        type: data.set
-        with:
-          doc_id: "{{ foreach.item[0] }}"
-          title: "{{ foreach.item[1] }}"
-          body: "{{ foreach.item[2] }}"
-
       - name: summarize_document
         type: ai.prompt
         # The default model for every prompt step. Change it to another AI connector id if the
@@ -105,15 +115,15 @@ steps:
             {{ consts.source_index }} index, so that an agent can find it and know what it covers
             without reading it.
 
-            Document id: {{ steps.document_context.output.doc_id }}
-            Title: {{ steps.document_context.output.title }}
+            Document id: {{ foreach.item.doc_id }}
+            Title: {{ foreach.item.title }}
 
             Body:
-            {{ steps.document_context.output.body }}
+            {{ foreach.item.body }}
 
-            Mapping of {{ consts.source_index }} — the only fields that exist, and the only ones
-            your ES|QL may name:
-            {{ steps.fetch_mapping.output | json }}
+            Fields of {{ consts.source_index }} with their types — the only fields that exist,
+            and the only ones your ES|QL may name:
+            {{ steps.fetch_fields.output.columns | json }}
 
             Produce a structured summary of this document, using only its text above.
 
@@ -136,8 +146,8 @@ steps:
             ES|QL correctness rules — esql_template and esql_example are both executed by the
             verifier, so both must be valid and runnable:
             - Start with `FROM {{ consts.source_index }}`; use `|` between commands. Every field
-              you name must appear in the mapping above — a field inferred from the document's
-              subject matter rather than read off the mapping is the most common way this fails.
+              you name must appear in the field list above — a field inferred from the document's
+              subject matter rather than read off the list is the most common way this fails.
               Reading `_id` requires `FROM {{ consts.source_index }} METADATA _id`.
             - Quote string literals with double quotes; do not quote numbers or booleans.
             - Date literals are strict ISO-8601, e.g. "2024-01-01T00:00:00.000Z"; for relative
@@ -190,12 +200,12 @@ steps:
             # Carries the source document's own title and topics, which is what separates this KI
             # from its neighbours when their summaries read alike.
             description: >-
-              {{ steps.document_context.output.title }} —
+              {{ foreach.item.title }} —
               {{ steps.summarize_document.output.content.summary }}
             content: |
-              # {{ steps.document_context.output.title }}
+              # {{ foreach.item.title }}
 
-              Source: {{ consts.source_index }} document {{ steps.document_context.output.doc_id }}
+              Source: {{ consts.source_index }} document {{ foreach.item.doc_id }}
 
               ## Summary
               {{ steps.summarize_document.output.content.summary }}
@@ -219,7 +229,7 @@ steps:
                 Example: `{{ ap.esql_example }}`
               {% endfor %}
               {%- else -%}
-              None. Fetch the document from {{ consts.source_index }} by its id, {{ steps.document_context.output.doc_id }}.
+              None. Fetch the document from {{ consts.source_index }} by its id, {{ foreach.item.doc_id }}.
               {%- endif %}
             tags:
               - "{{ consts.source_index }}"
@@ -229,7 +239,7 @@ steps:
             references:
               - uri: "index://{{ consts.source_index }}"
                 relation: derived_from
-              - uri: "doc://{{ consts.source_index }}/{{ steps.document_context.output.doc_id }}"
+              - uri: "doc://{{ consts.source_index }}/{{ foreach.item.doc_id }}"
                 relation: derived_from
             attributes:
               # Every ES|QL the KI carries goes here, which is what the verifiers check. `default: nil`
@@ -258,7 +268,7 @@ steps:
             type: context-engine.createKi
             with:
               ai_index_id: "{{ consts.ai_index_id }}"
-              ki_id: "{{ consts.source_index }}-{{ steps.document_context.output.doc_id }}"
+              ki_id: "{{ consts.source_index }}-{{ foreach.item.doc_id }}"
               ki: "${{ steps.assemble_ki.output.ki }}"
         else:
           - name: log_verification_failure
@@ -266,5 +276,5 @@ steps:
             with:
               message: |
                 KI verification failed for document
-                {{ steps.document_context.output.doc_id }}.
+                {{ foreach.item.doc_id }}.
                 Results: {{ steps.verify_ki.output.results | json }}
