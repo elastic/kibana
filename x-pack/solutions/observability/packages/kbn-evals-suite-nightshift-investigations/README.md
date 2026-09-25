@@ -25,7 +25,7 @@ Kibana starts with `--serverless=oblt` on `5620`. To run on stateful instead:
 node scripts/evals start --suite nightshift-investigations --scout-arch stateful
 ```
 
-Switching arch restarts Scout. Serverless Elasticsearch has no keystore, so `GCS_CREDENTIALS` cannot reach it; the smoke eval's snapshot seeding only works on stateful, so the smoke eval is skipped on serverless.
+Switching arch restarts Scout. Both arches run the smoke eval's snapshot seeding: serverless Elasticsearch has no keystore, so `kbn-es` passes `GCS_CREDENTIALS` to it as a file secret instead.
 
 Serverless Elasticsearch always binds transport ports `9300`–`9302`. A development Elasticsearch started with `yarn es snapshot` (as the `local` profile below needs) also takes `9300`, so give it another transport port: `yarn es snapshot --license trial -E transport.port=9400`.
 
@@ -480,8 +480,7 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** the trace-only investigations. The smoke eval is stateful-only, so it is skipped
-  on the serverless default and snapshot seeding is not checked in CI. The ci-prod Vault config must
+- **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
   hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
   `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the
   sandbox-api host.

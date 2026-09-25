@@ -22,13 +22,9 @@ import { summarizeSeedData } from './task';
  * No model takes part, so a red score here means seed data loading, score ingestion or the
  * golden-cluster export is broken rather than that investigation quality regressed.
  */
-evaluate.describe('Nightshift investigations: smoke', { tag: tags.stateful.classic }, () => {
-  // kbn-evals ignores Scout tags, so the stateful tag alone does not keep this off serverless.
-  evaluate.skip(
-    ({ config }) => config.serverless,
-    'Snapshot seeding needs GCS credentials in the ES keystore, which serverless lacks'
-  );
+const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
 
+evaluate.describe('Nightshift investigations: smoke', { tag: suiteTags }, () => {
   for (const dataset of getSmokeDatasets()) {
     evaluate.describe(dataset.id, () => {
       const seedData = withSeedData(dataset);

@@ -7,7 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { writeFileSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../types';
+
+/**
+ * Writes `GCS_CREDENTIALS` to a temp file and returns the ES secure setting that points at it, so
+ * snapshot seeding can read GCS buckets (the keystore on stateful, `file_secrets` on serverless).
+ */
+const getGcsSecureFile = (): string | undefined => {
+  const gcsCredentials = process.env.GCS_CREDENTIALS;
+  if (!gcsCredentials) {
+    return undefined;
+  }
+  const gcsCredentialsFilePath = join(
+    tmpdir(),
+    `gcs-credentials-${Date.now()}-${process.pid}.json`
+  );
+  writeFileSync(gcsCredentialsFilePath, gcsCredentials);
+  process.on('exit', () => {
+    try {
+      unlinkSync(gcsCredentialsFilePath);
+    } catch {
+      // Ignore errors if file was already deleted
+    }
+  });
+  return `gcs.client.default.credentials_file=${gcsCredentialsFilePath}`;
+};
 
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
@@ -28,7 +55,7 @@ const defaultExporters = JSON.stringify([
 
 /**
  * Layers the evals settings over a stateful or serverless base config: the evals plugin, EIS QA,
- * and OTLP trace exporting to a local OpenTelemetry collector (e.g. `node scripts/edot_collector.js`)
+ * the `GCS_CREDENTIALS` secure file for snapshot seeding, and OTLP trace exporting to a local OpenTelemetry collector (e.g. `node scripts/edot_collector.js`)
  * or the exporters in `TRACING_EXPORTERS`.
  */
 export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConfig => {
@@ -40,11 +67,16 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
   const isCi = Boolean(process.env.CI);
   const shouldEnableTracing = Boolean(tracingExporters) || !isCi;
   const exporters = tracingExporters ?? defaultExporters;
+  const gcsSecureFile = getGcsSecureFile();
 
   return {
     ...baseConfig,
     esTestCluster: {
       ...baseConfig.esTestCluster,
+      secureFiles: [
+        ...(baseConfig.esTestCluster.secureFiles ?? []),
+        ...(gcsSecureFile ? [gcsSecureFile] : []),
+      ],
       serverArgs: [
         ...baseConfig.esTestCluster.serverArgs,
         `xpack.inference.elastic.url=${EIS_QA_URL}`,

@@ -295,7 +295,9 @@ Suites run on a stateful/classic Scout cluster unless their `evals.suites.json` 
 }
 ```
 
-`node scripts/evals start` and `run_suite.sh` then start Scout with `--arch serverless --domain observability_complete`, so the config set needs a matching `serverless/observability_complete.serverless.config.ts` (the serverless `evals_tracing` config is a starting point). Serverless Elasticsearch runs in Docker and has no keystore, so `GCS_CREDENTIALS` is not available to it. `node scripts/evals start --scout-arch <arch> --scout-domain <domain>` overrides the suite's values for a local run (for example `--scout-arch stateful` runs such a suite on stateful/classic); switching arch or domain restarts Scout.
+Scout then starts with that arch and domain, locally and in CI, so the config set needs a matching `serverless/observability_complete.serverless.config.ts` (start from the serverless `evals_tracing` config). Serverless Elasticsearch runs in Docker, and GCS snapshot restores work as on stateful.
+
+To run a suite on a different arch or domain locally, pass `--scout-arch` / `--scout-domain` to `node scripts/evals start`, for example `--scout-arch stateful`. Switching restarts Scout.
 
 ### Playwright config
 

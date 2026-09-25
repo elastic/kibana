@@ -12,8 +12,7 @@ import { servers as defaultConfig } from '../../default/serverless/observability
 import { withEvalsTracing } from '../shared';
 
 /**
- * Serverless observability counterpart of the stateful `evals_tracing` config set. Serverless ES has
- * no keystore, so `GCS_CREDENTIALS` (snapshot seeding) is not supported here.
+ * Serverless observability counterpart of the stateful `evals_tracing` config set.
  *
  * Usage:
  *   node scripts/scout start-server --arch serverless --domain observability_complete --serverConfigSet evals_tracing

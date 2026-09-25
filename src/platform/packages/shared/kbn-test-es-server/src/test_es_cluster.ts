@@ -317,6 +317,7 @@ export function createTestEsCluster<
           clean,
           background: true,
           files,
+          secureFiles,
           ssl,
           kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
           waitForReady: true,

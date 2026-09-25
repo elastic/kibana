@@ -928,6 +928,66 @@ describe('setupServerlessVolumes()', () => {
     );
     expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
   });
+
+  test('should mount the bundled secrets file when no secure files are passed', async () => {
+    mockFs(existingObjectStore);
+
+    const volumeCmd = await setupServerlessVolumes(log, { projectType, basePath: baseEsPath });
+
+    expect(volumeCmd).toContain(
+      `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`
+    );
+    const settings = JSON.parse(
+      await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
+    );
+    expect(settings.state.cluster_secrets.file_secrets).toBeUndefined();
+  });
+
+  test('should deliver secure files as base64 file_secrets', async () => {
+    const generatedSecretsPath = `${SERVERLESS_OPERATOR_PATH}_secrets.json`;
+    mockFs({
+      ...existingObjectStore,
+      [SERVERLESS_SECRETS_PATH]: JSON.stringify({
+        metadata: { version: '1' },
+        string_secrets: { 'bundled.secret': 'value' },
+      }),
+      '/creds/gcs.json': '{"type":"service_account"}',
+    });
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+      secureFiles: ['gcs.client.default.credentials_file=/creds/gcs.json'],
+    });
+
+    const encoded = Buffer.from('{"type":"service_account"}').toString('base64');
+    expect(volumeCmd).toContain(
+      `${generatedSecretsPath}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`
+    );
+    expect(JSON.parse(await Fsp.readFile(generatedSecretsPath, 'utf-8'))).toEqual({
+      metadata: { version: '1' },
+      string_secrets: { 'bundled.secret': 'value' },
+      file_secrets: { 'gcs.client.default.credentials_file': encoded },
+    });
+    const settings = JSON.parse(
+      await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
+    );
+    expect(settings.state.cluster_secrets.file_secrets).toEqual({
+      'gcs.client.default.credentials_file': encoded,
+    });
+  });
+
+  test('should reject a malformed secure file entry', async () => {
+    mockFs(existingObjectStore);
+
+    await expect(
+      setupServerlessVolumes(log, {
+        projectType,
+        basePath: baseEsPath,
+        secureFiles: ['/creds/gcs.json'],
+      })
+    ).rejects.toThrow('Invalid secure file "/creds/gcs.json", expected "setting=/path/to/file"');
+  });
 });
 
 describe('runServerlessEsNode()', () => {
