@@ -47,3 +47,8 @@ export const PROPOSED_ACTIONS_LOAD_ERROR_LABEL = i18n.translate(
   'xpack.alertzero.detailsFlyout.proposedActions.loadError',
   { defaultMessage: 'Unable to load proposed actions. Try refreshing the page.' }
 );
+
+export const PROPOSED_ACTIONS_SHOW_MORE_LABEL = i18n.translate(
+  'xpack.alertzero.detailsFlyout.proposedActions.showMore',
+  { defaultMessage: 'Show more proposed actions' }
+);

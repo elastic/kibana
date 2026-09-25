@@ -40,6 +40,7 @@ export {
   isExpired,
   isProposalSettling,
   listProposalsQuerySchema,
+  MAX_PROPOSALS_PAGE_SIZE,
   proposalFiltersSchema,
   proposalCategorySchema,
   proposalConfidenceSchema,

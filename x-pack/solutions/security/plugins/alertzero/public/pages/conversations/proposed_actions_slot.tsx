@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   useApproveProposal,
@@ -23,7 +29,11 @@ import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton } from '@kbn/agentic-investigations-common';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { decisionErrorMessage } from './decision_errors';
-import { PROPOSED_ACTIONS_EMPTY_LABEL, PROPOSED_ACTIONS_LOAD_ERROR_LABEL } from './translations';
+import {
+  PROPOSED_ACTIONS_EMPTY_LABEL,
+  PROPOSED_ACTIONS_LOAD_ERROR_LABEL,
+  PROPOSED_ACTIONS_SHOW_MORE_LABEL,
+} from './translations';
 
 export interface ProposedActionsSlotProps {
   conversationId: string;
@@ -101,7 +111,8 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   const {
     services: { notifications },
   } = useKibana<CoreStart>();
-  const { data, isLoading, isError } = useConversationProposals(conversationId);
+  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useConversationProposals(conversationId);
   const { data: currentUserProfile } = useCurrentUserProfile();
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
@@ -125,7 +136,13 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
     return <KbnDangerCallout size="s" title={PROPOSED_ACTIONS_LOAD_ERROR_LABEL} />;
   }
 
-  const proposals = data?.proposals ?? [];
+  // Deduplicated because the pages are offset windows over a list a decision can move rows
+  // within: a proposal decided between two fetches shifts everything after it up.
+  const proposals = [
+    ...new Map(
+      (data?.pages ?? []).flatMap((page) => page.proposals).map((p) => [p.id, p])
+    ).values(),
+  ];
 
   if (proposals.length === 0) {
     return (
@@ -147,6 +164,18 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
           dismiss={dismiss}
         />
       ))}
+      {hasNextPage && (
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            size="s"
+            isLoading={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+            data-test-subj="investigationFlyoutProposedActionsShowMore"
+          >
+            {PROPOSED_ACTIONS_SHOW_MORE_LABEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -90,6 +90,25 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 const renderSlot = () =>
   render(<ProposedActionsSlot conversationId="conversation-1" />, { wrapper });
 
+/**
+ * Stands in for one page of `useConversationProposals`'s real (now paged) shape — every test
+ * here cares about the rows it renders, not the pagination machinery, so this fakes a single,
+ * complete page unless a test overrides it (the "Show more" tests do, explicitly).
+ */
+const mockConversationProposalsPage = (
+  proposals: ProposalWithMetadata[],
+  overrides: Partial<ReturnType<typeof useConversationProposals>> = {}
+) =>
+  mockUseConversationProposals.mockReturnValue({
+    data: { pages: [{ proposals, total: proposals.length }], pageParams: [undefined] },
+    isLoading: false,
+    isError: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: jest.fn(),
+    ...overrides,
+  } as unknown as ReturnType<typeof useConversationProposals>);
+
 describe('ProposedActionsSlot', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -112,10 +131,7 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('renders a proposed-action button for each proposal, decided or not', () => {
-    mockUseConversationProposals.mockReturnValue({
-      data: { proposals: [mockProposal, decidedProposal], total: 2 },
-      isLoading: false,
-    } as unknown as ReturnType<typeof useConversationProposals>);
+    mockConversationProposalsPage([mockProposal, decidedProposal]);
 
     renderSlot();
 
@@ -124,10 +140,7 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('renders a decided proposal as a closed record, but still opens a read-only modal for it', () => {
-    mockUseConversationProposals.mockReturnValue({
-      data: { proposals: [decidedProposal], total: 1 },
-      isLoading: false,
-    } as unknown as ReturnType<typeof useConversationProposals>);
+    mockConversationProposalsPage([decidedProposal]);
 
     renderSlot();
 
@@ -145,10 +158,7 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('shows an empty state when this conversation has no proposals', () => {
-    mockUseConversationProposals.mockReturnValue({
-      data: { proposals: [], total: 0 },
-      isLoading: false,
-    } as unknown as ReturnType<typeof useConversationProposals>);
+    mockConversationProposalsPage([]);
 
     renderSlot();
 
@@ -173,10 +183,7 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('approves with the proposal id and its own action input', () => {
-    mockUseConversationProposals.mockReturnValue({
-      data: { proposals: [mockProposal], total: 1 },
-      isLoading: false,
-    } as unknown as ReturnType<typeof useConversationProposals>);
+    mockConversationProposalsPage([mockProposal]);
 
     renderSlot();
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
@@ -191,10 +198,7 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('shows Applying on the row and its modal, scoped to the proposal useIsApprovingProposal reports', () => {
-    mockUseConversationProposals.mockReturnValue({
-      data: { proposals: [mockProposal], total: 1 },
-      isLoading: false,
-    } as unknown as ReturnType<typeof useConversationProposals>);
+    mockConversationProposalsPage([mockProposal]);
     mockUseIsApprovingProposal.mockImplementation((id) => id === 'proposal-1');
 
     renderSlot();
@@ -211,10 +215,7 @@ describe('ProposedActionsSlot', () => {
 
   it('surfaces a toast and keeps the modal open for retry when approving fails', async () => {
     approveMutateAsync.mockRejectedValueOnce(new Error('boom'));
-    mockUseConversationProposals.mockReturnValue({
-      data: { proposals: [mockProposal], total: 1 },
-      isLoading: false,
-    } as unknown as ReturnType<typeof useConversationProposals>);
+    mockConversationProposalsPage([mockProposal]);
 
     renderSlot();
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
@@ -229,10 +230,7 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('opens the dismiss modal instead of dismissing directly', () => {
-    mockUseConversationProposals.mockReturnValue({
-      data: { proposals: [mockProposal], total: 1 },
-      isLoading: false,
-    } as unknown as ReturnType<typeof useConversationProposals>);
+    mockConversationProposalsPage([mockProposal]);
 
     renderSlot();
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
@@ -242,5 +240,29 @@ describe('ProposedActionsSlot', () => {
 
     expect(screen.getByText('Close the investigation?')).toBeInTheDocument();
     expect(dismissMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('offers Show more when the conversation has more proposals than the loaded page, and fetches the next one', () => {
+    const fetchNextPage = jest.fn();
+    mockConversationProposalsPage([mockProposal], {
+      hasNextPage: true,
+      fetchNextPage,
+    });
+
+    renderSlot();
+    const showMore = screen.getByTestId('investigationFlyoutProposedActionsShowMore');
+    fireEvent.click(showMore);
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it('omits Show more once every proposal in the conversation is loaded', () => {
+    mockConversationProposalsPage([mockProposal]);
+
+    renderSlot();
+
+    expect(
+      screen.queryByTestId('investigationFlyoutProposedActionsShowMore')
+    ).not.toBeInTheDocument();
   });
 });

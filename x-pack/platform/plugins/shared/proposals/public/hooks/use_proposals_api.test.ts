@@ -20,7 +20,11 @@ import {
   useIsApprovingProposal,
   useIsDecliningProposal,
 } from './use_proposals_api';
-import { PROPOSALS_INTERNAL_URL, PROPOSALS_API_VERSION } from '@kbn/proposals-common';
+import {
+  PROPOSALS_INTERNAL_URL,
+  PROPOSALS_API_VERSION,
+  MAX_PROPOSALS_PAGE_SIZE,
+} from '@kbn/proposals-common';
 import { queryKeys } from '../query_keys';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -162,7 +166,12 @@ describe('useConversationProposals', () => {
     // needs a human — so unlike `usePendingProposals` this carries no `status` filter.
     expect(http.get).toHaveBeenCalledWith(PROPOSALS_INTERNAL_URL, {
       version: PROPOSALS_API_VERSION,
-      query: { conversationId: 'conv-42', excludeSuperseded: true },
+      query: {
+        conversationId: 'conv-42',
+        excludeSuperseded: true,
+        size: MAX_PROPOSALS_PAGE_SIZE,
+        from: 0,
+      },
     });
   });
 
@@ -181,7 +190,42 @@ describe('useConversationProposals', () => {
     const { result } = renderHook(() => useConversationProposals('conv-42'), { wrapper: Wrapper });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(mockResponse);
+    expect(result.current.data).toEqual({ pages: [mockResponse], pageParams: [undefined] });
+  });
+
+  it("pages past the API cap rather than silently losing a conversation's older proposals", async () => {
+    const http = makeHttp();
+    // `total` (2), not the API's per-page cap, is what should end paging — the point is that a
+    // conversation with more proposals than one page holds still gets all of them via
+    // `fetchNextPage`, not that this specific test has to reach the real 100-row cap.
+    const firstPage = { proposals: [{ id: 'p-1' }], total: 2 };
+    const secondPage = { proposals: [{ id: 'p-2' }], total: 2 };
+    http.get.mockResolvedValueOnce(firstPage).mockResolvedValueOnce(secondPage);
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useConversationProposals('conv-42'), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(true);
+
+    await result.current.fetchNextPage();
+
+    // `from` is the rows actually loaded so far (1, from the first page's own response),
+    // not the page size — the API caps how much a page can return, not the offset step.
+    expect(http.get).toHaveBeenLastCalledWith(PROPOSALS_INTERNAL_URL, {
+      version: PROPOSALS_API_VERSION,
+      query: {
+        conversationId: 'conv-42',
+        excludeSuperseded: true,
+        size: MAX_PROPOSALS_PAGE_SIZE,
+        from: 1,
+      },
+    });
+    await waitFor(() => expect(result.current.data?.pages).toEqual([firstPage, secondPage]));
+    expect(result.current.hasNextPage).toBe(false);
   });
 
   it('uses a query key distinct from usePendingProposals, so the two caches never collide', () => {
@@ -206,7 +250,9 @@ describe('useConversationProposals', () => {
       ({ conversationId }) => useConversationProposals(conversationId),
       { wrapper: Wrapper, initialProps: { conversationId: 'conv-a' } }
     );
-    await waitFor(() => expect(result.current.data).toEqual(convAProposals));
+    await waitFor(() =>
+      expect(result.current.data).toEqual({ pages: [convAProposals], pageParams: [undefined] })
+    );
 
     // A row keyed by `conv-a`'s proposal must not still be on screen, un-flagged as stale, once
     // the analyst has navigated to `conv-b` — that is what would let an approve/dismiss click
@@ -215,7 +261,9 @@ describe('useConversationProposals', () => {
     expect(result.current.isLoading).toBe(true);
     expect(result.current.data).toBeUndefined();
 
-    await waitFor(() => expect(result.current.data).toEqual(convBProposals));
+    await waitFor(() =>
+      expect(result.current.data).toEqual({ pages: [convBProposals], pageParams: [undefined] })
+    );
   });
 });
 

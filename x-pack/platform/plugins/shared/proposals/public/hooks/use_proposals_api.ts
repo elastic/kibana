@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@kbn/react-query';
-import { useIsMutating, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type { UseInfiniteQueryResult } from '@kbn/react-query';
+import {
+  useInfiniteQuery,
+  useIsMutating,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
+  MAX_PROPOSALS_PAGE_SIZE,
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
@@ -86,29 +93,53 @@ export const usePendingProposals = (conversationId?: string) => {
 };
 
 /**
+ * The accumulated row count rather than `pages.length * size`, which is what lets a shrunk last
+ * page (see `MAX_PROPOSALS_PAGE_OFFSET`) still end paging correctly. `undefined` stops it.
+ */
+const nextConversationProposalsOffset = (
+  lastPage: ListProposalsResponse,
+  pages: ListProposalsResponse[]
+): number | undefined => {
+  const loaded = pages.reduce((count, page) => count + page.proposals.length, 0);
+  return loaded >= lastPage.total ? undefined : loaded;
+};
+
+/**
  * Every proposal on one conversation, decided or not — the investigation flyout's own proposal
  * history, as opposed to `usePendingProposals`'s cross-conversation "awaiting a human" queue.
  * Superseded rows are still dropped: a retried proposal's earlier attempts are not history worth
  * a card of their own, only the live head is.
+ *
+ * Paged rather than a single fixed-size read: the list API caps a page at
+ * `MAX_PROPOSALS_PAGE_SIZE`, so an investigation with more proposals than that would otherwise
+ * silently lose its oldest ones. Requesting the largest page the API allows means the common case
+ * (an investigation with under 100 proposals) still resolves in one request; only a longer history
+ * needs `fetchNextPage`.
  */
 export const useConversationProposals = (
   conversationId: string
-): UseQueryResult<ListProposalsResponse, unknown> => {
+): UseInfiniteQueryResult<ListProposalsResponse, unknown> => {
   const { services } = useKibana();
 
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: queryKeys.proposals.forConversation(conversationId),
-    queryFn: async (): Promise<ListProposalsResponse> =>
+    queryFn: async ({ pageParam }: { pageParam?: number }): Promise<ListProposalsResponse> =>
       services.http!.get<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
         version: PROPOSALS_API_VERSION,
-        query: { conversationId, excludeSuperseded: true },
+        query: {
+          conversationId,
+          excludeSuperseded: true,
+          size: MAX_PROPOSALS_PAGE_SIZE,
+          from: pageParam ?? 0,
+        },
       }),
+    getNextPageParam: nextConversationProposalsOffset,
     // No `keepPreviousData`: unlike `usePendingProposals`'s cross-conversation queue, every row
     // here is actionable against `conversationId`. Showing the previous conversation's proposals
     // — un-flagged as stale — while this one loads would let an approve/dismiss click land on a
     // proposal from the investigation the analyst just navigated away from.
     refetchInterval: (data) =>
-      hasSettlingProposal(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
+      (data?.pages ?? []).some(hasSettlingProposal) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
 };
