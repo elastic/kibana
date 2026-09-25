@@ -9,6 +9,7 @@ import { useCallback, useMemo, useReducer } from 'react';
 import type { AiIndexAutomation, GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { buildStarterWorkflowYaml } from '../utils/starter_workflow_yaml';
 import { useCreateWorkflow } from './use_create_workflow';
+import { useDeleteWorkflows } from './use_delete_workflows';
 import { useSaveAiIndexAutomations } from './use_save_ai_index_automations';
 
 /** The draft only exists while editing, so it cannot outlive an edit session. */
@@ -22,6 +23,17 @@ type AutomationsEditorAction =
   | { type: 'automationRemoved'; value: string };
 
 const IDLE: AutomationsEditorState = { status: 'idle' };
+
+/** Workflow ids present in `previous` but no longer present in `next`. */
+const getRemovedWorkflowIds = (
+  previous: AiIndexAutomation[],
+  next: AiIndexAutomation[]
+): string[] => {
+  const nextValues = new Set(next.map((automation) => automation.value));
+  return previous
+    .filter((automation) => automation.type === 'workflow' && !nextValues.has(automation.value))
+    .map((automation) => automation.value);
+};
 
 const reducer = (
   state: AutomationsEditorState,
@@ -74,6 +86,7 @@ export const useAutomationsEditor = ({
   const [state, dispatch] = useReducer(reducer, IDLE);
   const { saveAutomations, isSaving } = useSaveAiIndexAutomations();
   const { createWorkflow, isCreating } = useCreateWorkflow();
+  const { deleteWorkflows } = useDeleteWorkflows();
 
   const savedAutomations = aiIndex?.automations;
   const automations = useMemo(
@@ -109,10 +122,16 @@ export const useAutomationsEditor = ({
       if (saved) {
         dispatch({ type: 'editStopped' });
         onSaved();
+        // The reference is already gone from the AI index at this point, so a failed
+        // workflow delete (handled inside deleteWorkflows) must not roll back the save.
+        const removedWorkflowIds = getRemovedWorkflowIds(savedAutomations ?? [], next);
+        if (removedWorkflowIds.length > 0) {
+          await deleteWorkflows(removedWorkflowIds);
+        }
       }
       return saved;
     },
-    [aiIndex, onSaved, saveAutomations]
+    [aiIndex, deleteWorkflows, onSaved, saveAutomations, savedAutomations]
   );
 
   const save = useCallback(async () => {

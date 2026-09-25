@@ -12,6 +12,7 @@ import { useAutomationsEditor } from './use_automations_editor';
 
 const mockSaveAutomations = jest.fn();
 const mockCreateWorkflow = jest.fn();
+const mockDeleteWorkflows = jest.fn();
 let mockIsSaving = false;
 let mockIsCreating = false;
 
@@ -26,6 +27,12 @@ jest.mock('./use_create_workflow', () => ({
   useCreateWorkflow: () => ({
     createWorkflow: mockCreateWorkflow,
     isCreating: mockIsCreating,
+  }),
+}));
+
+jest.mock('./use_delete_workflows', () => ({
+  useDeleteWorkflows: () => ({
+    deleteWorkflows: mockDeleteWorkflows,
   }),
 }));
 
@@ -59,6 +66,7 @@ describe('useAutomationsEditor', () => {
     mockIsCreating = false;
     mockSaveAutomations.mockResolvedValue(true);
     mockCreateWorkflow.mockResolvedValue('wf-created');
+    mockDeleteWorkflows.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -125,6 +133,7 @@ describe('useAutomationsEditor', () => {
     expect(result.current.isEditing).toBe(false);
     expect(result.current.workflowIds).toEqual(['wf-saved']);
     expect(mockSaveAutomations).not.toHaveBeenCalled();
+    expect(mockDeleteWorkflows).not.toHaveBeenCalled();
   });
 
   it('does not reuse a discarded draft when editing starts again', () => {
@@ -148,6 +157,66 @@ describe('useAutomationsEditor', () => {
     });
 
     expect(mockSaveAutomations).toHaveBeenCalledWith(aiIndex, []);
+    expect(mockDeleteWorkflows).toHaveBeenCalledWith(['wf-saved']);
+    expect(result.current.isEditing).toBe(false);
+    expect(onSaved).toHaveBeenCalledTimes(1);
+  });
+
+  it('deletes only removed workflow automations after a successful save', async () => {
+    const indexWithTwoWorkflows: GetAiIndexResponse = {
+      ...aiIndex,
+      automations: [
+        { type: 'workflow', value: 'wf-keep' },
+        { type: 'workflow', value: 'wf-remove' },
+      ],
+    };
+    const { result } = renderEditor({ index: indexWithTwoWorkflows });
+
+    act(() => result.current.startEditing());
+    act(() => result.current.removeAutomation('wf-remove'));
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(mockSaveAutomations).toHaveBeenCalledWith(indexWithTwoWorkflows, [
+      { type: 'workflow', value: 'wf-keep' },
+    ]);
+    expect(mockDeleteWorkflows).toHaveBeenCalledWith(['wf-remove']);
+    expect(mockDeleteWorkflows).not.toHaveBeenCalledWith(expect.arrayContaining(['wf-keep']));
+  });
+
+  it('does not delete workflows when saving fails', async () => {
+    mockSaveAutomations.mockResolvedValueOnce(false);
+    const { result } = renderEditor();
+
+    act(() => result.current.startEditing());
+    act(() => result.current.removeAutomation('wf-saved'));
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(mockDeleteWorkflows).not.toHaveBeenCalled();
+  });
+
+  it('does not roll back a successful save when workflow deletion fails', async () => {
+    const mockAddError = jest.fn();
+    mockDeleteWorkflows.mockImplementationOnce(async () => {
+      try {
+        throw new Error('delete failed');
+      } catch (error) {
+        mockAddError(error);
+      }
+    });
+    const { result, onSaved } = renderEditor();
+
+    act(() => result.current.startEditing());
+    act(() => result.current.removeAutomation('wf-saved'));
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(mockDeleteWorkflows).toHaveBeenCalledWith(['wf-saved']);
+    expect(mockAddError).toHaveBeenCalled();
     expect(result.current.isEditing).toBe(false);
     expect(onSaved).toHaveBeenCalledTimes(1);
   });
@@ -165,6 +234,7 @@ describe('useAutomationsEditor', () => {
     expect(result.current.isEditing).toBe(true);
     expect(result.current.workflowIds).toEqual([]);
     expect(onSaved).not.toHaveBeenCalled();
+    expect(mockDeleteWorkflows).not.toHaveBeenCalled();
   });
 
   it('does not save while idle', async () => {
@@ -193,6 +263,7 @@ describe('useAutomationsEditor', () => {
     expect(created).toBe('wf-created');
     expect(result.current.isEditing).toBe(false);
     expect(onSaved).toHaveBeenCalledTimes(1);
+    expect(mockDeleteWorkflows).not.toHaveBeenCalled();
   });
 
   it('creates a workflow while editing, attaches it, and resolves with its id', async () => {
@@ -212,6 +283,7 @@ describe('useAutomationsEditor', () => {
     expect(created).toBe('wf-created');
     expect(result.current.isEditing).toBe(false);
     expect(onSaved).toHaveBeenCalledTimes(1);
+    expect(mockDeleteWorkflows).not.toHaveBeenCalled();
   });
 
   it('does not persist anything when creating the workflow fails', async () => {
