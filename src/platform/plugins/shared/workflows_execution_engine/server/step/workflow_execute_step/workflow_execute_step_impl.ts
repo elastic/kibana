@@ -197,7 +197,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
   }
 
   private async getWorkflow(workflowId: string): Promise<EsWorkflow | null> {
-    const isManagedParentRun = true; // this.isManagedParentExecution();
+    const isManagedParentRun = this.isManagedParentExecution();
     return this.init.workflowRepository.getWorkflow(workflowId, this.init.spaceId, {
       includeGlobal: isManagedParentRun,
       managedFilter: isManagedParentRun ? 'all' : 'unmanaged',
