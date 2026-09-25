@@ -388,6 +388,18 @@ describe('AllCasesListGeneric', () => {
     expect(onRowClick).toBeCalledWith(undefined, isCreateCase);
   });
 
+  it('should disable the create case button without create privileges', async () => {
+    renderWithTestingProviders(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />, {
+      wrapperProps: { permissions: noCreateCasesPermissions() },
+    });
+
+    const createCaseButton = await screen.findByTestId('cases-table-add-case-filter-bar');
+    expect(createCaseButton).toBeDisabled();
+
+    await userEvent.click(createCaseButton);
+    expect(onRowClick).not.toHaveBeenCalled();
+  });
+
   it('should not render the create new case link when the user does not have create privileges', async () => {
     renderWithTestingProviders(<AllCasesList />, {
       wrapperProps: { permissions: noCreateCasesPermissions() },
