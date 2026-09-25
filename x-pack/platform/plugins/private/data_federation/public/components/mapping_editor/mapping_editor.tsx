@@ -20,7 +20,8 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import type { DatasetMappingFieldType, DatasetMappings } from '../../../common';
-import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form';
+import { FieldMappingForm } from './field_mapping_form';
+import type { FieldMappingFormValue } from './field_mapping_form';
 import { FieldMappingDisplayMode } from './field_mapping_display_mode';
 import { emptyMappingEditorValue, getTypeInfoByValue } from './constants';
 import { validateMappingEditorValue } from './validate_mapping_editor_value';
@@ -100,31 +101,28 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   const { euiTheme } = useEuiTheme();
   const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
   const nextId = useRef(0);
-  const originalFieldById = useRef<Record<string, MappingEditorField>>({});
+  const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
+  const [creatingFieldIds, setCreatingFieldIds] = useState<readonly string[]>([]);
   const validation = useMemo(
     () => validateMappingEditorValue(value, { reservedFieldNames }),
     [reservedFieldNames, value]
   );
-  const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
-  const [creatingFieldIds, setCreatingFieldIds] = useState<readonly string[]>([]);
-  const [draftField, setDraftField] = useState<MappingEditorField>(() => ({
-    id: 'draft',
-    name: '',
-    path: '',
-    type: 'keyword',
-    format: '',
-  }));
   const [validatedFieldIds, setValidatedFieldIds] = useState<readonly string[]>([]);
-  const [draftValidationAttempted, setDraftValidationAttempted] = useState(false);
-
-  const markFieldValidated = useCallback((id: string) => {
-    setValidatedFieldIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-  }, []);
+  const [fieldErrorsById, setFieldErrorsById] = useState<Record<string, FieldValidationErrors>>({});
+  const [draftErrors, setDraftErrors] = useState<FieldValidationErrors>({});
+  const [draftFormKey, setDraftFormKey] = useState(0);
+  const emptyDraftInitialValue = useMemo(
+    () => ({ type: 'keyword', name: '', path: '', format: '' }),
+    []
+  );
 
   const hasValidatedFieldErrors = useMemo(() => {
-    return validatedFieldIds.some((id) => validation.fieldErrorsById[id] !== undefined);
-  }, [validatedFieldIds, validation.fieldErrorsById]);
+    return validatedFieldIds.some((id) => fieldErrorsById[id] !== undefined);
+  }, [fieldErrorsById, validatedFieldIds]);
 
+  // Only show the top-level validation callout after the user has attempted
+  // to submit (Add/Update) an invalid field. Creating/editing a field should
+  // not immediately show "Fix mapping errors".
   const shouldShowValidationCallout = hasValidatedFieldErrors;
 
   const addField = useCallback(() => {
@@ -155,16 +153,10 @@ export const MappingEditor: FC<MappingEditorProps> = ({
       setEditingFieldId((current) => (current === id ? null : current));
       setValidatedFieldIds((prev) => prev.filter((v) => v !== id));
       setCreatingFieldIds((prev) => prev.filter((v) => v !== id));
-    },
-    [onChange]
-  );
-
-  const updateField = useCallback(
-    (id: string, patch: Partial<MappingEditorField>) => {
-      onChange((prev) => ({
-        ...prev,
-        fields: prev.fields.map((f) => (f.id === id ? { ...f, ...patch } : f)),
-      }));
+      setFieldErrorsById((prev) => {
+        const { [id]: _removed, ...rest } = prev;
+        return rest;
+      });
     },
     [onChange]
   );
@@ -179,112 +171,72 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     [onChange]
   );
 
-  const startEditingField = useCallback(
-    (id: string) => {
-      const current = value.fields.find((f) => f.id === id);
-      if (current && originalFieldById.current[id] === undefined) {
-        originalFieldById.current[id] = current;
-      }
-      setEditingFieldId(id);
-    },
-    [value.fields]
-  );
+  const startEditingField = useCallback((id: string) => {
+    setEditingFieldId(id);
+  }, []);
 
-  const cancelEditingField = useCallback(
-    (id: string) => {
-      const original = originalFieldById.current[id];
-      if (original) {
-        replaceField(id, original);
-      }
-      delete originalFieldById.current[id];
-      setEditingFieldId(null);
-    },
-    [replaceField]
-  );
-
-  const draftFieldErrors = useMemo(() => {
-    if (!draftValidationAttempted) return {};
-
-    const errors: { name?: string; type?: string; format?: string } = {};
-    const name = draftField.name.trim();
-    const type = draftField.type;
-
-    if (!name) {
-      errors.name = i18n.translate('xpack.dataFederation.mappingEditor.validation.nameRequired', {
-        defaultMessage: 'Logical name is required.',
-      });
-    } else if (reservedFieldNames?.some((n) => n.trim() === name)) {
-      errors.name = i18n.translate('xpack.dataFederation.mappingEditor.validation.nameReserved', {
-        defaultMessage: 'This field name is reserved.',
-      });
-    } else {
-      const isDuplicate = value.fields.some((f) => f.name.trim() === name);
-      if (isDuplicate) {
-        errors.name = i18n.translate(
-          'xpack.dataFederation.mappingEditor.validation.nameDuplicate',
-          {
-            defaultMessage: 'Names must be unique.',
-          }
-        );
-      }
-    }
-
-    if (!type) {
-      errors.type = i18n.translate('xpack.dataFederation.mappingEditor.validation.typeRequired', {
-        defaultMessage: 'Type is required.',
-      });
-    }
-
-    const format = draftField.format.trim();
-    if (format && type !== 'date') {
-      errors.format = i18n.translate(
-        'xpack.dataFederation.mappingEditor.validation.formatDateOnly',
-        {
-          defaultMessage: 'Format is only valid for type date.',
-        }
-      );
-    }
-
-    return errors;
-  }, [draftField, draftValidationAttempted, reservedFieldNames, value.fields]);
-
-  const addDraftField = useCallback(() => {
-    setDraftValidationAttempted(true);
-
-    const name = draftField.name.trim();
-    const type = draftField.type;
-    const format = draftField.format.trim();
-    const isDuplicate = Boolean(name) && value.fields.some((f) => f.name.trim() === name);
-    const isReserved = Boolean(name) && (reservedFieldNames ?? []).some((n) => n.trim() === name);
-    const hasErrors =
-      !name || !type || isDuplicate || isReserved || (Boolean(format) && type !== 'date');
-    if (hasErrors) return;
-
-    const id = `mapping-field-${nextId.current++}`;
-    onChange((prev) => ({
-      ...prev,
-      fields: [
-        ...prev.fields,
-        {
-          ...draftField,
-          id,
-          name,
-          path: draftField.path.trim(),
-          format: draftField.format.trim(),
-        },
-      ],
-    }));
-
-    // Reset draft for subsequent additions (only visible in empty state).
-    setDraftField({
-      id: 'draft',
-      name: '',
-      path: '',
-      type: 'keyword',
-      format: '',
+  const cancelEditingField = useCallback((id: string) => {
+    setFieldErrorsById((prev) => {
+      const { [id]: _removed, ...rest } = prev;
+      return rest;
     });
-    setDraftValidationAttempted(false);
-  }, [draftField, onChange, reservedFieldNames, value.fields]);
+    setEditingFieldId(null);
+  }, []);
+
+  const validateFieldCandidate = useCallback(
+    (id: string, candidate: MappingEditorField): FieldValidationErrors | undefined => {
+      const nextValue: MappingEditorValue = {
+        ...value,
+        fields: value.fields.map((f) => (f.id === id ? candidate : f)),
+      };
+      const nextValidation = validateMappingEditorValue(nextValue, { reservedFieldNames });
+      return nextValidation.fieldErrorsById[id];
+    },
+    [reservedFieldNames, value]
+  );
+
+  const addDraftField = useCallback(
+    (nextDraft: FieldMappingFormValue) => {
+      const tmpId = '__draft__';
+      const candidate: MappingEditorField = {
+        id: tmpId,
+        name: nextDraft.name,
+        path: nextDraft.path,
+        type: nextDraft.type as any,
+        format: nextDraft.format,
+      };
+
+      const nextValue: MappingEditorValue = {
+        ...value,
+        fields: [...value.fields, candidate],
+      };
+      const nextValidation = validateMappingEditorValue(nextValue, { reservedFieldNames });
+      const errors = nextValidation.fieldErrorsById[tmpId];
+      if (errors) {
+        setDraftErrors(errors);
+        return;
+      }
+
+      const id = `mapping-field-${nextId.current++}`;
+      onChange((prev) => ({
+        ...prev,
+        fields: [
+          ...prev.fields,
+          {
+            ...candidate,
+            id,
+            name: candidate.name.trim(),
+            path: candidate.path.trim(),
+            format: candidate.format.trim(),
+          },
+        ],
+      }));
+
+      setDraftErrors({});
+      setDraftFormKey((k) => k + 1);
+    },
+    [onChange, reservedFieldNames, value]
+  );
 
   return (
     <div data-test-subj="dataFederationMappingEditor">
@@ -317,19 +269,14 @@ export const MappingEditor: FC<MappingEditorProps> = ({
       {value.fields.length === 0 ? (
         <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
           <FieldMappingForm
-            value={draftField}
-            onChange={(patch) =>
-              setDraftField((prev) => ({ ...prev, ...(patch as Partial<MappingEditorField>) }))
-            }
-            typeHelpText={
-              draftField.type
-                ? getFieldTypeDocsHelpText(
-                    draftField.type as DatasetMappingFieldType,
-                    typeInfoByValue
-                  )
-                : undefined
-            }
-            errors={draftFieldErrors}
+            key={draftFormKey}
+            value={emptyDraftInitialValue}
+            typeInfoByValue={typeInfoByValue as any}
+            errors={draftErrors}
+            onDraftChange={() => {
+              if (Object.keys(draftErrors).length === 0) return;
+              setDraftErrors({});
+            }}
             mode="create"
             onSubmit={addDraftField}
           />
@@ -343,9 +290,8 @@ export const MappingEditor: FC<MappingEditorProps> = ({
               )[f.type];
               const isEditing = editingFieldId === f.id;
               const isCreating = creatingFieldIds.includes(f.id);
-              const shouldShowRowValidation = validatedFieldIds.includes(f.id);
-              const rowErrors = shouldShowRowValidation
-                ? validation.fieldErrorsById[f.id]
+              const rowErrors = validatedFieldIds.includes(f.id)
+                ? fieldErrorsById[f.id]
                 : undefined;
               return (
                 <EuiFlexItem key={f.id}>
@@ -366,27 +312,44 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                       {isEditing ? (
                         <FieldMappingForm
                           value={f}
-                          onChange={(patch) => {
-                            updateField(f.id, patch as Partial<MappingEditorField>);
-                          }}
-                          typeHelpText={
-                            f.type ? getFieldTypeDocsHelpText(f.type, typeInfoByValue) : undefined
-                          }
+                          typeInfoByValue={typeInfoByValue as any}
                           errors={rowErrors}
                           mode={isCreating ? 'create' : 'edit'}
                           onCancel={
                             isCreating ? () => removeField(f.id) : () => cancelEditingField(f.id)
                           }
-                          onSubmit={() => {
-                            const nextValidation = validateMappingEditorValue(value, {
-                              reservedFieldNames,
+                          onDraftChange={(draftValue) => {
+                            if (!validatedFieldIds.includes(f.id)) return;
+                            const candidate = { ...f, ...draftValue } as MappingEditorField;
+                            const errors = validateFieldCandidate(f.id, candidate);
+                            setFieldErrorsById((prev) => {
+                              if (!errors) return prev;
+                              return { ...prev, [f.id]: errors };
                             });
-                            const fieldErrors = nextValidation.fieldErrorsById[f.id];
-                            markFieldValidated(f.id);
-                            if (fieldErrors) return;
+                          }}
+                          onSubmit={(draftValue) => {
+                            setValidatedFieldIds((prev) =>
+                              prev.includes(f.id) ? prev : [...prev, f.id]
+                            );
+                            const candidate = { ...f, ...draftValue } as MappingEditorField;
+                            const errors = validateFieldCandidate(f.id, candidate);
+                            if (errors) {
+                              setFieldErrorsById((prev) => ({ ...prev, [f.id]: errors }));
+                              return;
+                            }
+
+                            replaceField(f.id, {
+                              ...candidate,
+                              name: candidate.name.trim(),
+                              path: candidate.path.trim(),
+                              format: candidate.format.trim(),
+                            });
                             setEditingFieldId(null);
                             setCreatingFieldIds((prev) => prev.filter((v) => v !== f.id));
-                            delete originalFieldById.current[f.id];
+                            setFieldErrorsById((prev) => {
+                              const { [f.id]: _removed, ...rest } = prev;
+                              return rest;
+                            });
                           }}
                         />
                       ) : (

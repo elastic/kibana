@@ -1085,7 +1085,7 @@ const labelReplaceDefinition: PromQLFunctionDefinition = {
   name: 'label_replace',
   description: i18n.translate('kbn-esql-language.promql.definitions.label_replace', {
     defaultMessage:
-      'Matches the regular expression `regex` against the value of the label `src_label`. On a match, sets the label `dst_label` to the expansion of `replacement`, substituting `$1`, `$name`, and `${name}` with the matched capture groups; on no match the input series is returned unchanged.',
+      "Matches the regular expression `regex` against the value of the label `src_label`. On a match, sets the label `dst_label` to the expansion of `replacement`, substituting `$1`, `$name`, and $'{name}' with the matched capture groups; on no match the input series is returned unchanged.",
   }),
   preview: false,
   signatures: [
@@ -1107,7 +1107,7 @@ const labelReplaceDefinition: PromQLFunctionDefinition = {
           name: 'replacement',
           type: 'scalar',
           optional: false,
-          description: 'Replacement value, with `$1`/`$name`/`${name}` capture-group expansion.',
+          description: "Replacement value, with `$1`/`$name`/$'{name}' capture-group expansion.",
         },
         {
           name: 'src_label',

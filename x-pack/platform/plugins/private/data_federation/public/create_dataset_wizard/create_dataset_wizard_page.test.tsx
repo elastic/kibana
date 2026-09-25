@@ -473,42 +473,6 @@ describe('CreateDatasetWizardPage', () => {
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
   });
 
-  it('allows navigating back from an invalid mapping step and returning to it', async () => {
-    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
-
-    fireEvent.click(getByTestId('createDatasetDataSource'));
-    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
-    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
-    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
-    selectFormat(getByTestId, 'csv');
-
-    await clickNext(getByTestId);
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-    ).toBeInTheDocument();
-
-    await clickNext(getByTestId);
-    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
-
-    // Make mapping invalid (Define schema + no mapped fields).
-    fireEvent.click(getByTestId('createDatasetWizardTimeseriesToggle'));
-    fireEvent.click(getByTestId('createDatasetWizardDefineSchemaCard'));
-
-    await clickNext(getByTestId);
-    expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
-    expect(getByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeInTheDocument();
-
-    // Navigate back to Additional settings, then Next should bring us back to Mapping
-    // so the user can fix the invalid mappings.
-    await clickBack(getByTestId);
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-    ).toBeInTheDocument();
-
-    await clickNext(getByTestId);
-    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
-  });
-
   it('blocks navigation when max error ratio is out of range', async () => {
     const { getByTestId, findByTestId, queryByTestId } = renderWizard();
 

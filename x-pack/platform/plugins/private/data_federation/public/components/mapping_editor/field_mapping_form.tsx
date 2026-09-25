@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   EuiButton,
@@ -35,12 +35,12 @@ export interface FieldMappingFormErrors {
 
 export interface FieldMappingFormProps {
   value: FieldMappingFormValue;
-  onChange: (patch: Partial<FieldMappingFormValue>) => void;
-  typeHelpText?: ReactNode;
   errors?: FieldMappingFormErrors;
   mode: 'create' | 'edit';
-  onSubmit: () => void;
+  onSubmit: (value: FieldMappingFormValue) => void;
   onCancel?: () => void;
+  onDraftChange?: (value: FieldMappingFormValue) => void;
+  typeInfoByValue: Record<DatasetMappingFieldType, { label: string; docs: string }>;
 }
 
 const isDateLikeType = (type: DatasetMappingFieldType): boolean => {
@@ -124,14 +124,34 @@ export const getFieldTypeDocsHelpText = (
 
 export function FieldMappingForm({
   value,
-  onChange,
-  typeHelpText,
   errors,
   mode,
   onSubmit,
   onCancel,
+  onDraftChange,
+  typeInfoByValue,
 }: FieldMappingFormProps) {
-  const isDateType = Boolean(value.type) && isDateLikeType(value.type as DatasetMappingFieldType);
+  const [draft, setDraft] = useState<FieldMappingFormValue>(value);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  const typeHelpText: ReactNode = useMemo(() => {
+    const type = draft.type as DatasetMappingFieldType;
+    if (!type) return undefined;
+    return getFieldTypeDocsHelpText(type, typeInfoByValue);
+  }, [draft.type, typeInfoByValue]);
+
+  const isDateType = Boolean(draft.type) && isDateLikeType(draft.type as DatasetMappingFieldType);
+
+  const updateDraft = (patch: Partial<FieldMappingFormValue>) => {
+    setDraft((prev) => {
+      const next = { ...prev, ...patch };
+      onDraftChange?.(next);
+      return next;
+    });
+  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
@@ -156,11 +176,11 @@ export function FieldMappingForm({
                 isInvalid={Boolean(errors?.type)}
                 fullWidth
                 options={DEFAULT_TYPE_OPTIONS as unknown as Array<{ value: string; text: string }>}
-                value={value.type}
+                value={draft.type}
                 onChange={(e) => {
                   const nextType = e.target.value as DatasetMappingFieldType;
                   const nextTypeIsDate = isDateLikeType(nextType);
-                  onChange({
+                  updateDraft({
                     type: nextType,
                     ...(nextTypeIsDate ? {} : { format: '' }),
                   });
@@ -182,8 +202,8 @@ export function FieldMappingForm({
               <EuiFieldText
                 isInvalid={Boolean(errors?.name)}
                 fullWidth
-                value={value.name}
-                onChange={(e) => onChange({ name: e.target.value })}
+                value={draft.name}
+                onChange={(e) => updateDraft({ name: e.target.value })}
                 data-test-subj="dataFederationMappingEditorFieldName"
               />
             </EuiFormRow>
@@ -201,8 +221,8 @@ export function FieldMappingForm({
             >
               <EuiFieldText
                 fullWidth
-                value={value.path}
-                onChange={(e) => onChange({ path: e.target.value })}
+                value={draft.path}
+                onChange={(e) => updateDraft({ path: e.target.value })}
                 data-test-subj="dataFederationMappingEditorFieldPath"
               />
             </EuiFormRow>
@@ -221,8 +241,8 @@ export function FieldMappingForm({
                 <EuiFieldText
                   isInvalid={Boolean(errors?.format)}
                   fullWidth
-                  value={value.format}
-                  onChange={(e) => onChange({ format: e.target.value })}
+                  value={draft.format}
+                  onChange={(e) => updateDraft({ format: e.target.value })}
                   data-test-subj="dataFederationMappingEditorFieldFormat"
                 />
               </EuiFormRow>
@@ -242,9 +262,9 @@ export function FieldMappingForm({
           ) : null}
           <EuiFlexItem grow={false}>
             {mode === 'create' ? (
-              <CreateButton onClick={onSubmit} />
+              <CreateButton onClick={() => onSubmit(draft)} />
             ) : (
-              <UpdateButton onClick={onSubmit} />
+              <UpdateButton onClick={() => onSubmit(draft)} />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

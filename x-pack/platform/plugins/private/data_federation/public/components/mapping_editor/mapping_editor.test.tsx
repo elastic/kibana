@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -58,6 +58,55 @@ describe('MappingEditor', () => {
     expect((getByTestId('dataFederationMappingEditorFieldName') as HTMLInputElement).value).toBe(
       '@timestamp'
     );
+  });
+
+  it('does not apply edits until Update is clicked', () => {
+    const Wrapper = () => {
+      const [value, setValue] = useState<MappingEditorValue>({
+        dynamic: true,
+        fields: [
+          {
+            id: 'field-1',
+            name: 'foo',
+            path: '',
+            type: 'keyword',
+            format: '',
+          },
+        ],
+      });
+
+      return (
+        <EuiProvider>
+          <MappingEditor
+            value={value}
+            onChange={(next) =>
+              setValue((prev) =>
+                typeof next === 'function' ? (next as (p: MappingEditorValue) => MappingEditorValue)(prev) : next
+              )
+            }
+            docLinks={docLinksMock}
+          />
+          <div data-test-subj="mappingEditorValueJson">{JSON.stringify(value)}</div>
+        </EuiProvider>
+      );
+    };
+
+    const { getByTestId } = render(<Wrapper />);
+
+    // Enter edit mode for the first field.
+    fireEvent.click(getByTestId('dataFederationMappingEditorEditField'));
+
+    // Change name while editing.
+    fireEvent.change(getByTestId('dataFederationMappingEditorFieldName'), {
+      target: { value: 'bar' },
+    });
+
+    // Underlying mapping value should not change until Update.
+    expect(getByTestId('mappingEditorValueJson').textContent).toContain('"name":"foo"');
+
+    fireEvent.click(getByTestId('dataFederationMappingEditorUpdateField'));
+
+    expect(getByTestId('mappingEditorValueJson').textContent).toContain('"name":"bar"');
   });
 });
 
