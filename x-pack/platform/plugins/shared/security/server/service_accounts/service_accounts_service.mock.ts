@@ -12,7 +12,6 @@ import type { ServiceAccountsServiceStart } from './types';
 export const serviceAccountsServiceMock = {
   createStart: (): jest.MockedObjectDeep<ServiceAccountsServiceStart> => ({
     backend: {
-      roleLimits: { maxRoles: 50, maxRoleNameLength: 507 },
       create: jest.fn().mockResolvedValue({
         id: 'mock-service-account-id',
         name: 'mock-service-account-name',

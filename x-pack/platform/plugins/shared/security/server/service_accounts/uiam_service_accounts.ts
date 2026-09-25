@@ -150,8 +150,6 @@ export interface UiamServiceAccountsOptions {
 }
 
 export class UiamServiceAccounts implements ServiceAccountsBackend {
-  readonly roleLimits = UIAM_SERVICE_ACCOUNT_ROLE_LIMITS;
-
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
@@ -215,7 +213,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const { name, roles } = parseCreateServiceAccountParams(params, this.roleLimits);
+    const { name, roles } = parseCreateServiceAccountParams(
+      params,
+      UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
+    );
 
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 

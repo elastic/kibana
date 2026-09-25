@@ -74,7 +74,6 @@ describe('ServiceAccountWorkloadBindings', () => {
     });
 
     backend = {
-      roleLimits: { maxRoles: 50, maxRoleNameLength: 507 },
       create: jest.fn(),
       list: jest.fn(),
       get: jest.fn(),

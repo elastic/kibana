@@ -17,7 +17,6 @@ import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import type {
   ListServiceAccountsResponse,
   ServiceAccountDirectoryEntry,
-  ServiceAccountRoleLimits,
 } from '../../common/service_accounts';
 
 /**
@@ -36,9 +35,6 @@ export interface ListServiceAccountsParams {
  * ones, so the route and contract layers stay backend-agnostic.
  */
 export interface ServiceAccountsBackend {
-  /** The limits this backend puts on the roles `create` accepts. */
-  readonly roleLimits: ServiceAccountRoleLimits;
-
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
 
   /**

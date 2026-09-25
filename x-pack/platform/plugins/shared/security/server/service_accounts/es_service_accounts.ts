@@ -123,8 +123,6 @@ export interface EsServiceAccountsOptions {
  * handed a short-lived token exchanged from it.
  */
 export class EsServiceAccounts implements ServiceAccountsBackend {
-  readonly roleLimits = ES_SERVICE_ACCOUNT_ROLE_LIMITS;
-
   private readonly fakeRequests: ServiceAccountFakeRequests;
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
@@ -212,7 +210,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    const { name, roles } = parseCreateServiceAccountParams(params, this.roleLimits);
+    const { name, roles } = parseCreateServiceAccountParams(params, ES_SERVICE_ACCOUNT_ROLE_LIMITS);
     const serviceAccountId = `${namespace}/${name}`;
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
