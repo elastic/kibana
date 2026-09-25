@@ -45,11 +45,18 @@ export {
   type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
 export {
+  OverviewTab,
+  type OverviewTabProps,
+} from './src/components/details/details_flyout_tab_contents';
+export {
   EscalationFlyoutHeader,
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
-export { OverviewTab } from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
+export {
+  ProposedActionButton,
+  type ProposedActionButtonProps,
+} from './src/components/details/proposed_action_button';
 
 export {
   AttachmentSummarySection,
@@ -72,8 +79,19 @@ export {
   registerEscalationTemplateUI,
   type RegisterEscalationTemplateUIOptions,
   getInvestigationTabIds,
+  getEscalationTabIds,
 } from './src/template_ui/register';
-export { type RenderAssignees, type AssigneesSlotRenderProps } from './src/template_ui/types';
+export {
+  type RenderAssignees,
+  type AssigneesSlotRenderProps,
+  type RenderLinkedInvestigations,
+  type LinkedInvestigationsSlotRenderProps,
+} from './src/template_ui/types';
+export {
+  LinkedInvestigationsList,
+  type LinkedInvestigationItem,
+  type LinkedInvestigationsListProps,
+} from './src/components/details/linked_investigations_list';
 export { conversationToInvestigation } from './src/template_ui/conversation_to_investigation';
 
 export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';

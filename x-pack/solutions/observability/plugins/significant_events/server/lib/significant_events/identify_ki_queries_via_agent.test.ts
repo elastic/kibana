@@ -120,6 +120,7 @@ describe('executeKIQueryGenerationAgent', () => {
         agentBuilder,
         request,
         connectorId: 'connector-1',
+        interactionId: 'run-1',
         definition,
         existingQueries: [],
         signal: requestSignal,
@@ -149,7 +150,18 @@ describe('executeKIQueryGenerationAgent', () => {
     expect(timeoutSpy).toHaveBeenCalledWith(300_000);
     expect(anySpy).toHaveBeenCalledWith([requestSignal, timeoutSignal]);
     expect(executeAgent).toHaveBeenCalledWith(
-      expect.objectContaining({ abortSignal: executionSignal })
+      expect.objectContaining({
+        abortSignal: executionSignal,
+        params: expect.objectContaining({
+          telemetryMetadata: {
+            pluginId: 'significant_events_ki_query_generation',
+            aggregateBy: 'significant_events',
+            productSolution: 'observability',
+            productFeature: 'nightshift',
+            interactionId: 'run-1',
+          },
+        }),
+      })
     );
   });
 
@@ -187,6 +199,7 @@ describe('executeKIQueryGenerationAgent', () => {
         agentBuilder,
         request: {} as KibanaRequest,
         connectorId: 'connector-1',
+        interactionId: 'run-1',
         definition,
         existingQueries: [],
         logger: loggerMock.create(),

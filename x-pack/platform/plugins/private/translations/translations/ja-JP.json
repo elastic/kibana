@@ -23282,6 +23282,8 @@
     "xpack.fleet.noAccess.accessDeniedTitle": "アクセスが拒否されました",
     "xpack.fleet.noTagsValue": "タグなし",
     "xpack.fleet.oldAppTitle": "Ingest Manager",
+    "xpack.fleet.onboardingOverride.awsDescription": "Amazon Web Services（AWS）からログとメトリクスを収集します。",
+    "xpack.fleet.onboardingOverride.awsTitle": "Amazon Web Services",
     "xpack.fleet.otelUi.collectorConfigView.allPipelines": "すべてのパイプライン",
     "xpack.fleet.otelUi.collectorConfigView.allSignalPipelines": "全ての{signal}（{count}件のパイプライン）",
     "xpack.fleet.otelUi.collectorConfigView.noPipelinesBody": "このコレクタ構成には可視化するパイプラインは含まれていません。",
