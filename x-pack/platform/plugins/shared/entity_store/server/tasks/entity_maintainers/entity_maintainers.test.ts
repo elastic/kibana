@@ -68,6 +68,9 @@ function createMockDeps() {
         asScoped: () => ({ asCurrentUser: mockEsClient }),
       },
     },
+    executionContext: {
+      withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()),
+    },
   };
   const plugins = {
     licensing: {
@@ -86,6 +89,7 @@ function createMockDeps() {
     taskManagerSetup,
     core,
     analytics,
+    withContextSpy: coreStart.executionContext.withContext as jest.Mock,
   };
 }
 
@@ -605,6 +609,40 @@ describe('entity_maintainer task', () => {
       expect(run).not.toHaveBeenCalled();
       expect(result.state.metadata.runs).toBe(currentState.metadata.runs);
       expect(result.state.state).toEqual(currentState.state);
+    });
+
+    it('runs the registered runner inside the entity-maintainer execution context', async () => {
+      const { logger, taskManagerSetup, core, analytics, withContextSpy } = createMockDeps();
+      const config = createMockConfig();
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      const runner = defs[taskType].createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
+          fakeRequest: { headers: {} } as KibanaRequest,
+        })
+      );
+
+      await runner.run();
+
+      expect(withContextSpy).toHaveBeenCalledWith(
+        {
+          type: 'security_solution',
+          name: 'entity_analytics-entity_maintainers_task',
+          id: 'test-maintainer:default',
+        },
+        expect.any(Function)
+      );
     });
   });
 });

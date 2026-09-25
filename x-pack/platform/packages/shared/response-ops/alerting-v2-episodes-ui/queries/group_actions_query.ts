@@ -12,7 +12,7 @@ export interface GroupActionRow {
   rule_id: string | null;
   last_deactivate_action: string | null;
   last_snooze_action: string | null;
-  snooze_expiry: string | null;
+  snoozed_until: string | null;
   tags: string | string[] | null;
   last_snooze_actor: string | null;
   last_deactivate_actor: string | null;
@@ -29,9 +29,9 @@ export const buildGroupActionsQuery = (spaceId: string, groupHashes: string[]) =
         tags = LAST(tags, @timestamp) WHERE action_type IN ("tag"),
         last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
         last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-        snooze_expiry = LAST(expiry, @timestamp) WHERE action_type IN ("snooze"),
+        snoozed_until = LAST(expiry, @timestamp) WHERE action_type IN ("snooze"),
         last_snooze_actor = LAST(actor, @timestamp) WHERE action_type == "snooze",
         last_deactivate_actor = LAST(actor, @timestamp) WHERE action_type == "deactivate"
       BY group_hash, rule_id`
-    .keep('group_hash', 'rule_id', 'last_deactivate_action', 'last_snooze_action', 'snooze_expiry', 'tags', 'last_snooze_actor', 'last_deactivate_actor');
+    .keep('group_hash', 'rule_id', 'last_deactivate_action', 'last_snooze_action', 'snoozed_until', 'tags', 'last_snooze_actor', 'last_deactivate_actor');
 };

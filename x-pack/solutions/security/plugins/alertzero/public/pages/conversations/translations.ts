@@ -37,3 +37,18 @@ export const DECISION_ERRORS: Readonly<Record<number | 'default', string>> = Obj
     defaultMessage: 'The decision could not be submitted. Try again.',
   }),
 });
+
+export const PROPOSED_ACTIONS_EMPTY_LABEL = i18n.translate(
+  'xpack.alertzero.detailsFlyout.proposedActions.empty',
+  { defaultMessage: 'No proposed actions for this investigation.' }
+);
+
+export const PROPOSED_ACTIONS_LOAD_ERROR_LABEL = i18n.translate(
+  'xpack.alertzero.detailsFlyout.proposedActions.loadError',
+  { defaultMessage: 'Unable to load proposed actions. Try refreshing the page.' }
+);
+
+export const PROPOSED_ACTIONS_SHOW_MORE_LABEL = i18n.translate(
+  'xpack.alertzero.detailsFlyout.proposedActions.showMore',
+  { defaultMessage: 'Show more proposed actions' }
+);

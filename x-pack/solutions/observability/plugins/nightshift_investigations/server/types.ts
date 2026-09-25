@@ -24,6 +24,7 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { SandboxPluginSetup, SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
+import type { DeleteAllInvestigationsResult } from './storage';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export interface InvestigationQuotaResult {
@@ -39,6 +40,8 @@ export interface NightshiftInvestigationsServerSetup {
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
   isInvestigationAvailable: (request: KibanaRequest) => Promise<boolean>;
+  /** Deletes investigations in every space; callers must authorize this destructive operation. */
+  deleteAllInvestigations: () => Promise<DeleteAllInvestigationsResult>;
 }
 
 export interface NightshiftInvestigationsSetupDeps {
