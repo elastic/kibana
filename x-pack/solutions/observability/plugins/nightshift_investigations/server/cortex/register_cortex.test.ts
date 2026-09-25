@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { runCortexOptimize } from './register_cortex';
 import { optimizeCortex } from './optimize';
@@ -41,6 +42,7 @@ describe('runCortexOptimize', () => {
       assistantMessage: 'redis',
       esClient,
       spaceId: 'default',
+      analytics: coreMock.createSetup().analytics,
       getInference,
       getSearchInferenceEndpoints,
       logger: loggerMock.create(),

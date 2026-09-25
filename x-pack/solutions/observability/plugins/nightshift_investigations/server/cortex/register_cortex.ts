@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceSetup,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
@@ -14,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { createCortexPageStore, type CortexPageStore } from './page_store';
@@ -56,16 +62,25 @@ export const hydrateCortexWorkspace = async ({
   esClient,
   spaceId,
   signal,
+  analytics,
+  conversationId,
   logger,
 }: {
   session: SandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
+  analytics: AnalyticsServiceSetup;
+  conversationId?: string;
   logger: Logger;
 }): Promise<void> => {
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  await materializeCortex({ session, store, logger });
+  await materializeCortex({
+    session,
+    store,
+    telemetry: createCortexTelemetry({ analytics, conversationId, logger }),
+    logger,
+  });
 };
 
 export const runCortexOptimize = async ({
@@ -76,6 +91,9 @@ export const runCortexOptimize = async ({
   esClient,
   spaceId,
   signal,
+  analytics,
+  conversationId,
+  roundId,
   getInference,
   getSearchInferenceEndpoints,
   logger,
@@ -87,6 +105,9 @@ export const runCortexOptimize = async ({
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
+  analytics: AnalyticsServiceSetup;
+  conversationId?: string;
+  roundId?: string;
   getInference: () => InferenceServerStart | undefined;
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
   logger: Logger;
@@ -127,6 +148,12 @@ export const runCortexOptimize = async ({
     proposeEdits: createLlmProposeCortexEdits({ inferenceClient, connectorId }),
     userMessage,
     assistantMessage,
+    telemetry: createCortexTelemetry({
+      analytics,
+      conversationId,
+      roundId,
+      logger,
+    }),
     logger,
   });
 };
