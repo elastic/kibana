@@ -8,11 +8,7 @@
 import type { EsClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import {
-  API_VERSIONS,
-  RESOLUTION_RULE_IDS,
-  type GetEntityMaintainersResponse,
-} from '../../../../common';
+import { API_VERSIONS, RESOLUTION_RULE_IDS } from '../../../../common';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
@@ -239,32 +235,6 @@ export const installEntityStoreSuite = async ({
     }
   );
   expect(initMaintainersResponse.statusCode).toBe(200);
-
-  const maintainersResponse = await apiClient.get(
-    ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
-    {
-      headers: internalHeaders,
-      responseType: 'json',
-    }
-  );
-  expect(maintainersResponse.statusCode).toBe(200);
-
-  const { maintainers } = maintainersResponse.body as GetEntityMaintainersResponse;
-  for (const maintainer of maintainers) {
-    if (maintainer.taskStatus !== 'stopped') {
-      continue;
-    }
-
-    const startResponse = await apiClient.put(
-      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START(maintainer.id),
-      {
-        headers: internalHeaders,
-        responseType: 'json',
-        body: {},
-      }
-    );
-    expect(startResponse.statusCode).toBe(200);
-  }
 };
 
 export const uninstallEntityStoreSuite = async ({
