@@ -75,6 +75,21 @@ describe('CustomizeLandingEmptyState', () => {
     expect(screen.getByTestId('emptyStateFooterContent')).toHaveTextContent('Footer note');
   });
 
+  it('renders a provided illustration node instead of an image src', () => {
+    renderWithIntl(
+      <CustomizeLandingEmptyState
+        dataTestSubj="illustrationNode"
+        illustration={<span data-test-subj="customIllustration">illustration</span>}
+        title="Title"
+        description="Body."
+        learnMoreHref="https://example.com/docs"
+      />
+    );
+
+    expect(screen.getByTestId('customIllustration')).toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
   it('renders learn more suffix as plain text after the link', () => {
     renderWithIntl(
       <CustomizeLandingEmptyState

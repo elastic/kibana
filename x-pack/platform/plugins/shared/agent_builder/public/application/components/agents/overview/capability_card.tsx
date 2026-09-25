@@ -22,6 +22,7 @@ export interface CapabilityCardProps {
   description: string;
   emptyDescription: string;
   image?: string;
+  illustration?: React.ReactNode;
   href?: string;
   onClick?: () => void;
   isCountLoading?: boolean;
@@ -37,6 +38,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
   description,
   emptyDescription,
   image,
+  illustration,
   href,
   onClick,
   isCountLoading = false,
@@ -98,7 +100,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
               justify-content: center;
             `}
           >
-            {image && <img src={image} alt="" width={96} height={96} />}
+            {illustration ?? (image && <img src={image} alt="" width={96} height={96} />)}
           </div>
         }
         css={css`
