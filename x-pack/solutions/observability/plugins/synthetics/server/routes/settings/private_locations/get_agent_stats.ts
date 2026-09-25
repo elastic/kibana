@@ -6,6 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -194,10 +196,10 @@ const getHostMetricsFromSystem = async (
  * Package policies are listed across all spaces; counts are limited to monitors
  * in spaces the caller can read so a shared location doesn't leak other spaces.
  */
-const getVisibleMonitorConfigIdsByLocation = async (
+const getVisibleMonitorSpacesByLocation = async (
   monitorConfigRepository: MonitorConfigRepository,
   locationIds: string[]
-): Promise<Map<string, Set<string>>> => {
+): Promise<Map<string, Map<string, Set<string>>>> => {
   if (locationIds.length === 0) {
     return new Map();
   }
@@ -207,17 +209,20 @@ const getVisibleMonitorConfigIdsByLocation = async (
     fields: ['config_id', ConfigKey.MONITOR_QUERY_ID, ConfigKey.LOCATIONS],
     showFromAllSpaces: true,
   });
-  const configIdsByLocation = new Map<string, Set<string>>();
+  const configIdsByLocation = new Map<string, Map<string, Set<string>>>();
 
-  for (const { id, attributes } of monitors) {
+  for (const { id, attributes, namespaces } of monitors) {
     const configId = attributes[ConfigKey.MONITOR_QUERY_ID] || attributes.config_id || id;
+    const visibleSpaces = namespaces?.length ? namespaces : [DEFAULT_SPACE_ID];
     for (const { id: locationId } of attributes[ConfigKey.LOCATIONS] ?? []) {
       if (!requestedLocationIds.has(locationId)) {
         continue;
       }
-      const configIds = configIdsByLocation.get(locationId) ?? new Set<string>();
-      configIds.add(configId);
-      configIdsByLocation.set(locationId, configIds);
+      const spacesByConfigId = configIdsByLocation.get(locationId) ?? new Map();
+      const spaces = spacesByConfigId.get(configId) ?? new Set<string>();
+      visibleSpaces.forEach((spaceId) => spaces.add(spaceId));
+      spacesByConfigId.set(configId, spaces);
+      configIdsByLocation.set(locationId, spacesByConfigId);
     }
   }
 
@@ -249,17 +254,17 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
     const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
     const packagePolicyService = new PackagePolicyService(server);
     const isAgentSharding = await isAgentShardingActive(server);
-    const visibleConfigIdsByLocation = isAgentSharding
-      ? await getVisibleMonitorConfigIdsByLocation(
+    const visibleMonitorSpacesByLocation = isAgentSharding
+      ? await getVisibleMonitorSpacesByLocation(
           monitorConfigRepository,
           locations.map(({ id }) => id)
         ).catch((error) => {
           server.logger.warn('Unable to load visible monitors for private location agent stats', {
             error,
           });
-          return new Map<string, Set<string>>();
+          return new Map<string, Map<string, Set<string>>>();
         })
-      : new Map<string, Set<string>>();
+      : new Map<string, Map<string, Set<string>>>();
 
     const { elasticsearch } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
@@ -274,11 +279,23 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
             ? packagePolicyService
                 .listByAgentPolicy({ agentPolicyId: location.agentPolicyId })
                 .then((policies) => {
-                  const visibleConfigIds = visibleConfigIdsByLocation.get(location.id);
+                  const visibleSpacesByConfigId = visibleMonitorSpacesByLocation.get(location.id);
                   return countMonitorsByAssignedAgent(
-                    policies.filter(({ id }) =>
-                      visibleConfigIds?.has(configIdOf(id, location.id) ?? '')
-                    ),
+                    policies.filter(({ id, spaceIds }) => {
+                      const configId = configIdOf(id, location.id);
+                      const visibleSpaces = configId
+                        ? visibleSpacesByConfigId?.get(configId)
+                        : undefined;
+                      if (!visibleSpaces) {
+                        return false;
+                      }
+                      const policySpaceIds = spaceIds?.length ? spaceIds : [DEFAULT_SPACE_ID];
+                      return (
+                        visibleSpaces.has(ALL_SPACES_ID) ||
+                        policySpaceIds.includes(ALL_SPACES_ID) ||
+                        policySpaceIds.some((spaceId) => visibleSpaces.has(spaceId))
+                      );
+                    }),
                     location.id
                   );
                 })

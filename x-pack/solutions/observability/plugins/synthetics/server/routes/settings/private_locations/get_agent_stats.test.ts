@@ -82,7 +82,11 @@ const makeContext = ({
   hasEnterprise?: boolean;
   rebalanceEnabled?: boolean;
   visibleConfigIds?: string[];
-  visibleMonitors?: Array<{ id: string; attributes: Record<string, unknown> }>;
+  visibleMonitors?: Array<{
+    id: string;
+    attributes: Record<string, unknown>;
+    namespaces?: string[];
+  }>;
 }) => {
   const search = jest.fn().mockResolvedValue({ aggregations: { by_host: { buckets } } });
   const routeContext = {
@@ -358,6 +362,47 @@ describe('getPrivateLocationAgentStats route', () => {
 
     expect(result[0].agents[0].monitorsAssigned).toBe(0);
     expect(result[1].agents[0].monitorsAssigned).toBe(1);
+  });
+
+  it('does not count a same-ID monitor from another space at the same location', async () => {
+    mockListByAgentPolicy.mockResolvedValue([
+      {
+        id: 'shared-monitor-loc-1-space-b',
+        condition: agentIdCondition('hidden-agent'),
+        spaceIds: ['space-b'],
+      },
+      {
+        id: 'shared-monitor-loc-1-space-a',
+        condition: agentIdCondition('visible-agent'),
+        spaceIds: ['space-a'],
+      },
+    ]);
+    const listAgents = jest.fn().mockResolvedValue({
+      agents: [agent({ id: 'visible-agent' }), agent({ id: 'hidden-agent' })],
+      total: 2,
+    });
+    const { routeContext } = makeContext({
+      listAgentsImpl: listAgents,
+      hasEnterprise: true,
+      visibleMonitors: [
+        {
+          id: 'visible-monitor',
+          namespaces: ['space-a'],
+          attributes: {
+            config_id: 'shared-monitor',
+            [ConfigKey.LOCATIONS]: [{ id: 'loc-1' }],
+          },
+        },
+      ],
+    });
+
+    const result = await run(routeContext);
+    const counts = new Map(
+      result[0].agents.map(({ agentId, monitorsAssigned }) => [agentId, monitorsAssigned])
+    );
+
+    expect(counts.get('visible-agent')).toBe(1);
+    expect(counts.get('hidden-agent')).toBe(0);
   });
 
   it('logs when visible monitors cannot be loaded', async () => {
