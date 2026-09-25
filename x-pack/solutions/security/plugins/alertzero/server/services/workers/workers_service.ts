@@ -34,23 +34,10 @@ import {
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
-
-interface AlertTriageAttachmentService {
-  getRuleAttachmentSelection(params: {
-    search: string;
-    attachmentFilter: 'all' | 'attached' | 'not_attached';
-  }): Promise<{ ruleIds: string[]; attachedRuleIds: string[] }>;
-  updateRuleAttachments(params: {
-    attachRuleIds: string[];
-    detachRuleIds: string[];
-  }): Promise<unknown>;
-}
+import type { AlertTriageAttachmentServiceProvider } from '../../types';
 
 interface AlertTriageOpts {
-  getAttachmentService?: (
-    request: KibanaRequest,
-    workflowId: string
-  ) => Promise<AlertTriageAttachmentService>;
+  getAttachmentService?: AlertTriageAttachmentServiceProvider;
   /**
    * Whether the Alert Analysis workflow will actually analyse anything in the caller's space.
    * Distinct from its `enabled` flag: the workflow installs enabled, but its own guard also
@@ -414,6 +401,7 @@ export class WorkersService {
     const { getAttachmentService } = this.alertTriageOpts;
     if (!getAttachmentService) return;
     const service = await getAttachmentService(request, installedWorkflowId);
+    if (!service) return;
     const selection = await service.getRuleAttachmentSelection({
       search: '',
       attachmentFilter: 'not_attached',
@@ -432,6 +420,7 @@ export class WorkersService {
     const { getAttachmentService } = this.alertTriageOpts;
     if (!getAttachmentService) return;
     const service = await getAttachmentService(request, installedWorkflowId);
+    if (!service) return;
     const selection = await service.getRuleAttachmentSelection({
       search: '',
       attachmentFilter: 'attached',

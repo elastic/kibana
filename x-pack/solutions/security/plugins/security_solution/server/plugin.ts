@@ -1269,8 +1269,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
 
-    return {
-      getAlertAnalysisWorkflowRuleAttachmentService: async (request, workflowId) => {
+    const getAlertAnalysisWorkflowRuleAttachmentService: SecuritySolutionPluginStart['getAlertAnalysisWorkflowRuleAttachmentService'] =
+      async (request, workflowId) => {
         const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
         const [rulesClient, actionsClient, rulesAuthz, license] = await Promise.all([
           plugins.alerting.getRulesClientWithRequest(request),
@@ -1308,7 +1308,18 @@ export class Plugin implements ISecuritySolutionPlugin {
             ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
           },
         });
-      },
+      };
+
+    // Push, not pull: alertzero cannot declare a dependency on this plugin's start contract to
+    // pull this function itself, since this plugin already depends on alertzero (the `alertzero`
+    // setup dependency above) and the reverse edge would make the two plugins depend on each
+    // other, which fails Kibana's plugin boot with a circular-dependency error.
+    plugins.alertzero?.registerAlertTriageAttachmentServiceProvider(
+      getAlertAnalysisWorkflowRuleAttachmentService
+    );
+
+    return {
+      getAlertAnalysisWorkflowRuleAttachmentService,
     };
   }
 
