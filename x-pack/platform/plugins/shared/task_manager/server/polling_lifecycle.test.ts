@@ -822,7 +822,7 @@ describe('TaskPollingLifecycle', () => {
     const claimCalls = () =>
       mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length;
 
-    const startLifecycleWithNudge = async (pollInterval?: number) => {
+    const startLifecycleWithNudge = async () => {
       const errors$ = new Subject<Error>();
       const claimNudgeSubject = new Subject<void>();
       const taskStore = taskStoreMock.create({});
@@ -834,10 +834,6 @@ describe('TaskPollingLifecycle', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       new TaskPollingLifecycle({
         ...taskManagerOpts,
-        config: {
-          ...taskManagerOpts.config,
-          poll_interval: pollInterval ?? taskManagerOpts.config.poll_interval,
-        },
         taskStore,
         elasticsearchAndSOAvailability$,
         claimNudgeService: {
@@ -908,53 +904,27 @@ describe('TaskPollingLifecycle', () => {
       expect(claimCalls()).toBe(baseline + 1);
     });
 
-    test('runs a throttled claim nudge at the end of the window instead of dropping it', async () => {
+    test('drops a throttled claim nudge instead of running it when the window closes', async () => {
       const { claimNudgeSubject } = await startLifecycleWithNudge();
-      const baseline = claimCalls();
+      // The regular cycle the leading nudge re-anchored falls due exactly when the window closes,
+      // so the claim count cannot tell a deferred nudge from it. Count the nudges the poller was
+      // handed instead.
+      const nudgesDelivered = () =>
+        (taskManagerLogger.debug as jest.Mock).mock.calls.filter(([message]) =>
+          String(message).startsWith('Task poller received a claim nudge')
+        ).length;
+      const baseline = nudgesDelivered();
 
       claimNudgeSubject.next();
       await flushPromises();
       claimNudgeSubject.next();
       await flushPromises();
-      expect(claimCalls()).toBe(baseline + 1);
+      expect(nudgesDelivered()).toBe(baseline + 1);
 
-      // The window closes just as the regular cycle after the leading nudge falls due; the held
-      // nudge fires first and cancels it, so the two amount to one cycle.
       clock.tick(taskManagerOpts.config.poll_interval);
       await flushPromises();
 
-      expect(claimCalls()).toBe(baseline + 2);
-    });
-
-    test('drops a held claim nudge when the error backoff starts before its window closes', async () => {
-      // The suite's usual poll interval dwarfs the error-count window, so a backoff activated
-      // mid-window would always clear again before the window closed. This one closes while the
-      // first backoff window is still in effect.
-      const pollInterval = ADJUST_THROUGHPUT_INTERVAL * 1.5;
-      const { errors$, claimNudgeSubject } = await startLifecycleWithNudge(pollInterval);
-      // The regular cycle that a held nudge would have replaced falls due at the same moment, so
-      // the claim count cannot tell the two apart; the log is what distinguishes them.
-      const nudgesIgnored = () =>
-        (taskManagerLogger.debug as jest.Mock).mock.calls.filter(([message]) =>
-          String(message).startsWith('Ignoring claim nudge')
-        ).length;
-      const baseline = nudgesIgnored();
-
-      claimNudgeSubject.next();
-      await flushPromises();
-      claimNudgeSubject.next();
-      await flushPromises();
-
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      await flushPromises();
-      // The nudge passed the pre-throttle check before the backoff existed.
-      expect(nudgesIgnored()).toBe(baseline);
-
-      clock.tick(pollInterval - ADJUST_THROUGHPUT_INTERVAL);
-      await flushPromises();
-
-      expect(nudgesIgnored()).toBe(baseline + 1);
+      expect(nudgesDelivered()).toBe(baseline + 1);
     });
   });
 
