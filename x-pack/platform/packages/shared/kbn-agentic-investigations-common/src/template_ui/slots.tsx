@@ -39,13 +39,23 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * attachment registry cannot be reached from ambient context.
    */
   attachmentsService: AttachmentServiceStartContract;
+  /**
+   * Renders the "Proposed actions" section's content. Called with the conversation's own id so a
+   * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
+   */
+  renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
 }
 
-export const OverviewSlot = ({ conversation, attachmentsService }: OverviewSlotProps) => (
+export const OverviewSlot = ({
+  conversation,
+  attachmentsService,
+  renderProposedActions,
+}: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}
     attachments={conversation.attachments}
     attachmentsService={attachmentsService}
+    proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
   />
 );
 

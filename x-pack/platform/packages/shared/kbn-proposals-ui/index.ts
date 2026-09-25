@@ -10,12 +10,24 @@ export {
   ApprovalContent,
   type ApprovalContentProps,
   type ApprovalAction,
+  type ApprovalDecision,
   type AlwaysAllowOption,
 } from './src/approval_content';
-export { getProposalTone, isProposalExpired } from './src/proposal_helpers';
-export { toActionImpactItems } from './src/to_action_impact_items';
-export type { ApprovalProposal } from './src/types';
 export {
-  type ActionImpactContent,
-  type ActionImpactSectionProps,
-} from './src/action_impact_section';
+  getApprovalOutcomeBadge,
+  type ApprovalOutcomeBadge,
+  type ApprovalOutcomeStatus,
+  type ApprovalPhase,
+} from './src/approval_outcome';
+export {
+  ProposedActionStatusBadge,
+  type ProposedActionStatusBadgeProps,
+} from './src/needs_review_badge';
+export {
+  getProposalCaption,
+  getProposalDecision,
+  getProposalTitle,
+  getProposalTone,
+  isProposalExpired,
+} from './src/proposal_helpers';
+export type { ApprovalProposal } from './src/types';

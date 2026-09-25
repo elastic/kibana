@@ -15,7 +15,8 @@ import * as i18n from './translations';
 export interface DismissProposalModalProps {
   proposalId: string;
   onClose: () => void;
-  onConfirm: (params: { dismissReason: DismissReason; rationale: string }) => void;
+  /** Awaited by the modal, which shows the Dismiss button's own loading state for as long as this takes. */
+  onConfirm: (params: { dismissReason: DismissReason; rationale: string }) => Promise<void>;
 }
 
 /**
