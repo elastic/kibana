@@ -124,6 +124,7 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/shared-ux-error-boundary",
     "@kbn/core-chrome-app-menu",
+    "@kbn/core-chrome-layout-constants",
     "@kbn/es-query-constants",
     "@kbn/presentation-publishing-schemas",
     "@kbn/esql",
