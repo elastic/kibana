@@ -197,6 +197,9 @@ async function defineSearchSourceAlert(page: ScoutPage, alertName: string) {
 }
 
 spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentAgnostic }, () => {
+  // Generated notification links depend on an asynchronously executed rule and can take up to 90 seconds.
+  spaceTest.setTimeout(150_000);
+
   const createdDataViewIds: string[] = [];
   const createdRuleIds: string[] = [];
   let connectorId = '';
