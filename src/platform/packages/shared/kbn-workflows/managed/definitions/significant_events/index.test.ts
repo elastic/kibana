@@ -13,6 +13,7 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
 } from '.';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface WorkflowStep {
   name: string;
@@ -91,6 +92,38 @@ describe('significant events persistence workflow contracts', () => {
     });
     expect(triggerStep.with?.message).toContain('Probable cause:');
     expect(triggerStep.with?.stream_names).toContain('stream_names');
+  });
+
+  it('bounds the discovery investigation message below the trigger input limit', () => {
+    const message = requireStep(discovery, 'trigger_investigation').with?.message;
+    if (!message) throw new Error('Expected trigger_investigation message');
+
+    const renderedMessage = createWorkflowLiquidEngine().parseAndRenderSync(message, {
+      steps: {
+        resolve_open_event: {
+          output: {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    title: 'T'.repeat(512),
+                    summary: 'S'.repeat(10_000),
+                    symptom_hypothesis: 'H'.repeat(10_000),
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+
+    expect(renderedMessage.length).toBeLessThanOrEqual(10_000);
+    expect(renderedMessage).toContain('T'.repeat(512));
+    expect(renderedMessage).toContain('S'.repeat(7000));
+    expect(renderedMessage).not.toContain('S'.repeat(7001));
+    expect(renderedMessage).toContain(`Probable cause: ${'H'.repeat(2000)}`);
+    expect(renderedMessage).not.toContain('...');
   });
 
   it('attributes discovery agent calls to Nightshift', () => {

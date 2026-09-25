@@ -63,6 +63,11 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).toContain('/workspace/elastic.md');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
     expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
+    expect(base.instructions).toContain('<alert_data>');
+    expect(base.instructions).toContain('Affected entity');
+    expect(base.instructions).not.toContain('inputs.context.alerts');
+    expect(base.instructions).toContain('FROM $.<stream-name>');
+    expect(base.instructions).toContain('FROM <stream-name>, <stream-name>.*');
   });
 
   it('hydrates and reinforces decision trees when they are enabled', () => {

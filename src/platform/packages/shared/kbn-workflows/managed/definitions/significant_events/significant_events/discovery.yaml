@@ -450,11 +450,11 @@ steps:
                               subject_type: significant_event
                               subject_id: '{{ foreach.item.event_id }}'
                               message: |
-                                {{ steps.resolve_open_event.output.hits.hits[0]._source.title }}
+                                {{ steps.resolve_open_event.output.hits.hits[0]._source.title | truncate: 512, '' }}
 
-                                {{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}
+                                {{ steps.resolve_open_event.output.hits.hits[0]._source.summary | truncate: 7000, '' }}
 
-                                Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis }}
+                                Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis | truncate: 2000, '' }}
                               title: '{{ steps.resolve_open_event.output.hits.hits[0]._source.title }}'
                               summary: '{{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}'
                               stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'

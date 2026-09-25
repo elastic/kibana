@@ -41,12 +41,11 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
 2.5. **Seed impact.** Before forming hypotheses, write an initial `impact` block:
 
-   - If `inputs.context.alerts` is present (alert-triggered investigation): the alert's
-     `grouping` fields are the known starting point. Extract service-level entities first:
-     `service.name` → entity type "service"; `host.name` → type "host". Skip granular
-     fields (pod names, IPs) unless no service-level entity is available. The YAML message
-     has already established these as confirmed scope — do not re-examine whether they are
-     impacted; they are.
+   - If the prompt contains an `<alert_data>` block (alert-triggered investigation): its
+     `Affected entity` fields are the known starting point. Extract service-level entities first:
+     `service.name` → entity type "service"; `host.name` → type "host". Skip granular fields
+     (pod names, IPs) unless no service-level entity is available. The alert brief has already
+     established these as confirmed scope — do not re-examine whether they are impacted; they are.
    - If `inputs.context.causal_features` or `inputs.context.blast_radius` are present
      (sig-event-triggered investigation): include entity-type entries with a name as impact
      entities. Set `feature_id` from the KI's `feature_id`. Set `type` to "service" for
@@ -146,9 +145,9 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
    How it relates to what triggered the run:
 
-   - Alert-triggered (`inputs.context.alerts`): rate the situation the alert exposed, not the
-     alert's own configured severity. An alert set to critical that turns out to be noise is
-     `20-low`; a warning that uncovers a blocked core operation is `60-high` or above.
+   - Alert-triggered (the prompt contains `<alert_data>`): rate the situation the alert exposed,
+     not the alert's own configured severity. An alert set to critical that turns out to be noise
+     is `20-low`; a warning that uncovers a blocked core operation is `60-high` or above.
    - Neither (free-form issue): nothing extra, rate what you found.
 
    Report progress: the final state, including the finished `conclusion`, `severity`, and
@@ -290,8 +289,13 @@ sets overflow context:
   window. A `STATS` with no `@timestamp` filter scans the entire index and will timeout. Use
   literal timestamps (the same values you put in evidence `time_range`), not `now-1h`. Schema
   probes (`| LIMIT 0`, or a single-row `| LIMIT 1`) are exempt.
-- Readable indices from the sandbox key: `logs-*`, `metrics-*`, `traces-*`. Discover shape from
-  Cortex pages first, or run `FROM <index> | LIMIT 0` (columns only).
+- Kickoff `Related streams` are logical stream names. Prefer the canonical query view by probing
+  `FROM $.<stream-name> | LIMIT 0`; if it is unavailable, probe the ingest-stream target with
+  `FROM <stream-name>, <stream-name>.* | LIMIT 0`. Use the target that resolves, and preserve the
+  literal `$.` prefix for query views. If neither target is accessible, record the missing stream
+  access in `blind_spots` and continue with other signals.
+- Baseline fallback indices are `logs-*`, `metrics-*`, and `traces-*`. Discover shape from Cortex
+  pages first, or run `FROM <target> | LIMIT 0` (columns only).
 - POST ES|QL to `$CONNECTOR_CONFIG_URL/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
   through `jq` and write bulky output to a file under `/workspace` instead of pasting it back.
 
