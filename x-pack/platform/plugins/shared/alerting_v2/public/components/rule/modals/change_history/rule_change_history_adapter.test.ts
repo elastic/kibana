@@ -13,9 +13,9 @@ const createApiMock = () =>
     listRuleChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     getRuleChangeEvent: jest.fn().mockResolvedValue({
       id: 'evt-1',
-      timestamp: '2026-01-01T00:00:00.000Z',
+      created_at: '2026-01-01T00:00:00.000Z',
       actor: { name: 'elastic' },
-      action: 'update',
+      action: 'rule_update',
       snapshot: {},
     }),
   } as unknown as jest.Mocked<RuleChangeHistoryApi>);
@@ -52,25 +52,34 @@ describe('createRuleChangeHistoryAdapter', () => {
       );
     });
 
-    it('returns only items and total (drops other response fields)', async () => {
+    it('returns only the mapped items and the total', async () => {
       const api = createApiMock();
-      const response = {
+      api.listRuleChanges.mockResolvedValueOnce({
+        items: [
+          {
+            id: 'evt-1',
+            created_at: '2026-01-01T00:00:00.000Z',
+            actor: { name: 'elastic' },
+            action: 'rule_update',
+          },
+        ],
+        total: 1,
+      });
+      const adapter = createRuleChangeHistoryAdapter(api);
+
+      await expect(
+        adapter.listChanges({ objectId: 'rule-1', page: { index: 0, size: 20 } })
+      ).resolves.toEqual({
         items: [
           {
             id: 'evt-1',
             timestamp: '2026-01-01T00:00:00.000Z',
             actor: { name: 'elastic' },
-            action: 'update',
+            action: 'rule_update',
           },
         ],
         total: 1,
-      };
-      api.listRuleChanges.mockResolvedValueOnce(response);
-      const adapter = createRuleChangeHistoryAdapter(api);
-
-      await expect(
-        adapter.listChanges({ objectId: 'rule-1', page: { index: 0, size: 20 } })
-      ).resolves.toEqual(response);
+      });
     });
 
     it('maps the response from the API to the UI contract', async () => {
@@ -79,9 +88,9 @@ describe('createRuleChangeHistoryAdapter', () => {
         items: [
           {
             id: 'evt-1',
-            timestamp: '2026-01-01T00:00:00.000Z',
+            created_at: '2026-01-01T00:00:00.000Z',
             actor: { name: 'elastic', profile_id: 'u_1' },
-            action: 'update',
+            action: 'rule_update',
             is_current: true,
           },
         ],
@@ -98,9 +107,33 @@ describe('createRuleChangeHistoryAdapter', () => {
         id: 'evt-1',
         timestamp: '2026-01-01T00:00:00.000Z',
         actor: { name: 'elastic', profileId: 'u_1' },
-        action: 'update',
+        action: 'rule_update',
         isCurrent: true,
       });
+    });
+
+    it('rebuilds the metadata bag the package reads for version-distance telemetry', async () => {
+      const api = createApiMock();
+      api.listRuleChanges.mockResolvedValueOnce({
+        items: [
+          {
+            id: 'evt-1',
+            created_at: '2026-01-01T00:00:00.000Z',
+            actor: { name: 'elastic' },
+            action: 'rule_update',
+            version: 7,
+          },
+        ],
+        total: 1,
+      });
+      const adapter = createRuleChangeHistoryAdapter(api);
+
+      const { items } = await adapter.listChanges({
+        objectId: 'rule-1',
+        page: { index: 0, size: 20 },
+      });
+
+      expect(items[0].metadata).toEqual({ version: 7 });
     });
 
     it('propagates errors', async () => {
@@ -133,9 +166,9 @@ describe('createRuleChangeHistoryAdapter', () => {
       const api = createApiMock();
       api.getRuleChangeEvent.mockResolvedValueOnce({
         id: 'evt-1',
-        timestamp: '2026-01-01T00:00:00.000Z',
+        created_at: '2026-01-01T00:00:00.000Z',
         actor: { name: 'elastic', profile_id: 'u_1' },
-        action: 'update',
+        action: 'rule_update',
         is_current: true,
         reason: 'renamed',
         snapshot: { name: 'rule' },
@@ -146,7 +179,7 @@ describe('createRuleChangeHistoryAdapter', () => {
         id: 'evt-1',
         timestamp: '2026-01-01T00:00:00.000Z',
         actor: { name: 'elastic', profileId: 'u_1' },
-        action: 'update',
+        action: 'rule_update',
         isCurrent: true,
         reason: 'renamed',
         snapshot: { name: 'rule' },

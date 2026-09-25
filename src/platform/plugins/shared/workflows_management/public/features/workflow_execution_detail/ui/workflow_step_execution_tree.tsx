@@ -1362,23 +1362,6 @@ export const WorkflowStepExecutionTree = ({
     [defaultExpandedIds]
   );
 
-  if (!execution) {
-    return (
-      <EuiEmptyPrompt
-        {...emptyPromptCommonProps}
-        icon={<EuiLoadingSpinner size="l" />}
-        title={
-          <h2>
-            <FormattedMessage
-              id="workflows.WorkflowStepExecutionTree.loadingStepExecutions"
-              defaultMessage="Loading step executions..."
-            />
-          </h2>
-        }
-      />
-    );
-  }
-
   if (error) {
     return (
       <EuiEmptyPrompt
@@ -1393,6 +1376,23 @@ export const WorkflowStepExecutionTree = ({
           </h2>
         }
         body={<EuiText>{error.message}</EuiText>}
+      />
+    );
+  }
+
+  if (!execution) {
+    return (
+      <EuiEmptyPrompt
+        {...emptyPromptCommonProps}
+        icon={<EuiLoadingSpinner size="l" />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.loadingStepExecutions"
+              defaultMessage="Loading step executions..."
+            />
+          </h2>
+        }
       />
     );
   }
