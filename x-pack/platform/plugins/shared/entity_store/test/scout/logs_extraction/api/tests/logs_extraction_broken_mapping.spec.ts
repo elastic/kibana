@@ -19,7 +19,11 @@ import {
   LATEST_ALIAS,
   PUBLIC_HEADERS,
 } from '../../../common/fixtures/constants';
-import { clearInstalledEntityStoreDocuments } from '../../../common/fixtures/helpers';
+import {
+  clearInstalledEntityStoreDocuments,
+  resetLogExtractionConfig,
+  updateLogExtractionConfig,
+} from '../../../common/fixtures/helpers';
 
 const BROKEN_MAPPING_DATA_STREAM = 'logs-broken-mapping';
 const BROKEN_MAPPING_TEMPLATE = 'logs-broken-mapping-template';
@@ -375,15 +379,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const resetAdditionalIndexPatternsResponse = await apiClient.put(
-      ENTITY_STORE_ROUTES.public.UPDATE,
-      {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: { logExtraction: { additionalIndexPatterns: [] } },
-      }
-    );
-    expect(resetAdditionalIndexPatternsResponse.statusCode).toBe(200);
+    await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
     await cleanupBrokenMappingArtifacts(esClient);
   });
 
@@ -596,13 +592,11 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
 
       // Include the date_nanos stream as an additional source. It does not carry a logs-* prefix
       // so it is not picked up by the default pattern — it must be added explicitly.
-      await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      await updateLogExtractionConfig({
+        apiClient,
         headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          logExtraction: {
-            additionalIndexPatterns: [DATE_NANOS_DATA_STREAM],
-          },
+        logExtraction: {
+          additionalIndexPatterns: [DATE_NANOS_DATA_STREAM],
         },
       });
 
@@ -675,11 +669,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
         expect(source2.entity.lifecycle.last_seen).toBe(thirdTimestamp);
       } finally {
         // Restore config and clean up regardless of test outcome
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: { logExtraction: { additionalIndexPatterns: [] } },
-        });
+        await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
         await cleanupDateNanosArtifacts(esClient);
       }
     }

@@ -30,11 +30,12 @@ import {
   forceLogExtraction,
   ingestDoc,
   normalizeKeywordList,
+  resetLogExtractionConfig,
   searchDocById,
   setupLogsTestDataStream,
   teardownLogsTestDataStream,
+  updateLogExtractionConfig,
 } from '../../../common/fixtures/helpers';
-import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../../server/domain/saved_objects';
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -80,12 +81,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const resetMaxLogsPerPageResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
-    });
-    expect(resetMaxLogsPerPageResponse.statusCode).toBe(200);
+    await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
     await teardownLogsTestDataStream(esClient);
   });
 
@@ -1134,12 +1130,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const TOTAL_DOCS = 6; // > MAX_LOGS_PER_PAGE so a second outer iteration is required
 
       // Shrink the log-slice window to force multiple outer loop iterations within one run.
-      const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      await updateLogExtractionConfig({
+        apiClient,
         headers: defaultHeaders,
-        responseType: 'json',
-        body: { logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE } },
+        logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE },
       });
-      expect(updateResponse.statusCode).toBe(200);
 
       try {
         // Ingest TOTAL_DOCS host documents all sharing @timestamp = fromDateISO.
@@ -1169,11 +1164,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         }
       } finally {
         // Restore default so subsequent tests are not affected.
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
-        });
+        await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
       }
     }
   );
