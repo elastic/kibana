@@ -68,6 +68,12 @@ interface ManagedIntegrationsSectionProps {
    * re-validation window which would otherwise disable the button on section re-open.
    */
   isDirty?: boolean;
+  /**
+   * Called when the static-key replace form becomes ready or is cancelled. Lets the parent
+   * merge form dirty with SO-derived drift so cancelling the replace form correctly clears
+   * the callout when there is no underlying service-var drift.
+   */
+  onReplaceFormDirtyChange?: (dirty: boolean) => void;
 }
 
 export function ManagedIntegrationsSection({
@@ -80,6 +86,7 @@ export function ManagedIntegrationsSection({
   hasFailed,
   isCleanupOnly = false,
   isDirty = false,
+  onReplaceFormDirtyChange,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
   const {
@@ -87,7 +94,6 @@ export function ManagedIntegrationsSection({
     setStaticKeys,
     setPendingIacTemplate,
     authenticateAndDeployStep,
-    updateDetectAndReviewStep,
   } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
@@ -191,9 +197,9 @@ export function ManagedIntegrationsSection({
   const handleStaticKeyReplaceReadyChange = useCallback(
     (ready: boolean) => {
       setIsDeployReady(ready);
-      if (ready) updateDetectAndReviewStep({ isDirty: true });
+      onReplaceFormDirtyChange?.(ready);
     },
-    [updateDetectAndReviewStep]
+    [onReplaceFormDirtyChange]
   );
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(

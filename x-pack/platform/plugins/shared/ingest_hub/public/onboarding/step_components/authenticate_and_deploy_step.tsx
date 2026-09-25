@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -80,10 +80,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // ── Drift detection ───────────────────────────────────────────────────────────
   // Compare current session values against the SO whenever edit mode is active and the user
-  // changes auth (connector / auth method). serviceVars drift is checked at the same time;
-  // static-key replacement additionally sets isDirty via onReadyChange in ManagedIntegrationsSection.
+  // changes auth (connector / auth method). serviceVars drift is checked at the same time.
   const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
   const { authMethod, connectorId } = authenticateAndDeployStep;
+  // Stores the SO-derived dirty result so the replace-form cancel handler can merge it without
+  // re-fetching. Starts false; updated once the SO fetch resolves.
+  const driftDirtyRef = useRef(false);
   useEffect(() => {
     if (!onboardingDeploymentId || awsServicesMap === undefined) return;
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
@@ -103,10 +105,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           { authMethod: item.authMethod, connectorId: item.connectorId }
         );
         const dirty = dirtyVarIds.length > 0 || authDirty;
-        // In static-key edit mode, isDirty is owned by the replace form: the SO fetch cannot
-        // see credential values, so a late response must not overwrite a isDirty=true the form
-        // already set. Service-var drift (dirty=true) can still write through. For all other
-        // auth methods, the SO is authoritative and correctly clears isDirty on revert.
+        driftDirtyRef.current = dirty;
+        // In static-key edit mode the SO cannot see credential values, so we never write
+        // isDirty=false here — that would overwrite a isDirty=true the replace form already
+        // set. Credential dirty state is managed via handleReplaceFormDirtyChange instead.
+        // Service-var drift (dirty=true) still writes through.
         if (authMethod !== 'static_keys' || dirty) {
           updateDetectAndReviewStep({ isDirty: dirty });
         }
@@ -118,6 +121,16 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     // lifetime and need to re-trigger the check; adding them to deps is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboardingDeploymentId, awsServicesMap, authMethod, connectorId]);
+
+  // Called by ManagedIntegrationsSection when the static-key replace form becomes ready or is
+  // cancelled. Merges the form's own dirty with the SO-derived drift so that cancelling the
+  // replace form correctly clears the callout when there is no underlying service-var drift.
+  const handleReplaceFormDirtyChange = useCallback(
+    (replaceFormDirty: boolean) => {
+      updateDetectAndReviewStep({ isDirty: replaceFormDirty || driftDirtyRef.current });
+    },
+    [updateDetectAndReviewStep]
+  );
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
@@ -582,6 +595,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           hasFailed={hasFailed}
           isCleanupOnly={isCleanupOnly}
           isDirty={isDirty}
+          onReplaceFormDirtyChange={handleReplaceFormDirtyChange}
         />
       )}
 

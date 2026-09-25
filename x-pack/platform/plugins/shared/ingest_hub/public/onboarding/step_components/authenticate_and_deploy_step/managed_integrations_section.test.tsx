@@ -178,6 +178,7 @@ function setupMocks({
     }) => (
       <div data-test-subj="static-keys-replace-view">
         <button onClick={() => onReadyChange?.(true)}>replace-ready</button>
+        <button onClick={() => onReadyChange?.(false)}>replace-cancel</button>
         <button
           onClick={() => onFieldsChange?.({ access_key_id: 'NEW', secret_access_key: 'newsecret' })}
         >
@@ -198,6 +199,7 @@ function renderSection(
     isDone?: boolean;
     hasFailed?: boolean;
     isDirty?: boolean;
+    onReplaceFormDirtyChange?: jest.Mock;
   } = {}
 ) {
   return render(
@@ -212,6 +214,7 @@ function renderSection(
           isDone={props.isDone ?? false}
           hasFailed={props.hasFailed ?? false}
           isDirty={props.isDirty ?? false}
+          onReplaceFormDirtyChange={props.onReplaceFormDirtyChange}
         />
       </React.Suspense>
     </I18nProvider>
@@ -659,6 +662,26 @@ describe('ManagedIntegrationsSection', () => {
         access_key_id: 'AKIA',
         secret_access_key: 'secret',
       });
+    });
+
+    it('replace form ready calls onReplaceFormDirtyChange(true)', () => {
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({ authMethod: 'static_keys', searchParams: 'deploymentId=dep-abc' });
+      renderSection({ showIdentityFederation: false, onReplaceFormDirtyChange });
+      fireEvent.click(screen.getByText('replace-ready'));
+      expect(onReplaceFormDirtyChange).toHaveBeenCalledWith(true);
+    });
+
+    it('replace form cancel calls onReplaceFormDirtyChange(false) so parent can clear callout', () => {
+      // When user fills then cancels the replace form, the section must report false so the
+      // parent can merge with drift state and clear isDirty if no underlying drift exists.
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({ authMethod: 'static_keys', searchParams: 'deploymentId=dep-abc' });
+      renderSection({ showIdentityFederation: false, onReplaceFormDirtyChange });
+      fireEvent.click(screen.getByText('replace-ready'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
+      fireEvent.click(screen.getByText('replace-cancel'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(false);
     });
   });
 });
