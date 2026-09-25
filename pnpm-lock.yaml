@@ -5483,6 +5483,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-agent-builder':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder
+      '@kbn/evals-suite-attack-discovery-fp-tp':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
       '@kbn/evals-suite-attack-discovery-fp-tp-real-workflow':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow
@@ -9696,6 +9699,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow: {}
 
