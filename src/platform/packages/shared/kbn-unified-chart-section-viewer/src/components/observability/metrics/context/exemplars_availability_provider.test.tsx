@@ -29,6 +29,7 @@ const mockFetch = fetchMetricsWithExemplars as jest.MockedFunction<
 const requestParams = {
   search: jest.fn() as unknown as ISearchGeneric,
   dataView: { getIndexPattern: () => 'metrics-generic.otel-default' } as unknown as DataView,
+  timeRange: { from: 'now-15m', to: 'now' },
   uiSettings: {} as IUiSettingsClient,
   profileId: 'metrics-data-source-profile',
 };

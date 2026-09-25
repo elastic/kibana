@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -35,6 +36,7 @@ export type MetricsWithExemplars = ReadonlyMap<string, ReadonlySet<string>>;
 export interface FetchMetricsWithExemplarsParams {
   search: ISearchGeneric;
   dataView: DataView;
+  timeRange: TimeRange;
   uiSettings: IUiSettingsClient;
   profileId: string;
 }
@@ -42,14 +44,18 @@ export interface FetchMetricsWithExemplarsParams {
 export const fetchMetricsWithExemplars = async ({
   search,
   dataView,
+  timeRange,
   uiSettings,
   profileId,
 }: FetchMetricsWithExemplarsParams): Promise<MetricsWithExemplars> => {
-  // Deliberately no signal, time range or filters: this is a schema question shared by every chart.
+  // Bounded to the Discover time range: the per-chart fetches use the same window, so a metric
+  // whose exemplars fall outside it would fetch nothing anyway. No signal or filters, because the
+  // result is shared by every chart in the fetch.
   const { rawResponse } = await executeEsqlQuery({
     esqlQuery: EXEMPLARS_PROBE_QUERY,
     search,
     dataView,
+    timeRange,
     uiSettings,
     profileId,
     executionContextName: MetricsExecutionContextName.EXEMPLARS,

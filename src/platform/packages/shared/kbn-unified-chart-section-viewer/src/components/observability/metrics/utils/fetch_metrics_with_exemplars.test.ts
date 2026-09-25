@@ -23,6 +23,7 @@ const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof exec
 const params = {
   search: jest.fn() as unknown as ISearchGeneric,
   dataView: { getIndexPattern: () => 'metrics-generic.otel-default' } as unknown as DataView,
+  timeRange: { from: 'now-15m', to: 'now' },
   uiSettings: {} as IUiSettingsClient,
   profileId: 'metrics-data-source-profile',
 };
@@ -45,7 +46,7 @@ describe('fetchMetricsWithExemplars', () => {
     jest.clearAllMocks();
   });
 
-  it('sends the probe query under the exemplars execution context without a time range, filters or signal', async () => {
+  it('sends the probe query under the exemplars execution context, bounded to the time range, without filters or signal', async () => {
     mockExecuteEsqlQuery.mockResolvedValue(probeResponse([]));
 
     await fetchMetricsWithExemplars(params);

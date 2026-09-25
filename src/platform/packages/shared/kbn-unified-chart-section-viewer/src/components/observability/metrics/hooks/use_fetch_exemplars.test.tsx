@@ -234,6 +234,7 @@ describe('useFetchExemplars', () => {
       fetchId: params.fetchParams.lastReloadRequestTime,
       search: params.services.data.search.search,
       dataView: params.fetchParams.dataView,
+      timeRange: params.fetchParams.timeRange,
       uiSettings: params.services.uiSettings,
       profileId: TEST_PROFILE_ID,
       onError: expect.any(Function),

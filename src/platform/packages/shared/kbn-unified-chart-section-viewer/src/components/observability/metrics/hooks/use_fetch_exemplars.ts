@@ -78,6 +78,7 @@ export const useFetchExemplars = ({
         fetchId: fetchParams.lastReloadRequestTime,
         search,
         dataView,
+        timeRange: fetchParams.timeRange,
         uiSettings,
         profileId,
         onError,
