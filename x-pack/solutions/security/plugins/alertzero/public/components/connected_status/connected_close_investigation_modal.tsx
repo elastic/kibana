@@ -9,7 +9,6 @@ import React, { useCallback, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
   useSetInvestigationStatus,
   useInvestigationClosePreview,
@@ -18,15 +17,10 @@ import {
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import type { DismissReason } from '@kbn/proposals-common';
 import type { CloseInvestigationModalRenderProps } from '@kbn/agentic-investigations-common';
+import { statusSignal } from './status_signal';
+import { getCloseErrorCode } from './close_error_codes';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';
 import * as i18n from '../close_confirmation/translations';
-
-/** Returns true when a fetch error carries our `close_targets_changed` code. */
-const isCloseTargetsChangedError = (error: unknown): boolean => {
-  if (!isHttpFetchError(error)) return false;
-  const body = error.body as { attributes?: { code?: string } } | undefined;
-  return body?.attributes?.code === 'close_targets_changed';
-};
 
 /**
  * Connected wrapper for `CloseInvestigationModal` for use in the queue page and flyout footer.
@@ -52,13 +46,6 @@ export const ConnectedCloseInvestigationModal: React.FC<CloseInvestigationModalR
     kind: 'dismiss_failed';
     count: number;
   } | null>(null);
-
-  /** Determines whether an error body carries the `proposal_dismiss_failed` code. */
-  const isProposalDismissFailedError = (error: unknown): boolean => {
-    if (!isHttpFetchError(error)) return false;
-    const body = error.body as { attributes?: { code?: string } } | undefined;
-    return body?.attributes?.code === 'proposal_dismiss_failed';
-  };
 
   const preview = useInvestigationClosePreview(conversationId, {
     enabled: Boolean(conversationId),
@@ -86,6 +73,7 @@ export const ConnectedCloseInvestigationModal: React.FC<CloseInvestigationModalR
         {
           onSuccess: (result) => {
             invalidateAll();
+            statusSignal.bump();
             services.notifications?.toasts.addSuccess(i18n.CLOSE_INVESTIGATION_SUCCESS);
             if (result.failed_proposal_ids.length > 0) {
               services.notifications?.toasts.addWarning(i18n.PARTIAL_PROPOSAL_DISMISS_WARNING);
@@ -93,11 +81,15 @@ export const ConnectedCloseInvestigationModal: React.FC<CloseInvestigationModalR
             onClose();
           },
           onError: (err) => {
-            if (isCloseTargetsChangedError(err)) {
+            const code = getCloseErrorCode(err);
+            if (code === 'close_targets_changed') {
               // Keep the modal open, show the changed-callout and refresh the list.
               setTargetsChanged(true);
               void preview.refetch();
-            } else if (isProposalDismissFailedError(err)) {
+            } else if (code === 'proposal_dismiss_failed') {
+              // Some proposals were dismissed: invalidate so the queue stays fresh.
+              invalidateAll();
+              statusSignal.bump();
               const ids =
                 (err as unknown as { body?: { attributes?: { failed_proposal_ids?: string[] } } })
                   .body?.attributes?.failed_proposal_ids ?? [];

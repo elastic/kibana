@@ -33,6 +33,7 @@ import type { InvestigationStatusService } from '../../investigations/services/i
 import { assertNoUnexpectedProposals } from '../../investigations/services/investigation_status_service';
 import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
 import { EscalationCloseIncompleteError } from './escalation_close_incomplete_error';
+import { LinkedInvestigationUnavailableError } from './linked_investigation_unavailable_error';
 import {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
@@ -234,10 +235,14 @@ export class EscalationsService {
     const linkedIds = (current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ??
       []) as string[];
     if (linkedIds.length === 0) {
-      return { open_investigations: [] };
+      return { open_investigations: [], unavailable_investigation_ids: [] };
     }
 
     const resolved = await client.bulkGet(linkedIds);
+
+    // Collect ids that bulkGet could not resolve (deleted or inaccessible).
+    const unavailableIds = linkedIds.filter((id) => !resolved.has(id));
+
     const openConversations = linkedIds
       .map((id) => resolved.get(id))
       .filter(
@@ -258,7 +263,10 @@ export class EscalationsService {
       })
     );
 
-    return { open_investigations: openInvestigations };
+    return {
+      open_investigations: openInvestigations,
+      unavailable_investigation_ids: unavailableIds,
+    };
   }
 
   async setStatus(
@@ -282,6 +290,15 @@ export class EscalationsService {
         []) as string[];
       if (linkedIds.length > 0) {
         const resolved = await client.bulkGet(linkedIds);
+
+        // Reject the close when any linked id cannot be resolved (deleted / inaccessible).
+        // Closing without touching those investigations would leave them permanently open
+        // while the escalation is marked closed.
+        const unavailableIds = linkedIds.filter((id) => !resolved.has(id));
+        if (unavailableIds.length > 0) {
+          throw new LinkedInvestigationUnavailableError(unavailableIds);
+        }
+
         const openIds = linkedIds.filter((id) => {
           const conv = resolved.get(id);
           return conv !== undefined && conv.metadata?.status !== 'closed';

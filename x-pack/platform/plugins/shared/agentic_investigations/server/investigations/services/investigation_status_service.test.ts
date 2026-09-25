@@ -10,6 +10,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   InvestigationStatusService,
   assertNoUnexpectedProposals,
+  ProposalDismissFailedError,
 } from './investigation_status_service';
 import { CloseTargetsChangedError } from './close_targets_changed_error';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
@@ -186,5 +187,170 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
         dismiss_reason: 'wrong',
       })
     ).resolves.not.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// InvestigationStatusService.setStatus — releaseGate error classification
+// ---------------------------------------------------------------------------
+
+describe('InvestigationStatusService.setStatus — releaseGate conflict classification', () => {
+  const makeDismissService = ({
+    releaseGateSideEffect,
+    getProposalResult,
+  }: {
+    /** First call outcome: 'success' | Error to throw */
+    releaseGateSideEffect: 'success' | Error;
+    /** What proposalsService.get returns (for the conflict re-read path) */
+    getProposalResult?: { decision?: string; status: string; expired: boolean } | Error;
+  }) => {
+    const releaseGate = jest
+      .fn()
+      .mockImplementationOnce(() =>
+        releaseGateSideEffect === 'success'
+          ? Promise.resolve({})
+          : Promise.reject(releaseGateSideEffect)
+      )
+      // Second call (retry) always succeeds unless explicitly made to fail.
+      .mockResolvedValue({});
+
+    const get = jest.fn().mockImplementation(() => {
+      if (!getProposalResult) return Promise.resolve({ decision: 'dismissed', status: 'decided', expired: false });
+      if (getProposalResult instanceof Error) return Promise.reject(getProposalResult);
+      return Promise.resolve(getProposalResult);
+    });
+
+    const proposalsService = {
+      list: jest.fn().mockResolvedValue({ proposals: [{ id: 'p-1' }], total: 1 }),
+      releaseGate,
+      get,
+    };
+    const proposals = {
+      getProposalsService: () => proposalsService,
+      getProposalPrivileges: () => ({
+        assertCanRead: jest.fn().mockResolvedValue(undefined),
+        assertCanManage: jest.fn().mockResolvedValue(undefined),
+      }),
+    };
+    const client = {
+      get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
+      patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION }),
+    };
+    const service = new InvestigationStatusService({
+      getConversationClient: jest.fn().mockResolvedValue(client),
+      getProposals: jest.fn().mockReturnValue(proposals),
+      getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+      logger,
+    });
+    return { service, releaseGate, patchMetadata: client.patchMetadata };
+  };
+
+  it('skips a proposal that was already decided (conflict, re-read shows decided)', async () => {
+    const conflictErr = Object.assign(new Error('already decided'), { name: 'ProposalConflictError' });
+    const { service, releaseGate, patchMetadata } = makeDismissService({
+      releaseGateSideEffect: conflictErr,
+      getProposalResult: { decision: 'approved', status: 'decided', expired: false },
+    });
+
+    const result = await service.setStatus(request, 'conv-1', {
+      status: 'closed',
+      dismiss_reason: 'wrong',
+    });
+
+    // Conflict → re-read shows decided → skip, close succeeds.
+    expect(releaseGate).toHaveBeenCalledTimes(1);
+    expect(patchMetadata).toHaveBeenCalled();
+    expect(result.dismissed_proposal_ids).toHaveLength(0);
+    expect(result.failed_proposal_ids).toHaveLength(0);
+  });
+
+  it('retries and succeeds when the proposal is still pending after a conflict', async () => {
+    const conflictErr = Object.assign(new Error('occ lost'), { name: 'ProposalConflictError' });
+    const { service, releaseGate, patchMetadata } = makeDismissService({
+      releaseGateSideEffect: conflictErr,
+      // Re-read: still pending.
+      getProposalResult: { decision: undefined, status: 'pending', expired: false },
+    });
+
+    const result = await service.setStatus(request, 'conv-1', {
+      status: 'closed',
+      dismiss_reason: 'wrong',
+    });
+
+    // First call failed → re-read says still pending → retry → success.
+    expect(releaseGate).toHaveBeenCalledTimes(2);
+    expect(patchMetadata).toHaveBeenCalled();
+    expect(result.dismissed_proposal_ids).toEqual(['p-1']);
+  });
+
+  it('fails the proposal when still pending and retry also fails', async () => {
+    const conflictErr = Object.assign(new Error('occ lost'), { name: 'ProposalConflictError' });
+    const retryErr = new Error('still failing');
+
+    const proposalsService = {
+      list: jest.fn().mockResolvedValue({ proposals: [{ id: 'p-1' }], total: 1 }),
+      releaseGate: jest
+        .fn()
+        .mockRejectedValueOnce(conflictErr)
+        .mockRejectedValueOnce(retryErr),
+      get: jest.fn().mockResolvedValue({ decision: undefined, status: 'pending', expired: false }),
+    };
+    const proposals = {
+      getProposalsService: () => proposalsService,
+      getProposalPrivileges: () => ({
+        assertCanRead: jest.fn().mockResolvedValue(undefined),
+        assertCanManage: jest.fn().mockResolvedValue(undefined),
+      }),
+    };
+    const client = {
+      get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
+      patchMetadata: jest.fn(),
+    };
+    const service = new InvestigationStatusService({
+      getConversationClient: jest.fn().mockResolvedValue(client),
+      getProposals: jest.fn().mockReturnValue(proposals),
+      getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+      logger,
+    });
+
+    // Throws ProposalDismissFailedError; patchMetadata is never called.
+    await expect(
+      service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'wrong' })
+    ).rejects.toBeInstanceOf(ProposalDismissFailedError);
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('skips ProposalExpiredError directly without re-reading', async () => {
+    const expiredErr = Object.assign(new Error('expired'), { name: 'ProposalExpiredError' });
+    const { service, releaseGate, patchMetadata } = makeDismissService({
+      releaseGateSideEffect: expiredErr,
+    });
+
+    const result = await service.setStatus(request, 'conv-1', {
+      status: 'closed',
+      dismiss_reason: 'wrong',
+    });
+
+    expect(releaseGate).toHaveBeenCalledTimes(1);
+    expect(patchMetadata).toHaveBeenCalled();
+    expect(result.dismissed_proposal_ids).toHaveLength(0);
+    expect(result.failed_proposal_ids).toHaveLength(0);
+  });
+
+  it('skips ProposalNotFoundError directly without re-reading', async () => {
+    const notFoundErr = Object.assign(new Error('not found'), { name: 'ProposalNotFoundError' });
+    const { service, releaseGate, patchMetadata } = makeDismissService({
+      releaseGateSideEffect: notFoundErr,
+    });
+
+    const result = await service.setStatus(request, 'conv-1', {
+      status: 'closed',
+      dismiss_reason: 'wrong',
+    });
+
+    expect(releaseGate).toHaveBeenCalledTimes(1);
+    expect(patchMetadata).toHaveBeenCalled();
+    expect(result.dismissed_proposal_ids).toHaveLength(0);
+    expect(result.failed_proposal_ids).toHaveLength(0);
   });
 });

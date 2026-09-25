@@ -14,6 +14,8 @@ import {
 import { EscalationsService } from './escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
 import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
+import { LinkedInvestigationUnavailableError } from './linked_investigation_unavailable_error';
+import { EscalationCloseIncompleteError } from './escalation_close_incomplete_error';
 import {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_TEMPLATE_ID,
@@ -601,7 +603,7 @@ describe('EscalationsService.getClosePreview', () => {
     });
 
     const result = await service.getClosePreview(request, 'escalation-1');
-    expect(result).toEqual({ open_investigations: [] });
+    expect(result).toEqual({ open_investigations: [], unavailable_investigation_ids: [] });
   });
 
   it('includes pending_proposals from the investigation preview', async () => {
@@ -763,5 +765,133 @@ describe('EscalationsService.setStatus — pre-flight checks', () => {
     ).resolves.not.toThrow();
 
     expect(investigationStatusService.listPendingProposalsForRequest).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// LinkedInvestigationUnavailableError — unresolvable linked id handling
+// ---------------------------------------------------------------------------
+
+describe('EscalationsService — unresolvable linked investigation', () => {
+  const ESCALATION_WITH_LINKED = {
+    ...MOCK_ESCALATION,
+    template_id: ESCALATION_TEMPLATE_ID,
+    metadata: { linked_investigations: ['inv-1', 'inv-missing'] },
+  };
+
+  it('setStatus throws LinkedInvestigationUnavailableError when a linked id is missing from bulkGet', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    // bulkGet only resolves inv-1; inv-missing is gone / inaccessible.
+    client.bulkGet.mockResolvedValue(
+      new Map([
+        [
+          'inv-1',
+          {
+            id: 'inv-1',
+            title: 'Open',
+            template_id: INVESTIGATION_TEMPLATE_ID,
+            metadata: { status: 'open' },
+          },
+        ],
+      ])
+    );
+
+    await expect(
+      service.setStatus(request, 'escalation-1', { status: 'closed' })
+    ).rejects.toBeInstanceOf(LinkedInvestigationUnavailableError);
+
+    // The escalation must not be patched.
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('getClosePreview returns unavailable_investigation_ids for missing linked ids', async () => {
+    const { service, client, investigationStatusService } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    // bulkGet only resolves inv-1.
+    client.bulkGet.mockResolvedValue(
+      new Map([
+        [
+          'inv-1',
+          {
+            id: 'inv-1',
+            title: 'Open',
+            template_id: INVESTIGATION_TEMPLATE_ID,
+            metadata: { status: 'open' },
+          },
+        ],
+      ])
+    );
+    investigationStatusService.getPreview.mockResolvedValue({
+      pending_proposal_count: 0,
+      pending_proposals: [],
+    });
+
+    const result = await service.getClosePreview(request, 'escalation-1');
+
+    expect(result.unavailable_investigation_ids).toEqual(['inv-missing']);
+    // The open investigation still appears normally.
+    expect(result.open_investigations).toHaveLength(1);
+  });
+
+  it('setStatus succeeds when all linked ids resolve', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue({
+      ...MOCK_ESCALATION,
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: { linked_investigations: ['inv-1'] },
+    });
+    client.bulkGet.mockResolvedValue(
+      new Map([
+        [
+          'inv-1',
+          {
+            id: 'inv-1',
+            title: 'Open',
+            template_id: INVESTIGATION_TEMPLATE_ID,
+            metadata: { status: 'closed' }, // already closed — skip, nothing to do
+          },
+        ],
+      ])
+    );
+    client.patchMetadata.mockResolvedValue({
+      conversation: { ...MOCK_ESCALATION, template_id: ESCALATION_TEMPLATE_ID },
+    });
+
+    await expect(
+      service.setStatus(request, 'escalation-1', { status: 'closed' })
+    ).resolves.not.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// EscalationsService.setStatus — partial close / incomplete cascade
+// ---------------------------------------------------------------------------
+
+describe('EscalationsService.setStatus — partial close leaves escalation open', () => {
+  const OPEN_INV = {
+    id: 'inv-1',
+    title: 'Open',
+    template_id: INVESTIGATION_TEMPLATE_ID,
+    metadata: { status: 'open' },
+  };
+
+  it('throws EscalationCloseIncompleteError and does not patch the escalation', async () => {
+    const { service, client, investigationStatusService } = makeService();
+    client.get.mockResolvedValue({
+      ...MOCK_ESCALATION,
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: { linked_investigations: ['inv-1'] },
+    });
+    client.bulkGet.mockResolvedValue(new Map([['inv-1', OPEN_INV]]));
+    // Simulate the investigation close failing.
+    investigationStatusService.setStatus.mockRejectedValueOnce(new Error('storage error'));
+
+    await expect(
+      service.setStatus(request, 'escalation-1', { status: 'closed' })
+    ).rejects.toBeInstanceOf(EscalationCloseIncompleteError);
+
+    // The escalation itself must remain open.
+    expect(client.patchMetadata).not.toHaveBeenCalled();
   });
 });

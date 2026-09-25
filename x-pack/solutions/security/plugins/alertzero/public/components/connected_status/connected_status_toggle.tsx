@@ -9,7 +9,6 @@ import React, { useState, useCallback } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { StatusToggle } from '@kbn/agentic-investigations-common';
 import {
   useSetInvestigationStatus,
@@ -27,25 +26,12 @@ import type {
 } from '@kbn/agentic-investigations-plugin/common';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 import { statusSignal } from './status_signal';
+import { getCloseErrorCode, isKnownCloseError, isPartialCloseError } from './close_error_codes';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';
 import { CloseEscalationModal } from '../close_confirmation/close_escalation_modal';
 import * as i18n from '../close_confirmation/translations';
 
 export type ConnectedStatusToggleProps = StatusSlotRenderProps;
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Returns true when an HTTP error response has our `close_targets_changed` code.
- * We avoid importing the error class across plugin boundaries.
- */
-const isCloseTargetsChangedError = (error: unknown): boolean => {
-  if (!isHttpFetchError(error)) return false;
-  const body = error.body as { attributes?: { code?: string } } | undefined;
-  return body?.attributes?.code === 'close_targets_changed';
-};
 
 // ---------------------------------------------------------------------------
 // Investigation close modal container
@@ -61,15 +47,6 @@ interface InvestigationCloseContainerProps {
     preview: InvestigationClosePreviewResponse;
   }) => Promise<void> | void;
 }
-
-/** Determines whether an error body carries the `proposal_dismiss_failed` code. */
-const isProposalDismissFailedError = (
-  error: unknown
-): error is { attributes: { code: string; failed_proposal_ids: string[] } } => {
-  if (!isHttpFetchError(error)) return false;
-  const body = error.body as { attributes?: { code?: string } } | undefined;
-  return body?.attributes?.code === 'proposal_dismiss_failed';
-};
 
 /**
  * Mounts the close preview hook and renders the investigation modal.
@@ -96,16 +73,20 @@ const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = 
       try {
         await onConfirm({ ...params, preview: preview.data });
       } catch (err) {
-        if (isCloseTargetsChangedError(err)) {
+        const code = getCloseErrorCode(err);
+        if (code === 'close_targets_changed') {
           setTargetsChanged(true);
           void preview.refetch();
-        } else if (isProposalDismissFailedError(err)) {
+        } else if (code === 'proposal_dismiss_failed') {
           const ids =
             (err as unknown as { body?: { attributes?: { failed_proposal_ids?: string[] } } }).body
               ?.attributes?.failed_proposal_ids ?? [];
           setCloseError({ kind: 'dismiss_failed', count: ids.length });
           void preview.refetch();
         }
+        // Other known codes (escalation_close_incomplete, linked_investigation_unavailable)
+        // are not expected here (investigation-only container), but we still re-throw so
+        // the outer onError in executeCloseInvestigation can handle them.
       }
     },
     [onConfirm, preview]
@@ -142,13 +123,6 @@ interface EscalationCloseContainerProps {
   }) => Promise<void> | void;
 }
 
-/** Determines whether an error body carries the `escalation_close_incomplete` code. */
-const isEscalationCloseIncompleteError = (error: unknown): boolean => {
-  if (!isHttpFetchError(error)) return false;
-  const body = error.body as { attributes?: { code?: string } } | undefined;
-  return body?.attributes?.code === 'escalation_close_incomplete';
-};
-
 /**
  * Mounts the close preview hook and renders the escalation modal.
  * Rendered only when the modal is open, so every open starts a fresh fetch.
@@ -174,10 +148,11 @@ const EscalationCloseContainer: React.FC<EscalationCloseContainerProps> = ({
       try {
         await onConfirm({ ...params, preview: preview.data });
       } catch (err) {
-        if (isCloseTargetsChangedError(err)) {
+        const code = getCloseErrorCode(err);
+        if (code === 'close_targets_changed') {
           setTargetsChanged(true);
           void preview.refetch();
-        } else if (isEscalationCloseIncompleteError(err)) {
+        } else if (code === 'escalation_close_incomplete') {
           const attrs = (
             err as unknown as { body?: { attributes?: { skipped_investigation_ids?: string[] } } }
           ).body?.attributes;
@@ -186,11 +161,14 @@ const EscalationCloseContainer: React.FC<EscalationCloseContainerProps> = ({
             count: attrs?.skipped_investigation_ids?.length ?? 1,
           });
           void preview.refetch();
-        } else if (isProposalDismissFailedError(err)) {
+        } else if (code === 'proposal_dismiss_failed') {
           const ids =
             (err as unknown as { body?: { attributes?: { failed_proposal_ids?: string[] } } }).body
               ?.attributes?.failed_proposal_ids ?? [];
           setCloseError({ kind: 'dismiss_failed', count: ids.length });
+          void preview.refetch();
+        } else if (code === 'linked_investigation_unavailable') {
+          // The preview will now surface unavailable_investigation_ids.
           void preview.refetch();
         }
       }
@@ -207,6 +185,7 @@ const EscalationCloseContainer: React.FC<EscalationCloseContainerProps> = ({
       onRetry={() => void preview.refetch()}
       closeErrorKind={closeError?.kind}
       closeErrorCount={closeError?.count}
+      unavailableInvestigationIds={preview.data?.unavailable_investigation_ids}
       onClose={onClose}
       onConfirm={handleConfirm}
       isLoading={isMutating}
@@ -305,8 +284,14 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
               resolve();
             },
             onError: (err) => {
-              if (isCloseTargetsChangedError(err)) {
-                // Let the container handle 409 — keep modal open.
+              if (isKnownCloseError(err)) {
+                // Let the container handle typed close errors — keep modal open.
+                // For partial outcomes (some proposals already dismissed), also invalidate.
+                if (isPartialCloseError(err)) {
+                  invalidateAll();
+                  statusSignal.bump();
+                  void refetchConversation?.();
+                }
                 reject(err);
               } else {
                 setShowCloseModal(false);
@@ -318,7 +303,14 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
         );
       });
     },
-    [conversationId, handleError, handleSuccess, setInvestigationStatus]
+    [
+      conversationId,
+      handleError,
+      handleSuccess,
+      invalidateAll,
+      refetchConversation,
+      setInvestigationStatus,
+    ]
   );
 
   const executeCloseEscalation = useCallback(
@@ -355,8 +347,14 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
               resolve();
             },
             onError: (err) => {
-              if (isCloseTargetsChangedError(err)) {
-                // Let the container handle 409 — keep modal open.
+              if (isKnownCloseError(err)) {
+                // Let the container handle typed close errors — keep modal open.
+                // For partial outcomes (some investigations already closed), also invalidate.
+                if (isPartialCloseError(err)) {
+                  invalidateAll();
+                  statusSignal.bump();
+                  void refetchConversation?.();
+                }
                 reject(err);
               } else {
                 setShowCloseModal(false);
@@ -368,7 +366,14 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
         );
       });
     },
-    [conversationId, handleError, handleSuccess, setEscalationStatus]
+    [
+      conversationId,
+      handleError,
+      handleSuccess,
+      invalidateAll,
+      refetchConversation,
+      setEscalationStatus,
+    ]
   );
 
   const handleToggle = useCallback(

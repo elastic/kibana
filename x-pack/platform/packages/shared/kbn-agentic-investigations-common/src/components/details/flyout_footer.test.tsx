@@ -78,4 +78,22 @@ describe('ConversationDetailsFlyoutFooter', () => {
 
     expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
   });
+
+  it('hides the close action when the investigation is already closed', () => {
+    const closedInvestigation: Investigation = { ...investigation, status: 'closed' };
+
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={closedInvestigation}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={() => <div>Dismiss proposal</div>}
+      />
+    );
+
+    openActionsMenu();
+
+    // Even though onCloseInvestigation is provided, the menu item should not appear
+    // because the investigation is already closed.
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+  });
 });

@@ -130,6 +130,13 @@ export const ESCALATION_CLOSE_INCOMPLETE = (count: number) =>
     values: { count },
   });
 
+export const LINKED_INVESTIGATION_UNAVAILABLE = (count: number) =>
+  i18n.translate('xpack.alertzero.closeConfirmation.linkedInvestigationUnavailable', {
+    defaultMessage:
+      '{count, plural, one {# linked investigation is} other {# linked investigations are}} deleted or not accessible to you. The escalation cannot be closed while unresolvable links exist.',
+    values: { count },
+  });
+
 // ---------------------------------------------------------------------------
 // Status toggle / reopening
 // ---------------------------------------------------------------------------

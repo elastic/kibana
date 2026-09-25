@@ -16,6 +16,7 @@ import { WrongTemplateError } from '../../assignments/assignments_service';
 import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
 import { ProposalDismissFailedError } from '../../investigations/services/proposal_dismiss_failed_error';
 import { EscalationCloseIncompleteError } from '../services/escalation_close_incomplete_error';
+import { LinkedInvestigationUnavailableError } from '../services/linked_investigation_unavailable_error';
 
 /**
  * Maps service errors to HTTP responses for escalation routes.
@@ -52,6 +53,18 @@ export const handleEscalationRouteError = (
   if (error instanceof CloseTargetsChangedError) {
     return response.conflict({
       body: { message: error.message, attributes: { code: error.code } },
+    });
+  }
+
+  if (error instanceof LinkedInvestigationUnavailableError) {
+    return response.conflict({
+      body: {
+        message: error.message,
+        attributes: {
+          code: error.code,
+          unavailable_investigation_ids: error.unavailableInvestigationIds,
+        },
+      },
     });
   }
 

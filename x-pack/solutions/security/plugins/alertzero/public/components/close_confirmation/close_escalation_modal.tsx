@@ -47,6 +47,11 @@ export interface CloseEscalationModalProps {
    * - `'escalation_incomplete'`: one or more linked investigations could not be closed.
    */
   closeErrorKind?: 'dismiss_failed' | 'escalation_incomplete';
+  /**
+   * IDs of linked investigations that cannot be resolved (deleted or inaccessible).
+   * When non-empty, the Confirm button is disabled and a blocking danger callout is shown.
+   */
+  unavailableInvestigationIds?: string[];
   /** Number of items that failed (used for the error callout message). */
   closeErrorCount?: number;
   onClose: () => void;
@@ -71,6 +76,7 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
   onRetry,
   closeErrorKind,
   closeErrorCount = 0,
+  unavailableInvestigationIds = [],
   onClose,
   onConfirm,
   isLoading = false,
@@ -89,7 +95,9 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
 
   const hasProposals = totalPendingProposals > 0;
   const hasOpenInvestigations = (preview?.open_investigations.length ?? 0) > 0;
-  const isConfirmDisabled = isLoading || isRefreshing || preview === undefined;
+  const hasUnavailableLinks = unavailableInvestigationIds.length > 0;
+  const isConfirmDisabled =
+    isLoading || isRefreshing || preview === undefined || hasUnavailableLinks;
 
   return (
     <EuiConfirmModal
@@ -105,6 +113,19 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
       confirmButtonDisabled={isConfirmDisabled}
       isLoading={isLoading}
     >
+      {hasUnavailableLinks && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            size="s"
+            title={i18n.LINKED_INVESTIGATION_UNAVAILABLE(unavailableInvestigationIds.length)}
+            data-test-subj="closeEscalationUnavailableLinksCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       {targetsChanged && (
         <>
           <EuiCallOut

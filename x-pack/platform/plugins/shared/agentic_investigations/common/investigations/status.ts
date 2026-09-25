@@ -82,4 +82,9 @@ export interface EscalationClosePreviewResponse {
     pending_proposal_count: number;
     pending_proposals: ClosePreviewProposal[];
   }>;
+  /**
+   * IDs of linked investigations that could not be resolved (deleted or inaccessible).
+   * When non-empty, closing the escalation is blocked until the links are removed.
+   */
+  unavailable_investigation_ids: string[];
 }

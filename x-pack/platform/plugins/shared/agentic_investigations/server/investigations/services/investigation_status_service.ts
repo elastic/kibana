@@ -24,33 +24,57 @@ import { ProposalDismissFailedError } from './proposal_dismiss_failed_error';
 export { MissingDismissReasonError, CloseTargetsChangedError, ProposalDismissFailedError };
 
 /**
- * Determines whether an error from `releaseGate` means the proposal was already
- * decided or expired (and should count as "skipped") or is a real failure.
- * We duck-type the error because cross-plugin error class imports are forbidden.
+ * Determines how to classify a `releaseGate` failure for a single proposal.
  *
- * `ProposalConflictError` and `ProposalExpiredError` are plain subclasses of `Error`
- * that set `this.name`. They do NOT carry `meta.statusCode` — that property is only
- * on HTTP response errors from the proposals HTTP route, which we do not call here.
- * We also check `meta.statusCode === 409` to handle Elasticsearch version-conflict
- * errors from the underlying write operations.
+ * - `ProposalExpiredError` or `ProposalNotFoundError` → the proposal is gone; skip it.
+ * - `ProposalConflictError` → ambiguous: could be "already decided" (skippable) or an OCC /
+ *   execution race where the proposal is still `pending` (retry-able). We re-read the proposal
+ *   to find out.
+ * - Anything else → treat as a real failure.
  *
- * `ProposalNotFoundError` is treated as skippable too: if the proposal disappeared
- * between `list` and `releaseGate`, it is already gone and the close should succeed.
+ * We match by `error.name` because cross-plugin class imports are forbidden and the proposals
+ * plugin sets `this.name` explicitly on every custom error.
+ *
+ * @returns
+ *   - `'skipped'` — the proposal was already decided, expired, or not found
+ *   - `'retry'`   — a conflict but the proposal is still pending; caller should retry once
+ *   - `'failed'`  — a non-recoverable failure
  */
-const isProposalAlreadyDecidedOrExpired = (err: unknown): boolean => {
-  if (!(err instanceof Error)) return false;
-  // Match by error class name (set via `this.name` in the proposals plugin).
-  if (
-    err.name === 'ProposalConflictError' ||
-    err.name === 'ProposalExpiredError' ||
-    err.name === 'ProposalNotFoundError'
-  ) {
-    return true;
+async function classifyReleaseGateError(
+  err: unknown,
+  proposalId: string,
+  proposalsService: {
+    get: (
+      id: string,
+      spaceId: string
+    ) => Promise<{ decision?: unknown; status: string; expired: boolean }>;
+  },
+  spaceId: string
+): Promise<'skipped' | 'retry' | 'failed'> {
+  if (!(err instanceof Error)) return 'failed';
+
+  if (err.name === 'ProposalExpiredError' || err.name === 'ProposalNotFoundError') {
+    return 'skipped';
   }
-  // Elasticsearch OCC conflict from the proposals service's underlying write.
-  const anyErr = err as { meta?: { statusCode?: number } };
-  return anyErr.meta?.statusCode === 409;
-};
+
+  if (err.name === 'ProposalConflictError') {
+    // Re-read the proposal to determine its actual state.
+    let proposal: { decision?: unknown; status: string; expired: boolean };
+    try {
+      proposal = await proposalsService.get(proposalId, spaceId);
+    } catch (readErr) {
+      if (readErr instanceof Error && readErr.name === 'ProposalNotFoundError') {
+        return 'skipped';
+      }
+      return 'failed';
+    }
+    const isSettled =
+      proposal.decision !== undefined || proposal.status !== 'pending' || proposal.expired;
+    return isSettled ? 'skipped' : 'retry';
+  }
+
+  return 'failed';
+}
 
 /**
  * Checks that no pending proposal is unknown to the caller.
@@ -214,31 +238,50 @@ export class InvestigationStatusService {
           await proposals.getProposalPrivileges().assertCanManage(request);
 
           const proposalsService = proposals.getProposalsService();
-          const results = await Promise.allSettled(
-            pending.map((p) =>
-              proposalsService.releaseGate(p.id, {
-                approved: false,
-                dismissReason: body.dismiss_reason as DismissReason,
-                rationale: body.rationale,
-                spaceId,
-                request,
-              })
-            )
+          const releaseParams = {
+            approved: false as const,
+            dismissReason: body.dismiss_reason as DismissReason,
+            rationale: body.rationale,
+            spaceId,
+            request,
+          };
+
+          const dismissOutcomes = await Promise.all(
+            pending.map(async (p) => {
+              try {
+                await proposalsService.releaseGate(p.id, releaseParams);
+                return { id: p.id, outcome: 'dismissed' as const };
+              } catch (firstErr) {
+                const classification = await classifyReleaseGateError(
+                  firstErr,
+                  p.id,
+                  proposalsService,
+                  spaceId
+                );
+                if (classification === 'skipped') {
+                  return { id: p.id, outcome: 'skipped' as const };
+                }
+                if (classification === 'retry') {
+                  // Proposal is still pending — retry once.
+                  try {
+                    await proposalsService.releaseGate(p.id, releaseParams);
+                    return { id: p.id, outcome: 'dismissed' as const };
+                  } catch {
+                    return { id: p.id, outcome: 'failed' as const };
+                  }
+                }
+                return { id: p.id, outcome: 'failed' as const };
+              }
+            })
           );
 
-          for (let i = 0; i < results.length; i++) {
-            const result = results[i];
-            const proposalId = pending[i].id;
-            if (result.status === 'fulfilled') {
+          for (const { id: proposalId, outcome } of dismissOutcomes) {
+            if (outcome === 'dismissed') {
               dismissedProposalIds.push(proposalId);
-            } else if (isProposalAlreadyDecidedOrExpired(result.reason)) {
+            } else if (outcome === 'skipped') {
               this.logger.debug(`Proposal ${proposalId} was already decided or expired, skipping`);
             } else {
-              this.logger.error(
-                `Failed to dismiss proposal ${proposalId}: ${
-                  result.reason instanceof Error ? result.reason.message : String(result.reason)
-                }`
-              );
+              this.logger.error(`Failed to dismiss proposal ${proposalId}`);
               failedProposalIds.push(proposalId);
             }
           }
