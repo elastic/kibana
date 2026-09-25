@@ -58,14 +58,15 @@ export const buildCandidateQuery = async (
   const { trigger, report_ids, spaceId, limit: rawLimit } = params;
   const limit = Math.min(rawLimit ?? DEFAULT_LIMIT, MAX_LIMIT);
 
-  const isManualWithIds = trigger === 'manual' && report_ids && report_ids.length > 0;
+  const namedIds =
+    trigger === 'manual' && report_ids && report_ids.length > 0 ? report_ids : undefined;
 
   const filterClauses: Array<Record<string, unknown>> = [buildHuntSpaceFilterTerms(spaceId)];
 
-  if (isManualWithIds) {
+  if (namedIds) {
     // Manual bypass lifts the hunt-once gate for these ids (replay semantics); the
     // open-proposal guard below still applies.
-    filterClauses.push({ ids: { values: report_ids } });
+    filterClauses.push({ ids: { values: namedIds } });
   } else {
     // Scheduled trigger: hunt-once gate, only reports never hunted in this space.
     //
@@ -119,8 +120,12 @@ export const buildCandidateQuery = async (
   try {
     response = await esClient.search({
       index: HUNT_REPORTS_INDEX,
-      // Manual selection is already bounded by the named ids; only the scheduled sweep needs headroom.
-      size: isManualWithIds ? limit : limit * OVERFETCH_MULTIPLIER,
+      // Manual selection has to see every named id, not just the first `limit` of
+      // them: an id the search never reached is indistinguishable from an absent
+      // one below, and would be reported as `not_found` although it exists. The
+      // request schema bounds `report_ids`, so this stays small. Only the
+      // scheduled sweep needs overfetch headroom.
+      size: namedIds ? namedIds.length : limit * OVERFETCH_MULTIPLIER,
       ignore_unavailable: true,
       track_total_hits: true,
       _source: false,
@@ -166,9 +171,9 @@ export const buildCandidateQuery = async (
 
   // Named ids that matched nothing are reported rather than silently dropped: from the
   // caller's side an unknown id and an id in another space are both "not selected".
-  if (isManualWithIds) {
+  if (namedIds) {
     const matched = new Set(matchedIds);
-    for (const requested of report_ids) {
+    for (const requested of namedIds) {
       if (!matched.has(requested)) {
         skipped.push({ id: requested, reason: 'not_found' });
       }
