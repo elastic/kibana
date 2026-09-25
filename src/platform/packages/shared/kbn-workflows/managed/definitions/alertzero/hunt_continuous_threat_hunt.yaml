@@ -37,14 +37,16 @@ consts:
 steps:
   # Tier 1 index check (which telemetry indices exist), not Security Solution
   # threat-intel readiness. `continue: true` (no fallback capture): a route
-  # exception is folded into the same "nothing usable" case as an all-blocked
-  # response by count_index_scope_statuses' `default: []` below, so selection
-  # is skipped and the run ends with no writes either way.
+  # exception collapses totalTechnologies/blockedTechnologies to 0/0 below,
+  # which resolve_index_scope_gate treats the same as all-blocked, so
+  # selection and the fan-out are both skipped and the run ends with no writes.
   - name: check_index_scope
     type: kibana.request
     with:
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/index_scope"
+      headers:
+        elastic-api-version: "1"
     on-failure:
       continue: true
 
@@ -96,14 +98,24 @@ steps:
         elastic-api-version: "1"
         Content-Type: application/json
       body:
-        report_ids: "${{ inputs.reportIds | default: [] }}"
+        report_ids: "${{ inputs.reportIds }}"
         limit: "${{ consts.worker_settings.candidateLimit }}"
     on-failure:
       continue: true
 
+  # `if:` gates the whole parallel step, not just its `foreach` source: a
+  # filter's `| default: []` does not produce a usable array for a skipped or
+  # nil predecessor in this engine (bracket array literals are not valid filter
+  # arguments here — verified live; the key is silently dropped rather than
+  # substituted), and `foreach` itself hard-fails ("must evaluate to an array")
+  # rather than treating a missing predecessor as empty. Skipping the whole
+  # step when the candidates call was blocked or itself failed sidesteps that
+  # entirely: index_scope_blocked covers the gate above; the `!= nil` check
+  # covers select_candidate_reports failing via its own `continue: true`.
   - name: report_fan_out
     type: parallel
-    foreach: "${{ steps.select_candidate_reports.output.ids | default: [] }}"
+    if: "${{ steps.resolve_index_scope_gate.output.index_scope_blocked != true and steps.select_candidate_reports.output.ids != nil }}"
+    foreach: "${{ steps.select_candidate_reports.output.ids }}"
     mode: settled
     # Hardcoded pending security-team#19670 (steps.<name>.output cross-branch
     # contamination inside a parallel branch when concurrency.max > 1). Not
