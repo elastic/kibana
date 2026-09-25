@@ -80,12 +80,15 @@ import {
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
+import { entityStoreMetrics } from '../../monitor/metrics';
 
 jest.mock('../../infra/elasticsearch/esql');
 jest.mock('../../infra/elasticsearch/ingest');
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
+
+const NO_INGEST_CHANGES = { created: 0, updated: 0, noop: 0 };
 
 function createMockEngineDescriptor(
   type: EntityType = 'user',
@@ -196,6 +199,9 @@ function createTestContext(globalStateOverrides?: GlobalStateLogExtractionOverri
   // Once values that would otherwise pollute the next test.
   mockExecuteEsqlQuery.mockReset();
   mockIngestEntities.mockReset();
+  // mockReset drops the implementation, so without a default the mock resolves to undefined and
+  // the client's `const { created, updated, noop } = await ingestEntities(...)` throws.
+  mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
   const mockLogger = loggerMock.create();
   const mockEsClient = {
@@ -281,7 +287,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExtractSuccessSequence(mockEsqlResponse);
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       const result = await client.extractLogs('user');
 
@@ -419,7 +425,7 @@ describe('LogsExtractionClient', () => {
         .mockResolvedValueOnce(mockEsqlResponse)
         .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
         .mockResolvedValueOnce({ columns: [], values: [] });
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       const result = await client.extractLogs('user');
 
@@ -482,7 +488,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       const result = await client.extractLogs('user');
 
@@ -537,7 +543,7 @@ describe('LogsExtractionClient', () => {
       mockExecuteEsqlQuery
         .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
         .mockResolvedValueOnce(realDocsResponse);
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       const result = await client.extractLogs('user');
 
@@ -610,7 +616,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       await client.extractLogs('user');
 
@@ -656,7 +662,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       await client.extractLogs('user');
 
@@ -693,7 +699,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       await client.extractLogs('user');
 
@@ -722,7 +728,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       await client.extractLogs('user');
 
@@ -821,7 +827,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       const fromDate = '2024-01-01T00:00:00.000Z';
       const toDate = '2024-01-02T00:00:00.000Z';
@@ -868,7 +874,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExtractSuccessSequence(mockEsqlResponse);
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       const result = await client.extractLogs('user', {
         specificWindow: {
@@ -966,7 +972,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExtractSuccessSequence(mockEsqlResponse);
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       const result = await client.extractLogs('user');
 
@@ -991,7 +997,7 @@ describe('LogsExtractionClient', () => {
       } as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>);
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       await client.extractLogs('user');
 
@@ -1010,7 +1016,7 @@ describe('LogsExtractionClient', () => {
       const error = new Error('Data view not found');
       mockDataViewsService.get.mockRejectedValue(error);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       const result = await client.extractLogs('user');
 
@@ -1040,7 +1046,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExtractSuccessSequence(mockEsqlResponse);
-      mockIngestEntities.mockResolvedValue(undefined);
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
       await client.extractLogs('host');
 
@@ -1130,7 +1136,7 @@ describe('LogsExtractionClient', () => {
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
         mockExtractSuccessSequence(mainExtractionResponse, 1);
-        mockIngestEntities.mockResolvedValue(undefined);
+        mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
         const result = await client.extractLogs('user');
 
@@ -1169,7 +1175,7 @@ describe('LogsExtractionClient', () => {
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
         mockExtractSuccessSequence(mainExtractionResponse, 1);
-        mockIngestEntities.mockResolvedValue(undefined);
+        mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
         const result = await client.extractLogs('user');
 
@@ -1209,7 +1215,7 @@ describe('LogsExtractionClient', () => {
         };
         setupVolCapTest({ maxLogsPerWindow: 0 });
         mockExtractSuccessSequence(mainExtractionResponse);
-        mockIngestEntities.mockResolvedValue(undefined);
+        mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
         const result = await client.extractLogs('user');
 
@@ -1255,7 +1261,7 @@ describe('LogsExtractionClient', () => {
           .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(lastPageTimestamp, 1))
           .mockResolvedValueOnce(mainExtractionResponse)
           .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty());
-        mockIngestEntities.mockResolvedValue(undefined);
+        mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
         const result = await client.extractLogs('user', {
           specificWindow: { fromDateISO: '2024-01-02T00:00:00.000Z', toDateISO },
@@ -1287,7 +1293,7 @@ describe('LogsExtractionClient', () => {
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
         mockExtractSuccessSequence(mainExtractionResponse, 1);
-        mockIngestEntities.mockResolvedValue(undefined);
+        mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
         const result = await client.extractLogs('user', {
           specificWindow: { fromDateISO: '2024-01-02T00:00:00.000Z', toDateISO },
@@ -1325,7 +1331,7 @@ describe('LogsExtractionClient', () => {
         mockDataViewsService.get.mockResolvedValue({
           getIndexPattern: jest.fn().mockReturnValue('logs-*'),
         } as any);
-        mockIngestEntities.mockResolvedValue(undefined);
+        mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
       };
 
       it('logs warn and bumps cursor by 1ms when timestamp unchanged and page is full', async () => {
@@ -1790,7 +1796,7 @@ describe('LogsExtractionClient mid-slice resume', () => {
     ctx.mockDataViewsService.get.mockResolvedValue({
       getIndexPattern: jest.fn().mockReturnValue('logs-*'),
     } as any);
-    mockIngestEntities.mockResolvedValue(undefined);
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
   };
 
   beforeEach(() => {
@@ -1979,6 +1985,7 @@ describe('LogsExtractionClient mid-slice resume', () => {
             ingestedIds.push(String(row[idIdx]));
           }
         });
+        return NO_INGEST_CHANGES;
       });
 
       // Run 1: probe pins the slice end, page 1 ingests entity1+entity2 and persists the
@@ -2040,50 +2047,53 @@ describe('LogsExtractionClient mid-slice resume', () => {
   );
 });
 
+const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+
+const extractionColumns: ESQLSearchResponse['columns'] = [
+  { name: '@timestamp', type: 'date' },
+  { name: HASHED_ID_FIELD, type: 'keyword' },
+  { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
+];
+
+function createContextWithMode(mode: ExtractionMode) {
+  jest.clearAllMocks();
+  mockExecuteEsqlQuery.mockReset();
+  mockIngestEntities.mockReset();
+  // mockReset drops the implementation, so without a default the mock resolves to undefined and
+  // the client's `const { created, updated, noop } = await ingestEntities(...)` throws.
+  mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+
+  const mockLogger = loggerMock.create();
+  const mockEsClient = {
+    indices: {
+      resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+    },
+  } as unknown as jest.Mocked<ElasticsearchClient>;
+  const mockDataViewsService = {
+    get: jest.fn().mockResolvedValue({ getIndexPattern: jest.fn().mockReturnValue('logs-*') }),
+  } as unknown as jest.Mocked<DataViewsService>;
+  const mockEngineDescriptorClient: jest.Mocked<
+    Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
+  > = {
+    findOrThrow: jest.fn(),
+    update: jest.fn().mockResolvedValue({}),
+  };
+  const mockGlobalStateClient = createMockGlobalStateClient();
+
+  const client = new LogsExtractionClient({
+    logger: mockLogger,
+    namespace: 'default',
+    esClient: mockEsClient,
+    dataViewsService: mockDataViewsService,
+    engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+    globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
+    extractionMode: mode,
+  });
+
+  return { client, mockEngineDescriptorClient, mockDataViewsService, mockGlobalStateClient };
+}
+
 describe('LogsExtractionClient extraction mode cursor routing', () => {
-  const fixedNow = new Date('2025-01-15T12:00:00.000Z');
-
-  const extractionColumns: ESQLSearchResponse['columns'] = [
-    { name: '@timestamp', type: 'date' },
-    { name: HASHED_ID_FIELD, type: 'keyword' },
-    { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
-  ];
-
-  function createContextWithMode(mode: ExtractionMode) {
-    jest.clearAllMocks();
-    mockExecuteEsqlQuery.mockReset();
-    mockIngestEntities.mockReset();
-
-    const mockLogger = loggerMock.create();
-    const mockEsClient = {
-      indices: {
-        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
-      },
-    } as unknown as jest.Mocked<ElasticsearchClient>;
-    const mockDataViewsService = {
-      get: jest.fn().mockResolvedValue({ getIndexPattern: jest.fn().mockReturnValue('logs-*') }),
-    } as unknown as jest.Mocked<DataViewsService>;
-    const mockEngineDescriptorClient: jest.Mocked<
-      Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
-    > = {
-      findOrThrow: jest.fn(),
-      update: jest.fn().mockResolvedValue({}),
-    };
-    const mockGlobalStateClient = createMockGlobalStateClient();
-
-    const client = new LogsExtractionClient({
-      logger: mockLogger,
-      namespace: 'default',
-      esClient: mockEsClient,
-      dataViewsService: mockDataViewsService,
-      engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
-      globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-      extractionMode: mode,
-    });
-
-    return { client, mockEngineDescriptorClient, mockDataViewsService };
-  }
-
   beforeEach(() => {
     jest.useFakeTimers({ now: fixedNow.getTime() });
   });
@@ -2101,7 +2111,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
         ReturnType<EngineDescriptorClient['findOrThrow']>
       >
     );
-    mockIngestEntities.mockResolvedValue(undefined);
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
     // probe → extraction (1 row, non-final) → empty probe (end of window) → sweep
     mockExecuteEsqlQuery
       .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:00:00.000Z'))
@@ -2127,7 +2137,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
         ReturnType<EngineDescriptorClient['findOrThrow']>
       >
     );
-    mockIngestEntities.mockResolvedValue(undefined);
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
     mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
 
     await client.extractLogs('user');
@@ -2155,7 +2165,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
       ...createMockEngineDescriptor('user'),
       ...otherStopped,
     } as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>);
-    mockIngestEntities.mockResolvedValue(undefined);
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
     mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
 
     const result = await client.extractLogs('user');
@@ -2206,7 +2216,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
         ReturnType<EngineDescriptorClient['findOrThrow']>
       >
     );
-    mockIngestEntities.mockResolvedValue(undefined);
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
     mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
 
     await client.extractLogs('user');
@@ -2225,7 +2235,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
         lastExecutionTimestamp: existingCheckpoint,
       }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
     );
-    mockIngestEntities.mockResolvedValue(undefined);
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
     mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
 
     await client.extractLogs('user');
@@ -2253,7 +2263,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
         // nonPriorityLogExtractionState absent → null default → fresh start
       }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
     );
-    mockIngestEntities.mockResolvedValue(undefined);
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
     mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
 
     await client.extractLogs('user');
@@ -2283,7 +2293,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
         },
       }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
     );
-    mockIngestEntities.mockResolvedValue(undefined);
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
     mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
 
     await client.extractLogs('user');
@@ -2294,5 +2304,287 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
     expect(firstQuery).toContain(nonPriorityCheckpoint);
     // And it must not fall back to the lookbackPeriod start (fixedNow − 3h = 09:00).
     expect(firstQuery).not.toContain('2025-01-15T09:00:00.000Z');
+  });
+});
+
+describe('LogsExtractionClient extraction metrics', () => {
+  let lagRecord: jest.SpyInstance;
+  let utilizationRecord: jest.SpyInstance;
+  let logsProcessedRecord: jest.SpyInstance;
+  let entitiesCreatedAdd: jest.SpyInstance;
+  let entitiesUpdatedAdd: jest.SpyInstance;
+  let entitiesNoopAdd: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: fixedNow.getTime() });
+    lagRecord = jest.spyOn(entityStoreMetrics.extractionLagMs, 'record').mockImplementation();
+    utilizationRecord = jest
+      .spyOn(entityStoreMetrics.extractionLogsCapUtilization, 'record')
+      .mockImplementation();
+    logsProcessedRecord = jest
+      .spyOn(entityStoreMetrics.extractionLogsProcessed, 'record')
+      .mockImplementation();
+    entitiesCreatedAdd = jest
+      .spyOn(entityStoreMetrics.extractionEntitiesCreated, 'add')
+      .mockImplementation();
+    entitiesUpdatedAdd = jest
+      .spyOn(entityStoreMetrics.extractionEntitiesUpdated, 'add')
+      .mockImplementation();
+    entitiesNoopAdd = jest
+      .spyOn(entityStoreMetrics.extractionEntitiesNoop, 'add')
+      .mockImplementation();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  const startedDescriptor = (overrides?: Parameters<typeof createMockEngineDescriptor>[1]) =>
+    createMockEngineDescriptor('user', overrides) as Awaited<
+      ReturnType<EngineDescriptorClient['findOrThrow']>
+    >;
+
+  it('records lag_ms on a run that processed no logs', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.single);
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    // A stalled engine produces no logs and no error. Without this the failure is invisible.
+    expect(lagRecord).toHaveBeenCalledTimes(1);
+    const [lagMs] = lagRecord.mock.calls[0];
+    expect(lagMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('records lag_ms from the pre-run resume point when the run throws', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.single);
+    const checkpoint = '2025-01-15T11:00:00.000Z'; // 1 hour before fixedNow
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      startedDescriptor({ checkpointTimestamp: checkpoint, lastExecutionTimestamp: checkpoint })
+    );
+    mockExecuteEsqlQuery.mockRejectedValue(new Error('es is down'));
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(false);
+    // A repeatedly failing engine must show growing lag, not an absent series.
+    expect(lagRecord).toHaveBeenCalledWith(
+      60 * 60 * 1000,
+      expect.objectContaining({ extraction_mode: EXTRACTION_MODE.single })
+    );
+  });
+
+  it.each([true, false])('records no lag_ms for a force run (succeeded: %s)', async (succeeds) => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.single);
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+    if (succeeds) {
+      mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+    } else {
+      mockExecuteEsqlQuery.mockRejectedValue(new Error('es is down'));
+    }
+
+    await client.extractLogs('user', {
+      specificWindow: {
+        fromDateISO: '2025-01-15T10:00:00.000Z',
+        toDateISO: '2025-01-15T11:00:00.000Z',
+      },
+    });
+
+    // A manual window neither reads nor advances the scheduled cursor, so it says nothing
+    // about how far behind the engine is — on either outcome.
+    expect(lagRecord).not.toHaveBeenCalled();
+  });
+
+  it('records no lag_ms when the non-priority process is switched off', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode(
+      EXTRACTION_MODE.nonPriority
+    );
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      startedDescriptor({ nonPriorityStatus: ENGINE_STATUS.STOPPED })
+    );
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(false);
+    // Idle is not stalled. Reporting lag here would page someone for a process that was
+    // deliberately turned off.
+    expect(lagRecord).not.toHaveBeenCalled();
+  });
+
+  it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority, EXTRACTION_MODE.nonPriority])(
+    'labels every metric with extraction_mode %s',
+    async (mode) => {
+      const { client, mockEngineDescriptorClient } = createContextWithMode(mode);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+      mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+      mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+      await client.extractLogs('user');
+
+      for (const call of [...lagRecord.mock.calls, ...logsProcessedRecord.mock.calls]) {
+        expect(call[1]).toMatchObject({
+          entity_type: 'user',
+          namespace: 'default',
+          extraction_mode: mode,
+        });
+      }
+      expect(logsProcessedRecord).toHaveBeenCalled();
+    }
+  );
+
+  it('labels metrics remote when the resolved index patterns cross clusters', async () => {
+    const { client, mockEngineDescriptorClient, mockDataViewsService } = createContextWithMode(
+      EXTRACTION_MODE.single
+    );
+    mockDataViewsService.get.mockResolvedValue({
+      getIndexPattern: jest.fn().mockReturnValue('remote-cluster:logs-*'),
+    } as unknown as Awaited<ReturnType<DataViewsService['get']>>);
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    // Every in-client site used to hardcode remote:false, mislabelling all CCS/CPS traffic.
+    expect(logsProcessedRecord).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.objectContaining({ remote: true })
+    );
+  });
+
+  it('records logs_cap.utilization as a fraction within [0, 1]', async () => {
+    const { client, mockEngineDescriptorClient, mockGlobalStateClient } = createContextWithMode(
+      EXTRACTION_MODE.single
+    );
+    // The shared fixture disables the cap by default; this metric only exists when it is on.
+    mockGlobalStateClient.findLogExtractionOverrides.mockResolvedValue(
+      LogExtractionConfig.parse({ maxLogsPerWindow: 1000, maxTimeWindowSize: '999d' })
+    );
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    expect(utilizationRecord).toHaveBeenCalled();
+    for (const [fraction] of utilizationRecord.mock.calls) {
+      expect(fraction).toBeGreaterThanOrEqual(0);
+      expect(fraction).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('records no logs_cap.utilization when the volume cap is disabled', async () => {
+    // The shared fixture already sets maxLogsPerWindow to 0, which means "no cap".
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.single);
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    // There is no fraction to report. A recorded 0 would read as an idle process.
+    expect(utilizationRecord).not.toHaveBeenCalled();
+  });
+
+  it('forwards ingest outcomes to the entities.created/updated/noop counters', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.single);
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    mockIngestEntities.mockResolvedValue({ created: 5, updated: 3, noop: 2 });
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [['user1']] });
+
+    await client.extractLogs('user');
+
+    expect(entitiesCreatedAdd).toHaveBeenCalledWith(
+      5,
+      expect.objectContaining({ extraction_mode: EXTRACTION_MODE.single })
+    );
+    expect(entitiesUpdatedAdd).toHaveBeenCalledWith(
+      3,
+      expect.objectContaining({ extraction_mode: EXTRACTION_MODE.single })
+    );
+    expect(entitiesNoopAdd).toHaveBeenCalledWith(
+      2,
+      expect.objectContaining({ extraction_mode: EXTRACTION_MODE.single })
+    );
+  });
+
+  it('records logs_cap.utilization proportional to logsProcessed / maxLogsPerWindow', async () => {
+    const { client, mockEngineDescriptorClient, mockGlobalStateClient } = createContextWithMode(
+      EXTRACTION_MODE.single
+    );
+    mockGlobalStateClient.findLogExtractionOverrides.mockResolvedValue(
+      LogExtractionConfig.parse({ maxLogsPerWindow: 1000, maxTimeWindowSize: '999d' })
+    );
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+    // 50 logs in the slice → logsProcessed ≈ 50 → utilization ≈ 50/1000 = 0.05
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] }, 50);
+
+    await client.extractLogs('user');
+
+    // Cross-check: logsProcessed (from the probe) and the utilization fraction must match.
+    const [logsProcessed] = logsProcessedRecord.mock.calls[0];
+    expect(logsProcessed).toBeGreaterThan(0);
+    const [fraction] = utilizationRecord.mock.calls[0];
+    expect(fraction).toBeCloseTo(Math.min(1, logsProcessed / 1000), 5);
+  });
+
+  it('records lag_ms from the last committed checkpoint after partial-progress failure', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.single);
+    // Pre-run start: one hour before fixedNow.
+    const runStart = '2025-01-15T11:00:00.000Z';
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      startedDescriptor({ checkpointTimestamp: runStart, lastExecutionTimestamp: runStart })
+    );
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+
+    const sliceOneEnd = '2025-01-15T11:30:00.000Z';
+    mockExecuteEsqlQuery
+      // Slice 1 probe: default (large) count → non-terminal, loop continues to slice 2.
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(sliceOneEnd))
+      // Slice 1 extraction: succeeds → checkpoint committed to sliceOneEnd.
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] })
+      // Slice 2 probe: succeeds.
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:45:00.000Z', 1))
+      // Slice 2 extraction: throws.
+      .mockRejectedValueOnce(new Error('es unavailable'));
+
+    await client.extractLogs('user');
+
+    // The first slice committed checkpoint = sliceOneEnd.
+    // Lag must be measured from that, not from runStart (pre-run start).
+    const [[lagMs]] = lagRecord.mock.calls;
+    const lagFromCommitted = fixedNow.getTime() - new Date(sliceOneEnd).getTime();
+    const lagFromRunStart = fixedNow.getTime() - new Date(runStart).getTime();
+    expect(lagMs).toBeCloseTo(lagFromCommitted, -2); // within 100ms
+    expect(lagMs).not.toBeCloseTo(lagFromRunStart, -2);
+  });
+
+  it('labels failure metrics remote:true when the query throws on a CCS/CPS run', async () => {
+    const { client, mockEngineDescriptorClient, mockDataViewsService } = createContextWithMode(
+      EXTRACTION_MODE.single
+    );
+    mockDataViewsService.get.mockResolvedValue({
+      getIndexPattern: jest.fn().mockReturnValue('remote-cluster:logs-*'),
+    } as unknown as Awaited<ReturnType<DataViewsService['get']>>);
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    // Probe succeeds (index patterns resolved, isRemote set), main query throws.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockRejectedValueOnce(new Error('remote shard unavailable'));
+
+    const result = await client.extractLogs('user');
+
+    // isRemote was set by onRemoteResolved before the query threw, so the error metric carries
+    // remote:true rather than the initialised-to-false default.
+    expect(result.isRemote).toBe(true);
+    expect(lagRecord).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.objectContaining({ remote: true })
+    );
   });
 });

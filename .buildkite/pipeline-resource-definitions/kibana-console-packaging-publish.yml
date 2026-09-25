@@ -42,7 +42,7 @@ spec:
         skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
-          access_level: BUILD_AND_READ
+          access_level: READ_ONLY
         kibana-management:
           access_level: MANAGE_BUILD_AND_READ
         kibana-operations:
