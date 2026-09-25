@@ -188,7 +188,12 @@ export const getAttachmentTypeFromAttributes = (attributes: unknown): string => 
     type === AttachmentType.externalReference &&
     typeof externalReferenceAttachmentTypeId === 'string'
   ) {
-    return EXTERNAL_REFERENCE_TYPE_MAP[externalReferenceAttachmentTypeId] ?? type;
+    // Fall back to the raw subtype id (not the generic `type`) on a map miss, so callers
+    // building log/error messages can still identify which subtype was unrecognized.
+    return (
+      EXTERNAL_REFERENCE_TYPE_MAP[externalReferenceAttachmentTypeId] ??
+      externalReferenceAttachmentTypeId
+    );
   }
   return type;
 };

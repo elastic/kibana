@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { BulkGetAttachmentsRequestRt } from '../../../../common/types/api/attachment/v1';
+import { BulkGetUnifiedAttachmentsRequestRt } from '../../../../common/types/api/attachment/v2';
 import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
-import type { attachmentApiV2, attachmentApiV2Union } from '../../../../common/types/api';
+import type { attachmentApiV2 } from '../../../../common/types/api';
 
 import { INTERNAL_BULK_GET_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -34,11 +34,11 @@ export const bulkGetAttachmentsRoute = createCasesRoute({
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
 
-      const requestBody: attachmentApiV2.BulkGetAttachmentsRequestV2 = decodeWithExcessOrThrow(
-        BulkGetAttachmentsRequestRt
+      const requestBody: attachmentApiV2.BulkGetUnifiedAttachmentsRequest = decodeWithExcessOrThrow(
+        BulkGetUnifiedAttachmentsRequestRt
       )(request.body);
 
-      const res: attachmentApiV2Union.BulkGetAttachmentsResponseV2 =
+      const res: attachmentApiV2.BulkGetUnifiedAttachmentsResponse =
         await client.attachments.bulkGet({
           caseID: request.params.case_id,
           savedObjectIds: requestBody.ids,

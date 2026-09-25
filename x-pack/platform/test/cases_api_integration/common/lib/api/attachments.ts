@@ -14,7 +14,7 @@ import {
 import type { Case } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type {
-  BulkGetAttachmentsResponse,
+  BulkGetUnifiedAttachmentsResponse,
   AttachmentRequestV2,
   BulkCreateAttachmentsRequest,
   BulkCreateAttachmentsRequestV2,
@@ -46,7 +46,7 @@ export const bulkGetAttachments = async ({
   caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<BulkGetAttachmentsResponse> => {
+}): Promise<BulkGetUnifiedAttachmentsResponse> => {
   const { body: comments } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_get`)
     .send({ ids: savedObjectIds })
