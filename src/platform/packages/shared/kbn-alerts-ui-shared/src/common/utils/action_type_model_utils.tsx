@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lazy, useMemo } from 'react';
+import React, { lazy, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import { getConnectorSpec, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
-import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
-import type { ConnectorZodSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
-import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
-import { narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs/src/lib/narrow_secrets_schema_for_auth_mode';
+import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs';
+import type { ConnectorZodSchema } from '@kbn/connector-specs';
+import { getMeta, setMeta } from '@kbn/connector-specs';
+import { UseField, type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ConnectorActionSelector } from '../components/connector_action_selector';
 import type {
+  ConnectorActionDef,
   ConnectorSpecResponse,
   ConnectorSpecWireResponse,
 } from '../apis/fetch_connector_spec';
@@ -125,14 +128,36 @@ export function transformSpecToActionTypeModel(
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {
-      const { generateFormFields } = await import(
-        /* webpackPrefetch: true */ '@kbn/response-ops-form-generator'
-      );
+      const [{ generateFormFields }, { EuiSpacer }] = await Promise.all([
+        import(/* webpackPrefetch: true */ '@kbn/response-ops-form-generator'),
+        import('@elastic/eui'),
+      ]);
       const parsedZodSchema = fromConnectorSpecSchema(spec.schema);
       if (!parsedZodSchema) {
         throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
+      const specActions = spec.actions ?? [];
+
+      // Bridges UseField's FieldHook API to ConnectorActionSelector's value/onChange props.
+      const ConnectorActionSelectorField = ({
+        field,
+        actions,
+        readOnly,
+      }: {
+        field: FieldHook<string[] | null>;
+        actions: ConnectorActionDef[];
+        readOnly?: boolean;
+      }) => (
+        <ConnectorActionSelector
+          value={field.value ?? null}
+          onChange={field.setValue}
+          actions={actions}
+          readOnly={readOnly}
+          errorMessage={field.errors[0]?.message}
+        />
+      );
+
       function SpecConnectorFormFields({ readOnly, isEdit, authMode }: ActionConnectorFieldsProps) {
         const narrowedSchema = useMemo(
           () => narrowSecretsSchemaForAuthMode(connectorZodSchema, authMode),
@@ -140,11 +165,42 @@ export function transformSpecToActionTypeModel(
 
           [authMode]
         );
-        return generateFormFields({
+        const configFields = generateFormFields({
           schema: narrowedSchema,
           formConfig: { disabled: readOnly, isEdit },
           metaFunctions: { getMeta, setMeta },
         });
+
+        if (specActions.length <= 1) {
+          return configFields;
+        }
+        return (
+          <>
+            {configFields}
+            <EuiSpacer size="m" />
+            <UseField
+              path="config.selectedActions"
+              config={{
+                defaultValue: null,
+                validations: [
+                  {
+                    validator: ({ value }) =>
+                      Array.isArray(value) && (value as string[]).length === 0
+                        ? {
+                            message: i18n.translate(
+                              'alertsUIShared.connectorActionSelector.emptySelectionError',
+                              { defaultMessage: 'Select at least one action, or enable All.' }
+                            ),
+                          }
+                        : undefined,
+                  },
+                ],
+              }}
+              component={ConnectorActionSelectorField}
+              componentProps={{ actions: specActions, readOnly }}
+            />
+          </>
+        );
       }
       return { default: SpecConnectorFormFields };
     }),
@@ -162,30 +218,24 @@ export function transformSpecToActionTypeModel(
   };
 }
 
-/**
- * Copy secrets.authType to config.authType when saving the connector.
- * This ensures authType persists since secrets are stripped by the API.
- */
 function createConnectorFormSerializer() {
   return (formData: Record<string, unknown>) => {
     const secrets = formData?.secrets as Record<string, unknown> | undefined;
-    if (!secrets?.authType) {
-      return formData;
+    const config = formData?.config as Record<string, unknown> | undefined;
+
+    const updatedConfig: Record<string, unknown> = {
+      ...(config ?? {}),
+      ...(secrets?.authType ? { authType: secrets.authType } : {}),
+    };
+
+    if (updatedConfig.selectedActions == null) {
+      delete updatedConfig.selectedActions;
     }
 
-    const config = formData?.config as Record<string, unknown> | undefined;
-    return {
-      ...formData,
-      config: { ...config, authType: secrets.authType },
-    };
+    return { ...formData, config: updatedConfig };
   };
 }
 
-/**
- * Copies config.authType to secrets.authType when loading the connector.
- * This allows the discriminated union widget to display the correct option on
- * connector edit.
- */
 function createConnectorFormDeserializer() {
   return (apiData: Record<string, unknown>) => {
     const config = apiData?.config as Record<string, unknown> | undefined;

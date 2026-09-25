@@ -62,4 +62,27 @@ describe('transformConnectorSpecResponse', () => {
     });
     expect(result.isTestable).toBe(false);
   });
+
+  it('transforms actions from wire format to client format', () => {
+    const result = transformConnectorSpecResponse({
+      metadata: {
+        id: '.test',
+        display_name: 'Test',
+        description: 'Test connector',
+        minimum_license: 'basic',
+        supported_feature_ids: ['agentBuilder'],
+      },
+      schema: {},
+      is_testable: false,
+      actions: [
+        { name: 'listIncidents', description: 'List incidents', is_tool: true },
+        { name: 'getIncident', is_tool: true },
+      ],
+    });
+
+    expect(result.actions).toEqual([
+      { name: 'listIncidents', description: 'List incidents', isTool: true },
+      { name: 'getIncident', isTool: true },
+    ]);
+  });
 });
