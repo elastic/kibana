@@ -54,6 +54,7 @@ type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
+    abortSignal$: BehaviorSubject<AbortSignal | undefined>;
   } & Partial<HasParentApi>;
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
@@ -197,6 +198,7 @@ export function initializeFetch({
           // Get new abort controller
           const currentAbortController = new AbortController();
           abortController = currentAbortController;
+          api.abortSignal$.next(currentAbortController.signal);
 
           await scopedProfilesManager.resolveDataSourceProfile({
             dataSource: createDataSource({ dataView, query: searchSourceQuery }),
@@ -303,7 +305,10 @@ export function initializeFetch({
     });
 
   return {
-    cleanup: () => fetchSubscription.unsubscribe(),
+    cleanup: () => {
+      abortController?.abort(AbortReason.CLEANUP);
+      fetchSubscription.unsubscribe();
+    },
     cancelRequests: () => {
       abortController?.abort();
       abortController = undefined;

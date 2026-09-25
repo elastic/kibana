@@ -46,10 +46,9 @@ export const BulkCreateAttachmentsRequestRtV2 = limitedArraySchema({
   fieldName: 'attachments',
 });
 
-// Bulk-get response tolerates legacy shapes: the getter (`AttachmentGetter.bulkGet`)
-// is mixed until every attachment type is migrated (see `toUnifiedAttributes`), so an
-// unmigrated type would fail a unified-only decode here and 500 the route. Narrow this
-// to unified-only once the getter is unified-only too.
+// Bulk-get response still accepts leftover cases-comments shapes: the getter
+// decodes the legacy-shaped branch for unknown persistable-state subtype ids.
+// Narrow this to unified-only once that fallback is gone.
 export const BulkGetAttachmentsResponseRtV2 = rt.strict({
   attachments: AttachmentsRtV2,
   errors: rt.array(
