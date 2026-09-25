@@ -253,10 +253,20 @@ steps:
 
         The world checks are entity_role, process_parent, and network_destination.
 
-        EVIDENCE GATE — check this before the rules below, every time: if either the
-        entity store or the raw events query is empty or failed, you may NOT return
-        false_positive under any rule. Missing evidence cannot clear an alert; skip
-        directly to whichever of rules 1, 3, or 4 applies.
+        EVIDENCE GATE — a mandatory precondition, checked before choosing any rule. State
+        the status of BOTH sources as the first line of rationale_markdown, in exactly this
+        form: "entity_store: hits|empty|failed; raw_events: hits|empty|failed".
+        - false_positive requires BOTH sources to be present. If either source is empty or
+          failed you may NOT return false_positive under any rule, no matter how clean,
+          total, or unambiguous the contradiction looks. You cannot exonerate an alert with
+          telemetry you never saw.
+        - A total contradiction on the raw events with an empty or failed entity store is
+          inconclusive, NOT false_positive. This is the single most common mistake this gate
+          exists to prevent: a decisive-looking raw-event contradiction does not become a
+          clearance when the other source is missing.
+        - Never let an unavailable source make the verdict MORE decisive. A source you could
+          not read weakens the verdict; it never strengthens it.
+        When the gate blocks false_positive, skip to whichever of rules 1, 3, or 4 applies.
 
         Choose the verdict by the first rule that matches:
         1. inconclusive — world checks both support and contradict; or you cannot cite
@@ -272,17 +282,18 @@ steps:
            only entity_role or alert_linkage supports.
 
         MANDATORY SELF-CHECK — do this before you pick a rule, and write the result as the
-        first bullet of rationale_markdown: list every world check (entity_role,
-        process_parent, network_destination) with its status and result, exactly as you
-        will report it below. Then re-read that list once, specifically hunting for any
-        check you marked "contradicts" and then talked yourself out of in your own
-        reasoning. If you find one, its result is still "contradicts" — you do not get to
-        downgrade a contradiction to neutral or supports because another check disagrees,
-        because it seems unrelated to the process chain, or because the overall story
-        otherwise looks compelling. Apply rule 1 above the instant two checks disagree; do
-        not skip past it looking for a rule that lets you pick a side.
+        first bullets of rationale_markdown: first the source-status line from the evidence
+        gate above, then every world check (entity_role, process_parent, network_destination)
+        with its status and result, exactly as you will report it below. Then re-read that
+        list once, specifically hunting for two traps: (a) any check you marked "contradicts"
+        and then talked yourself out of, and (b) any rule you are about to apply whose
+        precondition involves a source you just listed as empty or failed. For (a) its result
+        is still "contradicts" — you do not get to downgrade a contradiction to neutral or
+        supports because another check disagrees, because it seems unrelated to the process
+        chain, or because the overall story otherwise looks compelling. For (b) the rule does
+        not apply at all.
 
-        Two worked examples of the failure mode this self-check exists to catch:
+        Three worked examples of the failure modes this self-check exists to catch:
         - entity_role reads "contradicts" (host is a known MDM/management distribution
           point) and process_parent reads "supports" (an Office app spawned the process).
           These disagree, so the verdict is inconclusive under rule 1 — NOT true_positive.
@@ -292,11 +303,19 @@ steps:
         - process_parent shows a patch-management executable (ccmexec.exe or equivalent)
           launching the suspicious process, AND network_destination shows that process
           connecting to a named vendor management domain (e.g. manage.microsoft.com). Both
-          checks contradict. The verdict is inconclusive (if entity store is also empty) or
-          false_positive (if entity store has hits and shows no support) — NOT
-          true_positive. It is wrong to reason "the connection happened, so it supports the
-          story"; the identity of the destination, not the fact that a connection occurred,
-          is what process_parent and network_destination test.
+          checks contradict. It is wrong to reason "the connection happened, so it supports
+          the story"; the identity of the destination, not the fact that a connection
+          occurred, is what process_parent and network_destination test. Both contradicting
+          means rule 2 is the candidate — but its precondition is the next example's trap.
+        - raw_events shows BOTH process_parent and network_destination contradicting
+          (management agent parent, vendor management domain), the contradiction is total
+          and unambiguous, and the entity store is empty or failed. The verdict is
+          inconclusive — NOT false_positive. Rule 2's precondition ("both the entity store
+          and the raw events have hits") is unmet, so rule 2 does not apply, however
+          convincing the raw-event contradiction is. Entity_role being unevaluable is not
+          "no check supports"; it is a missing source, and a missing source can never clear
+          an alert. Do not write "entity_role could not be evaluated" and then still return
+          false_positive.
 
         Claims:
         - claims.world: one entry for each world-check result the verdict relies on, with
