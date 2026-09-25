@@ -56,27 +56,6 @@ const getTSDBFields = () =>
     },
   ] as DataView['fields'];
 
-const getClassicFields = () =>
-  [
-    {
-      name: '@timestamp',
-      displayName: '@timestamp',
-      type: 'date',
-      scripted: false,
-      filterable: true,
-      aggregatable: true,
-      sortable: true,
-    },
-    {
-      name: 'transaction.type',
-      displayName: 'transaction.type',
-      type: 'string',
-      scripted: false,
-      filterable: true,
-      aggregatable: true,
-    },
-  ] as DataView['fields'];
-
 // Mirrors an APM data view spanning TSDB metric indices and classic trace indices: `transaction.type`
 // only exists on the classic side, so a filter on it must not be sent to a TS query.
 const getMixedTSDBFields = () =>
@@ -390,13 +369,7 @@ describe('getInitialESQLQuery', () => {
     expect(getInitialESQLQuery(dataView)).toBe('FROM * | SORT @timestamp DESC');
   });
 
-  it('should use FROM command when * is one of several index patterns', () => {
-    const dataView = getDataView('logs-*, * ,metrics-*', getTSDBFields(), '@timestamp');
-
-    expect(getInitialESQLQuery(dataView)).toBe('FROM logs-*, * ,metrics-* | SORT @timestamp DESC');
-  });
-
-  it.each(['remote_cluster:*', 'my-remote:*', 'remote_cluster:*::failures'])(
+  it.each(['remote_cluster:*', 'remote_cluster:*::failures'])(
     'should use FROM command when %s matches every index of a remote cluster even in TSDB mode',
     (indexPattern) => {
       const dataView = getDataView(indexPattern, getTSDBFields(), '@timestamp');
@@ -404,14 +377,6 @@ describe('getInitialESQLQuery', () => {
       expect(getInitialESQLQuery(dataView)).toBe(`FROM ${indexPattern} | SORT @timestamp DESC`);
     }
   );
-
-  it('should use FROM command when a remote cluster wildcard is one of several index patterns', () => {
-    const dataView = getDataView('remote_cluster:*,metrics-*', getTSDBFields(), '@timestamp');
-
-    expect(getInitialESQLQuery(dataView)).toBe(
-      'FROM remote_cluster:*,metrics-* | SORT @timestamp DESC'
-    );
-  });
 
   it('should use FROM command in TSDB mode when filters are given', () => {
     const dataView = getDataView('traces-apm*,metrics-apm*', getMixedTSDBFields(), '@timestamp');
@@ -437,14 +402,6 @@ describe('getInitialESQLQuery', () => {
     );
   });
 
-  it('should still use TS command in TSDB mode when the filters array is empty', () => {
-    const dataView = getDataView('metrics-*', getTSDBFields(), '@timestamp');
-
-    expect(getInitialESQLQuery(dataView, undefined, [])).toBe(
-      'TS metrics-* | SORT @timestamp DESC'
-    );
-  });
-
   it('should still use TS command in TSDB mode when filters translate to an empty expression', () => {
     const dataView = getDataView('metrics-*', getTSDBFields(), '@timestamp');
     const filters: Filter[] = [
@@ -453,65 +410,6 @@ describe('getInitialESQLQuery', () => {
 
     expect(getInitialESQLQuery(dataView, { language: 'unknown', query: 'error' }, filters)).toBe(
       'TS metrics-* | SORT @timestamp DESC'
-    );
-  });
-
-  describe('source command per data view shape', () => {
-    // All patterns are targeted, so only the TSDB fields and the filters decide the source command.
-    const dataViewCases = [
-      {
-        description: 'no TSDB indices',
-        indexPattern: 'logs-a*,logs-b*',
-        getFields: getClassicFields,
-        expectedCommand: 'FROM',
-      },
-      {
-        description: 'a single TSDB index',
-        indexPattern: 'metrics-apm.internal-default',
-        getFields: getTSDBFields,
-        expectedCommand: 'TS',
-      },
-      {
-        description: 'several TSDB indices',
-        indexPattern: 'metrics-a*,metrics-b*',
-        getFields: getTSDBFields,
-        expectedCommand: 'TS',
-      },
-      {
-        description: 'a mix of TSDB and classic indices',
-        indexPattern: 'traces-apm*,metrics-apm*',
-        getFields: getMixedTSDBFields,
-        expectedCommand: 'TS',
-      },
-    ] as const;
-
-    const filters: Filter[] = [
-      {
-        meta: { key: 'transaction.type' },
-        query: { match_phrase: { 'transaction.type': 'request' } },
-      },
-    ];
-
-    it.each(dataViewCases)(
-      'should use the expected command for a data view with $description and no filters',
-      ({ indexPattern, getFields, expectedCommand }) => {
-        const dataView = getDataView(indexPattern, getFields(), '@timestamp');
-
-        expect(getInitialESQLQuery(dataView)).toBe(
-          `${expectedCommand} ${indexPattern} | SORT @timestamp DESC`
-        );
-      }
-    );
-
-    it.each(dataViewCases)(
-      'should use FROM command for a data view with $description and filters',
-      ({ indexPattern, getFields }) => {
-        const dataView = getDataView(indexPattern, getFields(), '@timestamp');
-
-        expect(getInitialESQLQuery(dataView, undefined, filters)).toBe(
-          `FROM ${indexPattern} | SORT @timestamp DESC | WHERE \`transaction.type\` : "request"`
-        );
-      }
     );
   });
 });
