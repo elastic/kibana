@@ -860,6 +860,13 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         setValue('authType', value);
         setValue('kerberos.enabled', value === HttpAuthMethod.KERBEROS);
         setValue('ntlm.enabled', value === HttpAuthMethod.NTLM);
+        // Hidden Basic fields keep their values unless cleared; otherwise
+        // switching away from Basic still serializes username/password and
+        // either keeps Basic auth (None) or fails mutual-exclusivity validation.
+        if (value !== HttpAuthMethod.BASIC) {
+          setValue(ConfigKey.USERNAME, '');
+          setValue(ConfigKey.PASSWORD, '');
+        }
       },
       disabled: readOnly,
     }),

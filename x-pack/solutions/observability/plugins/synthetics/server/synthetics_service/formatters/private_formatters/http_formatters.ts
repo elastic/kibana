@@ -60,15 +60,16 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
   // Package vars are single `kerberos` / `ntlm` text fields (synthetics 1.12.0+).
-  // Pack the nested SO object into a base64 JSON string when enabled.
+  // Emit JSON first so `formatSyntheticsPolicy` can resolve `${params}` before
+  // base64-encoding (see `encodeHttpAuthPackageVars`).
   [ConfigKey.KERBEROS]: (fields) => {
     const value = fields[ConfigKey.KERBEROS];
     if (!value?.enabled) return null;
-    return Buffer.from(JSON.stringify(value)).toString('base64');
+    return JSON.stringify(value);
   },
   [ConfigKey.NTLM]: (fields) => {
     const value = fields[ConfigKey.NTLM];
     if (!value?.enabled) return null;
-    return Buffer.from(JSON.stringify(value)).toString('base64');
+    return JSON.stringify(value);
   },
 };

@@ -18,8 +18,9 @@ import { ConfigKey } from '../../../../../common/runtime_types';
  * at runtime); the fixture intentionally omits a default to avoid leaking a
  * hardcoded location into tests that forget to override it.
  *
- * `kerberos` / `ntlm` mirror `DEFAULT_HTTP_ADVANCED_FIELDS` so create/edit
- * assertions match the defaults the API hydrates onto saved monitors.
+ * `kerberos` / `ntlm` mirror `DEFAULT_HTTP_ADVANCED_FIELDS` for create/edit
+ * assertions that deep-equal the request. A dedicated create-monitor case
+ * also posts without these keys to assert API hydration of the defaults.
  */
 export const httpMonitorFixture: Record<string, unknown> = {
   type: 'http',

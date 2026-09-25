@@ -20,6 +20,7 @@ import { addMonitor, deleteMonitors } from '../../../common/fixtures/monitors';
 import { getPackagePolicyForMonitor } from '../../../common/fixtures/fleet';
 import { tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
+import { ConfigKey } from '../../../../../common/runtime_types';
 
 /**
  * Ported from FTR `apis/synthetics/create_monitor_private_location.ts` (the
@@ -155,5 +156,48 @@ apiTest.describe(
         await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
       }
     });
+
+    apiTest(
+      'packages enabled NTLM auth into the Fleet policy as base64 JSON',
+      async ({ apiClient }) => {
+        const ntlm = {
+          enabled: true,
+          username: 'ntlm-user',
+          password: 'ntlm-pass',
+          domain: 'EXAMPLE',
+          workstation: 'WS1',
+        };
+        let monitorId = '';
+        try {
+          const res = await addMonitor(apiClient, editorHeaders, {
+            ...httpMonitorFixture,
+            [ConfigKey.USERNAME]: '',
+            [ConfigKey.PASSWORD]: '',
+            [ConfigKey.NTLM]: ntlm,
+            locations: [privateLocation],
+            name: `NTLM monitor ${uuidv4()}`,
+            namespace: 'default',
+          });
+          monitorId = (res.body as { id: string }).id;
+
+          await tryForTime(30_000, async () => {
+            const policy = await getPolicy(apiClient, monitorId, testPolicyId);
+            const httpVars = policy?.inputs
+              .find((input) => input.type === 'synthetics/http')
+              ?.streams.find((stream) => stream.data_stream.dataset === 'http')?.vars;
+            const encoded = httpVars?.ntlm?.value;
+            expect(typeof encoded).toBe('string');
+            expect(
+              JSON.parse(Buffer.from(encoded as string, 'base64').toString('utf8'))
+            ).toStrictEqual(ntlm);
+            expect(httpVars?.kerberos?.value ?? null).toBeNull();
+          });
+        } finally {
+          if (monitorId) {
+            await deleteMonitors(apiClient, editorHeaders, [monitorId], { spaceId: 'default' });
+          }
+        }
+      }
+    );
   }
 );

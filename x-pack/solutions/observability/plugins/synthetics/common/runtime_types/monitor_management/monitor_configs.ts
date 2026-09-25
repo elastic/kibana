@@ -124,26 +124,32 @@ export const FormMonitorTypeCodec = z.enum(FormMonitorType);
 export const ModeCodec = z.enum(Mode);
 export const KerberosAuthTypeCodec = z.enum(KerberosAuthType);
 
+// Bounds limit request/policy amplification for nested auth payloads.
+const AUTH_STRING_MAX = 4096;
+const AUTH_INLINE_CONF_MAX = 131072; // krb5.conf / keytab content
+const authString = z.string().max(AUTH_STRING_MAX);
+const authInlineConf = z.string().max(AUTH_INLINE_CONF_MAX);
+
 export const KerberosConfigCodec = z.looseObject({
   enabled: z.boolean(),
   auth_type: KerberosAuthTypeCodec,
-  username: z.string(),
-  password: z.string(),
-  keytab: z.string(),
+  username: authString,
+  password: authString,
+  keytab: authInlineConf,
   // Exactly one of config_path / krb5_conf is required when enabled (Heartbeat).
-  config_path: z.string(),
-  krb5_conf: z.string(),
-  realm: z.string(),
-  service_name: z.string(),
+  config_path: authString,
+  krb5_conf: authInlineConf,
+  realm: authString,
+  service_name: authString,
   enable_krb5_fast: z.boolean(),
 });
 
 export const NtlmConfigCodec = z.looseObject({
   enabled: z.boolean(),
-  username: z.string(),
-  password: z.string(),
-  domain: z.string(),
-  workstation: z.string(),
+  username: authString,
+  password: authString,
+  domain: authString,
+  workstation: authString,
 });
 
 export const ResponseCheckJSONCodec = z.looseObject({

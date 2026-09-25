@@ -33,6 +33,44 @@ export interface ProcessorFields {
   kibanaUrl?: string;
 }
 
+const HTTP_AUTH_PACKAGE_KEYS = [ConfigKey.KERBEROS, ConfigKey.NTLM] as const;
+
+const HTTP_AUTH_PACKAGE_UPGRADE_MESSAGE =
+  'Kerberos and NTLM authentication require the Synthetics integration version 1.12.0 or later. Upgrade the Synthetics package in Fleet and try again.';
+
+/**
+ * Enabled Kerberos/NTLM must map onto package vars. Older synthetics packages
+ * omit these keys; writing would silently drop auth and leave the monitor
+ * unauthenticated.
+ */
+export const assertHttpAuthPackageVarsAvailable = (
+  config: Partial<MonitorFields & ProcessorFields>,
+  vars: NewPackagePolicy['inputs'][number]['streams'][number]['vars'] | undefined
+) => {
+  for (const key of HTTP_AUTH_PACKAGE_KEYS) {
+    const auth = config[key];
+    if (auth && typeof auth === 'object' && 'enabled' in auth && auth.enabled && !vars?.[key]) {
+      throw new Error(HTTP_AUTH_PACKAGE_UPGRADE_MESSAGE);
+    }
+  }
+};
+
+/**
+ * Private formatters emit Kerberos/NTLM as JSON so param substitution can see
+ * `${...}` placeholders; the Fleet package var stores base64-encoded JSON.
+ */
+export const encodeHttpAuthPackageVars = (
+  vars: NewPackagePolicy['inputs'][number]['streams'][number]['vars'] | undefined
+) => {
+  if (!vars) return;
+  for (const key of HTTP_AUTH_PACKAGE_KEYS) {
+    const configItem = vars[key];
+    if (configItem && typeof configItem.value === 'string' && configItem.value) {
+      configItem.value = Buffer.from(configItem.value).toString('base64');
+    }
+  }
+};
+
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
   monitorType: MonitorTypeEnum,
@@ -86,6 +124,8 @@ export const formatSyntheticsPolicy = (
     }
   }
 
+  assertHttpAuthPackageVarsAvailable(config, dataStream?.vars);
+
   configKeys.forEach((key) => {
     const configItem = dataStream?.vars?.[key];
     if (configItem) {
@@ -105,6 +145,9 @@ export const formatSyntheticsPolicy = (
       }
     }
   });
+
+  // Params must be substituted while the auth payload is still JSON text.
+  encodeHttpAuthPackageVars(dataStream?.vars);
 
   // Heartbeat decodes inline scripts when source.inline.encoding=base64.
   // synthetics 1.10.0 added this var to the API input with the same name as
