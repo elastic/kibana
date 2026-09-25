@@ -11,7 +11,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { get } from 'lodash';
 import { Query } from '@elastic/eui';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import type { SpacesApi, SpacesContextProps } from '@kbn/spaces-plugin/public';
@@ -53,7 +53,7 @@ const SavedObjectsTablePage = ({
   const { search } = useLocation();
 
   const initialQuery = useMemo(() => {
-    const query = parse(search);
+    const query = queryString.parse(search);
     try {
       return Query.parse((query.initialQuery as string) ?? '');
     } catch (e) {

@@ -11,7 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import type EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
-import { parse } from 'query-string';
+import qs from 'query-string';
 
 import type { Capabilities } from '@kbn/core/public';
 import type { AppHeaderBack, AppHeaderMenu, AppHeaderShareAction } from '@kbn/app-header';
@@ -327,7 +327,7 @@ export const getTopNavConfig = (
   ) => {
     if (share) {
       const currentState = stateContainer.getState();
-      const searchParams = parse(history.location.search);
+      const searchParams = qs.parse(history.location.search);
       const params: VisualizeLocatorParams = {
         visId: savedVis?.id,
         filters: currentState.filters,

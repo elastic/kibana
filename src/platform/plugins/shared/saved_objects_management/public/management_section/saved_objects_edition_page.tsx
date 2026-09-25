@@ -9,7 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -30,7 +30,7 @@ const SavedObjectsEditionPage = ({
   const docLinks = coreStart.docLinks.links;
 
   const { search } = useLocation();
-  const query = parse(search);
+  const query = queryString.parse(search);
 
   useEffect(() => {
     setBreadcrumbs([

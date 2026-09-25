@@ -19,7 +19,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type { CreateEndpointListResponse } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list/create_endpoint_list.gen';
 import type {
@@ -130,7 +130,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint_list/items`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteEndpointListItemResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -155,7 +155,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint_list/items/_find`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindEndpointListItemsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -180,7 +180,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint_list/items`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadEndpointListItemResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',

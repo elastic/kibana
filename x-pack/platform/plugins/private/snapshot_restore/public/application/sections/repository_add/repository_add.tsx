@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { i18n as i18nLib } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -151,7 +151,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
         })
       );
 
-      const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
+      const { redirect } = queryString.parse(search.replace(/^\?/, ''), { sort: false });
 
       history.push(
         redirect ? (redirect as string) : encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}`)

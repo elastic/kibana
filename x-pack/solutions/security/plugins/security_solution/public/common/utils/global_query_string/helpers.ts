@@ -8,7 +8,7 @@
 import type { RisonValue } from '@kbn/rison';
 import { safeDecode, encode } from '@kbn/rison';
 import type { ParsedQuery } from 'query-string';
-import { parse, stringify } from 'query-string';
+import qs from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useCallback } from 'react';
@@ -27,7 +27,7 @@ export const getParamFromQueryString = (
   queryString: string,
   key: string
 ): string | undefined | null => {
-  const parsedQueryString = parse(queryString, { sort: false });
+  const parsedQueryString = qs.parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
@@ -64,7 +64,7 @@ export const useGetInitialUrlParamValue = <State extends RisonValue>(
 };
 
 export const encodeQueryString = (urlParams: ParsedQuery<string>): string =>
-  stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
+  qs.stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
 
 export const useReplaceUrlParams = (): ((params: Record<string, RisonValue | null>) => void) => {
   const history = useHistory();
@@ -75,7 +75,7 @@ export const useReplaceUrlParams = (): ((params: Record<string, RisonValue | nul
       // It prevents unnecessary re-renders which useLocation would create because 'replaceUrlParams' does update the location.
       // window.location.search also guarantees that we don't overwrite URL param managed outside react-router.
       const search = window.location.search;
-      const urlParams = parse(search, { sort: false });
+      const urlParams = qs.parse(search, { sort: false });
 
       Object.keys(params).forEach((key) => {
         const value = params[key];

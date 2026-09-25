@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { stringifyUrl } from 'query-string';
+import queryString from 'query-string';
 import { APP_UI_ID } from '../../../../common';
 
 export const RETURN_APP_ID = 'returnAppId';
@@ -16,7 +16,7 @@ export const addPathParamToUrl = (
   onboardingLink: string,
   extraParams?: Record<string, string>
 ): string => {
-  return stringifyUrl(
+  return queryString.stringifyUrl(
     {
       url,
       query: {

@@ -20,7 +20,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type {
   CreateAttackDiscoveryScheduleRequestBodyInput,
@@ -222,7 +222,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/internal/attack_discovery/schedules/_find`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindAttackDiscoverySchedulesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
