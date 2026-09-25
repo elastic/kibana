@@ -17,7 +17,7 @@ import type {
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
 import type { HuntScope } from './common/resolve_index_scope';
-import { summarizeHit } from './common/summarize_hit';
+import { SUMMARIZE_HIT_SOURCE_FIELDS, summarizeHit } from './common/summarize_hit';
 import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
 import type { HuntForThreatServiceResult } from './tier1/types';
 import { huntBehavior } from './tier2/hunt_behavior';
@@ -149,7 +149,10 @@ const sampleRequiredIndexEvents = async ({
         },
       },
       sort: [{ '@timestamp': { order: 'desc' as const } }],
-      _source: true,
+      // Only what the digest reads. These documents are never returned to the
+      // caller, so a full `_source` would move whole log events across the wire
+      // for `summarizeHit` to throw nearly all of away, once per sample.
+      _source: [...SUMMARIZE_HIT_SOURCE_FIELDS],
     });
     // Envelope keys last so a document with its own top-level `id`/`index`
     // field cannot clobber the hit's `_id`/`_index`.
@@ -242,8 +245,8 @@ export const huntCoordinator = async (
   const {
     report_id: reportId,
     spaceId,
-    iocs: callerIocs = [],
-    techniques: callerTechniques = [],
+    iocs: callerIocs,
+    techniques: callerTechniques,
     time_range: timeRange,
     size,
     max_assets: maxAssets,
@@ -290,9 +293,12 @@ export const huntCoordinator = async (
       completed_successfully: false,
     };
   }
-  const iocs = callerIocs.length > 0 ? callerIocs : reportContext?.iocs ?? [];
-  const techniques =
-    callerTechniques.length > 0 ? callerTechniques : reportContext?.techniques ?? [];
+  // An omitted array falls back to the report; an explicitly empty one is a
+  // choice and wins, as the contract above says caller input does. Testing length
+  // instead conflated the two, so `iocs: []` — a run meant to hunt techniques
+  // alone — still searched the report's IOCs and could confirm a hit on them.
+  const iocs = callerIocs ?? reportContext?.iocs ?? [];
+  const techniques = callerTechniques ?? reportContext?.techniques ?? [];
   // Clamp after merge: request schema bounds caller `text`, but report-loaded
   // `content.body_text` has no such bound and must not exceed the Tier 2 contract.
   const text = clampHuntReportText(callerText ?? reportContext?.text);

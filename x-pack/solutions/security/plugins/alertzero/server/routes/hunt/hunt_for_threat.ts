@@ -9,6 +9,7 @@ import type { HuntForThreatResponse } from '@kbn/alertzero-common';
 import { API_VERSIONS, HuntForThreatRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import type { RouteDependencies } from '../register_routes';
@@ -79,6 +80,9 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
           const body: HuntForThreatResponse = { scope, result: wireResult };
           return response.ok({ body });
         } catch (err) {
+          if (err instanceof InvalidHuntWindowError) {
+            return response.badRequest({ body: { message: err.message } });
+          }
           logger.error(`Failed to run hunt_for_threat: ${(err as Error).message}`);
           return response.customError({
             statusCode: 500,

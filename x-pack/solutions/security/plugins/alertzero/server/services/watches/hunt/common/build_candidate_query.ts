@@ -126,7 +126,12 @@ export const buildCandidateQuery = async (
       // request schema bounds `report_ids`, so this stays small. Only the
       // scheduled sweep needs overfetch headroom.
       size: namedIds ? namedIds.length : limit * OVERFETCH_MULTIPLIER,
-      ignore_unavailable: true,
+      // The reports index is required, not optional. Ignoring it when it is
+      // unavailable turns a missing index into a successful empty page, and an
+      // empty candidate pool reads exactly like "nothing is eligible to hunt".
+      // Let the search fail instead, so `failClosed` reports it as the outage it
+      // is.
+      ignore_unavailable: false,
       track_total_hits: true,
       _source: false,
       sort,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { summarizeHit } from './summarize_hit';
+import { SUMMARIZE_HIT_SOURCE_FIELDS, summarizeHit } from './summarize_hit';
 
 const MAX_SAMPLE_EVENT_CHARS = 2048;
 
@@ -56,5 +56,31 @@ describe('summarizeHit', () => {
     });
 
     expect(summary).toBe('action=AssumeRole');
+  });
+
+  it('reads every field SUMMARIZE_HIT_SOURCE_FIELDS projects, so a search can request just those', () => {
+    // A field the digest reads but the constant omits would be projected away and
+    // silently disappear from every digest, so pin the two together.
+    const source = Object.fromEntries(
+      SUMMARIZE_HIT_SOURCE_FIELDS.map((field) => [field, `value-of-${field}`])
+    );
+
+    const summary = summarizeHit({ index: 'logs-aws.cloudtrail-default', id: 'event-1', source });
+
+    // `event.dataset` wins over `data_stream.dataset`, which is its fallback.
+    const read = SUMMARIZE_HIT_SOURCE_FIELDS.filter((field) => field !== 'data_stream.dataset');
+    for (const field of read) {
+      expect(summary).toContain(`value-of-${field}`);
+    }
+  });
+
+  it('falls back to data_stream.dataset when event.dataset is absent', () => {
+    const summary = summarizeHit({
+      index: 'logs-aws.cloudtrail-default',
+      id: 'event-1',
+      source: { data_stream: { dataset: 'aws.cloudtrail' } },
+    });
+
+    expect(summary).toBe('dataset=aws.cloudtrail');
   });
 });

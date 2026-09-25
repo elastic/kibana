@@ -558,6 +558,40 @@ describe('huntBehavior', () => {
     expect(result.behaviors[0].affected_hosts_truncated).toBe(true);
   });
 
+  describe('a generated query that reads outside the hunt scope', () => {
+    const OUT_OF_SCOPE_ESQL = 'FROM .kibana-secrets\n| LIMIT 10';
+
+    beforeEach(() => {
+      generateEsqlMock.mockResolvedValue({ query: OUT_OF_SCOPE_ESQL });
+    });
+
+    it('is not published as a proposed rule, so nothing stages it as grounded', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(result.behaviors[0].proposed_esql_rule).not.toContain('.kibana-secrets');
+      expect(result.behaviors[0].execution?.executed).toBe(false);
+      expect(executeEsqlMock).not.toHaveBeenCalled();
+    });
+
+    it('is still published when it stays inside the scope', async () => {
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(result.behaviors[0].proposed_esql_rule).toContain(GROUNDED_ESQL);
+    });
+  });
+
   describe('the generation budget', () => {
     const GENERATION_BUDGET = 20;
     const OVER_BUDGET = GENERATION_BUDGET + 5;

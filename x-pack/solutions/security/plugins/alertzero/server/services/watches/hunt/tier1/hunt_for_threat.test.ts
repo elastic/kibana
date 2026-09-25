@@ -19,9 +19,15 @@ const scope: ResolvedIndexScope = {
   row_limit: 25,
 };
 
-const buildEsClient = (searchResponse: unknown): ElasticsearchClient =>
+/**
+ * `requiredMatches` stands in for the separate count the service runs against the
+ * required patterns: the hit bar is read from that, not from the capped
+ * `per_index` buckets in `searchResponse`.
+ */
+const buildEsClient = (searchResponse: unknown, requiredMatches = 0): ElasticsearchClient =>
   ({
     search: jest.fn().mockResolvedValue(searchResponse),
+    count: jest.fn().mockResolvedValue({ count: requiredMatches }),
   } as unknown as ElasticsearchClient);
 
 const emptySearchResponse = {
@@ -86,24 +92,27 @@ describe('huntForThreat', () => {
   });
 
   it('sets has_confirmed_hit when a hit lands in a required index', async () => {
-    const esClient = buildEsClient({
-      hits: {
-        total: { value: 1 },
-        hits: [
-          {
-            _index: 'logs-aws.cloudtrail-default',
-            _id: 'abc',
-            _score: 1.2,
-            _source: { '@timestamp': '2026-09-01T00:00:00.000Z', 'source.ip': '10.0.0.1' },
-          },
-        ],
+    const esClient = buildEsClient(
+      {
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _index: 'logs-aws.cloudtrail-default',
+              _id: 'abc',
+              _score: 1.2,
+              _source: { '@timestamp': '2026-09-01T00:00:00.000Z', 'source.ip': '10.0.0.1' },
+            },
+          ],
+        },
+        aggregations: {
+          per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
+          affected_hosts: { buckets: [] },
+          affected_users: { buckets: [] },
+        },
       },
-      aggregations: {
-        per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
-        affected_hosts: { buckets: [] },
-        affected_users: { buckets: [] },
-      },
-    });
+      1
+    );
 
     const result = await huntForThreat(esClient, {
       scope,
@@ -187,26 +196,53 @@ describe('huntForThreat', () => {
     expect(result.sample_event_summaries?.[0]).toContain('action=AssumeRole');
   });
 
-  it('counts a hit in a data stream backing index toward the required pattern', async () => {
+  it('flags a data stream backing index bucket as required in per_index', async () => {
     const backingIndex = '.ds-logs-aws.cloudtrail-default-2026.09.01-000001';
-    const esClient = buildEsClient({
-      hits: {
-        total: { value: 1 },
-        hits: [
-          {
-            _index: backingIndex,
-            _id: 'abc',
-            _score: 1.2,
-            _source: { '@timestamp': '2026-09-01T00:00:00.000Z', 'source.ip': '10.0.0.1' },
-          },
-        ],
+    const esClient = buildEsClient(
+      {
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _index: backingIndex,
+              _id: 'abc',
+              _score: 1.2,
+              _source: { '@timestamp': '2026-09-01T00:00:00.000Z', 'source.ip': '10.0.0.1' },
+            },
+          ],
+        },
+        aggregations: {
+          per_index: { buckets: [{ key: backingIndex, doc_count: 1 }] },
+          affected_hosts: { buckets: [] },
+          affected_users: { buckets: [] },
+        },
       },
-      aggregations: {
-        per_index: { buckets: [{ key: backingIndex, doc_count: 1 }] },
-        affected_hosts: { buckets: [] },
-        affected_users: { buckets: [] },
-      },
+      1
+    );
+
+    const result = await huntForThreat(esClient, {
+      scope,
+      iocs: [{ type: 'ip', value: '10.0.0.1' }],
     });
+
+    expect(result.per_index).toEqual([{ index: backingIndex, hit_count: 1, required: true }]);
+    expect(result.has_confirmed_hit).toBe(true);
+  });
+
+  it('reads the hit bar from a required-index count, not the capped per_index buckets', async () => {
+    // The required bucket lost the cap race to higher-volume optional indices, so
+    // it is absent here although a required index does hold a match.
+    const esClient = buildEsClient(
+      {
+        hits: { total: { value: 900 }, hits: [] },
+        aggregations: {
+          per_index: { buckets: [{ key: '.alerts-security.alerts-default', doc_count: 900 }] },
+          affected_hosts: { buckets: [] },
+          affected_users: { buckets: [] },
+        },
+      },
+      1
+    );
 
     const result = await huntForThreat(esClient, {
       scope,
@@ -214,6 +250,10 @@ describe('huntForThreat', () => {
     });
 
     expect(result.has_confirmed_hit).toBe(true);
+    expect(result.per_index.some((entry) => entry.required)).toBe(false);
+    expect(esClient.count).toHaveBeenCalledWith(
+      expect.objectContaining({ index: scope.required, query: expect.any(Object) })
+    );
   });
 
   it('does NOT set has_confirmed_hit when the only hit is in an optional index', async () => {
@@ -375,5 +415,121 @@ describe('huntForThreat', () => {
       },
     });
     expect(JSON.stringify(aggs)).not.toContain('.keyword');
+  });
+
+  describe('hash IOC casing', () => {
+    const UPPER_SHA256 = 'A'.repeat(64);
+
+    it('folds an uppercase digest to lowercase, matching how integrations index it', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, { scope, iocs: [{ type: 'hash', value: UPPER_SHA256 }] });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      expect(searchBody.query.bool.should).toEqual(
+        expect.arrayContaining([{ term: { 'file.hash.sha256': UPPER_SHA256.toLowerCase() } }])
+      );
+      expect(JSON.stringify(searchBody.query)).not.toContain(UPPER_SHA256);
+    });
+
+    it('still attributes the hit when the report and the document disagree on case', async () => {
+      const esClient = buildEsClient(
+        {
+          hits: {
+            total: { value: 1 },
+            hits: [
+              {
+                _index: 'logs-aws.cloudtrail-default',
+                _id: 'abc',
+                _source: {
+                  '@timestamp': '2026-09-01T00:00:00.000Z',
+                  file: { hash: { sha256: UPPER_SHA256.toLowerCase() } },
+                },
+              },
+            ],
+          },
+          aggregations: {
+            per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
+            affected_hosts: { buckets: [] },
+            affected_users: { buckets: [] },
+          },
+        },
+        1
+      );
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'hash', value: UPPER_SHA256 }],
+      });
+
+      // The echoed value stays as the caller wrote it; only the comparison folds.
+      expect(result.hits[0].matched).toEqual({
+        ioc: { type: 'hash', value: UPPER_SHA256 },
+        field: 'file.hash.sha256',
+      });
+    });
+  });
+
+  describe('the _source projection', () => {
+    it.each([
+      ['ip', '10.0.0.1', ['related.ip', 'kubernetes.audit.sourceIPs']],
+      ['email', 'a@b.com', ['user.email', 'related.user']],
+      ['domain', 'evil.test', ['dns.question.name', 'url.domain']],
+      ['url', 'https://evil.test/a', ['url.original']],
+      ['hash', 'f'.repeat(64), ['file.hash.sha256', 'process.hash.sha256']],
+    ] as const)(
+      'requests the %s fields it searches, so attribution can name the matching IOC',
+      async (type, value, expectedFields) => {
+        const esClient = buildEsClient(emptySearchResponse);
+
+        await huntForThreat(esClient, { scope, iocs: [{ type, value }] });
+
+        const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+        expect(searchBody._source).toEqual(expect.arrayContaining([...expectedFields]));
+      }
+    );
+
+    it('keeps the display fields and skips IOC fields for types that were not searched', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, { scope, iocs: [{ type: 'ip', value: '10.0.0.1' }] });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      expect(searchBody._source).toEqual(
+        expect.arrayContaining(['@timestamp', 'kibana.alert.rule.threat'])
+      );
+      expect(searchBody._source).not.toContain('file.hash.sha256');
+    });
+  });
+
+  describe('an empty window', () => {
+    it.each([
+      ['reversed absolute dates', '2026-09-18T00:00:00.000Z', '2026-09-01T00:00:00.000Z'],
+      ['reversed date math', 'now', 'now-30d'],
+      ['an equal pair, since `to` is exclusive', 'now-1d', 'now-1d'],
+    ])('rejects %s before searching', async (_label, from, to) => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await expect(
+        huntForThreat(esClient, {
+          scope,
+          iocs: [{ type: 'ip', value: '10.0.0.1' }],
+          time_range: { from, to },
+        })
+      ).rejects.toThrow('Hunt window is empty');
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('accepts date math that resolves in order', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await expect(
+        huntForThreat(esClient, {
+          scope,
+          iocs: [{ type: 'ip', value: '10.0.0.1' }],
+          time_range: { from: 'now-30d', to: 'now' },
+        })
+      ).resolves.toEqual(expect.objectContaining({ status: 'no_environment_hits' }));
+    });
   });
 });

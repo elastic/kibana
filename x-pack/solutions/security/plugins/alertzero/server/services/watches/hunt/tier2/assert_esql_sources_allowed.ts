@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { Parser, mutate } from '@elastic/esql';
+import { Parser, Walker } from '@elastic/esql';
 import { isIndexPatternAllowed } from '../common/matches_required';
 
 export type AssertEsqlSourcesAllowedResult = { ok: true } | { ok: false; reason: string };
 
 /**
- * Fail-closed gate for Tier 2 execute: every FROM source must sit inside the
- * hunt's allowed index patterns. The post-execute `_index` hit bar is not an
+ * Fail-closed gate for Tier 2 execute: every index a query reads must sit inside
+ * the hunt's allowed patterns. The post-execute `_index` hit bar is not an
  * execute-time boundary; this check is.
+ *
+ * `FROM` is not the only command that reads data — `LOOKUP JOIN` and `ENRICH`
+ * name a target too, so a query opening with an allowed `FROM` could still reach
+ * outside the scope. Every command is checked instead of the `FROM` list alone,
+ * and because each one names its target as a `source` node, a command ES|QL adds
+ * later is covered by default rather than silently exempt. An `ENRICH` policy is
+ * refused on the same grounds: it resolves to an index this hunt never allowed.
  *
  * Queries that fail to parse, do not start with FROM, have no sources, or
  * name a source outside the allowlist are refused.
@@ -31,17 +38,24 @@ export const assertEsqlSourcesAllowed = (
     return { ok: false, reason: 'query must start with a valid FROM' };
   }
 
-  const sources = [...mutate.commands.from.sources.list(root)];
-  if (sources.length === 0) {
+  const sourcesOf = (node: Parameters<typeof Walker.walk>[0]): string[] => {
+    const names: string[] = [];
+    Walker.walk(node, { visitSource: ({ name }) => names.push(name) });
+    return names;
+  };
+
+  if (sourcesOf(root.commands[0]).length === 0) {
     return { ok: false, reason: 'FROM has no sources' };
   }
 
-  for (const source of sources) {
-    if (!isIndexPatternAllowed(source.name, allowedPatterns)) {
-      return {
-        ok: false,
-        reason: `FROM source "${source.name}" is outside the hunt index scope`,
-      };
+  for (const command of root.commands) {
+    for (const source of sourcesOf(command)) {
+      if (!isIndexPatternAllowed(source, allowedPatterns)) {
+        return {
+          ok: false,
+          reason: `${command.name.toUpperCase()} source "${source}" is outside the hunt index scope`,
+        };
+      }
     }
   }
 

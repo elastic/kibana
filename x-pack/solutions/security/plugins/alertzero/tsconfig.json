@@ -9,6 +9,7 @@
     "@kbn/agentic-investigations-common",
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/datemath",
     "@kbn/logging",
     "@kbn/features-plugin",
     "@kbn/kibana-react-plugin",
