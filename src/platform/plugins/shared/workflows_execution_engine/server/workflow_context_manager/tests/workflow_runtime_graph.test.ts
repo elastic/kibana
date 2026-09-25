@@ -128,6 +128,18 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
     expect(remint).toBe(enterId);
   });
 
+  it('does not rebuild a replaced synthetic id after a later iteration is minted', () => {
+    const overlay = createOverlay();
+    const enter0 = overlay.insertSyntheticScope(
+      'enterForeach_outerLoop',
+      'iteration-0',
+      'foreach-iteration'
+    );
+    overlay.insertSyntheticScope('enterForeach_outerLoop', 'iteration-1', 'foreach-iteration');
+
+    expect(overlay.getNode(enter0)).toBeUndefined();
+  });
+
   describe('wrap once, rename the pair', () => {
     it('topo-next after the first iteration exit is the owner exit', () => {
       const overlay = createOverlay();

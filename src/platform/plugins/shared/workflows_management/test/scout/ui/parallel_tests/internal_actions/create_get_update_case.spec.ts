@@ -115,7 +115,7 @@ test.describe(
       for (let i = 0; i < workflowInput.comments.length; i++) {
         const comment = workflowInput.comments[i];
         const createCaseCommentStep = await pageObjects.workflowExecution.getStep(
-          `loop_through_comments > ${i} > create_case_comment`
+          `loop_through_comments > iteration-${i} > create_case_comment`
         );
         await createCaseCommentStep.click();
 

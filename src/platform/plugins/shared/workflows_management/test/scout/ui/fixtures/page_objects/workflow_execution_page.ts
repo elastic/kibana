@@ -132,7 +132,7 @@ export class WorkflowExecutionPage {
    * Selects a step in the execution tree by navigating through a hierarchical path.
    *
    * @param path - The hierarchical path to the step, using '>' as separator
-   *   (e.g., "Parent > Child > Target Step" or "loop_over_results > 0 > process-item")
+   *   (e.g., "Parent > Child > Target Step" or "loop_over_results > iteration-0 > process-item")
    * @returns A promise that resolves to the locator for the target step button
    * @throws Error if any node in the path is not found
    */

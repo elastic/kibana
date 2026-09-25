@@ -68,6 +68,25 @@ test.describe(
       const loopStepButton = await pageObjects.workflowExecution.getStep('loop');
       await loopStepButton.click();
       await expect(loopStepButton).toHaveCount(1);
+      expect(
+        await pageObjects.workflowExecution.getStepResultJson<{ items: number[] }>('input')
+      ).toStrictEqual(
+        expect.objectContaining({
+          items: [1, 2],
+        })
+      );
+
+      const firstIteration = await pageObjects.workflowExecution.getStep('loop > iteration-0');
+      await firstIteration.click();
+      expect(
+        await pageObjects.workflowExecution.getStepResultJson<{ item: number }>('input')
+      ).toStrictEqual({ item: 1 });
+
+      const secondIteration = await pageObjects.workflowExecution.getStep('loop > iteration-1');
+      await secondIteration.click();
+      expect(
+        await pageObjects.workflowExecution.getStepResultJson<{ item: number }>('input')
+      ).toStrictEqual({ item: 2 });
 
       // Verify foreach produced 2 iterations
       const logIterationButtons = pageObjects.workflowExecution.executionPanel.getByRole('button', {
@@ -75,15 +94,19 @@ test.describe(
       });
       await expect(logIterationButtons).toHaveCount(2);
 
-      // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
-      await logIterationButtons.first().click();
+      const firstLogIteration = await pageObjects.workflowExecution.getStep(
+        'loop > iteration-0 > log_iteration'
+      );
+      await firstLogIteration.click();
       let stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
       await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText(
         'Iteration is 0'
       );
 
-      // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
-      await logIterationButtons.last().click();
+      const lastLogIteration = await pageObjects.workflowExecution.getStep(
+        'loop > iteration-1 > log_iteration'
+      );
+      await lastLogIteration.click();
       stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
       await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText(
         'Iteration is 1'
@@ -124,7 +147,9 @@ test.describe(
 
       // Compare vertical positions: the post-foreach step must render
       // below the last iteration group, not interleaved among them.
-      const lastIterationGroup = await pageObjects.workflowExecution.getStep('foreach_loop > 49');
+      const lastIterationGroup = await pageObjects.workflowExecution.getStep(
+        'foreach_loop > iteration-49'
+      );
       await lastIterationGroup.scrollIntoViewIfNeeded();
       const lastIterationBox = await lastIterationGroup.boundingBox();
 

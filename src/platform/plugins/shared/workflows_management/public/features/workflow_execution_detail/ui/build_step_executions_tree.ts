@@ -155,17 +155,28 @@ function isVisibleStepType(stepType: string): boolean {
  * @param stackFrames - Array of stack frames representing the execution hierarchy
  * @returns A string array representing the deterministic step path
  */
+const RUNTIME_STEP_NODE_TYPES = new Set([
+  'enter-foreach',
+  'enter-foreach-iteration',
+  'enter-iteration',
+]);
+
 export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
   return stackFrames.flatMap((stackFrame) => {
-    const scopeWithSubScope = stackFrame.nestedScopes
+    const scopeIds = stackFrame.nestedScopes
       .filter((scopeEntry) => scopeEntry.scopeId)
-      .map((scopeEntry) => scopeEntry.scopeId!);
+      .map((scopeEntry) => scopeEntry.scopeId as string);
 
-    if (!scopeWithSubScope.length) {
-      return [];
+    // scopeId-based: foreach/if/retry still nest as stepId > "0" / "true" / "1-attempt"
+    if (scopeIds.length) {
+      return [stackFrame.stepId, ...scopeIds];
     }
 
-    return [stackFrame.stepId, ...scopeWithSubScope];
+    // runtime-step-based: real iteration steps have no scopeId; nest under the stepId
+    const isRuntimeStep = stackFrame.nestedScopes.some((scope) =>
+      RUNTIME_STEP_NODE_TYPES.has(scope.nodeType)
+    );
+    return isRuntimeStep ? [stackFrame.stepId] : [];
   });
 }
 
