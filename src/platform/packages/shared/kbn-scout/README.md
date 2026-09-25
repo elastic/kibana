@@ -348,7 +348,11 @@ Scout supports two distinct types of tests: UI and API, each with their own dire
 
 `node scripts/scout audit` prints, for every `pageObjects.<key>` in this package, how many files and which modules use it. It walks each `.ts` file under `test/scout*` and the solution Scout packages with the TypeScript compiler, so it counts property access and destructuring and ignores comments and strings. Import graph tools cannot do this because page objects are Proxy fixtures, not imports.
 
-Run it by hand when you add, move, or remove a page object, or when doing a quality pass over the package. Read the output against the placement policy above: a key with zero external consumers is a removal candidate, a key used from one plugin only may belong in that plugin, and a plugin-local class whose name also exists elsewhere is a duplicate. The command reports facts only, it does not decide.
+It also reports exported class names that appear in more than one Scout module, the FTR duplication pattern. `--format text` prints only the findings with the reason for each, in a form that reads well in Slack. The default JSON is for tooling.
+
+Run it by hand when you add, move, or remove a page object. A scheduled Buildkite pipeline (`kibana / scout / audit`) also runs it every two weeks and posts the text output to `#kibana-scout-stats`. Read the output against the placement policy above. The command reports facts only, it does not decide.
+
+The audit is a set of small functions in `src/cli/audit.ts` (consumer census, duplicate class names, text formatting) so the same facts can feed the scheduled run and the `scout-best-practices-reviewer` skill on every PR. To add a check, add a function that returns facts, include it in the report, and give it a section in `formatAuditText`.
 
 #### Setting up Test Directory
 
