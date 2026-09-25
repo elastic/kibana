@@ -149,6 +149,6 @@ describe('CreateDataSourceFlyout', () => {
     const banner = await findByTestId('createDataSourceFlyoutSaveError');
     expect(banner).toHaveTextContent('Could not save the data source');
     expect(banner).toHaveTextContent('validation_exception: something went wrong');
-    expect(banner).toBeInTheDocument();
+    expect(await findByTestId('createDataSourceFlyoutFooter')).toContainElement(banner);
   });
 });
