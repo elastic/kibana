@@ -691,5 +691,38 @@ describe('ProposalApprovalCard', () => {
         });
       });
     });
+
+    it('closes the inline dismiss form once the dismissal succeeds, rather than leaving it up beside the outcome', async () => {
+      const mutateAsync = jest.fn().mockResolvedValue({ id: PROPOSAL_ID });
+      setupMocks();
+      useDismissProposalMock.mockReturnValue({
+        ...noopMutation,
+        mutateAsync,
+      } as unknown as ReturnType<typeof useDismissProposal>);
+
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      fireEvent.click(
+        container.querySelector(
+          '[data-test-subj="proposalDismiss-proposal-1"]'
+        ) as HTMLButtonElement
+      );
+      fireEvent.change(
+        container.querySelector('[data-test-subj="rationale-input"]') as HTMLInputElement,
+        { target: { value: 'Not relevant' } }
+      );
+      fireEvent.click(
+        container.querySelector(
+          '[data-test-subj="proposalDismissConfirm-proposal-1"]'
+        ) as HTMLButtonElement
+      );
+
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(
+          container.querySelector('[data-test-subj="proposalDismissForm-proposal-1"]')
+        ).not.toBeInTheDocument()
+      );
+    });
   });
 });

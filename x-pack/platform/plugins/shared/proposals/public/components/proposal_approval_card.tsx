@@ -135,6 +135,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           id: proposalId,
           body: { dismissReason, rationale: rationale.trim() || undefined },
         });
+        // Otherwise the inline form stays rendered (still gated on `mode`, not `isPending`)
+        // beside the outcome banner `ApprovalContent` now shows for the decision that just landed.
+        setMode('view');
       } catch (err) {
         throw toFriendlyError(err);
       }
