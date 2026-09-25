@@ -21,6 +21,16 @@ import { FatalErrorScreen } from './fatal_error_screen';
 import { formatError, formatStack } from './utils';
 import { GenericError } from './generic_error';
 
+/**
+ * Mirrors VS Code's `isCancellationError`, which its workbench applies to every unhandled
+ * rejection before reporting it. Matched structurally rather than by class: the error is
+ * constructed inside whichever library cancelled the work, so `instanceof` is not available here.
+ *
+ * @see https://github.com/microsoft/vscode/blob/main/src/vs/base/common/errors.ts
+ */
+const isCancellationError = (error: unknown): boolean =>
+  error instanceof Error && error.name === 'Canceled' && error.message === 'Canceled';
+
 /** @internal */
 export interface FatalErrorsServiceSetupDeps {
   analytics: AnalyticsServiceStart;
@@ -132,6 +142,11 @@ export class FatalErrorsService {
 
   private setupGlobalErrorHandlers() {
     window.addEventListener?.('unhandledrejection', (e) => {
+      if (isCancellationError(e.reason)) {
+        e.preventDefault();
+        return;
+      }
+
       // eslint-disable-next-line no-console
       console.log(`Detected an unhandled Promise rejection.\n
       Message: ${formatError(e.reason)}\n
