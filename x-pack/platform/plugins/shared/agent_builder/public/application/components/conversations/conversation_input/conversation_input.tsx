@@ -187,7 +187,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
-  const isShared = useIsSharedConversation();
+  const isSharedConversation = useIsSharedConversation();
   const isExperimentalEnabled = useExperimentalFeatures();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
@@ -235,7 +235,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isNewConversation = !conversationId;
   const { title: conversationTitle } = useConversationTitle();
 
-  const isTriggerModeSelectable = isShared && isExperimentalEnabled;
+  const isTriggerModeSelectable = isSharedConversation && isExperimentalEnabled;
   const effectiveTriggerMode = isTriggerModeSelectable ? triggerMode : ChatTriggerMode.Always;
 
   const messageEditorAriaLabel = getMessageEditorAriaLabel({

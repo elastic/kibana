@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiListGroup, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiButton, EuiListGroup, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
@@ -38,13 +38,10 @@ export const TriggerModeSelector: React.FC<TriggerModeSelectorProps> = ({
   onTriggerModeChange,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const popoverId = useGeneratedHtmlId({ prefix: 'agentBuilderTriggerModeSelector' });
-
   const closePopover = () => setIsPopoverOpen(false);
 
   return (
     <EuiPopover
-      id={popoverId}
       aria-label={selectorAriaLabel}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
