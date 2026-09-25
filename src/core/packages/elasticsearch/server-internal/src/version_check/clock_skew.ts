@@ -10,8 +10,8 @@
 /**
  * The Kibana/Elasticsearch clock skew check as a state-action machine.
  *
- *   state   `ClockSkewState`: healthy checks every ten minutes, skewed reminds
- *           every hour
+ *   state   `ClockSkewState`: healthy or skewed, checked every ten minutes
+ *           either way; while skewed, a reminder is due once an hour
  *   action  `sampleClocks`: one node stats request, bracketed by Kibana's wall
  *           clock
  *   model   `model`: classifies the sample and says what the step meant as a
@@ -26,15 +26,15 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 import {
   nextOnGrid,
-  run,
   realClock,
+  run,
   type Action,
+  type ActionResult,
   type AugmentedState,
   type Clock,
   type InitialEvent,
-  type StateActionMachine,
-  type ActionResult,
   type Scheduled,
+  type StateActionMachine,
 } from './state_action_machine';
 
 const MAX_CLOCK_SKEW_MS = 60_000;
@@ -59,19 +59,20 @@ export interface ClockSkew {
 }
 
 export type ClockSkewClassification =
+  /** No node reported a timestamp, so nothing was measured. */
+  | { readonly type: 'unmeasured' }
   | { readonly type: 'inSync' }
   | { readonly type: 'skewed'; readonly skew: ClockSkew };
 
-export type ClockSkewControlState = 'healthy' | 'skewed';
-
-export interface ClockSkewState extends Scheduled {
-  readonly controlState: ClockSkewControlState;
-  readonly nextActionAt: number;
-}
+export type ClockSkewState = Scheduled &
+  (
+    | { readonly controlState: 'healthy' }
+    | { readonly controlState: 'skewed'; readonly remindAt: number }
+  );
 
 /** What a step meant, judged against the state it left. */
 export type ClockSkewEvent =
-  /** The request failed; nothing is known about this step. */
+  /** The request failed or measured nothing; nothing is known about this step. */
   | { readonly type: 'unavailable' }
   /** In sync, and was before. */
   | { readonly type: 'inSync' }
@@ -79,8 +80,10 @@ export type ClockSkewEvent =
   | { readonly type: 'recovered' }
   /** Skewed, and was not before. */
   | { readonly type: 'skewDetected'; readonly skew: ClockSkew }
-  /** Skewed, and was before. */
-  | { readonly type: 'skewPersists'; readonly skew: ClockSkew };
+  /** Still skewed; the hourly reminder is not yet due. */
+  | { readonly type: 'skewPersists' }
+  /** Still skewed, and an hour has passed since the last report. */
+  | { readonly type: 'skewReminder'; readonly skew: ClockSkew };
 
 // State
 
@@ -88,9 +91,6 @@ export const initialState = (nextActionAt: number): ClockSkewState => ({
   controlState: 'healthy',
   nextActionAt,
 });
-
-const pollingInterval = (controlState: ClockSkewControlState): number =>
-  controlState === 'skewed' ? CLOCK_SKEW_REMINDER_INTERVAL_MS : CLOCK_SKEW_CHECK_INTERVAL_MS;
 
 // Action
 
@@ -123,6 +123,9 @@ export const classifyClockSkew = ({
   respondedAt,
   timestamps,
 }: ClockSkewSample): ClockSkewClassification => {
+  if (timestamps.length === 0) {
+    return { type: 'unmeasured' };
+  }
   const elasticsearchTime = timestamps.find(
     (timestamp) =>
       requestedAt - timestamp > MAX_CLOCK_SKEW_MS || timestamp - respondedAt > MAX_CLOCK_SKEW_MS
@@ -141,24 +144,45 @@ export const model = (
   state: ClockSkewState,
   result: ActionResult<ClockSkewSample>
 ): AugmentedState<ClockSkewState, ClockSkewEvent> => {
-  const transitionTo = (controlState: ClockSkewControlState): ClockSkewState => ({
-    controlState,
-    nextActionAt: nextOnGrid(state.nextActionAt, result.completedAt, pollingInterval(controlState)),
-  });
+  const nextActionAt = nextOnGrid(
+    state.nextActionAt,
+    result.completedAt,
+    CLOCK_SKEW_CHECK_INTERVAL_MS
+  );
+  // Nothing new to say: keep the state, check again in ten minutes.
+  const unavailable: AugmentedState<ClockSkewState, ClockSkewEvent> = {
+    state: { ...state, nextActionAt },
+    event: { type: 'unavailable' },
+  };
 
   if (!result.ok) {
-    // Keep the state and its interval; there is nothing new to say.
-    return { state: transitionTo(state.controlState), event: { type: 'unavailable' } };
+    return unavailable;
+  }
+  const classification = classifyClockSkew(result.value);
+  if (classification.type === 'unmeasured') {
+    return unavailable;
+  }
+  if (classification.type === 'inSync') {
+    return {
+      state: { controlState: 'healthy', nextActionAt },
+      event: { type: state.controlState === 'skewed' ? 'recovered' : 'inSync' },
+    };
   }
 
-  const wasSkewed = state.controlState === 'skewed';
-  const classification = classifyClockSkew(result.value);
-  if (classification.type === 'inSync') {
-    return { state: transitionTo('healthy'), event: { type: wasSkewed ? 'recovered' : 'inSync' } };
+  const { skew } = classification;
+  const remindAt = result.completedAt + CLOCK_SKEW_REMINDER_INTERVAL_MS;
+  if (state.controlState === 'healthy') {
+    return {
+      state: { controlState: 'skewed', remindAt, nextActionAt },
+      event: { type: 'skewDetected', skew },
+    };
+  }
+  if (result.completedAt < state.remindAt) {
+    return { state: { ...state, nextActionAt }, event: { type: 'skewPersists' } };
   }
   return {
-    state: transitionTo('skewed'),
-    event: { type: wasSkewed ? 'skewPersists' : 'skewDetected', skew: classification.skew },
+    state: { controlState: 'skewed', remindAt, nextActionAt },
+    event: { type: 'skewReminder', skew },
   };
 };
 
@@ -186,6 +210,7 @@ export const logClockSkewEvent = (log: Logger, event: ClockSkewEvent | InitialEv
     case 'initial':
     case 'unavailable':
     case 'inSync':
+    case 'skewPersists':
       return;
     case 'recovered':
       log.info('Kibana and Elasticsearch clocks are in sync again.');
@@ -193,7 +218,7 @@ export const logClockSkewEvent = (log: Logger, event: ClockSkewEvent | InitialEv
     case 'skewDetected':
       log.error(describeSkew('', event.skew));
       return;
-    case 'skewPersists':
+    case 'skewReminder':
       log.error(describeSkew('still ', event.skew));
       return;
   }
