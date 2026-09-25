@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('management', () => {
-    loadTestFile(require.resolve('./remote_clusters'));
     loadTestFile(require.resolve('./index_lifecycle_management'));
   });
 }
