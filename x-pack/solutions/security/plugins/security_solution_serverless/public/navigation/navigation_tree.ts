@@ -140,6 +140,10 @@ export const createNavigationTree = async (
                 id: SecurityPageName.siemMigrationsDashboards,
                 link: securityLink(SecurityPageName.siemMigrationsDashboards),
               },
+              {
+                id: SecurityPageName.siemMigrationsWorkflows,
+                link: securityLink(SecurityPageName.siemMigrationsWorkflows),
+              },
             ],
           },
         ],

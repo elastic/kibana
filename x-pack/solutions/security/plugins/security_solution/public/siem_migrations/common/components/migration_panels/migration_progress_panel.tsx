@@ -22,8 +22,8 @@ import {
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useStopSiemMigration } from '../../hooks/use_stop_siem_migration';
-import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
-import type { MigrationType } from '../../../../../common/siem_migrations/types';
+import type { MigrationsServiceTaskStats } from '../../service/migrations_service_base';
+import type { MigrationType, SiemMigrationVendor } from '../../../../../common/siem_migrations/types';
 import { MigrationPanelTitle } from './migration_title';
 import { MigrationsReadMore } from './read_more';
 import {
@@ -35,7 +35,7 @@ import {
 } from './translations';
 
 export interface MigrationProgressPanelProps {
-  migrationStats: MigrationTaskStats;
+  migrationStats: MigrationsServiceTaskStats;
   migrationType: MigrationType;
 }
 
@@ -47,8 +47,11 @@ export const MigrationProgressPanel = React.memo(function MigrationProgressPanel
   const { mutate: stopMigration, isLoading: isStopping } = useStopSiemMigration(migrationType);
 
   const onStopMigration = useCallback(() => {
-    stopMigration({ migrationId: migrationStats.id, vendor: migrationStats.vendor });
-  }, [migrationStats, stopMigration]);
+    stopMigration({
+      migrationId: migrationStats.id,
+      vendor: migrationStats.vendor as SiemMigrationVendor | undefined,
+    });
+  }, [migrationStats.id, migrationStats.vendor, stopMigration]);
 
   const { items } = migrationStats;
   const finishedCount = items.completed + items.failed;

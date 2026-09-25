@@ -24,7 +24,12 @@ export const WithMissingPrivilegesTooltip = <P extends { isAuthorized: boolean }
       services: { siemMigrations },
     } = useKibana();
 
-    const service = migrationType === 'rule' ? siemMigrations.rules : siemMigrations.dashboards;
+    const service =
+      migrationType === 'rule'
+        ? siemMigrations.rules
+        : migrationType === 'workflow'
+        ? siemMigrations.workflows
+        : siemMigrations.dashboards;
     const missingCapabilities = useMemo(() => service.getMissingCapabilities(level), [service]);
 
     const isAuthorized = useMemo(() => missingCapabilities.length === 0, [missingCapabilities]);

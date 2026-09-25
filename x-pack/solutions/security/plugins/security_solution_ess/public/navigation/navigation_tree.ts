@@ -142,6 +142,10 @@ export const createNavigationTree = (
                 id: SecurityPageName.siemMigrationsDashboards,
                 link: securityLink(SecurityPageName.siemMigrationsDashboards),
               },
+              {
+                id: SecurityPageName.siemMigrationsWorkflows,
+                link: securityLink(SecurityPageName.siemMigrationsWorkflows),
+              },
             ],
           },
         ],
