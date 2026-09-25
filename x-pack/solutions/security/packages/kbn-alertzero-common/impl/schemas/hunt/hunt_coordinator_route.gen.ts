@@ -188,6 +188,15 @@ export const HuntCoordinatorResponse = lazySchema(() =>
           })
         ),
         dropped_unknown_ids: z.array(z.string()).optional(),
+        /**
+         * Catalog-valid techniques that were not corroborated because the report exceeded the per-run generation budget. They still appear in `behaviors`, carrying a non-executable placeholder and no execution. Present only on a partial run, so a caller can tell a report that was fully hunted from one that was not.
+         */
+        uncorroborated_technique_ids: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Catalog-valid techniques that were not corroborated because the report exceeded the per-run generation budget. They still appear in `behaviors`, carrying a non-executable placeholder and no execution. Present only on a partial run, so a caller can tell a report that was fully hunted from one that was not.'
+          ),
         message: z.string().optional(),
         next_step: z.string(),
         /**

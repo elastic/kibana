@@ -481,6 +481,7 @@ export const huntCoordinator = async (
 
   const tier2: HuntCoordinatorTier2 = { ...tier2Raw, tier: 2 };
   const hasConfirmedHit = tier1Raw.has_confirmed_hit || tier2Raw.has_hit;
+  const uncorroborated = tier2Raw.uncorroborated_technique_ids ?? [];
 
   return {
     status: 'tier1_and_tier2',
@@ -489,14 +490,28 @@ export const huntCoordinator = async (
     technologies,
     tier1,
     tier2,
-    message: `Tier 1: ${tier1Raw.status}. Tier 2: ${tier2Raw.status} (${tier2Raw.behaviors.length} proposed).`,
+    message:
+      `Tier 1: ${tier1Raw.status}. Tier 2: ${tier2Raw.status} ` +
+      `(${tier2Raw.behaviors.length} proposed` +
+      `${uncorroborated.length > 0 ? `, ${uncorroborated.length} uncorroborated` : ''}).`,
     next_step:
       tier2Raw.status === 'behaviors_proposed'
-        ? hasConfirmedHit
+        ? uncorroborated.length > 0
+          ? `Behaviors proposed, but ${uncorroborated.length} exceeded the Tier 2 generation ` +
+            `budget and were never searched: ${uncorroborated.join(', ')}. Re-hunt this report ` +
+            `explicitly to corroborate them.`
+          : hasConfirmedHit
           ? 'Behaviors proposed; at least one tier confirmed an environment hit.'
           : 'Behaviors proposed for Investigation staging.'
         : 'No behavioral candidates survived catalog validation.',
     has_confirmed_hit: hasConfirmedHit,
+    // A budget-truncated Tier 2 still counts as completed. Reporting it as a
+    // failure would park the report outside the hunt-once gate, and because the
+    // budget is deterministic the next sweep would truncate it identically and
+    // re-spend the whole generation budget on the same techniques, forever.
+    // Partial coverage is reported through `tier2.uncorroborated_technique_ids`
+    // and `next_step` instead; acting on it needs per-technique evidence the
+    // gate does not carry yet.
     completed_successfully: true,
   };
 };

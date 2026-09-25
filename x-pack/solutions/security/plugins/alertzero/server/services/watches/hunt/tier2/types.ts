@@ -76,6 +76,12 @@ export interface HuntBehaviorResult {
    */
   indexed_behaviors: IndexedBehavior[];
   dropped_unknown_ids?: string[];
+  /**
+   * Catalog-valid techniques left uncorroborated because the report exceeded the
+   * per-run generation budget. Set only on a partial run, so a caller can tell a
+   * fully hunted report from one whose remaining techniques were never searched.
+   */
+  uncorroborated_technique_ids?: string[];
   message?: string;
   next_step: string;
   /**

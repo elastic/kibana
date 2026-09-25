@@ -625,5 +625,35 @@ describe('huntBehavior', () => {
 
       expect(generateEsqlMock).toHaveBeenCalledTimes(GENERATION_BUDGET);
     });
+
+    it('names the techniques it left uncorroborated, so a partial run is not silent', async () => {
+      const ids = catalogIds();
+      const result = await huntBehavior(
+        buildMockModel(ascendingCandidates()),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      // The lowest-confidence ids are the ones the budget cut.
+      expect(result.uncorroborated_technique_ids).toEqual(
+        ids.slice(0, OVER_BUDGET - GENERATION_BUDGET)
+      );
+      expect(result.next_step).toContain('only partially corroborated');
+    });
+
+    it('reports nothing uncorroborated when the report stays inside the budget', async () => {
+      const candidates = ascendingCandidates().slice(0, GENERATION_BUDGET);
+
+      const result = await huntBehavior(
+        buildMockModel(candidates),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(result.uncorroborated_technique_ids).toBeUndefined();
+      expect(result.next_step).not.toContain('partially corroborated');
+    });
   });
 });
