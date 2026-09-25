@@ -32,7 +32,14 @@ const workflow = parse(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.yaml) a
     with?: Record<string, string>;
     branches?: Array<{
       name: string;
-      steps: Array<{ name: string; type?: string; with?: Record<string, string> }>;
+      steps: Array<{
+        name: string;
+        type?: string;
+        with?: Record<string, string>;
+        'on-failure'?: {
+          retry: { 'max-attempts': number; delay: string; strategy: string };
+        };
+      }>;
     }>;
   }>;
 };
@@ -64,6 +71,9 @@ describe('nightshift sandbox materialize workspace workflow', () => {
                 name: 'hydrate_cortex',
                 type: 'nightshift.cortexHydrate',
                 with: { sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}' },
+                'on-failure': {
+                  retry: { 'max-attempts': 3, delay: '5s', strategy: 'exponential' },
+                },
               }),
             ],
           }),
@@ -78,6 +88,9 @@ describe('nightshift sandbox materialize workspace workflow', () => {
                   prompt: '{{ inputs.prompt }}',
                   agent_id: '{{ inputs.agent_id }}',
                   conversation_id: '{{ inputs.conversation_id }}',
+                },
+                'on-failure': {
+                  retry: { 'max-attempts': 3, delay: '5s', strategy: 'exponential' },
                 },
               }),
             ],
