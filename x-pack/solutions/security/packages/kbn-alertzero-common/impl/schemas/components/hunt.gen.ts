@@ -32,6 +32,62 @@ export type IndexScopeStatus = z.infer<typeof IndexScopeStatus>;
 export type IndexScopeStatusEnum = typeof IndexScopeStatus.enum;
 export const IndexScopeStatusEnum = IndexScopeStatus.enum;
 
+/**
+ * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. The first four are transient: the same run repeated could succeed, so the report must stay eligible. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends the run.
+ */
+export const HuntIncompleteReason = lazySchema(() =>
+  z.enum([
+    'search_partial',
+    'index_unavailable',
+    'generation_failed',
+    'execute_failed',
+    'generation_budget',
+    'query_out_of_scope',
+    'query_ungrounded',
+    'quote_ungrounded',
+    'unknown_technique_id',
+    'rows_unclassifiable',
+    'refs_unavailable',
+    'nothing_searched',
+  ])
+);
+export type HuntIncompleteReason = z.infer<typeof HuntIncompleteReason>;
+export type HuntIncompleteReasonEnum = typeof HuntIncompleteReason.enum;
+export const HuntIncompleteReasonEnum = HuntIncompleteReason.enum;
+
+/**
+ * One gap in a hunt's coverage. A run reporting no gaps searched everything it was asked to; a run reporting gaps has not, whatever its hit count says.
+ */
+export const HuntIncompleteness = lazySchema(() =>
+  z.object({
+    reason: HuntIncompleteReason,
+    /**
+     * What was not covered, in a form a human reading the run can act on.
+     */
+    detail: z
+      .string()
+      .describe('What was not covered, in a form a human reading the run can act on.'),
+    /**
+     * Set when the gap is scoped to one technique rather than to the whole search.
+     */
+    technique_id: z
+      .string()
+      .optional()
+      .describe('Set when the gap is scoped to one technique rather than to the whole search.'),
+  })
+);
+export type HuntIncompleteness = z.infer<typeof HuntIncompleteness>;
+
+/**
+ * Whether the run covered what it was asked to, and if not, whether repeating it could change that. `complete`: every requested search ran, so a zero-hit run is a statement about the environment. `incomplete_retryable`: something transient stopped part of the search, so the report must stay eligible for a later run. `incomplete_final`: part of the search deterministically cannot run, so the report can be retired, but the run is not a statement that the environment is clean.
+ */
+export const HuntCompleteness = lazySchema(() =>
+  z.enum(['complete', 'incomplete_retryable', 'incomplete_final'])
+);
+export type HuntCompleteness = z.infer<typeof HuntCompleteness>;
+export type HuntCompletenessEnum = typeof HuntCompleteness.enum;
+export const HuntCompletenessEnum = HuntCompleteness.enum;
+
 export const IndexScopeWindow = lazySchema(() =>
   z.object({
     /**
@@ -142,6 +198,15 @@ export const HuntForThreatResult = lazySchema(() =>
       .boolean()
       .describe(
         'A confirmed event match in a required index inside the window. Never set by an optional-index or out-of-window match.'
+      ),
+    /**
+     * Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or a required pattern resolved to no index.
+     */
+    incomplete: z
+      .array(HuntIncompleteness)
+      .optional()
+      .describe(
+        'Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or a required pattern resolved to no index.'
       ),
     searched_iocs: z.number().int(),
     searched_techniques: z.number().int(),

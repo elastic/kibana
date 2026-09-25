@@ -14,6 +14,8 @@ import type {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
   HuntForThreatHit,
+  HuntIncompleteness,
+  HuntIncompleteReason,
 } from '@kbn/alertzero-common';
 import { buildMatchesRequired, isIndexPatternAllowed } from '../common/matches_required';
 import { getKnownHuntIndexPatterns } from '../common/resolve_index_scope';
@@ -39,7 +41,19 @@ import type {
 const MAX_AFFECTED_ENTITIES = 20;
 /** Cap Tier 2 Discover refs to match SSE `events[]` / `alerts[]` max. */
 const MAX_HITS = 50;
-const NO_EXECUTION: BehaviorExecution = { executed: false, row_count: 0, hit: false };
+
+/**
+ * A behavior with no execution result. `reason` is omitted only where nothing went
+ * wrong — the caller passed no client or no window, so corroboration was never
+ * asked for. Everywhere else it has to be named, because `executed: false` alone
+ * reads as "searched and found nothing" to whoever writes the hunt's evidence.
+ */
+const notExecuted = (reason?: HuntIncompleteReason): BehaviorExecution => ({
+  executed: false,
+  row_count: 0,
+  hit: false,
+  ...(reason ? { inconclusive_reason: reason } : {}),
+});
 
 const severityFromConfidence = (confidence: number): SeverityLevel => {
   if (confidence > 0.8) return 'critical';
@@ -205,7 +219,7 @@ const executeValidatedEsql = async ({
         `[hunt:esql] execute for ${techniqueId} refused — ${sourcesAllowed.reason}. ` +
           `Recording executed:false and continuing.`
       );
-      return { execution: NO_EXECUTION };
+      return { execution: notExecuted('query_out_of_scope') };
     }
 
     const response = await executeEsql({
@@ -228,9 +242,12 @@ const executeValidatedEsql = async ({
     const userCol = columnIndex(columns, 'user.name');
     const tsCol = columnIndex(columns, '@timestamp');
 
-    if (values.length > 0 && indexCol < 0) {
-      // Aggregating pipelines (STATS, etc.) drop METADATA columns. Rows existed
-      // but the required-index hit bar cannot evaluate them.
+    // Aggregating pipelines (STATS, etc.) drop METADATA columns. Rows existed but
+    // the required-index hit bar cannot evaluate them, so the `hit: false` below is
+    // "could not tell", not "nothing there" — the two have to stay distinguishable
+    // because only one of them is evidence of a clean environment.
+    const rowsUnclassifiable = values.length > 0 && indexCol < 0;
+    if (rowsUnclassifiable) {
       logger.warn(
         `[hunt:esql] execute for ${techniqueId} returned ${values.length} row(s) with no _index ` +
           `column (query may aggregate away METADATA). Treating as hit: false.`
@@ -261,6 +278,11 @@ const executeValidatedEsql = async ({
           )
         : undefined;
 
+    // `prepareEsqlForExecute` injects `METADATA _id`/`_index` but deliberately does
+    // not undo a `DROP _id` the model wrote, so a query can keep `_index` — enough to
+    // confirm required-index rows — while losing the ids the refs are built from. The
+    // hit stands, since rows really did match; what it cannot do is show its work, so
+    // downstream event attachment needs to hear that rather than render nothing.
     const hits: HuntForThreatHit[] = [];
     if (idCol >= 0 && indexCol >= 0) {
       for (const row of requiredRows) {
@@ -278,11 +300,25 @@ const executeValidatedEsql = async ({
       }
     }
 
+    const refsUnavailable = requiredRows.length > 0 && hits.length === 0;
+    if (refsUnavailable) {
+      logger.warn(
+        `[hunt:esql] execute for ${techniqueId} confirmed ${requiredRows.length} required-index ` +
+          `row(s) but produced no document refs (the query dropped _id), so the confirmed hit ` +
+          `carries no evidence to show.`
+      );
+    }
+
     return {
       execution: {
         executed: true,
         row_count: requiredRows.length,
         hit: requiredRows.length > 0,
+        ...(rowsUnclassifiable
+          ? { inconclusive_reason: 'rows_unclassifiable' as const }
+          : refsUnavailable
+          ? { inconclusive_reason: 'refs_unavailable' as const }
+          : {}),
       },
       ...(hosts && hosts.items.length > 0
         ? {
@@ -303,7 +339,7 @@ const executeValidatedEsql = async ({
       `[hunt:esql] execute for ${techniqueId} failed — recording executed:false and continuing. ` +
         `${((err as Error).message ?? '').slice(0, 300)}`
     );
-    return { execution: NO_EXECUTION };
+    return { execution: notExecuted('execute_failed') };
   }
 };
 
@@ -609,7 +645,9 @@ export const huntBehavior = async (
       rule_name: sanitizeRuleName(techniqueId, entry.name, reportId),
       severity,
       risk_score: severityToRiskScore(severity),
-      execution: NO_EXECUTION,
+      // No reason yet: generation below either fills this in with a real query's
+      // result or replaces it with the reason the query never ran.
+      execution: notExecuted(),
     });
   }
 
@@ -620,6 +658,28 @@ export const huntBehavior = async (
     );
   }
 
+  // Every technique this run was asked about and could not corroborate, with why.
+  // One list rather than a field per cause: a caller deciding whether a report was
+  // actually hunted has to read all of them, and each new cause added as its own
+  // optional field is one more a caller can miss and read silence as coverage.
+  const incomplete: HuntIncompleteness[] = [
+    ...droppedIds.map((technique_id) => ({
+      reason: 'unknown_technique_id' as const,
+      technique_id,
+      detail: `${technique_id} is not in the ATT&CK catalog, so it was never searched for.`,
+    })),
+    ...ungroundedQuoteIds.map((technique_id) => ({
+      reason: 'quote_ungrounded' as const,
+      technique_id,
+      detail:
+        `The quote offered as evidence for ${technique_id} is not in the report, so the ` +
+        `technique was dropped rather than attributed to it.`,
+    })),
+  ];
+  const gap = (technique_id: string, reason: HuntIncompleteReason, detail: string): void => {
+    incomplete.push({ reason, technique_id, detail });
+  };
+
   if (validated.length > 0 && !esClient) {
     logger.debug(
       '[hunt:esql] no Elasticsearch client — grounded ES|QL generation skipped, ' +
@@ -627,27 +687,29 @@ export const huntBehavior = async (
     );
   }
 
-  // Techniques the generation budget left unsearched. Reported rather than only
-  // logged: a behavior that kept its placeholder is indistinguishable in
-  // `behaviors` from one whose grounded query ran and found nothing, and the
-  // caller retires the report either way.
-  const uncorroboratedIds: string[] = [];
-
   if (validated.length > 0 && esClient) {
     // Highest confidence first, so a report that overruns the budget spends it on
     // its best-supported behaviors rather than whichever the model emitted first.
     const generationTargets = [...validated]
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, MAX_GENERATED_BEHAVIORS);
+    const targeted = new Set(generationTargets.map((b) => b.technique_id));
     if (generationTargets.length < validated.length) {
-      const targeted = new Set(generationTargets.map((b) => b.technique_id));
-      uncorroboratedIds.push(
-        ...validated.filter((b) => !targeted.has(b.technique_id)).map((b) => b.technique_id)
-      );
+      const skipped = validated.filter((b) => !targeted.has(b.technique_id));
+      for (const behavior of skipped) {
+        behavior.execution = notExecuted('generation_budget');
+        gap(
+          behavior.technique_id,
+          'generation_budget',
+          `The run reached its budget of ${MAX_GENERATED_BEHAVIORS} generated queries before ` +
+            `${behavior.technique_id}, so no query was written for it and it was never searched.`
+        );
+      }
       logger.warn(
         `[hunt:esql] ${validated.length} validated behaviors exceed the generation budget of ` +
-          `${MAX_GENERATED_BEHAVIORS}; ${uncorroboratedIds.length} techniques are left ` +
-          `uncorroborated and keep a non-executable placeholder: ${uncorroboratedIds.join(', ')}.`
+          `${MAX_GENERATED_BEHAVIORS}; ${skipped.length} techniques are left ` +
+          `uncorroborated and keep a non-executable placeholder: ` +
+          `${skipped.map((b) => b.technique_id).join(', ')}.`
       );
     }
     const groundedEsql = await generateGroundedEsql({
@@ -662,8 +724,20 @@ export const huntBehavior = async (
       rowLimit: rowLimit ?? DEFAULT_PROPOSED_RULE_LIMIT,
     });
     for (const behavior of validated) {
+      // Budget-skipped behaviors are already recorded above; re-reporting them here
+      // as generation failures would name the same technique twice for two causes.
+      if (!targeted.has(behavior.technique_id)) continue;
       const esql = groundedEsql.get(behavior.technique_id);
-      if (!esql) continue;
+      if (!esql) {
+        behavior.execution = notExecuted('generation_failed');
+        gap(
+          behavior.technique_id,
+          'generation_failed',
+          `No query could be generated for ${behavior.technique_id}, so it was never searched. ` +
+            `A later run may succeed.`
+        );
+        continue;
+      }
       // Publication clears a source gate of its own. A staged rule reads as
       // grounded and authoritative to whoever picks it up in Investigation, so a
       // query reaching outside the indices a hunt may read must not be handed on
@@ -679,6 +753,13 @@ export const huntBehavior = async (
         logger.warn(
           `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +
             `${sourcesAllowed.reason}. Keeping the non-executable placeholder.`
+        );
+        behavior.execution = notExecuted('query_out_of_scope');
+        gap(
+          behavior.technique_id,
+          'query_out_of_scope',
+          `The query generated for ${behavior.technique_id} was discarded (${sourcesAllowed.reason}), ` +
+            `so the technique was never searched.`
         );
         continue;
       }
@@ -696,6 +777,13 @@ export const huntBehavior = async (
           `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +
             `${groundedInReport.reason}. Keeping the non-executable placeholder.`
         );
+        behavior.execution = notExecuted('query_ungrounded');
+        gap(
+          behavior.technique_id,
+          'query_ungrounded',
+          `The query generated for ${behavior.technique_id} was discarded ` +
+            `(${groundedInReport.reason}), so the technique was never searched.`
+        );
         continue;
       }
       behavior.proposed_esql_rule = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
@@ -710,6 +798,18 @@ export const huntBehavior = async (
         requiredIndices,
       });
       behavior.execution = executed.execution;
+      const executeReason = executed.execution.inconclusive_reason;
+      if (executeReason) {
+        gap(
+          behavior.technique_id,
+          executeReason,
+          executeReason === 'refs_unavailable'
+            ? `The query for ${behavior.technique_id} confirmed required-index rows but returned ` +
+                `no document ids, so the hit cannot be shown.`
+            : `The query for ${behavior.technique_id} ran but its result does not say whether the ` +
+                `environment matched (${executeReason}).`
+        );
+      }
       if (executed.affected_hosts) behavior.affected_hosts = executed.affected_hosts;
       if (executed.affected_users) behavior.affected_users = executed.affected_users;
       if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
@@ -722,14 +822,14 @@ export const huntBehavior = async (
 
   logger.debug(
     `hunt_behavior validated=${validated.length} dropped=${droppedIds.length} ` +
-      `has_hit=${hasHit} report_id=${reportId}`
+      `incomplete=${incomplete.length} has_hit=${hasHit} report_id=${reportId}`
   );
 
   const partialSuffix =
-    uncorroboratedIds.length > 0
-      ? ` ${uncorroboratedIds.length} of ${validated.length} techniques exceeded the per-run ` +
-        `generation budget and were never searched, so this report is only partially ` +
-        `corroborated: ${uncorroboratedIds.join(', ')}.`
+    incomplete.length > 0
+      ? ` ${incomplete.length} technique${incomplete.length === 1 ? ' was' : 's were'} not ` +
+        `corroborated, so this report is only partially hunted — see \`incomplete\` for which ` +
+        `and why (${[...new Set(incomplete.map(({ reason }) => reason))].join(', ')}).`
       : '';
 
   return {
@@ -738,13 +838,13 @@ export const huntBehavior = async (
     behaviors: validated,
     indexed_behaviors: toIndexedBehaviors(validated, reportId),
     has_hit: hasHit,
-    ...(droppedIds.length > 0 && { dropped_unknown_ids: droppedIds }),
-    ...(uncorroboratedIds.length > 0 && { uncorroborated_technique_ids: uncorroboratedIds }),
+    ...(incomplete.length > 0 && { incomplete }),
     next_step:
       validated.length === 0
-        ? 'No candidates matched the canonical ATT&CK catalog. The LLM may have ' +
-          'hallucinated technique IDs; consider lowering the LLM threshold or falling ' +
-          'back to IOC matching for this report.'
+        ? 'No extracted candidate survived validation: each was either absent from the ' +
+          'canonical ATT&CK catalog or offered a quote the report does not contain. ' +
+          'Consider lowering the LLM threshold or falling back to IOC matching for this ' +
+          `report.${partialSuffix}`
         : hasHit
         ? `Behaviors proposed; at least one grounded query hit a required index.${partialSuffix}`
         : `Behaviors proposed for Investigation staging.${partialSuffix}`,

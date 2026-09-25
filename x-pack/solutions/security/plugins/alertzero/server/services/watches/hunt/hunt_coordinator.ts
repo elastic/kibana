@@ -9,11 +9,14 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type {
   HuntBehaviorArticleContext,
+  HuntCompleteness,
   HuntCoordinatorStatus,
   HuntForThreatResult,
+  HuntIncompleteness,
   HuntIoc,
   HuntTechnology,
 } from '@kbn/alertzero-common';
+import { completedSuccessfully, huntCompletenessOf } from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
 import type { HuntScope } from './common/resolve_index_scope';
@@ -80,8 +83,20 @@ export interface HuntCoordinatorResult {
    */
   has_confirmed_hit: boolean;
   /**
-   * True when the run completed without hard errors. The calling workflow checks
-   * this before writing hunt evidence; the coordinator itself never writes feedback.
+   * Whether the run covered what it was asked to. Read this, not
+   * `completed_successfully`, when recording a hunt outcome: the difference between
+   * `complete` and `incomplete_final` is the difference between "the environment is
+   * clean" and "we could not look". `tier1.incomplete` and `tier2.incomplete` say
+   * which gaps produced it.
+   */
+  completeness: HuntCompleteness;
+  /**
+   * Whether the report stays eligible for a later run. Derived from `completeness`,
+   * false only for `incomplete_retryable`. True for `incomplete_final` too, because
+   * a deterministic gap recurs identically every run, so keeping the report eligible
+   * re-spends the run forever without covering more. A caller that writes "clean"
+   * off this flag alone records a clean environment for a run that could not search
+   * it; that is what `completeness` is for.
    */
   completed_successfully: boolean;
 }
@@ -236,6 +251,32 @@ const decideTier2Skip = (
   return null;
 };
 
+/**
+ * The gap the coordinator sees that neither tier can: both of them sitting out. Tier
+ * 1 mapped none of the report's IOCs to a searchable field, and Tier 2 never ran, so
+ * nothing queried the environment at all. Tier 1 still returns zero hits, which a
+ * caller writing hunt evidence would otherwise record as a clean environment for a
+ * search that never happened.
+ *
+ * A missing connector is transient, since one can be configured and the next run then
+ * covers the report; every other skip reason recurs identically.
+ */
+const bothTiersSatOut = (
+  tier1Status: HuntForThreatResult['status'],
+  skipReason: HuntCoordinatorTier2SkipReason
+): HuntIncompleteness[] => {
+  if (tier1Status !== 'no_searchable_terms') return [];
+  return [
+    {
+      reason: skipReason === 'no_inference' ? 'generation_failed' : 'nothing_searched',
+      detail:
+        `Tier 1 mapped no searchable term from this report and Tier 2 did not run ` +
+        `(${skipReason}), so no query reached the environment. The absence of hits says ` +
+        `nothing about whether the environment is clean.`,
+    },
+  ];
+};
+
 export const huntCoordinator = async (
   { esClient, reportsEsClient }: HuntCoordinatorClients,
   model: ScopedModel | undefined,
@@ -290,6 +331,10 @@ export const huntCoordinator = async (
       next_step:
         'A report_id run requires the report to be visible in this space. Pass a report id that exists here, or omit report_id and pass iocs/techniques/text for an ad hoc hunt.',
       has_confirmed_hit: false,
+      // Nothing about this run says whether the environment is clean, and a later run
+      // can differ: the report may be indexed, the scope may resolve, the index may
+      // come back. The report has to stay eligible.
+      completeness: 'incomplete_retryable',
       completed_successfully: false,
     };
   }
@@ -331,6 +376,10 @@ export const huntCoordinator = async (
       message: `Scope resolution failed: ${(err as Error).message}`,
       next_step: 'Verify the technology index patterns are configured correctly.',
       has_confirmed_hit: false,
+      // Nothing about this run says whether the environment is clean, and a later run
+      // can differ: the report may be indexed, the scope may resolve, the index may
+      // come back. The report has to stay eligible.
+      completeness: 'incomplete_retryable',
       completed_successfully: false,
     };
   }
@@ -364,6 +413,10 @@ export const huntCoordinator = async (
       next_step:
         'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
       has_confirmed_hit: false,
+      // Nothing about this run says whether the environment is clean, and a later run
+      // can differ: the report may be indexed, the scope may resolve, the index may
+      // come back. The report has to stay eligible.
+      completeness: 'incomplete_retryable',
       completed_successfully: false,
     };
   }
@@ -381,28 +434,45 @@ export const huntCoordinator = async (
   const { sample_event_summaries: _summaries, ...tier1Wire } = tier1Raw;
   const tier1: HuntCoordinatorTier1 = { ...tier1Wire, tier: 1 };
 
+  const tier1Gaps = tier1Raw.incomplete ?? [];
+
+  /**
+   * Every return that stops before Tier 2 produces a result. Completeness is computed
+   * here rather than passed in: Tier 1's own gaps — partial shards, a required index
+   * that went away between scope resolution and the search — apply just as much on a
+   * run where Tier 2 was skipped, and the hardcoded `true` these paths used before
+   * silently discarded them.
+   */
   const tier1Only = ({
     reason,
     message,
     nextStep,
-    completed_successfully,
+    extraGaps = [],
   }: {
     reason: HuntCoordinatorTier2SkipReason;
     message: string;
     nextStep: string;
-    completed_successfully: boolean;
-  }): HuntCoordinatorResult => ({
-    status: 'tier1_only',
-    report_id: reportId,
-    run_id,
-    technologies,
-    tier1,
-    tier2_skipped_reason: reason,
-    message,
-    next_step: nextStep,
-    has_confirmed_hit: tier1Raw.has_confirmed_hit,
-    completed_successfully,
-  });
+    extraGaps?: HuntIncompleteness[];
+  }): HuntCoordinatorResult => {
+    const completeness = huntCompletenessOf([
+      ...tier1Gaps,
+      ...bothTiersSatOut(tier1Raw.status, reason),
+      ...extraGaps,
+    ]);
+    return {
+      status: 'tier1_only',
+      report_id: reportId,
+      run_id,
+      technologies,
+      tier1,
+      tier2_skipped_reason: reason,
+      message,
+      next_step: nextStep,
+      has_confirmed_hit: tier1Raw.has_confirmed_hit,
+      completeness,
+      completed_successfully: completedSuccessfully(completeness),
+    };
+  };
 
   const skipReason = decideTier2Skip(tier2When, tier1Raw);
   if (skipReason) {
@@ -413,7 +483,6 @@ export const huntCoordinator = async (
         tier1Raw.status === 'environment_hits_found'
           ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
           : 'No environment matches. Consider widening time_range.',
-      completed_successfully: true,
     });
   }
 
@@ -423,11 +492,14 @@ export const huntCoordinator = async (
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no GenAI connector).`,
       nextStep:
         'Tier 2 requires a GenAI connector. Configure one via Stack Management → Connectors.',
-      completed_successfully: true,
     });
   }
 
   if (!text) {
+    const completeness = huntCompletenessOf([
+      ...tier1Gaps,
+      ...bothTiersSatOut(tier1Raw.status, 'no_report_text'),
+    ]);
     return {
       status: 'tier2_only_skipped',
       report_id: reportId,
@@ -439,7 +511,8 @@ export const huntCoordinator = async (
       next_step:
         'Tier 2 needs report text. Pass `text` explicitly or use a `report_id` whose `content.body_text` has been ingested.',
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
-      completed_successfully: true,
+      completeness,
+      completed_successfully: completedSuccessfully(completeness),
     };
   }
 
@@ -481,13 +554,28 @@ export const huntCoordinator = async (
       reason: 'tier2_failed',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 failed: ${(err as Error).message}`,
       nextStep: 'Tier 2 LLM call failed. Check connector configuration and retry.',
-      completed_successfully: false,
+      extraGaps: [
+        {
+          reason: 'generation_failed',
+          detail:
+            `Tier 2 threw before producing any behavior (${(err as Error).message}), so none of ` +
+            `the report's techniques were searched. A later run may succeed.`,
+        },
+      ],
     });
   }
 
   const tier2: HuntCoordinatorTier2 = { ...tier2Raw, tier: 2 };
   const hasConfirmedHit = tier1Raw.has_confirmed_hit || tier2Raw.has_hit;
-  const uncorroborated = tier2Raw.uncorroborated_technique_ids ?? [];
+  const tier2Gaps = tier2Raw.incomplete ?? [];
+  const gaps = [...tier1Gaps, ...tier2Gaps];
+  // Both tiers ran, so `completed_successfully` is no longer a hardcoded `true`: it
+  // follows the gaps each tier reported. A deterministic gap still retires the report,
+  // because re-running reproduces it exactly and would re-spend the generation budget
+  // on the same techniques forever — but it retires as `incomplete_final`, so a caller
+  // writing hunt evidence can tell a searched-and-clean environment from one this run
+  // never reached.
+  const completeness = huntCompletenessOf(gaps);
 
   return {
     status: 'tier1_and_tier2',
@@ -499,25 +587,18 @@ export const huntCoordinator = async (
     message:
       `Tier 1: ${tier1Raw.status}. Tier 2: ${tier2Raw.status} ` +
       `(${tier2Raw.behaviors.length} proposed` +
-      `${uncorroborated.length > 0 ? `, ${uncorroborated.length} uncorroborated` : ''}).`,
+      `${gaps.length > 0 ? `, ${gaps.length} coverage gap(s)` : ''}).`,
     next_step:
       tier2Raw.status === 'behaviors_proposed'
-        ? uncorroborated.length > 0
-          ? `Behaviors proposed, but ${uncorroborated.length} exceeded the Tier 2 generation ` +
-            `budget and were never searched: ${uncorroborated.join(', ')}. Re-hunt this report ` +
-            `explicitly to corroborate them.`
+        ? gaps.length > 0
+          ? `Behaviors proposed, but ${gaps.length} part(s) of this hunt did not run: ` +
+            `${gaps.map(({ detail }) => detail).join(' ')}`
           : hasConfirmedHit
           ? 'Behaviors proposed; at least one tier confirmed an environment hit.'
           : 'Behaviors proposed for Investigation staging.'
         : 'No behavioral candidates survived catalog validation.',
     has_confirmed_hit: hasConfirmedHit,
-    // A budget-truncated Tier 2 still counts as completed. Reporting it as a
-    // failure would park the report outside the hunt-once gate, and because the
-    // budget is deterministic the next sweep would truncate it identically and
-    // re-spend the whole generation budget on the same techniques, forever.
-    // Partial coverage is reported through `tier2.uncorroborated_technique_ids`
-    // and `next_step` instead; acting on it needs per-technique evidence the
-    // gate does not carry yet.
-    completed_successfully: true,
+    completeness,
+    completed_successfully: completedSuccessfully(completeness),
   };
 };

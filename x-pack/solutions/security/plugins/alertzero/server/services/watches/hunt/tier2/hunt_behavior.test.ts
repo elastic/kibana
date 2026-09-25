@@ -124,7 +124,9 @@ describe('huntBehavior', () => {
       { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
     ]);
     const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
-    expect(result.dropped_unknown_ids).toContain('T9999999');
+    expect(result.incomplete).toContainEqual(
+      expect.objectContaining({ reason: 'unknown_technique_id', technique_id: 'T9999999' })
+    );
   });
 
   it('returns indexed_behaviors id as reportId:techniqueId', async () => {
@@ -390,6 +392,25 @@ describe('huntBehavior', () => {
   });
 
   it('returns execution.hit true for a required-index row', async () => {
+    // `prepareEsqlForExecute` injects `METADATA _id, _index`, so a query the model did
+    // not tamper with returns both.
+    executeEsqlMock.mockResolvedValue({
+      columns: [col('_id'), col('_index'), col('host.name')],
+      values: [['doc-1', 'logs-aws.cloudtrail-default', 'WIN-ANALYST01']],
+    });
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      executeParams,
+      esClient
+    );
+    expect(result.behaviors[0].execution).toEqual({ executed: true, row_count: 1, hit: true });
+  });
+
+  it('flags a confirmed hit that returned no document ids as unable to show its evidence', async () => {
+    // `prepareEsqlForExecute` adds the metadata columns but does not undo a `DROP _id`,
+    // so `_index` can survive while the ids the refs are built from do not. The hit is
+    // real; what the run cannot do is hand downstream attachment anything to render.
     executeEsqlMock.mockResolvedValue({
       columns: [col('_index'), col('host.name')],
       values: [['logs-aws.cloudtrail-default', 'WIN-ANALYST01']],
@@ -400,7 +421,16 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].execution).toEqual({ executed: true, row_count: 1, hit: true });
+    expect(result.behaviors[0].execution).toEqual({
+      executed: true,
+      row_count: 1,
+      hit: true,
+      inconclusive_reason: 'refs_unavailable',
+    });
+    expect(result.behaviors[0].hits).toBeUndefined();
+    expect(result.incomplete).toContainEqual(
+      expect.objectContaining({ reason: 'refs_unavailable', technique_id: 'T1078.004' })
+    );
   });
 
   it('returns has_hit false when only optional-index rows are returned', async () => {
@@ -455,6 +485,7 @@ describe('huntBehavior', () => {
       executed: false,
       row_count: 0,
       hit: false,
+      inconclusive_reason: 'query_out_of_scope',
     });
     expect(result.has_hit).toBe(false);
   });
@@ -474,6 +505,7 @@ describe('huntBehavior', () => {
       executed: false,
       row_count: 0,
       hit: false,
+      inconclusive_reason: 'query_out_of_scope',
     });
   });
 
@@ -503,7 +535,13 @@ describe('huntBehavior', () => {
       executed: false,
       row_count: 0,
       hit: false,
+      inconclusive_reason: 'execute_failed',
     });
+    // Transient, so the run must stay retryable rather than retiring the report on a
+    // timeout that a later run would get past.
+    expect(result.incomplete).toContainEqual(
+      expect.objectContaining({ reason: 'execute_failed', technique_id: 'T1078.004' })
+    );
   });
 
   it('returns has_hit true when a sibling behavior hits after another throws', async () => {
@@ -632,8 +670,37 @@ describe('huntBehavior', () => {
         'Grounded ES|QL generation unavailable'
       );
       expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
-      expect(result.behaviors[0].execution).toEqual({ executed: false, row_count: 0, hit: false });
+      expect(result.behaviors[0].execution).toEqual({
+        executed: false,
+        row_count: 0,
+        hit: false,
+        inconclusive_reason: 'query_ungrounded',
+      });
       expect(result.has_hit).toBe(false);
+      // The technique was never searched, so the run must say so rather than let
+      // `has_hit: false` read as a clean environment for it.
+      expect(result.incomplete).toContainEqual(
+        expect.objectContaining({ reason: 'query_ungrounded', technique_id: 'T1078.004' })
+      );
+    });
+
+    it('records a candidate dropped for an ungrounded quote as a coverage gap', async () => {
+      const result = await huntBehavior(
+        buildMockModel([
+          {
+            technique_id: 'T1566',
+            evidence_quote: 'never written in the report',
+            llm_confidence: 0.9,
+          },
+        ]),
+        logger,
+        { text: REPORT_TEXT }
+      );
+
+      expect(result.behaviors).toHaveLength(0);
+      expect(result.incomplete).toContainEqual(
+        expect.objectContaining({ reason: 'quote_ungrounded', technique_id: 'T1566' })
+      );
     });
   });
 
@@ -715,10 +782,31 @@ describe('huntBehavior', () => {
       );
 
       // The lowest-confidence ids are the ones the budget cut.
-      expect(result.uncorroborated_technique_ids).toEqual(
-        ids.slice(0, OVER_BUDGET - GENERATION_BUDGET)
+      expect(
+        result.incomplete
+          ?.filter(({ reason }) => reason === 'generation_budget')
+          .map(({ technique_id }) => technique_id)
+      ).toEqual(ids.slice(0, OVER_BUDGET - GENERATION_BUDGET));
+      expect(result.next_step).toContain('only partially hunted');
+    });
+
+    it('marks each budget-cut behavior inconclusive rather than leaving a bare placeholder', async () => {
+      const result = await huntBehavior(
+        buildMockModel(ascendingCandidates()),
+        logger,
+        executeParams,
+        esClient
       );
-      expect(result.next_step).toContain('only partially corroborated');
+
+      // Without a reason on the execution, a behavior the budget never reached looks
+      // exactly like one whose query ran and matched nothing.
+      const cut = catalogIds().slice(0, OVER_BUDGET - GENERATION_BUDGET);
+      for (const techniqueId of cut) {
+        const behavior = result.behaviors.find((b) => b.technique_id === techniqueId);
+        expect(behavior?.execution).toEqual(
+          expect.objectContaining({ executed: false, inconclusive_reason: 'generation_budget' })
+        );
+      }
     });
 
     it('reports nothing uncorroborated when the report stays inside the budget', async () => {
@@ -731,8 +819,8 @@ describe('huntBehavior', () => {
         esClient
       );
 
-      expect(result.uncorroborated_technique_ids).toBeUndefined();
-      expect(result.next_step).not.toContain('partially corroborated');
+      expect(result.incomplete).toBeUndefined();
+      expect(result.next_step).not.toContain('partially hunted');
     });
   });
 });

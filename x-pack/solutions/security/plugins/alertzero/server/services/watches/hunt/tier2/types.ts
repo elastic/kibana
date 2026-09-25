@@ -10,6 +10,8 @@ import type {
   HuntBehaviorIoc,
   HuntBehaviorStatus,
   HuntForThreatHit,
+  HuntIncompleteness,
+  HuntIncompleteReason,
 } from '@kbn/alertzero-common';
 
 /** Severity level for a proposed behavioral rule. */
@@ -22,6 +24,14 @@ export interface BehaviorExecution {
   row_count: number;
   /** True when at least one required-index row was returned. */
   hit: boolean;
+  /**
+   * Why this behavior's result is not a statement about the environment. Absent
+   * means it is one: `executed: true` ran and classified its rows, `executed:
+   * false` was never asked to run. Present means `hit: false` records that nothing
+   * was learned rather than that nothing is there, which is the distinction a
+   * caller writing hunt evidence has to make.
+   */
+  inconclusive_reason?: HuntIncompleteReason;
 }
 
 export interface HuntBehaviorParams {
@@ -75,13 +85,15 @@ export interface HuntBehaviorResult {
    * strict nested `extracted.behaviors` rejects extra keys.
    */
   indexed_behaviors: IndexedBehavior[];
-  dropped_unknown_ids?: string[];
   /**
-   * Catalog-valid techniques left uncorroborated because the report exceeded the
-   * per-run generation budget. Set only on a partial run, so a caller can tell a
-   * fully hunted report from one whose remaining techniques were never searched.
+   * Every technique Tier 2 was asked about but could not corroborate, each with
+   * why — an id outside the ATT&CK catalog, a quote absent from the report, a query
+   * that could not be generated, published or executed, or a technique the per-run
+   * generation budget never reached. Absent means every extracted technique was
+   * searched, so no hits is a statement about the environment rather than about
+   * how far Tier 2 got.
    */
-  uncorroborated_technique_ids?: string[];
+  incomplete?: HuntIncompleteness[];
   message?: string;
   next_step: string;
   /**

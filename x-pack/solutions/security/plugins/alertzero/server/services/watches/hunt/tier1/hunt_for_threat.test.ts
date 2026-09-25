@@ -532,4 +532,106 @@ describe('huntForThreat', () => {
       ).resolves.toEqual(expect.objectContaining({ status: 'no_environment_hits' }));
     });
   });
+  describe('coverage gaps', () => {
+    /**
+     * `search` and `count` both report shard trouble, and neither one failing is an
+     * exception the caller would see: the response just describes a smaller
+     * environment than the one that was asked about.
+     */
+    const buildPartialEsClient = (
+      searchOverrides: Record<string, unknown>,
+      countOverrides: Record<string, unknown> = {}
+    ): ElasticsearchClient =>
+      ({
+        search: jest.fn().mockResolvedValue({ ...emptySearchResponse, ...searchOverrides }),
+        count: jest.fn().mockResolvedValue({ count: 0, ...countOverrides }),
+      } as unknown as ElasticsearchClient);
+
+    it('reports a timed-out scope search as a retryable gap instead of a quiet environment', async () => {
+      const esClient = buildPartialEsClient({ timed_out: true });
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      expect(result.status).toBe('no_environment_hits');
+      expect(result.incomplete).toEqual([expect.objectContaining({ reason: 'search_partial' })]);
+    });
+
+    it('reports failed shards on the scope search as a retryable gap', async () => {
+      const esClient = buildPartialEsClient({
+        _shards: { total: 10, successful: 7, failed: 3, skipped: 0 },
+      });
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      expect(result.incomplete).toEqual([
+        expect.objectContaining({
+          reason: 'search_partial',
+          detail: expect.stringContaining('3 of 10'),
+        }),
+      ]);
+    });
+
+    it('reports failed shards on the required-index count, which sets the hit bar', async () => {
+      const esClient = buildPartialEsClient(
+        { hits: { total: { value: 4 }, hits: [] } },
+        { count: 0, _shards: { total: 5, successful: 4, failed: 1, skipped: 0 } }
+      );
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      // A floor of zero is not the same as a searched-and-clean required index.
+      expect(result.has_confirmed_hit).toBe(false);
+      expect(result.incomplete).toEqual([
+        expect.objectContaining({
+          reason: 'search_partial',
+          detail: expect.stringContaining('required-index count'),
+        }),
+      ]);
+    });
+
+    it('reports a required pattern that no longer resolves as index_unavailable', async () => {
+      // `ignore_unavailable` keeps the count from throwing, so a required index deleted
+      // after scope resolution answers zero matches from zero shards.
+      const esClient = buildPartialEsClient(
+        {},
+        { count: 0, _shards: { total: 0, successful: 0, failed: 0, skipped: 0 } }
+      );
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      expect(result.has_confirmed_hit).toBe(false);
+      expect(result.incomplete).toEqual([
+        expect.objectContaining({
+          reason: 'index_unavailable',
+          detail: expect.stringContaining('logs-aws.*'),
+        }),
+      ]);
+    });
+
+    it('omits `incomplete` entirely when every shard answered', async () => {
+      const esClient = buildPartialEsClient({
+        timed_out: false,
+        _shards: { total: 10, successful: 10, failed: 0, skipped: 0 },
+      });
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      expect(result.incomplete).toBeUndefined();
+    });
+  });
 });

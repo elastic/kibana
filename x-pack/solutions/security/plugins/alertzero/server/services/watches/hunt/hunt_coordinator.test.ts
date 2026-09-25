@@ -572,7 +572,18 @@ describe('huntCoordinator', () => {
       behaviors: [{ technique_id: 'T1078.004' }],
       indexed_behaviors: [],
       has_hit: false,
-      uncorroborated_technique_ids: ['T1059', 'T1105'],
+      incomplete: [
+        {
+          reason: 'generation_budget',
+          technique_id: 'T1059',
+          detail: 'budget reached before T1059',
+        },
+        {
+          reason: 'generation_budget',
+          technique_id: 'T1105',
+          detail: 'budget reached before T1105',
+        },
+      ],
       next_step: 'partial',
     });
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
@@ -584,12 +595,15 @@ describe('huntCoordinator', () => {
       { spaceId: 'default', trigger: 'scheduled', run_id: 'run-partial', text: 'report text' }
     );
 
-    expect(result.tier2?.uncorroborated_technique_ids).toEqual(['T1059', 'T1105']);
-    expect(result.next_step).toContain('T1059, T1105');
-    expect(result.message).toContain('2 uncorroborated');
+    expect(result.tier2?.incomplete).toHaveLength(2);
+    expect(result.next_step).toContain('budget reached before T1059');
+    expect(result.message).toContain('2 coverage gap(s)');
     // A deterministic budget cut must not re-open the report: the next sweep would
     // truncate it identically and re-spend the whole budget on the same techniques.
     expect(result.completed_successfully).toBe(true);
+    // But it is not a clean environment either, which is the distinction the flag
+    // above cannot carry on its own.
+    expect(result.completeness).toBe('incomplete_final');
   });
 
   it('forwards the Tier 1 window into huntBehavior for execute', async () => {
@@ -812,5 +826,161 @@ describe('huntCoordinator', () => {
       }
     );
     expect(result).toHaveProperty('completed_successfully');
+  });
+  describe('completeness', () => {
+    const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    const tier1Result = (overrides: Record<string, unknown> = {}) => ({
+      status: 'no_environment_hits',
+      has_confirmed_hit: false,
+      searched_iocs: 1,
+      searched_techniques: 1,
+      resolved_iocs: [{ type: 'ip', value: '192.0.2.30' }],
+      resolved_techniques: ['T1078.004'],
+      time_range: { from: 'now-24h', to: 'now' },
+      counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+      hits: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
+      ...overrides,
+    });
+
+    const tier2Result = (overrides: Record<string, unknown> = {}) => ({
+      status: 'behaviors_proposed',
+      behaviors: [],
+      indexed_behaviors: [],
+      has_hit: false,
+      next_step: 'none',
+      ...overrides,
+    });
+
+    const run = (runId: string) =>
+      huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: runId,
+        text: 'report text',
+      });
+
+    it('reports a run where both tiers searched and found nothing as complete', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(tier2Result());
+
+      const result = await run('run-complete');
+
+      expect(result.completeness).toBe('complete');
+      expect(result.completed_successfully).toBe(true);
+    });
+
+    it('carries a transient Tier 1 gap through as incomplete_retryable, so the report is swept again', async () => {
+      mockT1.mockResolvedValueOnce(
+        tier1Result({
+          incomplete: [{ reason: 'search_partial', detail: 'shards failed' }],
+        })
+      );
+      mockT2.mockResolvedValueOnce(tier2Result());
+
+      const result = await run('run-t1-partial');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
+    });
+
+    it('carries a deterministic Tier 2 gap through as incomplete_final, so the report is not re-swept forever', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          incomplete: [
+            { reason: 'query_out_of_scope', technique_id: 'T1078.004', detail: 'FROM elsewhere' },
+          ],
+        })
+      );
+
+      const result = await run('run-t2-final');
+
+      expect(result.completeness).toBe('incomplete_final');
+      // Retrying reproduces the same gap, so the run counts as done — but not as clean.
+      expect(result.completed_successfully).toBe(true);
+    });
+
+    it('lets one transient gap keep the report eligible even alongside a deterministic one', async () => {
+      mockT1.mockResolvedValueOnce(
+        tier1Result({ incomplete: [{ reason: 'index_unavailable', detail: 'no shards' }] })
+      );
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          incomplete: [{ reason: 'generation_budget', technique_id: 'T1566', detail: 'cut' }],
+        })
+      );
+
+      const result = await run('run-mixed');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
+    });
+
+    it('reports nothing_searched when Tier 1 mapped no term and Tier 2 was configured off', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-nothing-searched',
+          text: 'report text',
+          tier2_when: 'never',
+        }
+      );
+
+      // Zero hits from zero queries must not read as a clean environment.
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.completed_successfully).toBe(true);
+    });
+
+    it('treats a missing connector as transient when Tier 1 also searched nothing', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        undefined,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-no-inference',
+          text: 'report text',
+        }
+      );
+
+      // A connector can be configured, and the next run then covers the report.
+      expect(result.tier2_skipped_reason).toBe('no_inference');
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
+    });
+
+    it('leaves a Tier 1 hit with no mapped terms alone — the tiers did search', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result({ status: 'environment_hits_found' }));
+      mockT2.mockResolvedValueOnce(tier2Result());
+
+      const result = await run('run-t1-hits');
+
+      expect(result.completeness).toBe('complete');
+    });
+
+    it('fails the run as retryable when Tier 2 throws', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockRejectedValueOnce(new Error('connector down'));
+
+      const result = await run('run-t2-threw');
+
+      expect(result.tier2_skipped_reason).toBe('tier2_failed');
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
+    });
   });
 });

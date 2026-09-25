@@ -35,6 +35,7 @@ const coordinatorResult: HuntCoordinatorResult = {
   message: 'no hits',
   next_step: 'stop',
   has_confirmed_hit: false,
+  completeness: 'complete',
   completed_successfully: true,
 };
 

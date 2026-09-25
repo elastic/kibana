@@ -20,7 +20,10 @@ import {
   HuntIoc,
   HuntTechnology,
   HuntForThreatResult,
+  HuntIncompleteReason,
   HuntForThreatHit,
+  HuntIncompleteness,
+  HuntCompleteness,
 } from '../components/hunt.gen';
 
 export const HuntCoordinatorStatus = lazySchema(() =>
@@ -135,6 +138,12 @@ export const HuntCoordinatorResponse = lazySchema(() =>
                 hit: z
                   .boolean()
                   .describe('True when at least one required-index row was returned.'),
+                /**
+                 * Why this behavior's result is not a reliable statement about the environment. Absent means it is. Present means `hit: false` records that nothing was learned, not that nothing is there.
+                 */
+                inconclusive_reason: HuntIncompleteReason.optional().describe(
+                  "Why this behavior's result is not a reliable statement about the environment. Absent means it is. Present means `hit: false` records that nothing was learned, not that nothing is there."
+                ),
               })
               .optional(),
             /**
@@ -187,15 +196,14 @@ export const HuntCoordinatorResponse = lazySchema(() =>
             confidence: z.number(),
           })
         ),
-        dropped_unknown_ids: z.array(z.string()).optional(),
         /**
-         * Catalog-valid techniques that were not corroborated because the report exceeded the per-run generation budget. They still appear in `behaviors`, carrying a non-executable placeholder and no execution. Present only on a partial run, so a caller can tell a report that was fully hunted from one that was not.
+         * Every technique Tier 2 was asked about but could not corroborate, each with why. Absent or empty means every extracted technique was searched.
          */
-        uncorroborated_technique_ids: z
-          .array(z.string())
+        incomplete: z
+          .array(HuntIncompleteness)
           .optional()
           .describe(
-            'Catalog-valid techniques that were not corroborated because the report exceeded the per-run generation budget. They still appear in `behaviors`, carrying a non-executable placeholder and no execution. Present only on a partial run, so a caller can tell a report that was fully hunted from one that was not.'
+            'Every technique Tier 2 was asked about but could not corroborate, each with why. Absent or empty means every extracted technique was searched.'
           ),
         message: z.string().optional(),
         next_step: z.string(),
@@ -223,12 +231,18 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         'True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.'
       ),
     /**
-     * True when the run completed without hard errors. The calling workflow checks this before writing hunt evidence, so a failed run writes nothing.
+     * Whether the run covered what it was asked to. Read this rather than `completed_successfully` when deciding what to record: a run can finish without errors and still have searched almost nothing, and the difference between `complete` and `incomplete_final` is the difference between "the environment is clean" and "we could not look". `tier1.incomplete` and `tier2.incomplete` say which gaps produced it.
+     */
+    completeness: HuntCompleteness.describe(
+      'Whether the run covered what it was asked to. Read this rather than `completed_successfully` when deciding what to record: a run can finish without errors and still have searched almost nothing, and the difference between `complete` and `incomplete_final` is the difference between "the environment is clean" and "we could not look". `tier1.incomplete` and `tier2.incomplete` say which gaps produced it.'
+    ),
+    /**
+     * Whether the report should stay eligible for a later run. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.
      */
     completed_successfully: z
       .boolean()
       .describe(
-        'True when the run completed without hard errors. The calling workflow checks this before writing hunt evidence, so a failed run writes nothing.'
+        'Whether the report should stay eligible for a later run. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.'
       ),
   })
 );

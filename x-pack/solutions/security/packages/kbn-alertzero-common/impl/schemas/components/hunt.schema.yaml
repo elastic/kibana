@@ -20,6 +20,58 @@ components:
         required pattern resolved but an optional one did not. `blocked`: a
         required pattern resolved to nothing; the hunt must not run.
 
+    HuntIncompleteReason:
+      type: string
+      enum:
+        - search_partial
+        - index_unavailable
+        - generation_failed
+        - execute_failed
+        - generation_budget
+        - query_out_of_scope
+        - query_ungrounded
+        - quote_ungrounded
+        - unknown_technique_id
+        - rows_unclassifiable
+        - refs_unavailable
+        - nothing_searched
+      description: >-
+        Why a hunt could not corroborate part of what it was asked to look at, or
+        could not show what it found. The first four are transient: the same run
+        repeated could succeed, so the report must stay eligible. The rest are
+        deterministic: repeating the run produces the same gap, so retrying only
+        re-spends the run.
+
+    HuntIncompleteness:
+      type: object
+      required: [reason, detail]
+      description: >-
+        One gap in a hunt's coverage. A run reporting no gaps searched everything
+        it was asked to; a run reporting gaps has not, whatever its hit count says.
+      properties:
+        reason:
+          $ref: '#/components/schemas/HuntIncompleteReason'
+        detail:
+          type: string
+          description: What was not covered, in a form a human reading the run can act on.
+        technique_id:
+          type: string
+          description: >-
+            Set when the gap is scoped to one technique rather than to the whole
+            search.
+
+    HuntCompleteness:
+      type: string
+      enum: [complete, incomplete_retryable, incomplete_final]
+      description: >-
+        Whether the run covered what it was asked to, and if not, whether
+        repeating it could change that. `complete`: every requested search ran, so
+        a zero-hit run is a statement about the environment. `incomplete_retryable`:
+        something transient stopped part of the search, so the report must stay
+        eligible for a later run. `incomplete_final`: part of the search
+        deterministically cannot run, so the report can be retired, but the run is
+        not a statement that the environment is clean.
+
     IndexScopeWindow:
       type: object
       required: [from, to]
@@ -156,6 +208,15 @@ components:
           description: >-
             A confirmed event match in a required index inside the window.
             Never set by an optional-index or out-of-window match.
+        incomplete:
+          type: array
+          description: >-
+            Gaps in what the search actually covered. Absent or empty means the
+            search ran over the whole scope, so `status: no_environment_hits` is a
+            statement about the environment. Present means it is not: shards failed,
+            the search timed out, or a required pattern resolved to no index.
+          items:
+            $ref: '#/components/schemas/HuntIncompleteness'
         searched_iocs:
           type: integer
         searched_techniques:
