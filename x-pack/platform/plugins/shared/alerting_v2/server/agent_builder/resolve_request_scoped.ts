@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CoreDiServiceStart } from '@kbn/core-di';
-import { Global } from '@kbn/core-di-internal';
+import { type ScopedContainer } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ServiceIdentifier } from 'inversify';
@@ -26,12 +25,10 @@ import type { ServiceIdentifier } from 'inversify';
  * `@kbn/core-di`.
  */
 export const resolveRequestScoped = <T>(
-  injection: CoreDiServiceStart,
+  scope: ScopedContainer,
   request: KibanaRequest,
   token: ServiceIdentifier<T>
 ): T => {
-  const scope = injection.fork();
-  scope.bind(Request).toConstantValue(request);
-  scope.bind(Global).toConstantValue(Request);
+  scope.expose(Request).toConstantValue(request);
   return scope.get(token);
 };

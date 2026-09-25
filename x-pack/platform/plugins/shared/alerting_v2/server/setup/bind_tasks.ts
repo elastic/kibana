@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { OnSetup, PluginSetup } from '@kbn/core-di';
+import { type KibanaContainerModuleLoadOptions, PluginSetup } from '@kbn/core-di';
 import { PluginInitializer } from '@kbn/core-di-server';
-import type { PluginInitializerContext } from '@kbn/core/server';
-import type { ContainerModuleLoadOptions } from 'inversify';
 import { DispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
 import { ApiKeyInvalidationTaskDefinition } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
 import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
@@ -20,52 +18,42 @@ import {
 import type { AlertingServerSetupDependencies } from '../types';
 import type { PluginConfig } from '../config';
 
-export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
-  // Register task with Task Manager when the binding is activated
-  onActivation(TaskDefinition, ({ get }, definition) => {
-    const config = get<PluginInitializerContext<PluginConfig>['config']>(
-      PluginInitializer('config')
-    ).get<PluginConfig>();
+export function bindTasks({ bind, onSetup }: KibanaContainerModuleLoadOptions) {
+  onSetup(
+    TaskDefinition,
+    PluginInitializer('config'),
+    PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager'),
+    TaskRunnerFactoryToken,
+    (_, definition, configService, taskManager, taskRunnerFactory) => {
+      const config = configService.get<PluginConfig>();
 
-    const taskManager = get(
-      PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager')
-    );
-    const taskRunnerFactory = get(TaskRunnerFactoryToken);
+      let timeout = definition.timeout;
 
-    const createTaskRunner = taskRunnerFactory({
-      taskRunnerClass: definition.taskRunnerClass,
-      taskType: definition.taskType,
-      requiresFakeRequest: definition.requiresFakeRequest,
-    });
+      const createTaskRunner = taskRunnerFactory({
+        taskRunnerClass: definition.taskRunnerClass,
+        taskType: definition.taskType,
+        requiresFakeRequest: definition.requiresFakeRequest,
+      });
+      if (definition.resolveTimeout) {
+        timeout = definition.resolveTimeout(config);
+      }
 
-    let timeout = definition.timeout;
-    if (definition.resolveTimeout) {
-      timeout = definition.resolveTimeout(config);
+      taskManager.registerTaskDefinitions({
+        [definition.taskType]: {
+          title: definition.title,
+          timeout,
+          paramsSchema: definition.paramsSchema,
+          stateSchemaByVersion: definition.stateSchemaByVersion,
+          maxAttempts: definition.maxAttempts,
+          createTaskRunner,
+        },
+      });
     }
-
-    taskManager.registerTaskDefinitions({
-      [definition.taskType]: {
-        title: definition.title,
-        timeout,
-        paramsSchema: definition.paramsSchema,
-        stateSchemaByVersion: definition.stateSchemaByVersion,
-        maxAttempts: definition.maxAttempts,
-        createTaskRunner,
-      },
-    });
-
-    return definition;
-  });
+  );
 
   // Bind task definitions - add more tasks here as needed
   bind(TaskDefinition).toConstantValue(RuleExecutorTaskDefinition);
   bind(TaskDefinition).toConstantValue(DispatcherTaskDefinition);
   bind(TaskDefinition).toConstantValue(ApiKeyInvalidationTaskDefinition);
   bind(TaskDefinition).toConstantValue(TelemetryTaskDefinition);
-
-  // Resolve every bound task definition during setup so the onActivation hook
-  // above runs once per task and registers it with Task Manager.
-  bind(OnSetup).toConstantValue((container) => {
-    container.getAll(TaskDefinition);
-  });
 }
