@@ -23,6 +23,8 @@ const attachment: VersionedAttachment = {
   current_version: 1,
 };
 
+const onActivate = jest.fn();
+
 const renderRow = (
   uiDefinition: Partial<AttachmentUIDefinition> | undefined,
   overrides: Partial<VersionedAttachment> = {}
@@ -37,6 +39,7 @@ const renderRow = (
       typeName="Alert"
       attachmentsService={attachmentsService}
       hasTopBorder={false}
+      onActivate={onActivate}
     />
   );
 };
@@ -122,15 +125,14 @@ describe('AttachmentSummaryRow', () => {
   });
 
   describe('with a registered drill-down', () => {
-    const renderConversationDetailsContent = jest.fn(() => <div data-test-subj="drilldown" />);
+    beforeEach(() => onActivate.mockClear());
 
-    beforeEach(() => renderConversationDetailsContent.mockClear());
-
-    const renderDrilldownRow = (overrides: Partial<VersionedAttachment> = {}) =>
-      renderRow(
-        { getLabel: () => '3 alerts', getIcon: () => 'bell', renderConversationDetailsContent },
-        overrides
-      );
+    const renderDrilldownRow = () =>
+      renderRow({
+        getLabel: () => '3 alerts',
+        getIcon: () => 'bell',
+        renderConversationDetailsContent: () => null,
+      });
 
     it('names the row by its kind and label, since the kind is otherwise only visual', () => {
       renderDrilldownRow();
@@ -146,62 +148,22 @@ describe('AttachmentSummaryRow', () => {
       ).toBeInTheDocument();
     });
 
-    it('renders the drill-down only once the row is clicked', async () => {
+    it('asks the list to open the drill-down rather than mounting one itself', async () => {
+      // The list owns it so that clicking several rows never mounts several provider stacks.
       renderDrilldownRow();
 
-      expect(screen.queryByTestId('drilldown')).not.toBeInTheDocument();
-      expect(renderConversationDetailsContent).not.toHaveBeenCalled();
-
       await userEvent.click(screen.getByRole('button'));
 
-      expect(screen.getByTestId('drilldown')).toBeInTheDocument();
+      expect(onActivate).toHaveBeenCalledTimes(1);
     });
 
-    it('hands the drill-down the current version of the attachment', async () => {
-      renderDrilldownRow({
-        versions: [
-          {
-            version: 1,
-            data: { count: 2 },
-            created_at: '2026-09-01T10:00:00.000Z',
-            content_hash: 'a',
-          },
-          {
-            version: 2,
-            data: { count: 7 },
-            created_at: '2026-09-01T12:00:00.000Z',
-            content_hash: 'b',
-          },
-        ],
-        current_version: 2,
-      });
+    it('asks again on a second click, so the flyout can reopen', async () => {
+      renderDrilldownRow();
 
       await userEvent.click(screen.getByRole('button'));
-
-      expect(renderConversationDetailsContent).toHaveBeenCalledWith(
-        expect.objectContaining({
-          attachment: expect.objectContaining({ id: 'attachment-1', data: { count: 7 } }),
-        })
-      );
-    });
-
-    it('remounts the drill-down on a second click, so the flyout reopens', async () => {
-      // The opener acts on mount, so a re-render of the same element would not reopen anything.
-      const onMount = jest.fn();
-      const CountMounts = () => {
-        React.useEffect(() => onMount(), []);
-        return null;
-      };
-      renderRow({
-        getLabel: () => '3 alerts',
-        renderConversationDetailsContent: () => <CountMounts />,
-      });
-
       await userEvent.click(screen.getByRole('button'));
-      expect(onMount).toHaveBeenCalledTimes(1);
 
-      await userEvent.click(screen.getByRole('button'));
-      expect(onMount).toHaveBeenCalledTimes(2);
+      expect(onActivate).toHaveBeenCalledTimes(2);
     });
 
     it('keeps the label out of the tab order, since the row itself is now the tab stop', () => {

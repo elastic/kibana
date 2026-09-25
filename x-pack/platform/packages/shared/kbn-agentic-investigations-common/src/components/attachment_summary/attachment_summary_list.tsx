@@ -15,7 +15,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AttachmentSummaryRow } from './attachment_summary_row';
+import { DrilldownErrorBoundary } from './drilldown_error_boundary';
+import { toRenderAttachment } from './to_render_attachment';
 import type { SummaryAttachment } from './select_summary_attachments';
 import { ATTACHMENT_SUMMARY_SHOW_LESS, attachmentSummaryShowMore } from './translations';
 
@@ -37,6 +40,19 @@ export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
     const { euiTheme } = useEuiTheme();
     const listId = useGeneratedHtmlId({ prefix: 'attachmentSummaryList' });
     const [isExpanded, setIsExpanded] = useState(false);
+
+    // The drill-down lives here rather than on the row so that clicking several rows mounts one
+    // at a time: each carries a provider stack, and the data view manager it initialises expects
+    // a single mount. The counter keys the subtree, so re-clicking the same row opens it again.
+    const [activeDrilldown, setActiveDrilldown] = useState<{
+      attachment: VersionedAttachment;
+      count: number;
+    }>();
+
+    const activeDefinition = activeDrilldown
+      ? attachmentsService.getAttachmentUiDefinition(activeDrilldown.attachment.type)
+      : undefined;
+    const renderDrilldown = activeDefinition?.renderConversationDetailsContent;
 
     if (attachments.length === 0) {
       return null;
@@ -70,6 +86,12 @@ export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
               typeName={typeName}
               attachmentsService={attachmentsService}
               hasTopBorder={index > 0}
+              onActivate={() =>
+                setActiveDrilldown((previous) => ({
+                  attachment,
+                  count: (previous?.count ?? 0) + 1,
+                }))
+              }
             />
           ))}
         </EuiFlexGroup>
@@ -93,6 +115,17 @@ export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
             </EuiButtonEmpty>
           </div>
         )}
+
+        {/* Mounted for its side effect: the drill-down opens a flyout and renders nothing of its
+            own. Kept out of view because the provider stack behind it carries a panel-sized
+            loading state, which would distort the list. */}
+        {activeDrilldown && renderDrilldown ? (
+          <div css={css({ display: 'none' })} key={activeDrilldown.count}>
+            <DrilldownErrorBoundary>
+              {renderDrilldown({ attachment: toRenderAttachment(activeDrilldown.attachment) })}
+            </DrilldownErrorBoundary>
+          </div>
+        ) : null}
       </EuiPanel>
     );
   }

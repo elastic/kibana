@@ -126,4 +126,114 @@ describe('AttachmentSummaryList', () => {
     // The button nests inside the row rather than replacing it, so list semantics survive.
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
+
+  describe('drill-down', () => {
+    const renderConversationDetailsContent = jest.fn(() => <div data-test-subj="drilldown" />);
+
+    const drilldownService = {
+      getAttachmentUiDefinition: () => ({
+        getLabel: (attachment: { id: string }) => `Label for ${attachment.id}`,
+        getIcon: () => 'bell',
+        renderConversationDetailsContent,
+      }),
+    } as unknown as AttachmentServiceStartContract;
+
+    const renderDrilldownList = (count: number) =>
+      render(
+        <AttachmentSummaryList
+          attachments={makeAttachments(count)}
+          attachmentsService={drilldownService}
+        />
+      );
+
+    beforeEach(() => renderConversationDetailsContent.mockClear());
+
+    it('mounts nothing until a row is clicked', () => {
+      renderDrilldownList(3);
+
+      expect(screen.queryByTestId('drilldown')).not.toBeInTheDocument();
+      expect(renderConversationDetailsContent).not.toHaveBeenCalled();
+    });
+
+    it('mounts the drill-down for the clicked row', async () => {
+      renderDrilldownList(3);
+
+      await userEvent.click(screen.getAllByRole('button')[0]);
+
+      expect(screen.getByTestId('drilldown')).toBeInTheDocument();
+      expect(renderConversationDetailsContent).toHaveBeenCalledWith(
+        expect.objectContaining({ attachment: expect.objectContaining({ id: 'attachment-0' }) })
+      );
+    });
+
+    it('keeps one mounted when several rows are clicked, since each carries a provider stack', async () => {
+      renderDrilldownList(3);
+
+      await userEvent.click(screen.getAllByRole('button')[0]);
+      await userEvent.click(screen.getAllByRole('button')[1]);
+
+      expect(screen.getAllByTestId('drilldown')).toHaveLength(1);
+      expect(renderConversationDetailsContent).toHaveBeenLastCalledWith(
+        expect.objectContaining({ attachment: expect.objectContaining({ id: 'attachment-1' }) })
+      );
+    });
+
+    it('contains a failing drill-down instead of taking the summary down with it', async () => {
+      // It belongs to whichever plugin owns the attachment type and renders in our own fiber.
+      const Throw = () => {
+        throw new Error('chunk failed to load');
+      };
+      const warn = jest.spyOn(window.console, 'warn').mockImplementation(() => {});
+      try {
+        render(
+          <AttachmentSummaryList
+            attachments={makeAttachments(2)}
+            attachmentsService={
+              {
+                getAttachmentUiDefinition: () => ({
+                  getLabel: (attachment: { id: string }) => `Label for ${attachment.id}`,
+                  renderConversationDetailsContent: () => <Throw />,
+                }),
+              } as unknown as AttachmentServiceStartContract
+            }
+          />
+        );
+
+        await userEvent.click(screen.getAllByRole('button')[0]);
+
+        expect(screen.getAllByRole('listitem')).toHaveLength(2);
+        expect(warn).toHaveBeenCalled();
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it('remounts on a second click of the same row, so the flyout reopens', async () => {
+      // The drill-down acts on mount, so a re-render of the same element would reopen nothing.
+      const onMount = jest.fn();
+      const CountMounts = () => {
+        React.useEffect(() => onMount(), []);
+        return null;
+      };
+      render(
+        <AttachmentSummaryList
+          attachments={makeAttachments(1)}
+          attachmentsService={
+            {
+              getAttachmentUiDefinition: () => ({
+                getLabel: () => 'Label',
+                renderConversationDetailsContent: () => <CountMounts />,
+              }),
+            } as unknown as AttachmentServiceStartContract
+          }
+        />
+      );
+
+      await userEvent.click(screen.getByRole('button'));
+      expect(onMount).toHaveBeenCalledTimes(1);
+
+      await userEvent.click(screen.getByRole('button'));
+      expect(onMount).toHaveBeenCalledTimes(2);
+    });
+  });
 });

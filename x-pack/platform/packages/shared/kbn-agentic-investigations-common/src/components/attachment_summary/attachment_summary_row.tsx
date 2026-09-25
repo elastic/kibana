@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAvatar,
@@ -33,15 +33,21 @@ export interface AttachmentSummaryRowProps {
   attachmentsService: AttachmentServiceStartContract;
   /** A divider above every row but the first. */
   hasTopBorder: boolean;
+  /**
+   * Asks the list to open this attachment's drill-down. The list owns that so only one is ever
+   * mounted, however many rows the user clicks.
+   */
+  onActivate: () => void;
 }
 
 /**
- * One attachment in the summary. Clicking the row opens whatever the attachment's own plugin
- * registered as its conversation-details content; a type that registered none stays read-only
- * rather than becoming a button that does nothing.
+ * One attachment in the summary. Clicking the row asks its own plugin to open the matching
+ * flyout. A type that registered no drill-down stays read-only; note that a type registers one
+ * for all of its attachments, so a row can still be clickable when this particular payload turns
+ * out to identify nothing.
  */
 export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
-  ({ attachment, typeName, attachmentsService, hasTopBorder }) => {
+  ({ attachment, typeName, attachmentsService, hasTopBorder, onActivate }) => {
     const { euiTheme } = useEuiTheme();
     const { fontSize } = useEuiFontSize('s');
 
@@ -74,13 +80,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
       font-weight: ${euiTheme.font.weight.semiBold};
     `;
 
-    const renderDrilldown = uiDefinition?.renderConversationDetailsContent;
-
-    // The registry hands back content to render rather than a callback to call, so a click is
-    // expressed as mounting that content. Counting clicks rather than flagging one lets the
-    // count key the subtree below, which is what makes a second click mount it afresh.
-    const [activationCount, setActivationCount] = useState(0);
-    const openDrilldown = useCallback(() => setActivationCount((count) => count + 1), []);
+    const hasDrilldown = Boolean(uiDefinition?.renderConversationDetailsContent);
 
     const padding = `${euiTheme.size.s} ${euiTheme.size.base}`;
 
@@ -115,7 +115,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
                   which already stops here and cannot legally nest a focusable child. */}
               <div
                 ref={setLabelElement}
-                tabIndex={renderDrilldown ? undefined : 0}
+                tabIndex={hasDrilldown ? undefined : 0}
                 data-test-subj="attachmentSummaryRowLabel"
                 css={labelStyles}
               >
@@ -130,7 +130,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
         </EuiFlexItem>
 
         {/* The chevron reads as a promise of a drill-down, so a row without one does not show it. */}
-        {renderDrilldown ? (
+        {hasDrilldown ? (
           <EuiFlexItem grow={false}>
             <EuiIcon type="chevronSingleRight" color="subdued" size="s" aria-hidden={true} />
           </EuiFlexItem>
@@ -145,7 +145,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
         css={css({ borderTop: hasTopBorder ? euiTheme.border.thin : undefined })}
         data-test-subj="attachmentSummaryRow"
       >
-        {renderDrilldown ? (
+        {hasDrilldown ? (
           <EuiPanel
             element="button"
             type="button"
@@ -154,7 +154,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
             borderRadius="none"
             color="transparent"
             paddingSize="none"
-            onClick={openDrilldown}
+            onClick={onActivate}
             // EuiAvatar's `name` would otherwise put the kind in front of the row's own title.
             aria-label={attachmentSummaryRowAriaLabel(typeName, label)}
             data-test-subj="attachmentSummaryRowButton"
@@ -171,15 +171,6 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
         ) : (
           <div css={css({ padding })}>{content}</div>
         )}
-
-        {/* Mounted for its side effect: it opens a flyout and renders nothing of its own. Kept
-            out of view because the provider stack behind it carries a panel-sized loading state,
-            which would distort a list row. */}
-        {activationCount > 0 && renderDrilldown ? (
-          <div css={css({ display: 'none' })} key={activationCount}>
-            {renderDrilldown({ attachment: renderedAttachment })}
-          </div>
-        ) : null}
       </EuiFlexItem>
     );
   }

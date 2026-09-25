@@ -78,11 +78,18 @@ export const AttachmentSummaryFlyoutOpener = ({
 
   useEffect(() => {
     let isMounted = true;
-    resolveSecurityCanvasContext().then((resolved) => {
-      if (isMounted) {
-        setBundle(resolved);
-      }
-    });
+    resolveSecurityCanvasContext()
+      .then((resolved) => {
+        if (isMounted) {
+          setBundle(resolved);
+        }
+      })
+      .catch((error) => {
+        // Bootstrapping the Security sub-plugins can fail, and this component is mounted out of
+        // view, so there is nowhere to show it. Left as a warning rather than an unhandled
+        // rejection; the row simply does not open.
+        window.console.warn('Attachment summary drill-down could not start Security', error);
+      });
     return () => {
       isMounted = false;
     };
