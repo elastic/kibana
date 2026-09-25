@@ -18,7 +18,8 @@
     "@kbn/esql-utils",
     "@kbn/features-plugin",
     "@kbn/i18n",
-    "@kbn/management-plugin"
+    "@kbn/management-plugin",
+    "@kbn/esql-editor"
   ],
   "exclude": [
     "target/**/*"

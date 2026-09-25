@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/i18n'
   - '@kbn/management-plugin'
+  - '@kbn/esql-editor'
 tags:
   - plugin
   - prod
