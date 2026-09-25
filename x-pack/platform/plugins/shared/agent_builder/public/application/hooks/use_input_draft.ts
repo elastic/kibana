@@ -33,13 +33,17 @@ const getFromStorage = (key: string): string | null => {
 const writeToStorage = (key: string, content: string): void => {
   try {
     sessionStorage.setItem(key, content);
-  } catch {}
+  } catch {
+    // SecurityError or QuotaExceededError — best effort only
+  }
 };
 
 const removeFromStorage = (key: string): void => {
   try {
     sessionStorage.removeItem(key);
-  } catch {}
+  } catch {
+    // SecurityError — best effort only
+  }
 };
 
 /** Reads and writes a per-conversation input draft to `sessionStorage`. */
@@ -66,8 +70,8 @@ export const useInputDraft = ({
   const saveDraft = useCallback(
     (content: string) => {
       if (!key) return;
-      const stripped = content.replace(IMAGE_LINK_RE, '').trim();
-      if (stripped) {
+      const stripped = content.replace(IMAGE_LINK_RE, '');
+      if (stripped.trim()) {
         writeToStorage(key, stripped);
       } else {
         removeFromStorage(key);
