@@ -80,8 +80,10 @@ export {
 export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 export { MatchedPolicyReason } from './flyout/compose_discover/compose_discover_form/matched_policy_reason';
 export { WorkflowConnectorIcons } from './flyout/compose_discover/compose_discover_form/workflow_connector_icons';
-export { useActionPolicyConnectorTypes } from './flyout/compose_discover/compose_discover_form/use_action_policy_connector_types';
-export type { UseActionPolicyConnectorTypesResult } from './flyout/compose_discover/compose_discover_form/use_action_policy_connector_types';
+export {
+  useActionPolicyConnectorTypes,
+  type UseActionPolicyConnectorTypesResult,
+} from './flyout/compose_discover/compose_discover_form/use_action_policy_connector_types';
 
 // Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
 export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';
