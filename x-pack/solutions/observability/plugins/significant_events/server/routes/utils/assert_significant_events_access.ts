@@ -8,7 +8,7 @@
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SignificantEventsServer } from '../../types';
-import type { SignificantEventsAvailabilityResponse } from '../../../common';
+import type { SignificantEventsDeploymentAvailability } from '../../../common';
 import {
   SIGNIFICANT_EVENTS_REQUIRED_PLUGINS,
   SIGNIFICANT_EVENTS_TIERED_FEATURE,
@@ -145,12 +145,13 @@ export const isSignificantEventsAvailable = async (
 ): Promise<boolean> => (await findFirstUnmetRequirement(context)) === undefined;
 
 /**
- * Resolves significant events availability without throwing, returning the id
- * of the first unmet requirement. Used by the availability endpoint the UI calls.
+ * Resolves deployment-level significant events availability without throwing,
+ * returning the id of the first unmet requirement. The availability endpoint
+ * layers per-user privileges on top of this before returning to the UI.
  */
 export async function getSignificantEventsAvailability(
   context: SignificantEventsAccessContext
-): Promise<SignificantEventsAvailabilityResponse> {
+): Promise<SignificantEventsDeploymentAvailability> {
   const unmet = await findFirstUnmetRequirement(context);
   return unmet ? { available: false, reason: unmet.reason } : { available: true };
 }

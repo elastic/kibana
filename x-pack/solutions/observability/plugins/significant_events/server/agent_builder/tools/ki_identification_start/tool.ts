@@ -15,6 +15,7 @@ import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { GetScopedClients } from '../../../routes/types';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
 import { classifyError } from '../../utils/error_utils';
 import { startKiIdentificationToolHandler } from './handler';
@@ -41,10 +42,12 @@ export const createKiIdentificationStartTool = ({
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
+  getScopedClients,
 }: {
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
+  getScopedClients: GetScopedClients;
 }): BuiltinSkillBoundedTool<typeof onboardingStartSchema> => ({
   id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
   type: ToolType.builtin,
@@ -77,6 +80,7 @@ export const createKiIdentificationStartTool = ({
         connectors,
         streamsKIsOnboardingClient,
         maintenanceService,
+        getScopedClients,
         request,
       });
 

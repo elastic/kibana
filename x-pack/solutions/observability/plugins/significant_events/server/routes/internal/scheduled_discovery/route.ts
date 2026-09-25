@@ -23,6 +23,7 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
+import { assertCanWriteSignificantEvents } from '../../../lib/privileges';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
 import { StatusError } from '../../../lib/errors/status_error';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
@@ -181,7 +182,8 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
     getSpaceId,
     logger,
   }): Promise<{ success: true }> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing, uiSettingsClient, scopedClusterClient, isSecurityEnabled } =
+      await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const workflowService = significantEventsScheduledWorkflowsService;
@@ -215,6 +217,14 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
       ] as boolean) ?? false;
     const nextEnabled = scheduledDiscovery.enabled ?? previousEnabled;
+
+    // Gate enabling or updating-while-enabled before persisting settings; disabling is open.
+    if (nextEnabled && Object.keys(spaceUpdates).length > 0) {
+      await assertCanWriteSignificantEvents({
+        esClient: scopedClusterClient.asCurrentUser,
+        isSecurityEnabled,
+      });
+    }
 
     // Feature toggles are owned by Pause/Resume while paused — no edits allowed
     // (enable, disable, or config-only updates).

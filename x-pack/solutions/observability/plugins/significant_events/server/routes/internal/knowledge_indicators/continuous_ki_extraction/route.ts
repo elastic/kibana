@@ -14,6 +14,7 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
+import { assertCanWriteKnowledgeIndicators } from '../../../../lib/privileges';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import { MIN_EXTRACTION_INTERVAL_HOURS } from '../../../../../common/constants';
 
@@ -53,12 +54,21 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, globalUiSettingsClient } = await getScopedClients({
-      request,
-    });
+    const { licensing, globalUiSettingsClient, scopedClusterClient, isSecurityEnabled } =
+      await getScopedClients({
+        request,
+      });
     await assertSignificantEventsAccess({ server, licensing });
 
     const { continuousKiExtraction } = params.body;
+
+    // Gate enabling before persisting settings so a denial has no side effects; disabling is open.
+    if (continuousKiExtraction.enabled === true) {
+      await assertCanWriteKnowledgeIndicators({
+        esClient: scopedClusterClient.asCurrentUser,
+        isSecurityEnabled,
+      });
+    }
 
     // Feature toggles are owned by Pause/Resume while paused — no edits allowed.
     if (

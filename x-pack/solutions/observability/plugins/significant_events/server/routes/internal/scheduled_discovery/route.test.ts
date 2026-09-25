@@ -45,6 +45,7 @@ const createHandlerParams = ({
   scheduledDiscovery,
   scheduledWorkflowError,
   maintenanceState = 'enabled',
+  canWriteSignificantEvents = true,
   spaceSettings = {
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
@@ -59,11 +60,24 @@ const createHandlerParams = ({
   scheduledDiscovery: NonNullable<HandlerParams['params']>['body']['scheduledDiscovery'];
   scheduledWorkflowError?: Error;
   maintenanceState?: SignificantEventsMaintenanceState;
+  canWriteSignificantEvents?: boolean;
   spaceSettings?: Record<string, boolean | number>;
 }) => {
   const uiSettingsClient = {
     getAll: jest.fn().mockResolvedValue(spaceSettings),
     setMany: jest.fn().mockResolvedValue(undefined),
+  };
+  const scopedClusterClient = {
+    asCurrentUser: {
+      security: {
+        hasPrivileges: jest.fn(async () => ({
+          index: {
+            '.significant_events-detections': { read: true, write: canWriteSignificantEvents },
+            '.significant_events-events': { read: true },
+          },
+        })),
+      },
+    },
   };
   const scheduledWorkflowService = {
     ensureWorkflow: jest
@@ -83,6 +97,8 @@ const createHandlerParams = ({
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
       uiSettingsClient,
+      scopedClusterClient,
+      isSecurityEnabled: true,
     }),
     server: { agentBuilder },
     significantEventsScheduledWorkflowsService: scheduledWorkflowService,
@@ -431,5 +447,36 @@ describe('scheduled significant events discovery settings route', () => {
     });
     expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
     expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects with 403 and persists nothing when enabling without significant events write access', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: { enabled: true },
+      canWriteSignificantEvents: false,
+    });
+
+    // The route wrapper maps the SecurityError (403) to a Boom forbidden.
+    await expect(route.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+    // The preflight gate runs before any persistence or reconciliation.
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('allows disabling scheduled discovery without significant events write access', async () => {
+    const { handlerParams, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: { enabled: false },
+      canWriteSignificantEvents: false,
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+      },
+    });
+
+    await route.handler(handlerParams);
+
+    expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
   });
 });

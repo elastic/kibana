@@ -289,7 +289,8 @@ export class SignificantEventsPlugin
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
         knowledgeIndicatorService.getClient({
-          esClient: scopedClusterClient.asInternalUser,
+          // Current user: knowledge indicator reads/writes are access-controlled per requester.
+          esClient: scopedClusterClient.asCurrentUser,
           soClient,
           context,
           config: tuningConfig,

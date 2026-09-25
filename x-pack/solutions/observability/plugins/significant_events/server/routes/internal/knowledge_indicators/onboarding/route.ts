@@ -19,6 +19,7 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
+import { assertCanWriteKnowledgeIndicators } from '../../../../lib/privileges';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import {
   MAX_STREAMS_PER_QUERY,
@@ -100,13 +101,22 @@ const onboardingExecuteRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, streamsClient } = await getScopedClients({ request });
+    const { licensing, streamsClient, scopedClusterClient, isSecurityEnabled } =
+      await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { streamName },
       body,
     } = params;
+
+    // Gate before touching the stream so a denial has no side effects.
+    if (body.action === 'schedule') {
+      await assertCanWriteKnowledgeIndicators({
+        esClient: scopedClusterClient.asCurrentUser,
+        isSecurityEnabled,
+      });
+    }
 
     await streamsClient.ensureStream(streamName);
 

@@ -36,6 +36,27 @@ export type SignificantEventsUnavailableReason =
   | 'license'
   | SignificantEventsRequiredPlugin;
 
-export type SignificantEventsAvailabilityResponse =
+/** Read/write access a user holds on a single significant events resource. */
+export interface SignificantEventsResourcePrivileges {
+  read: boolean;
+  write: boolean;
+}
+
+/** Resource-specific privileges of the requesting user. */
+export interface SignificantEventsUserPrivileges {
+  knowledgeIndicators: SignificantEventsResourcePrivileges;
+  significantEvents: SignificantEventsResourcePrivileges;
+}
+
+/** Deployment-level availability, resolved before per-user privileges are layered on. */
+export type SignificantEventsDeploymentAvailability =
   | { available: true }
+  | { available: false; reason: SignificantEventsUnavailableReason };
+
+/**
+ * The availability response the UI consumes. `available` stays strictly
+ * deployment-level; when available, `privileges` gates resource-specific actions.
+ */
+export type SignificantEventsAvailabilityResponse =
+  | { available: true; privileges: SignificantEventsUserPrivileges }
   | { available: false; reason: SignificantEventsUnavailableReason };
