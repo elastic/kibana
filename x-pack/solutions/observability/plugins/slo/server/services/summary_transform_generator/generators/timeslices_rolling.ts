@@ -14,7 +14,6 @@ import {
   SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
 import type { SLODefinition } from '../../../domain/models';
-import { buildTransformDescription } from '../../utils';
 import { getGroupBy } from './common';
 import { buildBurnRateAgg } from './utils';
 
@@ -126,7 +125,9 @@ export function generateSummaryTransformForTimeslicesAndRolling(
         ...buildBurnRateAgg('oneDayBurnRate', slo),
       },
     },
-    description: buildTransformDescription('Summarise the rollup data of SLO: ', slo, '.'),
+    description: `Summarise the rollup data of SLO: ${slo.name.slice(0, 900)} [id: ${
+      slo.id
+    }, revision: ${slo.revision}].`,
     frequency: '1m',
     sync: {
       time: {

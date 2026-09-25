@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { buildTransformDescription } from './build_transform_description';
 export { getSloApmLabels } from './get_slo_apm_labels';
 export { getSloProjectRouting } from './get_slo_project_routing';
 import { get } from 'lodash';
