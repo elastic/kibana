@@ -14,17 +14,18 @@ import {
 
 /**
  * Schema an Inventory Threshold rule evaluates, and the flyout preview requests.
- *
- * Pods have no Schema control, so a stored Hosts `semconv` must not query kubeletstats.
- * The stored param is left unchanged, so switching For back to Hosts still shows OpenTelemetry.
- * An omitted host schema stays omitted. Do not substitute `DEFAULT_SCHEMA`: that constant is `semconv`.
+ * Returns the schema an Inventory Threshold rule should use based on the node type and schema selection settings.
  */
 export const getInventoryRuleSchema = (
   nodeType: InventoryItemType,
-  schema: DataSchemaFormat | null | undefined
+  schema: DataSchemaFormat | null | undefined,
+  isPodSchemaSelectorEnabled: boolean = false
 ): DataSchemaFormat | undefined => {
   if (nodeType === 'pod') {
-    return 'ecs';
+    // A pod rule saved before the Schema control existed stores no schema and is ECS.
+    // Unlike Hosts, pods must not fall through to `undefined`: that drops the
+    // `event.module: kubernetes` node filter and the rule starts matching OTel documents.
+    return isPodSchemaSelectorEnabled ? schema ?? 'ecs' : 'ecs';
   }
 
   return schema ?? undefined;
@@ -38,11 +39,15 @@ export const getInventoryRuleSchema = (
  */
 export const getInventoryAlertGroupingField = (
   nodeType: InventoryItemType,
-  schema: DataSchemaFormat | null | undefined
+  schema: DataSchemaFormat | null | undefined,
+  isPodSchemaSelectorEnabled: boolean = false
 ): string | undefined => {
   if (getFieldByType(nodeType) === undefined) {
     return undefined;
   }
 
-  return findInventoryFields(nodeType, getInventoryRuleSchema(nodeType, schema)).id;
+  return findInventoryFields(
+    nodeType,
+    getInventoryRuleSchema(nodeType, schema, isPodSchemaSelectorEnabled)
+  ).id;
 };
