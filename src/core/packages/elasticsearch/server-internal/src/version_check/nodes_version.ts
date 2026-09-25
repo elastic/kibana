@@ -96,9 +96,10 @@ const pollingInterval = (
 ): number => {
   switch (controlState) {
     case 'STARTUP':
-      return config.healthCheckStartupInterval ?? config.healthCheckInterval;
+      // `||`, not `??`: a configured zero would divide the grid by zero.
+      return config.healthCheckStartupInterval || config.healthCheckInterval;
     case 'FAILING':
-      return config.healthCheckFailureInterval ?? config.healthCheckInterval;
+      return config.healthCheckFailureInterval || config.healthCheckInterval;
     case 'NORMAL':
       return config.healthCheckInterval;
   }
@@ -185,6 +186,38 @@ export const nodesVersionMachine = (
 });
 
 // Runner
+
+export interface CheckEsNodesVersionOptions {
+  internalClient: ElasticsearchClient;
+  kibanaVersion: string;
+  ignoreVersionMismatch: boolean;
+}
+
+/**
+ * One compatibility check, for a caller that needs a single answer rather than
+ * a poll (interactive setup). One request, retried once on failure; a second
+ * failure is reported as the compatibility's `nodesInfoRequestError`.
+ */
+export const checkEsNodesVersion = async ({
+  internalClient,
+  kibanaVersion,
+  ignoreVersionMismatch,
+}: CheckEsNodesVersionOptions): Promise<NodesVersionCompatibility> => {
+  const fetch = fetchNodesInfo(internalClient);
+  const attempt = async (): Promise<NodesInfo & { nodesInfoRequestError?: Error }> => {
+    try {
+      return await fetch();
+    } catch (error) {
+      return {
+        nodes: {},
+        nodesInfoRequestError: error instanceof Error ? error : new Error(String(error)),
+      };
+    }
+  };
+  const first = await attempt();
+  const outcome = first.nodesInfoRequestError ? await attempt() : first;
+  return mapNodesVersionCompatibility(outcome, kibanaVersion, ignoreVersionMismatch);
+};
 
 /** @public */
 export interface PollEsNodesVersionOptions extends NodesVersionConfig {

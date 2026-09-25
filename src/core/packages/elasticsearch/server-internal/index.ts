@@ -15,14 +15,14 @@ export type {
   NodesInfo,
   NodeInfo,
 } from './src/version_check/nodes_version_compatibility';
-export type { PollEsNodesVersionOptions } from './src/version_check/nodes_version';
+export type { CheckEsNodesVersionOptions } from './src/version_check/nodes_version';
 export type {
   ElasticsearchStatusMeta,
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './src/types';
-export { pollEsNodesVersion } from './src/version_check/nodes_version';
+export { checkEsNodesVersion } from './src/version_check/nodes_version';
 export {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,

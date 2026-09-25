@@ -11,6 +11,7 @@ import { firstValueFrom, lastValueFrom, toArray } from 'rxjs';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
+  checkEsNodesVersion,
   fetchNodesInfo,
   initialState,
   model,
@@ -57,6 +58,21 @@ const compatibilityOf = (outcome: RequestOutcome) =>
 /** How long after the request that produced it this state schedules the next one. */
 const dueIn = (state: NodesVersionState, completedAt = 0): number =>
   state.nextActionAt - completedAt;
+
+describe('a zero interval falls back to the normal one', () => {
+  it('does not divide the grid by a configured zero failure interval', () => {
+    const zero = { ...config, healthCheckFailureInterval: 0 };
+    const normal: NodesVersionState = {
+      controlState: 'NORMAL',
+      compatibility: compatibilityOf(compatible),
+      attemptsLeft: 0,
+      nextActionAt: 0,
+    };
+    expect(model(zero, normal, fail(requestError)).state.nextActionAt).toBe(
+      config.healthCheckInterval
+    );
+  });
+});
 
 describe('FAILING tracks request errors, not incompatibility', () => {
   const normal: NodesVersionState = {
@@ -242,17 +258,16 @@ describe('pollEsNodesVersion', () => {
   const log = loggingSystemMock.createLogger();
   beforeEach(() => jest.clearAllMocks());
 
-  /** Answers each request from `responses` (the last repeating) and aborts after the last. */
+  /** Answers each request from `responses`; the request after the last response aborts the poll. */
   const poll = async (responses: NodesInfo[]) => {
     const internalClient = elasticsearchClientMock.createInternalClient();
     const controller = new AbortController();
     let calls = 0;
     internalClient.nodes.info.mockImplementation((async () => {
-      const response = responses[Math.min(calls, responses.length - 1)];
-      if (++calls === responses.length) {
-        controller.abort();
+      if (calls === responses.length) {
+        controller.abort(); // this result arrives after the abort and is dropped
       }
-      return response;
+      return responses[Math.min(calls++, responses.length - 1)];
     }) as never);
     const compatibility$ = pollEsNodesVersion(
       { ...config, internalClient, log, signal: controller.signal },
@@ -276,5 +291,42 @@ describe('pollEsNodesVersion', () => {
     await poll([incompatible, incompatible]);
     expect(log.error).toHaveBeenCalledTimes(1);
     expect(log.error).toHaveBeenCalledWith(expect.stringContaining('7.0.0'));
+  });
+});
+
+describe('checkEsNodesVersion', () => {
+  const check = (internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>) =>
+    checkEsNodesVersion({
+      internalClient,
+      kibanaVersion: config.kibanaVersion,
+      ignoreVersionMismatch: false,
+    });
+
+  it('answers once from a single request', async () => {
+    const internalClient = elasticsearchClientMock.createInternalClient();
+    internalClient.nodes.info.mockResolvedValue(compatible as never);
+
+    expect((await check(internalClient)).isCompatible).toBe(true);
+    expect(internalClient.nodes.info).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries once, immediately, when the request fails', async () => {
+    const internalClient = elasticsearchClientMock.createInternalClient();
+    internalClient.nodes.info
+      .mockRejectedValueOnce(requestError)
+      .mockResolvedValue(compatible as never);
+
+    expect((await check(internalClient)).isCompatible).toBe(true);
+    expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports the error when both requests fail', async () => {
+    const internalClient = elasticsearchClientMock.createInternalClient();
+    internalClient.nodes.info.mockRejectedValue(requestError);
+
+    const compatibility = await check(internalClient);
+    expect(compatibility.isCompatible).toBe(false);
+    expect(compatibility.nodesInfoRequestError).toBe(requestError);
+    expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 });
