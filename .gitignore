@@ -107,7 +107,8 @@ package-lock.json
 !/.buildkite/package-lock.json
 yarn.lock
 .yo-rc.json
-.vscode
+.vscode/*
+!.vscode/extensions.json
 *.sublime-*
 npm-debug.log*
 .tern-project
