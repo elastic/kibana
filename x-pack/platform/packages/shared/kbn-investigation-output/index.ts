@@ -13,11 +13,13 @@ export {
   type UseInvestigationStateResult,
 } from './src/use_investigation_state';
 export type { InvestigationOutputProps, InvestigationStatus } from './src/types';
-export { EvidenceList, type EvidenceListProps } from './src/evidence_list';
 export {
-  buildEvidenceDiscoverParams,
-  buildCodeReferenceUrl,
-  formatCodeReferenceDetail,
-  formatCodeReferenceLabel,
-  type InvestigationDiscoverParams,
-} from './src/evidence_links';
+  EvidenceList,
+  EvidenceItem,
+  type EvidenceListProps,
+  type EvidenceItemProps,
+} from './src/evidence_list';
+export { EvidenceChart, type EvidenceChartProps } from './src/evidence_chart';
+export { EvidenceMarkdown, type EvidenceMarkdownProps } from './src/evidence_markdown';
+export { ImpactSection, type ImpactSectionProps } from './src/impact_section';
+export { TimelineSection, type TimelineSectionProps } from './src/timeline_section';

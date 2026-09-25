@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import type { ComponentProps } from 'react';
 import {
+  EuiBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,11 +23,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  EvidenceMarkdown,
   FinalResults,
   HypothesisRow,
-  type InvestigationDiscoverParams,
+  ImpactSection,
+  TimelineSection,
 } from '@kbn/investigation-output';
-import type { InvestigationState } from '@kbn/significant-events-schema';
+import type { InvestigationState, Severity } from '@kbn/significant-events-schema';
 import {
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   type GetInvestigationResponse,
@@ -53,10 +56,40 @@ function toInvestigationState(
     summary: inv.summary ?? progress?.summary ?? '',
     hypotheses: inv.hypotheses ?? progress?.hypotheses ?? [],
     conclusion: inv.conclusion ?? progress?.conclusion,
+    severity: inv.severity ?? progress?.severity,
     recommendations: inv.recommendations ?? progress?.recommendations,
     blind_spots: inv.blind_spots ?? progress?.blind_spots,
+    impact: inv.impact ?? progress?.impact,
+    timeline: inv.timeline ?? progress?.timeline,
   };
 }
+
+const SEVERITY_BADGES: Record<Severity, { color: string; label: string }> = {
+  '80-critical': {
+    color: 'danger',
+    label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityCritical', {
+      defaultMessage: 'Critical',
+    }),
+  },
+  '60-high': {
+    color: 'warning',
+    label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityHigh', {
+      defaultMessage: 'High',
+    }),
+  },
+  '40-medium': {
+    color: 'accent',
+    label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityMedium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  '20-low': {
+    color: 'default',
+    label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityLow', {
+      defaultMessage: 'Low',
+    }),
+  },
+};
 
 const isInvestigationRunning = (inv: GetInvestigationResponse): boolean =>
   inv.status === 'pending' || inv.status === 'running';
@@ -77,11 +110,6 @@ export interface InvestigationDetailFlyoutProps {
   /** Pass-through to EuiFlyout; use to add share URL, EBT tracking, etc. */
   flyoutMenuProps?: ComponentProps<typeof EuiFlyout>['flyoutMenuProps'];
   onClickCapture?: React.MouseEventHandler<HTMLElement>;
-  /**
-   * Optional: builds a Discover href for evidence links inside hypotheses.
-   * When absent, evidence items render as plain text with no link.
-   */
-  getQueryHref?: (params: InvestigationDiscoverParams) => string | undefined;
   /**
    * Optional: latest snapshot streamed by the running agent. Fills in summary, hypotheses
    * and conclusion before the workflow persists them, so a live run shows its progress
@@ -105,7 +133,6 @@ export function InvestigationDetailFlyout({
   onClose,
   flyoutMenuProps,
   onClickCapture,
-  getQueryHref,
   progress,
 }: InvestigationDetailFlyoutProps): React.ReactElement {
   const primaryText = investigation
@@ -152,14 +179,29 @@ export function InvestigationDetailFlyout({
         {invState.summary && (
           <>
             <SectionTitle>
-              {i18n.translate('xpack.nightshiftInvestigations.flyout.summaryTitle', {
-                defaultMessage: 'Summary',
+              {i18n.translate('xpack.nightshiftInvestigations.flyout.whatHappenedTitle', {
+                defaultMessage: 'What happened',
               })}
             </SectionTitle>
             <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>{invState.summary}</p>
-            </EuiText>
+            <div data-test-subj="nightshiftInvestigationDetailFlyoutSummary">
+              <EvidenceMarkdown textSize="s" color="default">
+                {invState.summary}
+              </EvidenceMarkdown>
+            </div>
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {invState.impact && (invState.impact.summary || invState.impact.entities.length > 0) && (
+          <>
+            <SectionTitle>
+              {i18n.translate('xpack.nightshiftInvestigations.flyout.impactTitle', {
+                defaultMessage: 'Impact',
+              })}
+            </SectionTitle>
+            <EuiSpacer size="s" />
+            <ImpactSection impact={invState.impact} />
             <EuiSpacer size="l" />
           </>
         )}
@@ -183,6 +225,46 @@ export function InvestigationDetailFlyout({
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {/* A mid-run conclusion is still a draft, so it is held back until the run ends. */}
+        {!isRunning && (
+          <>
+            <FinalResults state={invState} showConclusionTitle />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {invState.hypotheses.length > 0 && (
+          <>
+            <SectionTitle>
+              {i18n.translate('xpack.nightshiftInvestigations.flyout.investigationTraceTitle', {
+                defaultMessage: 'Investigation',
+              })}
+            </SectionTitle>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+              {invState.hypotheses.map((hypothesis, index) => (
+                <EuiFlexItem key={`${hypothesis.candidate}-${index}`}>
+                  <HypothesisRow hypothesis={hypothesis} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {invState.timeline && invState.timeline.length > 0 && (
+          <>
+            <SectionTitle>
+              {i18n.translate('xpack.nightshiftInvestigations.flyout.timelineTitle', {
+                defaultMessage: 'Timeline',
+              })}
+            </SectionTitle>
+            <EuiSpacer size="s" />
+            <TimelineSection timeline={invState.timeline} />
             <EuiSpacer size="l" />
           </>
         )}
@@ -216,29 +298,6 @@ export function InvestigationDetailFlyout({
           </>
         )}
 
-        {invState.hypotheses.length > 0 && (
-          <>
-            <SectionTitle>
-              {i18n.translate('xpack.nightshiftInvestigations.flyout.hypothesesTitle', {
-                defaultMessage: 'Hypotheses',
-              })}
-            </SectionTitle>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-              {invState.hypotheses.map((hypothesis, index) => (
-                <EuiFlexItem key={`${hypothesis.candidate}-${index}`}>
-                  <HypothesisRow hypothesis={hypothesis} getQueryHref={getQueryHref} />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-          </>
-        )}
-
-        {/* A mid-run conclusion is still a draft, so it is held back until the run ends. */}
-        {!isRunning && <FinalResults state={invState} />}
-
-        <EuiSpacer size="l" />
         <SectionTitle>
           {i18n.translate('xpack.nightshiftInvestigations.flyout.runDetailsTitle', {
             defaultMessage: 'Run details',
@@ -315,7 +374,23 @@ export function InvestigationDetailFlyout({
           <h2>{primaryText}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {investigation && <InvestigationRunStatusBadge status={investigation.status} />}
+        {investigation && (
+          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <InvestigationRunStatusBadge status={investigation.status} />
+            </EuiFlexItem>
+            {investigation.severity && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color={SEVERITY_BADGES[investigation.severity].color}
+                  data-test-subj="nightshiftInvestigationDetailFlyoutSeverity"
+                >
+                  {SEVERITY_BADGES[investigation.severity].label}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        )}
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="xs">
           {investigation ? formatDate(investigation.created_at) : ''}

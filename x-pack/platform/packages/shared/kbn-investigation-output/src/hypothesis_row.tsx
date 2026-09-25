@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { InvestigationHypothesis } from '@kbn/significant-events-schema';
-import { EvidenceList, type EvidenceListProps } from './evidence_list';
+import { EvidenceList } from './evidence_list';
 
 const HYPOTHESIS_STATUS_ICON: Record<InvestigationHypothesis['status'], string> = {
   investigating: 'clock',
@@ -30,8 +30,7 @@ const HYPOTHESIS_STATUS_ICON: Record<InvestigationHypothesis['status'], string> 
 
 export const HypothesisRow: React.FC<{
   hypothesis: InvestigationHypothesis;
-  getQueryHref?: EvidenceListProps['getQueryHref'];
-}> = ({ hypothesis, getQueryHref }) => {
+}> = ({ hypothesis }) => {
   const { candidate, confidence, status, reason, evidence } = hypothesis;
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationHypothesis' });
 
@@ -91,7 +90,7 @@ export const HypothesisRow: React.FC<{
       {evidence?.length ? (
         <>
           <EuiSpacer size="s" />
-          <EvidenceList evidence={evidence} getQueryHref={getQueryHref} />
+          <EvidenceList evidence={evidence} />
         </>
       ) : null}
     </EuiAccordion>

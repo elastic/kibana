@@ -8,25 +8,36 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { InvestigationEvidence } from '@kbn/significant-events-schema';
+import type { EvidenceChart, InvestigationEvidence } from '@kbn/significant-events-schema';
 import { EvidenceList } from './evidence_list';
 
-const renderEvidence = (
-  evidence: InvestigationEvidence[],
-  getQueryHref?: (params: { query: { esql: string } }) => string | undefined
-) =>
+const renderEvidence = (evidence: InvestigationEvidence[]) =>
   render(
     <I18nProvider>
-      <EvidenceList evidence={evidence} getQueryHref={getQueryHref} />
+      <EvidenceList evidence={evidence} />
     </I18nProvider>
   );
 
-const queryHref = () => 'http://localhost:5601/app/discover#/?_a=(query:(esql:...))';
+const sampleChart: EvidenceChart = {
+  type: 'line',
+  title: 'orders-api pool utilization',
+  x_axis: { type: 'time' },
+  y_axis: { unit: 'percent' },
+  series: [
+    {
+      name: 'orders-api',
+      points: [
+        { x: '2026-07-28T14:00:00Z', y: 42 },
+        { x: '2026-07-28T14:05:00Z', y: 100 },
+      ],
+    },
+  ],
+  annotations: [{ x: '2026-07-28T14:02:00Z', label: 'Deploy' }],
+};
 
-const openableEvidence: InvestigationEvidence = {
-  description: 'Pool utilization saturates at 14:02.',
-  esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
-  time_range: { from: '2026-07-28T13:30:00Z', to: '2026-07-28T15:00:00Z' },
+const chartEvidence: InvestigationEvidence = {
+  description: 'Pool utilization saturates at **14:02**.',
+  chart: sampleChart,
 };
 
 describe('EvidenceList', () => {
@@ -36,151 +47,94 @@ describe('EvidenceList', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders each observation with its query', () => {
-    renderEvidence([openableEvidence]);
+  it('renders the description as markdown', () => {
+    renderEvidence([chartEvidence]);
 
-    expect(screen.getByText('Pool utilization saturates at 14:02.')).toBeInTheDocument();
-    expect(
-      screen.getByText('FROM metrics-* | STATS max = MAX(pool.utilization)')
-    ).toBeInTheDocument();
+    expect(screen.getByText('14:02').tagName).toBe('STRONG');
   });
 
-  it('renders an observation that has no query at all', () => {
-    renderEvidence([{ description: 'All checkout pods were in CrashLoopBackOff.' }], queryHref);
+  it('renders markdown tables', () => {
+    renderEvidence([{ description: '| host | cpu |\n| --- | --- |\n| a | 99% |' }]);
+
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByText('99%')).toBeInTheDocument();
+  });
+
+  it('renders the chart title when evidence carries a chart', () => {
+    renderEvidence([chartEvidence]);
+
+    expect(screen.getByTestId('investigationEvidenceChart')).toHaveTextContent(
+      'orders-api pool utilization'
+    );
+  });
+
+  it('lists every series in the legend of a multi-series chart', () => {
+    renderEvidence([
+      {
+        description: 'Latency by repository.',
+        chart: {
+          ...sampleChart,
+          series: [
+            { name: 'elastic/kibana p99', points: [{ x: '2026-07-28T14:00:00Z', y: 1 }] },
+            { name: 'all other repositories p99', points: [{ x: '2026-07-28T14:00:00Z', y: 2 }] },
+          ],
+        },
+      },
+    ]);
+
+    const legend = screen.getByTestId('investigationEvidenceChartLegend');
+    expect(legend).toHaveTextContent('elastic/kibana p99');
+    expect(legend).toHaveTextContent('all other repositories p99');
+  });
+
+  it('renders no legend for a single-series chart', () => {
+    renderEvidence([chartEvidence]);
+
+    expect(screen.queryByTestId('investigationEvidenceChartLegend')).not.toBeInTheDocument();
+  });
+
+  it('renders an observation without a chart', () => {
+    renderEvidence([{ description: 'All checkout pods were in CrashLoopBackOff.' }]);
 
     expect(screen.getByText('All checkout pods were in CrashLoopBackOff.')).toBeInTheDocument();
-    expect(screen.queryByTestId('investigationEvidenceQueryLink')).not.toBeInTheDocument();
-  });
-
-  it('links a query to Discover when the consumer can resolve an href', () => {
-    renderEvidence([openableEvidence], queryHref);
-
-    expect(screen.getByTestId('investigationEvidenceQueryLink')).toHaveAttribute(
-      'href',
-      queryHref()
-    );
-  });
-
-  it('opens links in a new tab so a streaming investigation is not navigated away from', () => {
-    renderEvidence([openableEvidence], queryHref);
-
-    expect(screen.getByTestId('investigationEvidenceQueryLink')).toHaveAttribute(
-      'target',
-      '_blank'
-    );
-  });
-
-  it('still renders the query, unlinked, when no href resolver is supplied', () => {
-    renderEvidence([openableEvidence]);
-
-    expect(
-      screen.getByText('FROM metrics-* | STATS max = MAX(pool.utilization)')
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId('investigationEvidenceQueryLink')).not.toBeInTheDocument();
-  });
-
-  it('does not link a query that has no time range, which would land on an unrelated window', () => {
-    renderEvidence(
-      [
-        {
-          description: 'Pool utilization saturates at 14:02.',
-          esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
-        },
-      ],
-      queryHref
-    );
-
-    expect(screen.queryByTestId('investigationEvidenceQueryLink')).not.toBeInTheDocument();
-    expect(
-      screen.getByText('FROM metrics-* | STATS max = MAX(pool.utilization)')
-    ).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationEvidenceChart')).not.toBeInTheDocument();
   });
 
   it('renders one row per observation', () => {
-    renderEvidence(
-      [openableEvidence, { description: 'All checkout pods were in CrashLoopBackOff.' }],
-      queryHref
-    );
+    renderEvidence([chartEvidence, { description: 'Pods restarted.' }]);
 
     expect(screen.getAllByTestId('investigationEvidenceItem')).toHaveLength(2);
-    expect(screen.getAllByTestId('investigationEvidenceQueryLink')).toHaveLength(1);
   });
-});
 
-describe('EvidenceList code references', () => {
-  const linkableCode = {
-    source: 'github_connector' as const,
-    repo: 'elastic/otel-demo-scenario',
-    path: 'src/recommendationservice/recommendation_server.py',
-    host: 'github.com',
-    ref: 'f07c1da942b0c555fab6cf4eab612df1997b1329',
-  };
+  it('opens absolute links in a new tab', () => {
+    renderEvidence([{ description: 'See [the runbook](https://example.com/runbook).' }]);
 
-  it('links a code reference without needing any consumer wiring', () => {
-    renderEvidence([{ description: 'The acquire path has no timeout.', code: linkableCode }]);
-
-    const link = screen.getByTestId('investigationEvidenceCodeLink');
-
-    expect(link).toHaveAttribute(
-      'href',
-      'https://github.com/elastic/otel-demo-scenario/blob/f07c1da942b0c555fab6cf4eab612df1997b1329/src/recommendationservice/recommendation_server.py'
-    );
+    const link = screen.getByRole('link', { name: /the runbook/ });
+    expect(link).toHaveAttribute('href', 'https://example.com/runbook');
     expect(link).toHaveAttribute('target', '_blank');
-    expect(link).toHaveTextContent('recommendation_server.py');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
   });
 
-  it('renders an unlinkable reference as text rather than guessing a host', () => {
-    const { host, ...withoutHost } = linkableCode;
-
-    renderEvidence([{ description: 'The acquire path has no timeout.', code: withoutHost }]);
-
-    expect(screen.queryByTestId('investigationEvidenceCodeLink')).not.toBeInTheDocument();
-    expect(screen.getByTestId('investigationEvidenceCodeText')).toHaveTextContent(
-      'elastic/otel-demo-scenario/src/recommendationservice/recommendation_server.py @ f07c1da'
-    );
-  });
-
-  it('links a GitHub Enterprise host', () => {
+  it('does not link relative or non-http urls', () => {
     renderEvidence([
-      {
-        description: 'The acquire path has no timeout.',
-        code: { ...linkableCode, host: 'github.acme.com' },
-      },
+      { description: '[relative](/app/management) and [script](javascript:alert(1))' },
     ]);
 
-    expect(screen.getByTestId('investigationEvidenceCodeLink')).toHaveAttribute(
-      'href',
-      'https://github.acme.com/elastic/otel-demo-scenario/blob/f07c1da942b0c555fab6cf4eab612df1997b1329/src/recommendationservice/recommendation_server.py'
-    );
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
-  it('renders a code_search reference as text, whatever else it carries', () => {
-    renderEvidence([
-      {
-        description: 'The acquire path has no timeout.',
-        code: { ...linkableCode, source: 'code_search' },
-      },
+  it('never renders images, which would fetch model-chosen urls', () => {
+    const { container } = renderEvidence([
+      { description: 'Before ![tracking pixel](https://attacker.example/p.png) after' },
     ]);
 
-    expect(screen.queryByTestId('investigationEvidenceCodeLink')).not.toBeInTheDocument();
-    expect(screen.getByTestId('investigationEvidenceCodeText')).toBeInTheDocument();
+    expect(container.querySelector('img')).toBeNull();
+    expect(screen.getByText(/tracking pixel/)).toBeInTheDocument();
   });
 
-  it('renders both links when one observation rests on a query and a file', () => {
-    renderEvidence(
-      [
-        {
-          description: 'Errors spike at 08:40 and the handler re-raises.',
-          esql_query: 'FROM logs.otel | STATS count = COUNT(*)',
-          time_range: { from: '2026-08-05T08:00:00Z', to: '2026-08-05T09:10:00Z' },
-          code: linkableCode,
-        },
-      ],
-      queryHref
-    );
+  it('does not render raw html', () => {
+    const { container } = renderEvidence([{ description: '<img src="https://x.example/a.png">' }]);
 
-    expect(screen.getByTestId('investigationEvidenceQueryLink')).toBeInTheDocument();
-    expect(screen.getByTestId('investigationEvidenceCodeLink')).toBeInTheDocument();
-    expect(screen.getAllByTestId('investigationEvidenceItem')).toHaveLength(1);
+    expect(container.querySelector('img')).toBeNull();
   });
 });

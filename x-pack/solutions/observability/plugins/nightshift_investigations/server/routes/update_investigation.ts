@@ -42,6 +42,7 @@ const updateInvestigationBodySchema = z.object({
   blind_spots: orAbsent(investigationStateSchema.shape.blind_spots.unwrap()),
   conversation_id: orAbsent(z.string().max(MAX_KEYWORD_LENGTH)),
   impact: orAbsent(investigationImpactSchema),
+  timeline: orAbsent(investigationStateSchema.shape.timeline.unwrap()),
 });
 
 export const updateInvestigationRoute = createNightshiftInvestigationsServerRoute({

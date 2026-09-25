@@ -79,6 +79,7 @@ describe('Nightshift investigation workflow', () => {
       expect.objectContaining({
         blind_spots: '${{ steps.investigate.output.structured_output.blind_spots }}',
         impact: '${{ steps.investigate.output.structured_output.impact }}',
+        timeline: '${{ steps.investigate.output.structured_output.timeline }}',
       })
     );
     expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');

@@ -16,9 +16,13 @@ import {
   INVESTIGATE_STEP_ID,
   investigationStateSchema,
   MAX_BLIND_SPOTS,
+  MAX_EVIDENCE_CHART_ANNOTATIONS,
+  MAX_EVIDENCE_CHART_POINTS,
+  MAX_EVIDENCE_CHART_SERIES,
   MAX_HYPOTHESIS_EVIDENCE,
   MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
+  MAX_TIMELINE_EVENTS,
 } from './investigation_state';
 
 interface ParsedInvestigationWorkflow {
@@ -155,145 +159,154 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(invalidHypothesis).success).toBe(false);
   });
 
-  it('accepts hypothesis evidence carrying a query and its window under both schemas', () => {
-    const withEvidence = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'Connection pool exhaustion after the 14:02 deploy',
-          confidence: 0.9,
-          status: 'confirmed',
-          reason: 'Pool metrics spiked exactly at deploy time.',
-          evidence: [
+  const sampleChart = {
+    type: 'line',
+    title: 'orders-api pool utilization',
+    x_axis: { type: 'time' },
+    y_axis: { label: 'Utilization', unit: 'percent' },
+    series: [
+      {
+        name: 'orders-api',
+        points: [
+          { x: '2026-07-28T14:00:00Z', y: 42 },
+          { x: '2026-07-28T14:05:00Z', y: 100 },
+        ],
+      },
+    ],
+    annotations: [{ x: '2026-07-28T14:02:00Z', label: 'Deploy v2.3.1' }],
+  };
+
+  const withHypothesisEvidence = (evidence: unknown[]) => ({
+    summary: 'ok',
+    hypotheses: [
+      {
+        candidate: 'Connection pool exhaustion after the 14:02 deploy',
+        confidence: 0.9,
+        status: 'confirmed',
+        evidence,
+      },
+    ],
+  });
+
+  it('accepts markdown evidence with a chart under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      {
+        description: '| minute | utilization |\n| --- | --- |\n| 14:00 | 42% |\n| 14:05 | 100% |',
+        chart: sampleChart,
+      },
+    ]);
+
+    expect(validate(payload)).toBe(true);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(true);
+  });
+
+  it('accepts evidence that is a markdown observation with no chart under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      { description: 'All checkout pods were in `CrashLoopBackOff`.' },
+    ]);
+
+    expect(validate(payload)).toBe(true);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(true);
+  });
+
+  it('accepts a stacked bar chart over categories with a range annotation under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      {
+        description: 'Errors per region.',
+        chart: {
+          type: 'bar',
+          title: 'Errors by region',
+          x_axis: { type: 'category', label: 'Region' },
+          y_axis: {},
+          stacked: true,
+          series: [
+            { name: '5xx', points: [{ x: 'eu-west-1', y: 12 }] },
+            { name: '4xx', points: [{ x: 'eu-west-1', y: 3 }] },
+          ],
+          annotations: [{ x: 'eu-west-1', x_end: 'us-east-1', label: 'Affected' }],
+        },
+      },
+    ]);
+
+    expect(validate(payload)).toBe(true);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(true);
+  });
+
+  it('rejects a chart without series under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      { description: 'Empty.', chart: { ...sampleChart, series: [] } },
+    ]);
+
+    expect(validate(payload)).toBe(false);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(false);
+  });
+
+  it('rejects an unsupported chart type under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      { description: 'Pie.', chart: { ...sampleChart, type: 'pie' } },
+    ]);
+
+    expect(validate(payload)).toBe(false);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(false);
+  });
+
+  it('rejects a chart exceeding the series, point, or annotation bounds under both schemas', () => {
+    const series = { name: 's', points: [{ x: 'a', y: 1 }] };
+    const tooManySeries = withHypothesisEvidence([
+      {
+        description: 'x',
+        chart: {
+          ...sampleChart,
+          series: Array.from({ length: MAX_EVIDENCE_CHART_SERIES + 1 }, () => series),
+        },
+      },
+    ]);
+    const tooManyPoints = withHypothesisEvidence([
+      {
+        description: 'x',
+        chart: {
+          ...sampleChart,
+          series: [
             {
-              description: 'Pool utilization saturates at 14:02.',
-              esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
-              time_range: { from: '2026-07-28T13:30:00Z', to: '2026-07-28T15:00:00Z' },
+              name: 's',
+              points: Array.from({ length: MAX_EVIDENCE_CHART_POINTS + 1 }, (_, index) => ({
+                x: `${index}`,
+                y: index,
+              })),
             },
           ],
         },
-      ],
-    };
+      },
+    ]);
+    const tooManyAnnotations = withHypothesisEvidence([
+      {
+        description: 'x',
+        chart: {
+          ...sampleChart,
+          annotations: Array.from({ length: MAX_EVIDENCE_CHART_ANNOTATIONS + 1 }, () => ({
+            x: 'a',
+            label: 'b',
+          })),
+        },
+      },
+    ]);
 
-    expect(validate(withEvidence)).toBe(true);
-    expect(investigationStateSchema.safeParse(withEvidence).success).toBe(true);
+    for (const payload of [tooManySeries, tooManyPoints, tooManyAnnotations]) {
+      expect(validate(payload)).toBe(false);
+      expect(investigationStateSchema.safeParse(payload).success).toBe(false);
+    }
   });
 
-  it('accepts evidence that is an observation with no query under both schemas', () => {
-    const observationOnly = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'Missing null check',
-          confidence: 0.8,
-          status: 'confirmed',
-          evidence: [{ description: 'All checkout pods were in CrashLoopBackOff.' }],
-        },
-      ],
-    };
+  it('rejects a chart point without a numeric y under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      {
+        description: 'x',
+        chart: { ...sampleChart, series: [{ name: 's', points: [{ x: 'a', y: 'high' }] }] },
+      },
+    ]);
 
-    expect(validate(observationOnly)).toBe(true);
-    expect(investigationStateSchema.safeParse(observationOnly).success).toBe(true);
-  });
-
-  it('accepts evidence carrying a query and a code reference in one entry under both schemas', () => {
-    const withCode = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'A 1ms gRPC timeout in the product validation loop',
-          confidence: 0.95,
-          status: 'confirmed',
-          evidence: [
-            {
-              description: 'Errors spike at 08:40 and the handler re-raises on deadline exceeded.',
-              esql_query: 'FROM logs.otel | STATS count = COUNT(*)',
-              time_range: { from: '2026-08-05T08:00:00Z', to: '2026-08-05T09:10:00Z' },
-              code: {
-                source: 'github_connector',
-                repo: 'elastic/otel-demo-scenario',
-                path: 'src/recommendationservice/recommendation_server.py',
-                host: 'github.com',
-                ref: 'f07c1da942b0c555fab6cf4eab612df1997b1329',
-              },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(withCode)).toBe(true);
-    expect(investigationStateSchema.safeParse(withCode).success).toBe(true);
-  });
-
-  it('accepts a code reference with neither host nor ref, which simply will not be linked', () => {
-    const unlinkable = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'X',
-          confidence: 0.5,
-          status: 'investigating',
-          evidence: [
-            {
-              description: 'The retry guard is missing.',
-              code: {
-                source: 'code_search',
-                repo: 'open-telemetry/opentelemetry-demo',
-                path: 'src/recommendationservice/recommendation_server.py',
-              },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(unlinkable)).toBe(true);
-    expect(investigationStateSchema.safeParse(unlinkable).success).toBe(true);
-  });
-
-  it('rejects a code reference missing its repo under both schemas', () => {
-    const missingRepo = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'X',
-          confidence: 0.5,
-          status: 'investigating',
-          evidence: [
-            {
-              description: 'Read the handler.',
-              code: { source: 'github_connector', path: 'src/handler.ts' },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(missingRepo)).toBe(false);
-    expect(investigationStateSchema.safeParse(missingRepo).success).toBe(false);
-  });
-
-  it('rejects a code reference with an unknown source under both schemas', () => {
-    const badSource = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'X',
-          confidence: 0.5,
-          status: 'investigating',
-          evidence: [
-            {
-              description: 'Read the handler.',
-              code: { source: 'gitlab', repo: 'acme/foo', path: 'src/handler.ts' },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(badSource)).toBe(false);
-    expect(investigationStateSchema.safeParse(badSource).success).toBe(false);
+    expect(validate(payload)).toBe(false);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(false);
   });
 
   it('rejects hypothesis evidence exceeding MAX_HYPOTHESIS_EVIDENCE under both schemas', () => {
@@ -313,29 +326,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(tooMuchEvidence)).toBe(false);
     expect(investigationStateSchema.safeParse(tooMuchEvidence).success).toBe(false);
-  });
-
-  it('rejects evidence with a half-specified time range under both schemas', () => {
-    const missingTo = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'X',
-          confidence: 0.5,
-          status: 'investigating',
-          evidence: [
-            {
-              description: 'Ran a query.',
-              esql_query: 'FROM logs-* | LIMIT 1',
-              time_range: { from: '2026-07-28T13:30:00Z' },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(missingTo)).toBe(false);
-    expect(investigationStateSchema.safeParse(missingTo).success).toBe(false);
   });
 
   it('rejects an invalid hypothesis status under both schemas', () => {
@@ -477,9 +467,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
             type: 'service',
             evidence: {
               description: 'checkout-service error rate during incident window',
-              esql_query:
-                'FROM traces-* | WHERE service.name == "checkout-service" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == "failure"',
-              time_range: { from: '2026-07-28T14:00:00Z', to: '2026-07-28T15:00:00Z' },
+              chart: sampleChart,
             },
           },
         ],
@@ -541,5 +529,53 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(tooManyEntities)).toBe(false);
     expect(investigationStateSchema.safeParse(tooManyEntities).success).toBe(false);
+  });
+
+  it('accepts an impact summary alongside the entities under both schemas', () => {
+    const withImpactSummary = {
+      ...validPayload,
+      impact: {
+        summary: 'Checkout failed for ~30% of requests for 40 minutes in eu-west-1.',
+        entities: [{ name: 'checkout-service' }],
+      },
+    };
+
+    expect(validate(withImpactSummary)).toBe(true);
+    expect(investigationStateSchema.safeParse(withImpactSummary).success).toBe(true);
+  });
+
+  it('accepts a timeline and sorts it chronologically', () => {
+    const withTimeline = {
+      ...validPayload,
+      timeline: [
+        { timestamp: '2026-07-28T14:05:00Z', type: 'symptom', summary: 'Error rate spikes.' },
+        { timestamp: '2026-07-28T14:02:00Z', type: 'change', summary: 'Deploy v2.3.1.' },
+        { timestamp: '2026-07-28T14:40:00Z', type: 'recovery', summary: 'Rollback completes.' },
+      ],
+    };
+
+    expect(validate(withTimeline)).toBe(true);
+    const parsed = investigationStateSchema.parse(withTimeline);
+    expect(parsed.timeline?.map(({ type }) => type)).toEqual(['change', 'symptom', 'recovery']);
+  });
+
+  it('rejects a timeline event with an unknown type or exceeding MAX_TIMELINE_EVENTS', () => {
+    const badType = {
+      ...validPayload,
+      timeline: [{ timestamp: '2026-07-28T14:05:00Z', type: 'deploy', summary: 'x' }],
+    };
+    const tooMany = {
+      ...validPayload,
+      timeline: Array.from({ length: MAX_TIMELINE_EVENTS + 1 }, () => ({
+        timestamp: '2026-07-28T14:05:00Z',
+        type: 'other',
+        summary: 'x',
+      })),
+    };
+
+    for (const payload of [badType, tooMany]) {
+      expect(validate(payload)).toBe(false);
+      expect(investigationStateSchema.safeParse(payload).success).toBe(false);
+    }
   });
 });

@@ -34,13 +34,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EvidenceList,
-  type InvestigationDiscoverParams,
-  type InvestigationStatus,
-} from '@kbn/investigation-output';
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { EvidenceList, type InvestigationStatus } from '@kbn/investigation-output';
 import type {
   InvestigationState,
   SignificantEventInvestigation,
@@ -413,7 +407,6 @@ function HypothesisRow({
   index,
   isConfidenceWinner,
   onOpenInChat,
-  getQueryHref,
 }: {
   candidate: string;
   confidence: number;
@@ -423,7 +416,6 @@ function HypothesisRow({
   index: number;
   isConfidenceWinner: boolean;
   onOpenInChat: () => void;
-  getQueryHref: (params: InvestigationDiscoverParams) => string | undefined;
 }): React.ReactElement {
   const hasEvidence = Boolean(evidence?.length);
   const expandableContent =
@@ -433,7 +425,7 @@ function HypothesisRow({
         {evidence?.length ? (
           <>
             {reason ? <EuiSpacer size="s" /> : null}
-            <EvidenceList evidence={evidence} getQueryHref={getQueryHref} />
+            <EvidenceList evidence={evidence} />
           </>
         ) : null}
       </>
@@ -501,14 +493,8 @@ export function InvestigationFlyout({
   onClose,
 }: InvestigationFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { agentBuilder, share } = useKibana().services;
+  const { agentBuilder } = useKibana().services;
   const [selectedTab, setSelectedTab] = useState<CompletedTabId>(initialTab);
-
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
-  const getQueryHref = useCallback(
-    (params: InvestigationDiscoverParams) => discoverLocator?.getRedirectUrl(params),
-    [discoverLocator]
-  );
 
   useEffect(() => {
     setSelectedTab(initialTab);
@@ -729,7 +715,6 @@ export function InvestigationFlyout({
                       index={index}
                       isConfidenceWinner={hypothesis.confidence === topHypothesisConfidence}
                       onOpenInChat={() => openHypothesisInChat(hypothesis, index)}
-                      getQueryHref={getQueryHref}
                     />
                   </InvestigationFlyoutListPanel>
                 </EuiFlexItem>

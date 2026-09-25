@@ -144,4 +144,47 @@ describe('InvestigationDetailFlyout', () => {
       screen.queryByTestId('nightshiftInvestigationDetailFlyoutProgressPending')
     ).not.toBeInTheDocument();
   });
+
+  it('renders the investigation template sections of a completed run', () => {
+    renderFlyout({
+      inv: investigation({
+        status: 'completed',
+        completed_at: '2026-09-15T12:10:00.000Z',
+        severity: '60-high',
+        summary: 'Checkout **failed** for 30% of requests.',
+        conclusion: 'The 12:02 deploy shrank the connection pool.',
+        impact: {
+          summary: 'Order placement failed for 40 minutes in all regions.',
+          entities: [{ name: 'checkout-service', type: 'service' }],
+        },
+        timeline: [
+          { timestamp: '2026-09-15T12:02:00.000Z', type: 'change', summary: 'Deploy v2.3.1.' },
+        ],
+        hypotheses: [
+          {
+            candidate: 'Connection pool exhaustion',
+            confidence: 0.9,
+            status: 'confirmed',
+            evidence: [{ description: 'Pool at 100%.' }],
+          },
+        ],
+      }),
+    });
+
+    expect(screen.getByText('What happened')).toBeInTheDocument();
+    expect(screen.getByText('failed').tagName).toBe('STRONG');
+    expect(screen.getByText('Impact')).toBeInTheDocument();
+    expect(
+      screen.getByText('Order placement failed for 40 minutes in all regions.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Conclusion')).toBeInTheDocument();
+    expect(screen.getByText('Investigation')).toBeInTheDocument();
+    expect(screen.getByText('Timeline')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationOutputTimelineEvent-change')).toHaveTextContent(
+      'Deploy v2.3.1.'
+    );
+    expect(screen.getByTestId('nightshiftInvestigationDetailFlyoutSeverity')).toHaveTextContent(
+      'High'
+    );
+  });
 });

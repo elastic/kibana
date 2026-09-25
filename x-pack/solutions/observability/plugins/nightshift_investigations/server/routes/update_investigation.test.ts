@@ -113,6 +113,33 @@ describe('updateInvestigation body schema', () => {
     ).toThrow();
   });
 
+  it('accepts an impact summary and sorts the timeline chronologically', () => {
+    expect(
+      parseBody({
+        status: 'completed',
+        impact: { summary: 'Checkout failed for 30% of requests.', entities: [] },
+        timeline: [
+          { timestamp: '2026-09-25T10:05:00Z', type: 'symptom', summary: 'Errors spike.' },
+          { timestamp: '2026-09-25T10:02:00Z', type: 'change', summary: 'Deploy.' },
+        ],
+      })
+    ).toEqual(
+      expect.objectContaining({
+        impact: { summary: 'Checkout failed for 30% of requests.', entities: [] },
+        timeline: [
+          { timestamp: '2026-09-25T10:02:00Z', type: 'change', summary: 'Deploy.' },
+          { timestamp: '2026-09-25T10:05:00Z', type: 'symptom', summary: 'Errors spike.' },
+        ],
+      })
+    );
+  });
+
+  it('treats a missing timeline as absent', () => {
+    expect(parseBody({ status: 'completed', timeline: null })).toEqual(
+      expect.objectContaining({ timeline: undefined })
+    );
+  });
+
   it('still rejects a severity outside the canonical tiers', () => {
     expect(() => parseBody({ status: 'completed', severity: 'catastrophic' })).toThrow();
   });

@@ -12,6 +12,7 @@ import {
   MAX_HYPOTHESES,
   MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
+  MAX_TIMELINE_EVENTS,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   SEVERITY_OPTIONS,
@@ -95,6 +96,19 @@ const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extend
   title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
 });
 
+// Adds the impact narrative and the timeline. Neither is queried, so both stay unmapped.
+const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends({
+  impact: schema.maybe(
+    schema.object({
+      summary: optionalText,
+      entities: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+        maxSize: MAX_IMPACT_ENTITIES,
+      }),
+    })
+  ),
+  timeline: opaqueArray(MAX_TIMELINE_EVENTS),
+});
+
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
   name: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   hidden: true,
@@ -140,6 +154,13 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       schemas: {
         create: investigationAttributesSchemaV3,
         forwardCompatibility: investigationAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    4: {
+      changes: [],
+      schemas: {
+        create: investigationAttributesSchemaV4,
+        forwardCompatibility: investigationAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
       },
     },
   },

@@ -34,64 +34,78 @@ export const INVESTIGATE_STEP_ID = 'investigate' as const;
 
 export type InvestigationRunStatus = 'pending' | 'complete' | 'failed' | 'unavailable';
 
-/**
- * A source file the agent read, recorded as parts rather than a URL so that consumers — not the
- * model — decide what is safe to link.
- *
- * `source` records how the code was reached, for provenance; it deliberately does NOT decide
- * whether a link can be built.
- */
-const investigationEvidenceCodeSchema = z.object({
-  /**
-   * How this reference was obtained: `github_connector` for a GitHub connector, `code_search` for
-   * Semantic Code Search. Model-reported, so treat it as advisory — it selects which URL shape a
-   * consumer may build, never as proof of where the code lives.
-   */
-  source: z.enum(['github_connector', 'code_search']),
-  /** Repository in `owner/name` form, e.g. `elastic/kibana`. */
-  repo: z.string().max(MAX_SHORT_STRING_LENGTH),
-  /** Repository-relative file path, e.g. `src/recommendationservice/recommendation_server.py`. */
-  path: z.string().max(MAX_MEDIUM_STRING_LENGTH),
-  /**
-   * Hostname the code can be browsed on, taken from the origin of the URL the tool itself
-   * returned — never inferred from `repo`. Absent when the tool reported no browsable location,
-   * as Semantic Code Search does: it records a bare `owner/repo` with no remote.
-   */
-  host: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
-  /**
-   * Commit SHA the file was read at. GitHub resolves a branch name to a SHA in the URLs it
-   * returns, so this is normally available without asking the model to look it up. Absent when the
-   * tool reported no revision — in which case no link is built, because a branch-pinned link
-   * drifts away from the code the investigation actually saw.
-   */
-  ref: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+/** Max series per evidence chart. Keep in sync with the YAML maxItems. */
+export const MAX_EVIDENCE_CHART_SERIES = 5;
+/** Max data points per evidence chart series. Keep in sync with the YAML maxItems. */
+export const MAX_EVIDENCE_CHART_POINTS = 100;
+/** Max annotations per evidence chart. Keep in sync with the YAML maxItems. */
+export const MAX_EVIDENCE_CHART_ANNOTATIONS = 5;
+/** Max length of chart titles, labels, and series names. */
+export const MAX_EVIDENCE_CHART_LABEL_LENGTH = 128;
+
+export const EVIDENCE_CHART_TYPES = ['line', 'bar'] as const;
+export const EVIDENCE_CHART_X_AXIS_TYPES = ['time', 'category'] as const;
+export const EVIDENCE_CHART_Y_AXIS_UNITS = ['number', 'percent', 'bytes', 'ms', 's'] as const;
+
+const evidenceChartPointSchema = z.object({
+  /** ISO 8601 timestamp for a `time` x axis, a category label for a `category` x axis. */
+  x: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH),
+  y: z.number(),
 });
-export type InvestigationEvidenceCode = z.infer<typeof investigationEvidenceCodeSchema>;
+
+const evidenceChartSeriesSchema = z.object({
+  name: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH),
+  points: z.array(evidenceChartPointSchema).max(MAX_EVIDENCE_CHART_POINTS),
+});
+
+const evidenceChartAnnotationSchema = z.object({
+  /** Where the annotation sits: a timestamp or category, matching the x axis type. */
+  x: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH),
+  /** When set, the annotation highlights the range from `x` to `x_end` instead of a point. */
+  x_end: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
+  label: z.string().max(MAX_SHORT_STRING_LENGTH),
+});
 
 /**
- * One observation supporting a claim the investigation makes, together with pointers back to the
- * concrete artefacts it rests on, so a reader can verify it instead of trusting it.
- *
+ * A small static chart carried inline with a piece of evidence. The data points are part of the
+ * spec itself, so the chart renders the same no matter where the data originally came from —
+ * the local cluster, a remote cluster reached through a connector, or any other source.
+ * Deliberately limited to line and bar charts with a handful of series and annotations.
  */
-const investigationEvidenceSchema = z.object({
-  /** What was observed and why it bears on the claim. Doubles as the label for its link. */
-  description: z.string().max(MAX_TEXT_LENGTH),
-  /** The exact ES|QL query executed to gather this evidence, when one was run. */
-  esql_query: z.string().max(MAX_TEXT_LENGTH).optional(),
-  /**
-   * Absolute time window `esql_query` was evaluated over, as ISO 8601 timestamps. Required for
-   * the query to be openable: the agent's queries embed absolute bounds in their WHERE clauses,
-   * so handing Discover the query without its window would apply Discover's own default range on
-   * top and land the reader on zero rows. Without it, consumers show the query but do not link it.
-   */
-  time_range: z
-    .object({
-      from: z.string().max(MAX_TIMESTAMP_LENGTH),
-      to: z.string().max(MAX_TIMESTAMP_LENGTH),
-    })
+export const evidenceChartSchema = z.object({
+  type: z.enum(EVIDENCE_CHART_TYPES),
+  title: z.string().max(MAX_SHORT_STRING_LENGTH),
+  x_axis: z.object({
+    type: z.enum(EVIDENCE_CHART_X_AXIS_TYPES),
+    label: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
+  }),
+  y_axis: z.object({
+    label: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
+    /** How y values are formatted. `percent` values are on a 0–100 scale. */
+    unit: z.enum(EVIDENCE_CHART_Y_AXIS_UNITS).optional(),
+  }),
+  /** Stack the series on top of each other. Only meaningful for bar charts. */
+  stacked: z.boolean().optional(),
+  series: z.array(evidenceChartSeriesSchema).min(1).max(MAX_EVIDENCE_CHART_SERIES),
+  annotations: z
+    .array(evidenceChartAnnotationSchema)
+    .max(MAX_EVIDENCE_CHART_ANNOTATIONS)
     .optional(),
-  /** The source file backing this evidence, when the agent read code. */
-  code: investigationEvidenceCodeSchema.optional(),
+});
+export type EvidenceChart = z.infer<typeof evidenceChartSchema>;
+export type EvidenceChartSeries = z.infer<typeof evidenceChartSeriesSchema>;
+export type EvidenceChartAnnotation = z.infer<typeof evidenceChartAnnotationSchema>;
+
+/**
+ * One observation supporting a claim the investigation makes. Evidence is self-contained: a
+ * Markdown description (text, tables, links) and an optional static chart, so it works for every
+ * data source, including data that is not available in the local cluster.
+ */
+export const investigationEvidenceSchema = z.object({
+  /** Markdown: what was observed and why it bears on the claim. Tables and links are allowed. */
+  description: z.string().max(MAX_TEXT_LENGTH),
+  /** Optional static chart visualizing the observation. */
+  chart: evidenceChartSchema.optional(),
 });
 export type InvestigationEvidence = z.infer<typeof investigationEvidenceSchema>;
 
@@ -107,18 +121,57 @@ export const investigationImpactEntitySchema = z.object({
   feature_id: z.string().max(MAX_ID_LENGTH).optional(),
   stream_name: z.string().max(MAX_ID_LENGTH).optional(),
   /**
-   * One evidence artifact linking this entity to the investigation — the query that shows
-   * the failure signal. Same shape as hypothesis evidence; prefer esql_query + time_range
-   * so the UI can render a chart.
+   * One evidence artifact linking this entity to the investigation — ideally a chart of the
+   * failure signal for this entity.
    */
   evidence: investigationEvidenceSchema.optional(),
 });
 export type InvestigationImpactEntity = z.infer<typeof investigationImpactEntitySchema>;
 
 export const investigationImpactSchema = z.object({
+  /**
+   * Business-facing account of the impact: what was affected, how badly, for how long, and how
+   * broadly (users, requests, regions). Lets a reader prioritise and explain the incident.
+   */
+  summary: z.string().max(MAX_TEXT_LENGTH).optional(),
   entities: z.array(investigationImpactEntitySchema).max(MAX_IMPACT_ENTITIES),
 });
 export type InvestigationImpact = z.infer<typeof investigationImpactSchema>;
+
+/** Max timeline events an investigation can emit. Keep in sync with the YAML maxItems. */
+export const MAX_TIMELINE_EVENTS = 20;
+
+export const INVESTIGATION_TIMELINE_EVENT_TYPES = [
+  'change',
+  'symptom',
+  'alert',
+  'recovery',
+  'other',
+] as const;
+
+/**
+ * One relevant event in the investigated system — a deploy or config change, the onset of a
+ * symptom, an alert firing, a recovery. Not the investigation's own steps.
+ */
+export const investigationTimelineEventSchema = z.object({
+  /** When it happened, as an ISO 8601 timestamp. */
+  timestamp: z.string().max(MAX_TIMESTAMP_LENGTH),
+  type: z.enum(INVESTIGATION_TIMELINE_EVENT_TYPES),
+  /** What happened, as one short plain-text sentence. */
+  summary: z.string().max(MAX_MEDIUM_STRING_LENGTH),
+});
+export type InvestigationTimelineEvent = z.infer<typeof investigationTimelineEventSchema>;
+
+const timestampSortKey = (timestamp: string): number => {
+  const parsed = Date.parse(timestamp);
+  return Number.isNaN(parsed) ? Number.POSITIVE_INFINITY : parsed;
+};
+
+/** Chronological order; events with unparseable timestamps keep their order at the end. */
+const sortByTimestamp = (events: InvestigationTimelineEvent[]): InvestigationTimelineEvent[] =>
+  [...events].sort(
+    (first, second) => timestampSortKey(first.timestamp) - timestampSortKey(second.timestamp)
+  );
 
 /** Max evidence entries per hypothesis. Keep in sync with the YAML maxItems. */
 export const MAX_HYPOTHESIS_EVIDENCE = 3;
@@ -206,13 +259,17 @@ export const investigationStateSchema = z.object({
    * as the cause becomes clear. Optional so a snapshot without one keeps the seeded title.
    */
   title: z.string().max(MAX_TITLE_LENGTH).optional(),
-  /** Current ("what's happening now") or final narrative summary of the investigation. */
+  /**
+   * "What happened": a short, factual TL;DR of the observed issue and the findings — symptoms,
+   * observations, and what was established. While running, what is happening right now. The
+   * root-cause narrative belongs in `conclusion`.
+   */
   summary: z.string().max(MAX_TEXT_LENGTH),
   hypotheses: z.array(investigationHypothesisSchema).max(MAX_HYPOTHESES),
   /**
-   * The final answer — the mechanism/root-cause narrative, as plain prose (no markdown headings
-   * or bullet lists). Populated once a hypothesis is `confirmed`; absent while still
-   * investigating. Actionable steps belong in `recommendations`, not here.
+   * The final answer — the best-supported explanation of why the issue occurred, as plain prose
+   * (no markdown headings or bullet lists). Populated once a hypothesis is `confirmed`; absent
+   * while still investigating. Actionable steps belong in `recommendations`, not here.
    */
   conclusion: z.string().max(MAX_TEXT_LENGTH).optional(),
   /**
@@ -252,5 +309,14 @@ export const investigationStateSchema = z.object({
    * features; finalized after hypotheses settle. At most 10 entries; service-level preferred.
    */
   impact: investigationImpactSchema.optional(),
+  /**
+   * Chronological list of the relevant events in the investigated system (changes, symptoms,
+   * alerts, recoveries). Optional so existing persisted investigations remain valid.
+   */
+  timeline: z
+    .array(investigationTimelineEventSchema)
+    .max(MAX_TIMELINE_EVENTS)
+    .overwrite(sortByTimestamp)
+    .optional(),
 });
 export type InvestigationState = z.infer<typeof investigationStateSchema>;

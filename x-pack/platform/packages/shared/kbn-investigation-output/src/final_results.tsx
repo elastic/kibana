@@ -189,7 +189,11 @@ const BlindSpotRow: React.FC<{
  * sections. Renders `null` when the investigation reported none of the three. The caller decides
  * when to show it — a mid-run conclusion is still a draft.
  */
-export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state }) => {
+export const FinalResults: React.FC<{
+  state: InvestigationState;
+  /** Put a "Conclusion" heading above the conclusion, for layouts where every section is titled. */
+  showConclusionTitle?: boolean;
+}> = ({ state, showConclusionTitle = false }) => {
   const { conclusion, recommendations, blind_spots: blindSpots } = state;
   const [selectedRecommendation, setSelectedRecommendation] =
     useState<InvestigationRecommendation>();
@@ -208,7 +212,17 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
       data-test-subj="investigationOutputFinalResults"
     >
       {hasVisibleText(conclusion) && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="investigationOutputConclusion">
+          {showConclusionTitle && (
+            <>
+              <SectionTitle>
+                {i18n.translate('xpack.investigationOutput.conclusionTitle', {
+                  defaultMessage: 'Conclusion',
+                })}
+              </SectionTitle>
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
         </EuiFlexItem>
       )}
