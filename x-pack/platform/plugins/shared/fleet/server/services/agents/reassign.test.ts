@@ -223,6 +223,34 @@ describe('reassignAgents kuery construction', () => {
       })
     );
   });
+
+  it('skips namespace filter for cross-space kuery (spaceId "*") so non-default-space agents are matched', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    // simulate an unscoped internal client by overriding getCurrentNamespace to return undefined
+    soClient.getCurrentNamespace = jest.fn().mockReturnValue(undefined);
+    const unscopedClient = soClient;
+
+    // make the filter return an empty string for undefined so buildFilterWithNamespace is a no-op
+    mockAgentsKueryNamespaceFilter.mockResolvedValueOnce(undefined);
+
+    await reassignAgents(
+      unscopedClient,
+      esClient,
+      { kuery: 'status:online', spaceId: '*', _internalCrossSpace: true },
+      regularAgentPolicySO2.id
+    );
+
+    // The key regression guard: agentsKueryNamespaceFilter must receive undefined,
+    // meaning no space restriction is applied. If the default-space filter were applied
+    // instead, non-default-space agents would be invisible to this query.
+    expect(mockAgentsKueryNamespaceFilter).toHaveBeenCalledWith(undefined);
+    // buildFilterWithNamespace wraps the single kuery in parens even without a namespace prefix
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      unscopedClient,
+      expect.objectContaining({ kuery: '(status:online)' })
+    );
+  });
 });
 
 describe('reassignAgents kuery path — cheap count and sync/async branching', () => {
