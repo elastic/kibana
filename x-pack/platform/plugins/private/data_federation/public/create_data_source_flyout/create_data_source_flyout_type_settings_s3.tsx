@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
@@ -13,13 +13,29 @@ import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
+import { FederatedIdentityDeployPanel } from './federated_identity_deploy_panel';
 import { FederatedIdentityManualSetup } from './federated_identity_manual_setup';
+import type {
+  FederatedIdentitySetupMethod,
+  FederatedIdentitySetupMethodOption,
+} from './federated_identity_setup_method_cards';
+import { FederatedIdentitySetupMethodCards } from './federated_identity_setup_method_cards';
 import {
+  getS3FederatedIdentityDeployConfig,
   getS3FederatedIdentityManualSteps,
   s3FederatedIdentitySetupStrings,
 } from './federated_identity_s3_setup_content';
 
 const ROLE_ARN_PLACEHOLDER = 'arn:aws:iam::112233445566:role/elastic-data-federation';
+
+const SETUP_METHOD_OPTIONS: FederatedIdentitySetupMethodOption[] = [
+  {
+    id: 'cloudformation',
+    label: s3FederatedIdentitySetupStrings.cloudFormationMethod,
+    icon: 'logoAWS',
+  },
+  { id: 'manual', label: s3FederatedIdentitySetupStrings.manualMethod, icon: 'consoleApp' },
+];
 
 export function CreateDataSourceFlyoutTypeSettingsS3({
   control,
@@ -181,27 +197,53 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
     };
   }, [unregister]);
 
+  const [setupMethod, setSetupMethod] = useState<FederatedIdentitySetupMethod>('cloudformation');
+
   const { jwtIssuer, deploymentId } = cloudInfo ?? {};
+  // The setup commands/template need both values, so without either we show only the
+  // plain Role ARN field.
   const setupValues = jwtIssuer && deploymentId ? { jwtIssuer, subject: deploymentId } : undefined;
+  const isCloudFormation = Boolean(setupValues) && setupMethod === 'cloudformation';
+  const roleArnHelpText = isCloudFormation
+    ? s3FederatedIdentitySetupStrings.deployRoleArnHelp
+    : s3FederatedIdentitySetupStrings.roleArnHelp;
 
   return (
     <>
       {setupValues ? (
         <>
-          <FederatedIdentityManualSetup
-            intro={s3FederatedIdentitySetupStrings.manualIntro}
-            steps={getS3FederatedIdentityManualSteps(setupValues)}
+          <FederatedIdentitySetupMethodCards
+            options={SETUP_METHOD_OPTIONS}
+            selectedMethod={setupMethod}
+            onMethodChange={setSetupMethod}
             testSubjPrefix="createDataSourceFlyoutS3Federated"
           />
+          <EuiSpacer size="l" />
+          {setupMethod === 'cloudformation' ? (
+            <FederatedIdentityDeployPanel
+              config={getS3FederatedIdentityDeployConfig(setupValues)}
+              testSubjPrefix="createDataSourceFlyoutS3Federated"
+            />
+          ) : (
+            <FederatedIdentityManualSetup
+              intro={s3FederatedIdentitySetupStrings.manualIntro}
+              steps={getS3FederatedIdentityManualSteps(setupValues)}
+              testSubjPrefix="createDataSourceFlyoutS3Federated"
+            />
+          )}
           <EuiSpacer size="l" />
         </>
       ) : null}
       <EuiFormRow
-        label={s3FederatedIdentitySetupStrings.roleArnLabel}
+        label={
+          isCloudFormation
+            ? s3FederatedIdentitySetupStrings.deployRoleArnLabel
+            : s3FederatedIdentitySetupStrings.roleArnLabel
+        }
         fullWidth
         isInvalid={Boolean(roleArnState.error)}
         error={roleArnState.error?.message}
-        helpText={setupValues ? s3FederatedIdentitySetupStrings.roleArnHelp : undefined}
+        helpText={setupValues ? roleArnHelpText : undefined}
       >
         <EuiFieldText
           data-test-subj="createDataSourceFlyoutS3FederatedRoleArn"
