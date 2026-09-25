@@ -38,12 +38,16 @@ describe('useCaseAttachmentWorkflowContext', () => {
 
   it('returns the case id and an executor factory inside a CaseAttachmentWorkflowProvider', () => {
     const { result } = renderHook(() => useCaseAttachmentWorkflowContext(), { wrapper });
-    expect(result.current).toEqual({ caseId: 'case-1', createExecutor: expect.any(Function) });
+    expect(result.current).toEqual({
+      status: 'available',
+      caseId: 'case-1',
+      createExecutor: expect.any(Function),
+    });
   });
 
-  it('returns undefined inside the provider when the user cannot run workflows through Cases', () => {
+  it('returns an unavailable status inside the provider when the user cannot run workflows through Cases', () => {
     mockUseCanRunCaseWorkflow.mockReturnValue(false);
     const { result } = renderHook(() => useCaseAttachmentWorkflowContext(), { wrapper });
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual({ status: 'unavailable', caseId: 'case-1' });
   });
 });

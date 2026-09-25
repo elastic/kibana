@@ -51,6 +51,7 @@ export interface AlertWorkflowsPanelProps {
    * the Cases API with a `cases.attachment` origin so the run appears in the case activity feed.
    * Absent for bulk actions (even a single-alert bulk selection uses `cases.attachments`).
    * Outside a case the value is ignored — the panel falls back to the generic Workflows API.
+   * Inside a case where Cases runs are unavailable, the menu hooks do not render this panel.
    */
   originAlertId?: string;
 }
@@ -63,10 +64,10 @@ export const AlertWorkflowsPanel = ({
   originAlertId,
 }: AlertWorkflowsPanelProps) => {
   // When rendered inside a case's attachment surface, route through the Cases API so the run
-  // is authorized, audited, and recorded in the case activity feed. The panel falls back to its
-  // built-in executor (generic Workflows API) when `runWorkflow` is undefined.
+  // is authorized, audited, and recorded in the case activity feed. Outside a case the panel
+  // falls back to its built-in executor (generic Workflows API) when `runWorkflow` is undefined.
   const selectedAlertIds = useMemo(() => alertIds.map(({ _id }) => _id), [alertIds]);
-  const caseRunProps = useCaseAttachmentWorkflowRun({
+  const { runWorkflow, showSuccessToast } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
     target:
       originAlertId !== undefined
@@ -87,7 +88,8 @@ export const AlertWorkflowsPanel = ({
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      {...caseRunProps}
+      runWorkflow={runWorkflow}
+      showSuccessToast={showSuccessToast}
       visibility={ALERT_WORKFLOW_VISIBILITY}
       sortWorkflow={sortAlertWorkflow}
       filterWorkflow={isAlertWorkflow}
@@ -120,9 +122,13 @@ export const useRunAlertWorkflowPanel = ({
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite } = useAlertsPrivileges();
+  // Inside a case, only offer the action when the run can be recorded on the case.
+  const { caseRouting } = useCaseAttachmentWorkflowRun({
+    attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
+  });
   const canRunWorkflow = useMemo(
-    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,
-    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
+    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow && caseRouting !== 'unavailable',
+    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow, caseRouting]
   );
 
   const runWorkflowMenuItem: AlertTableContextMenuItem[] = useMemo(

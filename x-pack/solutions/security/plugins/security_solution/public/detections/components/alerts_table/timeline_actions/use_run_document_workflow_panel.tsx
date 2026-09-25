@@ -39,7 +39,8 @@ export interface DocumentWorkflowsPanelProps {
    * When set, the panel was opened from a single-document row action inside a case. The
    * executor routes through the Cases API with a `cases.attachment` origin so the run appears in
    * the case activity feed. Outside a case the value is ignored — the panel falls back to
-   * the generic Workflows API.
+   * the generic Workflows API. Inside a case, `useRunDocumentWorkflowPanel` does not render this
+   * panel without it.
    */
   originEventId?: string;
 }
@@ -51,7 +52,7 @@ export const DocumentWorkflowsPanel = ({
   onExecute,
   originEventId,
 }: DocumentWorkflowsPanelProps) => {
-  const caseRunProps = useCaseAttachmentWorkflowRun({
+  const { runWorkflow, showSuccessToast } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
     target: originEventId !== undefined ? { attachmentId: originEventId } : undefined,
   });
@@ -69,7 +70,8 @@ export const DocumentWorkflowsPanel = ({
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      {...caseRunProps}
+      runWorkflow={runWorkflow}
+      showSuccessToast={showSuccessToast}
       sortWorkflow={sortManualWorkflow}
       onClose={onClose}
       onExecute={onExecute}
@@ -86,7 +88,8 @@ export interface UseRunDocumentWorkflowPanelProps {
   /**
    * When set, the document panel routes the run through the Cases API with a `cases.attachment`
    * origin. Pass `ecsRowData._id` from the case events table row action. Callers outside a
-   * case context omit this and get the generic Workflows API executor.
+   * case context omit this and get the generic Workflows API executor. Inside a case, the menu
+   * item is hidden when this is omitted or when Cases runs are unavailable.
    */
   originEventId?: string;
 }
@@ -105,10 +108,16 @@ export const useRunDocumentWorkflowPanel = ({
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
+  // Inside a case, only offer the action when the run can be recorded on the case.
+  const { caseRouting } = useCaseAttachmentWorkflowRun({
+    attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
+  });
+  const canRunInCase =
+    caseRouting === 'outside' || (caseRouting === 'available' && originEventId !== undefined);
 
   const canRunWorkflow = useMemo(
-    () => workflowUIEnabled && canExecuteWorkflow,
-    [workflowUIEnabled, canExecuteWorkflow]
+    () => workflowUIEnabled && canExecuteWorkflow && canRunInCase,
+    [workflowUIEnabled, canExecuteWorkflow, canRunInCase]
   );
 
   const runWorkflowMenuItem: DocumentTableContextMenuItem[] = useMemo(

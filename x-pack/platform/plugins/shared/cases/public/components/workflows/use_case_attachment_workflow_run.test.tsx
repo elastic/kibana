@@ -59,10 +59,14 @@ describe('useCaseAttachmentWorkflowRun', () => {
       })
     );
 
-    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
+    expect(result.current).toEqual({
+      runWorkflow: undefined,
+      showSuccessToast: true,
+      caseRouting: 'outside',
+    });
   });
 
-  it('falls back when the user cannot run workflows through Cases', () => {
+  it('reports unavailable routing when the user cannot run workflows through Cases', () => {
     mockUseCanRunCaseWorkflow.mockReturnValue(false);
     const { result } = renderHook(
       () =>
@@ -73,16 +77,24 @@ describe('useCaseAttachmentWorkflowRun', () => {
       { wrapper }
     );
 
-    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
+    expect(result.current).toEqual({
+      runWorkflow: undefined,
+      showSuccessToast: true,
+      caseRouting: 'unavailable',
+    });
   });
 
-  it('falls back without a row or bulk target', () => {
+  it('reports available routing without an executor when there is no row or bulk target', () => {
     const { result } = renderHook(
       () => useCaseAttachmentWorkflowRun({ attachmentType: 'security.alert' }),
       { wrapper }
     );
 
-    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
+    expect(result.current).toEqual({
+      runWorkflow: undefined,
+      showSuccessToast: true,
+      caseRouting: 'available',
+    });
   });
 
   it('suppresses the panel success toast when it returns a Cases executor', () => {
@@ -98,6 +110,7 @@ describe('useCaseAttachmentWorkflowRun', () => {
     expect(result.current).toEqual({
       runWorkflow: expect.any(Function),
       showSuccessToast: false,
+      caseRouting: 'available',
     });
   });
 

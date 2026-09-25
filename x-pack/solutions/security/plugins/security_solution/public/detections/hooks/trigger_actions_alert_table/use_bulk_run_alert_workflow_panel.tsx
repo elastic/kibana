@@ -11,6 +11,8 @@ import type {
   RenderContentPanelProps,
 } from '@kbn/response-ops-alerts-table/types';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { useCaseAttachmentWorkflowRun } from '@kbn/cases-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import * as i18n from '../../components/alerts_table/translations';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -31,9 +33,13 @@ export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResu
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite } = useAlertsPrivileges();
+  // Inside a case, only offer the action when the run can be recorded on the case.
+  const { caseRouting } = useCaseAttachmentWorkflowRun({
+    attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
+  });
   const canRunWorkflow = useMemo(
-    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,
-    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
+    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow && caseRouting !== 'unavailable',
+    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow, caseRouting]
   );
 
   const renderContent = useCallback((props: RenderContentPanelProps) => {
