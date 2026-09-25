@@ -281,7 +281,6 @@ export class AlertZeroPublicPlugin
         React.createElement(LazyConnectedLinkedInvestigations, props)
       );
 
-
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,
       templateId: TEMPLATE_ID_INVESTIGATION,
