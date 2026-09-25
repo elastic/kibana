@@ -21,8 +21,29 @@ export interface FetchFromSourceResult<T> {
 
 export const EMPTY_SOURCE_ERRORS: EpisodeSourceError[] = [];
 
-const toError = (value: unknown): Error =>
-  value instanceof Error ? value : new Error(String(value));
+interface ErrorLikeValue {
+  name?: unknown;
+  message?: unknown;
+}
+
+// Expression (ES|QL) failures reject with a plain `ErrorLike` object; keeping it as the
+// cause preserves `original.attributes` for `shouldSwallowFetchError`.
+const toError = (value: unknown): Error => {
+  if (value instanceof Error) {
+    return value;
+  }
+  if (value == null || typeof value !== 'object') {
+    return new Error(String(value));
+  }
+  const { name, message } = value as ErrorLikeValue;
+  const error = new Error(typeof message === 'string' ? message : String(value), {
+    cause: value,
+  });
+  if (typeof name === 'string') {
+    error.name = name;
+  }
+  return error;
+};
 
 const EMPTY_RESULT: FetchFromSourceResult<never> = { results: [], errors: [] };
 

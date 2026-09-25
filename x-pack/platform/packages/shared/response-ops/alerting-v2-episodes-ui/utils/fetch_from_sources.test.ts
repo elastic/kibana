@@ -6,6 +6,7 @@
  */
 
 import { fetchFromSource, fetchFromV2AndSource, settleFetch } from './fetch_from_sources';
+import { shouldSwallowFetchError } from './should_swallow_fetch_error';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 
 describe('settleFetch', () => {
@@ -29,6 +30,60 @@ describe('settleFetch', () => {
     expect(result.results).toEqual([]);
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].error).toEqual(new Error('nope'));
+  });
+
+  describe('expression ErrorLike rejections', () => {
+    const esqlSecurityError = {
+      name: 'EsError',
+      message: 'action [indices:data/read/esql] is unauthorized',
+      original: {
+        attributes: { error: { type: 'security_exception' } },
+      },
+    };
+
+    it('keeps the name, message and original error as the cause', async () => {
+      const {
+        errors: [{ error }],
+      } = await settleFetch('v2', async () => Promise.reject(esqlSecurityError));
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.name).toBe('EsError');
+      expect(error.message).toBe('action [indices:data/read/esql] is unauthorized');
+      expect(error.cause).toBe(esqlSecurityError);
+    });
+
+    it('is swallowed as a privilege error', async () => {
+      const {
+        errors: [{ error }],
+      } = await settleFetch('v2', async () => Promise.reject(esqlSecurityError));
+
+      expect(shouldSwallowFetchError(error)).toBe(true);
+    });
+
+    it('is still surfaced for non-privilege ES|QL errors', async () => {
+      const {
+        errors: [{ error }],
+      } = await settleFetch('v2', async () =>
+        Promise.reject({
+          name: 'EsError',
+          message: 'parsing error',
+          original: { attributes: { error: { type: 'parsing_exception' } } },
+        })
+      );
+
+      expect(error.message).toBe('parsing error');
+      expect(shouldSwallowFetchError(error)).toBe(false);
+    });
+
+    it('keeps AbortError names so aborted queries are swallowed', async () => {
+      const {
+        errors: [{ error }],
+      } = await settleFetch('v2', async () =>
+        Promise.reject({ name: 'AbortError', message: 'The user aborted a request.' })
+      );
+
+      expect(shouldSwallowFetchError(error)).toBe(true);
+    });
   });
 });
 
