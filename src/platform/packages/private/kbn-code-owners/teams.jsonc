@@ -653,6 +653,21 @@
     ]
   },
   {
+    "id": "obs-signals-ai-o11y",
+    "name": "Obs Signals AI O11y",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-ai-o11y",
+      "label": "Team:obs-signals-ai-o11y"
+    },
+    "responsibilities": [
+      "GenAI tab",
+      "AI observability"
+    ]
+  },
+  {
     "id": "obs-ux-management-team",
     "name": "Obs Ux Management Team",
     "areas": [

@@ -71,6 +71,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/observability-bi',
     'elastic/observability-design',
     'elastic/observability-ui',
+    'elastic/obs-signals-ai-o11y',
     'elastic/obs-signals-logs-team',
     'elastic/obs-signals-metrics-team',
     'elastic/observablt-robots',
