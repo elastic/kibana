@@ -1,10 +1,42 @@
 # AlertZero plugin (`@kbn/alertzero-plugin`)
 
-Security Watch investigation queue and catalog behind `xpack.alertzero.enabled`.
+Security Watch investigation queue and catalog behind the `securitySolution:enableAlertZero` advanced setting.
 
 ## Enablement
 
-Add to `kibana.yml` (or `config/kibana.dev.yml` for local dev):
+### Prerequisite: `xpack.agenticInvestigations.enabled`
+
+AlertZero lists `agenticInvestigations` in `requiredPlugins`, so Kibana will not load the AlertZero plugin at all when `agenticInvestigations` is disabled. That plugin defaults to `false`, so on a stock deployment neither of the two gates below has any effect until this is set first:
+
+```yaml
+xpack.agenticInvestigations.enabled: true
+```
+
+Both gates described below are skipped — and the advanced setting is never registered — unless this prerequisite is satisfied.
+
+### Two independent gates, with different scopes and different jobs
+
+### `securitySolution:enableAlertZero` — the user-facing, per-space gate
+
+A namespace-scoped Kibana advanced setting (default `false`), registered by this plugin in `server/ui_settings.ts`. Turn it on in **Stack Management → Advanced Settings** for the space you want AlertZero in, or pin it for a whole deployment:
+
+```yaml
+uiSettings.overrides:
+  securitySolution:enableAlertZero: true
+```
+
+It controls four things. Enabling takes effect live, but **disabling takes full effect only after a page reload** — the setting is registered with `requiresPageReload: true`, so Advanced Settings prompts for one. Dismiss that prompt and the Agent Builder surfaces in the last row stay in place until the page is reloaded:
+
+| Surface | When off |
+|---------|----------|
+| Browser app `/app/alertzero` | Registered but `AppStatus.inaccessible`; every page renders core's "Application unavailable" |
+| Security solution navigation | AlertZero nodes disappear — core empties `visibleIn` and `deepLinks` for an inaccessible app, and chrome drops nav nodes whose link has no nav link. The navigation trees hold no check of their own |
+| HTTP `/internal/alertzero/*` | `404`, via the `withAlertZeroEnabled` wrapper on every route |
+| Agent Builder Investigation template and its tabs | Absent from the next page load. Agent Builder's conversation template contract has no deregistration counterpart, so a session that already registered them keeps them until it reloads; in that window opening one raises an error instead of loading an investigation |
+
+### `xpack.alertzero.enabled` — the deployment kill switch
+
+A plugin config flag, defaulting to `false`. It is *not* the user-facing toggle; it is a deployment-level gate that must be on for AlertZero to register anything. Turning it on or off requires a restart:
 
 ```yaml
 xpack.alertzero.enabled: true
@@ -14,9 +46,12 @@ xpack.alertzero.enabled: true
 
 AlertZero reads live data only. To work on the UI without waiting for Workers to produce proposals, seed the queue with `scripts/seed_proposal_attachments.sh`, which writes real proposal documents and Agent Builder conversations into your local stack.
 
-Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space.
+Everything in the table below is skipped when it is off — including registration of the advanced setting itself, which is why `withAlertZeroEnabled` can never read an unregistered key.
 
-Restart Kibana after changing config, then open `/app/alertzero` (or use the Security left rail).
+
+### Worker lifecycle
+
+Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space. Turning the *advanced setting* off does **not** trigger cleanup; it only hides the surfaces.
 
 To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
 
@@ -27,16 +62,19 @@ uiSettings.overrides:
 
 This is optional. AlertZero's own Watch pages work without it; it only affects what the Workflows UI lists (default `false`).
 
-### When disabled (`xpack.alertzero.enabled: false`) — no production pollution
+### When the kill switch is off (`xpack.alertzero.enabled: false`) — no production pollution
 
 | Surface | Behavior |
 |---------|----------|
+| `securitySolution:enableAlertZero` | Not registered (absent from Advanced Settings) |
 | HTTP `/internal/alertzero/*` | Not registered |
 | Kibana feature / privileges | Not registered |
 | Browser app `/app/alertzero` | Not registered (nav links to `alertzero` / `alertzero:*` are removed by chrome) |
 | Managed workflow **owner** | Not registered (`registerManagedWorkflowOwner` skipped) |
 | Managed workflow initialization | Not called |
 | Leftover installed Worker documents | Global Workflows orphan cleanup removes docs whose owner is unregistered |
+
+With the kill switch on but the advanced setting off, the Kibana feature privileges *are* registered — `features.registerKibanaFeature` cannot be scoped per space — so the `alertzero` read/write privileges appear in the Roles and Spaces pickers regardless of the per-space toggle.
 
 Definitions still exist in `@kbn/workflows/managed` (code registry only). Worker definitions are **not** installed into `.workflows-*` until a user enables that Worker or saves settings on it. AlertZero startup installs only the three global rule workflows before `ready()` reconciles already-installed dynamic documents.
 
@@ -93,7 +131,7 @@ An investigation has no route of its own: it is a templated Agent Builder conver
 details open in Agent Builder's conversation flyout (`?selectedConversationId=` on the queue) and
 its chat opens at `/app/agent_builder/agents/{agentId}/conversations/{id}`.
 
-### Security left-rail order (when AlertZero enabled)
+### Security left-rail order (when `securitySolution:enableAlertZero` is on)
 
 **AlertZero → Discover → Dashboards → Alerts → Attacks → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
 
