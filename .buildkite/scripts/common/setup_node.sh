@@ -73,9 +73,20 @@ export PATH="$NODE_BIN_DIR:$PATH"
 
 echo " -- node: version=$(node --version)"
 
-echo " -- enabling corepack-managed pnpm"
+echo " -- enabling pnpm"
 export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+# Keep corepack state and shims under the Node cache. Official Node 24
+# ships corepack and can write to $NODE_BIN_DIR; the experiment's 26.8.1
+# tarball may omit corepack, and the agent corepack tries /usr/bin (EACCES).
+export COREPACK_HOME="${NODE_CACHE_DIR}/corepack"
+mkdir -p "$COREPACK_HOME"
 PNPM_VERSION="$(node -p "require('${KIBANA_DIR}/package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
-corepack enable
-corepack prepare "pnpm@${PNPM_VERSION}" --activate
+if command -v corepack >/dev/null 2>&1 &&
+  corepack enable --install-directory "$NODE_BIN_DIR" &&
+  corepack prepare "pnpm@${PNPM_VERSION}" --activate; then
+  echo " -- pnpm from corepack"
+else
+  echo " -- corepack unavailable; installing pnpm@${PNPM_VERSION} with npm"
+  npm install -g "pnpm@${PNPM_VERSION}"
+fi
 echo " -- pnpm: version=$(pnpm --version)"
