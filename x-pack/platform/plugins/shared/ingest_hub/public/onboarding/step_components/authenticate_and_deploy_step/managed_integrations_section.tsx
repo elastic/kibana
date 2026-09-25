@@ -121,13 +121,17 @@ export function ManagedIntegrationsSection({
 
   useEffect(() => {
     if (isDone) setIsOpen(false);
+    else setIsOpen(true); // Re-open when drift is detected (isDone reverts from true to false).
   }, [isDone]);
 
   // Re-seed from session so the user doesn't have to re-enter credentials they already provided
   // (e.g. after navigating Back/Forward or adding a new service without changing auth).
   // isStaticKeysEditMode intentionally skips the seed: the replace-flow requires new credentials.
+  // Identity federation with an existing connector is ready immediately — the form calls
+  // onReadyChange(false) if the connector turns out to be broken.
   const [isDeployReady, setIsDeployReady] = useState(() => {
     if (isStaticKeysEditMode) return false;
+    if (authenticateAndDeployStep.connectorId) return true;
     const keys = authenticateAndDeployStep.staticKeys;
     return Boolean(keys?.access_key_id && keys?.secret_access_key);
   });

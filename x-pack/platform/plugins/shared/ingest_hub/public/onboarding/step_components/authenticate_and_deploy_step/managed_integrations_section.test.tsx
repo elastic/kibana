@@ -280,9 +280,15 @@ describe('ManagedIntegrationsSection', () => {
   });
 
   describe('Deploy button readiness', () => {
-    it('Deploy button is disabled initially', () => {
+    it('Deploy button is disabled initially (no credentials, no connector)', () => {
       renderSection();
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+
+    it('Deploy button is enabled immediately when connectorId is present (identity federation drift)', () => {
+      setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
     });
 
     it('Deploy button enables when fleet component calls onReadyChange(true)', () => {
@@ -463,6 +469,48 @@ describe('ManagedIntegrationsSection', () => {
         );
       });
       expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
+    });
+
+    it('auto-reopens section when isDone transitions true → false (drift detected)', () => {
+      const { rerender } = renderSection({ isDone: false, showIdentityFederation: true });
+      // Deploy: section closes
+      act(() => {
+        rerender(
+          <I18nProvider>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <ManagedIntegrationsSection
+                serviceCount={3}
+                showIdentityFederation={true}
+                iacIntegrations={IAC_INTEGRATIONS}
+                onDeploy={jest.fn()}
+                isDeploying={false}
+                isDone={true}
+                hasFailed={false}
+              />
+            </React.Suspense>
+          </I18nProvider>
+        );
+      });
+      expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
+      // Drift detected: section auto-opens
+      act(() => {
+        rerender(
+          <I18nProvider>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <ManagedIntegrationsSection
+                serviceCount={3}
+                showIdentityFederation={true}
+                iacIntegrations={IAC_INTEGRATIONS}
+                onDeploy={jest.fn()}
+                isDeploying={false}
+                isDone={false}
+                hasFailed={false}
+              />
+            </React.Suspense>
+          </I18nProvider>
+        );
+      });
+      expect(screen.getByTestId('identity-federation')).toBeInTheDocument();
     });
 
     it('shows Done badge in header when isDone', () => {
