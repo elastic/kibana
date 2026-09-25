@@ -15,6 +15,7 @@ import { registerDeleteDataSource } from './data_sources/delete_data_source';
 import { registerGetDataSourceRoute } from './data_sources/get_data_source';
 import { registerGetAllDataSources } from './data_sources/get_all_data_sources';
 import { registerCreateDataSource } from './data_sources/create_data_source';
+import { registerTestDataSourceConnection } from './data_sources/test_data_source_connection';
 import type { DataFederationConfigType } from '../config';
 
 export function registerDataSetsRoutes(router: IRouter, config: DataFederationConfigType): void {
@@ -26,4 +27,5 @@ export function registerDataSetsRoutes(router: IRouter, config: DataFederationCo
   registerGetDataset(router);
   registerCreateDataset(router);
   registerDeleteDataSet(router);
+  registerTestDataSourceConnection(router, config);
 }

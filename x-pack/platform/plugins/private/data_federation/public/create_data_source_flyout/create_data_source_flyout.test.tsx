@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import type { ToastsStart } from '@kbn/core/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -72,6 +72,7 @@ describe('CreateDataSourceFlyout', () => {
       resolveSave = resolve;
     });
     const onSave = jest.fn().mockReturnValue(savePromise);
+    const onTestConnection = jest.fn().mockResolvedValue({ status: 'success' });
 
     const initialDataSource: DataSource = {
       type: 's3',
@@ -91,6 +92,7 @@ describe('CreateDataSourceFlyout', () => {
           <CreateDataSourceFlyout
             onClose={jest.fn()}
             onSave={onSave}
+            onTestConnection={onTestConnection}
             existingDataSourceNames={[]}
             initialDataSource={initialDataSource}
           />
@@ -123,6 +125,7 @@ describe('CreateDataSourceFlyout', () => {
       featureFlags: {},
     };
     const onSave = jest.fn().mockResolvedValue(null);
+    const onTestConnection = jest.fn().mockResolvedValue({ status: 'success' });
 
     const { getByTestId, queryByText } = render(
       <EuiProvider>
@@ -130,6 +133,7 @@ describe('CreateDataSourceFlyout', () => {
           <CreateDataSourceFlyout
             onClose={jest.fn()}
             onSave={onSave}
+            onTestConnection={onTestConnection}
             existingDataSourceNames={[]}
           />
         </KibanaContextProvider>
@@ -165,6 +169,7 @@ describe('CreateDataSourceFlyout', () => {
       featureFlags: {},
     };
     const onSave = jest.fn().mockResolvedValue('validation_exception: something went wrong');
+    const onTestConnection = jest.fn().mockResolvedValue({ status: 'success' });
 
     const initialDataSource: DataSource = {
       type: 's3',
@@ -181,6 +186,7 @@ describe('CreateDataSourceFlyout', () => {
           <CreateDataSourceFlyout
             onClose={jest.fn()}
             onSave={onSave}
+            onTestConnection={onTestConnection}
             existingDataSourceNames={[]}
             initialDataSource={initialDataSource}
           />
@@ -194,5 +200,199 @@ describe('CreateDataSourceFlyout', () => {
     expect(banner).toHaveTextContent('Could not save the data source');
     expect(banner).toHaveTextContent('validation_exception: something went wrong');
     expect(await findByTestId('createDataSourceFlyoutFooter')).toContainElement(banner);
+  });
+
+  describe('test connection', () => {
+    const editedDataSource: DataSource = {
+      type: 's3',
+      name: 'ds',
+      description: '',
+      settings: {
+        region: 'us-east-1',
+      } as any,
+    } as any;
+
+    const renderFlyout = (onTestConnection: jest.Mock, mode: 'create' | 'edit' = 'edit') => {
+      const services: DataFederationKibanaServices = {
+        dataSourcesClient: createClientMock(),
+        datasetsClient: createDatasetsClientMock(),
+        toasts: createToastsMock(),
+        docLinks: createDocLinksMock(),
+        featureFlags: {},
+      };
+
+      return render(
+        <EuiProvider>
+          <KibanaContextProvider services={services}>
+            <CreateDataSourceFlyout
+              onClose={jest.fn()}
+              onSave={jest.fn().mockResolvedValue(null)}
+              onTestConnection={onTestConnection}
+              existingDataSourceNames={[]}
+              initialDataSource={mode === 'edit' ? editedDataSource : undefined}
+            />
+          </KibanaContextProvider>
+        </EuiProvider>
+      );
+    };
+
+    it('reports a successful connection', async () => {
+      const onTestConnection = jest.fn().mockResolvedValue({ status: 'success' });
+      const { findByTestId } = renderFlyout(onTestConnection);
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+
+      const callout = await findByTestId('createDataSourceFlyoutTestConnectionSuccess');
+      expect(callout).toHaveTextContent('Connection successful');
+      expect(onTestConnection).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 's3', name: 'ds' })
+      );
+    });
+
+    it('shows the failure reason returned by Elasticsearch', async () => {
+      const onTestConnection = jest
+        .fn()
+        .mockResolvedValue({ status: 'failure', error: 'The AWS Access Key Id does not exist.' });
+      const { findByTestId } = renderFlyout(onTestConnection);
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+
+      const callout = await findByTestId('createDataSourceFlyoutTestConnectionFailure');
+      expect(callout).toHaveTextContent('Connection failed');
+      expect(callout).toHaveTextContent('The AWS Access Key Id does not exist.');
+    });
+
+    it('reports a request error apart from a failed connection', async () => {
+      const onTestConnection = jest.fn().mockRejectedValue(new Error('Request timed out'));
+      const { findByTestId, queryByTestId } = renderFlyout(onTestConnection);
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+
+      const callout = await findByTestId('createDataSourceFlyoutTestConnectionError');
+      expect(callout).toHaveTextContent('Could not run the connection test');
+      expect(callout).toHaveTextContent('Request timed out');
+      expect(queryByTestId('createDataSourceFlyoutTestConnectionFailure')).not.toBeInTheDocument();
+    });
+
+    it('ignores the result of a test the configuration changed under', async () => {
+      let resolveTest: (result: { status: string }) => void;
+      const onTestConnection = jest.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolveTest = resolve;
+        })
+      );
+      const { findByTestId, getByTestId, queryByTestId } = renderFlyout(onTestConnection);
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+      await waitFor(() => expect(onTestConnection).toHaveBeenCalled());
+
+      fireEvent.change(getByTestId('createDataSourceFlyoutS3Region'), {
+        target: { value: 'eu-west-1' },
+      });
+      resolveTest!({ status: 'success' });
+
+      await waitFor(() => {
+        expect(getByTestId('createDataSourceFlyoutSubmit')).not.toBeDisabled();
+      });
+      expect(queryByTestId('createDataSourceFlyoutTestConnectionSuccess')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the untestable callout for an unknown status', async () => {
+      const onTestConnection = jest.fn().mockResolvedValue({ status: 'something_new' });
+      const { findByTestId } = renderFlyout(onTestConnection);
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+
+      expect(
+        await findByTestId('createDataSourceFlyoutTestConnectionUntestable')
+      ).toHaveTextContent('Connection could not be verified');
+    });
+
+    it('shows an untestable result as a warning', async () => {
+      const onTestConnection = jest.fn().mockResolvedValue({
+        status: 'untestable',
+        message: 'Create a dataset to validate access.',
+      });
+      const { findByTestId } = renderFlyout(onTestConnection);
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+
+      const callout = await findByTestId('createDataSourceFlyoutTestConnectionUntestable');
+      expect(callout).toHaveTextContent('Connection could not be verified');
+      expect(callout).toHaveTextContent('Create a dataset to validate access.');
+    });
+
+    it('discards the result when the configuration changes', async () => {
+      const onTestConnection = jest.fn().mockResolvedValue({ status: 'success' });
+      const { findByTestId, getByTestId, queryByTestId } = renderFlyout(onTestConnection);
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+      await findByTestId('createDataSourceFlyoutTestConnectionSuccess');
+
+      fireEvent.change(getByTestId('createDataSourceFlyoutS3Region'), {
+        target: { value: 'eu-west-1' },
+      });
+
+      await waitFor(() => {
+        expect(
+          queryByTestId('createDataSourceFlyoutTestConnectionSuccess')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('discards the result when the authentication method changes', async () => {
+      const onTestConnection = jest.fn().mockResolvedValue({ status: 'success' });
+      const { findByTestId, queryByTestId } = renderFlyout(onTestConnection);
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+      await findByTestId('createDataSourceFlyoutTestConnectionSuccess');
+
+      // The EuiSuperSelect dropdown renders in a portal, outside the render container.
+      // The edited data source has no credentials, so it starts on Anonymous and the first
+      // option is a different method.
+      fireEvent.click(screen.getByTestId('createDataSourceFlyoutAuthentication'));
+      const [firstOption] = await screen.findAllByRole('option');
+      fireEvent.click(firstOption);
+
+      await waitFor(() => {
+        expect(
+          queryByTestId('createDataSourceFlyoutTestConnectionSuccess')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('blocks saving while a test is running', async () => {
+      let resolveTest: (result: { status: string }) => void;
+      const onTestConnection = jest.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolveTest = resolve;
+        })
+      );
+      const { findByTestId, getByTestId } = renderFlyout(onTestConnection);
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+
+      await waitFor(() => {
+        expect(getByTestId('createDataSourceFlyoutSubmit')).toBeDisabled();
+      });
+
+      resolveTest!({ status: 'success' });
+
+      await waitFor(() => {
+        expect(getByTestId('createDataSourceFlyoutSubmit')).not.toBeDisabled();
+      });
+    });
+
+    it('does not run the test when the form is invalid', async () => {
+      const onTestConnection = jest.fn().mockResolvedValue({ status: 'success' });
+      const { findByTestId, queryByText } = renderFlyout(onTestConnection, 'create');
+
+      fireEvent.click(await findByTestId('createDataSourceFlyoutTestConnection'));
+
+      await waitFor(() => {
+        expect(queryByText('Name is required.')).toBeInTheDocument();
+      });
+      expect(onTestConnection).not.toHaveBeenCalled();
+    });
   });
 });

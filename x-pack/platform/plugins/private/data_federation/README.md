@@ -17,6 +17,14 @@ When running on Elastic Cloud, data sources can authenticate using the workload 
 
 The issuer URL is injected by the kibana-controller via `xpack.dataFederation.workloadIdentityIssuerUrl`. If that config key is absent the read-only fields are hidden — no derived URL is shown.
 
+## Connection testing
+
+The data source flyout has a **Test connection** action that checks the configuration currently in the form without saving it. Elasticsearch answers with one of three statuses: `success`, `failure` (with a reason), or `untestable` — the settings are valid but cannot be verified at the data source level, for example anonymous or bucket-scoped credentials.
+
+The Kibana route proxies to Elasticsearch `POST /_query/data_source/_test` ([elasticsearch#157686](https://github.com/elastic/elasticsearch/pull/157686)), which only the cluster `manage` privilege grants: users who manage data sources through `global.data_source` get a 403 from the test even though they can save.
+
+Secrets of a saved data source are read back redacted, so a test started from the edit flyout only covers the credentials the user re-entered.
+
 ## Feature flags
 
 | Key | Default | Description |

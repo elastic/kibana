@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export type { DataSource, DataSourceType, DataSourceWithSecrets } from './datasource_types';
+export type {
+  DataSource,
+  DataSourceConnectionTestResult,
+  DataSourceType,
+  DataSourceWithSecrets,
+} from './datasource_types';
 export {
   ALL_DATA_SOURCE_TYPES,
   DATA_SOURCE_TYPES_TO_HELP_TEXT,
@@ -39,6 +44,12 @@ export const DATA_SOURCES_LIST_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sour
  * - DELETE → Elasticsearch `DELETE /_query/datasource/{id}`
  */
 export const DATA_SOURCE_BY_ID_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sources/{id}` as const;
+
+/**
+ * POST — test whether Elasticsearch can reach a data source configuration before it is saved
+ * (proxies to Elasticsearch `POST /_query/data_source/_test`).
+ */
+export const DATA_SOURCE_TEST_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sources/_test` as const;
 
 /** Resolves `DATA_SOURCE_BY_ID_ROUTE_PATH` with a URL-encoded id segment. */
 export function getDataSourceByIdApiPath(id: string): string {

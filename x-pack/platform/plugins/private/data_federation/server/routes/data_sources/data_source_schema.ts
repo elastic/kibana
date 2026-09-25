@@ -14,40 +14,72 @@ const optionalString = schema.maybe(schema.string({ maxLength: 4096 }));
 // accepted so the client can clear one.
 const nullableSecretString = schema.maybe(schema.nullable(schema.string({ maxLength: 4096 })));
 
-const s3SettingsWithSecretsSchema = schema.object({
+const s3PlaintextSettingsProps = {
   region: optionalString,
   endpoint: optionalString,
   auth: optionalString,
-  access_key: nullableSecretString,
-  secret_key: nullableSecretString,
   role_arn: optionalString,
   jwt_audience: optionalString,
   role_session_name: optionalString,
   sts_endpoint: optionalString,
   sts_region: optionalString,
-});
+};
 
-const gcsSettingsWithSecretsSchema = schema.object({
+const gcsPlaintextSettingsProps = {
   project_id: optionalString,
   endpoint: optionalString,
   token_uri: optionalString,
   auth: optionalString,
-  credentials: nullableSecretString,
   jwt_audience: optionalString,
   sts_audience: optionalString,
   service_account_impersonation_url: optionalString,
-});
+};
 
-const azureSettingsWithSecretsSchema = schema.object({
+const azurePlaintextSettingsProps = {
   endpoint: optionalString,
   account: optionalString,
   auth: optionalString,
-  connection_string: nullableSecretString,
-  key: nullableSecretString,
-  sas_token: nullableSecretString,
   tenant_id: optionalString,
   client_id: optionalString,
   jwt_audience: optionalString,
+};
+
+const s3SettingsWithSecretsSchema = schema.object({
+  ...s3PlaintextSettingsProps,
+  access_key: nullableSecretString,
+  secret_key: nullableSecretString,
+});
+
+const gcsSettingsWithSecretsSchema = schema.object({
+  ...gcsPlaintextSettingsProps,
+  credentials: nullableSecretString,
+});
+
+const azureSettingsWithSecretsSchema = schema.object({
+  ...azurePlaintextSettingsProps,
+  connection_string: nullableSecretString,
+  key: nullableSecretString,
+  sas_token: nullableSecretString,
+});
+
+// The test API has no stored data source to merge into, so a `null` secret has no meaning
+// there: Elasticsearch passes the settings straight to the PUT validator, which rejects it.
+const s3TestSettingsSchema = schema.object({
+  ...s3PlaintextSettingsProps,
+  access_key: optionalString,
+  secret_key: optionalString,
+});
+
+const gcsTestSettingsSchema = schema.object({
+  ...gcsPlaintextSettingsProps,
+  credentials: optionalString,
+});
+
+const azureTestSettingsSchema = schema.object({
+  ...azurePlaintextSettingsProps,
+  connection_string: optionalString,
+  key: optionalString,
+  sas_token: optionalString,
 });
 
 /**
@@ -69,5 +101,25 @@ export const putDataSourceBodySchema = schema.oneOf([
     type: schema.literal('azure'),
     description: schema.string({ maxLength: 1024 }),
     settings: azureSettingsWithSecretsSchema,
+  }),
+]);
+
+/**
+ * Request body for `POST .../data_sources/_test`: only the `type` and `settings` the
+ * Elasticsearch probe reads. Its parser rejects unknown fields, so `name` and
+ * `description` must stay out of this schema even though the PUT accepts them.
+ */
+export const testDataSourceBodySchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('s3'),
+    settings: s3TestSettingsSchema,
+  }),
+  schema.object({
+    type: schema.literal('gcs'),
+    settings: gcsTestSettingsSchema,
+  }),
+  schema.object({
+    type: schema.literal('azure'),
+    settings: azureTestSettingsSchema,
   }),
 ]);

@@ -15,7 +15,15 @@ import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
 import type { DataFederationKibanaServices } from './types';
 
-type MockDataSourcesClient = Pick<DataFederationKibanaServices['dataSourcesClient'], 'delete'>;
+type MockDataSourcesClient = Pick<DataFederationKibanaServices['dataSourcesClient'], 'delete'> &
+  Partial<Pick<DataFederationKibanaServices['dataSourcesClient'], 'testConnection'>>;
+
+const mockTestedDataSource: DataSource = {
+  name: 'ds1',
+  type: 's3',
+  description: '',
+  settings: {},
+};
 
 jest.mock('./data_sources_table', () => ({
   DataSourcesTable: (props: Record<string, unknown>) => {
@@ -48,13 +56,22 @@ jest.mock('./data_sources_table', () => ({
 }));
 
 jest.mock('./create_data_source_flyout', () => ({
-  CreateDataSourceFlyout: (props: { onClose: (result?: { savedChanges?: boolean }) => void }) => (
+  CreateDataSourceFlyout: (props: {
+    onClose: (result?: { savedChanges?: boolean }) => void;
+    onTestConnection: (dataSource: DataSource) => Promise<unknown>;
+  }) => (
     <div data-test-subj="mockCreateDataSourceFlyout">
       <button
         data-test-subj="mockFlyoutCloseSaved"
         onClick={() => props.onClose({ savedChanges: true })}
       />
       <button data-test-subj="mockFlyoutClose" onClick={() => props.onClose()} />
+      <button
+        data-test-subj="mockFlyoutTestConnection"
+        onClick={() => {
+          void props.onTestConnection(mockTestedDataSource);
+        }}
+      />
     </div>
   ),
 }));
@@ -172,6 +189,26 @@ describe('DataSourcesTabContent', () => {
 
     await waitFor(() => {
       expect(loadDataSources).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('runs the flyout connection test through the data sources client', async () => {
+    const testConnection = jest.fn().mockResolvedValue({ status: 'success' });
+
+    await renderComponent({
+      dataSources: [createDataSource('ds1')],
+      dataSets: [],
+      dataSourcesClient: { delete: jest.fn(), testConnection },
+      loadDataSources: jest.fn().mockResolvedValue(undefined),
+    });
+
+    fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
+    fireEvent.click(
+      document.querySelector('[data-test-subj="mockFlyoutTestConnection"]') as Element
+    );
+
+    await waitFor(() => {
+      expect(testConnection).toHaveBeenCalledWith(mockTestedDataSource);
     });
   });
 

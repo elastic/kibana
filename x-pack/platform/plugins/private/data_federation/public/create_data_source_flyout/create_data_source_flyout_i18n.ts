@@ -84,4 +84,59 @@ export const createDataSourceFlyoutStrings = {
     i18n.translate('xpack.dataFederation.createFlyout.saveErrorTitle', {
       defaultMessage: 'Could not save the data source',
     }),
+
+  testConnectionButton: i18n.translate('xpack.dataFederation.createFlyout.testConnectionButton', {
+    defaultMessage: 'Test connection',
+  }),
+
+  testConnectionSuccessTitle: i18n.translate(
+    'xpack.dataFederation.createFlyout.testConnectionSuccessTitle',
+    {
+      defaultMessage: 'Connection successful',
+    }
+  ),
+
+  testConnectionSuccessMessage: i18n.translate(
+    'xpack.dataFederation.createFlyout.testConnectionSuccessMessage',
+    {
+      defaultMessage: 'Elasticsearch can reach this data source with the current settings.',
+    }
+  ),
+
+  testConnectionFailureTitle: i18n.translate(
+    'xpack.dataFederation.createFlyout.testConnectionFailureTitle',
+    {
+      defaultMessage: 'Connection failed',
+    }
+  ),
+
+  testConnectionFailureMessage: i18n.translate(
+    'xpack.dataFederation.createFlyout.testConnectionFailureMessage',
+    {
+      defaultMessage:
+        'Elasticsearch could not connect to this data source. Check your settings and try again.',
+    }
+  ),
+
+  testConnectionErrorTitle: i18n.translate(
+    'xpack.dataFederation.createFlyout.testConnectionErrorTitle',
+    {
+      defaultMessage: 'Could not run the connection test',
+    }
+  ),
+
+  testConnectionUntestableTitle: i18n.translate(
+    'xpack.dataFederation.createFlyout.testConnectionUntestableTitle',
+    {
+      defaultMessage: 'Connection could not be verified',
+    }
+  ),
+
+  testConnectionUntestableMessage: i18n.translate(
+    'xpack.dataFederation.createFlyout.testConnectionUntestableMessage',
+    {
+      defaultMessage:
+        'Elasticsearch accepted these settings but cannot verify them without querying a dataset.',
+    }
+  ),
 };

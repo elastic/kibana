@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,7 +31,11 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useController, useForm } from 'react-hook-form';
 
-import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
+import type {
+  DataSource,
+  DataSourceConnectionTestResult,
+  DataSourceWithSecrets,
+} from '../../common/datasource_types';
 import {
   ALL_DATA_SOURCE_TYPES,
   DATA_SOURCE_TYPES_TO_ICONS,
@@ -47,9 +51,10 @@ import {
 } from './create_data_source_flyout_authentication';
 import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
+import { ConnectionTestCallout } from './connection_test_callout';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
 import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
-import { FlyoutErrorBanner } from './flyout_error_banner';
+import { FlyoutCallout } from './flyout_callout';
 import {
   authenticationModeFromDataSource,
   dataSourceToFlyoutFormValues,
@@ -69,6 +74,8 @@ export interface CreateDataSourceFlyoutProps {
    * Persist a data source (create or update). Resolve `null` on success, or an error message to show in the flyout.
    */
   onSave: (data: DataSourceWithSecrets) => Promise<string | null>;
+  /** Ask Elasticsearch whether it can reach the configuration currently in the form. */
+  onTestConnection: (data: DataSourceWithSecrets) => Promise<DataSourceConnectionTestResult>;
 }
 
 export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutProps> = ({
@@ -76,6 +83,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   existingDataSourceNames = [],
   onClose,
   onSave,
+  onTestConnection,
 }) => {
   const {
     services: { cloudInfo, featureFlags, docLinks },
@@ -102,6 +110,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     control,
     reset,
     unregister,
+    watch,
     formState: { errors },
   } = useForm<CreateDataSourceFlyoutFormValues>({
     defaultValues: formDefaultValues,
@@ -109,6 +118,10 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<DataSourceConnectionTestResult | undefined>();
+  const [testError, setTestError] = useState<string | undefined>();
+  const testRunIdRef = useRef(0);
 
   const [dataSourceType, setDataSourceType] = useState<DataSourceType>(
     initialDataSource?.type ?? 's3'
@@ -214,13 +227,30 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     }
   }, [dataSourceType, isEditMode, enableFederatedIdentityAuth]);
 
-  const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
-    onSave(
-      applyAuthenticationModeToDataSource(
-        { ...data, type: dataSourceType } as DataSourceWithSecrets,
-        authenticationMode
-      )
+  // A result only describes the configuration it was run against, so any edit discards it,
+  // including the result of a test still in flight.
+  const discardTestResult = useCallback(() => {
+    testRunIdRef.current += 1;
+    setTestResult(undefined);
+    setTestError(undefined);
+  }, []);
+
+  useEffect(() => {
+    const subscription = watch(discardTestResult);
+    return () => subscription.unsubscribe();
+  }, [watch, discardTestResult]);
+
+  useEffect(() => {
+    discardTestResult();
+  }, [dataSourceType, authenticationMode, discardTestResult]);
+
+  const buildDataSource = (data: CreateDataSourceFlyoutFormValues): DataSourceWithSecrets =>
+    applyAuthenticationModeToDataSource(
+      { ...data, type: dataSourceType } as DataSourceWithSecrets,
+      authenticationMode
     );
+
+  const handleSave = (data: CreateDataSourceFlyoutFormValues) => onSave(buildDataSource(data));
 
   const onSubmit = async (data: CreateDataSourceFlyoutFormValues) => {
     setSaveError(undefined);
@@ -234,6 +264,25 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       setSaveError(getFlyoutSaveErrorMessage(error));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const onTest = async (data: CreateDataSourceFlyoutFormValues) => {
+    discardTestResult();
+    setSaveError(undefined);
+    const runId = testRunIdRef.current;
+    setIsTesting(true);
+    try {
+      const result = await onTestConnection(buildDataSource(data));
+      if (runId === testRunIdRef.current) {
+        setTestResult(result);
+      }
+    } catch (error) {
+      if (runId === testRunIdRef.current) {
+        setTestError(getFlyoutSaveErrorMessage(error));
+      }
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -344,7 +393,8 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj="createDataSourceFlyoutFooter">
         {saveError ? (
-          <FlyoutErrorBanner
+          <FlyoutCallout
+            variant="danger"
             title={
               isEditMode
                 ? createDataSourceFlyoutStrings.saveErrorTitle()
@@ -354,6 +404,15 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             data-test-subj="createDataSourceFlyoutSaveError"
           />
         ) : null}
+        {testError ? (
+          <FlyoutCallout
+            variant="danger"
+            title={createDataSourceFlyoutStrings.testConnectionErrorTitle}
+            message={testError}
+            data-test-subj="createDataSourceFlyoutTestConnectionError"
+          />
+        ) : null}
+        {testResult ? <ConnectionTestCallout result={testResult} /> : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={() => onClose()}>
@@ -364,12 +423,22 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="createDataSourceFlyoutTestConnection"
+                  onClick={handleSubmit(onTest)}
+                  isLoading={isTesting}
+                  disabled={isSaving}
+                >
+                  {createDataSourceFlyoutStrings.testConnectionButton}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
                   fill
                   type="submit"
                   data-test-subj="createDataSourceFlyoutSubmit"
                   onClick={handleSubmit(onSubmit)}
                   isLoading={isSaving}
-                  disabled={isSaving}
+                  disabled={isSaving || isTesting}
                 >
                   {isEditMode
                     ? createDataSourceFlyoutStrings.saveButton()

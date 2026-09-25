@@ -80,6 +80,17 @@ export const DATA_SOURCE_TYPES_TO_HELP_TEXT: Partial<Record<DataSourceType, stri
     'URI with path and glob pattern(e.g. https://account.blob.core.windows.net/logs-bucket/access/**/*.parquet)',
 } as const;
 
+/**
+ * Outcome of a connection test for a not-yet-persisted data source configuration
+ * (Elasticsearch `POST /_query/data_source/_test`). `untestable` means the configuration is
+ * valid but Elasticsearch cannot verify it at the data source level, so it must be treated
+ * as neither a pass nor a failure.
+ */
+export type DataSourceConnectionTestResult =
+  | { status: 'success' }
+  | { status: 'failure'; error?: string }
+  | { status: 'untestable'; message?: string };
+
 export type S3DataSource = DataSourceCommon<'s3', S3DataSourceSettings>;
 
 export type S3DataSourceWithSecrets = DataSourceCommon<'s3', S3DataSourceSettingsWithSecrets>;
