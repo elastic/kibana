@@ -1,5 +1,5 @@
 {
-  "sha1": "450235000fc212dca1dfa90a3e8808f8713fa2f8",
+  "sha1": "5239ef3dfe495a54345bef2222df46973ec5123d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -898,6 +898,22 @@
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
         "line": 349,
         "column": 3
+      }
+    },
+    {
+      "id": "fc8fec24ce63075-f8c198fdf451522",
+      "title": "Entity Store Status API tests hides non-priority internal config and cursor state from the public response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
+        "line": 42,
+        "column": 16
       }
     }
   ]
