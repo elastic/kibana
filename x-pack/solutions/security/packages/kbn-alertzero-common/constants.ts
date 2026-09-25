@@ -45,6 +45,8 @@ export const ALERTZERO_PROPOSALS_CLOSED_URL = `${ALERTZERO_INTERNAL_URL}/proposa
 
 /** Action catalog — category-scoped discovery of installed action workflows. */
 export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
+export const ALERTZERO_INVESTIGATIONS_COUNT_URL =
+  `${ALERTZERO_INTERNAL_URL}/investigations/count` as const;
 
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;

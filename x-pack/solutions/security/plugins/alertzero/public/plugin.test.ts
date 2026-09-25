@@ -7,6 +7,8 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { AppStatus, type AppUpdater } from '@kbn/core/public';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { getInvestigationTabIds } from '@kbn/agentic-investigations-common';
 import { BehaviorSubject, filter, firstValueFrom, map, type Observable } from 'rxjs';
@@ -20,9 +22,9 @@ const createConfig = (overrides: Partial<AlertZeroClientConfig> = {}): AlertZero
 });
 
 const createContext = (config: AlertZeroClientConfig) =>
-  ({
-    config: { get: () => config },
-  } as unknown as ConstructorParameters<typeof AlertZeroPublicPlugin>[0]);
+  coreMock.createPluginInitializerContext(config) as unknown as ConstructorParameters<
+    typeof AlertZeroPublicPlugin
+  >[0];
 
 /** `coreMock` returns a plain jest mock for `get$`; wire it to the setting under test. */
 const withSetting = (
@@ -157,5 +159,81 @@ describe('AlertZeroPublicPlugin conversation template UI registration', () => {
     const { agentBuilder } = startPlugin(new BehaviorSubject(true), false);
 
     expect(agentBuilder.conversationTemplates.registerTemplateUIDefinition).not.toHaveBeenCalled();
+  });
+});
+
+describe('AlertZeroPublicPlugin attachment UI registration', () => {
+  // The registrars use `await import(...)` to keep these renderers out of the initial
+  // bundle, so registration is still a floating promise; let it settle before asserting.
+  const flushRegistration = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  const startPlugin = ({
+    enabled = true,
+    basePath,
+    share,
+  }: {
+    enabled?: boolean;
+    basePath?: string;
+    share?: SharePluginStart;
+  } = {}) => {
+    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
+    const agentBuilder = agentBuilderMocks.createStart();
+    const core = coreMock.createStart();
+    if (basePath !== undefined) {
+      // `getSpaceIdFromPath` reads the space from what follows `serverBasePath`, so the two
+      // must differ the way they do in a real non-default space.
+      const mockBasePath = httpServiceMock.createBasePath({ serverBasePath: '' });
+      mockBasePath.get.mockReturnValue(basePath);
+      // The core start mock types this as the concrete `BasePath` class, but the plugin only
+      // reads the `IBasePath` surface the mock implements.
+      core.http.basePath = mockBasePath as unknown as typeof core.http.basePath;
+    }
+
+    plugin.start(core, { agentBuilder, share } as never);
+
+    return agentBuilder;
+  };
+
+  it('registers the Hunt Watch attachment types', async () => {
+    const { attachments } = startPlugin();
+    await flushRegistration();
+
+    expect(attachments.addAttachmentType).toHaveBeenCalledTimes(1);
+    expect(attachments.addAttachmentType.mock.calls.map(([type]) => type).sort()).toEqual([
+      'security.threat',
+    ]);
+  });
+
+  it('derives the space id from the base path so registration never waits on a round trip', async () => {
+    // A non-default space is carried by the base path as `/s/<id>`, and that id scopes the
+    // threat-report lookup, so assert it reaches the ES|QL the action button is built from.
+    const locator = { getRedirectUrl: jest.fn().mockReturnValue('/app/discover#/?x=1') };
+    const share = {
+      url: { locators: { get: jest.fn().mockReturnValue(locator) } },
+    } as unknown as SharePluginStart;
+
+    const { attachments } = startPlugin({ basePath: '/s/soc', share });
+    await flushRegistration();
+
+    const [, threatDefinition] =
+      attachments.addAttachmentType.mock.calls.find(([type]) => type === 'security.threat') ?? [];
+    threatDefinition?.getActionButtons?.({
+      attachment: { id: 'a-1', type: 'security.threat', data: { report_id: 'report-7' } },
+    } as never);
+
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          esql: expect.stringContaining('space_id IN ("soc", "*")'),
+        }),
+      })
+    );
+  });
+
+  it('registers nothing when disabled', async () => {
+    const { attachments } = startPlugin({ enabled: false });
+    await flushRegistration();
+
+    expect(attachments.addAttachmentType).not.toHaveBeenCalled();
   });
 });
