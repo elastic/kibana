@@ -82,17 +82,21 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Compare current session values against the SO whenever edit mode is active and the user
   // changes auth (connector / auth method). serviceVars drift is checked at the same time;
   // static-key replacement additionally sets isDirty via onReadyChange in ManagedIntegrationsSection.
-  const { onboardingDeploymentId } = detectAndReviewStep;
+  const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
   const { authMethod, connectorId } = authenticateAndDeployStep;
   useEffect(() => {
     if (!onboardingDeploymentId || awsServicesMap === undefined) return;
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
       .then(({ item }) => {
         if (!item) return;
+        // policyIdsByInstance is captured from the closure: it is hydrated at mount from the SO
+        // (same as serviceVars) and does not change during the component's lifetime at Step 3.
+        const deployedInstanceIds = new Set(Object.keys(policyIdsByInstance ?? {}));
         const dirtyVarIds = detectServiceVarsDrift(
           serviceSettings?.serviceVars ?? {},
           (item.serviceVars ?? {}) as Record<string, Record<string, unknown>>,
-          awsServicesMap
+          awsServicesMap,
+          deployedInstanceIds
         );
         const authDirty = detectAuthDrift(
           { authMethod, connectorId },

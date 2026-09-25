@@ -75,6 +75,30 @@ describe('detectServiceVarsDrift', () => {
     const so = { inst1: makeVars() as unknown as Record<string, unknown> };
     expect(detectServiceVarsDrift(session, so, emptyServicesMap)).toEqual([]);
   });
+
+  it('detects drift for deployed instances missing from SO serviceVars (all-defaults deploy path)', () => {
+    const session = { inst1: makeVars({ enabledDataStreams: ['changed'] }) };
+    const so = {} as Record<string, Record<string, unknown>>;
+    const deployed = new Set(['inst1']);
+    expect(detectServiceVarsDrift(session, so, emptyServicesMap, deployed)).toEqual(['inst1']);
+  });
+
+  it('does not flag new instance when SO serviceVars is empty but instance not deployed', () => {
+    const session = { newInst: makeVars({ enabledDataStreams: ['new'] }) };
+    const so = {} as Record<string, Record<string, unknown>>;
+    const deployed = new Set<string>(); // newInst not deployed
+    expect(detectServiceVarsDrift(session, so, emptyServicesMap, deployed)).toEqual([]);
+  });
+
+  it('flags only the deployed instance, not new instances, when SO is empty', () => {
+    const session = {
+      inst1: makeVars({ enabledDataStreams: ['changed'] }),
+      newInst: makeVars({ enabledDataStreams: ['new'] }),
+    };
+    const so = {} as Record<string, Record<string, unknown>>;
+    const deployed = new Set(['inst1']);
+    expect(detectServiceVarsDrift(session, so, emptyServicesMap, deployed)).toEqual(['inst1']);
+  });
 });
 
 describe('detectAuthDrift', () => {
