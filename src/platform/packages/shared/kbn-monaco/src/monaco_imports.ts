@@ -74,5 +74,5 @@ export {
 } from 'monaco-editor/platform/actions/common/actions.js';
 
 export { HoverParticipantRegistry } from 'monaco-editor/editor/contrib/hover/browser/hoverTypes.js';
-
+export { isCancellationError, CancellationError } from 'monaco-editor/base/common/errors.js';
 export { monaco };

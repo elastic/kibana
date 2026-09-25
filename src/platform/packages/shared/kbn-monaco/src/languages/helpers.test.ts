@@ -7,26 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../monaco_imports';
-import { createInterruptibleLanguageProvider } from './helpers';
+import { monaco, CancellationError } from '../monaco_imports';
+import { handleInterruptibleMonacoOperation } from './helpers';
 
-describe('createInterruptibleLanguageProvider', () => {
+describe('handleInterruptibleMonacoOperation', () => {
+  let tokenSource: monaco.CancellationTokenSource;
+  beforeEach(() => {
+    tokenSource = new monaco.CancellationTokenSource();
+  });
+
+  afterEach(() => {
+    tokenSource.dispose();
+  });
+
   it('resolves with the provider result when the token is not cancelled', async () => {
-    const tokenSource = new monaco.CancellationTokenSource();
-
-    const result = await createInterruptibleLanguageProvider(
+    const result = await handleInterruptibleMonacoOperation(
       () => 'provider-result',
       tokenSource.token
     );
 
     expect(result).toBe('provider-result');
-    tokenSource.dispose();
   });
 
   it('rejects when the cancellation token is triggered', async () => {
-    const tokenSource = new monaco.CancellationTokenSource();
     let releaseRun: (value: string) => void = () => {};
-    const resultPromise = createInterruptibleLanguageProvider(
+    const resultPromise = handleInterruptibleMonacoOperation(
       () =>
         new Promise<string>((resolve) => {
           releaseRun = resolve;
@@ -36,18 +41,15 @@ describe('createInterruptibleLanguageProvider', () => {
 
     tokenSource.cancel();
 
-    await expect(resultPromise).rejects.toThrow('AbortedDueToCancellationRequest');
+    await expect(resultPromise).rejects.toThrow(CancellationError);
     releaseRun('full-result');
-    tokenSource.dispose();
   });
 
   it('rejects when the cancellation token has already been triggered', async () => {
-    const tokenSource = new monaco.CancellationTokenSource();
-
     tokenSource.cancel();
 
     let releaseRun: ((value: string) => void) | null = null;
-    const resultPromise = createInterruptibleLanguageProvider(
+    const resultPromise = handleInterruptibleMonacoOperation(
       () =>
         new Promise<string>((resolve) => {
           releaseRun = resolve;
@@ -55,8 +57,7 @@ describe('createInterruptibleLanguageProvider', () => {
       tokenSource.token
     );
 
-    await expect(resultPromise).rejects.toThrow('AbortedDueToCancellationRequest');
+    await expect(resultPromise).rejects.toThrow(CancellationError);
     expect(releaseRun).toBeNull();
-    tokenSource.dispose();
   });
 });
