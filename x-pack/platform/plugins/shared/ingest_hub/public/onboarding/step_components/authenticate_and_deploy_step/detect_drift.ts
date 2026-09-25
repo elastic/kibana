@@ -26,6 +26,9 @@ export function detectServiceVarsDrift(
   >;
   const dirty: string[] = [];
   for (const instanceId of Object.keys(soServiceVars)) {
+    // Skip instances the user has removed — they are not settings drift; they are handled
+    // separately as cleanup targets (pendingCleanupPolicyIds).
+    if (!typedSession[instanceId]) continue;
     if (JSON.stringify(typedSession[instanceId]) !== JSON.stringify(soServiceVars[instanceId])) {
       dirty.push(instanceId);
     }
