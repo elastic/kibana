@@ -320,7 +320,7 @@ describe('detection rule workflows', () => {
       );
       expect(proposals.length).toBe(5);
       for (const proposal of proposals) {
-        expect(proposal.with?.inputs?.expiresIn).toBeUndefined();
+        expect((proposal.with?.inputs as Record<string, unknown>)?.expiresIn).toBeUndefined();
       }
 
       expect(String(review.settings?.timeout)).toMatch(/^\d+h$/);
