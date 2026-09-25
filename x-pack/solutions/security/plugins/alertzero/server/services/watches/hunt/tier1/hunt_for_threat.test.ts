@@ -53,6 +53,67 @@ describe('huntForThreat', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
+  describe('a value that normalises to nothing', () => {
+    it.each([
+      ['a whitespace-only technique', { techniques: [' '] }],
+      ['a whitespace-only IOC value', { iocs: [{ type: 'ip' as const, value: '  ' }] }],
+      [
+        'a blank entry alongside no other searchable input',
+        { iocs: [{ type: 'domain' as const, value: '' }], techniques: ['\t'] },
+      ],
+    ])(
+      'reports no_searchable_terms for %s rather than a clean environment',
+      async (_label, input) => {
+        const esClient = buildEsClient(emptySearchResponse);
+
+        const result = await huntForThreat(esClient, { scope, ...input });
+
+        // A clause built from a blank value matches nothing but still counts towards the
+        // guard, so without dropping it the run reads as searched-and-clean.
+        expect(result.status).toBe('no_searchable_terms');
+        expect(esClient.search).not.toHaveBeenCalled();
+      }
+    );
+
+    it('drops the blank entry and still searches the real one', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, {
+        scope,
+        iocs: [
+          { type: 'ip', value: ' ' },
+          { type: 'ip', value: '10.0.0.1' },
+        ],
+        techniques: [' ', 't1078.004'],
+      });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      const serialized = JSON.stringify(searchBody.query.bool.should);
+      expect(serialized).toContain('10.0.0.1');
+      expect(serialized).toContain('T1078.004');
+      expect(serialized).not.toContain('" "');
+      expect(serialized).not.toContain('""');
+    });
+
+    it('echoes only what it actually searched for', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [
+          { type: 'ip', value: ' ' },
+          { type: 'ip', value: '10.0.0.1' },
+        ],
+        techniques: [' ', 't1078.004'],
+      });
+
+      expect(result.resolved_iocs).toEqual([{ type: 'ip', value: '10.0.0.1' }]);
+      expect(result.resolved_techniques).toEqual(['T1078.004']);
+      expect(result.searched_iocs).toBe(1);
+      expect(result.searched_techniques).toBe(1);
+    });
+  });
+
   it.each([
     ['the scope window', undefined, scope.window],
     [

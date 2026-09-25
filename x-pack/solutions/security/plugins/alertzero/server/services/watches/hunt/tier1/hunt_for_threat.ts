@@ -259,7 +259,7 @@ export const huntForThreat = async (
 ): Promise<HuntForThreatServiceResult> => {
   const {
     scope,
-    iocs = [],
+    iocs: rawIocs = [],
     techniques: rawTechniques = [],
     time_range,
     size,
@@ -268,7 +268,18 @@ export const huntForThreat = async (
   // Alerts store ATT&CK ids as `T1078.004` on keyword fields, and the `terms`
   // clause is case-sensitive, so a caller's `t1078.004` would never match
   // although hit attribution compares case-insensitively.
-  const techniques = rawTechniques.map((technique) => technique.trim().toUpperCase());
+  //
+  // A value that normalises to nothing is then dropped rather than searched for. Both
+  // filters bound the request only by length, so a blank entry survives them, and a
+  // clause built from it — `terms: { '…technique.id': [''] }` — matches nothing while
+  // still counting towards the no-searchable-terms guard below. The guard therefore
+  // does not fire, and the run reports `no_environment_hits`: searched and clean, for a
+  // hunt that searched for nothing. Dropping them here also keeps `resolved_iocs` and
+  // `resolved_techniques` honest about what was actually looked for.
+  const techniques = rawTechniques
+    .map((technique) => technique.trim().toUpperCase())
+    .filter((technique) => technique.length > 0);
+  const iocs = rawIocs.filter(({ value }) => value.trim().length > 0);
 
   const from = time_range?.from ?? scope.window.from;
   const to = time_range?.to ?? scope.window.to;
