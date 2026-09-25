@@ -63,8 +63,9 @@ jest.mock('@kbn/presentation-publishing', () => ({
 
 const getSuggestionsMock = getSuggestions as jest.MockedFunction<typeof getSuggestions>;
 
+const mockESQLDataGrid = jest.fn(() => null);
 jest.mock('@kbn/esql-datagrid/public', () => ({
-  ESQLDataGrid: () => null,
+  ESQLDataGrid: () => mockESQLDataGrid(),
 }));
 
 describe('ESQLEditor', () => {
@@ -124,6 +125,7 @@ describe('ESQLEditor', () => {
     lastPreviewRef.current = undefined;
     getSuggestionsMock.mockClear();
     getSuggestionsMock.mockResolvedValue(undefined);
+    mockESQLDataGrid.mockClear();
   });
 
   it('runs the same query again after the previous run was aborted', async () => {
@@ -191,7 +193,7 @@ describe('ESQLEditor', () => {
     expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
     expect(getSuggestionsMock).not.toHaveBeenCalled();
 
-    // While a refresh is in flight EuiAccordion swaps `extraAction` for its spinner
+    // While a refresh is in flight EuiAccordion swaps the row count for its spinner
     await waitFor(() => expect(capturedOnSubmit).toBeDefined());
     act(() => {
       void capturedOnSubmit!(
@@ -199,11 +201,44 @@ describe('ESQLEditor', () => {
         new AbortController()
       );
     });
-    await waitFor(() =>
-      expect(
-        within(screen.getByTestId('ESQLQueryResults')).getByRole('progressbar')
-      ).toBeInTheDocument()
+    await waitFor(() => expect(within(results).getByRole('progressbar')).toBeInTheDocument());
+    expect(results).not.toHaveTextContent('3');
+  });
+
+  it('keeps the grid rendered and shows a refreshing bar while a refresh is in flight', async () => {
+    const preview = {
+      rows: [{ a: 1 }, { a: 2 }, { a: 3 }],
+      columns: [],
+      dataView: {},
+    } as unknown as ESQLDataGridAttrs;
+
+    getSuggestionsMock.mockImplementationOnce(async (...args: unknown[]) => {
+      const setDataGridAttrs = args[9] as ((attrs: ESQLDataGridAttrs) => void) | undefined;
+      setDataGridAttrs?.(preview);
+      return undefined;
+    });
+
+    renderEditor({ isESQLResultsAccordionOpen: true, onESQLResultsAccordionToggle: jest.fn() });
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
     );
+    const results = screen.getByTestId('ESQLQueryResults');
+    expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
+
+    mockESQLDataGrid.mockClear();
+    getSuggestionsMock.mockReturnValue(new Promise(() => {}));
+    act(() => {
+      void capturedOnSubmit!(
+        { esql: 'FROM index1 | STATS minB = MIN(bytes)' },
+        new AbortController()
+      );
+    });
+
+    await waitFor(() =>
+      expect(within(results).getByTestId('ESQLQueryResultsRefreshing')).toBeInTheDocument()
+    );
+    expect(mockESQLDataGrid).toHaveBeenCalled();
   });
 
   it('stops showing the loading spinner when a refresh fails with cached rows', async () => {

@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiNotificationBadge,
   EuiPanel,
+  EuiProgress,
   EuiText,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -111,7 +112,15 @@ export const ESQLDataGridAccordion = ({
           </EuiPanel>
         )}
         {isAccordionOpen && dataGridAttrs && (
-          <>
+          <div css={styles.gridContainer}>
+            {isLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="ESQLQueryResultsRefreshing"
+              />
+            )}
             <ESQLDataGrid
               rows={dataGridAttrs.rows}
               columns={dataGridAttrs.columns}
@@ -124,7 +133,7 @@ export const ESQLDataGridAccordion = ({
               controlColumnIds={['openDetails']}
             />
             <EuiSpacer />
-          </>
+          </div>
         )}
       </EuiAccordion>
     </EuiFlexItem>
@@ -151,9 +160,6 @@ const componentStyles = {
         display: 'flex',
         flexDirection: 'column',
         blockSize: '100%',
-        // EuiAccordion's isLoading style sets align-items: center, which in this column
-        // layout would shrink the grid to its content width while refreshing.
-        alignItems: 'stretch',
       },
     },
     // Prevents the horizontal scrollbar from toggling on/off as the accordion's
@@ -166,6 +172,19 @@ const componentStyles = {
       }
     `
   ),
+  // EuiAccordion's loading style centres its children while refreshing; stretch ours so the
+  // grid keeps the full width. The top padding gives the refreshing bar its own band above
+  // the grid toolbar.
+  gridContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      paddingBlockStart: euiTheme.size.xxs,
+      display: 'flex',
+      flexDirection: 'column',
+      flexGrow: 1,
+      alignSelf: 'stretch',
+      minBlockSize: 0,
+    }),
   title: ({ euiTheme }: UseEuiTheme) => css({ padding: euiTheme.size.xxs }),
   emptyMessage: ({ euiTheme }: UseEuiTheme) => css({ marginBlockEnd: euiTheme.size.m }),
 };
