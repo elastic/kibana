@@ -24,10 +24,13 @@ export const createNavigationTree = (
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): NavigationTreeDefinition => {
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
-  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
-    AGENT_BUILDER_NAV_AT_TOP_FLAG,
-    false
-  );
+  let agentBuilderNavAtTop = false;
+  services.featureFlags
+    .getBooleanValue$(AGENT_BUILDER_NAV_AT_TOP_FLAG, false)
+    .subscribe((enabled) => {
+      agentBuilderNavAtTop = enabled;
+    })
+    .unsubscribe();
 
   const agentBuilderLink = {
     icon: 'productAgent',
