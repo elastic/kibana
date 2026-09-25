@@ -84,6 +84,7 @@ const ArtifactSimpleTableRowActions = memo<{
       icon="boxesVertical"
       isDisabled={isDisabled}
       disabledTooltip={disabledTooltip}
+      itemName={item.name}
       data-test-subj={dataTestSubj}
     />
   );
