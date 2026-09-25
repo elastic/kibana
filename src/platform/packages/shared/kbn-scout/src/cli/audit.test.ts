@@ -242,7 +242,7 @@ describe('formatAuditText', () => {
       ],
       configSets: {
         ...emptyConfigSets,
-        runtimeOnly: ['flags_only (stateful/classic.stateful.config.ts)'],
+        runtimeOnly: ['flags_only (stateful)'],
         identical: [['a (stateful/x.config.ts)', 'b (stateful/x.config.ts)']],
         subsets: [
           { set: 'small (stateful/x.config.ts)', of: 'big (stateful/x.config.ts)' },
@@ -257,7 +257,7 @@ describe('formatAuditText', () => {
       '`pageObjects.unifiedTabs` used in 45 files, all in @kbn/discover-plugin'
     );
     expect(text).toContain('`SavedObjectsManagementPage` in spaces, tagging');
-    expect(text).toContain('flags_only (stateful/classic.stateful.config.ts)');
+    expect(text).toContain('flags_only (stateful)');
     expect(text).toContain('a (stateful/x.config.ts) = b (stateful/x.config.ts)');
     expect(text).toContain(
       'small (stateful/x.config.ts) is a subset of: big (stateful/x.config.ts), bigger (stateful/x.config.ts)'
@@ -345,38 +345,33 @@ describe('config set audit, pure parts', () => {
       runtimeKeys
     );
 
-    expect(report.runtimeOnly).toEqual(['flags_only (stateful/classic.stateful.config.ts)']);
+    expect(report.runtimeOnly).toEqual(['flags_only (stateful)']);
     expect(report.bootFeatureFlags).toEqual([
-      'flags_only (stateful/classic.stateful.config.ts)',
-      'flags_plus_boot (stateful/classic.stateful.config.ts)',
+      'flags_only (stateful)',
+      'flags_plus_boot (stateful)',
     ]);
-    expect(report.identical).toEqual([
-      [
-        'twin_a (stateful/classic.stateful.config.ts)',
-        'twin_b (stateful/classic.stateful.config.ts)',
-      ],
-    ]);
+    expect(report.identical).toEqual([['twin_a (stateful)', 'twin_b (stateful)']]);
     // subsets: same flavor and file, not identical, and neither side has non-arg differences
     expect(report.subsets).toEqual([
       {
-        set: 'flags_only (stateful/classic.stateful.config.ts)',
-        of: 'flags_plus_boot (stateful/classic.stateful.config.ts)',
+        set: 'flags_only (stateful)',
+        of: 'flags_plus_boot (stateful)',
       },
       {
-        set: 'twin_a (stateful/classic.stateful.config.ts)',
-        of: 'flags_plus_boot (stateful/classic.stateful.config.ts)',
+        set: 'twin_a (stateful)',
+        of: 'flags_plus_boot (stateful)',
       },
       {
-        set: 'twin_a (stateful/classic.stateful.config.ts)',
-        of: 'big (stateful/classic.stateful.config.ts)',
+        set: 'twin_a (stateful)',
+        of: 'big (stateful)',
       },
       {
-        set: 'twin_b (stateful/classic.stateful.config.ts)',
-        of: 'flags_plus_boot (stateful/classic.stateful.config.ts)',
+        set: 'twin_b (stateful)',
+        of: 'flags_plus_boot (stateful)',
       },
       {
-        set: 'twin_b (stateful/classic.stateful.config.ts)',
-        of: 'big (stateful/classic.stateful.config.ts)',
+        set: 'twin_b (stateful)',
+        of: 'big (stateful)',
       },
     ]);
   });

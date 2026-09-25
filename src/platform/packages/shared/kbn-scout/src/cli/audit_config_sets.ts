@@ -231,7 +231,12 @@ export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsRepor
   return summarizeConfigSets(sets, runtimeKeys);
 }
 
-const label = (s: ConfigSetOverrides) => `${s.name} (${s.flavor}/${s.file})`;
+// `session_idle (stateful)` or `uiam_local (serverless/security_complete)`: the file
+// name only carries information for serverless, where each domain has its own config.
+const label = (s: ConfigSetOverrides) =>
+  s.flavor === 'stateful'
+    ? `${s.name} (stateful)`
+    : `${s.name} (serverless/${s.file.replace('.serverless.config.ts', '')})`;
 const signature = (s: ConfigSetOverrides) =>
   JSON.stringify([s.flavor, s.file, sortEntries(s.kibana), sortEntries(s.elasticsearch), s.other]);
 const sortEntries = (record: Record<string, string>) => Object.entries(record).sort();
