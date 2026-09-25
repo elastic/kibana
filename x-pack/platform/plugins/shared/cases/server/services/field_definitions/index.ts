@@ -322,7 +322,7 @@ export class FieldDefinitionsService {
    * re-applying the strict rule would strand pre-existing definitions as
    * permanently uneditable with no compensating benefit.
    */
-  private assertFieldDefinitionIsValid(definition: string, strict = false): void {
+  assertFieldDefinitionIsValid(definition: string, strict = false): void {
     let yamlDefinition: unknown;
     try {
       yamlDefinition = parseYaml(definition);
