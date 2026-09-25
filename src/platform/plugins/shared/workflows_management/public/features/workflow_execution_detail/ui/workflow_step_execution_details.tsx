@@ -47,6 +47,8 @@ interface WorkflowStepExecutionDetailsProps {
   approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
   waitingStepExecutionId?: string;
+  hasResumeError?: boolean;
+  onRetryResume?: () => void;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
   childWorkflowExecution?: ChildWorkflowExecutionItem;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
@@ -68,6 +70,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     approvalLabels,
     shouldAutoResume = false,
     waitingStepExecutionId,
+    hasResumeError,
+    onRetryResume,
     childWorkflowExecution,
     parentWorkflowExecution,
     onSelectStepExecution,
@@ -141,6 +145,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           approvalLabels={approvalLabels}
           shouldAutoResume={shouldAutoResume}
           waitingStepExecutionId={waitingStepExecutionId}
+          hasResumeError={hasResumeError}
+          onRetryResume={onRetryResume}
         />
       );
     }

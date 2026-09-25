@@ -50,6 +50,7 @@ import { ExecutionTakeActionSplitButton } from './execution_take_action_split_bu
 import { ForeachIterationsSection } from './foreach_iterations_section';
 import { NestedWorkflowExecutionLinks } from './nested_workflow_execution_links';
 import { ResumeExecutionButton } from './resume_execution_button';
+import { ResumeUnavailableCallout } from './resume_unavailable_callout';
 import { StepDataValueCell } from './step_data_value_cell';
 import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
@@ -477,6 +478,8 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       resumeMessage,
       resumeSchema,
       approvalLabels,
+      hasResumeError,
+      retryResume,
     } = useWaitingStepResume(executionId, workflowExecution);
     const [isResumeSubmitting, setIsResumeSubmitting] = useState(false);
     const [isResumeSubmitted, setIsResumeSubmitted] = useState(false);
@@ -1401,6 +1404,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     submitState={resumeSubmitState}
                   />
                 )}
+                {hasResumeError && <ResumeUnavailableCallout onRetry={retryResume} />}
               </div>
             </EuiFlyoutHeader>
 

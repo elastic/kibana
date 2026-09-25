@@ -133,8 +133,14 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const { childExecutions, isLoading: isLoadingChildExecutions } =
       useChildWorkflowExecutions(workflowExecution);
 
-    const { waitingStepExecutionId, resumeMessage, resumeSchema, approvalLabels } =
-      useWaitingStepResume(executionId, workflowExecution);
+    const {
+      waitingStepExecutionId,
+      resumeMessage,
+      resumeSchema,
+      approvalLabels,
+      hasResumeError,
+      retryResume,
+    } = useWaitingStepResume(executionId, workflowExecution);
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
@@ -258,6 +264,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
               waitingStepExecutionId={waitingStepExecutionId}
+              hasResumeError={hasResumeError}
+              onRetryResume={retryResume}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />

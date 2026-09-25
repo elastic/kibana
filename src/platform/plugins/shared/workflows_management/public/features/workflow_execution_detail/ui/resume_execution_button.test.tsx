@@ -284,6 +284,60 @@ describe('ResumeExecutionButton', () => {
       expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
     });
 
+    it('does not lock a newly opened run when the previous run resume resolves late', async () => {
+      let resolvePost: (value: unknown) => void = () => {};
+      mockHttpPost.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolvePost = resolve;
+          })
+      );
+
+      // Mirrors WorkflowExecutionFlyout: shared submit state reset on executionId change.
+      const FlyoutLike = ({ executionId }: { executionId: string }) => {
+        const [isSubmitting, setSubmitting] = React.useState(false);
+        const [isSubmitted, setSubmitted] = React.useState(false);
+        React.useEffect(() => {
+          setSubmitting(false);
+          setSubmitted(false);
+        }, [executionId]);
+        return (
+          <ResumeExecutionButton
+            {...defaultProps}
+            executionId={executionId}
+            submitState={{ isSubmitting, isSubmitted, setSubmitting, setSubmitted }}
+          />
+        );
+      };
+
+      const { rerender } = render(
+        <TestWrapper queryClient={queryClient}>
+          <FlyoutLike executionId="exec-1" />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        void capturedOnSubmit!({ stepInputs: {} });
+      });
+      await waitFor(() => expect(screen.getByTestId('provideActionButton')).toBeDisabled());
+
+      rerender(
+        <TestWrapper queryClient={queryClient}>
+          <FlyoutLike executionId="exec-2" />
+        </TestWrapper>
+      );
+      await waitFor(() => expect(screen.getByTestId('provideActionButton')).toBeEnabled());
+
+      await act(async () => {
+        resolvePost({});
+      });
+
+      expect(mockHttpPost.mock.calls[0][0]).toContain('exec-1');
+      expect(screen.getByTestId('provideActionButton')).toBeEnabled();
+    });
+
     it('does not re-enable shared submit state when a second instance mounts', async () => {
       const SharedResume = ({ showSecond }: { showSecond: boolean }) => {
         const [isSubmitting, setSubmitting] = React.useState(false);

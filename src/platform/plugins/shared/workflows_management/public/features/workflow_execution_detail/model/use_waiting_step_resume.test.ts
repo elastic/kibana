@@ -94,13 +94,16 @@ describe('useWaitingStepResume', () => {
       'step-wait',
       ExecutionStatus.WAITING_FOR_INPUT
     );
-    expect(result.current).toEqual({
-      waitingStepExecutionId: 'step-wait',
-      waitingStepStartedAt: '2024-01-01T00:00:01Z',
-      resumeMessage: 'Approve this',
-      resumeSchema: { type: 'object' },
-      approvalLabels: { approveLabel: 'Approve', rejectLabel: 'Reject' },
-    });
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        waitingStepExecutionId: 'step-wait',
+        waitingStepStartedAt: '2024-01-01T00:00:01Z',
+        resumeMessage: 'Approve this',
+        resumeSchema: { type: 'object' },
+        approvalLabels: { approveLabel: 'Approve', rejectLabel: 'Reject' },
+        hasResumeError: false,
+      })
+    );
   });
 
   it('invalidates step I/O queries when the execution leaves wait-for-input', () => {
@@ -168,6 +171,49 @@ describe('useWaitingStepResume', () => {
 
     expect(result.current.waitingStepExecutionId).toBeUndefined();
     expect(result.current.resumeMessage).toBeUndefined();
+  });
+
+  it('reports a resume error and retries when the waiting step fetch fails', () => {
+    const refetch = jest.fn();
+    mockUseStepExecution.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch,
+    } as unknown as ReturnType<typeof useStepExecution>);
+
+    const execution = createMockWorkflowExecutionDto({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'step-wait',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() => useWaitingStepResume('exec-1', execution));
+
+    expect(result.current.waitingStepExecutionId).toBeUndefined();
+    expect(result.current.hasResumeError).toBe(true);
+
+    result.current.retryResume();
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports no resume error when the run is not waiting for input', () => {
+    mockUseStepExecution.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useStepExecution>);
+
+    const execution = createMockWorkflowExecutionDto({ status: ExecutionStatus.RUNNING });
+
+    const { result } = renderHook(() => useWaitingStepResume('exec-1', execution));
+
+    expect(result.current.hasResumeError).toBe(false);
   });
 
   it('ignores a stale waiting execution after executionId changes', () => {

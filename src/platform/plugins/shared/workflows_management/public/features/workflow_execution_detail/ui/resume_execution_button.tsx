@@ -79,6 +79,10 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const setIsSubmitting = submitState?.setSubmitting ?? setLocalSubmitting;
   const setIsSubmitted = submitState?.setSubmitted ?? setLocalSubmitted;
   const modalOpenedAtRef = useRef<number | null>(null);
+  // Submit state can be shared across runs, so a late resume must not write back
+  // into the run the user opened in the meantime.
+  const executionIdRef = useRef(executionId);
+  executionIdRef.current = executionId;
   const isApprovalMode = Boolean(approvalLabels);
 
   useEffect(() => {
@@ -124,6 +128,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const handleSubmit = useCallback(
     async (stepInputs: Record<string, unknown>) => {
       setIsSubmitting(true);
+      const isSameRun = () => executionIdRef.current === executionId;
       const submittedAt = Date.now();
       const timeInModalMs =
         modalOpenedAtRef.current != null ? submittedAt - modalOpenedAtRef.current : undefined;
@@ -149,8 +154,10 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
           timeInModalMs,
           timeSinceStepStartedMs,
         });
-        setIsSubmitted(true);
-        closeModal();
+        if (isSameRun()) {
+          setIsSubmitted(true);
+          closeModal();
+        }
       } catch (error) {
         const errorObj = error instanceof Error ? error : new Error(String(error));
         notifications?.toasts.addError?.(errorObj, {
@@ -167,7 +174,9 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
           error: errorObj,
         });
       } finally {
-        setIsSubmitting(false);
+        if (isSameRun()) {
+          setIsSubmitting(false);
+        }
       }
     },
     [

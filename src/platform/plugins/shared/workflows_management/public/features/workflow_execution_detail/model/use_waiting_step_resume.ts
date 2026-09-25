@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -21,6 +21,9 @@ export interface WaitingStepResume {
   resumeMessage: string | undefined;
   resumeSchema: JsonModelSchemaType | undefined;
   approvalLabels: ApprovalLabels | undefined;
+  /** True when the waiting step is known but its input could not be fetched. */
+  hasResumeError: boolean;
+  retryResume: () => void;
 }
 
 /** Resolves the active waitForInput pause and its resume copy for Provide action / Approve–Reject. */
@@ -46,11 +49,17 @@ export function useWaitingStepResume(
   const waitingStepExecutionId = waitingStep?.id;
   const waitingStepStartedAt = waitingStep?.startedAt;
 
-  const { data: pausedStepFullData, isLoading: isPausedStepLoading } = useStepExecution(
-    executionId,
-    waitingStepExecutionId,
-    ExecutionStatus.WAITING_FOR_INPUT
-  );
+  const {
+    data: pausedStepFullData,
+    isLoading: isPausedStepLoading,
+    isError: isPausedStepError,
+    refetch: refetchPausedStep,
+  } = useStepExecution(executionId, waitingStepExecutionId, ExecutionStatus.WAITING_FOR_INPUT);
+
+  const hasResumeError = Boolean(waitingStepExecutionId && isPausedStepError);
+  const retryResume = useCallback(() => {
+    void refetchPausedStep();
+  }, [refetchPausedStep]);
 
   const prevWaitingStepExecutionIdRef = useRef<string | undefined>();
   useEffect(() => {
@@ -75,6 +84,8 @@ export function useWaitingStepResume(
         resumeMessage: undefined,
         resumeSchema: undefined,
         approvalLabels: undefined,
+        hasResumeError,
+        retryResume,
       };
     }
 
@@ -97,6 +108,15 @@ export function useWaitingStepResume(
       resumeMessage: stepInput?.message,
       resumeSchema: stepInput?.schema,
       approvalLabels: labels,
+      hasResumeError,
+      retryResume,
     };
-  }, [isPausedStepLoading, pausedStepFullData, waitingStepExecutionId, waitingStepStartedAt]);
+  }, [
+    hasResumeError,
+    isPausedStepLoading,
+    pausedStepFullData,
+    retryResume,
+    waitingStepExecutionId,
+    waitingStepStartedAt,
+  ]);
 }

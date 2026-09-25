@@ -59,6 +59,9 @@ describe('useChildWorkflowExecutions', () => {
   let mockGetChildrenExecutions: jest.Mock;
   let queryClient: QueryClient;
 
+  const executeStep = (id: string, status: ExecutionStatus) =>
+    ({ id, stepType: 'workflow.execute', status } as never);
+
   const childExecutionResponse = [
     {
       parentStepExecutionId: 'step-exec-1',
@@ -174,11 +177,8 @@ describe('useChildWorkflowExecutions', () => {
     expect(result.current.childExecutions.has('step-b')).toBe(true);
   });
 
-  it('keeps resolved children while a newly terminal child step changes the query key', async () => {
+  it('keeps resolved children while a child step status changes the query key', async () => {
     mockIsExecuteSyncStepType.mockReturnValue(true);
-    const executeStep = (id: string, status: ExecutionStatus) =>
-      ({ id, stepType: 'workflow.execute', status } as never);
-
     const { result, rerender } = renderHook(
       ({ execution }: { execution: WorkflowExecutionDto }) => useChildWorkflowExecutions(execution),
       {
@@ -218,6 +218,30 @@ describe('useChildWorkflowExecutions', () => {
     });
 
     expect(result.current.childExecutions.size).toBe(1);
+  });
+
+  it('refetches as soon as a workflow.execute step starts, before it is terminal', async () => {
+    mockIsExecuteSyncStepType.mockReturnValue(true);
+    const { rerender } = renderHook(
+      ({ execution }: { execution: WorkflowExecutionDto }) => useChildWorkflowExecutions(execution),
+      {
+        initialProps: {
+          execution: createMockExecution({ status: ExecutionStatus.RUNNING, stepExecutions: [] }),
+        },
+        wrapper: createWrapper(queryClient),
+      }
+    );
+
+    await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+    rerender({
+      execution: createMockExecution({
+        status: ExecutionStatus.RUNNING,
+        stepExecutions: [executeStep('step-exec-1', ExecutionStatus.WAITING_FOR_CHILD)],
+      }),
+    });
+
+    await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(2));
   });
 
   describe('serial polling', () => {
