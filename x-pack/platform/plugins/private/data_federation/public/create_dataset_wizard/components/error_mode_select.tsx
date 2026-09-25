@@ -53,7 +53,16 @@ export function ErrorModeSelect({
       aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
       singleSelection={{ asPlainText: true }}
       isClearable
-      selectedOptions={selectedOption ? [selectedOption] : []}
+      selectedOptions={
+        selectedOption
+          ? [
+              {
+                value: selectedOption.value,
+                label: selectedOption.label,
+              },
+            ]
+          : []
+      }
       onChange={(nextSelectedOptions) => {
         const next = nextSelectedOptions?.[0] as ErrorModeOption | undefined;
         onChange(next?.value ?? '');

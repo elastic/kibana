@@ -35,7 +35,14 @@ export function QuoteMode({
   const selectedOptions = useMemo(() => {
     if (!value) return [];
     const option = OPTIONS.find((o) => o.value === value);
-    return option ? [option] : ([{ value, label: value } as QuoteModeOption] as QuoteModeOption[]);
+    return option
+      ? ([
+          {
+            value: option.value,
+            label: option.label,
+          },
+        ] as QuoteModeOption[])
+      : ([{ value, label: value } as QuoteModeOption] as QuoteModeOption[]);
   }, [value]);
 
   return (

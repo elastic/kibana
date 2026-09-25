@@ -73,7 +73,6 @@ export function EuiComboBoxWithCustomOption({
       {
         value: selectedValue,
         label: preset?.label ?? getCustomLabel(selectedValue),
-        append: preset?.append,
       },
     ];
   }, [getCustomLabel, presetOptions, selectedValue]);

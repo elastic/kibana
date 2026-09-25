@@ -59,7 +59,16 @@ export function PartitionDetectionSelect({
       aria-label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
       singleSelection={{ asPlainText: true }}
       isClearable
-      selectedOptions={selectedOption ? [selectedOption] : []}
+      selectedOptions={
+        selectedOption
+          ? [
+              {
+                value: selectedOption.value,
+                label: selectedOption.label,
+              },
+            ]
+          : []
+      }
       onChange={(nextSelectedOptions) => {
         const next = nextSelectedOptions?.[0] as Option | undefined;
         partitionDetectionField.onChange(next?.value ?? '');

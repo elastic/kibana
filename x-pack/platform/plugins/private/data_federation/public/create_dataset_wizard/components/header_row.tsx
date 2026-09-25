@@ -34,7 +34,14 @@ export function HeaderRow({
   const selectedOptions = useMemo(() => {
     if (!value) return [];
     const option = OPTIONS.find((o) => o.value === value);
-    return option ? [option] : ([{ value, label: value } as HeaderRowOption] as HeaderRowOption[]);
+    return option
+      ? ([
+          {
+            value: option.value,
+            label: option.label,
+          },
+        ] as HeaderRowOption[])
+      : ([{ value, label: value } as HeaderRowOption] as HeaderRowOption[]);
   }, [value]);
 
   return (
