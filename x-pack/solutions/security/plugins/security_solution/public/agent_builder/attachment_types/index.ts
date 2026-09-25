@@ -24,7 +24,10 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import { createAttachmentSummaryDrilldown } from './attachment_summary_drilldown/create_details_drilldown';
+import {
+  createAlertSummaryRows,
+  createAlertsSummaryRows,
+} from './attachment_summary_drilldown/create_details_drilldown';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -74,13 +77,15 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 export const registerAttachmentUiDefinitions = ({
   attachments,
   resolveSecurityCanvasContext,
+  getSpaceId,
 }: {
   attachments: AttachmentServiceStartContract;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+  getSpaceId: () => Promise<string>;
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
-    renderConversationDetailsContent: createAttachmentSummaryDrilldown({
+    renderConversationDetailsContent: createAlertSummaryRows({
       resolveSecurityCanvasContext,
     }),
   });
@@ -98,6 +103,10 @@ export const registerAttachmentUiDefinitions = ({
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
+      renderConversationDetailsContent: createAlertsSummaryRows({
+        resolveSecurityCanvasContext,
+        getSpaceId,
+      }),
     }
   );
 };

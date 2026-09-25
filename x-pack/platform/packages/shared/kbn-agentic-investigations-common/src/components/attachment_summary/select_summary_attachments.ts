@@ -9,17 +9,7 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import { getActiveAttachments } from '@kbn/agent-builder-common/attachments';
 import type { SummaryAttachmentType } from './summary_attachment_types';
 
-/** An attachment the summary lists, paired with the display name of its kind. */
-export interface SummaryAttachment {
-  attachment: VersionedAttachment;
-  typeName: string;
-}
-
-/**
- * When the attachment was first added. Falls back to the lowest version present rather than
- * looking version 1 up directly, because history can be pruned, and sorts unparseable or missing
- * timestamps last instead of letting NaN reach the comparator.
- */
+// Falls back to the earliest version present; sorts missing/unparseable timestamps last.
 const getFirstVersionTime = (attachment: VersionedAttachment): number => {
   const firstVersion = attachment.versions.reduce<
     VersionedAttachment['versions'][number] | undefined
@@ -28,25 +18,23 @@ const getFirstVersionTime = (attachment: VersionedAttachment): number => {
     undefined
   );
 
-  // ISO strings can carry different UTC offsets, so compare instants rather than strings.
   const time = Date.parse(firstVersion?.created_at ?? '');
 
   return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time;
 };
 
 /**
- * Picks the attachments the summary shows: the ones some kind claims, ordered by kind and then by
- * when each was first added, so editing an attachment never moves its row.
+ * Picks the attachments the summary shows: the ones some kind claims, ordered by kind rank and
+ * then by when each was first added, so editing an attachment never moves its row.
  */
 export const selectSummaryAttachments = (
   attachments: VersionedAttachment[] | undefined,
   summaryAttachmentTypes: readonly SummaryAttachmentType[]
-): SummaryAttachment[] => {
+): VersionedAttachment[] => {
   if (!attachments?.length) {
     return [];
   }
 
-  // Soft-deleted attachments stay in `conversation.attachments`, and nothing upstream drops them.
   const visible = getActiveAttachments(attachments).filter((attachment) => !attachment.hidden);
 
   const firstVersionTimes = new Map(
@@ -57,19 +45,14 @@ export const selectSummaryAttachments = (
     const aTime = firstVersionTimes.get(a.id) ?? Number.POSITIVE_INFINITY;
     const bTime = firstVersionTimes.get(b.id) ?? Number.POSITIVE_INFINITY;
 
-    // Compared rather than subtracted: both can be Infinity, and Infinity - Infinity is NaN.
     if (aTime !== bTime) {
       return aTime < bTime ? -1 : 1;
     }
 
-    // The id tie-break keeps the order total: the API does not promise a stable input order.
     return a.id.localeCompare(b.id);
   };
 
-  return summaryAttachmentTypes.flatMap(({ name, types }) =>
-    visible
-      .filter(({ type }) => types.includes(type))
-      .sort(byFirstVersionThenId)
-      .map((attachment) => ({ attachment, typeName: name }))
+  return summaryAttachmentTypes.flatMap(({ types }) =>
+    visible.filter(({ type }) => types.includes(type)).sort(byFirstVersionThenId)
   );
 };

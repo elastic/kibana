@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import React, { useEffect, useRef, useState } from 'react';
 import { useInitDataViewManager } from '../../../data_view_manager/hooks/use_init_data_view_manager';
 import { useDataViewManagerStatus } from '../../../data_view_manager/hooks/use_data_view_manager_status';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
+import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { toFlyoutDescriptor } from './to_flyout_descriptor';
 
 /** The app shell normally does this; without it the opened flyout spins forever. */
 const DataViewManagerBootstrap = () => {
@@ -33,15 +32,12 @@ const DataViewManagerBootstrap = () => {
   return null;
 };
 
-/** Opens the attachment's flyout on mount, then renders nothing. */
-const OpenFlyoutOnMount = ({ attachment }: { attachment: UnknownAttachment }) => {
+const OpenFlyoutOnMount = ({ descriptor }: { descriptor: FlyoutDescriptor }) => {
   const api = useFlyoutApi();
   const hasOpened = useRef(false);
 
-  const descriptor = useMemo(() => toFlyoutDescriptor(attachment), [attachment]);
-
   useEffect(() => {
-    if (!descriptor || hasOpened.current) {
+    if (hasOpened.current) {
       return;
     }
     hasOpened.current = true;
@@ -52,19 +48,17 @@ const OpenFlyoutOnMount = ({ attachment }: { attachment: UnknownAttachment }) =>
 };
 
 export interface AttachmentSummaryFlyoutOpenerProps {
-  attachment: UnknownAttachment;
+  descriptor: FlyoutDescriptor;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
 
 /**
- * Drill-down for an attachment summary row, mounted for its side effect only.
- *
  * The summary renders outside the Security app shell, so `useFlyoutApi`'s dependencies are
  * re-established with `flyoutProviders` — the bundle the flyouts themselves use, as the rule
  * preview attachment does.
  */
 export const AttachmentSummaryFlyoutOpener = ({
-  attachment,
+  descriptor,
   resolveSecurityCanvasContext,
 }: AttachmentSummaryFlyoutOpenerProps) => {
   const [bundle, setBundle] = useState<SecurityCanvasEmbeddedBundle>();
@@ -96,7 +90,7 @@ export const AttachmentSummaryFlyoutOpener = ({
     children: (
       <>
         <DataViewManagerBootstrap />
-        <OpenFlyoutOnMount attachment={attachment} />
+        <OpenFlyoutOnMount descriptor={descriptor} />
       </>
     ),
   });

@@ -5,38 +5,27 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { renderAlertSection, renderAlertsSection } from './summary_rows';
 
-/** Only loaded on click: the opener pulls in the Security store, services and flyout API. */
-const LazyAttachmentSummaryFlyoutOpener = React.lazy(() =>
-  import(
-    /* webpackChunkName: "security_attachment_summary_drilldown" */
-    './open_flyout_on_mount'
-  ).then((m) => ({ default: m.AttachmentSummaryFlyoutOpener }))
-);
+export const createAlertSummaryRows =
+  <TAttachment extends UnknownAttachment = UnknownAttachment>({
+    resolveSecurityCanvasContext,
+  }: {
+    resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+  }): NonNullable<AttachmentUIDefinition<TAttachment>['renderConversationDetailsContent']> =>
+  ({ attachment }) =>
+    renderAlertSection({ attachment, resolveSecurityCanvasContext });
 
-/**
- * Builds the conversation-details drill-down for a `security.*` type. It renders no UI, and an
- * attachment that identifies nothing opens nothing, so registering it on a type is safe even
- * when only some of its attachments carry enough to open with.
- */
-export const createAttachmentSummaryDrilldown = <
-  TAttachment extends UnknownAttachment = UnknownAttachment
->({
-  resolveSecurityCanvasContext,
-}: {
-  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
-}): NonNullable<AttachmentUIDefinition<TAttachment>['renderConversationDetailsContent']> =>
-  function AttachmentSummaryDrilldown({ attachment }) {
-    return (
-      <Suspense fallback={null}>
-        <LazyAttachmentSummaryFlyoutOpener
-          attachment={attachment}
-          resolveSecurityCanvasContext={resolveSecurityCanvasContext}
-        />
-      </Suspense>
-    );
-  };
+export const createAlertsSummaryRows =
+  <TAttachment extends UnknownAttachment = UnknownAttachment>({
+    resolveSecurityCanvasContext,
+    getSpaceId,
+  }: {
+    resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+    getSpaceId: () => Promise<string>;
+  }): NonNullable<AttachmentUIDefinition<TAttachment>['renderConversationDetailsContent']> =>
+  ({ attachment }) =>
+    renderAlertsSection({ attachment, getSpaceId, resolveSecurityCanvasContext });

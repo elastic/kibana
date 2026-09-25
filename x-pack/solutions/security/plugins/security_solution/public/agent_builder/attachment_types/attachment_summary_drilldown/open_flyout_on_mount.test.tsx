@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
-import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
 import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
+import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { AttachmentSummaryFlyoutOpener } from './open_flyout_on_mount';
 
 jest.mock('../../../flyout_v2/use_flyout_api');
@@ -31,18 +30,18 @@ jest.mock('../../../data_view_manager/hooks/use_data_view_manager_status', () =>
   useDataViewManagerStatus: () => dataViewStatus,
 }));
 
-const alertAttachment: UnknownAttachment = {
-  id: 'attachment-1',
-  type: SecurityAgentBuilderAttachments.alert,
-  data: { alert: JSON.stringify({ _id: ['alert-1'], _index: ['.internal.alerts-1'] }) },
+const descriptor: FlyoutDescriptor = {
+  kind: 'document',
+  documentId: 'alert-1',
+  indexName: '.internal.alerts-1',
 };
 
 const resolveSecurityCanvasContext = jest.fn().mockResolvedValue({ store: {}, kibanaServices: {} });
 
-const renderOpener = (attachment: UnknownAttachment) =>
+const renderOpener = (d: FlyoutDescriptor = descriptor) =>
   render(
     <AttachmentSummaryFlyoutOpener
-      attachment={attachment}
+      descriptor={d}
       resolveSecurityCanvasContext={resolveSecurityCanvasContext}
     />
   );
@@ -54,46 +53,30 @@ describe('AttachmentSummaryFlyoutOpener', () => {
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
   });
 
-  it('opens the flyout the attachment resolves to, attributed to the summary', async () => {
-    renderOpener(alertAttachment);
+  it('opens the flyout for the given descriptor, attributed to the summary', async () => {
+    renderOpener();
 
     await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalledTimes(1));
     expect(openDescriptorAsStart).toHaveBeenCalledWith(
-      { kind: 'document', documentId: 'alert-1', indexName: '.internal.alerts-1' },
+      descriptor,
       {},
       expect.anything(),
       FLYOUT_ORIGIN.ATTACHMENT_SUMMARY
     );
   });
 
-  it('renders nothing, because the row it is mounted into owns the presentation', async () => {
-    const { container } = renderOpener(alertAttachment);
-
-    await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalled());
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('opens nothing for an attachment that identifies no flyout', async () => {
-    renderOpener({ ...alertAttachment, data: { alert: 'not json' } });
-
-    await waitFor(() => expect(resolveSecurityCanvasContext).toHaveBeenCalled());
-    expect(openDescriptorAsStart).not.toHaveBeenCalled();
-  });
-
   it('initialises the data view manager when nothing else has', async () => {
     dataViewStatus = 'pristine';
 
-    renderOpener(alertAttachment);
+    renderOpener();
 
     await waitFor(() => expect(initDataViewManager).toHaveBeenCalled());
   });
 
   it('does not retry after a failed initialisation, which would loop', async () => {
-    // The init listener reports failure by dispatching `error` and showing a toast, so retrying
-    // on `error` would re-init for as long as the summary stays mounted.
     dataViewStatus = 'error';
 
-    renderOpener(alertAttachment);
+    renderOpener();
 
     await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalled());
     expect(initDataViewManager).not.toHaveBeenCalled();

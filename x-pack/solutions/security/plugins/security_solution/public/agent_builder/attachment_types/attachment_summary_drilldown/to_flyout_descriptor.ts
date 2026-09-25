@@ -6,9 +6,8 @@
  */
 
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
-import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
-import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 
 /** Producers build the payload from a fields map, so values arrive as arrays. */
 const firstValue = (value: unknown): string | undefined => {
@@ -18,7 +17,11 @@ const firstValue = (value: unknown): string | undefined => {
   return Array.isArray(value) && typeof value[0] === 'string' ? value[0] : undefined;
 };
 
-const toDocumentDescriptor = (attachment: UnknownAttachment): FlyoutDescriptor | null => {
+/**
+ * Maps a `security.alert` attachment onto the document flyout it should open, or `null` when
+ * the payload identifies nothing (read-only row).
+ */
+export const toAlertDescriptor = (attachment: UnknownAttachment): FlyoutDescriptor | null => {
   const alert = (attachment.data as { alert?: unknown })?.alert;
   if (typeof alert !== 'string') {
     return null;
@@ -42,20 +45,4 @@ const toDocumentDescriptor = (attachment: UnknownAttachment): FlyoutDescriptor |
   return documentId && indexName
     ? { kind: FLYOUT_DESCRIPTOR_KIND.document, documentId, indexName }
     : null;
-};
-
-/**
- * Maps a summary attachment onto the flyout it should open, or `null` when the payload
- * identifies nothing, which leaves the row read-only.
- *
- * Only `security.alert` so far; the other summary kinds each add a case and a registration.
- */
-export const toFlyoutDescriptor = (attachment: UnknownAttachment): FlyoutDescriptor | null => {
-  switch (attachment.type) {
-    case SecurityAgentBuilderAttachments.alert:
-      return toDocumentDescriptor(attachment);
-
-    default:
-      return null;
-  }
 };
