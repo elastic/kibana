@@ -381,7 +381,8 @@ export class AlertZeroPublicPlugin
               name: ESCALATION_TEMPLATE_NAME,
               icon: 'warning',
               renderAssignees,
-              renderStatus: canManageEscalations && canManageInvestigations ? renderStatus : undefined,
+              renderStatus:
+                canManageEscalations && canManageInvestigations ? renderStatus : undefined,
               renderLinkedInvestigations: canShowEscalations
                 ? renderLinkedInvestigations
                 : undefined,
