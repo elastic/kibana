@@ -25,6 +25,8 @@
  * that was the shape of `retry({ delay })`, not a requirement.
  */
 
+import { ReplaySubject, type Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 import {
@@ -35,9 +37,12 @@ import {
 } from './nodes_version_compatibility';
 import {
   nextOnGrid,
+  realClock,
+  run,
   type Action,
   type ActionResult,
   type AugmentedState,
+  type Clock,
   type Scheduled,
   type StateActionMachine,
 } from './state_action_machine';
@@ -192,3 +197,47 @@ export const nodesVersionMachine = (
   next: () => action,
   model: (state, result) => model(config, state, result),
 });
+
+// Runner
+
+/** @public */
+export interface PollEsNodesVersionOptions extends NodesVersionConfig {
+  internalClient: ElasticsearchClient;
+  log: Logger;
+  /** Ends the check. The returned observable completes once the machine has stopped. */
+  signal: AbortSignal;
+}
+
+/**
+ * Runs the version check against the cluster until `signal` aborts, logging an
+ * incompatible cluster, and returns the change-only compatibility with the
+ * latest replayed to late subscribers: the shape `isValidConnection`, the saved
+ * objects service, and the status stream expect.
+ */
+export const pollEsNodesVersion = (
+  { internalClient, log, signal, ...config }: PollEsNodesVersionOptions,
+  clock: Clock = realClock
+): Observable<NodesVersionCompatibility> => {
+  log.debug('Checking Elasticsearch version');
+  const compatibility$ = new ReplaySubject<NodesVersionCompatibility>(1);
+  const machine = nodesVersionMachine(fetchNodesInfo(internalClient), config);
+
+  const poll = async (): Promise<void> => {
+    for await (const { event } of run(machine, clock, signal)) {
+      if (event.type !== 'compatibilityChanged') {
+        continue;
+      }
+      const { compatibility } = event;
+      if (!compatibility.isCompatible && compatibility.message) {
+        log.error(compatibility.message);
+      }
+      compatibility$.next(compatibility);
+    }
+  };
+  poll().then(
+    () => compatibility$.complete(),
+    (error) => compatibility$.error(error)
+  );
+
+  return compatibility$.asObservable();
+};

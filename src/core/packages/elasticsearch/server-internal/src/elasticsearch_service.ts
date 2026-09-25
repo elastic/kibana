@@ -42,7 +42,7 @@ import type {
   InternalElasticsearchServiceStart,
 } from './types';
 import type { NodesVersionCompatibility } from './version_check/nodes_version_compatibility';
-import { pollEsNodesVersion } from './version_check/nodes_version_rxjs';
+import { pollEsNodesVersion } from './version_check/nodes_version';
 import { pollEsNodesClockSkew } from './version_check/clock_skew';
 import { calculateStatus$ } from './status';
 import { isValidConnection } from './is_valid_connection';
@@ -129,6 +129,10 @@ export class ElasticsearchService
     this.security = deps.security;
     this.client = this.createClusterClient('data', config);
 
+    // Both polls run until the service stops.
+    const pollLifetime = new AbortController();
+    this.stop$.subscribe(() => pollLifetime.abort());
+
     const esNodesCompatibility$ = pollEsNodesVersion({
       kibanaVersion: this.kibanaVersion,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
@@ -138,21 +142,13 @@ export class ElasticsearchService
       healthCheckRetry: config.healthCheckRetry,
       log: this.log,
       internalClient: this.client.asInternalUser,
-    }).pipe(takeUntil(this.stop$));
-
-    // Log every error we may encounter in the connection to Elasticsearch
-    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-      if (!isCompatible && message) {
-        this.log.error(message);
-      }
+      signal: pollLifetime.signal,
     });
 
-    const clockSkewLifetime = new AbortController();
-    this.stop$.subscribe(() => clockSkewLifetime.abort());
     pollEsNodesClockSkew({
       log: this.log,
       internalClient: this.client.asInternalUser,
-      signal: clockSkewLifetime.signal,
+      signal: pollLifetime.signal,
     }).catch((error) => this.log.error(error));
 
     this.esNodesCompatibility$ = esNodesCompatibility$;

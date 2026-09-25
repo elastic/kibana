@@ -15,7 +15,7 @@ jest.mock('./is_valid_connection', () => ({
 }));
 
 // Mocking this module to force different statuses to help with the unit tests
-jest.mock('./version_check/nodes_version_rxjs', () => ({
+jest.mock('./version_check/nodes_version', () => ({
   pollEsNodesVersion: jest.fn(),
 }));
 
@@ -29,7 +29,6 @@ import {
   getClusterInfoMock,
 } from './elasticsearch_service.test.mocks';
 
-import type { NodesVersionCompatibility } from './version_check/nodes_version_compatibility';
 import { BehaviorSubject, firstValueFrom, of, throwError } from 'rxjs';
 import { first, concatMap } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -46,10 +45,10 @@ import type { SetupDeps } from './elasticsearch_service';
 import { ElasticsearchService } from './elasticsearch_service';
 import { duration } from 'moment';
 import { isValidConnection } from './is_valid_connection';
-import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/nodes_version_rxjs';
+import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/nodes_version';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
-  './version_check/nodes_version_rxjs'
+  './version_check/nodes_version'
 );
 
 const isValidConnectionMock = isValidConnection as jest.Mock;
@@ -253,15 +252,14 @@ describe('#setup', () => {
     expect(typeof setupContract.agentStatsProvider.getAgentsStats).toEqual('function');
   });
 
-  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
+  it('esNodesCompatibility$ polls from setup at the health check interval', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
-    // The machine yields its initial state before its first request, so the
-    // request lands a microtask after subscription rather than synchronously.
+    // The first request lands a microtask after setup, once the machine has yielded its initial state.
     await jest.advanceTimersByTimeAsync(0);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
@@ -275,15 +273,14 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 
-  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
+  it('esNodesCompatibility$ replays the latest compatibility to a late subscriber', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
-    // The machine yields its initial state before its first request, so the
-    // request lands a microtask after subscription rather than synchronously.
+    // The first request lands a microtask after setup, once the machine has yielded its initial state.
     await jest.advanceTimersByTimeAsync(0);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
@@ -320,32 +317,6 @@ describe('#start', () => {
     const client = startContract.client;
 
     expect(client.asInternalUser).toBe(mockClusterClientInstance.asInternalUser);
-  });
-
-  it('should log.error non-compatible nodes error', async () => {
-    const defaultMessage = {
-      isCompatible: true,
-      kibanaVersion: '8.0.0',
-      incompatibleNodes: [],
-      warningNodes: [],
-    };
-    const observable$ = new BehaviorSubject<NodesVersionCompatibility>(defaultMessage);
-
-    // @ts-expect-error this module is mocked, so `mockImplementation` is an allowed property
-    pollEsNodesVersionMocked.mockImplementation(() => observable$);
-
-    await elasticsearchService.setup(setupDeps);
-    tick();
-    await elasticsearchService.start();
-    expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([]);
-    observable$.next({
-      ...defaultMessage,
-      isCompatible: false,
-      message: 'Something went terribly wrong!',
-    });
-    expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([
-      ['Something went terribly wrong!'],
-    ]);
   });
 
   it('logs an info message about connecting to ES', async () => {

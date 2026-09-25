@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { firstValueFrom, lastValueFrom, toArray } from 'rxjs';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   fetchNodesInfo,
   initialState,
   model,
+  pollEsNodesVersion,
   sameCompatibility,
   type NodesVersionResult,
   type NodesVersionConfig,
@@ -22,6 +25,7 @@ import {
   type NodesInfo,
   type NodesVersionCompatibility,
 } from './nodes_version_compatibility';
+import { virtualClock } from './state_action_machine.test_helpers';
 
 // `satisfies` keeps the optional intervals as `number` where the tests read them.
 const config = {
@@ -256,5 +260,46 @@ describe('fetchNodesInfo', () => {
       },
       { requestTimeout: expect.any(Number), signal }
     );
+  });
+});
+
+describe('pollEsNodesVersion', () => {
+  const log = loggingSystemMock.createLogger();
+  beforeEach(() => jest.clearAllMocks());
+
+  /** Answers each request from `responses` (the last repeating) and aborts after the last. */
+  const poll = async (responses: NodesInfo[]) => {
+    const internalClient = elasticsearchClientMock.createInternalClient();
+    const controller = new AbortController();
+    let calls = 0;
+    internalClient.nodes.info.mockImplementation((async () => {
+      const response = responses[Math.min(calls, responses.length - 1)];
+      if (++calls === responses.length) {
+        controller.abort();
+      }
+      return response;
+    }) as never);
+    const compatibility$ = pollEsNodesVersion(
+      { ...config, internalClient, log, signal: controller.signal },
+      virtualClock()
+    );
+    const emitted = await lastValueFrom(compatibility$.pipe(toArray()));
+    return { compatibility$, emitted };
+  };
+
+  it('emits only when the compatibility changes, and completes once aborted', async () => {
+    const { emitted } = await poll([compatible, compatible, incompatible]);
+    expect(emitted.map((c) => c.isCompatible)).toEqual([true, false]);
+  });
+
+  it('replays the latest compatibility to a late subscriber', async () => {
+    const { compatibility$ } = await poll([compatible]);
+    expect((await firstValueFrom(compatibility$)).isCompatible).toBe(true);
+  });
+
+  it('logs an incompatible cluster once per change', async () => {
+    await poll([incompatible, incompatible]);
+    expect(log.error).toHaveBeenCalledTimes(1);
+    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('7.0.0'));
   });
 });
