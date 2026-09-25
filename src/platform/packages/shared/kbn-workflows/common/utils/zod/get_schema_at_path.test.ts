@@ -8,9 +8,52 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { getSchemaAtPath } from './get_schema_at_path';
+import { getSchemaAtPath, parsePath } from './get_schema_at_path';
 import { expectZodSchemaEqual } from './test_utils/expect_zod_schema_equal';
 import { EsGenericResponseSchema } from '../../elasticsearch_generic_response_schema';
+
+describe('parsePath', () => {
+  it('splits dot-separated segments', () => {
+    expect(parsePath('a.b.c')).toEqual(['a', 'b', 'c']);
+  });
+
+  it('normalizes quoted bracket keys', () => {
+    expect(parsePath("a['b'].c")).toEqual(['a', 'b', 'c']);
+    expect(parsePath('a["b"].c')).toEqual(['a', 'b', 'c']);
+  });
+
+  it('normalizes numeric bracket keys', () => {
+    expect(parsePath('a[0].b')).toEqual(['a', '0', 'b']);
+  });
+
+  it('replaces an unquoted non-numeric bracket key with the dynamic sentinel', () => {
+    expect(parsePath('rules[ep.rule_id].name')).toEqual([
+      'rules',
+      '__liquid_dynamic_key__',
+      'name',
+    ]);
+  });
+
+  it('treats a dotted Liquid expression as a single dynamic segment', () => {
+    expect(parsePath('rules[ep.a.b].name')).toEqual([
+      'rules',
+      '__liquid_dynamic_key__',
+      'name',
+    ]);
+  });
+
+  it('returns null for leading dots', () => {
+    expect(parsePath('.a')).toBeNull();
+  });
+
+  it('returns null for trailing dots', () => {
+    expect(parsePath('a.')).toBeNull();
+  });
+
+  it('returns null for consecutive dots', () => {
+    expect(parsePath('a..b')).toBeNull();
+  });
+});
 
 describe('getSchemaAtPath', () => {
   it('objects with simple paths', () => {
@@ -176,6 +219,14 @@ describe('getSchemaAtPath', () => {
     });
     expect(getSchemaAtPath(schema, 'data[item].name').schema).not.toBeNull();
     expect(getSchemaAtPath(schema, 'data[item].nmae').schema).toBeNull();
+  });
+
+  it('treats a dotted Liquid key as a single segment', () => {
+    const schema = z.object({
+      rules: z.record(z.string(), z.object({ name: z.string() })),
+    });
+    expect(getSchemaAtPath(schema, 'rules[ep.a.b].name').schema).not.toBeNull();
+    expect(getSchemaAtPath(schema, 'rules[ep.a.b].nmae').schema).toBeNull();
   });
 });
 
