@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
@@ -19,8 +20,17 @@ jest.mock('react-hook-form', () => ({
   useWatch: jest.fn().mockReturnValue({ name: '', tags: [] }),
 }));
 
-jest.mock('./use_matched_action_policies');
+jest.mock('./use_matched_action_policies', () => ({
+  ...jest.requireActual('./use_matched_action_policies'),
+  useMatchedActionPolicies: jest.fn(),
+}));
 jest.mock('./use_action_policy_connector_types');
+
+const mockInvalidateQueries = jest.fn();
+
+jest.mock('@kbn/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+}));
 
 const mockUseMatchedActionPolicies = useMatchedActionPolicies as jest.MockedFunction<
   typeof useMatchedActionPolicies
@@ -45,13 +55,14 @@ const renderComponent = (
 
 describe('LinkedActionPoliciesStep', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     mockUseActionPolicyConnectorTypes.mockReturnValue({
       connectorTypesByPolicy: new Map(),
       isLoading: false,
     });
   });
 
-  it('renders the title and the matching subtext when policies are present', () => {
+  it('renders the title and description when policies are present', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
@@ -104,7 +115,40 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(screen.getByTestId('linkedActionPoliciesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No matching action policies found.')).toBeInTheDocument();
+    expect(screen.getByText('No action policies match yet.')).toBeInTheDocument();
+  });
+
+  it('opens the create action policy flyout and refreshes matches after creation', async () => {
+    const user = userEvent.setup();
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [],
+      total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    const CreateActionPolicyFormFlyout = ({
+      onSuccess,
+    }: {
+      onClose: () => void;
+      onSuccess: () => void;
+    }) => (
+      <button type="button" onClick={onSuccess} data-test-subj="actionPolicyFormFlyout">
+        Save action policy
+      </button>
+    );
+
+    renderComponent({ CreateActionPolicyFormFlyout });
+
+    await user.click(screen.getByRole('button', { name: 'Create action policy' }));
+    expect(screen.getByTestId('actionPolicyFormFlyout')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('actionPolicyFormFlyout'));
+
+    expect(screen.queryByTestId('actionPolicyFormFlyout')).not.toBeInTheDocument();
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['matchedActionPolicies'] });
   });
 
   it('renders a catch-all badge for a global policy', () => {

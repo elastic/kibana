@@ -27,6 +27,7 @@ import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
+import { CreateActionPolicyFormFlyout } from './components/action_policy/form_flyout/create_action_policy_form_flyout';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -119,7 +120,10 @@ const CreateRuleOptionsFlyoutInner = ({
       import('@kbn/alerting-v2-rule-form'),
     ]);
     return {
-      services,
+      services: {
+        ...services,
+        createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
+      },
       ComposeDiscoverFlyout: mod.ComposeDiscoverFlyout,
     };
   }, []);
