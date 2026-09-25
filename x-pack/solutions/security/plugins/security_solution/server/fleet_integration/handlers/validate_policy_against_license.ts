@@ -19,14 +19,16 @@ export const validatePolicyAgainstLicense = (
   const licenseInformation = licenseService.getLicenseInformation();
   if (!isEndpointPolicyValidForLicense(policyConfig, licenseInformation)) {
     logger.warn('Incorrect license tier for paid policy fields');
-    // The `statusCode` below is used by Fleet API handler to ensure that the proper HTTP code is used in the API response
-    const licenseError: Error & { statusCode?: number; passThroughApi?: boolean } = new Error(
+    // `statusCode` sets the HTTP code used in the API response. `apiPassThrough` is the marker
+    // Fleet checks to rethrow this error instead of swallowing it and persisting the inbound
+    // payload unchanged, so it must keep that exact name.
+    const licenseError: Error & { statusCode?: number; apiPassThrough?: boolean } = new Error(
       `${capitalize(
         licenseInformation?.type || 'current'
       )} license does not support this action. Please upgrade your license.`
     );
     licenseError.statusCode = 403;
-    licenseError.passThroughApi = true;
+    licenseError.apiPassThrough = true;
 
     throw licenseError;
   }

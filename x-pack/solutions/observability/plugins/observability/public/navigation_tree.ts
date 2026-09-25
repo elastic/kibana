@@ -727,11 +727,6 @@ export const createDefinition = (
   coreStart: CoreStart,
   pluginsStart: ObservabilityPublicPluginsStart
 ): AddSolutionNavigationArg => {
-  const significantEventsAvailable = coreStart.featureFlags.getBooleanValue(
-    NIGHTSHIFT_ENABLED_FLAG,
-    false
-  );
-
   return {
     id: 'oblt',
     title,
@@ -740,8 +735,9 @@ export const createDefinition = (
       pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
       pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+      coreStart.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
     ]).pipe(
-      map(([{ status }, chatExperience, ingestHubAvailable]) =>
+      map(([{ status }, chatExperience, ingestHubAvailable, significantEventsAvailable]) =>
         createNavTree({
           coreStart,
           significantEventsAvailable,

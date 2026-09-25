@@ -84,6 +84,10 @@ export const buildSecurityApi = ({
               convert: (keys: string[]) => getAuthc().apiKeys.uiam!.convert(keys),
               getInternalCallerAttestationHeaders: (credential: HTTPAuthorizationHeader) =>
                 getAuthc().apiKeys.uiam!.getInternalCallerAttestationHeaders(credential),
+              isOwnClientAuthentication: (value: string) =>
+                getAuthc().apiKeys.uiam!.isOwnClientAuthentication(value),
+              isExternalApiKey: (request: KibanaRequest) =>
+                getAuthc().apiKeys.uiam!.isExternalApiKey(request),
             }
           : null,
       },

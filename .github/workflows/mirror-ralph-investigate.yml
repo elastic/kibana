@@ -118,8 +118,17 @@ jobs:
             printf '<!--kibana-mirror %s-->\n' "$ISSUE_NUMBER"
           } > "$RUNNER_TEMP/body.md"
 
+          # GitHub's issue title limit is 256 characters. The prefix adds a variable number of
+          # characters depending on the issue number length; truncate the source title to the
+          # remaining capacity before prepending so creation never fails on a long title.
+          PREFIX="[kibana#$ISSUE_NUMBER] "
+          MAX_TITLE=$((256 - ${#PREFIX}))
+          if [[ ${#ISSUE_TITLE} -gt $MAX_TITLE ]]; then
+            ISSUE_TITLE="${ISSUE_TITLE:0:$MAX_TITLE}"
+          fi
+
           MIRROR_URL=$(gh issue create --repo "$TARGET_REPO" \
-            --title "$ISSUE_TITLE" --body-file "$RUNNER_TEMP/body.md")
+            --title "${PREFIX}${ISSUE_TITLE}" --body-file "$RUNNER_TEMP/body.md")
           echo "url=$MIRROR_URL" >> "$GITHUB_OUTPUT"
 
           # Separate call on purpose. This label is what starts Detective Ralph; labels set at
