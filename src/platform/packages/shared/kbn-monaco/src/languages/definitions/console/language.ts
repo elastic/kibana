@@ -34,7 +34,8 @@ import {
   consoleOutputLanguageConfiguration,
 } from './lexer_rules';
 import { foldingRangeProvider } from './folding_range_provider';
-import { createInterruptibleLanguageProvider } from '../../helpers';
+import { isCancellationError } from '../../../monaco_imports';
+import { handleInterruptibleMonacoOperation } from '../../helpers';
 
 export const CONSOLE_TRIGGER_CHARS = ['/', '.', '_', ',', '?', '=', '&', '"'];
 
@@ -117,7 +118,7 @@ export const ConsoleLang: LangModuleType = {
       triggerCharacters: [...CONSOLE_TRIGGER_CHARS, ...ESQL_AUTOCOMPLETE_TRIGGER_CHARS],
       provideCompletionItems: (async (model, position, context, token) => {
         try {
-          return createInterruptibleLanguageProvider(async () => {
+          return handleInterruptibleMonacoOperation(async () => {
             // NOTE: Materializing the full editor content (e.g. via `model.getValue()`) can be very
             // expensive for large inputs (like pasted JSON with huge string fields). The anchored
             // range below is bounded by the request-line lookback caps.
@@ -162,7 +163,7 @@ export const ConsoleLang: LangModuleType = {
             return delegateToActionsProvider();
           }, token);
         } catch (e) {
-          if (e instanceof Error && e.message === 'AbortedDueToCancellationRequest') {
+          if (isCancellationError(e)) {
             return {
               suggestions: [],
             };

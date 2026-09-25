@@ -8,11 +8,12 @@
  */
 
 import { getIndexSourcesFromQuery, suggest } from '@kbn/esql-language';
-import { monaco } from '../../../../../monaco_imports';
+import { monaco, isCancellationError } from '../../../../../monaco_imports';
 import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoSuggestions } from '../converters/suggestions';
 import { filterSuggestionsWithCustomCommands, monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
+import { handleInterruptibleMonacoOperation } from '../../../../helpers';
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
@@ -93,67 +94,78 @@ export function getSuggestionProvider(
         emptyResult: { suggestions: [] },
       });
     }) satisfies monaco.languages.CompletionItemProvider['provideCompletionItems'],
-    async resolveCompletionItem(item): Promise<monaco.languages.CompletionItem> {
-      const context = itemContext.get(item);
-      if (!context?.getFieldsMetadata) return item;
+    resolveCompletionItem: (async (item, token) => {
+      try {
+        return await handleInterruptibleMonacoOperation(async () => {
+          const context = itemContext.get(item);
+          if (!context?.getFieldsMetadata) return item;
 
-      const fieldsMetadataClient = await context.getFieldsMetadata;
-      if (!fieldsMetadataClient) return item;
+          const fieldsMetadataClient = await context.getFieldsMetadata;
+          if (!fieldsMetadataClient) return item;
 
-      // Fetch the full ECS field list upfront as a single lightweight check.
-      // The client caches this result, so subsequent calls are free.
-      const fullEcsMetadataList = await fieldsMetadataClient.find({ attributes: ['type'] });
+          // Fetch the full ECS field list upfront as a single lightweight check.
+          // The client caches this result, so subsequent calls are free.
+          const fullEcsMetadataList = await fieldsMetadataClient.find({ attributes: ['type'] });
 
-      if (item.kind !== monaco.languages.CompletionItemKind.Variable) return item;
-      if (typeof item.label !== 'string') return item;
+          if (item.kind !== monaco.languages.CompletionItemKind.Variable) return item;
+          if (typeof item.label !== 'string') return item;
 
-      const strippedFieldName = removeKeywordSuffix(item.label);
-      const { streamNames } = context;
-      const documentationParts: string[] = [];
+          const strippedFieldName = removeKeywordSuffix(item.label);
+          const { streamNames } = context;
+          const documentationParts: string[] = [];
 
-      // 1. ECS description
-      if (fullEcsMetadataList && Object.hasOwn(fullEcsMetadataList.fields, strippedFieldName)) {
-        const ecsMetadata = await fieldsMetadataClient.find({
-          fieldNames: [strippedFieldName],
-          attributes: ['description'],
-        });
-        const ecsDescription = ecsMetadata.fields[strippedFieldName]?.description;
-        if (ecsDescription) {
-          documentationParts.push(ecsDescription);
-        }
-      }
-
-      // 2. Stream descriptions
-      if (streamNames?.length) {
-        const streamMetadata = await fieldsMetadataClient.find({
-          fieldNames: [strippedFieldName],
-          attributes: ['description'],
-          streamNames,
-          source: ['streams'],
-        });
-        const streamParts = streamNames.flatMap((streamName) => {
-          const streamDescription =
-            streamMetadata.streamFields[streamName]?.[strippedFieldName]?.description;
-          return streamDescription ? [`Per **${streamName}** stream: ${streamDescription}`] : [];
-        });
-        if (streamParts.length > 0) {
-          if (documentationParts.length > 0) {
-            documentationParts.push('---');
+          // 1. ECS description
+          if (fullEcsMetadataList && Object.hasOwn(fullEcsMetadataList.fields, strippedFieldName)) {
+            const ecsMetadata = await fieldsMetadataClient.find({
+              fieldNames: [strippedFieldName],
+              attributes: ['description'],
+            });
+            const ecsDescription = ecsMetadata.fields[strippedFieldName]?.description;
+            if (ecsDescription) {
+              documentationParts.push(ecsDescription);
+            }
           }
-          documentationParts.push(streamParts.join('\n\n'));
+
+          // 2. Stream descriptions
+          if (streamNames?.length) {
+            const streamMetadata = await fieldsMetadataClient.find({
+              fieldNames: [strippedFieldName],
+              attributes: ['description'],
+              streamNames,
+              source: ['streams'],
+            });
+            const streamParts = streamNames.flatMap((streamName) => {
+              const streamDescription =
+                streamMetadata.streamFields[streamName]?.[strippedFieldName]?.description;
+              return streamDescription
+                ? [`Per **${streamName}** stream: ${streamDescription}`]
+                : [];
+            });
+            if (streamParts.length > 0) {
+              if (documentationParts.length > 0) {
+                documentationParts.push('---');
+              }
+              documentationParts.push(streamParts.join('\n\n'));
+            }
+          }
+
+          if (documentationParts.length === 0) {
+            return item;
+          }
+
+          return {
+            ...item,
+            documentation: {
+              value: documentationParts.join('\n\n'),
+            },
+          };
+        }, token);
+      } catch (error) {
+        if (isCancellationError(error)) {
+          return item;
         }
+        throw error;
       }
-
-      if (documentationParts.length === 0) {
-        return item;
-      }
-
-      return {
-        ...item,
-        documentation: {
-          value: documentationParts.join('\n\n'),
-        },
-      };
-    },
+    }) satisfies monaco.languages.CompletionItemProvider['resolveCompletionItem'],
   };
 }

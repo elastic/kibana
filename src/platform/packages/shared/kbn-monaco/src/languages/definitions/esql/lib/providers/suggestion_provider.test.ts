@@ -525,5 +525,21 @@ describe('suggestion_provider', () => {
 
       settleHangs.forEach((resolveHang) => resolveHang(undefined));
     });
+
+    it('returns the original item when the token is cancelled before the item resolves', async () => {
+      const suggestionProvider = ESQLLang.getSuggestionProvider({
+        getFieldsMetadata: Promise.resolve({
+          find: jest.fn().mockResolvedValue({ fields: {}, streamFields: {} }),
+        }),
+      } as unknown as ESQLCallbacks);
+
+      const item = { label: 'test.field' } as monaco.languages.CompletionItem;
+
+      tokenSource.cancel();
+
+      await expect(
+        suggestionProvider.resolveCompletionItem!(item, tokenSource.token)
+      ).resolves.toEqual(item);
+    });
   });
 });
