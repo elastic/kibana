@@ -56,4 +56,42 @@ describe('useRiskEngineStatus', () => {
     const [callArg] = mockFetchRiskEngineStatus.mock.calls[0];
     expect(callArg.context).toBeUndefined();
   });
+
+  it('isolates caller contexts so each subscriber uses its own queryFn', async () => {
+    // Use a single shared QueryClient so both hooks live in the same cache.
+    // Without key isolation the second observer's queryFn would overwrite the
+    // first, and only one context (the last to render) would be seen on fetch.
+    const sharedClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const SharedWrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={sharedClient}>{children}</QueryClientProvider>
+    );
+
+    const contextA = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:home_page',
+        id: 'panel_a',
+      },
+    };
+    const contextB = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:home_page',
+        id: 'panel_b',
+      },
+    };
+
+    renderHook(() => useRiskEngineStatus({}, { executionContext: contextA }), {
+      wrapper: SharedWrapper,
+    });
+    renderHook(() => useRiskEngineStatus({}, { executionContext: contextB }), {
+      wrapper: SharedWrapper,
+    });
+
+    // Different cache keys → two independent fetches, each carrying the correct context.
+    await waitFor(() => expect(mockFetchRiskEngineStatus).toHaveBeenCalledTimes(2));
+
+    const seenContexts = mockFetchRiskEngineStatus.mock.calls.map(([arg]) => arg.context);
+    expect(seenContexts).toEqual(expect.arrayContaining([contextA, contextB]));
+  });
 });

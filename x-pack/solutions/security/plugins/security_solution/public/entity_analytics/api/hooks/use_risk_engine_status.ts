@@ -38,8 +38,19 @@ export const useRiskEngineStatus = (
   } = {}
 ) => {
   const { fetchRiskEngineStatus } = useEntityAnalyticsRoutes();
+  // Append caller-supplied context fields to the key so each distinct caller
+  // gets its own cache entry and queryFn. Without this, react-query would store
+  // whichever observer rendered last as the shared queryFn — making invalidation
+  // non-deterministically use the wrong (or missing) context.
+  const queryKey: string[] = executionContext?.child
+    ? [
+        ...FETCH_RISK_ENGINE_STATUS,
+        executionContext.child.name ?? '',
+        executionContext.child.id ?? '',
+      ]
+    : FETCH_RISK_ENGINE_STATUS;
   return useQuery(
-    FETCH_RISK_ENGINE_STATUS,
+    queryKey,
     async ({ signal }) => fetchRiskEngineStatus({ signal, context: executionContext }),
     queryOptions
   );
