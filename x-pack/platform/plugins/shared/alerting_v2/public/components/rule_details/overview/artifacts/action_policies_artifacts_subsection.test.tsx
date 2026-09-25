@@ -114,9 +114,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     });
     jest
       .mocked(mockLocators.actionPolicyLocators.getRedirectUrl)
-      .mockImplementation((params) =>
-        params.actionPolicyId ? `/mock-edit-${params.actionPolicyId}` : '/mock-locator-url'
-      );
+      .mockReturnValue('/mock-locator-url');
   });
 
   it('loads linked policies using the current rule tags', () => {
@@ -229,6 +227,21 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     expect(screen.getByText('Open action policies')).toBeInTheDocument();
   });
 
+  it('truncates policy names longer than 28 characters', () => {
+    const name = 'Long matching policy for production hosts across every region and cluster';
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      items: [buildItem('tags', { id: 'policy-long', name, matcher: { tags: ['prod'] } })],
+    });
+
+    renderSubsection();
+
+    expect(screen.getByTestId('ruleActionPolicyArtifactName-policy-long')).toHaveTextContent(
+      'Long matching policy for pro...'
+    );
+    expect(screen.getByLabelText(`View details for ${name}`)).toBeInTheDocument();
+  });
+
   it('shows a tag icon and an expression badge when the policy matches both ways', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
       ...idleHookResult,
@@ -269,9 +282,11 @@ describe('ActionPoliciesArtifactsSubsection', () => {
 
     renderSubsection();
 
+    const name = screen.getByTestId('ruleActionPolicyArtifactName-policy-match');
     const icons = screen.getByTestId('ruleActionPolicyArtifactConnectors-policy-match');
     expect(icons.querySelector('[data-euiicon-type="mail"]')).toBeInTheDocument();
     expect(icons.querySelector('[data-euiicon-type="logoSlack"]')).toBeInTheDocument();
+    expect(name.compareDocumentPosition(icons)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('open link params resolve to management action policies list URL', async () => {

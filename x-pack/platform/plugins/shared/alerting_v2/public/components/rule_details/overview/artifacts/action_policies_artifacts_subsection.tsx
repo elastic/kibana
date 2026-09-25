@@ -36,6 +36,14 @@ import { useLinkedActionPolicies } from './use_linked_action_policies';
 /** Max matched policies rendered in the artifacts card before a "show more" control. */
 export const LINKED_ACTION_POLICIES_VISIBLE_LIMIT = 8;
 
+/** Visible policy name length before the label is cut with an ellipsis. */
+const ACTION_POLICY_NAME_CHARACTER_LIMIT = 28;
+
+const truncateActionPolicyName = (name: string): string =>
+  name.length > ACTION_POLICY_NAME_CHARACTER_LIMIT
+    ? `${name.slice(0, ACTION_POLICY_NAME_CHARACTER_LIMIT).trimEnd()}...`
+    : name;
+
 const openLinkLabel = i18n.translate(
   'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.openLink',
   { defaultMessage: 'Open action policies' }
@@ -105,6 +113,17 @@ const PolicyArtifactRow = ({
     'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.viewPolicyAriaLabel',
     { defaultMessage: 'View details for {name}', values: { name: actionPolicy.name } }
   );
+  const visibleName = truncateActionPolicyName(actionPolicy.name);
+  const nameLink = (
+    <EuiLink
+      onClick={() => onOpen(actionPolicy.id)}
+      aria-label={viewAriaLabel}
+      css={{ whiteSpace: 'nowrap' }}
+      data-test-subj={`ruleActionPolicyArtifactName-${actionPolicy.id}`}
+    >
+      {visibleName}
+    </EuiLink>
+  );
 
   return (
     <EuiPanel
@@ -114,41 +133,20 @@ const PolicyArtifactRow = ({
       data-test-subj={`ruleActionPolicyArtifactRow-${actionPolicy.id}`}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={{ minWidth: 0 }}>
-        <EuiFlexItem grow css={{ minWidth: 0 }}>
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-            css={{ minWidth: 0, width: '100%' }}
-          >
-            <EuiFlexItem grow css={{ minWidth: 0 }}>
-              <EuiToolTip
-                content={actionPolicy.name}
-                disableScreenReaderOutput
-                anchorProps={{ css: { display: 'block', minWidth: 0, overflow: 'hidden' } }}
-              >
-                <EuiLink
-                  onClick={() => onOpen(actionPolicy.id)}
-                  aria-label={viewAriaLabel}
-                  css={{
-                    display: 'block',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                  data-test-subj={`ruleActionPolicyArtifactName-${actionPolicy.id}`}
-                >
-                  {actionPolicy.name}
-                </EuiLink>
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <WorkflowConnectorIcons
-                types={connectorTypes}
-                data-test-subj={`ruleActionPolicyArtifactConnectors-${actionPolicy.id}`}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          {visibleName === actionPolicy.name ? (
+            nameLink
+          ) : (
+            <EuiToolTip content={actionPolicy.name} disableScreenReaderOutput>
+              {nameLink}
+            </EuiToolTip>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <WorkflowConnectorIcons
+            types={connectorTypes}
+            data-test-subj={`ruleActionPolicyArtifactConnectors-${actionPolicy.id}`}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
