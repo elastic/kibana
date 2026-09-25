@@ -105,9 +105,11 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
       a:focus-visible & {
         --label-fade-start: ${fadeStartWidth};
         --label-fade-end: 0px;
+        // A slide shorter than the fade would otherwise start the end fade before the slide.
         ${euiCanAnimate} {
           animation: ${fadeStartIn} ${fadeDuration} ${delay} both,
-            ${fadeEndOut} ${fadeDuration} calc(${delay} + ${duration} - ${fadeDuration}) both;
+            ${fadeEndOut} ${fadeDuration} calc(${delay} + max(0ms, ${duration} - ${fadeDuration}))
+              both;
         }
       }
 
