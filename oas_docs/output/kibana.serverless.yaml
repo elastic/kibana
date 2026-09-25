@@ -139470,7 +139470,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
           type: boolean
         owner:
           $ref: '#/components/schemas/Cases_owner'
@@ -139488,7 +139488,7 @@ components:
       properties:
         extractObservables:
           description: |
-            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), the value is always `false` regardless of the space configuration or any explicit value.
+            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
           example: true
           type: boolean
         syncAlerts:
@@ -139857,7 +139857,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables are automatically extracted from alerts when they are added to new cases.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
           type: boolean
         templates:
           $ref: '#/components/schemas/Cases_templates'

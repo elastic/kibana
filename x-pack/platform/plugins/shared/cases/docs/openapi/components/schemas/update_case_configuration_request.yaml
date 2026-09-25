@@ -32,8 +32,7 @@ properties:
   extractObservables:
     type: boolean
     description: >
-      Indicates whether observables are automatically extracted from alerts when
-      they are added to new cases.
+      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
   templates:
     $ref: 'templates.yaml'
   version:

@@ -35,7 +35,7 @@ properties:
   extractObservables:
     type: boolean
     description: >
-      Indicates whether observables are automatically extracted from alerts when they are added to new cases.
+      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
       When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.
       For owners that do not support observable extraction (currently Observability), setting this to `true`
       has no effect on case creation; new cases for those owners always use `false`.

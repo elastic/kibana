@@ -388,14 +388,14 @@ export const Settings = lazySchema(() =>
      */
     syncAlerts: z.boolean().describe('Turns alert syncing on or off.'),
     /**
-      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), the value is always `false` regardless of the space configuration or any explicit value.
+      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), the value is always `false` regardless of the space configuration or any explicit value.\n"
+        "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n"
       ),
   })
 );
@@ -1295,14 +1295,14 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       .optional()
       .describe('Custom fields case configuration.'),
     /**
-      * Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        "Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
+        "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
       ),
     owner: Owner,
     templates: Templates.optional(),
@@ -1404,14 +1404,14 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       .optional()
       .describe('Custom fields case configuration.'),
     /**
-      * Indicates whether observables are automatically extracted from alerts when they are added to new cases.
+      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        'Indicates whether observables are automatically extracted from alerts when they are added to new cases.\n'
+        'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n'
       ),
     templates: Templates.optional(),
     /**

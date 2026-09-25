@@ -216,7 +216,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <SubmitCaseButton isSubmitting={isSubmitting} />
+                  <SubmitCaseButton isSubmitting={isSubmitting || isLoadingCaseConfiguration} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFormRow>

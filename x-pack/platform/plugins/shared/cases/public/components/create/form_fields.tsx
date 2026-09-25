@@ -108,10 +108,15 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     /**
      * Form defaultValue is fixed at mount. Re-apply the space default when configuration
      * changes (load completes, or owner switches to an unconfigured owner whose lookup
-     * returns initialConfiguration with id: '' and extractObservables: true). Skip only
+     * returns initialConfiguration with id: '' and extractObservables: false). Skip only
      * while the field is dirty so a user or template choice is not overwritten.
+     * Also skip while configurations are still loading to avoid committing the provisional
+     * false fallback before the real space value arrives.
      */
     useEffect(() => {
+      if (isLoading) {
+        return;
+      }
       const field = getFields().extractObservables;
       if (field && !field.isPristine) {
         return;
@@ -122,7 +127,14 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           ? false
           : configuration.extractObservables ?? false
       );
-    }, [caseOwner, configuration.extractObservables, configuration.id, getFields, setFieldValue]);
+    }, [
+      caseOwner,
+      configuration.extractObservables,
+      configuration.id,
+      getFields,
+      isLoading,
+      setFieldValue,
+    ]);
 
     const defaultTemplate = useMemo(
       () => ({

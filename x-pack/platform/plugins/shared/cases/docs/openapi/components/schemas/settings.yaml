@@ -13,7 +13,7 @@ properties:
       When omitted on create, the space configuration default is used. Falls back to the owner's default
       when no space configuration exists: `true` for Security, `false` for Stack and Observability.
       Precedence: explicit value > template setting > space config > owner default.
-      For owners that do not support observable extraction (currently Observability), the value is always
-      `false` regardless of the space configuration or any explicit value.
+      For owners that do not support observable extraction (currently Observability), an omitted
+      value resolves to `false` regardless of the space configuration.
     type: boolean
     example: true

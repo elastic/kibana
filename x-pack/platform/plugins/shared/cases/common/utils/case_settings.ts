@@ -34,7 +34,7 @@ export const getCaseSettings = (owner: string): OwnerCaseSettings => {
 
   return {
     syncAlerts: features.alerts.sync,
-    extractObservables: features.observables.autoExtract,
+    extractObservables: features.observables.autoExtractDefault,
     observablesEnabled: features.observables.enabled,
   };
 };
