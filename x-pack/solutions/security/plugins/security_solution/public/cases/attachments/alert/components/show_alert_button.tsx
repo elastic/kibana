@@ -38,7 +38,7 @@ export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButto
   const { navigateToCaseView } = useCaseViewNavigation();
   const { detailName } = useCaseViewParams();
   const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openDocumentFlyoutFromIndex } = useFlyoutApi();
+  const { openDocumentFlyoutFromPattern } = useFlyoutApi();
 
   // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
   //  https://github.com/elastic/kibana/issues/218741
@@ -60,7 +60,12 @@ export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButto
         });
       } else {
         if (enableNewFlyout) {
-          openDocumentFlyoutFromIndex({
+          // Resolve by *pattern* (routing the search at the index) rather than by concrete `_index`:
+          // the from-index path pins the lookup with a `term` filter on `_index`, which never matches
+          // a cross-cluster document. The alert's hidden `.internal.alerts-*` backing index is
+          // resolved to its public alias inside the wrapper. See
+          // https://github.com/elastic/kibana/issues/286323.
+          openDocumentFlyoutFromPattern({
             documentId: alertId,
             indexName: index,
             renderCellActions: casesCellActionRenderer,
@@ -96,7 +101,7 @@ export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButto
     detailName,
     navigateToCaseView,
     enableNewFlyout,
-    openDocumentFlyoutFromIndex,
+    openDocumentFlyoutFromPattern,
     ruleName,
   ]);
 

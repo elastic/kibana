@@ -32,13 +32,17 @@ const ShowEventButtonComponent = ({ id, eventId, index }: ShowEventButtonProps) 
   const { navigateToCaseView } = useCaseViewNavigation();
   const { detailName } = useCaseViewParams();
   const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openDocumentFlyoutFromIndex } = useFlyoutApi();
+  const { openDocumentFlyoutFromPattern } = useFlyoutApi();
 
   const onClick = useCallback(() => {
     const hasValidIndex = index && String(index).trim();
     if (hasValidIndex) {
       if (enableNewFlyout) {
-        openDocumentFlyoutFromIndex({
+        // Resolve the document by *pattern* (routing the search at the index) rather than by
+        // concrete `_index`: the from-index path pins the lookup with a `term` filter on `_index`,
+        // which never matches a cross-cluster document. Routing at the index reaches it, like the
+        // legacy flyout. See https://github.com/elastic/kibana/issues/286323.
+        openDocumentFlyoutFromPattern({
           documentId: eventId,
           indexName: index,
           renderCellActions: casesCellActionRenderer,
@@ -72,7 +76,7 @@ const ShowEventButtonComponent = ({ id, eventId, index }: ShowEventButtonProps) 
     detailName,
     navigateToCaseView,
     enableNewFlyout,
-    openDocumentFlyoutFromIndex,
+    openDocumentFlyoutFromPattern,
   ]);
 
   return (

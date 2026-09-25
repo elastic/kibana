@@ -46,13 +46,13 @@ const attackHit = createHit({
 });
 
 describe('useDocumentFlyoutTitle', () => {
-  const openDocumentFlyoutFromIndexAsChild = jest.fn();
+  const openDocumentFlyoutFromPatternAsChild = jest.fn();
   const openAttackFlyoutAsChild = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useFlyoutApi as jest.Mock).mockReturnValue({
-      openDocumentFlyoutFromIndexAsChild,
+      openDocumentFlyoutFromPatternAsChild,
       openAttackFlyoutAsChild,
     });
   });
@@ -78,15 +78,15 @@ describe('useDocumentFlyoutTitle', () => {
     expect(result.current.iconType).toBe('bolt');
   });
 
-  it('opens a regular document as a child flyout via openDocumentFlyoutFromIndexAsChild', () => {
+  it('opens a regular document as a child flyout via openDocumentFlyoutFromPatternAsChild', () => {
     const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: alertHit }));
 
     act(() => {
       result.current.onTitleClick?.();
     });
 
-    expect(openDocumentFlyoutFromIndexAsChild).toHaveBeenCalledTimes(1);
-    expect(openDocumentFlyoutFromIndexAsChild).toHaveBeenCalledWith(
+    expect(openDocumentFlyoutFromPatternAsChild).toHaveBeenCalledTimes(1);
+    expect(openDocumentFlyoutFromPatternAsChild).toHaveBeenCalledWith(
       expect.objectContaining({
         documentId: '1',
         indexName: 'test',
@@ -112,7 +112,7 @@ describe('useDocumentFlyoutTitle', () => {
         origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
       })
     );
-    expect(openDocumentFlyoutFromIndexAsChild).not.toHaveBeenCalled();
+    expect(openDocumentFlyoutFromPatternAsChild).not.toHaveBeenCalled();
   });
 
   it('returns badge and timestamp nodes derived from the hit', () => {
