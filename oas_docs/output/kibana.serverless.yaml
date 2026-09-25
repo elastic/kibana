@@ -22067,7 +22067,11 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Lists the AI Indices registered in the current space that the caller can read. An AI Index is left out when the caller cannot read its backing index. An empty AI Index is still listed. Up to 100 entries. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); it cannot be set any other way. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`). To learn more, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Lists up to 100 AI Indices in the current space that the caller can read. The response omits an AI Index when the caller cannot read its backing index. Empty AI Indices are still included. A caller with no read privilege on any index gets a 403 response.
+
+        The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index
       parameters: []
       responses:
@@ -22114,7 +22118,7 @@ paths:
                                   - workflow
                                 type: string
                               value:
-                                description: The workflow id.
+                                description: The workflow ID.
                                 type: string
                             required:
                               - type
@@ -22152,7 +22156,7 @@ paths:
                           type: object
                           properties:
                             agent_id:
-                              description: Agent Builder agent id that runs the analysis.
+                              description: Agent Builder agent ID that runs the analysis.
                               type: string
                             allowed_actions:
                               description: Improvement actions the analysis may propose.
@@ -22235,7 +22239,7 @@ paths:
                                   - connector
                                 type: string
                               value:
-                                description: An ES|QL query for `esql`, or a connector id for `connector`.
+                                description: An ES|QL query for `esql`, or a connector ID for `connector`.
                                 type: string
                             required:
                               - type
@@ -22278,6 +22282,37 @@ paths:
                 required:
                   - ai_indices
           description: The AI Indices available to the caller in the current space.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  description: The caller has no read privilege on any index
+                  summary: No index read privileges
+                  value:
+                    error: Forbidden
+                    message: |-
+                      security_exception
+                      	Root causes:
+                      		security_exception: action [indices:data/read/msearch] is unauthorized for user [jdoe] with effective roles [support_reader], this action is granted by the index privileges [read,all]
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The caller has no read privilege on any index, so Elasticsearch rejected the request.
         '404':
           content:
             application/json:
@@ -22330,7 +22365,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same id already exists. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`). To learn more, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists. Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: post-context-engine-ai-index
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22380,7 +22415,7 @@ paths:
                           - workflow
                         type: string
                       value:
-                        description: The workflow id.
+                        description: The workflow ID.
                         maxLength: 1024
                         minLength: 1
                         type: string
@@ -22418,7 +22453,7 @@ paths:
                   type: object
                   properties:
                     agent_id:
-                      description: Agent Builder agent id that runs this index’s feedback-loop analysis.
+                      description: Agent Builder agent ID that runs this index’s feedback-loop analysis.
                       maxLength: 256
                       type: string
                     allowed_actions:
@@ -22537,7 +22572,7 @@ paths:
                               - connector
                             type: string
                           value:
-                            description: The source value; a connector id when `type` is `connector`.
+                            description: The source value; a connector ID when `type` is `connector`.
                             maxLength: 10240
                             minLength: 1
                             type: string
@@ -22559,7 +22594,7 @@ paths:
                               - elastic_agent
                             type: string
                           value:
-                            description: The Agent Builder agent id.
+                            description: The Agent Builder agent ID.
                             maxLength: 10240
                             minLength: 1
                             type: string
@@ -22712,7 +22747,7 @@ paths:
             application/json:
               examples:
                 alreadyExistsExample:
-                  description: An AI Index with the same id already exists
+                  description: An AI Index with the same ID already exists
                   summary: AI Index already exists
                   value:
                     error: Conflict
@@ -22734,7 +22769,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: An AI Index with the same id already exists, or the write conflicted.
+          description: An AI Index with the same ID already exists, or the write conflicted.
       summary: Create an AI Index
       tags:
         - context engine
@@ -22784,7 +22819,13 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Runs an ES|QL query as the current user, with a space filter and a row limit (at most 1000) applied server-side. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); nothing in the request body can change it or replace the space filter. The query decides which indices it reads; Elasticsearch index privileges bound what it can reach. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`). To learn more, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most 1000 rows.
+
+        The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.
+
+        The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: post-context-engine-ai-index-query
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23013,7 +23054,13 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Deletes an AI Index by id. The backing data stream/index (and therefore its Knowledge Indicators) and the attached workflow automations are left untouched unless the `delete_knowledge_indicators`/`delete_automations` query parameters are set to true. The dest is not deleted when another AI Index still uses it. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`). To learn more, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): workflowsManagement:delete.
+        Deletes an AI Index by ID.
+
+        By default, the API preserves the backing data stream or index, its Knowledge Indicators, and attached workflow automations. Set `delete_knowledge_indicators` to `true` to delete the backing data stream or index and its Knowledge Indicators. Set `delete_automations` to `true` to delete the attached workflow automations.
+
+        The API does not delete the backing data stream or index when another AI Index uses the same destination.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): workflowsManagement:delete.
       operationId: delete-context-engine-ai-index-aiindexid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23091,7 +23138,7 @@ paths:
                     message: Not Found
                     statusCode: 404
                 notFoundExample:
-                  description: No AI Index with the given id exists in the current space
+                  description: No AI Index with the given ID exists in the current space
                   summary: AI Index not found
                   value:
                     error: Not Found
@@ -23113,7 +23160,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.
+          description: No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.
         '409':
           content:
             application/json:
@@ -23167,7 +23214,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Fetches an AI Index by id from the current space, including the ES|QL query derived from each trace. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`). To learn more, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Fetches an AI Index by ID from the current space, including the ES|QL query derived from each trace. Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index-aiindexid
       parameters:
         - description: The unique identifier of the AI Index.
@@ -23184,7 +23231,7 @@ paths:
             application/json:
               examples:
                 getAiIndexResponseExample:
-                  description: Example response returning an AI Index by id
+                  description: Example response returning an AI Index by ID
                   summary: An AI Index
                   value:
                     automations:
@@ -23222,7 +23269,7 @@ paths:
                             - workflow
                           type: string
                         value:
-                          description: The workflow id.
+                          description: The workflow ID.
                           type: string
                       required:
                         - type
@@ -23260,7 +23307,7 @@ paths:
                     type: object
                     properties:
                       agent_id:
-                        description: Agent Builder agent id that runs the analysis.
+                        description: Agent Builder agent ID that runs the analysis.
                         type: string
                       allowed_actions:
                         description: Improvement actions the analysis may propose.
@@ -23343,7 +23390,7 @@ paths:
                             - connector
                           type: string
                         value:
-                          description: An ES|QL query for `esql`, or a connector id for `connector`.
+                          description: An ES|QL query for `esql`, or a connector ID for `connector`.
                           type: string
                       required:
                         - type
@@ -23395,7 +23442,7 @@ paths:
                     message: Not Found
                     statusCode: 404
                 notFoundExample:
-                  description: No AI Index with the given id exists in the current space
+                  description: No AI Index with the given ID exists in the current space
                   summary: AI Index not found
                   value:
                     error: Not Found
@@ -23417,7 +23464,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.
+          description: No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.
       summary: Get an AI Index
       tags:
         - context engine
@@ -23442,7 +23489,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an AI Index with the given id, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`). To learn more, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409. Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: put-context-engine-ai-index-aiindexid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23497,7 +23544,7 @@ paths:
                           - workflow
                         type: string
                       value:
-                        description: The workflow id.
+                        description: The workflow ID.
                         maxLength: 1024
                         minLength: 1
                         type: string
@@ -23535,7 +23582,7 @@ paths:
                   type: object
                   properties:
                     agent_id:
-                      description: Agent Builder agent id that runs this index’s feedback-loop analysis.
+                      description: Agent Builder agent ID that runs this index’s feedback-loop analysis.
                       maxLength: 256
                       type: string
                     allowed_actions:
@@ -23649,7 +23696,7 @@ paths:
                               - connector
                             type: string
                           value:
-                            description: The source value; a connector id when `type` is `connector`.
+                            description: The source value; a connector ID when `type` is `connector`.
                             maxLength: 10240
                             minLength: 1
                             type: string
@@ -23671,7 +23718,7 @@ paths:
                               - elastic_agent
                             type: string
                           value:
-                            description: The Agent Builder agent id.
+                            description: The Agent Builder agent ID.
                             maxLength: 10240
                             minLength: 1
                             type: string
@@ -23908,7 +23955,13 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most 500) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); it cannot be set any other way. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`). To learn more, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to 500 fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.
+
+        The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.
+
+        The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index-aiindexid-describe
       parameters:
         - description: The unique identifier of the AI Index.
@@ -24023,14 +24076,21 @@ paths:
             application/json:
               examples:
                 forbiddenExample:
-                  description: The caller lacks Elasticsearch index privileges
-                  summary: Missing index privileges
+                  description: The caller can read the backing indices but cannot read their mappings
+                  summary: Missing view_index_metadata privilege
                   value:
                     error: Forbidden
                     message: |-
                       security_exception
                       	Root causes:
                       		security_exception: action [indices:admin/mappings/get] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [ai-index-ds-customer-support], this action is granted by the index privileges [view_index_metadata,manage,all]
+                    statusCode: 403
+                notReadableExample:
+                  description: The caller cannot read the backing indices of the AI Index
+                  summary: Backing indices not readable
+                  value:
+                    error: Forbidden
+                    message: AI index 'customer_support' is not readable. Reading it needs the Elasticsearch 'read' and 'view_index_metadata' privileges on its backing indices.
                     statusCode: 403
               schema:
                 additionalProperties: false
@@ -24048,7 +24108,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: Elasticsearch rejected the read; the caller lacks index privileges.
+          description: The caller cannot read the backing indices. Describing an AI Index requires the `read` and `view_index_metadata` index privileges on them.
         '404':
           content:
             application/json:
@@ -24061,7 +24121,7 @@ paths:
                     message: Not Found
                     statusCode: 404
                 notFoundExample:
-                  description: No AI Index with the given id exists in the current space
+                  description: No AI Index with the given ID exists in the current space
                   summary: AI Index not found
                   value:
                     error: Not Found
@@ -24083,7 +24143,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.
+          description: No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.
       summary: Describe an AI Index
       tags:
         - context engine
