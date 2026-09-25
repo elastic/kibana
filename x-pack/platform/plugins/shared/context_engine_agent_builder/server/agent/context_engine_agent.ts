@@ -6,11 +6,8 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type {
-  AgentAvailabilityConfig,
-  AgentTypeDefinition,
-} from '@kbn/agent-builder-server/agents';
-import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import { SELF_AGENT_ID, chatAgentTypeId } from '@kbn/agent-builder-common';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -26,24 +23,6 @@ import instructions from './instructions/context_engine_setup.md.text';
 
 export { CONTEXT_ENGINE_SETUP_AGENT_ID };
 
-export const CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID =
-  `${internalNamespaces.platformContextEngine}.setup-type` as const;
-
-const contextEngineSetupAgentType = {
-  id: CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
-  name: 'Context Engine',
-  description:
-    'Configures AI indices, chooses data sources, and generates workflow automations that ' +
-    'populate indices with useful, relevant data.',
-  avatar_icon: 'logoElastic',
-  baseConfiguration: {
-    tools: [],
-    skill_ids: [],
-    connector_ids: [],
-    enable_elastic_capabilities: false,
-  },
-} as const satisfies AgentTypeDefinition;
-
 const contextEngineAgentAvailability: AgentAvailabilityConfig = {
   cacheMode: 'space',
   handler: async ({ uiSettings }) => {
@@ -58,9 +37,8 @@ const contextEngineAgentAvailability: AgentAvailabilityConfig = {
 };
 
 export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.agents.registerType(contextEngineSetupAgentType);
   agentBuilder.agents.register({
-    type: CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
+    type: chatAgentTypeId,
     id: CONTEXT_ENGINE_SETUP_AGENT_ID,
     name: 'Context Engine',
     description:
@@ -94,6 +72,7 @@ export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup
           ],
         },
       ],
+      ai_indices: [],
       enable_elastic_capabilities: false,
       subagent_ids: [SELF_AGENT_ID],
       connector_ids: [],

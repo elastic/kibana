@@ -16,6 +16,8 @@ const sandboxConfigSchema = schema.object({
    * are injected per command, only when the agent asks for it.
    */
   telemetry_connector_id: schema.maybe(schema.string()),
+  // Operator-supplied readable index patterns and remote names for the telemetry manifest.
+  telemetry_readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
 });
 
 const cortexConfigSchema = schema.object({

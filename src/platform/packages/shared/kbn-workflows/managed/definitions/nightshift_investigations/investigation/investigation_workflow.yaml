@@ -90,6 +90,8 @@ steps:
     connector-id-by-feature: 'significant_events_investigation'
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
     create-conversation: true
     public-conversation: true
     timeout: 1800s

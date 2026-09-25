@@ -68,8 +68,10 @@ steps:
     type: ai.agent
     agent-id: significant-events.decision-tree-reinforcement
     connector-id-by-feature: 'significant_events_investigation'
-    plugin-id: 'significant_events_investigation'
+    plugin-id: 'significant_events_decision_tree_reinforce'
     aggregate-by: 'significant_events'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
     create-conversation: true
     timeout: 900s
     if: '${{ steps.prepare_turn.output.skipped == false }}'

@@ -36,7 +36,7 @@ import type {
 import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
-import { asErr, asOk, isErr, isOk } from '../lib/result_type';
+import { asErr, asOk, isOk } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import {
   atomicRemoveSnoozedInstancesWithEs,
@@ -60,6 +60,7 @@ import { IN_MEMORY_METRICS } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
+import { updateRuleMissingUiamKeyTag } from './update_rule_missing_uiam_key_tag';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';
@@ -79,15 +80,6 @@ import {
   evaluatePerAlertSnoozeExpiry,
   evaluatePerAlertSnoozeConditions,
 } from './lib';
-// Imported directly rather than through `./lib`: that barrel is also the entry point for widely used
-// helpers such as `withAlertingSpan`, so adding a module with heavy dependencies to it changes module
-// initialization order for every importer and closes an import cycle that leaves
-// `DEFAULT_APP_CATEGORIES` undefined in `alert_deletion_client`.
-import {
-  isMissingUiamApiKeyLastRunError,
-  isMissingUiamApiKeyRunError,
-  repairUiamApiKey,
-} from './lib/repair_uiam_api_key';
 import {
   ErrorWithType,
   isOutdatedTaskVersionError,
@@ -683,8 +675,11 @@ export class TaskRunner<
         this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
       }
 
-      const ruleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
+      const loadedRuleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
         getDecryptedRule(this.context, ruleId, spaceId)
+      );
+      const ruleData = await withAlertingSpan('alerting:update-missing-uiam-api-key-tag', () =>
+        updateRuleMissingUiamKeyTag(this.context, ruleId, spaceId, loadedRuleData)
       );
 
       // Check that this task is current
@@ -926,21 +921,6 @@ export class TaskRunner<
       runRuleResult = asErr(err);
       schedule = asErr(err);
       shouldDisableTask = err.reason === RuleExecutionStatusErrorReasons.Disabled;
-    }
-
-    // The rule's UIAM API key is unusable, so re-grant it now: the rule's next scheduled run then
-    // authenticates with a working credential instead of failing the same way indefinitely.
-    //
-    // Both shapes a failed run can take have to be checked. A rule type that throws leaves the
-    // Elasticsearch error on `runRuleResult`, while one that reports a failed run without throwing
-    // never enters the catch above at all and only exposes the failure as a recorded run error.
-    if (
-      (isErr(runRuleResult) && isMissingUiamApiKeyRunError(runRuleResult.error)) ||
-      isMissingUiamApiKeyLastRunError(this.ruleResult.getLastRunResults().errors)
-    ) {
-      await withAlertingSpan('alerting:repair-uiam-api-key', () =>
-        repairUiamApiKey({ context: this.context, logger: this.logger, ruleId, spaceId })
-      );
     }
 
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
