@@ -181,6 +181,110 @@ describe('assertEsqlGroundedInReport', () => {
     ).toBe(false);
   });
 
+  describe('a predicate has to constrain rows to the report value, not away from it', () => {
+    it.each([
+      ['!=', 'FROM logs-aws.* | WHERE event.action != "AssumeRole"'],
+      ['NOT', 'FROM logs-aws.* | WHERE NOT event.action == "AssumeRole"'],
+      ['NOT LIKE', 'FROM logs-aws.* | WHERE event.action NOT LIKE "*AssumeRole*"'],
+      [
+        'NOT IN',
+        'FROM logs-aws.* | WHERE event.action NOT IN ("AssumeRole", "AssumeRoleWithSAML")',
+      ],
+    ])('rejects a report value carried by %s', (_label, query) => {
+      // The report's artifact selects everything that is *not* the evidence, and Tier 2 would
+      // count any row that comes back as corroboration of it.
+      const result = assertEsqlGroundedInReport(query, { reportText, iocValues: [] });
+      expect(result).toEqual({
+        ok: false,
+        reason: expect.stringContaining('no predicate searches for it'),
+      });
+    });
+
+    it('accepts a grounded comparison ANDed with a negation', () => {
+      // AND narrows, so one grounded branch is enough.
+      const query =
+        'FROM logs-aws.* | WHERE event.action == "AssumeRole" AND event.outcome != "failure"';
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(true);
+    });
+
+    it('rejects a grounded comparison ORed with an ungrounded one', () => {
+      // OR widens: the ungrounded branch brings back rows the report says nothing about, and
+      // any of them would set has_confirmed_hit.
+      const query =
+        'FROM logs-aws.* | WHERE event.action == "AssumeRole" OR event.outcome == "success"';
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
+    });
+
+    it('accepts an OR where every branch is grounded', () => {
+      const query =
+        'FROM logs-aws.* | WHERE event.action == "AssumeRole" OR source.ip == "192.0.2.30"';
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues }).ok).toBe(true);
+    });
+
+    it('accepts IN when every value is grounded and rejects it when one is not', () => {
+      // `IN` is a set of alternatives, so it widens exactly as OR does.
+      const grounded = 'FROM logs-aws.* | WHERE source.ip IN ("192.0.2.30", "AssumeRole")';
+      const widened = 'FROM logs-aws.* | WHERE source.ip IN ("192.0.2.30", "203.0.113.7")';
+      expect(assertEsqlGroundedInReport(grounded, { reportText, iocValues }).ok).toBe(true);
+      expect(assertEsqlGroundedInReport(widened, { reportText, iocValues }).ok).toBe(false);
+    });
+
+    it('does not let a report value in a range comparison ground the query', () => {
+      // A report value under `>` is a threshold, not a search for the artifact.
+      const query = 'FROM logs-aws.* | WHERE aws.cloudtrail.count > 123456789012';
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
+    });
+  });
+
+  describe('a pattern built from a report artifact', () => {
+    it.each([
+      [
+        'LIKE with surrounding wildcards',
+        'FROM logs-aws.* | WHERE event.action LIKE "*AssumeRole*"',
+      ],
+      ['LIKE with a trailing wildcard', 'FROM logs-aws.* | WHERE event.action LIKE "AssumeRole*"'],
+      ['RLIKE', 'FROM logs-aws.* | WHERE event.action RLIKE ".*AssumeRole.*"'],
+    ])('grounds a query using %s', (_label, query) => {
+      // The generation contract asks for a tight pattern derived from a concrete artifact, and
+      // the report contains no wildcards, so comparing the whole pattern rejects a valid rule.
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(true);
+    });
+
+    it('still rejects a pattern whose fragments are not from the report', () => {
+      const query = 'FROM logs-aws.* | WHERE event.action LIKE "*ConsoleLogin*"';
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
+    });
+
+    it('does not let wildcards alone ground a query', () => {
+      // Splitting must not turn a pattern of pure metacharacters into a match.
+      const query = 'FROM logs-aws.* | WHERE event.action LIKE "*"';
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
+    });
+
+    it('rejects an RLIKE alternation where one branch is not from the report', () => {
+      // Alternation is the one place a pattern fragment is optional rather than required, so it
+      // widens like OR: `.*(AssumeRole|.*).*` would match everything while carrying a report value.
+      const query = 'FROM logs-aws.* | WHERE event.action RLIKE ".*AssumeRole.*|.*ConsoleLogin.*"';
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
+    });
+
+    it('accepts an RLIKE alternation where every branch is from the report', () => {
+      const query =
+        'FROM logs-aws.* | WHERE event.action RLIKE ".*AssumeRole.*|.*escalated-role.*"';
+      expect(
+        assertEsqlGroundedInReport(query, {
+          reportText: `${reportText} and escalated-role`,
+          iocValues: [],
+        }).ok
+      ).toBe(true);
+    });
+
+    it('grounds a query-string term wrapped in field syntax', () => {
+      const query = 'FROM logs-aws.* | WHERE QSTR("event.action: AssumeRole")';
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(true);
+    });
+  });
+
   it('does not count the FROM source as a report filter', () => {
     // Even if the report names the index, reading it is not filtering on report data.
     const query = 'FROM logs-aws.* | LIMIT 1';

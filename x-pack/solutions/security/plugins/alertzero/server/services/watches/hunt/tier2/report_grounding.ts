@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLAstNode, ESQLAstQueryExpression } from '@elastic/esql';
+import type { ESQLAstNode, ESQLAstQueryExpression, ESQLFunction, ESQLList } from '@elastic/esql';
 import { Parser, Walker } from '@elastic/esql';
 
 /**
@@ -87,68 +87,172 @@ const METADATA_COLUMNS: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Collects the literals a query uses to restrict which rows it reads. Two positions
- * qualify: the `WHERE` command, and the aggregation filter in `STATS ... WHERE ...`,
- * which the parser represents as a `where` function inside the `STATS` command rather
- * than as a command of its own. `FORK` branches are reached because their `WHERE`s are
- * ordinary nested commands.
+ * Collects the predicates a query uses to restrict which rows it reads. Two positions
+ * qualify: the `WHERE` command, and the aggregation filter in `STATS ... WHERE ...`, which
+ * the parser represents as a `where` function inside the `STATS` command rather than as a
+ * command of its own. `FORK` branches are reached because their `WHERE`s are ordinary
+ * nested commands.
  *
- * Literals anywhere else describe the shape of the output rather than narrowing the
+ * Everything else in a pipeline describes the shape of the output rather than narrowing the
  * input: an `EVAL` assignment, a `SORT` key, a `LIMIT`, a `GROK` pattern, an index name.
  */
-const collectFilterLiterals = (root: ESQLAstQueryExpression): string[] => {
-  const literals: string[] = [];
-  const collect = (node: ESQLAstNode | ESQLAstNode[]) =>
-    Walker.walk(node, {
-      visitFunction: (fn, _parent, walker) => {
-        // A comparison against a metadata field restates the scope rather than describing
-        // the report: `WHERE _index == "logs-aws.cloudtrail-default"` filters on the index
-        // the hunt was already pointed at and returns arbitrary rows from it. Skipping the
-        // subtree drops the literal on the other side of the comparison with it.
-        const comparesMetadata = fn.args.some(
-          (arg) =>
-            !Array.isArray(arg) &&
-            'type' in arg &&
-            arg.type === 'column' &&
-            METADATA_COLUMNS.has(arg.name.toLowerCase())
-        );
-        if (comparesMetadata) walker.skipChildren();
-      },
-      visitLiteral: ({ value }) => literals.push(stripFraming(String(value))),
-    });
-
+const collectFilterPredicates = (root: ESQLAstQueryExpression): ESQLAstNode[] => {
+  const predicates: ESQLAstNode[] = [];
   Walker.walk(root, {
     visitCommand: (command) => {
-      if (command.name === 'where') collect(command);
+      if (command.name === 'where') predicates.push(...command.args);
     },
     visitFunction: (fn) => {
-      // `STATS c = COUNT(*) WHERE user.name == "x"` parses as a `where` function whose
-      // first argument is the aggregation and second is the predicate. Only the second
-      // filters rows — the aggregation may hold literals of its own.
-      if (fn.name === 'where' && fn.args.length > 1) collect(fn.args[1]);
+      // `STATS c = COUNT(*) WHERE user.name == "x"` parses as a `where` function whose first
+      // argument is the aggregation and second is the predicate. Only the second filters rows —
+      // the aggregation may hold literals of its own.
+      if (fn.name === 'where' && fn.args.length > 1) predicates.push(fn.args[1]);
     },
   });
+  return predicates;
+};
 
-  return literals;
+/** Operators and functions that constrain matching rows to the value they carry. */
+const POSITIVE_MATCH_OPERATORS: ReadonlySet<string> = new Set(['==', 'in', 'like', 'rlike', ':']);
+const FULL_TEXT_FUNCTIONS: ReadonlySet<string> = new Set(['match', 'match_phrase', 'qstr', 'kql']);
+
+/**
+ * Operators that exclude the value they carry. A report artifact under one of these is the
+ * inverse of a hunt for it: `WHERE event.action != "AssumeRole"` returns every event that is
+ * *not* the report's evidence, and Tier 2 would count any row it returns as corroboration.
+ */
+const NEGATING_OPERATORS: ReadonlySet<string> = new Set([
+  '!=',
+  'not',
+  'not in',
+  'not like',
+  'not rlike',
+]);
+
+const asFunction = (node: ESQLAstNode): ESQLFunction | undefined =>
+  !Array.isArray(node) && 'type' in node && node.type === 'function' ? node : undefined;
+
+const isMetadataColumn = (node: ESQLAstNode): boolean =>
+  !Array.isArray(node) &&
+  'type' in node &&
+  node.type === 'column' &&
+  METADATA_COLUMNS.has(node.name.toLowerCase());
+
+const LIKE_WILDCARDS = /[*?]+/;
+const REGEXP_METACHARACTERS = /[.*+?()[\]{}^$\\]+/;
+const QUERY_STRING_SYNTAX = /[\s:()"']+/;
+
+/**
+ * What a literal has to match for the operator reading it to be grounded, as a list of
+ * alternatives each of which needs one grounded fragment.
+ *
+ * A `LIKE`/`RLIKE` pattern is a report artifact plus metacharacters the report does not
+ * contain, and a query-string literal wraps its terms in field syntax, so comparing either
+ * one whole against the report rejects a query that does search for the artifact — which is
+ * the shape the generation contract asks for. Splitting on those characters is what lets the
+ * fragment be recognised.
+ *
+ * A regular expression's alternation is the one case where a fragment is optional rather than
+ * required, so `|` splits the pattern into alternatives that must each be grounded — the same
+ * rule `OR` gets, for the same reason. A query string can express alternation too, in syntax
+ * this deliberately does not parse; a `QSTR` mixing a grounded term with an ungrounded `OR`
+ * branch is the known gap.
+ */
+const groundingRequirements = (operator: string, literal: string): string[][] => {
+  if (operator === 'like') {
+    return [[literal, ...literal.split(LIKE_WILDCARDS)]];
+  }
+  if (operator === 'rlike') {
+    return literal
+      .split('|')
+      .map((alternative) => [alternative, ...alternative.split(REGEXP_METACHARACTERS)]);
+  }
+  if (operator === 'qstr' || operator === 'kql') {
+    return [[literal, ...literal.split(QUERY_STRING_SYNTAX)]];
+  }
+  return [[literal]];
+};
+
+const literalsOf = (args: ESQLAstNode[]): string[] =>
+  args.flatMap((arg) =>
+    !Array.isArray(arg) && 'type' in arg && arg.type === 'literal'
+      ? [stripFraming(String(arg.value))]
+      : []
+  );
+
+const listValuesOf = (args: ESQLAstNode[]): string[] | undefined => {
+  const list = args.find((arg) => !Array.isArray(arg) && 'type' in arg && arg.type === 'list') as
+    | ESQLList
+    | undefined;
+  if (!list) return undefined;
+  const literals = literalsOf(list.values);
+  // A list holding anything other than literals — a column, a function — has a member this
+  // cannot ground, which under `IN`'s alternative semantics is enough to widen the result.
+  return literals.length === list.values.length ? literals : [];
 };
 
 /**
- * A generated query must filter on at least one value drawn from the report, so a
- * hit means the environment matched *the report* rather than merely that a
- * required index has rows.
+ * Whether a predicate constrains the rows it returns to a value drawn from the report.
  *
- * Only literals in a row-filtering predicate count. Considering literals anywhere in
- * the pipeline let `FROM logs-aws.* | EVAL label = "AssumeRole" | LIMIT 1` pass while
- * filtering on nothing at all: the report's value appears in the query text, and the
- * query still returns the first arbitrary row of a required index, which Tier 2 then
- * counts as corroboration. A value the query merely mentions is not a value it searched
- * for. A qualifying literal grounds the query when it equals an extracted IOC or appears
- * verbatim in the report text.
+ * Presence of a report value is not enough, because a predicate decides which rows come
+ * back: under `!=` or `NOT` the report's artifact selects everything except the evidence,
+ * and in one branch of an `OR` it selects the evidence *plus* whatever the other branches
+ * admit. So `AND` needs one grounded branch, `OR` needs all of them, and a negation grounds
+ * nothing regardless of what it carries.
+ */
+const isPositivelyGrounded = (
+  node: ESQLAstNode | ESQLAstNode[],
+  grounds: (operator: string, literal: string) => boolean
+): boolean => {
+  if (Array.isArray(node)) {
+    return node.some((child) => isPositivelyGrounded(child, grounds));
+  }
+  const fn = asFunction(node);
+  // A bare column, literal or list constrains nothing by itself.
+  if (!fn) return false;
+
+  const operator = fn.name.toLowerCase();
+  if (operator === 'and') return fn.args.some((arg) => isPositivelyGrounded(arg, grounds));
+  if (operator === 'or') return fn.args.every((arg) => isPositivelyGrounded(arg, grounds));
+  if (NEGATING_OPERATORS.has(operator)) return false;
+  if (!POSITIVE_MATCH_OPERATORS.has(operator) && !FULL_TEXT_FUNCTIONS.has(operator)) {
+    // Range comparisons and everything else: a report value under `>` is a threshold, not a
+    // search for the artifact.
+    return false;
+  }
+  // Comparing a metadata field restates the scope the hunt already fixed.
+  if (fn.args.some(isMetadataColumn)) return false;
+
+  const listValues = listValuesOf(fn.args);
+  if (listValues) {
+    // `IN (…)` is a set of alternatives, so it widens exactly as `OR` does: one ungrounded
+    // value brings back rows the report never mentioned.
+    return listValues.length > 0 && listValues.every((value) => grounds(operator, value));
+  }
+  return literalsOf(fn.args).some((literal) => grounds(operator, literal));
+};
+
+/**
+ * A generated query must search for at least one value drawn from the report, so a hit means
+ * the environment matched *the report* rather than merely that a required index has rows.
  *
- * The gate is deliberately a value test rather than a semantic one, so it does not
- * attempt to prove the predicate is *restrictive* — a tautology disjoined onto a
- * grounded comparison would still pass. It establishes that the report reached the
- * predicate, which is what the unfiltered and mention-only cases lack.
+ * Two things have to hold, and each of them was a way through this gate on its own. The value
+ * has to sit in a predicate that filters rows, because a value the query merely mentions is
+ * not a value it searched for: `FROM logs-aws.* | EVAL label = "AssumeRole" | LIMIT 1` puts the
+ * report's artifact in the query text while restricting nothing, and returns the first
+ * arbitrary row of a required index. And the predicate has to constrain rows *to* that value
+ * rather than away from it: `WHERE event.action != "AssumeRole"` filters on the report's
+ * artifact to return everything that is not the report's evidence.
+ *
+ * A literal grounds the query when it equals an extracted IOC or appears verbatim in the
+ * report text — or, for pattern and query-string operators, when a fragment of it does, since
+ * the wildcards in `LIKE "*AssumeRole*"` are not in the report and the generation contract
+ * asks for exactly that shape.
+ *
+ * It remains a value test rather than a semantic one: it establishes that the report
+ * constrains the rows, not that the constraint is tight. A tautology disjoined onto a grounded
+ * comparison is caught as an ungrounded `OR` branch, but a predicate that is grounded and
+ * still matches most of the index is not something this can see.
  */
 export const assertEsqlGroundedInReport = (
   query: string,
@@ -159,38 +263,51 @@ export const assertEsqlGroundedInReport = (
     return { ok: false, reason: 'query failed to parse' };
   }
 
-  const literals = collectFilterLiterals(root);
-  if (literals.length === 0) {
+  const predicates = collectFilterPredicates(root);
+  if (predicates.length === 0) {
     return {
       ok: false,
       reason: 'query has no filtering predicate, so any row in scope would answer it',
     };
   }
 
-  // Index patterns surface as `source` nodes, so a literal equal to one of them is the
-  // query naming its own scope. `collectFilterLiterals` already drops comparisons against
-  // `_index`; this covers the rest, at the cost of rejecting a report value that happens
-  // to be spelled exactly like an index pattern.
+  // Index patterns surface as `source` nodes, so a literal equal to one of them is the query
+  // naming its own scope rather than the report.
   const sources = new Set<string>();
   Walker.walk(root, { visitSource: ({ name }) => sources.add(normalize(name)) });
 
   const haystack = normalize(reportText);
   const groundingIocs = new Set(iocValues.map(normalize).filter((value) => value.length > 0));
 
-  const grounded = literals.some((literal) => {
-    const value = normalize(literal);
+  const qualifies = (candidate: string): boolean => {
+    const value = normalize(candidate);
     if (value.length < MIN_GROUNDING_LENGTH || sources.has(value)) {
       return false;
     }
     return groundingIocs.has(value) || haystack.includes(value);
-  });
+  };
 
-  if (!grounded) {
-    return {
-      ok: false,
-      reason:
-        'query filters on no value drawn from the report (no matching IOC or report literal in a filtering predicate)',
-    };
+  const grounds = (operator: string, literal: string): boolean =>
+    groundingRequirements(operator, literal).every((alternatives) => alternatives.some(qualifies));
+
+  if (predicates.some((predicate) => isPositivelyGrounded(predicate, grounds))) {
+    return { ok: true };
   }
-  return { ok: true };
+
+  // Deliberately permissive — it only chooses the wording of a rejection, never accepts one —
+  // so a report value under any operator is treated as mentioned.
+  const mentioned = predicates.some(
+    (predicate) =>
+      Walker.findAll(
+        predicate,
+        (node) => node.type === 'literal' && grounds('rlike', stripFraming(String(node.value)))
+      ).length > 0
+  );
+
+  return {
+    ok: false,
+    reason: mentioned
+      ? 'query carries a report value but no predicate searches for it (negated, or one alternative among ungrounded branches)'
+      : 'query filters on no value drawn from the report (no matching IOC or report literal in a filtering predicate)',
+  };
 };
