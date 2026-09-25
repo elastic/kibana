@@ -178,6 +178,7 @@ export class NightshiftInvestigationsPlugin
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
           getDeps: () => ({ actions: this.actionsStart }),
           telemetryConnectorId,
+          telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
