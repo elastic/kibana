@@ -26,6 +26,7 @@ import {
 import { toIndexedBehaviors } from './indexed_behaviors';
 import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
+import { assertEsqlGroundedInReport, isEvidenceQuoteGrounded } from './report_grounding';
 import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
   BehaviorExecution,
@@ -552,6 +553,7 @@ export const huntBehavior = async (
 
   const validated: ValidatedBehavior[] = [];
   const droppedIds: string[] = [];
+  const ungroundedQuoteIds: string[] = [];
 
   const { techniqueById, subtechniqueById } = getMitreCatalog();
   for (const candidate of candidates) {
@@ -560,6 +562,14 @@ export const huntBehavior = async (
     const entry = technique ?? subtechnique;
     if (!entry) {
       droppedIds.push(candidate.technique_id);
+      continue;
+    }
+    // The extraction contract promises a verbatim quote, but only the technique id is
+    // verified above. A real id paired with a fabricated quote would still become a
+    // proposed behavior and an indexed finding attributed to this report, so drop a
+    // candidate whose quote is not grounded in the report text.
+    if (!isEvidenceQuoteGrounded(candidate.evidence_quote, text)) {
+      ungroundedQuoteIds.push(candidate.technique_id);
       continue;
     }
     // A revoked id resolves to its live successor; carry the live id forward so
@@ -601,6 +611,13 @@ export const huntBehavior = async (
       risk_score: severityToRiskScore(severity),
       execution: NO_EXECUTION,
     });
+  }
+
+  if (ungroundedQuoteIds.length > 0) {
+    logger.warn(
+      `[hunt:extract] dropped ${ungroundedQuoteIds.length} candidate(s) whose evidence_quote ` +
+        `was not found verbatim in the report text: ${ungroundedQuoteIds.join(', ')}.`
+    );
   }
 
   if (validated.length > 0 && !esClient) {
@@ -662,6 +679,22 @@ export const huntBehavior = async (
         logger.warn(
           `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +
             `${sourcesAllowed.reason}. Keeping the non-executable placeholder.`
+        );
+        continue;
+      }
+      // The source gate proves the query stays in scope; it does not prove the query
+      // filters on anything from the report. An unfiltered query (`FROM <required> |
+      // LIMIT 1`) clears the gate above, executes, returns an arbitrary row, and sets
+      // `has_confirmed_hit` — a corroboration grounded in nothing. Require a literal
+      // drawn from the report, or keep the non-executable placeholder.
+      const groundedInReport = assertEsqlGroundedInReport(esql, {
+        reportText: text,
+        iocValues: (iocs ?? []).map((ioc) => ioc.value),
+      });
+      if (!groundedInReport.ok) {
+        logger.warn(
+          `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +
+            `${groundedInReport.reason}. Keeping the non-executable placeholder.`
         );
         continue;
       }

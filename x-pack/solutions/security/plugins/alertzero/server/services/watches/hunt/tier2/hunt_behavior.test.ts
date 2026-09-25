@@ -25,6 +25,15 @@ const GROUNDED_ESQL =
   'FROM logs-aws.cloudtrail-*\n| WHERE aws.cloudtrail.event_name == "AssumeRole"\n| KEEP host.name, user.name\n| LIMIT 100';
 const T1566_ESQL = 'FROM logs-aws.*\n| WHERE email.from.address == "evil@example.com"\n| LIMIT 10';
 
+// Report text the fixtures' quotes and generated-query literals are drawn from, so the
+// grounding checks (evidence_quote must appear in the text; a query must filter on a report
+// value) pass on the happy paths. Tests that assert dropping supply their own text.
+const REPORT_TEXT =
+  'Incident report: cloud account abuse via AssumeRole was observed. The intrusion started ' +
+  'with spear phishing used against staff, and a phishing email delivered the payload from ' +
+  'evil@example.com. Analysts recorded a second quote, a weaker quote, and a stronger quote ' +
+  'as corroborating evidence.';
+
 /** Resolve a grounded query per technique id from the `nlQuery` the service builds. */
 const generateByTechnique = (queries: Record<string, string>) =>
   generateEsqlMock.mockImplementation(async ({ nlQuery }) => {
@@ -57,7 +66,7 @@ const t1078Candidate = {
 const t1566Candidate = { technique_id: 'T1566', evidence_quote: 'phishing', llm_confidence: 0.9 };
 
 const executeParams = {
-  text: 'report',
+  text: REPORT_TEXT,
   window: { from: 'now-30d', to: 'now' },
   required_indices: ['logs-aws.*'],
   row_limit: 25,
@@ -85,7 +94,7 @@ describe('huntBehavior', () => {
       { technique_id: 'T1566', evidence_quote: 'phishing email', llm_confidence: 0.3 },
     ]);
     const result = await huntBehavior(model, logger, {
-      text: 'report text',
+      text: REPORT_TEXT,
       llm_confidence_threshold: 0.5,
     });
     expect(result.status).toBe('no_behaviors_found');
@@ -96,7 +105,7 @@ describe('huntBehavior', () => {
       { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
       { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
     ]);
-    const result = await huntBehavior(model, logger, { text: 'report' });
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
     expect(result.status).toBe('behaviors_proposed');
   });
 
@@ -105,7 +114,7 @@ describe('huntBehavior', () => {
       { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
       { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
     ]);
-    const result = await huntBehavior(model, logger, { text: 'report' });
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
     expect(result.behaviors).toHaveLength(1);
   });
 
@@ -114,7 +123,7 @@ describe('huntBehavior', () => {
       { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
       { technique_id: 'T9999999', evidence_quote: 'fictional', llm_confidence: 0.9 },
     ]);
-    const result = await huntBehavior(model, logger, { text: 'report' });
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
     expect(result.dropped_unknown_ids).toContain('T9999999');
   });
 
@@ -122,7 +131,7 @@ describe('huntBehavior', () => {
     const model = buildMockModel([
       { technique_id: 'T1566', evidence_quote: 'spear phishing', llm_confidence: 0.8 },
     ]);
-    const result = await huntBehavior(model, logger, { text: 'report', report_id: 'rpt-001' });
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT, report_id: 'rpt-001' });
     expect(result.indexed_behaviors[0].id).toBe('rpt-001:T1566');
   });
 
@@ -130,12 +139,14 @@ describe('huntBehavior', () => {
     const model = buildMockModel([
       { technique_id: 'T1566', evidence_quote: 'spear phishing', llm_confidence: 0.8 },
     ]);
-    const result = await huntBehavior(model, logger, { text: 'report', report_id: 'rpt-001' });
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT, report_id: 'rpt-001' });
     expect(result.indexed_behaviors[0].technique_id).toBe('T1566');
   });
 
   it('returns a non-executable placeholder without calling generateEsql when no esClient is given', async () => {
-    const result = await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: 'report' });
+    const result = await huntBehavior(buildMockModel([t1078Candidate]), logger, {
+      text: REPORT_TEXT,
+    });
     expect(generateEsqlMock).not.toHaveBeenCalled();
     expect(result.behaviors[0].proposed_esql_rule).toContain(
       'Grounded ES|QL generation unavailable'
@@ -145,7 +156,7 @@ describe('huntBehavior', () => {
 
   it('returns one generateEsql call per validated behavior', async () => {
     const model = buildMockModel([t1078Candidate, t1566Candidate]);
-    await huntBehavior(model, logger, { text: 'report' }, esClient);
+    await huntBehavior(model, logger, { text: REPORT_TEXT }, esClient);
     expect(generateEsqlMock).toHaveBeenCalledTimes(2);
   });
 
@@ -157,7 +168,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       model,
       logger,
-      { text: 'report', report_id: 'rpt-1' },
+      { text: REPORT_TEXT, report_id: 'rpt-1' },
       esClient
     );
     expect(result.behaviors).toHaveLength(1);
@@ -170,7 +181,7 @@ describe('huntBehavior', () => {
       { ...t1078Candidate, evidence_quote: 'weaker quote', llm_confidence: 0.6 },
       { ...t1078Candidate, evidence_quote: 'stronger quote', llm_confidence: 0.95 },
     ]);
-    const result = await huntBehavior(model, logger, { text: 'report' });
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
     expect(result.behaviors).toEqual([
       expect.objectContaining({ evidence_quote: 'stronger quote', llm_confidence: 0.95 }),
     ]);
@@ -181,7 +192,7 @@ describe('huntBehavior', () => {
       buildMockModel([t1078Candidate]),
       logger,
       {
-        text: 'report',
+        text: REPORT_TEXT,
         required_indices: ['logs-aws.*'],
         article_context: {
           matched_indices: [
@@ -203,7 +214,7 @@ describe('huntBehavior', () => {
       buildMockModel([t1078Candidate]),
       logger,
       {
-        text: 'report',
+        text: REPORT_TEXT,
         required_indices: ['logs-*'],
         article_context: {
           matched_indices: [
@@ -224,7 +235,7 @@ describe('huntBehavior', () => {
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: 'report', required_indices: ['logs-aws.*', 'logs-okta.*'] },
+      { text: REPORT_TEXT, required_indices: ['logs-aws.*', 'logs-okta.*'] },
       esClient
     );
     expect(generateEsqlMock).toHaveBeenCalledWith(
@@ -233,7 +244,7 @@ describe('huntBehavior', () => {
   });
 
   it('returns generateEsql targeting logs-* when neither hits nor scope name an index', async () => {
-    await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: 'report' }, esClient);
+    await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: REPORT_TEXT }, esClient);
     expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: 'logs-*' }));
   });
 
@@ -250,7 +261,7 @@ describe('huntBehavior', () => {
   });
 
   it('returns the technique and evidence in the generateEsql natural-language query', async () => {
-    await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: 'report' }, esClient);
+    await huntBehavior(buildMockModel([t1078Candidate]), logger, { text: REPORT_TEXT }, esClient);
     const { nlQuery } = generateEsqlMock.mock.calls[0][0];
     expect(nlQuery).toContain('T1078.004');
     expect(nlQuery).toContain('cloud account abuse via AssumeRole');
@@ -260,7 +271,7 @@ describe('huntBehavior', () => {
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: 'the report body', iocs: [{ type: 'ip', value: '203.0.113.7' }] },
+      { text: `${REPORT_TEXT} the report body`, iocs: [{ type: 'ip', value: '203.0.113.7' }] },
       esClient
     );
     const { additionalContext } = generateEsqlMock.mock.calls[0][0];
@@ -272,7 +283,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: 'report' },
+      { text: REPORT_TEXT },
       esClient
     );
     const rule = result.behaviors[0].proposed_esql_rule;
@@ -325,7 +336,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: 'report', required_indices: ['logs-aws.*'], row_limit: 25 },
+      { text: REPORT_TEXT, required_indices: ['logs-aws.*'], row_limit: 25 },
       esClient
     );
     expect(result.has_hit).toBe(false);
@@ -335,7 +346,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: 'report', required_indices: ['logs-aws.*'], row_limit: 25 },
+      { text: REPORT_TEXT, required_indices: ['logs-aws.*'], row_limit: 25 },
       esClient
     );
     expect(executeEsqlMock).not.toHaveBeenCalled();
@@ -589,6 +600,40 @@ describe('huntBehavior', () => {
       );
 
       expect(result.behaviors[0].proposed_esql_rule).toContain(GROUNDED_ESQL);
+    });
+  });
+
+  describe('report grounding', () => {
+    it('drops a candidate whose evidence_quote is absent from the report text', async () => {
+      const model = buildMockModel([
+        {
+          technique_id: 'T1566',
+          evidence_quote: 'a quote absent from the body',
+          llm_confidence: 0.9,
+        },
+      ]);
+      const result = await huntBehavior(model, logger, { text: REPORT_TEXT }, esClient);
+      expect(result.behaviors).toHaveLength(0);
+      expect(result.status).toBe('no_behaviors_validated');
+      expect(result.has_hit).toBe(false);
+    });
+
+    it('discards a generated query that filters on nothing from the report', async () => {
+      // In scope, so it clears the source gate, but it filters on no report value at all.
+      generateByTechnique({ 'T1078.004': 'FROM logs-aws.*\n| LIMIT 1' });
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+      expect(executeEsqlMock).not.toHaveBeenCalled();
+      expect(result.behaviors[0].proposed_esql_rule).toContain(
+        'Grounded ES|QL generation unavailable'
+      );
+      expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+      expect(result.behaviors[0].execution).toEqual({ executed: false, row_count: 0, hit: false });
+      expect(result.has_hit).toBe(false);
     });
   });
 
