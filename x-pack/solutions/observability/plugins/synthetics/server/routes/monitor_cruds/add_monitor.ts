@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
 import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -36,20 +37,32 @@ import {
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+  options: {
+    summary: 'Create a monitor',
+    description:
+      'Create a new monitor with the specified attributes.\nA monitor can be one of the following types: HTTP, TCP, ICMP, or Browser.\nThe required and default fields may vary based on the monitor type.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'post-synthetic-monitors',
+    oasOperationObject: () => path.join(__dirname, 'examples/post_monitor.yaml'),
+  },
   validate: {},
   validation: {
     request: {
       body: createMonitorRequestBody,
       query: z.strictObject({
-        id: optionalRouteId,
-        preserve_namespace: queryBoolean.optional(),
-        gettingStarted: queryBoolean.optional(),
-        internal: queryBoolean.optional().default(false),
+        id: optionalRouteId.describe('A custom ID for the new monitor. Generated if omitted.'),
+        preserve_namespace: queryBoolean
+          .optional()
+          .describe(
+            'If `true`, store the `namespace` as sent. Otherwise, a `default` namespace is replaced with one derived from the space ID.'
+          ),
+        gettingStarted: queryBoolean.optional().describe('For internal use only.'),
+        internal: queryBoolean.optional().default(false).describe('For internal use only.'),
         // primarily used for testing purposes, to specify the type of saved object
         savedObjectType: z
           .enum([syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle])
           .optional()
-          .default(syntheticsMonitorSavedObjectType),
+          .default(syntheticsMonitorSavedObjectType)
+          .describe('For internal use only.'),
       }),
     },
   },

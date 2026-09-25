@@ -1,0 +1,14 @@
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../../oas_schemas.yaml#/deleteResult'
+        examples:
+          deleteParameterResponseExample1:
+            value:
+              - id: param1-id
+                deleted: true

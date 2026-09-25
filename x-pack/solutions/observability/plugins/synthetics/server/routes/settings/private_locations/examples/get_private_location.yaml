@@ -1,0 +1,21 @@
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../oas_schemas.yaml#/getPrivateLocation'
+        examples:
+          getPrivateLocationResponseExample1:
+            value:
+              label: Test private location
+              id: test-private-location-id
+              agentPolicyId: test-private-location-id
+              isServiceManaged: false
+              isInvalid: false
+              geo:
+                lat: 0
+                lon: 0
+              namespace: default
+  404:
+    description: No private location matches the given ID or label.

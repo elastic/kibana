@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { z } from '@kbn/zod';
 import { routeId } from '../../zod_query';
@@ -55,12 +56,19 @@ const getParamsHandler: SyntheticsRouteHandler<ParamsResponse, { id?: string }> 
 export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<ParamsResponse> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PARAMS,
+  options: {
+    summary: 'Get parameters',
+    description:
+      'Get a list of all parameters.\n\nYou must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'get-parameters',
+    oasOperationObject: () => path.join(__dirname, 'examples/get_parameters.yaml'),
+  },
   validate: {},
   handler: getParamsHandler,
 });
 
 const RequestParamsSchema = z.strictObject({
-  id: routeId,
+  id: routeId.describe('The unique identifier for the parameter.'),
 });
 
 export const getSyntheticsParamRoute: SyntheticsRestApiRouteFactory<
@@ -69,6 +77,13 @@ export const getSyntheticsParamRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PARAMS + '/{id}',
+  options: {
+    summary: 'Get a parameter',
+    description:
+      'Get a parameter from the Synthetics app.\n\nYou must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'get-parameter',
+    oasOperationObject: () => path.join(__dirname, 'examples/get_parameter.yaml'),
+  },
   validate: {},
   validation: {
     request: {

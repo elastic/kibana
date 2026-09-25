@@ -6,6 +6,7 @@
  */
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import path from 'path';
 import { z } from '@kbn/zod';
 import { routeId } from '../../zod_query';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -51,6 +52,13 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
+  options: {
+    summary: 'Get private locations',
+    description:
+      'Get a list of private locations.\n\nYou must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'get-private-locations',
+    oasOperationObject: () => path.join(__dirname, 'examples/get_private_locations.yaml'),
+  },
   validate: {},
   handler: getPrivateLocationsHandler,
 });
@@ -61,11 +69,18 @@ export const getPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  options: {
+    summary: 'Get a private location',
+    description:
+      'You must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'get-private-location',
+    oasOperationObject: () => path.join(__dirname, 'examples/get_private_location.yaml'),
+  },
   validate: {},
   validation: {
     request: {
       params: z.strictObject({
-        locationId: routeId,
+        locationId: routeId.describe('A private location identifier or label.'),
       }),
     },
   },

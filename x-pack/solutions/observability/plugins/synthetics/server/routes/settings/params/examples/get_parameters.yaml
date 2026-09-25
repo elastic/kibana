@@ -1,0 +1,40 @@
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../../oas_schemas.yaml#/getParameterResponse'
+        examples:
+          getParametersResponseExample1:
+            summary: Read access
+            description: A successful response for a user with read-only permissions to get a list of parameters.
+            value:
+              - id: param1-id
+                key: param1
+                description: Description for param1
+                tags: [tag1, tag2]
+                namespaces: [namespace1]
+              - id: param2-id
+                key: param2
+                description: Description for param2
+                tags: [tag3]
+                namespaces: [namespace2]
+          getParametersResponseExample2:
+            summary: Write access
+            description: A successful response for a user with write permissions to get a list of parameters.
+            value:
+              - id: param1-id
+                key: param1
+                description: Description for param1
+                tags: [tag1, tag2]
+                namespaces: [namespace1]
+                value: value1
+              - id: param2-id
+                key: param2
+                description: Description for param2
+                tags: [tag3]
+                namespaces: [namespace2]
+                value: value2

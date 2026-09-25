@@ -1,0 +1,25 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkDeleteRequestExample1:
+          description: Run `POST /api/synthetics/monitors/_bulk_delete` to delete a list of monitors.
+          value:
+            ids: [monitor1-id, monitor2-id]
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../oas_schemas.yaml#/deleteResult'
+        examples:
+          deleteMonitorsResponseExample1:
+            description: A response from successfully deleting multiple monitors.
+            value:
+              - id: monitor1-id
+                deleted: true
+              - id: monitor2-id
+                deleted: true

@@ -1,0 +1,29 @@
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../oas_schemas.yaml#/getParameterResponse'
+        examples:
+          getParameterResponseExample1:
+            summary: Read access
+            description: A successful response for a user with read-only permissions to get a single parameter.
+            value:
+              id: unique-parameter-id
+              key: your-api-key
+              description: Param to use in browser monitor
+              tags: [authentication, security]
+              namespaces: [namespace1, namespace2]
+          getParameterResponseExample2:
+            summary: Write access
+            description: A successful response for a user with write permissions to get a single parameter.
+            value:
+              id: unique-parameter-id
+              key: your-param-key
+              description: Param to use in browser monitor
+              tags: [authentication, security]
+              namespaces: [namespace1, namespace2]
+              value: your-param-value
+  404:
+    description: The parameter or the Kibana space does not exist.

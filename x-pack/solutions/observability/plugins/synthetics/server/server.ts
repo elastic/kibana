@@ -12,7 +12,6 @@ import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
 import type { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsRouteWrapper } from './synthetics_route_wrapper';
 import { syntheticsAppPublicRestApiRoutes, syntheticsAppRestApiRoutes } from './routes';
-
 export const initSyntheticsServer = (
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient,
@@ -53,78 +52,43 @@ export const initSyntheticsServer = (
   });
 
   syntheticsAppPublicRestApiRoutes.forEach((route) => {
-    const { method, options, handler, validate, path, validation, security } =
-      syntheticsRouteWrapper(createSyntheticsRouteWithAuth(route), server, syntheticsMonitorClient);
+    const { method, options, handler, path, validation, security } = syntheticsRouteWrapper(
+      createSyntheticsRouteWithAuth(route),
+      server,
+      syntheticsMonitorClient
+    );
 
-    const routeDefinition = {
+    const routeConfig = {
+      access: 'public' as const,
       path,
-      validate,
-      options,
+      security,
+      summary: options?.summary,
+      description: options?.description,
+      operationId: options?.operationId,
+      options: {
+        tags: [...(options?.tags ?? []), 'oas-tag:synthetics'],
+        availability: options?.availability,
+        excludeFromOAS: options?.excludeFromOAS,
+      },
+    };
+    const versionConfig = {
+      version: '2023-10-31' as const,
+      validate: validation ?? (false as const),
+      options: { oasOperationObject: options?.oasOperationObject },
     };
 
     switch (method) {
       case 'GET':
-        router.versioned
-          .get({
-            access: 'public',
-            security,
-            path: routeDefinition.path,
-          })
-          .addVersion(
-            {
-              version: '2023-10-31',
-              validate: validation ?? false,
-            },
-            handler
-          );
+        router.versioned.get(routeConfig).addVersion(versionConfig, handler);
         break;
       case 'PUT':
-        router.versioned
-          .put({
-            access: 'public',
-            security,
-            path: routeDefinition.path,
-          })
-          .addVersion(
-            {
-              version: '2023-10-31',
-              validate: validation ?? false,
-            },
-            handler
-          );
+        router.versioned.put(routeConfig).addVersion(versionConfig, handler);
         break;
       case 'POST':
-        router.versioned
-          .post({
-            access: 'public',
-            security,
-            path: routeDefinition.path,
-          })
-          .addVersion(
-            {
-              version: '2023-10-31',
-              validate: validation ?? false,
-            },
-            handler
-          );
+        router.versioned.post(routeConfig).addVersion(versionConfig, handler);
         break;
       case 'DELETE':
-        router.versioned
-          .delete({
-            access: 'public',
-            path: routeDefinition.path,
-            security,
-            options: {
-              tags: options?.tags,
-            },
-          })
-          .addVersion(
-            {
-              version: '2023-10-31',
-              validate: validation ?? false,
-            },
-            handler
-          );
+        router.versioned.delete(routeConfig).addVersion(versionConfig, handler);
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);
