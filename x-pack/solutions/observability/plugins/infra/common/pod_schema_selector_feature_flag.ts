@@ -6,10 +6,12 @@
  */
 
 /**
- * Temporary flag until the feature is fully enabled.
- * Use with `feature_flags.overrides` in kibana.yml to toggle the pod schema selector.
+ * Temporary release gate so the unfinished Kubernetes Pods Schema selector
+ * does not ship enabled. Default off. Not a permanent product switch.
+ * Use with `feature_flags.overrides` in kibana.yml.
  */
-export const INFRA_POD_SCHEMA_SELECTOR_FEATURE_FLAG = 'infra.pod.schema.selector' as const;
+export const OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_FEATURE_FLAG =
+  'observability.infra.podSchemaSelectorEnabled' as const;
 
 /** Fallback when the flag is unset and no override exists. */
-export const INFRA_POD_SCHEMA_SELECTOR_DEFAULT = false;
+export const OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_DEFAULT = false;

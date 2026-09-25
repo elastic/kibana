@@ -41,12 +41,12 @@ describe('containsTemplate', () => {
     expect(containsTemplate('anything', '  ')).toBe(false);
   });
 
-  it('matches the real deductive prompt with decision trees on and off', () => {
+  it('matches the real investigation prompt with decision trees on and off', () => {
     const dir = join(
       REPO_ROOT,
-      'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/deductive_investigation/instructions'
+      'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions'
     );
-    const raw = readFileSync(join(dir, 'deductive_investigator.md.text'), 'utf8');
+    const raw = readFileSync(join(dir, 'investigator.md.text'), 'utf8');
     const trees = readFileSync(join(dir, 'decision_trees.text'), 'utf8');
     const fill = (loadStep: string, section: string) =>
       raw

@@ -35,18 +35,6 @@ export const SIGNALS_PATH = `${INTERNAL_API_PATH}/signals`;
 /** Version of the internal Signals API, shared between route registration and the browser client. */
 export const SIGNALS_INTERNAL_API_VERSION = '1';
 
-/** Read-only internal route for searching data streams, backing the AI index trace picker. */
-export const DATA_STREAMS_SEARCH_PATH = `${INTERNAL_API_PATH}/data_streams`;
-
-/** Version of the internal data streams search API, shared between route registration and the browser client. */
-export const DATA_STREAMS_SEARCH_INTERNAL_API_VERSION = '1';
-
-/** Cap on the number of data streams returned by the search API (applied after filtering hidden/managed streams out). */
-export const MAX_DATA_STREAM_SEARCH_RESULTS = 50;
-
-/** Bound on the free-text `search` query param, to prevent unbounded-input DoS. */
-export const MAX_DATA_STREAM_SEARCH_LENGTH = 256;
-
 /** Max number of tag groups returned by the grouped Signals list. */
 export const MAX_SIGNAL_GROUPS = 100;
 
@@ -89,11 +77,13 @@ export const DEFAULT_AI_INDEX_TYPE: AiIndexType = 'index';
  */
 export const MAX_AI_INDICES = 100;
 
-export const MAX_AI_INDEX_ID_LENGTH = 256;
 export const MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH = 256;
 export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_INDEX_NAME_BYTES = 255;
+export const KI_VIEW_NAME_PREFIX = 'v-ai-index-';
+// The view name `v-ai-index-<id>` must fit an index name.
+export const MAX_AI_INDEX_ID_LENGTH = MAX_INDEX_NAME_BYTES - KI_VIEW_NAME_PREFIX.length;
 export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;

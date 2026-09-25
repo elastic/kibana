@@ -77,6 +77,7 @@ export class ObservabilityAlertingPage {
   public readonly viewRuleDetailsLink: Locator;
   public readonly episodeDetailsPage: Locator;
   public readonly ruleDetailLayout: Locator;
+  public readonly toasts: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
@@ -108,6 +109,7 @@ export class ObservabilityAlertingPage {
     );
     this.episodeDetailsPage = this.page.testSubj.locator('alertingV2EpisodeDetailsPage');
     this.ruleDetailLayout = this.page.testSubj.locator('ruleDetailLayout');
+    this.toasts = this.page.components.toast().toasts;
   }
 
   urlFor(path: string): string {
@@ -184,5 +186,9 @@ export class ObservabilityAlertingPage {
 
   tagFilterOption(tag: string): Locator {
     return this.page.testSubj.locator(`episodesFilterBar-tags-popover-option-${tag}`);
+  }
+
+  episodeRuleCell(ruleName: string): Locator {
+    return this.page.testSubj.locator('episodeRuleCell').filter({ hasText: ruleName });
   }
 }

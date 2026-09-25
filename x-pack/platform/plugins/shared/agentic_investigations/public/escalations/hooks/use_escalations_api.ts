@@ -16,6 +16,8 @@ import {
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATIONS_INTERNAL_URL,
   ESCALATION_BY_ID_URL,
+  ESCALATION_STATUS_URL,
+  ESCALATION_CLOSE_PREVIEW_URL,
 } from '../../../common';
 import type {
   CreateEscalationRequest,
@@ -23,7 +25,9 @@ import type {
   LinkedInvestigationSummary,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
-  UpdateEscalationRequest,
+  SetEscalationStatusRequest,
+  SetEscalationStatusResponse,
+  EscalationClosePreviewResponse,
 } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 import { escalationQueryKeys } from '../query_keys';
@@ -135,7 +139,12 @@ export const useLinkedInvestigations = ({
 }: {
   escalationId: string;
   linkedInvestigationIds: readonly string[];
-}): { data: LinkedInvestigationSummary[] | undefined; isLoading: boolean; isError: boolean } => {
+}): {
+  data: LinkedInvestigationSummary[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+} => {
   const { services } = useKibana<CoreStart>();
   const linkedIds = linkedInvestigationIds.join(',');
 
@@ -156,20 +165,63 @@ export const useLinkedInvestigations = ({
     retry: retryOnTransientError,
   });
 
-  return { data: result.data?.results, isLoading: result.isLoading, isError: result.isError };
+  return {
+    data: result.data?.results,
+    isLoading: result.isLoading,
+    isError: result.isError,
+    refetch: result.refetch,
+  };
 };
 
-/** Patches an escalation. Invalidates the full escalations query key on success. */
-export const useUpdateEscalation = () => {
+/** Opens or closes an escalation (and its open linked investigations when closing). */
+export const useSetEscalationStatus = () => {
   const { services } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ escalationId, body }: { escalationId: string; body: UpdateEscalationRequest }) =>
-      services.http.patch(ESCALATION_BY_ID_URL.replace('{id}', encodeURIComponent(escalationId)), {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        body: JSON.stringify(body),
-      }),
+    mutationFn: ({
+      escalationId,
+      body,
+    }: {
+      escalationId: string;
+      body: SetEscalationStatusRequest;
+    }): Promise<SetEscalationStatusResponse> =>
+      services.http.put<SetEscalationStatusResponse>(
+        ESCALATION_STATUS_URL.replace('{id}', encodeURIComponent(escalationId)),
+        {
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+          body: JSON.stringify(body),
+        }
+      ),
     onSuccess: () => invalidateEscalations(queryClient),
+  });
+};
+
+/**
+ * Fetches a preview of what closing an escalation would affect.
+ *
+ * The query is always fresh: `staleTime` and `cacheTime` are both 0 so every
+ * mount starts a network request, and `refetchInterval` keeps the list current
+ * while the close dialog is open. Pass `enabled: false` to pause polling.
+ */
+export const useEscalationClosePreview = (
+  escalationId: string | undefined,
+  { enabled }: { enabled: boolean }
+) => {
+  const { services } = useKibana<CoreStart>();
+
+  return useQuery({
+    queryKey: [...escalationQueryKeys.all, 'closePreview', escalationId],
+    queryFn: (): Promise<EscalationClosePreviewResponse> =>
+      services.http.get<EscalationClosePreviewResponse>(
+        ESCALATION_CLOSE_PREVIEW_URL.replace('{id}', encodeURIComponent(escalationId!)),
+        { version: AGENTIC_INVESTIGATIONS_API_VERSION }
+      ),
+    enabled: enabled && Boolean(escalationId),
+    // Never serve stale data: every mount triggers a fresh fetch.
+    staleTime: 0,
+    cacheTime: 0,
+    // Keep the list current while the dialog is open.
+    refetchInterval: 10_000,
   });
 };

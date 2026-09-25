@@ -27,6 +27,7 @@ import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { executeMaintainerRun } from './execution';
 import { shouldDeleteOrphanedEntityStoreTask } from '../should_delete_orphaned_task';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../execution_context';
 
 /** Used when `RegisterEntityMaintainerConfig.minLicense` is omitted (minimum Kibana tier). */
 export const DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE: LicenseType = 'basic';
@@ -116,11 +117,10 @@ export function registerEntityMaintainerTask({
             createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
               run: async () =>
                 coreStart.executionContext.withContext(
-                  {
-                    type: 'security_solution',
-                    name: 'entity_analytics-entity_maintainers_task',
-                    id: taskInstance.id,
-                  },
+                  buildEaExecutionContext(
+                    EA_EXECUTION_CONTEXT_NAMES.ENTITY_MAINTAINERS_TASK,
+                    taskInstance.id
+                  ),
                   async () => {
                     const status = taskInstance.state;
                     const namespace =
