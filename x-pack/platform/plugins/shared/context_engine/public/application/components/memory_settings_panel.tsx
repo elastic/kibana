@@ -51,7 +51,7 @@ export const MemorySettingsPanel = ({
           <p>
             <FormattedMessage
               id="xpack.contextEngine.memorySettings.memoryDescription"
-              defaultMessage="Allow agents to save and recall memories in this AI index."
+              defaultMessage="Allow agents to save memories in this AI index."
             />
           </p>
         </EuiText>
