@@ -25,7 +25,10 @@ import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { createImpactAttachmentDefinition } from './impact';
-import { createAttachmentSummaryDrilldown } from './attachment_summary_drilldown/create_details_drilldown';
+import {
+  createAlertSummaryRows,
+  createAlertsSummaryRows,
+} from './attachment_summary_drilldown/create_details_drilldown';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -64,10 +67,8 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 
 /**
  * Registers the baseline attachment UI definitions:
- *   - `security.alert` — label, icon, and the attachment summary drill-down to the alert's
- *     document flyout. The drill-down is lazy behind a click, so this stays eagerly registered:
- *     the summary reads the label on first paint, and deferring registration would leave its rows
- *     unlabelled until a chunk resolved.
+ *   - `security.alert` — label, icon, and the attachment summary drill-down. The drill-down is
+ *     lazy behind a click, so this stays eager: the summary reads labels on first paint.
  *   - `security.alerts` — label + icon. A batch names a set of alerts and no flyout shows a set.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
@@ -77,13 +78,15 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 export const registerAttachmentUiDefinitions = ({
   attachments,
   resolveSecurityCanvasContext,
+  getSpaceId,
 }: {
   attachments: AttachmentServiceStartContract;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+  getSpaceId: () => Promise<string>;
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
-    renderConversationDetailsContent: createAttachmentSummaryDrilldown({
+    renderConversationDetailsContent: createAlertSummaryRows({
       resolveSecurityCanvasContext,
     }),
   });
@@ -101,6 +104,10 @@ export const registerAttachmentUiDefinitions = ({
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
+      renderConversationDetailsContent: createAlertsSummaryRows({
+        resolveSecurityCanvasContext,
+        getSpaceId,
+      }),
     }
   );
 };

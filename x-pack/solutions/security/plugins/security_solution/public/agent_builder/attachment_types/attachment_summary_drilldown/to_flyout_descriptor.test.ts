@@ -7,7 +7,7 @@
 
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
-import { toFlyoutDescriptor } from './to_flyout_descriptor';
+import { toAlertDescriptor } from './to_flyout_descriptor';
 
 const attachmentOf = (type: string, data: unknown): UnknownAttachment => ({
   id: 'attachment-1',
@@ -19,9 +19,9 @@ const attachmentOf = (type: string, data: unknown): UnknownAttachment => ({
 const alertAttachment = (fields: Record<string, unknown>) =>
   attachmentOf(SecurityAgentBuilderAttachments.alert, { alert: JSON.stringify(fields) });
 
-describe('toFlyoutDescriptor', () => {
+describe('toAlertDescriptor', () => {
   it('opens the document flyout for the alert the payload names', () => {
-    const descriptor = toFlyoutDescriptor(
+    const descriptor = toAlertDescriptor(
       alertAttachment({
         _id: ['alert-1'],
         _index: ['.internal.alerts-security.alerts-default-000001'],
@@ -37,7 +37,7 @@ describe('toFlyoutDescriptor', () => {
   });
 
   it('accepts scalar fields, since the payload is whatever the producer wrote', () => {
-    const descriptor = toFlyoutDescriptor(
+    const descriptor = toAlertDescriptor(
       alertAttachment({ _id: 'alert-1', _index: '.internal.alerts-1' })
     );
 
@@ -51,8 +51,8 @@ describe('toFlyoutDescriptor', () => {
   it.each([
     ['the id is missing', { _index: ['.internal.alerts-1'] }],
     ['the index is missing', { _id: ['alert-1'] }],
-  ])('stays read-only when %s', (_, fields) => {
-    expect(toFlyoutDescriptor(alertAttachment(fields))).toBeNull();
+  ])('returns null when %s', (_, fields) => {
+    expect(toAlertDescriptor(alertAttachment(fields))).toBeNull();
   });
 
   it.each([
@@ -62,18 +62,7 @@ describe('toFlyoutDescriptor', () => {
     ['the JSON is not an object', { alert: '"just a string"' }],
     ['there is no alert at all', {}],
     ['the alert is not a string', { alert: { _id: 'alert-1' } }],
-  ])('stays read-only when %s', (_, data) => {
-    expect(
-      toFlyoutDescriptor(attachmentOf(SecurityAgentBuilderAttachments.alert, data))
-    ).toBeNull();
-  });
-
-  it.each([
-    SecurityAgentBuilderAttachments.alerts,
-    SecurityAgentBuilderAttachments.attackDiscovery,
-    SecurityAgentBuilderAttachments.rule,
-    SecurityAgentBuilderAttachments.entity,
-  ])('has no drill-down yet for %s', (type) => {
-    expect(toFlyoutDescriptor(attachmentOf(type, {}))).toBeNull();
+  ])('returns null when %s', (_, data) => {
+    expect(toAlertDescriptor(attachmentOf(SecurityAgentBuilderAttachments.alert, data))).toBeNull();
   });
 });
