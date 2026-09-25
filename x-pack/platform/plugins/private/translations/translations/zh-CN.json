@@ -11595,7 +11595,6 @@
     "xpack.agentBuilder.conversationActions.fullScreenDisabledTooltip": "创建此对话后，将启用全屏模式。",
     "xpack.agentBuilder.conversationActions.genAiSettings": "GenAI 设置",
     "xpack.agentBuilder.conversationActions.viewSection": "查看",
-    "xpack.agentBuilder.conversationInput.actionButton.cancel": "取消",
     "xpack.agentBuilder.conversationInput.actionButton.submit": "提交",
     "xpack.agentBuilder.conversationInput.agentSelector.manageAgents": "管理",
     "xpack.agentBuilder.conversationInput.commandMenu.list.loading": "正在加载……",

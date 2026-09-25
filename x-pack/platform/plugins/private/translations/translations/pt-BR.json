@@ -11577,7 +11577,6 @@
     "xpack.agentBuilder.conversationActions.fullScreenDisabledTooltip": "O modo tela cheia fica disponível assim que essa conversa for criada.",
     "xpack.agentBuilder.conversationActions.genAiSettings": "Configurações do GenAI",
     "xpack.agentBuilder.conversationActions.viewSection": "Visualizar",
-    "xpack.agentBuilder.conversationInput.actionButton.cancel": "Cancelar",
     "xpack.agentBuilder.conversationInput.actionButton.submit": "Enviar",
     "xpack.agentBuilder.conversationInput.agentSelector.manageAgents": "Gerenciar",
     "xpack.agentBuilder.conversationInput.commandMenu.list.loading": "Carregando...",

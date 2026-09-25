@@ -11549,7 +11549,6 @@
     "xpack.agentBuilder.conversationActions.fullScreenDisabledTooltip": "Le mode plein écran est disponible une fois cette conversation créée.",
     "xpack.agentBuilder.conversationActions.genAiSettings": "Paramètres de l'IA générative",
     "xpack.agentBuilder.conversationActions.viewSection": "Afficher",
-    "xpack.agentBuilder.conversationInput.actionButton.cancel": "Annuler",
     "xpack.agentBuilder.conversationInput.actionButton.submit": "Envoyer",
     "xpack.agentBuilder.conversationInput.agentSelector.manageAgents": "Gérer",
     "xpack.agentBuilder.conversationInput.commandMenu.list.loading": "Chargement…",

@@ -11567,7 +11567,6 @@
     "xpack.agentBuilder.conversationActions.fullScreenDisabledTooltip": "Der Vollbildmodus ist verfügbar, sobald dieses Gespräch erstellt wurde.",
     "xpack.agentBuilder.conversationActions.genAiSettings": "GenAI-Einstellungen",
     "xpack.agentBuilder.conversationActions.viewSection": "Anzeigen",
-    "xpack.agentBuilder.conversationInput.actionButton.cancel": "Abbrechen",
     "xpack.agentBuilder.conversationInput.actionButton.submit": "Absenden",
     "xpack.agentBuilder.conversationInput.agentSelector.manageAgents": "Verwalten",
     "xpack.agentBuilder.conversationInput.commandMenu.list.loading": "Wird geladen ...",
