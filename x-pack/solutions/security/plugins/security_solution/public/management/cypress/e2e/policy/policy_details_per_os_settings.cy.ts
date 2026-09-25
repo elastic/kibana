@@ -15,6 +15,7 @@ import { loadPage } from '../../tasks/common';
 
 const formTestSubj = getPolicySettingsFormTestSubjects('endpointPolicyForm');
 const perOsMalware = formTestSubj.perOsMalware;
+const perOsMemory = formTestSubj.perOsMemory;
 const DETECT_LABEL = 'Detect';
 
 const loadSettingsUrl = (policyId: string) =>
@@ -39,7 +40,10 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['perOsPolicySettings'])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'perOsPolicySettings',
+            'customYaraSignaturesEnabled',
+          ])}`,
         ],
       },
     },
@@ -67,7 +71,7 @@ describe(
 
     // The other three Cypress cases live in RTL: per_os/per_os_malware_protections_card.test.tsx
     // (cross-OS isolation) and per_os/per_os_ransomware_protection_card.test.tsx (no Linux row).
-    // This one stays because save-plus-reload persistence needs a real stack.
+    // These stay because save-plus-reload persistence needs a real stack.
     it('persists Windows Detect across save and reload without changing other OSs', () => {
       loadSettingsUrl(policy.id);
       cy.getByTestSubj(perOsMalware.mac.modeSelect)
@@ -88,6 +92,33 @@ describe(
               });
             });
         });
+    });
+
+    it('persists a Windows custom YARA signatures change across save and reload without changing other OSs', () => {
+      const windowsSwitch = perOsMemory.windows.customYaraSignaturesEnableDisableSwitch;
+      const macSwitch = perOsMemory.mac.customYaraSignaturesEnableDisableSwitch;
+      const linuxSwitch = perOsMemory.linux.customYaraSignaturesEnableDisableSwitch;
+
+      loadSettingsUrl(policy.id);
+      // A policy created without a preset has every protection off, so memory threat starts
+      // disabled and the custom YARA signatures switches are hidden.
+      cy.getByTestSubj(perOsMemory.enableDisableSwitch).should(
+        'have.attr',
+        'aria-checked',
+        'false'
+      );
+      cy.getByTestSubj(perOsMemory.enableDisableSwitch).click();
+      for (const osSwitch of [windowsSwitch, macSwitch, linuxSwitch]) {
+        cy.getByTestSubj(osSwitch).should('have.attr', 'aria-checked', 'true');
+      }
+
+      cy.getByTestSubj(windowsSwitch).click();
+      savePolicyForm();
+      loadSettingsUrl(policy.id);
+
+      cy.getByTestSubj(windowsSwitch).should('have.attr', 'aria-checked', 'false');
+      cy.getByTestSubj(macSwitch).should('have.attr', 'aria-checked', 'true');
+      cy.getByTestSubj(linuxSwitch).should('have.attr', 'aria-checked', 'true');
     });
   }
 );

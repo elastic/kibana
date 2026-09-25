@@ -13,6 +13,8 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../../../../../../../common/endpoint/service/policy/custom_yara_signatures';
+import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { AntivirusRegistrationModes } from '../../../../../../../common/endpoint/types';
 import {
   expectIsViewOnly,
@@ -177,6 +179,64 @@ describe('PerOsPolicySettingsForm', () => {
         )
       ).toBeInTheDocument();
     }, 15_000);
+  });
+
+  describe('custom YARA signatures advanced settings', () => {
+    const renderAndShowAdvancedSettings = async () => {
+      render();
+      await userEvent.click(renderResult.getByTestId(testSubj.advancedSection.showHideButton));
+    };
+    const queryAdvancedSettingRow = (key: string) =>
+      renderResult.queryByTestId(testSubj.advancedSection.settingRowTestSubjects(key).container);
+
+    it('hides the custom YARA rescan interval rows when the experimental flag is off', async () => {
+      await renderAndShowAdvancedSettings();
+
+      for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+        expect(queryAdvancedSettingRow(key)).toBeNull();
+      }
+    });
+
+    describe('and the custom YARA signatures experimental flag is enabled', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({
+          linuxDnsEvents: true,
+          trustedDevices: false,
+          customYaraSignaturesEnabled: true,
+        });
+      });
+
+      it('shows the custom YARA rescan interval row for every OS', async () => {
+        await renderAndShowAdvancedSettings();
+
+        for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+          expect(queryAdvancedSettingRow(key)).toBeInTheDocument();
+        }
+      });
+
+      it('hides the custom YARA rescan interval rows when the license is lower than Enterprise', async () => {
+        const licenseServiceMock = createLicenseServiceMock();
+        licenseServiceMock.isEnterprise.mockReturnValue(false);
+        useLicenseMock.mockReturnValue(licenseServiceMock);
+        await renderAndShowAdvancedSettings();
+
+        for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+          expect(queryAdvancedSettingRow(key)).toBeNull();
+        }
+      });
+
+      it('hides the custom YARA rescan interval rows when a serverless PLI upsell message is present', async () => {
+        mockedContext.startServices.upselling.setMessages({
+          endpoint_custom_yara_signatures:
+            'To apply custom YARA signatures, you must add Endpoint Complete to your project.',
+        });
+        await renderAndShowAdvancedSettings();
+
+        for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+          expect(queryAdvancedSettingRow(key)).toBeNull();
+        }
+      });
+    });
   });
 
   describe('event merging banner', () => {

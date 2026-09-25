@@ -35,10 +35,17 @@ type ProtectionPolicyBranch<Protection extends PolicyProtection> = {
   popup: { [Key in Protection]: { enabled: boolean; message: string } };
 };
 
+export interface PerOsProtectionModeChangeSideEffectOptions<Protection extends PolicyProtection> {
+  previousMode: ProtectionModes;
+  nextMode: ProtectionModes;
+  osPolicy: PolicyConfig[ProtectionOperatingSystems[Protection]];
+}
+
 export const useProtectionModeChangeHandler = <Protection extends PolicyProtection>(
   accessor: PerOsPolicyAccessor<ProtectionOperatingSystems[Protection]>,
   protection: Protection,
-  onChange: PolicyFormComponentCommonProps['onChange']
+  onChange: PolicyFormComponentCommonProps['onChange'],
+  additionalOnModeChange?: (options: PerOsProtectionModeChangeSideEffectOptions<Protection>) => void
 ): ((nextMode: ProtectionModes) => void) => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
@@ -48,6 +55,7 @@ export const useProtectionModeChangeHandler = <Protection extends PolicyProtecti
         const protectionPolicy =
           currentOsPolicy as PolicyConfig[ProtectionOperatingSystems[Protection]] &
             ProtectionPolicyBranch<Protection>;
+        const previousMode = protectionPolicy[protection]?.mode ?? ProtectionModes.off;
         // Spread rather than assign into the branch: a policy stored before the protection
         // existed has no object there, and any sibling field it does carry must survive. The
         // seeded branch supplies `supported`, which the server's license check rejects when absent.
@@ -65,9 +73,11 @@ export const useProtectionModeChangeHandler = <Protection extends PolicyProtecti
             enabled: nextMode === ProtectionModes.prevent,
           };
         }
+
+        additionalOnModeChange?.({ previousMode, nextMode, osPolicy: currentOsPolicy });
       });
       onChange({ isValid: true, updatedPolicy });
     },
-    [accessor, isPlatinumPlus, onChange, protection]
+    [accessor, additionalOnModeChange, isPlatinumPlus, onChange, protection]
   );
 };
