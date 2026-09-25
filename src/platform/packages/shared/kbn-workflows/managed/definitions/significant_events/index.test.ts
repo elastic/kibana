@@ -12,16 +12,19 @@ import {
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
 } from '.';
+import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
 
 interface WorkflowStep {
   name: string;
   type?: string;
   condition?: string;
+  'product-solution'?: string;
+  'product-feature'?: string;
   'on-failure'?: { continue?: boolean };
   steps?: WorkflowStep[];
   with?: {
     path?: string;
-    body?: { trigger_feedback?: string };
+    body?: { trigger_feedback?: string; runId?: string };
     inputs?: { context?: { trigger_type?: string } };
     written_rule_uuids?: string;
   };
@@ -47,6 +50,9 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 };
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
+const queriesGeneration = parse(
+  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
+) as ParsedWorkflow;
 const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
   | ParsedWorkflow & {
       triggers: Array<{ type: string; on?: { condition?: string } }>;
@@ -73,6 +79,19 @@ describe('significant events persistence workflow contracts', () => {
       with?: { inputs?: { context?: { trigger_type?: string } } };
     };
     expect(triggerStep.with?.inputs?.context?.trigger_type).toBe('automatic');
+  });
+
+  it('attributes discovery agent calls to Nightshift', () => {
+    expect(requireStep(discovery, 'run_discovery_agent')).toMatchObject({
+      'product-solution': 'observability',
+      'product-feature': 'nightshift',
+    });
+  });
+
+  it('sends the workflow execution id when generating KI queries', () => {
+    expect(requireStep(queriesGeneration, 'generate_queries').with?.body?.runId).toBe(
+      '${{ execution.id }}'
+    );
   });
 
   it('stamps discovery detections only from confirmed write outcomes', () => {

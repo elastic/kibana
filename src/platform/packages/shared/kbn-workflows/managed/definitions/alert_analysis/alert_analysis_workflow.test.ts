@@ -2016,8 +2016,48 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       variables: { output_verdicts: verdicts },
     });
 
-    expect(summary).toContain('2 alert(s) for host ws-1 classified as true positive.');
-    expect(summary).toContain('1 alert(s) for host dc-1 classified as false positive.');
+    expect(summary).toContain('2 alert(s) with host ws-1 classified as true positive.');
+    expect(summary).toContain('1 alert(s) with host dc-1 classified as false positive.');
+  });
+
+  it('describes alerts with no host field in plain language instead of the __missing__ sentinel', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
+      with: { grouped_counts_summary: string };
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'false_positive',
+        host_name: '__missing__',
+      }),
+    ];
+
+    const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(summary).toContain('1 alert(s) with no host field classified as false positive.');
+    expect(summary).not.toContain('__missing__');
+  });
+
+  it('strips the leading space so grouped_counts_summary joins cleanly after other sentences', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
+      with: { grouped_counts_summary: string };
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'true_positive',
+        host_name: 'host-a',
+      }),
+    ];
+
+    const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(summary.startsWith(' ')).toBe(false);
+    expect(summary.endsWith(' ')).toBe(false);
   });
 
   it('builds host and user impact entity rows with per-verdict counts', () => {

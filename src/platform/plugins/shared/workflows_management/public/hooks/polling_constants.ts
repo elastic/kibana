@@ -8,6 +8,7 @@
  */
 
 export const WORKFLOW_EXECUTION_POLL_INTERVAL_MS = 1000 as const;
+export const LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS = 5000 as const;
 
 export const WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS = 5000 as const;
 

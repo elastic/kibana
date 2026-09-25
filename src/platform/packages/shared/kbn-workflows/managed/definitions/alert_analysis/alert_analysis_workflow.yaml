@@ -1637,10 +1637,10 @@ steps:
                   body:
                     conversation_id: "{{ variables.investigation_conversation_id }}"
                     trigger_mode: "never"
-                    input: >-
-                      🤖 **Alert Analysis** — Batch {{ foreach.index }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts.
-                      The alerts in this batch will not have verdict tags or verdict notes written; an error note will record the missing verdict, and a re-run of the Worker will retry them.
-                      Execution: {{ execution.url }}
+                    input: |-
+                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts. These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.
+
+                      [View execution]({{ execution.url }})
 
             else:
               # The model can echo an id from another batch; select_alert_verdict takes `first`
@@ -1775,11 +1775,11 @@ steps:
                     conversation_id: "{{ variables.investigation_conversation_id }}"
                     trigger_mode: "never"
                     input: >-
-                      🤖 **Alert Analysis** — Batch {{ foreach.index }} complete:
+                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete
+                      ({{ foreach.item | size }} alert(s)):
                       {{ variables.batch_tp_count }} true positive,
                       {{ variables.batch_fp_count }} false positive,
-                      {{ variables.batch_inc_count }} inconclusive
-                      ({{ foreach.item | size }} alert(s) in this batch).
+                      {{ variables.batch_inc_count }} inconclusive.
 
       # -----------------------------------------------------------------------
       # Write the verdicts back to the alerts
@@ -2015,17 +2015,22 @@ steps:
                 {%- assign all_host_names = variables.output_verdicts | map: 'host_name' | uniq -%}
                 {%- assign hosts = all_host_names | slice: 0, 50 -%}
                 {%- for h in hosts -%}
+                {%- if h == '__missing__' -%}
+                {%- assign host_label = 'no host field' -%}
+                {%- else -%}
+                {%- assign host_label = 'host ' | append: h -%}
+                {%- endif -%}
                 {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
                 {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
                 {%- assign fp = for_host | where: 'classification', 'false_positive' | size -%}
                 {%- assign inc = for_host | where: 'classification', 'inconclusive' | size -%}
-                {%- if tp > 0 %} {{ tp }} alert(s) for host {{ h }} classified as true positive.{% endif -%}
-                {%- if fp > 0 %} {{ fp }} alert(s) for host {{ h }} classified as false positive.{% endif -%}
-                {%- if inc > 0 %} {{ inc }} alert(s) for host {{ h }} were inconclusive.{% endif -%}
+                {%- if tp > 0 %} {{ tp }} alert(s) with {{ host_label }} classified as true positive.{% endif -%}
+                {%- if fp > 0 %} {{ fp }} alert(s) with {{ host_label }} classified as false positive.{% endif -%}
+                {%- if inc > 0 %} {{ inc }} alert(s) with {{ host_label }} were inconclusive.{% endif -%}
                 {%- endfor -%}
                 {%- if all_host_names.size > 50 %} ({{ all_host_names.size | minus: 50 }} additional host(s) omitted from summary.){% endif -%}
                 {%- endcapture -%}
-                {{- grouped_counts_summary_raw | truncate: 10000, ' [truncated]' -}}
+                {{- grouped_counts_summary_raw | strip | truncate: 10000, ' [truncated]' -}}
 
           # Join the per-batch summaries the model returned, skipping nil entries
           # (compact drops values the model omitted when batch_summary was not filled).
