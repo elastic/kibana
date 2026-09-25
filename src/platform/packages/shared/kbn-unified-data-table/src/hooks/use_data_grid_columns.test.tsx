@@ -32,6 +32,7 @@ describe('useColumns', () => {
     expect(result.current.columns).toEqual(['Time', 'message']);
     expect(result.current.onAddColumn).toBeInstanceOf(Function);
     expect(result.current.onRemoveColumn).toBeInstanceOf(Function);
+    expect(result.current.onRemoveColumns).toBeInstanceOf(Function);
     expect(result.current.onMoveColumn).toBeInstanceOf(Function);
     expect(result.current.onSetColumns).toBeInstanceOf(Function);
   });

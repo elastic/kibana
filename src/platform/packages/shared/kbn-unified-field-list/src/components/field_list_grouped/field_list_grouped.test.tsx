@@ -227,6 +227,12 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     const selectedFields = screen.getByTestId('fieldListGroupedSelectedFields');
     expect(within(availableFields).getAllByTestId('testFieldItem')).toHaveLength(28);
     expect(within(selectedFields).getAllByTestId('testFieldItem')).toHaveLength(1);
+    expect(
+      screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields')
+    ).toBeVisible();
+    expect(
+      screen.queryByTestId('fieldListGroupedAvailableFields-deselectSelectedFields')
+    ).not.toBeInTheDocument();
   });
 
   it('renders correctly when Meta gets open', async () => {
