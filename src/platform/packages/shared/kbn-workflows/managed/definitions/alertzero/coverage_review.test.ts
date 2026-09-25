@@ -632,6 +632,27 @@ describe('Detection Coverage review', () => {
       expect(outcome?.[flag]).toContain(evidence);
     });
 
+    // The gap is covered only by an installed rule that is also on, so the re-read has to
+    // show both, as on the enable path.
+    it.each([
+      ['installed and enabled', 'approved', null, { id: 'r1', enabled: true }, false],
+      ['installed but disabled', 'approved', null, { id: 'r1', enabled: false }, true],
+      ['not found', 'approved', { message: 'HTTP 404: not found' }, {}, true],
+      ['not approved', 'dismissed', null, {}, false],
+    ])(
+      'install_approved_not_applied for a rule %s',
+      (_scenario, gateDecision, error, refetched, expected) => {
+        expect(
+          evaluateExpression(String(outcome?.install_approved_not_applied), {
+            steps: {
+              propose_install: { output: { decision: gateDecision } },
+              refetch_rule: { error, output: refetched },
+            },
+          })
+        ).toBe(expected);
+      }
+    );
+
     // One source for the queue write and the report. If they were computed separately, a
     // run could report "approved but not applied" and still drop the indicator.
     it.each(APPLIED_FLAGS)('%s is computed once and forwarded to the output', (flag) => {

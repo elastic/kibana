@@ -601,7 +601,8 @@ steps:
       install_approved_not_applied: >-
         ${{ steps.propose_install.output.decision == 'approved'
           and not (steps.refetch_rule.error == null
-            and steps.refetch_rule.output.id != null) }}
+            and steps.refetch_rule.output.id != null
+            and steps.refetch_rule.output.enabled == true) }}
       creation_unreviewed: >-
         ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
           and steps.run_rule_creation.output.reviewed != true }}
