@@ -63,7 +63,7 @@ describe('AppMenu', () => {
     it('should hand EuiContextMenu the same panels across re-renders with unchanged props', async () => {
       mockCurrentBreakpoint = 'xs';
       const staticItems: AppMenuStaticItem[] = [
-        { id: 'static1', label: 'Static 1', run: jest.fn() },
+        { id: 'static1', label: 'Static 1', run: jest.fn(), iconType: 'gear' },
       ];
 
       const { rerender } = render(
