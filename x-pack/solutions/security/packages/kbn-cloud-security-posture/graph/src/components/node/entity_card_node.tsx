@@ -17,6 +17,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiText,
+  EuiTextTruncate,
   EuiToolTip,
   useEuiShadow,
   useEuiTheme,
@@ -34,9 +35,12 @@ import { NodeExpandButton } from './node_expand_button';
 import { ENTITY_CARD_HEADER_HEIGHT, NODE_WIDTH } from '../constants';
 import {
   GRAPH_ENTITY_NODE_ID,
+  GRAPH_ENTITY_NODE_DETAILS_ID,
   GRAPH_ENTITY_NODE_RISK_BADGE_ID,
   GRAPH_ENTITY_NODE_LAYERS_PANEL_ID,
   GRAPH_STACKED_SHAPE_ID,
+  GRAPH_TAG_TEXT_ID,
+  GRAPH_TAG_COUNT_ID,
 } from '../test_ids';
 import { getSpanIcon } from './get_span_icon';
 import { showStackedShape } from '../utils';
@@ -707,17 +711,10 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
         </NodeToolbar>
       )}
 
-      {/* The entity card is shorter than the full NODE_HEIGHT reservation.
-          justify-content: center vertically centres the card in the container
-          so top: 50% on the handles lands at the card's true visual centre —
-          the same dagreNode.y where relationship/event nodes are placed. */}
-      <NodeShapeContainer
-        css={css`
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        `}
-      >
+      {/* NodeShapeContainer grows to the card's content height. The layout uses
+          node.measured?.height so the card's visual centre lands at dagreNode.y —
+          the same point where relationship/event nodes are placed. */}
+      <NodeShapeContainer>
         {/* Relative wrapper — stacked cards peek from the bottom of EntityCardWrapper */}
         <div
           css={css`
@@ -728,7 +725,11 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
             {/* Header row: icon | name+tag | risk badge */}
             <EntityCardHeader>
               <IconBox bgColor={iconBgColor} euiTheme={euiTheme}>
-                {isGrouped && <CountBadge euiTheme={euiTheme}>{countDisplay}</CountBadge>}
+                {isGrouped && (
+                  <CountBadge data-test-subj={GRAPH_TAG_COUNT_ID} euiTheme={euiTheme}>
+                    {countDisplay}
+                  </CountBadge>
+                )}
                 {icon && (
                   <EuiIcon
                     type={getSpanIcon(icon) ?? icon}
@@ -739,24 +740,23 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 )}
               </IconBox>
 
-              <EntityInfo>
+              <EntityInfo data-test-subj={GRAPH_ENTITY_NODE_DETAILS_ID}>
                 <EuiText size="xs">
-                  <p
+                  <EuiTextTruncate
+                    text={label ?? ''}
+                    truncation="end"
                     css={css`
                       font-weight: ${euiTheme.font.weight.bold};
-                      overflow: hidden;
-                      text-overflow: ellipsis;
-                      white-space: nowrap;
-                      margin: 0;
                       line-height: ${euiTheme.size.l};
                     `}
                   >
-                    {label}
-                  </p>
+                    {(truncated) => truncated}
+                  </EuiTextTruncate>
                 </EuiText>
                 {tag && (
                   <EuiText size="xs" color="subdued">
                     <p
+                      data-test-subj={GRAPH_TAG_TEXT_ID}
                       css={css`
                         overflow: hidden;
                         text-overflow: ellipsis;
@@ -826,34 +826,37 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               scale={0.95}
             />
           )}
+
+          {interactive && (
+            <>
+              {/* Cover only the header row so the button does not steal mouse events
+                  from the metadata panel (which has its own interactive elements) or
+                  from nodes that are vertically adjacent to the expanded card body.
+                  Positioned inside the card wrapper div (position: relative) so y=0
+                  refers to the card top, not the NodeShapeContainer top. */}
+              <NodeButton
+                width={NODE_WIDTH}
+                height={ENTITY_CARD_HEADER_HEIGHT}
+                onClick={(e) => nodeClick?.(e, props)}
+              />
+              {/* Expand button — hidden visually when the NodeToolbar is wired, but always
+                   present in the DOM so that tests can click it to open the popover.
+                   Also inside the card wrapper div so its y offset aligns with the header. */}
+              <NodeExpandButton
+                color={color}
+                onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+                x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
+                y={`${(ENTITY_CARD_HEADER_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
+                style={toolbarItems.length > 0 ? { display: 'none' } : undefined}
+              />
+            </>
+          )}
         </div>
 
-        {interactive && (
-          <>
-            {/* Cover only the header row so the button does not steal mouse events
-                from the metadata panel (which has its own interactive elements) or
-                from nodes that are vertically adjacent to the expanded card body. */}
-            <NodeButton
-              width={NODE_WIDTH}
-              height={ENTITY_CARD_HEADER_HEIGHT}
-              onClick={(e) => nodeClick?.(e, props)}
-            />
-            {/* Expand button — hidden visually when the NodeToolbar is wired, but always
-                 present in the DOM so that tests can click it to open the popover. */}
-            <NodeExpandButton
-              color={color}
-              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
-              y={`${(ENTITY_CARD_HEADER_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
-              style={toolbarItems.length > 0 ? { display: 'none' } : undefined}
-            />
-          </>
-        )}
-
-        {/* Handles sit at top: 50% of NodeShapeContainer (= NODE_HEIGHT / 2).
-            Because the card is flexbox-centred in the container, the card's
-            visual centre is also at NODE_HEIGHT / 2 = dagreNode.y, exactly
-            where relationship/event nodes are placed by the layout algorithm. */}
+        {/* Handles sit at top: 50% of NodeShapeContainer. Because the container
+            grows to the card's content height, top: 50% lands at the card's
+            visual centre = dagreNode.y, the same point where relationship/event
+            nodes are positioned by the layout algorithm. */}
         <Handle
           type="target"
           isConnectable={false}
