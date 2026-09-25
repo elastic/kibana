@@ -206,6 +206,122 @@ export class WorkflowRunFixture {
     });
   }
 
+  /**
+   * Starts an execution under an explicit id, for suites that drive more than one
+   * workflow in the same engine — a `workflow.execute` chain, where the parent
+   * reads its child back out of the same repository.
+   *
+   * Unlike `runWorkflow`, this does NOT clear the repositories: every execution in
+   * a chain shares them, and clearing would delete the parent the child is about
+   * to be read back into.
+   */
+  public runExecution({
+    executionId,
+    workflowYaml,
+    workflowId,
+    inputs,
+    event,
+    parent,
+  }: {
+    executionId: string;
+    workflowYaml: string;
+    workflowId?: string;
+    inputs?: Record<string, unknown>;
+    event?: Record<string, unknown>;
+    parent?: {
+      workflowId: string;
+      executionId: string;
+      stepId: string;
+      invocation: 'sync' | 'async';
+    };
+  }) {
+    const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
+    const workflowExecution: Partial<EsWorkflowExecution> = {
+      id: executionId,
+      spaceId: 'fake_space_id',
+      workflowId: workflowId ?? 'fake_workflow_id',
+      isTestRun: false,
+      // Managed, so a `workflow.execute` step resolving a managed target takes the
+      // `includeGlobal` + `managedFilter: 'all'` path the shipped workflows take.
+      managed: true,
+      workflowDefinition,
+      context: {
+        inputs,
+        event,
+        ...(parent
+          ? {
+              parentWorkflowId: parent.workflowId,
+              parentWorkflowExecutionId: parent.executionId,
+              parentStepId: parent.stepId,
+              parentWorkflowInvocation: parent.invocation,
+            }
+          : {}),
+      },
+      status: ExecutionStatus.PENDING,
+      createdAt: new Date().toISOString(),
+      createdBy: 'system',
+      triggeredBy: parent ? 'workflow-step' : 'system',
+    };
+    this.workflowExecutionRepositoryMock.workflowExecutions.set(
+      executionId,
+      workflowExecution as EsWorkflowExecution
+    );
+    return this.runExecutionById(executionId);
+  }
+
+  /** Resumes an execution started by `runExecution`, at its current cursor. */
+  public resumeExecution(executionId: string) {
+    return this.resumeExecutionById(executionId);
+  }
+
+  /**
+   * Runs an execution row that already exists in the repository — the seam a
+   * `workflow.execute` chain needs: the sync strategy's mocked `executeWorkflow`
+   * inserts the child's PENDING row itself (mirroring what the real plugin's
+   * `executeWorkflow` does before task manager schedules `workflow:run`), and
+   * a driver loop calls this to actually run it, exactly as that scheduled task
+   * would.
+   */
+  public runExistingExecution(executionId: string) {
+    return this.runExecutionById(executionId);
+  }
+
+  public getExecution(executionId: string): EsWorkflowExecution | undefined {
+    return this.workflowExecutionRepositoryMock.workflowExecutions.get(executionId);
+  }
+
+  private runExecutionById(executionId: string) {
+    return runWorkflow({
+      workflowRunId: executionId,
+      spaceId: 'fake_space_id',
+      signal: this.taskAbortController.signal,
+      dependencies: this.dependencies,
+      logger: this.loggerMock,
+      config: this.configMock,
+      fakeRequest: this.fakeKibanaRequest,
+      workflowsExecutionEngine: this.workflowsExecutionEngineMock,
+      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
+    });
+  }
+
+  private resumeExecutionById(executionId: string) {
+    return resumeWorkflow({
+      workflowRunId: executionId,
+      spaceId: 'fake_space_id',
+      signal: this.taskAbortController.signal,
+      logger: this.loggerMock,
+      config: this.configMock,
+      fakeRequest: this.fakeKibanaRequest,
+      dependencies: this.dependencies,
+      workflowsExecutionEngine: this.workflowsExecutionEngineMock,
+      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
+    });
+  }
+
   private cleanup() {
     jest.clearAllMocks();
     this.workflowExecutionRepositoryMock.workflowExecutions.clear();
