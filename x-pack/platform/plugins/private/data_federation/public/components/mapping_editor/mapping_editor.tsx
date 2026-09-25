@@ -8,11 +8,14 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -98,6 +101,8 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   reservedFieldNames,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isDefineSchemaSelected = !value.dynamic;
+  const isInferSchemaSelected = value.dynamic;
   const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
   const nextId = useRef(0);
   const originalFieldById = useRef<Record<string, MappingEditorField>>({});
@@ -288,6 +293,43 @@ export const MappingEditor: FC<MappingEditorProps> = ({
 
   return (
     <div data-test-subj="dataFederationMappingEditor">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h3>
+              {isInferSchemaSelected
+                ? i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsTitleOptional', {
+                    defaultMessage: 'Field mappings (optional)',
+                  })
+                : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsTitle', {
+                    defaultMessage: 'Field mappings',
+                  })}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {isDefineSchemaSelected ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="danger">
+              {i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsRequiredBadge', {
+                defaultMessage: 'Required',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiText size="s" color="subdued">
+        {isInferSchemaSelected
+          ? i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheadingInfer', {
+              defaultMessage: "Schema will be inferred at query time for fields you don't map.",
+            })
+          : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheading', {
+              defaultMessage:
+                'Map at least one field, unmapped fields will not be inferred at query time, so nothing will be available to query until you add mappings.',
+            })}
+      </EuiText>
+      <EuiSpacer size="m" />
+
       {!validation.isValid && shouldShowValidationCallout ? (
         <>
           <KbnDangerCallout
