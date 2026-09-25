@@ -1146,6 +1146,156 @@ const K8S_CONTAINERS_METRICS: readonly MetricDescriptor[] = [
   },
 ];
 
+// -- ReplicaSets: like Deployments, focused on replica readiness. -----------
+const K8S_REPLICASETS_METRICS: readonly MetricDescriptor[] = [
+  {
+    id: 'rollout',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.rsRollout',
+      { defaultMessage: 'Rollout' }
+    ),
+    kind: 'categorical',
+    values: ROLLOUT_VALUES,
+  },
+  {
+    id: 'ready-replicas',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.readyReplicas',
+      { defaultMessage: 'Ready replicas' }
+    ),
+    kind: 'numeric',
+    unit: '%',
+    range: { min: 0, max: 100 },
+    thresholds: { warn: 80, crit: 50, direction: 'desc' },
+  },
+  {
+    id: 'replica-count',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.replicaCount',
+      { defaultMessage: 'Replica count' }
+    ),
+    kind: 'numeric',
+    range: { min: 1, max: 20 },
+    thresholds: { warn: 2, crit: 1, direction: 'desc' },
+  },
+];
+
+// -- StatefulSets: ordered pod management with persistent storage. ----------
+const K8S_STATEFULSETS_METRICS: readonly MetricDescriptor[] = [
+  {
+    id: 'rollout',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.stsRollout',
+      { defaultMessage: 'Rollout' }
+    ),
+    kind: 'categorical',
+    values: ROLLOUT_VALUES,
+  },
+  {
+    id: 'ready-replicas',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.stsReadyReplicas',
+      { defaultMessage: 'Ready replicas' }
+    ),
+    kind: 'numeric',
+    unit: '%',
+    range: { min: 0, max: 100 },
+    thresholds: { warn: 80, crit: 50, direction: 'desc' },
+  },
+  {
+    id: 'volume-util',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.volumeUtil',
+      { defaultMessage: 'Volume utilization' }
+    ),
+    kind: 'numeric',
+    unit: '%',
+    range: { min: 5, max: 100 },
+    thresholds: { warn: 75, crit: 90, direction: 'asc' },
+  },
+];
+
+// -- DaemonSets: one pod per node, focus on scheduling coverage. ------------
+const DAEMONSET_SCHEDULE_VALUES: readonly CategoricalValue[] = [
+  { id: 'all-scheduled', label: 'All scheduled', tone: 'good' },
+  { id: 'partial', label: 'Partial', tone: 'warning' },
+  { id: 'none-scheduled', label: 'None scheduled', tone: 'danger' },
+];
+
+const K8S_DAEMONSETS_METRICS: readonly MetricDescriptor[] = [
+  {
+    id: 'schedule-status',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.scheduleStatus',
+      { defaultMessage: 'Schedule status' }
+    ),
+    kind: 'categorical',
+    values: DAEMONSET_SCHEDULE_VALUES,
+  },
+  {
+    id: 'available-pct',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.availablePct',
+      { defaultMessage: 'Available %' }
+    ),
+    kind: 'numeric',
+    unit: '%',
+    range: { min: 0, max: 100 },
+    thresholds: { warn: 80, crit: 50, direction: 'desc' },
+  },
+  {
+    id: 'misscheduled',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.misscheduled',
+      { defaultMessage: 'Misscheduled' }
+    ),
+    kind: 'numeric',
+    range: { min: 0, max: 10 },
+    thresholds: { warn: 1, crit: 3, direction: 'asc' },
+  },
+];
+
+// -- CronJobs: recurring batch jobs, focus on success/failure cadence. ------
+const CRONJOB_LAST_STATUS_VALUES: readonly CategoricalValue[] = [
+  { id: 'succeeded', label: 'Succeeded', tone: 'good' },
+  { id: 'running', label: 'Running', tone: 'info' },
+  { id: 'failed', label: 'Failed', tone: 'danger' },
+  { id: 'suspended', label: 'Suspended', tone: 'neutral' },
+];
+
+const K8S_CRONJOBS_METRICS: readonly MetricDescriptor[] = [
+  {
+    id: 'last-status',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.lastStatus',
+      { defaultMessage: 'Last run' }
+    ),
+    kind: 'categorical',
+    values: CRONJOB_LAST_STATUS_VALUES,
+  },
+  {
+    id: 'failures-24h',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.failures24h',
+      { defaultMessage: 'Failures (24h)' }
+    ),
+    kind: 'numeric',
+    range: { min: 0, max: 30 },
+    thresholds: { warn: 2, crit: 5, direction: 'asc' },
+  },
+  {
+    id: 'avg-duration',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.avgDuration',
+      { defaultMessage: 'Avg duration' }
+    ),
+    kind: 'numeric',
+    unit: 's',
+    range: { min: 1, max: 600 },
+    thresholds: { warn: 120, crit: 300, direction: 'asc' },
+  },
+];
+
 /**
  * Per-bucket metric catalogs. Keys follow {@link bucketKeyFor}'s
  * `category[:subType]` shape, both lowercased — so the AWS sub-types
@@ -1187,6 +1337,10 @@ const CATALOG: Readonly<Record<BucketKey, readonly MetricDescriptor[]>> = {
   'kubernetes:pods': K8S_PODS_METRICS,
   'kubernetes:deployments': K8S_DEPLOYMENTS_METRICS,
   'kubernetes:containers': K8S_CONTAINERS_METRICS,
+  'kubernetes:replicasets': K8S_REPLICASETS_METRICS,
+  'kubernetes:statefulsets': K8S_STATEFULSETS_METRICS,
+  'kubernetes:daemonsets': K8S_DAEMONSETS_METRICS,
+  'kubernetes:cronjobs': K8S_CRONJOBS_METRICS,
 };
 
 /** Fallback catalog for any bucket we haven't modeled explicitly. */
@@ -1828,7 +1982,7 @@ export const resolveMetricReading = (
  * Number of points synthesised for a tooltip sparkline. Enough to read
  * as a trend line, few enough to stay crisp at ~120px wide.
  */
-const SPARKLINE_POINTS = 18;
+const SPARKLINE_POINTS = 28;
 
 /**
  * Deterministic mini time-series for a numeric metric, in the metric's
@@ -1867,11 +2021,23 @@ export const resolveMetricSparkline = (
   const statBias: Record<StatId, number> = { min: -0.18, avg: -0.06, last: 0.0, max: 0.18 };
   const finalUnit = clampUnit(baseUnit + statBias[statId] + noise);
 
-  // Start offset: ±0.25 around the final value, direction seeded per
-  // entity, so half the fleet reads as "climbing into" its current
-  // value and half as "settling down".
-  const startSeed = stableHash(`spark-start::${metric.id}::${entityName}`) / 0x7fffffff;
-  const startUnit = clampUnit(finalUnit + (startSeed - 0.5) * 0.5);
+  // Shape profiles that mimic real monitoring data: mostly flat baselines
+  // with distinct event signatures. Seeds mix entity name, metric id, AND
+  // a secondary name hash so entities with the same value get different shapes.
+  const nameHash = stableHash(entityName);
+  const shapeSeed = stableHash(`spark-shape::${nameHash}::${metric.id}`) / 0x7fffffff;
+  const shape = Math.floor(shapeSeed * 17);
+
+  // Seeded spike/event positions — each entity gets unique timing & amplitude.
+  const posSeed1 = stableHash(`spark-p1::${nameHash * 3}::${metric.id}`) / 0x7fffffff;
+  const posSeed2 = stableHash(`spark-p2::${nameHash * 7}::${metric.id}`) / 0x7fffffff;
+  const posSeed3 = stableHash(`spark-p3::${nameHash * 13}::${metric.id}`) / 0x7fffffff;
+  const ampSeed = stableHash(`spark-amp::${nameHash * 17}::${metric.id}`) / 0x7fffffff;
+  const spikeHeight = 0.15 + ampSeed * 0.3; // 0.15–0.45 above baseline
+
+  // Gaussian-ish bump centered at `centre` with width `w`.
+  const bump = (t: number, centre: number, w: number): number =>
+    Math.exp(-((t - centre) ** 2) / (2 * w * w));
 
   const span = metric.range.max - metric.range.min;
   const series: number[] = [];
@@ -1881,10 +2047,123 @@ export const resolveMetricSparkline = (
       series.push(metric.range.min + finalUnit * span);
       continue;
     }
-    const trend = startUnit + (finalUnit - startUnit) * t;
-    const wobble =
-      (stableHash(`spark::${i}::${metric.id}::${entityName}`) / 0x7fffffff - 0.5) * 0.12;
-    series.push(metric.range.min + clampUnit(trend + wobble) * span);
+
+    let value: number;
+    switch (shape) {
+      case 0: {
+        // Flat baseline with tiny jitter.
+        value = finalUnit;
+        break;
+      }
+      case 1: {
+        // Flat with one sharp spike.
+        const spikeAt = 0.2 + posSeed1 * 0.6;
+        value = finalUnit + spikeHeight * bump(t, spikeAt, 0.04);
+        break;
+      }
+      case 2: {
+        // Flat with two spikes at different positions.
+        const s1 = 0.15 + posSeed1 * 0.25;
+        const s2 = 0.6 + posSeed2 * 0.25;
+        value = finalUnit +
+          spikeHeight * bump(t, s1, 0.04) +
+          spikeHeight * 0.7 * bump(t, s2, 0.04);
+        break;
+      }
+      case 3: {
+        // Flat with three spikes.
+        const s1 = 0.1 + posSeed1 * 0.15;
+        const s2 = 0.38 + posSeed2 * 0.15;
+        const s3 = 0.7 + posSeed3 * 0.15;
+        value = finalUnit +
+          spikeHeight * bump(t, s1, 0.035) +
+          spikeHeight * 0.8 * bump(t, s2, 0.035) +
+          spikeHeight * 0.6 * bump(t, s3, 0.035);
+        break;
+      }
+      case 4: {
+        // Flat then step up — stays high.
+        const stepAt = 0.3 + posSeed1 * 0.35;
+        const ramp = t < stepAt ? 0 : Math.min(1, (t - stepAt) / 0.08);
+        const lift = 0.15 + posSeed2 * 0.15;
+        value = finalUnit - lift * (1 - ramp);
+        break;
+      }
+      case 5: {
+        // High then step down — settles low.
+        const stepAt = 0.3 + posSeed1 * 0.35;
+        const ramp = t < stepAt ? 0 : Math.min(1, (t - stepAt) / 0.08);
+        const drop = 0.15 + posSeed2 * 0.15;
+        value = finalUnit + drop * (1 - ramp);
+        break;
+      }
+      case 6: {
+        // Flat with one wide hump (elevated period then back down).
+        const centre = 0.3 + posSeed1 * 0.4;
+        value = finalUnit + spikeHeight * 0.6 * bump(t, centre, 0.12);
+        break;
+      }
+      case 7: {
+        // Flat with a dip (drops then recovers).
+        const centre = 0.3 + posSeed1 * 0.4;
+        value = finalUnit - spikeHeight * 0.5 * bump(t, centre, 0.08);
+        break;
+      }
+      case 8: {
+        // Gradual ramp up from lower baseline.
+        const lift = 0.12 + posSeed1 * 0.12;
+        value = finalUnit - lift * (1 - t);
+        break;
+      }
+      case 9: {
+        // Gradual ramp down from higher baseline.
+        const drop = 0.12 + posSeed1 * 0.12;
+        value = finalUnit + drop * (1 - t);
+        break;
+      }
+      case 10: {
+        // Dead flat — perfectly stable metric.
+        value = finalUnit;
+        break;
+      }
+      case 11: {
+        // Flat with very slight drift up (barely perceptible).
+        value = finalUnit - 0.02 * (1 - t);
+        break;
+      }
+      case 12: {
+        // Flat with very slight drift down.
+        value = finalUnit + 0.02 * (1 - t);
+        break;
+      }
+      case 13: {
+        // Flat with a tiny wobble — like a calm heartbeat.
+        value = finalUnit + Math.sin(t * Math.PI * 6) * 0.015;
+        break;
+      }
+      case 14: {
+        // Flat with one micro-bump — barely noticeable blip.
+        const at = 0.3 + posSeed1 * 0.4;
+        value = finalUnit + 0.06 * bump(t, at, 0.06);
+        break;
+      }
+      case 15: {
+        // Flat with gentle wave — slow sine, very low amplitude.
+        value = finalUnit + Math.sin(t * Math.PI * 2) * 0.025;
+        break;
+      }
+      default: {
+        // Flat — rock steady, almost no movement.
+        value = finalUnit + (posSeed1 - 0.5) * 0.01;
+        break;
+      }
+    }
+
+    // Tiny jitter for organic feel — amplitude varies per entity.
+    const jitterAmp = 0.01 + ampSeed * 0.04;
+    const jitter =
+      (stableHash(`spark::${i}::${nameHash}::${metric.id}`) / 0x7fffffff - 0.5) * jitterAmp;
+    series.push(metric.range.min + clampUnit(value + jitter) * span);
   }
   return series;
 };

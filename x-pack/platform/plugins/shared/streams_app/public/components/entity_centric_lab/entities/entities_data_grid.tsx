@@ -107,6 +107,7 @@ const METRIC_PREFIX = 'metric:';
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 const STORAGE_PREFIX = 'entityCentricLab.listColumns.v2:';
 
+
 interface CatalogColumn {
   readonly id: string;
   readonly label: string;
@@ -134,24 +135,6 @@ const BASE_VISIBLE_COLUMNS: readonly CatalogColumn[] = [
     }),
   },
   {
-    id: 'environment',
-    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.environment', {
-      defaultMessage: 'Environment',
-    }),
-  },
-  {
-    id: 'team',
-    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.team', {
-      defaultMessage: 'Team',
-    }),
-  },
-  {
-    id: 'region',
-    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.region', {
-      defaultMessage: 'Region',
-    }),
-  },
-  {
     id: 'lastHealthChange',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.lastHealthChange', {
       defaultMessage: 'Last health change',
@@ -167,6 +150,24 @@ const BASE_VISIBLE_COLUMNS: readonly CatalogColumn[] = [
 
 // Extra identity columns — available via "Add columns", hidden by default.
 const BASE_HIDDEN_COLUMNS: readonly CatalogColumn[] = [
+  {
+    id: 'environment',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.environment', {
+      defaultMessage: 'Environment',
+    }),
+  },
+  {
+    id: 'region',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.region', {
+      defaultMessage: 'Region',
+    }),
+  },
+  {
+    id: 'team',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.team', {
+      defaultMessage: 'Team',
+    }),
+  },
   {
     id: 'type',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.type', {
@@ -214,18 +215,42 @@ const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
   'kubernetes:nodes': ['metric:cpu-util', 'metric:memory-util', 'metric:pod-count'],
   'kubernetes:pods': ['metric:cpu-limit-util', 'metric:memory-limit-util', 'metric:restarts'],
   'kubernetes:deployments': ['metric:available-replicas', 'metric:restarts'],
+  'kubernetes:replicasets': ['metric:ready-replicas', 'metric:replica-count'],
+  'kubernetes:statefulsets': ['metric:ready-replicas', 'metric:volume-util'],
+  'kubernetes:daemonsets': ['metric:available-pct', 'metric:misscheduled'],
+  'kubernetes:cronjobs': ['metric:failures-24h', 'metric:avg-duration'],
   'kubernetes:containers': ['metric:cpu-usage', 'metric:memory-usage', 'metric:restarts'],
   'kubernetes:namespaces': ['metric:cpu-usage', 'metric:memory-usage'],
   'kubernetes:clusters': ['metric:api-latency', 'metric:node-count'],
   // Hosts
-  hosts: ['metric:cpu-util', 'metric:memory-util'],
+  hosts: ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
+  'hosts:bare-metal': ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
+  'hosts:aws ec2 instance': ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
+  'hosts:gcp compute engine': ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
+  'hosts:azure vm': ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
   // Services
-  services: ['metric:latency-p95', 'metric:throughput'],
+  services: ['metric:latency-p95', 'metric:error-rate', 'metric:throughput'],
+  'services:apm service': ['metric:latency-p95', 'metric:error-rate', 'metric:throughput'],
   // Databases
-  databases: ['metric:query-latency', 'metric:connection-saturation'],
+  databases: ['metric:query-latency', 'metric:connection-saturation', 'metric:replication-lag'],
+  'databases:postgres': ['metric:query-latency', 'metric:connection-saturation', 'metric:replication-lag'],
+  // Networking
+  networking: ['metric:active-connections', 'metric:request-rate', 'metric:error-rate'],
+  'networking:nginx': ['metric:active-connections', 'metric:request-rate', 'metric:error-rate'],
+  'networking:haproxy': ['metric:active-connections', 'metric:request-rate', 'metric:error-rate'],
+  'networking:envoy': ['metric:active-connections', 'metric:request-rate', 'metric:error-rate'],
+  // Messaging (middlewares)
+  middlewares: ['metric:queue-depth', 'metric:consumer-lag'],
+  'middlewares:kafka': ['metric:queue-depth', 'metric:consumer-lag'],
+  'middlewares:rabbitmq': ['metric:queue-depth', 'metric:consumer-lag'],
+  // AI/ML (llms)
+  llms: ['metric:latency-p95', 'metric:error-rate', 'metric:token-spend'],
+  'llms:openai': ['metric:latency-p95', 'metric:error-rate', 'metric:token-spend'],
+  'llms:anthropic': ['metric:latency-p95', 'metric:error-rate', 'metric:token-spend'],
   // Cloud
   cloud: ['metric:cpu-util', 'metric:memory-util'],
-  'cloud:aws ec2 instance': ['metric:cpu-util', 'metric:memory-util'],
+  'cloud:aws ec2 instance': ['metric:cpu-util', 'metric:memory-util', 'metric:network-out'],
+  'cloud:aws region': ['metric:api-success', 'metric:throttle-rate', 'metric:spend-mtd'],
   'cloud:aws lambda function': [
     'metric:invocations',
     'metric:error-rate',
@@ -430,20 +455,38 @@ const categoryLabel = (category: EntityCategoryId): string =>
  * palette/steps coloring here would mean pulling in that (un-exported) config
  * and fill logic, so the sparkline stays a calm, uniform trend indicator.
  */
+let sparkGradientId = 0;
 const CellSparkline = ({ values, color }: { values: readonly number[]; color: string }) => {
+  const [gradId] = useState(() => `spark-grad-${++sparkGradientId}`);
   const width = 56;
   const height = 16;
   const pad = 1;
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = max - min || 1;
-  const points = values
-    .map((value, index) => {
-      const x = (index / (values.length - 1)) * width;
-      const y = height - pad - ((value - min) / span) * (height - pad * 2);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
+  const pts = values.map((value, index) => ({
+    x: (index / (values.length - 1)) * width,
+    y: height - pad - ((value - min) / span) * (height - pad * 2),
+  }));
+
+  // Build a smooth Catmull-Rom → cubic-bezier SVG path.
+  let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(i - 1, 0)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(i + 2, pts.length - 1)];
+    const tension = 6;
+    const cp1x = p1.x + (p2.x - p0.x) / tension;
+    const cp1y = p1.y + (p2.y - p0.y) / tension;
+    const cp2x = p2.x - (p3.x - p1.x) / tension;
+    const cp2y = p2.y - (p3.y - p1.y) / tension;
+    d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+  }
+
+  // Closed area path: line path → bottom-right → bottom-left.
+  const areaD = `${d} L${width},${height} L0,${height} Z`;
+
   return (
     <svg
       width={width}
@@ -453,7 +496,14 @@ const CellSparkline = ({ values, color }: { values: readonly number[]; color: st
       style={{ display: 'block', flexShrink: 0 }}
       aria-hidden
     >
-      <polyline points={points} fill="none" stroke={color} strokeWidth={1.25} />
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+          <stop offset="100%" stopColor={color} stopOpacity={0.02} />
+        </linearGradient>
+      </defs>
+      <path d={areaD} fill={`url(#${gradId})`} />
+      <path d={d} fill="none" stroke={color} strokeWidth={1.25} strokeLinecap="round" />
     </svg>
   );
 };
@@ -639,16 +689,6 @@ export const EntityDataGridSection = ({
         id: column.id,
         displayAsText: column.label,
         isSortable: true,
-        initialWidth:
-          column.id === 'name'
-            ? 240
-            : column.id === 'alerts'
-            ? 140
-            : column.id.startsWith(METRIC_PREFIX)
-            ? 130
-            : K8S_CONTEXT_KEYS.includes(column.id as K8sContextKey)
-            ? 150
-            : undefined,
       })),
     [catalog]
   );
