@@ -8,6 +8,6 @@ xpack.sandbox:
   port: ${SANDBOX_API_PORT:9090}
   api_key: ${SANDBOX_API_KEY}
   ssl:
-    certificate: ${SANDBOX_CLIENT_CERT}
-    key: ${SANDBOX_CLIENT_KEY}
-    certificate_authorities: ${SANDBOX_CA_CERT}
+    certificate: ${SANDBOX_CLIENT_CERT_PATH}
+    key: ${SANDBOX_CLIENT_KEY_PATH}
+    certificate_authorities: ${SANDBOX_CA_CERT_PATH}

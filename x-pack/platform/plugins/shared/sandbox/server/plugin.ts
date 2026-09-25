@@ -19,6 +19,8 @@ import type { SandboxPluginConfig } from './config';
 import { SandboxApiClient } from './grpc_client';
 import { SandboxSessionImpl } from './sandbox_session';
 import type { SandboxSession } from './sandbox_session';
+import { readTlsCredentials } from './tls_credentials';
+import type { SandboxTlsCredentials } from './tls_credentials';
 
 interface SandboxPluginStartDeps {
   spaces?: SpacesPluginStart;
@@ -33,7 +35,7 @@ interface SandboxPluginStartDeps {
  * where the sandbox is not configured.
  */
 export interface SandboxPluginSetup {
-  /** `true` when `xpack.sandbox.enabled` is `true` and `api_key`/`ssl` are present in config. */
+  /** `true` when `xpack.sandbox.enabled` is `true` and `api_key` is present in config. */
   readonly isAvailable: boolean;
 }
 
@@ -64,7 +66,7 @@ export interface SandboxPluginSetup {
  * ```
  *
  * Note that `sandbox` itself is `undefined` when the plugin is not installed.
- * When it is installed but not configured (missing `api_key`/`ssl`, or
+ * When it is installed but not configured (missing `api_key`, or
  * `xpack.sandbox.enabled: false`), `getSession` throws a descriptive error.
  */
 export interface SandboxPluginStart {
@@ -77,7 +79,7 @@ export interface SandboxPluginStart {
    * Pod allocation happens transparently on the first RPC.
    *
    * @throws {Error} When the sandbox is not configured in this deployment
-   *   (`xpack.sandbox.enabled: false`, or missing `api_key`/`ssl`).
+   *   (`xpack.sandbox.enabled: false`, or missing `api_key`).
    */
   getSession(request: KibanaRequest, sessionId: string): SandboxSession;
 
@@ -99,6 +101,7 @@ export class SandboxPlugin
   private apiClient?: SandboxApiClient;
   private readonly sessions = new Map<string, SandboxSession>();
   private spaces?: SpacesPluginStart;
+  private tlsCredentials?: SandboxTlsCredentials;
 
   constructor(private readonly ctx: PluginInitializerContext<SandboxPluginConfig>) {
     this.logger = ctx.logger.get();
@@ -106,24 +109,28 @@ export class SandboxPlugin
 
   setup(_core: CoreSetup): SandboxPluginSetup {
     const config = this.ctx.config.get();
+    if (config.enabled) {
+      this.tlsCredentials = readTlsCredentials(config.ssl);
+    }
     return {
-      isAvailable: config.enabled && !!config.api_key && !!config.ssl,
+      isAvailable: config.enabled && !!config.api_key,
     };
   }
 
   start(_core: CoreStart, { spaces }: SandboxPluginStartDeps): SandboxPluginStart {
     this.spaces = spaces;
     const pluginConfig = this.ctx.config.get();
+    const { tlsCredentials } = this;
 
-    if (!pluginConfig.enabled || !pluginConfig.api_key || !pluginConfig.ssl) {
+    if (!pluginConfig.enabled || !pluginConfig.api_key || !tlsCredentials) {
       if (pluginConfig.enabled) {
         this.logger.warn(
-          'xpack.sandbox.enabled is true but api_key and ssl are not configured — sandbox is disabled'
+          'xpack.sandbox.enabled is true but api_key is not configured — sandbox is disabled'
         );
       }
       const reason = !pluginConfig.enabled
         ? 'xpack.sandbox.enabled is false'
-        : 'xpack.sandbox.api_key and xpack.sandbox.ssl are required when enabled';
+        : 'xpack.sandbox.api_key is required when enabled';
       const throwNotConfigured = (): never => {
         throw new Error(`Sandbox is not configured in this deployment: ${reason}`);
       };
@@ -133,18 +140,9 @@ export class SandboxPlugin
       };
     }
 
-    const { host, port, api_key: apiKey, ssl } = pluginConfig;
+    const { host, port, api_key: apiKey } = pluginConfig;
 
-    this.apiClient = new SandboxApiClient({
-      host,
-      port,
-      apiKey,
-      rootCertPem: ssl.certificate_authorities
-        ? Buffer.from(ssl.certificate_authorities)
-        : undefined,
-      clientCertPem: Buffer.from(ssl.certificate),
-      clientKeyPem: Buffer.from(ssl.key),
-    });
+    this.apiClient = new SandboxApiClient({ host, port, apiKey, ...tlsCredentials });
 
     const apiClient = this.apiClient;
     const sessions = this.sessions;

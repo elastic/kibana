@@ -45,6 +45,12 @@ xpack.apm.serverlessOnboarding: true
 xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
 xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
+# Sandbox service; mTLS certs default to the /mnt/elastic-internal/http-certs mount
+xpack.sandbox.enabled: true
+xpack.sandbox.host: elastic-sandbox-api.elastic-observability-ocp.elastic.dev
+xpack.sandbox.port: 9090
+xpack.sandbox.api_key: xxx
+
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
 xpack.fleet.internal.registry.excludePackages: [

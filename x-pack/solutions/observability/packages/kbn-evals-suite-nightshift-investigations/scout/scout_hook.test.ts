@@ -11,7 +11,15 @@ import { tmpdir } from 'os';
 import Path from 'path';
 
 const HOOK = Path.join(__dirname, 'scout_hook.sh');
-const CERT = '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----';
+const PEM_DIR = mkdtempSync(Path.join(tmpdir(), 'scout-hook-pem-'));
+const CERT = Path.join(PEM_DIR, 'client.crt');
+const KEY = Path.join(PEM_DIR, 'client.key');
+const CA = Path.join(PEM_DIR, 'ca.crt');
+const SHELL_KEY = Path.join(PEM_DIR, 'shell.key');
+writeFileSync(CERT, '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----');
+writeFileSync(KEY, 'KEY', { mode: 0o600 });
+writeFileSync(SHELL_KEY, 'SHELL_KEY', { mode: 0o600 });
+writeFileSync(CA, 'CA');
 
 const runHook = (config: unknown, env: Record<string, string> = {}) => {
   const baseEnv = Object.fromEntries(
@@ -35,10 +43,14 @@ const SANDBOX = {
   host: 'sandbox.example.com',
   port: 9443,
   apiKey: 'key',
-  ssl: { certificate: CERT, key: 'KEY', certificateAuthorities: 'CA' },
+  ssl: { certificate: CERT, key: KEY, certificateAuthorities: CA },
 };
 
 describe('nightshift-investigations scout hook', () => {
+  afterAll(() => {
+    rmSync(PEM_DIR, { recursive: true, force: true });
+  });
+
   it('adds nothing without sandbox credentials, so Scout starts plain evals_tracing', () => {
     expect(runHook({})).toEqual({ status: 0, stderr: '', output: {} });
     expect(runHook('')).toEqual({ status: 0, stderr: '', output: {} });
@@ -51,9 +63,9 @@ describe('nightshift-investigations scout hook', () => {
         SANDBOX_API_HOST: 'sandbox.example.com',
         SANDBOX_API_PORT: '9443',
         SANDBOX_API_KEY: 'key',
-        SANDBOX_CLIENT_CERT: CERT,
-        SANDBOX_CLIENT_KEY: 'KEY',
-        SANDBOX_CA_CERT: 'CA',
+        SANDBOX_CLIENT_CERT_PATH: CERT,
+        SANDBOX_CLIENT_KEY_PATH: KEY,
+        SANDBOX_CA_CERT_PATH: CA,
         SANDBOX_KIBANA_CONFIG: Path.join(__dirname, 'kibana.sandbox.yml'),
       },
     });
@@ -61,8 +73,8 @@ describe('nightshift-investigations scout hook', () => {
 
   it('exports an empty CA when the sandbox has no private CA, since kibana.sandbox.yml needs it', () => {
     const { ssl, ...rest } = SANDBOX;
-    const { output } = runHook({ sandbox: { ...rest, ssl: { certificate: CERT, key: 'KEY' } } });
-    expect(output.env.SANDBOX_CA_CERT).toBe('');
+    const { output } = runHook({ sandbox: { ...rest, ssl: { certificate: CERT, key: KEY } } });
+    expect(output.env.SANDBOX_CA_CERT_PATH).toBe('');
   });
 
   it('leaves host and port unset so kibana.sandbox.yml defaults them', () => {
@@ -75,41 +87,27 @@ describe('nightshift-investigations scout hook', () => {
   it('falls back to SANDBOX_* exported in the shell, with the config taking precedence', () => {
     const shell = {
       SANDBOX_API_KEY: 'shell-key',
-      SANDBOX_CLIENT_CERT: 'C',
-      SANDBOX_CLIENT_KEY: 'K',
+      SANDBOX_CLIENT_CERT_PATH: CERT,
+      SANDBOX_CLIENT_KEY_PATH: SHELL_KEY,
     };
     expect(runHook({}, shell).output.env).toMatchObject(shell);
-    expect(runHook({ sandbox: SANDBOX }, shell).output.env.SANDBOX_API_KEY).toBe('key');
+    expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
+      SANDBOX_API_KEY: 'key',
+      SANDBOX_CLIENT_KEY_PATH: KEY,
+    });
   });
 
-  it('reads legacy PEM file paths without overriding profile or shell contents', () => {
-    const directory = mkdtempSync(Path.join(tmpdir(), 'scout-hook-pem-'));
-    const certificatePath = Path.join(directory, 'client.crt');
-    const keyPath = Path.join(directory, 'client.key');
-    const caPath = Path.join(directory, 'ca.crt');
-    writeFileSync(certificatePath, CERT);
-    writeFileSync(keyPath, 'FILE_KEY', { mode: 0o600 });
-    writeFileSync(caPath, 'FILE_CA');
-    const env = {
-      SANDBOX_API_KEY: 'shell-key',
-      SANDBOX_CLIENT_CERT_PATH: certificatePath,
-      SANDBOX_CLIENT_KEY_PATH: keyPath,
-      SANDBOX_CA_CERT_PATH: caPath,
-    };
-    try {
-      expect(runHook({}, env).output.env).toMatchObject({
-        SANDBOX_CLIENT_CERT: CERT,
-        SANDBOX_CLIENT_KEY: 'FILE_KEY',
-        SANDBOX_CA_CERT: 'FILE_CA',
-      });
-      expect(
-        runHook({}, { ...env, SANDBOX_CLIENT_KEY: 'SHELL_KEY' }).output.env.SANDBOX_CLIENT_KEY
-      ).toBe('SHELL_KEY');
-      expect(runHook({ sandbox: SANDBOX }, env).output.env.SANDBOX_CLIENT_KEY).toBe('KEY');
-      expect(runHook({}, { ...env, SANDBOX_CLIENT_KEY_PATH: '/missing/key' }).status).not.toBe(0);
-    } finally {
-      rmSync(directory, { recursive: true, force: true });
-    }
+  it('rejects PEM file paths that cannot be read', () => {
+    const { status, stderr } = runHook({
+      sandbox: { ...SANDBOX, ssl: { ...SANDBOX.ssl, key: '/missing/key' } },
+    });
+    expect(status).toBe(1);
+    expect(stderr).toContain('cannot read sandbox PEM file /missing/key');
+    expect(
+      runHook({
+        sandbox: { ...SANDBOX, ssl: { ...SANDBOX.ssl, certificateAuthorities: '/no/ca' } },
+      }).status
+    ).toBe(1);
   });
 
   it('treats REPLACE_ME placeholders as unset', () => {
@@ -132,7 +130,7 @@ describe('nightshift-investigations scout hook', () => {
     expect(runHook('not json').status).toBe(1);
   });
 
-  it('never passes the API key or private key to jq as command-line arguments', () => {
+  it('never passes the API keys to jq as command-line arguments', () => {
     // A jq shim records every argv it receives, then defers to the real jq.
     const shimDir = mkdtempSync(Path.join(tmpdir(), 'scout-hook-jq-'));
     const argvLog = Path.join(shimDir, 'argv.log');
@@ -148,18 +146,13 @@ describe('nightshift-investigations scout hook', () => {
           nightshift: {
             telemetry: { url: 'https://remote.example.com', apiKey: 'SECRET_TELEMETRY_KEY' },
           },
-          sandbox: {
-            ...SANDBOX,
-            apiKey: 'SECRET_API_KEY',
-            ssl: { ...SANDBOX.ssl, key: 'SECRET_PEM' },
-          },
+          sandbox: { ...SANDBOX, apiKey: 'SECRET_API_KEY' },
         },
         { PATH: `${shimDir}:${process.env.PATH}` }
       );
       expect(status).toBe(0);
       const argv = readFileSync(argvLog, 'utf8');
       expect(argv).not.toContain('SECRET_API_KEY');
-      expect(argv).not.toContain('SECRET_PEM');
       expect(argv).not.toContain('SECRET_TELEMETRY_KEY');
     } finally {
       rmSync(shimDir, { recursive: true, force: true });

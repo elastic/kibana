@@ -19,7 +19,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 config="$(cat)"
 [[ -n "$config" ]] || config='{}'
 # Pipe the config rather than use `<<<`: bash before 5.1 (including macOS /bin/bash) backs here-strings
-# with a temp file, which would write the private key to disk.
+# with a temp file, which would write the API keys to disk.
 if ! printf '%s' "$config" | jq -e 'type == "object"' >/dev/null 2>&1; then
   echo "nightshift-investigations scout hook: stdin is not a JSON object" >&2
   exit 1
@@ -36,14 +36,9 @@ resolve() {
 host="$(resolve SANDBOX_API_HOST '.sandbox.host')"
 port="$(resolve SANDBOX_API_PORT '.sandbox.port')"
 api_key="$(resolve SANDBOX_API_KEY '.sandbox.apiKey')"
-certificate="$(resolve SANDBOX_CLIENT_CERT '.sandbox.ssl.certificate')"
-key="$(resolve SANDBOX_CLIENT_KEY '.sandbox.ssl.key')"
-ca="$(resolve SANDBOX_CA_CERT '.sandbox.ssl.certificateAuthorities')"
-
-# Existing local setups may provide PEM file paths rather than contents.
-[[ -n "$certificate" || -z "${SANDBOX_CLIENT_CERT_PATH:-}" ]] || certificate="$(cat "$SANDBOX_CLIENT_CERT_PATH")"
-[[ -n "$key" || -z "${SANDBOX_CLIENT_KEY_PATH:-}" ]] || key="$(cat "$SANDBOX_CLIENT_KEY_PATH")"
-[[ -n "$ca" || -z "${SANDBOX_CA_CERT_PATH:-}" ]] || ca="$(cat "$SANDBOX_CA_CERT_PATH")"
+certificate="$(resolve SANDBOX_CLIENT_CERT_PATH '.sandbox.ssl.certificate')"
+key="$(resolve SANDBOX_CLIENT_KEY_PATH '.sandbox.ssl.key')"
+ca="$(resolve SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 
 telemetry_url="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL '.nightshift.telemetry.url')"
 telemetry_key="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY '.nightshift.telemetry.apiKey')"
@@ -77,9 +72,16 @@ fi
 
 if [[ -z "$certificate" || -z "$key" ]]; then
   echo "nightshift-investigations scout hook: sandbox-api mTLS needs sandbox.ssl.certificate and" \
-    "sandbox.ssl.key (or SANDBOX_CLIENT_CERT and SANDBOX_CLIENT_KEY) as PEM contents." >&2
+    "sandbox.ssl.key (or SANDBOX_CLIENT_CERT_PATH and SANDBOX_CLIENT_KEY_PATH) as PEM file paths." >&2
   exit 1
 fi
+
+for path in "$certificate" "$key" ${ca:+"$ca"}; do
+  if [[ ! -r "$path" ]]; then
+    echo "nightshift-investigations scout hook: cannot read sandbox PEM file $path" >&2
+    exit 1
+  fi
+done
 
 # Values reach jq through its environment, not `--arg`: argv is visible to any process listing,
 # while a process's environment is readable only by its owner.
@@ -99,11 +101,11 @@ HOOK_HOST="$host" \
       SANDBOX_API_HOST: $ENV.HOOK_HOST,
       SANDBOX_API_PORT: $ENV.HOOK_PORT,
       SANDBOX_API_KEY: $ENV.HOOK_API_KEY,
-      SANDBOX_CLIENT_CERT: $ENV.HOOK_CERTIFICATE,
-      SANDBOX_CLIENT_KEY: $ENV.HOOK_KEY
+      SANDBOX_CLIENT_CERT_PATH: $ENV.HOOK_CERTIFICATE,
+      SANDBOX_CLIENT_KEY_PATH: $ENV.HOOK_KEY
     } | with_entries(select(.value != ""))) + {
       # kibana.sandbox.yml always references the CA; an empty value means no custom CA.
-      SANDBOX_CA_CERT: $ENV.HOOK_CA,
+      SANDBOX_CA_CERT_PATH: $ENV.HOOK_CA,
       SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
     } + (if $ENV.HOOK_TELEMETRY_CONFIG != "" then {
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: $ENV.HOOK_TELEMETRY_URL,

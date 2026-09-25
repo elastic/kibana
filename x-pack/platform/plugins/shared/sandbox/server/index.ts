@@ -19,13 +19,17 @@
  *   host: <sandbox-api-host>
  *   port: 9090          # gRPC port (default)
  *   api_key: <key>
- *   ssl:
- *     certificate_authorities: <PEM>   # optional CA for server cert verification
- *     certificate: <PEM>               # client cert (mTLS)
- *     key: <PEM>                       # client key  (mTLS)
+ *   ssl:                               # PEM file paths
+ *     certificate_authorities: <path>  # optional CA for server cert verification
+ *     certificate: <path>              # client cert (mTLS), default /mnt/elastic-internal/http-certs/tls.crt
+ *     key: <path>                      # client key  (mTLS), default /mnt/elastic-internal/http-certs/tls.key
  * ```
  *
- * When `enabled` is `false` (the default), or when `api_key`/`ssl` are absent,
+ * The client certificate and key default to where serverless mounts Kibana's
+ * Cloud-issued certificate. When `enabled` is `true`, Kibana fails to start if
+ * any referenced file cannot be read.
+ *
+ * When `enabled` is `false` (the default), or when `api_key` is absent,
  * `SandboxPluginStart.getSession` throws a descriptive error for every call.
  */
 

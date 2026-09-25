@@ -60,7 +60,7 @@ The suite owns its sandbox wiring through the `scoutHook` in its
 profile's evals config to it; the hook reads the `sandbox` block and exports the `SANDBOX_*`
 variables plus `SANDBOX_KIBANA_CONFIG`, which tells the `evals_nightshift_investigations` Scout
 config set to load [`scout/kibana.sandbox.yml`](scout/kibana.sandbox.yml). Kibana resolves the
-`${SANDBOX_*}` references in that file from its environment, so credentials never reach disk or
+`${SANDBOX_*}` references in that file from its environment, so API keys never reach disk or
 process arguments. CI reads the same block from the ci-prod Vault. The hook needs `jq`.
 
 #### Other profiles or a different sandbox
@@ -74,21 +74,21 @@ A profile backed by a local config file (for example `--profile local`, reading
   "port": 9090,
   "apiKey": "...",
   "ssl": {
-    "certificate": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
-    "key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
-    "certificateAuthorities": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
+    "certificate": "/path/to/tls.crt",
+    "key": "/path/to/tls.key",
+    "certificateAuthorities": "/path/to/ca.crt"
   }
 }
 ```
 
-PEM fields hold certificate **contents**, not paths; `certificateAuthorities` is optional.
+PEM fields hold absolute **file paths**, which Kibana reads at startup (`xpack.sandbox.ssl.*`);
+`certificateAuthorities` is optional. The hook fails early if a referenced file is not readable.
+sandbox-api only accepts Cloud-issued client certificates, so the certificate must carry that
+full chain.
 
 Alternatively, export the variables yourself, for example to point at a sandbox you run locally:
-`SANDBOX_API_KEY`, `SANDBOX_CLIENT_CERT` and `SANDBOX_CLIENT_KEY`, and for a private CA
-`SANDBOX_CA_CERT`, all as PEM contents (e.g. `export SANDBOX_CLIENT_CERT="$(cat tls.crt)"`).
-Existing local setups can instead use `SANDBOX_CLIENT_CERT_PATH`, `SANDBOX_CLIENT_KEY_PATH`,
-and optional `SANDBOX_CA_CERT_PATH`; the hook reads these files when PEM contents are not supplied.
-Profile values take precedence over exported ones. `SANDBOX_API_HOST` and `SANDBOX_API_PORT`
+`SANDBOX_API_KEY`, `SANDBOX_CLIENT_CERT_PATH` and `SANDBOX_CLIENT_KEY_PATH`, and for a private CA
+`SANDBOX_CA_CERT_PATH`. Profile values take precedence over exported ones. `SANDBOX_API_HOST` and `SANDBOX_API_PORT`
 default to `localhost:9090` (the probe port is not the gRPC endpoint). A self-hosted sandbox must
 accept these client certificates and allow sandbox-api to reach its containers; leave
 sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated conversations.
