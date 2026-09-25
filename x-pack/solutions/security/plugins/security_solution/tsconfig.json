@@ -322,5 +322,6 @@
     "@kbn/core-execution-context-common",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
+    "@kbn/test-es-server",
   ]
 }

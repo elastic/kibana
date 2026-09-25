@@ -20,7 +20,7 @@ import { clearDocumentationDirectives } from '../lib/docs';
 const SETTINGS_TO_EXCLUDE = new Set(['time_zone']);
 const GENERATED_DEFINITIONS_PATH = join(
   REPO_ROOT,
-  'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated'
+  'src/platform/packages/shared/esql/kbn-esql-language/src/commands/definitions/generated'
 );
 
 async function generateElasticsearchSettingsDefinitions(): Promise<void> {
