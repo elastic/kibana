@@ -36,6 +36,8 @@ const coordinatorResult: HuntCoordinatorResult = {
   next_step: 'stop',
   has_confirmed_hit: false,
   completed_successfully: true,
+  headline: 'no confirmed hits: Tier 1 found no matches; Tier 2 skipped',
+  narrative: 'Hunt Watch found no confirmed hits for threat report report-1 in aws_iam telemetry.',
 };
 
 const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {

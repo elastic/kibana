@@ -9,6 +9,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
+  type ElasticsearchClient,
   type KibanaRequest,
   type Logger,
   type Plugin,
@@ -68,6 +69,7 @@ export class AlertZeroPlugin
   private proposals?: AlertZeroStartDependencies['proposals'];
   private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
   private huntServices?: HuntServices;
+  private reportsEsClient?: ElasticsearchClient;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -104,6 +106,8 @@ export class AlertZeroPlugin
       workflowsExtensions,
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
+      getReportsEsClient: () => this.requireReportsEsClient(),
+      logger: this.logger.get('steps'),
     });
     // Registered in setup so the builtin tool is available to Agent Builder before
     // the first agent run; the handler resolves the service lazily like the routes do.
@@ -153,8 +157,9 @@ export class AlertZeroPlugin
     return { enabled: true };
   }
 
-  start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
+  start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
+    this.reportsEsClient = core.elasticsearch.client.asInternalUser;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
@@ -252,6 +257,10 @@ export class AlertZeroPlugin
 
   private requireHuntServices(): HuntServices {
     return this.requireStarted(this.huntServices, 'Hunt services');
+  }
+
+  private requireReportsEsClient(): ElasticsearchClient {
+    return this.requireStarted(this.reportsEsClient, 'internal Elasticsearch client');
   }
 
   private getSpaceId(request: KibanaRequest): string {

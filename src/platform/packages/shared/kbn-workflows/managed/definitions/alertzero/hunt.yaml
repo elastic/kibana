@@ -65,6 +65,15 @@ outputs:
     type: string
   - name: reason
     type: string
+  # One clause the Worker's run conclusion quotes (the coordinator's
+  # `headline`), so the conclusion can say what the hunt found without
+  # re-deriving it from nested tier output inside a parallel branch body.
+  - name: headline
+    type: string
+  - name: hit
+    type: boolean
+  - name: sse_count
+    type: number
 steps:
   # The coordinator's request body is snake_case (report_id, run_id, trigger)
   # and does not know about Investigations; this step is the camelCase ->
@@ -124,26 +133,23 @@ steps:
           continue: true
 
   # Hunt results write-back: every completed hunt (hit or clean) gets exactly
-  # one message here (mvp-slice.md's Investigation write map). The SSE
-  # attachment (above) already carries the structured findings, so the hit
-  # narrative does not restate them - it just points at what happened. The
-  # clean/no-hit narrative (Steph, 2026-09-25: needs to give the user
-  # confidence we actually looked, where, and that it was not found) names
-  # what was searched for (resolved_iocs/resolved_techniques) and the window,
-  # and is honest about degraded cases rather than always claiming a clean
-  # search happened: `tier1.status` distinguishes a real zero-hit search
-  # (environment_hits_found with 0 total, or no_environment_hits - despite the
-  # name, `hunt_for_threat.ts` sets this purely on `total === 0`, not on
-  # missing indices) from hits confined to optional (non-required) indices
-  # only (total_hits > 0 but no sse, since has_confirmed_hit requires a
-  # required-index match), from no usable indicators at all
-  # (no_searchable_terms), from not being able to search at all
-  # (scope_blocked or any other/unrecognized status). `per_index` is not used
-  # here: Elasticsearch's terms aggregation only returns buckets for indices
-  # that matched at least one doc, so on a genuinely clean run it is always
-  # empty - it cannot list "which indices were searched with zero hits."
-  # Verified live (all 4 branches, fabricated coordinator-shaped output) and
-  # against a real clean run (hunt-coverage-ki, no_environment_hits branch).
+  # one message here (mvp-slice.md's Investigation write map). The narrative
+  # itself is built server-side by the coordinator (`build_hunt_narrative.ts`,
+  # returned as `narrative`) so it is deterministic, unit-tested, and identical
+  # for every caller: it names the report, what was searched for
+  # (resolved_iocs/resolved_techniques), where (required and optional index
+  # patterns) and when (the window), what Tier 1 matched per index and which
+  # entities were involved, what Tier 2 derived, executed, and confirmed
+  # (per behavior, with rows and entities), and why a tier did not run. It is
+  # honest about degraded cases (optional-only matches, no searchable terms,
+  # blocked scope) rather than always claiming a clean search happened, and it
+  # is self-sufficient because the SSE attachment may not render everywhere
+  # yet (Steph, 2026-09-25: the user must be able to read the whole story of
+  # the hunt from the messages alone). Markdown, as every Investigation
+  # message is (Agent Builder conversations render it); literal block scalar so
+  # the narrative's own line breaks survive. The SSE count appended here is
+  # what the coordinator prepared; whether each attachment landed is not
+  # observable from a foreach's output, and packaging's conclusion reports that.
   - name: write_hunt_results_message
     type: workflow.execute
     if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
@@ -151,17 +157,12 @@ steps:
       workflow-id: system-alertzero-journal-note
       inputs:
         conversation_id: "{{ inputs.investigationConversationId }}"
-        message: >-
-          {%- assign coordinator = steps.run_hunt_coordinator.output -%}
-          {%- if coordinator.sse != null -%}
-          Hunt Watch: {{ coordinator.message }} Technologies hunted: {{ coordinator.technologies | join: ", " }}.
-          {%- elsif coordinator.tier1.status == 'environment_hits_found' or coordinator.tier1.status == 'no_environment_hits' -%}
-          Hunt Watch: searched {{ coordinator.technologies | join: ", " }} telemetry from {{ coordinator.tier1.time_range.from }} to {{ coordinator.tier1.time_range.to }}{% if coordinator.tier1.resolved_iocs.size > 0 %} for indicators {{ coordinator.tier1.resolved_iocs | map: 'value' | join: ", " }}{% endif %}{% if coordinator.tier1.resolved_techniques.size > 0 %} and techniques {{ coordinator.tier1.resolved_techniques | join: ", " }}{% endif %}: {% if coordinator.tier1.counts.total_hits > 0 %}found {{ coordinator.tier1.counts.total_hits }} event(s) in optional telemetry only; none met the required-index confirmation bar{% else %}no matching events found{% endif %}.
-          {%- elsif coordinator.tier1.status == 'no_searchable_terms' -%}
-          Hunt Watch: {{ coordinator.technologies | join: ", " }} telemetry is available, but this report had no usable indicators or techniques to hunt for.
-          {%- else -%}
-          Hunt Watch: required indices{% if coordinator.technologies.size > 0 %} for {{ coordinator.technologies | join: ", " }}{% endif %} are not available in this space; the hunt could not run. {{ coordinator.next_step }}
-          {%- endif -%}
+        message: |-
+          {% assign coordinator = steps.run_hunt_coordinator.output -%}
+          {{ coordinator.narrative }}
+          {% if coordinator.sse != null %}
+          _The coordinator prepared {{ coordinator.sse | size }} significant security event attachment{% if coordinator.sse.size != 1 %}s{% endif %} for this Investigation._
+          {%- endif %}
     on-failure:
       continue: true
 
@@ -269,6 +270,17 @@ steps:
         {%- else -%}
         {{ steps.run_hunt_coordinator.error.message }}
         {%- endif -%}
+      result_headline: |-
+        {%- if steps.run_hunt_coordinator.output.headline != nil -%}
+        {{ steps.run_hunt_coordinator.output.headline }}
+        {%- else -%}
+        hunt did not run
+        {%- endif -%}
+      result_hit: "${{ steps.run_hunt_coordinator.output.has_confirmed_hit == true }}"
+      # `size` of a nil `sse` is 0 in this engine, and the `${{ }}` form keeps the
+      # native number: a `{% if %}` text block here rendered "0" as a string and
+      # failed the `sse_count: number` output validation (verified live).
+      result_sse_count: "${{ steps.run_hunt_coordinator.output.sse | size }}"
 
   - name: emit_result
     type: workflow.output
@@ -277,3 +289,6 @@ steps:
       status: "{{ variables.result_status }}"
       stage: hunt
       reason: "{{ variables.result_reason }}"
+      headline: "{{ variables.result_headline }}"
+      hit: "${{ variables.result_hit }}"
+      sse_count: "${{ variables.result_sse_count }}"

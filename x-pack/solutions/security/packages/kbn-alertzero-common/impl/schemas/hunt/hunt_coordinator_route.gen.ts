@@ -231,6 +231,24 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         'True when the run completed without hard errors. The calling workflow checks this before writing hunt evidence, so a failed run writes nothing.'
       ),
     /**
+     * One clause for the run conclusion message: the outcome (confirmed hit or not) plus what each tier did.
+     */
+    headline: z
+      .string()
+      .optional()
+      .describe(
+        'One clause for the run conclusion message: the outcome (confirmed hit or not) plus what each tier did.'
+      ),
+    /**
+     * The full hunt results narrative the hunt child writes to the Investigation: what was hunted, where and when, what each tier found, and why a tier did not run. Deterministic prose derived from the structured fields, self-sufficient because the SSE attachment may not render everywhere.
+     */
+    narrative: z
+      .string()
+      .optional()
+      .describe(
+        'The full hunt results narrative the hunt child writes to the Investigation: what was hunted, where and when, what each tier found, and why a tier did not run. Deterministic prose derived from the structured fields, self-sufficient because the SSE attachment may not render everywhere.'
+      ),
+    /**
      * Populated when Tier 1 confirmed a hit: one entry per confirmed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
      */
     sse: z

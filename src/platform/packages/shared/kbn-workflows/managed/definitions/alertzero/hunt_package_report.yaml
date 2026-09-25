@@ -48,6 +48,11 @@ outputs:
     type: string
   - name: reason
     type: string
+  # Plain-prose account of what packaging did (proposals minted and for what,
+  # benign dismissal, coverage knowledge written), quoted verbatim by the
+  # Worker's run conclusion message.
+  - name: summary
+    type: string
 steps:
   # No Investigation to package against (the Worker's find_or_create failed)
   # means there is nothing to decide: skip the real packaging call rather than
@@ -141,6 +146,37 @@ steps:
         {{ variables.dispatch_failed_count }} of {{ steps.decide_and_package.output.proposals | size }} gate dispatch(es) failed to launch
         {%- endif -%}
 
+  # The packaging story for the run conclusion. Written from the native step's
+  # structured output rather than a second copy of the decision logic: what was
+  # minted (one bullet per proposal: category, host, executable action or the
+  # reason it is recommendation-only), whether the Investigation was dismissed
+  # as benign, and how many coverage knowledge items were written or skipped.
+  # On an incomplete run it explains why packaging stopped, in the same words
+  # the `reason` output carries. Markdown, embedded under the conclusion's
+  # "Packaging" heading, so it starts with a sentence and may add bullets;
+  # block tags use `-%}` only so the bullet line breaks survive.
+  - name: resolve_package_summary
+    type: data.set
+    with:
+      package_summary: |-
+        {% assign packaged = steps.decide_and_package.output -%}
+        {% if variables.package_status != 'success' and packaged.status != 'packaged' -%}
+        Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
+        {% elsif packaged.dismiss == true -%}
+        No confirmed hits, so packaging closed this Investigation as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %} and recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        {% else -%}
+        Packaging minted {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% else %} Each proposal waits on its own approval gate; the Investigation stays open until every gate is decided.{% endif %}
+        {% for p in packaged.proposals -%}
+          - **{{ p.category }}**{% if p.hostName != nil and p.hostName != empty %} on `{{ p.hostName }}`{% endif %}{% if p.actionWorkflowId != nil and p.actionWorkflowId != empty %}: runs `{{ p.actionWorkflowId }}` on approval{% else %}: recommendation only{% if p.actionlessReason != nil and p.actionlessReason != empty %} ({{ p.actionlessReason | replace: "_", " " }}){% endif %}{% endif %}
+        {% endfor -%}
+        {% if packaged.coverage.written != nil and packaged.coverage.written != empty -%}
+          - Recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch.
+        {% endif -%}
+        {% if packaged.coverage.skipped != nil and packaged.coverage.skipped != empty -%}
+          - {{ packaged.coverage.skipped | size }} coverage knowledge item{% if packaged.coverage.skipped.size != 1 %}s were{% else %} was{% endif %} not written ({{ packaged.coverage.skipped | map: "reason" | uniq | join: ", " | replace: "_", " " }}).
+        {% endif -%}
+        {% endif -%}
+
   # Benign close: only when packaging actually ran and decided to dismiss
   # (clean run, no hits). A packaging failure or skip never reaches `dismiss`
   # (steps.decide_and_package.output stays nil in both cases), so this cannot
@@ -164,3 +200,4 @@ steps:
       status: "{{ variables.package_status }}"
       stage: packaging
       reason: "{{ variables.package_reason }}"
+      summary: "{{ variables.package_summary }}"

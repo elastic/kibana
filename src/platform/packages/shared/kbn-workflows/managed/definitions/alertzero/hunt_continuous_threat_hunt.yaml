@@ -193,15 +193,37 @@ steps:
       # conversation_id (find_or_create never minted one) a silent no-op,
       # which is exactly "a run that never obtained an Investigation writes no
       # conclusion" (section A) without a branch-level conditional.
+      #
+      # The single closing message (mvp-slice.md's message contract): the run
+      # outcome, what the hunt found (the hunt child's `headline`), what
+      # packaging did (the packaging child's `summary`), the failing or
+      # incomplete stage and its reason when the run did not complete cleanly,
+      # and the workflow execution link for full per-stage detail. Markdown
+      # (heading, fact list, link), built only from child outputs (no nested
+      # tier data, which a parallel branch body cannot safely reach into).
+      # Literal block scalar; block tags use `-%}` only so line breaks survive.
       - name: write_run_conclusion
         type: workflow.execute
         with:
           workflow-id: system-alertzero-journal-note
           inputs:
             conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-            message: >-
-              {%- if steps.resolve_run_outcome.output.outcome == 'completed' -%}
-              Hunt Watch: run {{ workflow.runId }} completed for report {{ foreach.item }}.
-              {%- else -%}
-              Hunt Watch: run {{ workflow.runId }} {{ steps.resolve_run_outcome.output.outcome }} for report {{ foreach.item }} at stage {{ steps.resolve_run_outcome.output.incomplete_stage }}.
-              {%- endif -%}
+            message: |-
+              {% if steps.resolve_run_outcome.output.outcome == 'completed' -%}
+              ### Hunt Watch run completed
+              - **Report:** `{{ foreach.item }}`
+              - **Hunt:** {{ steps.hunt.output.headline }}.
+              - **Packaging:** {{ steps.package_report.output.summary | strip }}
+              {% elsif steps.resolve_run_outcome.output.outcome == 'partial' -%}
+              ### Hunt Watch run partial: packaging did not complete
+              - **Report:** `{{ foreach.item }}`
+              - **Hunt:** {{ steps.hunt.output.headline }}.
+              - **Packaging:** did not complete. {{ steps.package_report.output.reason }}.
+              - **What this means:** no proposals were created from this run. The hunt evidence was recorded, so the report will not be re-hunted automatically; the Investigation stays open for a manual rerun or review.
+              {% else -%}
+              ### Hunt Watch run failed: the hunt did not complete
+              - **Report:** `{{ foreach.item }}`
+              - **Hunt:** did not complete. {{ steps.hunt.output.reason }}
+              - **What this means:** no findings or hunt evidence were recorded, so the report stays eligible for the next scheduled sweep or a manual rerun.
+              {% endif -%}
+              - **Run:** `{{ execution.id }}` ([full per-stage detail]({{ execution.url }}))

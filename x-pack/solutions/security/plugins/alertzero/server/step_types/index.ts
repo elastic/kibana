@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ActionsService } from '../services/actions/actions_service';
@@ -15,12 +16,17 @@ export const registerStepDefinitions = ({
   workflowsExtensions,
   getActionsService,
   getConversations,
+  getReportsEsClient,
   isContextEngineEnabled,
+  logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
+  /** Internal-user client for the hidden `.kibana-threat-reports` index (trigger message report facts). */
+  getReportsEsClient?: () => ElasticsearchClient;
   isContextEngineEnabled?: (spaceId: string) => Promise<boolean>;
+  logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
     getPackageReportStepDefinition({
@@ -30,7 +36,7 @@ export const registerStepDefinitions = ({
     })
   );
   workflowsExtensions.registerStepDefinition(
-    getFindOrCreateInvestigationStepDefinition({ getConversations })
+    getFindOrCreateInvestigationStepDefinition({ getConversations, getReportsEsClient, logger })
   );
 };
 

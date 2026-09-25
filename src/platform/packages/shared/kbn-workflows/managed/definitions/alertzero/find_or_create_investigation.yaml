@@ -82,7 +82,18 @@ steps:
   # message type does not depend on the attachment landing to be useful on its
   # own. Same skip guard; a rerun gets its own trigger message on the same
   # Investigation (section B: a manual rerun appends a new run cycle, it does
-  # not create a second Investigation).
+  # not create a second Investigation), and says so: `created` distinguishes
+  # the first run from a rerun.
+  #
+  # The message is the first line of the Investigation's story, so it names
+  # the report (title, source, publication time, severity), what the report
+  # exposes for hunting (indicator count and ATT&CK techniques), and what the
+  # run is about to do. Every report fact is optional (the native step reads
+  # the report best-effort); the message degrades to the report id alone.
+  # Markdown (Agent Builder conversations render it): a heading, a fact list,
+  # and a closing paragraph. Literal block scalar so line breaks survive;
+  # block tags use `-%}` only (a leading `{%-` would eat the previous line's
+  # newline and glue two lines together).
   - name: write_trigger_message
     type: workflow.execute
     if: "${{ steps.find_or_create.output.investigationConversationId != nil and steps.find_or_create.output.investigationConversationId != empty }}"
@@ -90,12 +101,32 @@ steps:
       workflow-id: system-alertzero-journal-note
       inputs:
         conversation_id: "{{ steps.find_or_create.output.investigationConversationId }}"
-        message: >-
-          {%- if inputs.runId != nil and inputs.runId != empty -%}
-          Investigation opened for threat report {{ inputs.reportId }} under hunt run {{ inputs.runId }}; results will be appended to this Investigation.
-          {%- else -%}
-          Investigation opened for threat report {{ inputs.reportId }}; results will be appended to this Investigation.
-          {%- endif -%}
+        message: |-
+          {% assign report = steps.find_or_create.output.report -%}
+          {% if steps.find_or_create.output.created == true -%}
+          ### Hunt Watch opened this Investigation
+          {% else -%}
+          ### Hunt Watch started a new hunt run on this Investigation
+          {% endif -%}
+          Threat report {% if report.title != nil and report.title != empty %}**"{{ report.title }}"** (`{{ inputs.reportId }}`){% else %}`{{ inputs.reportId }}`{% endif %}.
+
+          {% if report.sourceName != nil and report.sourceName != empty -%}
+          - **Source:** {{ report.sourceName }}
+          {% endif -%}
+          {% if report.publishedAt != nil and report.publishedAt != empty -%}
+          - **Published:** {{ report.publishedAt }}
+          {% endif -%}
+          {% if report.severity != nil and report.severity != empty -%}
+          - **Source severity:** {{ report.severity }}
+          {% endif -%}
+          {% if report != nil -%}
+          - **Indicators for Tier 1 to search:** {{ report.iocCount }}
+          - **ATT&CK techniques:** {% if report.techniques != nil and report.techniques != empty %}{% for technique in report.techniques %}`{{ technique }}`{% unless forloop.last %}, {% endunless %}{% endfor %}{% else %}none{% endif %}
+          {% endif -%}
+          {% if inputs.runId != nil and inputs.runId != empty -%}
+          - **Hunt run:** `{{ inputs.runId }}`
+          {% endif %}
+          This run searches the space's telemetry for those indicators and techniques (Tier 1), derives behavior hunts from the report text and executes them as ES|QL (Tier 2), and appends what it finds to this Investigation.
     on-failure:
       continue: true
 

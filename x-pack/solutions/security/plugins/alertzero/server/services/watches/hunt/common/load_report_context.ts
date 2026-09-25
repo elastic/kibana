@@ -11,20 +11,38 @@ import { HuntIocType } from '@kbn/alertzero-common';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { buildHuntSpaceFilterTerms } from './space_filter';
 
-/** What a hunt needs from a threat report: the IOCs and techniques Tier 1 searches for and the text Tier 2 reads. */
+/**
+ * What a hunt needs from a threat report: the IOCs and techniques Tier 1
+ * searches for, the text Tier 2 reads, and the descriptive fields the
+ * Investigation narratives cite (title, source, publication time, severity).
+ */
 export interface ReportHuntContext {
   iocs: HuntIoc[];
   techniques: string[];
   text?: string;
+  title?: string;
+  source_name?: string;
+  published_at?: string;
+  severity?: string;
 }
 
 interface StoredReportSource {
-  content?: { body_text?: string };
+  '@timestamp'?: string;
+  content?: { title?: string; body_text?: string };
+  source?: { name?: string };
+  severity?: { level?: string };
   extracted?: {
     iocs?: Array<{ type?: string; value?: string }>;
     ttps?: { techniques?: string[] };
   };
 }
+
+const MAX_REPORT_LABEL_CHARS = 512;
+
+const asLabel = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0
+    ? value.slice(0, MAX_REPORT_LABEL_CHARS)
+    : undefined;
 
 /** Matches the OpenAPI `text` maxLength on hunt_behavior / hunt_coordinator. */
 export const MAX_HUNT_REPORT_TEXT_CHARS = 200_000;
@@ -75,7 +93,15 @@ export const loadReportHuntContext = async ({
         filter: [buildHuntSpaceFilterTerms(spaceId), { ids: { values: [reportId] } }],
       },
     },
-    _source: ['content.body_text', 'extracted.iocs', 'extracted.ttps.techniques'],
+    _source: [
+      '@timestamp',
+      'content.title',
+      'content.body_text',
+      'source.name',
+      'severity.level',
+      'extracted.iocs',
+      'extracted.ttps.techniques',
+    ],
   });
   const source = response.hits.hits[0]?._source;
   if (!source) return null;
@@ -85,7 +111,15 @@ export const loadReportHuntContext = async ({
     typeof rawText === 'string' && rawText.length > 0
       ? rawText.slice(0, MAX_HUNT_REPORT_TEXT_CHARS)
       : undefined;
+  const title = asLabel(source.content?.title);
+  const sourceName = asLabel(source.source?.name);
+  const publishedAt = asLabel(source['@timestamp']);
+  const severity = asLabel(source.severity?.level);
   return {
+    ...(title !== undefined ? { title } : {}),
+    ...(sourceName !== undefined ? { source_name: sourceName } : {}),
+    ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),
+    ...(severity !== undefined ? { severity } : {}),
     iocs: (source.extracted?.iocs ?? [])
       .filter(isHuntIoc)
       .slice(0, MAX_HUNT_REPORT_IOCS)

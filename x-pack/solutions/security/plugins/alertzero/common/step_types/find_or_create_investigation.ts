@@ -20,6 +20,22 @@ export const findOrCreateInvestigationInputSchema = z.object({
   ),
 });
 
+const boundedLabel = z.string().max(512);
+
+/**
+ * What the trigger message can say about the report being hunted. Every field
+ * is optional: a report that cannot be read still gets an Investigation, the
+ * message just falls back to the report id.
+ */
+export const findOrCreateInvestigationReportSummarySchema = z.object({
+  title: boundedLabel.optional(),
+  sourceName: boundedLabel.optional(),
+  publishedAt: boundedLabel.optional(),
+  severity: boundedLabel.optional(),
+  iocCount: z.number().int().min(0),
+  techniques: z.array(boundedLabel).max(100),
+});
+
 export const findOrCreateInvestigationOutputSchema = z.object({
   investigationConversationId: z
     .string()
@@ -29,12 +45,24 @@ export const findOrCreateInvestigationOutputSchema = z.object({
     .describe(
       "trigger-{sha256(space|reportId)}; the security.threat attachment id the caller attaches to name this Investigation's report."
     ),
+  created: z
+    .boolean()
+    .describe(
+      'True when this call minted the Investigation; false when it verified one that already existed (a rerun on the same report).'
+    ),
+  report: findOrCreateInvestigationReportSummarySchema
+    .optional()
+    .describe(
+      'Descriptive facts about the report for the trigger message (title, source, publication time, severity, indicator count, techniques). Absent when the report could not be read in this space.'
+    ),
 });
 
-export type FindOrCreateInvestigationInput = z.infer<typeof findOrCreateInvestigationInputSchema>;
-export type FindOrCreateInvestigationOutput = z.infer<
-  typeof findOrCreateInvestigationOutputSchema
+export type FindOrCreateInvestigationReportSummary = z.infer<
+  typeof findOrCreateInvestigationReportSummarySchema
 >;
+
+export type FindOrCreateInvestigationInput = z.infer<typeof findOrCreateInvestigationInputSchema>;
+export type FindOrCreateInvestigationOutput = z.infer<typeof findOrCreateInvestigationOutputSchema>;
 
 export const findOrCreateInvestigationStepCommonDefinition: CommonStepDefinition<
   typeof findOrCreateInvestigationInputSchema,

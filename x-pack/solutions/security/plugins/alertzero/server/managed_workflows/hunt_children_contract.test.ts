@@ -9,6 +9,9 @@ import { parse } from 'yaml';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_HUNT_WORKFLOW_ID,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { API_VERSIONS } from '@kbn/alertzero-common';
 
@@ -22,6 +25,7 @@ interface NestedStep {
 
 interface ParsedWorkflow {
   tags?: string[];
+  outputs?: Array<{ name: string; type: string }>;
   steps: NestedStep[];
 }
 
@@ -101,7 +105,87 @@ describe('system-security-hunt-execute', () => {
 
   it('writes evidence only when the coordinator reports a completed run', () => {
     expect(stepNamed(workflow, 'write_evidence').if).toEqual(
-      expect.stringContaining('completedSuccessfully == true')
+      expect.stringContaining('completed_successfully == true')
     );
+  });
+
+  it('writes the coordinator narrative as the hunt results message', () => {
+    const inputs = stepNamed(workflow, 'write_hunt_results_message').with?.inputs as Record<
+      string,
+      string
+    >;
+    expect(inputs.message).toEqual(expect.stringContaining('coordinator.narrative'));
+  });
+
+  it('exposes the headline, hit, and sse_count the Worker conclusion quotes', () => {
+    const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
+    expect(Object.keys(emitted)).toEqual(expect.arrayContaining(['headline', 'hit', 'sse_count']));
+    expect((workflow.outputs ?? []).map((output) => output.name)).toEqual(
+      expect.arrayContaining(['headline', 'hit', 'sse_count'])
+    );
+  });
+});
+
+describe(ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID, () => {
+  it('opens the story with the report facts and distinguishes a rerun', () => {
+    const workflow = parseChild(ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID);
+    const inputs = stepNamed(workflow, 'write_trigger_message').with?.inputs as Record<
+      string,
+      string
+    >;
+    expect(inputs.message).toEqual(expect.stringContaining('report.title'));
+    expect(inputs.message).toEqual(expect.stringContaining('report.techniques'));
+    expect(inputs.message).toEqual(expect.stringContaining('output.created == true'));
+  });
+});
+
+describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
+  it('emits a packaging summary for the Worker conclusion', () => {
+    const workflow = parseChild(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID);
+    const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
+    expect(emitted.summary).toEqual(expect.stringContaining('package_summary'));
+    expect((workflow.outputs ?? []).map((output) => output.name)).toEqual(
+      expect.arrayContaining(['summary'])
+    );
+  });
+});
+
+describe(ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID, () => {
+  const renderWorker = (): ParsedWorkflow => {
+    const definition = getManagedWorkflowDefinition(
+      ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID
+    );
+    if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+      throw new Error('Missing Worker yamlTemplate');
+    }
+    const yamlTemplate = definition.yamlTemplate as (values: Record<string, unknown>) => string;
+    return parse(
+      yamlTemplate({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval: '4h',
+        extras: { tier2When: 'always', candidateLimit: 10, fanOutMax: 10 },
+      })
+    ) as ParsedWorkflow;
+  };
+
+  it('threads the engine execution id, not a nonexistent workflow.runId, to every child', () => {
+    const workflow = renderWorker();
+    for (const name of ['find_or_create_investigation', 'hunt', 'package_report']) {
+      const inputs = stepNamed(workflow, name).with?.inputs as Record<string, string>;
+      expect(inputs.runId).toBe('{{ execution.id }}');
+    }
+  });
+
+  it('closes each branch with the hunt headline, the packaging summary, and the execution link', () => {
+    const inputs = stepNamed(renderWorker(), 'write_run_conclusion').with?.inputs as Record<
+      string,
+      string
+    >;
+    expect(inputs.message).toEqual(expect.stringContaining('steps.hunt.output.headline'));
+    expect(inputs.message).toEqual(expect.stringContaining('steps.package_report.output.summary'));
+    expect(inputs.message).toEqual(expect.stringContaining('steps.package_report.output.reason'));
+    expect(inputs.message).toEqual(expect.stringContaining('steps.hunt.output.reason'));
+    expect(inputs.message).toEqual(expect.stringContaining('execution.url'));
   });
 });
