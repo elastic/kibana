@@ -235,7 +235,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             redeployResults.forEach((result) => {
               if (result.status === 'rejected') {
                 // eslint-disable-next-line no-console
-                console.error('Failed to update agent-based policy during dirty redeploy:', result.reason);
+                console.error(
+                  'Failed to update agent-based policy during dirty redeploy:',
+                  result.reason
+                );
               }
             });
             if (redeployResults.some((r) => r.status === 'rejected')) {

@@ -104,11 +104,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         updateDetectAndReviewStep({ isDirty: dirty });
       })
       .catch(() => {});
-  // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
-  // service-var and region changes come from Step 2 navigation (full remount), not same-step
-  // edits. Only auth mutations (connector swap, authMethod change) happen in this component's
-  // lifetime and need to re-trigger the check; adding them to deps is sufficient.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
+    // service-var and region changes come from Step 2 navigation (full remount), not same-step
+    // edits. Only auth mutations (connector swap, authMethod change) happen in this component's
+    // lifetime and need to re-trigger the check; adding them to deps is sufficient.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboardingDeploymentId, awsServicesMap, authMethod, connectorId]);
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
