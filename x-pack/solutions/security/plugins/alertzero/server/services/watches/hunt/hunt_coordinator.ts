@@ -395,7 +395,7 @@ export const huntCoordinator = async (
   // report truncates the same way every sweep — so it retires the report rather than
   // re-hunting the same prefix forever, but it retires saying what it never looked at.
   const truncated = reportContext?.truncated;
-  const lostToTruncation = [
+  const lostSearchTerms = [
     ...(truncated?.iocs && callerIocs === undefined
       ? [
           ...(truncated.iocs.dropped > 0
@@ -411,23 +411,33 @@ export const huntCoordinator = async (
           `${truncated.techniques.dropped} technique(s) beyond the first ${truncated.techniques.kept}`,
         ]
       : []),
-    ...(truncated?.text && callerText === undefined
+  ];
+  const lostReportText =
+    truncated?.text && callerText === undefined
       ? [
           `${truncated.text.dropped} character(s) of report text beyond the first ${truncated.text.kept}`,
         ]
-      : []),
-  ];
-  const inputGaps: HuntIncompleteness[] =
-    lostToTruncation.length > 0
+      : [];
+
+  /**
+   * What the input bounds cost this run. Dropped IOCs and techniques always cost it something:
+   * Tier 1 searches them directly. Dropped text only does on a run that read the text, and Tier 2
+   * is its only reader — reporting it on a Tier 1 only run said the run had not searched something
+   * it was never going to search either way, which makes a skipped Tier 2 look like lost coverage.
+   */
+  const inputGaps = (readReportText: boolean): HuntIncompleteness[] => {
+    const lost = [...lostSearchTerms, ...(readReportText ? lostReportText : [])];
+    return lost.length > 0
       ? [
           {
             reason: 'input_truncated',
             detail:
               `This report carries more than a hunt accepts, so only a prefix of it was hunted: ` +
-              `${lostToTruncation.join(', ')} were never searched.`,
+              `${lost.join(', ')} were never searched.`,
           },
         ]
       : [];
+  };
 
   // Resolve the index scope from the environment: the named technology, or every
   // technology whose required indices exist in this space.
@@ -517,7 +527,10 @@ export const huntCoordinator = async (
 
   // Everything known before a tier reported: what the report lost to the input bounds
   // applies to every return below, whether or not Tier 2 ran.
-  const runGaps = [...inputGaps, ...(tier1Raw.incomplete ?? [])];
+  const runGaps = (readReportText: boolean) => [
+    ...inputGaps(readReportText),
+    ...(tier1Raw.incomplete ?? []),
+  ];
 
   /**
    * Every return that stops before Tier 2 produces a result. Completeness is computed
@@ -531,14 +544,17 @@ export const huntCoordinator = async (
     message,
     nextStep,
     skipDetail,
+    // True only where Tier 2 was handed the report text before this run gave up on it.
+    readReportText = false,
   }: {
     reason: HuntCoordinatorTier2SkipReason;
     message: string;
     nextStep: string;
     skipDetail?: string;
+    readReportText?: boolean;
   }): HuntCoordinatorResult => {
     const completeness = huntCompletenessOf([
-      ...runGaps,
+      ...runGaps(readReportText),
       // Tier 2 never ran on any of these paths, so nothing it could have executed
       // counts towards coverage.
       ...coordinatorGaps({
@@ -586,7 +602,8 @@ export const huntCoordinator = async (
 
   if (!text) {
     const completeness = huntCompletenessOf([
-      ...runGaps,
+      // There is no text on this path, so there is no dropped text either.
+      ...runGaps(false),
       ...coordinatorGaps({
         tier1Status: tier1Raw.status,
         tier2Executed: false,
@@ -648,6 +665,8 @@ export const huntCoordinator = async (
       message: `Tier 1: ${tier1Raw.status}. Tier 2 failed: ${(err as Error).message}`,
       nextStep: 'Tier 2 LLM call failed. Check connector configuration and retry.',
       skipDetail: (err as Error).message,
+      // Tier 2 had the text and failed on it, so the prefix it read is what it failed on.
+      readReportText: true,
     });
   }
 
@@ -662,7 +681,7 @@ export const huntCoordinator = async (
   // exactly as much as one that executed and returned nothing: nothing.
   const tier2Executed = tier2Raw.behaviors.some(({ execution }) => execution?.executed === true);
   const gaps = [
-    ...runGaps,
+    ...runGaps(true),
     ...tier2Gaps,
     ...coordinatorGaps({ tier1Status: tier1Raw.status, tier2Executed }),
   ];

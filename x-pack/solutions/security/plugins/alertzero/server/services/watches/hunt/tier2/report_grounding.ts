@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ESQLAstNode, ESQLAstQueryExpression, ESQLFunction, ESQLList } from '@elastic/esql';
+import type {
+  ESQLAstNode,
+  ESQLAstQueryExpression,
+  ESQLFunction,
+  ESQLList,
+  ESQLLiteral,
+} from '@elastic/esql';
 import { Parser, Walker } from '@elastic/esql';
 
 /**
@@ -265,63 +271,74 @@ const readsTheDocument = (
 };
 
 const LIKE_WILDCARDS = /[*?]+/;
-const REGEXP_METACHARACTERS = /[.*+?()[\]{}^$\\]+/g;
-/** A quantifier admitting zero occurrences of the character in front of it. */
-const OPTIONAL_CHARACTER = /^[?*]/;
-/** The same quantifier applied to a group, which can make a whole artifact optional. */
-const OPTIONAL_GROUP = /\)\s*[?*]/;
-/** A repeat whose lower bound is zero, wherever it sits and whatever it governs. */
-const ZERO_BOUNDED_REPEAT = /\{\s*0\s*[,}]/;
+/** Wildcards and anchors a pattern may wrap its core in: they widen where it matches, not what. */
+const REGEXP_SURROUND = /^[\^]?(?:\.[*+?])*|(?:\.[*+?])*\$?$/g;
+/** Anything left in the core that gives regex syntax a say in what the core matches. */
+const REGEXP_METACHARACTER = /[.*+?()[\]{}^$|]/;
 
 /**
- * The fragments of one regular-expression alternative that every row it matches has to contain.
+ * The core of one regular-expression alternative: the text every row it matches has to contain,
+ * or nothing when this cannot tell.
  *
- * A quantifier admitting zero occurrences makes what precedes it optional, so the fragment before
- * one is shortened by the character it governs. Applied to a group it can make an entire artifact
- * optional — `.*(AssumeRole)?.*` names the report's evidence while matching every row in scope —
- * and which fragments sat inside that group is not something splitting the pattern can recover,
- * so an alternative carrying one requires nothing and grounds nothing.
+ * Deliberately a whitelist. The question "which metacharacters can make a fragment optional?" has
+ * been answered wrongly three times — alternation, then quantifiers, then a character class, each
+ * found one review round after the last — because splitting a pattern on its metacharacters reads
+ * whatever sits between them as required, and regex syntax has many ways to say it is not:
+ * `(AssumeRole)?`, `AssumeRole{0,2}` and `[AssumeRole]+` all name the artifact and match rows
+ * without it. So rather than enumerate those, this accepts one shape and refuses the rest: a
+ * literal core, optionally wrapped in anchors and `.*`-style wildcards, which is what the
+ * generation contract asks for when it asks for a tight pattern derived from a concrete artifact.
+ * A pattern doing anything else grounds nothing and keeps the non-executable placeholder.
  */
-const requiredRegexpFragments = (alternative: string): string[] => {
-  if (OPTIONAL_GROUP.test(alternative) || ZERO_BOUNDED_REPEAT.test(alternative)) {
-    return [];
+const requiredRegexpCore = (alternative: string): string[] => {
+  const pattern = alternative.replace(REGEXP_SURROUND, '');
+  let core = '';
+  for (let at = 0; at < pattern.length; at += 1) {
+    const character = pattern[at];
+    if (character === '\\') {
+      // An escaped punctuation character is that character: `evil\.example\.com` is a domain from
+      // the report, not a pattern over it. Escaping a letter or digit makes a character class or a
+      // backreference instead, which is regex syntax deciding what matches.
+      const escaped = pattern[at + 1];
+      if (!escaped || /[A-Za-z0-9]/.test(escaped)) return [];
+      core += escaped;
+      at += 1;
+      continue;
+    }
+    if (REGEXP_METACHARACTER.test(character)) return [];
+    core += character;
   }
-  const fragments: string[] = [];
-  let from = 0;
-  for (const run of alternative.matchAll(REGEXP_METACHARACTERS)) {
-    const fragment = alternative.slice(from, run.index);
-    fragments.push(OPTIONAL_CHARACTER.test(run[0]) ? fragment.slice(0, -1) : fragment);
-    from = run.index + run[0].length;
-  }
-  fragments.push(alternative.slice(from));
-  return [alternative, ...fragments];
+  return core.length > 0 ? [core] : [];
 };
 
 /**
  * What a literal has to match for the operator reading it to be grounded, expressed as a list
- * of alternatives each of which needs one grounded fragment.
+ * of alternatives each of which needs one grounded candidate.
  *
  * A `LIKE`/`RLIKE` pattern is a report artifact plus metacharacters the report does not contain,
  * so comparing the pattern whole rejects a query that does search for the artifact — and a tight
  * pattern derived from an artifact is a shape the generation contract explicitly asks for.
- * Splitting on those characters is what lets the fragment be recognised.
+ * Recognising the artifact inside the pattern is what lets such a query through.
  *
- * Three places a fragment is *optional* rather than required, and each gets the `OR` rule because
+ * Two places a candidate is *optional* rather than required, and each gets the `OR` rule because
  * each is the `OR` problem written inside a string:
  *
  * - a regular expression's alternation, so `|` splits the pattern into alternatives that must
  *   each be grounded;
- * - a regular expression's quantifiers, which can drop the fragment they govern altogether;
  * - a full-text match's terms, which are ORed by default, so each term has to be grounded.
  *   Terms below `MIN_GROUNDING_LENGTH` are dropped rather than required, because that is the
  *   length at which this gate stops being able to judge a value in either direction.
+ *
+ * `LIKE` needs neither the alternation rule nor `RLIKE`'s whitelist: its only wildcards are `*`
+ * for any sequence and `?` for exactly one character, so every fragment between them is text the
+ * matching rows contain.
  */
 const groundingRequirements = (operator: string, literal: string): string[][] => {
   if (operator === 'like') {
     return [[literal, ...literal.split(LIKE_WILDCARDS)]];
   }
   if (operator === 'rlike') {
-    return literal.split('|').map(requiredRegexpFragments);
+    return literal.split('|').map(requiredRegexpCore);
   }
   if (FULL_TEXT_FUNCTIONS.has(operator)) {
     const terms = literal.split(/\s+/).filter((term) => term.length >= MIN_GROUNDING_LENGTH);
@@ -330,11 +347,18 @@ const groundingRequirements = (operator: string, literal: string): string[][] =>
   return [[literal]];
 };
 
+/**
+ * A literal as Elasticsearch will receive it. A string literal carries both its source text and
+ * its unescaped value, and only the second is what gets matched: the escapes an ES|QL string needs
+ * to express `\.` are not part of the value, and reading the source text makes a literal dot in a
+ * domain look like a wildcard.
+ */
+const valueOf = (literal: ESQLLiteral): string =>
+  stripFraming(String('valueUnquoted' in literal ? literal.valueUnquoted : literal.value));
+
 const literalsOf = (args: ESQLAstNode[]): string[] =>
   args.flatMap((arg) =>
-    !Array.isArray(arg) && 'type' in arg && arg.type === 'literal'
-      ? [stripFraming(String(arg.value))]
-      : []
+    !Array.isArray(arg) && 'type' in arg && arg.type === 'literal' ? [valueOf(arg)] : []
   );
 
 const listValuesOf = (args: ESQLAstNode[]): string[] | undefined => {
@@ -499,15 +523,18 @@ export const assertEsqlGroundedInReport = (
     return { ok: true };
   }
 
-  // Deliberately permissive — it only chooses the wording of a rejection, never accepts one —
-  // so a report value under any operator is treated as mentioned.
-  const mentioned = predicates.some(
-    (predicate) =>
-      Walker.findAll(
-        predicate,
-        (node) => node.type === 'literal' && grounds('rlike', stripFraming(String(node.value)))
-      ).length > 0
-  );
+  // Deliberately permissive — it only chooses the wording of a rejection, never accepts one — so
+  // every literal is read under the loosest rule there is, `LIKE`, which keeps each fragment a
+  // wildcard leaves behind and asks no more of it than that the report contain it.
+  const mentioned = predicates.some((predicate) => {
+    let carries = false;
+    Walker.walk(predicate, {
+      visitLiteral: (literal) => {
+        if (grounds('like', valueOf(literal))) carries = true;
+      },
+    });
+    return carries;
+  });
 
   return {
     ok: false,

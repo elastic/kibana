@@ -407,17 +407,39 @@ describe('assertEsqlGroundedInReport', () => {
         'a zero-bounded repeat',
         'FROM logs-aws.* | WHERE event.action RLIKE ".*(AssumeRole){0,2}.*"',
       ],
-    ])('rejects an RLIKE pattern making the report artifact optional with %s', (_label, query) => {
-      // The artifact is named but not required: the pattern matches every row in scope, and
-      // executing it would confirm arbitrary rows of a required index as corroboration.
+      ['a character class', 'FROM logs-aws.* | WHERE event.action RLIKE "[AssumeRole]+"'],
+      ['a quantified character', 'FROM logs-aws.* | WHERE event.action RLIKE "AssumeRolez?"'],
+      ['an internal wildcard', 'FROM logs-aws.* | WHERE event.action RLIKE ".*Assume.*Role.*"'],
+      [
+        'a character class shorthand',
+        String.raw`FROM logs-aws.* | WHERE event.action RLIKE ".*AssumeRole\\w*"`,
+      ],
+    ])('rejects an RLIKE pattern whose syntax decides what matches — %s', (_label, query) => {
+      // Only one shape grounds: a literal core wrapped in anchors and wildcards. Every pattern here
+      // names the artifact while letting the regex admit rows without it — `[AssumeRole]+` matches an
+      // action of `a` — and enumerating which constructs do that is the mistake this replaced.
       expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
     });
 
-    it('requires the fragment a quantifier governs to be dropped, not counted', () => {
-      // `AssumeRolez?` requires `AssumeRole` and nothing more, so it still grounds; the trailing
-      // character the quantifier governs must not be part of what the report has to contain.
-      const query = 'FROM logs-aws.* | WHERE event.action RLIKE "AssumeRolez?"';
+    it.each([
+      ['anchors', 'FROM logs-aws.* | WHERE event.action RLIKE "^AssumeRole$"'],
+      ['a leading wildcard only', 'FROM logs-aws.* | WHERE event.action RLIKE ".*AssumeRole"'],
+      ['a plus wildcard', 'FROM logs-aws.* | WHERE event.action RLIKE ".+AssumeRole.+"'],
+    ])('grounds an RLIKE pattern that is a literal core wrapped in %s', (_label, query) => {
       expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(true);
+    });
+
+    it('grounds a pattern whose core escapes the punctuation in an IOC', () => {
+      // A domain has to have its dots escaped to be a literal in a regex, so treating `\.` as
+      // pattern syntax would reject the one shape an IOC of this kind can take. ES|QL needs the
+      // backslash escaped in turn, which is why the gate has to read the unescaped value.
+      const query = String.raw`FROM logs-aws.* | WHERE dns.question.name RLIKE ".*evil\\.example\\.com.*"`;
+      expect(
+        assertEsqlGroundedInReport(query, {
+          reportText: 'unrelated',
+          iocValues: ['evil.example.com'],
+        }).ok
+      ).toBe(true);
     });
 
     it.each([

@@ -1165,6 +1165,63 @@ describe('huntCoordinator', () => {
       expect(result.completeness).toBe('complete');
     });
 
+    it('counts dropped report text against a run that read the text', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        truncated: { text: { kept: 20000, dropped: 5000 } },
+      });
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(tier2Result());
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-text-truncated',
+          report_id: 'rpt-1',
+        }
+      );
+
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.next_step).toContain('5000 character(s) of report text');
+    });
+
+    it('does not count dropped report text against a run that never read the text', async () => {
+      // Tier 2 is the only reader of the text, so on a run where it never ran the dropped
+      // suffix cost this run nothing: reporting it makes a skipped Tier 2 look like a hunt
+      // that fell short of its input.
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        truncated: { text: { kept: 20000, dropped: 5000 } },
+      });
+      mockT1.mockResolvedValueOnce(tier1Result());
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-text-truncated-no-tier2',
+          report_id: 'rpt-1',
+          tier2_when: 'never',
+        }
+      );
+
+      expect(result.tier2_skipped_reason).toBe('configured_never');
+      expect(result.completeness).toBe('complete');
+    });
+
     it('fails the run as retryable when Tier 2 throws', async () => {
       mockT1.mockResolvedValueOnce(tier1Result());
       mockT2.mockRejectedValueOnce(new Error('connector down'));
