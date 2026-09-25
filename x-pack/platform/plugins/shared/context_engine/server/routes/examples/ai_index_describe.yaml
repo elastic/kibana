@@ -74,9 +74,16 @@ responses:
     content:
       application/json:
         examples:
+          notReadableExample:
+            summary: "Backing indices not readable"
+            description: "The caller cannot read the backing indices of the AI Index"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "AI index 'customer_support' is not readable. Reading it needs the Elasticsearch 'read' and 'view_index_metadata' privileges on its backing indices."
           forbiddenExample:
-            summary: "Missing index privileges"
-            description: "The caller lacks Elasticsearch index privileges"
+            summary: "Missing view_index_metadata privilege"
+            description: "The caller can read the backing indices but cannot read their mappings"
             value:
               statusCode: 403
               error: Forbidden
@@ -87,7 +94,7 @@ responses:
         examples:
           notFoundExample:
             summary: "AI Index not found"
-            description: "No AI Index with the given id exists in the current space"
+            description: "No AI Index with the given ID exists in the current space"
             value:
               statusCode: 404
               error: Not Found

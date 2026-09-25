@@ -115,10 +115,10 @@ const DELETE_SECURITY: RouteSecurity = {
 };
 
 const CONTEXT_ENGINE_DISABLED_NOTE =
-  'Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).';
+  'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).';
 
 const CONTEXT_ENGINE_DOCS_NOTE =
-  'To learn more, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).';
+  'For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).';
 
 const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
 
@@ -222,7 +222,7 @@ export const registerAiIndexRoutes = ({
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create an AI Index',
-      description: `Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same id already exists. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: `Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -256,7 +256,7 @@ export const registerAiIndexRoutes = ({
             },
             409: {
               body: errorResponseSchema,
-              description: 'An AI Index with the same id already exists, or the write conflicted.',
+              description: 'An AI Index with the same ID already exists, or the write conflicted.',
             },
           },
         },
@@ -301,7 +301,7 @@ export const registerAiIndexRoutes = ({
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create or update an AI Index',
-      description: `Creates an AI Index with the given id, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: `Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -389,7 +389,7 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Get an AI Index',
-      description: `Fetches an AI Index by id from the current space, including the ES|QL query derived from each trace. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: `Fetches an AI Index by ID from the current space, including the ES|QL query derived from each trace. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -410,7 +410,7 @@ export const registerAiIndexRoutes = ({
             404: {
               body: errorResponseSchema,
               description:
-                'No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.',
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
             },
           },
         },
@@ -442,7 +442,11 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'List AI Indices',
-      description: `Lists the AI Indices registered in the current space that the caller can read. An AI Index is left out when the caller cannot read its backing index. An empty AI Index is still listed. Up to ${MAX_AI_INDICES} entries. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: [
+        `Lists up to ${MAX_AI_INDICES} AI Indices in the current space that the caller can read. The response omits an AI Index when the caller cannot read its backing index. Empty AI Indices are still included. A caller with no read privilege on any index gets a 403 response.`,
+        'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
+        `${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -456,6 +460,11 @@ export const registerAiIndexRoutes = ({
             200: {
               body: listAiIndexResponseSchema,
               description: 'The AI Indices available to the caller in the current space.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'The caller has no read privilege on any index, so Elasticsearch rejected the request.',
             },
             404: {
               body: errorResponseSchema,
@@ -487,7 +496,12 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Query AI Indices',
-      description: `Runs an ES|QL query as the current user, with a space filter and a row limit (at most ${MAX_AI_INDEX_QUERY_LIMIT}) applied server-side. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); nothing in the request body can change it or replace the space filter. The query decides which indices it reads; Elasticsearch index privileges bound what it can reach. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: [
+        `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows.`,
+        'The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.',
+        'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.',
+        `${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -544,7 +558,12 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Describe an AI Index',
-      description: `Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: [
+        `Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to ${MAX_AI_INDEX_DESCRIBE_FIELDS} fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.`,
+        'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.',
+        'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
+        `${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -568,12 +587,13 @@ export const registerAiIndexRoutes = ({
             },
             403: {
               body: errorResponseSchema,
-              description: 'Elasticsearch rejected the read; the caller lacks index privileges.',
+              description:
+                'The caller cannot read the backing indices. Describing an AI Index requires the `read` and `view_index_metadata` index privileges on them.',
             },
             404: {
               body: errorResponseSchema,
               description:
-                'No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.',
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
             },
           },
         },
@@ -731,11 +751,12 @@ export const registerAiIndexRoutes = ({
       security: DELETE_SECURITY,
       access: 'public',
       summary: 'Delete an AI Index',
-      description:
-        'Deletes an AI Index by id. The backing data stream/index (and therefore its Knowledge ' +
-        'Indicators) and the attached workflow automations are left untouched unless the ' +
-        '`delete_knowledge_indicators`/`delete_automations` query parameters are set to true. ' +
-        `The dest is not deleted when another AI Index still uses it. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: [
+        'Deletes an AI Index by ID.',
+        'By default, the API preserves the backing data stream or index, its Knowledge Indicators, and attached workflow automations. Set `delete_knowledge_indicators` to `true` to delete the backing data stream or index and its Knowledge Indicators. Set `delete_automations` to `true` to delete the attached workflow automations.',
+        'The API does not delete the backing data stream or index when another AI Index uses the same destination.',
+        `${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -758,7 +779,7 @@ export const registerAiIndexRoutes = ({
             404: {
               body: errorResponseSchema,
               description:
-                'No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.',
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
             },
             409: {
               body: errorResponseSchema,

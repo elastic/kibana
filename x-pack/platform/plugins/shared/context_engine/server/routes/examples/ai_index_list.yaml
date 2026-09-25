@@ -21,6 +21,17 @@ responses:
                   traces: []
                   date_created: "2026-09-22T12:00:00.000Z"
                   date_modified: "2026-09-22T12:00:00.000Z"
+  403:
+    content:
+      application/json:
+        examples:
+          forbiddenExample:
+            summary: "No index read privileges"
+            description: "The caller has no read privilege on any index"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/read/msearch] is unauthorized for user [jdoe] with effective roles [support_reader], this action is granted by the index privileges [read,all]"
   404:
     content:
       application/json:

@@ -5,7 +5,7 @@ responses:
         examples:
           getAiIndexResponseExample:
             summary: "An AI Index"
-            description: "Example response returning an AI Index by id"
+            description: "Example response returning an AI Index by ID"
             value:
               id: customer_support
               description: Knowledge about customer support cases.
@@ -33,7 +33,7 @@ responses:
         examples:
           notFoundExample:
             summary: "AI Index not found"
-            description: "No AI Index with the given id exists in the current space"
+            description: "No AI Index with the given ID exists in the current space"
             value:
               statusCode: 404
               error: Not Found

@@ -111,7 +111,7 @@ export const feedbackAnalysisSchema = schema.object(
       schema.string({
         maxLength: MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
         meta: {
-          description: 'Agent Builder agent id that runs this index’s feedback-loop analysis.',
+          description: 'Agent Builder agent ID that runs this index’s feedback-loop analysis.',
         },
       })
     ),
@@ -164,7 +164,7 @@ export const kiIdParamsSchema = schema.object({
   kiId: schema.string({
     minLength: 1,
     maxLength: MAX_KI_ID_LENGTH,
-    meta: { description: 'The document id of the Knowledge Indicator.' },
+    meta: { description: 'The document ID of the Knowledge Indicator.' },
   }),
 });
 
@@ -174,7 +174,7 @@ const aiIndexTraceSchema = schema.oneOf([
     value: schema.string({
       minLength: 1,
       maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
-      meta: { description: 'The Agent Builder agent id.' },
+      meta: { description: 'The Agent Builder agent ID.' },
     }),
   }),
   schema.object({
@@ -225,7 +225,7 @@ const aiIndexAutomationSchema = schema.object({
   value: schema.string({
     minLength: 1,
     maxLength: MAX_AI_INDEX_AUTOMATION_LENGTH,
-    meta: { description: 'The workflow id.' },
+    meta: { description: 'The workflow ID.' },
   }),
 });
 
@@ -245,7 +245,7 @@ const aiIndexSourceSchema = schema.oneOf([
     value: schema.string({
       minLength: 1,
       maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-      meta: { description: 'The source value; a connector id when `type` is `connector`.' },
+      meta: { description: 'The source value; a connector ID when `type` is `connector`.' },
     }),
   }),
 ]);
@@ -384,7 +384,7 @@ const aiIndexDestResponseSchema = () =>
 const aiIndexAutomationResponseSchema = () =>
   schema.object({
     type: schema.literal('workflow'),
-    value: schema.string({ meta: { description: 'The workflow id.' } }),
+    value: schema.string({ meta: { description: 'The workflow ID.' } }),
   });
 
 const aiIndexSourceResponseSchema = () =>
@@ -393,7 +393,7 @@ const aiIndexSourceResponseSchema = () =>
       meta: { description: '`esql` for an ES|QL query, or `connector` for a data connector.' },
     }),
     value: schema.string({
-      meta: { description: 'An ES|QL query for `esql`, or a connector id for `connector`.' },
+      meta: { description: 'An ES|QL query for `esql`, or a connector ID for `connector`.' },
     }),
   });
 
@@ -404,7 +404,7 @@ const feedbackAnalysisResponseSchema = () =>
         meta: { description: 'Whether the recurring feedback analysis is desired to run.' },
       }),
       agent_id: schema.maybe(
-        schema.string({ meta: { description: 'Agent Builder agent id that runs the analysis.' } })
+        schema.string({ meta: { description: 'Agent Builder agent ID that runs the analysis.' } })
       ),
       schedule: schema.maybe(
         schema.object(

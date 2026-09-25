@@ -71,7 +71,7 @@ responses:
         examples:
           alreadyExistsExample:
             summary: "AI Index already exists"
-            description: "An AI Index with the same id already exists"
+            description: "An AI Index with the same ID already exists"
             value:
               statusCode: 409
               error: Conflict

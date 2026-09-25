@@ -22,7 +22,7 @@ responses:
         examples:
           notFoundExample:
             summary: "AI Index not found"
-            description: "No AI Index with the given id exists in the current space"
+            description: "No AI Index with the given ID exists in the current space"
             value:
               statusCode: 404
               error: Not Found
