@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiWindowEvent,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { isEqual } from 'lodash';
 import { noop } from 'lodash/fp';
@@ -21,12 +15,12 @@ import type { Filter } from '@kbn/es-query';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { SecurityAppHeader } from '../../../common/components/app_header';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { HeaderPage } from '../../../common/components/header_page';
 import { KPIsSection } from './kpis/kpis_section';
 import { FiltersSection } from './filters/filters_section';
-import { HeaderSection } from './header/header_section';
+import { useAlertsHeaderMenu } from './header/use_alerts_header_menu';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
@@ -69,12 +63,13 @@ export interface AlertsPageContentProps {
 }
 
 /**
- * Renders the content of the alerts page: search bar, header, filters, KPIs, and table sections.
+ * Renders the alerts page: header, search bar, filters, KPIs, and table.
  */
 export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => {
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const { globalFullScreen } = useGlobalFullScreen();
+  const headerMenu = useAlertsHeaderMenu();
 
   const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
   const [statusFilter, setStatusFilter] = useState<Status[]>([]);
@@ -131,17 +126,15 @@ export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => 
       ref={containerElement}
     >
       <EuiWindowEvent event="resize" handler={noop} />
-      <SearchBarSection dataView={dataView} />
       <SecuritySolutionPageWrapper
         noPadding={globalFullScreen}
         data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
       >
         <Display show={!globalFullScreen}>
-          <HeaderPage title={PAGE_TITLE}>
-            <HeaderSection />
-          </HeaderPage>
-          <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="l" />
+          <SecurityAppHeader title={PAGE_TITLE} menu={headerMenu} spacing="largeBleed" />
+          <EuiSpacer size="s" />
+          <SearchBarSection dataView={dataView} />
+          <EuiSpacer size="s" />
           <EuiFlexGroup direction="row" responsive={false} wrap={true}>
             <EuiFlexItem grow={false} data-test-subj={ALERTS_PAGE_ASSIGNEE_FILTER_TEST_ID}>
               <FilterByAssigneesPopover
