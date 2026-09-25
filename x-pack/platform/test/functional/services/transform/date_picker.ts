@@ -29,7 +29,7 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
     },
 
     async quickSelect(timeValue: number = 15, timeUnit: string = 'y') {
-      if (await testSubjects.exists('dateRangePickerControlButton')) {
+      if (await pageObjects.timePicker.isNewDateRangePicker()) {
         // New DateRangePicker (e.g. Discover) — type the relative range directly into the input.
         await testSubjects.click('dateRangePickerControlButton');
         await testSubjects.existOrFail('dateRangePickerInput', { timeout: 5000 });

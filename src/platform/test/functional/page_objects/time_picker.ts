@@ -60,7 +60,7 @@ export class TimePickerPageObject extends FtrService {
    * EuiSuperDatePicker. Not cached because different apps may use different
    * picker variants within the same test suite.
    */
-  private async isNewDateRangePicker(): Promise<boolean> {
+  public async isNewDateRangePicker(): Promise<boolean> {
     // Wait for the page to settle before detecting, otherwise a stale picker
     // from a previous app may briefly appear during navigation.
     await this.header.awaitGlobalLoadingIndicatorHidden();
@@ -300,7 +300,7 @@ export class TimePickerPageObject extends FtrService {
       await picker.moveMouseTo();
       await picker.click();
 
-      if (!(await this.testSubjects.exists('dateRangePickerInput'))) {
+      if (!(await this.testSubjects.waitForExists('dateRangePickerInput', { timeout: 5000 }))) {
         this.log.debug('dateRangePickerInput did not appear after opening the picker, retrying');
         return false;
       }
@@ -308,7 +308,6 @@ export class TimePickerPageObject extends FtrService {
       await this.inputValue('dateRangePickerInput', rangeText);
       // Pressing Enter in inputValue applies the range and closes the popover.
       // Verify the button reflects the new range.
-      await this.testSubjects.exists('dateRangePickerControlButton');
       const actualRange = await this.testSubjects.getAttribute(
         'dateRangePickerControlButton',
         'data-date-range'

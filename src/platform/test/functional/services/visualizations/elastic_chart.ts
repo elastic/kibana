@@ -67,7 +67,7 @@ export class ElasticChartService extends FtrService {
 
   public async hasChart(dataTestSubj?: string, timeout?: number): Promise<boolean> {
     if (dataTestSubj) {
-      return await this.testSubjects.exists(dataTestSubj);
+      return await this.testSubjects.waitForExists(dataTestSubj, { timeout });
     } else {
       const charts = await this.getAllCharts(timeout);
 

@@ -15,7 +15,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'timePicker']);
   const comboBox = getService('comboBox');
 
   return {
@@ -358,7 +358,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return testSubjects.findAll('anomalyRow');
     },
     async setAnomaliesDate(date: string) {
-      if (await testSubjects.exists('dateRangePickerControlButton')) {
+      if (await pageObjects.timePicker.isNewDateRangePicker()) {
         // New DateRangePicker: open custom range panel and set the start date,
         // leaving the existing end date untouched.
         await testSubjects.click('dateRangePickerControlButton');

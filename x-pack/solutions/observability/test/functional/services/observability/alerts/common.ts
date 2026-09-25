@@ -43,7 +43,7 @@ export function ObservabilityAlertsCommonProvider({
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
   const retryOnStale = getService('retryOnStale');
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
   const navigateToTimeWithData = async () => {
     await pageObjects.common.navigateToUrlWithBrowserHistory(
@@ -318,7 +318,7 @@ export function ObservabilityAlertsCommonProvider({
 
   // Date picker
   const getTimeRange = async () => {
-    if (await testSubjects.exists('dateRangePickerControlButton')) {
+    if (await pageObjects.timePicker.isNewDateRangePicker()) {
       // New DateRangePicker renders the humanised range as the control button's
       // visible text (the `dateRangePickerValueDisplay` node), e.g. "Last 10 days"
       // or "30 days ago → 10 days ago". The button has no `value` attribute; the

@@ -104,7 +104,8 @@ export class FilterBarService extends FtrService {
       .filter(Boolean)
       .join(' & ');
 
-    return this.testSubjects.exists(dataSubj, { allowHidden: true });
+    // Callers usually assert right after the action that adds the filter, so keep the bounded wait.
+    return this.testSubjects.waitForExists(dataSubj, { allowHidden: true });
   }
 
   public async hasFilterWithId(

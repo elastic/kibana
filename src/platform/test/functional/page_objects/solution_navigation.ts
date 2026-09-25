@@ -28,7 +28,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     log.debug(
       'SolutionNavigation.sidenav.expandMoreIfNeeded - checking if "More" menu needs to be expanded'
     );
-    const moreMenuExists = await testSubjects.exists('kbnChromeNav-moreMenuTrigger');
+    const moreMenuExists = await testSubjects.waitForExists('kbnChromeNav-moreMenuTrigger', {
+      timeout: TIMEOUT_CHECK,
+    });
 
     if (moreMenuExists) {
       await retry.try(async () => {

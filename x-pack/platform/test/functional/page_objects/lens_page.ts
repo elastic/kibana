@@ -1784,7 +1784,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (!(await find.existsByCssSelector('[data-test-subj^="lns-layerPanel-"]', 10000))) {
         throw new Error('Lens layer panel has not rendered');
       }
-      await retry.try(async () => {
+      // Bounded below the default hook timeout so a blocked click reports its cause.
+      await retry.tryForTime(60000, async () => {
         // The no-data popover can open late after navigation and cover the layer header.
         await timePicker.ensureHiddenNoDataPopover();
         // Hover over the tab to make the layer actions button visible
