@@ -244,6 +244,7 @@ describe('ManagementApp', () => {
       new EsqlViewsClientError(
         'an index or data stream exists with the same name',
         400,
+        undefined,
         'resource_already_exists_exception'
       )
     );
@@ -283,6 +284,7 @@ describe('ManagementApp', () => {
       new EsqlViewsClientError(
         'An ES|QL view named "sales-view" already exists',
         409,
+        undefined,
         ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE
       )
     );

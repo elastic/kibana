@@ -41,8 +41,8 @@ export class EsqlViewsClientError extends Error {
   constructor(
     message: string,
     public readonly statusCode?: number,
-    public readonly errorType?: string,
-    public readonly originalError?: Error
+    public readonly originalError?: Error,
+    public readonly errorType?: string
   ) {
     super(message);
     this.name = 'EsqlViewsClientError';
@@ -73,13 +73,13 @@ const normalizeError = (error: unknown): EsqlViewsClientError => {
     return new EsqlViewsClientError(
       body?.message ?? error.message,
       error.response?.status ?? body?.statusCode,
-      body?.attributes?.errorType,
-      error
+      error,
+      body?.attributes?.errorType
     );
   }
 
   const originalError = error instanceof Error ? error : new Error(String(error));
-  return new EsqlViewsClientError(originalError.message, undefined, undefined, originalError);
+  return new EsqlViewsClientError(originalError.message, undefined, originalError);
 };
 
 const runRequest = async <Response>(request: () => Promise<Response>): Promise<Response> => {
@@ -129,6 +129,7 @@ export const createEsqlViewsManagementClient = (http: HttpStart): EsqlViewsClien
     throw new EsqlViewsClientError(
       `An ES|QL view named "${request.name}" already exists`,
       409,
+      undefined,
       ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE
     );
   };
