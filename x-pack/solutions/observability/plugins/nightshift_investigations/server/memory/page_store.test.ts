@@ -164,7 +164,7 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'significant-events.deductive-investigation',
+      agentId: 'nightshift.investigation',
       now: () => T0,
     });
 
@@ -185,7 +185,7 @@ describe('createMemoryPageStore', () => {
         document: expect.objectContaining({
           tags: ['memory', 'kafka'],
           attributes: expect.objectContaining({
-            agent_id: 'significant-events.deductive-investigation',
+            agent_id: 'nightshift.investigation',
             space_id: 'space-a',
             impressions: 0,
             conversions: 0,

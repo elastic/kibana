@@ -98,7 +98,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
         'default__conv-1',
         'default',
         'checkout lag',
-        'significant-events.deductive-investigation'
+        'nightshift.investigation'
       )
     );
 
@@ -109,7 +109,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       session: mockSession,
       esClient,
       spaceId: 'default',
-      agentId: 'significant-events.deductive-investigation',
+      agentId: 'nightshift.investigation',
       query: 'checkout lag',
       signal: expect.any(AbortSignal),
       logger: expect.anything(),
@@ -122,7 +122,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       },
     });
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledWith({
-      agent_id: 'significant-events.deductive-investigation',
+      agent_id: 'nightshift.investigation',
       conversation_id: 'conv-1',
       workflow_execution_id: 'workflow-exec-1',
       outcome: 'success',
@@ -158,7 +158,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
         'default__conv-1',
         'default',
         'checkout lag',
-        'significant-events.deductive-investigation'
+        'nightshift.investigation'
       )
     );
     await Promise.resolve();
@@ -185,7 +185,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
         'marketing__conv-1',
         'marketing',
         undefined,
-        'significant-events.deductive-investigation'
+        'nightshift.investigation'
       )
     );
 
@@ -193,7 +193,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({
         session: mockSession,
-        agentId: 'significant-events.deductive-investigation',
+        agentId: 'nightshift.investigation',
       })
     );
     expect(result).toEqual({
@@ -219,7 +219,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
           'default__conv-1',
           'default',
           undefined,
-          'significant-events.deductive-investigation'
+          'nightshift.investigation'
         )
       )
     ).rejects.toThrow(/sandbox is not configured/);
@@ -241,13 +241,13 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
           'default__conv-1',
           'default',
           'task',
-          'significant-events.deductive-investigation'
+          'nightshift.investigation'
         )
       )
     ).rejects.toThrow('write failed');
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledTimes(1);
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledWith({
-      agent_id: 'significant-events.deductive-investigation',
+      agent_id: 'nightshift.investigation',
       conversation_id: 'conv-1',
       workflow_execution_id: 'workflow-exec-1',
       outcome: 'failure',
@@ -338,7 +338,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
           'default__conv-1',
           'default',
           'task',
-          'significant-events.deductive-investigation'
+          'nightshift.investigation'
         )
       )
     ).rejects.toThrow('Semantic Memory internal Elasticsearch client is unavailable');

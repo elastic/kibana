@@ -90,7 +90,7 @@ describe('memoryOptimizeStepDefinition', () => {
       createContext({
         prompt: 'why is checkout slow?',
         response: 'Redis evictions.',
-        agent_id: 'significant-events.deductive-investigation',
+        agent_id: 'nightshift.investigation',
         recalled_ids: ['memory_a'],
         sandbox_id: 'default__conv-1',
         conversation_id: 'conv-1',
@@ -100,7 +100,7 @@ describe('memoryOptimizeStepDefinition', () => {
 
     expect(runMemoryOptimize).toHaveBeenCalledWith({
       request,
-      agentId: 'significant-events.deductive-investigation',
+      agentId: 'nightshift.investigation',
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
       recalledIds: ['memory_a'],
@@ -115,7 +115,7 @@ describe('memoryOptimizeStepDefinition', () => {
     expect(getScopedEsClient).not.toHaveBeenCalled();
     expect(result).toEqual({ output: { status: 'ok' } });
     expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
-      agent_id: 'significant-events.deductive-investigation',
+      agent_id: 'nightshift.investigation',
       conversation_id: 'conv-1',
       round_id: 'round-1',
       workflow_execution_id: 'workflow-exec-1',
@@ -148,7 +148,7 @@ describe('memoryOptimizeStepDefinition', () => {
         {
           prompt: 'why is checkout slow?',
           response: 'Redis evictions.',
-          agent_id: 'significant-events.deductive-investigation',
+          agent_id: 'nightshift.investigation',
           recalled_ids: ['memory_a'],
           sandbox_id: 'attacker-selected-space__conv-1',
           conversation_id: 'attacker-selected-space__conv-1',
@@ -225,7 +225,7 @@ describe('memoryOptimizeStepDefinition', () => {
       createContext({
         prompt: 'why is checkout slow?',
         response: 'Redis evictions.',
-        agent_id: 'significant-events.deductive-investigation',
+        agent_id: 'nightshift.investigation',
         sandbox_id: 'default__conv-1',
         connector_id: 'anthropic-sonnet',
       })
@@ -279,14 +279,14 @@ describe('memoryOptimizeStepDefinition', () => {
       createContext({
         prompt: 'why?',
         response: 'because',
-        agent_id: 'significant-events.deductive-investigation',
+        agent_id: 'nightshift.investigation',
         conversation_id: 'conv-1',
         round_id: 'round-1',
       })
     );
 
     expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
-      agent_id: 'significant-events.deductive-investigation',
+      agent_id: 'nightshift.investigation',
       conversation_id: 'conv-1',
       round_id: 'round-1',
       workflow_execution_id: 'workflow-exec-1',
@@ -321,7 +321,7 @@ describe('memoryOptimizeStepDefinition', () => {
         createContext({
           prompt: 'why?',
           response: 'because',
-          agent_id: 'significant-events.deductive-investigation',
+          agent_id: 'nightshift.investigation',
           conversation_id: 'conv-1',
           round_id: 'round-1',
         })
@@ -329,7 +329,7 @@ describe('memoryOptimizeStepDefinition', () => {
     ).rejects.toThrow('Memory optimize failed to persist 2 required operation(s)');
     expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledTimes(1);
     expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
-      agent_id: 'significant-events.deductive-investigation',
+      agent_id: 'nightshift.investigation',
       conversation_id: 'conv-1',
       round_id: 'round-1',
       workflow_execution_id: 'workflow-exec-1',
@@ -353,7 +353,7 @@ describe('memoryOptimizeStepDefinition', () => {
         createContext({
           prompt: 'why?',
           response: 'because',
-          agent_id: 'significant-events.deductive-investigation',
+          agent_id: 'nightshift.investigation',
         })
       )
     ).rejects.toThrow('Semantic Memory internal Elasticsearch client is unavailable');
