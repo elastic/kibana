@@ -8,20 +8,22 @@ import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { EntityTypes } from '../../../common/http_api/shared/entity_type';
 import { SCHEMA_SELECTOR_DOCS_LINK } from '../../../common/constants';
 
 export function SwitchSchemaMessage({
   dataTestSubj,
-  entityDisplayName = 'hosts',
+  nodeType,
 }: {
   dataTestSubj: string;
-  entityDisplayName?: string;
+  nodeType: EntityTypes;
 }) {
   return (
     <FormattedMessage
-      id="xpack.infra.waffle.noDataInSelectedSchemaMessage"
-      defaultMessage="{switchSchema} to view {entity} matching another schema."
+      id="xpack.infra.waffle.noDataInSelectedSchemaByNodeTypeMessage"
+      defaultMessage="{nodeType, select, host {{switchSchema} to view hosts matching another schema.} pod {{switchSchema} to view Kubernetes pods matching another schema.} other {{switchSchema} to view entities matching another schema.}}"
       values={{
+        nodeType,
         switchSchema: (
           <EuiLink data-test-subj={dataTestSubj} target="_blank" href={SCHEMA_SELECTOR_DOCS_LINK}>
             {i18n.translate('xpack.infra.waffle.switchSchemaDocsLink', {
@@ -29,7 +31,6 @@ export function SwitchSchemaMessage({
             })}
           </EuiLink>
         ),
-        entity: entityDisplayName,
       }}
     />
   );
