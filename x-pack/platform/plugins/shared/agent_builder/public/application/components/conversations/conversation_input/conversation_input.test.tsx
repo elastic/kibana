@@ -16,6 +16,7 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
+  useIsSharedConversation,
 } from '../../../hooks/use_conversation';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
@@ -41,6 +42,7 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useConversationReadOnly: jest.fn(),
   useConversationTitle: jest.fn(),
   useHasActiveConversation: jest.fn(),
+  useIsSharedConversation: jest.fn(),
 }));
 jest.mock('../../../hooks/use_is_awaiting_prompt', () => ({
   useIsAwaitingPrompt: jest.fn(),
@@ -138,6 +140,7 @@ const mockedUseAgentId = jest.mocked(useAgentId);
 const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockedUseConversationTitle = jest.mocked(useConversationTitle);
 const mockedUseHasActiveConversation = jest.mocked(useHasActiveConversation);
+const mockedUseIsSharedConversation = jest.mocked(useIsSharedConversation);
 const mockedUseIsAwaitingPrompt = jest.mocked(useIsAwaitingPrompt);
 const mockedUseConversationId = jest.mocked(useConversationId);
 const mockedUseConversationContext = jest.mocked(useConversationContext);
@@ -179,6 +182,7 @@ describe('ConversationInput', () => {
     mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: false });
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
     mockedUseHasActiveConversation.mockReturnValue(false);
+    mockedUseIsSharedConversation.mockReturnValue(false);
     mockedUseIsAwaitingPrompt.mockReturnValue(false);
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
@@ -241,14 +245,20 @@ describe('ConversationInput', () => {
         target: { value: 'never' },
       });
 
-    it('is not offered for a new conversation', () => {
+    beforeEach(() => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseIsSharedConversation.mockReturnValue(true);
+    });
+
+    it('is not offered for a conversation that is not shared', () => {
+      mockedUseIsSharedConversation.mockReturnValue(false);
+
       render(<ConversationInput />);
 
       expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
     });
 
     it('is not offered when experimental features are off', () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
       mockedUseExperimentalFeatures.mockReturnValue(false);
 
       render(<ConversationInput />);
@@ -256,9 +266,13 @@ describe('ConversationInput', () => {
       expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
     });
 
-    it('shows the post to team header only when talking to users', () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
+    it('is offered for a shared conversation', () => {
+      render(<ConversationInput />);
 
+      expect(screen.getByTestId('mock-trigger-mode-selector')).toBeInTheDocument();
+    });
+
+    it('shows the post to team header only when talking to users', () => {
       render(<ConversationInput />);
 
       expect(
@@ -272,12 +286,11 @@ describe('ConversationInput', () => {
       );
     });
 
-    it('falls back to running the agent once the selector is no longer offered', () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
+    it('falls back to running the agent once the conversation is no longer shared', () => {
       const { rerender } = render(<ConversationInput />);
 
       selectTalkToUsers();
-      mockedUseConversationId.mockReturnValue(undefined);
+      mockedUseIsSharedConversation.mockReturnValue(false);
       rerender(<ConversationInput />);
 
       expect(
@@ -291,7 +304,6 @@ describe('ConversationInput', () => {
     });
 
     it('sends without running the agent when talking to users and clears the editor on success', async () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
       const onSubmit = jest.fn();
 
       render(<ConversationInput onSubmit={onSubmit} />);
@@ -306,7 +318,6 @@ describe('ConversationInput', () => {
     });
 
     it('keeps the editor content and shows a toast when the send fails', async () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
       sendUserMessage.mockRejectedValue(new Error('boom'));
 
       render(<ConversationInput />);
@@ -319,8 +330,6 @@ describe('ConversationInput', () => {
     });
 
     it('runs the agent when talking to agent and users', () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
-
       render(<ConversationInput />);
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));

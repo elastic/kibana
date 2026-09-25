@@ -24,6 +24,7 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
+  useIsSharedConversation,
 } from '../../../hooks/use_conversation';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
@@ -152,6 +153,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
+  const isShared = useIsSharedConversation();
   const isExperimentalEnabled = useExperimentalFeatures();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
@@ -199,7 +201,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isNewConversation = !conversationId;
   const { title: conversationTitle } = useConversationTitle();
 
-  const isTriggerModeSelectable = !isNewConversation && isExperimentalEnabled;
+  const isTriggerModeSelectable = isShared && isExperimentalEnabled;
   const effectiveTriggerMode = isTriggerModeSelectable ? triggerMode : ChatTriggerMode.Always;
   const isPostToTeam = effectiveTriggerMode === ChatTriggerMode.Never;
 
