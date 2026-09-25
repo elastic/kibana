@@ -29,11 +29,16 @@ import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
   type RenderAssignees,
+  type RenderStatus,
+  type CloseInvestigationModalRenderProps,
+  type RenderLinkedInvestigations,
 } from '@kbn/agentic-investigations-common';
 import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
+import { ProposedActionsBoundary } from './pages/conversations/proposed_actions_boundary';
+import { getSharedAppQueryClient } from './shared_app_query_client';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -55,6 +60,11 @@ const INVESTIGATION_TEMPLATE_NAME = i18n.translate('xpack.alertzero.conversation
 const ESCALATION_TEMPLATE_NAME = i18n.translate(
   'xpack.alertzero.escalationConversationTemplate.name',
   { defaultMessage: 'Escalation' }
+);
+
+const LINKED_INVESTIGATIONS_LOADING_LABEL = i18n.translate(
+  'xpack.alertzero.linkedInvestigations.loading',
+  { defaultMessage: 'Loading linked investigations…' }
 );
 
 export class AlertZeroPublicPlugin
@@ -177,6 +187,43 @@ export class AlertZeroPublicPlugin
       >;
     });
 
+    // Lazy-loaded for the same reason as the escalation modal above: the proposals hooks (React
+    // Query, the HTTP client) stay out of alertzero's main chunk until the flyout's overview tab
+    // actually renders its "Proposed actions" section.
+    //
+    // Shares `getSharedAppQueryClient()` with the queue page (`application.tsx`) rather than
+    // creating its own — see https://github.com/elastic/kibana/pull/292946#discussion_r4092473937.
+    // Both read and decide the same proposals; an isolated client here would let a decision made
+    // in one leave the other showing it as still pending.
+    const LazyProposedActionsSlot = React.lazy(async () => {
+      const [
+        { KibanaContextProvider },
+        { QueryClientProvider },
+        { ProposedActionsSlot },
+        queryClient,
+      ] = await Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        import('./pages/conversations/proposed_actions_slot'),
+        getSharedAppQueryClient(),
+      ]);
+
+      const stableServices = { ...core, ...startDeps };
+
+      const WrappedSlot: React.FC<React.ComponentProps<typeof ProposedActionsSlot>> = (props) =>
+        React.createElement(
+          KibanaContextProvider,
+          { services: stableServices },
+          React.createElement(
+            QueryClientProvider,
+            { client: queryClient },
+            React.createElement(ProposedActionsSlot, props)
+          )
+        );
+
+      return { default: WrappedSlot };
+    });
+
     // ---------------------------------------------------------------------------
     // Assignee picker (embedded in both investigation and escalation flyout headers)
     // ---------------------------------------------------------------------------
@@ -189,9 +236,47 @@ export class AlertZeroPublicPlugin
       >;
     });
 
-    const { manageEscalations: canManageEscalations } = getAgenticInvestigationsCapabilities(
-      core.application.capabilities
-    );
+    // ---------------------------------------------------------------------------
+    // Status toggle (embedded in both investigation and escalation flyout headers)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedStatusToggle = makeLazyWithProviders(async () => {
+      const { ConnectedStatusToggle } = await import(
+        './components/connected_status/connected_status_toggle'
+      );
+      return ConnectedStatusToggle as React.ComponentType<
+        React.ComponentProps<typeof ConnectedStatusToggle>
+      >;
+    });
+
+    // ---------------------------------------------------------------------------
+    // Close investigation modal (used from the flyout footer and queue card actions)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedCloseInvestigationModal = makeLazyWithProviders(async () => {
+      const { ConnectedCloseInvestigationModal } = await import(
+        './components/connected_status/connected_close_investigation_modal'
+      );
+      return ConnectedCloseInvestigationModal as React.ComponentType<
+        React.ComponentProps<typeof ConnectedCloseInvestigationModal>
+      >;
+    });
+
+    // ---------------------------------------------------------------------------
+    // Linked investigations list (escalation flyout overview tab body)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedLinkedInvestigations = makeLazyWithProviders(async () => {
+      const { ConnectedLinkedInvestigations } = await import(
+        './components/connected_linked_investigations/connected_linked_investigations'
+      );
+      return ConnectedLinkedInvestigations as React.ComponentType<
+        React.ComponentProps<typeof ConnectedLinkedInvestigations>
+      >;
+    });
+
+    const {
+      manageEscalations: canManageEscalations,
+      manageInvestigations: canManageInvestigations,
+      showEscalations: canShowEscalations,
+    } = getAgenticInvestigationsCapabilities(core.application.capabilities);
 
     // ---------------------------------------------------------------------------
     // renderAssignees render prop — shared by both templates
@@ -203,12 +288,46 @@ export class AlertZeroPublicPlugin
         React.createElement(LazyConnectedAssignees, props)
       );
 
+    // ---------------------------------------------------------------------------
+    // renderStatus render prop — shared by both templates
+    // ---------------------------------------------------------------------------
+    const renderStatus: RenderStatus = (props) =>
+      React.createElement(
+        EscalationModalBoundary,
+        null,
+        React.createElement(LazyConnectedStatusToggle, props)
+      );
+
+    // ---------------------------------------------------------------------------
+    // renderCloseInvestigationModal — flyout footer close action
+    // ---------------------------------------------------------------------------
+    const renderCloseInvestigationModal = canManageInvestigations
+      ? (props: CloseInvestigationModalRenderProps) =>
+          React.createElement(
+            EscalationModalBoundary,
+            null,
+            React.createElement(LazyConnectedCloseInvestigationModal, props)
+          )
+      : undefined;
+
+    // ---------------------------------------------------------------------------
+    // renderLinkedInvestigations render prop — escalation overview tab
+    // ---------------------------------------------------------------------------
+    const renderLinkedInvestigations: RenderLinkedInvestigations = (props) =>
+      React.createElement(
+        EscalationModalBoundary,
+        { loadingLabel: LINKED_INVESTIGATIONS_LOADING_LABEL },
+        React.createElement(LazyConnectedLinkedInvestigations, props)
+      );
+
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
       renderAssignees,
+      renderStatus: canManageInvestigations ? renderStatus : undefined,
+      renderCloseInvestigationModal,
       renderEscalationModal: canManageEscalations
         ? (props) =>
             React.createElement(
@@ -217,6 +336,12 @@ export class AlertZeroPublicPlugin
               React.createElement(LazyEscalationModal, props)
             )
         : undefined,
+      renderProposedActions: (props) =>
+        React.createElement(
+          ProposedActionsBoundary,
+          null,
+          React.createElement(LazyProposedActionsSlot, props)
+        ),
     });
 
     // Space id comes from the base path so registration starts synchronously.
@@ -241,6 +366,8 @@ export class AlertZeroPublicPlugin
       name: ESCALATION_TEMPLATE_NAME,
       icon: 'warning',
       renderAssignees,
+      renderStatus: canManageEscalations && canManageInvestigations ? renderStatus : undefined,
+      renderLinkedInvestigations: canShowEscalations ? renderLinkedInvestigations : undefined,
     });
 
     return {};
