@@ -21,6 +21,7 @@ const {
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+  GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID,
 } = testSubjectIds;
 
 // eslint-disable-next-line import/no-default-export
@@ -202,7 +203,12 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           'GraphGroupedNodePreviewPanelGroupedItemActionsButton'
         );
         await actionsBtn.click();
-        await testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
+        // Scope within the open popover panel to avoid matching NodeToolbar buttons in the graph
+        // (which share the same data-test-subj but are always in the DOM with isVisible={true}).
+        const showRelPanel1 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
+        await (
+          await showRelPanel1.findByTestSubject(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID)
+        ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
@@ -211,7 +217,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // and select "Hide entity relationships" — this unpins the entity and it
         // merges back into the group.
         await actionsBtn.click();
-        await testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
+        // Scope within the open popover panel to avoid cross-node toolbar mis-clicks.
+        const hideRelPanel1 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
+        await (
+          await hideRelPanel1.findByTestSubject(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID)
+        ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Close the grouped preview panel and fit the graph into view
@@ -305,7 +315,12 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           'GraphGroupedNodePreviewPanelGroupedItemActionsButton'
         );
         await actionsBtn.click();
-        await testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
+        // Scope within the open popover panel to avoid matching NodeToolbar buttons in the graph
+        // (which share the same data-test-subj but are always in the DOM with isVisible={true}).
+        const showRelPanel2 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
+        await (
+          await showRelPanel2.findByTestSubject(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID)
+        ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
         await expandedFlyoutGraph.closePreviewSection();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
@@ -350,7 +365,12 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           'GraphGroupedNodePreviewPanelGroupedItemActionsButton'
         );
         await hideActionsBtn.click();
-        await testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
+        // Scope within the open popover panel to avoid matching NodeToolbar buttons in the graph
+        // (which share the same data-test-subj but are always in the DOM with isVisible={true}).
+        const hideRelPanel3 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
+        await (
+          await hideRelPanel3.findByTestSubject(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID)
+        ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
         await expandedFlyoutGraph.closePreviewSection();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();

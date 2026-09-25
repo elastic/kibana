@@ -34,3 +34,6 @@ export const GROUPED_ITEM_SKELETON_TEST_ID = `${GROUPED_ITEM_TEST_ID}Skeleton` a
 export const GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID = `${GROUPED_ITEM_TEST_ID}ActionsButton` as const;
 export const GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID =
   `${GROUPED_ITEM_TEST_ID}ActionsPopover` as const;
+/** Applied to the EuiPopover panel element so FTR tests can scope clicks to the open panel. */
+export const GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID =
+  `${GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID}Panel` as const;

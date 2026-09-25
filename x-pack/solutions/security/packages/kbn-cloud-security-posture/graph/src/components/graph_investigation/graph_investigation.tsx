@@ -541,7 +541,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
 
     // Converts a raw expand-popover itemsFn into the minimal NodeToolbarItem shape:
-    // filters out separators and maps iconType + label + onClick + disabled.
+    // filters out separators and maps iconType + label + onClick + disabled + testSubject.
+    // testSubject is forwarded so FTR tests can locate toolbar buttons by the same IDs
+    // they previously used to find popover items.
     const toToolbarItemsFn =
       (
         itemsFn: (
@@ -557,6 +559,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   label: item.label,
                   onClick: item.onClick,
                   disabled: item.disabled,
+                  testSubject: item.testSubject,
                 },
               ]
             : []

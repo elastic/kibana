@@ -47,6 +47,8 @@ export interface NodeToolbarItem {
   label: string;
   onClick: () => void;
   disabled?: boolean;
+  /** data-test-subj for FTR targeting. Mirrors the popover item's testSubject. */
+  testSubject?: string;
 }
 
 export interface EntityNodeViewModel

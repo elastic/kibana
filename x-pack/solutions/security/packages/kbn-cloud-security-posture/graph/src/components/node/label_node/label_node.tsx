@@ -104,9 +104,12 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
         onMouseEnter={showToolbar}
         onMouseLeave={hideToolbar}
       >
-        {/* Floating action toolbar — shown on hover when toolbar items are available */}
+        {/* Floating action toolbar — always in DOM when toolbar items exist so FTR
+            tests can find buttons by data-test-subj without relying on hover state.
+            Opacity controls visual show/hide; WebDriver ignores opacity for
+            interactability checks so FTR can always click the buttons. */}
         {interactive && toolbarItems.length > 0 && (
-          <NodeToolbar isVisible={isHovered} position={Position.Top} align="center" offset={4}>
+          <NodeToolbar isVisible={true} position={Position.Top} align="center" offset={4}>
             <div
               onMouseEnter={showToolbar}
               onMouseLeave={hideToolbar}
@@ -119,11 +122,15 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
                 border-radius: ${euiTheme.border.radius.medium};
                 padding: 2px;
                 box-shadow: ${shadow};
+                opacity: ${isHovered ? 1 : 0};
+                pointer-events: ${isHovered ? 'auto' : 'none'};
+                transition: opacity 150ms ease;
               `}
             >
               {toolbarItems.map((item, idx) => (
                 <EuiToolTip key={idx} content={item.label} disableScreenReaderOutput>
                   <EuiButtonIcon
+                    data-test-subj={item.testSubject}
                     iconType={item.iconType}
                     iconSize="s"
                     color="text"
@@ -195,16 +202,19 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             />
             {/* Expand button — hidden visually when the NodeToolbar is wired, but always
                  present in the DOM so that tests can click it to open the popover. */}
-            <NodeExpandButton
-              data-test-subj={TEST_SUBJ_EXPAND_BTN}
-              color={'primary'}
-              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-              x={`${NODE_LABEL_WIDTH - 3}px`}
-              y={`${
-                -ACTUAL_LABEL_HEIGHT + (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
-              }px`}
-              style={toolbarItems.length > 0 ? { display: 'none' } : undefined}
-            />
+            {/* Hidden when the NodeToolbar is shown; FTR tests use the toolbar items directly. */}
+            {toolbarItems.length === 0 && (
+              <NodeExpandButton
+                data-test-subj={TEST_SUBJ_EXPAND_BTN}
+                color={'primary'}
+                onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+                x={`${NODE_LABEL_WIDTH - 3}px`}
+                y={`${
+                  -ACTUAL_LABEL_HEIGHT +
+                  (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
+                }px`}
+              />
+            )}
           </>
         )}
         <Handle
