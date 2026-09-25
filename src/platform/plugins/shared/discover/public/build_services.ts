@@ -232,7 +232,7 @@ export const buildServices = ({
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
         readBooleanFlag(core, CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
-      getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
+      getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, true),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
