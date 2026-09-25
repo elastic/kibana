@@ -15,7 +15,15 @@ source .buildkite/scripts/common/util.sh
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
   export BUILDKITE_TOKEN
 
-  GITHUB_TOKEN=$(vault_get kibanamachine github_token)
+  case "$BUILDKITE_PIPELINE_SLUG" in
+    kibana-deploy-cloud-from-pr | \
+    kibana-deploy-project-from-pr)
+      GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
+      ;;
+    *)
+      GITHUB_TOKEN=$(vault_get kibanamachine github_token)
+      ;;
+  esac
   export GITHUB_TOKEN
 
   KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
