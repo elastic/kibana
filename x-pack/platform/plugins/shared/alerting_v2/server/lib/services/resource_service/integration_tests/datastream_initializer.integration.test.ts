@@ -19,7 +19,8 @@ const TEST_DATA_STREAM = '.rule-events-migration-integration-test';
 
 // Simplified v6 mappings: episode.* are real keyword/long fields, no alias.
 // These match the shape that existed before the episode→alert rename.
-const v6MappingsRaw = {
+// Typed as MappingsDefinition so putIndexTemplate overload resolves correctly.
+const v6MappingsRaw: MappingsDefinition = {
   dynamic: false,
   properties: {
     '@timestamp': { type: 'date' },
