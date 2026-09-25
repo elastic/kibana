@@ -64,6 +64,14 @@ describe('FP/TP scenario registry', () => {
     }
   );
 
+  it('returns the provenance of its base for every variant', () => {
+    expect(
+      FP_TP_EXAMPLES.filter(
+        (example) => example.variant && baseOf(example)?.provenance !== example.provenance
+      ).map(({ id }) => id)
+    ).toEqual([]);
+  });
+
   it('returns checks for every variant and its base', () => {
     expect(
       FP_TP_EXAMPLES.filter(

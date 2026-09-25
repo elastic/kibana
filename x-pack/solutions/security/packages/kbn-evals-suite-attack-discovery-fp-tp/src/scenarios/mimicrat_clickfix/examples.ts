@@ -131,7 +131,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U1',
     evidenceState: 'complete',
     expectedOutcome: 'false_positive',
-    provenance: 'replay',
+    provenance: 'authored',
     checks: {
       entityRole: 'contradicts',
       processParent: 'contradicts',
@@ -144,7 +144,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U4',
     evidenceState: 'complete',
     expectedOutcome: 'false_positive',
-    provenance: 'replay',
+    provenance: 'authored',
     variant: {
       kind: 'mutation',
       of: FP_ID,
@@ -161,7 +161,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U1',
     evidenceState: 'entities_missing',
     expectedOutcome: 'inconclusive',
-    provenance: 'replay',
+    provenance: 'authored',
     variant: {
       kind: 'mutation',
       of: FP_ID,
@@ -179,7 +179,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U1',
     evidenceState: 'events_missing',
     expectedOutcome: 'inconclusive',
-    provenance: 'replay',
+    provenance: 'authored',
     variant: {
       kind: 'mutation',
       of: FP_ID,

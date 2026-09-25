@@ -20,7 +20,11 @@ export type FpTpEvidenceState =
   | 'attack_discovery_missing'
   | 'cited_alert_missing';
 
-/** Where the world came from: written by hand, or replayed from a published attack chain. */
+/**
+ * Where the world came from: written by hand, or replayed from a published attack chain.
+ * A world whose checked facts are invented is `authored`, even when it reuses a replay's
+ * alerts and discovery.
+ */
 export type FpTpProvenance = 'authored' | 'replay';
 
 /** How an example's world differs from the world of another example in its scenario. */
