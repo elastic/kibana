@@ -6,7 +6,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 
-import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
