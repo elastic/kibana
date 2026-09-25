@@ -27,6 +27,10 @@ const frontmatterSchema = z.object({
   description: z.string({ error: 'frontmatter "description" is required and must be a string' }),
   id: z.string().optional(),
   experimental: z.boolean().optional(),
+  uiSettingRequired: z
+    .string({ error: 'frontmatter "uiSettingRequired" must be a string' })
+    .min(1, 'frontmatter "uiSettingRequired" must be non-empty')
+    .optional(),
 });
 
 type SkillReferencedContent = NonNullable<SkillDefinition['referencedContent']>[number];
@@ -86,6 +90,7 @@ export const loadSkillFromDirectory = (
     basePath,
     description: frontmatter.description,
     experimental: frontmatter.experimental,
+    uiSettingRequired: frontmatter.uiSettingRequired,
     content: frontmatter.body,
     referencedContent: referencedContent.length ? referencedContent : undefined,
   };
@@ -115,6 +120,7 @@ interface ParsedFrontmatter {
   name: string;
   description: string;
   experimental?: boolean;
+  uiSettingRequired?: string;
   body: string;
 }
 
