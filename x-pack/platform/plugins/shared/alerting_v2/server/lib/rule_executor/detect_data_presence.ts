@@ -17,7 +17,7 @@ import { buildExecutionUuid, buildGroupHash } from './build_alert_events';
 import { getQueryPayload } from './get_query_payload';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
-import type { RuleResponse } from '../rules_client';
+import type { InternalRule } from '../rules_client';
 
 /**
  * Runs the rule's no_data ES|QL query once and returns the set of group hashes
@@ -37,7 +37,7 @@ export const detectDataPresence = async ({
   maxResponseSize,
 }: {
   queryService: QueryServiceContract;
-  rule: RuleResponse;
+  rule: InternalRule;
   input: RuleExecutionInput;
   logger: LoggerServiceContract;
   maxResponseSize?: number;
@@ -92,7 +92,7 @@ function collectGroupHashesFromRows({
   rows,
   input,
 }: {
-  rule: RuleResponse;
+  rule: InternalRule;
   rows: Array<Record<string, unknown>>;
   input: RuleExecutionInput;
 }): Set<string> {

@@ -52,7 +52,7 @@ const rule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test rule', version: 1 },
+  metadata: { name: 'Test rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-*' } },

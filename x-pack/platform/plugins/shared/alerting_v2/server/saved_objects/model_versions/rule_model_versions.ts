@@ -11,6 +11,7 @@ import {
   ruleSavedObjectAttributesSchemaV2,
   ruleSavedObjectAttributesSchemaV3,
   ruleSavedObjectAttributesSchemaV4,
+  ruleSavedObjectAttributesSchemaV5,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
@@ -131,6 +132,33 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV4,
+    },
+  },
+  '7': {
+    /**
+     * v7 moves the server-managed version counter from `metadata.version` to the
+     * attributes root, so that `metadata` holds only client-supplied fields now
+     * that the counter is no longer part of the API response. Documents written
+     * before the v3 backfill have no counter at all and are seeded with `1`, the
+     * same baseline v3 used.
+     *
+     * Still not indexed, so there is no mappings change.
+     *
+     * As in v4, the backfill leaves the legacy `metadata.version` on disk — it is
+     * never written or read again — so a rollback to model version 6 keeps the
+     * counter it was migrated from.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => ({
+          attributes: { version: doc.attributes.metadata?.version ?? 1 },
+        }),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV5.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV5,
     },
   },
 };

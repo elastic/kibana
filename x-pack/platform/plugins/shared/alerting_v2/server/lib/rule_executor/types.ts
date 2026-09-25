@@ -8,7 +8,7 @@
 import type { SpaceId } from '@kbn/core-spaces-common';
 
 import type { QueryPayload } from './get_query_payload';
-import type { RuleResponse } from '../rules_client';
+import type { InternalRule } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
@@ -31,7 +31,7 @@ export interface RulePipelineState {
   readonly input: RuleExecutionInput;
   /** Bound per-execution logger (subsystem + rule/space/task labels). */
   readonly logger: LoggerServiceContract;
-  readonly rule?: RuleResponse;
+  readonly rule?: InternalRule;
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;

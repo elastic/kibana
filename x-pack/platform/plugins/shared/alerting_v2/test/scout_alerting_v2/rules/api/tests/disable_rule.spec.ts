@@ -75,7 +75,7 @@ apiTest.describe('Disable rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'state: preserves the rule fields and bumps version/updatedAt after an enable → disable round-trip',
+    'state: preserves the rule fields and bumps updatedAt after an enable → disable round-trip',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'round-trip' } })
@@ -92,17 +92,10 @@ apiTest.describe('Disable rule API', { tag: '@local-stateful-classic' }, () => {
         enabled: false,
         updated_at: response.body.updated_at,
         updated_by: response.body.updated_by,
-        version: response.body.version,
-        metadata: {
-          ...enabled.metadata,
-          version: response.body.metadata.version,
-        },
       });
       expect(Date.parse(response.body.updated_at)).toBeGreaterThanOrEqual(
         Date.parse(enabled.updated_at)
       );
-      expect(response.body.version).not.toBe(enabled.version);
-      expect(response.body.metadata.version).toBe(enabled.metadata.version + 1);
     }
   );
 

@@ -355,7 +355,7 @@ Do **not** add a step when:
 import { injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { mapStep, requireState } from '../stream_utils';
-import type { RuleResponse } from '../../rules_client';
+import type { InternalRule } from '../../rules_client';
 
 @injectable()
 export class MyNewStep implements RuleExecutionStep {
@@ -381,7 +381,7 @@ export class MyNewStep implements RuleExecutionStep {
     });
   }
 
-  private async doSomething(_rule: RuleResponse): Promise<Record<string, unknown>> {
+  private async doSomething(_rule: InternalRule): Promise<Record<string, unknown>> {
     return {};
   }
 }
@@ -392,7 +392,7 @@ export class MyNewStep implements RuleExecutionStep {
 ```typescript
 export interface RulePipelineState {
   readonly input: RuleExecutionInput;
-  readonly rule?: RuleResponse;
+  readonly rule?: InternalRule;
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
@@ -427,7 +427,7 @@ import {
   collectStreamResults,
   createPipelineStream,
   createRulePipelineState,
-  createRuleResponse,
+  createInternalRule,
 } from '../test_utils';
 
 describe('MyNewStep', () => {
@@ -435,7 +435,7 @@ describe('MyNewStep', () => {
     const step = new MyNewStep();
 
     const stream = step.executeStream(
-      createPipelineStream([createRulePipelineState({ rule: createRuleResponse() })])
+      createPipelineStream([createRulePipelineState({ rule: createInternalRule() })])
     );
 
     const [result] = await collectStreamResults(stream);

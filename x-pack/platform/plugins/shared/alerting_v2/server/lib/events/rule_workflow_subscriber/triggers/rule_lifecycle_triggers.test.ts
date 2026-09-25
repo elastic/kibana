@@ -13,7 +13,7 @@ import {
   RULE_UPDATED_EVENT_TYPE,
   type RuleEvent,
 } from '../../rule_event_publisher/events';
-import { createRuleResponse } from '../../../test_utils';
+import { createInternalRule } from '../../../test_utils';
 import type { RuleWorkflowTriggerBinding } from './types';
 import { ruleCreatedTrigger } from './rule_created';
 import { ruleUpdatedTrigger } from './rule_updated';
@@ -33,7 +33,7 @@ const ruleRef = { ruleId: 'rule-1', spaceId: 'default', tags: [...tags] };
 const enrichedPayload: RuleEvent['payload'] = {
   ruleId: ruleRef.ruleId,
   spaceId: ruleRef.spaceId,
-  rule: createRuleResponse({
+  rule: createInternalRule({
     id: ruleRef.ruleId,
     metadata: { name: 'secret rule', tags: [...tags] },
   }),
@@ -114,7 +114,7 @@ describe('toLifecycleWorkflowPayload', () => {
       payload: {
         ruleId: 'rule-1',
         spaceId: 'default',
-        rule: createRuleResponse({ id: 'rule-1' }),
+        rule: createInternalRule({ id: 'rule-1' }),
       },
     };
 
@@ -122,7 +122,7 @@ describe('toLifecycleWorkflowPayload', () => {
   });
 
   it('copies tags into a fresh array (does not alias the domain rule)', () => {
-    const rule = createRuleResponse({
+    const rule = createInternalRule({
       id: 'rule-1',
       metadata: { name: 'tagged', tags: ['critical'] },
     });

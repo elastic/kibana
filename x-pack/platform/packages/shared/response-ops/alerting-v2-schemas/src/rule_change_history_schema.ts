@@ -83,7 +83,14 @@ export const ruleChangeHistoryListItemSchema = z.object({
   comment: z.string().optional(),
   is_current: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  version: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      'Monotonically increasing rule configuration version this entry captures, incremented on every change.'
+    ),
 });
 export type RuleChangeHistoryListItem = z.infer<typeof ruleChangeHistoryListItemSchema>;
 
@@ -101,7 +108,7 @@ export type ListRuleChangeHistoryResponse = z.infer<typeof listRuleChangeHistory
  * development. The TypeScript type is narrowed to the write-path snapshot
  * shape for autocomplete. Same rationale as alerting v1 `get_rule_history`.
  */
-export type RuleChangeHistorySnapshot = Omit<RuleResponse, 'version'>;
+export type RuleChangeHistorySnapshot = RuleResponse;
 
 const ruleChangeHistorySnapshotSchema = z.record(z.string(), z.unknown()) as z.ZodType<
   RuleChangeHistorySnapshot | Record<string, unknown>

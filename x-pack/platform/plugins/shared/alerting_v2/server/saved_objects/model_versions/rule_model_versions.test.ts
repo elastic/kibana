@@ -96,6 +96,60 @@ describe('ruleModelVersions', () => {
     });
   });
 
+  describe('v6 to v7 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: ruleType });
+
+    const createV6RuleDocument = (metadata: Record<string, unknown>): SavedObject =>
+      createV5RuleDocument({
+        metadata,
+        createdBy: { profile_uid: 'author_profile_uid' },
+        updatedBy: { profile_uid: 'editor_profile_uid' },
+      });
+
+    const migrate = (document: SavedObject) =>
+      migrator.migrate({ document, fromVersion: 6, toVersion: 7 }).attributes as Record<
+        string,
+        unknown
+      >;
+
+    it('copies the configuration version counter to the attributes root', () => {
+      expect(migrate(createV6RuleDocument({ name: 'test-rule', version: 4 })).version).toBe(4);
+    });
+
+    it('backfills the baseline counter for a rule written before versioning', () => {
+      expect(migrate(createV6RuleDocument({ name: 'test-rule' })).version).toBe(1);
+    });
+
+    it('leaves the legacy metadata.version in place for rollback', () => {
+      const document = createV6RuleDocument({ name: 'test-rule', version: 4 });
+
+      expect(migrate(document)).toEqual({
+        ...(document.attributes as Record<string, unknown>),
+        version: 4,
+      });
+    });
+  });
+
+  describe('v7 forward compatibility', () => {
+    const forwardCompatibility = ruleModelVersions['7']?.schemas
+      ?.forwardCompatibility as ObjectType;
+
+    it('accepts a rule carrying the root version counter', () => {
+      const attributes = {
+        ...(createV5RuleDocument({
+          metadata: { name: 'test-rule' },
+          createdBy: { profile_uid: 'author_profile_uid' },
+          updatedBy: null,
+        }).attributes as Record<string, unknown>),
+        version: 4,
+      };
+
+      expect((forwardCompatibility.validate(attributes) as Record<string, unknown>).version).toBe(
+        4
+      );
+    });
+  });
+
   // The actor is a nested object, so these pin that `unknowns: 'ignore'` on the
   // attributes schema reaches it. It does: config-schema maps the option to Joi's
   // `stripUnknown`, which cascades to children that do not override it. Without

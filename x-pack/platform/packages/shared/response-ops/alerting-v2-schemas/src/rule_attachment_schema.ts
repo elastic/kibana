@@ -14,8 +14,8 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
 /**
  * Data stored inside a rule attachment.
  *
- * Server-generated fields (id, enabled, created_at, updated_at, metadata.version)
- * are optional so that the same schema covers both:
+ * Server-generated fields (id, enabled, created_at, updated_at) are optional so
+ * that the same schema covers both:
  *   - proposed rules (by-value, not yet saved — no id or audit fields)
  *   - saved rules    (by-reference, linked via attachment.origin = rule saved object id)
  *
@@ -27,9 +27,10 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
  * `.strip()` undoes the `.strict()` inherited from the create-rule base schema,
  * making this a projection rather than a validator: callers hand over a whole
  * `RuleResponse` and the actors are dropped instead of raising
- * `unrecognized_keys`. It also lets attachments stored before the actors and
- * `metadata.owner` were removed still resolve. Unlike the strictness itself,
- * `.strip()` does not cascade, so the nested metadata needs its own.
+ * `unrecognized_keys`. It also lets attachments stored before the actors,
+ * `metadata.owner` and `metadata.version` were removed still resolve. Unlike the
+ * strictness itself, `.strip()` does not cascade, so the nested metadata needs
+ * its own.
  */
 const { shape } = ruleResponseSchema;
 
@@ -40,7 +41,7 @@ export const ruleAttachmentDataSchema = ruleResponseSchema
     enabled: opt(shape.enabled),
     created_at: opt(shape.created_at),
     updated_at: opt(shape.updated_at),
-    metadata: shape.metadata.extend({ version: opt(shape.metadata.shape.version) }).strip(),
+    metadata: shape.metadata.strip(),
   })
   .strip();
 

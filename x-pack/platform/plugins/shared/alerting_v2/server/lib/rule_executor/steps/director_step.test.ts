@@ -12,7 +12,7 @@ import {
   createRuleExecutionInput,
   createRulePipelineState,
   createAlertEvent,
-  createRuleResponse,
+  createInternalRule,
 } from '../test_utils';
 import { createDirectorService } from '../../director/director.mock';
 
@@ -37,7 +37,7 @@ describe('DirectorStep', () => {
     const alertEventsBatch = [createAlertEvent({ group_hash: 'hash-1' })];
 
     const state = createRulePipelineState({
-      rule: createRuleResponse({ kind: 'alert' }),
+      rule: createInternalRule({ kind: 'alert' }),
       alertEventsBatch,
     });
 
@@ -61,7 +61,7 @@ describe('DirectorStep', () => {
     ];
 
     const state = createRulePipelineState({
-      rule: createRuleResponse({ kind: 'alert' }),
+      rule: createInternalRule({ kind: 'alert' }),
       alertEventsBatch,
     });
 
@@ -79,7 +79,7 @@ describe('DirectorStep', () => {
     const alertEventsBatch = [createAlertEvent({ group_hash: 'hash-1' })];
 
     const state = createRulePipelineState({
-      rule: createRuleResponse({ kind: 'signal' }),
+      rule: createInternalRule({ kind: 'signal' }),
       alertEventsBatch,
     });
 
@@ -97,7 +97,7 @@ describe('DirectorStep', () => {
     const step = new DirectorStep(directorService);
 
     const state = createRulePipelineState({
-      rule: createRuleResponse({ kind: 'alert' }),
+      rule: createInternalRule({ kind: 'alert' }),
       alertEventsBatch: [],
     });
 
@@ -118,7 +118,7 @@ describe('DirectorStep', () => {
     mockEsClient.esql.query.mockRejectedValue(new Error('ES query failed'));
 
     const state = createRulePipelineState({
-      rule: createRuleResponse({ kind: 'alert' }),
+      rule: createInternalRule({ kind: 'alert' }),
       alertEventsBatch,
     });
 
@@ -137,7 +137,7 @@ describe('DirectorStep', () => {
     const input = createRuleExecutionInput({ abortSignal: abortController.signal });
     const state = createRulePipelineState({
       input,
-      rule: createRuleResponse({ kind: 'alert' }),
+      rule: createInternalRule({ kind: 'alert' }),
       alertEventsBatch: [createAlertEvent()],
     });
 

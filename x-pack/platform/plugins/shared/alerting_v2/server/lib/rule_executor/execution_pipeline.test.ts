@@ -16,7 +16,7 @@ import {
   createRuleExecutionPipelineInput,
   createMockStep,
   createQueryPayload,
-  createRuleResponse,
+  createInternalRule,
 } from './test_utils';
 import { createMetricCollectorFactory } from './metrics/metric_collector_factory.mock';
 import { createMockRuleExecutorEventPublisher } from '../events/rule_executor_event_publisher/rule_executor_event_publisher.mock';
@@ -110,7 +110,7 @@ describe('RuleExecutionPipeline', () => {
       const step1 = createMockStep('step1', (input) =>
         pipeStream(input, (state) => {
           statesReceived.push({ ...state });
-          return { type: 'continue', state: { ...state, rule: createRuleResponse() } };
+          return { type: 'continue', state: { ...state, rule: createInternalRule() } };
         })
       );
 
@@ -351,7 +351,7 @@ describe('RuleExecutionPipeline', () => {
         }))
       );
 
-    const createRuleStep = (rule: ReturnType<typeof createRuleResponse>): RuleExecutionStep =>
+    const createRuleStep = (rule: ReturnType<typeof createInternalRule>): RuleExecutionStep =>
       createMockStep('fetch_rule', (input) =>
         pipeStream(input, (state) => ({ type: 'continue', state: { ...state, rule } }))
       );
@@ -410,7 +410,7 @@ describe('RuleExecutionPipeline', () => {
       const eventPublisher = createMockRuleExecutorEventPublisher();
 
       const ruleStep = createRuleStep(
-        createRuleResponse({
+        createInternalRule({
           kind: 'signal',
           metadata: { name: 'test-rule', tags: ['security', 'siem'] },
         })
@@ -451,7 +451,7 @@ describe('RuleExecutionPipeline', () => {
       const { loggerService } = createLoggerService();
       const eventPublisher = createMockRuleExecutorEventPublisher();
 
-      const ruleStep = createRuleStep(createRuleResponse({ kind: 'alert' }));
+      const ruleStep = createRuleStep(createInternalRule({ kind: 'alert' }));
 
       const pipeline = new RuleExecutionPipeline(
         [ruleStep],
@@ -519,7 +519,7 @@ describe('RuleExecutionPipeline', () => {
       const { loggerService } = createLoggerService();
       const eventPublisher = createMockRuleExecutorEventPublisher();
 
-      const ruleStep = createRuleStep(createRuleResponse({ kind: 'alert' }));
+      const ruleStep = createRuleStep(createInternalRule({ kind: 'alert' }));
 
       const pipeline = new RuleExecutionPipeline(
         [ruleStep],
@@ -537,7 +537,7 @@ describe('RuleExecutionPipeline', () => {
       const { loggerService } = createLoggerService();
       const eventPublisher = createMockRuleExecutorEventPublisher();
 
-      const ruleStep = createRuleStep(createRuleResponse({ kind: 'signal' }));
+      const ruleStep = createRuleStep(createInternalRule({ kind: 'signal' }));
       const step2 = createMockStep('halt', (input) =>
         pipeStream(input, (state) => ({ type: 'halt', reason: 'rule_disabled', state }))
       );

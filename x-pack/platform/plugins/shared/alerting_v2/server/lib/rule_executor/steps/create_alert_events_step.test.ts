@@ -13,7 +13,7 @@ import {
   collectStreamResults,
   createPipelineStream,
   createRuleExecutionInput,
-  createRuleResponse,
+  createInternalRule,
   createRulePipelineState,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
@@ -58,7 +58,7 @@ describe('CreateAlertEventsStep', () => {
 
   it('builds alert-typed events for kind: alert rule', async () => {
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse({ kind: 'alert' });
+    const rule = createInternalRule({ kind: 'alert' });
     const esqlRowBatch = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
 
     const state = createRulePipelineState({ input, rule, esqlRowBatch });
@@ -94,7 +94,7 @@ describe('CreateAlertEventsStep', () => {
 
   it('captures rule.version from the rule version', async () => {
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse({ metadata: { version: 5 } });
+    const rule = createInternalRule({ version: 5 });
     const esqlRowBatch = [{ 'host.name': 'host-a' }];
 
     const state = createRulePipelineState({ input, rule, esqlRowBatch });
@@ -104,7 +104,7 @@ describe('CreateAlertEventsStep', () => {
 
   it('builds signal-typed events for a stateless kind: signal rule', async () => {
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse({ kind: 'signal' });
+    const rule = createInternalRule({ kind: 'signal' });
     const esqlRowBatch = [{ 'host.name': 'host-a' }];
 
     const state = createRulePipelineState({ input, rule, esqlRowBatch });
@@ -120,7 +120,7 @@ describe('CreateAlertEventsStep', () => {
 
   it('yields multiple batches when receiving multiple input batches', async () => {
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse();
+    const rule = createInternalRule();
     const batch1 = [{ 'host.name': 'host-a' }];
     const batch2 = [{ 'host.name': 'host-b' }];
 
@@ -140,7 +140,7 @@ describe('CreateAlertEventsStep', () => {
 
   it('yields continue with empty alertEventsBatch when no alert events are produced', async () => {
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse();
+    const rule = createInternalRule();
 
     const state = createRulePipelineState({ input, rule, esqlRowBatch: [] });
 
@@ -160,7 +160,7 @@ describe('CreateAlertEventsStep', () => {
   });
 
   it('halts with state_not_ready when esqlRowBatch is missing from state', async () => {
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({ rule: createInternalRule() });
 
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
@@ -178,7 +178,7 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const input = createRuleExecutionInput();
-      const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
+      const rule = createInternalRule({ kind: 'alert', grouping: { fields: ['host.name'] } });
       const esqlRowBatch = [
         { 'host.name': 'host-a' },
         { 'host.name': 'host-b' },
@@ -225,7 +225,7 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const input = createRuleExecutionInput();
-      const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
+      const rule = createInternalRule({ kind: 'alert', grouping: { fields: ['host.name'] } });
       const esqlRowBatch = [
         { 'host.name': 'host-a' },
         { 'host.name': 'host-b' },
@@ -261,7 +261,7 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const input = createRuleExecutionInput();
-      const rule = createRuleResponse({ kind: 'alert' });
+      const rule = createInternalRule({ kind: 'alert' });
       const esqlRowBatch = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
 
       const state = createRulePipelineState({ input, rule, esqlRowBatch });
@@ -289,7 +289,7 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const input = createRuleExecutionInput();
-      const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
+      const rule = createInternalRule({ kind: 'alert', grouping: { fields: ['host.name'] } });
       const batch1 = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
       const batch2 = [{ 'host.name': 'host-c' }, { 'host.name': 'host-d' }];
 
@@ -346,7 +346,7 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const input = createRuleExecutionInput();
-      const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
+      const rule = createInternalRule({ kind: 'alert', grouping: { fields: ['host.name'] } });
       const esqlRowBatch = [
         { 'host.name': 'host-a' }, // new group -> fills the cap
         { 'host.name': 'host-b' }, // new group past the cap -> dropped

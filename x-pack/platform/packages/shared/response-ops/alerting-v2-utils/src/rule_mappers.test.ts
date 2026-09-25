@@ -12,7 +12,7 @@ import { buildRulePayload } from './rule_mappers';
 describe('buildRulePayload', () => {
   const minimalData: Partial<RuleAttachmentData> = {
     kind: 'signal',
-    metadata: { name: 'Host CPU high', version: 1 },
+    metadata: { name: 'Host CPU high' },
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
   };
@@ -22,7 +22,7 @@ describe('buildRulePayload', () => {
 
     expect(result).toEqual({
       kind: 'signal',
-      metadata: { name: 'Host CPU high', version: 1 },
+      metadata: { name: 'Host CPU high' },
       schedule: { every: '5m' },
       query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       state_transition: null,

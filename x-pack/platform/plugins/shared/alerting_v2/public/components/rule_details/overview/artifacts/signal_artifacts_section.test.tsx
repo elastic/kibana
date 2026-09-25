@@ -21,7 +21,7 @@ const rule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1 },
+  metadata: { name: 'Test Rule' },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },

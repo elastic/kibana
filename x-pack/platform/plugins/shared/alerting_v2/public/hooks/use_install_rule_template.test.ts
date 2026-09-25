@@ -41,7 +41,6 @@ const mockRuleResponse: RuleResponse = {
   enabled: true,
   metadata: {
     name: 'CPU usage',
-    version: 1,
     description: '',
     tags: [],
   },

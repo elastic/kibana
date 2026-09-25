@@ -20,7 +20,7 @@ import type {
   RulePipelineState,
   StepStreamResult,
 } from './rule_executor/types';
-import type { RuleResponse } from './rules_client';
+import type { InternalRule, RuleResponse } from './rules_client';
 import type { QueryPayload } from './rule_executor/get_query_payload';
 import type { AlertEvent } from '../resources/datastreams/alert_events';
 import type { RuleExecutionPipelineInput } from './rule_executor/execution_pipeline';
@@ -72,8 +72,18 @@ export function createRuleResponse(
     updated_by: { profile_uid: 'elastic_profile_uid' },
     updated_at: '2025-01-01T00:00:00.000Z',
     ...rest,
-    metadata: { name: 'test-rule', ...metadata, version: metadata?.version ?? 1 },
+    metadata: { name: 'test-rule', ...metadata },
   };
+}
+
+/**
+ * Creates a standard InternalRule (API shape + version counter) for testing.
+ */
+export function createInternalRule(
+  overrides: Parameters<typeof createRuleResponse>[0] & { version?: number } = {}
+): InternalRule {
+  const { version, ...rest } = overrides;
+  return { ...createRuleResponse(rest), version: version ?? 1 };
 }
 
 /**
