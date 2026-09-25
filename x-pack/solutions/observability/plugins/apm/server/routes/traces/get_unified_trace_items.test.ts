@@ -79,6 +79,42 @@ describe('getErrorsByDocId', () => {
     });
   });
 
+  it('falls back to transaction.id for APM errors that carry no span.id', () => {
+    // Classic APM errors reference only the transaction they belong to. Without this fallback
+    // the waterfall row for that transaction renders no error badge at all.
+    const unifiedTraceErrors = {
+      apmErrors: [
+        {
+          span: { id: undefined },
+          transaction: { id: 'tx-1' },
+          id: 'error-1',
+          source: 'apm',
+          index: 'logs-apm.error-default',
+        },
+      ],
+      unprocessedOtelErrors: [],
+      totalErrors: 1,
+    } as unknown as UnifiedTraceErrors;
+
+    expect(getErrorsByDocId(unifiedTraceErrors)).toEqual({
+      'tx-1': [{ errorDocId: 'error-1', source: 'apm', errorDocIndex: 'logs-apm.error-default' }],
+    });
+  });
+
+  it('prefers span.id over transaction.id when both are present', () => {
+    const unifiedTraceErrors = {
+      apmErrors: [
+        { span: { id: 'span-1' }, transaction: { id: 'tx-1' }, id: 'error-1', source: 'apm' },
+      ],
+      unprocessedOtelErrors: [],
+      totalErrors: 1,
+    } as unknown as UnifiedTraceErrors;
+
+    expect(getErrorsByDocId(unifiedTraceErrors)).toEqual({
+      'span-1': [{ errorDocId: 'error-1', source: 'apm' }],
+    });
+  });
+
   it('returns an empty object if there are no errors', () => {
     const unifiedTraceErrors = {
       apmErrors: [],

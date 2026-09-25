@@ -64,8 +64,12 @@ export function UnifiedWaterfallContainer({
   discoverHref,
 }: Props) {
   const history = useHistory();
-  const handleErrorClick = useErrorClickHandler(traceItems);
   const getServiceBadgeHref = useGetServiceBadgeHrefFromRouter();
+
+  // Every error-badge click navigates to the service's Errors page. The page
+  // renders two sections ("APM errors" + "Errors from logs") scoped by the kuery
+  // that use_error_click_handler sets.
+  const handleErrorClick = useErrorClickHandler(traceItems);
 
   const handleNodeClick = (id: string, options?: { flyoutDetailTab?: string }) => {
     toggleFlyout({
