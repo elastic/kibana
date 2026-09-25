@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { formatPageRefs, previewText } from './log_format';
-import type { MemoryPageStore } from './page_store';
+import type { MemoryPageStore, VersionedMemoryPage } from './page_store';
 import {
   canonicalizeSlug,
   epochSecondsToIso,
@@ -606,23 +606,6 @@ const unionStrings = (...groups: Array<readonly string[] | undefined>): string[]
   return out;
 };
 
-const unionPages = (...groups: Array<readonly MemoryPage[]>): MemoryPage[] => {
-  const order: string[] = [];
-  const byId = new Map<string, MemoryPage>();
-  for (const group of groups) {
-    for (const page of group) {
-      if (!byId.has(page.id)) {
-        order.push(page.id);
-      }
-      byId.set(page.id, page);
-    }
-  }
-  return order.flatMap((id) => {
-    const page = byId.get(id);
-    return page ? [page] : [];
-  });
-};
-
 export const applyMemoryEdits = async ({
   store,
   recalledIds,
@@ -777,12 +760,12 @@ export const applyMemoryEdits = async ({
   }
 
   for (const group of groups) {
-    const sources = (await Promise.all(group.sourceIds.map(async (id) => store.get(id)))).filter(
-      (page): page is MemoryPage => page !== undefined && page.status !== 'archived'
-    );
-    const memberCount = sources.length + (group.extract ? 1 : 0);
-    if (sources.length < 1 || memberCount < 2) {
-      logger.debug('Memory merge skipped — fewer than 2 live members after refresh');
+    const memberCount = new Set([
+      ...group.sourceIds,
+      ...(group.canonicalId ? [group.canonicalId] : []),
+    ]).size;
+    if (memberCount < 1 || memberCount + (group.extract ? 1 : 0) < 2) {
+      logger.debug('Memory merge skipped — fewer than 2 members');
       continue;
     }
     if (!synthesizeMemoryGroup) {
@@ -792,7 +775,7 @@ export const applyMemoryEdits = async ({
     summary.mergeAttemptCount += 1;
     const mergeResult = await mergeMemoryGroup({
       store,
-      sources,
+      sourceIds: group.sourceIds,
       extract: group.extract,
       canonicalId: group.canonicalId,
       task,
@@ -839,7 +822,7 @@ export const applyMemoryEdits = async ({
           summary.mergeAttemptCount += 1;
           const mergeResult = await mergeMemoryGroup({
             store,
-            sources: [winner],
+            sourceIds: [winner.id],
             extract: extra,
             canonicalId: winner.id,
             task,
@@ -878,7 +861,7 @@ interface MergeMemoryGroupResult {
 
 const mergeMemoryGroup = async ({
   store,
-  sources,
+  sourceIds: initialSourceIds,
   extract,
   canonicalId: initialCanonicalId,
   task,
@@ -887,7 +870,7 @@ const mergeMemoryGroup = async ({
   logger,
 }: {
   store: MemoryPageStore;
-  sources: MemoryPage[];
+  sourceIds: string[];
   extract?: MemoryExtractProposal;
   canonicalId?: string;
   task: string;
@@ -897,26 +880,36 @@ const mergeMemoryGroup = async ({
 }): Promise<MergeMemoryGroupResult> => {
   const nowSec = now();
   let canonicalId = initialCanonicalId;
+  let canonicalIsSource = initialCanonicalId !== undefined;
   let writtenCanonicalId: string | undefined;
-  const originalSources = [...sources];
+  let committedSources: MemoryPage[] = [];
 
-  for (let conflictAttempt = 0; conflictAttempt <= 2; conflictAttempt++) {
-    let versionedCanonical =
-      canonicalId !== undefined ? await store.getVersioned(canonicalId) : undefined;
-    if (canonicalId && !versionedCanonical) {
-      logger.warn('Memory merge aborted because the canonical page disappeared');
-      logger.debug(`Memory merge missing canonical=${canonicalId}`);
-      return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
-    }
-    if (versionedCanonical?.page.status === 'archived') {
-      logger.debug(`Memory merge skipped — canonical ${canonicalId} is archived`);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const requiredSourceIds = unionStrings(
+      initialSourceIds,
+      canonicalIsSource && canonicalId ? [canonicalId] : undefined
+    );
+    const sourceSnapshots = await Promise.all(
+      requiredSourceIds.map(async (id) => store.getVersioned(id))
+    );
+    const unavailableIndex = sourceSnapshots.findIndex(
+      (source) => !source || source.page.status === 'archived'
+    );
+    if (unavailableIndex !== -1) {
+      logger.debug(
+        `Memory merge aborted — required source ${requiredSourceIds[unavailableIndex]} is missing or archived`
+      );
       return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
     }
+    const versionedSources = sourceSnapshots as VersionedMemoryPage[];
+    const currentSources = versionedSources.map(({ page }) => page);
+    const versionedCanonical =
+      canonicalIsSource && canonicalId
+        ? versionedSources[requiredSourceIds.indexOf(canonicalId)]
+        : undefined;
 
-    const currentSources = unionPages(
-      originalSources,
-      versionedCanonical ? [versionedCanonical.page] : []
-    );
+    // Synthesis is asynchronous and may overlap another optimizer round. The versioned
+    // snapshots above are therefore validated again immediately before any canonical write.
     let synthesis: MemoryMergeSynthesis;
     try {
       synthesis = await synthesizeMemoryGroup({
@@ -960,9 +953,13 @@ const mergeMemoryGroup = async ({
     if (!slug) {
       const avoid = new Set(currentSources.map((page) => page.id));
       const base = canonicalizeSlug(synthesis.title) || 'merged';
-      for (let attempt = 0; attempt < 6; attempt++) {
+      for (let slugAttempt = 0; slugAttempt < 6; slugAttempt++) {
         const candidate =
-          attempt === 0 ? base : attempt === 1 ? `${base}-merged` : `${base}-merged-${attempt}`;
+          slugAttempt === 0
+            ? base
+            : slugAttempt === 1
+            ? `${base}-merged`
+            : `${base}-merged-${slugAttempt}`;
         const candidateId = toMemoryKiId(candidate);
         if (avoid.has(candidateId) || (await store.get(candidateId))) {
           continue;
@@ -1019,6 +1016,34 @@ const mergeMemoryGroup = async ({
       return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
+    const validatedSources = await Promise.all(
+      requiredSourceIds.map(async (id) => store.getVersioned(id))
+    );
+    const unavailableAfterSynthesisIndex = validatedSources.findIndex(
+      (source) => !source || source.page.status === 'archived'
+    );
+    if (unavailableAfterSynthesisIndex !== -1) {
+      logger.debug(
+        `Memory merge aborted after synthesis — required source ${requiredSourceIds[unavailableAfterSynthesisIndex]} is missing or archived`
+      );
+      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+    }
+    const sourceChanged = versionedSources.some((source, index) => {
+      const validated = validatedSources[index];
+      return (
+        !validated ||
+        validated.seqNo !== source.seqNo ||
+        validated.primaryTerm !== source.primaryTerm
+      );
+    });
+    if (sourceChanged) {
+      if (attempt === 2) {
+        logger.warn('Memory merge exhausted source changes; sources preserved');
+        return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+      }
+      continue;
+    }
+
     try {
       if (versionedCanonical) {
         await store.update(targetCanonicalId, write, versionedCanonical);
@@ -1026,7 +1051,7 @@ const mergeMemoryGroup = async ({
         await store.create(write);
       }
       writtenCanonicalId = targetCanonicalId;
-      sources = currentSources;
+      committedSources = currentSources;
       break;
     } catch (err) {
       if ((err as { statusCode?: number }).statusCode !== 409) {
@@ -1034,16 +1059,12 @@ const mergeMemoryGroup = async ({
         logger.debug(`Memory merge canonical write error: ${(err as Error).message}`);
         return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
       }
-      versionedCanonical = await store.getVersioned(targetCanonicalId);
-      if (versionedCanonical?.page.status === 'archived') {
-        logger.debug(`Memory merge skipped — conflict winner ${targetCanonicalId} is archived`);
-        return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
-      }
-      if (conflictAttempt === 2) {
+      if (attempt === 2) {
         logger.warn('Memory merge exhausted version conflicts; sources preserved');
         logger.debug(`Memory merge conflict exhaustion canonical=${targetCanonicalId}`);
         return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
       }
+      canonicalIsSource = true;
     }
   }
 
@@ -1053,7 +1074,7 @@ const mergeMemoryGroup = async ({
 
   let archivedSourceCount = 0;
   let writeFailureCount = 0;
-  for (const page of sources) {
+  for (const page of committedSources) {
     if (page.id === writtenCanonicalId) {
       continue;
     }
@@ -1067,7 +1088,7 @@ const mergeMemoryGroup = async ({
     }
   }
   logger.debug(
-    `Merged ${sources.map((page) => page.id).join(', ')} into ${writtenCanonicalId}` +
+    `Merged ${committedSources.map((page) => page.id).join(', ')} into ${writtenCanonicalId}` +
       (extract ? ` (folded extract ${extract.slug})` : '')
   );
   return { merged: true, archivedSourceCount, writeFailureCount };
