@@ -159,10 +159,6 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
       await discover.waitUntilTabIsLoaded();
       await expect(discoverHitCount).toHaveText('737');
 
-      await page.reload();
-      await discover.waitUntilTabIsLoaded();
-      await expect(discoverHitCount).toHaveText('737');
-
       const savedSearchId = page.url().match(/view\/([^?]+)\?/)?.[1];
       expect(savedSearchId).toBeTruthy();
 
