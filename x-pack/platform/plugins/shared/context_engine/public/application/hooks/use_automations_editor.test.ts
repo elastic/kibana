@@ -200,6 +200,7 @@ describe('useAutomationsEditor', () => {
 
     expect(onSaved).toHaveBeenCalledTimes(1);
     expect(createSettled).toBe(false);
+    expect(result.current.isBusy).toBe(true);
 
     await act(async () => {
       resolveOnSaved();
