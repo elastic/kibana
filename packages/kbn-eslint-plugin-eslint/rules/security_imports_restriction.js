@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Linter = require('eslint').Linter;
-
-const coreRule = new Linter().getRules().get('no-restricted-imports');
+const { rules } = require('@typescript-eslint/eslint-plugin');
 
 /**
  * Keep Kibana's security-oriented import bans independent from local
  * no-restricted-imports overrides.
  */
-module.exports = coreRule;
+module.exports = rules['no-restricted-imports'];

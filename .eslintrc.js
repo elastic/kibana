@@ -229,8 +229,12 @@ const DEV_PATTERNS = [
   'src/platform/kbn-ui/_tooling/**/*',
 ];
 
-/** Restricted imports with suggested alternatives */
-const RESTRICTED_IMPORTS = [
+/**
+ * Security-related restricted imports. These are enforced by the dedicated
+ * `@kbn/eslint/security_imports_restriction` rule so that local
+ * `no-restricted-imports` overrides cannot silently drop them.
+ */
+const SECURITY_RESTRICTED_IMPORTS = [
   {
     name: 'lodash',
     importNames: ['set', 'setWith', 'template'],
@@ -289,6 +293,15 @@ const RESTRICTED_IMPORTS = [
     name: 'lodash/fp/template',
     message: 'lodash.template is unsafe, and not compatible with our content security policy.',
   },
+  {
+    name: 'axios',
+    message:
+      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
+  },
+];
+
+/** Restricted imports with suggested alternatives */
+const RESTRICTED_IMPORTS = [
   {
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
@@ -427,11 +440,6 @@ const RESTRICTED_IMPORTS = [
   {
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
-  },
-  {
-    name: 'axios',
-    message:
-      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
   },
 ];
 
@@ -1045,7 +1053,8 @@ module.exports = {
         '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         '@kbn/eslint/no_npx_playwright': 'error',
-        '@kbn/eslint/security_imports_restriction': ['error', ...RESTRICTED_IMPORTS],
+        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
           'warn',
           {
@@ -1179,6 +1188,7 @@ module.exports = {
       rules: {
         'no-restricted-imports': [
           'error',
+          ...RESTRICTED_IMPORTS,
           {
             name: 'semver',
             message: 'Please use "semver/*/{function}" instead',
@@ -1189,7 +1199,7 @@ module.exports = {
     {
       files: ['x-pack/platform/plugins/shared/fields_metadata/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        '@kbn/eslint/security_imports_restriction': [
+        'no-restricted-imports': [
           'error',
           // Exclude @elastic/ecs from restricted imports for the fields metadata plugin.
           ...RESTRICTED_IMPORTS.filter(({ name }) => name !== '@elastic/ecs'),
@@ -1353,6 +1363,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1416,6 +1427,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1493,6 +1505,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
             patterns: ['*legacy*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1647,6 +1660,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1894,6 +1908,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
             patterns: ['*legacy*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1984,6 +1999,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/*server*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
         '@typescript-eslint/no-explicit-any': 'error',
@@ -2009,7 +2025,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'no-restricted-imports': 'off',
+        'no-restricted-imports': ['error', { paths: RESTRICTED_IMPORTS }],
       },
     },
 
@@ -2651,6 +2667,7 @@ module.exports = {
               // this pattern allows to import this generated file
               '!*.gen',
             ],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
         'import/order': [
@@ -3194,23 +3211,24 @@ module.exports = {
     },
     {
       // Allow axios in files that already use it. New axios imports are blocked
-      // globally by @kbn/eslint/security_imports_restriction; this allowlist
-      // should only ever shrink as consumers migrate to the native `fetch`
-      // API. Placed last so it wins over any earlier override for the same
-      // custom rule. The trade-off: the allowlisted files that
-      // overlap with that block lose their `*legacy*` pattern check; verified
-      // that none of them currently import any path matching `*legacy*`. The
-      // workflows_management overlap is gone, and this comment can be dropped
-      // entirely once the remaining security_solution consumers migrate. The
-      // js-yaml freeze is handled separately via
-      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
-      // so it does not interact with this override.
+      // globally by SECURITY_RESTRICTED_IMPORTS; this allowlist should only ever
+      // shrink as consumers migrate to the native `fetch` API.
+      // The `no-restricted-imports` entry preserves this block's historical
+      // behavior: it is placed last, so the allowlisted files that overlap with
+      // an earlier override (e.g. the security_solution block) lose that
+      // override's `*legacy*` pattern check; verified that none of them
+      // currently import any path matching `*legacy*`. The workflows_management
+      // overlap is gone, and this entry can be dropped entirely once the
+      // remaining security_solution consumers migrate. The js-yaml freeze is
+      // handled separately via @kbn/eslint/module_migration in
+      // packages/kbn-eslint-config/.eslintrc.js so it does not interact with
+      // this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
-        'no-restricted-imports': 'off',
+        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/security_imports_restriction': [
           'error',
-          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
+          ...SECURITY_RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
       },
     },
