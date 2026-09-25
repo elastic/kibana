@@ -1,5 +1,5 @@
 {
-  "sha1": "f19e02a2ed8a8fe577b579a9fc081db4a2aafb63",
+  "sha1": "d49c96022f0379b29aa58bc563f88ff443561de9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -31,6 +31,20 @@
       }
     },
     {
+      "id": "43bc63ddaba86b0-d8548e6b6a91a8d",
+      "title": "Maps - filter by map extent filter by map extent lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/filter_by_map_extent.spec.ts",
+        "line": 39,
+        "column": 37
+      }
+    },
+    {
       "id": "0d46d86b877f63c-caca4780f786cad",
       "title": "Maps Full screen mode",
       "expectedStatus": "passed",
@@ -48,6 +62,48 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
         "line": 18,
         "column": 43
+      }
+    },
+    {
+      "id": "33cd82ee8ea79c8-9c8dbc398b758dd",
+      "title": "Maps - tooltip filter actions apply filter action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
+        "line": 37,
+        "column": 37
+      }
+    },
+    {
+      "id": "33cd82ee8ea79c8-dc9613c55761c90",
+      "title": "Maps - tooltip filter actions dashboard drilldown action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
+        "line": 48,
+        "column": 13
+      }
+    },
+    {
+      "id": "33cd82ee8ea79c8-3a614e041e60734",
+      "title": "Maps - tooltip filter actions url drilldown action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
+        "line": 67,
+        "column": 7
       }
     }
   ]
