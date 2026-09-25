@@ -9,11 +9,14 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { findPackageForPath } from '@kbn/repo-packages';
+import { findPackageForPath, getPackages } from '@kbn/repo-packages';
 import {
   diffArgs,
+  findRuntimeUpdatableKeys,
   isRuntimeUpdatable,
+  otherDifferences,
   parseServerArgs,
+  REMOVED,
   summarizeConfigSets,
   type ConfigSetOverrides,
 } from './audit_config_sets';
@@ -40,8 +43,9 @@ jest.mock('./audit_config_sets', () => ({
   ...jest.requireActual('./audit_config_sets'),
   auditConfigSets: jest.fn(async () => ({
     sets: [],
+    failed: [],
+    sameAsDefault: [],
     runtimeOnly: [],
-    bootFeatureFlags: [],
     identical: [],
     subsets: [],
     runtimeKeys: [],
@@ -50,8 +54,9 @@ jest.mock('./audit_config_sets', () => ({
 
 const emptyConfigSets = {
   sets: [],
+  failed: [],
+  sameAsDefault: [],
   runtimeOnly: [],
-  bootFeatureFlags: [],
   identical: [],
   subsets: [],
   runtimeKeys: [],
@@ -242,6 +247,13 @@ describe('formatAuditText', () => {
       ],
       configSets: {
         ...emptyConfigSets,
+        sameAsDefault: ['isolated (stateful)'],
+        failed: [
+          {
+            file: 'config_sets/broken/stateful/classic.stateful.config.ts',
+            error: 'Error: boom\n  at x',
+          },
+        ],
         runtimeOnly: ['flags_only (stateful)'],
         identical: [['a (stateful/x.config.ts)', 'b (stateful/x.config.ts)']],
         subsets: [
@@ -258,6 +270,9 @@ describe('formatAuditText', () => {
     );
     expect(text).toContain('`SavedObjectsManagementPage` in spaces, tagging');
     expect(text).toContain('flags_only (stateful)');
+    expect(text).toContain('isolated (stateful)');
+    expect(text).toContain('config_sets/broken/stateful/classic.stateful.config.ts: Error: boom');
+    expect(text).not.toContain('at x');
     expect(text).toContain('a (stateful/x.config.ts) = b (stateful/x.config.ts)');
     expect(text).toContain(
       'small (stateful/x.config.ts) is covered by big (stateful/x.config.ts), bigger (stateful/x.config.ts)'
@@ -307,15 +322,63 @@ describe('config set audit, pure parts', () => {
       ...extra,
     } as ConfigSetOverrides);
 
-  it('parses --key=value and key=value args and joins repeated keys', () => {
+  it('parses --key=value and key=value args, joins repeated keys, masks timestamps', () => {
     expect(parseServerArgs(['--a.b=1', 'c=x', 'c=y', 'not-an-arg'])).toEqual({
       'a.b': '1',
       c: 'x,y',
     });
+    expect(parseServerArgs(['--config=/tmp/preboot-1790270000000.yml'])).toEqual({
+      config: '/tmp/preboot-<n>.yml',
+    });
   });
 
-  it('diffs only changed or added keys', () => {
-    expect(diffArgs({ a: '1', b: '2', c: '3' }, { a: '1', b: '9' })).toEqual({ b: '2', c: '3' });
+  it('diffs changed, added and removed keys', () => {
+    expect(diffArgs({ a: '1', b: '2', c: '3' }, { a: '1', b: '9', d: '4' })).toEqual({
+      b: '2',
+      c: '3',
+      d: REMOVED,
+    });
+  });
+
+  it('reports every non-arg field that differs, by dotted path, and ignores the args themselves', () => {
+    type Cfg = Parameters<typeof otherDifferences>[0];
+    const base = {
+      esTestCluster: { license: 'trial', files: [], serverArgs: ['a=1'], ssl: false },
+      kbnTestServer: { serverArgs: ['--x=1'], env: { A: '1' } },
+      servers: { kibana: { port: 5620 } },
+    } as unknown as Cfg;
+    const actual = {
+      esTestCluster: { license: 'basic', files: [], serverArgs: ['a=2'], ssl: false },
+      kbnTestServer: { serverArgs: ['--x=2'], env: { A: '1', TRACING: 'on' } },
+      servers: { kibana: { port: 5620 } },
+      prebootOnly: true,
+    } as unknown as Cfg;
+    expect(otherDifferences(actual, base)).toEqual([
+      'esTestCluster.license',
+      'kbnTestServer.env.TRACING',
+      'prebootOnly',
+    ]);
+  });
+
+  it('reads runtime keys from plugin dynamicConfig declarations, prefixed by the plugin config path', () => {
+    (getPackages as jest.Mock).mockReturnValueOnce([
+      {
+        id: '@kbn/fake-dyn-plugin',
+        directory: Path.join(FIXTURES_DIR, 'fake_dyn_plugin'),
+        manifest: { plugin: { id: 'fakeDyn', configPath: ['xpack', 'fakeDyn'] } },
+      },
+      {
+        id: '@kbn/fake-no-config-path',
+        directory: Path.join(FIXTURES_DIR, 'fake_no_config_path'),
+        manifest: { plugin: { id: 'fakeNoConfigPath' } },
+      },
+    ]);
+    expect(findRuntimeUpdatableKeys(FAKE_REPO_ROOT)).toEqual([
+      'fake_no_config_path.labels',
+      'feature_flags.overrides',
+      'xpack.fakeDyn.experimentalFeatures',
+      'xpack.fakeDyn.nested.flag',
+    ]);
   });
 
   it('treats a key under a runtime path as runtime updatable', () => {
@@ -326,37 +389,37 @@ describe('config set audit, pure parts', () => {
     expect(isRuntimeUpdatable('feature_flags_other', keys)).toBe(false);
   });
 
-  it('finds runtime-only sets, boot feature flags, identical sets and subsets', () => {
-    const runtimeKeys = ['feature_flags.overrides'];
+  it('finds same-as-default, runtime-only, identical sets and nearest subsets', () => {
     const report = summarizeConfigSets(
       [
+        set('same_as_default', {}),
         set('flags_only', { 'feature_flags.overrides.x': 'true' }),
         set('flags_plus_boot', { 'feature_flags.overrides.x': 'true', 'server.foo': '1' }),
         set('twin_a', { 'server.foo': '1' }),
         set('twin_b', { 'server.foo': '1' }),
         set('big', { 'server.foo': '1', 'server.bar': '2' }),
+        set('bigger', { 'server.foo': '1', 'server.bar': '2', 'server.baz': '3' }),
         set(
           'other_flavor',
           { 'server.foo': '1' },
           { flavor: 'serverless', file: 'search.serverless.config.ts' }
         ),
-        set('with_docker', { 'server.foo': '1' }, { other: ['docker servers'] }),
+        set('with_docker', { 'server.foo': '1' }, { other: ['dockerServers'] }),
       ],
-      runtimeKeys
+      ['feature_flags.overrides']
     );
 
+    expect(report.sameAsDefault).toEqual(['same_as_default (stateful)']);
     expect(report.runtimeOnly).toEqual(['flags_only (stateful)']);
-    expect(report.bootFeatureFlags).toEqual([
-      'flags_only (stateful)',
-      'flags_plus_boot (stateful)',
-    ]);
+    // zero-diff sets are reported as same as default, not as identical to each other
     expect(report.identical).toEqual([['twin_a (stateful)', 'twin_b (stateful)']]);
-    // subsets: one line per identical group (twin_b is represented by twin_a), only the
-    // nearest superset (flags_plus_boot ⊆ ... is not transitive here, big is unrelated to flags)
+    // one line per identical group (twin_b is represented by twin_a), nearest superset only
+    // (big, not bigger, since big is itself covered by bigger), sets with non-arg differences never take part
     expect(report.subsets).toEqual([
       { set: 'flags_only (stateful)', of: 'flags_plus_boot (stateful)' },
       { set: 'twin_a (stateful)', of: 'flags_plus_boot (stateful)' },
       { set: 'twin_a (stateful)', of: 'big (stateful)' },
+      { set: 'big (stateful)', of: 'bigger (stateful)' },
     ]);
   });
 });

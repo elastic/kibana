@@ -310,12 +310,12 @@ export function formatAuditText(report: AuditReport): string {
     duplicateClassNames.map((d) => `\`${d.className}\` in ${d.modules.join(', ')}`)
   );
   section(
-    'Config sets that only change runtime settings, use apiServices.core.settings() instead of a boot',
-    configSets.runtimeOnly
+    'Config sets identical to the default, check they still need their own server',
+    configSets.sameAsDefault
   );
   section(
-    'Config sets that boot with feature_flags.overrides, the runtime API can set those',
-    configSets.bootFeatureFlags.filter((s) => !configSets.runtimeOnly.includes(s))
+    'Config sets that only change runtime settings, use apiServices.core.settings() instead of a boot',
+    configSets.runtimeOnly
   );
   section(
     'Config sets with identical differences from the default, one set would do',
@@ -328,6 +328,11 @@ export function formatAuditText(report: AuditReport): string {
   section(
     'Config sets whose settings another set already includes, their tests could run on that set',
     [...subsetsBySet.entries()].map(([set, ofs]) => `${set} is covered by ${ofs.join(', ')}`)
+  );
+
+  section(
+    'Config sets the audit could not load, fix or check by hand',
+    configSets.failed.map((f) => `${f.file}: ${f.error.split('\n')[0]}`)
   );
 
   if (lines.length === 1) lines.push('', 'No findings.');

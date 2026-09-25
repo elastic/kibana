@@ -10,6 +10,7 @@
 import Fs from 'fs';
 import Path from 'path';
 import { getPackages } from '@kbn/repo-packages';
+import { snakeCase } from 'lodash';
 import ts from 'typescript';
 import type { ScoutServerConfig } from '../types';
 import { loadRawServerConfig } from '../servers/configs/loader/read_config_file';
@@ -28,21 +29,25 @@ export interface ConfigSetOverrides {
   flavor: ConfigSetFlavor;
   /** Config file name, e.g. `classic.stateful.config.ts`, which also identifies the default it is compared to. */
   file: string;
-  /** Kibana `serverArgs` that differ from the default set, key to value. */
+  /** Kibana `serverArgs` that differ from the default set, key to value (`<removed>` when the set drops a default arg). */
   kibana: Record<string, string>;
-  /** Elasticsearch `serverArgs` that differ from the default set, key to value. */
+  /** Elasticsearch `serverArgs` that differ from the default set, key to value (`<removed>` when the set drops a default arg). */
   elasticsearch: Record<string, string>;
-  /** Differences outside server args (license, ES files, docker servers, preboot), as short labels. */
+  /** Dotted paths of every other field that differs from the default (license, files, env, servers, ...). */
   other: string[];
 }
 
+export const REMOVED = '<removed>';
+
 export interface ConfigSetsReport {
   sets: ConfigSetOverrides[];
+  /** Config files that could not be loaded, with the error. The rest of the report is still valid. */
+  failed: Array<{ file: string; error: string }>;
+  /** Sets with no difference from the default at all. */
+  sameAsDefault: string[];
   /** Sets whose every difference from the default is a runtime updatable Kibana setting. */
   runtimeOnly: string[];
-  /** Sets that boot with `feature_flags.overrides`, which the runtime API can set instead. */
-  bootFeatureFlags: string[];
-  /** Sets (same flavor and file) with identical differences from the default. */
+  /** Sets (same flavor and file) with identical, non empty differences from the default. */
   identical: string[][];
   /** Sets whose differences are a strict subset of another set's. */
   subsets: Array<{ set: string; of: string }>;
@@ -50,19 +55,24 @@ export interface ConfigSetsReport {
   runtimeKeys: string[];
 }
 
-/** `--a.b=c` or `a.b=c` to `[a.b, c]`. Repeated keys are joined so ordering does not matter. */
+/**
+ * `--a.b=c` or `a.b=c` to `[a.b, c]`. Repeated keys are joined so ordering does
+ * not matter. Long digit runs (timestamps in generated file names) are masked so
+ * two boots of the same set compare equal.
+ */
 export function parseServerArgs(args: readonly string[]): Record<string, string> {
   const out: Record<string, string> = {};
   for (const arg of args) {
-    const match = /^(?:--)?([^=]+)=(.*)$/s.exec(arg);
+    const match = /^(?:--)?([^=]+)=(.*)$/s.exec(String(arg));
     if (!match) continue;
-    const [, key, value] = match;
+    const [, key, raw] = match;
+    const value = raw.replace(/\d{10,}/g, '<n>');
     out[key] = key in out ? `${out[key]},${value}` : value;
   }
   return out;
 }
 
-/** Entries of `actual` that are missing from or differ in `base`. */
+/** Keys added or changed in `actual`, plus keys of `base` that `actual` dropped (as `<removed>`). */
 export function diffArgs(
   actual: Record<string, string>,
   base: Record<string, string>
@@ -71,23 +81,33 @@ export function diffArgs(
   for (const [key, value] of Object.entries(actual)) {
     if (base[key] !== value) out[key] = value;
   }
+  for (const key of Object.keys(base)) {
+    if (!(key in actual)) out[key] = REMOVED;
+  }
   return out;
 }
 
-const otherDifferences = (set: ScoutServerConfig, base: ScoutServerConfig): string[] => {
-  const labels: string[] = [];
-  if (set.esTestCluster?.license !== base.esTestCluster?.license) labels.push('es license');
-  if (
-    JSON.stringify(set.esTestCluster?.files ?? []) !==
-    JSON.stringify(base.esTestCluster?.files ?? [])
-  ) {
-    labels.push('es files');
+const SERVER_ARG_PATHS = new Set(['kbnTestServer.serverArgs', 'esTestCluster.serverArgs']);
+
+const flatten = (value: unknown, prefix = '', out: Record<string, string> = {}) => {
+  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      flatten(v, prefix ? `${prefix}.${k}` : k, out);
+    }
+  } else if (!SERVER_ARG_PATHS.has(prefix)) {
+    out[prefix] = (JSON.stringify(value) ?? 'undefined').replace(/\d{10,}/g, '<n>');
   }
-  if (Boolean(set.dockerServers) !== Boolean(base.dockerServers)) labels.push('docker servers');
-  if (Boolean(set.prebootOnly) !== Boolean(base.prebootOnly)) labels.push('preboot only');
-  if (Boolean(set.http2) !== Boolean(base.http2)) labels.push('http2');
-  return labels;
+  return out;
 };
+
+/** Dotted paths of every field outside the server args where the set and the default differ. */
+export function otherDifferences(set: ScoutServerConfig, base: ScoutServerConfig): string[] {
+  const a = flatten(set);
+  const b = flatten(base);
+  return [...new Set([...Object.keys(a), ...Object.keys(b)])]
+    .filter((path) => a[path] !== b[path])
+    .sort();
+}
 
 /** `true` when `key` equals a runtime key or sits under one (`feature_flags.overrides.x`). */
 export function isRuntimeUpdatable(key: string, runtimeKeys: readonly string[]): boolean {
@@ -115,12 +135,13 @@ export function findRuntimeUpdatableKeys(repoRoot: string): string[] {
   for (const pkg of getPackages(repoRoot)) {
     const { plugin } = pkg.manifest as { plugin?: { id: string; configPath?: string | string[] } };
     if (!plugin) continue;
-    const serverDir = Path.join(repoRoot, pkg.directory, 'server');
+    // `pkg.directory` is already absolute.
+    const serverDir = Path.join(pkg.directory, 'server');
     if (!Fs.existsSync(serverDir)) continue;
 
     const configPath = Array.isArray(plugin.configPath)
       ? plugin.configPath.join('.')
-      : plugin.configPath ?? plugin.id;
+      : plugin.configPath ?? snakeCase(plugin.id); // Kibana's own default for a missing configPath
 
     for (const file of listConfigSourceFiles(serverDir)) {
       const text = Fs.readFileSync(file, 'utf8');
@@ -207,11 +228,20 @@ export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsRepor
   };
 
   const sets: ConfigSetOverrides[] = [];
+  const failed: ConfigSetsReport['failed'] = [];
   for (const entry of listConfigSetFiles(repoRoot)) {
-    const [set, base] = await Promise.all([
-      loadRawServerConfig(entry.path),
-      loadDefault(entry.flavor, entry.file),
-    ]);
+    let set: ScoutServerConfig;
+    let base: ScoutServerConfig;
+    try {
+      [set, base] = await Promise.all([
+        loadRawServerConfig(entry.path),
+        loadDefault(entry.flavor, entry.file),
+      ]);
+    } catch (error) {
+      // One broken or unusual set must not hide the rest of the report.
+      failed.push({ file: Path.relative(repoRoot, entry.path), error: String(error) });
+      continue;
+    }
     sets.push({
       name: entry.name,
       flavor: entry.flavor,
@@ -228,7 +258,7 @@ export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsRepor
     });
   }
 
-  return summarizeConfigSets(sets, runtimeKeys);
+  return { ...summarizeConfigSets(sets, runtimeKeys), failed };
 }
 
 // `session_idle (stateful)` or `uiam_local (serverless/security_complete)`: the file
@@ -248,6 +278,12 @@ export function summarizeConfigSets(
   sets: ConfigSetOverrides[],
   runtimeKeys: string[]
 ): ConfigSetsReport {
+  const isEmpty = (s: ConfigSetOverrides) =>
+    Object.keys(s.kibana).length === 0 &&
+    Object.keys(s.elasticsearch).length === 0 &&
+    s.other.length === 0;
+  const sameAsDefault = sets.filter(isEmpty).map(label);
+
   const runtimeOnly = sets
     .filter(
       (s) =>
@@ -258,12 +294,8 @@ export function summarizeConfigSets(
     )
     .map(label);
 
-  const bootFeatureFlags = sets
-    .filter((s) => Object.keys(s.kibana).some((k) => k.startsWith('feature_flags.overrides')))
-    .map(label);
-
   const bySignature = new Map<string, ConfigSetOverrides[]>();
-  for (const s of sets) {
+  for (const s of sets.filter((x) => !isEmpty(x))) {
     const sig = signature(s);
     bySignature.set(sig, [...(bySignature.get(sig) ?? []), s]);
   }
@@ -293,5 +325,5 @@ export function summarizeConfigSets(
     for (const b of nearest) subsets.push({ set: label(a), of: label(b) });
   }
 
-  return { sets, runtimeOnly, bootFeatureFlags, identical, subsets, runtimeKeys };
+  return { sets, failed: [], sameAsDefault, runtimeOnly, identical, subsets, runtimeKeys };
 }
