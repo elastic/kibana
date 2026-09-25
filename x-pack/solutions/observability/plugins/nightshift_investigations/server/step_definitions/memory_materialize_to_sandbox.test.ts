@@ -21,6 +21,7 @@ jest.mock('../memory/register_memory', () => ({
       recalledCount: 1,
       newPageCount: 1,
       catalogSize: 3,
+      catalogEvictedCount: 0,
       podReset: false,
       notificationChars: 0,
     },
@@ -127,6 +128,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       recalled_count: 1,
       new_page_count: 1,
       catalog_size: 3,
+      catalog_evicted_count: 0,
       pod_reset: false,
       notification_chars: 0,
     });
@@ -178,7 +180,6 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({
         session: mockSession,
-        agentId: 'nightshift.investigation',
       })
     );
     expect(result).toEqual({

@@ -8,7 +8,6 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { previewText } from './log_format';
 import { materializeMemory, type MaterializeMemoryResult } from './materialize';
@@ -25,19 +24,14 @@ export const createMemoryStore = ({
   esClient,
   logger,
   spaceId,
-  agentId,
   signal,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
-  agentId: string;
   signal?: AbortSignal;
 }): MemoryPageStore => {
-  if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
-    throw new Error('Semantic Memory is only available to the Nightshift investigator');
-  }
-  return createMemoryPageStore({ esClient, logger, spaceId, agentId, signal });
+  return createMemoryPageStore({ esClient, logger, spaceId, signal });
 };
 
 export const hydrateMemoryWorkspace = async ({
@@ -57,7 +51,7 @@ export const hydrateMemoryWorkspace = async ({
   signal?: AbortSignal;
   logger: Logger;
 }): Promise<MaterializeMemoryResult> => {
-  const store = createMemoryStore({ esClient, logger, spaceId, agentId, signal });
+  const store = createMemoryStore({ esClient, logger, spaceId, signal });
   logger.debug(
     `Memory hydrate space=${spaceId} agent=${agentId} query=${JSON.stringify(previewText(query))}`
   );
@@ -89,15 +83,6 @@ export const runMemoryOptimize = async ({
   logger: Logger;
   connectorId?: string;
 }): Promise<MemoryOptimizeSummary | undefined> => {
-  if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
-    logger.info('Memory optimizer skipped — round was not produced by the Nightshift investigator');
-    logger.debug(
-      `Memory optimize skip agent=${agentId ?? '(missing)'} ` +
-        `expected=${NIGHTSHIFT_INVESTIGATION_AGENT_ID}`
-    );
-    return undefined;
-  }
-
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
       `connector=${requestedConnectorId ?? '(agent default)'} ` +
@@ -115,7 +100,7 @@ export const runMemoryOptimize = async ({
     return undefined;
   }
 
-  const store = createMemoryStore({ esClient, logger, spaceId, agentId, signal });
+  const store = createMemoryStore({ esClient, logger, spaceId, signal });
   return optimizeMemory({
     store,
     recalledIds,

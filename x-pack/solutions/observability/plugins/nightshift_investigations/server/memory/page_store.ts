@@ -6,6 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isNotFoundError, isResponseError } from '@kbn/es-errors';
+import { isElasticsearchWriteConflict } from '@kbn/occ';
 import {
   MEMORY_INDEX,
   type MemoryArchiveReason,
@@ -174,7 +176,6 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
     context: source.context,
     tags: source.tags ?? [],
     status,
-    agent_id: source.attributes?.agent_id ?? '',
     source: source.attributes?.source,
     merged_from: source.attributes?.merged_from,
     archive_reason: source.attributes?.archive_reason,
@@ -197,35 +198,20 @@ export const createMemoryPageStore = ({
   esClient,
   logger,
   spaceId,
-  agentId,
   signal,
   now = () => Date.now() / 1000,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
-  agentId: string;
   signal?: AbortSignal;
   now?: () => number;
 }): MemoryPageStore => {
-  const isIndexNotFoundError = (err: unknown): boolean => {
-    const error = err as {
-      body?: { error?: { type?: unknown } | string };
-      meta?: { body?: { error?: { type?: unknown } | string } };
-    };
-    const bodyError = error.meta?.body?.error ?? error.body?.error;
-    if (typeof bodyError === 'string' && bodyError.includes('index_not_found_exception')) {
-      return true;
+  const isIndexNotFoundError = (error: unknown): boolean => {
+    if (!isResponseError(error) || typeof error.body.error !== 'object') {
+      return false;
     }
-    if (
-      typeof bodyError === 'object' &&
-      bodyError !== null &&
-      bodyError.type === 'index_not_found_exception'
-    ) {
-      return true;
-    }
-    const message = err instanceof Error ? err.message : String(err);
-    return message.includes('index_not_found_exception');
+    return error.body.error.type === 'index_not_found_exception';
   };
 
   const idPrefix = `${spaceId}:`;
@@ -253,7 +239,6 @@ export const createMemoryPageStore = ({
         status: page.status,
         slug: page.slug,
         space_id: spaceId,
-        agent_id: agentId,
         categories: page.categories,
         ...(page.source !== undefined ? { source: page.source } : {}),
         ...(page.merged_from !== undefined ? { merged_from: page.merged_from } : {}),
@@ -393,7 +378,7 @@ export const createMemoryPageStore = ({
       const notArchived = { term: { 'attributes.status': 'archived' } };
       logger.debug(
         `Memory retrieve start match=${match} search=${isSearch} size=${pageSize} ` +
-          `space=${spaceId} agent=${agentId} query=${JSON.stringify(previewText(trimmed))}`
+          `space=${spaceId} query=${JSON.stringify(previewText(trimmed))}`
       );
 
       const hitsToPages = (
@@ -536,7 +521,7 @@ export const createMemoryPageStore = ({
         );
         return response.found && response._source ? toPage(id, response._source) : undefined;
       } catch (err) {
-        if (isIndexNotFoundError(err) || (err as { statusCode?: number }).statusCode === 404) {
+        if (isIndexNotFoundError(err) || isNotFoundError(err)) {
           return undefined;
         }
         throw err;
@@ -568,7 +553,7 @@ export const createMemoryPageStore = ({
         }
         return undefined;
       } catch (err) {
-        if (isIndexNotFoundError(err) || (err as { statusCode?: number }).statusCode === 404) {
+        if (isIndexNotFoundError(err) || isNotFoundError(err)) {
           return undefined;
         }
         throw err;
@@ -675,7 +660,7 @@ export const createMemoryPageStore = ({
             applied = true;
             break;
           } catch (err) {
-            if ((err as { statusCode?: number }).statusCode !== 409) {
+            if (!isElasticsearchWriteConflict(err)) {
               throw err;
             }
             conflicts++;
@@ -711,7 +696,7 @@ export const createMemoryPageStore = ({
         try {
           return await this.archiveVersioned(versioned, reason);
         } catch (err) {
-          if ((err as { statusCode?: number }).statusCode !== 409) {
+          if (!isElasticsearchWriteConflict(err)) {
             throw err;
           }
           if (attempt === MAX_ARCHIVE_ATTEMPTS - 1) {

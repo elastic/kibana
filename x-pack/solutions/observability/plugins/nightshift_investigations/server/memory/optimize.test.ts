@@ -35,7 +35,6 @@ const page = (id: string, title = id, content = 'body'): MemoryPage => ({
   content,
   tags: ['memory'],
   status: 'established',
-  agent_id: 'agent-1',
   categories: [],
   references: [],
   created_at: '2026-01-01T00:00:00.000Z',

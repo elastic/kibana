@@ -168,6 +168,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         recalled_count: result.summary.recalledCount,
         new_page_count: result.summary.newPageCount,
         catalog_size: result.summary.catalogSize,
+        catalog_evicted_count: result.summary.catalogEvictedCount,
         pod_reset: result.summary.podReset,
         notification_chars: result.summary.notificationChars,
       });

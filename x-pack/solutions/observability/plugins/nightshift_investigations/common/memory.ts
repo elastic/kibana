@@ -33,9 +33,8 @@ export interface StoredMemoryPage {
     categories?: string[];
     references?: string[];
     slug?: string;
-    /** Space is the memory isolation boundary; `agent_id` is provenance metadata. */
+    /** Space is the Semantic Memory isolation boundary. */
     space_id?: string;
-    agent_id?: string;
     source?: string;
     merged_from?: string[];
     archive_reason?: MemoryArchiveReason;
@@ -55,7 +54,6 @@ export interface MemoryPage {
   context?: string;
   tags: string[];
   status: StoredMemoryStatus;
-  agent_id: string;
   source?: string;
   merged_from?: string[];
   archive_reason?: MemoryArchiveReason;

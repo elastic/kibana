@@ -24,6 +24,7 @@ export interface SemanticMemoryMaterializedEvent {
   recalled_count?: number;
   new_page_count?: number;
   catalog_size?: number;
+  catalog_evicted_count?: number;
   pod_reset?: boolean;
   notification_chars?: number;
 }
@@ -95,6 +96,13 @@ const materializedSchema: RootSchema<SemanticMemoryMaterializedEvent> = {
   catalog_size: {
     type: 'long',
     _meta: { description: 'Entries in the additive conversation catalog.', optional: true },
+  },
+  catalog_evicted_count: {
+    type: 'long',
+    _meta: {
+      description: 'Oldest catalog entries evicted after reaching a count or byte boundary.',
+      optional: true,
+    },
   },
   pod_reset: {
     type: 'boolean',
