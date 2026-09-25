@@ -15,6 +15,14 @@ import { RUNNING_IN_EDITOR } from './helpers/running_in_editor';
 let importResolverCache: ImportResolver | undefined;
 
 /**
+ * Process-wide ImportResolver shared by `@kbn/imports/*` rules and the `import/*` resolver
+ * adapter so import requests are resolved (and stat'd) once per process.
+ */
+export function getSharedImportResolver(): ImportResolver {
+  return (importResolverCache ||= ImportResolver.create(REPO_ROOT));
+}
+
+/**
  * Create a request resolver for ESLint, requires a PluginPackageResolver from @kbn/repo-packages which will
  * be created and cached on contextServices automatically.
  *
@@ -27,5 +35,5 @@ export function getImportResolver(context: Rule.RuleContext): ImportResolver {
     return (context.parserServices.kibanaImportResolver ||= ImportResolver.create(REPO_ROOT));
   }
 
-  return (importResolverCache ||= ImportResolver.create(REPO_ROOT));
+  return getSharedImportResolver();
 }

@@ -317,6 +317,7 @@ export class ImportResolver {
       type: 'file',
       absolute,
       nodeModule: pkgName,
+      viaExportsMap: true,
     };
   }
 

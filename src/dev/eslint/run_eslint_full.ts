@@ -77,7 +77,14 @@ function getLintableFileBatches(filePatterns: string[], workerCount: number) {
     .stdout.trim()
     .split('\n')
     .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
-  const batchSize = Math.min(Math.ceil(files.length / workerCount), maxBatchSize);
+
+  // Round the batch count up to a multiple of the worker count so every wave keeps all workers
+  // busy (e.g. 27 batches on 15 workers = 2 waves with 3 idle workers in the second one).
+  // Batches stay contiguous `git ls-files` slices: ESLint caches config per directory, so
+  // directory locality within a process is what keeps per-file config resolution cheap.
+  const waves = Math.ceil(files.length / (maxBatchSize * workerCount));
+  const batchCount = Math.max(1, waves * workerCount);
+  const batchSize = Math.ceil(files.length / batchCount);
   const batches = [];
   for (let i = 0; i < files.length; i += batchSize) {
     batches.push(files.slice(i, i + batchSize));

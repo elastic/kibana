@@ -89,6 +89,19 @@ module.exports = {
     es6: true,
   },
 
+  settings: {
+    // `import/*` rules resolve through the same @kbn/import-resolver instance as `@kbn/imports/*`
+    // (see ./import_resolver.js) instead of a second eslint-import-resolver-node pass per import.
+    'import/resolver': {
+      [require.resolve('./import_resolver')]: {},
+    },
+    // ESLint runs are one-shot; the default 30s lifetime expires the resolution cache several
+    // times per CI batch and forces every import to be re-resolved from disk.
+    'import/cache': {
+      lifetime: Infinity,
+    },
+  },
+
   rules: {
     // Suggests better replacements for packages: https://github.com/es-tooling/module-replacements/tree/main/docs/modules
     'depend/ban-dependencies': [

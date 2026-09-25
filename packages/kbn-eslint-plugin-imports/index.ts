@@ -8,6 +8,7 @@
  */
 
 export * from './src/get_import_resolver';
+export * from './src/eslint_import_resolver';
 import { NoUnresolvableImportsRule } from './src/rules/no_unresolvable_imports';
 import { UniformImportsRule } from './src/rules/uniform_imports';
 import { ExportsMovedPackagesRule } from './src/rules/exports_moved_packages';

@@ -54,6 +54,8 @@ export interface FileResult {
   nodeModule?: string;
   prefix?: string;
   postfix?: string;
+  /** resolved through the package.json "exports" map rather than node's main/index lookup */
+  viaExportsMap?: true;
 }
 
 /**
