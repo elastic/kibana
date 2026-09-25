@@ -42,6 +42,7 @@ test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }
   test('shows isolate, kill-process, and failed suspend-process on the alert flyout', async ({
     pageObjects,
     kbnClient,
+    apiServices,
     enrolledEndpoint,
   }) => {
     seededRule = await createEnabledRuleWithAutomatedResponseActions(
@@ -49,6 +50,7 @@ test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }
       enrolledEndpoint.agentId
     );
     await triggerMatchingProcessEvent(enrolledEndpoint.hostname);
+    await apiServices.detectionAlerts.waitForAlerts(seededRule.name, 1, ALERT_TIMEOUT_MS);
 
     await pageObjects.alertsTablePage.navigate();
     await pageObjects.alertsTablePage.expandFirstAlertDetailsFlyout(

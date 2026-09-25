@@ -87,7 +87,7 @@ export class AlertsTablePage {
    * Use when one rule can emit multiple alerts (`expandAlertDetailsFlyout` requires exactly one).
    */
   async expandFirstAlertDetailsFlyout(ruleName: string, timeout = 60_000) {
-    await this.alertsTable.waitFor({ state: 'visible' });
+    await this.alertsTable.waitFor({ state: 'visible', timeout });
     const matchingCells = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
     // One rule can emit several alerts; open the first matching row.
     // eslint-disable-next-line playwright/no-nth-methods
