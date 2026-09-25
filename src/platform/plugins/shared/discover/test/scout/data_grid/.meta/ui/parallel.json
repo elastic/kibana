@@ -1,5 +1,5 @@
 {
-  "sha1": "e948a4977ae176529d5705a79c8742260861d856",
+  "sha1": "de6f79051e39f1491bd906bf9b783f1d37ab06cd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,32 @@
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "1fa5578f6918dbc-69819201797622b",
+      "title": "Discover data grid - accessibility has no automated a11y violations in the column actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_accessibility.spec.ts",
+        "line": 43,
+        "column": 23
+      }
+    },
+    {
+      "id": "1fa5578f6918dbc-e278f1f5535d6a5",
+      "title": "Discover data grid - accessibility has no automated a11y violations in the sort and display popovers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_accessibility.spec.ts",
+        "line": 54,
+        "column": 5
       }
     },
     {
@@ -255,7 +281,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_footer_date_nanos.spec.ts",
-        "line": 64,
+        "line": 66,
         "column": 25
       }
     },
@@ -697,7 +723,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
-        "line": 92,
+        "line": 97,
         "column": 22
       }
     },
@@ -710,8 +736,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
-        "line": 107,
-        "column": 24
+        "line": 119,
+        "column": 9
       }
     },
     {
@@ -827,8 +853,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 49,
-        "column": 15
+        "line": 56,
+        "column": 31
       }
     },
     {
@@ -840,8 +866,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 67,
-        "column": 60
+        "line": 76,
+        "column": 15
       }
     },
     {
@@ -853,8 +879,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 110,
-        "column": 15
+        "line": 117,
+        "column": 24
       }
     },
     {
@@ -866,8 +892,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 120,
-        "column": 60
+        "line": 129,
+        "column": 15
       }
     },
     {
@@ -879,8 +905,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 143,
-        "column": 58
+        "line": 151,
+        "column": 42
+      }
+    },
+    {
+      "id": "5e3d2b70d72b957-1271f9e3c5654a0",
+      "title": "Discover doc viewer flyout - accessibility has no automated a11y violations in the source tab or an expanded field cell",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
+        "line": 185,
+        "column": 22
       }
     },
     {

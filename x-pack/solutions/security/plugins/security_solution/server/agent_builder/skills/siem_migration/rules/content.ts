@@ -43,6 +43,7 @@ does not auto-load its tools, the user must move to that workflow.
 - **${RULE_MIGRATION_SKILLS.STOP}** — Stop a running migration (mutating).
 - **${RULE_MIGRATION_SKILLS.UPDATE}** — Rename a migration (mutating).
 - **${RULE_MIGRATION_SKILLS.DELETE}** — Permanently delete a migration and all its rule items (destructive, irreversible).
+- **${RULE_MIGRATION_SKILLS.INSTALL}** — Install translated rules into Elastic (mutating, confirms; requires Rules: All).
 `;
 
 /**

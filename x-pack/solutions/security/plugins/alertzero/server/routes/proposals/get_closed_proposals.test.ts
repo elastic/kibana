@@ -29,7 +29,14 @@ const makeDeps = (conversationProposalsService: unknown) => {
     request: ReturnType<typeof httpServerMock.createKibanaRequest>,
     response: ReturnType<typeof httpServerMock.createResponseFactory>
   ) => Promise<unknown>;
-  return { handler };
+
+  const validateQuery = (query: unknown) =>
+    addVersion.mock.calls[0][0].validate.request.query(query, {
+      ok: (value: unknown) => ({ value }),
+      badRequest: (message: string) => ({ error: message }),
+    });
+
+  return { handler, validateQuery };
 };
 
 describe('registerGetClosedProposalsRoute', () => {
@@ -52,6 +59,32 @@ describe('registerGetClosedProposalsRoute', () => {
       from: '0',
     });
     expect(response.ok).toHaveBeenCalledWith({ body: { proposals: [], total: 0 } });
+  });
+
+  it('accepts size=0, so a collapsed accordion can read the total without the rows', () => {
+    const { validateQuery } = makeDeps({ listClosed: jest.fn() });
+
+    expect(validateQuery({ size: '0', from: '0' })).toEqual({ value: { size: 0, from: 0 } });
+  });
+
+  it('returns the group total on a size=0 page', async () => {
+    const listClosed = jest.fn().mockResolvedValue({ proposals: [], total: 42 });
+    const { handler } = makeDeps({ listClosed });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      {},
+      httpServerMock.createKibanaRequest({ query: { size: 0, from: 0 } }),
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { proposals: [], total: 42 } });
+  });
+
+  it('rejects a negative size', () => {
+    const { validateQuery } = makeDeps({ listClosed: jest.fn() });
+
+    expect(validateQuery({ size: '-1', from: '0' })).toEqual({ error: expect.any(String) });
   });
 
   it('returns 500 when listClosed throws', async () => {
