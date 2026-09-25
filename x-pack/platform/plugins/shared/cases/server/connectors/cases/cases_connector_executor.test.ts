@@ -2261,8 +2261,16 @@ fields: []
             });
           };
 
-          it('turns syncAlerts and extractObservables on for Security when no template is selected', async () => {
+          it('uses extractObservables from the space configuration', async () => {
             mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
 
             await connectorExecutor.execute({
               ...params,
@@ -2276,8 +2284,9 @@ fields: []
             });
           });
 
-          it('keeps syncAlerts and extractObservables off for Observability when no template is selected', async () => {
+          it('falls back to the owner default when no space configuration exists', async () => {
             mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
             await connectorExecutor.execute({
               ...params,
@@ -2287,6 +2296,45 @@ fields: []
 
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: false,
+              extractObservables: false,
+            });
+          });
+
+          it('falls back to true for securitySolution when no space configuration exists', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('uses space config extractObservables: false when explicitly set', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
               extractObservables: false,
             });
           });

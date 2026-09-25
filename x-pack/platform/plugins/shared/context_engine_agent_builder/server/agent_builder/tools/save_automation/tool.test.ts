@@ -12,6 +12,7 @@ import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createSaveAutomationTool, normalizeSaveAutomationParams } from './tool';
+import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
@@ -105,6 +106,10 @@ describe('save_automation tool', () => {
 
   it('uses the expected tool id', () => {
     expect(createTool().id).toBe(CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID);
+  });
+
+  it('is gated by the shared availability config', () => {
+    expect(createTool().availability).toBe(aiIndexToolsAvailability);
   });
 
   it('uses always confirmation policy with workflow and ai index names', async () => {
