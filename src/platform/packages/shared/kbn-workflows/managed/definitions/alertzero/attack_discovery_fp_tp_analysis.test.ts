@@ -589,6 +589,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         'A management server, MDM, jump box, or service account is neutral, not contradicts'
       );
     });
+
+    it('weighs the process parent with the cited alert severity', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'A risk score or severity on a cited alert weighs how strong that parent is.'
+      );
+    });
   });
 
   describe('the truncation clear', () => {
