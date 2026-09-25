@@ -141,7 +141,18 @@ function VarField({
           <LazyPackagePolicyInputVarField
             varDef={varDef}
             value={value}
-            onChange={(next) => onFieldChange(activeInput, fieldName, toDraft(next))}
+            onChange={(next) => {
+              // DatasetComponent calls onChange with { dataset, package } — an object, not a
+              // string. toDraft() would produce "[object Object]"; extract the dataset name.
+              const raw =
+                fieldName === 'data_stream.dataset' &&
+                next !== null &&
+                typeof next === 'object' &&
+                !Array.isArray(next)
+                  ? (next as { dataset?: unknown }).dataset ?? ''
+                  : next;
+              onFieldChange(activeInput, fieldName, toDraft(raw));
+            }}
             errors={errors}
             forceShowErrors={forceShowErrors}
             packageName={service.packageName}
