@@ -8,7 +8,7 @@ echo '--- Executor Setup'
 # if FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE is set,
 # we should clear previously cached EPR images,
 # (as the package registry image is quite big to keep 2 versions of)
-DEFAULT_FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/kibana-ci/package-registry-distribution:lite'
+DEFAULT_FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/observability-ci/distribution:lite-pr-3176'
 
 # Test docker is available
 if [[ `command -v docker` \

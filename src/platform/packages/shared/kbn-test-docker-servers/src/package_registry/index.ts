@@ -14,7 +14,7 @@ import { join } from 'path';
 // which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
 export const fleetPackageRegistryDockerImage =
   process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
-  'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
+  'docker.elastic.co/observability-ci/distribution:lite-pr-3176';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
 // EPR_REQUIRE_PACKAGE_SIGNATURES=false: opt out of upstream signature enforcement
