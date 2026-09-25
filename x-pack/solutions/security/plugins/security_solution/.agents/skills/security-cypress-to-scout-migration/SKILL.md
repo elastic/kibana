@@ -210,8 +210,16 @@ In addition to the general cleanup audit, Security Solution tests commonly creat
 - Asset Criticality assignments
 - Exception lists and items
 - Endpoint policies and fleet agents
+- Response actions (the history index is deployment-wide; delete only the hosts and actions this test created)
 
 Ensure ALL of these are cleaned in `afterAll`/`afterEach`.
+
+### Response actions history
+
+The actions log (`.logs-endpoint.actions-*`) is shared by every suite on the deployment. It is not isolated by Scout space.
+
+- Do not assert a global row count. Other suites add rows, and the endpoint data generator sometimes adds extra manual actions. Scope the history page to the hosts this test created (`?hosts=<agent ids>`) and assert on those rows' content (for example, every visible row says "Triggered by rule").
+- Seeded actions stay hidden in the worker space unless Fleet setup runs in that space. `indexHostsAndAlerts` creates the integration policy through `kbnClient`, whose active space is `default`, while parallel Scout UI runs in `scoutSpace`. Classic visibility matches `agent.policy.integrationPolicyId` to policies in the current space, so prefix that client's Kibana requests with `/s/<scoutSpace.id>` before indexing. That same loader copies the active space id into the agent policy `namespace`. The field is a Fleet data stream namespace, and hyphens are invalid, so a space id such as `test-space-2` returns 400 (`Namespace contains invalid characters`). Rewrite those invalid `namespace` values to `default` and keep the request on the worker space. Generated actions also set `originSpaceId` to `default`; that does not make them visible in the worker space.
 
 ## MKI pipeline specifics
 
@@ -233,6 +241,7 @@ After migration, run the general `scout-best-practices-reviewer` skill and then 
 - [ ] Static locators are `readonly` constructor properties; parameterized locators use named methods
 - [ ] No EUI CSS class selectors (`.euiTableRow`, `.euiToolTipAnchor`) — use `getByRole()` or `data-test-subj`
 - [ ] All Security-specific resources cleaned in `afterAll`/`afterEach`
+- [ ] Response actions history assertions are scoped to hosts this test created — no global row counts — and Fleet setup used the worker space with data stream namespace `default` (not the hyphenated space id)
 - [ ] Tags preserve the original test's deployment scope; stateful-only and serverless-only coverage remain valid when intentional
 
 ## Ownership notes
@@ -258,6 +267,8 @@ Prompt the user: _"During this migration I learned [X]. Want me to add it to the
 - Using `loginAsAdmin()` — admin masks permission bugs; use `loginAsPlatformEngineer()` for CRUD or `loginAsT1Analyst()` for read-only
 - Using `loginAsSecurityRole('t1_analyst')` instead of `loginAsT1Analyst()` — prefer named convenience methods for commonly used roles
 - Not cleaning Security-specific resources (Risk Engine, Entity Store, detection rules)
+- Asserting response actions history by global row count — the index is deployment-wide; scope to the hosts this test created
+- Indexing endpoint hosts with the default-space `kbnClient` and then opening response actions history in the worker space — the rows stay hidden unless Fleet setup uses that space. Sending the Scout space id as the Fleet `namespace` fails policy creation, because ids such as `test-space-2` contain hyphens
 - Following general Scout conventions over Security Solution conventions when they conflict
 - Migrating a flaky/skipped test without running the flaky-test-doctor analysis first — you may port an app bug into Scout
 - Ignoring Gate 4b risk patterns in Cypress tasks/screens — flakiness hides in shared helpers, not just the test file
