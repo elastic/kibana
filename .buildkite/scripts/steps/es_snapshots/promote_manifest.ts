@@ -28,7 +28,7 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
     const tempDir = fs.mkdtempSync('snapshot-promotion');
     process.chdir(tempDir);
 
-    const manifestResponse = await fetch(MANIFEST_URL);
+    const manifestResponse = await fetch(MANIFEST_URL, { redirect: 'error' });
     if (!manifestResponse.ok) {
       throw Error(`Failed to fetch manifest: ${manifestResponse.status} ${MANIFEST_URL}`);
     }

@@ -10,8 +10,8 @@ ES_SERVERLESS_GITHUB_URL="https://github.com/elastic/elasticsearch-serverless"
 if [[ -z "$ES_SERVERLESS_IMAGE" ]]; then
   echo "ES_SERVERLESS_IMAGE is not set"
   exit 1
-elif [[ ! "$ES_SERVERLESS_IMAGE" =~ ^docker\.elastic\.co/elasticsearch-ci/elasticsearch-serverless[:@][A-Za-z0-9_.:@-]+$ ]]; then
-  echo "ES_SERVERLESS_IMAGE should be a docker.elastic.co/elasticsearch-ci/elasticsearch-serverless image"
+elif [[ ! "$ES_SERVERLESS_IMAGE" =~ ^docker\.elastic\.co/elasticsearch-ci/elasticsearch-serverless:[A-Za-z0-9_.-]+$ ]]; then
+  echo "ES_SERVERLESS_IMAGE should be a tagged docker.elastic.co/elasticsearch-ci/elasticsearch-serverless image"
   exit 1
 fi
 
