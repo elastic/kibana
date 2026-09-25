@@ -22,16 +22,20 @@ export const resolveResourceForEsqlWithSamplingStats = async ({
   resourceName,
   esClient,
   samplingSize,
+  includeFrozen = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
   samplingSize?: number;
+  includeFrozen?: boolean;
 }) => {
   const [resource, stats] = await Promise.all([
-    resolveResourceForEsql({ resourceName, esClient }),
-    getSampleDocs({ esClient, index: resourceName, size: samplingSize }).then(({ samples }) => {
-      return createStatsFromSamples({ samples });
-    }),
+    resolveResourceForEsql({ resourceName, esClient, includeFrozen }),
+    getSampleDocs({ esClient, index: resourceName, size: samplingSize, includeFrozen }).then(
+      ({ samples }) => {
+        return createStatsFromSamples({ samples });
+      }
+    ),
   ]);
 
   const combinedFields = combineFieldsWithStats({ fields: resource.fields, stats });
