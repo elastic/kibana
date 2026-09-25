@@ -16,7 +16,11 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
+  AnonymizationFailureMode,
   AnonymizationEntityClass,
   AnonymizationResponseMetadata,
   DeanonymizedMessageData,
 } from './types';
+
+export { DEFAULT_BUILTIN_REGEX_RULES } from './default_builtin_regex_rules';
+export { refreshBuiltInAnonymizationRules } from './refresh_builtin_rules';

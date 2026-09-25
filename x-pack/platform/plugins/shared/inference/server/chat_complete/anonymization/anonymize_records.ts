@@ -6,7 +6,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import type {
+  AnonymizationRule,
+  AnonymizationFailureMode,
+  RegexAnonymizationRule,
+} from '@kbn/inference-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { partition } from 'lodash';
 import { unescapePointerToken, type AnonymizationState } from './types';
@@ -210,6 +215,8 @@ export async function anonymizeRecords<T extends Record<string, string | undefin
   salt,
   effectivePolicy,
   knownReplacements,
+  onFailure,
+  logger,
 }: {
   input: T[];
   anonymizationRules: AnonymizationRule[];
@@ -218,6 +225,8 @@ export async function anonymizeRecords<T extends Record<string, string | undefin
   salt?: string;
   effectivePolicy?: EffectivePolicy;
   knownReplacements?: Array<{ anonymized: string; original: string }>;
+  onFailure?: AnonymizationFailureMode;
+  logger?: Logger;
 }): Promise<AnonymizationState>;
 
 export async function anonymizeRecords({
@@ -228,6 +237,8 @@ export async function anonymizeRecords({
   salt,
   effectivePolicy,
   knownReplacements,
+  onFailure,
+  logger,
 }: {
   input: Array<Record<string, string>>;
   anonymizationRules: AnonymizationRule[];
@@ -236,6 +247,8 @@ export async function anonymizeRecords({
   salt?: string;
   effectivePolicy?: EffectivePolicy;
   knownReplacements?: Array<{ anonymized: string; original: string }>;
+  onFailure?: AnonymizationFailureMode;
+  logger?: Logger;
 }): Promise<AnonymizationState> {
   let state: AnonymizationState = {
     records: input.concat(),
@@ -258,19 +271,32 @@ export async function anonymizeRecords({
     (rule): rule is RegexAnonymizationRule => rule.type === 'RegExp'
   );
 
-  const detectedRegexEntities = await executeRegexRules({
-    records: state.records,
-    rules: regexRules,
-    regexWorker,
-  });
+  try {
+    const detectedRegexEntities = await executeRegexRules({
+      records: state.records,
+      rules: regexRules,
+      regexWorker,
+    });
 
-  // Process detected regex matches to resolve overlaps and apply masks
-  state = resolveOverlapsAndMask({
-    detectedMatches: detectedRegexEntities,
-    state,
-    rules: regexRules,
-    salt,
-  });
+    // Process detected regex matches to resolve overlaps and apply masks
+    state = resolveOverlapsAndMask({
+      detectedMatches: detectedRegexEntities,
+      state,
+      rules: regexRules,
+      salt,
+    });
+  } catch (error) {
+    if (onFailure !== 'allow_unsafe') {
+      throw error;
+    }
+    // allow_unsafe: proceed without masking the entities regex detection would have found,
+    // rather than failing the chatComplete call.
+    logger?.warn(
+      `Regex anonymization failed; proceeding unmasked because onFailure is "allow_unsafe": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 
   if (!nerRules.length) {
     return state;
