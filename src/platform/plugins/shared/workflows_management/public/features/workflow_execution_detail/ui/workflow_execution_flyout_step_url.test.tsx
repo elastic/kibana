@@ -13,7 +13,7 @@
  */
 
 import { copyToClipboard } from '@elastic/eui';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -178,5 +178,34 @@ describe('WorkflowExecutionFlyout step URL and field paths', () => {
     fireEvent.click(screen.getByTestId('workflowExecutionFlyoutStepClose'));
 
     expect(mockSetSelectedStepExecution).toHaveBeenCalledWith(null);
+  });
+
+  it('offers copy only on metadata rows that exist in the workflow context', () => {
+    mockUrlState.selectedStepExecutionId = 'trigger';
+    jest.mocked(useWorkflowExecutionPolling).mockReturnValue({
+      workflowExecution: createMockWorkflowExecutionDto({
+        id: 'exec-1',
+        workflowId: 'workflow-1',
+        status: ExecutionStatus.FAILED,
+        stepExecutions: [step],
+        traceId: 'trace-1',
+        entryTransactionId: 'transaction-1',
+        error: { type: 'ResponseError', message: 'index_not_found_exception' },
+        context: { workflow: { name: 'demo' } },
+      }),
+      isLoading: false,
+      error: null,
+    });
+
+    renderFlyout();
+
+    const copyButtonInRow = (field: string) =>
+      within(screen.getByText(field).closest('tr') as HTMLElement).queryByTestId(
+        'workflowExecutionStepDataCopyFieldPath'
+      );
+
+    expect(copyButtonInRow('workflow.name')).toBeInTheDocument();
+    expect(copyButtonInRow('trace.traceId')).not.toBeInTheDocument();
+    expect(copyButtonInRow('executionError.message')).not.toBeInTheDocument();
   });
 });

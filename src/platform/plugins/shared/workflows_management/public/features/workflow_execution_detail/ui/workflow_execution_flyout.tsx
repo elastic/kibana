@@ -54,6 +54,7 @@ import { StepExecutionsTruncatedCallout } from './step_executions_truncated_call
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
+  isOverviewContextField,
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { areStepExecutionsUnavailable } from '../../../../common';
@@ -191,10 +192,13 @@ const StepDataSection = ({
   label,
   data,
   fieldPathPrefix,
+  isFieldPathCopyable,
 }: {
   label: string;
   data: unknown;
   fieldPathPrefix?: string;
+  /** Hides copy on rows whose field is not a real template path. Copy is on for all rows if omitted. */
+  isFieldPathCopyable?: (field: string) => boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const [view, setView] = useState<'table' | 'code'>(() => (isTableable(data) ? 'table' : 'code'));
@@ -277,7 +281,7 @@ const StepDataSection = ({
                 <bdi>{field}</bdi>
               </span>
             </EuiToolTip>
-            {fieldPathPrefix != null && (
+            {fieldPathPrefix != null && (isFieldPathCopyable?.(field) ?? true) && (
               <EuiToolTip
                 content={i18n.translate('workflows.executionFlyout.stepDetail.copyFieldPath', {
                   defaultMessage: 'Copy field path',
@@ -309,7 +313,7 @@ const StepDataSection = ({
         render: (value: string) => <StepDataValueCell value={value} />,
       },
     ],
-    [euiTheme.font.familyCode, fieldPathPrefix]
+    [euiTheme.font.familyCode, fieldPathPrefix, isFieldPathCopyable]
   );
 
   const onTableChange = useCallback(({ page }: Criteria<StepDataTableRow>) => {
@@ -969,6 +973,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         })}
                         data={executionMetadata}
                         fieldPathPrefix={metadataFieldPathPrefix}
+                        isFieldPathCopyable={isOverviewContextField}
                       />
                     )}
                     {!isPseudoStep && stepAiWithModel && (
