@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { AgentPolicyCallout } from './agent_policy_callout';
-import { AgentShardingField } from './agent_sharding_field';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/agent_policies';
 
@@ -33,11 +32,9 @@ export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
 export const PolicyHostsField = ({
   privateLocations,
   isDisabled,
-  isEditingShardedLocation = false,
 }: {
   privateLocations: PrivateLocation[];
   isDisabled?: boolean;
-  isEditingShardedLocation?: boolean;
 }) => {
   const { data } = useSelector(selectAgentPolicies);
   const { basePath } = useSyntheticsSettingsContext();
@@ -149,12 +146,6 @@ export const PolicyHostsField = ({
         />
       </EuiFormRow>
       <EuiSpacer />
-      {Boolean(selectedPolicyId) && (
-        <>
-          <AgentShardingField isEditingShardedLocation={isEditingShardedLocation} />
-          <EuiSpacer />
-        </>
-      )}
       {selectedPolicy?.agents === 0 && <AgentPolicyCallout />}
     </>
   );

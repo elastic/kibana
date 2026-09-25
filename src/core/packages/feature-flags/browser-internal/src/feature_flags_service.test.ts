@@ -307,6 +307,33 @@ describe('FeatureFlagsService Browser', () => {
       });
     });
 
+    test('getBooleanValue$ delivers the current evaluation before subscribe returns', () => {
+      jest.spyOn(featureFlagsClient, 'getBooleanValue').mockReturnValue(true);
+
+      let value: boolean | undefined;
+      startContract
+        .getBooleanValue$('my-flag', false)
+        .subscribe((next) => {
+          value = next;
+        })
+        .unsubscribe();
+
+      // Unsubscribing in the same turn drops a later emission, so this stays
+      // undefined unless the current value was delivered synchronously.
+      expect(value).toBe(true);
+
+      jest.spyOn(featureFlagsClient, 'getBooleanValue').mockReturnValue(false);
+      value = undefined;
+      startContract
+        .getBooleanValue$('my-flag', true)
+        .subscribe((next) => {
+          value = next;
+        })
+        .unsubscribe();
+
+      expect(value).toBe(false);
+    });
+
     test('observe a boolean flag', async () => {
       const value = false;
       const flag$ = startContract.getBooleanValue$('my-flag', value);

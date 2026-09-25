@@ -15,6 +15,7 @@ import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
+import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
 import { WaffleSortControls } from '../waffle/waffle_sort_controls';
@@ -56,9 +57,11 @@ export const MetricsAndGroupByToolbarItems = ({
     timeRangeMetadata?.preferredSchema,
   ]);
 
+  const requestSchema = getInventoryRequestSchema(props.nodeType, preferredSchema);
+
   const { value: aggregations } = useAsync(
-    () => inventoryModel.metrics.getAggregations({ schema: preferredSchema ?? DEFAULT_SCHEMA }),
-    [inventoryModel.metrics, preferredSchema]
+    () => inventoryModel.metrics.getAggregations({ schema: requestSchema }),
+    [inventoryModel.metrics, requestSchema]
   );
 
   const metricOptions = useMemo(

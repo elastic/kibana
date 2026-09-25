@@ -13,6 +13,13 @@ import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ActionPoliciesListHeader } from './action_policies_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
+let mockExperimentalFeaturesEnabled = true;
+let mockAreAgentBuilderSkillsAvailable = true;
+let mockAgentBuilderSkillsRequirements = {
+  hasAgentBuilderCapability: true,
+  isExperimentalFeaturesEnabled: true,
+};
+let mockIsLicenseValid = true;
 
 jest.mock('@kbn/content-list-provider', () => {
   const actual = jest.requireActual('@kbn/content-list-provider');
@@ -21,6 +28,24 @@ jest.mock('@kbn/content-list-provider', () => {
     useContentListPhase: () => mockPhase,
   };
 });
+
+jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
+  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
+}));
+
+jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
+  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
+
+jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
+
+jest.mock('@kbn/core-di-browser', () => ({
+  ...jest.requireActual('@kbn/core-di-browser'),
+  useService: () => ({ capabilities: {}, getUrlForApp: jest.fn() }),
+}));
 
 const onCreatePolicy = jest.fn();
 const onCreateWithAgent = jest.fn();
@@ -41,6 +66,13 @@ describe('ActionPoliciesListHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPhase = 'populated';
+    mockExperimentalFeaturesEnabled = true;
+    mockAreAgentBuilderSkillsAvailable = true;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: true,
+    };
+    mockIsLicenseValid = true;
   });
 
   it('renders the page title and experimental badge', () => {
@@ -75,18 +107,23 @@ describe('ActionPoliciesListHeader', () => {
     await waitFor(() =>
       expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeInTheDocument()
     );
+    expect(screen.getByTestId('createActionPolicyWithAgentButton')).toHaveTextContent(
+      'Create with agent (Experimental)'
+    );
     await user.click(screen.getByTestId('createActionPolicyWithAgentButton'));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
     expect(onCreatePolicy).not.toHaveBeenCalled();
   });
 
-  it('disables the agent option (does not hide it) when createWithAgentDisabled is set', async () => {
+  it('disables the agent option (does not hide it) when agent builder is unavailable', async () => {
     const user = userEvent.setup({ delay: null });
-    renderHeader({
-      createWithAgentDisabled: true,
-      createWithAgentTooltipText: 'Missing privileges',
-    });
+    mockAreAgentBuilderSkillsAvailable = false;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: false,
+      isExperimentalFeaturesEnabled: true,
+    };
+    renderHeader();
 
     await user.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
     await waitFor(() =>
@@ -119,5 +156,38 @@ describe('ActionPoliciesListHeader', () => {
     renderHeader();
 
     expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
+  });
+
+  describe('license gating', () => {
+    it('does not render the license callout when the license is valid', () => {
+      renderHeader();
+
+      expect(screen.queryByTestId('actionPoliciesLicenseCallout')).toBeNull();
+      expect(screen.getByTestId('createActionPolicyButton')).toBeEnabled();
+    });
+
+    it('disables the create split button and renders the license callout when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      renderHeader();
+
+      expect(screen.getByTestId('createActionPolicyButton')).toBeDisabled();
+      expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toBeDisabled();
+      expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+    });
+
+    it('renders the license callout in the empty state, where the header menu is hidden', () => {
+      mockIsLicenseValid = false;
+      mockPhase = 'empty';
+      renderHeader();
+
+      expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+    });
+
+    it('does not render the license callout when the user cannot write', () => {
+      mockIsLicenseValid = false;
+      renderHeader({ canWrite: false });
+
+      expect(screen.queryByTestId('actionPoliciesLicenseCallout')).toBeNull();
+    });
   });
 });
