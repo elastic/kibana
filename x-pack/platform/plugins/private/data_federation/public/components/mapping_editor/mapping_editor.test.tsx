@@ -109,4 +109,3 @@ describe('MappingEditor', () => {
     expect(getByTestId('mappingEditorValueJson').textContent).toContain('"name":"bar"');
   });
 });
-

@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    ".storybook/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -23,6 +24,7 @@
     "@kbn/core-doc-links-browser",
     "@kbn/ui-callout",
     "@kbn/es-ui-shared-plugin"
+    "@kbn/storybook",
   ],
   "exclude": [
     "target/**/*",

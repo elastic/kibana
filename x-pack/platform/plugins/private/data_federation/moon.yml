@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/core-doc-links-browser'
   - '@kbn/ui-callout'
   - '@kbn/es-ui-shared-plugin'
+  - '@kbn/storybook'
 tags:
   - plugin
   - prod
@@ -41,6 +42,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - .storybook/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

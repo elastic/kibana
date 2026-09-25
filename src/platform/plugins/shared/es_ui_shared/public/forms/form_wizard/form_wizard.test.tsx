@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect } from 'react';
@@ -13,11 +15,11 @@ import { FormWizard } from './form_wizard';
 import { FormWizardStep } from './form_wizard_step';
 import { useContent } from '../multi_content';
 
-type WizardContent = {
+interface WizardContent {
   step1: { foo: string };
   step2: { bar: string };
   step3: { baz: string };
-};
+}
 
 const StepOne = () => {
   const { updateContent } = useContent<WizardContent, 'step1'>('step1');
@@ -105,4 +107,3 @@ describe('FormWizard navigation when invalid', () => {
     expect(queryByTestId('step3Content')).toBeNull();
   });
 });
-

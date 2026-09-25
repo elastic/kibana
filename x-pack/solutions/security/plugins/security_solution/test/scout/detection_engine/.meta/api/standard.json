@@ -1,9 +1,41 @@
 {
-  "sha1": "e622eca78d8b4bbae0413e80cee7c8a4974e455a",
+  "sha1": "1d678827befa64d01f2f7328f92040a3da0717d5",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "097e67d4566dd10-5430592436c9676",
+      "title": "Detection rules with invalid queries for the target field type prefix query on an ip field fails with query_shard_exception",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/api/tests/rule_execution/invalid_query_for_field_type.spec.ts",
+        "line": 152,
+        "column": 17
+      }
+    },
+    {
+      "id": "097e67d4566dd10-ff6e8ab72c6935d",
+      "title": "Detection rules with invalid queries for the target field type IP literal query on an ip field fails with \"is not an IP string literal\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/api/tests/rule_execution/invalid_query_for_field_type.spec.ts",
+        "line": 160,
+        "column": 17
+      }
+    },
     {
       "id": "ec2e0613f2d50b3-379e199936b1765",
       "title": "Detection rules over source indices without the read privilege custom query rule reports a partial failure naming the pattern",

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { Assignees } from './assignees';
 import { TestProviders } from '../../../../common/mock';
@@ -24,6 +25,7 @@ import {
   USERS_AVATARS_PANEL_TEST_ID,
   USER_AVATAR_ITEM_TEST_ID,
 } from '../../../../common/components/user_profiles/test_ids';
+import { ATTACK_ASSIGNEE_ACTION_IDS } from '../../../../common/constants/action_ids';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
 jest.mock(
@@ -71,7 +73,20 @@ const mockUseUpsellingMessage = useUpsellingMessage as jest.MockedFunction<
 const mockInvalidateFindAttackDiscoveries = jest.fn();
 
 const defaultMenuItems = {
-  items: [{ name: 'Manage assignees', panel: 2, key: 'manage' }],
+  items: [
+    {
+      key: ATTACK_ASSIGNEE_ACTION_IDS.assign,
+      'data-test-subj': 'attack-assignees-context-menu-item',
+      name: 'Manage assignees',
+      panel: 2,
+    },
+    {
+      key: ATTACK_ASSIGNEE_ACTION_IDS.unassignAll,
+      'data-test-subj': 'remove-attack-assignees-menu-item',
+      name: 'Remove all assignees',
+      onClick: jest.fn(),
+    },
+  ],
   panels: [{ id: 2, title: 'Assignees', content: <div data-test-subj="assignees-panel" /> }],
 };
 
@@ -112,6 +127,24 @@ describe('<Assignees /> (v2)', () => {
       isPlatinumPlus: () => true,
     } as ReturnType<typeof useLicense>);
     mockUseUpsellingMessage.mockReturnValue(undefined);
+  });
+
+  it('decorates assignee items with users icons', async () => {
+    renderAssignees();
+
+    fireEvent.click(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID));
+    await waitForEuiPopoverOpen();
+
+    expect(
+      screen
+        .getByTestId('attack-assignees-context-menu-item')
+        .querySelector('[data-euiicon-type="users"]')
+    ).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('remove-attack-assignees-menu-item')
+        .querySelector('[data-euiicon-type="users"]')
+    ).toBeInTheDocument();
   });
 
   it('passes attacksWithAssignees and onSuccess to useAttackAssigneesContextMenuItems', () => {

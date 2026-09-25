@@ -26,7 +26,11 @@ import { RunnerManager } from './runner';
 import { forkContextForAgentRun } from './utils';
 import { runTool, runInternalTool } from './run_tool';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { HookLifecycle, AgentExecutionMode } from '@kbn/agent-builder-common';
+import {
+  HookLifecycle,
+  AgentExecutionMode,
+  ConversationOriginType,
+} from '@kbn/agent-builder-common';
 
 jest.mock('@kbn/agent-builder-server/tools/utils', () => ({
   ...jest.requireActual('@kbn/agent-builder-server/tools/utils'),
@@ -959,7 +963,48 @@ describe('runInternalTool - telemetry', () => {
     expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledWith(
       expect.objectContaining({
         agentId: undefined,
+        origin: undefined,
       })
+    );
+  });
+
+  it('extracts the conversation origin from the run context stack', async () => {
+    const contextWithAgent = forkContextForAgentRun({
+      agentId: 'my-custom-agent',
+      origin: ConversationOriginType.Slack,
+      parentContext: runnerManager.context,
+    });
+    const managerWithAgent = new RunnerManager(runnerDeps, contextWithAgent);
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-origin-success',
+        source: 'agent',
+      },
+      parentManager: managerWithAgent,
+    });
+
+    toolHandler.mockReturnValue({
+      results: [{ type: ToolResultType.error, data: { message: 'nope' } }],
+    });
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-origin-error',
+        source: 'agent',
+      },
+      parentManager: managerWithAgent,
+    });
+
+    expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: ConversationOriginType.Slack })
+    );
+    expect(analyticsService.reportToolCallError).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: ConversationOriginType.Slack })
     );
   });
 
