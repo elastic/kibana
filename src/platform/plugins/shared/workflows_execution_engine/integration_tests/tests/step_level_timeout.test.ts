@@ -158,3 +158,40 @@ steps:
     );
   });
 });
+
+describe('templated step timeout around an idle step', () => {
+  // The zone and the foreach share a step id; the foreach execution is the latest one.
+  const workflowYaml = `
+inputs:
+  stepTimeout:
+    type: string
+steps:
+  - name: loop
+    type: foreach
+    foreach: '["a"]'
+    timeout: "{{ inputs.stepTimeout }}"
+    steps:
+      - name: ask
+        type: waitForInput
+        with:
+          message: 'Approve?'
+`;
+
+  it('arms the idle wake-up from the timeout rendered on the zone', async () => {
+    const fixture = new WorkflowRunFixture();
+    fixture.taskManagerMock.ensureScheduled = jest.fn().mockResolvedValue({ id: 'wake-task' });
+
+    await fixture.runWorkflow({ workflowYaml, inputs: { stepTimeout: '45s' } });
+
+    const execution = fixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    );
+    expect(execution?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+
+    const zoneExecution = Array.from(
+      fixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).find((se) => se.stepId === 'loop' && se.stepType === 'step_level_timeout');
+    const [[wakeTask]] = fixture.taskManagerMock.ensureScheduled.mock.calls;
+    expect(wakeTask.runAt).toEqual(new Date(Date.parse(zoneExecution?.startedAt ?? '') + 45_000));
+  });
+});

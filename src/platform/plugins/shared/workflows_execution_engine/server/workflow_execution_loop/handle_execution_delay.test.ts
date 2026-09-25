@@ -41,6 +41,7 @@ const makeParams = (
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
       getLatestStepExecution: jest.fn().mockReturnValue(undefined),
+      getStepExecutionsByStepId: jest.fn().mockReturnValue([]),
     },
     workflowExecutionRepository: {
       getWorkflowExecutionById: jest.fn().mockResolvedValue(undefined),
@@ -244,13 +245,14 @@ describe('handleExecutionDelay', () => {
               return undefined;
             }
           );
-          (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockImplementation(
-            (stepId: string) => {
-              if (stepId === 'timedParent') {
-                return { startedAt: '2025-06-01T12:00:00.000Z' };
-              }
-              return undefined;
-            }
+          (params.workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockImplementation(
+            (stepId: string) =>
+              stepId === 'timedParent'
+                ? [
+                    { stepType: 'step_level_timeout', startedAt: '2025-06-01T12:00:00.000Z' },
+                    { stepType: 'foreach', startedAt: '2025-06-01T12:00:05.000Z' },
+                  ]
+                : []
           );
 
           const stepRuntime = makeStepRuntime({
@@ -296,11 +298,18 @@ describe('handleExecutionDelay', () => {
               }
             : undefined
         );
-        (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockImplementation(
+        (params.workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockImplementation(
           (stepId: string) =>
             stepId === 'timedParent'
-              ? { startedAt: '2025-06-01T12:00:00.000Z', state: { resolvedTimeout: '45s' } }
-              : undefined
+              ? [
+                  {
+                    stepType: 'step_level_timeout',
+                    startedAt: '2025-06-01T12:00:00.000Z',
+                    state: { resolvedTimeout: '45s' },
+                  },
+                  { stepType: 'foreach', startedAt: '2025-06-01T12:00:05.000Z', state: {} },
+                ]
+              : []
         );
 
         const stepRuntime = makeStepRuntime({

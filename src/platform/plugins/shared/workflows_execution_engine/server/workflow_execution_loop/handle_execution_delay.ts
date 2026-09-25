@@ -58,10 +58,14 @@ export function getIdleTimeoutResumeDeadlineMs(
     for (const scope of frame.nestedScopes) {
       const graphNode = params.workflowExecutionGraph.getNode(scope.nodeId);
       if (graphNode && isEnterStepTimeoutZone(graphNode)) {
-        const latest = params.workflowExecutionState.getLatestStepExecution(graphNode.stepId);
-        if (latest?.startedAt) {
-          const timeout = getResolvedStepTimeout(latest.state, graphNode.timeout);
-          deadlineMs.push(new Date(latest.startedAt).getTime() + parseDuration(timeout));
+        // The zone and its inner step share a step id, so pick the zone's own execution.
+        const zoneExecution = params.workflowExecutionState
+          .getStepExecutionsByStepId(graphNode.stepId)
+          .filter(({ stepType }) => stepType === graphNode.stepType)
+          .at(-1);
+        if (zoneExecution?.startedAt) {
+          const timeout = getResolvedStepTimeout(zoneExecution.state, graphNode.timeout);
+          deadlineMs.push(new Date(zoneExecution.startedAt).getTime() + parseDuration(timeout));
         }
       }
     }
