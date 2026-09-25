@@ -112,6 +112,10 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    // 32766 is Lucene's max term byte length - prevents "immense term" indexing errors
+    // that otherwise reject the whole alert document when the composed reason is over-length.
+    // The .text sub-field below keeps the full value searchable.
+    ignore_above: 32766,
     multi_fields: [
       {
         flat_name: `${ALERT_REASON}.text`,
