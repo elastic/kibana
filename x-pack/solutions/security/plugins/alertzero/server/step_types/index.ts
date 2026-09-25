@@ -9,6 +9,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ActionsService } from '../services/actions/actions_service';
 import { getPackageReportStepDefinition } from './package_report';
+import { getFindOrCreateInvestigationStepDefinition } from './find_or_create_investigation';
 
 export const registerStepDefinitions = ({
   workflowsExtensions,
@@ -28,6 +29,10 @@ export const registerStepDefinitions = ({
       isContextEngineEnabled,
     })
   );
+  workflowsExtensions.registerStepDefinition(
+    getFindOrCreateInvestigationStepDefinition({ getConversations })
+  );
 };
 
 export { getPackageReportStepDefinition } from './package_report';
+export { getFindOrCreateInvestigationStepDefinition } from './find_or_create_investigation';

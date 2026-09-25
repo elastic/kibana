@@ -29,6 +29,7 @@ import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_att
 import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_endpoint_analysis';
 import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_run_endpoint_analysis';
 import { ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
+import { ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID } from './find_or_create_investigation';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './hunt_continuous_threat_hunt';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID } from './journal_note';
 import {
@@ -94,6 +95,10 @@ export {
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
 } from './journal_note';
 export { ALERTZERO_HUNT_WORKFLOW, ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
+export {
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
+} from './find_or_create_investigation';
 export {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -166,14 +171,20 @@ export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Hunt Watch's untagged hunt child (former 3D, now on PR 4), invoked via
- * `workflow.execute` by the tagged Worker (`hunt_continuous_threat_hunt.yaml`)
- * using the registered id `system-security-hunt-execute`. Own no trigger, so —
- * like `journal_note` above — it must be installed globally for the Worker's
- * `workflow.execute` call to resolve it. Correlation (`system-security-hunt-
- * correlation`) lands with 3B under R.7.
+ * Hunt Watch's untagged children invoked via `workflow.execute` by the tagged
+ * Worker (`hunt_continuous_threat_hunt.yaml`): the hunt child (former 3D, now
+ * on PR 4, `system-security-hunt-execute`) and the find-or-create-Investigation
+ * child (added Phase 0 task 7: the deterministic id it mints needs a uuidv5
+ * hash Liquid cannot compute, so it cannot live inline in the Worker's
+ * `parallel` branch). Own no trigger, so — like `journal_note` above — both
+ * must be installed globally for the Worker's `workflow.execute` calls to
+ * resolve them. Correlation (`system-security-hunt-correlation`) lands with 3B
+ * under R.7.
  */
-export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [ALERTZERO_HUNT_WORKFLOW_ID] as const;
+export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [
+  ALERTZERO_HUNT_WORKFLOW_ID,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
+] as const;
 
 /**
  * Action workflows AlertZero may propose. Discovery is normally by the generic

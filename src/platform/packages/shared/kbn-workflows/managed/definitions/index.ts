@@ -24,6 +24,7 @@ import {
   ALERTZERO_COVERAGE_WORKER_WORKFLOW,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
   ALERTZERO_HUNT_WORKFLOW,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_RULE_CREATION_WORKFLOW,
   ALERTZERO_RULE_PREVIEW_WORKFLOW,
@@ -134,6 +135,7 @@ export {
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
   ALERTZERO_HUNT_WORKFLOW_ID,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
   ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
   ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
@@ -214,11 +216,12 @@ export const managedWorkflowDefinitions = [
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
-  // Hunt Watch's untagged hunt child (PR 4 / R.7). Own no trigger, so — like
-  // the journal-note child above — it must be registered/installed globally
-  // for the Worker's `workflow.execute` call to resolve it. Correlation lands
-  // with 3B.
+  // Hunt Watch's untagged children (PR 4 / R.7 / Phase 0 task 7). Own no
+  // trigger, so — like the journal-note child above — both must be
+  // registered/installed globally for the Worker's `workflow.execute` calls
+  // to resolve them. Correlation lands with 3B.
   ALERTZERO_HUNT_WORKFLOW,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW,
   // Generic proposal gate, owned by the proposals plugin.
   CREATE_PROPOSAL_WORKFLOW,
   // AlertZero action catalog. The forensics handoff installs unconditionally even

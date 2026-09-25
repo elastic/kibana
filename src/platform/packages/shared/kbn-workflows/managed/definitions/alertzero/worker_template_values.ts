@@ -84,15 +84,32 @@ export interface HuntWorkerTemplateValues extends ScheduledWorkerTemplateValues 
  * child/coordinator treat it as unset. `extras` is also rendered whole (settings
  * contract), matching Rule Tuning.
  */
+/**
+ * The manual trigger's optional `reportIds` input (Phase 3 task 2): a manual-bypass
+ * fan-out over named reports, capped at 10 to match `create_proposal.yaml`'s
+ * trigger-input shape and the candidates route's own `report_ids` bound. Present on
+ * every autonomy level's manual trigger, scheduled or not.
+ */
+const MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT = [
+  '  - type: manual',
+  '    inputs:',
+  '      properties:',
+  '        reportIds:',
+  '          type: array',
+  '          items:',
+  '            type: string',
+  '          maxItems: 10',
+].join('\n');
+
 export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateValues): string => {
   const triggers =
     values.autonomyLevel === 'manual'
-      ? '  - type: manual'
+      ? MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT
       : [
           '  - type: scheduled',
           '    with:',
           `      every: ${JSON.stringify(values.scheduleInterval)}`,
-          '  - type: manual',
+          MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT,
         ].join('\n');
 
   return renderScheduledWorkerYaml(yaml, values)
