@@ -20,6 +20,7 @@ import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../lib/errors/error_co
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { createRouteDependencies } from './test_utils';
 import type { computeRouteValidate } from './compute_route_validate';
+import { ZodRequestValidationError } from './zod_request_validation';
 
 type ComputedValidate = Exclude<ReturnType<typeof computeRouteValidate>, false>;
 
@@ -565,6 +566,39 @@ describe('BaseAlertingRoute', () => {
         },
         bypassErrorFormat: true,
       });
+    });
+
+    it('adds the per-field errors when the rejection carries the Zod issues', async () => {
+      const schema = z.object({ name: z.string(), age: z.number() });
+      TestRoute.schemas = { request: { body: schema } };
+      const validate = TestRoute.validate as ComputedValidate;
+
+      const parsed = schema.safeParse({ age: 'not-a-number' });
+      const rawError = new ZodRequestValidationError(
+        (parsed as { success: false; error: z.ZodError }).error
+      );
+
+      await validate.onRequestValidationError?.(
+        { message: rawError.message, source: 'body', rawError },
+        {} as unknown as KibanaRequest,
+        response
+      );
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            details: {
+              source: 'body',
+              errors: expect.objectContaining({
+                properties: {
+                  name: { errors: [expect.any(String)] },
+                  age: { errors: [expect.any(String)] },
+                },
+              }),
+            },
+          }),
+        })
+      );
     });
   });
 });

@@ -14,6 +14,9 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
+  'plugin-id'?: string;
+  'product-solution'?: string;
+  'product-feature'?: string;
   with?: { method?: string; path?: string; body?: { status?: string } };
   'on-failure'?: unknown;
   steps?: WorkflowStep[];
@@ -92,6 +95,14 @@ describe('investigation lifecycle contracts', () => {
     expect(investigation.steps.some((step) => step.name === 'attach_to_significant_event')).toBe(
       false
     );
+  });
+
+  it('attributes agent calls to Nightshift under the shared investigation id', () => {
+    expect(requireStep('investigate')).toMatchObject({
+      'plugin-id': 'significant_events_investigation',
+      'product-solution': 'observability',
+      'product-feature': 'nightshift',
+    });
   });
 
   it('space-scopes the path of every kibana.request step', () => {

@@ -83,8 +83,8 @@ const formatEpisodeDescription = ({
   if (data.last_snooze_action) {
     lines.push(`Snooze: ${data.last_snooze_action}`);
   }
-  if (data.snooze_expiry) {
-    lines.push(`Snooze expiry: ${data.snooze_expiry}`);
+  if (data.snoozed_until) {
+    lines.push(`Snoozed until: ${data.snoozed_until}`);
   }
   if (data.last_tags?.length) {
     lines.push(`Tags: ${data.last_tags.join(', ')}`);
