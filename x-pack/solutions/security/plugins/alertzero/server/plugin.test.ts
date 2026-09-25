@@ -262,6 +262,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         agenticInvestigations: {
           getImpactClient: jest.fn(),
         },
+        inference: {},
       } as never);
 
       expect(initializeManagedWorkflows).toHaveBeenCalledWith(
@@ -284,6 +285,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         agenticInvestigations: {
           getImpactClient: jest.fn(),
         },
+        inference: {},
       } as never);
 
       expect(ensureAgentSafe).toHaveBeenCalledWith(
