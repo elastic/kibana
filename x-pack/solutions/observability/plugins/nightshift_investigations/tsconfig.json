@@ -47,5 +47,6 @@
     "@kbn/es-errors",
     "@kbn/test",
     "@kbn/tooling-log",
+    "@kbn/occ",
   ]
 }
