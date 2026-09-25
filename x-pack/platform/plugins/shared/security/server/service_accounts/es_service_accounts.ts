@@ -473,10 +473,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     return false;
   }
 
-  async createFakeRequest(_params?: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
-    throw Boom.notImplemented(
-      'Creating requests for Elasticsearch service accounts is not yet implemented'
-    );
+  async createFakeRequest(params?: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
+    if (!params) {
+      throw Boom.notImplemented(
+        'Creating requests for Elasticsearch service accounts is not yet implemented'
+      );
+    }
+    return await this.fakeRequests.create(params);
   }
 
   async reauthenticateFakeRequest(
