@@ -4379,8 +4379,8 @@ importers:
         specifier: 3.50.0
         version: 3.50.0
       cronstrue:
-        specifier: 3.24.0
-        version: 3.24.0
+        specifier: 3.25.0
+        version: 3.25.0
       css-box-model:
         specifier: 1.2.1
         version: 1.2.1
@@ -17498,8 +17498,8 @@ packages:
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
 
-  cronstrue@3.24.0:
-    resolution: {integrity: sha512-t/Ji3Ur2c/pzhIAWNwC0ftl3JAE4dLfCjAdZoTZXmPDZwcispnS1PaMcMS4OmIIXyIVouAz+yw+mfQiE3hz5OQ==}
+  cronstrue@3.25.0:
+    resolution: {integrity: sha512-PAPaioNXHMLiUSM8V5sC0bIx5MALUQjjtuDZZWBir5Tau8D676Aoj3Oju/SCaggi4eLG+QPC3IU+dCo30AzDIA==}
     hasBin: true
 
   cross-spawn@7.0.6:
@@ -35201,7 +35201,7 @@ snapshots:
 
   create-require@1.1.1: {}
 
-  cronstrue@3.24.0: {}
+  cronstrue@3.25.0: {}
 
   cross-spawn@7.0.6:
     dependencies:
