@@ -28,6 +28,7 @@ import {
 import { toIndexedBehaviors } from './indexed_behaviors';
 import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
+import { scopedEsqlProbeClient } from './scoped_esql_probe_client';
 import { assertEsqlGroundedInReport, isEvidenceQuoteGrounded } from './report_grounding';
 import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
@@ -448,6 +449,13 @@ const generateGroundedEsql = async ({
 }): Promise<Map<string, string>> => {
   const index = resolveGenerationIndex(articleContext, requiredIndices);
   const additionalContext = buildGenerationContext({ text, iocs, articleContext });
+  // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
+  // client it runs on with the same allowlist — an out-of-scope probe is refused before it
+  // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
+  const probeClient = scopedEsqlProbeClient(
+    esClient,
+    requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns()
+  );
 
   const entries = await pMap(
     behaviors,
@@ -455,7 +463,7 @@ const generateGroundedEsql = async ({
       try {
         const { query, error } = await generateEsql({
           model,
-          esClient,
+          esClient: probeClient,
           logger,
           nlQuery:
             `Hunt for MITRE ATT&CK ${behavior.technique_id} (${behavior.technique_name}) ` +

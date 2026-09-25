@@ -54,7 +54,11 @@ const buildMockModel = (
   };
 };
 
-const esClient = {} as ElasticsearchClient;
+// Carries a stub `esql.query` because the probe-scoping wrapper reads `esClient.esql` when the
+// generator client is built. `generateEsql`/`executeEsql` are mocked, so it is never called.
+const esClient = {
+  esql: { query: jest.fn().mockResolvedValue({ columns: [], values: [] }) },
+} as unknown as ElasticsearchClient;
 const col = (name: string) => ({ name, type: 'keyword' });
 const logger = loggingSystemMock.createLogger();
 
@@ -658,6 +662,27 @@ describe('huntBehavior', () => {
       );
 
       expect(result.behaviors[0].proposed_esql_rule).toContain(GROUNDED_ESQL);
+    });
+
+    it('gives generateEsql a probe client that refuses an out-of-scope schema probe', async () => {
+      // `generateEsql`'s schema probe runs the model's FROM before the publish/execute gate,
+      // so the client it probes on must enforce the same allowlist. The generator is mocked
+      // here, so drive its client directly to prove the probe would be refused.
+      await huntBehavior(buildMockModel([t1078Candidate]), logger, executeParams, esClient);
+
+      const probeClient = generateEsqlMock.mock.calls[0][0].esClient;
+      await expect(probeClient?.esql.query({ query: OUT_OF_SCOPE_ESQL })).rejects.toThrow(
+        'refused to probe an out-of-scope generated query'
+      );
+    });
+
+    it('gives generateEsql a probe client that lets an in-scope schema probe through', async () => {
+      await huntBehavior(buildMockModel([t1078Candidate]), logger, executeParams, esClient);
+
+      const probeClient = generateEsqlMock.mock.calls[0][0].esClient;
+      await expect(
+        probeClient?.esql.query({ query: 'FROM logs-aws.* | LIMIT 1' })
+      ).resolves.toBeDefined();
     });
   });
 
