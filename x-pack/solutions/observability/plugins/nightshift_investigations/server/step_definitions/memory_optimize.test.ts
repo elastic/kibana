@@ -32,7 +32,7 @@ describe('memoryOptimizeStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const request = { headers: {} };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
-  const getMemoryEsClient = jest.fn().mockReturnValue(esClient);
+  const getMemoryEsClient = jest.fn().mockResolvedValue(esClient);
   const getFakeRequest = jest.fn().mockReturnValue(request);
   const getAgentBuilder = jest.fn();
   const telemetry = {
@@ -43,7 +43,7 @@ describe('memoryOptimizeStepDefinition', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getScopedEsClient.mockReturnValue(esClient);
-    getMemoryEsClient.mockReturnValue(esClient);
+    getMemoryEsClient.mockResolvedValue(esClient);
     getFakeRequest.mockReturnValue(request);
   });
 
@@ -310,7 +310,7 @@ describe('memoryOptimizeStepDefinition', () => {
   it('fails clearly when the internal Memory client is unavailable', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
-      getMemoryEsClient: () => {
+      getMemoryEsClient: async () => {
         throw new Error('Semantic Memory internal Elasticsearch client is unavailable');
       },
       logger: loggerMock.create(),

@@ -45,8 +45,7 @@ import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
-import { ensureMemoryIndex } from './memory/ensure_memory_index';
-import { createMemoryInternalClient, type MemoryInternalClient } from './memory/internal_client';
+import { createMemoryService, type MemoryService } from './memory/internal_client';
 import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
@@ -105,11 +104,11 @@ export class NightshiftInvestigationsPlugin
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
-  private readonly memoryInternalClient: MemoryInternalClient;
+  private readonly memoryService: MemoryService;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
-    this.memoryInternalClient = createMemoryInternalClient({
+    this.memoryService = createMemoryService({
       getElasticsearch: () => this.elasticsearch,
     });
   }
@@ -279,7 +278,7 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryMaterializeToSandboxStepDefinition({
             getSandboxStart: () => this.sandboxStart,
-            getMemoryEsClient: this.memoryInternalClient.getClient,
+            getMemoryEsClient: this.memoryService.getClientWhenReady,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
@@ -298,7 +297,7 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryOptimizeStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
-            getMemoryEsClient: this.memoryInternalClient.getClient,
+            getMemoryEsClient: this.memoryService.getClientWhenReady,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
@@ -392,12 +391,7 @@ export class NightshiftInvestigationsPlugin
     this.security = coreStart.security;
 
     if (this.memoryEnabled) {
-      void ensureMemoryIndex({
-        esClient: this.memoryInternalClient.getClient(),
-        logger: this.logger.get('memory'),
-      }).catch((err) => {
-        this.logger.error(`Failed to ensure Semantic Memory index: ${err.message}`);
-      });
+      void this.memoryService.initialize(this.logger.get('memory'));
     }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the

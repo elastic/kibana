@@ -29,7 +29,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
   telemetry,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
-  getMemoryEsClient: () => ElasticsearchClient;
+  getMemoryEsClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -134,10 +134,10 @@ export const memoryMaterializeToSandboxStepDefinition = ({
       let result: Awaited<ReturnType<typeof hydrateMemoryWorkspace>>;
       try {
         result = await withTimeout(
-          (signal) =>
+          async (signal) =>
             hydrateMemoryWorkspace({
               session,
-              esClient: getMemoryEsClient(),
+              esClient: await getMemoryEsClient(),
               spaceId,
               agentId: trimmedAgentId,
               query: prompt,

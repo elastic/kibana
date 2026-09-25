@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, ElasticsearchServiceStart } from '@kbn/core/server';
+import type { ElasticsearchClient, ElasticsearchServiceStart, Logger } from '@kbn/core/server';
+import { ensureMemoryIndex } from './ensure_memory_index';
 
-export interface MemoryInternalClient {
-  getClient: () => ElasticsearchClient;
+export interface MemoryService {
+  initialize: (logger: Logger) => Promise<void>;
+  getClientWhenReady: () => Promise<ElasticsearchClient>;
 }
 
 /**
- * Provides the plugin-owned client used only for Nightshift Semantic Memory operations.
+ * Owns the internal client and one plugin-lifetime Semantic Memory readiness attempt.
  */
-export const createMemoryInternalClient = ({
+export const createMemoryService = ({
   getElasticsearch,
 }: {
   getElasticsearch: () => ElasticsearchServiceStart | undefined;
-}): MemoryInternalClient => ({
-  getClient: () => {
+}): MemoryService => {
+  let readiness: Promise<void> | undefined;
+
+  const getClient = (): ElasticsearchClient => {
     const elasticsearch = getElasticsearch();
     if (!elasticsearch) {
       throw new Error(
@@ -28,5 +32,29 @@ export const createMemoryInternalClient = ({
       );
     }
     return elasticsearch.client.asInternalUser;
-  },
-});
+  };
+
+  return {
+    initialize: (logger) => {
+      if (!readiness) {
+        const esClient = getClient();
+        readiness = ensureMemoryIndex({ esClient, logger });
+        // Observe startup failures without replacing the shared rejected promise.
+        void readiness.catch((error) => {
+          logger.error(`Failed to ensure Semantic Memory index: ${error.message}`);
+        });
+      }
+      return readiness;
+    },
+    getClientWhenReady: async () => {
+      if (!readiness) {
+        throw new Error(
+          'Semantic Memory is not initialized — ' +
+            'Nightshift Investigations plugin start() has not been called'
+        );
+      }
+      await readiness;
+      return getClient();
+    },
+  };
+};
