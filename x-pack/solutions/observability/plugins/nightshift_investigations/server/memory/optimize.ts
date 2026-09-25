@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
 import type { MemoryPageStore, VersionedMemoryPage } from './page_store';
 import {
@@ -883,7 +884,7 @@ export const applyMemoryEdits = async ({
         `Memory extract upserted ${toMemoryKiId(extra.slug)} contextChars=${task.length}`
       );
     } catch (err) {
-      if ((err as { statusCode?: number }).statusCode === 409) {
+      if (isElasticsearchWriteConflict(err)) {
         const winner = await store.get(toMemoryKiId(extra.slug));
         if (winner?.status === 'archived') {
           logger.debug(`Skipped extraction "${extra.slug}" — race winner is archived`);
@@ -1122,7 +1123,7 @@ const mergeMemoryGroup = async ({
       committedSources = revalidatedSources;
       break;
     } catch (err) {
-      if ((err as { statusCode?: number }).statusCode !== 409) {
+      if (!isElasticsearchWriteConflict(err)) {
         logger.warn('Memory merge failed to write its canonical page');
         logger.debug(`Memory merge canonical write error: ${(err as Error).message}`);
         return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };

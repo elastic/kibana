@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import { MEMORY_INDEX } from '../../common/memory';
 
 export const MEMORY_INDEX_TEMPLATE_NAME = 'nightshift-semantic-memory';
@@ -42,14 +43,10 @@ const MEMORY_INDEX_SETTINGS = {
   'index.hidden': true,
 };
 
-const isAlreadyExistsError = (err: unknown): boolean => {
-  const statusCode = (err as { statusCode?: number }).statusCode;
-  if (statusCode === 400) {
-    const message = err instanceof Error ? err.message : String(err);
-    return message.includes('resource_already_exists_exception');
-  }
-  return false;
-};
+const isAlreadyExistsError = (error: unknown): boolean =>
+  isResponseError(error) &&
+  typeof error.body.error === 'object' &&
+  error.body.error.type === 'resource_already_exists_exception';
 
 export const ensureMemoryIndex = async ({
   esClient,

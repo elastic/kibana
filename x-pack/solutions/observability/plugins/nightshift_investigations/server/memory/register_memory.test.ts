@@ -9,14 +9,13 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { createMemoryStore } from './register_memory';
 
 describe('createMemoryStore', () => {
-  it('rejects unsupported agents at the Semantic Memory service boundary', () => {
-    expect(() =>
+  it('creates a space-scoped store without an agent boundary', () => {
+    expect(
       createMemoryStore({
         esClient: {} as never,
         logger: loggerMock.create(),
         spaceId: 'default',
-        agentId: 'another-agent',
       })
-    ).toThrow('Semantic Memory is only available to the Nightshift deductive investigator');
+    ).toBeDefined();
   });
 });

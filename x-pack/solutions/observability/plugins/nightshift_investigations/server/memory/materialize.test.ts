@@ -6,7 +6,13 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { materializeMemory, parseMemoryCatalog } from './materialize';
+import {
+  boundMemoryCatalog,
+  materializeMemory,
+  MEMORY_INDEX_MAX_BYTES,
+  MEMORY_INDEX_MAX_ENTRIES,
+  parseMemoryCatalog,
+} from './materialize';
 import type { MemoryPageStore } from './page_store';
 import type { MemoryPage } from '../../common/memory';
 
@@ -17,7 +23,6 @@ const page = (id: string, title: string): MemoryPage => ({
   content: `${title} body`,
   tags: ['memory'],
   status: 'established',
-  agent_id: 'agent-1',
   categories: [],
   references: [],
   created_at: '2026-01-01T00:00:00.000Z',
@@ -49,6 +54,37 @@ const createSession = () => ({
       modified_time_sec: 0,
     }))
   ),
+});
+
+describe('boundMemoryCatalog', () => {
+  const entry = (id: number, title = `Memory ${id}`) => ({
+    id: `memory_${id}`,
+    title,
+    path: `/workspace/memories/memory_${id}.md`,
+  });
+
+  it('drops the oldest entries when the count boundary is reached', () => {
+    const result = boundMemoryCatalog(
+      Array.from({ length: MEMORY_INDEX_MAX_ENTRIES + 2 }, (_, index) => entry(index))
+    );
+
+    expect(result.entries).toHaveLength(MEMORY_INDEX_MAX_ENTRIES);
+    expect(result.entries[0].id).toBe('memory_2');
+    expect(result.evictedCount).toBe(2);
+  });
+
+  it('drops the oldest entries until the serialized catalog fits the byte boundary', () => {
+    const result = boundMemoryCatalog([
+      entry(1, 'a'.repeat(MEMORY_INDEX_MAX_BYTES)),
+      entry(2, 'kept'),
+    ]);
+
+    expect(
+      Buffer.byteLength(JSON.stringify({ entries: result.entries }), 'utf8')
+    ).toBeLessThanOrEqual(MEMORY_INDEX_MAX_BYTES);
+    expect(result.entries.map(({ id }) => id)).toEqual(['memory_2']);
+    expect(result.evictedCount).toBe(1);
+  });
 });
 
 describe('materializeMemory', () => {
@@ -272,6 +308,7 @@ describe('materializeMemory', () => {
       recalledCount: 2,
       newPageCount: 1,
       catalogSize: 2,
+      catalogEvictedCount: 0,
       podReset: false,
       notificationChars: notification.length,
     });

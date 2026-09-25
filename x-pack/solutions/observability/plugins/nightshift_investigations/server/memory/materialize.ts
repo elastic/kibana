@@ -18,7 +18,18 @@ import { type MemoryPage } from '../../common/memory';
 export const MEMORY_WORKSPACE_ROOT = '/workspace/memories';
 export const MEMORY_INDEX_PATH = `${MEMORY_WORKSPACE_ROOT}/.index.json`;
 export const MEMORY_KEEP_COUNT = 15;
-export const MEMORY_INDEX_MAX_BYTES = 262_144;
+export const MEMORY_INDEX_MAX_BYTES = 1_048_576;
+export const MEMORY_INDEX_MAX_ENTRIES = 10_000;
+
+export const boundMemoryCatalog = (
+  entries: readonly MemoryCatalogEntry[]
+): { entries: MemoryCatalogEntry[]; evictedCount: number } => {
+  const bounded = entries.slice(-MEMORY_INDEX_MAX_ENTRIES);
+  while (Buffer.byteLength(JSON.stringify({ entries: bounded }), 'utf8') > MEMORY_INDEX_MAX_BYTES) {
+    bounded.shift();
+  }
+  return { entries: bounded, evictedCount: entries.length - bounded.length };
+};
 
 export interface MemoryCatalogEntry {
   id: string;
@@ -36,6 +47,7 @@ export interface MaterializeMemoryResult {
     recalledCount: number;
     newPageCount: number;
     catalogSize: number;
+    catalogEvictedCount: number;
     podReset: boolean;
     notificationChars: number;
   };
@@ -291,10 +303,17 @@ export const materializeMemory = async ({
     }
     carried.push(priorById.get(entry.id) ?? entry);
   }
-  const entries: MemoryCatalogEntry[] = [
+  const allEntries: MemoryCatalogEntry[] = [
     ...carried,
     ...pages.map((page) => ({ id: page.id, title: page.title, path: pagePath(page) })),
   ];
+  const { entries, evictedCount: catalogEvictedCount } = boundMemoryCatalog(allEntries);
+  if (catalogEvictedCount > 0) {
+    logger.warn(
+      `Semantic Memory catalog reached its boundary; evicted ${catalogEvictedCount} oldest ` +
+        `entry(s) (maxEntries=${MEMORY_INDEX_MAX_ENTRIES}, maxBytes=${MEMORY_INDEX_MAX_BYTES})`
+    );
+  }
 
   const newPages = pages.filter((page) => !alreadyOnDisk.has(pagePath(page)));
   const notification = formatHydrateNotification(
@@ -339,6 +358,7 @@ export const materializeMemory = async ({
       recalledCount: recalledIds.length,
       newPageCount: newPages.length,
       catalogSize: entries.length,
+      catalogEvictedCount,
       podReset,
       notificationChars: notification.length,
     },

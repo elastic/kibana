@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import { MEMORY_INDEX } from '../../common/memory';
 import { HALF_LIFE_SEC } from './ranking';
@@ -30,7 +31,6 @@ const source = {
     status: 'established' as const,
     slug: 'kafka-lag',
     space_id: 'space-a',
-    agent_id: 'agent-1',
     impressions: 10,
     conversions: 3,
     last_impression_time: T0_ISO,
@@ -66,7 +66,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0 + HALF_LIFE_SEC,
     });
 
@@ -114,7 +113,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -134,7 +132,6 @@ describe('createMemoryPageStore', () => {
       content: 'Scale the consumer.',
       tags: ['memory'],
       status: 'established' as const,
-      agent_id: 'agent-1',
       categories: [],
       references: [],
       created_at: T0_ISO,
@@ -154,9 +151,11 @@ describe('createMemoryPageStore', () => {
     expect(display.conversions).toBeCloseTo(1.5, 10);
   });
 
-  it('upserts with a space-prefixed stored id and writes space and agent metadata', async () => {
+  it('upserts with a space-prefixed stored id and writes space metadata', async () => {
     const esClient = {
-      get: jest.fn().mockRejectedValue({ statusCode: 404 }),
+      get: jest
+        .fn()
+        .mockRejectedValue(new errors.ResponseError({ statusCode: 404, body: {} } as never)),
       index: jest.fn().mockResolvedValue({}),
     };
 
@@ -164,7 +163,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'nightshift.investigation',
       now: () => T0,
     });
 
@@ -185,7 +183,6 @@ describe('createMemoryPageStore', () => {
         document: expect.objectContaining({
           tags: ['memory', 'kafka'],
           attributes: expect.objectContaining({
-            agent_id: 'nightshift.investigation',
             space_id: 'space-a',
             impressions: 0,
             conversions: 0,
@@ -205,7 +202,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
     const existing = {
@@ -215,7 +211,6 @@ describe('createMemoryPageStore', () => {
       content: 'Old content.',
       tags: ['memory'],
       status: 'established' as const,
-      agent_id: 'agent-1',
       categories: [],
       references: [],
       created_at: T0_ISO,
@@ -254,7 +249,6 @@ describe('createMemoryPageStore', () => {
           attributes: expect.objectContaining({
             created_at: T0_ISO,
             space_id: 'space-a',
-            agent_id: 'agent-1',
           }),
         }),
       }),
@@ -268,7 +262,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -307,7 +300,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -343,7 +335,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -367,7 +358,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0 + HALF_LIFE_SEC,
     });
 
@@ -410,7 +400,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0 + HALF_LIFE_SEC,
     });
 
@@ -459,7 +448,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0 + HALF_LIFE_SEC,
     });
 
@@ -496,14 +484,13 @@ describe('createMemoryPageStore', () => {
           _primary_term: 3,
           _source: archived,
         })
-        .mockRejectedValueOnce({ statusCode: 404 }),
+        .mockRejectedValueOnce(new errors.ResponseError({ statusCode: 404, body: {} } as never)),
       update: jest.fn(),
     };
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -531,7 +518,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -556,7 +542,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -589,7 +574,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -612,7 +596,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -666,7 +649,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -685,16 +667,17 @@ describe('createMemoryPageStore', () => {
 
   it('returns no hits for an index_not_found_exception without attempting BM25', async () => {
     const esClient = {
-      search: jest.fn().mockRejectedValue({
-        statusCode: 404,
-        meta: { body: { error: { type: 'index_not_found_exception' } } },
-      }),
+      search: jest.fn().mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+        } as never)
+      ),
     };
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -712,7 +695,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -741,14 +723,15 @@ describe('createMemoryPageStore', () => {
 
   it('upserts the task into context and does not write search_embedding', async () => {
     const esClient = {
-      get: jest.fn().mockRejectedValue({ statusCode: 404 }),
+      get: jest
+        .fn()
+        .mockRejectedValue(new errors.ResponseError({ statusCode: 404, body: {} } as never)),
       index: jest.fn().mockResolvedValue({}),
     };
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -799,7 +782,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -817,7 +799,6 @@ describe('createMemoryPageStore', () => {
             archive_reason: 'merged',
             source: 'Merged from memories: memory_a',
             merged_from: ['memory_a'],
-            agent_id: 'agent-1',
           }),
         }),
       }),
@@ -839,7 +820,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
     const version = await store.getVersioned('memory_kafka-lag');
@@ -882,7 +862,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
     const version = await store.getVersioned('memory_kafka-lag');
@@ -928,7 +907,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 
@@ -966,7 +944,6 @@ describe('createMemoryPageStore', () => {
       esClient: esClient as never,
       logger,
       spaceId: 'space-a',
-      agentId: 'agent-1',
       now: () => T0,
     });
 

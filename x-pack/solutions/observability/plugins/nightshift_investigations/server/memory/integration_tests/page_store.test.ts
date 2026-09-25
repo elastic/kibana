@@ -16,7 +16,6 @@ import { createMemoryPageStore, epochSecondsToIso, type MemoryPageWrite } from '
 
 const SPACE_A = 'space-a';
 const SPACE_B = 'space-b';
-const AGENT_ID = 'nightshift.investigation';
 const NOW_SECONDS = 1_800_000_000;
 
 const createPage = (slug: string, overrides: Partial<MemoryPageWrite> = {}): MemoryPageWrite => ({
@@ -91,14 +90,12 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
       esClient,
       logger,
       spaceId: SPACE_A,
-      agentId: AGENT_ID,
       now: () => NOW_SECONDS,
     });
     const storeB = createMemoryPageStore({
       esClient,
       logger,
       spaceId: SPACE_B,
-      agentId: AGENT_ID,
       now: () => NOW_SECONDS,
     });
 
