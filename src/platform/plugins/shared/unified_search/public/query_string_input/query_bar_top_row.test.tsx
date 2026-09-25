@@ -23,8 +23,8 @@ jest.mock('@kbn/date-range-picker-presets', () => ({
 }));
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import { EMPTY, of } from 'rxjs';
 
 import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
@@ -431,6 +431,82 @@ describe('QueryBarTopRowTopRow', () => {
           // Then
           expect(onSendToBackground).toHaveBeenCalled();
         });
+      });
+    });
+
+    describe('secondary button enabled state after rapid state transitions', () => {
+      it('should not re-enable the button when Loading transitions to Completed before the 500ms delay fires', async () => {
+        // Regression test: mergeMap allowed a stale delayed Loading emission to fire after
+        // Completed, briefly re-enabling the secondary button. switchMap cancels the delayed
+        // emission when a new state arrives, preventing the stale re-enable.
+        const stateSubject = new Subject<SearchSessionState>();
+        const data = dataPluginMock.createStartContract();
+        data.search.session = getSessionServiceMock({
+          state$: stateSubject.asObservable(),
+        });
+
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              screenTitle: 'Test Screen',
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              isLoading: true,
+              onCancel: jest.fn(),
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
+
+        const button = getByTestId('queryCancelButton-secondary-button');
+
+        // Rapidly emit Loading then Completed — simulates a fast search completing in < 500ms
+        await act(async () => {
+          stateSubject.next(SearchSessionState.Loading);
+          stateSubject.next(SearchSessionState.Completed);
+          // Wait past the 500ms delay: with mergeMap the stale Loading would fire here;
+          // with switchMap it is cancelled by the Completed emission and never fires.
+          await new Promise((resolve) => setTimeout(resolve, 600));
+        });
+
+        // The button must stay disabled — Completed cancelled any in-flight Loading delay.
+        expect(button).toBeDisabled();
+      });
+
+      it('should enable the button after 500ms when the search remains Loading', async () => {
+        const stateSubject = new Subject<SearchSessionState>();
+        const data = dataPluginMock.createStartContract();
+        data.search.session = getSessionServiceMock({
+          state$: stateSubject.asObservable(),
+        });
+
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              screenTitle: 'Test Screen',
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              isLoading: true,
+              onCancel: jest.fn(),
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
+
+        const button = getByTestId('queryCancelButton-secondary-button');
+
+        act(() => stateSubject.next(SearchSessionState.Loading));
+        // Button should be disabled before the 500ms delay fires.
+        expect(button).toBeDisabled();
+
+        // Button should enable once the 500ms delay has elapsed.
+        await waitFor(() => expect(button).toBeEnabled(), { timeout: 1000 });
       });
     });
   });
