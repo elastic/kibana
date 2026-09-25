@@ -114,49 +114,57 @@ export function registerEntityMaintainerTask({
             description,
             timeout: effectiveTimeout,
             createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
-              run: async () => {
-                const status = taskInstance.state;
-                const namespace =
-                  (typeof status?.metadata?.namespace === 'string'
-                    ? status.metadata.namespace
-                    : undefined) ??
-                  (typeof status?.namespace === 'string' ? status.namespace : undefined);
+              run: async () =>
+                coreStart.executionContext.withContext(
+                  {
+                    type: 'security_solution',
+                    name: 'entity_analytics-entity_maintainers_task',
+                    id: taskInstance.id,
+                  },
+                  async () => {
+                    const status = taskInstance.state;
+                    const namespace =
+                      (typeof status?.metadata?.namespace === 'string'
+                        ? status.metadata.namespace
+                        : undefined) ??
+                      (typeof status?.namespace === 'string' ? status.namespace : undefined);
 
-                if (
-                  await shouldDeleteOrphanedEntityStoreTask({
-                    coreStart,
-                    namespace,
-                    logger,
-                  })
-                ) {
-                  return { state: status, shouldDeleteTask: true };
-                }
+                    if (
+                      await shouldDeleteOrphanedEntityStoreTask({
+                        coreStart,
+                        namespace,
+                        logger,
+                      })
+                    ) {
+                      return { state: status, shouldDeleteTask: true };
+                    }
 
-                if (!fakeRequest) {
-                  logger.error(`No fake request found, skipping run`);
-                  return { state: status };
-                }
+                    if (!fakeRequest) {
+                      logger.error(`No fake request found, skipping run`);
+                      return { state: status };
+                    }
 
-                const result = await executeMaintainerRun({
-                  status,
-                  request: fakeRequest,
-                  taskId: taskInstance.id,
-                  signal,
-                  id,
-                  run,
-                  setup,
-                  initialState,
-                  effectiveMinLicense,
-                  type,
-                  coreStart,
-                  licensing: plugins.licensing,
-                  workflowsExtensions: plugins.workflowsExtensions,
-                  analytics,
-                  logger,
-                });
+                    const result = await executeMaintainerRun({
+                      status,
+                      request: fakeRequest,
+                      taskId: taskInstance.id,
+                      signal,
+                      id,
+                      run,
+                      setup,
+                      initialState,
+                      effectiveMinLicense,
+                      type,
+                      coreStart,
+                      licensing: plugins.licensing,
+                      workflowsExtensions: plugins.workflowsExtensions,
+                      analytics,
+                      logger,
+                    });
 
-                return result ?? { state: status };
-              },
+                    return result ?? { state: status };
+                  }
+                ),
             }),
           },
         });
