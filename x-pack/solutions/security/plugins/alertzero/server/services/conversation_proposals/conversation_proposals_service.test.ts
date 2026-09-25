@@ -11,7 +11,7 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { ALERTZERO_PROPOSAL_ORIGIN } from '@kbn/workflows/managed';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
 import { ConversationProposalsService } from './conversation_proposals_service';
 
 const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMetadata => ({
@@ -23,7 +23,7 @@ const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
   impact: 'low',
   confidence: 'medium',
   category: 'investigate',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-01T10:00:00.000Z',
   expired: false,
   ...overrides,

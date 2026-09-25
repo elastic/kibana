@@ -66,7 +66,7 @@ describe('proposals.createProposal input schema', () => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
       comment: 'Tune the noisy rule',
-      origin: 'test-origin',
+      origin: 'alertzero',
       actionInput: blank,
       expiresIn: blank,
     });
@@ -74,7 +74,7 @@ describe('proposals.createProposal input schema', () => {
     expect(parsed).toEqual({
       conversationId: 'conv-1',
       comment: 'Tune the noisy rule',
-      origin: 'test-origin',
+      origin: 'alertzero',
     });
   });
 
@@ -82,7 +82,7 @@ describe('proposals.createProposal input schema', () => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
       comment: 'Tune the noisy rule',
-      origin: 'test-origin',
+      origin: 'alertzero',
       impact: blank,
       confidence: blank,
     });
@@ -90,7 +90,7 @@ describe('proposals.createProposal input schema', () => {
     expect(parsed).toEqual({
       conversationId: 'conv-1',
       comment: 'Tune the noisy rule',
-      origin: 'test-origin',
+      origin: 'alertzero',
     });
   });
 
@@ -121,7 +121,7 @@ describe('proposals.createProposal input schema', () => {
       createProposalStepInputSchema.safeParse({
         conversationId: 'conv-1',
         comment: 'Tune the noisy rule',
-        origin: 'test-origin',
+        origin: 'alertzero',
         impact: 'nope',
       }).success
     ).toBe(false);
@@ -138,7 +138,7 @@ describe('proposals.createProposal input schema', () => {
       conversationId: 'conv-1',
       title: 'Tune noisy rule',
       comment: 'Tune the noisy rule',
-      origin: 'test-origin',
+      origin: 'alertzero',
       actionInput: { name: 'Suspicious PowerShell' },
       expiresIn: '24h',
       impact: 'high',
@@ -148,7 +148,7 @@ describe('proposals.createProposal input schema', () => {
       conversationId: 'conv-1',
       title: 'Tune noisy rule',
       comment: 'Tune the noisy rule',
-      origin: 'test-origin',
+      origin: 'alertzero',
       actionInput: { name: 'Suspicious PowerShell' },
       expiresIn: '24h',
       impact: 'high',
@@ -246,7 +246,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
-        origin: 'test-origin',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
         // A caller cannot smuggle in a different execution to resume.
@@ -281,7 +281,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
-        origin: 'test-origin',
+        origin: 'alertzero',
         comment: 'Isolate the host',
         actionWorkflowId: 'system-alertzero-action-isolate-host',
       })
@@ -302,7 +302,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
-        origin: 'test-origin',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
       })
@@ -322,7 +322,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
-        origin: 'test-origin',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
       })
@@ -344,7 +344,7 @@ describe('proposals.createProposal step', () => {
     await definition.handler(
       createContext({
         conversationId: 'conv-1',
-        origin: 'test-origin',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: '',
         impact: '',
@@ -374,7 +374,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
-        origin: 'test-origin',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
       })
     );
@@ -389,14 +389,14 @@ describe('proposals.createProposal step', () => {
     await definition.handler(
       createContext({
         conversationId: 'conv-1',
-        origin: 'test-origin',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         impact: 'high',
       })
     );
 
     expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({ impact: 'high', confidence: 'medium', origin: 'test-origin' }),
+      expect.objectContaining({ impact: 'high', confidence: 'medium', origin: 'alertzero' }),
       expect.anything()
     );
   });
@@ -408,7 +408,7 @@ describe('proposals.createProposal step', () => {
     await definition.handler(
       createContext({
         conversationId: 'conv-1',
-        origin: 'test-origin',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
       })
     );
@@ -429,7 +429,7 @@ describe('proposals.createProposal step', () => {
 
     await expect(
       definition.handler(
-        createContext({ conversationId: 'conv-1', origin: 'test-origin', comment: 'Tune' })
+        createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
       )
     ).rejects.toMatchObject({ type: 'PermissionError' });
     expect(create).not.toHaveBeenCalled();
@@ -443,7 +443,7 @@ describe('proposals.createProposal step', () => {
     // ExecutionError carries nothing else to tell failures apart.
     await expect(
       definition.handler(
-        createContext({ conversationId: 'conv-1', origin: 'test-origin', comment: 'Tune' })
+        createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
       )
     ).rejects.toMatchObject({ type: 'ApiError', message: 'index unavailable' });
   });

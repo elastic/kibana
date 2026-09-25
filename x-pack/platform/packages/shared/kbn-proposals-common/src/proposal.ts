@@ -45,30 +45,32 @@ export type ProposalImpact = z.infer<typeof proposalImpactSchema>;
 export const proposalConfidenceSchema = z.enum(['low', 'medium', 'high']);
 export type ProposalConfidence = z.infer<typeof proposalConfidenceSchema>;
 
-/** Bounded like `category`, and for the same reason: the vocabulary is the caller's. */
-const MAX_ORIGIN_LENGTH = 64;
-
 /**
- * Which system produced the proposal, so a queue can show its own and not
- * another solution's. Deliberately not "machine or human" — `createdBy` already
- * records the actor behind it.
+ * Which feature produced the proposal, so a queue can show its own and not
+ * another's. Deliberately not "machine or human" — `createdBy` already records
+ * the actor behind it.
  *
- * An opaque lowercase keyword rather than an enum, copying `category`: this
- * plugin owns no vocabulary, because it serves callers beyond the two that
- * exist today and cannot learn their names. Unlike `category` it is required,
- * and it is fixed for the whole revision chain.
+ * Closed, unlike `category`, because the two fail differently. A typo'd
+ * category still appears, as a group with a silly name; a typo'd origin matches
+ * no queue's filter and the proposal is never seen by anyone. Consumers filter
+ * on exact equality, so this is a routing key every producer and consumer has
+ * to agree on character for character — which is what an enum enforces and an
+ * open vocabulary cannot.
  *
- * An open vocabulary fails differently here than it does for `category`,
- * though: a typo'd category still appears, as a group with a silly name, while
- * a typo'd origin drops the proposal out of a filter with no error anywhere.
- * Each consumer therefore exports its own constant and pins its workflow YAML
- * to it, so a typo fails CI instead of failing quietly.
+ * One member per producing feature. The members below that nothing writes yet
+ * are declared intent: adding a producer is a deliberate change here, reviewed
+ * alongside the queue-visibility consequences it carries.
  *
- * Trimmed before it is bounded, so the `''` Liquid renders for an absent
- * workflow input is rejected here rather than stored as an origin nothing
- * matches.
+ * Required, and fixed for the whole revision chain: `revise()` and `clone()`
+ * inherit it, and no update path can move it.
  */
-export const proposalOriginSchema = z.string().trim().min(1).max(MAX_ORIGIN_LENGTH);
+export const proposalOriginSchema = z.enum([
+  'alertzero',
+  'nightshift',
+  'context_engine',
+  /** The standalone chat surface, owned by no solution feature. */
+  'agent_builder',
+]);
 export type ProposalOrigin = z.infer<typeof proposalOriginSchema>;
 
 /**

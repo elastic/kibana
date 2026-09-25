@@ -9,18 +9,6 @@
 
 export const ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID = 'alertzero';
 
-/**
- * The `origin` every AlertZero proposal is stamped with, and the value its
- * queue filters on.
- *
- * The proposals plugin owns no origin vocabulary — it serves callers beyond
- * AlertZero and cannot learn their names — so the value belongs here. A typo
- * would drop a proposal out of the queue's filter with no error anywhere, which
- * is why the workflow shape tests pin the YAML literal to this constant and the
- * queue reads the same one.
- */
-export const ALERTZERO_PROPOSAL_ORIGIN = 'alertzero';
-
 export const ALERTZERO_WORKER_MANAGEMENT = {
   enablement: 'restorable',
   lifecycle: 'dynamic',

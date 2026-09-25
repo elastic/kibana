@@ -16,7 +16,7 @@ const baseProposal: ProposalItem = {
   status: 'pending',
   impact: 'high',
   confidence: 'high',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-10T10:00:00.000Z',
   expired: false,
   conversationAssignees: [],

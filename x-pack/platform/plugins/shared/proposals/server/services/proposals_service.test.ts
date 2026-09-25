@@ -41,7 +41,7 @@ const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocume
   impact: 'low',
   confidence: 'medium',
   category: 'tune',
-  origin: 'worker',
+  origin: 'alertzero',
   ranks: { impact: 3, confidence: 1 },
   workflowExecutionId: EXECUTION_ID,
   createdAt: '2026-09-01T00:00:00.000Z',
@@ -164,7 +164,7 @@ describe('ProposalsService', () => {
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -190,7 +190,7 @@ describe('ProposalsService', () => {
           actionInput: { name: 'Suspicious PowerShell' },
           impact: 'high',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
           workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, user: analyst('worker-user'), request: REQUEST }
@@ -215,7 +215,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           actionInput: { name: 'Suspicious PowerShell' },
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -247,7 +247,7 @@ describe('ProposalsService', () => {
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -271,7 +271,7 @@ describe('ProposalsService', () => {
           conversationId: 'conv-1',
           comment: 'Tune the noisy rule',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -315,7 +315,7 @@ describe('ProposalsService', () => {
             actionInput: {},
             impact: 'low',
             confidence: 'medium',
-            origin: 'worker',
+            origin: 'alertzero',
           },
           { spaceId: SPACE_ID, request: REQUEST }
         )
@@ -338,7 +338,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           impact: 'low',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -371,7 +371,7 @@ describe('ProposalsService', () => {
           comment: 'Isolate the host',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -390,7 +390,7 @@ describe('ProposalsService', () => {
           comment: 'Rotate the credentials by hand, then approve',
           category: 'respond',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -415,7 +415,7 @@ describe('ProposalsService', () => {
           comment: 'Contain the host',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -445,7 +445,7 @@ describe('ProposalsService', () => {
           // came out of, which the action's own metadata cannot.
           impact: 'critical',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -470,7 +470,7 @@ describe('ProposalsService', () => {
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -492,7 +492,7 @@ describe('ProposalsService', () => {
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -524,7 +524,7 @@ describe('ProposalsService', () => {
           impact: '' as never,
           category: '' as never,
           confidence: '' as never,
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -551,7 +551,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           category: 'contain',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -572,7 +572,7 @@ describe('ProposalsService', () => {
           comment: 'Rotate the credentials by hand, then approve',
           category: 'contain',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -594,7 +594,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           impact: 'low',
           confidence: 'low',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -618,7 +618,7 @@ describe('ProposalsService', () => {
           expiresAt: '',
           impact: 'low',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
           workflowExecutionId: '',
         },
         { spaceId: SPACE_ID, request: REQUEST }
@@ -641,7 +641,7 @@ describe('ProposalsService', () => {
           comment: 'Rotate the credentials by hand, then approve',
           impact: 'medium',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -1179,6 +1179,18 @@ describe('ProposalsService', () => {
   });
 
   describe('clone', () => {
+    it('inherits the origin, so a retry stays in the queue that raised it', async () => {
+      const storage = createStorage(
+        baseDocument({ origin: 'nightshift', decision: 'approved', status: 'failed' })
+      );
+      const { service } = createService(storage);
+
+      await service.clone({ id: 'proposal-1' }, SPACE_ID);
+
+      const [[cloneArgs]] = storage.index.mock.calls;
+      expect(cloneArgs.document.origin).toBe('nightshift');
+    });
+
     it('carries the failure it re-offers onto the clone, so the queue need not fetch the predecessor', async () => {
       const storage = createStorage(baseDocument({ decision: 'approved', status: 'failed' }));
       const { service } = createService(storage);
@@ -1242,7 +1254,7 @@ describe('ProposalsService', () => {
         impact: 'low',
         confidence: 'medium',
         category: 'tune',
-        origin: 'worker',
+        origin: 'alertzero',
         status: 'pending',
         // The clone points at the same still-parked gate execution, so
         // approving it resumes that execution rather than stranding.
@@ -1340,6 +1352,19 @@ describe('ProposalsService', () => {
   });
 
   describe('revise', () => {
+    it('inherits the origin, so a chain cannot split across two queues', async () => {
+      const storage = createStorage(baseDocument({ origin: 'nightshift' }));
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', comment: 'Revised' }, SPACE_ID);
+
+      // No revise input can move it, and consumers filter on exact equality:
+      // a revision that relabelled itself would vanish from the queue showing
+      // its predecessor.
+      const [[reviseArgs]] = storage.index.mock.calls;
+      expect(reviseArgs.document.origin).toBe('nightshift');
+    });
+
     it('applies a title override, since renaming is exactly what produces a revision', async () => {
       const storage = createStorage(baseDocument({ title: 'Tune noisy rule' }));
       const { service } = createService(storage);

@@ -137,7 +137,7 @@ const baseProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
   status: 'pending',
   impact: 'low',
   confidence: 'medium',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-01-01T00:00:00.000Z',
   expired: false,
   ...overrides,

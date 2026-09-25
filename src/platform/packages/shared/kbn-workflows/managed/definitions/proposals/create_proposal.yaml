@@ -134,16 +134,13 @@ triggers:
           description: Confidence in the recommendation.
         origin:
           type: string
-          minLength: 1
-          maxLength: 64
           description: >
-            Which system is producing this proposal, so a solution's queue can
-            show its own and not another's. Required and undefaulted: a default
-            would attribute every caller that forgot it to whichever system the
-            default named. This workflow is solution-agnostic and owns no
-            vocabulary — callers pass their own constant, and pin this literal
-            to it in their shape tests so a typo fails CI rather than silently
-            dropping the proposal out of a filter.
+            Which feature is producing this proposal, so its own queue can show
+            it and another's cannot. Required and undefaulted: a default would
+            attribute every caller that forgot it to whichever feature the
+            default named. Must be a member of the shared origin vocabulary,
+            which `proposals.createProposal` validates — an unrecognised value
+            fails the step rather than being stored.
         autoApprove:
           type: boolean
           description: >

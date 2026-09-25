@@ -40,7 +40,7 @@ apiTest.describe(
           comment: 'Original comment',
           impact: 'low',
           confidence: 'medium',
-          origin: 'seeded-origin',
+          origin: 'nightshift',
         });
 
         const reviseResponse = await reviseProposal(apiClient, cookieHeader, originalId, {
@@ -61,8 +61,8 @@ apiTest.describe(
         expect(replacementResponse.body.impact).toBe('high');
         expect(replacementResponse.body.confidence).toBe('high');
         // Inherited from the predecessor rather than re-resolved, so a revision
-        // cannot silently relabel which system a proposal came from.
-        expect(replacementResponse.body.origin).toBe('seeded-origin');
+        // cannot silently relabel which feature a proposal came from.
+        expect(replacementResponse.body.origin).toBe('nightshift');
         expect(replacementResponse.body.revision).toBe(2);
         expect(replacementResponse.body.rootProposalId).toBe(originalId);
         expect(replacementResponse.body.supersedes).toBe(originalId);

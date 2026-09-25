@@ -10,9 +10,9 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import { ALERTZERO_PROPOSAL_ORIGIN } from '@kbn/workflows/managed';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
 import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;

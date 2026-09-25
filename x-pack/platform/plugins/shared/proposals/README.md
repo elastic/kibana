@@ -64,17 +64,21 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-proposals` and points at the conversation it belongs to.
 - An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
-- Every proposal declares an **`origin`**: which system produced it, so a solution's queue can show its own and not another's. It is an opaque bounded keyword this plugin owns no vocabulary for, exactly like `category` — and it is required, because no default could name a caller correctly. See "Origin is the caller's vocabulary" below.
+- Every proposal declares an **`origin`**: which feature produced it, so that feature's queue can show it and another's cannot. It is a closed enum, required, and fixed for the whole revision chain. See "Origin is a closed routing key" below.
 - A proposal may carry a **`title`**: a short plain-text label, distinct from the markdown `comment`. Optional, so every surface that renders one keeps its `title ?? action.name ?? actionWorkflowId ?? <fallback>` chain.
 - Proposals are immutable once **decided**. An undecided proposal can still be **revised**: `revise()` supersedes the current head with a new revision that carries the correction, and the gate decides whichever revision is live when the analyst answers. The predecessor is marked `superseded` and hidden from the queue by `excludeSuperseded`, so a chain shows one live row at a time.
 
-### Origin is the caller's vocabulary
+### Origin is a closed routing key
 
-This plugin serves callers beyond the two that exist today, so it cannot learn their names: `origin` is `z.string().trim().min(1).max(64)`, copying `actionCategorySchema`.
+`origin` is a `z.enum` in `@kbn/proposals-common`, one member per producing feature. That is deliberately unlike `category`, which is an open per-solution keyword, because the two fail differently: a typo'd category still appears, as a group with a silly name, while a typo'd origin matches no queue's filter and the proposal is never seen by anyone.
 
-An open vocabulary fails differently here than it does for `category`, though. A typo'd category still appears, as a group with a silly name; a typo'd origin drops the proposal out of a filter with no error anywhere. So each consumer exports its own constant — AlertZero's is `ALERTZERO_PROPOSAL_ORIGIN` in `@kbn/workflows/managed` — and its workflow shape tests pin the YAML literal to it, the way `max-iterations.limit` is pinned to `consts.max_attempts`. A typo then fails CI instead of failing quietly.
+Consumers filter on **exact equality** — AlertZero's queues pass `ALERTZERO_PROPOSAL_ORIGIN` and therefore never show Nightshift's or Context Engine's rows, nor a proposal raised from the standalone chat surface. So the value is a routing key every producer and consumer must agree on character for character, which is what an enum enforces and an open vocabulary cannot.
 
-A queue that later wants an origin dropdown can take a terms aggregation on the keyword; that needs no central enum either.
+Adding a producer is a deliberate change to that enum, reviewed alongside the queue-visibility consequences it carries. Members nothing writes yet are declared intent.
+
+It is also **immutable**: `create()` is the only writer, `revise()` and `clone()` inherit it through the spread, and `UpdateProposalParams` has no field for it. A chain therefore cannot split across two queues.
+
+The one thing the enum cannot catch is a valid member used by the wrong producer — an AlertZero Worker declaring `nightshift` on a copy-paste. `proposal_origin.test.ts` in the AlertZero plugin sweeps every AlertZero managed definition for `system-create-proposal` call sites and pins each to `ALERTZERO_PROPOSAL_ORIGIN`, so a new Worker cannot be added without one.
 
 ### Decision and status are two axes
 

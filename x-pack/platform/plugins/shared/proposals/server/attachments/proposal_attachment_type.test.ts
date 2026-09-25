@@ -27,7 +27,7 @@ const proposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMe
   impact: 'high',
   confidence: 'high',
   category: 'configure',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-01T00:00:00.000Z',
   expired: false,
   ...overrides,

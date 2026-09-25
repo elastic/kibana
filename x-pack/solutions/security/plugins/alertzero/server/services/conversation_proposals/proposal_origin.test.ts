@@ -1,29 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { parse } from 'yaml';
-import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_PROPOSAL_ORIGIN } from './constants';
-import { managedWorkflowDefinitions } from '..';
-import type { ManagedWorkflowDefinition } from '../../types';
-import { CREATE_PROPOSAL_WORKFLOW_ID } from '../proposals';
+import { CREATE_PROPOSAL_WORKFLOW_ID, getManagedWorkflowDefinitions } from '@kbn/workflows/managed';
+import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
 
 /**
- * `origin` is an open vocabulary, so a typo'd one is not a validation error —
- * it is a proposal that silently never matches the queue's filter and is never
- * seen. Pinning the literal here is what turns that into a CI failure, and
- * sweeping every definition rather than naming call sites means a new one
- * cannot be added without one.
+ * `origin` is the routing key the queue filters on by exact equality, so an
+ * AlertZero Worker that declares someone else's — easy on a copy-paste, and
+ * still a valid enum member — produces proposals no AlertZero analyst ever
+ * sees. The enum cannot catch that; only comparing each call site against the
+ * value this solution owns can.
+ *
+ * Swept across every AlertZero definition rather than naming call sites, so a
+ * new Worker cannot be added without one.
  */
+
+/** The plugin id AlertZero's managed workflow definitions are registered under. */
+const ALERTZERO_PLUGIN_ID = 'alertzero';
 
 interface WorkflowStep {
   name?: string;
-  type?: string;
   with?: { 'workflow-id'?: string; inputs?: Record<string, unknown> };
   steps?: WorkflowStep[];
   cases?: Array<{ steps?: WorkflowStep[] }>;
@@ -43,14 +45,10 @@ const flatten = (steps: WorkflowStep[]): WorkflowStep[] =>
     ...flatten(step.default ?? []),
   ]);
 
-const alertzeroDefinitions: ManagedWorkflowDefinition[] = managedWorkflowDefinitions.filter(
-  (definition) => definition.pluginId === ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID
-);
-
 /**
  * Templating here is placeholder substitution, so any plausible scalar renders
- * a parseable document. A template that needs a key this lacks throws, which is
- * the right outcome: it means a definition escaped this sweep.
+ * a parseable document. A template needing a key this lacks throws, which is
+ * the right outcome: it means a definition escaped the sweep.
  */
 const TEMPLATE_VALUES = {
   settingsVersion: 1,
@@ -58,6 +56,10 @@ const TEMPLATE_VALUES = {
   scheduleInterval: '1h',
   extras: { analysisWindowDays: 7 },
 };
+
+const alertzeroDefinitions: ManagedWorkflowDefinition[] = getManagedWorkflowDefinitions().filter(
+  (definition) => definition.pluginId === ALERTZERO_PLUGIN_ID
+);
 
 const proposalCallSites = alertzeroDefinitions.flatMap((definition) => {
   const yaml = definition.yaml ?? definition.yamlTemplate(TEMPLATE_VALUES);

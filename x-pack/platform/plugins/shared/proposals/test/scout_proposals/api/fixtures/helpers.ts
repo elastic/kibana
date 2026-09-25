@@ -7,6 +7,7 @@
 
 import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
 import type { Client } from '@elastic/elasticsearch';
+import type { ProposalOrigin } from '@kbn/proposals-common';
 import { v4 as uuidv4 } from 'uuid';
 import { COMMON_HEADERS } from './constants';
 
@@ -216,7 +217,7 @@ export interface SeedProposalOptions {
   comment?: string;
   impact?: string;
   confidence?: string;
-  origin?: string;
+  origin?: ProposalOrigin;
   /** Overrides the seeded status away from `pending` — e.g. to prove a route
    * rejects revising something already settled, without needing a real
    * workflow execution to transition it there. */
@@ -255,7 +256,7 @@ export const seedProposal = async (
       category: 'tune',
       // Required by `proposalSchema` and always stamped by `create()`, so a seed
       // without it is a shape this plugin never writes in production.
-      origin: options.origin ?? 'scout',
+      origin: options.origin ?? 'alertzero',
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       workflowExecutionId: `scout-fake-execution-${Date.now()}`,
       createdAt: now,
