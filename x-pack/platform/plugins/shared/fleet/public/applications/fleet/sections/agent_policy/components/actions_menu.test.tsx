@@ -343,6 +343,67 @@ describe('AgentPolicyActionMenu', () => {
     });
   });
 
+  describe('uninstall command flyout', () => {
+    const agentPolicyWithAgents: AgentPolicy = {
+      ...baseAgentPolicy,
+      agents: 1,
+    };
+
+    beforeEach(() => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgentPolicies: true,
+          allAgents: true,
+        },
+        integrations: {
+          writeIntegrationPolicies: true,
+        },
+      } as any);
+    });
+
+    it('should not render "Uninstall agents on this policy" menu item for managed Agent', async () => {
+      const testRenderer = createFleetTestRendererMock();
+
+      const result = testRenderer.render(
+        <AgentPolicyActionMenu agentPolicy={{ ...agentPolicyWithAgents, is_managed: true }} />
+      );
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      await userEvent.click(agentActionsButton);
+
+      expect(result.queryByTestId('uninstall-agents-command-menu-item')).not.toBeInTheDocument();
+    });
+
+    it('should render "Uninstall agents on this policy" menu item for not managed Agent', async () => {
+      const testRenderer = createFleetTestRendererMock();
+
+      const result = testRenderer.render(
+        <AgentPolicyActionMenu agentPolicy={agentPolicyWithAgents} />
+      );
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      await userEvent.click(agentActionsButton);
+
+      expect(result.queryByTestId('uninstall-agents-command-menu-item')).toBeInTheDocument();
+    });
+
+    it('should open uninstall commands flyout when clicking on "Uninstall agents on this policy"', async () => {
+      const testRenderer = createFleetTestRendererMock();
+
+      const result = testRenderer.render(
+        <AgentPolicyActionMenu agentPolicy={agentPolicyWithAgents} />
+      );
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      await userEvent.click(agentActionsButton);
+      expect(result.queryByTestId('uninstall-command-flyout')).not.toBeInTheDocument();
+
+      await userEvent.click(result.getByTestId('uninstall-agents-command-menu-item'));
+
+      expect(result.queryByTestId('uninstall-command-flyout')).toBeInTheDocument();
+    });
+  });
+
   describe('manage auto-upgrade agents', () => {
     const agentPolicyWithStandardPackagePolicy: AgentPolicy = {
       ...baseAgentPolicy,

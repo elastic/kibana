@@ -35,9 +35,9 @@ const baseRule: RuleApiResponse = {
     format: 'standalone',
     breach: { query: 'FROM logs-* | STATS count() BY host.name' },
   },
-  created_by: 'alice@example.com',
+  created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
-  updated_by: 'bob@example.com',
+  updated_by: { profile_uid: 'bob@example.com' },
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
@@ -248,7 +248,7 @@ describe('RuleConditions', () => {
       state_transition: {
         pending_count: 3,
         pending_timeframe: '5m',
-        pending_operator: 'AND',
+        pending_operator: 'and',
         recovering_count: 0,
       },
     });
@@ -264,7 +264,7 @@ describe('RuleConditions', () => {
         pending_count: 0,
         recovering_count: 4,
         recovering_timeframe: '20m',
-        recovering_operator: 'OR',
+        recovering_operator: 'or',
       },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent(
