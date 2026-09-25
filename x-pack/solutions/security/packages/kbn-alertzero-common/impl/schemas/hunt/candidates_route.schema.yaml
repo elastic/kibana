@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: AlertZero candidates route
+  version: '1'
+paths:
+  /internal/alertzero/hunt/candidates:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: Candidates
+      description: >-
+        The single source of truth for hunt-once candidate selection. Named
+        report_ids mean manual-bypass semantics; absent or empty means a
+        scheduled-shaped sweep.
+      summary: Get candidate report ids for the next hunt run
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                report_ids:
+                  type: array
+                  maxItems: 10
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 512
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ids, skipped, total, truncated]
+                properties:
+                  ids:
+                    type: array
+                    items:
+                      type: string
+                  skipped:
+                    type: array
+                    description: >-
+                      Reports that matched the request but are not being hunted,
+                      each with why. A report carrying an open Hunt Proposal is
+                      skipped on the scheduled and the manual-named path alike.
+                    items:
+                      type: object
+                      required: [id, reason]
+                      properties:
+                        id:
+                          type: string
+                        reason:
+                          $ref: '#/components/schemas/CandidateSkipReason'
+                  total:
+                    type: integer
+                  truncated:
+                    type: boolean
+components:
+  schemas:
+    CandidateSkipReason:
+      type: string
+      enum: [open_proposal, already_hunted, not_found]
