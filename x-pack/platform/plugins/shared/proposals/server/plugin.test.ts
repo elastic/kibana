@@ -16,6 +16,7 @@ import {
   GetProposalStepId,
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
+  SettleIncompleteProposalStepId,
   UpdateProposalStepId,
 } from '@kbn/proposals-common';
 import { ProposalsPlugin } from './plugin';
@@ -151,6 +152,7 @@ describe('ProposalsPlugin', () => {
       expect(registeredIds).toEqual([
         CreateProposalStepId,
         UpdateProposalStepId,
+        SettleIncompleteProposalStepId,
         CheckDecidePrivilegesStepId,
         GetProposalStepId,
         CloneProposalStepId,
