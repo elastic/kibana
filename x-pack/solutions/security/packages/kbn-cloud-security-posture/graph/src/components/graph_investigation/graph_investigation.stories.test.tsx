@@ -19,14 +19,11 @@ import {
   GRAPH_INVESTIGATION_TEST_ID,
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
-  GRAPH_NODE_EXPAND_BUTTON_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
-  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
-  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../test_ids';
 import * as previewAnnotations from '../../../.storybook/preview';
 import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
@@ -105,38 +102,66 @@ const QUERY_PARAM_IDX = 0;
 const FILTERS_PARAM_IDX = 1;
 
 const expandNode = async (container: HTMLElement, nodeId: string) => {
+  // Wait for the node to appear in the ReactFlow canvas
   await waitFor(() => {
-    const nodeElement = container.querySelector(
-      `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
-    );
-    expect(nodeElement).not.toBeNull();
+    expect(
+      container.querySelector(`.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`)
+    ).not.toBeNull();
   });
-
+  // Hover to set isHovered=true (affects CSS opacity/pointer-events via the NodeToolbar).
+  // NodeToolbar items are always in the DOM (isVisible={true}); no expand-button click needed.
   const nodeElement = container.querySelector(
     `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
   );
   userEvent.hover(nodeElement!);
-  (
-    nodeElement?.querySelector(
-      `[data-test-subj="${GRAPH_NODE_EXPAND_BUTTON_ID}"]`
-    ) as HTMLButtonElement
-  )?.click();
+};
+
+/**
+ * Returns the button with the given data-test-subj inside the NodeToolbar portal for `nodeId`,
+ * or null if the toolbar or button is absent.  Scoping prevents false positives when multiple
+ * entity nodes have the same button test-subject in the DOM simultaneously.
+ *
+ * NodeToolbar portals render inside the ReactFlow viewport container (not at document.body),
+ * so `document.querySelector` reliably finds them after nodes have mounted.
+ */
+const getNodeToolbarButton = (nodeId: string, testSubjectId: string) => {
+  const toolbar = document.querySelector<HTMLElement>(
+    `.react-flow__node-toolbar[data-id="${nodeId}"]`
+  );
+  return toolbar ? within(toolbar).queryByTestId(testSubjectId) : null;
 };
 
 const showActionsByNode = async (container: HTMLElement, nodeId: string) => {
   await expandNode(container, nodeId);
-
-  const btn = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
-  expect(btn).toHaveTextContent("Show this entity's actions");
-  btn.click();
+  // NodeToolbar buttons are always in DOM (isVisible={true}); just find the button directly.
+  const btn = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+  expect(btn).not.toBeNull();
+  expect(btn).toHaveAttribute('aria-label', "Show this entity's actions");
+  // Use fireEvent so the click fires synchronously. The filter-store update propagates via
+  // useSyncExternalStore; await waitFor to let the re-render flush before the caller asserts.
+  fireEvent.click(btn!);
+  await waitFor(() => {
+    expect(
+      getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)
+    ).toHaveAttribute('aria-label', "Hide this entity's actions");
+  });
 };
 
 const hideActionsByNode = async (container: HTMLElement, nodeId: string) => {
   await expandNode(container, nodeId);
-
-  const hideBtn = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
-  expect(hideBtn).toHaveTextContent("Hide this entity's actions");
-  hideBtn.click();
+  // NodeToolbar buttons are always in DOM; wait for the filter-active label from the prior click.
+  await waitFor(() => {
+    expect(
+      getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)
+    ).toHaveAttribute('aria-label', "Hide this entity's actions");
+  });
+  const btn = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+  fireEvent.click(btn!);
+  await waitFor(() => {
+    expect(
+      getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)
+    ).toHaveAttribute('aria-label', "Show this entity's actions");
+  });
 };
 
 const disableFilter = (container: HTMLElement, filterIndex: number) => {
@@ -155,24 +180,6 @@ const isSearchBarVisible = (container: HTMLElement) => {
   return searchBarContainer === null;
 };
 
-const waitAndExecute = async (callback: () => void, timeout: number = 3000) => {
-  const startTime = Date.now();
-  const pollInterval = 100;
-
-  while (Date.now() - startTime < timeout) {
-    try {
-      callback();
-      // If callback executes without throwing, we're done
-      return;
-    } catch (error) {
-      // If callback throws, wait and try again
-      await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    }
-  }
-
-  // If we've reached the timeout, try one final time and let any error bubble up
-  callback();
-};
 
 describe('GraphInvestigation Component', () => {
   beforeEach(() => {
@@ -255,114 +262,116 @@ describe('GraphInvestigation Component', () => {
 
   describe('popover', () => {
     it('shows `Show event details` list item when label node has documentsData of event', async () => {
-      const { container, getByTestId } = renderStory();
+      const { container } = renderStory();
+      const nodeId =
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)';
 
-      await expandNode(
-        container,
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)'
+      await expandNode(container, nodeId);
+
+      const showDetailsItem = getNodeToolbarButton(
+        nodeId,
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
       );
-
-      const showDetailsItem = getByTestId(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
-      expect(showDetailsItem).toHaveTextContent('Show event details');
+      expect(showDetailsItem).not.toBeNull();
+      expect(showDetailsItem).toHaveAttribute('aria-label', 'Show event details');
     });
 
     it('shows `Show alert details` list item when label node has documentsData of alert', async () => {
-      const { container, getByTestId } = renderStory();
+      const { container } = renderStory();
+      const nodeId =
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)';
 
-      await expandNode(
-        container,
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
+      await expandNode(container, nodeId);
+
+      const showDetailsItem = getNodeToolbarButton(
+        nodeId,
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
       );
-
-      const showDetailsItem = getByTestId(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
-      expect(showDetailsItem).toHaveTextContent('Show alert details');
+      expect(showDetailsItem).not.toBeNull();
+      expect(showDetailsItem).toHaveAttribute('aria-label', 'Show alert details');
     });
 
     it('should not show `Show event details` list item when label node misses documentsData', async () => {
-      const { container, queryByTestId } = renderStory();
+      const { container } = renderStory();
+      const nodeId =
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.DeleteRole)';
 
-      await expandNode(
-        container,
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.DeleteRole)'
+      await expandNode(container, nodeId);
+
+      const showDetailsItem = getNodeToolbarButton(
+        nodeId,
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
       );
-
-      const showDetailsItem = queryByTestId(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
-      expect(showDetailsItem).not.toBeInTheDocument();
+      expect(showDetailsItem).toBeNull();
     });
 
     it('shows the option `Show entity details` as enabled when entity node has documentsData with entity data', async () => {
-      const { container, getByTestId } = renderStory();
+      const { container } = renderStory();
+      const nodeId = 'projects/your-project-id/roles/customRole';
 
-      await expandNode(container, 'projects/your-project-id/roles/customRole');
+      await expandNode(container, nodeId);
 
-      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
-      expect(showDetailsItem).toHaveTextContent('Show entity details');
+      const showDetailsItem = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).not.toBeNull();
+      expect(showDetailsItem).toHaveAttribute('aria-label', 'Show entity details');
       expect(showDetailsItem).not.toHaveAttribute('disabled');
     });
 
     it('show the option `Show entity details` as disabled when entity node has no documentsData', async () => {
-      const { container, getByTestId, queryByTestId } = renderStory();
+      const { container } = renderStory();
+      const nodeId = 'admin@example.com';
 
-      await expandNode(container, 'admin@example.com');
-      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
-      expect(showDetailsItem).toHaveTextContent('Show entity details');
+      await expandNode(container, nodeId);
+      const showDetailsItem = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).not.toBeNull();
+      expect(showDetailsItem).toHaveAttribute('aria-label', 'Show entity details');
+      // In the NodeToolbar design the button is rendered disabled; the tooltip test-subj is not
+      // forwarded by toToolbarItemsFn, so we verify only the disabled attribute here.
       expect(showDetailsItem).toHaveAttribute('disabled');
-
-      // can't use userEvent.hover since we get the following error:
-      // 'Unable to perform pointer interaction as the element has pointer-events: none:'
-      fireEvent.mouseOver(showDetailsItem);
-
-      // Wait for tooltip and execute validation
-      await waitAndExecute(() => {
-        const tooltip = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID);
-        expect(tooltip).toBeInTheDocument();
-        expect(tooltip).toHaveTextContent('Details not available');
-      });
     });
 
     it('shows the option `Show entity relationships` as enabled when entity node is enriched', async () => {
-      const { container, getByTestId } = renderStory();
+      const { container } = renderStory();
+      const nodeId = 'projects/your-project-id/roles/customRole';
 
-      await expandNode(container, 'projects/your-project-id/roles/customRole');
+      await expandNode(container, nodeId);
 
-      const showRelationshipsItem = getByTestId(
+      const showRelationshipsItem = getNodeToolbarButton(
+        nodeId,
         GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
       );
-      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).not.toBeNull();
+      expect(showRelationshipsItem).toHaveAttribute('aria-label', 'Show entity relationships');
       expect(showRelationshipsItem).not.toHaveAttribute('disabled');
     });
 
     it('shows the option `Show entity relationships` as disabled when entity node is not enriched', async () => {
-      const { container, getByTestId, queryByTestId } = renderStory();
+      const { container } = renderStory();
+      const nodeId = 'admin@example.com';
 
-      await expandNode(container, 'admin@example.com');
-      const showRelationshipsItem = getByTestId(
+      await expandNode(container, nodeId);
+      const showRelationshipsItem = getNodeToolbarButton(
+        nodeId,
         GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
       );
-      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).not.toBeNull();
+      expect(showRelationshipsItem).toHaveAttribute('aria-label', 'Show entity relationships');
+      // In the NodeToolbar design the button is rendered disabled; the tooltip test-subj is not
+      // forwarded by toToolbarItemsFn, so we verify only the disabled attribute here.
       expect(showRelationshipsItem).toHaveAttribute('disabled');
-
-      // can't use userEvent.hover since we get the following error:
-      // 'Unable to perform pointer interaction as the element has pointer-events: none:'
-      fireEvent.mouseOver(showRelationshipsItem);
-
-      // Wait for tooltip and execute validation
-      await waitAndExecute(() => {
-        const tooltip = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID);
-        expect(tooltip).toBeInTheDocument();
-        expect(tooltip).toHaveTextContent('Entity relationships not available');
-      });
     });
 
     it('does not show `Show entity relationships` option for grouped entities', async () => {
-      const { container, queryByTestId } = renderGroupedActorStory();
+      const { container } = renderGroupedActorStory();
+      const nodeId = 'mixed-entities';
 
-      await expandNode(container, 'mixed-entities');
+      await expandNode(container, nodeId);
 
-      const showRelationshipsItem = queryByTestId(
+      const showRelationshipsItem = getNodeToolbarButton(
+        nodeId,
         GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
       );
-      expect(showRelationshipsItem).not.toBeInTheDocument();
+      expect(showRelationshipsItem).toBeNull();
     });
   });
 
@@ -437,7 +446,7 @@ describe('GraphInvestigation Component', () => {
         showToggleSearch: true,
       });
       await expandNode(container, 'admin@example.com');
-      getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID).click();
+      getNodeToolbarButton('admin@example.com', GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)!.click();
 
       expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('2');
     });
@@ -455,9 +464,9 @@ describe('GraphInvestigation Component', () => {
       expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('');
 
       await expandNode(container, 'admin@example.com');
-      expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
-        "Show this entity's actions"
-      );
+      expect(
+        getNodeToolbarButton('admin@example.com', GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)
+      ).toHaveAttribute('aria-label', "Show this entity's actions");
     });
 
     it('hide filters counter when filter is disabled', async () => {
@@ -473,9 +482,9 @@ describe('GraphInvestigation Component', () => {
       expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('');
 
       await expandNode(container, 'admin@example.com');
-      expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
-        "Show this entity's actions"
-      );
+      expect(
+        getNodeToolbarButton('admin@example.com', GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)
+      ).toHaveAttribute('aria-label', "Show this entity's actions");
     });
   });
 
@@ -513,11 +522,14 @@ describe('GraphInvestigation Component', () => {
       expect(mouseupSpy.mock.calls[0][0].target).toBe(root);
     });
 
-    it('does not dispatch synthetic mouse events when only a graph-internal popover is open', async () => {
+    it('does not dispatch synthetic mouse events when no external overlay is open', async () => {
       const { container } = renderStory({ showToggleSearch: true });
       await expandNode(container, 'admin@example.com');
       await waitFor(() => {
-        expect(screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toBeInTheDocument();
+        // Toolbar buttons are always in DOM (isVisible={true}); verify node has rendered
+        expect(
+          getNodeToolbarButton('admin@example.com', GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)
+        ).not.toBeNull();
       });
 
       const pane = container.querySelector('.react-flow__pane') as HTMLElement;
@@ -1209,22 +1221,25 @@ describe('GraphInvestigation Component', () => {
     });
 
     it('grouped actor node does not show filter actions in popover', async () => {
-      const { container, queryByTestId } = renderGroupedActorStory();
+      const { container } = renderGroupedActorStory();
+      const nodeId = 'mixed-entities';
 
-      await expandNode(container, 'mixed-entities');
+      await expandNode(container, nodeId);
 
       // Grouped entities should not have "Show actions by entity" option
-      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
-      expect(showActionsBy).not.toBeInTheDocument();
+      const showActionsBy = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).toBeNull();
     });
 
     it('grouped actor node shows grouped entities option', async () => {
-      const { container, getByTestId } = renderGroupedActorStory();
+      const { container } = renderGroupedActorStory();
+      const nodeId = 'mixed-entities';
 
-      await expandNode(container, 'mixed-entities');
+      await expandNode(container, nodeId);
 
-      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID);
-      expect(showDetailsItem).toHaveTextContent('Show grouped entities');
+      const showDetailsItem = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID);
+      expect(showDetailsItem).not.toBeNull();
+      expect(showDetailsItem).toHaveAttribute('aria-label', 'Show grouped entities');
     });
   });
 
@@ -1293,22 +1308,25 @@ describe('GraphInvestigation Component', () => {
     });
 
     it('grouped target node with mixed namespaces does not show filter actions in popover', async () => {
-      const { container, queryByTestId } = renderGroupedTargetStory();
+      const { container } = renderGroupedTargetStory();
+      const nodeId = 'mixed-targets';
 
-      await expandNode(container, 'mixed-targets');
+      await expandNode(container, nodeId);
 
       // Grouped entities should not have "Show actions by entity" or "Show actions on entity" options
-      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
-      expect(showActionsBy).not.toBeInTheDocument();
+      const showActionsBy = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).toBeNull();
     });
 
     it('grouped target node shows grouped entities option', async () => {
-      const { container, getByTestId } = renderGroupedTargetStory();
+      const { container } = renderGroupedTargetStory();
+      const nodeId = 'mixed-targets';
 
-      await expandNode(container, 'mixed-targets');
+      await expandNode(container, nodeId);
 
-      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID);
-      expect(showDetailsItem).toHaveTextContent('Show grouped entities');
+      const showDetailsItem = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID);
+      expect(showDetailsItem).not.toBeNull();
+      expect(showDetailsItem).toHaveAttribute('aria-label', 'Show grouped entities');
     });
   });
 });

@@ -718,6 +718,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           return { ...node };
         }) ?? []
       );
+      // Callbacks (expandButtonClick, ipClickHandler, etc.) are excluded from deps intentionally —
+      // they are stable or recreated from memoized state and do not affect layout or node keys.
+      // toolbarItemsFn MUST be included because its factory function closes over filter-active state;
+      // when a filter is toggled the label ("Show" ↔ "Hide") must reflect the new state.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       data?.nodes,
@@ -725,6 +729,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       originAlertIdsSet,
       originEntityIdsSet,
       relationshipNodeSources,
+      nodeToolbarItemsFn,
+      labelToolbarItemsFn,
     ]);
 
     const searchFilterCounter = useMemo(() => {
