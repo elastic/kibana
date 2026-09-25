@@ -39,6 +39,8 @@ export {
   type ConversationDetailsFlyoutFooterProps,
 } from './src/components/details/flyout_footer';
 export {
+  ConversationHeaderBlocks,
+  type ConversationHeaderBlocksProps,
   InvestigationHeaderBlocks,
   type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
@@ -46,6 +48,10 @@ export {
   OverviewTab,
   type OverviewTabProps,
 } from './src/components/details/details_flyout_tab_contents';
+export {
+  EscalationFlyoutHeader,
+  type EscalationFlyoutHeaderProps,
+} from './src/components/details/escalation_flyout_header';
 export { DetailsBlock } from './src/components/details/detail_block';
 export {
   ProposedActionButton,
@@ -66,8 +72,11 @@ export {
 export {
   registerAgenticInvestigationTemplateUI,
   type RegisterAgenticInvestigationTemplateUIOptions,
+  registerEscalationTemplateUI,
+  type RegisterEscalationTemplateUIOptions,
   getInvestigationTabIds,
 } from './src/template_ui/register';
+export { type RenderAssignees, type AssigneesSlotRenderProps } from './src/template_ui/types';
 export { conversationToInvestigation } from './src/template_ui/conversation_to_investigation';
 
 export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';

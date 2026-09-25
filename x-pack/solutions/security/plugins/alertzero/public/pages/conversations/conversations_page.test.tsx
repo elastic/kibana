@@ -22,6 +22,11 @@ import {
   useIsDecliningProposal,
 } from '@kbn/proposals-plugin/public';
 import {
+  useAssignInvestigation,
+  useUserProfiles,
+  useSuggestUserProfiles,
+} from '@kbn/agentic-investigations-plugin/public';
+import {
   useProposalsByCategory,
   useProposalsByCategoryCount,
   useClosedProposals,
@@ -41,11 +46,45 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useIsApprovingProposal: jest.fn(),
   useIsDecliningProposal: jest.fn(),
 }));
-// Only the profile lookup is stubbed here.
+// Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
+// jest.mock calls for the same module would silently replace one another rather than merge.
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
   useCurrentUserProfile: jest.fn(() => ({ data: null })),
+  useAssignInvestigation: jest.fn(),
+  useUserProfiles: jest.fn(),
+  useSuggestUserProfiles: jest.fn(),
 }));
+jest.mock('@kbn/agentic-investigations-common', () => {
+  const actual = jest.requireActual('@kbn/agentic-investigations-common');
+  return {
+    ...actual,
+    // Replace AssignToUsers with a minimal stub so the queue renders without needing
+    // a full EUI/user-profile environment.
+    // eslint-disable-next-line react/display-name
+    AssignToUsers: ({
+      conversationId,
+      onChange,
+      canManage,
+    }: {
+      conversationId: string;
+      onChange: (s: unknown[]) => void;
+      canManage: boolean;
+    }) =>
+      canManage ? (
+        <button
+          data-test-subj={`mock-assign-${conversationId}`}
+          onClick={() =>
+            onChange([{ uid: 'user-uid-1', enabled: true, user: { username: 'alice' }, data: {} }])
+          }
+        >
+          Assign
+        </button>
+      ) : (
+        <span data-test-subj={`mock-assignees-readonly-${conversationId}`}>Read-only</span>
+      ),
+  };
+});
 jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
@@ -61,6 +100,9 @@ const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
 const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
 const mockUseIsDecliningProposal = useIsDecliningProposal as jest.Mock;
+const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
+const mockUseUserProfiles = useUserProfiles as jest.Mock;
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 
 /** Records the fetchNextPage of each bucket, so a Show more click can be asserted. */
 const fetchNextPage: Record<string, jest.Mock> = {};
@@ -151,13 +193,17 @@ const proposal: ProposalItem = {
   conversationAssignees: [],
 };
 
-const renderPage = (initialEntry: string) => {
+const renderPage = (
+  initialEntry: string,
+  { capabilities = {} }: { capabilities?: Record<string, unknown> } = {}
+) => {
   const core = coreMock.createStart();
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
   core.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
+  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
   const agentBuilder = agentBuilderMocks.createStart();
   const closeFlyout = jest.fn();
   (agentBuilder.openConversationDetails as jest.Mock).mockResolvedValue(closeFlyout);
@@ -184,6 +230,7 @@ const renderPage = (initialEntry: string) => {
 
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
 const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
+const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
   approveMutateAsync.mockResolvedValue(undefined);
@@ -192,6 +239,9 @@ beforeEach(() => {
   mockUseDismissProposal.mockReturnValue({ mutateAsync: dismissMutateAsync });
   mockUseIsApprovingProposal.mockReturnValue(false);
   mockUseIsDecliningProposal.mockReturnValue(false);
+  mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
+  mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
+  mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockOpenCount(0);
 });
 
@@ -695,5 +745,47 @@ describe('ConversationsPage impact pills', () => {
 
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+  });
+});
+
+describe('ConversationsPage assignee picker', () => {
+  beforeEach(() => {
+    mockProposals({ investigate: [proposal] });
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('passes the conversationId (not the proposal id) to the assignment mutation', async () => {
+    renderPage('/', { capabilities: { manageInvestigations: true } });
+
+    // The stub AssignToUsers is keyed by getRowKey (proposal id), so the button test-id uses it.
+    fireEvent.click(screen.getByTestId('mock-assign-prop-1'));
+
+    await waitFor(() =>
+      expect(assignInvestigationMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ investigationId: 'inv-1' })
+      )
+    );
+    // The proposal id 'prop-1' must NOT appear as the investigation id.
+    expect(assignInvestigationMutate).not.toHaveBeenCalledWith(
+      expect.objectContaining({ investigationId: 'prop-1' })
+    );
+  });
+
+  it('does not open the conversation flyout when the assign button is clicked', async () => {
+    const { agentBuilder } = renderPage('/', { capabilities: { manageInvestigations: true } });
+
+    fireEvent.click(screen.getByTestId('mock-assign-prop-1'));
+
+    // Wait for any async handlers.
+    await waitFor(() => expect(assignInvestigationMutate).toHaveBeenCalled());
+    expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
+  });
+
+  it('renders the assignee picker as read-only when manageInvestigations is false', () => {
+    renderPage('/', { capabilities: { manageInvestigations: false } });
+
+    expect(screen.getByTestId('mock-assignees-readonly-prop-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-assign-prop-1')).not.toBeInTheDocument();
   });
 });

@@ -14,6 +14,7 @@ import {
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
@@ -32,9 +33,12 @@ import {
 } from '../../../spec/schema';
 
 /**
- * Verdicts the FP/TP analysis workflow may return. Each one must have a dedicated
- * switch case in the review workflow, so a verdict never falls through to the
- * default arm.
+ * Verdicts the review workflow may apply. Each one must have a dedicated switch
+ * case, so a verdict never falls through to the default arm.
+ *
+ * The analysis workflow returns only the first three. `failed` is an execution
+ * state the review derives when the analysis produced no payload at all, which is
+ * why it is a case here and not an output there.
  */
 const VERDICTS = ['false_positive', 'true_positive', 'inconclusive', 'failed'] as const;
 
@@ -661,18 +665,14 @@ describe('Attack Discovery worker chain', () => {
       expect(verdictSwitch?.type).toBe('switch');
     });
 
-    it('switches on the stub verdict', () => {
-      expect(verdictSwitch?.expression).toContain('inputs.stub_verdict');
+    // The verdict arrives from another workflow, so `resolve_analysis` is the one
+    // place it is interpreted and every reader below goes through it.
+    it('switches on the resolved analysis verdict', () => {
+      expect(verdictSwitch?.expression).toBe('{{ steps.resolve_analysis.output.verdict }}');
     });
 
-    // #19276 AC1. A default run then exercises the escalation path, the same one
-    // true_positive takes.
-    it('defaults the stub verdict from consts.default_verdict', () => {
-      expect(verdictSwitch?.expression).toContain('default: consts.default_verdict');
-    });
-
-    it('defaults consts.default_verdict to inconclusive', () => {
-      expect(review.consts?.default_verdict).toBe('inconclusive');
+    it('does not switch on an input the caller could set', () => {
+      expect(verdictSwitch?.expression).not.toContain('inputs.');
     });
 
     // Both escalating verdicts reach the same gate, which is why neither case
@@ -684,18 +684,19 @@ describe('Attack Discovery worker chain', () => {
       }
     );
 
-    it('exposes every verdict as an input so all branches stay reachable', () => {
-      expect(review.triggers?.[0]?.inputs?.properties?.stub_verdict?.enum).toEqual([...VERDICTS]);
+    // The verdict is the analysis's to decide, so there is no longer an input that
+    // can set it. An analyst can read the classification but not override it.
+    it('takes no verdict input', () => {
+      expect(review.triggers?.[0]?.inputs?.properties?.stub_verdict).toBeUndefined();
     });
 
-    // The goal of this PR: every console stub #290732 committed is gone. The only
-    // remaining console step is `run_fp_tp_analysis`, which waits on #19211, plus
-    // `report_unknown_verdict`, which is a defensive default arm rather than a
-    // placeholder.
-    it('leaves exactly two console steps', () => {
+    // Every console stub is now gone: `run_fp_tp_analysis` calls the real analysis
+    // workflow, and `report_unknown_verdict` is a defensive default arm rather than
+    // a placeholder.
+    it('leaves exactly one console step', () => {
       expect(
         reviewSteps.filter((step) => step.type === 'console').map((step) => step.name)
-      ).toEqual(['run_fp_tp_analysis', 'report_unknown_verdict']);
+      ).toEqual(['report_unknown_verdict']);
     });
 
     it.each([
@@ -706,7 +707,10 @@ describe('Attack Discovery worker chain', () => {
       ['attach_alerts', 'foreach'],
       ['attach_alert_batch', 'ai.attachment.add'],
       ['verify_evidence', 'ai.attachment.read'],
+      ['run_fp_tp_analysis', 'workflow.execute'],
+      ['resolve_analysis', 'data.set'],
       ['attach_verdict', 'ai.attachment.add'],
+      ['refresh_verdict', 'ai.attachment.update'],
       ['close_investigation_false_positive', 'ai.conversation.metadata.patch'],
       ['close_attack_false_positive', 'security.setAttackStatus'],
       ['record_analysis_failure', 'ai.conversation.metadata.patch'],
@@ -719,8 +723,111 @@ describe('Attack Discovery worker chain', () => {
       expect(stepIn(reviewSteps, name)?.type).toBe(type);
     });
 
-    it('still stubs run_fp_tp_analysis pending #19211', () => {
-      expect(stepIn(reviewSteps, 'run_fp_tp_analysis')?.type).toBe('console');
+    describe('the FP/TP analysis handoff', () => {
+      const runAnalysis = stepIn(reviewSteps, 'run_fp_tp_analysis');
+      const analysisInputs = asInputs(runAnalysis);
+
+      it('calls the analysis workflow', () => {
+        expect(review.consts?.fp_tp_analysis).toBe(
+          ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID
+        );
+      });
+
+      it('resolves the workflow id from that const', () => {
+        expect(runAnalysis?.with?.['workflow-id']).toBe('{{ consts.fp_tp_analysis }}');
+      });
+
+      // Synchronous: the review needs the verdict inline, and every write the
+      // verdict produces is the review's.
+      it('waits for the verdict rather than dispatching detached', () => {
+        expect(runAnalysis?.type).toBe('workflow.execute');
+      });
+
+      // IDS ONLY. The analysis loads the authoritative documents itself, so a retry
+      // cannot reason over a copy of either that went stale between attempts.
+      it('hands the analysis nothing but the two ids', () => {
+        expect(Object.keys(analysisInputs).sort()).toEqual([
+          'attack_discovery_id',
+          'investigation_id',
+        ]);
+      });
+
+      it('names the attack under review', () => {
+        expect(analysisInputs.attack_discovery_id).toBe('{{ inputs.attack_discovery_id }}');
+      });
+
+      it('names the Investigation by its derived id', () => {
+        expect(analysisInputs.investigation_id).toBe(derivedInvestigationId);
+      });
+
+      // The failure contract: the analysis fails its run rather than classifying,
+      // and continuing is what lets `resolve_analysis` route that to the `failed`
+      // arm instead of abandoning the Investigation mid-review.
+      it('continues when the analysis fails so the failure can be recorded', () => {
+        expect(runAnalysis?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('runs the analysis before applying a verdict', () => {
+        expect(reviewStepNames.indexOf('run_fp_tp_analysis')).toBeLessThan(
+          reviewStepNames.indexOf('apply_verdict')
+        );
+      });
+    });
+
+    describe('the resolved analysis result', () => {
+      const resolved = asWith(stepIn(reviewSteps, 'resolve_analysis'));
+
+      // Renders the mapping exactly as the engine will, so each assertion reads the
+      // value a real execution produces rather than the template source. `output` is
+      // what a failed child leaves behind: nothing.
+      const resolve = (template: string, output: Record<string, string> = {}) =>
+        createWorkflowLiquidEngine().parseAndRender(template, {
+          consts: review.consts,
+          execution: { id: 'review-run-1' },
+          steps: { run_fp_tp_analysis: { output } },
+        });
+
+      // A failed child hands its parent nothing, so an absent verdict IS the
+      // failure signal. This is the whole `failed` mapping.
+      it('falls back to the failed verdict when the analysis produced none', async () => {
+        await expect(resolve(resolved.verdict)).resolves.toBe('failed');
+      });
+
+      it('takes the analysis verdict when there is one', async () => {
+        await expect(resolve(resolved.verdict, { verdict: 'false_positive' })).resolves.toBe(
+          'false_positive'
+        );
+      });
+
+      it('names failed as an execution state rather than a classification', () => {
+        expect(review.consts?.failed_verdict).toBe('failed');
+      });
+
+      // The attachment requires a summary, so a failed analysis has to supply one
+      // rather than attach an empty verdict. The execution reference is what makes
+      // the failure investigable, since the error itself lives in workflow history.
+      it('explains the failure when the analysis produced no summary', async () => {
+        await expect(resolve(resolved.summary_markdown)).resolves.toContain(
+          'See review execution review-run-1'
+        );
+      });
+
+      // The `{% if %}` rather than `| default:` is load-bearing: appending the
+      // execution id after a `default:` would append it to the child's summary too.
+      it('passes the analysis summary through untouched when there is one', async () => {
+        await expect(
+          resolve(resolved.summary_markdown, { summary_markdown: 'A **summary**' })
+        ).resolves.toBe('A **summary**');
+      });
+
+      // `${{ }}`, not `{{ }}`: the rationale is optional, and the attachment's
+      // renderer null-checks it, so a stringified absence would render an empty
+      // `## Rationale` section.
+      it('keeps an absent rationale absent rather than empty', () => {
+        expect(resolved.rationale_markdown).toBe(
+          '${{ steps.run_fp_tp_analysis.output.rationale_markdown }}'
+        );
+      });
     });
 
     describe('the Investigation', () => {
@@ -922,10 +1029,13 @@ describe('Attack Discovery worker chain', () => {
 
       // The heading and the narrative are rendered by the type from these fields, so
       // the workflow passes the verdict as an enum rather than as assembled markdown.
+      // All three come from the analysis via `resolve_analysis`: the summary is the
+      // conclusion's, not the discovery's `inputs.summary_markdown`.
       it('passes the verdict as structured data rather than a markdown blob', () => {
         expect(stepIn(reviewSteps, 'attach_verdict')?.with?.data).toEqual({
-          summary_markdown: '{{ inputs.summary_markdown }}',
-          verdict: '{{ inputs.stub_verdict | default: consts.default_verdict }}',
+          summary_markdown: '{{ steps.resolve_analysis.output.summary_markdown }}',
+          verdict: '{{ steps.resolve_analysis.output.verdict }}',
+          rationale_markdown: '${{ steps.resolve_analysis.output.rationale_markdown }}',
         });
       });
 
@@ -1004,6 +1114,47 @@ describe('Attack Discovery worker chain', () => {
       // produced it.
       it('continues past a failed attachment', () => {
         expect(attachments.map((step) => step['on-failure']?.continue)).toEqual([true, true, true]);
+      });
+
+      // A re-review lands on the SAME Investigation, so the add above 409s and its
+      // verdict is discarded — while the switch, the journal and the run output all
+      // act on the NEW one. The evidence attachments keep the first snapshot on
+      // purpose; the conclusion is the one that has to follow the analysis.
+      describe('refreshing the verdict on a re-review', () => {
+        const refresh = stepIn(reviewSteps, 'refresh_verdict');
+
+        // `update` versions rather than overwrites, so the superseded verdict stays
+        // in the attachment's history.
+        it('updates rather than adding a second verdict attachment', () => {
+          expect(refresh?.type).toBe('ai.attachment.update');
+        });
+
+        it('targets the attachment the add created', () => {
+          expect(refresh?.with?.attachment_id).toBe('analysis-verdict');
+        });
+
+        // Only on the 409 path: a first review's add already wrote this.
+        it('runs only when the add did not write the verdict', () => {
+          expect(refresh?.if).toBe('${{ steps.attach_verdict.error != null }}');
+        });
+
+        // The whole point: the refreshed payload is the one every other consumer of
+        // the verdict reads, so it cannot drift from them.
+        it('writes the same payload the rest of the review acts on', () => {
+          expect(refresh?.with?.data).toEqual(stepIn(reviewSteps, 'attach_verdict')?.with?.data);
+        });
+
+        it('refreshes before any lifecycle action is taken', () => {
+          expect(reviewStepNames.indexOf('refresh_verdict')).toBeLessThan(
+            reviewStepNames.indexOf('apply_verdict')
+          );
+        });
+
+        // Same reason the add continues: a verdict that could not be recorded is not
+        // a reason to abandon the review that produced it.
+        it('continues past a failed refresh', () => {
+          expect(refresh?.['on-failure']?.continue).toBe(true);
+        });
       });
     });
 

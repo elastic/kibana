@@ -11,6 +11,12 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   pageTitle: i18n.translate('xpack.alertzero.queue.pageTitle', {
     defaultMessage: 'AlertZero - Proposals queue',
   }),
+  assignSuccess: i18n.translate('xpack.alertzero.queue.assignSuccess', {
+    defaultMessage: 'Assignees updated',
+  }),
+  assignError: i18n.translate('xpack.alertzero.queue.assignError', {
+    defaultMessage: 'Could not update assignees',
+  }),
 });
 
 /** Keyed by the HTTP status the proposals route returns for a refused decision. */

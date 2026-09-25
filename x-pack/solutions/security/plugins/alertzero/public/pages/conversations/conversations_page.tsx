@@ -23,15 +23,15 @@ import {
   useIsApprovingProposal,
   useIsDecliningProposal,
   useProposal,
+  queryKeys as platformQueryKeys,
 } from '@kbn/proposals-plugin/public';
 import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-  ESCALATIONS_UI_CAPABILITY_MANAGE,
-} from '@kbn/agentic-investigations-plugin/common';
+import { useAssignInvestigation } from '@kbn/agentic-investigations-plugin/public';
+import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
+import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
@@ -134,13 +134,32 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const {
-    services: { notifications, application },
+    services: { notifications },
   } = useKibana<CoreStart>();
 
-  const canManageEscalations =
-    application?.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
-      ESCALATIONS_UI_CAPABILITY_MANAGE
-    ] === true;
+  const { manageEscalations: canManageEscalations, manageInvestigations: canManageInvestigations } =
+    useAgenticInvestigationsCapabilities();
+
+  // ---------------------------------------------------------------------------
+  // Assignee picker — shared across all non-closed investigation cards
+  // ---------------------------------------------------------------------------
+
+  const assignInvestigation = useAssignInvestigation();
+
+  const renderAssignees = useQueueAssignees({
+    items: conversations,
+    getRowKey: (inv) => inv.id,
+    getTargetId: (inv) => inv.conversationId,
+    getAssigneeUids: (inv) => inv.assignees ?? [],
+    assign: (investigationId, assignees) =>
+      assignInvestigation.mutateAsync({ investigationId, assignees }),
+    queryKey: platformQueryKeys.proposals.all,
+    canManage: canManageInvestigations,
+    labels: {
+      assignSuccess: QUEUE_PAGE_INFO.assignSuccess,
+      assignError: QUEUE_PAGE_INFO.assignError,
+    },
+  });
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
   // deadline or a proposal someone else already decided must not look like it landed.
@@ -325,6 +344,7 @@ export const ConversationsPage: React.FC = () => {
               onOpenChat={openChatForProposal}
               getChatHref={getChatHrefForProposal}
               canManageEscalations={canManageEscalations}
+              renderAssignees={renderAssignees}
             />
           </EuiFlexItem>
         ))}

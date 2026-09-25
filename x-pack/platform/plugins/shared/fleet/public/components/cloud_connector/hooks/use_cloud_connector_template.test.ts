@@ -9,6 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 
 import { useIacProvisioner, useStartServices } from '../../../hooks';
 import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
 
 import { useCloudConnectorTemplate } from './use_cloud_connector_template';
 
@@ -28,6 +29,7 @@ const CLOUD = {
   cloudId: CLOUD_ID,
   cloudHost: 'cloud.example',
   deploymentUrl: 'https://cloud.example/deployments/abc123',
+  deploymentId: 'abc123',
   serverless: {},
 } as any;
 
@@ -123,12 +125,37 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(result.current.isDisabled).toBe(true);
     });
+
+    it('names the template tokens this Kibana cannot resolve', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          iacTemplateUrl: `${IAC_TEMPLATE_URL}&param_ElasticOrganizationId=ORGANIZATION_ID`,
+        })
+      );
+
+      expect(result.current.isDisabled).toBe(true);
+      expect(result.current.templateGenerationError).toContain('ORGANIZATION_ID');
+    });
   });
 
   describe('when the IaC Provisioner is enabled', () => {
     beforeEach(() => {
       mockedUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       mockedSendRenderIacTemplate.mockResolvedValue(RENDERED as any);
+    });
+
+    it('reports the unresolved template tokens instead of rendering', async () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          iacTemplateUrl: `${IAC_TEMPLATE_URL}&param_ElasticOrganizationId=ORGANIZATION_ID`,
+        })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+      expect(result.current.templateGenerationError).toContain('ORGANIZATION_ID');
     });
 
     it('returns onClick button props instead of an href', () => {
@@ -145,7 +172,7 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        workflow: 'federated_identity',
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: 'cloud_connector',
         integrations: [{ name: 'cloud_security_posture', policyTemplates: POLICY_TEMPLATES }],
       });
@@ -173,7 +200,7 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        workflow: 'federated_identity',
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: 'cloud_connector',
         integrations: [{ name: 'aws', policyTemplates }],
       });
@@ -599,7 +626,7 @@ describe('useCloudConnectorTemplate', () => {
 
         expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
           provider: 'aws',
-          workflow: 'federated_identity',
+          workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
           flow: 'cloud_connector',
           integrations,
         });
