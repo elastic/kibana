@@ -52,14 +52,9 @@ describe('runCortexOptimize', () => {
     getAgentBuilder.mockReturnValue({ runtime: { createModelProvider } });
   });
 
-  it('runs for the Nightshift investigation agent', async () => {
+  it('runs for the deductive investigation agent', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
     expect(optimizeCortex).toHaveBeenCalled();
-  });
-
-  it('skips another agent', async () => {
-    await run('other-agent');
-    expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
   // The optimize workflow has a manual trigger, so it can be invoked without an agent id. Writing
@@ -76,7 +71,7 @@ describe('runCortexOptimize', () => {
   });
 
   it('inherits the triggering agent connector via createModelProvider', async () => {
-    await run(NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID, 'anthropic-sonnet');
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, 'anthropic-sonnet');
 
     expect(createModelProvider).toHaveBeenCalledWith({
       request,

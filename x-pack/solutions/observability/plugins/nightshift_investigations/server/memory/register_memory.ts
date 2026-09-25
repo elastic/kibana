@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
-import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { previewText } from './log_format';
 import { materializeMemory, type MaterializeMemoryResult } from './materialize';
@@ -34,8 +34,8 @@ export const createMemoryStore = ({
   agentId: string;
   signal?: AbortSignal;
 }): MemoryPageStore => {
-  if (agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
-    throw new Error('Semantic Memory is only available to the Nightshift deductive investigator');
+  if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+    throw new Error('Semantic Memory is only available to the Nightshift investigator');
   }
   return createMemoryPageStore({ esClient, logger, spaceId, agentId, signal });
 };
@@ -89,11 +89,11 @@ export const runMemoryOptimize = async ({
   logger: Logger;
   connectorId?: string;
 }): Promise<MemoryOptimizeSummary | undefined> => {
-  if (agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
-    logger.info('Memory optimizer skipped — round was not produced by the deductive investigator');
+  if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+    logger.info('Memory optimizer skipped — round was not produced by the Nightshift investigator');
     logger.debug(
       `Memory optimize skip agent=${agentId ?? '(missing)'} ` +
-        `expected=${NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID}`
+        `expected=${NIGHTSHIFT_INVESTIGATION_AGENT_ID}`
     );
     return undefined;
   }

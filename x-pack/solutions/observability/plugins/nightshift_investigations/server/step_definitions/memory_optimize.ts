@@ -10,7 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { runMemoryOptimize } from '../memory/register_memory';
 import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import type { NightshiftTelemetryClient } from '../telemetry';
@@ -163,7 +163,7 @@ export const memoryOptimizeStepDefinition = ({
         );
       }
 
-      if (!summary && context.input.agent_id === NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
+      if (!summary && context.input.agent_id === NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
         telemetry.reportSemanticMemoryOptimized({
           agent_id: context.input.agent_id,
           ...(context.input.conversation_id
