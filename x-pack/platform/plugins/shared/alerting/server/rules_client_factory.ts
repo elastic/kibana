@@ -231,7 +231,7 @@ export class RulesClientFactory {
         name: `uiam-${name}`,
       });
       if (!result) {
-        throw new Error('UIAM API key grant did not return a key');
+        throw new Error(`Failed to create a Cloud API key for alerting rule : ${name}`);
       }
       return result;
     } catch (err) {

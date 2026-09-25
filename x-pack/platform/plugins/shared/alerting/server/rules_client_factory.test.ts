@@ -462,7 +462,7 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: UIAM API key grant did not return a key',
+      'Failed to create UIAM API key for alerting rule : test: Failed to create a Cloud API key for alerting rule : test',
       expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
@@ -644,7 +644,7 @@ describe('RulesClientFactory', () => {
       securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
       await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"UIAM API key grant did not return a key"`
+        `"Failed to create a Cloud API key for alerting rule : test"`
       );
       expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });

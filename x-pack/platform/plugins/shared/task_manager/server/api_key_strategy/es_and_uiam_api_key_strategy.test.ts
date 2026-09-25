@@ -697,7 +697,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
 
       const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
       await expect(strategy.grantApiKeys(tasks, request, coreStart.security)).rejects.toThrow(
-        'UIAM API key grant did not return a key'
+        'Failed to create a Cloud API key for task type : report'
       );
     });
 

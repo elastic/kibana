@@ -257,7 +257,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
           name: truncate(apiKeyName, { length: 256 }),
         });
         if (!uiamResult) {
-          throw new Error('UIAM API key grant did not return a key');
+          throw new Error(`Failed to create a Cloud API key for task type : ${taskType}`);
         }
         onApiKeyCreated?.({ apiKeyId: uiamResult.id, uiamApiKey: uiamResult.api_key });
         uiamKeyByTaskTypeMap.set(taskType, {
