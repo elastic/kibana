@@ -71,7 +71,7 @@ export function SloListSearchBar() {
         }}
         query={{ query: String(state.kqlQuery), language: 'kuery' }}
         showSubmitButton={true}
-        showDatePicker={false}
+        showDatePicker="hidden"
         showQueryInput={true}
         disableQueryLanguageSwitcher={true}
         allowSavingQueries

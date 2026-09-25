@@ -457,7 +457,7 @@ describe('QueryBarTopRowTopRow', () => {
       wrapQueryBarTopRowInContext({
         isDirty: false,
         screenTitle: 'Another Screen',
-        showDatePicker: true,
+        showDatePicker: 'active',
         showSubmitButton: true,
         submitButtonStyle: 'iconOnly',
         dateRangeFrom: 'now-7d',
@@ -479,7 +479,7 @@ describe('QueryBarTopRowTopRow', () => {
       wrapQueryBarTopRowInContext({
         isDirty: false,
         screenTitle: 'Another Screen',
-        showDatePicker: true,
+        showDatePicker: 'active',
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
         timeHistory: mockTimeHistory,
@@ -518,7 +518,7 @@ describe('QueryBarTopRowTopRow', () => {
         onCancel: () => {},
         isDirty: false,
         screenTitle: 'Another Screen',
-        showDatePicker: true,
+        showDatePicker: 'active',
         showSubmitButton: true,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
@@ -539,7 +539,7 @@ describe('QueryBarTopRowTopRow', () => {
         onCancel: () => {},
         isDirty: false,
         screenTitle: 'Another Screen',
-        showDatePicker: true,
+        showDatePicker: 'active',
         showSubmitButton: true,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
@@ -621,7 +621,7 @@ describe('QueryBarTopRowTopRow', () => {
       const { getByText } = render(
         wrapQueryBarTopRowInContext({
           isDirty: true,
-          showDatePicker: false,
+          showDatePicker: 'hidden',
           onDraftChange,
           ...state,
         })
@@ -734,7 +734,7 @@ describe('QueryBarTopRowTopRow', () => {
     it('Should not show timepicker when asked', async () => {
       const { container } = render(
         wrapWithPicker({
-          showDatePicker: false,
+          showDatePicker: 'hidden',
           timeHistory: mockTimeHistory,
           isDirty: false,
         })
@@ -754,7 +754,7 @@ describe('QueryBarTopRowTopRow', () => {
         wrapWithPicker({
           isDirty: false,
           screenTitle: 'Another Screen',
-          showDatePicker: true,
+          showDatePicker: 'active',
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
           timeHistory: mockTimeHistory,
@@ -774,7 +774,7 @@ describe('QueryBarTopRowTopRow', () => {
         wrapWithPicker({
           isDirty: false,
           screenTitle: 'Another Screen',
-          showDatePicker: true,
+          showDatePicker: 'active',
           showSubmitButton: false,
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
@@ -796,7 +796,7 @@ describe('QueryBarTopRowTopRow', () => {
           indexPatterns: [stubIndexPattern],
           isDirty: false,
           screenTitle: 'Another Screen',
-          showDatePicker: false,
+          showDatePicker: 'hidden',
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
           timeHistory: mockTimeHistory,
@@ -817,7 +817,7 @@ describe('QueryBarTopRowTopRow', () => {
           screenTitle: 'Another Screen',
           indexPatterns: [stubIndexPattern],
           showQueryInput: false,
-          showDatePicker: false,
+          showDatePicker: 'hidden',
           timeHistory: mockTimeHistory,
         })
       );
@@ -836,7 +836,7 @@ describe('QueryBarTopRowTopRow', () => {
         wrapWithPicker({
           isDirty: false,
           screenTitle: 'Another Screen',
-          showDatePicker: false,
+          showDatePicker: 'hidden',
           timeHistory: mockTimeHistory,
         })
       );
@@ -858,7 +858,7 @@ describe('QueryBarTopRowTopRow', () => {
           screenTitle: 'SQL Screen',
           timeHistory: mockTimeHistory,
           indexPatterns: [stubIndexPattern],
-          showDatePicker: true,
+          showDatePicker: 'active',
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
         })
@@ -886,7 +886,7 @@ describe('QueryBarTopRowTopRow', () => {
           screenTitle: 'SQL Screen',
           timeHistory: mockTimeHistory,
           indexPatterns: [dataView],
-          showDatePicker: true,
+          showDatePicker: 'active',
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
         })
@@ -914,7 +914,7 @@ describe('QueryBarTopRowTopRow', () => {
           screenTitle: 'ES|QL Screen',
           timeHistory: mockTimeHistory,
           indexPatterns: [stubIndexPattern],
-          showDatePicker: true,
+          showDatePicker: 'active',
           dateRangeFrom: 'now-15m',
           dateRangeTo: 'now',
         })
@@ -1020,7 +1020,7 @@ describe('QueryBarTopRowTopRow', () => {
           screenTitle: 'Another Screen',
           timeHistory: mockTimeHistory,
           indexPatterns: [dataView],
-          showDatePicker: true,
+          showDatePicker: 'active',
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
         })
@@ -1065,7 +1065,7 @@ describe('QueryBarTopRowTopRow', () => {
           timeHistory: mockTimeHistory,
           indexPatterns: [stubIndexPattern],
           showQueryInput: false,
-          showDatePicker: true,
+          showDatePicker: 'active',
           showQueryMenu: false,
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
@@ -1147,7 +1147,7 @@ describe('QueryBarTopRowTopRow', () => {
         wrapQueryBarTopRowInContext({
           isDirty: false,
           timeHistory: mockTimeHistory,
-          showDatePicker: false,
+          showDatePicker: 'hidden',
           showAutoRefreshOnly: true,
           isRefreshPaused: true,
           refreshInterval: 5000,

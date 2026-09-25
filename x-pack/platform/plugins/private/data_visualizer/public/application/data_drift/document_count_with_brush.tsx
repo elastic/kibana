@@ -116,7 +116,7 @@ export const DocumentCountWithBrush: FC<DocumentCountContentProps> = ({
               dataTestSubj="dataVisualizerQueryInput"
               appName={'dataVisualizer'}
               showFilterBar={true}
-              showDatePicker={false}
+              showDatePicker="hidden"
               showQueryInput={false}
               filters={stateManager.filters}
               onFiltersUpdated={(filters: Filter[]) => stateManager.setFilters(filters)}
@@ -173,7 +173,7 @@ export const DocumentCountWithBrush: FC<DocumentCountContentProps> = ({
             dataTestSubj="dataVisualizerQueryInput"
             appName={'dataVisualizer'}
             showFilterBar={true}
-            showDatePicker={false}
+            showDatePicker="hidden"
             showQueryInput={false}
             filters={stateManager.filters}
             onFiltersUpdated={(filters: Filter[]) => stateManager.setFilters(filters)}

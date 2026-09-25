@@ -21,6 +21,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+import type { ShowDatePicker } from '@kbn/unified-search-plugin/public';
 import type { UIProcessorEvent } from '../../../../common/processor_event';
 import type { TimePickerTimeDefaults } from '../date_picker/typings';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
@@ -112,7 +113,7 @@ function convertKueryToEsQuery(kuery: string, dataView: DataView) {
 export function UnifiedSearchBar({
   placeholder,
   value,
-  showDatePicker = true,
+  showDatePicker = 'active' as ShowDatePicker,
   showQueryInput = true,
   showFilterBar = false,
   showSubmitButton = true,
@@ -121,7 +122,7 @@ export function UnifiedSearchBar({
 }: {
   placeholder?: string;
   value?: string;
-  showDatePicker?: boolean;
+  showDatePicker?: ShowDatePicker;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showSubmitButton?: boolean;

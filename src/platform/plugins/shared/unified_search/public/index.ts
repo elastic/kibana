@@ -13,6 +13,7 @@ import { UnifiedSearchPublicPlugin } from './plugin';
 
 export type { IndexPatternSelectProps } from './index_pattern_select';
 export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
+export type { ShowDatePicker } from './query_string_input/query_bar_top_row';
 export type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPluginSetup,

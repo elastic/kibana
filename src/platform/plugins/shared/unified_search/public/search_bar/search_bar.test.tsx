@@ -164,7 +164,7 @@ describe('SearchBar', () => {
     render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
-        showDatePicker: false,
+        showDatePicker: 'hidden',
         showQueryInput: true,
         showFilterBar: true,
         onFiltersUpdated: noop,
@@ -200,7 +200,7 @@ describe('SearchBar', () => {
     render(
       wrapSearchBarInContext({
         indexPatterns: [],
-        showDatePicker: false,
+        showDatePicker: 'hidden',
         showQueryInput: true,
         showFilterBar: true,
         onFiltersUpdated: noop,
@@ -221,7 +221,7 @@ describe('SearchBar', () => {
         showFilterBar: false,
         filters: [],
         onFiltersUpdated: noop,
-        showDatePicker: false,
+        showDatePicker: 'hidden',
       })
     );
 

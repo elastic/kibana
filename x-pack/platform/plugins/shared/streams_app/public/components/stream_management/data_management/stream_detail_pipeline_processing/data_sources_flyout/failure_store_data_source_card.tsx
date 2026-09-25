@@ -108,7 +108,7 @@ export const FailureStoreDataSourceCard = ({ dataSourceRef }: FailureStoreDataSo
             <UncontrolledStreamsAppSearchBar
               showFilterBar={false}
               showQueryInput={false}
-              showDatePicker
+              showDatePicker="active"
               isDisabled={!hasTimeRange}
               dateRangeFrom={dataSource.timeRange?.from}
               dateRangeTo={dataSource.timeRange?.to}

@@ -662,7 +662,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
         showQueryInput
         showQueryMenu
         showFilterBar
-        showDatePicker={false}
+        showDatePicker="hidden"
         showSubmitButton={false}
         displayStyle="inPage"
         onQueryChange={debouncedOnQueryChange}

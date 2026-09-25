@@ -53,7 +53,7 @@ export function IngestionRatePanel({
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <StreamsAppSearchBar showDatePicker />
+                <StreamsAppSearchBar showDatePicker="active" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

@@ -56,7 +56,7 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
 
   const dateFilterProps = dataSource.timeRange
     ? {
-        showDatePicker: true,
+        showDatePicker: 'active',
         dataRangeFrom: dataSource.timeRange.from,
         dataRangeTo: dataSource.timeRange.to,
       }

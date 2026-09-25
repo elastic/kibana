@@ -743,7 +743,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                 <div>
                   <SearchBar<Query>
                     showFilterBar={true}
-                    showDatePicker={true}
+                    showDatePicker="active"
                     showAutoRefreshOnly={false}
                     showSaveQuery={false}
                     showQueryInput={true}

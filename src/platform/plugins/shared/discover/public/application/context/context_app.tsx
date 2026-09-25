@@ -226,7 +226,7 @@ export const ContextApp = ({
       showSearchBar: true,
       showQueryInput: false,
       showFilterBar: true,
-      showDatePicker: false,
+      showDatePicker: 'hidden' as const,
       indexPatterns: [dataView],
       useDefaultBehaviors: true,
     };

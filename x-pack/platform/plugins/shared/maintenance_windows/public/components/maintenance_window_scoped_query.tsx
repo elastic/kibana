@@ -84,7 +84,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
               onFiltersUpdated={onFiltersChange}
               showFilterBar
               submitOnBlur
-              showDatePicker={false}
+              showDatePicker="hidden"
               showSubmitButton={false}
               http={http}
               toasts={toasts}

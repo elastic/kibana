@@ -59,7 +59,7 @@ export const AdminSearchBar = memo(() => {
             isLoading={false}
             iconType="magnify"
             showFilterBar={false}
-            showDatePicker={false}
+            showDatePicker="hidden"
             showQueryInput={true}
             suggestionsAbstraction={{
               type: 'endpoints',
