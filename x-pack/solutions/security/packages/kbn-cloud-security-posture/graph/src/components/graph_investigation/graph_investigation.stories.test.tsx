@@ -180,7 +180,6 @@ const isSearchBarVisible = (container: HTMLElement) => {
   return searchBarContainer === null;
 };
 
-
 describe('GraphInvestigation Component', () => {
   beforeEach(() => {
     for (const key in actionMocks) {
@@ -311,7 +310,10 @@ describe('GraphInvestigation Component', () => {
 
       await expandNode(container, nodeId);
 
-      const showDetailsItem = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      const showDetailsItem = getNodeToolbarButton(
+        nodeId,
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
+      );
       expect(showDetailsItem).not.toBeNull();
       expect(showDetailsItem).toHaveAttribute('aria-label', 'Show entity details');
       expect(showDetailsItem).not.toHaveAttribute('disabled');
@@ -322,7 +324,10 @@ describe('GraphInvestigation Component', () => {
       const nodeId = 'admin@example.com';
 
       await expandNode(container, nodeId);
-      const showDetailsItem = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      const showDetailsItem = getNodeToolbarButton(
+        nodeId,
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
+      );
       expect(showDetailsItem).not.toBeNull();
       expect(showDetailsItem).toHaveAttribute('aria-label', 'Show entity details');
       // In the NodeToolbar design the button is rendered disabled; the tooltip test-subj is not
@@ -446,7 +451,10 @@ describe('GraphInvestigation Component', () => {
         showToggleSearch: true,
       });
       await expandNode(container, 'admin@example.com');
-      getNodeToolbarButton('admin@example.com', GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)!.click();
+      getNodeToolbarButton(
+        'admin@example.com',
+        GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      )!.click();
 
       expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('2');
     });
@@ -1227,7 +1235,10 @@ describe('GraphInvestigation Component', () => {
       await expandNode(container, nodeId);
 
       // Grouped entities should not have "Show actions by entity" option
-      const showActionsBy = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      const showActionsBy = getNodeToolbarButton(
+        nodeId,
+        GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      );
       expect(showActionsBy).toBeNull();
     });
 
@@ -1237,7 +1248,10 @@ describe('GraphInvestigation Component', () => {
 
       await expandNode(container, nodeId);
 
-      const showDetailsItem = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID);
+      const showDetailsItem = getNodeToolbarButton(
+        nodeId,
+        GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID
+      );
       expect(showDetailsItem).not.toBeNull();
       expect(showDetailsItem).toHaveAttribute('aria-label', 'Show grouped entities');
     });
@@ -1314,7 +1328,10 @@ describe('GraphInvestigation Component', () => {
       await expandNode(container, nodeId);
 
       // Grouped entities should not have "Show actions by entity" or "Show actions on entity" options
-      const showActionsBy = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      const showActionsBy = getNodeToolbarButton(
+        nodeId,
+        GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      );
       expect(showActionsBy).toBeNull();
     });
 
@@ -1324,7 +1341,10 @@ describe('GraphInvestigation Component', () => {
 
       await expandNode(container, nodeId);
 
-      const showDetailsItem = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID);
+      const showDetailsItem = getNodeToolbarButton(
+        nodeId,
+        GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID
+      );
       expect(showDetailsItem).not.toBeNull();
       expect(showDetailsItem).toHaveAttribute('aria-label', 'Show grouped entities');
     });
