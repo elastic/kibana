@@ -103,9 +103,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           { authMethod: item.authMethod, connectorId: item.connectorId }
         );
         const dirty = dirtyVarIds.length > 0 || authDirty;
-        // SO fetch is authoritative: write dirty regardless of current value so that
-        // reverting auth back to match the SO correctly clears isDirty.
-        updateDetectAndReviewStep({ isDirty: dirty });
+        // In static-key edit mode, isDirty is owned by the replace form: the SO fetch cannot
+        // see credential values, so a late response must not overwrite a isDirty=true the form
+        // already set. Service-var drift (dirty=true) can still write through. For all other
+        // auth methods, the SO is authoritative and correctly clears isDirty on revert.
+        if (authMethod !== 'static_keys' || dirty) {
+          updateDetectAndReviewStep({ isDirty: dirty });
+        }
       })
       .catch(() => {});
     // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:

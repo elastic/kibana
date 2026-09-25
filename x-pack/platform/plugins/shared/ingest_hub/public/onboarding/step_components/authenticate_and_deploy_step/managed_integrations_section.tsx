@@ -143,11 +143,28 @@ export function ManagedIntegrationsSection({
     const keys = authenticateAndDeployStep.staticKeys;
     return Boolean(keys?.access_key_id && keys?.secret_access_key);
   });
-  // Tracks whether a connector was pre-loaded from session. When true, transient
-  // onReadyChange(false) calls from the identity federation form (loading / re-validating) are
-  // suppressed so the Deploy button stays enabled across section open/close cycles caused by
-  // drift detection. Reset when the user actively switches to a different connector or method.
+  // Tracks whether the connector that was in session at (or after) initial mount is still the
+  // active one — i.e. the user has not picked a different connector since the page loaded.
+  // Used to: (a) suppress transient onReadyChange(false) from the identity federation form while
+  // it re-validates an already-known-good connector, and (b) drive the isDirty bypass on the
+  // Deploy button. Both are reset when the user actively selects a new connector or switches
+  // auth method, so a freshly-chosen connector always requires form validation before Deploy.
   const connectorPreloaded = useRef(!!initialConnectorId && !isStaticKeysEditMode);
+  // Reactive mirror of connectorPreloaded for use in JSX (refs can't drive rendering).
+  const [isConnectorPreloaded, setIsConnectorPreloaded] = useState(
+    !!initialConnectorId && !isStaticKeysEditMode
+  );
+  // Track whether the user has actively changed the connector so the useEffect below can
+  // distinguish hydration (should restore preloaded state) from a user pick (should not).
+  const userChangedConnector = useRef(false);
+  // After session hydration the parent re-renders with a populated connectorId. If the component
+  // mounted before hydration (connectorId was undefined) we need to set the preloaded flag now.
+  useEffect(() => {
+    if (initialConnectorId && !isStaticKeysEditMode && !userChangedConnector.current) {
+      connectorPreloaded.current = true;
+      setIsConnectorPreloaded(true);
+    }
+  }, [initialConnectorId, isStaticKeysEditMode]);
 
   const handleIdentityFedReadyChange = useCallback((ready: boolean) => {
     if (connectorPreloaded.current && !ready) return;
@@ -156,7 +173,9 @@ export function ManagedIntegrationsSection({
 
   const handleIdentityFedConnectorChange = useCallback(
     (id: string | undefined, name?: string) => {
+      userChangedConnector.current = true;
       connectorPreloaded.current = false;
+      setIsConnectorPreloaded(false);
       setConnectorId(id, name);
     },
     [setConnectorId]
@@ -308,7 +327,9 @@ export function ManagedIntegrationsSection({
                       setPreferredMethod(id as PreferredMethod);
                       setIsDeployReady(false);
                       if (id === 'access_keys') {
+                        userChangedConnector.current = true;
                         connectorPreloaded.current = false;
+                        setIsConnectorPreloaded(false);
                         setConnectorId(undefined);
                       }
                     }}
@@ -395,7 +416,7 @@ export function ManagedIntegrationsSection({
                 isDisabled={
                   !isDeployReady &&
                   !isCleanupOnly &&
-                  !(isDirty && preferredMethod === 'identity_federation' && !!initialConnectorId)
+                  !(isDirty && preferredMethod === 'identity_federation' && isConnectorPreloaded)
                 }
                 isLoading={isDeploying}
                 onClick={onDeploy}

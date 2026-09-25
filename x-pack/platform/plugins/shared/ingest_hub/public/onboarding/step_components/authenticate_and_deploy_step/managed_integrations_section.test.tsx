@@ -314,19 +314,21 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
     });
 
-    it('onReadyChange(false) applies after user changes connector', () => {
-      // Once the user picks a different connector (connectorPreloaded cleared), a subsequent
-      // onReadyChange(false) from the form must be honoured so the button disables while loading.
-      // isDirty bypass still applies here (connector present), so we test via isDeployReady state
-      // being false — the bypass only affects button rendering, not isDeployReady itself.
+    it('isDirty bypass clears after user changes connector, so form validation applies', () => {
+      // After user picks a new connector, isConnectorPreloaded becomes false.
+      // isDirty bypass no longer applies, and isDeployReady=false from the loading form
+      // must disable the button until the new connector is validated.
       setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
-      renderSection({ showIdentityFederation: true, isDirty: false }); // no bypass
+      renderSection({ showIdentityFederation: true, isDirty: true });
+      // Bypass active initially
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
       act(() => {
-        fireEvent.click(screen.getByText('mark-named')); // user selected a new connector
+        fireEvent.click(screen.getByText('mark-named')); // user picks new connector
       });
       act(() => {
         fireEvent.click(screen.getByText('mark-not-ready')); // form loading new connector
       });
+      // Bypass cleared — button disabled while new connector validates
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
     });
 
