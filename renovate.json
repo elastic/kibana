@@ -1982,8 +1982,7 @@
         "jest-mock",
         "jest-runtime",
         "jest-snapshot",
-        "jest-styled-components",
-        "mutation-observer"
+        "jest-styled-components"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
