@@ -283,7 +283,9 @@ export class AlertZeroPublicPlugin
               name: ESCALATION_TEMPLATE_NAME,
               icon: 'warning',
               renderAssignees,
-              renderLinkedInvestigations: canShowEscalations ? renderLinkedInvestigations : undefined,
+              renderLinkedInvestigations: canShowEscalations
+                ? renderLinkedInvestigations
+                : undefined,
             });
           } catch (err) {
             return Promise.reject(err);
