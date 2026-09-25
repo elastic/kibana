@@ -24,6 +24,7 @@ import {
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAccessControlEntryInput,
   type ConversationAddEventInput,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
@@ -32,6 +33,7 @@ import {
   ConversationAccessControlMode,
   EventActorType,
   isConversationAccessControlRole,
+  isPublicConversation,
   normalizeConversationAccessControl,
   createBadRequestError,
   createConversationAlreadyExistsError,
@@ -159,6 +161,29 @@ export interface ConversationClient {
     conversationId: string,
     update: UpdateConversationAccessControlRequestBody
   ): Promise<ConversationAccessControl>;
+  /**
+   * Adds entries to a private conversation's ACL without removing existing entries or
+   * changing the access mode. A no-op for public conversations. Existing entries are left
+   * unchanged — even when the requested role differs; role changes go through
+   * `updateAccessControl` (owner-only). Safe to call with `access: 'converse'` so
+   * collaborators can add new members when assigning.
+   */
+  addAccessControlEntries(
+    conversationId: string,
+    entries: ConversationAccessControlEntryInput[],
+    options?: { access?: ConversationAccess }
+  ): Promise<Conversation>;
+  /**
+   * Removes principals from a private conversation's ACL. A no-op for public conversations,
+   * or when none of the requested principals are present. Never changes the access mode or
+   * removes the owner. Safe to call with `access: 'converse'` so assignees can revoke their
+   * own (or others') access when un-assigning.
+   */
+  removeAccessControlEntries(
+    conversationId: string,
+    principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
+    options?: { access?: ConversationAccess }
+  ): Promise<Conversation>;
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
   patchMetadata(
     conversationId: string,
@@ -958,6 +983,109 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     return normalizeConversationAccessControl(conversation.access_control);
+  }
+
+  async addAccessControlEntries(
+    conversationId: string,
+    entries: ConversationAccessControlEntryInput[],
+    { access = 'converse' }: { access?: ConversationAccess } = {}
+  ): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        // Public conversations use access_mode filtering; ACL entries are not valid on them.
+        if (isPublicConversation(current.access_control)) {
+          throw skipWrite(current);
+        }
+
+        const normalized = normalizeConversationAccessControl(current.access_control);
+        // Key format matches validateAccessControlEntries: `${type}:${id}`.
+        const existingKeys = new Set([
+          ...normalized.entries.map((e) => `${e.type}:${e.id}`),
+          // The owner is never stored as an entry; treat them as implicitly present.
+          `user:${current.user.id}`,
+        ]);
+
+        // Dedupe the request by key and drop entries that are already present.
+        const seenKeys = new Set<string>();
+        const newEntries = entries.filter((e) => {
+          const key = `${e.type}:${e.id}`;
+          if (existingKeys.has(key) || seenKeys.has(key)) return false;
+          seenKeys.add(key);
+          return true;
+        });
+
+        // If every requested principal is already a member (or the owner), skip the write.
+        if (newEntries.length === 0) {
+          throw skipWrite(current);
+        }
+
+        const addedAtById = new Map(
+          normalized.entries.map((entry) => [`${entry.type}:${entry.id}`, entry.added_at])
+        );
+
+        const allEntries = [...normalized.entries, ...newEntries];
+
+        const validatedEntries = validateAccessControlEntries({
+          entries: allEntries,
+          ownerId: current.user.id,
+          addedAtById,
+        });
+
+        return {
+          access_control: {
+            access_mode: normalized.access_mode,
+            entries: validatedEntries,
+          },
+        };
+      },
+    });
+  }
+
+  async removeAccessControlEntries(
+    conversationId: string,
+    principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
+    { access = 'converse' }: { access?: ConversationAccess } = {}
+  ): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        // Public conversations use access_mode filtering; ACL entries are not relevant.
+        if (isPublicConversation(current.access_control)) {
+          throw skipWrite(current);
+        }
+
+        const normalized = normalizeConversationAccessControl(current.access_control);
+        const toRemove = new Set(principals.map((p) => `${p.type}:${p.id}`));
+        const hasAny = normalized.entries.some((e) => toRemove.has(`${e.type}:${e.id}`));
+
+        // If none of the requested principals are present as members, skip the write.
+        if (!hasAny) {
+          throw skipWrite(current);
+        }
+
+        const remaining = normalized.entries.filter((e) => !toRemove.has(`${e.type}:${e.id}`));
+
+        const addedAtById = new Map(
+          normalized.entries.map((entry) => [`${entry.type}:${entry.id}`, entry.added_at])
+        );
+
+        const validatedEntries = validateAccessControlEntries({
+          entries: remaining,
+          ownerId: current.user.id,
+          addedAtById,
+        });
+
+        return {
+          access_control: {
+            access_mode: normalized.access_mode,
+            entries: validatedEntries,
+          },
+        };
+      },
+    });
   }
 
   async applyTemplate(conversationId: string, templateId: string): Promise<Conversation> {
