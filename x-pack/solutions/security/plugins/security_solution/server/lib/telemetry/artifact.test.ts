@@ -7,16 +7,53 @@
 
 import { createMockTelemetryReceiver } from './__mocks__';
 import { Artifact } from './artifact';
-import axios from 'axios';
+import Fs from 'fs';
 import type { TelemetryConfiguration } from './types';
 
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 describe('telemetry artifact test', () => {
   beforeEach(() => {
-    mockedAxios.get.mockReset();
+    mockedFetch.mockReset();
   });
+
+  test.each(['manifest', 'artifact'])(
+    'should time out while reading the %s body',
+    async (stage) => {
+      jest.useFakeTimers();
+      try {
+        const artifact = new Artifact();
+        await artifact.start(createMockTelemetryReceiver());
+        if (stage === 'artifact') {
+          mockedFetch.mockResolvedValueOnce(
+            zipResponse(
+              'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip'
+            )
+          );
+        }
+        mockedFetch.mockImplementationOnce(async (_input, init) => {
+          return new Response(
+            new ReadableStream({
+              start(controller) {
+                init?.signal?.addEventListener('abort', () => {
+                  controller.error(new Error('Response body aborted'));
+                });
+              },
+            })
+          );
+        });
+
+        const result = expect(
+          artifact.getArtifact('telemetry-buffer-and-batch-sizes-v1')
+        ).rejects.toThrow('Response body aborted');
+        await jest.advanceTimersByTimeAsync(10_000);
+        await result;
+        expect(jest.getTimerCount()).toBe(0);
+      } finally {
+        jest.useRealTimers();
+      }
+    }
+  );
 
   test('start should set manifest url for snapshot version', async () => {
     const expectedManifestUrl =
@@ -64,11 +101,11 @@ describe('telemetry artifact test', () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const artifact = new Artifact();
     await artifact.start(mockTelemetryReceiver);
-    const axiosResponse = {
-      status: 200,
-      data: 'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
-    };
-    mockedAxios.get.mockImplementationOnce(() => Promise.resolve(axiosResponse));
+    mockedFetch.mockResolvedValueOnce(
+      zipResponse(
+        'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip'
+      )
+    );
     await expect(async () => artifact.getArtifact('artifactThatDoesNotExist')).rejects.toThrow(
       'No artifact for name artifactThatDoesNotExist'
     );
@@ -78,22 +115,19 @@ describe('telemetry artifact test', () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const artifact = new Artifact();
     await artifact.start(mockTelemetryReceiver);
-    const axiosResponse = {
-      status: 200,
-      data: 'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
-    };
-    mockedAxios.get
-      .mockImplementationOnce(() => Promise.resolve(axiosResponse))
-      .mockImplementationOnce(() =>
-        Promise.resolve({
-          status: 200,
-          data: {
-            telemetry_max_buffer_size: 100,
-            max_security_list_telemetry_batch: 100,
-            max_endpoint_telemetry_batch: 300,
-            max_detection_rule_telemetry_batch: 1_000,
-            max_detection_alerts_batch: 50,
-          },
+    mockedFetch
+      .mockResolvedValueOnce(
+        zipResponse(
+          'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip'
+        )
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          telemetry_max_buffer_size: 100,
+          max_security_list_telemetry_batch: 100,
+          max_endpoint_telemetry_batch: 300,
+          max_detection_rule_telemetry_batch: 1_000,
+          max_detection_alerts_batch: 50,
         })
       );
     const manifest = await artifact.getArtifact('telemetry-buffer-and-batch-sizes-v1');
@@ -109,33 +143,39 @@ describe('telemetry artifact test', () => {
 
   test('getArtifact should cache response', async () => {
     const fakeEtag = '123';
-    const axiosResponse = {
-      status: 200,
-      data: 'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
-      headers: { etag: fakeEtag },
-    };
     const artifact = new Artifact();
 
     await artifact.start(createMockTelemetryReceiver());
 
-    mockedAxios.get
-      .mockImplementationOnce(() => Promise.resolve(axiosResponse))
-      .mockImplementationOnce(() => Promise.resolve({ status: 200, data: {} }))
-      .mockImplementationOnce(() => Promise.resolve({ status: 304 }));
+    mockedFetch
+      .mockResolvedValueOnce(
+        zipResponse(
+          'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
+          { etag: fakeEtag }
+        )
+      )
+      .mockResolvedValueOnce(jsonResponse({}))
+      .mockResolvedValueOnce(new Response(null, { status: 304 }));
 
     let manifest = await artifact.getArtifact('telemetry-buffer-and-batch-sizes-v1');
     expect(manifest).not.toBeFalsy();
     expect(manifest.notModified).toEqual(false);
-    expect(mockedAxios.get.mock.calls.length).toBe(2);
+    expect(mockedFetch.mock.calls.length).toBe(2);
 
     manifest = await artifact.getArtifact('telemetry-buffer-and-batch-sizes-v1');
     expect(manifest).not.toBeFalsy();
     expect(manifest.notModified).toEqual(true);
-    expect(mockedAxios.get.mock.calls.length).toBe(3);
+    expect(mockedFetch.mock.calls.length).toBe(3);
 
-    const [_url, config] = mockedAxios.get.mock.calls[2];
-    const headers = config?.headers ?? {};
-    expect(headers).not.toBeFalsy();
-    expect(headers['If-None-Match']).toEqual(fakeEtag);
+    const [_url, init] = mockedFetch.mock.calls[2];
+    expect(new Headers(init?.headers).get('If-None-Match')).toEqual(fakeEtag);
   });
 });
+
+function zipResponse(path: string, headers?: HeadersInit): Response {
+  return new Response(Fs.readFileSync(path), { status: 200, headers });
+}
+
+function jsonResponse(data: unknown): Response {
+  return new Response(JSON.stringify(data), { status: 200 });
+}
