@@ -333,6 +333,7 @@ export function ESQLEditor({
       <ESQLDataGridAccordion
         dataGridAttrs={dataGridAttrs}
         isLoading={isPreviewLoading}
+        hasQueryError={errors.length > 0}
         isAccordionOpen={isESQLResultsAccordionOpen}
         isTableView={visualization.activeId !== 'lnsDatatable'}
         isApproximate={isApproximate}

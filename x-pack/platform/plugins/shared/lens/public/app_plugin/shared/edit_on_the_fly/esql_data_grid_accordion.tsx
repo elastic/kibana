@@ -13,7 +13,10 @@ import {
   EuiAccordion,
   EuiSpacer,
   EuiFlexItem,
+  EuiIcon,
   EuiNotificationBadge,
+  EuiPanel,
+  EuiText,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -25,6 +28,7 @@ interface ESQLDataGridAccordionProps {
   isAccordionOpen: boolean;
   dataGridAttrs?: ESQLDataGridAttrs;
   isLoading: boolean;
+  hasQueryError: boolean;
   query: AggregateQuery;
   isTableView: boolean;
   isApproximate: boolean;
@@ -36,6 +40,7 @@ export const ESQLDataGridAccordion = ({
   isAccordionOpen,
   dataGridAttrs,
   isLoading,
+  hasQueryError,
   query,
   isTableView,
   isApproximate,
@@ -50,12 +55,14 @@ export const ESQLDataGridAccordion = ({
     [isAccordionOpen, onAccordionToggleCb, setIsAccordionOpen]
   );
   const styles = useMemoCss(componentStyles);
+  const isEmpty = !isLoading && !dataGridAttrs;
+  const fillsAvailableSpace = isAccordionOpen && Boolean(dataGridAttrs);
 
   return (
     <EuiFlexItem
-      grow={isAccordionOpen ? 1 : false}
+      grow={fillsAvailableSpace ? 1 : false}
       data-test-subj="ESQLQueryResults"
-      css={[styles.wrapper, isAccordionOpen ? styles.expanded : styles.collapsed]}
+      css={[styles.wrapper, fillsAvailableSpace ? styles.expanded : styles.collapsed]}
     >
       <EuiAccordion
         id="esql-results"
@@ -80,6 +87,15 @@ export const ESQLDataGridAccordion = ({
             <EuiNotificationBadge size="m" color="subdued">
               {dataGridAttrs.rows.length}
             </EuiNotificationBadge>
+          ) : hasQueryError ? (
+            <EuiIcon
+              type="error"
+              color="danger"
+              aria-label={i18n.translate('xpack.lens.config.ESQLQueryResultsErrorLabel', {
+                defaultMessage: 'Query error',
+              })}
+              data-test-subj="ESQLQueryResultsErrorIcon"
+            />
           ) : undefined
         }
         isLoading={isLoading}
@@ -87,6 +103,22 @@ export const ESQLDataGridAccordion = ({
         // content area when there is nothing to show yet.
         isLoadingMessage={!dataGridAttrs}
       >
+        {isAccordionOpen && isEmpty && (
+          <EuiPanel
+            color="subdued"
+            paddingSize="m"
+            css={styles.emptyMessage}
+            data-test-subj="ESQLQueryResultsEmpty"
+          >
+            <EuiText size="s" color="subdued" textAlign="center">
+              <p>
+                {i18n.translate('xpack.lens.config.ESQLQueryResultsUnavailable', {
+                  defaultMessage: 'No results to display',
+                })}
+              </p>
+            </EuiText>
+          </EuiPanel>
+        )}
         {isAccordionOpen && dataGridAttrs && (
           <>
             <ESQLDataGrid
@@ -144,4 +176,5 @@ const componentStyles = {
     `
   ),
   title: ({ euiTheme }: UseEuiTheme) => css({ padding: euiTheme.size.xxs }),
+  emptyMessage: ({ euiTheme }: UseEuiTheme) => css({ marginBlockEnd: euiTheme.size.m }),
 };

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
@@ -233,5 +234,44 @@ describe('ESQLEditor', () => {
     const results = screen.getByTestId('ESQLQueryResults');
     expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
     expect(results).toHaveTextContent('3');
+  });
+
+  it('shows an empty message in the open results accordion when the first preview fails', async () => {
+    renderEditor();
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+
+    const results = screen.getByTestId('ESQLQueryResults');
+    await userEvent.click(within(results).getByRole('button', { name: /ES\|QL Query Results/i }));
+    // Still loading: EuiAccordion's own loading message owns the content area
+    expect(within(results).queryByTestId('ESQLQueryResultsEmpty')).not.toBeInTheDocument();
+
+    getSuggestionsMock.mockImplementationOnce(async (...args: unknown[]) => {
+      const setErrors = args[7] as ((errors: Error[]) => void) | undefined;
+      setErrors?.([new Error('Unknown index [index1]')]);
+      return undefined;
+    });
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+
+    expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(within(results).getByTestId('ESQLQueryResultsEmpty')).toBeInTheDocument();
+    expect(within(results).getByTestId('ESQLQueryResultsErrorIcon')).toHaveAttribute(
+      'data-euiicon-type',
+      'error'
+    );
+  });
+
+  it('does not show the error icon when the first preview returns nothing without an error', async () => {
+    renderEditor();
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+
+    const results = screen.getByTestId('ESQLQueryResults');
+    expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(within(results).queryByTestId('ESQLQueryResultsErrorIcon')).not.toBeInTheDocument();
   });
 });
