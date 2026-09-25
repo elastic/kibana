@@ -440,7 +440,10 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         // steps incomplete on every reload.
         if (!entry) return true;
         // Agent-based-only services bypass the ECS/OTel pipeline — keep them across data formats.
-        return entry.showInUI !== false && (isAgentBasedOnly(entry) || (entry.dataFormat ?? 'ecs') === dataFormat);
+        return (
+          entry.showInUI !== false &&
+          (isAgentBasedOnly(entry) || (entry.dataFormat ?? 'ecs') === dataFormat)
+        );
       }),
     [persistedServices, awsServicesMap, dataFormat]
   );

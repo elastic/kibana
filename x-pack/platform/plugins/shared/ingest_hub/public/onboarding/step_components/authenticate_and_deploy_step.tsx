@@ -523,6 +523,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <>
           <EuiHorizontalRule margin="l" />
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.title"
@@ -582,6 +583,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <>
           <EuiHorizontalRule margin="l" />
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.mixedDeploymentCallout.title"
@@ -598,9 +600,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                 defaultMessage="{services} {count, plural, one {requires} other {require}} a self-managed Elastic Agent and cannot be deployed here. After completing this wizard, install {count, plural, one {this integration} other {these integrations}} on an Elastic Agent policy and enroll an Elastic Agent that has access to your AWS environment."
                 values={{
                   count: agentBasedOnlyServices.length,
-                  services: (
-                    <strong>{agentBasedOnlyServices.map((s) => s.name).join(', ')}</strong>
-                  ),
+                  services: <strong>{agentBasedOnlyServices.map((s) => s.name).join(', ')}</strong>,
                 }}
               />
             </p>
