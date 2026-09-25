@@ -201,6 +201,7 @@ describe('chain mutations', () => {
       'withNetworkDestination',
       () => withNetworkDestination(world, 'nope.example', { domain: 'a', ip: '1.1.1.1', port: 1 }),
     ],
+    ['withoutEventIds', () => withoutEventIds(world, [ids.eventId('start'), 'nope'])],
   ])('throws from %s when no raw event matches', (_name, rewrite) => {
     expect(rewrite).toThrow('No raw event matches');
   });

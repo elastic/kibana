@@ -127,10 +127,13 @@ export const withNetworkDestination = (
   );
 
 /** Drops the raw events with the given ids. Alerts still cite them, as they would after data loss. */
-export const withoutEventIds = (world: FpTpWorld, eventIds: readonly string[]): FpTpWorld => ({
-  ...world,
-  events: world.events.filter(({ id }) => !eventIds.includes(id)),
-});
+export const withoutEventIds = (world: FpTpWorld, eventIds: readonly string[]): FpTpWorld => {
+  const missing = eventIds.filter((eventId) => !world.events.some(({ id }) => id === eventId));
+  if (missing.length > 0) {
+    throw new Error(`No raw event matches id ${missing.join(', ')}`);
+  }
+  return { ...world, events: world.events.filter(({ id }) => !eventIds.includes(id)) };
+};
 
 /** Drops every raw event whose `event.category` includes `category`. */
 export const withoutEventCategory = (world: FpTpWorld, category: string): FpTpWorld => ({

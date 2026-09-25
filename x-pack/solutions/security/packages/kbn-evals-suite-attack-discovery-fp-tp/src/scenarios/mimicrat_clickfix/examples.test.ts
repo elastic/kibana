@@ -84,6 +84,15 @@ describe('mimicrat-clickfix examples', () => {
     }
   );
 
+  it.each(['mimicrat-clickfix.drop-one-redundant', 'mimicrat-clickfix.drop-one-sole-evidence'])(
+    'returns %s with one raw event fewer than tp',
+    (id) => {
+      expect(buildFpTpExampleWorld(id, 'run1').events).toHaveLength(
+        buildFpTpExampleWorld('mimicrat-clickfix.tp', 'run1').events.length - 1
+      );
+    }
+  );
+
   it.each([
     ['mimicrat-clickfix.fp-benign-mimic', MIMICRAT_STAGE2_DOMAIN],
     ['mimicrat-clickfix.fp-benign-mimic', 'amsiInitFailed'],
