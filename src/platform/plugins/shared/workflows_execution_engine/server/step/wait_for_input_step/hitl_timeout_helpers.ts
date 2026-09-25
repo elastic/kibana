@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  assertValidDuration,
-  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
-  DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
-} from '@kbn/workflows';
+import { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT, DEFAULT_WAIT_FOR_INPUT_TIMEOUT } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isWaitForApproval, isWaitForInput } from '@kbn/workflows/graph';
-import { parseDuration } from '../../utils';
+import { parseDuration, renderDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 
 export const DYNAMIC_TIMEOUT_STATE_KEY = 'dynamicTimeout' as const;
@@ -48,11 +44,7 @@ export function resolveDynamicTimeout(
   defaultTimeout: string,
   render: (value: string) => unknown
 ): string {
-  const raw = configuredTimeout ?? defaultTimeout;
-  const rendered = render(raw);
-  const timeout = typeof rendered === 'string' ? rendered.trim() : String(rendered ?? '');
-  assertValidDuration(timeout);
-  return timeout;
+  return renderDuration(configuredTimeout ?? defaultTimeout, render);
 }
 
 export function getPersistedDynamicTimeout(
