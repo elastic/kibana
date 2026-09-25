@@ -27,6 +27,7 @@ import {
 } from '@kbn/core-http-common';
 import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
+import { isIPv6 } from 'node:net';
 import type { HttpConfig } from './http_config';
 import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
 import { SELF_CALL_HEADER } from './self_client_observer';
@@ -232,12 +233,24 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       throw new Error('Cannot call Kibana self HTTP APIs when the server protocol is "socket".');
     }
 
-    const hostname =
-      serverInfo.hostname === '0.0.0.0' || serverInfo.hostname === '::'
-        ? 'localhost'
-        : serverInfo.hostname;
+    let urlHost: string;
 
-    return new URL(`${serverInfo.protocol}://${hostname}:${serverInfo.port}`);
+    if (serverInfo.hostname === '0.0.0.0') {
+      // Wildcard bind on v4; map to `localhost` as it's consistent across all operating systems
+      urlHost = 'localhost';
+    } else if (serverInfo.hostname === '::') {
+      // Wildcard bind on v6; map to IPv6 loopback address because `localhost` doesn't universally
+      // resolve to the loopback IPv6 address
+      urlHost = '::1';
+    } else {
+      urlHost = serverInfo.hostname;
+    }
+
+    if (isIPv6(urlHost)) {
+      urlHost = `[${urlHost}]`;
+    }
+
+    return new URL(`${serverInfo.protocol}://${urlHost}:${serverInfo.port}`);
   }
 
   private createHeaders<TRequestBody>(options: HttpSelfFetchOptions<TRequestBody>): Headers {
