@@ -52,6 +52,14 @@ export type {
   ActionImpact,
   ActionMetadata,
 } from './action_workflow';
+export {
+  ATTACK_DISCOVERY_SCHEDULE_INTERVAL_DEFAULT,
+  RULE_TUNING_ANALYSIS_WINDOW_DAYS_DEFAULT,
+  RULE_TUNING_EXTRAS_DEFAULTS,
+  RULE_TUNING_FP_COUNT_THRESHOLD_DEFAULT,
+  RULE_TUNING_FP_RATE_THRESHOLD_PCT_DEFAULT,
+  RULE_TUNING_SCHEDULE_INTERVAL_DEFAULT,
+} from './definitions/alertzero/worker_settings_defaults';
 export * from './definitions';
 
 type ManagedWorkflowDefinitionById = {

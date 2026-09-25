@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ATTACK_DISCOVERY_SCHEDULE_INTERVAL_DEFAULT } from '@kbn/workflows';
 import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -26,5 +27,5 @@ export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration = {
   // 2026-09-14; the shared scale itself is unchanged.
   allowedAutonomyLevels: ['manual', 'supervised'],
   // Matches the Attack Discovery schedule form default.
-  scheduleInterval: { defaultValue: '24h' },
+  scheduleInterval: { defaultValue: ATTACK_DISCOVERY_SCHEDULE_INTERVAL_DEFAULT },
 };

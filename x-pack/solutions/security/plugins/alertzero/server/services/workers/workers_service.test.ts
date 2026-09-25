@@ -418,15 +418,20 @@ describe('WorkersService', () => {
     expect(worker?.settingsRevision).toBeNull();
   });
 
-  it('lists a Worker whose stored settings no longer match the current shape as unavailable', async () => {
+  it('lists a Worker whose stored settings contain a key the schema no longer knows as unavailable', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
     await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
-    // A document from an older development shape: no interval, no extras. It stays in the
-    // persistent store, so every read (list and get) sees it.
+    // A stored key the current extras schema no longer knows (removal / the old half of a
+    // rename). Missing fields are filled from defaults and do not make the Worker unavailable.
     const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
     if (!document) throw new Error('Expected the Rule Tuning document to be installed');
-    document.values = { settingsVersion: 1, autonomyLevel: 'manual' };
+    document.values = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+      extras: { analysisWindowDays: 14, retiredField: 1 },
+    };
 
     const { workers } = await service.list(request, SPACE);
     const ruleTuning = workers.find(({ id }) => id === RULE_TUNING);
@@ -447,6 +452,30 @@ describe('WorkersService', () => {
     expect(
       workers.filter(({ id }) => id !== RULE_TUNING).every(({ state }) => state !== 'unavailable')
     ).toBe(true);
+  });
+
+  it('lists a Rule Tuning Worker that omits extras as available, with the defaults filled', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+    const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
+    if (!document) throw new Error('Expected the Rule Tuning document to be installed');
+    document.values = { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '2h' };
+
+    const { workers } = await service.list(request, SPACE);
+    const ruleTuning = workers.find(({ id }) => id === RULE_TUNING);
+
+    expect(ruleTuning).toMatchObject({
+      state: 'ok',
+      settingsRevision: document.version,
+      enabled: true,
+      settings: {
+        workerId: RULE_TUNING,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
+      },
+    });
   });
 
   it('installs on enable and leaves the per-space document in place on disable', async () => {
