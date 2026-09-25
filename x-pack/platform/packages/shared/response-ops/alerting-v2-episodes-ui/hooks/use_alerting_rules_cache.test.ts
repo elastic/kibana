@@ -170,4 +170,33 @@ describe('useAlertingRulesCache', () => {
     await waitFor(() => expect(result.current.rulesCache).toEqual({ [ruleId]: classicRule }));
     expect(mockHttp.get).not.toHaveBeenCalled();
   });
+
+  it('falls back to the additional source when the v2 rules lookup is forbidden', async () => {
+    const ruleId = 'classic-rule';
+    const classicRule = {
+      id: ruleId,
+      metadata: { name: 'Classic Rule' },
+    } as unknown as FindRulesResponse['items'][number];
+    mockHttp.get.mockRejectedValue({
+      name: 'Error',
+      message: 'Forbidden',
+      response: { status: 403 },
+    });
+    const dataSource = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([classicRule]),
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(EpisodeDataSourceProvider, { dataSource }, children);
+
+    const { result } = renderHook(
+      () => useAlertingRulesCache({ ruleIds: [ruleId], services: { http: mockHttp } }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.rulesCache).toEqual({ [ruleId]: classicRule }));
+    expect(mockHttp.get).toHaveBeenCalled();
+    expect(dataSource.resolveRules).toHaveBeenCalledWith(
+      expect.objectContaining({ ids: [ruleId] })
+    );
+  });
 });

@@ -11,6 +11,7 @@ import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import useAsync from 'react-use/lib/useAsync';
 import { fetchRulesByIds } from '../apis/fetch_rules_by_ids';
 import { fetchFromSource } from '../utils/fetch_from_sources';
+import { shouldSwallowFetchError } from '../utils/should_swallow_fetch_error';
 import {
   useAdditionalEpisodesDataSource,
   useQueryV2Source,
@@ -43,8 +44,15 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
       return;
     }
 
+    // v2 rules read is granted separately from v2 alerts read, so a forbidden lookup
+    // falls through to the additional source instead of failing the whole resolution.
     const v2Rules = queryV2Source
-      ? await fetchRulesByIds({ http: services.http, ids: uncachedIds })
+      ? await fetchRulesByIds({ http: services.http, ids: uncachedIds }).catch((fetchError) => {
+          if (shouldSwallowFetchError(fetchError)) {
+            return [];
+          }
+          throw fetchError;
+        })
       : [];
     const resolvedByV2 = new Set(v2Rules.map((rule) => rule.id));
     const unresolvedIds = uncachedIds.filter((id) => !resolvedByV2.has(id));
