@@ -14,11 +14,6 @@ if [[ -z "$EVAL_SUITE_ID" ]]; then
   exit 1
 fi
 
-# Boot disk for the fanout agents. Eval steps bootstrap the workspace, unpack the Kibana
-# distributable and run a local ES + Kibana; on the image default ES ends up under its merge
-# disk watermark and stops merging segments. Keep in sync with `pipelines/evals/eval_pipeline.ts`.
-EVAL_AGENT_DISK_SIZE_GB="${EVAL_AGENT_DISK_SIZE_GB:-130}"
-
 # Tag inference traffic with `X-Elastic-Product-Use-Case` (forwarded from inference connector telemetry).
 # The value should be the platform-level `pluginId` use-case identifier.
 # `@kbn/evals` defaults this to `kbn_evals`, but you can override via KBN_EVALS_TELEMETRY_PLUGIN_ID.
@@ -295,7 +290,6 @@ EOF
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}
 EOF
 
           if [[ "$fanout_preemptible" == "true" ]]; then

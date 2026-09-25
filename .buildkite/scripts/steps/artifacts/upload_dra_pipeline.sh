@@ -23,7 +23,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 180
     timeout_in_minutes: 30
     plugins:
       - elastic/dra-prep#v0.1.6:

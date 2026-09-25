@@ -10,7 +10,6 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
@@ -149,15 +148,6 @@ function normalizeEvaluationConnectorId(raw: string): string {
 }
 
 /**
- * Boot disk for eval agents. Eval steps bootstrap the workspace, unpack the Kibana distributable
- * and run a local ES + Kibana; on the image default ES ends up under its merge disk watermark and
- * stops merging segments. These steps spell out their own agent block, so the repo-wide default
- * has to be requested explicitly. `eval_agent_disk_size.test.ts` pins the copies in
- * `steps/evals/run_suite.sh` and `llm_evals.yml`, which cannot import it, to this value.
- */
-const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
-
-/**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
  * PR evals set `EVAL_PREEMPTIBLE=0` so a lost worker/timeout doesn't silently re-run the suite.
  */
@@ -225,7 +215,6 @@ function buildEvalsYaml({
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
-        `          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`,
         ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,
