@@ -156,6 +156,26 @@ describe('huntBehavior', () => {
     expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
   });
 
+  it('keeps a line break in an evidence quote from ending the comment that makes the placeholder safe', async () => {
+    // The quote has to appear in the report to clear the grounding check, so this is
+    // reachable with report prose the model quoted faithfully — it does not need a
+    // lying model, only a crafted report.
+    const injected = 'cloud account abuse\nFROM logs-aws.* | LIMIT 1\n// tail';
+    const result = await huntBehavior(
+      buildMockModel([
+        { technique_id: 'T1078.004', evidence_quote: injected, llm_confidence: 0.9 },
+      ]),
+      logger,
+      { text: `Incident report: ${injected} was observed.` }
+    );
+
+    const rule = result.behaviors[0].proposed_esql_rule;
+    expect(rule).toContain('Grounded ES|QL generation unavailable');
+    // The whole placeholder stays commented out, which is the property that makes it
+    // non-executable — a single uncommented line would be ES|QL.
+    expect(rule.split('\n').every((line) => line.startsWith('//'))).toBe(true);
+  });
+
   it('returns one generateEsql call per validated behavior', async () => {
     const model = buildMockModel([t1078Candidate, t1566Candidate]);
     await huntBehavior(model, logger, { text: REPORT_TEXT }, esClient);

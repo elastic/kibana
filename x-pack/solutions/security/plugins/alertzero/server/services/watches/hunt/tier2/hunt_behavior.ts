@@ -87,6 +87,18 @@ const sanitizeRuleName = (
 };
 
 /**
+ * Joins `//` lines with every interpolated value flattened onto its own line. A
+ * `//` comment ends at the line break, so a model-supplied value carrying one —
+ * an `evidence_quote` is report prose, and `slice` bounds its length without
+ * touching its newlines — ends the comment early and leaves whatever followed it
+ * as ES|QL. That turns the placeholder below into an executable query, which is
+ * precisely what it exists not to be, so the flattening belongs here rather than
+ * at each call site where the next line added would forget it.
+ */
+const commentBlock = (lines: string[]): string =>
+  lines.map((line) => line.replace(/\s+/g, ' ').trim()).join('\n');
+
+/**
  * Non-executable placeholder when grounded generation is unavailable or fails.
  * Never emits a FROM clause — a prior `FROM *` stub was unsafe to ship as a
  * proposed rule even though the execute path skipped it.
@@ -110,14 +122,14 @@ const proposedEsqlRuleUnavailable = ({
   report_id?: string;
 }): string => {
   const name = sanitizeRuleName(technique_id, technique_name, report_id);
-  return [
+  return commentBlock([
     `// rule_name: ${name}`,
     `// technique: ${technique_id} (${technique_name})`,
     `// tactics: ${tactic_ids.join(', ') || '<unmapped>'}`,
     `// severity: ${severity}  confidence: ${confidence.toFixed(2)}`,
     `// evidence: ${evidence_quote.slice(0, 120)}`,
     `// Grounded ES|QL generation unavailable; no executable query proposed.`,
-  ].join('\n');
+  ]);
 };
 
 const buildGroundedEsqlHeader = (b: {
@@ -128,7 +140,7 @@ const buildGroundedEsqlHeader = (b: {
   parent_technique_id?: string;
   tactic_ids: string[];
 }): string =>
-  [
+  commentBlock([
     `// Generated from hunt.hunt_behavior — grounded in the report's extracted`,
     `// IOCs/behaviors and validated against the target index mappings.`,
     `// Review the FROM clause and artifact values before enabling.`,
@@ -138,7 +150,7 @@ const buildGroundedEsqlHeader = (b: {
       b.parent_technique_id ? ` (parent ${b.parent_technique_id})` : ''
     }`,
     `// tactics: ${b.tactic_ids.join(', ') || '<unmapped>'}`,
-  ].join('\n');
+  ]);
 
 const MAX_ESQL_PROMPT_IOCS = 30;
 const MAX_ESQL_PROMPT_TEXT_CHARS = 6000;

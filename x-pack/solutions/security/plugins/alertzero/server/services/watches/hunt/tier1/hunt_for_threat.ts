@@ -18,6 +18,7 @@ import { summarizeHit } from '../common/summarize_hit';
 import {
   ALERT_TECHNIQUE_ID_FIELDS,
   attributeHits,
+  CASE_INSENSITIVE_IOC_TYPES,
   HASH_ALGO_BY_LENGTH,
   hashFieldsForAlgo,
   IOC_FIELDS_BY_TYPE,
@@ -26,8 +27,18 @@ import {
 } from './attribute_hits';
 import type { HuntForThreatParams, HuntForThreatServiceResult } from './types';
 
-const termClause = (field: string, value: string): Record<string, unknown> => ({
-  term: { [field]: value },
+/**
+ * Folding the report's value is not enough on its own for a case-insensitive IOC
+ * type: the document may be the side carrying the mixed case, and `term` on a
+ * `keyword` field compares bytes. So the clause itself matches case-insensitively
+ * and `normalizeIocValue` folds both sides during attribution.
+ */
+const termClause = (
+  field: string,
+  value: string,
+  caseInsensitive = false
+): Record<string, unknown> => ({
+  term: { [field]: caseInsensitive ? { value, case_insensitive: true } : value },
 });
 
 /**
@@ -49,8 +60,9 @@ const buildIocShould = (iocs: HuntIoc[]): Array<Record<string, unknown>> => {
       if (algo) clauses.push(...hashFieldsForAlgo(algo).map((field) => termClause(field, digest)));
       continue;
     }
+    const caseInsensitive = CASE_INSENSITIVE_IOC_TYPES.has(type);
     for (const field of IOC_FIELDS_BY_TYPE[type] ?? []) {
-      clauses.push(termClause(field, value));
+      clauses.push(termClause(field, value, caseInsensitive));
     }
   }
   return clauses;

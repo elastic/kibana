@@ -470,6 +470,73 @@ describe('huntForThreat', () => {
     });
   });
 
+  describe('domain IOC casing', () => {
+    it('matches a domain case-insensitively, since DNS names are', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, { scope, iocs: [{ type: 'domain', value: 'Example.COM' }] });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      // Folding the report's value would not be enough: the document is just as
+      // likely to be the side carrying the mixed case.
+      expect(searchBody.query.bool.should).toEqual(
+        expect.arrayContaining([
+          { term: { 'dns.question.name': { value: 'Example.COM', case_insensitive: true } } },
+        ])
+      );
+    });
+
+    it('leaves a case-sensitive type on a plain term clause', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, { scope, iocs: [{ type: 'ip', value: '10.0.0.1' }] });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      expect(searchBody.query.bool.should).toEqual(
+        expect.arrayContaining([{ term: { 'source.ip': '10.0.0.1' } }])
+      );
+      expect(JSON.stringify(searchBody.query)).not.toContain('case_insensitive');
+    });
+
+    it('still attributes the hit when the report and the document disagree on case', async () => {
+      const esClient = buildEsClient(
+        {
+          hits: {
+            total: { value: 1 },
+            hits: [
+              {
+                _index: 'logs-aws.cloudtrail-default',
+                _id: 'abc',
+                _source: {
+                  '@timestamp': '2026-09-01T00:00:00.000Z',
+                  dns: { question: { name: 'example.com' } },
+                },
+              },
+            ],
+          },
+          aggregations: {
+            per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
+            affected_hosts: { buckets: [] },
+            affected_users: { buckets: [] },
+          },
+        },
+        1
+      );
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'domain', value: 'Example.COM' }],
+      });
+
+      // A hit the search found but attribution cannot explain is worse than either
+      // behaviour alone, so both sides fold.
+      expect(result.hits[0].matched).toEqual({
+        ioc: { type: 'domain', value: 'Example.COM' },
+        field: 'dns.question.name',
+      });
+    });
+  });
+
   describe('the _source projection', () => {
     it.each([
       ['ip', '10.0.0.1', ['related.ip', 'kubernetes.audit.sourceIPs']],

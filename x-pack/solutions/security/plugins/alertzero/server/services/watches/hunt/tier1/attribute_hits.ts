@@ -49,15 +49,21 @@ export const IOC_FIELDS_BY_TYPE: Record<string, string[]> = {
 };
 
 /**
- * Canonical form of an IOC value for comparison. Hex digests are
- * case-insensitive as identifiers but ECS hash fields are `keyword`, so a report
- * quoting `ABC…` and an integration indexing `abc…` name the same file and not
- * the same term. Applied to both sides — the query built in `hunt_for_threat.ts`
- * and the `_source` comparison in `matchIoc` — so a hit that the search found is
- * a hit attribution can also explain.
+ * IOC types whose values name the same thing whatever their case. Hex digests are
+ * case-insensitive as identifiers, and DNS names are case-insensitive by
+ * definition, but the ECS fields holding both are `keyword`, so a report quoting
+ * `ABC…` or `Example.COM` and an integration indexing `abc…` or `example.com`
+ * name the same file and the same host without naming the same term.
+ *
+ * Exported because the query in `hunt_for_threat.ts` has to agree with attribution
+ * here: a hit the search found and a hit attribution cannot explain is worse than
+ * either behaviour on its own.
  */
+export const CASE_INSENSITIVE_IOC_TYPES: ReadonlySet<string> = new Set(['hash', 'domain']);
+
+/** Canonical form of an IOC value for comparison, applied to both sides of it. */
 export const normalizeIocValue = (type: string, value: string): string =>
-  type === 'hash' ? value.toLowerCase() : value;
+  CASE_INSENSITIVE_IOC_TYPES.has(type) ? value.toLowerCase() : value;
 
 const asString = (value: unknown): string | undefined => {
   if (typeof value === 'string') return value;
