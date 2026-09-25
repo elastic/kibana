@@ -7,7 +7,7 @@
 
 import type { CandidatesResponse } from '@kbn/alertzero-common';
 import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
-import { MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
+import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
@@ -28,8 +28,15 @@ const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
 /**
- * A single page of 50 would fail open past that: any further open gate would be
- * invisible and the report would be re-hunted while containment is still parked.
+ * Every open proposal in the space, paged to exhaustion. This set is the gate
+ * that keeps a report from being re-hunted while an action on it is still
+ * pending or running, so a single capped page would fail open: any open
+ * proposal past it would be invisible and the report would be re-hunted while
+ * containment is still parked.
+ *
+ * `list` pages with `from`/`size` and exposes no `search_after`, so it cannot
+ * read past Elasticsearch's result window. Past that ceiling the set cannot be
+ * completed, and this throws rather than hand back a partial gate.
  */
 const readAllOpenProposalConversationIds = async (
   proposalsService: ProposalsService,
@@ -39,6 +46,13 @@ const readAllOpenProposalConversationIds = async (
   for (const status of OPEN_PROPOSAL_STATUSES) {
     let from = 0;
     for (;;) {
+      if (from > MAX_PROPOSALS_PAGE_OFFSET) {
+        throw new Error(
+          `Cannot enumerate ${status} proposals in space "${space}": more than ` +
+            `${MAX_PROPOSALS_PAGE_OFFSET + MAX_PROPOSALS_PAGE_SIZE} exist and this list cannot ` +
+            `page past Elasticsearch's result window.`
+        );
+      }
       const page = await proposalsService.list(
         {
           status,

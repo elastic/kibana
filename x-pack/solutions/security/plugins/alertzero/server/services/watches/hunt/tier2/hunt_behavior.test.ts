@@ -416,7 +416,7 @@ describe('huntBehavior', () => {
       expect.objectContaining({
         esClient,
         limit: 25,
-        filter: { range: { '@timestamp': { gte: 'now-7d', lte: 'now' } } },
+        filter: { range: { '@timestamp': { gte: 'now-7d', lt: 'now' } } },
       })
     );
   });

@@ -204,7 +204,8 @@ const executeValidatedEsql = async ({
       limit: row_limit,
       filter: {
         range: {
-          '@timestamp': { gte: window.from, lte: window.to },
+          // Exclusive `to`, matching `IndexScopeWindow` and Tier 1.
+          '@timestamp': { gte: window.from, lt: window.to },
         },
       },
     });

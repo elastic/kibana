@@ -140,7 +140,8 @@ const sampleRequiredIndexEvents = async ({
               range: {
                 '@timestamp': {
                   gte: window.from,
-                  lte: window.to,
+                  // Exclusive `to`, matching `IndexScopeWindow` and both tiers.
+                  lt: window.to,
                 },
               },
             },
