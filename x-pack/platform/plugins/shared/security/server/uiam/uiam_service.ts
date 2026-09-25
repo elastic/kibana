@@ -38,8 +38,8 @@ import {
 import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
 import type {
   ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   UiamListServiceAccountsResponse,
+  UiamRoleAssignments,
   UiamServiceAccount,
   UiamServiceAccountDetails,
 } from './service_account_types';
@@ -56,8 +56,8 @@ interface CreateServiceAccountRequestBody {
   organization_id: string;
   /** A descriptive name for the service account. */
   name: string;
-  /** Roles granted to the service account, referenced by name. */
-  role_assignments: ServiceAccountRoleAssignments;
+  /** The roles asked for; see {@link UiamRoleAssignments}. */
+  role_assignments: UiamRoleAssignments;
   /** Principals allowed to exchange the service account's credentials for a token. */
   assumable_by: ServiceAccountAssumableBy[];
 }
