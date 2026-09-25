@@ -18,10 +18,12 @@ import { BehaviorSubject } from 'rxjs';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../..';
 import { DataSourceCategory } from '../../../../profiles';
 import type { LogOverviewContext } from '../profile';
-import { getRowAdditionalLeadingControls } from './get_row_additional_leading_controls';
+import { createGetRowAdditionalLeadingControls } from './get_row_additional_leading_controls';
+import type { ProfileProviderServices } from '../../../profile_provider_services';
 
 const DEGRADED_DOCS_CONTROL_ID = 'connectedDegradedDocs';
 const STACKTRACE_CONTROL_ID = 'connectedStacktraceDocs';
+const SURROUNDING_LOGS_CONTROL_ID = 'surroundingLogs';
 
 const record = buildDataTableRecord(
   {
@@ -52,6 +54,11 @@ const findControl = (controls: RowControlColumn[] | undefined, id: string) => {
   return control;
 };
 
+const mockServices = {
+  filterManager: { getGlobalFilters: () => [], getAppFilters: () => [] },
+  contextLocator: { navigate: jest.fn() },
+} as unknown as ProfileProviderServices;
+
 const setup = ({
   setExpandedDoc,
   query,
@@ -62,7 +69,7 @@ const setup = ({
   const logOverviewContext$ = new BehaviorSubject<LogOverviewContext | undefined>(undefined);
 
   // Non-null assertion: accessors are optional on the profile type, this one is implemented here.
-  const controls = getRowAdditionalLeadingControls!(() => [], {
+  const controls = createGetRowAdditionalLeadingControls(mockServices)!(() => [], {
     context: { category: DataSourceCategory.Logs, logOverviewContext$ },
     toolkit: { ...EMPTY_CONTEXT_AWARENESS_TOOLKIT, actions: { setExpandedDoc } },
   })({
@@ -83,7 +90,7 @@ const degradedDocsGating = [
   { esql: 'FROM logs-* METADATA _ignored | LIMIT 10', requests: 'requests', enabled: true },
 ] as const;
 
-describe('getRowAdditionalLeadingControls (logs)', () => {
+describe('createGetRowAdditionalLeadingControls (logs)', () => {
   clickTargets.forEach(({ controlId, section }) => {
     it(`queues the ${section} section and opens the log overview tab when its control is clicked`, () => {
       const setExpandedDoc = jest.fn();
@@ -99,6 +106,11 @@ describe('getRowAdditionalLeadingControls (logs)', () => {
         initialTabId: 'doc_view_logs_overview',
       });
     });
+  });
+
+  it('always includes the surrounding logs control regardless of query type', () => {
+    const { controls } = setup({ setExpandedDoc: jest.fn() });
+    expect(controls?.some((c) => c.id === SURROUNDING_LOGS_CONTROL_ID)).toBe(true);
   });
 
   degradedDocsGating.forEach(({ esql, requests, enabled }) => {
