@@ -6,7 +6,8 @@
  */
 
 /**
- * Fully-populated monitor payloads used by the characterization tests.
+ * Fully-populated monitor payloads used by the monitor request-body and
+ * runtime-type characterization tests.
  *
  * Every field of every monitor type is set to a distinctive, non-default value
  * so a decode round-trip proves each field is both accepted and preserved. The

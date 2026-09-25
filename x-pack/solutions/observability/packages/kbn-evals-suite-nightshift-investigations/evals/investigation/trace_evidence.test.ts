@@ -6,8 +6,64 @@
  */
 
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolCallStep } from '@kbn/agent-builder-common';
-import { assertAgentTrace, assertSuccessfulSandboxCommand } from './trace_evidence';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  assertAgentTrace,
+  assertSuccessfulSandboxCommand,
+  containsTemplate,
+} from './trace_evidence';
+
+describe('containsTemplate', () => {
+  const template = 'Start.{{load_step}} Middle.\n{{section}}\nEnd.';
+
+  it.each([
+    ['placeholders filled', 'Start. Load trees. Middle.\n<trees/>\nEnd.'],
+    ['placeholders empty', 'Start. Middle.\n\nEnd.'],
+    ['extra text around the prompt', 'Prefix. Start. Middle.\nEnd. Suffix.'],
+  ])('accepts the prompt with %s', (_label, text) => {
+    expect(containsTemplate(text, template)).toBe(true);
+  });
+
+  it.each([
+    ['a missing piece', 'Start. Middle.'],
+    ['pieces out of order', 'End. Start. Middle.'],
+    ['an edited piece', 'Start. Changed.\nEnd.'],
+  ])('rejects %s', (_label, text) => {
+    expect(containsTemplate(text, template)).toBe(false);
+  });
+
+  it('rejects an empty template', () => {
+    expect(containsTemplate('anything', '  ')).toBe(false);
+  });
+
+  it('matches the real deductive prompt with decision trees on and off', () => {
+    const dir = join(
+      REPO_ROOT,
+      'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/deductive_investigation/instructions'
+    );
+    const raw = readFileSync(join(dir, 'deductive_investigator.md.text'), 'utf8');
+    const trees = readFileSync(join(dir, 'decision_trees.text'), 'utf8');
+    const fill = (loadStep: string, section: string) =>
+      raw
+        .replace('{{decision_trees_load_step}}', loadStep)
+        .replace('{{decision_trees_section}}', section);
+
+    const promptTemplate = cleanPrompt(raw);
+    expect(promptTemplate).toContain('{{decision_trees_section}}');
+    expect(containsTemplate(cleanPrompt(fill('', '')), promptTemplate)).toBe(true);
+    expect(
+      containsTemplate(
+        cleanPrompt(fill(' Also check trees.', `\n${trees.trimEnd()}\n`)),
+        promptTemplate
+      )
+    ).toBe(true);
+  });
+});
 
 const toolCall = {
   type: ConversationRoundStepType.toolCall,
@@ -99,6 +155,67 @@ it.each([
 
 it('accepts full payload evidence for the investigation conversation', () => {
   expect(() => assertAgentTrace(attributes, expected)).not.toThrow();
+});
+
+it('checks executed progress arguments after schema ordering without losing the raw model call', () => {
+  const low = { title: 'Low priority gap', description: 'Missing low signal', confidence: 0.2 };
+  const high = { title: 'High priority gap', description: 'Missing high signal', confidence: 0.9 };
+  const params = { summary: 'Investigating', hypotheses: [], blind_spots: [low, high] };
+  const progressCall = {
+    ...toolCall,
+    tool_id: 'platform.streams.investigation_progress_report',
+    params,
+  };
+  const spans = [
+    {
+      ...attributes[0],
+      'gen_ai.tool.name': progressCall.tool_id,
+      'gen_ai.tool.call.arguments': JSON.stringify({ ...params, blind_spots: [high, low] }),
+      'gen_ai.output.messages': JSON.stringify([
+        {
+          role: 'assistant',
+          parts: [
+            { type: 'text', content: expected.rounds[0].response.message },
+            {
+              ...toolCallPart,
+              name: sanitizeToolId(progressCall.tool_id),
+              arguments: JSON.stringify(params),
+            },
+          ],
+        },
+      ]),
+    },
+  ];
+  const progressExpected = {
+    ...expected,
+    rounds: [{ ...expected.rounds[0], steps: [progressCall] }],
+  };
+  expect(() => assertAgentTrace(spans, progressExpected)).not.toThrow();
+  expect(() =>
+    assertAgentTrace(
+      [
+        {
+          ...spans[0],
+          'gen_ai.tool.call.arguments': JSON.stringify({ ...params, blind_spots: [high] }),
+        },
+      ],
+      progressExpected
+    )
+  ).toThrow('must retain arguments');
+  expect(() =>
+    assertAgentTrace(
+      [
+        {
+          ...spans[0],
+          'gen_ai.output.messages': spans[0]['gen_ai.output.messages'].replace(
+            'Low priority gap',
+            'Redacted'
+          ),
+        },
+      ],
+      progressExpected
+    )
+  ).toThrow('must retain the model tool call');
 });
 
 it('rejects a trace that retains message attributes but has redacted the user question', () => {
