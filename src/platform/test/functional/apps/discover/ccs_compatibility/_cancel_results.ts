@@ -19,6 +19,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
  */
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const es = getService('es');
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
@@ -146,15 +147,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
         await timePicker.setDefaultAbsoluteRange();
+        // DELAY(10ms) here is evaluated once per matching remote row (not once per block/page —
+        // Case's lazy evaluator invokes each branch per-row), so its total wall-clock contribution
+        // scales with the remote row count and isn't a value we should tune to "just barely win a
+        // race" — see the state-based wait below instead of a larger constant here.
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
         await testSubjects.click('querySubmitButton');
 
-        // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID. The secondary button becoming enabled signals
-        // SearchSessionState.Loading (after a 500ms delay), which is guaranteed to fire after the
-        // async search ID is available from ES (~200ms from wait_for_completion_timeout).
+        // Confirm the ES|QL compute task is genuinely running on a data node before cancelling.
+        // We can't infer this from elapsed time — DELAY()'s total wall-clock contribution scales
+        // with however many remote rows the engine happens to evaluate it for, which isn't a
+        // documented contract. Polling real task state removes the guesswork: this action is only
+        // present in the tasks list while a compute driver is actively executing (see the `esql`
+        // action prefix `indices:data/read/esql`; the compute/driver sub-task is
+        // `indices:data/read/esql/compute`, as also relied on by the `query_activity` plugin).
+        await retry.waitFor('esql compute task to be actively running', async () => {
+          const { nodes } = await es.tasks.list({ actions: 'indices:data/read/esql/compute*' });
+          return Object.values(nodes ?? {}).some(
+            (node) => Object.keys(node.tasks ?? {}).length > 0
+          );
+        });
+
+        // The secondary button becoming enabled signals SearchSessionState.Loading (after a 500ms
+        // delay) — this is a front-end readiness check (the client-side async search id is set),
+        // complementary to the ES-side task confirmation above.
         await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
         await testSubjects.existOrFail('queryCancelButton');
         await testSubjects.click('queryCancelButton');
