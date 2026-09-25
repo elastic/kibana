@@ -823,6 +823,33 @@ describe('DatatableComponent', () => {
         });
       });
 
+      test('should use percent-space range bounds when applying default colors to data outside 0-100', () => {
+        // no palette or color mapping persisted -> render-time defaults path
+        args.columns[2].colorMode = 'cell';
+        data.rows = [
+          { a: 'shoe', b: 1588024800000, c: 200 },
+          { a: 'hat', b: 1588024800000, c: 1000 },
+        ];
+
+        renderDatatableComponent({
+          getType: jest.fn().mockReturnValue({ type: 'metrics' }),
+        });
+
+        expect(getCellColorFn).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ type: 'ranges', min: 200, max: 1000 }),
+          false,
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            name: 'custom',
+            params: expect.objectContaining({ range: 'percent', rangeMin: 0, rangeMax: 100 }),
+          }),
+          undefined
+        );
+      });
+
       const color = 'red';
 
       test('should correctly color numerical values', () => {
