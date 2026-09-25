@@ -12,9 +12,9 @@ This skill is not about generating these KIs, that is a separate skill.
 Each AI index is queried through the ES|QL target listed for it. AI indices created in Kibana are
 queried through a view named `v-ai-index-<id>`, which returns their current, active, unexpired KIs
 and drops the governance fields, so lifecycle handling never belongs in your query. AI indices
-Elastic manages, such as `elastic`, have no view and are queried through their backing store:
-their KIs carry per-document space permissions that ES|QL only applies there. `v-ai-index-*`
-reaches every AI index created in Kibana that you can read.
+Elastic manages have no view and are queried through their backing store: their KIs carry
+per-document space permissions that ES|QL only applies there. `v-ai-index-*` reaches every AI
+index created in Kibana that you can read.
 
 The AI INDICES section of your instructions lists the targets available to this agent. When that
 section is absent, `platform.context_engine.list_ai_indices` returns the AI indices you can read
