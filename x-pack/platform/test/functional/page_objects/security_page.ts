@@ -348,7 +348,6 @@ export class SecurityPageObject extends FtrService {
       // Unload the app first. Requests that outlive the page (e.g. keepalive) can still
       // re-set the session cookie after it is deleted, so clear until it stays cleared.
       const hostPort = this.deployment.getHostPort();
-      const originalUrl = await this.browser.getCurrentUrl();
       await this.browser.get(hostPort + '/bootstrap-anonymous.js');
       const alert = await this.browser.getAlert();
       if (alert) await alert.accept();
@@ -363,11 +362,9 @@ export class SecurityPageObject extends FtrService {
         clearedChecks++;
         return clearedChecks >= 2;
       });
-      // Return to the original page; without a session Kibana redirects it to the login page,
-      // which callers rely on.
-      if (originalUrl.startsWith(hostPort)) {
-        await this.browser.get(originalUrl);
-      }
+      // Land on a plain login page, which callers rely on. Returning to the previous app URL
+      // would add a `next` target that sends the next form login past the space selector.
+      await this.browser.get(hostPort + '/login');
       return;
     }
 
