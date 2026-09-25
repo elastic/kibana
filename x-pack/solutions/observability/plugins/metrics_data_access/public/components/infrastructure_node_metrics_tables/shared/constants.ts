@@ -52,13 +52,13 @@ export const MEMORY_LIMIT_UTILIZATION = 'memory_limit_utilization';
 export const KUBERNETES_NODE_MEMORY_ALLOCATABLE_BYTES = 'kubernetes.node.memory.allocatable.bytes';
 export const KUBERNETES_NODE_MEMORY_USAGE_BYTES = 'kubernetes.node.memory.usage.bytes';
 
-/** SemConv K8s pod metric field names — require resource limits to be set */
-export const SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION = 'metrics.k8s.pod.cpu_limit_utilization';
-export const SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION = 'metrics.k8s.pod.memory_limit_utilization';
-
-/** SemConv K8s pod metrics always emitted by kubeletstats (no limits required) */
-export const SEMCONV_K8S_POD_CPU_NODE_UTILIZATION = 'metrics.k8s.pod.cpu.node.utilization';
-export const SEMCONV_K8S_POD_MEMORY_WORKING_SET = 'metrics.k8s.pod.memory.working_set';
+/** SemConv K8s pod metric field names (limits-required and always-emitted kubeletstats metrics) */
+export {
+  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_CPU_NODE_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_WORKING_SET,
+} from '../../../../common/constants';
 
 // --- OTel dataset filter helper ---
 
