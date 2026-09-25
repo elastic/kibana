@@ -411,8 +411,10 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
 
-    // Turn off timeseries so there are zero mappings.
-    fireEvent.click(getByTestId('createDatasetWizardTimeseriesToggle'));
+    // Keep timeseries enabled, but make it valid.
+    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+      target: { value: 'event_time' },
+    });
 
     // Select Define schema (dynamic = false).
     fireEvent.click(getByTestId('createDatasetWizardDefineSchemaCard'));

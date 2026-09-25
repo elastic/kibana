@@ -7,8 +7,8 @@
 
 import type { SetStateAction } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useController, useFormContext } from 'react-hook-form';
@@ -19,6 +19,7 @@ import { MappingHeader } from './mapping_header';
 import { TimeseriesDataSection } from './timeseries_data_section';
 import type { DataFederationKibanaServices } from '../types';
 import { MappingEditor, type MappingEditorValue } from '../components/mapping_editor';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { DatasetWizardContent } from './types';
 
 const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
@@ -62,10 +63,20 @@ export function StepMapping() {
   const isTimeseriesFieldValid =
     !splitFields.timestampField || splitFields.timestampField.path.trim() !== '';
   const declaredFieldCount = useMemo(() => {
-    return field.value.fields.filter((f) => f.name.trim() && f.type).length;
-  }, [field.value.fields]);
+    return splitFields.otherFields.filter((f) => f.name.trim() && f.type).length;
+  }, [splitFields.otherFields]);
   const isDefineSchemaValid = dynamicMode || declaredFieldCount > 0;
   const isMappingStepValid = isTimeseriesFieldValid && isDefineSchemaValid;
+  const mappingStepErrors = useMemo(() => {
+    const errors: Array<{ testSubj: string; message: string }> = [];
+    if (shouldShowDefineSchemaValidation && !isDefineSchemaValid) {
+      errors.push({
+        testSubj: 'createDatasetWizardDefineSchemaRequiresField',
+        message: createDatasetWizardStrings.defineSchemaRequiresFieldError,
+      });
+    }
+    return errors;
+  }, [isDefineSchemaValid, shouldShowDefineSchemaValidation]);
 
   const onTimeseriesToggle = useCallback(
     (checked: boolean) => {
@@ -169,22 +180,22 @@ export function StepMapping() {
 
         <EuiSpacer size="m" />
         <InferSchemaToggle dynamicMode={dynamicMode} onDynamicModeChange={onDynamicModeChange} />
-        {shouldShowDefineSchemaValidation && !isDefineSchemaValid ? (
+        {mappingStepErrors.length > 0 ? (
           <>
             <EuiSpacer size="s" />
-            <EuiText
-              color="danger"
-              size="s"
-              data-test-subj="createDatasetWizardDefineSchemaRequiresField"
-            >
-              {i18n.translate(
-                'xpack.dataFederation.createDatasetWizard.defineSchemaRequiresField',
-                {
-                  defaultMessage:
-                    'When Define schema is selected, you must map at least one field.',
-                }
-              )}
-            </EuiText>
+            <KbnDangerCallout
+              title={createDatasetWizardStrings.mappingStepErrorsTitle}
+              data-test-subj="createDatasetWizardMappingStepErrors"
+              text={
+                <ul>
+                  {mappingStepErrors.map((e) => (
+                    <li key={e.testSubj} data-test-subj={e.testSubj}>
+                      {e.message}
+                    </li>
+                  ))}
+                </ul>
+              }
+            />
           </>
         ) : null}
 

@@ -44,6 +44,18 @@ export const createDatasetWizardStrings = {
   mappingStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappingStepLabel', {
     defaultMessage: 'Mapping',
   }),
+  mappingStepErrorsTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.mappingStepErrorsTitle',
+    {
+      defaultMessage: 'Fix the following errors',
+    }
+  ),
+  defineSchemaRequiresFieldError: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.defineSchemaRequiresField',
+    {
+      defaultMessage: 'When Define schema is selected, you must map at least one field.',
+    }
+  ),
   commonSettingsSectionTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.commonSettingsSectionTitle',
     {
