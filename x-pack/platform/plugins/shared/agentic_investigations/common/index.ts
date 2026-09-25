@@ -17,10 +17,9 @@ export type { User } from './user';
 // Each entity this plugin owns keeps its own barrel; the umbrella re-exports
 // them so consumers have a single entry point per the plugin's public surface.
 export {
+  IMPACT_ATTACHMENT_TYPE,
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
-  IMPACT_UI_CAPABILITY_MANAGE,
-  IMPACT_UI_CAPABILITY_SHOW,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,

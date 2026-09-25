@@ -181,11 +181,13 @@ export const getIndexFields = async ({
   esClient,
   cleanup = true,
   includeFrozen = false,
+  skipUnauthorized = false,
 }: {
   indices: string[];
   esClient: ElasticsearchClient;
   cleanup?: boolean;
   includeFrozen?: boolean;
+  skipUnauthorized?: boolean;
 }): Promise<Record<string, IndexFieldsResult>> => {
   const local = indices.filter((i) => !isCcsTarget(i));
   const remote = indices.filter((i) => isCcsTarget(i));
@@ -238,6 +240,7 @@ export const getIndexFields = async ({
             getIndexMappings({
               indices: buckets.index.map((i) => i.concrete),
               cleanup,
+              skipUnauthorized,
               esClient,
             })
           )

@@ -14,8 +14,10 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
@@ -32,6 +34,7 @@ import {
 } from '@kbn/agentic-investigations-common';
 import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { getAlertZeroDeepLinks } from './deep_links';
+import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import type {
   AlertZeroClientConfig,
@@ -66,6 +69,7 @@ export class AlertZeroPublicPlugin
     >
 {
   private readonly config: AlertZeroClientConfig;
+  private readonly logger: Logger;
   /**
    * Allows `start()` to push updated deep links (with capability-resolved visibility)
    * after capabilities become available, without re-registering the application.
@@ -74,6 +78,7 @@ export class AlertZeroPublicPlugin
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
+    this.logger = context.logger.get();
   }
 
   public setup(
@@ -81,7 +86,7 @@ export class AlertZeroPublicPlugin
     _setupDeps: AlertZeroSetupDependencies
   ): AlertZeroPublicSetup {
     if (!this.config.enabled) {
-      return {};
+      return { enabled: false };
     }
 
     coreSetup.application.register({
@@ -108,7 +113,7 @@ export class AlertZeroPublicPlugin
       },
     });
 
-    return {};
+    return { enabled: true };
   }
 
   public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
@@ -263,6 +268,22 @@ export class AlertZeroPublicPlugin
               React.createElement(LazyEscalationModal, props)
             )
         : undefined,
+    });
+
+    // Space id comes from the base path so registration starts synchronously.
+    const { spaceId } = getSpaceIdFromPath(
+      core.http.basePath.get(),
+      core.http.basePath.serverBasePath
+    );
+
+    registerAlertZeroAttachmentTypesUI(startDeps.agentBuilder.attachments, {
+      http: core.http,
+      navigation: {
+        share: startDeps.share,
+        spaceId,
+      },
+    }).catch((error) => {
+      this.logger.error('Failed to register AlertZero attachment UI definitions', error);
     });
 
     registerEscalationTemplateUI({
