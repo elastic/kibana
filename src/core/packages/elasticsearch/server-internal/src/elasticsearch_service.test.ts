@@ -46,6 +46,7 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { duration } from 'moment';
 import { isValidConnection } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/nodes_version';
+import { pollEsNodesClockSkew } from './version_check/clock_skew';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
   './version_check/nodes_version'
@@ -505,6 +506,25 @@ describe('#stop', () => {
         })
       )
     );
+  });
+});
+
+describe('clock skew check', () => {
+  it('runs on traditional deployments', async () => {
+    await elasticsearchService.setup(setupDeps);
+
+    expect(pollEsNodesClockSkew).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not run on serverless', async () => {
+    const serverlessService = new ElasticsearchService({
+      ...coreContext,
+      env: Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { serverless: true } })),
+    });
+    await serverlessService.setup(setupDeps);
+
+    expect(pollEsNodesClockSkew).not.toHaveBeenCalled();
+    await serverlessService.stop();
   });
 });
 

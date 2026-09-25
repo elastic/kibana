@@ -145,11 +145,14 @@ export class ElasticsearchService
       signal: pollLifetime.signal,
     });
 
-    pollEsNodesClockSkew({
-      log: this.log,
-      internalClient: this.client.asInternalUser,
-      signal: pollLifetime.signal,
-    }).catch((error) => this.log.error(error));
+    // On serverless, Elastic runs both clocks, so a skew is not the user's to fix.
+    if (!this.isServerless) {
+      pollEsNodesClockSkew({
+        log: this.log,
+        internalClient: this.client.asInternalUser,
+        signal: pollLifetime.signal,
+      }).catch((error) => this.log.error(error));
+    }
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
 
