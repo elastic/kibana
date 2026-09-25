@@ -194,9 +194,9 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     const definitionsById = new Map(
       [...rulesToCreate, ...knownConflicts].map(({ id, definition }) => [id, definition])
     );
-    const { rules: created, errors } =
+    const { items: created, errors } =
       rulesToCreate.length === 0
-        ? { rules: [], errors: [] }
+        ? { items: [], errors: [] }
         : await this.rulesClient.bulkCreateRules({
             rules: rulesToCreate.map(({ id, definition }) => ({
               ...toV2CreateBody({ definition, isServerless: this.isServerless }),

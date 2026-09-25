@@ -103,6 +103,13 @@ describe('ServiceFlyoutFooter', () => {
 
     openActionsMenu();
 
+    const overviewAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openServiceOverview');
+    expect(overviewAction).toHaveAttribute('href', '/app/apm/services/opbeans-java/overview');
+    expect(overviewAction).toHaveTextContent('Open service overview');
+    expect(overviewAction).toHaveAttribute('data-ebt-action', 'viewService');
+    expect(overviewAction).toHaveAttribute('data-ebt-element', 'serviceFlyoutActionsMenu');
+    expect(overviewAction).toHaveAttribute('data-ebt-detail', 'overview');
+
     const tracesAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover');
     expect(tracesAction).toHaveAttribute('href', '/app/discover/traces');
     expect(tracesAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
@@ -123,6 +130,37 @@ describe('ServiceFlyoutFooter', () => {
 
     const slosAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openSlos');
     expect(slosAction).toHaveAttribute('href', '/app/slos?serviceName=opbeans-java');
+  });
+
+  it('omits Open service overview when the serviceNameLink capability is disabled', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      deps: {},
+      service: { name: 'opbeans-java' },
+      capabilities: {
+        ...makeCapabilities(),
+        header: { serviceNameLink: false, badges: true },
+      },
+      filters: {
+        environment: 'production',
+        setEnvironment: jest.fn(),
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        start: '2026-01-01T00:00:00.000Z',
+        end: '2026-01-01T00:15:00.000Z',
+        setRange: jest.fn(),
+        refreshToken: 0,
+        onRefresh: jest.fn(),
+      },
+    });
+    renderFooter();
+    openActionsMenu();
+
+    expect(
+      screen.queryByTestId('serviceFlyoutActionsMenuItem-openServiceOverview')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover')
+    ).toBeInTheDocument();
   });
 
   it('renders the Alerts and SLOs group labels', () => {
@@ -189,6 +227,7 @@ describe('ServiceFlyoutFooter', () => {
   it('disables the actions button when no actions are available', () => {
     mockUseServiceFlyoutLinks.mockReturnValue({
       ...makeLinks(),
+      apm: { overviewTab: undefined, alertsTab: undefined },
       alerts: undefined,
       slos: undefined,
       discover: {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { getAddCustomContentAction } from './add_custom_content_action';
 import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../../common/constants';
@@ -51,6 +54,17 @@ describe('getAddCustomContentAction', () => {
 
   it('returns CustomContentIcon as the icon type', () => {
     expect(action.getIconType!({ embeddable: {} })).toBe(CustomContentIcon);
+  });
+
+  it('renders a New badge next to the display name', () => {
+    const MenuItem = action.MenuItem!;
+    render(
+      <I18nProvider>
+        <MenuItem context={{ embeddable: {} }} />
+      </I18nProvider>
+    );
+    expect(screen.getByText('Custom')).toBeInTheDocument();
+    expect(screen.getByText('New')).toBeInTheDocument();
   });
 
   describe('isCompatible', () => {

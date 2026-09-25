@@ -19,6 +19,7 @@ export type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
 } from './types';
+export type { DeleteAllInvestigationsResult } from './storage';
 
 export { alertSnapshotSchema, type AlertSnapshot } from '../common';
 

@@ -44,6 +44,28 @@ const capitalizeStyle = css`
   text-transform: capitalize;
 `;
 
+const TITLE_COLUMN_WIDTH = '240px';
+
+const titleCellStyles = css`
+  width: 100%;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+`;
+
+const titleTextStyles = css`
+  min-width: 0;
+  overflow: hidden;
+`;
+
+const titleLinkStyles = css`
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 interface UseKnowledgeIndicatorsColumnsParams {
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   selectedKnowledgeIndicatorId: string | undefined;
@@ -63,12 +85,18 @@ export const useKnowledgeIndicatorsColumns = ({
     const columns: Array<EuiBasicTableColumn<KnowledgeIndicator>> = [
       {
         name: TITLE_COLUMN_LABEL,
+        width: TITLE_COLUMN_WIDTH,
         render: (ki: KnowledgeIndicator) => {
           const title = getKnowledgeIndicatorTitle(ki);
           const isExpanded = selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki);
 
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              css={titleCellStyles}
+            >
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
@@ -82,13 +110,16 @@ export const useKnowledgeIndicatorsColumns = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiLink
-                  data-test-subj="significantEventsAppColumnsLink"
-                  onClick={() => toggleSelectedKnowledgeIndicator(ki)}
-                >
-                  {title}
-                </EuiLink>
+              <EuiFlexItem css={titleTextStyles}>
+                <EuiToolTip content={title} display="block" disableScreenReaderOutput>
+                  <EuiLink
+                    data-test-subj="significantEventsAppColumnsLink"
+                    css={titleLinkStyles}
+                    onClick={() => toggleSelectedKnowledgeIndicator(ki)}
+                  >
+                    {title}
+                  </EuiLink>
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

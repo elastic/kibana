@@ -327,4 +327,33 @@ describe('useFetchAlertingEpisodesQuery', () => {
     );
     expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
   });
+
+  it('skips the v2 fetch and returns only source episodes when queryV2Source is false', async () => {
+    const sourceEpisodes: AlertEpisode[] = [
+      { ...mockEpisodesData[0], 'episode.id': 'source-episode-1', supports_actions: false },
+    ];
+    const dataSource = sourceWithEpisodes(jest.fn().mockResolvedValue(sourceEpisodes));
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EpisodeDataSourceProvider dataSource={dataSource} queryV2Source={false}>
+        {wrapper({ children })}
+      </EpisodeDataSourceProvider>
+    );
+
+    const { result } = renderHook(
+      () =>
+        useFetchAlertingEpisodesQuery({
+          pageSize: 10,
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchAlertingEpisodesMock).not.toHaveBeenCalled();
+    expect(result.current.data).toEqual(
+      sourceEpisodes.map((episode) => ({ ...episode, source_id: 'test-source' }))
+    );
+    expect(result.current.sourceErrors).toEqual([]);
+  });
 });
