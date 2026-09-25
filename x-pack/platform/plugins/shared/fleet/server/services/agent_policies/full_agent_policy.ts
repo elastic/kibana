@@ -465,7 +465,6 @@ export async function getFullAgentPolicy(
 
       outputPermissions[outputId] = permissions;
     } else if (
-      agentPolicy.supports_agentless &&
       originalOutput &&
       isOtlpOutput(originalOutput) &&
       isManagedOtlpEndpoint(originalOutput.otlp_exporter.endpoint)
