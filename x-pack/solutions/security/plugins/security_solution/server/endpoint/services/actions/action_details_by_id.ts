@@ -128,7 +128,13 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
         // comparisons and can delay or time out both this read and the status
         // tool. A Map makes the enrichment linear in the fan-out.
         for (const entry of metadata?.data ?? []) {
-          const agentId = entry.metadata?.agent?.id;
+          // Match on the Fleet agent id — the same id the action and this
+          // batch's kuery (`united.agent.agent.id`) key on — falling back to
+          // the endpoint's own `agent.id` only when Fleet's id is missing,
+          // mirroring `EndpointMetadataService.getEnrichedHostMetadata()`.
+          // Endpoint metadata's own `agent.id` can differ from the Fleet
+          // agent id; indexing by the wrong one silently drops the hostname.
+          const agentId = entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id;
           const hostname = entry.metadata?.host?.hostname;
 
           // First row wins, matching the previous `.find()` semantics when a
