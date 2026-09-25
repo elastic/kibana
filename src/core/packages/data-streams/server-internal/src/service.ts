@@ -83,6 +83,7 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
       elasticsearchClient,
       logger: this.logger,
       lazyCreation,
+      devMode: this.coreContext.env.mode.dev,
     });
 
     this.dataStreamClients.set(dataStreamName, maybeInitializedClient);
