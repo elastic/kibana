@@ -176,7 +176,7 @@ describe('run', () => {
     expect(pulled.value).toEqual({ count: 2, nextActionAt: 200 });
   });
 
-  it('returns once aborted, even with a sleep that ignores the signal', async () => {
+  it('drops the result of an action that completed after the abort', async () => {
     const controller = new AbortController();
     let requests = 0;
     const request = async () => {
@@ -193,7 +193,7 @@ describe('run', () => {
     }
 
     expect(requests).toBe(2);
-    expect(counts).toEqual([0, 1, 2]);
+    expect(counts).toEqual([0, 1]);
   });
 
   it('hands the signal to the action, so an in-flight request can be cancelled', async () => {

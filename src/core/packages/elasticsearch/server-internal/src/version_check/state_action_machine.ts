@@ -130,7 +130,8 @@ const perform = async <R>(
 
 /**
  * Runs a machine. Yields the initial state, then one augmented state per step,
- * and returns the last state once `next` yields null or `signal` aborts.
+ * and returns the last state once `next` yields null or `signal` aborts. A
+ * result that arrives after the abort is dropped, not modelled.
  * `next` and `model` see the same state within a step, so an action may close
  * over the state it was built for. What to do with the states is the
  * consumer's concern.
@@ -157,6 +158,10 @@ export async function* run<S extends Scheduled, R, E extends DomainEvent>(
         return state;
       }
       throw error;
+    }
+    if (signal?.aborted) {
+      // The result arrived after the abort: drop it rather than model and yield it.
+      return state;
     }
     const reached = model(state, result);
     state = reached.state;
