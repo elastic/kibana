@@ -601,14 +601,19 @@ describe('Endpoint analysis run', () => {
     });
 
     // `system-alertzero-journal-note` bounds `message` at 8000 characters and rejects a
-    // longer one whole. The assessment is that message, so the schema cap matches.
+    // longer one whole. The note prefixes the assessment, and the longer prefix is
+    // "Rationale for ending investigation: " (36 characters), so the schema cap
+    // stays under that.
     it('caps the assessment at the length a journal note can carry', () => {
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         properties?: { rationale?: { maxLength?: number } };
       };
       const journal = stepByName('journal_rationale');
+      const rationaleCap = schema?.properties?.rationale?.maxLength ?? 0;
+      const longerPrefix = 'Rationale for ending investigation: ';
 
-      expect(schema?.properties?.rationale?.maxLength).toBe(JOURNAL_MESSAGE_MAX_LENGTH);
+      expect(rationaleCap).toBe(7900);
+      expect(rationaleCap + longerPrefix.length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
       expect(journal?.type).toBe('workflow.execute');
       expect((journal?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
         '{{ consts.journal_note }}'
@@ -1033,25 +1038,28 @@ describe('Endpoint analysis run', () => {
     });
 
     // One gate — the containment proposals — so the dial is the same two levels as
-    // Attack Discovery. A missing level fails closed to manual.
+    // Attack Discovery. The level is the indicator attribute the worker wrote.
+    // A missing attribute fails closed to manual. The trigger does not accept a level.
     it('auto-approves containment only at supervised autonomy', () => {
-      expect(definition.triggers?.[0]?.inputs?.properties?.autonomy?.enum).toEqual([
-        'manual',
-        'supervised',
-      ]);
-      expect(definition.triggers?.[0]?.inputs?.required).not.toContain('autonomy');
+      expect(definition.triggers?.[0]?.inputs?.properties?.autonomy).toBeUndefined();
       expect(definition.consts?.default_autonomy).toBe('manual');
 
       const level = String(stepByName('resolve_autonomy')?.with?.level);
-      expect(evaluate(level, { inputs: {}, consts: { default_autonomy: 'manual' } })).toBe(
-        'manual'
-      );
-      expect(
-        evaluate(level, {
-          inputs: { autonomy: 'supervised' },
-          consts: { default_autonomy: 'manual' },
-        })
-      ).toBe('supervised');
+      const recorded = (autonomy?: string) => ({
+        steps: {
+          read_ki: {
+            output: {
+              hits: {
+                hits: [{ _source: { attributes: autonomy === undefined ? {} : { autonomy } } }],
+              },
+            },
+          },
+        },
+        consts: { default_autonomy: 'manual' },
+      });
+      expect(evaluate(level, recorded())).toBe('manual');
+      expect(evaluate(level, recorded('supervised'))).toBe('supervised');
+      expect(evaluate(level, recorded('manual'))).toBe('manual');
 
       const autoApprove = String(
         (

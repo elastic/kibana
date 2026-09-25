@@ -140,14 +140,28 @@ steps:
       # Covers consts.batch_size, which the input can only lower.
       max: 2
     steps:
+      # The child workflow reads autonomy from the KI. Only a scheduled
+      # execution writes the saved watch setting, which may be supervised.
+      # Every other trigger, including a manual run of this worker, writes
+      # `manual`, so containment waits for approval.
+      - name: set_ki_autonomy
+        type: context-engine.updateKi
+        on-failure:
+          continue: true
+        with:
+          ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
+          ki_id: "{{ foreach.item._source.id | default: foreach.item._id }}"
+          ki:
+            attributes:
+              autonomy: "{%- if execution.triggeredBy == 'scheduled' -%}{{ consts.worker_settings.autonomy }}{%- else -%}manual{%- endif -%}"
       - name: start_run
         type: workflow.executeAsync
+        if: "${{ steps.set_ki_autonomy.error == null }}"
         with:
           workflow-id: system-security-forensics-run-endpoint-analysis
           inputs:
             ki_id: "{{ foreach.item._source.id | default: foreach.item._id }}"
             ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
-            autonomy: "${{ consts.worker_settings.autonomy }}"
 
   - name: emit_result
     type: workflow.output

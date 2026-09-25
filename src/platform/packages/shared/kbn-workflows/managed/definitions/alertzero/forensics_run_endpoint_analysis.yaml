@@ -41,14 +41,6 @@ triggers:
           # Mirrors AI_INDEX_ID_PATTERN in the context engine.
           pattern: "^[a-z0-9][a-z0-9_-]*$"
           description: AI index that holds the indicator. The result is written to the same index.
-        autonomy:
-          type: string
-          enum:
-            - manual
-            - supervised
-          description: >-
-            Worker autonomy level. `supervised` auto-approves containment proposals;
-            `manual` waits for an analyst. Defaults to `manual`.
       required:
         - ki_id
         - ai_index_id
@@ -71,7 +63,7 @@ consts:
   journal_note: system-alertzero-journal-note
   # Cap on the number of containment actions this run can propose.
   max_recommended_actions: 8
-  # Used when the dispatching worker omits `autonomy`.
+  # Fallback when the KI carries no `attributes.autonomy`.
   default_autonomy: manual
 
 steps:
@@ -363,11 +355,12 @@ steps:
                   # Required and non-empty: `timeline` and `iocs` can legitimately both be
                   # empty, so this rationale is the one thing a completed analysis always
                   # writes. It is journaled, and the journal note rejects a message
-                  # longer than 8000 characters.
+                  # longer than 8000 characters. Set less than 8000 to allow journal note
+                  # to include additional text
                   rationale:
                     type: string
                     minLength: 1
-                    maxLength: 8000
+                    maxLength: 7900
                     description: >
                       Assessment only: whether this is a real incident, other affected hosts,
                       data gaps, and why the evidence supports the recommended actions. The
@@ -763,10 +756,12 @@ steps:
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs)
           or steps.resolve_host.output.host_name == blank }}
 
+  # The worker writes this onto the indicator before dispatch. A missing
+  # attribute fails closed to manual.
   - name: resolve_autonomy
     type: data.set
     with:
-      level: "{{ inputs.autonomy | default: consts.default_autonomy }}"
+      level: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.autonomy | default: consts.default_autonomy }}"
 
   # Written before any proposal starts. Each proposal posts its own comment as
   # soon as it reaches the approval gate, and those runs are asynchronous, so a
