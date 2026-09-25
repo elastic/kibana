@@ -70,7 +70,7 @@ export function compareRowMultisets(
  * True when a LIMIT truncates rows that no SORT has ordered since the last
  * STATS (or the source), so which rows survive is up to Elasticsearch.
  */
-export function hasUnorderedLimit(query: string): boolean {
+function hasUnorderedLimit(query: string): boolean {
   let ordered = false;
   for (const { name } of Parser.parse(query).root.commands) {
     if (name === 'stats') {
@@ -148,15 +148,9 @@ export function createEsqlResultEquivalenceEvaluator<
       const goldQuery = groundTruthExtractor(expected);
 
       if (!goldQuery) {
-        return {
-          score: null,
-          label: 'skipped',
-          explanation: 'No gold query declared for this example.',
-        };
+        return skippedResult('No gold query declared for this example.');
       }
       if (hasUnorderedLimit(goldQuery)) {
-        // Rows kept by an unordered LIMIT are arbitrary, so an equivalent candidate
-        // can share none of them; the row comparison would carry no signal.
         return skippedResult(
           'Gold query truncates with LIMIT but no SORT; its result rows are not deterministic.'
         );
@@ -216,7 +210,10 @@ export function createEsqlResultEquivalenceEvaluator<
         score,
         label: allFailed ? 'execution-failure' : labelFromScore(score),
         explanation: comparisons
-          .map((comparison) => describeComparison(comparison, goldRows.length))
+          .map((comparison, index) => {
+            const description = describeComparison(comparison, goldRows.length);
+            return comparisons.length > 1 ? `[${index}] ${description}` : description;
+          })
           .join(' '),
         metadata: {
           goldRowCount: goldRows.length,
