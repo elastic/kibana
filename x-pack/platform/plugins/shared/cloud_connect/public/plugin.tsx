@@ -25,7 +25,7 @@ import type {
 } from './types';
 import { CloudConnectTelemetryService } from './telemetry/service';
 import { CloudConnectApiService } from './lib/api';
-import { createUseCloudConnectStatusHook } from './hooks';
+import { createUseCloudConnectStatusHook, createUseEchAutoOpsStatusHook } from './hooks';
 
 export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 
@@ -42,7 +42,8 @@ export class CloudConnectedPlugin
   private readonly telemetry = new CloudConnectTelemetryService();
   private homeSetup?: HomePublicPluginSetup;
   private managementSetup?: ManagementSetup;
-  private deploymentId?: string;
+  private shouldShowEchAutoOpsBanner = false;
+  private echDeploymentUrl?: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<CloudConnectConfig>();
@@ -52,6 +53,16 @@ export class CloudConnectedPlugin
     core: CoreSetup<CloudConnectedStartDeps>,
     plugins: CloudConnectedSetupDeps
   ): CloudConnectedPluginSetup {
+    const shouldShowEchAutoOpsBanner =
+      plugins.cloud?.isElasticCloudHosted === true && plugins.cloud?.isFedrampHigh !== true;
+
+    if (shouldShowEchAutoOpsBanner) {
+      this.shouldShowEchAutoOpsBanner = true;
+      this.echDeploymentUrl = plugins.cloud?.deploymentUrl;
+      this.managementSetup = plugins.management;
+      return {};
+    }
+
     // Skip plugin registration if running on ESS.
     // CCM is enabled for ECE deployments and self-managed clusters.
     if (plugins.cloud?.isCloudEnabled && !plugins.cloud?.isEce) {
@@ -61,7 +72,6 @@ export class CloudConnectedPlugin
     // Store plugin setup references for registering hooks in start()
     this.homeSetup = plugins.home;
     this.managementSetup = plugins.management;
-    this.deploymentId = plugins.cloud?.deploymentId;
 
     // Setup telemetry
     this.telemetry.setup(core.analytics);
@@ -97,10 +107,9 @@ export class CloudConnectedPlugin
   }
 
   public start(core: CoreStart): CloudConnectedPluginStart {
-    const useCloudConnectStatus = createUseCloudConnectStatusHook({
-      http: core.http,
-      deploymentId: this.deploymentId,
-    });
+    const useCloudConnectStatus = this.shouldShowEchAutoOpsBanner
+      ? createUseEchAutoOpsStatusHook(this.echDeploymentUrl)
+      : createUseCloudConnectStatusHook({ http: core.http });
 
     // Register the hook with home plugin if available.
     // We use this registration pattern instead of having home depend on cloudConnect

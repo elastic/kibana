@@ -222,6 +222,15 @@ export interface CloudSetup extends CloudBasicUrls {
    */
   isEce?: boolean;
   /**
+   * `true` when running on FedRAMP High (govcloud-high). Set by Cloud via kibana.yml.
+   */
+  isFedrampHigh?: boolean;
+  /**
+   * `true` when running on Elastic Cloud Hosted (ECH). Set by Cloud via kibana.yml.
+   * Unset or `false` on ECE and self-managed.
+   */
+  isElasticCloudHosted?: boolean;
+  /**
    * The end date for the Elastic Cloud trial. Only available on Elastic Cloud.
    *
    * @example `2020-10-14T10:40:22Z`
