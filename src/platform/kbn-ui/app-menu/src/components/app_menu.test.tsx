@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { EuiBreakpointSize, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { AppMenuComponent } from './app_menu';
 import type { AppMenuConfig, AppMenuItemType, AppMenuStaticItem } from '../types';
@@ -77,6 +78,44 @@ describe('AppMenu', () => {
       rerender(<AppMenuComponent config={defaultConfig} staticItems={staticItems} />);
 
       expect(renderedPanels.at(-1)).toBe(panels);
+    });
+
+    it('should re-evaluate function-valued item fields when the menu reopens', async () => {
+      mockCurrentBreakpoint = 'xs';
+      let isItemDisabled = true;
+      let itemTooltip = 'Initial tooltip';
+      const config: AppMenuConfig = {
+        items: [
+          {
+            id: 'dynamic',
+            label: 'Dynamic',
+            run: jest.fn(),
+            iconType: 'gear',
+            testId: 'dynamicItem',
+            disableButton: () => isItemDisabled,
+            tooltipContent: () => itemTooltip,
+          },
+        ],
+      };
+      const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
+
+      render(<AppMenuComponent config={config} />);
+      await openAppMenuOverflow(user);
+      expect(screen.getByTestId('dynamicItem')).toBeDisabled();
+      const initialPanels = renderedPanels.at(-1);
+
+      await user.click(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+      isItemDisabled = false;
+      itemTooltip = 'Updated tooltip';
+      await openAppMenuOverflow(user);
+
+      const reopenedPanels = renderedPanels.at(-1);
+      expect(reopenedPanels).not.toBe(initialPanels);
+      expect(reopenedPanels?.[0].items?.[0]).toMatchObject({
+        disabled: false,
+        toolTipContent: 'Updated tooltip',
+      });
+      expect(await screen.findByTestId('dynamicItem')).toBeEnabled();
     });
   });
 
