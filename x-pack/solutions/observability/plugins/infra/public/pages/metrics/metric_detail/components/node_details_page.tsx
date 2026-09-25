@@ -8,7 +8,7 @@
 import React from 'react';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type {
   InventoryTsvbType,
   InventoryItemType,
@@ -95,6 +95,7 @@ export const NodeDetailsPage = (props: Props) => {
 
   return (
     <>
+      <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <MetricsTimeControls
@@ -108,10 +109,17 @@ export const NodeDetailsPage = (props: Props) => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <MetricsSideNav loading={props.metadataLoading} name={props.name} items={props.sideNav} />
-        </EuiFlexItem>
+        {metrics.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <MetricsSideNav
+              loading={props.metadataLoading}
+              name={props.name}
+              items={props.sideNav}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <SideNavContext.Provider
             value={{

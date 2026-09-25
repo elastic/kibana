@@ -38,7 +38,13 @@ export const getUpdateKiStepDefinition = ({
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, lifecycle, force = false } = context.input;
+      const {
+        ai_index_id: aiIndexId,
+        ki_id: kiId,
+        lifecycle,
+        force = false,
+        refresh = false,
+      } = context.input;
       // A null attribute is left out of the patch, so the stored value is untouched.
       const ki = omitNullKiAttributes(context.input.ki);
       return withKiWriteTelemetry({
@@ -85,6 +91,7 @@ export const getUpdateKiStepDefinition = ({
               kiId,
               source: revision.source,
               changes,
+              refresh,
               abortSignal: context.abortSignal,
             });
             return { output: { id: kiId, result: 'updated' as const } };
@@ -98,7 +105,7 @@ export const getUpdateKiStepDefinition = ({
                 doc: changes,
                 if_seq_no: revision.seqNo,
                 if_primary_term: revision.primaryTerm,
-                refresh: 'wait_for',
+                ...(refresh && { refresh: 'wait_for' as const }),
               },
               { signal: context.abortSignal }
             )

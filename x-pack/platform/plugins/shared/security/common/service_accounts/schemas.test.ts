@@ -10,9 +10,9 @@ import {
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
 } from './constants';
 import {
+  getServiceAccountRolesSchema,
   serviceAccountIdSchema,
   serviceAccountNameSchema,
-  serviceAccountRoleNameSchema,
 } from './schemas';
 
 describe('service account schemas', () => {
@@ -54,15 +54,29 @@ describe('service account schemas', () => {
     });
   });
 
-  describe('serviceAccountRoleNameSchema', () => {
+  describe('getServiceAccountRolesSchema', () => {
+    const schema = getServiceAccountRolesSchema({ maxRoles: 2, maxRoleNameLength: 5 });
+
+    it('rejects an empty role list', () => {
+      expect(schema.safeParse([]).success).toBe(false);
+    });
+
     it('rejects an empty role name', () => {
-      expect(serviceAccountRoleNameSchema.safeParse('').success).toBe(false);
+      expect(schema.safeParse(['']).success).toBe(false);
     });
 
     it('bounds the role name length', () => {
-      const max = SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH;
-      expect(serviceAccountRoleNameSchema.safeParse('a'.repeat(max)).success).toBe(true);
-      expect(serviceAccountRoleNameSchema.safeParse('a'.repeat(max + 1)).success).toBe(false);
+      expect(schema.safeParse(['a'.repeat(5)]).success).toBe(true);
+      expect(schema.safeParse(['a'.repeat(6)]).success).toBe(false);
+    });
+
+    it('bounds the number of roles', () => {
+      expect(schema.safeParse(['a', 'b']).success).toBe(true);
+      expect(schema.safeParse(['a', 'b', 'c']).success).toBe(false);
+    });
+
+    it('drops duplicates before counting, keeping first occurrences in order', () => {
+      expect(schema.parse(['b', 'a', 'b', 'a'])).toEqual(['b', 'a']);
     });
   });
 });
