@@ -79,6 +79,7 @@ describe('#resolve()', () => {
         "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules/exports-pkg/dist/my_module.js,
         "nodeModule": "exports-pkg",
         "type": "file",
+        "viaExportsMap": true,
       }
     `);
   });
@@ -90,6 +91,7 @@ describe('#resolve()', () => {
         "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules/exports-pkg/dist/sub/my_other_module.js,
         "nodeModule": "exports-pkg",
         "type": "file",
+        "viaExportsMap": true,
       }
     `);
   });

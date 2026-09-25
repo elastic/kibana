@@ -10,15 +10,8 @@
 import Fs from 'fs';
 
 export function safeStat(path: string) {
-  try {
-    return Fs.statSync(path);
-  } catch (error) {
-    if (error?.code === 'ENOENT') {
-      return undefined;
-    }
-
-    throw error;
-  }
+  // `throwIfNoEntry: false` avoids allocating and throwing an ENOENT error for every missing path
+  return Fs.statSync(path, { throwIfNoEntry: false });
 }
 
 export function readFileSync(path: string) {

@@ -922,13 +922,32 @@ module.exports = {
         'import/no-extraneous-dependencies': [
           'error',
           {
-            /* Files that ARE allowed to use devDependencies */
-            devDependencies: [...DEV_PATTERNS],
+            devDependencies: false,
             peerDependencies: true,
             packageDir: __dirname,
           },
         ],
       },
+      overrides: [
+        {
+          /*
+           * Files that ARE allowed to use devDependencies. Matched here rather than via the rule's
+           * `devDependencies` glob array: the rule recompiles every glob for every linted file, while
+           * ESLint compiles override globs once.
+           */
+          files: DEV_PATTERNS,
+          rules: {
+            'import/no-extraneous-dependencies': [
+              'error',
+              {
+                devDependencies: true,
+                peerDependencies: true,
+                packageDir: __dirname,
+              },
+            ],
+          },
+        },
+      ],
     },
 
     /**

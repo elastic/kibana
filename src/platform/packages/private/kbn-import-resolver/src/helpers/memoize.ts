@@ -11,9 +11,9 @@ export function memoize<T, T2>(fn: (arg: T) => T2): (arg: T) => T2 {
   const cache = new Map<T, T2>();
 
   return (arg) => {
-    const cached = cache.get(arg);
-    if (cached !== undefined) {
-      return cached;
+    // `has` rather than an `undefined` check: `undefined` results (e.g. missing paths) must be cached too
+    if (cache.has(arg)) {
+      return cache.get(arg) as T2;
     }
 
     const result = fn(arg);

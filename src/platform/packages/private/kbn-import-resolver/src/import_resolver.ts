@@ -28,12 +28,22 @@ export class ImportResolver {
   }
 
   private safeStat = memoize(safeStat);
+  private readFile = memoize(readFileSync);
+  private readPackage = memoize((path: string) => {
+    try {
+      return JSON.parse(this.readFile(path));
+    } catch {
+      return undefined;
+    }
+  });
+  private readonly resolveCache = new Map<string, ResolveResult | null>();
 
   private baseResolveOpts = {
     extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
     isFile: (path: string) => !!this.safeStat(path)?.isFile(),
     isDirectory: (path: string) => !!this.safeStat(path)?.isDirectory(),
-    readFileSync: memoize(readFileSync),
+    // parse each package.json once instead of on every lookup that walks past it
+    readPackageSync: (_readFileSync: unknown, path: string) => this.readPackage(path),
     packageFilter(pkg) {
       if (!pkg.main && pkg.types) {
         // for the purpose of resolving files, a "types" file is adequate
@@ -285,15 +295,8 @@ export class ImportResolver {
     }
 
     const pkgDir = Path.dirname(manifestPath);
-    const pkgJsonRaw = this.baseResolveOpts.readFileSync(manifestPath);
-    if (!pkgJsonRaw) {
-      return null;
-    }
-
-    let pkgJson: ParsedPackageJson;
-    try {
-      pkgJson = JSON.parse(pkgJsonRaw);
-    } catch {
+    const pkgJson: ParsedPackageJson | undefined = this.readPackage(manifestPath);
+    if (!pkgJson) {
       return null;
     }
 
@@ -325,6 +328,19 @@ export class ImportResolver {
    * Resolve an import request from a file in the given dirname
    */
   resolve(req: string, dirname: string): ResolveResult | null {
+    // every import is resolved by several lint rules, so cache results per (dirname, request)
+    const key = `${dirname}\0${req}`;
+    const cached = this.resolveCache.get(key);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    const result = this.resolveUncached(req, dirname);
+    this.resolveCache.set(key, result);
+    return result;
+  }
+
+  private resolveUncached(req: string, dirname: string): ResolveResult | null {
     // transform webpack loader requests and focus on the actual file selected
     const lastExI = req.lastIndexOf('!');
     const quesI = req.lastIndexOf('?');
