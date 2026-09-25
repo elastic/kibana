@@ -39,6 +39,8 @@ interface OwnProps {
   totalItems: number;
   filterStatus?: AlertWorkflowStatus;
   query?: string;
+  /** Index (pattern) the table is querying, used to expand a "select all" run-workflow action. */
+  index?: string | string[];
   showAlertStatusActions?: boolean;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
@@ -58,6 +60,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     totalItems,
     filterStatus,
     query,
+    index,
     selectedEventIds,
     isSelectAllChecked,
     clearSelected,
@@ -187,6 +190,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
       eventIds,
       currentStatus: filterStatus,
       ...(showClearSelection ? { query } : {}),
+      index,
       setEventsLoading,
       setEventsDeleted,
       showAlertStatusActions,

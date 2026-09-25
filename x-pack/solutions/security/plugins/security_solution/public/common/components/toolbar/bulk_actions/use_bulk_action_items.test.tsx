@@ -184,6 +184,55 @@ describe('useBulkActionItems', () => {
       ).toBeUndefined();
     });
 
+    it('sends compact documentIds (not a query) for an explicit selection', () => {
+      renderUseBulkActionItems({
+        eventIds: ['mockEventId'],
+        data: [{ _id: 'mockEventId', _index: 'test-index', data: [], ecs: { _id: 'mockEventId' } }],
+      });
+
+      const lastCall =
+        mockUseRunDocumentWorkflowPanel.mock.calls[
+          mockUseRunDocumentWorkflowPanel.mock.calls.length - 1
+        ][0];
+      expect(lastCall.documentIds).toEqual([{ _id: 'mockEventId', _index: 'test-index' }]);
+      expect(lastCall.querySelection).toBeUndefined();
+    });
+
+    it('sends a query selection on select all (query + index) instead of the loaded ids', () => {
+      const dslQuery = { bool: { must: [{ match_all: {} }] } };
+      renderUseBulkActionItems({
+        eventIds: ['mockEventId'],
+        query: JSON.stringify(dslQuery),
+        index: '.alerts-security.alerts-default',
+        data: [{ _id: 'mockEventId', _index: 'test-index', data: [], ecs: { _id: 'mockEventId' } }],
+      });
+
+      const lastCall =
+        mockUseRunDocumentWorkflowPanel.mock.calls[
+          mockUseRunDocumentWorkflowPanel.mock.calls.length - 1
+        ][0];
+      expect(lastCall.querySelection).toEqual({
+        query: dslQuery,
+        index: '.alerts-security.alerts-default',
+      });
+      expect(lastCall.documentIds).toBeUndefined();
+    });
+
+    it('falls back to documentIds when a query is present but no index is available', () => {
+      renderUseBulkActionItems({
+        eventIds: ['mockEventId'],
+        query: JSON.stringify({ bool: {} }),
+        data: [{ _id: 'mockEventId', _index: 'test-index', data: [], ecs: { _id: 'mockEventId' } }],
+      });
+
+      const lastCall =
+        mockUseRunDocumentWorkflowPanel.mock.calls[
+          mockUseRunDocumentWorkflowPanel.mock.calls.length - 1
+        ][0];
+      expect(lastCall.querySelection).toBeUndefined();
+      expect(lastCall.documentIds).toEqual([{ _id: 'mockEventId', _index: 'test-index' }]);
+    });
+
     it('should not include workflow menu items when showRunWorkflowActions is false', () => {
       const mockMenuItem = {
         key: 'run-document-workflow-action',

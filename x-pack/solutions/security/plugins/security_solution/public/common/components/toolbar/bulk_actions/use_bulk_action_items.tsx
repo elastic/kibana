@@ -7,8 +7,8 @@
 
 import { useMemo, useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
-import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
@@ -51,6 +51,11 @@ export interface BulkActionsProps {
   eventIds: string[];
   currentStatus?: AlertWorkflowStatus;
   query?: string;
+  /**
+   * Index (pattern) the table is querying. Combined with `query` on "select all" to expand the
+   * whole selection server-side for the run-workflow action instead of only the loaded page.
+   */
+  index?: string | string[];
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
   showAlertStatusActions?: boolean;
@@ -112,6 +117,7 @@ export const useBulkActionItems = ({
   eventIds,
   currentStatus,
   query,
+  index,
   setEventsLoading,
   showAlertStatusActions = true,
   setEventsDeleted,
@@ -234,27 +240,36 @@ export const useBulkActionItems = ({
       },
     });
 
-  const workflowDocuments = useMemo(() => {
+  // Send compact ids only; the server expands them to full source via mget. This avoids
+  // embedding every document's `_source` in the request payload (the 1 MB payload wall).
+  const workflowDocumentIds = useMemo(() => {
     if (!data) return [];
     return data
       .filter((item) => eventIds.includes(item._id))
-      .map((item) => {
-        const flattened = flattenObject(item.ecs);
-        const fields: Record<string, unknown> = {};
-        for (const [field, value] of Object.entries(flattened)) {
-          fields[field] = value;
-        }
-        return {
-          _id: item._id,
-          _index: item._index ?? '',
-          ...fields,
-        };
-      });
+      .map((item) => ({
+        _id: item._id,
+        _index: item._index ?? '',
+      }));
   }, [data, eventIds]);
+
+  // On "select all", `query` holds the table's full DSL (filters + time range) and `eventIds`
+  // only covers the loaded page. Send the query so the whole selection is expanded server-side.
+  const workflowQuerySelection = useMemo(() => {
+    if (!query || !index) {
+      return undefined;
+    }
+    try {
+      return { query: JSON.parse(query) as QueryDslQueryContainer, index };
+    } catch {
+      return undefined;
+    }
+  }, [query, index]);
 
   const noop = useCallback(() => {}, []);
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({
-    documents: workflowDocuments,
+    ...(workflowQuerySelection
+      ? { querySelection: workflowQuerySelection }
+      : { documentIds: workflowDocumentIds }),
     closePopover: closePopover ?? noop,
   });
 
