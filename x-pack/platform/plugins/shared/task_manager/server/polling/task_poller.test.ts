@@ -553,6 +553,57 @@ describe('TaskPoller', () => {
 
       expect(work).toHaveBeenCalledTimes(1);
     });
+
+    test('releases its subscriptions when the poller is stopped', async () => {
+      const claimNudge$ = new Subject<void>();
+      const poller = createTaskPoller<void, boolean>({
+        initialPollInterval: 1000,
+        logger: loggingSystemMock.create().get(),
+        pollInterval$: of(1000),
+        claimNudge$,
+        getCapacity: () => 1,
+        work: jest.fn(async () => true),
+      });
+
+      poller.start();
+      clock.tick(0);
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(claimNudge$.observed).toBe(true);
+
+      poller.stop();
+
+      // A retained observer also keeps the nudge throttle's pending duration timer alive, which
+      // would hold the event loop open for up to a poll interval after shutdown.
+      expect(claimNudge$.observed).toBe(false);
+    });
+
+    test('resubscribes when a stopped poller is started again', async () => {
+      const claimNudge$ = new Subject<void>();
+      const work = jest.fn(async () => true);
+      const poller = createTaskPoller<void, boolean>({
+        initialPollInterval: 1000,
+        logger: loggingSystemMock.create().get(),
+        pollInterval$: of(1000),
+        claimNudge$,
+        getCapacity: () => 1,
+        work,
+      });
+
+      poller.start();
+      clock.tick(0);
+      await new Promise((resolve) => setImmediate(resolve));
+      poller.stop();
+
+      poller.start();
+      clock.tick(0);
+      await new Promise((resolve) => setImmediate(resolve));
+      const callsBeforeNudge = work.mock.calls.length;
+
+      claimNudge$.next();
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(work).toHaveBeenCalledTimes(callsBeforeNudge + 1);
+    });
   });
 });
 
