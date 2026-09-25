@@ -10,6 +10,7 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
+import { FLYOUT_HEADER_CLASS_NAME } from './use_header_collapse';
 
 const noop = () => {};
 
@@ -371,7 +372,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
   ) => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
-    const headerEl = document.querySelector('.euiFlyoutHeader') as HTMLElement;
+    const headerEl = document.querySelector(`.${FLYOUT_HEADER_CLASS_NAME}`) as HTMLElement;
     const scrollBy = jest.fn();
     Object.defineProperty(overflowEl, 'scrollBy', { value: scrollBy, configurable: true });
     // Page mode derives its pixel delta from the viewport height.

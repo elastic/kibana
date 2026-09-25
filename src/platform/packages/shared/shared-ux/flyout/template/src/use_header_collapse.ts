@@ -37,6 +37,13 @@ const WHEEL_PAGE_FRACTION = 0.9;
 /** Absorbs fractional-DPR rounding when comparing a scroll offset against its extreme. */
 const SCROLL_EDGE_EPSILON = 1;
 
+/**
+ * Class the header zone applies to its `EuiFlyoutHeader`. `EuiFlyoutHeader` does not forward a
+ * ref, so `headerRef` walks up to this class to reach the header element and its padding.
+ * Clean this up when EUI implements https://github.com/elastic/eui/issues/10087
+ */
+export const FLYOUT_HEADER_CLASS_NAME = 'kbnFlyoutTemplateHeader';
+
 /** Whether the element can still move in the delta's direction. */
 const canScrollBy = (element: HTMLElement, delta: number): boolean => {
   if (delta === 0) return false;
@@ -265,7 +272,7 @@ export const useHeaderCollapse = ({
     headerCleanupRef.current?.();
     headerCleanupRef.current = null;
     // Walk up to the flyout header element to cover its padding, which the inner wrapper does not.
-    const header = node?.closest<HTMLElement>('.euiFlyoutHeader');
+    const header = node?.closest<HTMLElement>(`.${FLYOUT_HEADER_CLASS_NAME}`);
     if (!header) return;
 
     const onWheel = (event: Event) => {

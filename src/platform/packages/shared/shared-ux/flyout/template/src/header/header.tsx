@@ -39,6 +39,7 @@ import {
 } from '../context';
 import { renderTitleIcon, renderTitleWithIcon } from '../title_adornments';
 import type { FlyoutHeaderProps } from '../types';
+import { FLYOUT_HEADER_CLASS_NAME } from '../use_header_collapse';
 import { Badge, badgePart, BADGE_PART_NAME, type HeaderBadgeDescriptor } from './badge';
 import { InfoBlock, infoBlockPart, INFO_BLOCK_PART_NAME } from './info_block';
 import { MetaBlock as MetaBlockPart, metaBlockPart, META_BLOCK_PART_NAME } from './meta_block';
@@ -286,6 +287,7 @@ export const HeaderZone = ({
     <KibanaErrorBoundaryProvider>
       <EuiFlyoutHeader
         hasBorder={false}
+        className={FLYOUT_HEADER_CLASS_NAME}
         data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header')}
       >
         <KibanaErrorBoundary>
