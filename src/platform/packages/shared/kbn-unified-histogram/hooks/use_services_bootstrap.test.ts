@@ -16,7 +16,7 @@ import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewSource } from '@kbn/data-source';
-import * as processFetchParamsModule from '../utils/process_fetch_params';
+import { processFetchParams } from '../utils/process_fetch_params';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
@@ -24,10 +24,25 @@ jest.mock('@kbn/discover-utils', () => ({
   ...jest.requireActual('@kbn/discover-utils/src/constants'),
   getBreakdownField: jest.fn(),
 }));
+jest.mock('../utils/process_fetch_params', () => {
+  const actual = jest.requireActual('../utils/process_fetch_params');
+  return {
+    ...actual,
+    processFetchParams: jest.fn((...args: unknown[]) =>
+      actual.processFetchParams(
+        ...(args as Parameters<typeof actual.processFetchParams>)
+      )
+    ),
+  };
+});
 
 const createStateServiceMock = createStateService as jest.MockedFunction<typeof createStateService>;
 const useStatePropsMock = useStateProps as jest.MockedFunction<typeof useStateProps>;
 const getBreakdownFieldMock = getBreakdownField as jest.MockedFunction<typeof getBreakdownField>;
+const processFetchParamsMock = processFetchParams as jest.MockedFunction<typeof processFetchParams>;
+const { processFetchParams: actualProcessFetchParams } = jest.requireActual(
+  '../utils/process_fetch_params'
+);
 
 describe('useServicesBootstrap', () => {
   const localStorageKeyPrefix = 'discover';
@@ -36,6 +51,7 @@ describe('useServicesBootstrap', () => {
   };
 
   beforeEach(() => {
+    processFetchParamsMock.mockImplementation(actualProcessFetchParams);
     useStatePropsMock.mockReturnValue({
       chart: {
         hidden: false,
