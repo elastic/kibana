@@ -176,12 +176,10 @@ steps:
       body:
         conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
         trigger_mode: "never"
-        input: >-
-          🤖 **Alert Triage** — Triage started for rule "{{ event.rule.name }}"
-          ({{ event.alerts | size }} alert(s)).
-          Model routed via Model Management feature `alertzero_reasoning`.
-          Alerts: {% for a in event.alerts limit: 10 %}`{{ a._id }}`{% unless forloop.last %}, {% endunless %}{% endfor %}{% if event.alerts.size > 10 %} and {{ event.alerts.size | minus: 10 }} more{% endif %}.
-          Execution: {{ execution.url }}
+        input: |-
+          Triage started for rule **{{ event.rule.name }}** ({{ event.alerts | size }} alert(s), attached above). Model routed via the `alertzero_reasoning` Model Management feature.
+
+          [View execution]({{ execution.url }})
 
   # ---------------------------------------------------------------------------
   # 3. Run the Security Alert Analysis sub-workflow.
@@ -336,14 +334,12 @@ steps:
       body:
         conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
         trigger_mode: "never"
-        input: >-
-          🤖 **Alert Triage** — Classification complete:
-          {{ steps.classify_alerts.output.true_positive_count }} true positive,
-          {{ steps.classify_alerts.output.false_positive_count }} false positive,
-          {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+        input: |-
+          Classification complete: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+
           {{ steps.classify_alerts.output.grouped_counts_summary }}
-          {{ steps.classify_alerts.output.generated_summary }}
-          {% if steps.classify_alerts.output.connector_id != '' %}Connector: {{ steps.classify_alerts.output.connector_id }}. Agent: {{ steps.classify_alerts.output.agent_id }}.{% endif %}
+
+          {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`, Agent: `{{ steps.classify_alerts.output.agent_id }}`)_{% endif %}
 
   # ---------------------------------------------------------------------------
   # 4b. Attach impact summary (entity × verdict breakdown) to the Investigation.
@@ -456,7 +452,7 @@ steps:
         conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
         trigger_mode: "never"
         input: >-
-          🤖 **Alert Triage** — Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts | size }} alert(s).
+          Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts | size }} alert(s).
 
   # ---------------------------------------------------------------------------
   # 7. Autonomy gate — create a proposal to close FP alerts if any qualify.
@@ -497,7 +493,7 @@ steps:
             conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
             trigger_mode: "never"
             input: >-
-              🤖 **Alert Triage** — Proposing closure of {{ variables.fp_candidate_count }} alert(s) classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor.
+              Proposing closure of {{ variables.fp_candidate_count }} alert(s) classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor.
               Autonomy level: {{ consts.worker_settings.autonomy }}.
               {% if consts.worker_settings.autonomy == 'supervised' %}This proposal will auto-approve immediately; you will be notified and can undo.{% else %}A human decision is required.{% endif %}
 
@@ -509,8 +505,23 @@ steps:
         # legible terminal state rather than a perpetually open one.
         on-failure:
           fallback:
+            # Patching the Investigation closed is best-effort cleanup for an already-failed
+            # gate: `ai.conversation.metadata.patch` 404s when `agentBuilder:experimentalFeatures`
+            # is off, and that must not swallow the fallback's own error (the gate timeout) or
+            # skip post_comment_outcome_gate_timeout below.
             - name: close_investigation_on_gate_timeout
               type: ai.conversation.metadata.patch
+              on-failure:
+                continue: true
+                fallback:
+                  - name: log_gate_timeout_close_failed
+                    type: console
+                    with:
+                      message: >-
+                        Gate timed out and the Investigation could not be marked closed:
+                        {{ error.message }}. Investigation
+                        {{ steps.create_investigation.output.conversation_id }} stays open
+                        until the reconciliation sweep resolves it.
               with:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 updates:
@@ -533,7 +544,7 @@ steps:
                   conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                   trigger_mode: "never"
                   input: >-
-                    🤖 **Alert Triage** — No decision received within 72 hours. {{ variables.fp_candidate_ids | size }} alert(s) remain open and tagged az:false_positive.
+                    No decision received within 72 hours. {{ variables.fp_candidate_ids | size }} alert(s) remain open and tagged az:false_positive.
                     Re-run the Worker to create a new proposal.
         with:
           workflow-id: system-create-proposal
@@ -571,9 +582,15 @@ steps:
           # Everything the analyst approved has already happened by this point: the alerts are
           # closed and the proposal is `succeeded`. Failing the run on the bookkeeping patch
           # would report a successful triage as a failure, so the patch is allowed to fail.
+          # `continue: true` is required for that: fallback alone still re-throws the original
+          # error afterwards (see on_failure/README.md), which would abort the run and skip
+          # post_comment_outcome_approved below — exactly the "successful triage reported as a
+          # failure" this step exists to avoid. Also the failure mode `ai.conversation.metadata.patch`
+          # hits when `agentBuilder:experimentalFeatures` is off.
           - name: close_investigation_after_approval
             type: ai.conversation.metadata.patch
             on-failure:
+              continue: true
               fallback:
                 - name: log_investigation_close_failed
                   type: console
@@ -605,7 +622,7 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
+                  Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
 
         else:
           # Map the dismiss reason to the correct re-tag:
@@ -670,7 +687,7 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}.{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
+                  Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}.{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
 
   # ---------------------------------------------------------------------------
   # 9. No-FP branch: close the Investigation immediately (D31, D41).
@@ -683,8 +700,24 @@ steps:
     type: if
     condition: "${{ variables.fp_candidate_count == 0 }}"
     steps:
+      # This is the most common branch (no FP candidates), so an unhandled patch failure here
+      # would fail most triage runs. `ai.conversation.metadata.patch` errors when
+      # `agentBuilder:experimentalFeatures` is off; `continue: true` is required alongside
+      # `fallback` — fallback alone still re-throws the original error afterwards (see
+      # on_failure/README.md) and would skip post_comment_outcome_no_fp below.
       - name: close_no_fp
         type: ai.conversation.metadata.patch
+        on-failure:
+          continue: true
+          fallback:
+            - name: log_no_fp_close_failed
+              type: console
+              with:
+                message: >-
+                  Triage completed with no false-positive candidates, but the Investigation
+                  could not be marked closed: {{ error.message }}. Investigation
+                  {{ steps.create_investigation.output.conversation_id }} stays open until
+                  the reconciliation sweep resolves it.
         with:
           conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
           updates:
@@ -706,6 +739,6 @@ steps:
             conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
             trigger_mode: "never"
             input: >-
-              🤖 **Alert Triage** — Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
+              Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
               {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
 

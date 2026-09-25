@@ -190,19 +190,15 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
     expect(comment).toContain('alertzero_reasoning');
   });
 
-  it('lists up to 10 alert IDs for small batches', () => {
+  it('reports the alert count without listing individual IDs, since the chip attachment above already shows them', () => {
     const comment = renderTriageStarted(3);
-    expect(comment).toContain('alert-id-1');
-    expect(comment).toContain('alert-id-3');
-    expect(comment).not.toContain('more');
+    expect(comment).toContain('3 alert(s)');
+    expect(comment).not.toContain('alert-id-1');
   });
 
-  it('shows first 10 IDs and "and N more" for a 50-alert batch', () => {
-    const comment = renderTriageStarted(50);
-    expect(comment).toContain('alert-id-1');
-    expect(comment).toContain('alert-id-10');
-    expect(comment).not.toContain('alert-id-11');
-    expect(comment).toContain('and 40 more');
+  it('renders the execution URL as a markdown link rather than a raw URL', () => {
+    const comment = renderTriageStarted(3);
+    expect(comment).toContain('[View execution](https://kibana.example.com/app/exec/1)');
   });
 });
 
@@ -315,4 +311,39 @@ describe('floor_alert_triage — if-conditions', () => {
       expect(step.condition).not.toContain('|');
     }
   });
+});
+
+// ---------------------------------------------------------------------------
+// ai.conversation.metadata.patch — required experimental-features gating
+//
+// The step handler errors when `agentBuilder:experimentalFeatures` is off
+// (see agent_builder/server/workflows/steps/update_conversation_metadata.ts).
+// Every "close the Investigation" step must survive that: `fallback` alone still
+// re-throws the original error afterwards (on_failure/README.md — "workflow still
+// fails after fallback execution"), so `continue: true` is required alongside it,
+// or the run aborts and any step after the patch (e.g. the outcome comment) never runs.
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage — ai.conversation.metadata.patch failure handling', () => {
+  const patchSteps = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
+
+  it('finds every conversation-close step this workflow defines', () => {
+    expect(patchSteps.map((step) => step.name).sort()).toEqual([
+      'close_investigation_after_approval',
+      'close_investigation_on_gate_timeout',
+      'close_no_fp',
+    ]);
+  });
+
+  it.each([
+    'close_no_fp',
+    'close_investigation_after_approval',
+    'close_investigation_on_gate_timeout',
+  ])(
+    '"%s" survives a patch failure via fallback + continue, so the step after it still runs',
+    (name) => {
+      const step = stepByName(name);
+      expect(step?.['on-failure']?.continue).toBe(true);
+      expect(step?.['on-failure']?.fallback?.length).toBeGreaterThan(0);
+    }
+  );
 });
