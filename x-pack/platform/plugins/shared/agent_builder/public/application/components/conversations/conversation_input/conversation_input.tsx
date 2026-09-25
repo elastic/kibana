@@ -47,9 +47,10 @@ const INPUT_SHELL_RADIUS = 16;
 const POST_TO_TEAM_HEADER_HEIGHT = 24;
 
 const InputContainer: React.FC<
-  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean; isPostToTeam: boolean }>
-> = ({ children, isDisabled, isCollapsed, isPostToTeam }) => {
+  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean; triggerMode: ChatTriggerMode }>
+> = ({ children, isDisabled, isCollapsed, triggerMode }) => {
   const { euiTheme } = useEuiTheme();
+  const showHeader = triggerMode === ChatTriggerMode.Never;
 
   const transitionDuration = euiTheme.animation.fast;
 
@@ -57,7 +58,7 @@ const InputContainer: React.FC<
     flex-grow: 0;
     width: 100%;
     border-radius: ${INPUT_SHELL_RADIUS}px;
-    background-color: ${isPostToTeam ? euiTheme.colors.backgroundBaseDisabled : 'transparent'};
+    background-color: ${showHeader ? euiTheme.colors.backgroundBaseDisabled : 'transparent'};
     ${euiCanAnimate} {
       transition: background-color ${transitionDuration} ease-out;
     }
@@ -65,12 +66,12 @@ const InputContainer: React.FC<
   // The header stays mounted so it can slide back behind the input on the way out;
   // visibility is delayed on exit so it only leaves the accessibility tree once collapsed.
   const headerStyles = css`
-    height: ${isPostToTeam ? POST_TO_TEAM_HEADER_HEIGHT : 0}px;
+    height: ${showHeader ? POST_TO_TEAM_HEADER_HEIGHT : 0}px;
     overflow: hidden;
-    visibility: ${isPostToTeam ? 'visible' : 'hidden'};
+    visibility: ${showHeader ? 'visible' : 'hidden'};
     ${euiCanAnimate} {
       transition: height ${transitionDuration} ease-out,
-        visibility 0s linear ${isPostToTeam ? '0s' : transitionDuration};
+        visibility 0s linear ${showHeader ? '0s' : transitionDuration};
     }
   `;
   const headerContentStyles = css`
@@ -85,7 +86,7 @@ const InputContainer: React.FC<
     <div css={wrapperStyles}>
       <div
         css={headerStyles}
-        aria-hidden={!isPostToTeam}
+        aria-hidden={!showHeader}
         data-test-subj="agentBuilderConversationInputPostToTeamHeader"
       >
         <div css={headerContentStyles}>
@@ -223,7 +224,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const isTriggerModeSelectable = isShared && isExperimentalEnabled;
   const effectiveTriggerMode = isTriggerModeSelectable ? triggerMode : ChatTriggerMode.Always;
-  const isPostToTeam = effectiveTriggerMode === ChatTriggerMode.Never;
 
   const messageEditorAriaLabel = getMessageEditorAriaLabel({
     isNewConversation,
@@ -279,7 +279,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
-    if (isPostToTeam) {
+    if (effectiveTriggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
           messageEditorController.clear();
@@ -307,7 +307,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     <InputContainer
       isDisabled={isInputDisabled}
       isCollapsed={shouldCollapseInput}
-      isPostToTeam={isPostToTeam}
+      triggerMode={effectiveTriggerMode}
     >
       {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
