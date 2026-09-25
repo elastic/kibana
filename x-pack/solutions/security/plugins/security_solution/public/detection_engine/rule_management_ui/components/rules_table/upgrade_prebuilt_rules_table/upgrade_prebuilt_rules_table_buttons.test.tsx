@@ -108,16 +108,16 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       mockContext({
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 }),
+          .mockReturnValue({ total: 3, customizedCount: 2, ruleTypeChangeCount: 0 }),
       });
       renderButtons(selectedRules);
 
       await openSelectedRulesToTargetAction(user);
 
       const modal = await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
-      expect(modal).toHaveTextContent('customizations that will be overwritten');
+      expect(modal).toHaveTextContent('Modifications on 2 of them will be overwritten');
+      expect(modal).toHaveTextContent('3');
       expect(modal).toHaveTextContent('2');
-      expect(modal).toHaveTextContent('1');
       expect(modal).not.toHaveTextContent('rule type change');
       expect(modal).not.toHaveTextContent('rule-customized');
       expect(modal).not.toHaveTextContent('rule-plain');
@@ -385,7 +385,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
       expect(modal).toHaveTextContent('12');
       expect(modal).toHaveTextContent('4');
-      expect(modal).toHaveTextContent('customizations that will be overwritten');
+      expect(modal).toHaveTextContent('Modifications on 4 of them will be overwritten');
       await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
@@ -409,7 +409,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
       const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
       expect(fetchAllRulesCustomizationCounts).toHaveBeenCalledTimes(1);
-      expect(modal).toHaveTextContent('2 of 4 have customizations that will be overwritten');
+      expect(modal).toHaveTextContent('Modifications on 2 of them will be overwritten');
       expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
     });
 
