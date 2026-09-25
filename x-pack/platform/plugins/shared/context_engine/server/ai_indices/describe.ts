@@ -10,7 +10,7 @@ import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indi
 import { MEMORY_KI_TYPES } from '../../common/memory';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
-import { buildExampleQueries } from './example_queries';
+import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
 import { buildMemoryExampleQueries } from './memory_example_queries';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
@@ -85,7 +85,7 @@ const memorySection = (
     'Use platform.context_engine.remember to write memory.',
     'Use platform.context_engine.forget with a memory id to tombstone memory.',
     'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:',
-    '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")',
+    EXCLUDE_MEMORY_KI_TYPES_FILTER,
     'For cross-session recall, search granular facts with hybrid retrieval:',
     crossSession,
     'For recall from the current Agent Builder conversation:',
@@ -95,9 +95,9 @@ const memorySection = (
   ];
 };
 
-const exampleQueriesSection = (target: string): string[] => [
+const exampleQueriesSection = (target: string, excludeMemory: boolean): string[] => [
   'Example queries (adapt field names for non-canonical indices)',
-  ...buildExampleQueries(target).flatMap(({ title, esql }) => ['', title, esql]),
+  ...buildExampleQueries(target, { excludeMemory }).flatMap(({ title, esql }) => ['', title, esql]),
 ];
 
 /** One item per line; sections separated by a blank line; empty sections dropped. */
@@ -135,6 +135,6 @@ export const describeAiIndex = async ({
     kiTypeCountsSection(kiTypeCounts),
     tagCountsSection(tagCounts),
     memorySection(aiIndex, target),
-    exampleQueriesSection(target),
+    exampleQueriesSection(target, true),
   ]);
 };
