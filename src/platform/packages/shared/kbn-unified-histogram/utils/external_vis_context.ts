@@ -129,27 +129,6 @@ export const isSuggestionShapeAndVisContextCompatible = (
   );
 };
 
-/**
- * Chart-switch Apply used to stamp every edit as `lensSuggestion`. An XY series
- * change on an ES|QL histogram must stay `histogramForESQL` so keep/drop does
- * not rebuild the default Area on the next fetch.
- */
-export const getSuggestionTypeAfterEditorUpdate = ({
-  currentSuggestionType,
-  visualizationType,
-}: {
-  currentSuggestionType: UnifiedHistogramSuggestionType;
-  visualizationType: string | undefined;
-}): UnifiedHistogramSuggestionType => {
-  if (
-    currentSuggestionType === UnifiedHistogramSuggestionType.histogramForESQL &&
-    visualizationType === 'lnsXY'
-  ) {
-    return UnifiedHistogramSuggestionType.histogramForESQL;
-  }
-  return UnifiedHistogramSuggestionType.lensSuggestion;
-};
-
 const injectIntervalToDateTimeColumn = (
   columns: TextBasedLayerColumn[],
   dateFieldLabel: string
