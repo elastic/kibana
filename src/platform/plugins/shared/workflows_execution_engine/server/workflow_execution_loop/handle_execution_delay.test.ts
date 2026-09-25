@@ -271,6 +271,52 @@ describe('handleExecutionDelay', () => {
         }
       }
     );
+    it('should schedule idle resume from the rendered step timeout frozen on zone state', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T12:00:10.000Z'));
+        const params = makeParams({
+          currentStackFrames: [
+            {
+              stepId: 'timedParent',
+              nestedScopes: [
+                { nodeId: 'enterTimeoutZone_timedParent', nodeType: 'enter-timeout-zone' },
+              ],
+            },
+          ],
+        });
+        (params.workflowExecutionGraph.getNode as jest.Mock).mockImplementation((nodeId: string) =>
+          nodeId === 'enterTimeoutZone_timedParent'
+            ? {
+                id: 'enterTimeoutZone_timedParent',
+                type: 'enter-timeout-zone',
+                stepId: 'timedParent',
+                stepType: 'step_level_timeout',
+                timeout: '{{ inputs.stepTimeout }}',
+              }
+            : undefined
+        );
+        (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockImplementation(
+          (stepId: string) =>
+            stepId === 'timedParent'
+              ? { startedAt: '2025-06-01T12:00:00.000Z', state: { resolvedTimeout: '45s' } }
+              : undefined
+        );
+
+        const stepRuntime = makeStepRuntime({
+          stepExecution: { status: ExecutionStatus.WAITING_FOR_INPUT } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        const call = (
+          params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask as jest.Mock
+        ).mock.calls[0][0];
+        expect(call.resumeAt.toISOString()).toBe('2025-06-01T12:00:45.000Z');
+      } finally {
+        jest.useRealTimers();
+      }
+    });
   });
 
   describe('WAITING_FOR_CHILD step (sync child workflow)', () => {

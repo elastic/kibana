@@ -98,3 +98,63 @@ steps:
     expect(finalStepExecutions.length).toBe(0);
   });
 });
+
+describe('step level timeout with a templated value', () => {
+  const buildYaml = () => `
+inputs:
+  stepTimeout:
+    type: string
+    required: false
+steps:
+  - name: timeoutStep
+    type: ${FakeConnectors.slow_3sec_inference.actionTypeId}
+    connector-id: ${FakeConnectors.slow_3sec_inference.name}
+    timeout: "{{ inputs.stepTimeout | default: '10s' }}"
+    with:
+      message: 'Templated timeout'
+  - name: finalStep
+    type: ${FakeConnectors.slack1.actionTypeId}
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'After the timed step'
+`;
+
+  const getExecution = (fixture: WorkflowRunFixture) =>
+    fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
+
+  it('times the step out at the rendered duration', async () => {
+    const fixture = new WorkflowRunFixture();
+    await fixture.runWorkflow({ workflowYaml: buildYaml(), inputs: { stepTimeout: '1s' } });
+
+    const execution = getExecution(fixture);
+    expect(execution?.status).toBe(ExecutionStatus.FAILED);
+    expect(execution?.error).toEqual({
+      type: 'TimeoutError',
+      message: 'Step execution exceeded the configured timeout of 1s.',
+    });
+  });
+
+  it('lets the step finish when the rendered duration is long enough', async () => {
+    const fixture = new WorkflowRunFixture();
+    await fixture.runWorkflow({ workflowYaml: buildYaml() });
+
+    expect(getExecution(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    const finalStep = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
+      (se) => se.stepId === 'finalStep'
+    );
+    expect(finalStep?.status).toBe(ExecutionStatus.COMPLETED);
+  });
+
+  it('fails the step when the template renders to an invalid duration', async () => {
+    const fixture = new WorkflowRunFixture();
+    await fixture.runWorkflow({ workflowYaml: buildYaml(), inputs: { stepTimeout: 'soon' } });
+
+    const execution = getExecution(fixture);
+    expect(execution?.status).toBe(ExecutionStatus.FAILED);
+    expect(execution?.error).toEqual(
+      expect.objectContaining({
+        message: expect.stringContaining('Invalid duration format: soon'),
+      })
+    );
+  });
+});

@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
+  BaseConnectorStepSchema,
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
   DataSetStepSchema,
@@ -1328,7 +1329,14 @@ describe('dynamic timeout schema', () => {
     expect(WaitForInputStepSchema.safeParse({ ...input, timeout: overLimit }).success).toBe(false);
   });
 
-  it('does not accept templates on connector TimeoutPropSchema', () => {
+  it('accepts a duration or a Liquid template as a connector/action step timeout', () => {
+    const step = { name: 's', type: 'slack' };
+    expect(BaseConnectorStepSchema.safeParse({ ...step, timeout: '5m' }).success).toBe(true);
+    expect(BaseConnectorStepSchema.safeParse({ ...step, timeout: templated }).success).toBe(true);
+    expect(BaseConnectorStepSchema.safeParse({ ...step, timeout: 'soon' }).success).toBe(false);
+  });
+
+  it('does not accept templates on flow-control TimeoutPropSchema', () => {
     expect(TimeoutPropSchema.safeParse({ timeout: templated }).success).toBe(false);
     expect(TimeoutPropSchema.safeParse({ timeout: '5m' }).success).toBe(true);
     expect(TimeoutPropSchema.safeParse({ timeout: '1h30m' }).success).toBe(true);

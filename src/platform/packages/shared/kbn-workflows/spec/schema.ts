@@ -281,7 +281,7 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   with: z.record(z.string(), z.any()).optional(),
 })
   .merge(StepWithForEachSchema)
-  .merge(TimeoutPropSchema)
+  .merge(DynamicTimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
