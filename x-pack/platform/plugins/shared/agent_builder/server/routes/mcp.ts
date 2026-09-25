@@ -144,6 +144,7 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
                 });
                 return {
                   content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
+                  structuredContent: { ...toolResult },
                 };
               }
             );
