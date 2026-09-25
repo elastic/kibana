@@ -23,10 +23,11 @@ import { getNamespaceTemplatePriority } from '../elasticsearch/template/template
 export type { NamespaceConflictWarning };
 
 /**
- * Returns true if any of the data stream's streams effectively use the OTel collector input
- * type AND OTel integrations are enabled. Resolves named inputs so that a stream referencing
- * an input by name (e.g. `otel_logs`) is correctly identified as OTel when its backing input
- * has `type: otelcol`.
+ * Returns true if the data stream has no streams and opts into OTel asset naming via
+ * `use_otel_suffix: true`, or any of its streams effectively use the OTel collector input type,
+ * AND OTel integrations are enabled. Resolves named inputs so that a stream referencing an input
+ * by name (e.g. `otel_logs`) is correctly identified as OTel when its backing input has
+ * `type: otelcol`.
  *
  * Shared between the namespace-scoped data stream template and ILM policy sync logic, which
  * both need to derive the same (possibly OTel-suffixed) base template name for a data stream.
