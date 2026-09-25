@@ -131,7 +131,12 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     const contradictions = [
       { status: 'no_environment_hits' as const, total: 4, confirmed: false, sources: [] as const },
       { status: 'no_searchable_terms' as const, total: 4, confirmed: false, sources: [] as const },
-      { status: 'environment_hits_found' as const, total: 0, confirmed: false, sources: [] as const },
+      {
+        status: 'environment_hits_found' as const,
+        total: 0,
+        confirmed: false,
+        sources: [] as const,
+      },
       // Confirmed a hit while Tier 1 reports it could not search anything and Tier 2 did not hit.
       {
         status: 'no_searchable_terms' as const,
