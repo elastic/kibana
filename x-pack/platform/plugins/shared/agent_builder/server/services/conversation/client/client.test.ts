@@ -18,6 +18,7 @@ import {
   TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
+  feedbackEventId,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
@@ -1702,7 +1703,7 @@ describe('ConversationClient', () => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
     });
 
-    it('persists a vote with chips and comment, stamping connector and model from model_usage', async () => {
+    it('persists a round_feedback event with chips, comment, connector and model', async () => {
       const roundWithModel = createRound({
         id: 'round-1',
         model_usage: {
@@ -1721,54 +1722,65 @@ describe('ConversationClient', () => {
         comment: 'great answer',
       });
 
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'conversation-1',
-          if_seq_no: 1,
-          if_primary_term: 1,
-          document: expect.objectContaining({
-            conversation_rounds: [
-              expect.objectContaining({
-                id: 'round-1',
-                feedback: expect.objectContaining({
-                  vote: 'up',
-                  chips: ['useful'],
-                  comment: 'great answer',
-                  connector_id: 'connector-abc',
-                  model: 'claude-4.6-sonnet',
-                }),
-              }),
-            ],
-          }),
-        })
-      );
+      const { events } = mockEsClient.index.mock.calls[0][0].document as {
+        events: TimelineEvent[];
+      };
+      const feedbackEvent = events.find((e) => e.type === TimelineEventType.roundFeedback);
+      expect(feedbackEvent).toMatchObject({
+        type: TimelineEventType.roundFeedback,
+        data: expect.objectContaining({
+          round_id: 'round-1',
+          vote: 'up',
+          chips: ['useful'],
+          comment: 'great answer',
+          connector_id: 'connector-abc',
+          model: 'claude-4.6-sonnet',
+        }),
+      });
     });
 
-    it('removes the feedback sub-object entirely on retract (vote: null)', async () => {
-      const roundWithFeedback = {
-        ...round,
-        feedback: {
+    it('appends a null-vote tombstone on retract instead of deleting the prior event', async () => {
+      const priorVoteEvent: TimelineEvent = {
+        id: 'prior-vote-event-id',
+        type: TimelineEventType.roundFeedback,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1' },
+        data: {
+          round_id: 'round-1',
           vote: 'up' as const,
-          chips: [],
-          comment: '',
           submitted_at: '2025-01-01T00:00:00.000Z',
         },
       };
-      mockGetDocumentResponse(createConversationDocument({ rounds: [roundWithFeedback] }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [round],
+          events: [priorVoteEvent],
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+        })
+      );
 
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
 
-      const persistedRounds = mockEsClient.index.mock.calls[0][0].document
-        .conversation_rounds as Array<Record<string, unknown>>;
-      expect(persistedRounds[0]).not.toHaveProperty('feedback');
+      const { events } = mockEsClient.index.mock.calls[0][0].document as {
+        events: TimelineEvent[];
+      };
+      const feedbackEvents = events.filter(
+        (e) =>
+          e.type === TimelineEventType.roundFeedback &&
+          (e.data as { round_id: string }).round_id === 'round-1'
+      );
+      expect(feedbackEvents.find((e) => e.id === 'prior-vote-event-id')).toBeDefined();
+      const tombstone = feedbackEvents.find((e) => e.id !== 'prior-vote-event-id');
+      expect(tombstone).toBeDefined();
+      expect((tombstone!.data as { vote: unknown }).vote).toBeNull();
     });
 
-    it('throws not found when the round does not exist in the conversation', async () => {
+    it('throws bad request when the round does not exist in the conversation', async () => {
       mockGetDocumentResponse(createConversationDocument({ rounds: [round] }));
 
       await expect(
         client.updateRoundFeedback('conversation-1', 'nonexistent-round', { vote: 'up' })
-      ).rejects.toMatchObject({ message: 'Conversation conversation-1 not found' });
+      ).rejects.toMatchObject({ message: 'round not found: nonexistent-round' });
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
@@ -3428,6 +3440,61 @@ describe('ConversationClient', () => {
       expect(replacedUserMessage?.data?.message).toBe('processed input');
       const replacedStep0 = indexed.events?.find((event) => event.id === 'round-1::step::0');
       expect(replacedStep0?.created_at).toBe('CANONICAL_TS_0');
+    });
+
+    it('replaceRoundEvents preserves round_feedback events across regeneration, including legacy ::feedback IDs', async () => {
+      const uuidFeedbackEvent: TimelineEvent = {
+        id: 'uuid-feedback-abc-123',
+        type: TimelineEventType.roundFeedback,
+        created_at: '2025-08-04T07:43:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: {
+          round_id: 'round-1',
+          vote: 'up' as const,
+          submitted_at: '2025-08-04T07:43:00.000Z',
+        },
+      };
+      const legacyFeedbackEvent: TimelineEvent = {
+        id: feedbackEventId('round-1'), // 'round-1::feedback'
+        type: TimelineEventType.roundFeedback,
+        created_at: '2025-08-04T07:42:50.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: {
+          round_id: 'round-1',
+          vote: 'down' as const,
+          submitted_at: '2025-08-04T07:42:50.000Z',
+        },
+      };
+      const storedUserMessage: TimelineEvent = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'original input' },
+      };
+
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [storedUserMessage, legacyFeedbackEvent, uuidFeedbackEvent],
+        })
+      );
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      await client.replaceRoundEvents({
+        id: 'conversation-1',
+        roundId: 'round-1',
+        events: [{ ...storedUserMessage, data: { message: 'reprocessed input' } }],
+      });
+
+      const { events: indexed } = mockEsClient.index.mock.calls[0][0].document as {
+        events: Array<{ id: string }>;
+      };
+      const indexedIds = indexed.map((e) => e.id);
+
+      expect(indexedIds).toContain(uuidFeedbackEvent.id);
+      expect(indexedIds).toContain(legacyFeedbackEvent.id);
+      expect(indexedIds).toContain('round-1::user_message');
     });
 
     it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {

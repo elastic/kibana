@@ -12,7 +12,7 @@ import type {
   ExecutionAbortedEvent,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { TimelineEventType } from '@kbn/agent-builder-common';
+import { TimelineEventType, parseExecutionId } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 import type { AgentTurnItem, AgentTurnStatus, ExecutionAccumulator, TerminalEvent } from './types';
 
@@ -70,10 +70,12 @@ export const accumulatorToItem = (
   const triggerAttachmentRefs =
     trigger?.type === TimelineEventType.userMessage ? trigger.data.attachment_refs : undefined;
   const status = resolveStatus(acc, awaitingPromptEventId);
+  const roundId = parseExecutionId(executionId)?.roundId ?? executionId;
   const item: AgentTurnItem = {
     kind: 'agentTurn',
     key: executionId,
     executionId,
+    roundId,
     status,
     startedAt,
     steps,

@@ -101,15 +101,24 @@ const isRemovableBlock = (
  * the per-round rule ({@link eventsForKnownRound}). A block whose round is *not* in `rounds` is
  * dropped only when {@link isRemovableBlock} — the caller's `rounds` is authoritative for the
  * rounds it could see (`storedRounds`, the document's rounds at write time) — and kept untouched
- * otherwise. Rounds with no stored block yet are appended in `rounds` order. Additive events are
- * re-inserted by `created_at`.
+ * otherwise. Rounds with no stored block yet are appended in `rounds` order. Non-feedback additive
+ * events are re-inserted by `created_at`. Feedback events are appended last in their stored order
+ * so that `eventsToRounds` last-event-wins is immune to clock skew between Kibana nodes: if two
+ * feedback events for the same round have out-of-order `created_at` timestamps (because they were
+ * written on nodes with skewed clocks), the one that was appended later still wins.
  */
 export const reconcileEvents = (
   merged: Conversation,
   storedRounds: ReadonlyArray<Pick<ConversationRound, 'id'>>
 ): ConversationEvent[] => {
   const stored = merged.events ?? [];
-  const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
+  const nonRoundDerived = stored.filter((event) => !isRoundDerivedEventId(event.id));
+  const additive = nonRoundDerived.filter(
+    (event) => event.type !== TimelineEventType.roundFeedback
+  );
+  const feedbackEvents = nonRoundDerived.filter(
+    (event) => event.type === TimelineEventType.roundFeedback
+  );
   const roundsById = new Map(merged.rounds.map((round) => [round.id, round]));
   const storedRoundIds = new Set(storedRounds.map((round) => round.id));
 
@@ -138,6 +147,7 @@ export const reconcileEvents = (
       events.splice(insertAt, 0, event);
     }
   }
+  events.push(...feedbackEvents);
   return events;
 };
 

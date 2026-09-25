@@ -169,6 +169,30 @@ describe('reconcileEvents', () => {
     ]);
   });
 
+  it('preserves append order of round_feedback events regardless of created_at (clock-skew immunity)', () => {
+    const vote = {
+      id: 'fb-vote',
+      type: TimelineEventType.roundFeedback,
+      created_at: '2024-01-01T00:00:10.000Z',
+      actor: agentActor(conversation),
+      data: { round_id: 'r1', vote: 'up' as const, submitted_at: '2024-01-01T00:00:10.000Z' },
+    } as unknown as TimelineEvent;
+    const retract = {
+      id: 'fb-retract',
+      type: TimelineEventType.roundFeedback,
+      created_at: '2024-01-01T00:00:09.000Z',
+      actor: agentActor(conversation),
+      data: { round_id: 'r1', vote: null, submitted_at: '2024-01-01T00:00:09.000Z' },
+    } as unknown as TimelineEvent;
+    const result = reconcile({
+      ...conversation,
+      rounds: [],
+      events: [...failedBlock(), vote, retract],
+    });
+    const resultIds = ids(result);
+    expect(resultIds.indexOf('fb-vote')).toBeLessThan(resultIds.indexOf('fb-retract'));
+  });
+
   describe('interrupted blocks', () => {
     it('keeps an interrupted exec_0 block absent from the caller rounds (stale stored rounds)', () => {
       const r0 = completedRound({ id: 'r0', started_at: T0 });

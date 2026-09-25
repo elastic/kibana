@@ -7,6 +7,7 @@
 
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundStep,
@@ -27,6 +28,7 @@ import {
   TimelineTriggerType,
   executionTerminatedEventId,
   isZeroModelUsage,
+  feedbackEventId,
   parseExecutionId,
   resumeExecutionId,
   roundStepEventId,
@@ -166,12 +168,54 @@ export const roundToEvents = (
   ];
 };
 
+const feedbackEventForRound = (
+  roundId: string,
+  feedback: NonNullable<ConversationRound['feedback']>,
+  conversation: ConversationForRoundEvents
+): TimelineEvent =>
+  ({
+    id: feedbackEventId(roundId),
+    type: TimelineEventType.roundFeedback,
+    created_at: feedback.submitted_at,
+    actor: {
+      type: EventActorType.user,
+      id: conversation.user?.id ?? conversation.user?.username ?? 'unknown',
+      ...(conversation.user?.username ? { username: conversation.user.username } : {}),
+    },
+    data: { round_id: roundId, ...feedback },
+  } as TimelineEvent);
+
+export const roundsToEvents = (conversation: Conversation): TimelineEvent[] => {
+  const events: TimelineEvent[] = [];
+  for (const round of conversation.rounds) {
+    events.push(...roundToEvents(round, conversation));
+    if (round.feedback) {
+      events.push(feedbackEventForRound(round.id, round.feedback, conversation));
+    }
+  }
+  return events;
+};
+
 /**
- * Converts a rounds-based conversation into a timeline, on read. Maps each round with
- * {@link roundToEvents}, in round order.
+ * Synthesizes feedback events for any rounds that have `round.feedback` stored directly on the
+ * round but no corresponding `round_feedback` event in `existingEvents`. This covers events-native
+ * documents whose feedback was written by the pre-events `updateRoundFeedback` implementation
+ * (which stored feedback only on `conversation_rounds`). Rounds that already have any feedback
+ * event — including a retract tombstone — are left untouched.
  */
-export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
-  conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
+export const backfillRoundFeedbackEvents = (
+  conversation: Conversation,
+  existingEvents: ConversationEvent[]
+): TimelineEvent[] => {
+  const roundsWithFeedbackEvent = new Set(
+    existingEvents
+      .filter((e) => e.type === TimelineEventType.roundFeedback)
+      .map((e) => (e.data as { round_id: string }).round_id)
+  );
+  return conversation.rounds
+    .filter((round) => round.feedback && !roundsWithFeedbackEvent.has(round.id))
+    .map((round) => feedbackEventForRound(round.id, round.feedback!, conversation));
+};
 
 const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => ({
   model_usage: round.model_usage,

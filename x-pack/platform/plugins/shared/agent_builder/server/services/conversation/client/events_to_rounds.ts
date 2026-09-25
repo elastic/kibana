@@ -15,6 +15,7 @@ import type {
   ExecutionStepEvent,
   ExecutionTerminatedEvent,
   PromptResponseEvent,
+  RoundFeedbackEvent,
   RoundInput,
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
@@ -166,6 +167,28 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
       }
     }
     rounds.push(round);
+  }
+
+  // Last-event-wins: reconcileEvents appends round_feedback events in stored (append) order,
+  // so the final set() for each round_id is always the most recently submitted vote,
+  // regardless of created_at clock skew between Kibana nodes.
+  const feedbackByRoundId = new Map<string, RoundFeedbackEvent['data']>();
+  for (const event of events) {
+    if (event.type === TimelineEventType.roundFeedback) {
+      const data = event.data as RoundFeedbackEvent['data'] | null | undefined;
+      if (data && typeof data === 'object' && typeof data.round_id === 'string') {
+        feedbackByRoundId.set(data.round_id, data);
+      }
+    }
+  }
+
+  if (feedbackByRoundId.size > 0) {
+    return rounds.map((r) => {
+      const fb = feedbackByRoundId.get(r.id);
+      if (!fb || fb.vote === null) return r;
+      const { round_id: _ignored, vote, ...restFeedback } = fb;
+      return { ...r, feedback: { vote: vote as 'up' | 'down', ...restFeedback } };
+    });
   }
 
   return rounds;

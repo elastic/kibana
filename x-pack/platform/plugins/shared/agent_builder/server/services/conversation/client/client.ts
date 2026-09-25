@@ -15,8 +15,8 @@ import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
-  ConversationRoundFeedback,
   FeedbackChipId,
+  RoundFeedbackEvent,
 } from '@kbn/agent-builder-common';
 import {
   type ConversationEvent,
@@ -31,6 +31,7 @@ import {
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   EventActorType,
+  TimelineEventType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -801,7 +802,10 @@ class ConversationClientImpl implements ConversationClient {
           throw skipWrite(current);
         }
         const currentEvents = current.events ?? [];
-        const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
+        const nonRoundEvents = currentEvents.filter(
+          (event) =>
+            !event.id.startsWith(roundPrefix) || event.type === TimelineEventType.roundFeedback
+        );
         const existingIds = new Set(nonRoundEvents.map((event) => event.id));
         // Round-derived events for this round were just wiped, so they always pass; additive ids
         // collide only when a caller re-inserts an existing uuid, which we drop.
@@ -872,33 +876,35 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access: 'owner',
       fields: (current) => {
-        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
-
-        if (roundIndex === -1) {
-          throw createConversationNotFoundError({ conversationId });
+        const round = current.rounds.find((r) => r.id === roundId);
+        if (!round) {
+          throw createBadRequestError(`round not found: ${roundId}`);
         }
 
-        const round = current.rounds[roundIndex];
-        const { feedback: _removed, ...roundWithoutFeedback } = round;
-
-        const updatedRound =
-          feedback.vote === null
-            ? roundWithoutFeedback
-            : {
-                ...round,
-                feedback: {
-                  vote: feedback.vote,
-                  chips: feedback.chips ?? [],
-                  comment: feedback.comment ?? '',
-                  submitted_at: new Date().toISOString(),
-                  connector_id: round.model_usage?.connector_id,
-                  model: round.model_usage?.model,
-                } satisfies ConversationRoundFeedback,
-              };
-
-        return {
-          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
+        const now = new Date().toISOString();
+        const newEvent: RoundFeedbackEvent = {
+          id: uuidv4(),
+          type: TimelineEventType.roundFeedback,
+          created_at: now,
+          actor: {
+            type: EventActorType.user,
+            id: current.user.id ?? current.user.username,
+            ...(current.user.username ? { username: current.user.username } : {}),
+          },
+          data: {
+            round_id: roundId,
+            vote: feedback.vote,
+            ...(feedback.chips !== undefined ? { chips: feedback.chips } : {}),
+            ...(feedback.comment !== undefined ? { comment: feedback.comment } : {}),
+            submitted_at: now,
+            ...(round.model_usage?.connector_id
+              ? { connector_id: round.model_usage.connector_id }
+              : {}),
+            ...(round.model_usage?.model ? { model: round.model_usage.model } : {}),
+          },
         };
+
+        return { events: [...(current.events ?? []), newEvent] };
       },
     });
   }

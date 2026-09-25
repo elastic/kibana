@@ -75,12 +75,17 @@ export type TimelineEntry<E extends AnyTimelineEvent = TimelineEvent> =
  * stored rounds; events-native conversations are folded and re-serialized. Context only, never
  * persisted, so downstream consumers can read events without reconstructing rounds.
  */
+const isNotFeedbackEvent = (event: TimelineEvent): boolean =>
+  event.type !== TimelineEventType.roundFeedback;
+
 export const eventsForContext = (conversation: Conversation): TimelineEvent[] => {
   if (!isEventsNativeVersion(conversation.schema_version) || !conversation.events?.length) {
-    return roundsToEvents(conversation);
+    return roundsToEvents(conversation).filter(isNotFeedbackEvent);
   }
   const timelineEvents = conversation.events.filter(isTimelineEvent);
-  const folded = roundsToEvents({ ...conversation, rounds: eventsToRounds(timelineEvents) });
+  const folded = roundsToEvents({ ...conversation, rounds: eventsToRounds(timelineEvents) }).filter(
+    isNotFeedbackEvent
+  );
   const positions = new Map(conversation.events.map((event, index) => [event.id, index]));
   const position = (id: string) => positions.get(id) ?? Number.MAX_SAFE_INTEGER;
   // Folding drops the standalone messages and the executions that never terminated, so re-add

@@ -33,6 +33,7 @@ export interface AgentTurnItem {
   kind: 'agentTurn';
   key: string;
   executionId?: string;
+  roundId?: string;
   triggerEventId?: string;
   status: AgentTurnStatus;
   startedAt: string;
