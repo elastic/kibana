@@ -13,6 +13,7 @@ import {
 import type SuperTest from 'supertest';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { ensureEisEndpoints } from '../artifacts/ensure_eis';
 
 const getProductDocStatus = async (supertest: SuperTest.Agent, inferenceId: string) => {
   return supertest
@@ -61,6 +62,7 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
   const es = getService('es');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
 
   const deleteProductDocIndex = async ({
     productName,
@@ -114,7 +116,7 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
         products.map((product) =>
           deleteProductDocIndex({
             productName: product,
-            optionalInferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+            optionalInferenceId: defaultInferenceEndpoints.JINAv5,
           })
         )
       );
@@ -142,137 +144,151 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
         )}`
       );
     });
-    it('installs the E5 product docs', async () => {
-      const e5ProductDocs = await installProductDoc(
-        supertest,
-        defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
-      );
-      expect(e5ProductDocs.status).to.be(200);
-      expect(e5ProductDocs.body.installed).to.be(true);
-
-      const statusResponse = await getProductDocStatus(
-        supertest,
-        defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
-      );
-      const statusBody = statusResponse.body;
-      expect(statusBody.overall).to.eql(
-        'installed',
-        `Expected overall product doc installation status to be 'installed', got ${JSON.stringify(
-          statusBody,
-          null,
-          2
-        )}`
-      );
-      expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL);
-      products.forEach((product) => {
-        expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
-          'installed',
-          `Expected product doc installation status for [${product}] to be installed, got ${JSON.stringify(
-            statusBody.perProducts[product as DocumentationProduct],
-            null,
-            2
-          )}`
-        );
-      });
-      for (const product of products) {
-        await assertProducDocIndex({
-          productName: product,
-          shouldExist: true,
-          optionalInferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+    describe('Jina (via EIS)', () => {
+      before(async () => {
+        await ensureEisEndpoints({
+          es,
+          log,
+          requiredInferenceIds: [defaultInferenceEndpoints.JINAv5],
         });
-      }
-    });
-    it('updates the product docs for all previously installed Inference IDs if inferenceIds is ommited', async () => {
-      const updatedResponse = await supertest
-        .post('/internal/product_doc_base/update_all')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send({
-          forceUpdate: false,
-        })
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
-      const updatedBody = updatedResponse.body;
-      expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
-      // TODO: Restore this assertion once the E5 product docs are available
-      // expect(updatedBody[defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL].installed).to.be(true);
-    });
+      });
 
-    it('updates the product docs the specific inferenceId', async () => {
-      const updatedResponse = await supertest
-        .post('/internal/product_doc_base/update_all')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send({
-          forceUpdate: true,
-          inferenceIds: [defaultInferenceEndpoints.ELSER],
-        })
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
-      const updatedBody = updatedResponse.body;
-      expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
-      expect(updatedBody[defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL]).to.be(undefined);
-    });
-
-    it('uninstalls the E5 product docs', async () => {
-      const uninstalledResponse = await uninstallProductDoc(
-        supertest,
-        defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
-      );
-
-      expect(uninstalledResponse.status).to.be(200);
-
-      const statusResponse = await getProductDocStatus(
-        supertest,
-        defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
-      );
-      const statusBody = statusResponse.body;
-      expect(statusBody.overall).to.eql(
-        'uninstalled',
-        `Expected overall product doc installation status to be 'uninstalled', got ${JSON.stringify(
-          statusBody,
-          null,
-          2
-        )}`
-      );
-      expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL);
-      products.forEach((product) => {
-        expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
-          'uninstalled',
-          `Expected product doc installation status for [${product}] to be 'uninstalled', got ${JSON.stringify(
-            statusBody.perProducts[product as DocumentationProduct],
-            null,
-            2
-          )}`
+      it('installs the Jina product docs', async () => {
+        const jinaProductDocs = await installProductDoc(
+          supertest,
+          defaultInferenceEndpoints.JINAv5
         );
-      });
-      await assertProducDocIndex({
-        productName: 'kibana',
-        shouldExist: false,
-        optionalInferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
-      });
-    });
-    it('stills retains the other installed product docs', async () => {
-      const statusResponse = await getProductDocStatus(supertest, defaultInferenceEndpoints.ELSER);
-      const statusBody = statusResponse.body;
-      expect(statusBody.overall).to.eql(
-        'installed',
-        `Expected overall product doc installation status for inferenceId [${
-          defaultInferenceEndpoints.ELSER
-        }] to be 'installed', got ${JSON.stringify(statusBody, null, 2)}`
-      );
-      expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.ELSER);
-      products.forEach((product) => {
-        expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
+        expect(jinaProductDocs.status).to.be(200);
+        expect(jinaProductDocs.body.installed).to.be(true);
+
+        const statusResponse = await getProductDocStatus(
+          supertest,
+          defaultInferenceEndpoints.JINAv5
+        );
+        const statusBody = statusResponse.body;
+        expect(statusBody.overall).to.eql(
           'installed',
-          `Expected product doc installation status for inferenceId [${
-            defaultInferenceEndpoints.ELSER
-          }] for [${product}] to be 'installed', got ${JSON.stringify(
-            statusBody.perProducts[product as DocumentationProduct],
+          `Expected overall product doc installation status to be 'installed', got ${JSON.stringify(
+            statusBody,
             null,
             2
           )}`
         );
+        expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.JINAv5);
+        products.forEach((product) => {
+          expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
+            'installed',
+            `Expected product doc installation status for [${product}] to be installed, got ${JSON.stringify(
+              statusBody.perProducts[product as DocumentationProduct],
+              null,
+              2
+            )}`
+          );
+        });
+        for (const product of products) {
+          await assertProducDocIndex({
+            productName: product,
+            shouldExist: true,
+            optionalInferenceId: defaultInferenceEndpoints.JINAv5,
+          });
+        }
+      });
+
+      it('updates the product docs for all previously installed Inference IDs if inferenceIds is omitted', async () => {
+        const updatedResponse = await supertest
+          .post('/internal/product_doc_base/update_all')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send({
+            forceUpdate: false,
+          })
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        const updatedBody = updatedResponse.body;
+        expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
+        expect(updatedBody[defaultInferenceEndpoints.JINAv5].installed).to.be(true);
+      });
+
+      it('updates the product docs for a specific inferenceId', async () => {
+        const updatedResponse = await supertest
+          .post('/internal/product_doc_base/update_all')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send({
+            forceUpdate: true,
+            inferenceIds: [defaultInferenceEndpoints.ELSER],
+          })
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        const updatedBody = updatedResponse.body;
+        expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
+        expect(updatedBody[defaultInferenceEndpoints.JINAv5]).to.be(undefined);
+      });
+
+      it('uninstalls the Jina product docs', async () => {
+        const uninstalledResponse = await uninstallProductDoc(
+          supertest,
+          defaultInferenceEndpoints.JINAv5
+        );
+
+        expect(uninstalledResponse.status).to.be(200);
+
+        const statusResponse = await getProductDocStatus(
+          supertest,
+          defaultInferenceEndpoints.JINAv5
+        );
+        const statusBody = statusResponse.body;
+        expect(statusBody.overall).to.eql(
+          'uninstalled',
+          `Expected overall product doc installation status to be 'uninstalled', got ${JSON.stringify(
+            statusBody,
+            null,
+            2
+          )}`
+        );
+        expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.JINAv5);
+        products.forEach((product) => {
+          expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
+            'uninstalled',
+            `Expected product doc installation status for [${product}] to be 'uninstalled', got ${JSON.stringify(
+              statusBody.perProducts[product as DocumentationProduct],
+              null,
+              2
+            )}`
+          );
+        });
+        await assertProducDocIndex({
+          productName: 'kibana',
+          shouldExist: false,
+          optionalInferenceId: defaultInferenceEndpoints.JINAv5,
+        });
+      });
+
+      it('still retains the ELSER product docs after Jina uninstall', async () => {
+        const statusResponse = await getProductDocStatus(
+          supertest,
+          defaultInferenceEndpoints.ELSER
+        );
+        const statusBody = statusResponse.body;
+        expect(statusBody.overall).to.eql(
+          'installed',
+          `Expected overall product doc installation status for inferenceId [${
+            defaultInferenceEndpoints.ELSER
+          }] to be 'installed', got ${JSON.stringify(statusBody, null, 2)}`
+        );
+        expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.ELSER);
+        products.forEach((product) => {
+          expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
+            'installed',
+            `Expected product doc installation status for inferenceId [${
+              defaultInferenceEndpoints.ELSER
+            }] for [${product}] to be 'installed', got ${JSON.stringify(
+              statusBody.perProducts[product as DocumentationProduct],
+              null,
+              2
+            )}`
+          );
+        });
       });
     });
   });

@@ -64,7 +64,7 @@ const processDocument = (document: ExtractedDocument) => {
     // limit to 2 consecutive carriage return
     .replaceAll(/\n\n+/g, '\n\n');
 
-  document.content_title = document.content_title.split('|')[0].trim();
+  document.content_title = document.content_title.split(' | ')[0].trim();
 
   // specific to security: remove rule query section as it's usually large without much value for the LLM
   if (document.product_name === 'security') {
