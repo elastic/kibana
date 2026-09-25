@@ -1211,7 +1211,7 @@ describe('Cases API', () => {
       });
 
       expect(postMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/find`, {
-        body: '{"aggs":{"consumer":{"terms":{"field":"kibana.alert.rule.consumer","size":100}},"producer":{"terms":{"field":"kibana.alert.rule.producer","size":100}},"ruleTypeIds":{"terms":{"field":"kibana.alert.rule.rule_type_id","size":100}}},"query":{"ids":{"values":["alert_id_1","alert_id_2"]}}}',
+        body: '{"_source":false,"size":0,"aggs":{"consumer":{"terms":{"field":"kibana.alert.rule.consumer","size":100}},"producer":{"terms":{"field":"kibana.alert.rule.producer","size":100}},"ruleTypeIds":{"terms":{"field":"kibana.alert.rule.rule_type_id","size":100}}},"query":{"ids":{"values":["alert_id_1","alert_id_2"]}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
