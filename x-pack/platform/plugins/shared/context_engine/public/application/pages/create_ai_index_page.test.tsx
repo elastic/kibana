@@ -20,6 +20,7 @@ import { CONTEXT_ENGINE_PATHS } from '../paths';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
 jest.mock('../hooks/use_data_connectors', () => ({
@@ -39,8 +40,13 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
   }),
 }));
 
+jest.mock('../hooks/use_memory_enabled', () => ({
+  useMemoryEnabled: jest.fn(),
+}));
+
 jest.mock('../api/data_streams');
 const mockedSearchDataStreams = jest.mocked(searchDataStreams);
+const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -80,6 +86,7 @@ const VALID_ID = 'support-ticket-triage';
 describe('CreateAiIndexPage', () => {
   beforeEach(() => {
     mockedSearchDataStreams.mockResolvedValue({ dataStreams: [] });
+    mockUseMemoryEnabled.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -128,6 +135,62 @@ describe('CreateAiIndexPage', () => {
 
     typeId(VALID_ID);
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeEnabled();
+  });
+
+  it('creates with memory enabled by default when the global memory feature is enabled', async () => {
+    mockUseMemoryEnabled.mockReturnValue(true);
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+
+    expect(screen.getByTestId('contextCreateAiIndexMemoryToggle')).toBeChecked();
+
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({
+          body: expect.stringContaining('"memory_enabled":true'),
+        })
+      );
+    });
+  });
+
+  it('does not show memory settings when the global memory feature is disabled', () => {
+    renderWithProviders(coreMock.createStart());
+
+    expect(screen.queryByTestId('contextCreateAiIndexMemoryToggle')).not.toBeInTheDocument();
+  });
+
+  it('creates the AI index with the selected memory setting', async () => {
+    mockUseMemoryEnabled.mockReturnValue(true);
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexMemoryToggle'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            id: VALID_ID,
+            memory_enabled: false,
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
+            automations: [],
+            sources: [],
+            traces: [],
+          }),
+        })
+      );
+    });
   });
 
   it('creates an AI index without any source', async () => {
