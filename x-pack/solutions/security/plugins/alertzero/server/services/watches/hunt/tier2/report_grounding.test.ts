@@ -129,18 +129,35 @@ describe('assertEsqlGroundedInReport', () => {
     });
   });
 
-  it('accepts the aggregation filter inside STATS, which is not a WHERE command', () => {
-    // `STATS ... WHERE` parses as a function rather than a command, so a filter-aware gate
-    // has to reach it or it rejects a legitimately filtered aggregating query.
-    const query =
-      'FROM logs-aws.* | STATS count = COUNT(*) WHERE source.ip == "192.0.2.30" BY host.name';
-    expect(assertEsqlGroundedInReport(query, { reportText: 'unrelated', iocValues }).ok).toBe(true);
+  it.each([
+    [
+      'grouped by a field',
+      'FROM logs-aws.* | STATS count = COUNT(*) WHERE source.ip == "192.0.2.30" BY host.name',
+    ],
+    [
+      'grouped by the index',
+      'FROM logs-aws.* | STATS count = COUNT(*) WHERE source.ip == "192.0.2.30" BY _index',
+    ],
+  ])('does not let an aggregation filter %s ground the query', (_label, query) => {
+    // `STATS ... WHERE` filters the aggregate, not the rows handed back: there is a row per group
+    // whether or not anything matched, holding `count = 0`, and Tier 2 would read those groups as
+    // corroboration. The extraction contract asks for row-level events and no aggregation, so
+    // declining this costs nothing it asks for.
+    expect(assertEsqlGroundedInReport(query, { reportText, iocValues }).ok).toBe(false);
   });
 
   it('does not let a literal in the aggregation itself ground the query', () => {
     const query =
       'FROM logs-aws.* | STATS count = COUNT(*) WHERE event.outcome == "success" BY host.name';
     expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
+  });
+
+  it('accepts a grounded WHERE command in front of an aggregation', () => {
+    // The shape an aggregating query has to take to ground: the rows are selected before they are
+    // counted, so the groups are built from rows the report chose.
+    const query =
+      'FROM logs-aws.* | WHERE source.ip == "192.0.2.30" | STATS count = COUNT(*) BY host.name';
+    expect(assertEsqlGroundedInReport(query, { reportText: 'unrelated', iocValues }).ok).toBe(true);
   });
 
   describe('a FORK unions the rows of its branches', () => {
@@ -279,6 +296,11 @@ describe('assertEsqlGroundedInReport', () => {
       [
         'a constant alias wrapped in a function',
         'FROM logs-aws.* | EVAL label = "AssumeRole" | WHERE TO_UPPER(label) == "ASSUMEROLE"',
+      ],
+      ['no column at all', 'FROM logs-aws.* | WHERE "AssumeRole" == "AssumeRole" | LIMIT 1'],
+      [
+        'two metadata fields',
+        'FROM logs-aws.* | WHERE _index == "logs-aws.cloudtrail-default" AND _id == "AssumeRole"',
       ],
     ])('rejects a filter comparing %s to the report value', (_label, query) => {
       // Every row satisfies the predicate whatever its telemetry says, so the query returns an

@@ -94,13 +94,17 @@ interface PipelineFilters {
 
 /**
  * Collects the predicates one pipeline uses to restrict which rows it reads, keeping the
- * branches of a `FORK` separate because they combine differently. Two positions filter rows:
- * the `WHERE` command, and the aggregation filter in `STATS ... WHERE ...`, which the parser
- * represents as a `where` function inside the `STATS` command rather than as a command of its
- * own.
+ * branches of a `FORK` separate because they combine differently.
  *
- * Everything else in a pipeline describes the shape of the output rather than narrowing the
- * input: an `EVAL` assignment, a `SORT` key, a `LIMIT`, a `GROK` pattern, an index name.
+ * Only the `WHERE` command qualifies. Everything else in a pipeline describes the shape of the
+ * output rather than which rows reach it: an `EVAL` assignment, a `SORT` key, a `LIMIT`, a `GROK`
+ * pattern, an index name — and the aggregation filter in `STATS c = COUNT(*) WHERE ... BY ...`,
+ * which is worth spelling out because it reads like a filter and is not one. It filters the
+ * aggregate, not the rows: `STATS c = COUNT(*) WHERE source.ip == "10.0.0.1" BY host.name` returns
+ * a row for every host, holding `c = 0` where nothing matched. Counting it grounded let a query
+ * pass while handing back groups the report never selected. Declining it costs nothing the
+ * pipeline asks for, because the extraction contract tells the model to return row-level events
+ * and not to aggregate.
  */
 const collectPipelineFilters = (query: ESQLAstQueryExpression): PipelineFilters => {
   const predicates: ESQLAstNode[] = [];
@@ -115,18 +119,7 @@ const collectPipelineFilters = (query: ESQLAstQueryExpression): PipelineFilters 
       );
       continue;
     }
-    if (command.name === 'where') {
-      predicates.push(...command.args);
-      continue;
-    }
-    Walker.walk(command, {
-      visitFunction: (fn) => {
-        // `STATS c = COUNT(*) WHERE user.name == "x"` parses as a `where` function whose first
-        // argument is the aggregation and second is the predicate. Only the second filters rows —
-        // the aggregation may hold literals of its own.
-        if (fn.name === 'where' && fn.args.length > 1) predicates.push(fn.args[1]);
-      },
-    });
+    if (command.name === 'where') predicates.push(...command.args);
   }
   return { predicates, forks };
 };
@@ -245,12 +238,19 @@ const collectConstantColumns = (
 };
 
 /**
- * Whether a comparison reads something that tells nothing about the document it came from: a
- * metadata field, which restates the scope the hunt already fixed, or a column the query filled
- * with a constant. The whole comparison is searched, so wrapping either in a function does not
- * hide it.
+ * Whether a comparison reads a value out of the document it is deciding on.
+ *
+ * Stated this way round on purpose. Asking instead which columns disqualify a comparison leaves
+ * every shape nobody thought of grounded, and each round of review has found one more: a metadata
+ * column restating the scope the hunt already fixed, a column the query filled with a constant,
+ * and `WHERE "AssumeRole" == "AssumeRole"`, which names no column at all and so passes any
+ * rejection list while matching every row. A comparison that reads nothing from the document
+ * cannot distinguish documents, whatever value it carries.
+ *
+ * The whole comparison is searched, so a field wrapped in a function still counts and an alias
+ * wrapped in one is still refused.
  */
-const readsNothingFromTheDocument = (
+const readsTheDocument = (
   comparison: ESQLFunction,
   constantColumns: ReadonlySet<string>
 ): boolean => {
@@ -258,7 +258,7 @@ const readsNothingFromTheDocument = (
   Walker.walk(comparison, {
     visitColumn: (column) => {
       const name = column.name.toLowerCase();
-      if (METADATA_COLUMNS.has(name) || constantColumns.has(name)) found = true;
+      if (!METADATA_COLUMNS.has(name) && !constantColumns.has(name)) found = true;
     },
   });
   return found;
@@ -384,7 +384,7 @@ const isPositivelyGrounded = (
     // search for the artifact.
     return false;
   }
-  if (readsNothingFromTheDocument(fn, rules.constantColumns)) return false;
+  if (!readsTheDocument(fn, rules.constantColumns)) return false;
 
   const { grounds } = rules;
   const listValues = listValuesOf(fn.args);
@@ -443,8 +443,9 @@ const isPipelineGrounded = (
  *
  * Where the predicate sits decides how much it has to carry. One grounded `WHERE` grounds a linear
  * pipeline, because its filters compose with `AND`; a `FORK` unions rows instead, so every branch
- * of one has to ground itself. And what it compares has to come from the document: a column the
- * query filled with a constant matches every row while reading as a hunt for the value in it.
+ * of one has to ground itself. And the comparison has to read the document it decides on: a column
+ * the query filled with a constant, or no column at all, matches every row while reading as a hunt
+ * for the value it carries.
  *
  * It remains a value test rather than a semantic one: it establishes that the report constrains
  * the rows, not that the constraint is tight. A tautology disjoined onto a grounded comparison is
