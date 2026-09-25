@@ -277,8 +277,6 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
     async completeSaveToDashboardForm(createNew?: boolean) {
       const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
       if (createNew) {
-        // Wait for the dashboard picker's initial search to settle so its panel stops
-        // re-rendering (and shifting layout) while we click the "New" radio.
         await testSubjects.waitForEnabled('open-dashboard-picker');
 
         const label = await dashboardSelector.findByCssSelector(
