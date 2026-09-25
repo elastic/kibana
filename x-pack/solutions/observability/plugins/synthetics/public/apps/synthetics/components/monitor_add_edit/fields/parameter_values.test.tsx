@@ -19,6 +19,25 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => mockUseKibana(),
 }));
 
+jest.mock('./code_editor', () => ({
+  JSONEditor: ({
+    ariaLabel,
+    onChange,
+    value,
+  }: {
+    ariaLabel: string;
+    onChange: (value: string) => void;
+    value: string;
+  }) => (
+    <textarea
+      aria-label={ariaLabel}
+      data-test-subj="syntheticsParamsJSONEditor"
+      onChange={(event) => onChange(event.target.value)}
+      value={value}
+    />
+  ),
+}));
+
 describe('ParameterValuesEditor', () => {
   beforeEach(() => {
     mockUseKibana.mockReturnValue({
@@ -161,6 +180,32 @@ describe('ParameterValuesEditor', () => {
 
     expect(getByTestId('keyValuePairsValue0')).toHaveValue('two');
     expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+  });
+
+  it('uses the JSON editor for mixed and nested parameter values', () => {
+    const params = '{"retries":3,"options":{"mode":"x"},"enabled":true,"empty":null}';
+    const { getByTestId, queryByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={params} />
+    );
+
+    expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
+    expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue(params);
+
+    const updated = '{"retries":4,"options":{"mode":"y"},"enabled":false,"empty":null}';
+    fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), {
+      target: { value: updated },
+    });
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent(updated);
+  });
+
+  it('uses the JSON editor for top-level arrays', () => {
+    const params = '["first",{"nested":true}]';
+    const { getByTestId, queryByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={params} />
+    );
+
+    expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
+    expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue(params);
   });
 });
 

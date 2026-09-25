@@ -22,6 +22,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { canRevealParameterValues } from '../../../../../../common/utils/can_reveal_parameter_values';
 import { MASKED_PARAM_VALUE } from '../../../../../../common/utils/mask_monitor_params';
 import type { Pair } from './key_value_field';
+import { JSONEditor } from './code_editor';
 
 interface ParameterValuesEditorProps {
   onBlur?: () => void;
@@ -50,6 +51,24 @@ export const paramsJsonToPairs = (params?: string): Pair[] => {
   return [];
 };
 
+export const canUseParameterPairs = (params?: string): boolean => {
+  if (!params) {
+    return true;
+  }
+
+  try {
+    const parsed = JSON.parse(params) as unknown;
+    return (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      !Array.isArray(parsed) &&
+      Object.values(parsed).every((value) => typeof value === 'string')
+    );
+  } catch {
+    return false;
+  }
+};
+
 export const pairsToParamsJson = (pairs: Pair[]): string => {
   const params: Record<string, string> = {};
   for (const [key, val] of pairs) {
@@ -73,6 +92,7 @@ export const ParameterValuesEditor = ({
   const valueBeforeEdit = useRef<Record<number, string>>({});
   const pairsFromValue = useMemo(() => paramsJsonToPairs(value), [value]);
   const [pairs, setPairs] = useState<Pair[]>(pairsFromValue);
+  const useParameterPairs = useMemo(() => canUseParameterPairs(value), [value]);
 
   const canReveal = canRevealParameterValues({
     canSave: Boolean(application?.capabilities.uptime.save),
@@ -129,6 +149,19 @@ export const ParameterValuesEditor = ({
     },
     [canReveal]
   );
+
+  if (!useParameterPairs) {
+    return (
+      <JSONEditor
+        ariaLabel={PARAMETER_JSON_EDITOR_LABEL}
+        height="100px"
+        id="syntheticsMonitorConfigParams"
+        onChange={onChange}
+        readOnly={readOnly}
+        value={value ?? ''}
+      />
+    );
+  }
 
   return (
     <div data-test-subj="syntheticsMonitorConfigParams">
@@ -319,6 +352,13 @@ const ADD_PARAMETER_LABEL = i18n.translate(
   'xpack.synthetics.monitorConfig.params.addParameter.label',
   {
     defaultMessage: 'Add parameter',
+  }
+);
+
+const PARAMETER_JSON_EDITOR_LABEL = i18n.translate(
+  'xpack.synthetics.monitorConfig.paramsAria.label',
+  {
+    defaultMessage: 'Monitor params code editor',
   }
 );
 
