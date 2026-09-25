@@ -30,8 +30,13 @@ const MAX_ALERTS_PER_RUN = 10000;
 const DEFAULT_MAX_QUERY_RESPONSE_SIZE = '50mb';
 /** Anything smaller than this cannot hold a single ES|QL row with metadata. */
 const MIN_MAX_QUERY_RESPONSE_SIZE = '1kb';
-/** Anything larger than this would exhaust the heap on even a single concurrent execution. */
-const MAX_MAX_QUERY_RESPONSE_SIZE = '1gb';
+/**
+ * Upper bound on `maxResponseSize`. At Task Manager capacity 10 and the 4× heap
+ * multiplier, 200 MB requires ~8 GB Kibana heap — a large but real deployment.
+ * Beyond this, operators should use Arrow or NDJSON streaming rather than
+ * increasing the JSON body limit.
+ */
+const MAX_MAX_QUERY_RESPONSE_SIZE = '200mb';
 
 const rulesRunSchema = schema.object({
   alerts: schema.object({

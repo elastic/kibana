@@ -189,10 +189,10 @@ describe('alerting_v2 config schema', () => {
       ).toThrow();
     });
 
-    it('rejects values above 1gb', () => {
+    it('rejects values above 200mb', () => {
       expect(() =>
         configSchema.validate({
-          rules: { run: { query: { maxResponseSize: '1073741825b' } } },
+          rules: { run: { query: { maxResponseSize: '201mb' } } },
         })
       ).toThrow();
     });
