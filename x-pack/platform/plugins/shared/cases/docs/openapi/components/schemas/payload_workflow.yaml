@@ -1,0 +1,108 @@
+type: object
+description: The payload for a workflow user action, recorded when a user runs a workflow from a case.
+required:
+  - workflow
+properties:
+  workflow:
+    type: object
+    description: Identifies the workflow that was run.
+    required:
+      - id
+      - name
+      - executionId
+    properties:
+      id:
+        type: string
+        description: The workflow ID.
+      name:
+        type: string
+        description: The workflow name at the time the run was triggered.
+      executionId:
+        type: string
+        description: The execution ID returned by the Workflows engine.
+  origin:
+    description: The context from which the workflow was triggered.
+    oneOf:
+      - type: object
+        required:
+          - type
+          - id
+        properties:
+          type:
+            type: string
+            enum:
+              - cases.case
+          id:
+            type: string
+            description: The case ID.
+      - type: object
+        required:
+          - type
+          - id
+        properties:
+          type:
+            type: string
+            enum:
+              - cases.observable
+          id:
+            type: string
+            description: The observable ID.
+          typeKey:
+            type: string
+            description: The observable type key.
+          value:
+            type: string
+            description: The observable value.
+      - type: object
+        required:
+          - type
+          - id
+        properties:
+          type:
+            type: string
+            enum:
+              - cases.observables
+          id:
+            type: string
+            description: The case ID.
+          count:
+            type: number
+            description: The number of selected observables.
+      - type: object
+        required:
+          - type
+          - id
+          - attachmentType
+        properties:
+          type:
+            type: string
+            enum:
+              - cases.attachment
+          id:
+            type: string
+            description: The attachment target ID.
+          attachmentType:
+            type: string
+            description: The normalized registered attachment type.
+          index:
+            type: string
+            description: The Elasticsearch index the target document lives in.
+      - type: object
+        required:
+          - type
+          - id
+          - attachmentType
+        properties:
+          type:
+            type: string
+            enum:
+              - cases.attachments
+          id:
+            type: string
+            description: The case ID.
+          attachmentType:
+            type: string
+            description: The normalized registered attachment type.
+          count:
+            type: number
+            description: The number of selected attachment targets.

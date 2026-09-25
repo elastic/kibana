@@ -11,6 +11,7 @@ import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
 } from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -18,7 +19,14 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
-export type AlertZeroPluginSetup = Record<string, never>;
+/**
+ * Soft-enable contract. Always returned from `setup()` so optional consumers
+ * (e.g. security_solution threat-intel supply) can gate on `enabled` without
+ * reading `xpack.alertzero` config themselves.
+ */
+export interface AlertZeroPluginSetup {
+  enabled: boolean;
+}
 export type AlertZeroPluginStart = Record<string, never>;
 
 export interface AlertZeroSetupDependencies {
@@ -27,6 +35,7 @@ export interface AlertZeroSetupDependencies {
   workflowsManagement: WorkflowsServerPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
   agenticInvestigations: AgenticInvestigationsPluginSetup;
+  proposals: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
@@ -35,6 +44,7 @@ export interface AlertZeroStartDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   agentBuilder: AgentBuilderPluginStart;
   agenticInvestigations: AgenticInvestigationsPluginStart;
+  proposals: ProposalsPluginStart;
 }
 
 export type AlertZeroRouter = IRouter;

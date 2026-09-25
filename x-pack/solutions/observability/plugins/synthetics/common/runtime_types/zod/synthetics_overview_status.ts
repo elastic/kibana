@@ -35,6 +35,11 @@ export const OverviewPingCodec = z.looseObject({
   labels: z.record(z.string(), z.string()).optional(),
 });
 
+export const LinkedRemoteLocationCodec = z.object({
+  remoteName: z.string(),
+  locationId: z.string(),
+});
+
 export const OverviewStatusMetaDataCodec = z.looseObject({
   monitorQueryId: z.string(),
   configId: z.string(),
@@ -62,14 +67,13 @@ export const OverviewStatusMetaDataCodec = z.looseObject({
   overallStatus: z.string(),
   projectId: z.string().optional(),
   updated_at: z.string().optional(),
+  created_at: z.string().optional(),
   timestamp: z.string().optional(),
   spaces: z.array(z.string()).optional(),
   urls: z.string().optional(),
   maintenanceWindows: z.array(z.string()).optional(),
   remote: remoteMonitorInfoSchema.optional(),
-  linkedRemoteLocations: z
-    .array(z.object({ remoteName: z.string(), locationId: z.string() }))
-    .optional(),
+  linkedRemoteLocations: z.array(LinkedRemoteLocationCodec).optional(),
   origin: MonitorOriginCodec.optional(),
 });
 
@@ -77,9 +81,7 @@ export const OverviewStatusFilterIdCodec = z.looseObject({
   monitorQueryId: z.string(),
   remoteName: z.string().optional(),
   locationId: z.string().optional(),
-  linkedRemoteLocations: z
-    .array(z.object({ remoteName: z.string(), locationId: z.string() }))
-    .optional(),
+  linkedRemoteLocations: z.array(LinkedRemoteLocationCodec).optional(),
 });
 
 export const OverviewStatusCodec = z.looseObject({
