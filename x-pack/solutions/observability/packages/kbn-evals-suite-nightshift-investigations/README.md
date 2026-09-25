@@ -81,14 +81,14 @@ A profile backed by a local config file (for example `--profile local`, reading
 }
 ```
 
-PEM fields hold absolute **file paths**, which Kibana reads at startup (`xpack.sandbox.ssl.*`);
-`certificateAuthorities` is optional. The hook fails early if a referenced file is not readable.
-sandbox-api only accepts Cloud-issued client certificates, so the certificate must carry that
-full chain.
+PEM fields hold absolute **file paths**, which Kibana reads at startup (`xpack.sandbox.ssl.*`).
+All three are optional, but `certificate` and `key` go together. Without them, Kibana connects
+without a client certificate and authenticates with the API key only, which works only if
+sandbox-api does not require mTLS. The hook fails early if a referenced file is not readable.
 
 Alternatively, export the variables yourself, for example to point at a sandbox you run locally:
-`SANDBOX_API_KEY`, `SANDBOX_CLIENT_CERT_PATH` and `SANDBOX_CLIENT_KEY_PATH`, and for a private CA
-`SANDBOX_CA_CERT_PATH`. Profile values take precedence over exported ones. `SANDBOX_API_HOST` and `SANDBOX_API_PORT`
+`SANDBOX_API_KEY`, optionally `SANDBOX_CLIENT_CERT_PATH` and `SANDBOX_CLIENT_KEY_PATH` for mTLS,
+and for a private CA `SANDBOX_CA_CERT_PATH`. Profile values take precedence over exported ones. `SANDBOX_API_HOST` and `SANDBOX_API_PORT`
 default to `localhost:9090` (the probe port is not the gRPC endpoint). A self-hosted sandbox must
 accept these client certificates and allow sandbox-api to reach its containers; leave
 sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated conversations.

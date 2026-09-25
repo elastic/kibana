@@ -70,13 +70,15 @@ if [[ -z "$api_key" ]]; then
   exit 0
 fi
 
-if [[ -z "$certificate" || -z "$key" ]]; then
-  echo "nightshift-investigations scout hook: sandbox-api mTLS needs sandbox.ssl.certificate and" \
-    "sandbox.ssl.key (or SANDBOX_CLIENT_CERT_PATH and SANDBOX_CLIENT_KEY_PATH) as PEM file paths." >&2
+# The client certificate is optional (without it Kibana authenticates with the API key only), but
+# the certificate and key only work as a pair.
+if [[ -z "$certificate" && -n "$key" || -n "$certificate" && -z "$key" ]]; then
+  echo "nightshift-investigations scout hook: set both sandbox.ssl.certificate and sandbox.ssl.key" \
+    "(or SANDBOX_CLIENT_CERT_PATH and SANDBOX_CLIENT_KEY_PATH) as PEM file paths, or neither." >&2
   exit 1
 fi
 
-for path in "$certificate" "$key" ${ca:+"$ca"}; do
+for path in ${certificate:+"$certificate"} ${key:+"$key"} ${ca:+"$ca"}; do
   if [[ ! -r "$path" ]]; then
     echo "nightshift-investigations scout hook: cannot read sandbox PEM file $path" >&2
     exit 1
@@ -100,11 +102,11 @@ HOOK_HOST="$host" \
     env: (({
       SANDBOX_API_HOST: $ENV.HOOK_HOST,
       SANDBOX_API_PORT: $ENV.HOOK_PORT,
-      SANDBOX_API_KEY: $ENV.HOOK_API_KEY,
-      SANDBOX_CLIENT_CERT_PATH: $ENV.HOOK_CERTIFICATE,
-      SANDBOX_CLIENT_KEY_PATH: $ENV.HOOK_KEY
+      SANDBOX_API_KEY: $ENV.HOOK_API_KEY
     } | with_entries(select(.value != ""))) + {
-      # kibana.sandbox.yml always references the CA; an empty value means no custom CA.
+      # kibana.sandbox.yml always references these paths; an empty value leaves the setting unset.
+      SANDBOX_CLIENT_CERT_PATH: $ENV.HOOK_CERTIFICATE,
+      SANDBOX_CLIENT_KEY_PATH: $ENV.HOOK_KEY,
       SANDBOX_CA_CERT_PATH: $ENV.HOOK_CA,
       SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
     } + (if $ENV.HOOK_TELEMETRY_CONFIG != "" then {

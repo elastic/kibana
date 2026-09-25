@@ -120,10 +120,21 @@ describe('nightshift-investigations scout hook', () => {
     expect(stderr).toContain('sandbox host set without an API key');
   });
 
-  it('requires the mTLS certificate and key alongside the API key', () => {
-    const { status, stderr } = runHook({ sandbox: { apiKey: 'key' } });
+  it('exports empty PEM paths without a client certificate, so Kibana uses the API key only', () => {
+    const { output } = runHook({ sandbox: { apiKey: 'key' } });
+    expect(output.env).toMatchObject({
+      SANDBOX_API_KEY: 'key',
+      SANDBOX_CLIENT_CERT_PATH: '',
+      SANDBOX_CLIENT_KEY_PATH: '',
+      SANDBOX_CA_CERT_PATH: '',
+    });
+  });
+
+  it('requires the client certificate and key as a pair', () => {
+    const { status, stderr } = runHook({ sandbox: { apiKey: 'key', ssl: { certificate: CERT } } });
     expect(status).toBe(1);
-    expect(stderr).toContain('sandbox-api mTLS needs');
+    expect(stderr).toContain('set both sandbox.ssl.certificate and sandbox.ssl.key');
+    expect(runHook({ sandbox: { apiKey: 'key', ssl: { key: KEY } } }).status).toBe(1);
   });
 
   it('rejects input that is not a JSON object', () => {

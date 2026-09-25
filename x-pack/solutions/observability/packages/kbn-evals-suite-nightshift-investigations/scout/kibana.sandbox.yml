@@ -1,6 +1,8 @@
 # Sandbox-api connection for the investigation evals, loaded by the evals_nightshift_investigations
 # Scout config set when scout_hook.sh exports SANDBOX_KIBANA_CONFIG. Kibana resolves ${SANDBOX_*}
 # from the environment the hook exports, so no secret is written to disk or passed as an argument.
+# The ssl paths are optional: the hook exports them empty when unset, and Kibana then connects
+# without a client certificate, authenticated by the API key only.
 
 xpack.sandbox:
   enabled: true

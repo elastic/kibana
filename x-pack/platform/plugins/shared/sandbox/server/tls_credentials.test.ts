@@ -71,6 +71,9 @@ describe('readTlsCredentials', () => {
 
   it('skips the client certificate when nothing is configured and the mount is missing', () => {
     expect(readTlsCredentials({})).toEqual({ rootCertPem: undefined });
+    expect(readTlsCredentials({ certificate: '', key: '', certificate_authorities: '' })).toEqual({
+      rootCertPem: undefined,
+    });
     mockDefaultMount.set(DEFAULT_CERTIFICATE_PATH, 'MOUNT_CERT');
     expect(readTlsCredentials({ certificate_authorities: certificateAuthorities })).toEqual({
       rootCertPem: Buffer.from('CA'),
