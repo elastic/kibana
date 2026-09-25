@@ -81,15 +81,11 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
   // Resolve the href to [Metrics AWS] Overview for the "Take me to my data" button.
   const overviewHref = useAwsOverviewDashboardUrl(installationInfo);
 
-  // Prefer the installed version so "Finish" lands on the policies of what's actually installed.
-  const awsPackageVersion = installationInfo?.version ?? awsPackageData?.item?.version;
-  const policiesHref = useMemo(() => {
-    if (!awsPackageVersion) return undefined;
-    const [appPath, detailPath] = pagePathGetters.integration_details_policies({
-      pkgkey: `aws-${awsPackageVersion}`,
-    });
-    return services.http.basePath.prepend(`${appPath}${detailPath}`);
-  }, [awsPackageVersion, services.http]);
+  // Versionless pkgkey: Fleet's detail page resolves it to the installed version.
+  const [policiesAppPath, policiesDetailPath] = pagePathGetters.integration_details_policies({
+    pkgkey: 'aws',
+  });
+  const policiesHref = services.http.basePath.prepend(`${policiesAppPath}${policiesDetailPath}`);
 
   const hasDeployedServices = selectedServiceIds.length > 0;
 
@@ -164,7 +160,6 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 href={policiesHref}
-                isDisabled={!policiesHref}
                 onClick={onContinue}
                 data-test-subj="detectAndReviewStep-finishButton"
               >
