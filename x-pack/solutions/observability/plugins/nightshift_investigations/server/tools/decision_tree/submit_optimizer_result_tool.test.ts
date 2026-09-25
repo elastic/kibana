@@ -111,7 +111,7 @@ const runSubmit = async ({
   return { result, session };
 };
 
-describe('submit_optimizer_result', () => {
+describe('nightshift_submit_optimizer_result', () => {
   it('reads the submitted file back from the sandbox and persists it', async () => {
     const store = createStore();
 

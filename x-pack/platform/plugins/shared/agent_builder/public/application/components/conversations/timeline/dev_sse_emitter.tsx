@@ -13,7 +13,9 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
@@ -28,13 +30,37 @@ import {
 // hand. Each button emits one `ChatEvent`; the deck groups them by phase and offers a single "Next"
 // that walks the happy path. Lives here permanently for the Timeline stories - not shipped in the app.
 
+// A button that adds an item over the (faked) HTTP API, e.g. an attachment or a custom event. These
+// land in the same timeline as the streamed events, so they sit in the deck alongside them.
+export interface AddItemButton {
+  id: string;
+  label: string;
+  onClick: () => void;
+}
+
 interface DevSseEmitterProps {
   emit: (event: ChatEvent) => void;
   reset: () => void;
+  addItemButtons: AddItemButton[];
 }
 
 const MESSAGE_ID = 'dev-message';
 const TOOL_CALL_ID = 'dev-tool-call';
+
+// The assistant message is streamed one part at a time by the message_chunk button, so each press
+// adds the next slice. The seal (message_complete / execution_terminated) fills in the whole message.
+const MESSAGE_PARTS = [
+  'You have ',
+  '4 standalone indices ',
+  'and 2 data streams. ',
+  'Everything looks healthy.',
+];
+const FULL_MESSAGE = MESSAGE_PARTS.join('');
+
+const buildMessageChunk = (text: string): ChatEvent => ({
+  type: ChatEventType.messageChunk,
+  data: { message_id: MESSAGE_ID, text_chunk: text },
+});
 // Must parse as a round-derived execution id, so the fold can derive step and terminal ids.
 const DEV_ROUND_ID = 'dev-round';
 const DEV_EXECUTION_ID = `${DEV_ROUND_ID}::execution`;
@@ -110,10 +136,8 @@ const BUTTONS: EventButton[] = [
     id: 'message-chunk',
     label: 'message_chunk',
     phase: 'Message',
-    build: () => ({
-      type: ChatEventType.messageChunk,
-      data: { message_id: MESSAGE_ID, text_chunk: 'Hello ' },
-    }),
+    // Overridden in the click handler to stream successive parts; this is only the fallback.
+    build: () => buildMessageChunk(MESSAGE_PARTS[0]),
   },
   {
     id: 'thinking-complete',
@@ -130,7 +154,7 @@ const BUTTONS: EventButton[] = [
     phase: 'Message',
     build: () => ({
       type: ChatEventType.messageComplete,
-      data: { message_id: MESSAGE_ID, message_content: 'Hello there, all hosts look healthy.' },
+      data: { message_id: MESSAGE_ID, message_content: FULL_MESSAGE },
     }),
   },
   {
@@ -155,7 +179,7 @@ const BUTTONS: EventButton[] = [
         time_to_last_token: 500,
         outcome: {
           type: 'responded',
-          response: { message: 'Hello there, all hosts look healthy.' },
+          response: { message: FULL_MESSAGE },
         },
       },
     }),
@@ -173,6 +197,8 @@ const HAPPY_PATH: string[] = [
   'reasoning',
   'message-chunk',
   'message-chunk',
+  'message-chunk',
+  'message-chunk',
   'thinking-complete',
   'message-complete',
   'execution-terminated',
@@ -180,25 +206,111 @@ const HAPPY_PATH: string[] = [
 
 const byId = (id: string) => BUTTONS.find((button) => button.id === id);
 
-export const DevSseEmitter: React.FC<DevSseEmitterProps> = ({ emit, reset }) => {
+// One labeled row of the deck: a fixed-width label on the left, wrapping buttons on the right.
+const DeckRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexItem grow={false} css={{ minInlineSize: 72 }}>
+      <EuiText size="xs" color="subdued">
+        {label}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+        {children}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <EuiText size="xs" color="subdued">
+    <strong>{children}</strong>
+  </EuiText>
+);
+
+export const DevSseEmitter: React.FC<DevSseEmitterProps> = ({ emit, reset, addItemButtons }) => {
   const [nextIndex, setNextIndex] = useState(0);
+  const [chunkIndex, setChunkIndex] = useState(0);
+
+  const chunksExhausted = chunkIndex >= MESSAGE_PARTS.length;
+
+  const emitButton = (button: EventButton) => {
+    // Stream the message one part at a time instead of re-emitting the same chunk.
+    if (button.id === 'message-chunk') {
+      if (chunksExhausted) return;
+      emit(buildMessageChunk(MESSAGE_PARTS[chunkIndex]));
+      setChunkIndex((index) => index + 1);
+      return;
+    }
+    emit(button.build());
+  };
 
   const emitNext = () => {
     const button = byId(HAPPY_PATH[nextIndex]);
     if (!button) return;
-    emit(button.build());
+    emitButton(button);
     setNextIndex((index) => index + 1);
   };
 
   const handleReset = () => {
     setNextIndex(0);
+    setChunkIndex(0);
     reset();
   };
 
   const isDone = nextIndex >= HAPPY_PATH.length;
 
+  // The "Add" row (attachments / custom events) sits just above Seal, since those items land in the
+  // timeline before the run is sealed.
+  const eventRows = [
+    ...PHASES.filter((phase) => phase !== 'Seal').map((phase) => ({
+      key: phase,
+      label: phase,
+      buttons: BUTTONS.filter((button) => button.phase === phase).map((button) => (
+        <EuiFlexItem grow={false} key={button.id}>
+          <EuiButton
+            size="s"
+            color="text"
+            isDisabled={button.id === 'message-chunk' && chunksExhausted}
+            onClick={() => emitButton(button)}
+          >
+            {button.label}
+          </EuiButton>
+        </EuiFlexItem>
+      )),
+    })),
+    {
+      key: 'Add',
+      label: 'Add',
+      buttons: addItemButtons.map((button) => (
+        <EuiFlexItem grow={false} key={button.id}>
+          <EuiButton size="s" color="text" onClick={button.onClick}>
+            {button.label}
+          </EuiButton>
+        </EuiFlexItem>
+      )),
+    },
+    ...PHASES.filter((phase) => phase === 'Seal').map((phase) => ({
+      key: phase,
+      label: phase,
+      buttons: BUTTONS.filter((button) => button.phase === phase).map((button) => (
+        <EuiFlexItem grow={false} key={button.id}>
+          <EuiButton size="s" color="text" onClick={() => emitButton(button)}>
+            {button.label}
+          </EuiButton>
+        </EuiFlexItem>
+      )),
+    })),
+  ];
+
   return (
-    <EuiPanel hasBorder paddingSize="m" color="subdued">
+    <EuiPanel hasBorder paddingSize="m">
+      <EuiTitle size="xxs">
+        <h3>Event deck</h3>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton size="s" fill iconType="play" onClick={emitNext} isDisabled={isDone}>
@@ -212,34 +324,18 @@ export const DevSseEmitter: React.FC<DevSseEmitterProps> = ({ emit, reset }) => 
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiHorizontalRule margin="s" />
+      <EuiSpacer size="m" />
 
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {PHASES.map((phase) => (
-          <EuiFlexItem grow={false} key={phase}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false} css={{ minInlineSize: 72 }}>
-                <EuiText size="xs" color="subdued">
-                  {phase}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                  {BUTTONS.filter((button) => button.phase === phase).map(
-                    ({ id, label, build }) => (
-                      <EuiFlexItem grow={false} key={id}>
-                        <EuiButton size="s" color="text" onClick={() => emit(build())}>
-                          {label}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    )
-                  )}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+      <SectionLabel>Events</SectionLabel>
+      <EuiSpacer size="xs" />
+      <EuiPanel color="subdued" hasShadow={false} paddingSize="s">
+        {eventRows.map((row, index) => (
+          <React.Fragment key={row.key}>
+            {index > 0 && <EuiHorizontalRule margin="xs" />}
+            <DeckRow label={row.label}>{row.buttons}</DeckRow>
+          </React.Fragment>
         ))}
-      </EuiFlexGroup>
+      </EuiPanel>
     </EuiPanel>
   );
 };

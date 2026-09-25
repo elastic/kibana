@@ -44,7 +44,7 @@ export const ALERT_EPISODE_FIELDS = [
   'last_ack_action',
   'last_assignee_uid',
   'last_snooze_action',
-  'snooze_expiry',
+  'snoozed_until',
   'last_tags',
   'episode_data',
   'severity',
@@ -127,7 +127,7 @@ const addGroupHashActionStats = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`INLINE STATS last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-                       snooze_expiry      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
+                       snoozed_until      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
                        first_series_event_timestamp = MIN(@timestamp)    WHERE type == "alert"
           BY group_hash`;
 };
@@ -189,6 +189,8 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
     parts.push('severity IS NULL');
   }
   if (!parts.length) {
+    // No selected severity is a v2 value — exclude all v2 rows
+    query.pipe('WHERE false');
     return;
   }
   query.pipe(`WHERE ${parts.join(' OR ')}`);
@@ -320,8 +322,13 @@ export const buildEpisodesQuery = (
 
   addDurationLowerBoundFlag(query);
 
+  const sortedQuery =
+    sortState.sortField === 'severity'
+      ? query.sort([sortField, sortDir], ['@timestamp', sortDir])
+      : query.sort([sortField, sortDir]);
+
   return asTypedEsqlQuery<AlertEpisodeEsqlRow>(
-    query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
+    sortedQuery.pipe`LIMIT ${pageSizeParam}`.keep(
       ...ALERT_EPISODE_FIELDS,
       DURATION_LOWER_BOUND_FIELD
     )

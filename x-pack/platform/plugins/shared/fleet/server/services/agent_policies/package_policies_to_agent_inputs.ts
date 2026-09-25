@@ -319,6 +319,7 @@ const backfillInputsForVersion = async ({
   savedObjectType,
   inputsForVersions,
   version,
+  namespace,
 }: {
   packageInfo: PackageInfo;
   packagePolicy: PackagePolicy;
@@ -327,6 +328,7 @@ const backfillInputsForVersion = async ({
   savedObjectType: string;
   inputsForVersions?: Record<string, PackagePolicyInput[]>;
   version?: string;
+  namespace?: string;
 }): Promise<PackagePolicyInput[] | undefined> => {
   const logger = appContextService.getLogger();
   const span = apm.startSpan(
@@ -363,7 +365,7 @@ const backfillInputsForVersion = async ({
             [agentVersion]: versionInputs,
           },
         },
-        { version }
+        { version, ...(namespace ? { namespace } : {}) }
       );
     } catch (error) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
@@ -395,7 +397,8 @@ export const storedPackagePoliciesToAgentInputs = async (
   globalDataTags?: GlobalDataTag[],
   agentVersion?: string,
   soClient?: SavedObjectsClientContract,
-  hasAgentVersionConditions?: boolean
+  hasAgentVersionConditions?: boolean,
+  packagePoliciesNamespace?: string
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -430,7 +433,8 @@ export const storedPackagePoliciesToAgentInputs = async (
       );
       const packagePolicySO = await soClient?.get<PackagePolicySOAttributes>(
         savedObjectType,
-        packagePolicy.id
+        packagePolicy.id,
+        packagePoliciesNamespace ? { namespace: packagePoliciesNamespace } : undefined
       );
       readSpan?.end();
 
@@ -463,6 +467,7 @@ export const storedPackagePoliciesToAgentInputs = async (
             savedObjectType,
             inputsForVersions,
             version: packagePolicySO?.version,
+            namespace: packagePoliciesNamespace,
           });
         }
 

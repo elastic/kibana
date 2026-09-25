@@ -28,6 +28,7 @@ import type { SetupPlugins, StartPlugins } from '../../../../plugin_contract';
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from './constants';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -129,16 +130,20 @@ const createLeadGenerationTaskRunnerFactory =
     return {
       run: async () => {
         const [core, startPlugins] = await deps.getStartServices();
-        return runLeadGenerationTask({
-          isCancelled,
-          logger: deps.logger,
-          taskInstance,
-          fakeRequest,
-          core,
-          startPlugins,
-          kibanaVersion: deps.kibanaVersion,
-          ml: deps.ml,
-        });
+        return core.executionContext.withContext(
+          buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.LEAD_GENERATION_TASK, taskInstance.id),
+          () =>
+            runLeadGenerationTask({
+              isCancelled,
+              logger: deps.logger,
+              taskInstance,
+              fakeRequest,
+              core,
+              startPlugins,
+              kibanaVersion: deps.kibanaVersion,
+              ml: deps.ml,
+            })
+        );
       },
       cancel: async () => {
         cancelled = true;
