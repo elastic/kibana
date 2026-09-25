@@ -22,11 +22,13 @@ jest.mock('../../../flyout_v2/shared/url_state/use_flyout_v2_restore');
 jest.mock('../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+const initDataViewManager = jest.fn();
+let dataViewStatus = 'ready';
 jest.mock('../../../data_view_manager/hooks/use_init_data_view_manager', () => ({
-  useInitDataViewManager: () => jest.fn(),
+  useInitDataViewManager: () => initDataViewManager,
 }));
 jest.mock('../../../data_view_manager/hooks/use_data_view_manager_status', () => ({
-  useDataViewManagerStatus: () => 'ready',
+  useDataViewManagerStatus: () => dataViewStatus,
 }));
 
 const alertAttachment: UnknownAttachment = {
@@ -48,6 +50,7 @@ const renderOpener = (attachment: UnknownAttachment) =>
 describe('AttachmentSummaryFlyoutOpener', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    dataViewStatus = 'ready';
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
   });
 
@@ -75,5 +78,24 @@ describe('AttachmentSummaryFlyoutOpener', () => {
 
     await waitFor(() => expect(resolveSecurityCanvasContext).toHaveBeenCalled());
     expect(openDescriptorAsStart).not.toHaveBeenCalled();
+  });
+
+  it('initialises the data view manager when nothing else has', async () => {
+    dataViewStatus = 'pristine';
+
+    renderOpener(alertAttachment);
+
+    await waitFor(() => expect(initDataViewManager).toHaveBeenCalled());
+  });
+
+  it('does not retry after a failed initialisation, which would loop', async () => {
+    // The init listener reports failure by dispatching `error` and showing a toast, so retrying
+    // on `error` would re-init for as long as the summary stays mounted.
+    dataViewStatus = 'error';
+
+    renderOpener(alertAttachment);
+
+    await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalled());
+    expect(initDataViewManager).not.toHaveBeenCalled();
   });
 });

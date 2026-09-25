@@ -63,10 +63,8 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 
 /**
  * Registers the baseline attachment UI definitions:
- *   - `security.alert` — label, icon, and the attachment summary drill-down to the alert's
- *     document flyout. The drill-down is lazy behind a click, so this stays eagerly registered:
- *     the summary reads the label on first paint, and deferring registration would leave its rows
- *     unlabelled until a chunk resolved.
+ *   - `security.alert` — label, icon, and the attachment summary drill-down. The drill-down is
+ *     lazy behind a click, so this stays eager: the summary reads labels on first paint.
  *   - `security.alerts` — label + icon. A batch names a set of alerts and no flyout shows a set.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate

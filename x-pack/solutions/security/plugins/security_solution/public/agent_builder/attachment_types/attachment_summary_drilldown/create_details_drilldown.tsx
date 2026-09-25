@@ -10,10 +10,7 @@ import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 
-/**
- * Only loaded once a row is clicked. The opener pulls in the Security store, services and the
- * flyout API, none of which should reach the bundle of a surface that merely lists attachments.
- */
+/** Only loaded on click: the opener pulls in the Security store, services and flyout API. */
 const LazyAttachmentSummaryFlyoutOpener = React.lazy(() =>
   import(
     /* webpackChunkName: "security_attachment_summary_drilldown" */
@@ -22,12 +19,9 @@ const LazyAttachmentSummaryFlyoutOpener = React.lazy(() =>
 );
 
 /**
- * Builds the conversation-details drill-down for a `security.*` attachment type: the jump from
- * the investigation flyout's attachment summary to the flyout that describes the attachment.
- *
- * It renders no UI — the row that mounts it owns the presentation — so the Suspense fallback is
- * empty too. An attachment whose payload identifies nothing simply opens nothing, so registering
- * this on a type is safe even when only some of its attachments carry enough to open with.
+ * Builds the conversation-details drill-down for a `security.*` type. It renders no UI, and an
+ * attachment that identifies nothing opens nothing, so registering it on a type is safe even
+ * when only some of its attachments carry enough to open with.
  */
 export const createAttachmentSummaryDrilldown = <
   TAttachment extends UnknownAttachment = UnknownAttachment

@@ -33,18 +33,14 @@ export interface AttachmentSummaryRowProps {
   attachmentsService: AttachmentServiceStartContract;
   /** A divider above every row but the first. */
   hasTopBorder: boolean;
-  /**
-   * Asks the list to open this attachment's drill-down. The list owns that so only one is ever
-   * mounted, however many rows the user clicks.
-   */
+  /** Asks the list to open this attachment's drill-down; the list owns the mounting. */
   onActivate: () => void;
 }
 
 /**
- * One attachment in the summary. Clicking the row asks its own plugin to open the matching
- * flyout. A type that registered no drill-down stays read-only; note that a type registers one
- * for all of its attachments, so a row can still be clickable when this particular payload turns
- * out to identify nothing.
+ * One attachment in the summary. A type that registered no drill-down stays read-only, but a
+ * type registers one for all of its attachments, so a row can be clickable and still open
+ * nothing when the payload identifies nothing.
  */
 export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
   ({ attachment, typeName, attachmentsService, hasTopBorder, onActivate }) => {
@@ -110,9 +106,8 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
               position="top"
               anchorProps={{ css: css({ display: 'block', minInlineSize: 0 }) }}
             >
-              {/* Focusable only while cut off, so a row whose label already reads in full does
-                  not become a pointless tab stop — and never once the row itself is a button,
-                  which already stops here and cannot legally nest a focusable child. */}
+              {/* Focusable only while cut off, and never inside the button: that is already a
+                  tab stop and cannot legally nest a focusable child. */}
               <div
                 ref={setLabelElement}
                 tabIndex={hasDrilldown ? undefined : 0}
@@ -155,15 +150,17 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
             color="transparent"
             paddingSize="none"
             onClick={onActivate}
-            // EuiAvatar's `name` would otherwise put the kind in front of the row's own title.
             aria-label={attachmentSummaryRowAriaLabel(typeName, label)}
             data-test-subj="attachmentSummaryRowButton"
             css={css({
               padding,
               // EuiPanel's clickable treatment is a drop shadow, which would lift a row out of
-              // the flat list it belongs to.
-              '&:hover, &:focus': { boxShadow: 'none' },
-              '&:hover': { backgroundColor: euiTheme.colors.backgroundBaseSubdued },
+              // the flat list it belongs to. Dropped on hover only: the same shadow is what
+              // marks the row as focused, and a keyboard user has nothing else to go on.
+              '&:hover': {
+                boxShadow: 'none',
+                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+              },
             })}
           >
             {content}

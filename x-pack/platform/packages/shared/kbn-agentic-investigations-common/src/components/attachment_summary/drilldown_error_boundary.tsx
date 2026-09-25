@@ -11,14 +11,7 @@ interface DrilldownErrorBoundaryState {
   hasError: boolean;
 }
 
-/**
- * Contains a failing drill-down to its own row.
- *
- * The drill-down comes from whichever plugin owns the attachment type and is rendered inside the
- * summary's own fiber, so an exception — a lazily loaded chunk missing after a deploy, a provider
- * throwing — would otherwise take down the surface hosting the summary. It renders nothing to
- * begin with, so there is nothing to fall back to: the row simply stops being able to open.
- */
+/** Keeps a drill-down failure from taking down the surface hosting the summary. */
 export class DrilldownErrorBoundary extends React.Component<
   React.PropsWithChildren<{}>,
   DrilldownErrorBoundaryState

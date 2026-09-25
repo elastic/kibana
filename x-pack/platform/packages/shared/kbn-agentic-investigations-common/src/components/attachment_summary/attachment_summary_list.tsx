@@ -41,9 +41,8 @@ export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
     const listId = useGeneratedHtmlId({ prefix: 'attachmentSummaryList' });
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // The drill-down lives here rather than on the row so that clicking several rows mounts one
-    // at a time: each carries a provider stack, and the data view manager it initialises expects
-    // a single mount. The counter keys the subtree, so re-clicking the same row opens it again.
+    // Held here, not on the row: each drill-down carries a provider stack, so only one is
+    // mounted at a time. The counter keys it, so re-clicking the same row reopens.
     const [activeDrilldown, setActiveDrilldown] = useState<{
       attachment: VersionedAttachment;
       count: number;
@@ -116,9 +115,8 @@ export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
           </div>
         )}
 
-        {/* Mounted for its side effect: the drill-down opens a flyout and renders nothing of its
-            own. Kept out of view because the provider stack behind it carries a panel-sized
-            loading state, which would distort the list. */}
+        {/* Mounted for its side effect. Hidden because the provider stack can render overlays
+            of its own, which do not belong in a list row. */}
         {activeDrilldown && renderDrilldown ? (
           <div css={css({ display: 'none' })} key={activeDrilldown.count}>
             <DrilldownErrorBoundary>

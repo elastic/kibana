@@ -10,10 +10,7 @@ import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 
-/**
- * `security.alert` stores the alert as a JSON string of picked fields. The producers build it
- * from a fields map, so values arrive as arrays, but a scalar is still an id.
- */
+/** Producers build the payload from a fields map, so values arrive as arrays. */
 const firstValue = (value: unknown): string | undefined => {
   if (typeof value === 'string') {
     return value;
@@ -31,8 +28,7 @@ const toDocumentDescriptor = (attachment: UnknownAttachment): FlyoutDescriptor |
   try {
     parsed = JSON.parse(alert);
   } catch {
-    // The schema for this payload is a bare string, so a producer writing prose or markdown is
-    // valid — it just cannot be drilled into.
+    // The payload schema is a bare string, so prose and markdown are valid and unopenable.
     return null;
   }
   if (!parsed || typeof parsed !== 'object') {
@@ -49,13 +45,10 @@ const toDocumentDescriptor = (attachment: UnknownAttachment): FlyoutDescriptor |
 };
 
 /**
- * Maps an attachment shown in the investigation flyout's attachment summary onto the flyout it
- * should open. Returns `null` when the payload identifies nothing, which leaves the row read-only
- * rather than opening an empty flyout.
+ * Maps a summary attachment onto the flyout it should open, or `null` when the payload
+ * identifies nothing, which leaves the row read-only.
  *
- * Only `security.alert` is wired up so far. The remaining summary kinds — attack discovery, rule
- * and entity — each add a case here and a registration alongside their own attachment definition;
- * nothing else has to change, because opening goes through flyout_v2's own descriptor switch.
+ * Only `security.alert` so far; the other summary kinds each add a case and a registration.
  */
 export const toFlyoutDescriptor = (attachment: UnknownAttachment): FlyoutDescriptor | null => {
   switch (attachment.type) {
