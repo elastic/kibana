@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// Must match the `kerberos` config set's pinned Kibana host:port (set via configureHTTP2).
-export const KIBANA_TLS_ORIGIN = 'https://localhost:5620';
+export { KIBANA_TLS_ORIGIN } from '@kbn/scout';
 
 // Kerberos realm name configured in the `kerberos` server config set.
 export const KERBEROS_REALM_NAME = 'kerb1';
