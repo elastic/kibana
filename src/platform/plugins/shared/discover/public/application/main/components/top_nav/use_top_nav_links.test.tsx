@@ -261,10 +261,7 @@ describe('useTopNavLinks', () => {
       const appMenuConfig = await setup({ hasShareIntegration: true, services });
 
       const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
-      expect(exportItem?.items?.map((item) => item.id)).toEqual([
-        'csvReports',
-        'scheduledReports',
-      ]);
+      expect(exportItem?.items?.map((item) => item.id)).toEqual(['csvReports', 'scheduledReports']);
     });
 
     it('hides Schedule export when CSV reporting is not available', async () => {
