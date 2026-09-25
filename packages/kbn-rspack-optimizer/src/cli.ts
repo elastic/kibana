@@ -57,13 +57,12 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --test-plugins to have no value');
       }
 
-      const devOnly = flags['dev-only'] ?? false;
-      if (typeof devOnly !== 'boolean') {
-        throw createFlagError('expected --dev-only to have no value');
-      }
-
-      // cache and hmr are declared as positive booleans defaulting to true.
+      // dev-only, cache and hmr are declared as positive booleans defaulting to true.
       // getopts interprets --no-cache as cache=false and --no-hmr as hmr=false.
+      // dev-only defaults to true because a source server started in dev mode without the
+      // optimizer (scripts/functional_tests, --no-optimizer) discovers devOnly plugins, and the
+      // UI fails to load without their bundles.
+      const devOnly = flags['dev-only'] as boolean;
       const cache = flags.cache as boolean;
       const hmr = flags.hmr as boolean;
 
@@ -284,7 +283,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           dist: false,
           examples: false,
           'test-plugins': false,
-          'dev-only': false,
+          'dev-only': true,
           cache: true,
           hmr: true,
           profile: false,
@@ -297,7 +296,7 @@ export function runRspackCli(options: CliOptions = {}): void {
             --dist                    Build for distribution (minified, no source maps)
             --examples                Include example plugins
             --test-plugins            Include test plugins
-            --dev-only                Include devOnly plugins
+            --no-dev-only             Exclude devOnly plugins (distributable builds always exclude them)
             --themes <tags>           Comma-separated theme tags to build (default: all)
             --plugin-groups <groups>  Comma-separated plugin groups to build (default: all).
                                       Mirrors the server's plugins.allowlistPluginGroups setting.

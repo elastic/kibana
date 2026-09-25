@@ -76,7 +76,7 @@ Build Options:
   --dist                    Build for distribution (minified, no source maps)
   --examples                Include example plugins
   --test-plugins            Include test plugins
-  --dev-only                Include devOnly plugins (default: false; `pnpm start` enables this)
+  --no-dev-only             Exclude devOnly plugins (distributable builds always exclude them)
   --themes <tags>           Comma-separated theme tags to build (default: all)
   --output-root <dir>       Output root directory (default: repo root)
   --no-cache                Disable filesystem caching
