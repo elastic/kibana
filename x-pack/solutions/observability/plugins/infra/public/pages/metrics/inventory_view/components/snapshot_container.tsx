@@ -12,6 +12,7 @@ import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
+import { getInventoryRequestSchema } from '../lib/get_inventory_request_schema';
 import { LayoutView } from './layout_view';
 
 export const SnapshotContainer = React.memo(function SnapshotContainer() {
@@ -41,7 +42,7 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
       currentTime,
       accountId,
       region,
-      schema: preferredSchema,
+      schema: getInventoryRequestSchema(nodeType, preferredSchema),
       includeTimeseries: true,
     },
     { sendRequestImmediately: true }
