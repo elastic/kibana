@@ -35,6 +35,8 @@ export class TimePickerPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
+  private detectedPickerVariant?: { appPath: string; isNew: boolean };
+
   private readonly quickSelectTimeMenuToggle = this.ctx.getService('menuToggle').create({
     name: 'QuickSelectTime Menu',
     menuTestSubject: 'superDatePickerQuickMenu',
@@ -57,16 +59,40 @@ export class TimePickerPageObject extends FtrService {
 
   /**
    * Detects whether the page is using the new DateRangePicker or the legacy
-   * EuiSuperDatePicker. Not cached because different apps may use different
-   * picker variants within the same test suite.
+   * EuiSuperDatePicker. Cache by app path because different apps may use
+   * different picker variants within the same test suite.
    */
   private async isNewDateRangePicker(): Promise<boolean> {
+    const appPath = new URL(await this.browser.getCurrentUrl()).pathname;
+    if (this.detectedPickerVariant?.appPath === appPath) {
+      return this.detectedPickerVariant.isNew;
+    }
+
     // Wait for the page to settle before detecting, otherwise a stale picker
     // from a previous app may briefly appear during navigation.
     await this.header.awaitGlobalLoadingIndicatorHidden();
-    const isNew = await this.testSubjects.exists('dateRangePickerControlButton', {
-      timeout: 5000,
-    });
+    let detectedVariant: 'new' | 'legacy' | undefined;
+    try {
+      await this.retry.tryForTime(5000, async () => {
+        if (await this.testSubjects.exists('dateRangePickerControlButton', { timeout: 0 })) {
+          detectedVariant = 'new';
+          return;
+        }
+        if (
+          await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 0 })
+        ) {
+          detectedVariant = 'legacy';
+          return;
+        }
+        throw new Error('date picker has not rendered yet');
+      });
+    } catch {
+      // Preserve the legacy fallback for pages that do not render either picker.
+    }
+    const isNew = detectedVariant === 'new';
+    if (detectedVariant) {
+      this.detectedPickerVariant = { appPath, isNew };
+    }
     this.log.debug(
       `Detected date picker variant: ${isNew ? 'DateRangePicker' : 'EuiSuperDatePicker'}`
     );
@@ -466,7 +492,7 @@ export class TimePickerPageObject extends FtrService {
   private async openNewPickerSettingsPanel() {
     // If the settings panel is already visible, nothing to do.
     const alreadyOpen = await this.testSubjects.exists('dateRangePickerSettingsPanel', {
-      timeout: 500,
+      timeout: 0,
     });
     if (alreadyOpen) return;
 
@@ -700,7 +726,7 @@ export class TimePickerPageObject extends FtrService {
       }
       await this.closeNewPickerSettingsPanel();
     } else {
-      const refreshConfig = await this.getRefreshConfig(true);
+      const refreshConfig = await this.getRefreshConfigLegacy(true);
       if (!refreshConfig.isPaused) {
         this.log.debug('pause auto refresh');
         await this.testSubjects.click('superDatePickerToggleRefreshButton');

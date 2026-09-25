@@ -64,7 +64,7 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async getAllControlIds() {
-    const controls = await this.find.allByCssSelector('[data-control-id]');
+    const controls = await this.find.allByCssSelector('[data-control-id]', 0);
     const ids = await Promise.all([
       ...controls.map(async (control) => (await control.getAttribute('data-control-id')) ?? ''),
     ]);
@@ -74,7 +74,7 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async getAllControlTitles() {
-    const titleObjects = await this.testSubjects.findAll('control-frame-title');
+    const titleObjects = await this.testSubjects.findAll('control-frame-title', 0);
     const titles = await Promise.all(
       titleObjects.map(async (title) => (await title.getVisibleText()).split('\n')[0])
     );
@@ -107,9 +107,11 @@ export class DashboardPageControls extends FtrService {
     });
 
     /** All control type options should be disabled until a field is selected */
-    const controlTypeOptions = await this.find.allByCssSelector(
-      '[data-test-subj="controlTypeMenu"] > li > button'
-    );
+    const controlTypeOptions = await this.retry.try(async () => {
+      const options = await this.find.allByCssSelector('[data-test-subj^="create__"]', 0);
+      expect(options.length).to.be.greaterThan(0);
+      return options;
+    });
     await asyncForEach(controlTypeOptions, async (controlTypeOption) => {
       expect(await controlTypeOption.isEnabled()).to.be(false);
     });
@@ -117,7 +119,8 @@ export class DashboardPageControls extends FtrService {
 
   public async isControlPinned(controlId: string) {
     return this.find.existsByCssSelector(
-      `[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`
+      `[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`,
+      0
     );
   }
 
@@ -224,7 +227,7 @@ export class DashboardPageControls extends FtrService {
     const errorText = `Control frame ${controlId} could not be found`;
     let controlElement: WebElementWrapper | undefined;
     await this.retry.try(async () => {
-      const controls = await this.find.allByCssSelector('[data-control-id]');
+      const controls = await this.find.allByCssSelector('[data-control-id]', 0);
       const controlsWithIds = await Promise.all(
         controls.map(async (control) => {
           const id = await control.getAttribute('data-control-id');
@@ -303,7 +306,9 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
       await elementToHover.focus();
-      expect(this.testSubjects.descendantExists(`hover-actions-${controlId}`, elementToHover));
+      expect(
+        await this.testSubjects.descendantExists(`hover-actions-${controlId}`, elementToHover)
+      ).to.be(true);
     });
   }
 
@@ -439,7 +444,8 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       const isPopoverOpen = await this.isOptionsListPopoverOpen(controlId);
       if (isPopoverOpen) {
-        await this.testSubjects.click(`optionsList-control-${controlId}`);
+        const searchInput = await this.testSubjects.find('optionsList-control-search-input');
+        await searchInput.pressKeys(this.browser.keys.ESCAPE);
         await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
       }
     });
@@ -463,28 +469,36 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverGetAvailableOptions() {
     this.log.debug(`getting available options from options list`);
     await this.optionsListPopoverWaitForLoading();
-    const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
     const optionsCount = await this.optionsListPopoverGetAvailableOptionsCount();
 
-    const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
     const suggestions: { [key: string]: number } = {};
     while (Object.keys(suggestions).length < optionsCount) {
-      await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
+      const [suggestion, docCount] = await this.retry.try(async () => {
+        const availableOptions = await this.testSubjects.find(
+          `optionsList-control-available-options`
+        );
+        const selectableListItems = await availableOptions.findByClassName(
+          'euiSelectableList__list'
+        );
+        await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
 
-      const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
-      const activeDescendantId = await list.getAttribute('aria-activedescendant');
-
-      if (activeDescendantId) {
-        const currentOption = await selectableListItems.findByCssSelector(`#${activeDescendantId}`);
-        const [suggestion, docCount] = (await currentOption.getVisibleText()).split('\n');
-        if (suggestion !== 'Exists') {
-          suggestions[suggestion] = Number(docCount);
+        const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
+        const activeDescendantId = await list.getAttribute('aria-activedescendant');
+        if (!activeDescendantId) {
+          throw new Error('options list did not set an active option');
         }
+        const currentOption = await selectableListItems.findByCssSelector(`#${activeDescendantId}`);
+        return (await currentOption.getVisibleText()).split('\n');
+      });
+      if (suggestion !== 'Exists') {
+        suggestions[suggestion] = Number(docCount);
       }
     }
 
+    const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
     const invalidSelectionElements = await availableOptions.findAllByClassName(
-      'optionsList__selectionInvalid'
+      'optionsList__selectionInvalid',
+      0
     );
     const invalidSelections = await Promise.all(
       invalidSelectionElements.map(async (option) => {
@@ -509,7 +523,7 @@ export class DashboardPageControls extends FtrService {
         expectation.invalidSelections.sort()
       );
     });
-    if (await this.testSubjects.exists('optionsList-cardinality-label')) {
+    if (await this.testSubjects.exists('optionsList-cardinality-label', { timeout: 0 })) {
       expect(await this.optionsListGetCardinalityValue()).to.be(
         Object.keys(expectation.suggestions).length.toLocaleString()
       );
@@ -725,30 +739,24 @@ export class DashboardPageControls extends FtrService {
 
   public async rangeSliderSetLowerBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
+    const lowerBoundSubject =
+      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber` as const;
     await this.retry.try(async () => {
-      await this.testSubjects.setValue(
-        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
-        value
-      );
-      await this.testSubjects.pressEnter(
-        // force the change without waiting for the debounce
-        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
-      );
+      await this.testSubjects.setValue(lowerBoundSubject, value);
+      // EuiDualRange flushes its debounced input change on mouseup.
+      await this.testSubjects.click(lowerBoundSubject);
       expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
     });
   }
 
   public async rangeSliderSetUpperBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
+    const upperBoundSubject =
+      `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber` as const;
     await this.retry.try(async () => {
-      await this.testSubjects.setValue(
-        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
-        value
-      );
-      await this.testSubjects.pressEnter(
-        // force the change without waiting for the debounce
-        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`
-      );
+      await this.testSubjects.setValue(upperBoundSubject, value);
+      // EuiDualRange flushes its debounced input change on mouseup.
+      await this.testSubjects.click(upperBoundSubject);
       expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.be(value);
     });
   }

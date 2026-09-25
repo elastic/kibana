@@ -38,8 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText('breadcrumb last');
       expect(lastBreadcrumbdcrumb).to.be('Converting "area" visualization');
-      const filterCount = await filterBar.getFilterCount();
-      expect(filterCount).to.equal(0);
+      await filterBar.waitForFilterCount(0);
       await lens.replaceInDashboard();
 
       await dashboard.waitForRenderComplete();

@@ -117,8 +117,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const operation of allOperations) {
           // now check that operations won't show the incompatibility tooltip
           expect(
-            testSubjects.exists(`lns-indexPatternDimension-${operation} incompatible`, {
-              timeout: 500,
+            await testSubjects.exists(`lns-indexPatternDimension-${operation} incompatible`, {
+              timeout: 0,
             })
           ).to.eql(false);
           // try to change to the provided function and check all is ok
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(
             await find.existsByCssSelector(
               '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
-              500
+              0
             )
           ).to.be(false);
         }

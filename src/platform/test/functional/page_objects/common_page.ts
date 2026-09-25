@@ -148,10 +148,6 @@ export class CommonPageObject extends FtrService {
         await this.browser.get(appUrl, insertTimestamp);
       }
 
-      // accept alert if it pops up
-      const alert = await this.browser.getAlert();
-      await alert?.accept();
-
       const currentUrl = shouldLoginIfPrompted
         ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
         : await this.browser.getCurrentUrl();
@@ -327,13 +323,12 @@ export class CommonPageObject extends FtrService {
         // since we're using hash URLs, always reload first to force re-render
         this.log.debug('navigate to: ' + appUrl);
         await this.browser.get(appUrl, insertTimestamp);
-        // accept alert if it pops up
-        const alert = await this.browser.getAlert();
-        await alert?.accept();
-        // browser.get() waits for document.readyState==='complete' before returning,
-        // so no sleep is needed here; the refresh below starts from a fully loaded page.
-        this.log.debug('returned from get, calling refresh');
-        await this.browser.refresh();
+        // A timestamp makes browser.get() perform a full navigation even when the app URL is
+        // unchanged. Without one, refresh explicitly preserves the previous reload behavior.
+        if (!insertTimestamp) {
+          this.log.debug('returned from get without a timestamp, calling refresh');
+          await this.browser.refresh();
+        }
         let currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
           : await this.browser.getCurrentUrl();
@@ -389,7 +384,7 @@ export class CommonPageObject extends FtrService {
       if (!skipUrlValidation) {
         // Poll until the URL stops changing. No upfront sleep: if the URL has
         // already settled we return immediately; the retry service's built-in
-        // 502ms delay provides spacing between checks when it is still moving.
+        // delay provides spacing between checks when it is still moving.
         await this.retry.tryForTime(this.defaultFindTimeout, async () => {
           const currentUrl = await this.browser.getCurrentUrl();
           this.log.debug('in navigateTo url = ' + currentUrl);
@@ -500,7 +495,7 @@ export class CommonPageObject extends FtrService {
   }
 
   async isFatalErrorScreen() {
-    return await this.testSubjects.exists('fatalErrorScreen');
+    return await this.testSubjects.exists('fatalErrorScreen', { timeout: 0 });
   }
 
   async waitForTopNavToBeVisible() {
@@ -514,11 +509,11 @@ export class CommonPageObject extends FtrService {
   }
 
   async getJsonBodyText() {
-    if (await this.find.existsByCssSelector('a[id=rawdata-tab]', this.defaultFindTimeout)) {
+    if (await this.find.existsByCssSelector('a[id=rawdata-tab]', 0)) {
       // Firefox has 3 tabs and requires navigation to see Raw output
       await this.find.clickByCssSelector('a[id=rawdata-tab]');
     }
-    const msgElements = await this.find.allByCssSelector('body pre');
+    const msgElements = await this.find.allByCssSelector('body pre', 0);
     if (msgElements.length > 0) {
       return await msgElements[0].getVisibleText();
     } else {

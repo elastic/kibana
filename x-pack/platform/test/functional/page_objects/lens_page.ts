@@ -198,7 +198,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async addFieldToTooltip(fieldName: string) {
       const lastIndex = (
-        await find.allByCssSelector('[data-test-subj^="lnsXY-annotation-tooltip-field-picker"]')
+        await find.allByCssSelector('[data-test-subj^="lnsXY-annotation-tooltip-field-picker"]', 0)
       ).length;
       await retry.try(async () => {
         await testSubjects.click('lnsXY-annotation-tooltip-add_field');
@@ -795,7 +795,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async setTermsNumberOfValues(value: number) {
       const valuesInput = await this.getNumericFieldReady('indexPattern-terms-values');
       await valuesInput.type(`${value}`);
-      await common.sleep(500);
+      const expectedLabel = value === 1 ? 'Top value' : `Top ${value} values`;
+      await retry.waitFor('terms number of values to commit', async () => {
+        const dimensionTriggers = await testSubjects.findAll('lns-dimensionTrigger');
+        const triggerLabels = await Promise.all(
+          dimensionTriggers.map(async (trigger) => await trigger.getVisibleText())
+        );
+        return triggerLabels.some((label) => label.replace(/\u200b/g, '').includes(expectedLabel));
+      });
     },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
@@ -1020,14 +1027,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await header.waitUntilLoadingHasFinished();
     },
     async waitForSearchInputValue(subVisualizationId: string, searchTerm?: string) {
-      await retry.try(async () => {
-        await this.searchOnChartSwitch(subVisualizationId, searchTerm);
-        await common.sleep(1000); // give time for the value to be typed
+      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
+      await retry.waitFor('chart switch search results to update', async () => {
         const searchInputValue = await testSubjects.getAttribute('lnsChartSwitchSearch', 'value');
         const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
-        if (searchInputValue !== queryTerm) {
-          throw new Error('Search input value is not the expected value');
-        }
+        const optionExists = await testSubjects.exists(
+          `lnsChartSwitchPopover_${subVisualizationId}`,
+          { timeout: 0 }
+        );
+        return searchInputValue === queryTerm && optionExists;
       });
     },
 
@@ -1736,14 +1744,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return Number(renderingCount);
       }
       await header.waitUntilLoadingHasFinished();
+      let previousCount: number | undefined;
+      let stablePolls = 0;
+      const requiredStablePolls = 3;
+
       await retry.waitFor('rendering count to stabilize', async () => {
-        const firstCount = await getRenderingCount();
+        const currentCount = await getRenderingCount();
 
-        await common.sleep(1000);
+        if (currentCount === previousCount) {
+          stablePolls++;
+        } else {
+          previousCount = currentCount;
+          stablePolls = 0;
+        }
 
-        const secondCount = await getRenderingCount();
-
-        return firstCount === secondCount;
+        return stablePolls >= requiredStablePolls;
       });
     },
 
@@ -1774,24 +1789,50 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
-      await retry.try(async () => {
-        // Hover over the tab to make the layer actions button visible
-        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
-        if (tabs[index]) {
-          await tabs[index].moveMouseTo();
+      await retry.try(
+        async () => {
+          await timePicker.ensureHiddenNoDataPopover();
+
+          // Hover over the tab to make the layer actions button visible
+          const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 0);
+          if (tabs[index]) {
+            await tabs[index].moveMouseTo();
+          }
+
+          const splitButtonExists = await testSubjects.exists(`lnsLayerSplitButton--${index}`, {
+            timeout: 0,
+          });
+          const removeButtonExists = await testSubjects.exists(`lnsLayerRemove--${index}`, {
+            timeout: 0,
+          });
+          if (!splitButtonExists && !removeButtonExists) {
+            throw new Error(`Layer ${index} actions are not visible`);
+          }
+
+          if (splitButtonExists) {
+            await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerSplitButton--${index}`);
+          }
+          // Let intercepted clicks reach the outer retry so its recovery can dismiss a
+          // late-opening popover and retry from freshly queried layer actions.
+          await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerRemove--${index}`);
+          if (await testSubjects.exists('lnsLayerRemoveModal')) {
+            await testSubjects.exists('lnsLayerRemoveConfirmButton');
+            await testSubjects.click('lnsLayerRemoveConfirmButton');
+          }
+        },
+        async () => {
+          // Search completion can open this popover after the initial visibility check and
+          // intercept the remove click. Dismiss it before retrying the interaction.
+          await browser.pressKeys(browser.keys.ESCAPE);
         }
-        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
-          await testSubjects.click(`lnsLayerSplitButton--${index}`);
-        }
-        await testSubjects.click(`lnsLayerRemove--${index}`);
-        if (await testSubjects.exists('lnsLayerRemoveModal')) {
-          await testSubjects.exists('lnsLayerRemoveConfirmButton');
-          await testSubjects.click('lnsLayerRemoveConfirmButton');
-        }
-      });
+      );
     },
 
     async ensureLayerTabIsActive(index: number = 0) {
+      if (await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 0 })) {
+        return;
+      }
+
       const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
 
       if (tabs[index]) {

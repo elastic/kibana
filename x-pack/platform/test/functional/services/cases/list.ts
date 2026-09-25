@@ -505,10 +505,7 @@ export function CasesTableServiceProvider(
     },
 
     async hasColumn(columnName: string) {
-      const column = await find.allByCssSelector(
-        `th.euiTableHeaderCell span[title="${columnName}"]`
-      );
-      return column.length !== 0;
+      return await find.existsByCssSelector(`th.euiTableHeaderCell span[title="${columnName}"]`);
     },
 
     async openColumnsPopover() {

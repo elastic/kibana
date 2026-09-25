@@ -141,7 +141,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
         );
 
-        expect(await desc.getVisibleText()).equal('Description with space');
+        await retry.try(async () => {
+          expect(await desc.getVisibleText()).equal('Description with space');
+        });
       });
 
       it('comment area does not have focus on page load', async () => {

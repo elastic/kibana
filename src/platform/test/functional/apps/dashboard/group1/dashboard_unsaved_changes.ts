@@ -79,8 +79,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('persists after a hard refresh', async () => {
         await browser.refresh();
-        const alert = await browser.getAlert();
-        await alert?.accept();
         await dashboard.waitForRenderComplete();
         await validateQueryAndFilter();
       });
@@ -91,8 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const query = await queryBar.getQueryString();
         expect(query).to.eql('');
-        const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.eql(0);
+        await filterBar.waitForFilterCount(0);
       });
     });
 
@@ -124,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickCancelOutOfEditMode();
         await header.waitUntilLoadingHasFinished();
         expect(await dashboard.getPanelCount()).to.eql(originalPanelCount);
-        expect(dashboard.getIsInViewMode()).to.eql(true);
+        expect(await dashboard.getIsInViewMode()).to.eql(true);
       });
 
       it('does not show unsaved changes badge after saving', async () => {

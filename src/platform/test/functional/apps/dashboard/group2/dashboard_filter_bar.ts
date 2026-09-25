@@ -103,8 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('are not selected by default', async function () {
-        const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(0);
+        await filterBar.waitForFilterCount(0);
       });
 
       it('are added when a pie chart slice is clicked', async function () {
@@ -168,7 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it("pinned filters aren't saved", async () => {
         await filterBar.removeFilter('bytes');
         await dashboard.loadSavedDashboard('saved with pinned filters');
-        expect(await filterBar.getFilterCount()).to.be(0);
+        await filterBar.waitForFilterCount(0);
         await pieChart.expectPieSliceCount(5);
       });
     });

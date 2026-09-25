@@ -12,16 +12,26 @@ import { UnexpectedAlertOpenError } from 'selenium-webdriver/lib/error';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { BrowserService } from './browser';
 
-describe('Browser#get', () => {
+describe('Browser navigation dialog recovery', () => {
   let log: ToolingLog;
   let accept: jest.Mock;
-  let driver: { get: jest.Mock; switchTo: () => { alert: () => { accept: jest.Mock } } };
+  let refresh: jest.Mock;
+  let driver: {
+    get: jest.Mock;
+    navigate: () => { refresh: jest.Mock };
+    switchTo: () => { alert: () => { accept: jest.Mock } };
+  };
 
   beforeEach(() => {
     log = new ToolingLog();
     jest.spyOn(log, 'warning').mockImplementation(() => {});
     accept = jest.fn();
-    driver = { get: jest.fn(), switchTo: () => ({ alert: () => ({ accept }) }) };
+    refresh = jest.fn();
+    driver = {
+      get: jest.fn(),
+      navigate: () => ({ refresh }),
+      switchTo: () => ({ alert: () => ({ accept }) }),
+    };
   });
 
   const getBrowser = () => {
@@ -59,6 +69,18 @@ describe('Browser#get', () => {
     );
 
     expect(driver.get).toHaveBeenCalledTimes(2);
+    expect(accept).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries refresh once after dismissing a leaked dialog', async () => {
+    refresh
+      .mockRejectedValueOnce(new UnexpectedAlertOpenError('unexpected alert open'))
+      .mockResolvedValueOnce(undefined);
+    accept.mockResolvedValue(undefined);
+
+    await getBrowser().refresh();
+
+    expect(refresh).toHaveBeenCalledTimes(2);
     expect(accept).toHaveBeenCalledTimes(1);
   });
 });

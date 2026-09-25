@@ -9,6 +9,8 @@
 
 import { FtrService } from '../ftr_provider_context';
 
+const LOADING_INDICATOR_APPEARANCE_TIMEOUT_MS = 300;
+
 export class HeaderPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
@@ -54,15 +56,6 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async waitUntilLoadingHasFinished() {
-    try {
-      await this.isGlobalLoadingIndicatorVisible();
-    } catch (exception) {
-      if (exception.name === 'ElementNotVisible') {
-        // selenium might just have been too slow to catch it
-      } else {
-        throw exception;
-      }
-    }
     await this.awaitGlobalLoadingIndicatorHidden();
   }
 
@@ -72,6 +65,15 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async awaitGlobalLoadingIndicatorHidden() {
+    // The loading indicator is debounced by 250ms. Give an in-flight request one complete
+    // debounce window to make it visible, but do not delay after a visible load has completed.
+    const loadingIndicatorAppeared = await this.testSubjects.exists('globalLoadingIndicator', {
+      timeout: LOADING_INDICATOR_APPEARANCE_TIMEOUT_MS,
+    });
+    if (!loadingIndicatorAppeared) {
+      return;
+    }
+
     await this.testSubjects.existOrFail('globalLoadingIndicator-hidden', {
       allowHidden: true,
       timeout: this.defaultFindTimeout * 10,
@@ -84,7 +86,7 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async onAppLeaveWarning(ignoreWarning = false) {
-    const warning = await this.testSubjects.exists('confirmModalTitleText');
+    const warning = await this.testSubjects.exists('confirmModalTitleText', { timeout: 0 });
     if (warning) {
       await this.testSubjects.click(
         ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'

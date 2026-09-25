@@ -110,7 +110,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async openContextMenu(wrapper?: WebElementWrapper) {
     this.log.debug(`openContextMenu(${wrapper}`);
-    const open = await this.testSubjects.exists('embeddablePanelContextMenuOpen');
+    const open = await this.testSubjects.exists('embeddablePanelContextMenuOpen', { timeout: 0 });
     if (!open) await this.toggleContextMenu(wrapper);
     await this.expectContextMenuToBeOpen();
   }
@@ -125,7 +125,7 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`clickPanelAction(${testSubject})`);
     wrapper = wrapper || (await this.getPanelWrapper());
     await this.scrollPanelIntoView(wrapper);
-    const exists = await this.testSubjects.descendantExists(testSubject, wrapper);
+    const exists = await this.testSubjects.descendantExists(testSubject, wrapper, 0);
     let action;
     if (!exists) {
       await this.openContextMenu(wrapper);
@@ -278,8 +278,8 @@ export class DashboardPanelActionsService extends FtrService {
   async panelActionExists(testSubject: string, wrapper?: WebElementWrapper) {
     this.log.debug(`panelActionExists(${testSubject})`);
     return wrapper
-      ? await this.testSubjects.descendantExists(testSubject, wrapper)
-      : await this.testSubjects.exists(testSubject, { allowHidden: true });
+      ? await this.testSubjects.descendantExists(testSubject, wrapper, 0)
+      : await this.testSubjects.exists(testSubject, { allowHidden: true, timeout: 0 });
   }
 
   async panelActionExistsByTitle(testSubject: string, title = '') {

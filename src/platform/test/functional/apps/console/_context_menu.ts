@@ -28,17 +28,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open context menu', async () => {
-      expect(await PageObjects.console.isContextMenuOpen()).to.be(false);
+      expect(await PageObjects.console.isContextMenuOpen(0)).to.be(false);
       await PageObjects.console.clickContextMenu();
-      expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
+      expect(await PageObjects.console.isContextMenuOpen()).to.be.eql(true);
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await testSubjects.waitForDeleted('consoleMenu');
+      await PageObjects.console.selectAllRequests();
+      await PageObjects.console.waitForSelectedRequestsCount(1);
     });
 
     it('should have options to copy to language, open documentation, and auto indent', async () => {
       await PageObjects.console.clickContextMenu();
-      expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
-      expect(PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
-      expect(PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
-      expect(PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
+      expect(await PageObjects.console.isContextMenuOpen()).to.be.eql(true);
+      expect(await PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
+      expect(await PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
+      expect(await PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
     });
 
     describe('Copy as', () => {
@@ -107,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Verify that the Select language button is hidden for kbn request
         await PageObjects.console.clickContextMenu();
-        const selectLanguageVisible = await PageObjects.console.isSelectLanguageButtonVisible();
+        const selectLanguageVisible = await PageObjects.console.isSelectLanguageButtonVisible(0);
         expect(selectLanguageVisible).to.be(false);
       });
 

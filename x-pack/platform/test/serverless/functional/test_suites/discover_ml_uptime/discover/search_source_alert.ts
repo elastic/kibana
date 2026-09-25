@@ -344,12 +344,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     if (isViewInApp) {
       expect(await toasts.getCount()).to.be(0);
     } else {
-      expect(await toasts.getCount()).to.be(1);
+      await toasts.assertCount(1);
       expect((await toasts.getContentByIndex(1)).startsWith('Displayed documents may vary')).to.be(
         true
       );
     }
-    expect(await filterBar.getFilterCount()).to.be(0);
+    await filterBar.waitForFilterCount(0);
     expect(await queryBar.getQueryString()).to.equal('');
 
     const selectedDataView = await dataViews.getSelectedName();
@@ -665,7 +665,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not display results after data view removal on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
 
-      expect(await toasts.getCount()).to.be.equal(1);
+      await toasts.assertCount(1);
       const content = await toasts.getContentByIndex(1);
       expect(content).to.equal(
         `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
