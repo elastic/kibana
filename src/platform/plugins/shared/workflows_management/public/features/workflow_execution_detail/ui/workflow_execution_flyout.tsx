@@ -41,9 +41,10 @@ import {
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
 import { AiStepSection } from './ai_step_section';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { ForeachIterationsSection } from './foreach_iterations_section';
@@ -51,21 +52,25 @@ import { NestedWorkflowExecutionLinks } from './nested_workflow_execution_links'
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepDataValueCell } from './step_data_value_cell';
 import { StepDetailAccordionSection } from './step_detail_accordion_section';
+import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
+import { areStepExecutionsUnavailable } from '../../../../common';
 import {
   useAvailableConnectors,
   useFetchConnector,
 } from '../../../entities/connectors/model/use_available_connectors';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import { selectStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
+import { JSONCodeEditorCommonMemoized } from '../../../shared/ui/execution_data_viewer/json_editor_common';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
@@ -495,6 +500,24 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       setIsResumeSubmitting(false);
       setIsResumeSubmitted(false);
     }, [waitingStepExecutionId]);
+
+    const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
+    const stepExecutionsUnavailable = areStepExecutionsUnavailable({
+      stepExecutionsTotal,
+      loadedCount: workflowExecution?.stepExecutions.length ?? 0,
+      isInProgress: workflowExecution ? isInProgressStatus(workflowExecution.status) : false,
+    });
+    const showStepExecutionTree =
+      activeTab === 'table' || error !== null || stepExecutionsUnavailable;
+    // Monaco renders only the visible lines, so a run with thousands of loaded steps stays usable.
+    // Only stringify while the JSON tab is showing; the Table tab re-renders on every poll.
+    const executionJson = useMemo(
+      () =>
+        !showStepExecutionTree && workflowExecution
+          ? JSON.stringify(workflowExecution, null, 2)
+          : '',
+      [showStepExecutionTree, workflowExecution]
+    );
 
     const workflowName =
       workflowNameProp ||
@@ -1422,10 +1445,16 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       padding: `${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base}`,
                     }}
                   >
-                    {activeTab === 'table' && (
+                    {/* Both tabs show the same paginated run, so the callout is outside the Table branch. */}
+                    <StepExecutionsTruncatedCallout
+                      executionId={executionId}
+                      loadedCount={workflowExecution?.stepExecutions.length ?? 0}
+                    />
+                    {showStepExecutionTree && (
                       <WorkflowStepExecutionTree
                         definition={workflowDefinition}
                         execution={workflowExecution ?? null}
+                        stepExecutionsTotal={stepExecutionsTotal}
                         error={error}
                         onStepExecutionClick={setSelectedStepExecutionId}
                         selectedId={selectedStepExecutionId}
@@ -1437,10 +1466,17 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
                       />
                     )}
-                    {activeTab === 'json' && workflowExecution && (
-                      <EuiCodeBlock language="json" fontSize="m" isCopyable overflowHeight="100%">
-                        {JSON.stringify(workflowExecution, null, 2)}
-                      </EuiCodeBlock>
+                    {!showStepExecutionTree && (
+                      <div css={{ height: '70vh' }}>
+                        <JSONCodeEditorCommonMemoized
+                          data-test-subj="workflowExecutionJsonEditor"
+                          jsonValue={executionJson}
+                          onEditorDidMount={() => {}}
+                          height="100%"
+                          hasLineNumbers
+                          enableFindAction
+                        />
+                      </div>
                     )}
                   </div>
                 </>

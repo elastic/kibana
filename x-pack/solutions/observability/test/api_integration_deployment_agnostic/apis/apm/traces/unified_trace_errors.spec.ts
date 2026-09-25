@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, otelLog, timerange, generateLongId } from '@kbn/synthtrace-client';
+import { apm, otelLog, log, timerange, generateLongId } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { Readable } from 'stream';
@@ -106,7 +106,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => await apmSynthtraceEsClient.clean());
 
-      it('returns APM errors for the trace', async () => {
+      it('returns APM errors for the trace with per-error source', async () => {
         const response = await fetchUnifiedTraceErrors({ traceId });
 
         expect(response.status).to.be(200);
@@ -123,7 +123,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         );
         expect(response.body.traceErrors[0].error.exception?.type).to.be('ResponseError');
         expect(response.body.traceErrors[0].timestamp).to.have.property('us');
-        expect(response.body.source).to.be('apm');
+        // Each error now carries its own source instead of a trace-wide discriminator.
+        expect(response.body.traceErrors[0].source).to.be('apm');
+        expect(response.body.traceErrors[1].source).to.be('apm');
+        // The trace-wide `source` field has been removed.
+        expect(response.body).not.to.have.property('source');
       });
     });
 
@@ -174,17 +178,103 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => await logsSynthtraceEsClient.clean());
 
-      it('returns unprocessed OTEL errors for the trace', async () => {
+      it('returns unprocessed OTEL errors for the trace with per-error source', async () => {
         const response = await fetchUnifiedTraceErrors({ traceId, spanId });
 
         expect(response.status).to.be(200);
         expect(response.body.traceErrors).to.have.length(1);
-        expect(response.body.source).to.be('unprocessedOtel');
+        expect(response.body.traceErrors[0].source).to.be('unprocessedOtel');
         expect(response.body.traceErrors[0].error.exception?.message).to.be('Deadline Exceeded');
         expect(response.body.traceErrors[0].error.exception?.type).to.be(
           'grpc._channel._MultiThreadedRendezvous'
         );
-        expect(response.body.source).to.be('unprocessedOtel');
+        // The trace-wide `source` field has been removed.
+        expect(response.body).not.to.have.property('source');
+      });
+    });
+
+    describe('when both APM and unprocessed OTel errors exist on the same trace', () => {
+      let traceId: string;
+      let spanId: string;
+
+      before(async () => {
+        // Build a real APM trace so we can get a valid traceId / spanId.
+        const instanceJava = apm
+          .service({ name: 'synth-mixed-errors', environment: 'production', agentName: 'java' })
+          .instance('instance-1');
+
+        const txTs = start + 500;
+        const events = timerange(start, end)
+          .interval('15m')
+          .rate(1)
+          .generator((timestamp) => {
+            return [
+              instanceJava
+                .transaction({ transactionName: 'POST /order' })
+                .timestamp(txTs)
+                .duration(800)
+                .failure()
+                .errors(
+                  instanceJava
+                    .error({ message: 'DB connection refused', type: 'DBError' })
+                    .timestamp(txTs + 50)
+                ),
+            ];
+          });
+
+        const unserialized = Array.from(events);
+        const entities = unserialized.flatMap((e) => e.serialize());
+        const txDoc = entities.find((e) => e['processor.event'] === 'transaction');
+        traceId = txDoc?.['trace.id']!;
+        spanId = txDoc?.['transaction.id']!;
+
+        // Two unprocessed OTel exception logs correlated to the same span.
+        const otelLogs = timerange(start, end)
+          .interval('15m')
+          .rate(1)
+          .generator((timestamp) =>
+            [
+              { type: 'ValidationError', msg: 'Missing required field' },
+              { type: 'PaymentError', msg: 'Gateway timeout' },
+            ].map(({ type, msg }) =>
+              log
+                .create()
+                .message(msg)
+                .logLevel('error')
+                .defaults({
+                  event_name: 'exception',
+                  'exception.type': type,
+                  'exception.message': msg,
+                  'trace.id': traceId,
+                  'span.id': spanId,
+                  'service.name': 'synth-mixed-errors',
+                })
+                .timestamp(timestamp + 200)
+            )
+          );
+
+        await apmSynthtraceEsClient.index(Readable.from(unserialized));
+        await logsSynthtraceEsClient.index(otelLogs);
+      });
+
+      after(async () => {
+        await apmSynthtraceEsClient.clean();
+        await logsSynthtraceEsClient.clean();
+      });
+
+      it('returns all errors merged, each with its own source', async () => {
+        const response = await fetchUnifiedTraceErrors({ traceId, spanId });
+
+        expect(response.status).to.be(200);
+        // 1 APM error + 2 OTel errors = 3
+        expect(response.body.traceErrors).to.have.length(3);
+
+        const sources = response.body.traceErrors.map((e: { source: string }) => e.source);
+        expect(sources.filter((s: string) => s === 'apm')).to.have.length(1);
+        expect(sources.filter((s: string) => s === 'unprocessedOtel')).to.have.length(2);
+
+        // No trace-wide source discriminator.
+        expect(response.body).not.to.have.property('source');
       });
     });
   });
