@@ -62,6 +62,12 @@ export class AppMenu {
    */
   async revealItem(item: Locator | string): Promise<void> {
     const locator = this.toLocator(item);
+
+    // The app menu initialises asynchronously (lazy chunk load, async profile
+    // resolution). Wait for the item to exist in the DOM before testing
+    // visibility — avoids a 10 s race timeout when the menu hasn't settled yet.
+    await locator.waitFor({ state: 'attached', timeout: 30_000 });
+
     if (await locator.isVisible()) {
       return;
     }
