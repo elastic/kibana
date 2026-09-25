@@ -298,6 +298,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const latestFindingsTable = createDataTableObject('latest_findings_table');
   const latestVulnerabilitiesTable = createDataTableObject('latest_vulnerabilities_table');
 
+  const waitForFindingsTable = (expectedRowsCount: number) =>
+    retry.waitFor(
+      `findings table to render ${expectedRowsCount} rows`,
+      async () => (await latestFindingsTable.getRowsCount()) === expectedRowsCount
+    );
+
   const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
   const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
   const thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt = createNotInstalledObject(
@@ -373,6 +379,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const row = await element.findAllByTestSubject('grouping-accordion');
       return await row[rowIndex];
     },
+    // The counters keep rendering the previous result set while the grouping query is in
+    // flight, so they have to be polled rather than read once.
+    async waitForCounts({ groupCount, unitCount }: { groupCount: string; unitCount: string }) {
+      await retry.try(async () => {
+        expect(await this.getGroupCount()).to.be(groupCount);
+        expect(await this.getUnitCount()).to.be(unitCount);
+      });
+    },
   });
   const isLatestFindingsTableThere = async () => {
     const table = await testSubjects.findAll('docTable');
@@ -389,6 +403,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     navigateToMisconfigurations,
     latestFindingsTable,
     latestVulnerabilitiesTable,
+    waitForFindingsTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
     thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt,
