@@ -80,9 +80,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // ── Drift detection ───────────────────────────────────────────────────────────
   // Compare current session values against the SO whenever edit mode is active and the user
-  // changes auth (connector / auth method). serviceVars and globalRegion drift are checked at
-  // the same time; static-key replacement additionally sets isDirty via onReadyChange in
-  // ManagedIntegrationsSection.
+  // changes auth (connector / auth method). serviceVars drift is checked at the same time;
+  // static-key replacement additionally sets isDirty via onReadyChange in ManagedIntegrationsSection.
   const { onboardingDeploymentId } = detectAndReviewStep;
   const { authMethod, connectorId } = authenticateAndDeployStep;
   // Mirror isDirty into a ref so the async fetch callback can see the latest value without
@@ -106,8 +105,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           { authMethod, connectorId },
           { authMethod: item.authMethod, connectorId: item.connectorId }
         );
-        const regionDirty = globalRegion !== (item.globalRegion ?? '');
-        const dirty = dirtyVarIds.length > 0 || authDirty || regionDirty;
+        const dirty = dirtyVarIds.length > 0 || authDirty;
         // Preserve any locally-set dirty flag (e.g. from static-key replacement) that arrived
         // while this async fetch was in flight.
         updateDetectAndReviewStep({ isDirty: dirty || isDirtyRef.current });
