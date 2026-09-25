@@ -77,7 +77,7 @@ export const resolveWorkloadBinder = async (
 
     case 'anonymous':
       // The persisted binder has no anonymous arm; authorization decides whether anonymous
-      // callers may bind at all, so record them the way they were recorded before.
+      // callers may bind at all.
       if (user.api_key) {
         return await toApiKeyBinder(
           user.api_key.id,

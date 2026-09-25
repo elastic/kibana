@@ -202,7 +202,7 @@ export class ServiceAccountFakeRequests {
     // for as the service account while Elasticsearch authenticates someone else.
     if (request.headers.authorization !== `Bearer ${entry.token}`) {
       this.logger.error(
-        `Authorization header on a fake request bound to service account ${entry.serviceAccountId} ` +
+        `Authorization header on a fake request bound to service account [${entry.serviceAccountId}] ` +
           `was replaced; refusing to identify the request as that service account.`
       );
       return undefined;

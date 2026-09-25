@@ -16,13 +16,7 @@ export const SERVICE_ACCOUNT_REALM_TYPE = '_service_account';
 export const CLOUD_SERVICE_ACCOUNT_REALM_TYPE = '_cloud_service_account';
 
 /**
- * The kind of principal a request was authenticated as, with the backend variant where there is
- * one. Computed from an {@link AuthenticatedUser}; never persisted, so it is free to grow.
- * `variant` uses one vocabulary on every arm: `stack` for credentials Elasticsearch issues itself,
- * `uiam` for credentials issued by UIAM.
- *
- * Shares its vocabulary with the persisted `ServiceAccountWorkloadBinder` on purpose, but is a
- * distinct type: the binder is stored and must stay stable.
+ * The kind of principal a request was authenticated as, with the backend variant where there is one.
  */
 export type AuthenticatedPrincipal =
   | { type: 'user'; username: string; userProfileId?: string }
@@ -39,13 +33,12 @@ const toUserPrincipal = (user: AuthenticatedUser): AuthenticatedPrincipal => ({
 /**
  * Classifies the given authenticated user by the kind of principal that authenticated it.
  *
- * Pure and synchronous. The anonymous provider always yields `anonymous`, even when it is configured
- * to authenticate with an API key: anonymous takes precedence over the credential kind, unlike a
- * check on `authentication_type === 'api_key'`. Apart from that, only the `http` provider accepts
+ * The anonymous provider always yields `anonymous`, even when it is configured
+ * to authenticate with an API key: anonymous takes precedence over the credential kind.
+ * Apart from that, only the `http` provider accepts
  * API keys and service account tokens; every other provider yields a session-backed `user`.
  * Deciding on the provider first also keeps this function off `authentication_realm` and
- * `authentication_type`, which throw on minimally authenticated users, and lets partial users (the
- * fake-request enrichment override) degrade to `user`.
+ * `authentication_type`, which throw on minimally authenticated users.
  *
  * Credentials over the `http` provider that are neither an API key nor a service account token
  * default to `user`. That covers Basic and bearer credentials from any realm, including realms

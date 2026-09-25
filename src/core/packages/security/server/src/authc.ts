@@ -29,16 +29,6 @@ export interface CoreAuthenticationService {
    * or a service account, each Elasticsearch-issued (`stack`) or UIAM-issued (`uiam`) where that
    * applies. Performs no I/O.
    *
-   * Real requests are classified from {@link getCurrentUser}. Fake requests are not:
-   * - Service-account-bound fake requests minted by the security plugin resolve to their service
-   *   account, although {@link getCurrentUser} returns `null` for them. They stop resolving once
-   *   released or once their `authorization` header no longer carries the token they were minted
-   *   with.
-   * - Every other fake request resolves to `null`, including Task Manager requests that carry an
-   *   API key. That holds even when the request was enriched with a user identity:
-   *   {@link getCurrentUser} still returns that user, but it names who the request acts for, not
-   *   the credential Elasticsearch authenticates it with.
-   *
    * `null` means no authenticated principal is known, e.g. for unauthenticated requests.
    *
    * @param request The request to classify the authenticated principal for.
