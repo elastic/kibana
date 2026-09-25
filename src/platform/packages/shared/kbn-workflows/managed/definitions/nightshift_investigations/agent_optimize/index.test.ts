@@ -21,6 +21,7 @@ import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW, NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_
 
 const workflow = parse(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.yaml) as {
   name: string;
+  description: string;
   steps: Array<{
     name: string;
     type?: string;
@@ -38,6 +39,10 @@ describe('nightshift agent optimize workflow', () => {
   it('obtains one sandbox then optimizes cortex and memory in parallel with that id', () => {
     expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.id).toBe(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID);
     expect(workflow.name).toBe('Nightshift Agent Optimize');
+    expect(workflow.description).toContain(
+      'Authorization to execute this managed workflow permits its defined Memory operations'
+    );
+    expect(workflow.description).toContain('trusted current-Space execution context');
     expect(workflow.steps).toEqual([
       expect.objectContaining({
         name: 'obtain_sandbox',

@@ -4,6 +4,8 @@ description: >
   Post-round workflow that reuses the conversation sandbox, then runs Cortex and
   Semantic Memory optimize in parallel. Both writers receive the same sandbox_id
   obtain produced so they address the workspace hydrate and the bash tools used.
+  Authorization to execute this managed workflow permits its defined Memory operations;
+  the step derives storage tenancy from the trusted current-Space execution context.
 enabled: true
 tags:
   - observability
@@ -30,7 +32,7 @@ triggers:
           description: Id of the completed conversation round.
         agent_id:
           type: string
-          description: Agent id that produced the round.
+          description: Supported agent policy selector; never a storage or Space boundary.
         connector_id:
           type: string
           description: Inference connector the triggering agent used for this round.

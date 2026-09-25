@@ -135,6 +135,37 @@ describe('memoryOptimizeStepDefinition', () => {
     });
   });
 
+  it('derives the storage boundary from trusted workflow context, not caller inputs', async () => {
+    const definition = memoryOptimizeStepDefinition({
+      getAgentBuilder,
+      getMemoryEsClient,
+      logger: loggerMock.create(),
+      telemetry: telemetry as never,
+    });
+
+    await definition.handler(
+      createContext(
+        {
+          prompt: 'why is checkout slow?',
+          response: 'Redis evictions.',
+          agent_id: 'significant-events.deductive-investigation',
+          recalled_ids: ['memory_a'],
+          sandbox_id: 'attacker-selected-space__conv-1',
+          conversation_id: 'attacker-selected-space__conv-1',
+          round_id: 'round-1',
+        },
+        'trusted-space'
+      )
+    );
+
+    expect(runMemoryOptimize).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'trusted-space',
+        recalledIds: ['memory_a'],
+      })
+    );
+  });
+
   it('defaults an absent persisted recalled set to empty', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
