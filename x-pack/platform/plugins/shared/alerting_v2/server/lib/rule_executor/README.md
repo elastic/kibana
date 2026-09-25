@@ -144,7 +144,7 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Task timeout | `xpack.alerting_v2.rules.run.timeout`, defaults to `DEFAULT_RULE_EXECUTION_TIMEOUT` (`5m`) | [`task_definition.ts`](task_definition.ts) |
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
-| Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default `10000`, ceiling tied to `alerts.max` | [`config.ts`](../../config.ts) |
+| Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default and ceiling `10000` (tied to `alerts.max`). Caps **new** episodes per run only — rows for already-open groups always pass. | [`config.ts`](../../config.ts) |
 | Max JSON query rows | Internal `NON_STREAMING_MAX_ROWS` (`1000`), declared as the JSON format's `maxRows`; applied as `LIMIT min(alerts.max, maxRows)` | [`json_format.ts`](../services/query_service/formats/json_format.ts) |
 | ES\|QL response format | `alertingV2.esqlResponseFormat` feature flag; allowed values are the names in the format registry (`json`, `arrow`), falls back to `json` | [`registry.ts`](../services/query_service/formats/registry.ts) |
 

@@ -30,15 +30,32 @@ const MAX_ALERTS_PER_RUN = 10000;
 const DEFAULT_MAX_QUERY_RESPONSE_SIZE = '50mb';
 /** Anything smaller than this cannot hold a single ES|QL row with metadata. */
 const MIN_MAX_QUERY_RESPONSE_SIZE = '1kb';
+/** Anything larger than this would exhaust the heap on even a single concurrent execution. */
+const MAX_MAX_QUERY_RESPONSE_SIZE = '1gb';
 
 const rulesRunSchema = schema.object({
   alerts: schema.object({
+    // default === max: can only be tightened; loosening would be breaking (v1 has no ceiling).
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
   }),
-  /** Distinct groups per run can never exceed rows per run, so the ceiling is tied to `alerts.max`. */
+  /**
+   * Cap on **new** alert episodes a single execution may open. A row is dropped
+   * only when all four conditions hold: grouped rule, first appearance of this
+   * group in the run, no existing open episode for the group, and the cap is
+   * reached. Rows for already-seen groups always pass — the cap protects episode
+   * creation, action dispatch fan-out, and `.rule-events` volume, not query results.
+   *
+   * default === max: can only be tightened; tied to `alerts.max` as the upper
+   * bound because a single run cannot produce more new groups than it fetches rows.
+   *
+   * Under the JSON path (`alerts.max` ≤ `NON_STREAMING_MAX_ROWS`=1000) this cap
+   * can never fire at its default 10000 — it only becomes live when explicitly
+   * lowered below the effective row ceiling.
+   */
   maxGroupsPerExecution: schema.number({
     defaultValue: MAX_ALERTS_PER_RUN,
     min: 1,
+    // default === max: can only be tightened; loosening would be breaking.
     max: MAX_ALERTS_PER_RUN,
   }),
   timeout: schema.maybe(schema.string({ validate: validateDuration })),
@@ -55,10 +72,14 @@ const rulesRunSchema = schema.object({
      * `heap budget / (capacity x 4)`. Accepts a byte-size string (`10mb`, `512kb`)
      * or a plain number of bytes. Defaults to 50mb; `config/serverless.yml`
      * lowers it to 10mb for the default Serverless background-tasks pod.
+     *
+     * This guard applies only to the JSON transport path — Arrow uses chunked
+     * transfer without `Content-Length`, so there `alerts.max` is the sole bound.
      */
     maxResponseSize: schema.byteSize({
       defaultValue: DEFAULT_MAX_QUERY_RESPONSE_SIZE,
       min: MIN_MAX_QUERY_RESPONSE_SIZE,
+      max: MAX_MAX_QUERY_RESPONSE_SIZE,
     }),
   }),
 });
@@ -90,6 +111,10 @@ const rulesSchema = schema.object({
    * Upper bound on the combined number of rule runs per minute across all
    * spaces. Creating, updating or enabling a rule that would push the total
    * past this limit is rejected.
+   *
+   * Setting this to `0` is a valid "freeze" mode: creates and enables are
+   * rejected, but existing enabled rules keep running. Useful during high-load
+   * incidents to stop new scheduling load from being added.
    *
    * The default matches the alerting v1 hosted budget (`xpack.alerting.rules.maxScheduledPerMinute`).
    * Serverless projects are capped at 400 via `config/serverless.yml`, mirroring v1.

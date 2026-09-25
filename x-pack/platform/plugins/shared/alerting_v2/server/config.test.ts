@@ -188,6 +188,14 @@ describe('alerting_v2 config schema', () => {
         configSchema.validate({ rules: { run: { query: { maxResponseSize: 'ten megs' } } } })
       ).toThrow();
     });
+
+    it('rejects values above 1gb', () => {
+      expect(() =>
+        configSchema.validate({
+          rules: { run: { query: { maxResponseSize: '1073741825b' } } },
+        })
+      ).toThrow();
+    });
   });
 
   describe('rules.run.timeout', () => {
