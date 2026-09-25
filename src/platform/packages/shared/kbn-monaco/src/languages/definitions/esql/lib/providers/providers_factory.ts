@@ -9,8 +9,8 @@
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { isPromise } from '@kbn/std';
-import { createInterruptibleLanguageProvider } from '../../../../helpers';
-import { monaco } from '../../../../../monaco_imports';
+import { handleInterruptibleMonacoOperation } from '../../../../helpers';
+import { isCancellationError, monaco } from '../../../../../monaco_imports';
 
 export interface CreateProviderParams<T> {
   model: monaco.editor.ITextModel;
@@ -51,16 +51,13 @@ export async function createMonacoProvider<T>({
   const safeModel = createDisposedSafeModel(model);
 
   try {
-    const result = await createInterruptibleLanguageProvider(
+    const result = await handleInterruptibleMonacoOperation(
       () => run(safeModel),
       cancellationToken
     );
     return model.isDisposed() ? emptyResult : result;
   } catch (error) {
-    if (
-      error instanceof ProviderEmptyResultError ||
-      (error instanceof Error && error.message === 'AbortedDueToCancellationRequest')
-    ) {
+    if (error instanceof ProviderEmptyResultError || isCancellationError(error)) {
       return emptyResult;
     }
     throw error;

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../../monaco_imports';
-import { createInterruptibleLanguageProvider } from '../../helpers';
+import { monaco, isCancellationError } from '../../../monaco_imports';
+import { handleInterruptibleMonacoOperation } from '../../helpers';
 import type { EditorStateService } from './lib';
 import type { PainlessCompletionResult, PainlessCompletionKind } from './types';
 import type { PainlessWorker } from './worker';
@@ -48,7 +48,7 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
 
   public provideCompletionItems = (async (model, position, _context, token) => {
     try {
-      return await createInterruptibleLanguageProvider(async () => {
+      return await handleInterruptibleMonacoOperation(async () => {
         // Active line characters
         const currentLineChars = model.getValueInRange({
           startLineNumber: position.lineNumber,
@@ -92,7 +92,7 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
         };
       }, token);
     } catch (e) {
-      if (e instanceof Error && e.message === 'AbortedDueToCancellationRequest') {
+      if (isCancellationError(e)) {
         return {
           incomplete: false,
           suggestions: [],

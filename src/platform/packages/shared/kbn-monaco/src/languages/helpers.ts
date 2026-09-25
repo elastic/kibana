@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../monaco_imports';
+import { monaco, CancellationError } from '../monaco_imports';
 import type { LangModuleType, CustomLangModuleType } from '../types';
 
 /**
@@ -33,7 +33,7 @@ function listenForCancellation(token: monaco.CancellationToken): {
   void promise.catch(() => {});
 
   const listener = token.onCancellationRequested(() => {
-    rejectCancellation(new Error('AbortedDueToCancellationRequest'));
+    rejectCancellation(new CancellationError());
   });
 
   return {
@@ -46,17 +46,18 @@ function listenForCancellation(token: monaco.CancellationToken): {
 }
 
 /**
- * Runs a provider and rejects when Monaco cancels the token.
+ * Helper function to execute a Monaco operation that can be cancelled.
+ * So it's can be handled safely, any wrapped operation will throw a monaco CancellationError.
  */
-export async function createInterruptibleLanguageProvider<T>(
+export async function handleInterruptibleMonacoOperation<T>(
   provider: () => T | PromiseLike<T>,
-  cancellationToken: monaco.CancellationToken
+  operationCancellationToken: monaco.CancellationToken
 ): Promise<T> {
-  if (cancellationToken.isCancellationRequested) {
-    throw new Error('AbortedDueToCancellationRequest');
+  if (operationCancellationToken.isCancellationRequested) {
+    throw new CancellationError();
   }
 
-  const cancellation = listenForCancellation(cancellationToken);
+  const cancellation = listenForCancellation(operationCancellationToken);
 
   try {
     return await Promise.race([cancellation.promise, Promise.resolve(provider())]);
