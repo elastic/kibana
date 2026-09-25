@@ -1225,7 +1225,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
       delete attributes.savedObjectId;
     }
 
-    // 'state.visualization.title' is a legacy default the XY/heatmap `initialize()` writes for freshly
+    // 'state.visualization.title' is a legacy default the XY/heatmap `initialize()` wrote for freshly
     // created charts ('Empty XY chart' / 'Empty Heatmap chart'). It is untyped (absent from the
     // visualization state types) and never read at render: the displayed title comes from the panel-level
     // title when set, otherwise the document `attributes.title` (`defaultTitle$`) — never from
