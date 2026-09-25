@@ -18,9 +18,8 @@ import type { RuntimeFieldSpec } from './runtime_field';
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 /**
- * Set of field attributes
- * @public
  * Storage of field attributes. Necessary since the field list isn't saved.
+ * @public
  */
 export type FieldAttrs = Map<string, FieldAttrSet>;
 
@@ -81,7 +80,6 @@ export type FieldSpec = DataViewFieldBase & {
    * True if field is empty
    */
   isNull?: boolean;
-
   /**
    * True if field is a computed column, used in ES|QL to distinguish from index fields
    */
@@ -106,29 +104,24 @@ export type FieldSpec = DataViewFieldBase & {
    * Runtime field definition
    */
   runtimeField?: RuntimeFieldSpec;
-
   /**
    * list of allowed field intervals for the field
    */
   fixedInterval?: string[];
-
   /**
    * List of allowed timezones for the field
    */
   timeZone?: string[];
-
   /**
    * set to true if field is a TSDB dimension field
    */
   timeSeriesDimension?: boolean;
-
   /**
    * set if field is a TSDB metric field
    */
   timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
 
   // not persisted
-
   /**
    * Whether short dots are enabled, based on uiSettings.
    */
@@ -143,7 +136,6 @@ export type FieldSpec = DataViewFieldBase & {
   parentName?: string;
 
   defaultFormatter?: string;
-
   /**
    * Indicates whether the field is a metadata field.
    */
