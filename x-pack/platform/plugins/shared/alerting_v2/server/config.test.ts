@@ -7,9 +7,18 @@
 
 import { configSchema, getQueryRowLimit } from './config';
 import {
-  ESQL_RESPONSE_FORMAT_NAMES,
+  findEsqlResponseFormat,
   NON_STREAMING_MAX_ROWS,
 } from './lib/services/query_service/formats';
+import type { EsqlResponseFormat } from './lib/services/query_service/formats';
+
+const formatByName = (name: string): EsqlResponseFormat => {
+  const format = findEsqlResponseFormat(name);
+  if (!format) {
+    throw new Error(`Test fixture references an unregistered ES|QL format: ${name}`);
+  }
+  return format;
+};
 
 describe('alerting_v2 config schema', () => {
   describe('enabled', () => {
@@ -126,29 +135,23 @@ describe('alerting_v2 config schema', () => {
 
   describe('getQueryRowLimit', () => {
     it('uses min(alerts.max, NON_STREAMING_MAX_ROWS) for the json response format', () => {
-      const config = configSchema.validate({ esql: { responseFormat: 'json' } });
-      expect(getQueryRowLimit(config)).toBe(NON_STREAMING_MAX_ROWS);
+      const config = configSchema.validate({});
+      expect(getQueryRowLimit(config, formatByName('json'))).toBe(NON_STREAMING_MAX_ROWS);
     });
 
     it('uses alerts.max for the arrow response format', () => {
-      const config = configSchema.validate({ esql: { responseFormat: 'arrow' } });
-      expect(getQueryRowLimit(config)).toBe(10000);
+      const config = configSchema.validate({});
+      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(10000);
     });
 
     it('honors a lower alerts.max on the json response format', () => {
-      const config = configSchema.validate({
-        esql: { responseFormat: 'json' },
-        rules: { run: { alerts: { max: 500 } } },
-      });
-      expect(getQueryRowLimit(config)).toBe(500);
+      const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
+      expect(getQueryRowLimit(config, formatByName('json'))).toBe(500);
     });
 
     it('honors a lower alerts.max on the arrow response format', () => {
-      const config = configSchema.validate({
-        esql: { responseFormat: 'arrow' },
-        rules: { run: { alerts: { max: 500 } } },
-      });
-      expect(getQueryRowLimit(config)).toBe(500);
+      const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
+      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(500);
     });
   });
 
@@ -206,28 +209,9 @@ describe('alerting_v2 config schema', () => {
     });
   });
 
-  describe('esql.responseFormat', () => {
-    it('defaults to json', () => {
-      const config = configSchema.validate({});
-      expect(config.esql.responseFormat).toBe('json');
-    });
-
-    it('accepts arrow', () => {
-      expect(configSchema.validate({ esql: { responseFormat: 'arrow' } }).esql.responseFormat).toBe(
-        'arrow'
-      );
-    });
-
-    it('rejects an unknown format', () => {
-      expect(() => configSchema.validate({ esql: { responseFormat: 'csv' } })).toThrow();
-    });
-
-    it('accepts every name the format registry advertises', () => {
-      for (const name of ESQL_RESPONSE_FORMAT_NAMES) {
-        expect(configSchema.validate({ esql: { responseFormat: name } }).esql.responseFormat).toBe(
-          name
-        );
-      }
+  describe('esql', () => {
+    it('no longer exposes a response format setting (it is the alertingV2.esqlResponseFormat feature flag)', () => {
+      expect(() => configSchema.validate({ esql: { responseFormat: 'arrow' } })).toThrow();
     });
   });
 });

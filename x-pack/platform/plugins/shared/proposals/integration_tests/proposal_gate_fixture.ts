@@ -152,6 +152,9 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     storage: client,
     logger: loggerMock.create(),
     getWorkflowsApi: () => workflowsApi as never,
+    // The gate's behaviour does not depend on the conversation card, so the
+    // attachment write is stubbed rather than simulated.
+    getAttachmentsClient: async () => ({ create: jest.fn() } as never),
   });
 
   const privileges: ProposalPrivilegesChecker = {

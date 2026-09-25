@@ -10,6 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { AiIndexCard } from './ai_index_card';
 import { AI_INDEX_TYPE_LABEL } from './labels';
 
@@ -47,6 +48,14 @@ describe('AiIndexCard', () => {
 
     const link = screen.getByRole('link', { name: /support-tickets/ });
     expect(link).toHaveAttribute('href', '/app/context_engine/ai_index/support-tickets');
+    expect(link).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard
+    );
+    expect(link).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_CARD
+    );
     expect(screen.getByTestId('contextAiIndexCard')).toBeInTheDocument();
   });
 
@@ -155,8 +164,28 @@ describe('AiIndexCard', () => {
     const onDeleteClick = jest.fn();
     renderAiIndexCard(buildAiIndex({ managed: false }), undefined, onDeleteClick);
 
-    fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
-    fireEvent.click(screen.getByTestId('contextAiIndexCardDeleteAction'));
+    const actionsButton = screen.getByTestId('contextAiIndexCardActionsButton');
+    expect(actionsButton).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard
+    );
+    expect(actionsButton).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CARD_ACTIONS_MENU
+    );
+
+    fireEvent.click(actionsButton);
+
+    const deleteAction = screen.getByTestId('contextAiIndexCardDeleteAction');
+    expect(deleteAction).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard
+    );
+    expect(deleteAction).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE
+    );
+    fireEvent.click(deleteAction);
 
     expect(onDeleteClick).toHaveBeenCalledTimes(1);
   });

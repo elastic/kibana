@@ -11,10 +11,7 @@ import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
 import type { WorkloadBindingStore } from './workload_binding_store';
-import {
-  createNotImplementedWorkloadBindings,
-  ServiceAccountWorkloadBindings,
-} from './workload_bindings';
+import { ServiceAccountWorkloadBindings } from './workload_bindings';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import type { ServiceAccountMintInterceptor } from '../fake_requests';
@@ -78,6 +75,8 @@ describe('ServiceAccountWorkloadBindings', () => {
 
     backend = {
       create: jest.fn(),
+      list: jest.fn(),
+      get: jest.fn(),
       createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
       reauthenticateFakeRequest: jest.fn(),
       releaseFakeRequest: jest.fn(),
@@ -337,6 +336,35 @@ describe('ServiceAccountWorkloadBindings', () => {
         expect(mint).toHaveBeenCalledTimes(1);
       });
 
+      it('permits a same-account replacement binding that changed between checks', async () => {
+        const interceptor = await captureRefreshInterceptor();
+        store.getVerified.mockResolvedValue(binding({ boundAt: '2026-09-23T12:00:00Z' }));
+        const mint = jest.fn().mockResolvedValue('fresh-token');
+        await expect(interceptor(mint)).resolves.toBe('fresh-token');
+      });
+
+      it('allows an exchange already started before unbinding to finish', async () => {
+        const interceptor = await captureRefreshInterceptor();
+        let finishMint: (token: string) => void = () => {
+          throw new Error('Mint has not started');
+        };
+        const mint = jest.fn(
+          () =>
+            new Promise<string>((resolve) => {
+              finishMint = resolve;
+            })
+        );
+        const inflight = interceptor(mint);
+        // Let the binding read complete and the exchange begin before removing the binding.
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(mint).toHaveBeenCalledTimes(1);
+        store.getVerified.mockResolvedValue(null);
+        finishMint('issued-token');
+        await expect(inflight).resolves.toBe('issued-token');
+        await expect(interceptor(mint)).rejects.toMatchObject({ output: { statusCode: 404 } });
+      });
+
       it('refuses to re-mint once the workload has been unbound, and says so', async () => {
         const interceptor = await captureRefreshInterceptor();
         store.getVerified.mockResolvedValue(null);
@@ -421,36 +449,5 @@ describe('ServiceAccountWorkloadBindings', () => {
         output: { statusCode: 403 },
       });
     });
-  });
-});
-
-describe('createNotImplementedWorkloadBindings', () => {
-  const api = createNotImplementedWorkloadBindings();
-  const expected = {
-    message:
-      'Service account workload bindings are not yet implemented for the Elasticsearch backend',
-    output: { statusCode: 501 },
-  };
-
-  it.each([
-    [
-      'bindWorkload',
-      () =>
-        api.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
-          serviceAccountId: 'sa',
-          ...WORKLOAD,
-        }),
-    ],
-    [
-      'unbindWorkload',
-      () => api.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD),
-    ],
-    ['getBinding', () => api.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)],
-    [
-      'withScopedRequest',
-      () => api.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined),
-    ],
-  ])('rejects %s with a 501', async (_name, invoke) => {
-    await expect(invoke()).rejects.toMatchObject(expected);
   });
 });
