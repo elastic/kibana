@@ -20,6 +20,7 @@ import {
 } from '@kbn/workflows-yaml';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
+import { validateIgnoredFetcherSetting } from './validate_ignored_fetcher_setting';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateParallelFanOut } from './validate_parallel_fan_out';
 import { validateParallelMode } from './validate_parallel_mode';
@@ -37,6 +38,7 @@ export interface RunWorkflowYamlValidationsParams {
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph;
   workflowDefinition?: WorkflowYaml;
+  warnIgnoredKibanaFetcher?: boolean;
 }
 
 /**
@@ -55,6 +57,7 @@ export function runWorkflowYamlValidations({
   workflowLookup,
   workflowGraph,
   workflowDefinition,
+  warnIgnoredKibanaFetcher = false,
 }: RunWorkflowYamlValidationsParams): YamlValidationResult[] {
   const stepContext =
     workflowGraph && workflowDefinition
@@ -76,6 +79,7 @@ export function runWorkflowYamlValidations({
   if (workflowLookup) {
     results.push(
       ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
+      ...validateIgnoredFetcherSetting(workflowLookup, lineCounter, warnIgnoredKibanaFetcher),
       ...validateIfConditions(workflowLookup, lineCounter),
       ...validateParallelMode(workflowLookup, lineCounter),
       ...validateParallelFanOut(workflowLookup, lineCounter)

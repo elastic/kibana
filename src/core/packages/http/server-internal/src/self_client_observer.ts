@@ -65,7 +65,7 @@ export const createSelfCallPreResponseHandler = (log: Logger): Lifecycle.Method 
       ? request.response.output.statusCode
       : request.response.statusCode;
 
-    log.info('Kibana self HTTP call completed', {
+    const meta = {
       event: { action: SELF_CALL_OBSERVED_EVENT_ACTION },
       http: {
         request: { method: observation.method },
@@ -76,7 +76,13 @@ export const createSelfCallPreResponseHandler = (log: Logger): Lifecycle.Method 
         self_http_status_class: `${Math.floor(statusCode / 100)}xx`,
         ...(observation.apiVersion ? { self_http_api_version: observation.apiVersion } : {}),
       },
-    });
+    };
+
+    if (statusCode >= 500) {
+      log.warn('Kibana self HTTP call completed with a server error status', meta);
+    } else {
+      log.debug('Kibana self HTTP call completed', meta);
+    }
 
     return responseToolkit.continue;
   };

@@ -24,6 +24,7 @@ import {
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
+  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
   type WorkflowYaml,
 } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -123,6 +124,14 @@ export class WorkflowCrudService {
   private indexOccWriter?: OccWriter<WorkflowProperties>;
 
   constructor(private readonly deps: WorkflowCrudDeps) {}
+
+  private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
+    return (
+      (await this.deps
+        .getCoreStart()
+        .featureFlags?.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)) ?? false
+    );
+  }
 
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
@@ -362,6 +371,8 @@ export class WorkflowCrudService {
       now: params.now,
       spaceId: params.spaceId,
       triggerDefinitions,
+      logger: this.deps.logger,
+      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
   }
 
@@ -527,6 +538,8 @@ export class WorkflowCrudService {
       spaceId,
       triggerDefinitions,
       nameFallback: options?.nameFallback,
+      logger: this.deps.logger,
+      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
 
     let id = baseId;
@@ -593,6 +606,7 @@ export class WorkflowCrudService {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const warnIgnoredKibanaFetcher = await this.shouldWarnIgnoredKibanaFetcher();
 
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
@@ -612,6 +626,8 @@ export class WorkflowCrudService {
           now,
           spaceId,
           triggerDefinitions,
+          logger: this.deps.logger,
+          warnIgnoredKibanaFetcher,
         });
 
         validWorkflows.push({
@@ -788,6 +804,9 @@ export class WorkflowCrudService {
               workflowYaml,
               zodSchema,
               triggerDefinitions,
+              logger: this.deps.logger,
+              warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
+              workflowId: id,
             }),
           }
         : undefined;

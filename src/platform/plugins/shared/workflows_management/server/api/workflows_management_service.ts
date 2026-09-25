@@ -255,6 +255,7 @@ export class WorkflowsService {
       workflowsExtensions: this.workflowsExtensions,
       getActionsClient: this.getActionsClient,
       getActionsClientWithRequest: this.getActionsClientWithRequest,
+      getCoreStart: () => this.coreStart,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =

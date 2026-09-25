@@ -10,6 +10,7 @@
 import { type MutableRefObject, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG } from '@kbn/workflows';
 import type {
   ConnectorTypesValidationState,
   WorkflowYamlValidationContext,
@@ -42,10 +43,15 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const connectorsData = useAvailableConnectors();
   const connectorsLoadState = useSelector(selectConnectorsLoadState);
   const workflows = useSelector(selectWorkflows);
-  const { application, http, data, licensing, workflowsExtensions } = useKibana().services;
+  const { application, http, data, licensing, featureFlags, workflowsExtensions } =
+    useKibana().services;
   const registry = useMemo(
     () => createWorkflowContextRegistry(workflowsExtensions),
     [workflowsExtensions]
+  );
+  const warnIgnoredKibanaFetcher = featureFlags.useBooleanValue(
+    WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
+    false
   );
   const esqlCallbacks = useWorkflowEsqlCallbacks({
     http,
@@ -68,8 +74,17 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
       workflows,
       getPropertyHandler,
       esqlCallbacks: esqlCallbacksRef.current,
+      warnIgnoredKibanaFetcher,
     }),
-    [application, connectorsData, connectorsLoadState, getPropertyHandler, registry, workflows]
+    [
+      application,
+      connectorsData,
+      connectorsLoadState,
+      getPropertyHandler,
+      registry,
+      warnIgnoredKibanaFetcher,
+      workflows,
+    ]
   );
 }
 

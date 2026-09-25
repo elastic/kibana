@@ -67,7 +67,7 @@ describe('SelfHttpDispatcherProvider', () => {
       certificateAuthorities: ['public CA'],
     });
 
-    expect(provider.get(new URL('http://kibana.example.com/api/status'))).toBeUndefined();
+    expect(provider.get(new URL('http://kibana.example.com/api/status'), 'public')).toBeUndefined();
     expect(AgentMock).not.toHaveBeenCalled();
   });
 
@@ -78,7 +78,7 @@ describe('SelfHttpDispatcherProvider', () => {
         certificateAuthorities: ['public CA'],
       });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
       expect(AgentMock).toHaveBeenCalledTimes(1);
       expect(connectOptionsOf(0)).toEqual({
         ca: [...rootCertificates, 'public CA'],
@@ -94,7 +94,7 @@ describe('SelfHttpDispatcherProvider', () => {
         certificateAuthorities: ['public CA'],
       });
 
-      provider.get(HTTPS_URL);
+      provider.get(HTTPS_URL, 'public');
 
       const connect = connectOptionsOf(0);
       expect(connect.ca).toEqual([...rootCertificates, 'public CA']);
@@ -109,7 +109,7 @@ describe('SelfHttpDispatcherProvider', () => {
         certificateAuthorities: ['public CA'],
       });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
       expect(connectOptionsOf(0).rejectUnauthorized).toBe(false);
     });
   });
@@ -118,14 +118,14 @@ describe('SelfHttpDispatcherProvider', () => {
     it('defers to the global dispatcher in full mode', () => {
       const { provider } = createProvider({ verificationMode: 'full' });
 
-      expect(provider.get(HTTPS_URL)).toBeUndefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeUndefined();
       expect(AgentMock).not.toHaveBeenCalled();
     });
 
     it('builds an agent that keeps the default trust store in certificate mode', () => {
       const { provider } = createProvider({ verificationMode: 'certificate' });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
       expect(AgentMock).toHaveBeenCalledTimes(1);
 
       const connect = connectOptionsOf(0);
@@ -138,27 +138,42 @@ describe('SelfHttpDispatcherProvider', () => {
     it('builds an agent rather than deferring to the global dispatcher in none mode', () => {
       const { provider } = createProvider({ verificationMode: 'none' });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
       expect(AgentMock).toHaveBeenCalledTimes(1);
       expect(connectOptionsOf(0)).toEqual({ rejectUnauthorized: false });
     });
   });
 
   describe('local target', () => {
-    it("trusts the listener's own certificate in full mode", () => {
+    it('treats full as a leaf pin so the loopback hostname is not required to match the SAN', () => {
+      const leaf = '-----BEGIN CERTIFICATE-----\nLEAF\n-----END CERTIFICATE-----';
       const { provider } = createProvider({
         verificationMode: 'full',
+        target: 'local',
+        serverCertificate: `${leaf}\n-----BEGIN CERTIFICATE-----\nINTERMEDIATE\n-----END CERTIFICATE-----`,
+      });
+
+      provider.get(HTTPS_URL, 'local');
+
+      const connect = connectOptionsOf(0);
+      expect(connect.ca).toEqual([leaf]);
+      expect(connect.allowPartialTrustChain).toBe(true);
+      expect(connect.rejectUnauthorized).toBe(true);
+      expect(connect.checkServerIdentity('localhost', {})).toBeUndefined();
+    });
+
+    it('keeps public roots when certificate mode is selected explicitly', () => {
+      const { provider } = createProvider({
+        verificationMode: 'certificate',
         target: 'local',
         serverCertificate: 'local server certificate',
       });
 
-      provider.get(HTTPS_URL);
+      provider.get(HTTPS_URL, 'local');
 
-      expect(connectOptionsOf(0)).toEqual({
-        ca: [...rootCertificates, 'local server certificate'],
-        allowPartialTrustChain: true,
-        rejectUnauthorized: true,
-      });
+      const connect = connectOptionsOf(0);
+      expect(connect.ca).toEqual([...rootCertificates, 'local server certificate']);
+      expect(connect.checkServerIdentity('localhost', {})).toBeUndefined();
     });
 
     it('skips verification in none mode', () => {
@@ -168,7 +183,7 @@ describe('SelfHttpDispatcherProvider', () => {
         serverCertificate: 'local server certificate',
       });
 
-      provider.get(HTTPS_URL);
+      provider.get(HTTPS_URL, 'local');
 
       expect(connectOptionsOf(0).rejectUnauthorized).toBe(false);
     });
@@ -181,7 +196,7 @@ describe('SelfHttpDispatcherProvider', () => {
         certificateAuthorities: ['public CA'],
       });
 
-      expect(provider.get(HTTPS_URL)).toBe(provider.get(HTTPS_URL));
+      expect(provider.get(HTTPS_URL, 'public')).toBe(provider.get(HTTPS_URL, 'public'));
       expect(AgentMock).toHaveBeenCalledTimes(1);
     });
 
@@ -200,12 +215,12 @@ describe('SelfHttpDispatcherProvider', () => {
         target: 'auto',
       });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
 
       verificationMode = 'full';
       certificateAuthorities = undefined;
 
-      expect(provider.get(HTTPS_URL)).toBeUndefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeUndefined();
       expect(AgentMock).toHaveBeenCalledTimes(1);
       expect(AgentMock.mock.results[0].value.close).toHaveBeenCalled();
     });
@@ -224,14 +239,30 @@ describe('SelfHttpDispatcherProvider', () => {
         target: 'auto',
       });
 
-      const first = provider.get(HTTPS_URL);
+      const first = provider.get(HTTPS_URL, 'public');
       verificationMode = 'none';
-      const second = provider.get(HTTPS_URL);
+      const second = provider.get(HTTPS_URL, 'public');
 
       expect(second).not.toBe(first);
       expect(AgentMock).toHaveBeenCalledTimes(2);
       expect(AgentMock.mock.results[0].value.close).toHaveBeenCalled();
       expect(connectOptionsOf(1).rejectUnauthorized).toBe(false);
+    });
+
+    it('caches local and public agents independently', () => {
+      const { provider } = createProvider({
+        verificationMode: 'none',
+        certificateAuthorities: ['public CA'],
+        serverCertificate: 'local server certificate',
+      });
+
+      const local = provider.get(HTTPS_URL, 'local');
+      const pub = provider.get(HTTPS_URL, 'public');
+
+      expect(local).toBeDefined();
+      expect(pub).toBeDefined();
+      expect(local).not.toBe(pub);
+      expect(AgentMock).toHaveBeenCalledTimes(2);
     });
   });
 });

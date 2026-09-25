@@ -11,13 +11,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
-import type { FetcherConfigSchema } from '@kbn/workflows';
-import { buildKibanaRequest, KibanaHttpMethods } from '@kbn/workflows';
+import {
+  buildKibanaRequest,
+  type FetcherConfigSchema,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  KibanaHttpMethods,
+  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
+} from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+import {
+  type BufferedRawBody,
+  CallKibanaApiResponseTooLargeError,
+  type CallKibanaApiResult,
+  KibanaApiCallError,
+} from '../lib/call_kibana_api';
 import { getInternalUiamCallerAttestationHeaders } from '../lib/get_internal_uiam_caller_attestation_headers';
 import {
   EVENT_CHAIN_DEPTH_HEADER,
@@ -81,16 +92,29 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     const stepWith = withInputs || this.node.configuration.with;
     // Extract meta params (not forwarded as HTTP request params)
     const {
+      debug = false,
       use_server_info = false,
       use_localhost = false,
-      debug = false,
       ...httpParams
     } = stepWith;
+    const useCoreSelfClient = await this.shouldUseCoreSelfClient();
 
     if (use_server_info && use_localhost) {
       throw new Error(
-        'Cannot set both use_server_info and use_localhost — they are mutually exclusive. ' +
-          'Use use_server_info to route via the internal server address, or use_localhost to route via localhost:5601.'
+        useCoreSelfClient
+          ? 'Cannot set both use_server_info and use_localhost — they are mutually exclusive.'
+          : 'Cannot set both use_server_info and use_localhost — they are mutually exclusive. ' +
+            'Use use_server_info to route via the internal server address, or use_localhost to route via localhost:5601.'
+      );
+    }
+    if (useCoreSelfClient && use_localhost) {
+      this.workflowLogger.logWarn(
+        'The "use_localhost" setting now routes through the Kibana listener via server.selfHttp (local target), not a hardcoded http://localhost:5601.',
+        {
+          event: { action: 'kibana-action' },
+          tags: ['kibana'],
+          labels: { step_type: stepType },
+        }
       );
     }
 
@@ -105,11 +129,21 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         },
       });
 
-      // Get Kibana base URL (respecting force flags)
-      const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
-
-      // Generic approach like Dev Console - just forward the request to Kibana
-      const result = await this.executeKibanaRequest(kibanaUrl, stepType, httpParams, debug);
+      const result = useCoreSelfClient
+        ? await this.executeViaSelfClient(
+            stepType,
+            httpParams,
+            debug,
+            // Both flags opt into Core's local self HTTP target (the configured listener).
+            // Hardcoded localhost:5601 is not preserved; the listener may use another bind address or port.
+            use_server_info || use_localhost ? 'local' : undefined
+          )
+        : await this.executeViaLegacy(
+            this.getKibanaUrl(use_server_info, use_localhost),
+            stepType,
+            httpParams,
+            debug
+          );
 
       this.workflowLogger.logInfo(`Kibana action completed: ${stepType}`, {
         event: { action: 'kibana-action', outcome: 'success' },
@@ -135,15 +169,132 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
       const failure = this.handleFailure(stepWith, error);
       if (debug && failure.error) {
-        const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
-        failure.error = {
-          type: failure.error.type,
-          message: failure.error.message,
-          details: { ...failure.error.details, _debug: { kibanaUrl } },
-        };
+        if (useCoreSelfClient) {
+          const kibanaUrl = error instanceof KibanaApiCallError ? error.url : undefined;
+          failure.error = {
+            type: failure.error.type,
+            message: failure.error.message,
+            details: {
+              ...failure.error.details,
+              _debug: kibanaUrl ? { kibanaUrl } : { selfClient: true },
+            },
+          };
+        } else {
+          const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
+          failure.error = {
+            type: failure.error.type,
+            message: failure.error.message,
+            details: { ...failure.error.details, _debug: { kibanaUrl } },
+          };
+        }
       }
       return failure;
     }
+  }
+
+  private async shouldUseCoreSelfClient(): Promise<boolean> {
+    return this.stepExecutionRuntime.contextManager
+      .getCoreStart()
+      .featureFlags.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
+  }
+
+  private async executeViaSelfClient(
+    stepType: string,
+    params: any,
+    debug: boolean = false,
+    target?: 'local'
+  ): Promise<any> {
+    const spaceId = this.stepExecutionRuntime.contextManager.getWorkflowSpaceId();
+    if (params.fetcher !== undefined) {
+      this.workflowLogger.logWarn(IGNORED_KIBANA_FETCHER_SETTING_MESSAGE, {
+        event: { action: 'kibana-action' },
+        tags: ['kibana', 'deprecated'],
+        labels: { step_type: stepType },
+      });
+    }
+    // Core's scoped self client owns redirect/TLS/dispatcher policy. YAML `fetcher` is
+    // accepted for compatibility and warned above; it is never applied.
+    const { fetcher: _fetcherOptions, ...cleanParams } = params;
+    // `callKibanaApi` owns the workflow-space prefix, so strip an existing current-space prefix
+    // from paths that already carry one (raw `request`/`form_data` paths were historically
+    // forwarded unchanged, and generated connector paths are built space-prefixed).
+    const currentSpacePrefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
+    const stripCurrentSpacePrefix = (path: string) =>
+      currentSpacePrefix && path.startsWith(`${currentSpacePrefix}/`)
+        ? path.slice(currentSpacePrefix.length)
+        : path;
+    let requestConfig: {
+      method: string;
+      path: string;
+      body?: unknown;
+      rawBody?: BufferedRawBody;
+      query?: Record<string, string | number | boolean | undefined>;
+      headers?: Record<string, string>;
+    };
+
+    if (cleanParams.body !== undefined && cleanParams.form_data !== undefined) {
+      throw new Error('Cannot set both body and form_data — they are mutually exclusive.');
+    }
+    if (cleanParams.request) {
+      const { method = 'GET', path, body, query, headers } = cleanParams.request;
+      requestConfig = { method, path: stripCurrentSpacePrefix(path), body, query, headers };
+    } else if (cleanParams.form_data) {
+      const { form_data, method = 'POST', path, query, headers } = cleanParams;
+      requestConfig = {
+        method,
+        path: stripCurrentSpacePrefix(path),
+        query,
+        headers,
+        rawBody: this.buildFormData(form_data),
+      };
+    } else {
+      const { method, path, body, query, headers } = buildKibanaRequest(
+        stepType,
+        cleanParams,
+        spaceId
+      );
+      requestConfig = { method, path: stripCurrentSpacePrefix(path), body, query, headers };
+    }
+
+    const normalizedMethod = requestConfig.method?.toUpperCase();
+    if (!normalizedMethod || !(KibanaHttpMethods as readonly string[]).includes(normalizedMethod)) {
+      throw new Error(
+        `Invalid HTTP method "${requestConfig.method}". Valid values: ${KibanaHttpMethods.join(
+          ', '
+        )}`
+      );
+    }
+
+    const contextManager = this.stepExecutionRuntime.contextManager;
+    let result: CallKibanaApiResult;
+    try {
+      result = await contextManager.callKibanaApi({
+        method: normalizedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+        path: requestConfig.path,
+        body: requestConfig.rawBody === undefined ? requestConfig.body : undefined,
+        rawBody: requestConfig.rawBody,
+        query: requestConfig.query,
+        headers: requestConfig.headers,
+        maxResponseBytes: this.getMaxResponseBytes(),
+        target,
+      });
+    } catch (error) {
+      if (error instanceof CallKibanaApiResponseTooLargeError) {
+        throw new ResponseSizeLimitError(error.limitBytes, this.step.name);
+      }
+      throw error;
+    }
+
+    if (
+      debug &&
+      result.body &&
+      typeof result.body === 'object' &&
+      !Buffer.isBuffer(result.body) &&
+      !Array.isArray(result.body)
+    ) {
+      return { ...result.body, _debug: { method: normalizedMethod, fullUrl: result.url } };
+    }
+    return result.body;
   }
 
   private getKibanaUrl(use_server_info = false, use_localhost = false): string {
@@ -168,7 +319,10 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     return headers;
   }
 
-  private async executeKibanaRequest(
+  /**
+   * Global `fetch` client used when Kibana steps are not routed through Core self-client.
+   */
+  private async executeViaLegacy(
     kibanaUrl: string,
     stepType: string,
     params: any,
@@ -189,7 +343,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       headers?: Record<string, string>;
     };
 
-    if (cleanParams.body && cleanParams.form_data) {
+    if (cleanParams.body !== undefined && cleanParams.form_data !== undefined) {
       throw new Error(
         'Cannot set both body and form_data — they are mutually exclusive. ' +
           'Use body for JSON requests, or form_data for multipart/form-data uploads.'

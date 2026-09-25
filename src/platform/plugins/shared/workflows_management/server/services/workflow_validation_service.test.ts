@@ -41,6 +41,12 @@ const makeDeps = (
       } as any,
       getActionsClient: jest.fn().mockResolvedValue(actionsClient) as any,
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
+      getCoreStart: () =>
+        ({
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(false),
+          },
+        } as any),
     },
     actionsClient,
     actionsClientWithRequest,
