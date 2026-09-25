@@ -27,6 +27,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -163,11 +164,10 @@ const createPrivilegeMonitoringTaskRunnerFactory =
         const [core] = await deps.getStartServices();
         const config = deps.config;
         return core.executionContext.withContext(
-          {
-            type: 'security_solution',
-            name: 'entity_analytics:privilege_monitoring_task',
-            id: taskInstance.id,
-          },
+          buildEaExecutionContext(
+            EA_EXECUTION_CONTEXT_NAMES.PRIVILEGE_MONITORING_TASK,
+            taskInstance.id
+          ),
           () =>
             runPrivilegeMonitoringTask({
               isCancelled,

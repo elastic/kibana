@@ -44,6 +44,7 @@ import {
 } from './lead_generation_task';
 import { TYPE, VERSION, TIMEOUT, INTERVAL, SCOPE } from './constants';
 import { defaultState } from './state';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 
 describe('Lead Generation Task', () => {
   const logger = loggingSystemMock.createLogger();
@@ -213,7 +214,7 @@ describe('Lead Generation Task', () => {
     // Re-created in each beforeEach so clearAllMocks() doesn't wipe return values
     let mockCore: {
       elasticsearch: { client: { asScoped: jest.Mock } };
-      executionContext: { withContext: <T>(ctx: unknown, fn: () => T) => T };
+      executionContext: { withContext: jest.Mock };
     };
     let mockStartPlugins: {
       entityStore: { createCRUDClient: jest.Mock; createRelationshipsClient: jest.Mock };
@@ -232,7 +233,7 @@ describe('Lead Generation Task', () => {
           },
         },
         executionContext: {
-          withContext: <T>(_ctx: unknown, fn: () => T) => fn(),
+          withContext: jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn()),
         },
       };
       mockStartPlugins = {
@@ -312,6 +313,19 @@ describe('Lead Generation Task', () => {
     it('re-throws FRAMEWORK error when fakeRequest is undefined', async () => {
       const runner = capturedCreateTaskRunner({ taskInstance, fakeRequest: undefined });
       await expect(runner.run()).rejects.toThrow('No fakeRequest available in task context');
+    });
+
+    it('wraps the task run in coreStart.executionContext.withContext with the expected label and id', async () => {
+      (getLeadGenerationConfig as jest.Mock).mockResolvedValueOnce({ connectorId: 'c1' });
+      const fakeRequest = httpServerMock.createKibanaRequest();
+      const runner = capturedCreateTaskRunner({ taskInstance, fakeRequest });
+      await runner.run();
+
+      expect(mockCore.executionContext.withContext).toHaveBeenCalledTimes(1);
+      expect(mockCore.executionContext.withContext).toHaveBeenCalledWith(
+        buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.LEAD_GENERATION_TASK, taskInstance.id),
+        expect.any(Function)
+      );
     });
   });
 });

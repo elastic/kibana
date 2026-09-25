@@ -42,6 +42,7 @@ import {
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
 import type { EntityAnalyticsConfig, EntityAnalyticsRoutesDeps } from '../../types';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -456,11 +457,7 @@ const createTaskRunnerFactory =
       run: async () => {
         const [coreStart] = await getStartServices();
         return coreStart.executionContext.withContext(
-          {
-            type: 'security_solution',
-            name: 'entity_analytics:risk_scoring_task',
-            id: taskInstance.id,
-          },
+          buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORING_TASK, taskInstance.id),
           () =>
             runTask({
               getRiskScoreService,

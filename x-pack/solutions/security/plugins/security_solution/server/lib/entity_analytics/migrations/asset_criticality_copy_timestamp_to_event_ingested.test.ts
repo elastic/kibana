@@ -18,6 +18,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { auditLoggerMock } from '@kbn/core-security-server-mocks';
 
 import { createMigrationTask } from './asset_criticality_copy_timestamp_to_event_ingested';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../execution_context';
 
 const TASK_TYPE = 'security-solution-ea-asset-criticality-copy-timestamp-to-event-ingested';
 const TASK_ID = `${TASK_TYPE}-task-id`;
@@ -46,11 +47,7 @@ describe('assetCrticalityCopyTimestampToEventIngested — execution context wrap
 
     expect(withContext).toHaveBeenCalledTimes(1);
     expect(withContext).toHaveBeenCalledWith(
-      {
-        type: 'security_solution',
-        name: 'entity_analytics:asset_criticality_migration',
-        id: TASK_ID,
-      },
+      buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY_MIGRATION, TASK_ID),
       expect.any(Function)
     );
   });

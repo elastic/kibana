@@ -20,6 +20,7 @@ import type { ConcreteTaskInstance, RunContext } from '@kbn/task-manager-plugin/
 import { registerPrivilegeMonitoringTask } from './privilege_monitoring_task';
 import { TYPE, VERSION } from '../constants';
 import { defaultState } from './state';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 
 describe('registerPrivilegeMonitoringTask — execution context wrap', () => {
   const logger = loggingSystemMock.createLogger();
@@ -73,11 +74,10 @@ describe('registerPrivilegeMonitoringTask — execution context wrap', () => {
 
     expect(withContext).toHaveBeenCalledTimes(1);
     expect(withContext).toHaveBeenCalledWith(
-      {
-        type: 'security_solution',
-        name: 'entity_analytics:privilege_monitoring_task',
-        id: taskInstance.id,
-      },
+      buildEaExecutionContext(
+        EA_EXECUTION_CONTEXT_NAMES.PRIVILEGE_MONITORING_TASK,
+        taskInstance.id
+      ),
       expect.any(Function)
     );
   });
