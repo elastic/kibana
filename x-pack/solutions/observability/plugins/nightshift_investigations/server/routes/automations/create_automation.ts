@@ -119,11 +119,22 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       throw badRequest(`Failed to create backing workflow: ${err.message}`);
     }
 
-    await soClient.update<NightshiftAutomationAttributes>(
-      NIGHTSHIFT_AUTOMATION_SO_TYPE,
-      created.id,
-      { workflowId }
-    );
+    try {
+      await soClient.update<NightshiftAutomationAttributes>(
+        NIGHTSHIFT_AUTOMATION_SO_TYPE,
+        created.id,
+        { workflowId }
+      );
+    } catch (err) {
+      // SO link failed — delete the workflow so the two resources stay in sync.
+      try {
+        await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
+      } catch {
+        // Best-effort cleanup; the SO will have no workflowId so the automation is inert.
+      }
+      await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id);
+      throw badRequest(`Failed to link workflow to automation: ${err.message}`);
+    }
 
     return { id: created.id, ...attributes, workflowId };
   },

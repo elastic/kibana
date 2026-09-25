@@ -88,22 +88,27 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       params.path.id
     );
 
-    const updates: Partial<NightshiftAutomationAttributes> = {
-      ...params.body,
+    // Merge nested objects field-by-field so a partial execution/completion/runtime patch
+    // does not erase fields that were omitted from the request body.
+    const merged: NightshiftAutomationAttributes = {
+      ...existing.attributes,
+      ...(params.body.name !== undefined && { name: params.body.name }),
+      ...(params.body.description !== undefined && { description: params.body.description }),
+      ...(params.body.isEnabled !== undefined && { isEnabled: params.body.isEnabled }),
+      ...(params.body.trigger !== undefined && { trigger: params.body.trigger }),
+      ...(params.body.execution !== undefined && {
+        execution: { ...existing.attributes.execution, ...params.body.execution },
+      }),
+      ...(params.body.completion !== undefined && {
+        completion: { ...existing.attributes.completion, ...params.body.completion },
+      }),
+      ...(params.body.runtime !== undefined && {
+        runtime: { ...existing.attributes.runtime, ...params.body.runtime },
+      }),
       updatedAt: new Date().toISOString(),
     };
 
-    await soClient.update<NightshiftAutomationAttributes>(
-      NIGHTSHIFT_AUTOMATION_SO_TYPE,
-      params.path.id,
-      updates
-    );
-
-    const merged: NightshiftAutomationAttributes = {
-      ...existing.attributes,
-      ...updates,
-    };
-
+    // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
       try {
         const yaml = generateWorkflowYaml(params.path.id, merged);
@@ -117,6 +122,13 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
         throw badRequest(`Failed to update backing workflow: ${err.message}`);
       }
     }
+
+    const { workflowId: _workflowId, ...soUpdates } = merged;
+    await soClient.update<NightshiftAutomationAttributes>(
+      NIGHTSHIFT_AUTOMATION_SO_TYPE,
+      params.path.id,
+      soUpdates
+    );
 
     return { id: params.path.id, ...merged };
   },

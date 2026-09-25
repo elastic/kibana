@@ -19,7 +19,7 @@ export const listAutomationsRoute = createNightshiftInvestigationsServerRoute({
     description: 'Returns all nightshift automations in the current space.',
   },
   security: {
-    authz: { requiredPrivileges: ['manage_nightshift'] },
+    authz: { requiredPrivileges: ['read_nightshift'] },
   },
   params: z.object({}),
   handler: async ({ request, getAutomationsSoClient, context }) => {

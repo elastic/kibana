@@ -19,7 +19,7 @@ export const getAutomationRoute = createNightshiftInvestigationsServerRoute({
     description: 'Returns a single nightshift automation by ID.',
   },
   security: {
-    authz: { requiredPrivileges: ['manage_nightshift'] },
+    authz: { requiredPrivileges: ['read_nightshift'] },
   },
   params: z.object({
     path: z.object({ id: z.string().min(1) }),
