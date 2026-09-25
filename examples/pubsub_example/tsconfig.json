@@ -1,0 +1,9 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["server/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": ["@kbn/config-schema", "@kbn/core", "@kbn/core-security-server"]
+}

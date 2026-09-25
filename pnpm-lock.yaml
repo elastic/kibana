@@ -2983,6 +2983,9 @@ importers:
       '@kbn/proposals-ui':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-proposals-ui
+      '@kbn/pubsub-example-plugin':
+        specifier: workspace:*
+        version: link:examples/pubsub_example
       '@kbn/query-activity-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/query_activity
@@ -6903,6 +6906,8 @@ importers:
   examples/portable_dashboards_example: {}
 
   examples/preboot_example: {}
+
+  examples/pubsub_example: {}
 
   examples/resizable_layout_examples: {}
 
