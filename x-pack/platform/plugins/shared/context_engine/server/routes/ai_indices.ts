@@ -118,7 +118,7 @@ const CONTEXT_ENGINE_DISABLED_NOTE =
   'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).';
 
 const CONTEXT_ENGINE_DOCS_NOTE =
-  'For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).';
+  '**For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**';
 
 const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
 
@@ -222,7 +222,11 @@ export const registerAiIndexRoutes = ({
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create an AI Index',
-      description: `Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: [
+        'Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -301,7 +305,11 @@ export const registerAiIndexRoutes = ({
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create or update an AI Index',
-      description: `Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: [
+        'Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -389,7 +397,11 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Get an AI Index',
-      description: `Fetches an AI Index by ID from the current space, including the ES|QL query derived from each trace. ${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+      description: [
+        'Fetches an AI Index by ID from the current space, including the ES|QL query derived from each trace.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -445,7 +457,8 @@ export const registerAiIndexRoutes = ({
       description: [
         `Lists up to ${MAX_AI_INDICES} AI Indices in the current space that the caller can read. The response omits an AI Index when the caller cannot read its backing index. Empty AI Indices are still included. A caller with no read privilege on any index gets a 403 response.`,
         'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
-        `${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
@@ -500,7 +513,8 @@ export const registerAiIndexRoutes = ({
         `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows.`,
         'The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.',
         'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.',
-        `${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
@@ -562,7 +576,8 @@ export const registerAiIndexRoutes = ({
         `Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to ${MAX_AI_INDEX_DESCRIBE_FIELDS} fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.`,
         'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.',
         'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
-        `${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
@@ -755,7 +770,8 @@ export const registerAiIndexRoutes = ({
         'Deletes an AI Index by ID.',
         'By default, the API preserves the backing data stream or index, its Knowledge Indicators, and attached workflow automations. Set `delete_knowledge_indicators` to `true` to delete the backing data stream or index and its Knowledge Indicators. Set `delete_automations` to `true` to delete the attached workflow automations.',
         'The API does not delete the backing data stream or index when another AI Index uses the same destination.',
-        `${CONTEXT_ENGINE_DISABLED_NOTE} ${CONTEXT_ENGINE_DOCS_NOTE}`,
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
