@@ -1032,7 +1032,7 @@ describe('query_builders', () => {
   });
 
   describe('buildExperimentRunsAggregation', () => {
-    it('enumerates runs in natural order with ids as tie-breakers', () => {
+    it('enumerates runs grouped by dataset, then by example index and repetition', () => {
       expect(buildExperimentRunsAggregation()).toEqual({
         runs: {
           composite: {

@@ -349,17 +349,18 @@ export interface ExperimentRunKey {
 export interface ExperimentRunsPage {
   /** Distinct runs matching the query, exact up to {@link MAX_SCORES_PER_QUERY}. */
   total: number;
-  /** The requested page window, in dataset name / example index / repetition order. */
+  /** The requested page window: grouped by dataset (name, then id), then example index, then repetition. */
   runs: ExperimentRunKey[];
 }
 
 /**
  * Returns a composite aggregation enumerating an experiment's runs (one
- * bucket per example x repetition) in their natural presentation order:
- * dataset name, example index, repetition. Dataset and example ids sit
- * between as tie-breakers, so the order stays deterministic when two
- * datasets share a name, and each bucket carries the ids the run's score
- * documents are fetched by.
+ * bucket per example x repetition) grouped by dataset, then ordered by
+ * example index and repetition. Composite buckets sort by the declared
+ * sources in turn, so datasets are grouped by name and then by id: two
+ * datasets sharing a name stay contiguous rather than interleaving by
+ * example index. The example id is the tie-breaker within a dataset, and
+ * each bucket carries the ids the run's score documents are fetched by.
  */
 export const buildExperimentRunsAggregation = () => ({
   runs: {

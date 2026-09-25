@@ -72,7 +72,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     // A third experiment with two evaluators per example (an LLM judge and a code evaluator)
     // and task/evaluator trace references, for the runs, traces, and evaluator inventory cases.
+    // Its first example is also run a second time (repetition 1, untraced), so the runs
+    // endpoint's example x repetition grouping is exercised against real aggregations.
     const tracedExperimentId = `experiment-traced-${suiteId}`;
+    const repeatedExampleId = exampleIds[0];
+    const repeatedRunOutput = { answer: `answer-${repeatedExampleId}-repetition-1` };
     const codeEvaluatorName = 'latency';
     const judgeModel = { id: 'gpt-4o', family: 'gpt-4', provider: 'openai' };
     const traceIndex = `traces-evals-ftr-experiments-${suiteId}`;
@@ -196,6 +200,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )
         .expect(200);
 
+      await adminClient
+        .post(EVALS_SCORES_URL)
+        .send(
+          buildScoresRequestBody({
+            experimentId: tracedExperimentId,
+            suiteId,
+            scores: [
+              {
+                evaluatorName,
+                evaluatorVersion: '2',
+                evaluatorKind: 'llm' as const,
+                evaluatorModel: judgeModel,
+                score: 0,
+              },
+              {
+                evaluatorName: codeEvaluatorName,
+                evaluatorKind: 'code' as const,
+                evaluatorModel: judgeModel,
+                score: 0.25,
+              },
+            ].map((evaluator) => {
+              const score = buildScore({
+                exampleId: repeatedExampleId,
+                exampleIndex: 0,
+                datasetId,
+                datasetName,
+                repetitionIndex: 1,
+                ...evaluator,
+              });
+              return { ...score, task: { ...score.task, output: repeatedRunOutput } };
+            }),
+          })
+        )
+        .expect(200);
+
       // Only the first task trace has spans; the other references have "aged out".
       await seedTrace(es, traceIndex, taskTraceId(0), [
         {
@@ -310,12 +349,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           version: '2',
           kind: 'llm',
           model: judgeModel,
-          score_count: 3,
+          score_count: 4,
         });
 
         // The code evaluator's stray model is withheld, in the inventory and in the stats.
         const code = detail.evaluators?.find((evaluator) => evaluator.name === codeEvaluatorName);
-        expect(code).to.eql({ name: codeEvaluatorName, kind: 'code', score_count: 3 });
+        expect(code).to.eql({ name: codeEvaluatorName, kind: 'code', score_count: 4 });
         const codeStats = detail.stats.find((stat) => stat.evaluator_name === codeEvaluatorName);
         expect(codeStats?.evaluator_model).to.be(undefined);
       });
@@ -334,12 +373,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = body as GetEvaluationExperimentRunsResponse;
         expect(response.experiment_id).to.eql(tracedExperimentId);
-        expect(response.total).to.eql(3);
+        expect(response.total).to.eql(4);
         expect(response.page).to.eql(1);
         expect(response.per_page).to.eql(2);
-        expect(response.runs.map((run) => run.example.id)).to.eql(exampleIds.slice(0, 2));
+        // Both repetitions of the first example come before the second example.
+        expect(response.runs.map((run) => [run.example.id, run.task.repetition_index])).to.eql([
+          [repeatedExampleId, 0],
+          [repeatedExampleId, 1],
+        ]);
 
-        const [first] = response.runs;
+        const [first, second] = response.runs;
         expect(first.example.index).to.eql(0);
         expect(first.example.input).to.eql({ question: `question-${exampleIds[0]}` });
         expect(first.task.repetition_index).to.eql(0);
@@ -358,6 +401,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const code = first.evaluators.find((evaluator) => evaluator.name === codeEvaluatorName);
         expect(code?.kind).to.eql('code');
         expect(code?.model).to.be(undefined);
+
+        // The second repetition is a distinct run with its own output and scores,
+        // not merged into the first one.
+        expect(second.example.index).to.eql(0);
+        expect(second.task.repetition_index).to.eql(1);
+        expect(second.task.output).to.eql(repeatedRunOutput);
+        expect(second.task.trace_id).to.be(undefined);
+        expect(second.evaluators.map((evaluator) => [evaluator.name, evaluator.score])).to.eql([
+          [evaluatorName, 0],
+          [codeEvaluatorName, 0.25],
+        ]);
       });
 
       it('returns the remaining runs on the last page', async () => {
@@ -367,8 +421,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
 
         const response = body as GetEvaluationExperimentRunsResponse;
-        expect(response.total).to.eql(3);
-        expect(response.runs.map((run) => run.example.id)).to.eql([exampleIds[2]]);
+        expect(response.total).to.eql(4);
+        expect(response.runs.map((run) => run.example.id)).to.eql(exampleIds.slice(1, 3));
       });
 
       it('returns an empty page past the last run while keeping the total', async () => {
@@ -378,7 +432,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
 
         const response = body as GetEvaluationExperimentRunsResponse;
-        expect(response.total).to.eql(3);
+        expect(response.total).to.eql(4);
         expect(response.runs).to.eql([]);
       });
 

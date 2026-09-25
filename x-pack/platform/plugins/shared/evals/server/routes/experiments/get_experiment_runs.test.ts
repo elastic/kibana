@@ -209,6 +209,75 @@ describe('GET /internal/evals/experiments/{experimentId}/runs', () => {
     });
   });
 
+  it('keeps runs apart when dataset and example ids collide on a separator character', async () => {
+    // ('a|b', 'c') and ('a', 'b|c') would share the key "a|b|c" under a
+    // naive join; each run must still receive only its own documents.
+    const { handler, context, evaluationScoreService } = setup();
+    const collidingDocument = (datasetId: string, exampleId: string, score: number) => ({
+      _source: {
+        experiment_id: 'experiment-abc',
+        example: {
+          id: exampleId,
+          index: 0,
+          input: { question: `${datasetId} / ${exampleId}` },
+          dataset: { id: datasetId, name: 'Dataset One' },
+        },
+        task: { repetition_index: 0, output: { answer: `${datasetId} / ${exampleId}` } },
+        evaluator: { name: 'correctness', kind: 'llm', score },
+      },
+    });
+    evaluationScoreService.search
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+        aggregations: {
+          runs: {
+            buckets: [
+              {
+                key: {
+                  dataset_name: 'Dataset One',
+                  dataset_id: 'a',
+                  example_index: 0,
+                  example_id: 'b|c',
+                  repetition_index: 0,
+                },
+                doc_count: 1,
+              },
+              {
+                key: {
+                  dataset_name: 'Dataset One',
+                  dataset_id: 'a|b',
+                  example_index: 0,
+                  example_id: 'c',
+                  repetition_index: 0,
+                },
+                doc_count: 1,
+              },
+            ],
+          },
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [collidingDocument('a|b', 'c', 0.2), collidingDocument('a', 'b|c', 0.9)],
+        },
+      } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.runs).toHaveLength(2);
+    expect(
+      response.payload.runs.map((run: any) => [
+        run.example.dataset.id,
+        run.example.id,
+        run.evaluators.map((evaluator: any) => evaluator.score),
+      ])
+    ).toEqual([
+      ['a', 'b|c', [0.9]],
+      ['a|b', 'c', [0.2]],
+    ]);
+  });
+
   it('drops a run whose documents were truncated by the MAX_SCORES_PER_QUERY cap', async () => {
     // Simulates the cap: aggregation says run (0,1) has 2 scores but the ES
     // fetch only returned 1 of them (the page hit the 10K document limit).

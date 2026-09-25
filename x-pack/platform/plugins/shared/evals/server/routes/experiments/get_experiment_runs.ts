@@ -41,6 +41,10 @@ const isScoreDocument = (source: unknown): source is EvaluationScoreDocument => 
   );
 };
 
+/**
+ * Collision-free key of a run: dataset and example ids may contain any
+ * character, so the tuple is JSON-encoded rather than joined on a separator.
+ */
 const runKeyOf = ({
   dataset_id: datasetId,
   example_id: exampleId,
@@ -49,7 +53,7 @@ const runKeyOf = ({
   dataset_id: string;
   example_id: string;
   repetition_index: number;
-}): string => `${datasetId}|${exampleId}|${repetition}`;
+}): string => JSON.stringify([datasetId, exampleId, repetition]);
 
 /**
  * A model is never attributed to a `code` evaluator, which invokes none;
