@@ -758,6 +758,7 @@ export enum SecurityAgentBuilderAttachments {
   entityGraph = 'security.entity_graph',
   entityRiskScoreHistory = 'security.entity_risk_score_history',
   exception = 'security.exception',
+  impact = 'security.impact',
   investigationIocs = 'security.investigation.iocs',
   investigationTimeline = 'security.investigation.timeline',
   rule = 'security.rule',

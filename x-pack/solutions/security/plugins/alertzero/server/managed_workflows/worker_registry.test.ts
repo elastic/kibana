@@ -29,8 +29,14 @@ interface ExpectedWorkerSettings {
    * deliberately not offered as a setting.
    */
   every?: string;
-  /** Present only for Workers with Watch-owned settings. */
+  /** Present only for Workers with Watch-owned settings, nested under `extras` in the YAML. */
   extras?: Record<string, unknown>;
+  /**
+   * Watch-owned settings the YAML renders flat into `worker_settings` rather than nesting them
+   * under `extras`. Alert Triage diverges from Rule Tuning's shape here: the settings API uses
+   * `extras` for both, only the rendered YAML differs. Recorded in FOLLOW_UPS.md.
+   */
+  flatSettings?: Record<string, unknown>;
   triggerTypes: string[];
 }
 
@@ -40,7 +46,11 @@ interface ExpectedWorkerSettings {
  * change what already-installed spaces receive.
  */
 const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSettings> = {
-  'system-security-floor-alert-triage': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-floor-alert-triage': {
+    settingsVersion: 2,
+    flatSettings: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+    triggerTypes: ['alert', 'manual'],
+  },
   'system-security-floor-attack-discovery': {
     settingsVersion: 1,
     scheduleInterval: '24h',
@@ -104,6 +114,7 @@ describe('workerRegistry', () => {
             ? {}
             : { scheduleInterval: expected.scheduleInterval }),
           ...(expected.extras === undefined ? {} : { extras: expected.extras }),
+          ...(expected.flatSettings ?? {}),
         })
       );
 

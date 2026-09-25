@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSONSchema7 } from 'json-schema';
 import { z } from '@kbn/zod/v4';
 import {
   builtinWorkflowInputDefinitionRefSchema,
@@ -15,6 +16,7 @@ import {
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
   mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
 } from './builtin_workflow_input_definitions';
+import { convertJsonSchemaToZod } from './lib/build_fields_zod_validator';
 
 describe('builtinWorkflowInputDefinitions', () => {
   it('registers alertingV2NotificationGroup with required top-level fields', () => {
@@ -26,6 +28,47 @@ describe('builtinWorkflowInputDefinitions', () => {
     expect(schema.properties?.groupKey?.type).toBe('object');
     expect(schema.properties?.episodes?.type).toBe('array');
     expect(schema.properties?.rules?.type).toBe('object');
+  });
+
+  it('registers securityAlertAnalysisCallerAlerts as a bounded alert-document array', () => {
+    const schema = builtinWorkflowInputDefinitions.securityAlertAnalysisCallerAlerts;
+    expect(schema.type).toBe('array');
+    expect(schema.maxItems).toBe(1000);
+    const items = schema.items as {
+      required?: string[];
+      properties?: Record<string, { type?: string; format?: string; pattern?: string }>;
+    };
+    expect(items?.required).toEqual(
+      expect.arrayContaining(['_id', '_index', '@timestamp', 'kibana'])
+    );
+    expect(items?.properties?._id?.type).toBe('string');
+    expect(items?.properties?._index?.pattern).toBe(
+      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+    );
+    expect(items?.properties?.['@timestamp']?.format).toBe('date-time');
+  });
+
+  it('keeps extra alert fields, including nested kibana.alert fields, when validating securityAlertAnalysisCallerAlerts', () => {
+    const validator = convertJsonSchemaToZod(
+      builtinWorkflowInputDefinitions.securityAlertAnalysisCallerAlerts as JSONSchema7
+    );
+    const alert = {
+      _id: 'alert-1',
+      _index: '.internal.alerts-security.alerts-default-000001',
+      '@timestamp': '2026-09-23T10:00:00.000Z',
+      host: { name: 'host-1' },
+      kibana: {
+        space_ids: ['default'],
+        alert: {
+          workflow_tags: ['ai.classification.true_positive'],
+          severity: 'high',
+          risk_score: 73,
+          rule: { uuid: 'rule-1', name: 'Rule 1', rule_type_id: 'siem.queryRule' },
+        },
+      },
+    };
+
+    expect(validator.parse([alert])).toEqual([alert]);
   });
 
   it('registers alertingV2NotificationGroup with severity on episode items', () => {
@@ -83,6 +126,7 @@ describe('builtinWorkflowInputDefinitions', () => {
         definitions: {
           customType: { type: 'string' },
           alertingV2NotificationGroup: expect.objectContaining({ type: 'object' }),
+          securityAlertAnalysisCallerAlerts: expect.objectContaining({ type: 'array' }),
         },
       },
     });

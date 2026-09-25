@@ -302,6 +302,7 @@
     "@kbn/anonymization-common",
     "@kbn/workflows-extensions",
     "@kbn/alertzero-common",
+    "@kbn/alertzero-plugin",
     "@kbn/shared-ux-ai-components",
     "@kbn/shared-ux-markdown",
     "@kbn/controls-schemas",

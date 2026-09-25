@@ -161,3 +161,34 @@ export const WORKERS_EMPTY_TITLE = i18n.translate(
     defaultMessage: 'No Workers in this Watch',
   }
 );
+
+/* -------------------------------------------------------------------------- */
+/* Workers section (Watch detail)                                             */
+/* -------------------------------------------------------------------------- */
+
+export const WORKERS_SECTION_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.sectionTitle',
+  { defaultMessage: 'Workers' }
+);
+
+export const WORKERS_SECTION_SUBTITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.sectionSubtitle',
+  { defaultMessage: 'Workers tagged as this Watch' }
+);
+
+/* -------------------------------------------------------------------------- */
+/* Alert Triage Worker extras                                                 */
+/* -------------------------------------------------------------------------- */
+
+export const MINIMUM_CONFIDENCE_SCORE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreLabel',
+  { defaultMessage: 'Minimum confidence score' }
+);
+
+export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
+  {
+    defaultMessage:
+      'False positive alerts must meet or exceed this confidence score to be surfaced for review or auto-closed. Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
+  }
+);

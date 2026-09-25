@@ -213,42 +213,12 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         ],
       },
       {
-        level: 'assisted',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.who',
-          {
-            defaultMessage: 'Closes false positives on its own; you review and can reopen.',
-          }
-        ),
-        facts: [
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.classifies',
-              { defaultMessage: 'Classifies' }
-            ),
-            value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.classifiesValue',
-              '<worker> every batch'
-            ),
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.closures',
-              { defaultMessage: 'Closures' }
-            ),
-            value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.closuresValue',
-              '<worker> closes false positives on its own — <you> reopen any you disagree with'
-            ),
-          },
-        ],
-      },
-      {
         level: 'supervised',
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.who',
           {
-            defaultMessage: 'Closes false positives on its own — same as Assisted for this Worker.',
+            defaultMessage:
+              'Closes false positives on its own — you can reopen any you disagree with.',
           }
         ),
         facts: [

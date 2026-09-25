@@ -13,6 +13,7 @@
     "@kbn/features-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/alertzero-common",
+    "@kbn/management-settings-ids",
     "@kbn/agentic-investigations-plugin",
     "@kbn/zod",
     "@kbn/zod-helpers",
@@ -49,7 +50,8 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/user-profile-components",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/react-kibana-mount",
     "@kbn/proposals-common",
-    "@kbn/proposals-plugin",
+    "@kbn/proposals-plugin"
   ]
 }

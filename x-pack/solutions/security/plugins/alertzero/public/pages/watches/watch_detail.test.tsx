@@ -393,23 +393,18 @@ describe('WatchDetailPage', () => {
   it('offers only the autonomy levels a Worker allows', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
-    // Attack Discovery has no assisted gate; Alert Triage carries the full dial.
-    const attackDiscovery = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
-    );
-    expect(within(attackDiscovery).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
-    expect(
-      within(attackDiscovery).getByTestId('alertZeroAutonomyCard-supervised')
-    ).toBeInTheDocument();
-    expect(
-      within(attackDiscovery).queryByTestId('alertZeroAutonomyCard-assisted')
-    ).not.toBeInTheDocument();
+    // Both Floor Workers gate exactly one action, so neither offers the in-between assisted level.
+    const sections = [
+      SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+    ].map((workerId) => screen.getByTestId(`alertZeroWatchWorkerSection-${workerId}`));
 
-    const alertTriage = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
-    );
-    for (const level of ['manual', 'assisted', 'supervised'] as const) {
-      expect(within(alertTriage).getByTestId(`alertZeroAutonomyCard-${level}`)).toBeInTheDocument();
+    for (const section of sections) {
+      expect(within(section).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+      expect(within(section).getByTestId('alertZeroAutonomyCard-supervised')).toBeInTheDocument();
+      expect(
+        within(section).queryByTestId('alertZeroAutonomyCard-assisted')
+      ).not.toBeInTheDocument();
     }
   });
 

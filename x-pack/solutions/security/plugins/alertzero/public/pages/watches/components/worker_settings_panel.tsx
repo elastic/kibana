@@ -262,7 +262,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         <>
           <EuiSpacer size="s" />
           <EuiText size="s" color="danger" data-test-subj={`alertZeroWorkerSaveError-${worker.id}`}>
-            <p>{settingsI18n.WORKER_SETTINGS_SAVE_ERROR}</p>
+            <p>{error}</p>
           </EuiText>
         </>
       ) : null}

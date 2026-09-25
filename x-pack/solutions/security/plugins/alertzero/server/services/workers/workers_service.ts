@@ -12,12 +12,15 @@ import {
   ListWorkersResponse,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   touchesWorkerSettings,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   type UpdateWorkerRequestBody,
   type Worker,
 } from '@kbn/alertzero-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowSchema } from '@kbn/workflows';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -31,6 +34,19 @@ import {
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
+import type { AlertTriageAttachmentServiceProvider } from '../../types';
+
+interface AlertTriageOpts {
+  getAttachmentService?: AlertTriageAttachmentServiceProvider;
+  /**
+   * Whether the Alert Analysis workflow will actually analyse anything in the caller's space.
+   * Distinct from its `enabled` flag: the workflow installs enabled, but its own guard also
+   * requires a per-space uiSetting that now defaults to off, and with that off it completes
+   * having classified nothing instead of failing. Injected rather than read here because the
+   * setting belongs to security_solution.
+   */
+  isAlertAnalysisRuntimeEnabled?: (request: KibanaRequest) => Promise<boolean>;
+}
 
 /**
  * Workers hidden until the named skill is registered. These skills may be
@@ -85,7 +101,8 @@ export class WorkersService {
       agentBuilder?: AgentBuilderPluginStart;
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
-    } = {}
+    } = {},
+    private readonly alertTriageOpts: AlertTriageOpts = {}
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -265,17 +282,154 @@ export class WorkersService {
         if (!status.installed) return { outcome: 'unavailable' };
       }
 
+      const isAlertTriageEnabled = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+
+      const isAlertTriageWorker =
+        isAlertTriageEnabled && this.alertTriageOpts.getAttachmentService != null;
+
+      if (isAlertTriageEnabled && patch.enabled) {
+        const preflight = await this.checkAlertAnalysisPreflight(request);
+        if (preflight) {
+          return {
+            outcome: 'rejected',
+            what: preflight.message,
+          };
+        }
+      }
+
+      if (isAlertTriageWorker && patch.enabled) {
+        // Attach-then-enable: a failed bulk edit leaves the Worker off, not enabled-but-unattached.
+        await this.attachAlertTriageWorkerToAllRules(request, status.workflowId).catch(
+          (err: Error) => {
+            this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
+            throw err;
+          }
+        );
+      }
+
       await management.updateWorkflow(
         status.workflowId,
         { enabled: patch.enabled },
         spaceId,
         request
       );
+
+      if (isAlertTriageWorker && !patch.enabled) {
+        // Detach after disabling; don't let a partial detach fail the disable.
+        await this.detachAlertTriageWorkerFromAllRules(request, status.workflowId).catch(
+          (err: Error) => {
+            this.logger.error(`Alert Triage Worker: rule detachment failed: ${err.message}`);
+          }
+        );
+      }
     }
 
     const agentLookup = await this.buildAgentLookup(request);
     const worker = await this.projectWorker(registration, spaceId, agentLookup);
     return { outcome: 'updated', response: { worker } };
+  }
+
+  /**
+   * Returns an error message if the Alert Analysis workflow cannot do the Worker's work, null
+   * if the enable may proceed. The Worker wraps that workflow, so enabling it against an
+   * unusable one produces a Worker that triages nothing.
+   *
+   * Two independent things have to hold, and they fail differently:
+   *
+   * - the workflow must be `enabled`, or `workflow.execute` throws and every rule trigger
+   *   surfaces a failed execution
+   * - its per-space runtime config must have analysis switched on. This is the quieter of the
+   *   two and the reason the check cannot stop at the `enabled` flag: the workflow installs
+   *   enabled, but `securitySolution:alertAnalysisWorkflowEnabled` now defaults to false, and
+   *   with it off the workflow's own guard short-circuits and it returns an empty verdict set.
+   *   The Worker then completes successfully having classified, tagged and closed nothing.
+   *
+   * Refusing rather than switching it on is deliberate: that setting is `readonly` and owned
+   * by security_solution, so it is not ours to flip. See FOLLOW_UPS.md.
+   */
+  private async checkAlertAnalysisPreflight(
+    request: KibanaRequest
+  ): Promise<{ message: string } | null> {
+    const management = this.management;
+    if (!management) return null;
+    try {
+      const workflow = await management.getWorkflow(
+        SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+        GLOBAL_WORKFLOW_SPACE_ID
+      );
+      if (workflow && !workflow.enabled) {
+        return {
+          message:
+            'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.',
+        };
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Alert Triage Worker: could not verify Alert Analysis workflow state: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+
+    const { isAlertAnalysisRuntimeEnabled } = this.alertTriageOpts;
+    if (isAlertAnalysisRuntimeEnabled) {
+      try {
+        if (!(await isAlertAnalysisRuntimeEnabled(request))) {
+          return {
+            message:
+              'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
+          };
+        }
+      } catch (err) {
+        // Refusing on an unreadable setting would make the Worker un-enableable whenever the
+        // read fails for an unrelated reason, so this degrades to the checks above.
+        this.logger.warn(
+          `Alert Triage Worker: could not verify alert analysis runtime config: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
+
+    return null;
+  }
+
+  private async attachAlertTriageWorkerToAllRules(
+    request: KibanaRequest,
+    installedWorkflowId: string
+  ): Promise<void> {
+    const { getAttachmentService } = this.alertTriageOpts;
+    if (!getAttachmentService) return;
+    const service = await getAttachmentService(request, installedWorkflowId);
+    if (!service) return;
+    const selection = await service.getRuleAttachmentSelection({
+      search: '',
+      attachmentFilter: 'not_attached',
+    });
+    if (selection.ruleIds.length === 0) return;
+    await service.updateRuleAttachments({
+      attachRuleIds: selection.ruleIds,
+      detachRuleIds: [],
+    });
+  }
+
+  private async detachAlertTriageWorkerFromAllRules(
+    request: KibanaRequest,
+    installedWorkflowId: string
+  ): Promise<void> {
+    const { getAttachmentService } = this.alertTriageOpts;
+    if (!getAttachmentService) return;
+    const service = await getAttachmentService(request, installedWorkflowId);
+    if (!service) return;
+    const selection = await service.getRuleAttachmentSelection({
+      search: '',
+      attachmentFilter: 'attached',
+    });
+    if (selection.attachedRuleIds.length === 0) return;
+    await service.updateRuleAttachments({
+      attachRuleIds: [],
+      detachRuleIds: selection.attachedRuleIds,
+    });
   }
 
   private async projectWorker(

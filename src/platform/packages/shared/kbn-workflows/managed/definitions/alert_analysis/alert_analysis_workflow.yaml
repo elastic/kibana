@@ -51,6 +51,246 @@ tags:
 
 triggers:
   - type: alert
+  # Caller inputs (Worker / Run dialog) must live on a `manual` trigger — AlertRuleTriggerSchema
+  # only allows `type: alert`, so inputs declared on the alert trigger are stripped at parse time.
+  - type: manual
+    # Optional caller-supplied inputs. When provided (e.g. by the AlertZero Alert Triage Worker
+    # via workflow.execute), they override the space's uiSettings runtime_config values.
+    # Absent inputs leave the standalone (alert-trigger) path unchanged.
+    #
+    # CONTRACT — Worker-path steps are gated on `calledByWorker: true`. A caller that omits
+    # this flag runs the same path as a trigger-fired run. A caller that sets
+    # `calledByWorker: true` MUST supply a non-empty `alerts` array (and typically
+    # connectorIdByFeature); missing or empty alerts fail the run via workflow.fail
+    # rather than completing with empty output.
+    inputs:
+      additionalProperties: false
+      properties:
+        alerts:
+          $ref: '#/kibana/definitions/securityAlertAnalysisCallerAlerts'
+          description: >
+            Alert documents to analyse, supplied by a `workflow.execute` caller such as the
+            AlertZero Alert Triage Worker. A child run receives no trigger event, so without
+            this the workflow would see zero alerts. When `calledByWorker` is true, a missing
+            or empty `alerts` array fails the run (workflow.fail) instead of completing with
+            empty output. Absent on the standalone path, which keeps reading the alert
+            trigger's own `event.alerts`.
+            Bounded to 1000 items; each item must include `_id`, `_index` (Security alerts
+            alias or backing index for related-alert graph lookup), `@timestamp`, and
+            `kibana.alert.rule.uuid` (writebacks, enrichment date-range anchor, and
+            rule-context derivation). Execution still chunks by consts.batch_size.
+        autoCloseEnabled:
+          type: boolean
+          description: >
+            When provided, overrides the space's uiSettings autoCloseEnabled value.
+            The Worker sets this to false because it owns closing via proposals. When
+            `calledByWorker` is true and this field is omitted, the sub-workflow forces
+            auto-close off so HITL cannot be bypassed by accident.
+        autoCloseConfidenceScoreMinThreshold:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: >
+            Minimum confidence score for FP auto-close. Overrides the uiSettings value.
+            When supplied, the max threshold is collapsed to 1 (range becomes a floor).
+            Bounded to 0–1 to match the uiSettings contract.
+        agentId:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Agent Builder agent id. Overrides the uiSettings-derived agentId.
+        tagPrefix:
+          type: string
+          maxLength: 256
+          pattern: '^(?=.*[a-zA-Z0-9])[a-zA-Z0-9._-]+$'
+          description: >
+            Tag prefix for workflow tags. Overrides the uiSettings tagPrefix.
+            Same length/pattern constraints as the uiSettings value (interpolated into
+            filter expressions).
+        connectorIdByFeature:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: >
+            Model Management feature id used to resolve the LLM connector at run time.
+            Mutually exclusive with the uiSettings-derived connectorId: supplying this
+            tells the sub-workflow to use the feature registry instead of uiSettings.
+            Must be non-empty — an empty string passes the != null gate but leaves both
+            connectors unset, causing analysis to silently skip with empty verdicts.
+            Bounded to 255 chars to match other Kibana featureId request bounds; interpolated
+            into every batch's ai.agent connector lookup.
+        calledByWorker:
+          type: boolean
+          description: >
+            Explicit flag that this run was triggered by an AlertZero Worker via
+            workflow.execute (not by the alert trigger directly). When true, Worker-specific
+            steps activate: input overrides, caller-supplied alerts, and output accumulation.
+            Absent (or false) keeps the standalone (alert-trigger) path unchanged.
+        investigationConversationId:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: >
+            Conversation id of an existing Investigation conversation (created by the
+            Worker before calling this sub-workflow). When supplied and calledByWorker
+            is true, progress comments are posted into that conversation so the analyst
+            sees batch-by-batch results without leaving the Investigation. Absent on the
+            standalone path — no comments are posted.
+            Bounded to 1–256 chars to match Agent Builder CONVERSATION_ID_MAX_LENGTH;
+            posted into /api/chat/converse once per batch when present.
+
+# Structured output emitted by the `emit_workflow_output` step at the end of each run.
+# Always present, even when analysis is skipped (empty arrays / zero counts).
+# On the standalone path, Worker-gated fields (verdicts, summaries, impact entities, etc.)
+# stay empty even when tags/notes ran — see the emit_workflow_output step comment.
+# Declared in JSON Schema object form, not the legacy `- name: / type:` list. The legacy
+# converter hardcodes array items to `anyOf: [string, number, boolean]`
+# (field_conversion.ts), so an array of objects cannot be expressed in it: `verdicts` would
+# fail output validation once per verdict at the end of an otherwise successful run.
+outputs:
+  # Keep in sync with AlertAnalysisWorkflowOutput / AlertAnalysisVerdict /
+  # AlertAnalysisImpactedEntity in security_solution/common/workflows/alert_analysis_workflow.ts.
+  required:
+    - verdicts
+    - false_positive_count
+    - true_positive_count
+    - inconclusive_count
+    - auto_closed_ids
+    - grouped_counts_summary
+    - generated_summary
+    - connector_id
+    - agent_id
+    - impacted_entities
+    - impacted_entities_truncated
+    - missing_alert_ids
+  properties:
+    verdicts:
+      type: array
+      items:
+        type: object
+        required:
+          - alert_id
+          - classification
+          - confidence_score
+          - rationale
+          - contributing_factors
+          - host_name
+          - user_name
+        properties:
+          alert_id:
+            type: string
+            maxLength: 512
+          classification:
+            type: string
+            enum:
+              - true_positive
+              - false_positive
+              - inconclusive
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+          rationale:
+            type: string
+            maxLength: 500
+          contributing_factors:
+            type: array
+            maxItems: 3
+            items:
+              type: string
+              maxLength: 100
+          host_name:
+            type: string
+            maxLength: 512
+          user_name:
+            type: string
+            maxLength: 512
+    generated_summary:
+      type: string
+      maxLength: 2000
+    connector_id:
+      type: string
+      maxLength: 512
+    agent_id:
+      type: string
+      maxLength: 64
+    impacted_entities:
+      type: array
+      maxItems: 50
+      items:
+        type: object
+        required:
+          - entity_type
+          - name
+          - alert_count
+          - verdicts
+        properties:
+          entity_type:
+            type: string
+            enum:
+              - host
+              - user
+          name:
+            type: string
+            maxLength: 512
+          alert_count:
+            type: integer
+            minimum: 0
+          verdicts:
+            type: object
+            required:
+              - true_positive
+              - false_positive
+              - inconclusive
+            properties:
+              true_positive:
+                type: integer
+                minimum: 0
+              false_positive:
+                type: integer
+                minimum: 0
+              inconclusive:
+                type: integer
+                minimum: 0
+    impacted_entities_truncated:
+      type: string
+      enum:
+        - "true"
+        - "false"
+    missing_alert_ids:
+      type: array
+      description: >
+        Alert ids from the analyzed set for which the agent returned no matching
+        verdict. Always present (empty when every alert was reconciled). Workers
+        should treat a non-empty list as a partial result — the run still completes
+        so matched verdicts are not discarded, but missing ids need retry or
+        Investigation follow-up.
+      maxItems: 1000
+      items:
+        type: string
+        maxLength: 512
+    false_positive_count:
+      type: integer
+      minimum: 0
+    true_positive_count:
+      type: integer
+      minimum: 0
+    inconclusive_count:
+      type: integer
+      minimum: 0
+    auto_closed_ids:
+      type: array
+      description: >
+        Alert ids that qualified for FP auto-close and were submitted to
+        kibana.SetAlertsStatus. Not a confirmation that every id is closed:
+        the close step uses conflicts: proceed, so version-conflicted docs can
+        remain open while still appearing here. Treat as attempted/candidate ids.
+      items:
+        type: string
+        maxLength: 512
+    grouped_counts_summary:
+      type: string
+      maxLength: 10000
 
 settings:
   on-failure:
@@ -63,7 +303,7 @@ settings:
 # Adjust these values to tune workflow behaviour without editing step logic.
 
 consts:
-  workflow_version: "v0.0.3"
+  workflow_version: "v0.0.4"
 
   # When false, the workflow skips alerts that already carry the workflow tag prefix.
   # Set to true to re-evaluate previously analyzed alerts.
@@ -108,10 +348,21 @@ steps:
   - name: set_workflow_variables
     type: data.set
     with:
+      # Copy for ES/Liquid bodies — sibling managed workflows (threat-intel, significant
+      # events) do the same so enrichment queries can term-filter kibana.space_ids.
+      spaceId: "{{ workflow.spaceId }}"
       normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
       # One entry per alert, appended by each batch call: { id, classification,
-      # confidence_score, rationale, contributing_factors }.
+      # confidence_score, rationale, contributing_factors }. `id` is the model's echo of the
+      # alert id, so this list is for internal pairing only — never export it to a caller.
       all_verdicts: []
+      # The caller-facing verdict list emitted by workflow.output, merged once per batch in
+      # classify_alert_batches and keyed on the real alert id rather than the model's echo:
+      # { alert_id, classification, confidence_score, rationale, contributing_factors,
+      #   host_name, user_name }.
+      output_verdicts: []
+      # Skip-path placeholder — build_grouped_counts_summary only runs inside analysis_enabled.
+      grouped_counts_summary: ""
       # One entry per alert: { id, summary } — the related-alert graph, pre-rendered.
       # Reset at the start of each batch iteration (see classify_alert_batches).
       related_summaries: []
@@ -122,6 +373,24 @@ steps:
       batch_input_tokens: 0
       batch_output_tokens: 0
       batch_llm_calls: 0
+      # Sibling of connector_id; apply_caller_input_overrides sets the feature id when the
+      # Worker supplies connectorIdByFeature. analysis_enabled / ai.agent check either.
+      connector_id_by_feature: ""
+      # apply_caller_input_overrides sets this from investigationConversationId (Worker
+      # progress comments when calledByWorker is true).
+      investigation_conversation_id: ""
+      # Per-batch model summaries (Worker path); joined into generated_summary at the end.
+      batch_summaries: []
+      generated_summary: ""
+      # First successful batch connector id (first-non-empty-wins in collect_batch_verdicts).
+      # Empty on the skip path = no LLM call was made.
+      resolved_connector_id: ""
+      # Entity × verdict rows for security.impact (Worker path only).
+      impacted_entities: []
+      # true when impacted_entities was truncated to 50.
+      impacted_entities_truncated: "false"
+      # Alert ids with no agent verdict (apply_verdicts no-match branch).
+      missing_alert_ids: []
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -158,6 +427,83 @@ steps:
       tag_prefix: "{{ steps.fetch_runtime_config.output.tagPrefix }}"
 
   # ---------------------------------------------------------------------------
+  # Apply caller-supplied input overrides (Worker path)
+  # ---------------------------------------------------------------------------
+  # When a caller (e.g. the Alert Triage Worker) supplies inputs, those values take
+  # precedence over the space's uiSettings read above. Gated on calledByWorker so the
+  # standalone (trigger-fired) path is unchanged.
+  #
+  # NOTE — workflow_enabled is intentionally NOT overridden here. If a space admin
+  # has disabled the workflow in uiSettings, Worker invocations will also no-op (the
+  # analysis_enabled guard sees workflow_enabled=false and skips). This is the intended
+  # behaviour: space-admin intent is respected on both paths. The Worker must check
+  # workflowEnabled before invoking this sub-workflow.
+  - name: apply_caller_input_overrides
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: set_caller_overrides
+        type: data.set
+        with:
+          # When min threshold is omitted, keep the uiSettings max. Collapsing max to 1
+          # happens only in collapse_max_threshold_if_min_provided below — otherwise a
+          # Worker that enables auto-close without passing min would widen the range to
+          # [uiSettings.min, 1] past the space admin's configured max.
+          # NOTE: the engine's Liquid has no ternary operator — `a != null ? a : b` fails at
+          # execution time with "The provided expression is invalid", so every fallback here
+          # is either a filter or a separate gated step.
+          auto_close_confidence_score_min_threshold: "${{ inputs.autoCloseConfidenceScoreMinThreshold | default: variables.auto_close_confidence_score_min_threshold }}"
+          agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
+          tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
+          # When called by the Worker the ai.agent output is posted into the Investigation
+          # conversation. Showing a separate Agent Builder chat entry in the Chats UI
+          # would be confusing and redundant.
+          create_conversation: false
+          # When the Worker passes investigationConversationId, store it for progress
+          # comment steps guarded by calledByWorker.
+          investigation_conversation_id: "{{ inputs.investigationConversationId }}"
+          # Worker mode owns closing via HITL. Default auto-close off even when the caller
+          # omits autoCloseEnabled — otherwise a space with uiSettings auto-close on would
+          # still close FPs inside this sub-workflow and bypass the proposal gate.
+          auto_close_enabled: false
+
+      # Swap to the feature-registry connector only when one is supplied, so an omitted
+      # connectorIdByFeature keeps the space's uiSettings connector. Clearing connector_id
+      # keeps the ai.agent step's superRefine from seeing both non-empty.
+      - name: use_connector_by_feature_if_provided
+        type: if
+        condition: "${{ inputs.connectorIdByFeature != null }}"
+        steps:
+          - name: apply_connector_by_feature
+            type: data.set
+            with:
+              connector_id: ""
+              connector_id_by_feature: "{{ inputs.connectorIdByFeature }}"
+
+      # When the Worker supplies a min threshold, collapse max to 1 so the range is a
+      # floor (close at any score >= min). Gated separately so omitting min leaves the
+      # uiSettings max intact.
+      - name: collapse_max_threshold_if_min_provided
+        type: if
+        condition: "${{ inputs.autoCloseConfidenceScoreMinThreshold != null }}"
+        steps:
+          - name: apply_max_floor
+            type: data.set
+            with:
+              auto_close_confidence_score_max_threshold: 1
+
+      # Optional explicit override after the Worker-mode default above. Cannot use
+      # `| default:`: Liquid treats false as falsy, so `false | default: x` yields x.
+      - name: set_auto_close_enabled_if_provided
+        type: if
+        condition: "${{ inputs.autoCloseEnabled != null }}"
+        steps:
+          - name: apply_auto_close_override
+            type: data.set
+            with:
+              auto_close_enabled: "${{ inputs.autoCloseEnabled }}"
+
+  # ---------------------------------------------------------------------------
   # Select the alerts to analyze
   # ---------------------------------------------------------------------------
   # The pending set is never materialised into a variable: it is a `reject_exp` applied
@@ -172,11 +518,137 @@ steps:
       # every alert is re-analyzed.
       pending_filter_expr: '{% if consts.override_previous %}false{% else %}a.kibana.alert.workflow_tags contains "{{ variables.tag_prefix }}"{% endif %}'
 
+  # Worker supplies an explicit alert set and expects a complete structured result for it.
+  # The standalone "already analyzed" tag filter would drop tagged alerts on retry (e.g.
+  # after a mid-run failure) and leave those ids out of workflow.output. Bypass dedup on
+  # the Worker path so every caller-supplied alert is re-analyzed and returned.
+  - name: bypass_dedup_for_worker
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: clear_pending_filter_for_worker
+        type: data.set
+        with:
+          pending_filter_expr: 'false'
+
+  # Worker path with no alerts would otherwise skip analysis and emit empty workflow.output
+  # with status completed — a miswired caller looks healthy. Fail loud instead so the
+  # Worker treats the run as an error. Input defaulting turns an omitted array into [],
+  # so this one check covers both a missing and an empty `alerts`.
+  - name: require_caller_alerts_nonempty
+    type: if
+    condition: "${{ inputs.calledByWorker == true and inputs.alerts.size == 0 }}"
+    steps:
+      - name: fail_empty_caller_alerts
+        type: workflow.fail
+        with:
+          message: >-
+            Alert Analysis Worker path requires a non-empty alerts input;
+            inputs.alerts was missing or empty.
+
+  # The mirror of the gate above. Every alert read is selected by calledByWorker, not by which
+  # input happens to hold data, so a caller that supplies alerts without the flag would fall
+  # through to event.alerts — absent in a child run — and complete with an empty output as if
+  # there had been nothing to analyze. Fail instead of no-oping silently. An alert-trigger run
+  # leaves inputs.alerts empty and never reaches this.
+  - name: require_worker_flag_for_caller_alerts
+    type: if
+    condition: "${{ inputs.alerts.size > 0 and inputs.calledByWorker != true }}"
+    steps:
+      - name: fail_caller_alerts_without_worker_flag
+        type: workflow.fail
+        with:
+          message: >-
+            Alert Analysis received an alerts input without calledByWorker: true.
+            Caller-supplied alerts are only read on the Worker path; set calledByWorker
+            to true or omit alerts.
+
+  # Duplicate _id entries would be analyzed/written multiple times while the model only
+  # returns one verdict per id — select_alert_verdict would reuse the same match and
+  # workflow.output.verdicts would double-count. Fail before batching rather than silently
+  # collapsing (JSON Schema uniqueItems only rejects identical objects, not same-_id pairs).
+  - name: reject_duplicate_caller_alert_ids
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: compute_caller_alert_id_counts
+        type: data.set
+        with:
+          caller_alert_count: "${{ inputs.alerts.size }}"
+          caller_unique_alert_id_count: "${{ inputs.alerts | map: '_id' | uniq | size }}"
+      - name: fail_if_duplicate_caller_alert_ids
+        type: if
+        condition: "${{ variables.caller_alert_count != variables.caller_unique_alert_id_count }}"
+        steps:
+          - name: fail_duplicate_caller_alert_ids
+            type: workflow.fail
+            with:
+              message: >-
+                Alert Analysis Worker path requires unique alert _id values;
+                inputs.alerts contained duplicate ids.
+
+  # All enrichment (prevalence, noise, close history, rule metadata, AI prompt) anchors on
+  # inputs.alerts[0].kibana.alert.rule.uuid. Mixed-rule batches would analyze remaining alerts
+  # with the wrong rule context. Fail loud so the caller is forced to split by rule before
+  # invoking the workflow.
+  - name: reject_multi_rule_caller_alerts
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: compute_caller_unique_rule_count
+        type: data.set
+        with:
+          caller_unique_rule_uuid_count: "${{ inputs.alerts | map: 'kibana.alert.rule.uuid' | uniq | size }}"
+      - name: fail_if_multi_rule_caller_alerts
+        type: if
+        condition: "${{ variables.caller_unique_rule_uuid_count > 1 }}"
+        steps:
+          - name: fail_multi_rule_caller_alerts
+            type: workflow.fail
+            with:
+              message: >-
+                Alert Analysis Worker path requires all alerts to belong to a single rule;
+                inputs.alerts contained alerts from multiple rule UUIDs.
+
+  # ---------------------------------------------------------------------------
+  # Rule context for enrichment queries / logs
+  # ---------------------------------------------------------------------------
+  # Standalone (alert trigger) reads event.rule. Worker/manual child runs have no
+  # trigger event, so derive from the first caller alert. Worker batches are
+  # guaranteed single-rule by the reject_multi_rule_caller_alerts gate above.
+  - name: set_rule_context
+    type: data.set
+    with:
+      rule_id: "{{ event.rule.id }}"
+      rule_name: "{{ event.rule.name }}"
+
+  - name: derive_rule_context_from_alerts
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: apply_rule_from_caller_alerts
+        type: data.set
+        with:
+          rule_id: "{{ inputs.alerts[0].kibana.alert.rule.uuid }}"
+          rule_name: "{{ inputs.alerts[0].kibana.alert.rule.name }}"
+
+  # Alerts are read inline from event.alerts (standalone) or inputs.alerts (Worker) and never
+  # stored in a step output, which would subject them to max-step-size and duplicate them in state.
   - name: set_alert_counts
     type: data.set
     with:
       total_alert_count: "${{ event.alerts | size }}"
       pending_alert_count: "${{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | size }}"
+
+  - name: count_caller_alerts
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: apply_caller_alert_counts
+        type: data.set
+        with:
+          total_alert_count: "${{ inputs.alerts | size }}"
+          pending_alert_count: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | size }}"
 
   # ---------------------------------------------------------------------------
   # Runtime guard
@@ -184,11 +656,11 @@ steps:
   # Enrichment, the AI agent calls and auto-close only run when this space has the workflow
   # enabled, a connector configured, and at least one alert left to analyze. A disabled or
   # unconfigured space no-ops, which is why enabled-by-default with an empty connector is
-  # safe. The guard is a parens-free `and` because the workflow template parser reads `(`
-  # as range syntax.
+  # safe. Parentheses group the two-connector OR — createWorkflowLiquidEngine enables
+  # groupedExpressions, so this is valid Liquid (not range syntax).
   - name: analysis_enabled
     type: if
-    condition: "${{ variables.workflow_enabled and variables.connector_id != '' and variables.pending_alert_count > 0 }}"
+    condition: "${{ variables.workflow_enabled and (variables.connector_id != '' or variables.connector_id_by_feature != '') and variables.pending_alert_count > 0 }}"
     steps:
 
       # Logged inside the guard so a space with the workflow disabled does not claim, on every rule
@@ -197,35 +669,52 @@ steps:
         type: console
         with:
           message: >-
-            Alert analysis for rule {{ event.rule.name }} ({{ event.rule.id }}):
+            Alert analysis for rule {{ variables.rule_name }} ({{ variables.rule_id }}):
             {{ variables.pending_alert_count }} of {{ variables.total_alert_count }} alerts to analyze
             in batches of {{ consts.batch_size }}.
 
       # -----------------------------------------------------------------------
       # Rule-scoped enrichment (once per execution)
       # -----------------------------------------------------------------------
-      # Every alert in the trigger batch comes from the same rule execution, so these
-      # queries return the same answer for all of them. They are anchored on the first
-      # alert's timestamp — the alerts of one execution share a detection window, so the
-      # anchor is equivalent to the per-alert anchor it replaces.
+      # Enrichment is rule-scoped (same UUID, same 30d/7d/±24h windows for all alerts).
+      # The anchor is the first alert's timestamp. For standalone triggers all alerts share
+      # one rule execution window, so the anchor is equivalent to a per-alert anchor.
+      # For Worker batches the anchor may lag the newest alert by hours, but the query
+      # windows (30d close history, 7d/24h prevalence) are large enough that realistic
+      # batch spreads do not materially change the enrichment result. Running enrichment
+      # once per execution rather than once per alert avoids multiplying ES queries by
+      # batch size.
       - name: set_enrichment_anchor
         type: data.set
         with:
           anchor_timestamp: '{{ event.alerts[0]["@timestamp"] }}'
+
+      - name: anchor_on_caller_alerts
+        type: if
+        condition: "${{ inputs.calledByWorker == true }}"
+        steps:
+          - name: apply_caller_enrichment_anchor
+            type: data.set
+            with:
+              anchor_timestamp: '{{ inputs.alerts[0]["@timestamp"] }}'
 
       # Close history: how often this rule's alerts have been closed and
       # the distribution of close reasons (e.g. false_positive, resolved).
       - name: get_close_history_search
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          # Space-scoped alias + kibana.space_ids filter: Worker-path rule UUID comes from
+          # caller-supplied alerts and must not read another space's alert data.
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           query:
             bool:
               filter:
                 - term:
-                    kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    kibana.space_ids: "{{ variables.spaceId }}"
+                - term:
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - term:
                     kibana.alert.workflow_status: "closed"
                 - range:
@@ -236,14 +725,16 @@ steps:
       - name: get_close_history_false_positive_count
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           query:
             bool:
               filter:
                 - term:
-                    kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    kibana.space_ids: "{{ variables.spaceId }}"
+                - term:
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - term:
                     kibana.alert.workflow_status: "closed"
                 - range:
@@ -272,16 +763,18 @@ steps:
         type: elasticsearch.esql.query
         with:
           query: |-
-            FROM .alerts-security.alerts-*
+            FROM .alerts-security.alerts-{{ variables.spaceId }}
             | WHERE `kibana.alert.rule.uuid` == ?1 AND `kibana.alert.workflow_status` == "closed"
             | EVAL close_reason = COALESCE(`kibana.alert.workflow_reason`, "unknown")
             | STATS close_reason_count = COUNT(*) BY close_reason
             | SORT close_reason_count DESC
           params:
-            - "{{event.rule.id}}"
+            - "{{ variables.rule_id }}"
           filter:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - range:
                     "@timestamp":
                       gte: '{{ variables.anchor_timestamp }}||-30d'
@@ -307,7 +800,7 @@ steps:
       - name: get_global_prevalence_stats
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           runtime_mappings:
@@ -341,7 +834,9 @@ steps:
             bool:
               filter:
                 - term:
-                    kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    kibana.space_ids: "{{ variables.spaceId }}"
+                - term:
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - range:
                     "@timestamp":
                       gte: '{{ variables.anchor_timestamp }}||-24h'
@@ -387,7 +882,7 @@ steps:
       - name: get_noise_signal_stats
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           runtime_mappings:
@@ -421,7 +916,9 @@ steps:
             bool:
               filter:
                 - term:
-                    kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    kibana.space_ids: "{{ variables.spaceId }}"
+                - term:
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - range:
                     "@timestamp":
                       gte: '{{ variables.anchor_timestamp }}||-7d'
@@ -462,7 +959,7 @@ steps:
       - name: get_rule_metadata_source
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 1
           _source:
             - "kibana.alert.rule.name"
@@ -475,15 +972,19 @@ steps:
             - "kibana.alert.rule.references"
             - "kibana.alert.rule.threat"
           query:
-            term:
-              kibana.alert.rule.uuid: "{{event.rule.id}}"
+            bool:
+              filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
+                - term:
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
 
       - name: get_rule_metadata
         type: data.set
         with:
-          rule_id: "{{event.rule.id}}"
+          rule_id: "{{ variables.rule_id }}"
           metadata:
-            rule_id: "{{event.rule.id}}"
+            rule_id: "{{ variables.rule_id }}"
             rule_name: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.name"] }}'
             rule_uuid: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.uuid"] }}'
             rule_description: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.description"] }}'
@@ -538,7 +1039,8 @@ steps:
       # the total alert count), so workflow-execution state stays proportional to batch size.
       - name: classify_alert_batches
         type: foreach
-        foreach: "{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
+        foreach: >-
+          {% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% endif %}
         steps:
 
           # -----------------------------------------------------------------
@@ -563,7 +1065,11 @@ steps:
                 type: security.buildAlertEntityGraph
                 with:
                   alertId: "{{foreach.item._id}}"
-                  alertIndex: "{{foreach.item._index}}"
+                  # Executing-space alias only — never foreach.item._index. A Worker caller can
+                  # supply another space's Security alerts index; buildAlertEntityGraph has no
+                  # kibana.space_ids filter, so trusting caller _index would leak related-alert
+                  # metadata across spaces. Same-space alerts still resolve via this alias.
+                  alertIndex: ".alerts-security.alerts-{{ variables.spaceId }}"
                   # The alert itself is already in the prompt; the graph only needs to add the others.
                   include_seed: false
                   entity_fields:
@@ -666,6 +1172,12 @@ steps:
                 - Judge every alert on its own evidence. A severe alert elsewhere in the batch is NOT evidence about this alert; the only cross-alert evidence you may use is the Related Alerts line inside an alert's own block.
                 - Alerts in this batch share a rule, so they often look alike. Identical evidence must produce the identical verdict, and genuinely different evidence must produce a different one — do not copy a neighbour's verdict, and do not vary a verdict for the sake of variety.
                 - Keep each rationale to ONE short sentence of at most 20 words. List at most 3 contributing factors, each a short phrase of at most 6 words. Terse output is mandatory: a long reply gets cut off and loses verdicts for the alerts at the end of the batch.
+                {% if inputs.calledByWorker == true %}
+                - Also return a `batch_summary` string: 1–2 sentences (≤45 words total), grouped by
+                  host or user, explaining *why* the verdicts came out that way. Do not repeat per-alert
+                  rationale; state the pattern. Omit the field entirely if there is nothing meaningful to
+                  add beyond the verdict counts.
+                {% endif %}
                 </batch_protocol>
 
                 <untrusted_content>
@@ -990,6 +1502,12 @@ steps:
             type: ai.agent
             agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
+            # Exactly one of connector-id / connector-id-by-feature must be non-empty at
+            # execution time. Liquid renders "" for the unused variable; the ai.agent step's
+            # superRefine only fires when BOTH are non-empty, so they coexist safely.
+            # Standalone path: connector_id_by_feature="", connector_id=<real id>.
+            # Worker path: connector_id="", connector_id_by_feature=<feature id>.
+            connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
             create-conversation: "${{ variables.create_conversation }}"
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch.
             # Azure OpenAI's buffered response for all verdicts can exceed 1 MB; Bedrock bypasses
@@ -1022,12 +1540,18 @@ steps:
                 properties:
                   verdicts:
                     type: array
+                    # Cap at consts.batch_size: a batch never has more than 50 real alerts, so
+                    # more than 50 verdicts is hallucination/injection. Without this bound a
+                    # 10 MB response can inflate all_verdicts across up to 20 batches.
+                    maxItems: 50
                     description: One verdict per alert in the batch, in the order the alerts were given.
                     items:
                       type: object
                       properties:
                         id:
                           type: string
+                          # Matches alerts items._id maxLength — the model must echo a real id.
+                          maxLength: 512
                           description: The alert id, copied verbatim from the <alert id="..."> block being classified
                         classification:
                           type: string
@@ -1043,11 +1567,20 @@ steps:
                           description: Confidence score from 0.0-1.0 indicating certainty of the classification
                         rationale:
                           type: string
+                          # Matches workflow.output / AlertAnalysisVerdict — unbounded rationale
+                          # would pass the agent schema then fail final output validation after
+                          # tags/notes have already been written.
+                          maxLength: 500
                           description: One short sentence (max 20 words) naming the decision gate and the strongest evidence
                         contributing_factors:
                           type: array
+                          maxItems: 3
                           items:
                             type: string
+                            # Matches workflow.output / AlertAnalysisVerdict — unbounded factors
+                            # would pass the agent schema then fail final output validation after
+                            # tags/notes have already been written.
+                            maxLength: 100
                           description: At most 3 short phrases (max 6 words each) naming the strongest contributing factors
                       required:
                         - id
@@ -1055,6 +1588,18 @@ steps:
                         - confidence_score
                         - rationale
                         - contributing_factors
+                  batch_summary:
+                    type: string
+                    # Prompt asks ≤45 words; bound at the producer so up to ~20 batch
+                    # summaries cannot inflate execution state before join+truncate.
+                    # 500 chars leaves headroom while staying well under generated_summary's
+                    # 2000-char emit cap (20 × 500 would be truncated at join anyway).
+                    maxLength: 500
+                    description: >-
+                      Optional 1–2 sentences (≤45 words) grouped by host or user explaining
+                      why the batch verdicts came out as they did. Present only when
+                      calledByWorker; per-alert detail stays in each rationale. Not required —
+                      omit entirely if there is nothing to add beyond counts.
                 required:
                   - verdicts
 
@@ -1073,14 +1618,168 @@ steps:
                   message: >-
                     Alert analysis batch {{ foreach.index }} returned no verdicts for
                     {{ foreach.item | size }} alerts.
+
+              # TODO: replace with ai.conversation.message.add once kibana#291688 merges.
+              # Until then /api/chat/converse + trigger_mode:never appends via appendUserMessage,
+              # so these progress lines are stored as user messages (emoji does not change role).
+              - name: post_batch_failure_comment
+                type: kibana.request
+                if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
+                on-failure:
+                  continue: true
+                with:
+                  method: POST
+                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+                  headers:
+                    kbn-xsrf: string
+                    Content-Type: application/json
+                    elastic-api-version: "2023-10-31"
+                  body:
+                    conversation_id: "{{ variables.investigation_conversation_id }}"
+                    trigger_mode: "never"
+                    input: |-
+                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts. These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.
+
+                      [View execution]({{ execution.url }})
+
             else:
+              # The model can echo an id from another batch; select_alert_verdict takes `first`
+              # over all_verdicts, so only this batch's ids may enter it (and the progress counts).
+              - name: set_batch_alert_ids
+                type: data.set
+                with:
+                  batch_alert_ids: "${{ foreach.item | map: '_id' }}"
+
+              - name: filter_verdicts_to_batch
+                type: data.set
+                with:
+                  batch_verdicts: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', 'variables.batch_alert_ids contains v.id' }}"
+
               - name: collect_batch_verdicts
                 type: data.set
                 with:
-                  all_verdicts: "${{ variables.all_verdicts | concat: steps.runAgent_step.output.structured_output.verdicts }}"
+                  all_verdicts: "${{ variables.all_verdicts | concat: variables.batch_verdicts }}"
                   batch_input_tokens: "${{ variables.batch_input_tokens | plus: steps.runAgent_step.output.metadata.usage.inputTokens }}"
                   batch_output_tokens: "${{ variables.batch_output_tokens | plus: steps.runAgent_step.output.metadata.usage.outputTokens }}"
                   batch_llm_calls: "${{ variables.batch_llm_calls | plus: 1 }}"
+                  # `uniq` so a repeated id cannot stand in for one the model dropped.
+                  batch_matched_id_count: "${{ variables.batch_verdicts | map: 'id' | uniq | size }}"
+                  # First non-empty wins: keep the connector from the first successful batch
+                  # call so the Worker can name it in Comment 2 without a second lookup.
+                  resolved_connector_id: >-
+                    {% if variables.resolved_connector_id == '' %}{{ steps.runAgent_step.output.metadata.usage.connectorId }}{% else %}{{ variables.resolved_connector_id }}{% endif %}
+
+              # -------------------------------------------------------------------
+              # Accumulate the verdicts a caller receives via workflow.output
+              # (Worker path only — gated on calledByWorker so standalone runs skip this)
+              # -------------------------------------------------------------------
+              # Built per batch into a list reset each iteration, then merged once: every
+              # data.set persists its full value, so pushing each alert onto the run-wide list
+              # would store it O(n²) times across the execution.
+              - name: accumulate_batch_output_verdicts_gate
+                type: if
+                condition: "${{ inputs.calledByWorker == true }}"
+                steps:
+                  - name: reset_batch_output_verdicts
+                    type: data.set
+                    with:
+                      batch_output_verdicts: []
+
+                  - name: build_batch_output_verdicts
+                    type: foreach
+                    foreach: "{{ foreach.item | json }}"
+                    steps:
+                      # Count, not emptiness, decides the branch (see select_alert_verdict).
+                      - name: select_batch_alert_verdict
+                        type: data.set
+                        with:
+                          batch_alert_verdict: "${{ variables.batch_verdicts | where: 'id', foreach.item._id | first }}"
+                          batch_alert_verdict_count: "${{ variables.batch_verdicts | where: 'id', foreach.item._id | size }}"
+
+                      # Keyed on foreach.item._id — the real alert id — never on the model's
+                      # echoed `id`. A caller acts on these: the Alert Triage Worker tags, notes
+                      # and closes by this field, so passing the raw model output through would
+                      # let a fabricated id close an unrelated alert. An alert with no verdict is
+                      # skipped here and reported via missing_alert_ids by apply_verdicts.
+                      - name: accumulate_worker_output_verdict
+                        type: if
+                        condition: "${{ variables.batch_alert_verdict_count > 0 }}"
+                        steps:
+                          - name: build_output_verdict
+                            type: data.set
+                            with:
+                              output_verdict:
+                                alert_id: "{{ foreach.item._id }}"
+                                classification: "{{ variables.batch_alert_verdict.classification }}"
+                                confidence_score: "${{ variables.batch_alert_verdict.confidence_score }}"
+                                rationale: "{{ variables.batch_alert_verdict.rationale }}"
+                                contributing_factors: "${{ variables.batch_alert_verdict.contributing_factors }}"
+                                # Entity the alert belongs to, carried so a caller can group verdicts by
+                                # host/user without re-reading the alerts. Read from the alert document,
+                                # never from the model's reply. `__missing__` keeps grouping total (an
+                                # alert with no host still belongs in exactly one group) and cannot
+                                # collide with a real ECS host/user named "unknown". Truncate to the
+                                # workflow.output / Zod maxLength (512) so a long caller-supplied name
+                                # cannot fail emit after tags/notes are already written.
+                                host_name: "{{ foreach.item.host.name | default: '__missing__' | truncate: 512, '' }}"
+                                user_name: "{{ foreach.item.user.name | default: '__missing__' | truncate: 512, '' }}"
+
+                          - name: accumulate_output_verdict
+                            type: data.set
+                            with:
+                              batch_output_verdicts: "${{ variables.batch_output_verdicts | push: variables.output_verdict }}"
+
+                  - name: merge_batch_output_verdicts
+                    type: data.set
+                    with:
+                      output_verdicts: "${{ variables.output_verdicts | concat: variables.batch_output_verdicts }}"
+
+              # Keep the model's batch_summary (Worker path only) when at least one of its
+              # verdicts matched this batch, and say so when it covers only part of the batch;
+              # a summary with no matched verdicts would describe results the caller never sees.
+              - name: accumulate_batch_summary_gate
+                type: if
+                condition: "${{ inputs.calledByWorker == true and variables.batch_matched_id_count > 0 and steps.runAgent_step.output.structured_output.batch_summary != blank }}"
+                steps:
+                  - name: build_batch_summary_entry
+                    type: data.set
+                    with:
+                      batch_summary_entry: >-
+                        {{ steps.runAgent_step.output.structured_output.batch_summary }}{% if variables.batch_matched_id_count < variables.batch_alert_ids.size %} (Covers {{ variables.batch_matched_id_count }} of {{ variables.batch_alert_ids.size }} alerts in this batch; the rest returned no verdict.){% endif %}
+                  - name: accumulate_batch_summary
+                    type: data.set
+                    with:
+                      batch_summaries: "${{ variables.batch_summaries | push: variables.batch_summary_entry }}"
+
+              - name: set_batch_progress_counts
+                type: data.set
+                with:
+                  batch_tp_count: "${{ variables.batch_verdicts | where: 'classification', 'true_positive' | size }}"
+                  batch_fp_count: "${{ variables.batch_verdicts | where: 'classification', 'false_positive' | size }}"
+                  batch_inc_count: "${{ variables.batch_verdicts | where: 'classification', 'inconclusive' | size }}"
+
+              # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+              - name: post_batch_progress_comment
+                type: kibana.request
+                if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
+                on-failure:
+                  continue: true
+                with:
+                  method: POST
+                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+                  headers:
+                    kbn-xsrf: string
+                    Content-Type: application/json
+                    elastic-api-version: "2023-10-31"
+                  body:
+                    conversation_id: "{{ variables.investigation_conversation_id }}"
+                    trigger_mode: "never"
+                    input: >-
+                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete
+                      ({{ foreach.item | size }} alert(s)):
+                      {{ variables.batch_tp_count }} true positive,
+                      {{ variables.batch_fp_count }} false positive,
+                      {{ variables.batch_inc_count }} inconclusive.
 
       # -----------------------------------------------------------------------
       # Write the verdicts back to the alerts
@@ -1094,7 +1793,8 @@ steps:
 
       - name: apply_verdicts
         type: foreach
-        foreach: "{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}"
+        foreach: >-
+          {% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% endif %}
         steps:
           - name: select_alert_verdict
             type: data.set
@@ -1138,14 +1838,21 @@ steps:
 
                         ---
                         Error: the batch this alert was analyzed in returned no verdict for it.
+                        {% if variables.investigation_conversation_id != '' %}
+                        - Investigation: [{{ variables.investigation_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
+                        {%- endif %}
                   headers:
                     kbn-xsrf: string
                     Content-Type: application/json
+
             else:
 
               # -------------------------------------------------------------------
               # Write the verdict note to the alert timeline
               # -------------------------------------------------------------------
+              # The Investigation line is what lets another worker reading this alert pick up
+              # the conversation that produced the verdict. Empty on the standalone path,
+              # where no Investigation exists.
               - name: add_verdict_note_to_alert
                 type: kibana.request
                 on-failure:
@@ -1178,9 +1885,12 @@ steps:
                         {%- endfor %}
 
                         ### Analysis Details
+                        {% if variables.investigation_conversation_id != '' -%}
+                        - Investigation: [{{ variables.investigation_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
+                        {% endif -%}
                         - Workflow version: {{ variables.normalized_version }}
                         - Tag prefix: {{ variables.tag_prefix }}
-                        - Connector: {{ variables.connector_id }}
+                        - Connector: {{ variables.resolved_connector_id | default: variables.connector_id }}
                         - Analyzed in a batch of up to {{ consts.batch_size }} alerts
                         {% if variables.auto_close_enabled -%}
                         - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
@@ -1260,6 +1970,159 @@ steps:
                       auto_close_ids: "${{ variables.auto_close_ids | push: foreach.item._id }}"
 
       # -----------------------------------------------------------------------
+      # Alert ids the agent never returned a verdict for (Worker path only)
+      # -----------------------------------------------------------------------
+      # Exposed in workflow.output so a Worker can retry or surface a partial Investigation
+      # result instead of treating completed+empty as success. Prefer this over failing the
+      # whole run, which would discard the verdicts that did match. Derived once from the
+      # analyzed set rather than pushed per alert: every data.set persists its full value, so
+      # a per-alert push would store the cumulative list once for each alert. Covers both an
+      # alert the agent skipped and a batch that returned nothing, since neither reaches
+      # all_verdicts. Real alert ids only — never the model's echo.
+      - name: collect_verdict_ids
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          all_verdict_ids: "${{ variables.all_verdicts | map: 'id' }}"
+
+      - name: set_missing_alert_ids
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          missing_alert_ids: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | map: '_id' }}"
+
+      # -----------------------------------------------------------------------
+      # Grouped verdict counts, per entity, as a ready-to-render sentence
+      # (Worker path only — gated on calledByWorker; standalone runs have no caller to receive it)
+      # -----------------------------------------------------------------------
+      # Builds an Investigation conclusion like "X alerts for host A classified as true
+      # positive. Y alerts from host B were classified as false positives." Rendered here
+      # rather than in the caller so grouping stays with the data that produced it, and stays
+      # deterministic (plain Liquid over the counts — no second model call).
+      - name: build_grouped_counts_summary_gate
+        type: if
+        condition: "${{ inputs.calledByWorker == true }}"
+        steps:
+          - name: build_grouped_counts_summary
+            type: data.set
+            with:
+              # Cap unique hosts before the per-host rescans (same 50 budget as
+              # impacted_entities), then truncate to the workflow.output maxLength (10000).
+              # Without the host cap a 1000-unique-host batch does ~4M Liquid predicates
+              # and can hit the engine render limit after tags/notes are already written.
+              grouped_counts_summary: >-
+                {%- capture grouped_counts_summary_raw -%}
+                {%- assign all_host_names = variables.output_verdicts | map: 'host_name' | uniq -%}
+                {%- assign hosts = all_host_names | slice: 0, 50 -%}
+                {%- for h in hosts -%}
+                {%- if h == '__missing__' -%}
+                {%- assign host_label = 'no host field' -%}
+                {%- else -%}
+                {%- assign host_label = 'host ' | append: h -%}
+                {%- endif -%}
+                {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
+                {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
+                {%- assign fp = for_host | where: 'classification', 'false_positive' | size -%}
+                {%- assign inc = for_host | where: 'classification', 'inconclusive' | size -%}
+                {%- if tp > 0 %} {{ tp }} alert(s) with {{ host_label }} classified as true positive.{% endif -%}
+                {%- if fp > 0 %} {{ fp }} alert(s) with {{ host_label }} classified as false positive.{% endif -%}
+                {%- if inc > 0 %} {{ inc }} alert(s) with {{ host_label }} were inconclusive.{% endif -%}
+                {%- endfor -%}
+                {%- if all_host_names.size > 50 %} ({{ all_host_names.size | minus: 50 }} additional host(s) omitted from summary.){% endif -%}
+                {%- endcapture -%}
+                {{- grouped_counts_summary_raw | strip | truncate: 10000, ' [truncated]' -}}
+
+          # Join the per-batch summaries the model returned, skipping nil entries
+          # (compact drops values the model omitted when batch_summary was not filled).
+          # Truncate to workflow.output maxLength (2000): up to ~20 schema-valid batch
+          # summaries can exceed that limit and would otherwise fail emit after writebacks.
+          - name: build_generated_summary
+            type: data.set
+            with:
+              generated_summary: "{{ variables.batch_summaries | compact | join: ' ' | truncate: 2000, ' [truncated]' }}"
+
+          # Build one entity row per unique host, then per unique user, collecting
+          # per-entity verdict counts. The Worker passes this to the security.impact
+          # attachment so the Investigation shows what the alert batch touched.
+          #
+          # Cap the unique-name lists BEFORE the loops: a 1000-alert batch can have
+          # ~2000 unique host+user names, and each iteration rescans all verdicts.
+          # Hosts take the first up-to-50 slots; users get the remainder. Truncation
+          # is computed from the uncapped counts.
+          - name: collect_unique_entity_names
+            type: data.set
+            with:
+              host_names_all: "${{ variables.output_verdicts | map: 'host_name' | uniq }}"
+              user_names_all: "${{ variables.output_verdicts | map: 'user_name' | uniq }}"
+
+          - name: plan_host_entity_iteration
+            type: data.set
+            with:
+              entity_name_count: "${{ variables.host_names_all.size | plus: variables.user_names_all.size }}"
+              host_names_for_entities: "${{ variables.host_names_all | slice: 0, 50 }}"
+
+          # Budget/truncation need the capped host list from the previous step — Liquid cannot
+          # read a sibling key from the same data.set `with` block.
+          - name: plan_user_entity_iteration
+            type: data.set
+            with:
+              impacted_entities_truncated: >-
+                {% if variables.entity_name_count > 50 %}true{% else %}false{% endif %}
+              user_entity_budget: "${{ 50 | minus: variables.host_names_for_entities.size }}"
+
+          - name: slice_user_names_for_entities
+            type: data.set
+            with:
+              user_names_for_entities: "${{ variables.user_names_all | slice: 0, variables.user_entity_budget }}"
+
+          - name: build_host_entities
+            type: foreach
+            foreach: "${{ variables.host_names_for_entities }}"
+            steps:
+              - name: build_host_entity
+                type: data.set
+                with:
+                  current_entity:
+                    entity_type: host
+                    name: "{{ foreach.item }}"
+                    alert_count: "${{ variables.output_verdicts | where: 'host_name', foreach.item | size }}"
+                    verdicts:
+                      true_positive: "${{ variables.output_verdicts | where: 'host_name', foreach.item | where: 'classification', 'true_positive' | size }}"
+                      false_positive: "${{ variables.output_verdicts | where: 'host_name', foreach.item | where: 'classification', 'false_positive' | size }}"
+                      inconclusive: "${{ variables.output_verdicts | where: 'host_name', foreach.item | where: 'classification', 'inconclusive' | size }}"
+              - name: push_host_entity
+                type: data.set
+                with:
+                  impacted_entities: "${{ variables.impacted_entities | push: variables.current_entity }}"
+
+          - name: build_user_entities
+            type: foreach
+            foreach: "${{ variables.user_names_for_entities }}"
+            steps:
+              - name: build_user_entity
+                type: data.set
+                with:
+                  current_entity:
+                    entity_type: user
+                    name: "{{ foreach.item }}"
+                    alert_count: "${{ variables.output_verdicts | where: 'user_name', foreach.item | size }}"
+                    verdicts:
+                      true_positive: "${{ variables.output_verdicts | where: 'user_name', foreach.item | where: 'classification', 'true_positive' | size }}"
+                      false_positive: "${{ variables.output_verdicts | where: 'user_name', foreach.item | where: 'classification', 'false_positive' | size }}"
+                      inconclusive: "${{ variables.output_verdicts | where: 'user_name', foreach.item | where: 'classification', 'inconclusive' | size }}"
+              - name: push_user_entity
+                type: data.set
+                with:
+                  impacted_entities: "${{ variables.impacted_entities | push: variables.current_entity }}"
+
+          # Safety slice — lists were already capped above; keep ≤50 if a future change
+          # reorders host/user budgeting.
+          - name: cap_impacted_entities
+            type: data.set
+            with:
+              impacted_entities: "${{ variables.impacted_entities | slice: 0, 50 }}"
+
+      # -----------------------------------------------------------------------
       # Auto-close: close every alert that meets the FP thresholds, in bulk
       # -----------------------------------------------------------------------
       # When auto_close_enabled is true, alerts classified as false_positive with a
@@ -1267,6 +2130,8 @@ steps:
       # a list of ids, so the whole execution closes in two calls rather than two per alert.
       # auto_close_ids is accumulated inside apply_verdicts using foreach.item._id (the real
       # alert id, never the model's echo), so a fabricated model id cannot close an unrelated alert.
+      # Emitted as workflow.output.auto_closed_ids = ids submitted to SetAlertsStatus — not a
+      # confirmed-closed list (conflicts: proceed can leave individual docs open).
 
       - name: check_auto_close_conditions
         type: if
@@ -1314,7 +2179,56 @@ steps:
         type: console
         with:
           message: >-
-            Alert analysis finished for rule {{ event.rule.name }}:
+            Alert analysis finished for rule {{ variables.rule_name }}:
             {{ variables.all_verdicts | size }} verdicts for {{ variables.pending_alert_count }} alerts
             in {{ variables.batch_llm_calls }} model call(s);
             {{ variables.auto_close_ids | size }} alert(s) matched the auto-close thresholds.
+
+    else:
+      # Skipped alerts are unprocessed, so the Worker must not read an empty list as "all reconciled".
+      - name: set_missing_alert_ids_on_skip
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          missing_alert_ids: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | map: '_id' }}"
+
+  # ---------------------------------------------------------------------------
+  # Emit structured output for callers (Worker path)
+  # ---------------------------------------------------------------------------
+  # workflow.output is at the TOP LEVEL (outside analysis_enabled) so it always fires.
+  # When the guard short-circuits (workflow disabled, no connector, zero pending alerts),
+  # the accumulators are still at their initialised values ([] / 0) and the output is
+  # well-formed — callers receive an empty verdict list rather than a missing output.
+  #
+  # STANDALONE PATH CAVEAT: output_verdicts / generated_summary / impacted_entities /
+  # missing_alert_ids are only accumulated when calledByWorker == true. On a standalone
+  # (alert-trigger) run those fields stay at their empty-init values even though
+  # tags/notes/auto-close may have run. auto_closed_ids, connector_id (resolved) and
+  # agent_id ARE populated on both paths. Do not treat standalone workflow.output
+  # as a complete analysis summary — there is no Worker consumer of it today.
+  - name: emit_workflow_output
+    type: workflow.output
+    status: completed
+    with:
+      # output_verdicts, not all_verdicts: the caller-facing list is keyed on the real alert
+      # id. Exporting all_verdicts would hand a caller the model's echoed id to act on.
+      verdicts: "${{ variables.output_verdicts }}"
+      false_positive_count: "${{ variables.output_verdicts | where: 'classification', 'false_positive' | size }}"
+      true_positive_count: "${{ variables.output_verdicts | where: 'classification', 'true_positive' | size }}"
+      inconclusive_count: "${{ variables.output_verdicts | where: 'classification', 'inconclusive' | size }}"
+      auto_closed_ids: "${{ variables.auto_close_ids }}"
+      # Candidate / submitted ids (see outputs.auto_closed_ids description) — not reconciled
+      # against SetAlertsStatus per-doc success; that step returns opaque update_by_query counts.
+      grouped_counts_summary: "{{ variables.grouped_counts_summary }}"
+      # Empty string on the standalone / skip path — honest signal that no call was made.
+      generated_summary: "{{ variables.generated_summary }}"
+      # Connector ID used by the first successful batch call, for Worker attribution.
+      connector_id: "{{ variables.resolved_connector_id }}"
+      # Agent / model id resolved at run time, passed through for Worker attribution.
+      agent_id: "{{ variables.agent_id }}"
+      # Structured entity × verdict array for the security.impact attachment.
+      impacted_entities: "${{ variables.impacted_entities }}"
+      # "true" when the list was capped at 50; "false" otherwise.
+      impacted_entities_truncated: "{{ variables.impacted_entities_truncated }}"
+      # Alert ids the agent omitted; empty when every analyzed alert got a verdict.
+      missing_alert_ids: "${{ variables.missing_alert_ids }}"

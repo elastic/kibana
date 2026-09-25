@@ -23,6 +23,7 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
+import { SettingsSection } from './components/settings_section';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import * as i18n from './translations';
@@ -291,7 +292,13 @@ export const WatchDetailPage: React.FC = () => {
         ) : null}
 
         <EuiFlexItem grow={false}>
-          <div data-test-subj="alertZeroWatchWorkersSection">{renderWorkers()}</div>
+          <SettingsSection
+            title={settingsI18n.WORKERS_SECTION_TITLE}
+            subtitle={settingsI18n.WORKERS_SECTION_SUBTITLE}
+            data-test-subj="alertZeroWatchWorkersSection"
+          >
+            {renderWorkers()}
+          </SettingsSection>
         </EuiFlexItem>
       </EuiFlexGroup>
     </WatchesSectionLayout>
