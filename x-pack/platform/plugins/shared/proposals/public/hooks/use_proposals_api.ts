@@ -31,6 +31,8 @@ import type {
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
 import { mutationKeys, queryKeys } from '../query_keys';
+import { proposalDecisionSignal } from './proposal_decision_signal';
+import { useProposalDecisionSignal } from './use_proposal_decision_signal';
 
 const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
   response?.proposals.some(isProposalSettling) ?? false;
@@ -70,6 +72,7 @@ export const retryOnTransientError = (failureCount: number, error: unknown): boo
  */
 export const usePendingProposals = (conversationId?: string) => {
   const { services } = useKibana();
+  useProposalDecisionSignal();
 
   return useQuery({
     queryKey: queryKeys.proposals.list(conversationId),
@@ -120,6 +123,7 @@ export const useConversationProposals = (
   conversationId: string
 ): UseInfiniteQueryResult<ListProposalsResponse, unknown> => {
   const { services } = useKibana();
+  useProposalDecisionSignal();
 
   return useInfiniteQuery({
     queryKey: queryKeys.proposals.forConversation(conversationId),
@@ -146,6 +150,7 @@ export const useConversationProposals = (
 
 export const useProposal = (id: string | undefined) => {
   const { services } = useKibana();
+  useProposalDecisionSignal();
 
   return useQuery({
     queryKey: queryKeys.proposals.detail(id),
@@ -183,9 +188,15 @@ export const useProposal = (id: string | undefined) => {
  * mutation itself — and therefore `useIsMutating` for it — pending until that
  * refetch lands. Without this, a submission could read as "done" the instant
  * the HTTP call returns, before the UI has any fresher data to show instead.
+ *
+ * Also bumps `proposalDecisionSignal`, so a host with its own isolated `QueryClient` (the
+ * investigation flyout's, say, when the decision was made from the queue page's) invalidates
+ * its cache too — see `useProposalDecisionSignal`.
  */
-const invalidateProposals = (queryClient: ReturnType<typeof useQueryClient>) =>
-  queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
+const invalidateProposals = (queryClient: ReturnType<typeof useQueryClient>) => {
+  proposalDecisionSignal.bump();
+  return queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
+};
 
 /** How often, and for how long, to poll for the decision before giving up on it. */
 const DECISION_POLL_INTERVAL_MS = 750;

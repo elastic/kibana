@@ -26,6 +26,7 @@ import {
   MAX_PROPOSALS_PAGE_SIZE,
 } from '@kbn/proposals-common';
 import { queryKeys } from '../query_keys';
+import { proposalDecisionSignal } from './proposal_decision_signal';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -393,6 +394,24 @@ describe('useApproveProposal', () => {
       expect(invalidateSpy).toHaveBeenCalledTimes(1);
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
     });
+  });
+
+  it('bumps the cross-boundary decision signal, so a host with its own isolated QueryClient invalidates too', async () => {
+    const http = makeHttp();
+    http.post.mockResolvedValue({ id: 'p-1', status: 'approved' });
+    http.get.mockResolvedValue({ decision: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const bumpSpy = jest.spyOn(proposalDecisionSignal, 'bump');
+
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+    await result.current.mutateAsync({ id: 'p-1', body: {} });
+
+    expect(bumpSpy).toHaveBeenCalledTimes(1);
+    bumpSpy.mockRestore();
   });
 
   it('keeps polling the proposal until it reads a decision, rather than trusting the first look', async () => {
