@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-esql-types'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/esql/kbn-esql-types'],
 };

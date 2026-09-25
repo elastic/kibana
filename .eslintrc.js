@@ -225,7 +225,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/packages/shared/esql/kbn-esql-language/scripts/**/*',
   'src/platform/kbn-ui/_tooling/**/*',
 ];
 
