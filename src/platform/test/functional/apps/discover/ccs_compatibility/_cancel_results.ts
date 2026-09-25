@@ -96,8 +96,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // partial results via the async search ID. The secondary button becoming enabled signals
+        // SearchSessionState.Loading (after a 500ms delay), which is guaranteed to fire after the
+        // async search ID is available from ES (~200ms from wait_for_completion_timeout).
+        await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
         await testSubjects.existOrFail('queryCancelButton');
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
@@ -118,6 +120,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
 
         await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+        // Wait for the accordion content to render before reading it
+        await retry.waitFor(
+          'cluster details callout to render',
+          async () =>
+            (await testSubjects.getVisibleText('inspectorRequestClustersDetails')).length > 0
+        );
         const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
         expect(txt).to.contain('Results may be incomplete or empty.');
 
@@ -144,8 +152,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
 
         // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // partial results via the async search ID. The secondary button becoming enabled signals
+        // SearchSessionState.Loading (after a 500ms delay), which is guaranteed to fire after the
+        // async search ID is available from ES (~200ms from wait_for_completion_timeout).
+        await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
         await testSubjects.existOrFail('queryCancelButton');
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
