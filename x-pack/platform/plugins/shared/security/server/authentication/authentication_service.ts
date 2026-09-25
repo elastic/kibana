@@ -7,6 +7,7 @@
 
 import type { errors } from '@elastic/elasticsearch';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import url from 'url';
 
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -464,7 +465,15 @@ export class AuthenticationService {
       const { protocol, hostname, port } = http.getServerInfo();
       const serverConfig = { protocol, hostname, port, ...config.public };
 
-      return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
+      // `url.format` brackets IPv6 literal hostnames (`::1` -> `[::1]`), without which the
+      // result is not a parseable URL. `slashes` is required because the server protocol is
+      // not always one of the schemes Node treats as slashed (e.g. `socket`).
+      return url.format({
+        protocol: serverConfig.protocol,
+        hostname: serverConfig.hostname,
+        port: serverConfig.port,
+        slashes: true,
+      });
     };
 
     this.session = session;
