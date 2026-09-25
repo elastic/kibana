@@ -9,7 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { OperatingSystem, hasNullCharacter, trimInputValues } from '@kbn/securitysolution-utils';
 
 import { i18n } from '@kbn/i18n';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
@@ -91,6 +91,13 @@ const ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE = (spaceIds: string[]): st
       itemOwnerSpaces: spaceIds.join(', '),
     },
   });
+
+interface EndpointArtifactEntryValue {
+  field: string;
+  type: string;
+  value?: string | string[];
+  entries?: EndpointArtifactEntryValue[];
+}
 
 export const BasicEndpointExceptionDataSchema = schema.object(
   {
@@ -184,6 +191,70 @@ export class BaseValidator {
       BasicEndpointExceptionDataSchema.validate(item);
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
+    }
+  }
+
+  /**
+   * Walks `match`/`match_any`/`wildcard` entry values (the ones the Endpoint matches literally),
+   * applying `callback` to each.
+   */
+  private forEachLiteralEntry(
+    item: ExceptionItemLikeOptions,
+    callback: (entry: EndpointArtifactEntryValue & { value: string | string[] }) => void
+  ): void {
+    const inspectEntries = (entries: EndpointArtifactEntryValue[]): void => {
+      entries.forEach((entry) => {
+        if (entry.type === 'nested') {
+          inspectEntries(entry.entries ?? []);
+          return;
+        }
+
+        if (!['match', 'match_any', 'wildcard'].includes(entry.type) || entry.value === undefined) {
+          return;
+        }
+
+        callback(entry as EndpointArtifactEntryValue & { value: string | string[] });
+      });
+    };
+
+    inspectEntries(item.entries as EndpointArtifactEntryValue[]);
+  }
+
+  /**
+   * Trims edge whitespace from entry values in place. Called only for basic-mode Trusted Apps and
+   * Blocklist, where accidentally padded paths, hashes and signers are a common cause of artifacts
+   * that never match.
+   */
+  protected trimEntryValues(item: ExceptionItemLikeOptions): void {
+    this.forEachLiteralEntry(item, (entry) => {
+      entry.value = trimInputValues(entry.value);
+    });
+  }
+
+  /**
+   * Rejects entry values containing a NUL character. NUL can never be part of a real value and
+   * prevents the Endpoint from matching, so this applies to every artifact type. Other control
+   * characters are allowed: a tab or newline can appear in a genuine command line or path.
+   */
+  protected validateEntryValueCharacters(item: ExceptionItemLikeOptions): void {
+    const nullCharacterFields = new Set<string>();
+
+    this.forEachLiteralEntry(item, (entry) => {
+      if (hasNullCharacter(entry.value)) {
+        nullCharacterFields.add(entry.field);
+      }
+    });
+
+    if (nullCharacterFields.size) {
+      throw new EndpointArtifactExceptionValidationError(
+        i18n.translate(
+          'xpack.securitySolution.endpointArtifactValidation.invalidEntryValuesErrorMessage',
+          {
+            defaultMessage: 'Invalid entry values: null characters in fields: {fields}',
+            values: { fields: i18n.formatList('unit', [...nullCharacterFields]) },
+          }
+        )
+      );
     }
   }
 

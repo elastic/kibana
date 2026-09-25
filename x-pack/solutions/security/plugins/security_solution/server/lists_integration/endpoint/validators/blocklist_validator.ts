@@ -107,6 +107,7 @@ const WindowsSignerEntrySchema = schema.object({
         schema.literal('match'),
         schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }),
         schema.arrayOf(schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }), {
+          minSize: 1,
           maxSize: 2000,
         })
       ),
@@ -248,6 +249,8 @@ export class BlocklistValidator extends BaseValidator {
       await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
 
       // usual validators from pre-create
+      this.trimEntryValues(item); // trim first, so dedup sees normalized values
+      this.validateEntryValueCharacters(item);
       (item.entries as BlocklistConditionEntry[]) = removeDuplicateEntryValues(
         item.entries as BlocklistConditionEntry[]
       );
@@ -261,6 +264,8 @@ export class BlocklistValidator extends BaseValidator {
   ): Promise<CreateExceptionListItemOptions> {
     await this.validateHasWritePrivilege();
 
+    this.trimEntryValues(item); // trim first, so dedup sees normalized values
+    this.validateEntryValueCharacters(item);
     (item.entries as BlocklistConditionEntry[]) = removeDuplicateEntryValues(
       item.entries as BlocklistConditionEntry[]
     );
@@ -308,6 +313,8 @@ export class BlocklistValidator extends BaseValidator {
 
     await this.validateHasWritePrivilege();
 
+    this.trimEntryValues(updatedItem); // trim first, so dedup sees normalized values
+    this.validateEntryValueCharacters(updatedItem);
     (_updatedItem.entries as BlocklistConditionEntry[]) = removeDuplicateEntryValues(
       _updatedItem.entries as BlocklistConditionEntry[]
     );

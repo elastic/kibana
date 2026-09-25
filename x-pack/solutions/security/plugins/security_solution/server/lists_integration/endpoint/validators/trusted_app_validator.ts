@@ -308,6 +308,15 @@ export class TrustedAppValidator extends BaseValidator {
   }
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {
+    const isAdvancedMode = item.tags.includes('form_mode:advanced');
+
+    // Basic mode has a fixed set of path/hash/signer fields, so edge whitespace is never
+    // meaningful and can be trimmed. Advanced mode accepts any field from the events index
+    // (like Event Filters), where edge whitespace can be part of a legitimate value.
+    if (!isAdvancedMode) {
+      this.trimEntryValues(item);
+    }
+    this.validateEntryValueCharacters(item);
     await this.validateBasicData(item);
 
     try {
@@ -315,7 +324,6 @@ export class TrustedAppValidator extends BaseValidator {
         this.endpointAppContext.experimentalFeatures.trustedAppsAdvancedMode;
       const isTAProcessDescendantsFeatureFlagEnabled =
         this.endpointAppContext.experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled;
-      const isAdvancedMode = item.tags.includes('form_mode:advanced');
       const hasProcessDescendants = item.tags.includes(TRUSTED_PROCESS_DESCENDANTS_TAG);
 
       // Validate that the feature flags are enabled if the related features are used

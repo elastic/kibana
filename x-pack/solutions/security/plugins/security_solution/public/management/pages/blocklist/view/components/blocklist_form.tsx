@@ -106,6 +106,13 @@ function isValid(itemValidation: ItemValidation): boolean {
   return !Object.values(itemValidation).some((errors) => Object.keys(errors).length);
 }
 
+/** Splits a comma-separated `is one of` value into trimmed, non-empty members. */
+const splitCommaSeparatedValues = (value: string): string[] =>
+  value
+    .split(',')
+    .map((member) => member.trim())
+    .filter(Boolean);
+
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode, error: submitError }) => {
@@ -272,13 +279,15 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         }
 
         // error if invalid hash
-        if (field === 'file.hash.*' && values.some((v) => !isValidHash(v))) {
+        if (field === 'file.hash.*' && values.some((v) => !isValidHash(v.trim()))) {
           newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
         } else {
           delete newValueErrors.INVALID_HASH;
         }
 
-        const isInvalidPath = values.some((v) => !isPathValid({ os, field, type, value: v }));
+        const isInvalidPath = values.some(
+          (v) => !isPathValid({ os, field, type, value: v.trim() })
+        );
         // warn if invalid path
         if (field !== 'file.hash.*' && isInvalidPath) {
           newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
@@ -304,9 +313,27 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     }, [item, validateValues]);
 
     const handleOnValueBlur = useCallback(() => {
+      if (typeof blocklistEntry.value === 'string') {
+        const trimmedValue = blocklistEntry.value.trim();
+        if (trimmedValue !== blocklistEntry.value) {
+          const nextItem = {
+            ...item,
+            entries: [{ ...blocklistEntry, value: trimmedValue }],
+          } as ArtifactFormComponentProps['item'];
+
+          validateValues(nextItem);
+          onChange({
+            isValid: isValid(errorsRef.current),
+            item: nextItem,
+          });
+          setValueVisited({ value: true });
+          return;
+        }
+      }
+
       validateValues(item);
       setValueVisited({ value: true });
-    }, [item, validateValues]);
+    }, [blocklistEntry, item, onChange, validateValues]);
 
     const handleOnNameChange = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -356,7 +383,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
                   : blocklistEntry.field,
               type: ListOperatorTypeEnum.MATCH_ANY,
               ...(typeof blocklistEntry.value === 'string'
-                ? { value: blocklistEntry.value.length ? blocklistEntry.value.split(',') : [] }
+                ? { value: splitCommaSeparatedValues(blocklistEntry.value) }
                 : {}),
             },
           ],
@@ -382,7 +409,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
               field,
               type: ListOperatorTypeEnum.MATCH_ANY,
               ...(typeof blocklistEntry.value === 'string'
-                ? { value: blocklistEntry.value.length ? blocklistEntry.value.split(',') : [] }
+                ? { value: splitCommaSeparatedValues(blocklistEntry.value) }
                 : {}),
             },
           ],
@@ -404,7 +431,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           return { value: Array.isArray(value) ? value.join(',') : value };
         } else {
           return {
-            value: (typeof value === 'string' ? value.split(',') : value).filter(Boolean),
+            value: typeof value === 'string' ? splitCommaSeparatedValues(value) : value,
           };
         }
       },
@@ -493,8 +520,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const handleOnValueAdd = useCallback(
       (option: string) => {
-        const splitValues = option.split(',').filter((value) => value.trim());
-        const value = [...blocklistEntry.value, ...splitValues];
+        const value = [...blocklistEntry.value, ...splitCommaSeparatedValues(option)];
 
         const nextItem = {
           ...item,
