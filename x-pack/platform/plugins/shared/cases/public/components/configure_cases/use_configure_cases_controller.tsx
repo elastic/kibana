@@ -44,7 +44,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
-  const { isObservablesFeatureEnabled } = useCasesFeatures();
+  const { isObservablesFeatureEnabled, isExtractObservablesEnabled } = useCasesFeatures();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] =
@@ -378,6 +378,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     hasMinimumLicensePermissions,
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
+    isExtractObservablesEnabled,
     configurationId,
     configurationVersion,
     closureType,

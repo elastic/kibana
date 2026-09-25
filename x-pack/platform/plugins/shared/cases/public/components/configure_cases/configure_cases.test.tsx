@@ -461,6 +461,19 @@ describe('ConfigureCasesRedesign', () => {
       ).not.toBeInTheDocument();
       expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
     });
+
+    it('does not render the extract observables section for the Stack owner', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { owner: ['cases'] },
+      });
+
+      await screen.findByTestId('cases-redesign-settings-panel');
+
+      expect(
+        screen.queryByTestId('cases-redesign-extract-observables-section')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
+    });
   });
 
   it('renders observable types as line-separated rows without a subdued panel', async () => {

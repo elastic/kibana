@@ -62,6 +62,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     hasMinimumLicensePermissions,
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
+    isExtractObservablesEnabled,
     configurationId,
     configurationVersion,
     closureType,
@@ -96,6 +97,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
 
   const showObservableTypesSection =
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
+  const showExtractObservablesSection = showObservableTypesSection && isExtractObservablesEnabled;
 
   return (
     <>
@@ -177,7 +179,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   <EuiHorizontalRule margin="l" />
                 )}
 
-                {showObservableTypesSection && (
+                {showExtractObservablesSection && (
                   <SettingsSection
                     data-test-subj="cases-redesign-extract-observables-section"
                     title={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_TITLE}
@@ -197,7 +199,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   </SettingsSection>
                 )}
 
-                {showObservableTypesSection && <EuiHorizontalRule margin="l" />}
+                {showExtractObservablesSection && <EuiHorizontalRule margin="l" />}
 
                 {showObservableTypesSection && (
                   <SettingsSection
