@@ -51,7 +51,7 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
 }) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
-  const memoized = useEuiMemoizedStyles(styles);
+  const memoizedStyles = useEuiMemoizedStyles(styles);
   const valueFontSize = size ? euiFontSize(euiThemeContext, size, { unit: 'px' }) : undefined;
   // Primitive values get built-in single-line truncation.
   const isTextValue = typeof value === 'string' || typeof value === 'number';
@@ -66,14 +66,14 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
     : { fontWeight: euiTheme.font.weight.bold };
 
   return (
-    <div {...rest} data-test-subj={dataTestSubj ?? 'infoBlock'} css={memoized.block}>
+    <div {...rest} data-test-subj={dataTestSubj ?? 'infoBlock'} css={memoizedStyles.block}>
       <dt>
         <EuiText size="xs" color="subdued">
           <EuiTextTruncate text={title} />
         </EuiText>
       </dt>
       <dd>
-        <EuiText size="s" color={color} css={memoized.value} style={valueStyle}>
+        <EuiText size="s" color={color} css={memoizedStyles.value} style={valueStyle}>
           {/* Values are often identifiers, where both ends carry meaning. */}
           {isTextValue ? (
             <EuiTextTruncate

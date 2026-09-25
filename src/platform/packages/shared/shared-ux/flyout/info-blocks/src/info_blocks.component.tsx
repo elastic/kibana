@@ -144,11 +144,11 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
   maxColumns = 'auto',
   ...rest
 }) => {
-  const memoized = useEuiMemoizedStyles(styles);
+  const memoizedStyles = useEuiMemoizedStyles(styles);
   const columns = maxColumns === 'auto' ? resolveMaxColumns(items.length) : maxColumns;
 
   return (
-    <div css={memoized.wrapper}>
+    <div css={memoizedStyles.wrapper}>
       <EuiPanel
         paddingSize="none"
         hasShadow={false}
@@ -157,7 +157,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
       >
         {/* The grid lives on the `dl` because each block is a `dt`/`dd` pair, which `dl` only
             accepts wrapped in a single element — so that wrapper has to be the grid cell. */}
-        <dl css={[memoized.grid, memoized.grids[columns]]}>
+        <dl css={[memoizedStyles.grid, memoizedStyles.grids[columns]]}>
           {items.map((item, index) => (
             <InfoBlock key={item.id ?? index} {...item} />
           ))}
