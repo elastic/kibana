@@ -12,6 +12,7 @@ import type {
   Error,
   IWaterfallGetRelatedErrorsHref,
   IWaterfallLegend,
+  TraceErrorRowSource,
   TraceItem,
   WaterfallGetErrorMarkerHref,
   WaterfallGetServiceBadgeHref,
@@ -113,6 +114,11 @@ export type OnErrorClick = (params: {
   errorCount: number;
   errorDocId?: string;
   docIndex?: string;
+  /**
+   * Per-row aggregate source. 'mixed' means the row carries both classic APM errors and
+   * unprocessed OTel exception logs. Use TraceErrorRowSource from @kbn/apm-types.
+   */
+  errorSource?: TraceErrorRowSource;
 }) => void;
 
 interface Props {

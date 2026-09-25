@@ -19,7 +19,10 @@
     "@kbn/agent-builder-common",
     "@kbn/flyout-info-blocks",
     "@kbn/test-jest-helpers",
+    "@kbn/ui-ai-components",
     "@kbn/user-profile-components",
     "@kbn/proposals-ui",
+    "@kbn/proposals-common",
+    "@kbn/ui-ai-components",
   ]
 }

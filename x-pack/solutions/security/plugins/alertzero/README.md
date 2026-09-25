@@ -129,7 +129,7 @@ Managed Worker definitions:
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
 
-Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on enable or a settings save with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Each Worker is a `yamlTemplate` whose template values mirror the settings API (shared fields flat, Worker-specific fields under `extras`) and are re-used during definition upgrades. Persisted values are validated against the Worker's current declaration on every read and write; there is no migration layer (see [Pre-customer state](#pre-customer-state)). Startup does not enumerate documents before `ready()`.
+Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on enable or a settings save with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Each Worker is a `yamlTemplate` whose template values mirror the settings API (shared fields flat, Worker-specific fields under `extras`) and are re-used during definition upgrades. Persisted values are validated against the Worker's current declaration on every read and write. A schedule or extras key the declaration now requires, and the document does not have yet, is filled from the current default at startup (before `ready()`) and again on read. A value that is already stored is left as-is, including when it is out of range. Renames and other breaking shape changes have no compatibility path (see [Pre-customer state](#pre-customer-state)).
 
 The prototype rule workflows remain static global installs and are not advertised to workflow selector UIs:
 
@@ -213,7 +213,7 @@ Tests to update:
 `enabled` sits beside `settings`; `autonomy` and `scheduleInterval` are the shared fields inside it. Anything else lives under `settings.extras`, owned by the Worker's Watch team and closed per Worker. A PATCH is the editable subset of the read body plus the revision GET returned:
 
 ```json
-{ "enabled": true, "settingsRevision": 3, "settings": { "autonomy": "manual", "scheduleInterval": "2h", "extras": { "analysisWindowDays": 14 } } }
+{ "enabled": true, "settingsRevision": 3, "settings": { "autonomy": "manual", "scheduleInterval": "2h", "extras": { "analysisWindowDays": 7, "fpCountThreshold": 10, "fpRateThresholdPct": 50 } } }
 ```
 
 Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras` is whole-object: omitted keeps the stored object; supplied must be the complete valid object for that Worker and replaces it. No deep merge, no special `null`. Unknown keys, another Worker's fields, a replacement missing a required field, or an autonomy level the Worker does not allow are rejected with a 400 naming the field.
@@ -221,7 +221,7 @@ Shared fields are per-field: omitted keeps the stored value, supplied replaces i
 Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning's analysis window is the worked example):
 
 1. **Schema** — add the field to the Worker's extras object in `@kbn/alertzero-common/impl/schemas/components/<watch>_watch_settings.schema.yaml` (`additionalProperties: false`, required) and run `yarn openapi:generate` in that package.
-2. **Declaration** — add its fresh-install default to `extras.defaultValue` in `impl/worker_settings/<watch>.ts`.
+2. **Declaration** — add its fresh-install default to `extras.defaultValue` in `impl/worker_settings/<watch>.ts`. An already installed document that lacks the key receives that default at startup and on read. A stored value is not overwritten when the default later changes.
 3. **Template** — forward `values.extras.<field>` in the Worker's `yamlTemplate` renderer and YAML and bump the definition `version`; the setting is done only when the saved value reaches the run.
 4. **Control** — build a real control in the Worker's own folder under `public/pages/watches/custom_settings/<worker>/` (Rule Tuning lives in `custom_settings/rule_tuning/`), registered by Worker id in `custom_settings/registry.ts`. It receives `settings` and `onExtrasChange(extras)` and hands back the complete `extras` object. It never calls an API and there is no form generator or app-load completeness check; cover it with a component test.
 
@@ -229,7 +229,7 @@ The shared Watch page renders the interval control from the presence of `schedul
 
 ### Pre-customer state
 
-AlertZero is not live. Declarations, schemas and template values may change without a compatibility path or migration. Persisted settings must validate against the current shape; when documents from earlier development builds do not, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
+AlertZero is not live. A new required extra or schedule key that has a default is filled when it is absent. Renames, type changes, and other breaking shape changes still have no compatibility path. When documents from earlier development builds do not validate, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
 
 ## Working-group contribution map
 

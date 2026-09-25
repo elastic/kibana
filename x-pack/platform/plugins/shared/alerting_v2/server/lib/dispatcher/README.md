@@ -64,9 +64,10 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 
 | Tick outcome                                    | `nextWatermark`                                     |
 | ----------------------------------------------- | --------------------------------------------------- |
-| Truncated (`EPISODE_QUERY_LIMIT` rows returned) | `last_event_timestamp` of the last returned episode |
+| Truncated (`ESQL_QUERY_ROW_LIMIT` rows returned) | `last_event_timestamp` of the last returned episode |
 | `no_episodes` or `no_actions` halt              | `windowEnd`                                         |
 | Aborted before `StoreActionsStep`               | `eventWatermark` (no advance)                       |
+| `inline_stats_too_large` halt                   | `eventWatermark` (no advance)                       |
 | Normal completion                               | `windowEnd`                                         |
 
 `nextWatermark` never regresses: the final value is `max(computed, eventWatermark)`.
@@ -167,7 +168,7 @@ An empty matcher is a catch-all.
 | Task schedule               | `5s`                           | [`schedule_task.ts`](schedule_task.ts)                                                                                                                                                                                                  |
 | Task timeout                | `1m`                           | `DISPATCHER_TASK_TIMEOUT` in [`constants.ts`](constants.ts)                                                                                                                                                                             |
 | Soft deadline               | `42 000 ms` (~70 % of timeout) | `TICK_DEADLINE_MS` — pipeline is aborted at this point so the returned `RunResult` is always within the TM window                                                                                                                       |
-| Episode query cap           | `10 000` rows                  | `EPISODE_QUERY_LIMIT` in [`queries.ts`](queries.ts) — a truncated tick advances the watermark to the last returned row, not to `now`                                                                                                    |
+| Query row cap               | `10 000` rows                  | `ESQL_QUERY_ROW_LIMIT` in [`queries.ts`](queries.ts) — `LIMIT` on every dispatcher query; a truncated episode scan advances the watermark to the last returned row, not to `now`                                                        |
 | Overlap re-read             | `10` minutes                   | `OVERLAP_WINDOW_MINUTES` — each scan re-reads this far behind the watermark; content-addressed dedup makes re-reads free                                                                                                                |
 | Max scan window             | `15` minutes                   | `MAX_WINDOW_MINUTES` — caps forward progress per tick; must be `> OVERLAP_WINDOW_MINUTES`                                                                                                                                               |
 | Settle buffer               | `5` seconds                    | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write                                                                                                                                                    |
@@ -217,11 +218,12 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 ## Halt reasons
 
-| Reason        | Meaning                                                                                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `no_episodes` | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
-| `no_actions`  | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
-| `aborted`     | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). If aborted before `StoreActionsStep`, the watermark does not advance. |
+| Reason                   | Meaning                                                                                                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `no_episodes`            | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
+| `no_actions`             | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
+| `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). If aborted before `StoreActionsStep`, the watermark does not advance. |
+| `inline_stats_too_large` | ES rejected the INLINE STATS pre-fetch query with `illegal_argument_exception: sub-plan execution results too large`. Watermark held; tick counts toward stuck-tick limit (see below). |
 
 ## Watermark contract
 
@@ -242,14 +244,28 @@ If the watermark does not advance for `STUCK_TICK_LIMIT` consecutive ticks (defa
 
 The blocking episodes are **not dispatched** — they are permanently marked as `unmatched`. This is the documented escape from a permanently un-recordable episode that would otherwise stall the dispatcher indefinitely.
 
-If the pipeline never reached `FetchEpisodesStep` (`episodes` empty), there is nothing to mark. While watermark lag is within `PRE_FETCH_STUCK_ADVANCE_LAG_MS` (one max scan window), the hatch holds the watermark, logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK`, and resets the counter so a transient outage can recover. Once lag exceeds that threshold, it logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` and advances to `windowEnd` anyway — unread events in that window are skipped so the dispatcher cannot stall forever.
+If no episodes were fetched (the pipeline was aborted before or during `FetchEpisodesStep`, or the scan was rejected with `inline_stats_too_large`), there is nothing to mark. While watermark lag is within `PRE_FETCH_STUCK_ADVANCE_LAG_MS` (one max scan window), the hatch holds the watermark, logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK`, and resets the counter so the scan can recover. Once lag exceeds that threshold, it logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` and advances to `windowEnd` anyway — unread events in that window are skipped so the dispatcher cannot stall forever. Both logs include the tick's `halt_reason`.
+
+#### `inline_stats_too_large` recovery timeline (on-call reference)
+
+When cardinality exceeds the Serverless INLINE STATS sub-plan cap (~20.4 MB), the dispatcher enters the pre-fetch stuck path. Every failing tick logs `DISPATCHER_INLINE_STATS_TOO_LARGE` with the scanned window, the held watermark, and its lag. Holding the watermark does not shrink the query: `.alert-actions` rows are only lower-bounded by `windowStart`, so the error persists until cardinality drops.
+
+| Phase | Ticks | Wall clock (~5 s/tick) | Logs |
+|-------|-------|------------------------|------|
+| Stuck accumulation | 1–9 | ~0–45 s | `DISPATCHER_INLINE_STATS_TOO_LARGE` only |
+| First hatch fire (lag ≤ 15 min) | 10 | ~50 s | `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK` (`halt_reason: inline_stats_too_large`) — counter resets, watermark held |
+| Hatch fires again every 10 stuck ticks while lag ≤ 15 min | 20, 30, … | grows | same |
+| First force-advance (lag > 15 min on a hatch-firing tick) | ~190 | ~15–16 min after freeze | `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` — watermark advances to `windowEnd`, i.e. by `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` (5 min); unread events skipped |
+| Steady state while the error persists | every ~60 | every ~5 min | same force-advance; lag oscillates between ~10 and ~16 min; no episodes dispatched |
+
+Episodes in the skipped window are **not dispatched** (accepted data loss). Once the query succeeds again, the dispatcher catches up normally from `eventWatermark − OVERLAP_WINDOW_MINUTES`. The root fix is reducing cardinality or splitting the INLINE STATS query.
 
 ## Delivery guarantees and limits
 
 - Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
-- The episode query is capped at `EPISODE_QUERY_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
+- The episode query is capped at `ESQL_QUERY_ROW_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
 - Sustained backlog is drained over multiple ticks at up to `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` minutes per tick.
 - Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `episode_count`, `stuck_ticks`.
 

@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export const OBSERVABILITY_ALERTING_APP_ROUTE = 'observability/alerting';
-export const OBSERVABILITY_ALERTING_BASE_PATH = `/app/${OBSERVABILITY_ALERTING_APP_ROUTE}`;
-
 export const OBSERVABILITY_ALERTING_ALERTS_PATH = '/alerts';
 export const OBSERVABILITY_ALERTING_RULES_V1_PATH = '/rules/v1';
 export const OBSERVABILITY_ALERTING_RULES_V2_PATH = '/rules/v2';

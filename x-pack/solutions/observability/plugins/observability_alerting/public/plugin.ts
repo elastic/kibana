@@ -15,9 +15,11 @@ import type {
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { from, map, switchMap } from 'rxjs';
-import { OBSERVABILITY_ALERTING_BASE_PATH } from './constants';
 import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
 import type {
   ObservabilityAlertingPublicSetup,

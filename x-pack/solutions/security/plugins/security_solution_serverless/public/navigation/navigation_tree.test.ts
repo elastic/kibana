@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
@@ -24,12 +25,12 @@ describe('createNavigationTree', () => {
     ...mockServices,
     featureFlags: {
       ...mockServices.featureFlags,
-      getBooleanValue: jest.fn((flag: string, defaultValue?: boolean) => {
+      getBooleanValue$: jest.fn((flag: string, defaultValue?: boolean) => {
         if (flag === AGENT_BUILDER_NAV_AT_TOP_FLAG) {
-          return options?.agentBuilderNavAtTop ?? defaultValue ?? false;
+          return of(options?.agentBuilderNavAtTop ?? defaultValue ?? false);
         }
 
-        return defaultValue ?? false;
+        return of(defaultValue ?? false);
       }),
     },
     uiSettings: {

@@ -20,6 +20,7 @@ import { appendSearch } from '../../../common/components/link_to/helpers';
 
 const SHOW_PARAM_ALLOWED_VALUES: ReadonlyArray<Required<ArtifactListPageUrlParams>['show']> = [
   'edit',
+  'view',
   'create',
 ];
 

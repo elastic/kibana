@@ -1,0 +1,694 @@
+products:
+- product: cloud-serverless
+  target: 2026-09-22
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-09-22
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 291996.yaml
+    checksum: 36be4fe7220bd3b7def44e5402e01a0af564e95d
+  type: enhancement
+  title: Include who decided a proposal in investigation workflow output
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Exposes the `decidedBy` field (`username`, `fullName`, `email`, `profileUid`) in the `proposals.getProposal` workflow step output so investigation workers can attribute proposal decisions in comments.
+  prs:
+  - https://github.com/elastic/kibana/pull/291996
+- file:
+    name: 283817.yaml
+    checksum: b1f251dea22bafe6602eba1e0ff57b3b34a3abb1
+  type: feature
+  title: Add write actions to the ServiceNow connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/283817
+- file:
+    name: 290104.yaml
+    checksum: 249f21e8a5d8b9b94311c0ba3d22dcda4b8ea3c9
+  type: enhancement
+  title: Preserve inbound UIAM authentication when Kibana forwards requests
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Kibana now forwards an inbound Universal Identity and Access Management (UIAM) ephemeral token with the request's original shared secret when that secret differs from Kibana's configured secret.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/290104
+- file:
+    name: 290780.yaml
+    checksum: be61d162e8075a6e604eeead460da27353fdca54
+  type: bug-fix
+  title: Fix re-running a workflow test execution when the workflow is disabled
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes "Re-run" on a test execution returning 400 when the workflow is disabled. Test re-runs now start; production re-runs of a disabled workflow still fail.
+  prs:
+  - https://github.com/elastic/kibana/pull/290780
+  issues:
+  - https://github.com/elastic/security-team/issues/19309
+- file:
+    name: 290352.yaml
+    checksum: 6cc89637698c664d6c8c34dddd296c9cb80867bd
+  type: enhancement
+  title: Add list fields when creating inference endpoints
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Inference endpoint creation now supports list fields from the `_services` API, such as OAuth2 scopes for OpenAI and Azure OpenAI, as a tag input that submits a string array.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/290352
+- file:
+    name: 290325.yaml
+    checksum: f007e32b9cd4b339fa24bf72ca156dea081cc1de
+  type: bug-fix
+  title: Fix response console treating bare arguments as named flags
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the Elastic Defend response console treating un-prefixed text after a command name as a named `--` argument. Bare positional arguments now produce a validation error.
+  prs:
+  - https://github.com/elastic/kibana/pull/290325
+- file:
+    name: 287819.yaml
+    checksum: 43a84a2dd9da80cd839ada4bb9d13835988182a2
+  type: bug-fix
+  title: Fix ES|QL metric trendlines with `FORK`
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an issue where Lens metric background trendlines failed for ES|QL queries that use `FORK`.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/287819
+  issues:
+  - https://github.com/elastic/kibana/issues/282275
+- file:
+    name: 291172.yaml
+    checksum: 11d5e975d957f4f3ad55d858d71b970cc505ebcd
+  type: bug-fix
+  title: Fix APM metadata table column widths differing across sections
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the APM Metadata tab rendering a separate table per field-name section, so key columns no longer use different widths in each section.
+  prs:
+  - https://github.com/elastic/kibana/pull/291172
+  issues:
+  - https://github.com/elastic/kibana/issues/290168
+  - https://github.com/elastic/kibana/issues/275904
+- file:
+    name: 289742.yaml
+    checksum: d0d31ee3d32a8615a084bfb970f3312b2c4b141d
+  type: enhancement
+  title: Add push and overlay flyout mode setting in Elastic Security
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Users can set Security flyouts to push or overlay mode from the UI, instead of relying only on window width.
+  prs:
+  - https://github.com/elastic/kibana/pull/289742
+- file:
+    name: 284127.yaml
+    checksum: ab2469dbbeac7ee6e74fff49e729bdf6243ffc30
+  type: enhancement
+  title: Add "Take Action" menus for alerts, documents, events, and entities
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Elastic Security "Take Action" surfaces now share the same grouped menus for alerts, documents, events, and entities.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/284127
+- file:
+    name: 288942.yaml
+    checksum: 0f405ae67c432ee2d335159b119ba505fd3ae091
+  type: enhancement
+  title: Support doc viewer deep links from nested Discover group-by grids
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/288942
+  issues:
+  - https://github.com/elastic/kibana/issues/286961
+- file:
+    name: 289646.yaml
+    checksum: 7fea116d178b28a8a05639a92759ec97c0794293
+  type: feature
+  title: Add the shared app header to Infrastructure detail pages
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Infrastructure asset and metric detail pages now use the shared Kibana app header, with back navigation to the page you opened them from.
+  prs:
+  - https://github.com/elastic/kibana/pull/289646
+  issues:
+  - https://github.com/elastic/kibana/issues/287805
+- file:
+    name: 291000.yaml
+    checksum: 1b2709cf42f2c619f1cb40b0d1c2a8b305f149c7
+  type: bug-fix
+  title: Fix "Edit pipeline" button hiding behind wide processor JSON
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the ingest pipeline details flyout so the "Edit pipeline" button stays visible when a processor contains a long value.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/291000
+  issues:
+  - https://github.com/elastic/kibana/issues/290999
+- file:
+    name: 289918.yaml
+    checksum: 83fd5aece4c59c3caf967944f639161b4285678d
+  type: bug-fix
+  title: Fix Discover embeddable inline editing stuck after a search error
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes exiting Discover embeddable inline editing on a dashboard when a search error hid the Discard button.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/289918
+  issues:
+  - https://github.com/elastic/kibana/issues/289787
+- file:
+    name: 291240.yaml
+    checksum: 18b088cbf416c8b8e6a0323223c2aaea6fe2deae
+  type: bug-fix
+  title: Fix "Security Alert Analysis" workflow enabling by default in new spaces
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: The "Security Alert Analysis" workflow is now disabled by default for new spaces; users must explicitly enable it via the "Alert Analysis Workflow" settings page.
+  prs:
+  - https://github.com/elastic/kibana/pull/291240
+- file:
+    name: 290778.yaml
+    checksum: a3e1fcc79e7b040e300681b707171f4df5cc758d
+  type: bug-fix
+  title: Fix canceling a running workflow execution from the flyout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes running workflow executions that could not be canceled from the execution flyout. "Cancel execution" is now available in the Take Action menu while a run is in progress.
+  prs:
+  - https://github.com/elastic/kibana/pull/290778
+  issues:
+  - https://github.com/elastic/security-team/issues/19321
+- file:
+    name: 291123.yaml
+    checksum: f69dec5c99ffa1170cdf0b8ba3b7168a124ae4f1
+  type: enhancement
+  title: Enable the Brazilian Portuguese (`pt-BR`) locale
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Kibana now accepts `pt-BR` as an `i18n.locale` configuration value.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/291123
+- file:
+    name: 291334.yaml
+    checksum: ba68aeb580db5812f693ce893253c471089d633f
+  type: feature
+  title: Enable timeslices budgeting for Synthetics availability SLOs
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Synthetics Availability SLOs now support Timeslices budgeting. The SLO form and details page guide you to use a timeslice window at least as long as the monitor interval to avoid inflated SLIs and understated burn rates.
+  prs:
+  - https://github.com/elastic/kibana/pull/291334
+  issues:
+  - https://github.com/elastic/kibana/issues/291316
+- file:
+    name: 287825.yaml
+    checksum: d3e170f2efbee8feba1133416996780e28354f48
+  type: enhancement
+  title: Open transaction details from the service details flyout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287825
+  issues:
+  - https://github.com/elastic/kibana/issues/286500
+- file:
+    name: 290533.yaml
+    checksum: 9f659e5258d220a30e2519d48cddfa6f595a53c4
+  type: bug-fix
+  title: Fix LLM model resolution for users without the "Actions" privilege
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes LLM model resolution failing for users without the "Actions" privilege when an inference endpoint was configured in Model settings.
+  prs:
+  - https://github.com/elastic/kibana/pull/290533
+- file:
+    name: 290071.yaml
+    checksum: c36bd0d9d2cf76a5bf6286d86e7211c291c09aec
+  type: bug-fix
+  title: Fix timeouts when deleting snapshots in snapshot and restore
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Deleting snapshots in snapshot and restore no longer fails on long-running deletions of up to 30 minutes, and a snapshot that no longer exists no longer blocks deleting the others in the same request.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/290071
+  issues:
+  - https://github.com/elastic/kibana/issues/283816
+- file:
+    name: 290358.yaml
+    checksum: 54a7698f47d8e699f4a915c46ce9a2f346bc855e
+  type: bug-fix
+  title: Fix invalid time ranges from the URL in Discover
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes displaying an invalid time range provided by the URL in Discover.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/290358
+  issues:
+  - https://github.com/elastic/kibana/issues/287837
+- file:
+    name: 288070.yaml
+    checksum: e5f8afc3186216d91492e98a262d69ab7ff5d8c2
+  type: bug-fix
+  title: Add "Expand site group members" toggle for SharePoint Online in Fleet
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: SharePoint Online connectors now expose an **Expand site group members** toggle in Fleet for compact document-level security.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/288070
+- file:
+    name: 291285.yaml
+    checksum: 6f18daf77632cb6e942f9ad548ab83126f7a2c18
+  type: feature
+  title: Add a source filter to case activity
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/291285
+- file:
+    name: 290553.yaml
+    checksum: e19ac199487480af22b026ba5207299e655ac133
+  type: bug-fix
+  title: Fix Search apps remaining available in Observability spaces
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Search Home, Getting Started, Playground, and other Search-only apps were still available through global search and direct URLs in Observability spaces. They are now disabled in those spaces, matching Security. Content connectors and Index Management under Stack Management are unchanged. To use Search apps, switch the space to Classic or to the Search solution.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/290553
+  issues:
+  - https://github.com/elastic/kibana/issues/290568
+- file:
+    name: 291211.yaml
+    checksum: 4913dd7479750c339d4ac75c211be11c989be44e
+  type: bug-fix
+  title: Fix `{{ now }}` rendering as text in generated Elasticsearch documents
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes generated workflows writing `{{ now }}` as a locale date string, which Elasticsearch mapped as text instead of date.
+  prs:
+  - https://github.com/elastic/kibana/pull/291211
+  issues:
+  - https://github.com/elastic/security-team/issues/19365
+- file:
+    name: 290379.yaml
+    checksum: 68272eaed590a7589550af907cfb1f17d04603b8
+  type: bug-fix
+  title: Hide Stack Alerts from global search and Observability navigation
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Hides the Alerts page in Stack Management navigation for Observability projects and Observability solution nav. The main entry point for Obs alerting should be in the Observability navigation.
+  prs:
+  - https://github.com/elastic/kibana/pull/290379
+- file:
+    name: 283781.yaml
+    checksum: dd9fdc985bd4df1bf11f6a5d77a8d2f1580feb3d
+  type: enhancement
+  title: Add a cancel button to cancel loading dashboards
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Users can now cancel a dashboard load. The button aborts in-flight requests for Lens, legacy visualizations, Vega, Discover sessions, and Maps until Refresh is clicked.
+  prs:
+  - https://github.com/elastic/kibana/pull/283781
+  issues:
+  - https://github.com/elastic/kibana/issues/283156
+- file:
+    name: 291698.yaml
+    checksum: fac7e222714312ab96712c7b38f7ae19efd62df7
+  type: bug-fix
+  title: Fix Jira Service Management and Opsgenie actions failing on long messages
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Jira Service Management and Opsgenie connectors failing when a rendered alert message exceeds 130 characters by truncating the message instead of rejecting the action.
+  prs:
+  - https://github.com/elastic/kibana/pull/291698
+  issues:
+  - https://github.com/elastic/kibana/issues/278760
+- file:
+    name: 289904.yaml
+    checksum: 7b632400aa8b368dcdf662e7043fc536435d6038
+  type: enhancement
+  title: Allow Dashboard and Discover privileges on Security Serverless projects
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: On Elastic Cloud Serverless Security projects, Dashboard and Discover can be assigned as feature privileges. Custom roles can grant access to those apps without granting the full Security solution. Roles that already included these privileges now receive that access.
+  prs:
+  - https://github.com/elastic/kibana/pull/289904
+- file:
+    name: 285874.yaml
+    checksum: 698254fb8de57df9c3245b5ec299053bf9e0911b
+  type: bug-fix
+  title: Fix alert tag updates writing across Kibana spaces
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes `bulkUpdateTags` updating alerts in other spaces when the authorization check passed on in-space IDs.
+  prs:
+  - https://github.com/elastic/kibana/pull/285874
+- file:
+    name: 289481.yaml
+    checksum: 56cc44a612854ba5acc9ce7fbbb28ebbc75a9540
+  type: bug-fix
+  title: Fix Console reporting Elasticsearch timeouts as connection failures
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Console now explains that timed-out Elasticsearch requests may still be running and advises checking their status before retrying.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/289481
+  issues:
+  - https://github.com/elastic/kibana/issues/284095
+- file:
+    name: 289032.yaml
+    checksum: 0300542885e29b096011f0d8fc280befdc103eed
+  type: feature
+  title: Keep new Discover tabs empty until you run a search
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/289032
+  issues:
+  - https://github.com/elastic/kibana/issues/255686
+- file:
+    name: 291269.yaml
+    checksum: 084bd76e9ae445cf09a8a535529408d1faebaffb
+  type: bug-fix
+  title: Fix Streams tool descriptions for MCP clients
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Streams write-tool descriptions and parameter text that told MCP clients to expect Agent Builder-only confirmation UI.
+  prs:
+  - https://github.com/elastic/kibana/pull/291269
+- file:
+    name: 290101.yaml
+    checksum: c88f7395c9dfb98dd0b7856ee3f0ac026c1a47fc
+  type: enhancement
+  title: Support multiple download sources for Fleet agent policies
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds support for multiple download sources in Fleet-managed agent policies.
+  prs:
+  - https://github.com/elastic/kibana/pull/290101
+  issues:
+  - https://github.com/elastic/kibana/issues/183445
+- file:
+    name: 291679.yaml
+    checksum: 32ad1e7b3ff924049dd683f2cf4a72ffb6f47332
+  type: bug-fix
+  title: Fix false-positive error when deleting OpenTelemetry input policies
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes deleting an OpenTelemetry input policy that shares a dataset with another policy showing a danger toast even though the deletion succeeded.
+  prs:
+  - https://github.com/elastic/kibana/pull/291679
+  issues:
+  - https://github.com/elastic/kibana/issues/271672
+- file:
+    name: 286807.yaml
+    checksum: 96bc35b10b3df028547da50c208f865f86d59d5e
+  type: bug-fix
+  title: Fix rule exception items deleting without confirmation
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes rule exception items being deleted immediately from the actions menu with no warning. Kibana now shows a confirmation dialog before it deletes the exception item.
+  prs:
+  - https://github.com/elastic/kibana/pull/286807
+  issues:
+  - https://github.com/elastic/kibana/issues/284851
+- file:
+    name: 290750.yaml
+    checksum: 7192a8f3809e3583023cfb2ef80a504a45b6488b
+  type: bug-fix
+  title: Apply Agent Builder tracing privacy settings per space
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Agent Builder tracing GenAI privacy settings now apply per Kibana space instead of from a default-space cache.
+  prs:
+  - https://github.com/elastic/kibana/pull/290750
+- file:
+    name: 291268.yaml
+    checksum: ea7b6bd746c9a03ff708db23985df25d1a116c6f
+  type: bug-fix
+  title: Fix Cases tools appearing in Serverless Search projects
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an issue where Cases tools could be present in Serverless project types where they could not be used. A previous change fixed this for solution-specific spaces, but not globally for Serverless project types.
+  prs:
+  - https://github.com/elastic/kibana/pull/291268
+  issues:
+  - https://github.com/elastic/agentic-interface-program/issues/154
+- file:
+    name: 288622.yaml
+    checksum: 1dbde193e16ad602523be303883180d2daf83b91
+  type: bug-fix
+  title: Fix workflow execution details failing to load for large runs
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes opening a large workflow run exceeding Kibana's response size limit. The execution flyout now loads run metadata and step details separately.
+  prs:
+  - https://github.com/elastic/kibana/pull/288622
+  issues:
+  - https://github.com/elastic/kibana/issues/287809
+- file:
+    name: 288664.yaml
+    checksum: c19cbbea493ac6ff20c1cfade4c496d1f691eb65
+  type: bug-fix
+  title: Fix email connector HTTP tests sending custom subject and body
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the email connector HTTP test route sending caller-provided subject and body. That route now always sends a fixed subject and body, because it only verifies that Kibana can deliver mail.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/288664
+  issues:
+  - https://github.com/elastic/response-ops-team/issues/701
+- file:
+    name: 289736.yaml
+    checksum: a43b49ca9bb23572239f83afcd79252db6170954
+  type: feature
+  title: Add quick-fix code actions and prettify query shortcut to Sandbox ES|QL editor
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/289736
+- file:
+    name: 289891.yaml
+    checksum: edba5278855c6568e9cf05c0a9ebbe6123885187
+  type: feature
+  title: Add "Import dashboard" action to the dashboard listing
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/289891
+  issues:
+  - https://github.com/elastic/kibana/issues/280423
+- file:
+    name: 291222.yaml
+    checksum: 6bf73b97b8409d72ab27f1dc62d408fefc9e3dbd
+  type: enhancement
+  title: Add display options for Elastic Inference Service models
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds display options on the Elastic Inference Service models page so people can hide or show preview, end-of-life, and region-blocked models. Models nearing end of life are always shown.
+  prs:
+  - https://github.com/elastic/kibana/pull/291222
+- file:
+    name: 291648.yaml
+    checksum: f5d1353caa887db32ad3f5af5affb4d2147fdcdd
+  type: bug-fix
+  title: Fix Fleet dashboard installs failing with `ambiguous_conflict`
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes remaining `ambiguous_conflict` failures on dashboard saved objects when installing Fleet packages into multiple spaces.
+  prs:
+  - https://github.com/elastic/kibana/pull/291648
+  issues:
+  - https://github.com/elastic/kibana/issues/210141
+- file:
+    name: 290058.yaml
+    checksum: 849ca1d4b3468e97c6a7ea29997b31a83841de55
+  type: bug-fix
+  title: Fix New Terms rules that fail when the fetched documents are too large
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes New Terms rule executions failing with `The content length (...) is bigger than the maximum allowed string (...)` when the documents fetched for new terms exceed `elasticsearch.maxResponseSize`. The rule now retries with smaller batches of terms and reports a warning instead of failing.
+  prs:
+  - https://github.com/elastic/kibana/pull/290058
+- file:
+    name: 279607.yaml
+    checksum: e80ac70b2f5d0633c7a6b2f4d0f36f986fc17d5d
+  type: feature
+  title: Add a MongoDB connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds a MongoDB connector with `find`, `aggregate`, `count`, and `listCollections` available as Agent Builder tools.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/279607
+- file:
+    name: 291274.yaml
+    checksum: fb603b7adaf9a2d22e37e95f899d8da11fe955e6
+  type: bug-fix
+  title: Fix attachment tools appearing on the MCP server
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes tools that return Kibana-only attachments remaining available through the MCP server, where external clients cannot use those results.
+  prs:
+  - https://github.com/elastic/kibana/pull/291274
+  issues:
+  - https://github.com/elastic/agentic-interface-program/issues/148
+- file:
+    name: 289582.yaml
+    checksum: c12d1016ed5444ccf34f1849380bfa4395fc7d19
+  type: enhancement
+  title: Add "Created" and "Last modified" columns to Synthetics monitor tables
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/289582
+  issues:
+  - https://github.com/elastic/kibana/issues/289875
+- file:
+    name: 289202.yaml
+    checksum: 8dc0a63c7d7ea72eccf12d4a1bb912b134c3114f
+  type: enhancement
+  title: Support doc viewer deep links from the Discover embeddable
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/289202
+  issues:
+  - https://github.com/elastic/kibana/issues/286963
+- file:
+    name: 289058.yaml
+    checksum: 72bda5ff288ffeb965da4d8b0b1b1b9a359c872a
+  type: bug-fix
+  title: Fix Lens ES|QL date buckets treating as strings after reload
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Lens ES|QL visualizations so date buckets from the query keep behaving as time after an API round-trip, including heatmap time scale and sort, chart-switch suggestion ranking, XY current-time and partial-data markers, and dimension drag-and-drop, instead of using the persisted string column type.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/289058
+  issues:
+  - https://github.com/elastic/kibana/issues/289708
+- file:
+    name: 290310.yaml
+    checksum: 9c645ea488f971a75494626540c2f7bcfcbb17bd
+  type: feature
+  title: Scope AI index documents to the current Kibana space
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: AI index registry entries, feedback analysis schedules, and improvements are scoped to the current Kibana space. The same index id can exist independently in different spaces. The managed `elastic` index is created per space on first use.
+  areas:
+  - Search and data
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/290310
+  issues:
+  - https://github.com/elastic/search-team/issues/15981
+- file:
+    name: 291813.yaml
+    checksum: f130c9a11fe0f7d2440eab5093a1022a074a363b
+  type: bug-fix
+  title: Fix integration upgrades that add a custom analyzer after the write index exists
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes integration upgrade for integrations where a custom analyzer or normalizer was added to a `@custom` component template after the write index was created.
+  prs:
+  - https://github.com/elastic/kibana/pull/291813
+  issues:
+  - https://github.com/elastic/kibana/issues/249668

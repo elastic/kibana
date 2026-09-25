@@ -7,9 +7,9 @@
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { OBSERVABILITY_ALERTING_BASE_PATH } from '@kbn/deeplinks-observability';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
@@ -77,6 +77,7 @@ export class ObservabilityAlertingPage {
   public readonly viewRuleDetailsLink: Locator;
   public readonly episodeDetailsPage: Locator;
   public readonly ruleDetailLayout: Locator;
+  public readonly toasts: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
@@ -108,6 +109,7 @@ export class ObservabilityAlertingPage {
     );
     this.episodeDetailsPage = this.page.testSubj.locator('alertingV2EpisodeDetailsPage');
     this.ruleDetailLayout = this.page.testSubj.locator('ruleDetailLayout');
+    this.toasts = this.page.components.toast().toasts;
   }
 
   urlFor(path: string): string {
@@ -184,5 +186,9 @@ export class ObservabilityAlertingPage {
 
   tagFilterOption(tag: string): Locator {
     return this.page.testSubj.locator(`episodesFilterBar-tags-popover-option-${tag}`);
+  }
+
+  episodeRuleCell(ruleName: string): Locator {
+    return this.page.testSubj.locator('episodeRuleCell').filter({ hasText: ruleName });
   }
 }
