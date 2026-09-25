@@ -30,6 +30,7 @@ import type {
   AlertZeroStartDependencies,
 } from './types';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
+import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
@@ -83,10 +84,14 @@ export class AlertZeroPlugin
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('AlertZero plugin is disabled');
-      return { enabled: false };
+      return { isEnabled: false };
     }
 
     this.logger.info('Setting up AlertZero plugin');
+
+    // Registered inside the config guard so the deployment kill switch removes the setting
+    // entirely; `withAlertZeroEnabled` then never reads an unregistered key.
+    registerUiSettings(coreSetup.uiSettings);
 
     this.workflowsManagementApi = workflowsManagement.management;
 
@@ -138,7 +143,7 @@ export class AlertZeroPlugin
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
     });
 
-    return { enabled: true };
+    return { isEnabled: true };
   }
 
   start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
