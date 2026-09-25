@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import type { CoreStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { subscribeToDualProcessFlag } from './dual_process';
@@ -38,15 +38,18 @@ function buildCoreStart(
     update: jest.fn().mockResolvedValue({}),
   };
 
-  const getBooleanValue =
+  const startupFlag$ =
     flagOnStartup !== undefined
-      ? jest.fn().mockResolvedValue(flagOnStartup)
-      : jest.fn().mockRejectedValue(new Error('getBooleanValue not mocked for this test'));
+      ? of(flagOnStartup)
+      : throwError(() => new Error('startup flag read not mocked for this test'));
 
   return {
     featureFlags: {
-      getBooleanValue$: jest.fn().mockReturnValue(flagSubject.asObservable()),
-      getBooleanValue,
+      // First subscription is the startup snapshot; later ones drive in-session transitions.
+      getBooleanValue$: jest
+        .fn()
+        .mockImplementationOnce(() => startupFlag$)
+        .mockReturnValue(flagSubject.asObservable()),
     },
     savedObjects: {
       createInternalRepository: jest.fn().mockReturnValue(mockInternalRepo),
@@ -314,10 +317,12 @@ describe('subscribeToDualProcessFlag', () => {
       const mockInternalRepo = { find: mockFind, update: mockUpdate };
       const coreStart = {
         featureFlags: {
-          getBooleanValue$: jest.fn().mockReturnValue(flagSubject.asObservable()),
-          getBooleanValue: jest
+          getBooleanValue$: jest
             .fn()
-            .mockRejectedValue(new Error('getBooleanValue not mocked for this test')),
+            .mockImplementationOnce(() =>
+              throwError(() => new Error('startup flag read not mocked for this test'))
+            )
+            .mockReturnValue(flagSubject.asObservable()),
         },
         savedObjects: {
           createInternalRepository: jest.fn().mockReturnValue(mockInternalRepo),

@@ -18,7 +18,6 @@ import {
   KibanaApiCallError,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/workflows-extensions/server';
-import { getInternalUiamCallerAttestationHeaders } from './get_internal_uiam_caller_attestation_headers';
 import { isTextContentType, readResponseStream } from '../utils/http_response';
 
 export { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -206,10 +205,10 @@ const stringifyErrorBodyForMessage = (body: unknown): string => {
  * intentionally kept narrow (no multipart, no fetcher options, no streaming).
  *
  * Transport is Core's HTTP self client (`coreStart.http.selfClient`): it owns URL resolution,
- * forwarding the scoped request's `authorization`, and stamping `x-elastic-internal-origin` /
- * `kbn-version`, so this helper only supplies the headers Core does not manage (custom + event-chain
- * + the UIAM attestation) and keeps its own response-shaping contract (size cap, binary handling,
- * structured {@link KibanaApiCallError}).
+ * forwarding the scoped request's `authorization`, stamping `x-elastic-internal-origin` /
+ * `kbn-version`, and the UIAM internal-caller attestation. This helper only supplies the headers
+ * Core does not manage (custom + event-chain) and keeps its own response-shaping contract (size
+ * cap, binary handling, structured {@link KibanaApiCallError}).
  */
 export async function callKibanaApi<T = unknown>(
   deps: CallKibanaApiDeps,
@@ -229,7 +228,6 @@ export async function callKibanaApi<T = unknown>(
   const outboundHeaders: Record<string, string> = {
     ...stripReservedHeaders(params.headers),
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
-    ...getInternalUiamCallerAttestationHeaders(coreStart, fakeRequest),
   };
 
   // The workflow's fake request carries neither a space nor the server base path, so both have to

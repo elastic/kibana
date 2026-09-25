@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { EventClient } from './event_client';
 import { updateSignificantEventStatus } from './update_event_status';
@@ -76,10 +78,15 @@ export const cleanupStaleEvents = async ({
   eventClient,
   rulesClient,
   candidateRuleIds,
+  alertEventsClient,
+  logger,
 }: {
   eventClient: EventClient;
   rulesClient: IRulesManagementClient;
   candidateRuleIds?: string[];
+  /** Optional — callers must attempt to pass in production; omitted only when client is unavailable. */
+  alertEventsClient?: AlertEventsClientApi;
+  logger?: Logger;
 }): Promise<CleanupStaleEventsResult> => {
   const uniqueCandidateRuleIds = candidateRuleIds
     ? [...new Set(candidateRuleIds)].filter(Boolean)
@@ -124,6 +131,8 @@ export const cleanupStaleEvents = async ({
             eventUuid: event.event_uuid,
             status: 'closed',
             assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
+            alertEventsClient,
+            logger,
           })
         )
       )
