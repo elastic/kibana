@@ -23,6 +23,16 @@ export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
  */
 export const NIGHTSHIFT_ENABLED_FLAG = 'nightshift.enabled';
 
+/**
+ * Gates whether `EventService.getClient()` (Significant Events) returns the `.rule-events`-backed
+ * `RuleEventsClient` instead of the legacy `EventClient`. Read-only; the dual-write to
+ * `.rule-events` is unconditional and independent of this flag. Falls back to `false` so reads
+ * keep hitting the legacy events data stream until the read migration (nightshift-program#1515)
+ * is validated and rolled out.
+ */
+export const SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ =
+  'nightshift.significant_events.use_rule_events_read';
+
 /** Saved object type registered by `nightshiftSources` and granted by the Nightshift feature. */
 export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
 

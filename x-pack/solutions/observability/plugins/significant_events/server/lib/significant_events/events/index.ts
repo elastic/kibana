@@ -11,4 +11,5 @@ export type { SignificantEvent, StoredEvent } from './data_stream';
 export { EventClient } from './event_client';
 export type { EventDataStreamClient } from './event_client';
 export { EventService } from './event_service';
+export { RuleEventsClient } from './rule_events_client';
 export { toRuleEvent } from './to_rule_event';
