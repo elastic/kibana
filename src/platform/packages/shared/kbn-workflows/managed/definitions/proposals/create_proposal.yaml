@@ -32,55 +32,20 @@ settings:
     # still fails and later steps are skipped. That is what makes this safe for
     # settling the record, and it is also what catches a gate timeout, since a
     # HITL step cannot carry its own `on-failure` (elastic/security-team#19315).
+    #
+    # One step, not a get-then-update chain: workflow-level fallback steps are
+    # renamed to `workflow-level-on-failure_<failed>_<name>`, so Liquid
+    # `steps.<yaml-name>` references resolve to nothing. The settle step adopts
+    # the live head and discriminates decided→failed / undecided→expired itself.
+    # It does not check manage_proposals — a denied resumer's API key may be on
+    # the task when this runs.
     fallback:
-      # Last chance to settle the record, so it adopts for the same reason the
-      # loop does: a revision may have superseded the carried id, and every
-      # write below would be refused on it.
-      #
-      # The `if` guards here are the only ones the id needs. This handler runs
-      # even when `create_proposal` itself failed, which is the one case where
-      # there is no id to settle; inside the loop it is always set.
-      - name: get_last_revision_on_failure
-        type: proposals.getLatestRevision
-        if: '${{ variables.current_proposal_id != blank }}'
-        with:
-          proposalId: '{{ variables.current_proposal_id }}'
-
-      - name: adopt_last_revision_on_failure
-        type: data.set
-        if: '${{ variables.current_proposal_id != blank }}'
-        with:
-          current_proposal_id: '{{ steps.get_last_revision_on_failure.output.proposalId }}'
-
-      # The carried id, not the create step's output: a clone moves the id, and
-      # only `data.set` variables survive the loop and a HITL park.
-      - name: read_proposal_on_failure
-        type: proposals.getProposal
+      - name: settle_on_failure
+        type: proposals.settleIncompleteProposal
         # Nothing to settle when creation itself failed.
         if: '${{ variables.current_proposal_id != blank }}'
         with:
           proposalId: '{{ variables.current_proposal_id }}'
-
-      # Discriminates on the record's own decision, not on the error: all three
-      # timeout sources share `type: TimeoutError` and `ExecutionError` carries
-      # nothing else to tell them apart.
-      - name: record_failure_after_decision
-        type: proposals.updateProposal
-        if: '${{ variables.current_proposal_id != blank and steps.read_proposal_on_failure.output.decision != blank }}'
-        with:
-          proposalId: '{{ variables.current_proposal_id }}'
-          status: failed
-          executionError: '{{ error.message }}'
-
-      # `expired` is the only terminal status an undecided proposal has — every
-      # execution state requires an approval — so a malfunction before anyone
-      # decided is "no decision was reached", not a failure.
-      - name: record_expiry_before_decision
-        type: proposals.updateProposal
-        if: '${{ variables.current_proposal_id != blank and steps.read_proposal_on_failure.output.decision == blank }}'
-        with:
-          proposalId: '{{ variables.current_proposal_id }}'
-          status: expired
           executionError: '{{ error.message }}'
 
 triggers:
@@ -364,8 +329,10 @@ steps:
         steps:
           # `expired`, not `failed`: the gate's timeout is the remaining
           # deadline, so a gate that times out has reached it by construction.
+          # settleIncompleteProposal skips manage_proposals so a denied resumer's
+          # key on the task cannot strand the record here.
           - name: record_gate_expiry
-            type: proposals.updateProposal
+            type: proposals.settleIncompleteProposal
             with:
               proposalId: '{{ variables.current_proposal_id }}'
               status: expired
@@ -520,15 +487,14 @@ steps:
   # a finished execution, which is the outcome this whole definition exists to
   # prevent — so the budget gets the same treatment as every other way out.
   #
-  # No adopt of its own. If a revision superseded the carried id the write is
-  # refused, and the workflow-level handler picks it up, adopts, and settles
-  # the live head. Either way the record ends up terminal.
+  # settleIncompleteProposal adopts the live head and skips manage_proposals, so
+  # a denied resumer who burned the budget cannot leave the record pending.
   - name: settle_unfinished
     type: if
     condition: '${{ variables.completed != true }}'
     steps:
       - name: record_unfinished
-        type: proposals.updateProposal
+        type: proposals.settleIncompleteProposal
         with:
           proposalId: '{{ variables.current_proposal_id }}'
           status: expired

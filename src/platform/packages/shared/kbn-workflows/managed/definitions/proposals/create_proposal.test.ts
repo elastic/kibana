@@ -331,9 +331,11 @@ describe('create-investigation-proposal workflow', () => {
       // as every other way out of the loop.
       const top = workflow.steps.map(({ name }) => name);
       const settle = findStep(workflow.steps, 'settle_unfinished');
+      const record = findStep(workflow.steps, 'record_unfinished');
 
       expect(settle?.condition).toContain('variables.completed != true');
-      expect(findStep(workflow.steps, 'record_unfinished')?.with?.status).toBe('expired');
+      expect(record?.type).toBe('proposals.settleIncompleteProposal');
+      expect(record?.with?.status).toBe('expired');
       expect(top.indexOf('settle_unfinished')).toBeGreaterThan(top.indexOf('decision_loop'));
       expect(top.indexOf('settle_unfinished')).toBeLessThan(top.indexOf('output_result'));
     });
@@ -542,12 +544,12 @@ describe('create-investigation-proposal workflow', () => {
 
     it('settles a timed-out gate as expired, on the deadline it was parked against', () => {
       const handle = findStep(workflow.steps, 'handle_gate_timeout');
+      const record = findStep(workflow.steps, 'record_gate_expiry');
 
       expect(handle?.condition).toContain('variables.gate_timed_out == true');
-      expect(findStep(workflow.steps, 'record_gate_expiry')?.with?.status).toBe('expired');
-      expect(
-        String(findStep(workflow.steps, 'record_gate_expiry')?.with?.executionError)
-      ).toContain('variables.gate_error');
+      expect(record?.type).toBe('proposals.settleIncompleteProposal');
+      expect(record?.with?.status).toBe('expired');
+      expect(String(record?.with?.executionError)).toContain('variables.gate_error');
       expect(findStep(workflow.steps, 'break_gate_expiry')?.type).toBe('loop.break');
     });
 
@@ -614,15 +616,17 @@ describe('create-investigation-proposal workflow', () => {
       }
     });
 
-    it('reads the chain exactly twice: once in the loop, once in the failure handler', () => {
-      // The count is the invariant. Every extra read was a placement that had
-      // to be kept correct by hand, and the write this PR fixed was the one
-      // placement that had been missed.
+    it('reads the chain once in the YAML; the incomplete-settle step adopts internally', () => {
+      // The loop still needs an explicit adopt before every write. The
+      // workflow-level fallback and the incomplete-settle call sites adopt
+      // inside `settleIncompleteProposal` instead — workflow-level fallback
+      // step names are engine-prefixed, so a YAML get-then-update chain cannot
+      // reference its own outputs.
       const reads = allSteps()
         .filter(({ type }) => type === 'proposals.getLatestRevision')
         .map(({ name }) => name);
 
-      expect(reads.sort()).toEqual(['get_last_revision', 'get_last_revision_on_failure']);
+      expect(reads).toEqual(['get_last_revision']);
     });
   });
 
@@ -732,43 +736,38 @@ describe('create-investigation-proposal workflow', () => {
   });
 
   describe('workflow-level failure handling', () => {
-    it('records a failure from the workflow-level on-failure, since HITL steps take none', () => {
+    it('settles from a single incomplete-settle step, not a get-then-update chain', () => {
+      // Workflow-level fallback steps are renamed
+      // `workflow-level-on-failure_<failed>_<name>`, so Liquid `steps.<name>`
+      // references resolve to nothing. One step that adopts and settles keeps
+      // the handler working.
       const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
 
-      expect(fallback.map(({ type }) => type)).toContain('proposals.updateProposal');
+      expect(fallback.map(({ name, type }) => ({ name, type }))).toEqual([
+        { name: 'settle_on_failure', type: 'proposals.settleIncompleteProposal' },
+      ]);
     });
 
     it('settles from the carried id, not the create step output that a clone invalidates', () => {
-      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
-      const addressed = fallback.filter((step) => step.with?.proposalId !== undefined);
+      const settle = findStep(
+        workflow.settings?.['on-failure']?.fallback ?? [],
+        'settle_on_failure'
+      );
 
-      expect(addressed.length).toBeGreaterThan(0);
-      for (const step of addressed) {
-        expect(String(step.with?.proposalId)).toContain('variables.current_proposal_id');
-      }
+      expect(String(settle?.with?.proposalId)).toContain('variables.current_proposal_id');
     });
 
-    it('adopts the live head before settling, or the handler fails the way the loop did', () => {
-      // This is the last thing that can settle the record. A revision landing
-      // during the park leaves the carried id superseded, which `updateProposal`
-      // refuses — so without this the handler throws on the same conflict that
-      // brought it here, and the live revision is left `pending` against an
-      // execution that is already over.
-      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
-      const names = fallback.map(({ name }) => name);
-
-      expect(findStep(fallback, 'get_last_revision_on_failure')?.type).toBe(
-        'proposals.getLatestRevision'
+    it('omits status so the step discriminates decided→failed / undecided→expired', () => {
+      // All three timeout sources share `type: TimeoutError`, and
+      // `ExecutionError` carries nothing else to tell them apart — so the
+      // record's own decision is what chooses the terminal status.
+      const settle = findStep(
+        workflow.settings?.['on-failure']?.fallback ?? [],
+        'settle_on_failure'
       );
-      expect(
-        String(findStep(fallback, 'adopt_last_revision_on_failure')?.with?.current_proposal_id)
-      ).toContain('steps.get_last_revision_on_failure.output.proposalId');
 
-      for (const write of ['record_failure_after_decision', 'record_expiry_before_decision']) {
-        expect(names.indexOf(write)).toBeGreaterThan(
-          names.indexOf('adopt_last_revision_on_failure')
-        );
-      }
+      expect(settle?.with?.status).toBeUndefined();
+      expect(String(settle?.with?.executionError)).toContain('error.message');
     });
 
     it('guards the id only here, where creation itself may have failed', () => {
@@ -792,24 +791,6 @@ describe('create-investigation-proposal workflow', () => {
       for (const step of fallback) {
         expect(step.if).toContain('variables.current_proposal_id != blank');
       }
-    });
-
-    it('discriminates on the proposal decision rather than on the error type', () => {
-      // All three timeout sources share `type: TimeoutError`, and
-      // `ExecutionError` carries nothing else to tell them apart.
-      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
-      const afterDecision = fallback.find(({ name }) => name === 'record_failure_after_decision');
-      const beforeDecision = fallback.find(({ name }) => name === 'record_expiry_before_decision');
-
-      expect(afterDecision?.if).toContain(
-        'steps.read_proposal_on_failure.output.decision != blank'
-      );
-      expect(afterDecision?.with?.status).toBe('failed');
-      // `expired` is the only terminal status an undecided proposal has.
-      expect(beforeDecision?.if).toContain(
-        'steps.read_proposal_on_failure.output.decision == blank'
-      );
-      expect(beforeDecision?.with?.status).toBe('expired');
     });
   });
 });

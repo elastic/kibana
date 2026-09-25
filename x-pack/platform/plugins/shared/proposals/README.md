@@ -139,7 +139,7 @@ flowchart TB
     end
 
     subgraph proposals["proposals (this plugin)"]
-        steps["proposals.createProposal<br/>proposals.updateProposal<br/>proposals.checkDecidePrivileges<br/>proposals.getProposal<br/>proposals.cloneProposal"]
+        steps["proposals.createProposal<br/>proposals.updateProposal<br/>proposals.settleIncompleteProposal<br/>proposals.checkDecidePrivileges<br/>proposals.getProposal<br/>proposals.cloneProposal"]
         api["Internal HTTP API<br/>/internal/proposals"]
         service["ProposalsService<br/><i>the only writer</i>"]
         gate["system-create-proposal<br/><i>managed gate workflow</i>"]
@@ -222,7 +222,7 @@ The gate sits inside a `while` loop, because releasing a gate is not the same th
 6. **Record the decision**, together with the status it implies — never on its own, because `approved` + `pending` is not a legal pair, and a decision-only write would leave the record claiming an approval with no outcome.
 7. On an action failure, **clone** the proposal, adopt the new id, and loop; the clone inherits the deadline so a chain of retries cannot outlive it. Cloning a proposal that already carries `supersededBy` is refused, because overwriting the pointer would orphan the first clone.
 
-The chain is read in exactly two places: step 4, and the workflow-level failure handler. Every write is downstream of one of them.
+The chain is read explicitly once in the loop (step 4). Incomplete settles — gate expiry, attempt-budget exhaustion, and the workflow-level failure handler — adopt inside `proposals.settleIncompleteProposal` instead, because a workflow-level fallback cannot reference its own step outputs by YAML name.
 
 Three invariants the loop depends on:
 
@@ -238,9 +238,12 @@ Conditions use a single `and` or a single comparison throughout. Liquid has no o
 | --- | --- | --- |
 | `proposals.createProposal` | manage | Fails the step |
 | `proposals.updateProposal` | manage | Fails the step |
+| `proposals.settleIncompleteProposal` | none | — |
 | `proposals.getProposal` | read | Fails the step |
 | `proposals.cloneProposal` | manage | Fails the step |
 | `proposals.checkDecidePrivileges` | manage | **Returns `false`** |
+
+`settleIncompleteProposal` deliberately skips `manage_proposals`: gate expiry, attempt-budget exhaustion, and the workflow-level fallback may run under a denied resumer's API key, and `updateProposal` would fail the settle. It adopts the live head, then writes `failed` or `expired` (explicit status, or discriminated from whether the record already has a decision).
 
 Each failure mode gets its own `ExecutionError.type` (`PermissionError`, `ConflictError`, `ExpiredError`, `NotFoundError`, `ValidationError`, `ApiError`), because the type is the only part of an error a workflow can branch on — `ExecutionError` carries just `{ type, message, details? }`, and all three timeout sources already share `TimeoutError`.
 
@@ -357,8 +360,7 @@ The service surface follows from that: `releaseGate()` makes at most that one an
 
 - **The decision is written behind the gate, by the workflow.** Every resume surface funnels through the gate, so one write there covers them all; a write in the approve route would only ever cover that route.
 - **Nothing durable is written before the resume**, so a failed resume needs no rollback. The sole exception is the dismiss reason, which the gate cannot carry.
-- **The privilege check precedes every read and write in the loop.** The chain resolve reads the proposal on the resumer's behalf, so it waits for the check too; an unauthorized resumer is re-parked before anything is read for it. The timeout path resolves the chain separately, inside its own handler, because it writes without ever reaching that check.
-- **The privilege check precedes every write in the loop.** A write that failed first would leave the gate spent and the proposal stranded.
+- **The privilege check precedes every read and write on the answered path.** The chain resolve reads the proposal on the resumer's behalf, so it waits for the check too; an unauthorized resumer is re-parked before anything is read for it. Gate timeout, attempt-budget exhaustion, and the workflow-level fallback settle through `settleIncompleteProposal`, which skips the privilege check so a denied resumer's API key cannot strand the record. On the answered path, a write that failed before the check would leave the gate spent and the proposal stranded.
 - **A settled status cannot move and a decision cannot be overwritten.** Two independent guards, because the two axes settle independently.
 - **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `resumeGate` finds the step itself and passes `stepExecutionId`.
 - **The decision actor is server-derived.** Never accepted from a request body. `createdBy` and `decidedBy` store `{ username, fullName, email, profileUid? }`, the shape Cases established: the profile uid is the stable identity a UI resolves an avatar from, and the names are stored rather than looked up so attribution survives a missing profile. The uid is genuinely often absent — security disabled, a `run-as` proxy, a session without a profile, or an API key whose creator has no activated profile, which is exactly what the resume path runs under.
@@ -440,7 +442,7 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 ## Known limitations
 
 - **Two steps rely on an `on-failure` their schema does not model** ([#19315](https://github.com/elastic/security-team/issues/19315)). Neither `WaitForApprovalStepSchema` nor `WorkflowExecuteStepSchema` merges `StepWithOnFailureSchema`, unlike the connector-derived schema every custom step gets — so zod drops the key on any path that validates steps against the full schema. The engine honours it on both: a HITL wait fails through the ordinary `failStep` path with a `TimeoutError`, and `handleStepLevelOnFailure` wraps any step declaring the key with no exclusion by type. Both are load-bearing here — the gate's settles an unanswered proposal, the action's keeps a failed action inside the loop to be cloned — and they reach the engine only because managed workflows install under `lightweightValidation`, which does not validate steps. The schema-parity test beside the definition pins exactly these two so a third cannot appear unnoticed, and so the list shrinks when #19315 lands.
-- **An exhausted iteration budget settles as `expired`.** `max-iterations` is 200 with `on-limit: continue`, so hitting it exits the loop into `settle_unfinished`, which writes `status: expired` and reports `final_status: expired`. Reaching the limit means something spun — a resumer who keeps failing the decide check, or a long chain of action retries. Residual: that write runs as whoever released the gate last, so a user who can resume workflows but not manage proposals can burn the budget and leave the record `pending` when `assertCanManage` fails ([#19654](https://github.com/elastic/security-team/issues/19654)).
+- **An exhausted iteration budget settles as `expired`.** `max-iterations` is 200 with `on-limit: continue`, so hitting it exits the loop into `settle_unfinished`, which calls `settleIncompleteProposal` with `status: expired` and reports `final_status: expired`. Reaching the limit means something spun — a resumer who keeps failing the decide check, or a long chain of action retries.
 - **A write can still lose a race to a revision.** Every write is preceded by the one adopt, but a revision landing in the window between them makes the write conflict. Nothing retries, so a conflict reaches the workflow-level handler — which adopts and settles the live head rather than stranding it. Losing a decision to a millisecond race is bad but bounded, and a retry per write would undo the single-adopt simplification. If it ever matters, the fix is one retry around the whole post-adopt section, not one per write.
 - **A decision resumed past the deadline is accepted for a few seconds.** The engine schedules the gate's timeout task at the deadline, but it fires when Task Manager claims it, and `resume()` only checks expiry when the wake carries no input. A resume arriving in that gap is taken. The approve and dismiss routes are not affected — `releaseGate` refuses an expired proposal — so this is reachable only through the platform's generic resume API or the Inbox. Not worth a step in the loop to catch at 72h deadlines.
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.

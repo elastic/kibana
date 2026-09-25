@@ -14,6 +14,7 @@ import { getCloneProposalStepDefinition } from './clone_proposal_step';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
 import { getGetLatestRevisionStepDefinition } from './get_latest_revision_step';
 import { getGetProposalStepDefinition } from './get_proposal_step';
+import { getSettleIncompleteProposalStepDefinition } from './settle_incomplete_proposal_step';
 import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 export const registerStepDefinitions = ({
@@ -34,6 +35,9 @@ export const registerStepDefinitions = ({
     getUpdateProposalStepDefinition({ getProposalsService, resolveUser, privileges })
   );
   workflowsExtensions.registerStepDefinition(
+    getSettleIncompleteProposalStepDefinition({ getProposalsService })
+  );
+  workflowsExtensions.registerStepDefinition(
     getCheckDecidePrivilegesStepDefinition({ privileges })
   );
   workflowsExtensions.registerStepDefinition(
@@ -52,4 +56,5 @@ export { getCloneProposalStepDefinition } from './clone_proposal_step';
 export { getCreateProposalStepDefinition } from './create_proposal_step';
 export { getGetLatestRevisionStepDefinition } from './get_latest_revision_step';
 export { getGetProposalStepDefinition } from './get_proposal_step';
+export { getSettleIncompleteProposalStepDefinition } from './settle_incomplete_proposal_step';
 export { getUpdateProposalStepDefinition } from './update_proposal_step';

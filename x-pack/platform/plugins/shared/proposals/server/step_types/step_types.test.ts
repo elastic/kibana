@@ -16,6 +16,7 @@ import { getCheckDecidePrivilegesStepDefinition } from './check_decide_privilege
 import { getCloneProposalStepDefinition } from './clone_proposal_step';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
 import { getGetProposalStepDefinition } from './get_proposal_step';
+import { getSettleIncompleteProposalStepDefinition } from './settle_incomplete_proposal_step';
 import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 const EXECUTION_ID = 'exec-1';
@@ -700,5 +701,123 @@ describe('proposals.cloneProposal step', () => {
       cloneDefinition(clone, privileges).handler(createContext({ proposalId: 'proposal-1' }))
     ).rejects.toMatchObject({ type: 'PermissionError' });
     expect(clone).not.toHaveBeenCalled();
+  });
+});
+
+describe('proposals.settleIncompleteProposal step', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const settleDefinition = (service: {
+    getLatestRevision: jest.Mock;
+    get: jest.Mock;
+    update: jest.Mock;
+  }) =>
+    getSettleIncompleteProposalStepDefinition({
+      getProposalsService: () => service as unknown as ProposalsService,
+    });
+
+  it('should adopt the live head before writing', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 }),
+      get: jest.fn().mockResolvedValue({ id: 'proposal-2', status: 'pending' }),
+      update: jest.fn().mockResolvedValue({ id: 'proposal-2', status: 'expired' }),
+    };
+
+    const result = await settleDefinition(service).handler(
+      createContext({
+        proposalId: 'proposal-1',
+        status: 'expired',
+        executionError: 'timed out',
+      })
+    );
+
+    expect(service.getLatestRevision).toHaveBeenCalledWith('proposal-1', SPACE_ID);
+    expect(service.get).toHaveBeenCalledWith('proposal-2', SPACE_ID);
+    expect(service.update).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'proposal-2', status: 'expired', executionError: 'timed out' }),
+      SPACE_ID
+    );
+    expect(result.output).toEqual({
+      proposalId: 'proposal-2',
+      status: 'expired',
+      decision: undefined,
+    });
+  });
+
+  it('should expire an undecided proposal when status is omitted', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
+      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'expired' }),
+    };
+
+    await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', executionError: 'workflow failed' })
+    );
+
+    expect(service.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'expired' }),
+      SPACE_ID
+    );
+  });
+
+  it('should fail a decided proposal when status is omitted', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: jest
+        .fn()
+        .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' }),
+      update: jest
+        .fn()
+        .mockResolvedValue({ id: 'proposal-1', status: 'failed', decision: 'approved' }),
+    };
+
+    const result = await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', executionError: 'clone threw' })
+    );
+
+    expect(service.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'failed' }),
+      SPACE_ID
+    );
+    expect(result.output?.status).toBe('failed');
+    expect(result.output?.decision).toBe('approved');
+  });
+
+  it('should honour an explicit status over discrimination', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: jest
+        .fn()
+        .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' }),
+      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' }),
+    };
+
+    await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', status: 'failed', executionError: 'forced' })
+    );
+
+    expect(service.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'failed' }),
+      SPACE_ID
+    );
+  });
+
+  it('should not check manage privileges', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
+      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'expired' }),
+    };
+
+    // No privileges object is injected — a denied resumer's key on the task
+    // must still be able to leave the record terminal.
+    await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', status: 'expired' })
+    );
+
+    expect(service.update).toHaveBeenCalled();
   });
 });
