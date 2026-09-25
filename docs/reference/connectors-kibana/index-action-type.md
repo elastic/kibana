@@ -35,11 +35,7 @@ For example:
 :screenshot:
 :::
 
-Index connector actions contain a document in JSON format.
-
-{applies_to}`serverless: ga` {applies_to}`stack: ga 9.5+` You can pass each document as a JSON object or as a JSON-encoded string. Invalid JSON strings are rejected.
-
-For example, if you have an index with the following properties:
+Index connector actions contain a document in JSON format. For example, if you have an index with the following properties:
 
 ```text
 PUT test
@@ -68,3 +64,5 @@ Your test document could contain the following properties and variables:
     "context_message": "{{context.message}}"
 }
 ```
+
+{applies_to}`serverless: ga` {applies_to}`stack: ga 9.5+` You can pass each document as a JSON object or as a JSON-encoded string. Invalid JSON strings are rejected.
