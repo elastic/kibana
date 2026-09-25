@@ -203,7 +203,12 @@ describe('GCS service account activation', () => {
     const result = run('--logout-gcloud', { MOCK_ACTIVE_ACCOUNT: PROXY_EMAIL });
 
     expect(result.status).toBe(0);
-    expect(result.calls).toContainEqual(['auth', 'revoke', PROXY_EMAIL, '--no-user-output-enabled']);
+    expect(result.calls).toContainEqual([
+      'auth',
+      'revoke',
+      PROXY_EMAIL,
+      '--no-user-output-enabled',
+    ]);
     expect(Fs.existsSync(credentialsDir)).toBe(false);
   });
 });
