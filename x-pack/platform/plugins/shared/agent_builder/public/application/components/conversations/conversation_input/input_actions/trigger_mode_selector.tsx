@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiListGroup, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiListGroup, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
@@ -48,7 +48,7 @@ export const TriggerModeSelector: React.FC<TriggerModeSelectorProps> = ({
       panelPaddingSize="s"
       anchorPosition="upRight"
       button={
-        <EuiButton
+        <EuiButtonEmpty
           color="text"
           size="s"
           iconType="chevronSingleDown"
@@ -58,7 +58,7 @@ export const TriggerModeSelector: React.FC<TriggerModeSelectorProps> = ({
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
         >
           {triggerModeLabels[triggerMode]}
-        </EuiButton>
+        </EuiButtonEmpty>
       }
     >
       <EuiListGroup
