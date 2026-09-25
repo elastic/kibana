@@ -204,8 +204,7 @@ test.describe(
       const cpuValue = tooltip
         .locator('[aria-label^="CPU usage"]')
         .getByTestId('conditionalTooltipContent-value');
-      await expect(cpuValue).not.toHaveText('-');
-      await expect(cpuValue).not.toHaveText('N/A');
+      await expect(cpuValue).toHaveText(/\d/);
     });
 
     test('group by k8s.node.name splits OpenTelemetry pods into two groups', async ({
