@@ -48,7 +48,7 @@ const reducer = (
 
 interface UseAutomationsEditorParams {
   aiIndex: GetAiIndexResponse | undefined;
-  onSaved: () => void;
+  onSaved: () => void | Promise<void>;
 }
 
 export interface UseAutomationsEditorResult {
@@ -108,7 +108,8 @@ export const useAutomationsEditor = ({
       const saved = await saveAutomations(aiIndex, next);
       if (saved) {
         dispatch({ type: 'editStopped' });
-        onSaved();
+        // Wait for the AI index refetch so navigation to Workflows does not abort it.
+        await onSaved();
       }
       return saved;
     },
