@@ -152,6 +152,11 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await header.waitUntilLoadingHasFinished();
     },
 
+    async selectUserInAssigneesPopover(username: string) {
+      await testSubjects.click(`userProfileSelectableOption-${username}`);
+      await header.waitUntilLoadingHasFinished();
+    },
+
     async selectAllRowsInAssigneesPopover() {
       const rows = await find.allByCssSelector('.euiSelectableListItem__content');
       for (const row of rows) {
