@@ -230,6 +230,16 @@ export const installEntityStoreSuite = async ({
     }
   );
   expect(initMaintainersResponse.statusCode).toBe(200);
+
+  const startAutomatedResolutionMaintainerResponse = await apiClient.post(
+    ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('automated-resolution'),
+    {
+      headers: internalHeaders,
+      responseType: 'json',
+      body: {},
+    }
+  );
+  expect(startAutomatedResolutionMaintainerResponse.statusCode).toBe(200);
 };
 
 export const uninstallEntityStoreSuite = async ({
