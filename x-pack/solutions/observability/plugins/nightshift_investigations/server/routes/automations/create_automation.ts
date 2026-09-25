@@ -16,17 +16,17 @@ import type { NightshiftAutomationAttributes } from '../../lib/automations/types
 const triggerRowSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('alert'),
-    ruleNamePattern: z.string().optional(),
+    ruleNamePattern: z.string().max(1000).optional(),
     ruleNameMatchMode: z.enum(['substring', 'regex']).optional(),
     alertStatus: z.enum(['active', 'inactive', 'any']).optional(),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string().max(500)).optional(),
   }),
   z.object({
     kind: z.literal('schedule'),
     schedulePreset: z.enum(['hourly', 'daily', 'weekly', 'custom']).optional(),
-    cronExpression: z.string().optional(),
-    timezone: z.string().optional(),
-    scopeQuery: z.string().optional(),
+    cronExpression: z.string().max(100).optional(),
+    timezone: z.string().max(100).optional(),
+    scopeQuery: z.string().max(10000).optional(),
   }),
 ]);
 
@@ -35,16 +35,16 @@ const triggerSchema = z.object({
 });
 
 const executionSchema = z.object({
-  promptTemplate: z.string().optional(),
+  promptTemplate: z.string().max(50000).optional(),
   reasoningMode: z.enum(['investigate', 'observe']).optional(),
-  agentId: z.string().optional(),
-  connectorId: z.string().optional(),
+  agentId: z.string().max(512).optional(),
+  connectorId: z.string().max(512).optional(),
 });
 
 const completionSchema = z.object({
   action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),
   targetMode: z.enum(['thread', 'channel', 'self']).optional(),
-  destination: z.string().optional(),
+  destination: z.string().max(500).optional(),
 });
 
 const runtimeSchema = z.object({
