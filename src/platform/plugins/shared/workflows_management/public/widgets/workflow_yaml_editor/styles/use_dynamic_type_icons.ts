@@ -10,8 +10,10 @@
 import { type EuiThemeColorModeStandard, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
 import { HardcodedIconDataUrls } from '@kbn/workflows-ui';
+import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
 import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -138,9 +140,24 @@ function isValidDataUrl(url: string): boolean {
   return url.length > 50 && url.startsWith('data:') && url.includes('base64,');
 }
 
+function isFallbackBoltDataUrl(url: string, boltUrl: string): boolean {
+  return (
+    url === boltUrl || url === FALLBACK_BOLT_DATA_URL || url === getTriggerBoltFallbackDataUrl()
+  );
+}
+
+/** Bolt fallback and connector events with no brand icon (the plugs glyph) stay masked. */
+function keepsTriggerGlyphMask(actionTypeId: string, iconBase64: string, boltUrl: string): boolean {
+  if (isMonochromeActionType(actionTypeId) || isFallbackBoltDataUrl(iconBase64, boltUrl)) {
+    return true;
+  }
+  const connectorTypeId = getConnectorTypeIdForTriggerEventId(actionTypeId);
+  return connectorTypeId !== undefined && !ConnectorIconsMap.has(connectorTypeId);
+}
+
 /**
- * Background declarations for a custom trigger inline icon. A resolved full-color mark
- * clears the shared bolt mask so the logo is not clipped into the bolt silhouette.
+ * Background declarations for a custom trigger inline icon. A branded mark clears
+ * the shared bolt mask. Fallback and unbranded glyphs keep the currentColor mask.
  */
 function getTriggerInlineIconBackground({
   iconBase64,
@@ -153,20 +170,19 @@ function getTriggerInlineIconBackground({
   boltUrl: string;
   isMonochrome: boolean;
 }): string {
-  const hasResolvedIcon = isValidDataUrl(iconBase64);
-  const triggerIconUrl = hasResolvedIcon ? iconBase64 : boltUrl || FALLBACK_BOLT_DATA_URL;
-  if (isMonochrome && hasResolvedIcon) {
+  const hasBrandIcon = isValidDataUrl(iconBase64) && !isMonochrome;
+  if (isMonochrome && isValidDataUrl(iconBase64)) {
     return monochromeBackground;
   }
-  if (hasResolvedIcon) {
+  if (hasBrandIcon) {
     return `
-    background-image: url("${triggerIconUrl}") !important;
+    background-image: url("${iconBase64}") !important;
     mask-image: none !important;
     -webkit-mask-image: none !important;
     background-color: transparent !important;
   `;
   }
-  return `background-image: url("${triggerIconUrl}") !important;`;
+  return `background-image: url("${boltUrl || FALLBACK_BOLT_DATA_URL}") !important;`;
 }
 
 function appendStyleToEditorScope(
@@ -603,23 +619,23 @@ async function injectDynamicShadowIcons(
         className = connectorType;
       }
 
-      let bgProp: string;
-      if (isMonochromeActionType(connector.actionTypeId)) {
-        bgProp = `
+      const keepGlyphMask = isTriggerConnector
+        ? keepsTriggerGlyphMask(connector.actionTypeId, iconBase64, boltUrl)
+        : isMonochromeActionType(connector.actionTypeId);
+      const bgProp = keepGlyphMask
+        ? `
         mask-image: url("${iconBase64}");
         mask-size: contain;
         background-color: currentColor;
-      `;
-      } else {
-        bgProp = `background-image: url("${iconBase64}") !important;`;
-      }
+      `
+        : `background-image: url("${iconBase64}") !important;`;
 
       if (isTriggerConnector) {
         const triggerBgProp = getTriggerInlineIconBackground({
           iconBase64,
           monochromeBackground: bgProp,
           boltUrl,
-          isMonochrome: isMonochromeActionType(connector.actionTypeId),
+          isMonochrome: keepGlyphMask,
         });
         cssToInject += `
   .monaco-editor .type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}.${className}::after,

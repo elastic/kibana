@@ -9,8 +9,11 @@
 
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import {
+  connectorEventPlugsIcon,
+  registerConnectorEventTriggersPublic,
+} from './register_connector_event_triggers';
 import { getConnectorTypeIdForTriggerEventId } from '../../common/triggers/connector_event_triggers';
-import { registerConnectorEventTriggersPublic } from './register_connector_event_triggers';
 
 describe('registerConnectorEventTriggersPublic', () => {
   it('does not register inboundWebhook.received when inbound events are disabled', () => {
@@ -41,7 +44,7 @@ describe('registerConnectorEventTriggersPublic', () => {
         id: 'inboundWebhook.received',
         stability: 'tech_preview',
         requiresConnectorId: true,
-        icon: expect.anything(),
+        icon: connectorEventPlugsIcon,
       })
     );
   });
@@ -54,17 +57,15 @@ describe('registerConnectorEventTriggersPublic', () => {
       registerTriggerDefinition,
     });
 
-    const triggersWithBrandIcon = registerTriggerDefinition.mock.calls.flatMap(
-      ([definition]: [PublicTriggerDefinition]) => {
-        const connectorTypeId = getConnectorTypeIdForTriggerEventId(definition.id);
-        const brandIcon = connectorTypeId ? ConnectorIconsMap.get(connectorTypeId) : undefined;
-        return brandIcon ? [{ definition, brandIcon }] : [];
-      }
+    const definitions = registerTriggerDefinition.mock.calls.map(
+      ([definition]: [PublicTriggerDefinition]) => definition
     );
 
-    expect(triggersWithBrandIcon.length).toBeGreaterThan(0);
-    for (const { definition, brandIcon } of triggersWithBrandIcon) {
-      expect(definition.icon).toBe(brandIcon);
+    expect(definitions.map((definition) => definition.id)).toContain('inboundWebhook.received');
+    for (const definition of definitions) {
+      const connectorTypeId = getConnectorTypeIdForTriggerEventId(definition.id);
+      const brandIcon = connectorTypeId ? ConnectorIconsMap.get(connectorTypeId) : undefined;
+      expect(definition.icon).toBe(brandIcon ?? connectorEventPlugsIcon);
     }
   });
 });

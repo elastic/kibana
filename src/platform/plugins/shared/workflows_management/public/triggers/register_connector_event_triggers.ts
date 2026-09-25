@@ -16,7 +16,8 @@ import {
   getConnectorTypeIdForTriggerEventId,
 } from '../../common/triggers/connector_event_triggers';
 
-const connectorEventTriggerIcon = React.lazy(() =>
+/** Plugs glyph for connector events that have no brand icon. */
+export const connectorEventPlugsIcon = React.lazy(() =>
   import('@elastic/eui/es/components/icon/assets/plugs').then(({ icon }) => ({ default: icon }))
 );
 
@@ -30,7 +31,7 @@ function resolveConnectorEventTriggerIcon(
 ): React.ComponentType {
   const connectorTypeId = getConnectorTypeIdForTriggerEventId(eventId, specs);
   const specIcon = connectorTypeId ? ConnectorIconsMap.get(connectorTypeId) : undefined;
-  return specIcon ?? connectorEventTriggerIcon;
+  return specIcon ?? connectorEventPlugsIcon;
 }
 
 export interface RegisterConnectorEventTriggersPublicParams {
