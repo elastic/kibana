@@ -10,12 +10,7 @@ import { expect } from '@kbn/scout-oblt/api';
 import type { KibanaRole, ApiClientFixture } from '@kbn/scout-oblt';
 import { ConfigKey } from '../../../../../common/runtime_types';
 import { MASKED_PARAM_VALUE } from '../../../../../common/utils/mask_monitor_params';
-import {
-  apiTest,
-  mergeSyntheticsApiHeaders,
-  PUBLIC_API_VERSION,
-  SYNTHETICS_MONITOR_SO_TYPES,
-} from '../../../common/fixtures';
+import { apiTest, mergeSyntheticsApiHeaders, PUBLIC_API_VERSION } from '../../../common/fixtures';
 import type { ScoutPrivateLocation } from '../../../common/services/synthetics_private_location_api_service';
 import {
   deleteMonitors,
@@ -70,8 +65,7 @@ apiTest.describe(
     let adminHeaders: Record<string, string>;
     let privateLocation: ScoutPrivateLocation;
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient, apiServices, kbnClient }) => {
-      await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
+    apiTest.beforeAll(async ({ requestAuth, apiClient, apiServices }) => {
       const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
       editorHeaders = mergeSyntheticsApiHeaders(editorKey);
       const { apiKeyHeader: restrictedKey } = await requestAuth.getApiKeyForCustomRole(
@@ -88,10 +82,14 @@ apiTest.describe(
       privateLocation = await apiServices.syntheticsPrivateLocations.getSharedPrivateLocation();
     });
 
-    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
-      await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
-      await apiServices.syntheticsPrivateLocations.deletePrivateLocation(privateLocation.id);
-      await apiServices.fleet.agent_policies.delete(privateLocation.agentPolicyId, true);
+    apiTest.afterAll(async ({ apiServices }) => {
+      if (privateLocation) {
+        try {
+          await apiServices.syntheticsPrivateLocations.deletePrivateLocation(privateLocation.id);
+        } finally {
+          await apiServices.fleet.agent_policies.delete(privateLocation.agentPolicyId, true);
+        }
+      }
     });
 
     apiTest(
@@ -171,8 +169,11 @@ apiTest.describe(
           expect(stored).toHaveStatusCode(200);
           expect(stored.body.params).toBe(originalParams);
         } finally {
-          await deleteRunOncePolicies().catch(() => {});
-          await deleteMonitors(apiClient, editorHeaders, [monitorId], { ignoreErrors: true });
+          try {
+            await deleteRunOncePolicies();
+          } finally {
+            await deleteMonitors(apiClient, editorHeaders, [monitorId], { ignoreErrors: true });
+          }
         }
       }
     );

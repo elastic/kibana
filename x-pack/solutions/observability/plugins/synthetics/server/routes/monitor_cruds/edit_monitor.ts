@@ -54,6 +54,7 @@ import {
   maskMonitorParams,
   restoreMaskedMonitorParams,
 } from '../../../common/utils/mask_monitor_params';
+import { canRevealParameterValues } from '../../../common/utils/can_reveal_parameter_values';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -120,17 +121,26 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       const submittedParams = toParamJson(monitor[ConfigKey.PARAMS]);
       const previousParams = toParamJson(normalizedPreviousMonitor[ConfigKey.PARAMS]);
-      const unrestorableParamKeys = getUnrestorableMaskedParamKeys({
-        previousParams,
-        submittedParams,
+      const capabilities = await server.coreStart?.capabilities?.resolveCapabilities(request, {
+        capabilityPath: 'uptime.*',
       });
+      const shouldRestoreMaskedParams = !canRevealParameterValues({
+        canSave: Boolean(capabilities?.uptime?.save),
+        canReadParamValues: Boolean(capabilities?.uptime?.canReadParamValues),
+      });
+      const unrestorableParamKeys = shouldRestoreMaskedParams
+        ? getUnrestorableMaskedParamKeys({
+            previousParams,
+            submittedParams,
+          })
+        : [];
       if (unrestorableParamKeys.length > 0) {
         const message = getUnrestorableParamsMessage(unrestorableParamKeys);
         return response.badRequest({ body: { message, attributes: { details: message } } });
       }
       // A submitted ******** is the masked placeholder, so keep the stored secret.
       const monitorWithRestoredParams =
-        submittedParams === undefined
+        submittedParams === undefined || !shouldRestoreMaskedParams
           ? monitor
           : {
               ...monitor,
