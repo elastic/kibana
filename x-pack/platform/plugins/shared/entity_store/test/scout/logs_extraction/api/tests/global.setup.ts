@@ -11,8 +11,8 @@ import { installEntityStoreSuite, startAllEntityTypes } from '../../../common/fi
 
 globalSetupHook(
   'Install Entity Store once for logs extraction API suite',
-  async ({ apiClient, kbnClient, samlAuth }) => {
-    await installEntityStoreSuite({ apiClient, kbnClient, samlAuth });
+  async ({ apiClient, samlAuth }) => {
+    await installEntityStoreSuite({ apiClient, samlAuth });
 
     const credentials = await samlAuth.asInteractiveUser('admin');
     const defaultHeaders = {
