@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const TIMESTAMP_RUNTIME_FIELD = 'kibana.combined_timestamp' as const;
+export { TIMESTAMP_RUNTIME_FIELD } from '../../../../common/detection_engine/constants';
 
 /**
  * When suppression is enabled, allow to to suppress more than max signals alerts

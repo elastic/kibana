@@ -6,9 +6,18 @@
  */
 
 import { createAction } from 'redux-toolkit-v1';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import type { PageScope } from '../constants';
 import { SLICE_PREFIX } from '../constants';
+
+/**
+ * Time field of an ad-hoc data view, along with any runtime fields it depends on.
+ */
+export interface TimeFieldSpec {
+  timeFieldName: string;
+  runtimeFieldMap?: DataViewSpec['runtimeFieldMap'];
+}
 
 export interface SelectDataViewAsyncPayload {
   id?: string | null;
@@ -16,6 +25,10 @@ export interface SelectDataViewAsyncPayload {
    * Fallback patterns are used when the specific data view ID is undefined. This flow results in an ad-hoc data view creation
    */
   fallbackPatterns?: string[];
+  /**
+   * Time field for the ad-hoc data view created from `fallbackPatterns`. Defaults to no time field.
+   */
+  fallbackTimeFieldSpec?: TimeFieldSpec;
   /**
    * Specify one or more security solution scopes where the data view selection should be applied
    */

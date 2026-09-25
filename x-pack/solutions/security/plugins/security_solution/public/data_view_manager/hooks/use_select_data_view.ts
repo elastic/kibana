@@ -8,7 +8,7 @@
 import { useDispatch } from 'react-redux-v7';
 import { useCallback } from 'react';
 import type { PageScope } from '../constants';
-import { selectDataViewAsync } from '../redux/actions';
+import { selectDataViewAsync, type TimeFieldSpec } from '../redux/actions';
 
 interface UseSelectDataViewParams {
   /**
@@ -20,6 +20,10 @@ interface UseSelectDataViewParams {
    * .id param is not provided or the data view does not exist
    */
   fallbackPatterns?: string[];
+  /**
+   * Time field for the adhoc data view constructed from .fallbackPatterns
+   */
+  fallbackTimeFieldSpec?: TimeFieldSpec;
   /**
    * Data view selection will be applied to the scopes listed here
    */

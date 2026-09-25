@@ -944,6 +944,124 @@ describe('alert actions', () => {
       });
     });
 
+    describe('timestamp override', () => {
+      const combinedTimestampFieldSpec = {
+        timeFieldName: 'kibana.combined_timestamp',
+        runtimeFieldMap: {
+          'kibana.combined_timestamp': expect.objectContaining({ type: 'date' }),
+        },
+      };
+
+      const mockFetchedAlert = (_source: object) => {
+        fetchMock.mockResolvedValue({
+          hits: { hits: [{ _id: '1', _index: 'mock', _source }] },
+        });
+      };
+
+      const withTimestampOverride = (
+        alert: Ecs,
+        parameters: Record<string, unknown> = { timestamp_override: ['event.ingested'] }
+      ): Ecs => {
+        const alertWithOverride = cloneDeep(alert);
+        Object.entries(parameters).forEach(([key, value]) =>
+          set(alertWithOverride, `kibana.alert.rule.parameters.${key}`, value)
+        );
+        return alertWithOverride;
+      };
+
+      test('threshold alerts filter Timeline on the combined override timestamp', async () => {
+        const alert = withTimestampOverride(ecsDataMockWithNoTemplateTimeline[0]);
+        mockFetchedAlert(alert);
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: [alert],
+          searchStrategyClient,
+          getExceptionFilter: mockGetExceptionFilter,
+        });
+
+        expect(createTimeline).toHaveBeenCalledWith(
+          expect.objectContaining({ timeFieldSpec: combinedTimestampFieldSpec })
+        );
+      });
+
+      test('threshold alerts filter Timeline on the override field when the fallback is disabled', async () => {
+        const alert = withTimestampOverride(ecsDataMockWithNoTemplateTimeline[0], {
+          timestamp_override: ['event.ingested'],
+          timestamp_override_fallback_disabled: [true],
+        });
+        mockFetchedAlert(alert);
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: [alert],
+          searchStrategyClient,
+          getExceptionFilter: mockGetExceptionFilter,
+        });
+
+        expect(createTimeline).toHaveBeenCalledWith(
+          expect.objectContaining({ timeFieldSpec: { timeFieldName: 'event.ingested' } })
+        );
+      });
+
+      test('threshold alerts without an override do not set a Timeline time field', async () => {
+        mockFetchedAlert(ecsDataMockWithNoTemplateTimeline[0]);
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMockWithNoTemplateTimeline,
+          searchStrategyClient,
+          getExceptionFilter: mockGetExceptionFilter,
+        });
+
+        expect(createTimeline).toHaveBeenCalledWith(
+          expect.objectContaining({ timeFieldSpec: undefined })
+        );
+      });
+
+      test('new terms alerts filter Timeline on the combined override timestamp', async () => {
+        const alert = withTimestampOverride(ecsDataMockWithNoTemplateTimeline[0], {
+          timestamp_override: ['event.ingested'],
+          new_terms_fields: ['host.name'],
+        });
+        set(alert, 'kibana.alert.rule.type', ['new_terms']);
+        set(alert, 'kibana.alert.new_terms', ['host-0']);
+        mockFetchedAlert(alert);
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: [alert],
+          searchStrategyClient,
+          getExceptionFilter: mockGetExceptionFilter,
+        });
+
+        expect(createTimeline).toHaveBeenCalledWith(
+          expect.objectContaining({ timeFieldSpec: combinedTimestampFieldSpec })
+        );
+      });
+
+      test('suppressed alerts filter Timeline on the combined override timestamp', async () => {
+        mockFetchedAlert({
+          ...mockSuppressedDetectionAlertAADSource,
+          'kibana.alert.rule.parameters': {
+            ...mockSuppressedDetectionAlertAADSource['kibana.alert.rule.parameters'],
+            timestamp_override: 'event.ingested',
+          },
+        });
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: getSuppressedDetectionAlertAADMock() as unknown as Ecs,
+          searchStrategyClient,
+          getExceptionFilter: mockGetExceptionFilter,
+        });
+
+        expect(createTimeline).toHaveBeenCalledWith(
+          expect.objectContaining({ timeFieldSpec: combinedTimestampFieldSpec })
+        );
+      });
+    });
+
     describe('New terms', () => {
       describe('getNewTermsData', () => {
         it('should return new terms data correctly for single value field', () => {

@@ -146,7 +146,13 @@ export const useInvestigateInTimeline = ({
   const updateTimeline = useUpdateTimeline();
 
   const createTimeline = useCallback(
-    async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+    async ({
+      from: fromTimeline,
+      timeline,
+      to: toTimeline,
+      ruleNote,
+      timeFieldSpec,
+    }: CreateTimelineProps) => {
       const newColumns = timeline.columns;
       const newColumnsOverride =
         !newColumns || isEmpty(newColumns) ? defaultUdtHeaders : newColumns;
@@ -169,6 +175,7 @@ export const useInvestigateInTimeline = ({
         },
         to: toTimeline,
         ruleNote,
+        timeFieldSpec,
       });
     },
     [updateTimeline, clearActiveTimeline]
