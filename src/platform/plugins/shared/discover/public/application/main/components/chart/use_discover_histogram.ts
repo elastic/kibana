@@ -27,7 +27,7 @@ import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
-import type { EsqlSource } from '@kbn/data-source';
+import { isSameDataset, type EsqlSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -63,8 +63,10 @@ const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchPar
 ];
 
 /**
- * `dataSource` is compared by kind+id so a new DataViewSource wrapper around the
- * same DataView (e.g. revert → setDataView) does not look like a source change.
+ * A new source for the same dataset (revert → setDataView) is not a source change.
+ * Classic compares `id`. ES|QL compares `datasetKey`, because `id` is a query hash
+ * and changes when the query text changes even if FROM, time field, and project
+ * routing stay the same.
  */
 function hasFetchParamChanged(
   previous: UnifiedHistogramFetchParamsExternal,
@@ -72,10 +74,10 @@ function hasFetchParamChanged(
   key: keyof UnifiedHistogramFetchParamsExternal
 ): boolean {
   if (key === 'dataSource') {
-    return (
-      previous.dataSource?.kind !== next.dataSource?.kind ||
-      previous.dataSource?.id !== next.dataSource?.id
-    );
+    if (!previous.dataSource && !next.dataSource) {
+      return false;
+    }
+    return !isSameDataset(previous.dataSource, next.dataSource);
   }
   return previous[key] !== next[key];
 }
