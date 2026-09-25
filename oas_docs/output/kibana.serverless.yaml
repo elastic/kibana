@@ -9453,13 +9453,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '204':
@@ -9569,13 +9570,14 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '200':
@@ -9723,13 +9725,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       requestBody:
         content:
@@ -9915,13 +9918,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       requestBody:
         content:
@@ -10134,13 +10138,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '200':
@@ -10195,7 +10200,7 @@ paths:
                     message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request failed schema validation.
+          description: Indicates an invalid schema or parameters.
         '401':
           content:
             application/json:
@@ -10304,13 +10309,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '200':
@@ -10365,7 +10371,7 @@ paths:
                     message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request failed schema validation.
+          description: Indicates an invalid schema or parameters.
         '401':
           content:
             application/json:
@@ -10484,13 +10490,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       requestBody:
         content:
@@ -10664,13 +10671,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '200':
@@ -10725,7 +10733,7 @@ paths:
                     message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request failed schema validation.
+          description: Indicates an invalid schema or parameters.
         '401':
           content:
             application/json:
@@ -10834,17 +10842,49 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
-        '204':
-          description: The API key of the action policy was updated successfully.
+        '200':
+          content:
+            application/json:
+              examples:
+                updateActionPolicyApiKeyResponse:
+                  summary: Action policy whose API key was rotated
+                  value:
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by:
+                      profile_uid: u_elastic_0
+                    description: Sends notifications for alerts generated by rules with the production tag.
+                    destinations:
+                      - id: workflow-1
+                        type: workflow
+                    enabled: true
+                    group_by: null
+                    grouping_mode: per_episode
+                    id: action-policy-1
+                    matcher:
+                      tags:
+                        - production
+                    name: Notify on production alerts
+                    snoozed_until: null
+                    throttle:
+                      interval: null
+                      strategy: on_status_change
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by:
+                      profile_uid: u_elastic_0
+                    version: WzAsMV0=
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
+          description: Returns the action policy whose API key was rotated.
         '400':
           content:
             application/json:
@@ -10864,7 +10904,7 @@ paths:
                     message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request failed schema validation.
+          description: Indicates an invalid schema or parameters.
         '401':
           content:
             application/json:
@@ -11780,7 +11820,7 @@ paths:
                     message: Alert episode with episode_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found, or is not the latest episode of its series (activate and deactivate only).
+          description: Indicates the alert episode was not found.
         '500':
           content:
             application/json:
@@ -11911,7 +11951,23 @@ paths:
                     message: Alert episode with episode_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found, or is not the latest episode of its series (activate and deactivate only).
+          description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertEpisodeNotLatest:
+                  summary: The alert episode has been superseded by a newer episode of its series
+                  value:
+                    code: ALERT_EPISODE_NOT_LATEST
+                    details:
+                      episode_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: Episode [episode-1] is not the latest episode for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert episode has been superseded by a newer episode of its series, or is already in the requested state.
         '500':
           content:
             application/json:
@@ -12042,7 +12098,7 @@ paths:
                     message: Alert episode with episode_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found, or is not the latest episode of its series (activate and deactivate only).
+          description: Indicates the alert episode was not found.
         '500':
           content:
             application/json:
@@ -12173,7 +12229,23 @@ paths:
                     message: Alert episode with episode_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found, or is not the latest episode of its series (activate and deactivate only).
+          description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertEpisodeNotLatest:
+                  summary: The alert episode has been superseded by a newer episode of its series
+                  value:
+                    code: ALERT_EPISODE_NOT_LATEST
+                    details:
+                      episode_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: Episode [episode-1] is not the latest episode for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert episode has been superseded by a newer episode of its series, or is already in the requested state.
         '500':
           content:
             application/json:
@@ -12306,7 +12378,7 @@ paths:
                     message: Alert episode with episode_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found, or is not the latest episode of its series (activate and deactivate only).
+          description: Indicates the alert episode was not found.
         '500':
           content:
             application/json:
@@ -12436,7 +12508,7 @@ paths:
                     message: Alert episode with episode_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found, or is not the latest episode of its series (activate and deactivate only).
+          description: Indicates the alert episode was not found.
         '500':
           content:
             application/json:
@@ -12530,7 +12602,7 @@ paths:
             type: array
         - description: Sort field. Defaults to "dispatched_at".
           in: query
-          name: sort
+          name: sort_field
           required: true
           schema:
             default: dispatched_at
@@ -12567,16 +12639,16 @@ paths:
             maxItems: 50
             minItems: 1
             type: array
-        - description: Outcome filter. When omitted matches all outcomes. Pass one or more of "dispatched", "throttled", "dispatch_failed" to narrow.
+        - description: Outcome filter. When omitted matches all outcomes. Pass one or more of "success", "throttled", "failure" to narrow.
           in: query
-          name: outcome
+          name: outcomes
           required: false
           schema:
             items:
               enum:
-                - dispatched
+                - success
                 - throttled
-                - dispatch_failed
+                - failure
               type: string
             maxItems: 3
             minItems: 1
@@ -12596,7 +12668,7 @@ paths:
                         episodes:
                           - id: episode-1
                         error: null
-                        outcome: dispatched
+                        outcome: success
                         policy:
                           id: action-policy-1
                           name: Notify on production alerts
@@ -12716,7 +12788,7 @@ paths:
             type: array
         - description: 'Outcome filter. '
           in: query
-          name: outcome
+          name: outcomes
           required: false
           schema:
             items:
@@ -12745,13 +12817,13 @@ paths:
             type: string
         - description: Sort field. Defaults to started_at.
           in: query
-          name: sort
+          name: sort_field
           required: true
           schema:
             default: started_at
             enum:
               - started_at
-              - duration
+              - duration_ms
             type: string
         - description: Sort direction.
           in: query
@@ -12801,8 +12873,8 @@ paths:
                         space_id: default
                         started_at: '2026-01-15T12:00:00.000Z'
                         timings:
-                          duration: 1250
-                          scheduled_delay: 40
+                          duration_ms: 1250
+                          scheduled_delay_ms: 40
                     page: 1
                     per_page: 20
                     total: 1
@@ -12910,7 +12982,7 @@ paths:
           name: per_page
           required: false
           schema:
-            maximum: 1000
+            maximum: 100
             minimum: 1
             type: integer
         - description: The filter to apply to the rules.
@@ -13250,7 +13322,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates up to 100 rules in a single request. Each item can include a client-supplied `id`. Kibana generates an identifier when `id` is omitted. The request succeeds with HTTP 200 even when some rules fail. Created rules are returned in `rules`. Failures are returned in `errors`. Check `errors` before treating the request as fully successful. To create a single rule, use POST /api/alerting/v2/rules.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates up to 100 rules in a single request. Each item can include a client-supplied `id`. Kibana generates an identifier when `id` is omitted. The request succeeds with HTTP 200 even when some rules fail. Created rules are returned in `items`. Failures are returned in `errors`. Check `errors` before treating the request as fully successful. To create a single rule, use POST /api/alerting/v2/rules.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: post-alerting-v2-rules-bulk-create
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13325,7 +13397,7 @@ paths:
                   summary: Created both requested rules
                   value:
                     errors: []
-                    rules:
+                    items:
                       - created_at: '2026-01-15T12:00:00.000Z'
                         created_by:
                           profile_uid: u_elastic_0
@@ -13392,7 +13464,7 @@ paths:
                         version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rules_response'
-          description: Created rules are returned in `rules`. Failures are returned in `errors`.
+          description: Created rules are returned in `items`. Failures are returned in `errors`.
         '400':
           content:
             application/json:
@@ -13868,7 +13940,7 @@ paths:
                 bulkGetRulesResponse:
                   summary: Returned the requested rules
                   value:
-                    rules:
+                    items:
                       - created_at: '2026-01-15T12:00:00.000Z'
                         created_by:
                           profile_uid: u_elastic_0
@@ -14620,13 +14692,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the rule.
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '204':
@@ -14736,13 +14809,14 @@ paths:
         [Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: get-alerting-v2-rules-id
       parameters:
-        - description: The identifier for the rule.
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '200':
@@ -14899,13 +14973,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the rule.
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       requestBody:
         content:
@@ -15087,13 +15162,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the rule.
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       requestBody:
         content:
@@ -15321,13 +15397,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the rule.
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '200':
@@ -15500,13 +15577,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the rule.
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '200':
@@ -15675,17 +15753,18 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the rule.
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
           schema:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
       responses:
         '202':
-          description: The rule run was triggered successfully.
+          description: 'The run was accepted: the rule is scheduled to run. Requests that arrive before the run starts are collapsed into a single run. Poll the rule execution history to observe the result.'
         '400':
           content:
             application/json:
@@ -126082,7 +126161,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -140372,7 +140451,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_53___schema0:
+    Kibana_HTTP_APIs__zod_v4_54___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -140401,7 +140480,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
                       - type: object
                         properties:
                           destination:
@@ -140970,7 +141049,7 @@ components:
           description: The number of action policies per page.
           type: number
         total:
-          description: The total number of action policies matching the query.
+          description: 'The number of action policies matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
           type: number
       required:
         - items
@@ -140983,6 +141062,8 @@ components:
       properties:
         created_at:
           description: The ISO datetime when the action policy was created.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         created_by:
           allOf:
@@ -141028,7 +141109,7 @@ components:
             tags:
               description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
-                maxLength: 256
+                maxLength: 128
                 minLength: 1
                 type: string
               maxItems: 50
@@ -141075,6 +141156,8 @@ components:
             - interval
         updated_at:
           description: The ISO datetime when the action policy was last updated.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         updated_by:
           allOf:
@@ -141231,6 +141314,7 @@ components:
           items:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
           maxItems: 100
           minItems: 1
@@ -141280,6 +141364,7 @@ components:
           description: Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.
           maxLength: 150
           minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
           type: string
         kind:
           anyOf:
@@ -141344,10 +141429,10 @@ components:
               minimum: 0
               type: integer
             pending_operator:
-              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
+              description: The operator that combines `pending_count` and `pending_timeframe`. `and` requires both. `or` requires either.
               enum:
-                - AND
-                - OR
+                - and
+                - or
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
@@ -141359,10 +141444,10 @@ components:
               minimum: 0
               type: integer
             recovering_operator:
-              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
+              description: The operator that combines `recovering_count` and `recovering_timeframe`. `and` requires both. `or` requires either.
               enum:
-                - AND
-                - OR
+                - and
+                - or
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
@@ -141371,7 +141456,7 @@ components:
         time_field:
           default: '@timestamp'
           description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
-          maxLength: 128
+          maxLength: 256
           minLength: 1
           type: string
       required:
@@ -141424,13 +141509,13 @@ components:
               - id
               - error
           type: array
-        rules:
+        items:
           description: Rules that were created. Rules listed in `errors` are not included.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           type: array
       required:
-        - rules
+        - items
         - errors
     Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_item:
       additionalProperties: false
@@ -141485,13 +141570,13 @@ components:
       additionalProperties: false
       type: object
       properties:
-        rules:
+        items:
           description: The requested rules, in the same order as the requested ids.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           type: array
       required:
-        - rules
+        - items
     Kibana_HTTP_APIs_alerting_bulk_operation_response:
       additionalProperties: false
       description: Result of an executed bulk operation.
@@ -141542,6 +141627,7 @@ components:
           items:
             maxLength: 150
             minLength: 1
+            pattern: ^[a-zA-Z0-9_-]+$
             type: string
           maxItems: 100
           minItems: 1
@@ -141564,7 +141650,7 @@ components:
           minLength: 1
           type: string
         tags:
-          description: List of tags to add to the episode.
+          description: Replaces the episode's tags. Send `[]` to clear.
           items:
             maxLength: 128
             minLength: 1
@@ -141716,7 +141802,7 @@ components:
             tags:
               description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
-                maxLength: 256
+                maxLength: 128
                 minLength: 1
                 type: string
               maxItems: 50
@@ -141842,10 +141928,10 @@ components:
               minimum: 0
               type: integer
             pending_operator:
-              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
+              description: The operator that combines `pending_count` and `pending_timeframe`. `and` requires both. `or` requires either.
               enum:
-                - AND
-                - OR
+                - and
+                - or
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
@@ -141857,10 +141943,10 @@ components:
               minimum: 0
               type: integer
             recovering_operator:
-              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
+              description: The operator that combines `recovering_count` and `recovering_timeframe`. `and` requires both. `or` requires either.
               enum:
-                - AND
-                - OR
+                - and
+                - or
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
@@ -141869,7 +141955,7 @@ components:
         time_field:
           default: '@timestamp'
           description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
-          maxLength: 128
+          maxLength: 256
           minLength: 1
           type: string
       required:
@@ -141882,7 +141968,7 @@ components:
       type: object
       properties:
         tags:
-          description: List of tags to add to the episode.
+          description: Replaces the episode's tags. Send `[]` to clear.
           items:
             maxLength: 128
             minLength: 1
@@ -141902,6 +141988,8 @@ components:
         action_group_count:
           type: number
         dispatched_at:
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         episode_count:
           type: number
@@ -141938,9 +142026,9 @@ components:
           type: string
         outcome:
           enum:
-            - dispatched
+            - success
             - throttled
-            - dispatch_failed
+            - failure
           type: string
         policy:
           additionalProperties: false
@@ -142019,16 +142107,17 @@ components:
               description: True when the server filter cap was reached and results may be truncated.
               type: boolean
             policies:
-              description: Total policies matching the search.
+              description: 'Policies matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
               type: number
             rules:
-              description: Total rules matching the search.
+              description: 'Rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
               type: number
           required:
             - policies
             - rules
             - is_truncated
         total:
+          description: 'The number of action policy events matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
           maximum: 9007199254740991
           minimum: 0
           type: integer
@@ -142048,7 +142137,7 @@ components:
           type: object
         id:
           description: Artifact identifier.
-          maxLength: 256
+          maxLength: 150
           minLength: 1
           type: string
         type:
@@ -142065,6 +142154,8 @@ components:
       type: object
       properties:
         ended_at:
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         error:
           additionalProperties: false
@@ -142106,22 +142197,26 @@ components:
         space_id:
           type: string
         started_at:
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         timings:
           additionalProperties: false
           type: object
           properties:
-            duration:
+            duration_ms:
+              description: Wall-clock duration of the run, in milliseconds.
               maximum: 9007199254740991
               minimum: 0
               type: integer
-            scheduled_delay:
+            scheduled_delay_ms:
+              description: Delay between the scheduled run time and the actual start, in milliseconds. Negative when the run started ahead of its scheduled time.
               maximum: 9007199254740991
               minimum: -9007199254740991
               type: integer
           required:
-            - duration
-            - scheduled_delay
+            - duration_ms
+            - scheduled_delay_ms
       required:
         - id
         - rule
@@ -142149,6 +142244,7 @@ components:
           minimum: 0
           type: integer
         total:
+          description: 'The number of rule executions matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
           maximum: 9007199254740991
           minimum: 0
           type: integer
@@ -142189,7 +142285,7 @@ components:
           description: The number of rules per page.
           type: number
         total:
-          description: The total number of rules matching the query.
+          description: 'The number of rules matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
           type: number
       required:
         - items
@@ -142247,6 +142343,8 @@ components:
           type: array
         created_at:
           description: ISO timestamp when the rule was created.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         created_by:
           allOf:
@@ -142324,10 +142422,10 @@ components:
               minimum: 0
               type: integer
             pending_operator:
-              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
+              description: The operator that combines `pending_count` and `pending_timeframe`. `and` requires both. `or` requires either.
               enum:
-                - AND
-                - OR
+                - and
+                - or
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
@@ -142339,10 +142437,10 @@ components:
               minimum: 0
               type: integer
             recovering_operator:
-              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
+              description: The operator that combines `recovering_count` and `recovering_timeframe`. `and` requires both. `or` requires either.
               enum:
-                - AND
-                - OR
+                - and
+                - or
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
@@ -142351,11 +142449,13 @@ components:
         time_field:
           default: '@timestamp'
           description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
-          maxLength: 128
+          maxLength: 256
           minLength: 1
           type: string
         updated_at:
           description: ISO timestamp when the rule was last updated.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         updated_by:
           allOf:
@@ -142527,7 +142627,7 @@ components:
             tags:
               description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
-                maxLength: 256
+                maxLength: 128
                 minLength: 1
                 type: string
               maxItems: 50
@@ -142654,10 +142754,10 @@ components:
                   minimum: 0
                   type: integer
                 pending_operator:
-                  description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
+                  description: The operator that combines `pending_count` and `pending_timeframe`. `and` requires both. `or` requires either.
                   enum:
-                    - AND
-                    - OR
+                    - and
+                    - or
                   type: string
                 pending_timeframe:
                   description: Time window used with `pending_count`, for example `5m` or `15m`.
@@ -142669,10 +142769,10 @@ components:
                   minimum: 0
                   type: integer
                 recovering_operator:
-                  description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
+                  description: The operator that combines `recovering_count` and `recovering_timeframe`. `and` requires both. `or` requires either.
                   enum:
-                    - AND
-                    - OR
+                    - and
+                    - or
                   type: string
                 recovering_timeframe:
                   description: Time window used with `recovering_count`, for example `5m` or `15m`.
@@ -142682,7 +142782,7 @@ components:
           nullable: true
         time_field:
           description: Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.
-          maxLength: 128
+          maxLength: 256
           minLength: 1
           type: string
         version:
@@ -142695,7 +142795,7 @@ components:
       type: object
       properties:
         id:
-          description: The workflow connector identifier.
+          description: The workflow identifier.
           maxLength: 150
           minLength: 1
           type: string

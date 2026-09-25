@@ -56,6 +56,12 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderEscalationModal?: import('./slots').FooterSlotProps['onOpenEscalation'];
   /**
+   * When provided, the overview tab renders a "Proposed actions" section with this as its
+   * content. Supplied by the caller because listing and deciding a conversation's proposals
+   * needs Kibana HTTP hooks unavailable in this package.
+   */
+  renderProposedActions?: import('./slots').OverviewSlotProps['renderProposedActions'];
+  /**
    * When provided, the header renders an interactive assignee picker instead of the read-only
    * avatar stack. Supplied by the caller so the picker can use HTTP hooks and Kibana context
    * unavailable in this package.
@@ -76,6 +82,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   name,
   icon,
   renderEscalationModal,
+  renderProposedActions,
   renderAssignees,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
@@ -85,7 +92,11 @@ export const registerAgenticInvestigationTemplateUI = ({
     content: function OverviewTabContent({ conversation }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyOverviewSlot conversation={conversation} attachmentsService={attachmentsService} />
+          <LazyOverviewSlot
+            conversation={conversation}
+            attachmentsService={attachmentsService}
+            renderProposedActions={renderProposedActions}
+          />
         </Suspense>
       );
     },
