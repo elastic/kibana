@@ -26,6 +26,7 @@ import type { DatasetMappingFieldType, DatasetMappings } from '../../../common';
 import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form';
 import { FieldMappingDisplayMode } from './field_mapping_display_mode';
 import { emptyMappingEditorValue, getTypeInfoByValue } from './constants';
+import { DeleteConfirmModal } from './delete_confirm_modal';
 import { validateMappingEditorValue } from './validate_mapping_editor_value';
 
 export { validateMappingEditorValue };
@@ -114,6 +115,10 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   const [creatingFieldIds, setCreatingFieldIds] = useState<readonly string[]>([]);
   const [validatedFieldIds, setValidatedFieldIds] = useState<readonly string[]>([]);
   const [isAddFieldFormOpen, setIsAddFieldFormOpen] = useState(false);
+  const [pendingRemoveField, setPendingRemoveField] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [draftField, setDraftField] = useState<MappingEditorField>(() => ({
     id: 'draft',
     name: '',
@@ -255,6 +260,20 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     [replaceField]
   );
 
+  const requestRemoveField = useCallback((field: MappingEditorField) => {
+    setPendingRemoveField({ id: field.id, name: field.name.trim() });
+  }, []);
+
+  const cancelRemoveField = useCallback(() => {
+    setPendingRemoveField(null);
+  }, []);
+
+  const confirmRemoveField = useCallback(() => {
+    if (!pendingRemoveField) return;
+    removeField(pendingRemoveField.id);
+    setPendingRemoveField(null);
+  }, [pendingRemoveField, removeField]);
+
   return (
     <div data-test-subj="dataFederationMappingEditor">
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -385,7 +404,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                           field={f}
                           typeLabel={typeInfo?.label}
                           onEdit={() => startEditingField(f.id)}
-                          onRemove={() => removeField(f.id)}
+                          onRemove={() => requestRemoveField(f)}
                           areActionsDisabled={editingFieldId !== null}
                         />
                       )}
@@ -442,6 +461,14 @@ export const MappingEditor: FC<MappingEditorProps> = ({
             />
           </EuiPanel>
         </>
+      ) : null}
+
+      {pendingRemoveField ? (
+        <DeleteConfirmModal
+          fieldName={pendingRemoveField.name}
+          onCancel={cancelRemoveField}
+          onConfirm={confirmRemoveField}
+        />
       ) : null}
     </div>
   );
