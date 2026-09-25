@@ -81,7 +81,7 @@ const DESCRIBE_ROLE: KibanaRole = {
     cluster: [],
     indices: [
       {
-        names: ['ai-index-idx-scout-describe-*', DATA_STREAM],
+        names: ['ai-index-idx-scout-describe-*', DATA_STREAM, 'v-ai-index-scout-describe-*'],
         privileges: ['read', 'view_index_metadata'],
       },
     ],
@@ -378,7 +378,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${MISSING_INDEX}\n`);
+    expect(block).toContain(`\nQuery with ES|QL against: v-ai-index-${MISSING_AI_INDEX_ID}\n`);
     expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
   });
 });

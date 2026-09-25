@@ -50,7 +50,9 @@ const AGENT_BUILDER_READ = { agentBuilder: ['read'] };
 const CONTEXT_ENGINE_READ = { contextEngine: ['read'] };
 const ES_READ = {
   cluster: [],
-  indices: [{ names: [INDEX], privileges: ['read', 'view_index_metadata'] }],
+  indices: [
+    { names: [INDEX, `v-ai-index-${AI_INDEX_ID}`], privileges: ['read', 'view_index_metadata'] },
+  ],
 };
 
 /** Can read Agent Builder and Context Engine, and has Elasticsearch read on the backing index. */
