@@ -294,9 +294,10 @@ export function useMiDeploy({
             });
             if (redeployResults.some((r) => r.status === 'rejected')) {
               // At least one policy update failed — leave isDirty so Deploy stays visible for retry.
+              // Return cleanupFailed: true so the ECF-only gate in handleNext blocks navigation.
               setIsDeploying(false);
               updateDetectAndReviewStep({ isDeploying: false });
-              return { cleanupFailed: false };
+              return { cleanupFailed: true };
             }
           }
 
@@ -314,9 +315,10 @@ export function useMiDeploy({
               });
               if (!soUpdated) {
                 // Toast already shown by updateDeployment. Keep isDirty so the user can retry.
+                // Return cleanupFailed: true so the ECF-only gate in handleNext blocks navigation.
                 setIsDeploying(false);
                 updateDetectAndReviewStep({ isDeploying: false });
-                return { cleanupFailed: false };
+                return { cleanupFailed: true };
               }
             }
             setIsDeploying(false);
