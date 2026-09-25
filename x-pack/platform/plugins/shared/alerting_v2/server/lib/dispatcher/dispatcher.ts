@@ -239,7 +239,7 @@ export class DispatcherService implements DispatcherServiceContract {
     }
 
     // On a truncated batch, advance only to the truncation edge so the tail
-    // (beyond EPISODE_QUERY_LIMIT) is re-read and also escape-hatched next tick.
+    // (beyond ESQL_QUERY_ROW_LIMIT) is re-read and also escape-hatched next tick.
     // The edge can sit at or behind the watermark (that is what made a truncated
     // tick stuck) — clamp so the watermark never regresses; progress then comes
     // from the dedup marks written below.
