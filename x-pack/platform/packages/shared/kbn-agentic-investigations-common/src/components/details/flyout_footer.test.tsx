@@ -62,13 +62,13 @@ describe('ConversationDetailsFlyoutFooter', () => {
     expect(screen.getByText('Escalation modal')).toBeInTheDocument();
   });
 
-  it('does not throw when the escalation button is clicked without onOpenEscalation supplied', () => {
+  it('omits the escalation button when onOpenEscalation is not supplied', () => {
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
     );
 
-    expect(() =>
-      fireEvent.click(screen.getByRole('button', { name: openEscalationButtonName }))
-    ).not.toThrow();
+    expect(
+      screen.queryByRole('button', { name: openEscalationButtonName })
+    ).not.toBeInTheDocument();
   });
 });

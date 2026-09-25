@@ -45,8 +45,8 @@ export const ConversationDetailsFlyoutFooter = ({
   onOpenEscalation,
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
-
   const closeModal = useCallback(() => setModalState(CLOSED_MODAL), []);
+  const canRenderEscalationButton = Boolean(onOpenEscalation);
 
   const onClickAction = useCallback(
     (action: CardActionType, recordId: Investigation['recordId']) => {
@@ -69,16 +69,18 @@ export const ConversationDetailsFlyoutFooter = ({
           </AiButtonEmpty>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            iconType="document"
-            onClick={() => onClickAction('createEscalation', investigation.recordId)}
-            size="s"
-          >
-            {ACTIONS_TRANSLATIONS.buttons.openEscalation}
-          </EuiButton>
-        </EuiFlexItem>
+        {canRenderEscalationButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="primary"
+              iconType="document"
+              onClick={() => onClickAction('createEscalation', investigation.recordId)}
+              size="s"
+            >
+              {ACTIONS_TRANSLATIONS.buttons.openEscalation}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <InvestigationActionModals
