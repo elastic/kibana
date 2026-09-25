@@ -107,7 +107,7 @@ outputs:
 consts:
   # Fallbacks for the optional operational inputs; keep in sync with the sweep's
   # consts in rule_tuning_worker.yaml.
-  analysis_window_days: 14
+  analysis_window_days: 7
   preview_invocation_count: 2
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
@@ -314,11 +314,29 @@ steps:
           low-priority noise. Populate proposed_risk_score (0–100) and
           proposed_severity (low / medium / high / critical).
 
+        threshold  — The rule fires too broadly because the threshold count is
+          too low, capturing events that a higher minimum count would filter out.
+          Only valid for rule type "threshold". Always populate all three fields:
+          proposed_threshold_value (integer, minimum 1),
+          proposed_threshold_field (array of field names — use the rule's current
+          threshold.field if not changing it), and proposed_threshold_cardinality
+          (array of {field, value} objects — use the rule's current
+          threshold.cardinality, or [] if it has none). Do not use this for query
+          changes; if the threshold logic is structurally wrong, use manual instead.
+
+        schedule  — The rule sweeps too wide a lookback window or runs too
+          frequently, generating FPs that tighter timing would prevent.
+          Always populate both proposed_interval (e.g. "10m") and proposed_from
+          (e.g. "now-11m") using the same date-math format the rule currently
+          uses, even if only one setting needs to change. The patch replaces
+          both atomically, so both must be explicitly proposed. Ensure
+          proposed_from overlaps with proposed_interval to avoid gaps.
+
         manual  — None of the above is safe to apply automatically. Use summary
           to describe: (a) the false-positive pattern you found, (b) which automated
-          paths you considered (exception / query / risk_score) and why each is unsafe
-          or inapplicable for this rule, and (c) a concrete recommendation for what the
-          analyst should do manually in the Detection Rules UI.
+          paths you considered (exception / query / risk_score / threshold / schedule)
+          and why each is unsafe or inapplicable for this rule, and (c) a concrete
+          recommendation for what the analyst should do manually in the Detection Rules UI.
 
         The analyst sees your output as a proposal card, so fill every field for a
         reader who has not seen the alerts: title is one short line naming the
@@ -443,6 +461,65 @@ steps:
           - type: object
             properties:
               change_type:
+                const: threshold
+              summary:
+                type: string
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_threshold_value:
+                type: integer
+                minimum: 1
+              proposed_threshold_field:
+                type: array
+                items:
+                  type: string
+                  maxLength: 512
+                maxItems: 5
+              proposed_threshold_cardinality:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      maxLength: 512
+                    value:
+                      type: integer
+                      minimum: 0
+                  required: [field, value]
+            required: [change_type, summary, proposed_threshold_value, proposed_threshold_field, proposed_threshold_cardinality, title, fp_pattern, reasoning, confidence]
+          - type: object
+            properties:
+              change_type:
+                const: schedule
+              summary:
+                type: string
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_interval:
+                type: string
+                maxLength: 32
+              proposed_from:
+                type: string
+                maxLength: 64
+            required: [change_type, summary, title, fp_pattern, reasoning, confidence, proposed_interval, proposed_from]
+          - type: object
+            properties:
+              change_type:
                 const: manual
               summary:
                 type: string
@@ -561,7 +638,7 @@ steps:
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
         {{ steps.compose_evidence.output.rule_line }}
-        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule settings (risk score and severity){% else %}Manual change, no automated action{% endcase %}
+        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule settings (risk score and severity){% when "threshold" %}Edit rule settings (threshold){% when "schedule" %}Edit rule settings (schedule){% else %}Manual change, no automated action{% endcase %}
         {{ steps.compose_evidence.output.investigation_line }}
 
         **Why this rule needs tuning**
@@ -606,6 +683,22 @@ steps:
         Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
         Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
+        {% when "threshold" %}
+        Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
+        Proposed threshold value: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}
+        {% if steps.diagnose_rule.output.structured_output.proposed_threshold_field != nil %}
+        Current threshold field: {{ steps.fetch_rule.output.threshold.field | json }}
+        Proposed threshold field: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_field | json }}
+        {% endif %}
+        Current threshold cardinality: {% if steps.fetch_rule.output.threshold.cardinality %}{% for entry in steps.fetch_rule.output.threshold.cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
+        Proposed threshold cardinality: {% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}{% for entry in steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
+        Approving patches the rule's threshold settings. The change can be reverted in the Detection Rules UI.
+        {% when "schedule" %}
+        Current interval: {{ steps.fetch_rule.output.interval }}
+        Proposed interval: {{ steps.diagnose_rule.output.structured_output.proposed_interval }}
+        Current lookback (from): {{ steps.fetch_rule.output.from }}
+        Proposed lookback (from): {{ steps.diagnose_rule.output.structured_output.proposed_from }}
+        Approving patches the rule's schedule settings. The change can be reverted in the Detection Rules UI.
         {% else %}
         No automated change can be applied safely for this rule.
         Approving records the handoff — no rule changes are made automatically.
@@ -714,6 +807,52 @@ steps:
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
                 autoApprove: false
 
+      - match: threshold
+        steps:
+          - name: incomplete_threshold_output
+            type: workflow.fail
+            if: >-
+              ${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value == nil
+                or steps.diagnose_rule.output.structured_output.proposed_threshold_field == nil
+                or steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality == nil }}
+            with:
+              message: "diagnose_rule chose change_type=threshold but did not populate all required threshold fields"
+          - name: propose_threshold
+            type: workflow.execute
+            with:
+              workflow-id: system-create-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  threshold:
+                    value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
+                    field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field }}"
+                    cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
+      - match: schedule
+        steps:
+          - name: propose_schedule
+            type: workflow.execute
+            with:
+              workflow-id: system-create-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  interval: "{{ steps.diagnose_rule.output.structured_output.proposed_interval }}"
+                  from: "{{ steps.diagnose_rule.output.structured_output.proposed_from }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
     # Same gate without an action: the analyst carries the change out
     # themselves, so approval is the whole lifecycle. The default arm, so a
     # change type the arms above do not recognise still reaches the analyst.
@@ -754,16 +893,22 @@ steps:
       applied: >-
         ${{ steps.propose_query.output.status == 'succeeded'
           or steps.propose_risk_score.output.status == 'succeeded'
-          or steps.propose_exception.output.status == 'succeeded' }}
+          or steps.propose_exception.output.status == 'succeeded'
+          or steps.propose_threshold.output.status == 'succeeded'
+          or steps.propose_schedule.output.status == 'succeeded' }}
       approved: >-
         ${{ steps.propose_query.output.decision == 'approved'
           or steps.propose_risk_score.output.decision == 'approved'
           or steps.propose_exception.output.decision == 'approved'
+          or steps.propose_threshold.output.decision == 'approved'
+          or steps.propose_schedule.output.decision == 'approved'
           or steps.propose_manual.output.decision == 'approved' }}
       dismissed: >-
         ${{ steps.propose_query.output.decision == 'dismissed'
           or steps.propose_risk_score.output.decision == 'dismissed'
           or steps.propose_exception.output.decision == 'dismissed'
+          or steps.propose_threshold.output.decision == 'dismissed'
+          or steps.propose_schedule.output.decision == 'dismissed'
           or steps.propose_manual.output.decision == 'dismissed' }}
 
   # The action ran inside the gate, so its result is not visible here; re-read the

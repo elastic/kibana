@@ -479,23 +479,6 @@ export abstract class LayoutMixin extends SaveMixin {
     await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
   }
 
-  public readonly controls = {
-    getControlFrame: (controlId: string): Locator =>
-      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
-    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
-      this.controls.getControlFrame(controlId).getByText(value),
-    /**
-     * Locator for an options-list control's selected-values label, e.g. `AE` for a
-     * single selection or `AE, CN` for multiple. Unlike
-     * {@link getControlFrameSelectedValue} this matches the whole label, so it can
-     * assert that a value is the *only* selection.
-     */
-    getSelectionsLocator: (controlId: string): Locator =>
-      this.page.testSubj
-        .locator(`optionsList-control-${controlId}`)
-        .getByTestId('optionsListSelections'),
-  };
-
   // ── Sidebar ────────────────────────────────────────────────────────────────
 
   async waitUntilFieldListHasCountOfFields() {
