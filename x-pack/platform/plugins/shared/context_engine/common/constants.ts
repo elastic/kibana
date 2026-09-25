@@ -35,18 +35,6 @@ export const SIGNALS_PATH = `${INTERNAL_API_PATH}/signals`;
 /** Version of the internal Signals API, shared between route registration and the browser client. */
 export const SIGNALS_INTERNAL_API_VERSION = '1';
 
-/** Read-only internal route for searching data streams, backing the AI index trace picker. */
-export const DATA_STREAMS_SEARCH_PATH = `${INTERNAL_API_PATH}/data_streams`;
-
-/** Version of the internal data streams search API, shared between route registration and the browser client. */
-export const DATA_STREAMS_SEARCH_INTERNAL_API_VERSION = '1';
-
-/** Cap on the number of data streams returned by the search API (applied after filtering hidden/managed streams out). */
-export const MAX_DATA_STREAM_SEARCH_RESULTS = 50;
-
-/** Bound on the free-text `search` query param, to prevent unbounded-input DoS. */
-export const MAX_DATA_STREAM_SEARCH_LENGTH = 256;
-
 /** Max number of tag groups returned by the grouped Signals list. */
 export const MAX_SIGNAL_GROUPS = 100;
 
