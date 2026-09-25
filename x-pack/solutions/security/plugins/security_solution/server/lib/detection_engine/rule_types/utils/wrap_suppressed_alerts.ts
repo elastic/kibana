@@ -18,7 +18,7 @@ import type {
 
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
-import { generateId } from './utils';
+import { generateId, getSourceProjectId } from './utils';
 import type { BuildReasonMessage } from './reason_formatters';
 import type { EqlRuleParams, MachineLearningRuleParams, ThreatRuleParams } from '../../rule_schema';
 
@@ -48,7 +48,8 @@ export const wrapSuppressedAlerts = ({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       event._id!,
       String(event._version),
-      `${spaceId}:${completeRule.alertId}`
+      `${spaceId}:${completeRule.alertId}`,
+      getSourceProjectId(event._source)
     );
 
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);

@@ -24,6 +24,7 @@ moment.suppressDeprecationWarnings = true;
 
 import {
   generateId,
+  getSourceProjectId,
   parseInterval,
   getGapBetweenRuns,
   getGapReason,
@@ -93,6 +94,59 @@ describe('utils', () => {
     test('expected output is a hex', () => {
       const id = generateId('index-123', 'doc-123', 'version-123', 'rule-123');
       expect(id).toMatch(/[a-f0-9]+/);
+    });
+
+    test('produces distinct ids when extra differs', () => {
+      const base = generateId('index-123', 'doc-123', 'version-123', 'rule-123');
+      const withExtra = generateId('index-123', 'doc-123', 'version-123', 'rule-123', 'account-A');
+      expect(base).not.toEqual(withExtra);
+    });
+
+    test('produces same id when extra is empty string (backward compat)', () => {
+      const without = generateId('index-123', 'doc-123', 'version-123', 'rule-123');
+      const withEmpty = generateId('index-123', 'doc-123', 'version-123', 'rule-123', '');
+      expect(without).toEqual(withEmpty);
+    });
+  });
+
+  describe('getSourceProjectId', () => {
+    test('returns empty string for undefined source', () => {
+      expect(getSourceProjectId(undefined)).toBe('');
+    });
+
+    test('returns empty string for source with no project fields', () => {
+      expect(getSourceProjectId({ '@timestamp': '2024-01-01' })).toBe('');
+    });
+
+    test('returns cloud.account.id for CSPM findings', () => {
+      const source = { cloud: { account: { id: 'aws-account-123' } } };
+      expect(getSourceProjectId(source)).toBe('aws-account-123');
+    });
+
+    test('returns orchestrator.cluster.id for KSPM findings', () => {
+      const source = { orchestrator: { cluster: { id: 'k8s-cluster-456' } } };
+      expect(getSourceProjectId(source)).toBe('k8s-cluster-456');
+    });
+
+    test('prefers cloud.account.id over orchestrator.cluster.id when both present', () => {
+      const source = {
+        cloud: { account: { id: 'aws-account-123' } },
+        orchestrator: { cluster: { id: 'k8s-cluster-456' } },
+      };
+      expect(getSourceProjectId(source)).toBe('aws-account-123');
+    });
+
+    test('falls back to orchestrator.cluster.id when cloud.account.id is missing', () => {
+      const source = {
+        cloud: { region: 'us-east-1' },
+        orchestrator: { cluster: { id: 'k8s-cluster-456' } },
+      };
+      expect(getSourceProjectId(source)).toBe('k8s-cluster-456');
+    });
+
+    test('returns empty string when cloud.account.id is not a string', () => {
+      const source = { cloud: { account: { id: 42 } } };
+      expect(getSourceProjectId(source)).toBe('');
     });
   });
 

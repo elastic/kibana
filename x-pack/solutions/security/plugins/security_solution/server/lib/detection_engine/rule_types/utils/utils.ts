@@ -281,8 +281,38 @@ export const generateId = (
   docIndex: string,
   docId: string,
   version: string,
-  ruleId: string
-): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
+  ruleId: string,
+  extra: string = ''
+): string =>
+  createHash('sha256').update(docIndex.concat(docId, version, ruleId, extra)).digest('hex');
+
+/**
+ * Extracts a project-level identifier from a source document. Used to prevent alert
+ * deduplication collisions when findings from different cloud accounts or Kubernetes
+ * clusters share the same document _id within the same index.
+ *
+ * Priority: cloud.account.id (CSPM) → orchestrator.cluster.id (KSPM) → empty string
+ */
+export const getSourceProjectId = (source: { [key: string]: unknown } | undefined): string => {
+  if (!source) return '';
+  const cloud = source['cloud'];
+  if (cloud && typeof cloud === 'object' && !Array.isArray(cloud)) {
+    const account = (cloud as Record<string, unknown>)['account'];
+    if (account && typeof account === 'object' && !Array.isArray(account)) {
+      const id = (account as Record<string, unknown>)['id'];
+      if (typeof id === 'string' && id) return id;
+    }
+  }
+  const orchestrator = source['orchestrator'];
+  if (orchestrator && typeof orchestrator === 'object' && !Array.isArray(orchestrator)) {
+    const cluster = (orchestrator as Record<string, unknown>)['cluster'];
+    if (cluster && typeof cluster === 'object' && !Array.isArray(cluster)) {
+      const id = (cluster as Record<string, unknown>)['id'];
+      if (typeof id === 'string' && id) return id;
+    }
+  }
+  return '';
+};
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {

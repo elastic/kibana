@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { SecuritySharedParams, SignalSource, SimpleHit } from '../types';
-import { generateId } from '../utils/utils';
+import { generateId, getSourceProjectId } from '../utils/utils';
 import { transformHitToAlert } from './utils/transform_hit_to_alert';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type {
@@ -35,7 +35,8 @@ export const wrapHits = (
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       event._id!,
       String(event._version),
-      `${sharedParams.spaceId}:${sharedParams.completeRule.alertId}`
+      `${sharedParams.spaceId}:${sharedParams.completeRule.alertId}`,
+      getSourceProjectId(event._source)
     );
 
     const baseAlert = transformHitToAlert({
