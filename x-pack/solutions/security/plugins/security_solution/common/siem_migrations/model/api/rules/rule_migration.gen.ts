@@ -203,11 +203,11 @@ export const GetRuleMigrationPrivilegesResponse = lazySchema(() =>
       /**
        * The index name of the privilege missing
        */
-      indexName: z.string().describe('The index name of the privilege missing'),
+      indexName: z.string().max(255).describe('The index name of the privilege missing'),
       /**
        * The index privileges level missing
        */
-      privileges: z.array(z.string()).describe('The index privileges level missing'),
+      privileges: z.array(z.string().max(100)).describe('The index privileges level missing'),
     })
   )
 );
@@ -215,7 +215,7 @@ export type GetRuleMigrationPrivilegesResponse = z.infer<typeof GetRuleMigration
 export const GetRuleMigrationResourcesRequestQuery = lazySchema(() =>
   z.object({
     type: SiemMigrationResourceType.optional(),
-    names: ArrayFromString(z.string()).optional(),
+    names: ArrayFromString(z.string().max(256)).optional(),
     from: z.coerce.number().optional(),
     size: z.coerce.number().optional(),
   })
@@ -269,7 +269,7 @@ export const GetRuleMigrationRulesRequestQuery = lazySchema(() =>
     per_page: z.coerce.number().optional(),
     sort_field: NonEmptyString.optional(),
     sort_direction: z.enum(['asc', 'desc']).optional(),
-    search_term: z.string().optional(),
+    search_term: z.string().max(1000).optional(),
     ids: ArrayFromString(NonEmptyString).optional(),
     is_prebuilt: BooleanFromString.optional(),
     is_installed: BooleanFromString.optional(),

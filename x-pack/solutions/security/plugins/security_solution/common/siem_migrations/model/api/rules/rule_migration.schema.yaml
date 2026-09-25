@@ -246,6 +246,7 @@ paths:
           required: false
           schema:
             type: string
+            maxLength: 1000
         - name: ids
           in: query
           required: false
@@ -785,6 +786,7 @@ paths:
             description: The names of the resource to retrieve
             items:
               type: string
+              maxLength: 256
         - name: from
           in: query
           required: false
@@ -858,10 +860,12 @@ paths:
                   properties:
                     indexName:
                       type: string
+                      maxLength: 255
                       description: The index name of the privilege missing
                     privileges:
                       type: array
                       items:
                         type: string
+                        maxLength: 100
                       description: The index privileges level missing
 
