@@ -890,6 +890,29 @@ describe('Execution Routes', () => {
       expect(result).toEqual({ type: 'ok', body: list });
     });
 
+    it('returns 413 when a step page exceeds the response size limit', async () => {
+      mockApi.getExecutionStepExecutions.mockRejectedValue(
+        new errors.RequestAbortedError(
+          'The content length (9000) is bigger than the maximum allowed buffer (42)'
+        )
+      );
+      const routeHandler = handler('GET', path);
+      if (!routeHandler) throw new Error('Steps route was not registered');
+
+      const result = await routeHandler(
+        mockContext,
+        { params: { executionId: 'ex-1' }, query: { page: 2, size: 5000 } },
+        mockResponse
+      );
+
+      expect(result).toMatchObject({
+        type: 'customError',
+        statusCode: 413,
+        body: { message: expect.stringContaining('too large to load') },
+      });
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+
     it('should return not found when the execution does not exist', async () => {
       mockApi.getExecutionStepExecutions.mockRejectedValue(
         new WorkflowExecutionNotFoundError('missing')
@@ -929,6 +952,10 @@ describe('Execution Routes', () => {
   });
 
   describe('executionStepsQuerySchema', () => {
+    it('keeps the public API default at 1000 steps when size is omitted', () => {
+      expect(executionStepsQuerySchema.validate({})).toEqual({ page: 1, size: 1000 });
+    });
+
     it('accepts integer page and size values', () => {
       expect(executionStepsQuerySchema.validate({ page: 2, size: 50 })).toEqual({
         page: 2,
