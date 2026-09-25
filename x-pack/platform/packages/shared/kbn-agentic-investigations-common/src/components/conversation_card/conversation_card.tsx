@@ -31,6 +31,17 @@ interface ConversationCardProps {
   onOpenChat: (id: Investigation['id']) => void;
   /** URL for this card's chat, so its control renders as a link. */
   chatHref?: string;
+  /** When true escalation actions are shown. Requires the manage escalations capability. */
+  canManageEscalations?: boolean;
+  /** When true the "Close investigation" action appears. */
+  canCloseInvestigation?: boolean;
+  /**
+   * Optional: render the assignee picker widget for this investigation. Supplied by the page
+   * so that hook calls (profile fetch, mutation) stay outside the package.
+   * Pointer and keyboard events on the widget are stopped from bubbling so they do not
+   * trigger the card click.
+   */
+  renderAssignees: (investigation: Investigation) => React.ReactNode;
 }
 
 export const ConversationCard = memo<ConversationCardProps>(
@@ -43,6 +54,9 @@ export const ConversationCard = memo<ConversationCardProps>(
     onClickCard,
     onOpenChat,
     chatHref,
+    canManageEscalations,
+    canCloseInvestigation,
+    renderAssignees,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -61,7 +75,6 @@ export const ConversationCard = memo<ConversationCardProps>(
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
           borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
           boxSizing: 'border-box',
-          boxShadow: 'none',
           backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
           '&:hover': {
             backgroundColor: isSelected
@@ -95,13 +108,30 @@ export const ConversationCard = memo<ConversationCardProps>(
                 <ConversationMetaInfo createdAt={investigation.createdAt} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ConversationsActionsGroup
-                  investigation={investigation}
-                  onClickRecommendedAction={onClickRecommendedAction}
-                  onClickAction={onClickAction}
-                  onOpenChat={() => onOpenChat(investigation.id)}
-                  chatHref={chatHref}
-                />
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  {/*
+                   * Stop propagation so interacting with the assignee picker
+                   * (clicking the + button or selecting a user) does not trigger the card click.
+                   */}
+                  <EuiFlexItem
+                    grow={false}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+                  >
+                    {renderAssignees(investigation)}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ConversationsActionsGroup
+                      investigation={investigation}
+                      onClickRecommendedAction={onClickRecommendedAction}
+                      onClickAction={onClickAction}
+                      onOpenChat={() => onOpenChat(investigation.id)}
+                      chatHref={chatHref}
+                      canManageEscalations={canManageEscalations}
+                      canCloseInvestigation={canCloseInvestigation}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

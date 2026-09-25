@@ -22,6 +22,7 @@
     "@kbn/core-http-browser",
     "@kbn/app-header",
     "@kbn/deeplinks-security",
+    "@kbn/deeplinks-workflows",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-yaml",
@@ -40,6 +41,16 @@
     "@kbn/charts-theme",
     "@kbn/i18n-react",
     "@kbn/app-menu",
-    "@kbn/search-inference-endpoints"
+    "@kbn/search-inference-endpoints",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/ui-callout",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/user-profile-components",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/proposals-common",
+    "@kbn/proposals-plugin",
+    "@kbn/ui-callout",
   ]
 }

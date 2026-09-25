@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
+import { useCallback, useMemo } from 'react';
 
-import { useAddToExistingCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case';
-import { useAddToNewCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
+import { useAddToCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
 import { APP_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
-import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
+import { ATTACK_ADD_TO_CASE_ACTION_ID } from '../../../../../common/constants/action_ids';
 import { ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT } from '../constants';
 import type { BulkAttackActionItems } from '../types';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 
 export interface UseBulkAttackCaseItemsProps {
-  /** Title used to initialize "create case" flyout */
+  /** Title used to initialize the create-case flyout */
   title: string;
   /** Optional callback when add-to-case action is triggered */
   onCasesAdd?: () => void;
@@ -31,7 +31,7 @@ export interface UseBulkAttackCaseItemsProps {
 }
 
 /**
- * Hook that provides bulk action items for adding attacks to a new or existing case.
+ * Hook that provides a bulk action item for adding attacks to a case.
  */
 export const useBulkAttackCaseItems = ({
   title,
@@ -49,46 +49,26 @@ export const useBulkAttackCaseItems = ({
     [canCreateAndReadCases]
   );
 
-  const { onAddToNewCase, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
-    canUserCreateAndReadCases,
-    title,
-    onClick: onCasesAdd,
-  });
-
-  const { onAddToExistingCase, disabled: isAddToExistingCaseDisabled } = useAddToExistingCase({
-    canUserCreateAndReadCases,
-    onClick: onCasesAdd,
-  });
-
-  const onAddToNewCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(
-    async (alertItems) => {
-      const alertIds = extractRelatedDetectionAlertIds(alertItems);
-      const markdownComments = alertItems
-        .map((item) => {
-          const value = item.data.find(
-            (data) => data.field === ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT
-          )?.value;
-          if (!Array.isArray(value)) {
-            return undefined;
-          }
-          return typeof value[0] === 'string' ? value[0] : undefined;
-        })
-        .filter((comment): comment is string => comment != null);
-
+  const onAddToCaseSuccess = useCallback(
+    (isNewCase: boolean) => {
       if (telemetrySource) {
         telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
           source: telemetrySource,
-          action: 'add_to_new_case',
+          action: isNewCase ? 'add_to_new_case' : 'add_to_existing_case',
         });
       }
-
-      onAddToNewCase({ alertIds, markdownComments });
-      closePopover?.();
     },
-    [closePopover, onAddToNewCase, telemetrySource, telemetry]
+    [telemetry, telemetrySource]
   );
 
-  const onAddToExistingCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(
+  const { onAddToCase, disabled } = useAddToCase({
+    canUserCreateAndReadCases,
+    onClick: onCasesAdd,
+    onSuccess: onAddToCaseSuccess,
+    title,
+  });
+
+  const onAddToCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(
     async (alertItems) => {
       const alertIds = extractRelatedDetectionAlertIds(alertItems);
       const markdownComments = alertItems
@@ -103,17 +83,10 @@ export const useBulkAttackCaseItems = ({
         })
         .filter((comment): comment is string => comment != null);
 
-      if (telemetrySource) {
-        telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
-          source: telemetrySource,
-          action: 'add_to_existing_case',
-        });
-      }
-
-      onAddToExistingCase({ alertIds, markdownComments });
+      onAddToCase({ alertIds, markdownComments });
       closePopover?.();
     },
-    [closePopover, onAddToExistingCase, telemetrySource, telemetry]
+    [closePopover, onAddToCase]
   );
 
   const items = useMemo<BulkActionsConfig[]>(
@@ -121,39 +94,20 @@ export const useBulkAttackCaseItems = ({
       canCreateAndReadCases
         ? [
             {
-              name: ADD_TO_EXISTING_CASE,
-              label: ADD_TO_EXISTING_CASE,
-              key: 'attack-add-to-existing-case',
-              'data-test-subj': 'attack-add-to-existing-case',
+              name: ADD_TO_CASE,
+              label: ADD_TO_CASE,
+              key: ATTACK_ADD_TO_CASE_ACTION_ID,
+              'data-test-subj': ATTACK_ADD_TO_CASE_ACTION_ID,
               disableOnQuery: true,
-              disable: isAddToExistingCaseDisabled,
-              onClick: onAddToExistingCaseClick,
-            },
-            {
-              name: ADD_TO_NEW_CASE,
-              label: ADD_TO_NEW_CASE,
-              key: 'attack-add-to-new-case',
-              'data-test-subj': 'attack-add-to-new-case',
-              disableOnQuery: true,
-              disable: isAddToNewCaseDisabled,
-              onClick: onAddToNewCaseClick,
+              disable: disabled,
+              groupId: 'cases',
+              icon: 'briefcase',
+              onClick: onAddToCaseClick,
             },
           ]
         : [],
-    [
-      canCreateAndReadCases,
-      isAddToExistingCaseDisabled,
-      isAddToNewCaseDisabled,
-      onAddToExistingCaseClick,
-      onAddToNewCaseClick,
-    ]
+    [canCreateAndReadCases, disabled, onAddToCaseClick]
   );
 
-  return useMemo(
-    () => ({
-      items,
-      panels: [],
-    }),
-    [items]
-  );
+  return useMemo(() => ({ items, panels: [] }), [items]);
 };

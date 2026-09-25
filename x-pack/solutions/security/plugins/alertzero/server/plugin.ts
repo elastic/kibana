@@ -41,6 +41,7 @@ import { ActionsService } from './services/actions/actions_service';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
+import { registerAttachments } from './agent_builder/attachments/register_attachments';
 
 export class AlertZeroPlugin
   implements
@@ -61,7 +62,8 @@ export class AlertZeroPlugin
   private actionsService?: ActionsService;
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
-  private agenticInvestigations?: AlertZeroStartDependencies['agenticInvestigations'];
+  private proposals?: AlertZeroStartDependencies['proposals'];
+  private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -72,7 +74,7 @@ export class AlertZeroPlugin
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
     {
       agentBuilder,
-      agenticInvestigations: _agenticInvestigationsSetup,
+      proposals: _proposalsSetup,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -81,7 +83,7 @@ export class AlertZeroPlugin
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('AlertZero plugin is disabled');
-      return {};
+      return { enabled: false };
     }
 
     this.logger.info('Setting up AlertZero plugin');
@@ -90,6 +92,7 @@ export class AlertZeroPlugin
 
     registerOwner({ workflowsExtensions });
     registerAgentType(agentBuilder);
+    registerAttachments(agentBuilder);
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
     // Registered in setup so the builtin tool is available to Agent Builder before
     // the first agent run; the handler resolves the service lazily like the routes do.
@@ -97,7 +100,7 @@ export class AlertZeroPlugin
       ...listActionsTool(() => this.requireActionsService()),
     });
     agentBuilder.tools.register({
-      ...reviseProposalTool(() => this.requireAgenticInvestigations()),
+      ...reviseProposalTool(() => this.requireProposals()),
     });
 
     features.registerKibanaFeature({
@@ -132,14 +135,16 @@ export class AlertZeroPlugin
       getWorkersService: () => this.requireWorkersService(),
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
+      getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
     });
 
-    return {};
+    return { enabled: true };
   }
 
   start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
-    this.agenticInvestigations = plugins.agenticInvestigations;
+    this.proposals = plugins.proposals;
+    this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
     if (!this.config.enabled) {
       return {};
@@ -170,9 +175,10 @@ export class AlertZeroPlugin
     });
 
     this.conversationProposalsService = new ConversationProposalsService(
-      plugins.agenticInvestigations.getProposalsService(),
+      plugins.proposals.getProposalsService(),
       plugins.agentBuilder,
-      this.logger
+      this.logger,
+      plugins.agenticInvestigations.getImpactClient
     );
 
     this.watchesService = new WatchesService();
@@ -208,13 +214,13 @@ export class AlertZeroPlugin
     }
     return this.actionsService;
   }
-  private requireAgenticInvestigations(): AlertZeroStartDependencies['agenticInvestigations'] {
-    if (!this.agenticInvestigations) {
+  private requireProposals(): AlertZeroStartDependencies['proposals'] {
+    if (!this.proposals) {
       throw new Error(
-        'agenticInvestigations plugin start contract is not available until the AlertZero plugin has started'
+        'proposals plugin start contract is not available until the AlertZero plugin has started'
       );
     }
-    return this.agenticInvestigations;
+    return this.proposals;
   }
   private requireWorkersService(): WorkersService {
     if (!this.workersService) {
@@ -230,6 +236,15 @@ export class AlertZeroPlugin
       );
     }
     return this.conversationProposalsService;
+  }
+
+  private requireAgentBuilderConversations(): AlertZeroStartDependencies['agentBuilder']['conversations'] {
+    if (!this.agentBuilderConversations) {
+      throw new Error(
+        'agentBuilder.conversations is not available until the AlertZero plugin has started'
+      );
+    }
+    return this.agentBuilderConversations;
   }
 
   private getSpaceId(request: KibanaRequest): string {

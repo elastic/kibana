@@ -8,8 +8,10 @@ import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { DateRangeRedirect } from '../app_root/date_range_redirect';
 import { SignificantEventsAppPageTemplate } from '../components/page_template';
 import { RedirectTo } from '../components/redirect_to';
+import { SettingsPage } from '../pages/settings/page';
 import { SignificantEventsPage } from '../pages/significant_events/page';
 
 /**
@@ -29,8 +31,15 @@ const significantEventsAppRoutes = {
       '/': {
         element: <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />,
       },
+      '/settings': {
+        element: <SettingsPage />,
+      },
       '/{tab}': {
-        element: <SignificantEventsPage />,
+        element: (
+          <DateRangeRedirect>
+            <SignificantEventsPage />
+          </DateRangeRedirect>
+        ),
         params: t.intersection([
           t.type({
             path: t.type({

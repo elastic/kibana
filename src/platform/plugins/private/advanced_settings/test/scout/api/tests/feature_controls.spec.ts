@@ -9,7 +9,12 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { ApiClientFixture, KbnClient, RoleSessionCredentials } from '@kbn/scout';
+import type {
+  ApiClientFixture,
+  ApiClientResponse,
+  KbnClient,
+  RoleSessionCredentials,
+} from '@kbn/scout';
 import { apiTest, testData, CUSTOM_ROLES, buildSpacesRole } from '../fixtures';
 
 const {
@@ -25,7 +30,7 @@ type UiSettingUserValue = Awaited<ReturnType<KbnClient['uiSettings']['get']>>;
 type TelemetryAttributes = Record<string, unknown>;
 
 type CookieHeader = RoleSessionCredentials['cookieHeader'];
-type ApiResponse = Awaited<ReturnType<ApiClientFixture['post']>>;
+type ApiResponse = ApiClientResponse;
 
 const spacePath = (path: string, spaceId?: string) => (spaceId ? `/s/${spaceId}${path}` : path);
 

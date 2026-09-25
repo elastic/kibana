@@ -16,16 +16,13 @@ const DEFAULT_TO = 'now';
 /**
  * Hook to get the current time range from URL params.
  *
- * Reads from URL search params directly to work across all routes.
- * Time params are defined in route definitions for type-safe navigation,
- * but read universally via URL for flexibility.
- *
- * Assumes DateRangeRedirect has ensured time params are present in the URL.
+ * Management routes define the params for type-safe navigation and read them
+ * directly from the URL. DateRangeRedirect ensures they are present on `/{tab}`.
  */
 export function useTimeRange() {
   const location = useLocation();
 
-  // DateRangeRedirect ensures rangeFrom/rangeTo are always present.
+  // The fallbacks keep the hook safe outside a normalized management route.
   const { rangeFrom, rangeTo } = useMemo(() => {
     const searchParams = new URLSearchParams(location.search);
     return {

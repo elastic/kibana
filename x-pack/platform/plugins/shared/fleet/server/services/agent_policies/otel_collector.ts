@@ -25,6 +25,7 @@ import {
   dataTypes,
   FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
+  otlpProtocol,
   outputType,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
@@ -53,6 +54,21 @@ import { buildOtelEsExporterConfig, parseYamlRecord } from './otel_output_settin
  * @see `dev_docs/data_streams.md` (OpenTelemetry integrations and the `.otel` suffix)
  * @see `x-pack/platform/test/fleet_api_integration/apis/agent_policy/agent_policy_otel_routing.ts`
  */
+// Recursively removes null and undefined values from a plain object so that
+// SO-layer cleanup sentinels (written when switching OTLP protocols) never
+// reach compiled collector config where the strict decoder would reject them.
+const deepStripNulls = (obj: Record<string, unknown>): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(obj)
+      .filter(([, v]) => v !== null && v !== undefined)
+      .map(([k, v]) => [
+        k,
+        !Array.isArray(v) && typeof v === 'object'
+          ? deepStripNulls(v as Record<string, unknown>)
+          : v,
+      ])
+  );
+
 export function generateOtelcolConfig({
   inputs,
   dataOutput,
@@ -815,6 +831,27 @@ function generateOtelcolExporter(
             // endpoints and auth always take precedence over user-supplied YAML
             endpoints: dataOutput.hosts,
             ...(hasBeatsauthConfig ? { auth: { authenticator: beatsauthID } } : {}),
+          },
+        },
+      };
+    }
+    case outputType.Otlp: {
+      const outputID = getOutputIdForAgentPolicy(dataOutput);
+      const { protocol, ...rest } = dataOutput.otlp_exporter;
+      // Null values are SO-layer cleanup sentinels written when switching protocols
+      // (e.g. removeOtlpHttpFields / removeOtlpGrpcFields). Strip them recursively
+      // so they never appear in the compiled exporter config — the OTel Collector
+      // strict decoder rejects unknown keys.
+      const exporterConfig = deepStripNulls(rest);
+      const exporterID =
+        protocol === otlpProtocol.Grpc ? `otlp/${outputID}` : `otlphttp/${outputID}`;
+      const tlsSecrets = dataOutput.secrets?.otlp_exporter?.tls;
+      return {
+        extensions: {},
+        exporters: {
+          [exporterID]: {
+            ...exporterConfig,
+            ...(tlsSecrets ? { secrets: { tls: tlsSecrets } } : {}),
           },
         },
       };

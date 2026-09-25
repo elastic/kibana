@@ -441,6 +441,8 @@ export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
   enabledEmailServices: ActionsPublicPluginSetup['enabledEmailServices'];
   isWebhookSslWithPfxEnabled?: ActionsPublicPluginSetup['isWebhookSslWithPfxEnabled'];
+  /** Cluster switch from the actions setup contract. Embedded hosts often have no actions start contract. */
+  isInboundEventsEnabled?: ActionsPublicPluginSetup['isInboundEventsEnabled'];
 }
 
 export interface RulesListFilters {

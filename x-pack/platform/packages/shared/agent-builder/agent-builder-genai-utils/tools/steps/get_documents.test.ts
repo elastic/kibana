@@ -36,7 +36,12 @@ describe('getDocumentById', () => {
       expect(esClient.search).toHaveBeenCalledWith({
         index: 'remote_cluster:logs-test',
         size: 1,
-        query: { term: { _id: 'doc-123' } },
+        query: {
+          bool: {
+            filter: [{ term: { _id: 'doc-123' } }],
+            must_not: [{ term: { _tier: 'data_frozen' } }],
+          },
+        },
       });
       expect(esClient.get).not.toHaveBeenCalled();
 
@@ -67,6 +72,23 @@ describe('getDocumentById', () => {
         index: 'remote_cluster:logs-test',
         found: false,
       });
+    });
+
+    it('omits the frozen tier exclusion when frozen tier indices are included', async () => {
+      const esClient = {
+        search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+        get: jest.fn(),
+      } as unknown as ElasticsearchClient;
+
+      await getDocumentById({
+        id: 'doc-123',
+        index: 'remote_cluster:logs-test',
+        includeFrozen: true,
+        esClient,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchCall.query.bool).not.toHaveProperty('must_not');
     });
   });
 

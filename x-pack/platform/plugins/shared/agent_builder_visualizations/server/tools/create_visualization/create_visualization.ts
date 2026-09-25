@@ -12,6 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
+  DEFAULT_TIME_RANGE,
   VISUALIZATION_ATTACHMENT_TYPE,
   getEffectiveRenderer,
   isCustomContentVisualization,
@@ -175,32 +176,53 @@ const createVisualizationSchema = z.object({
     ),
   target: targetSchema,
   time_range: z
-    .object({
-      from: z
-        .string()
-        .max(256)
-        .describe(
-          'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
-        ),
-      to: z
-        .string()
-        .max(256)
-        .describe(
-          'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
-        ),
-    })
-    .check((ctx) => {
-      try {
-        getDateRange(ctx.value);
-      } catch (err) {
-        ctx.issues.push({
-          code: 'custom',
-          message: err instanceof Error ? err.message : 'Invalid time_range',
-          input: ctx.value,
-        });
-      }
-    })
-    .optional()
+    .preprocess(
+      (value) => {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+          return value;
+        }
+        const from = (value as { from?: unknown }).from;
+        const to = (value as { to?: unknown }).to;
+        const fromBlank = from == null || from === '';
+        const toBlank = to == null || to === '';
+        // Both blank: omit so create can apply the data-aware default.
+        if (fromBlank && toBlank) {
+          return undefined;
+        }
+        // Models often dump one empty endpoint. Fill the missing side rather than fail.
+        return {
+          from: fromBlank ? DEFAULT_TIME_RANGE.from : from,
+          to: toBlank ? DEFAULT_TIME_RANGE.to : to,
+        };
+      },
+      z
+        .object({
+          from: z
+            .string()
+            .max(256)
+            .describe(
+              'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
+            ),
+          to: z
+            .string()
+            .max(256)
+            .describe(
+              'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
+            ),
+        })
+        .check((ctx) => {
+          try {
+            getDateRange(ctx.value);
+          } catch (err) {
+            ctx.issues.push({
+              code: 'custom',
+              message: err instanceof Error ? err.message : 'Invalid time_range',
+              input: ctx.value,
+            });
+          }
+        })
+        .optional()
+    )
     .describe(
       '(optional) Only set this when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.'
     ),
