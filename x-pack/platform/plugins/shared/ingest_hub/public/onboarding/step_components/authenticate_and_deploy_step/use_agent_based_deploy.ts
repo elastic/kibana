@@ -23,11 +23,8 @@ import type { AgentCredentialVars } from './package_inputs';
 import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
 import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
+import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
 import { useOnboardingSO } from './use_onboarding_so';
-import {
-  cleanupAgentBasedPolicies,
-  updateAgentBasedPolicy,
-} from './policy_cleanup_agent_based';
 import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
@@ -151,7 +148,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
       const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
 
-      if (targetsToDeploy.length === 0 && !hasPendingCleanup && !(detectAndReviewStep.isDirty ?? false)) {
+      if (
+        targetsToDeploy.length === 0 &&
+        !hasPendingCleanup &&
+        !(detectAndReviewStep.isDirty ?? false)
+      ) {
         // No deploy targets and no cleanup to run, but the service selection may still have
         // changed (e.g., a previously-failed service with no package policy was deselected).
         // Reconcile the SO services list so resume reflects the current selection.

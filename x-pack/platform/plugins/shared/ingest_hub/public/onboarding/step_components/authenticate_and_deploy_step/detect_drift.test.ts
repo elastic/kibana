@@ -42,12 +42,16 @@ describe('detectServiceVarsDrift', () => {
   it('returns dirty instance when varsByDataStream differ', () => {
     const session = {
       inst1: makeVars({
-        varsByDataStream: { logs: { enabledInputs: ['s3'], varsByInput: { s3: { bucket_arn: 'arn:new' } } } },
+        varsByDataStream: {
+          logs: { enabledInputs: ['s3'], varsByInput: { s3: { bucket_arn: 'arn:new' } } },
+        },
       }),
     };
     const so = {
       inst1: makeVars({
-        varsByDataStream: { logs: { enabledInputs: ['s3'], varsByInput: { s3: { bucket_arn: 'arn:old' } } } },
+        varsByDataStream: {
+          logs: { enabledInputs: ['s3'], varsByInput: { s3: { bucket_arn: 'arn:old' } } },
+        },
       }) as unknown as Record<string, unknown>,
     };
     expect(detectServiceVarsDrift(session, so, emptyServicesMap)).toEqual(['inst1']);
@@ -81,15 +85,12 @@ describe('detectAuthDrift', () => {
     ['identity_federation', 'conn-a', 'static_keys', 'conn-a', true],
     ['static_keys', undefined, 'identity_federation', null, true],
     [undefined, undefined, undefined, undefined, false],
-  ])(
-    'session(%s,%s) vs SO(%s,%s) → %s',
-    (sMethod, sConnector, soMethod, soConnector, expected) => {
-      expect(
-        detectAuthDrift(
-          { authMethod: sMethod ?? undefined, connectorId: sConnector ?? undefined },
-          { authMethod: soMethod ?? undefined, connectorId: soConnector as string | null | undefined }
-        )
-      ).toBe(expected);
-    }
-  );
+  ])('session(%s,%s) vs SO(%s,%s) → %s', (sMethod, sConnector, soMethod, soConnector, expected) => {
+    expect(
+      detectAuthDrift(
+        { authMethod: sMethod ?? undefined, connectorId: sConnector ?? undefined },
+        { authMethod: soMethod ?? undefined, connectorId: soConnector as string | null | undefined }
+      )
+    ).toBe(expected);
+  });
 });
