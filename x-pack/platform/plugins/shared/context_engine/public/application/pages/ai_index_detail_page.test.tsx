@@ -518,7 +518,7 @@ describe('AiIndexDetailPage', () => {
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
 
-  it('opens the edit sources flyout with the current sources selected', async () => {
+  it('opens the inline sources editor with the current sources selected', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 
@@ -528,7 +528,7 @@ describe('AiIndexDetailPage', () => {
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
-    expect(await screen.findByTestId('contextEditSourcesFlyout')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
     expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
   });
 
@@ -539,10 +539,10 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services);
 
-    await screen.findByTestId('contextEditSourcesButton');
+    await screen.findByTestId('contextAddSourcesButton');
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
 
     // The ES|QL tab is selected by default; author a raw query and add it.
     const editor = await screen.findByTestId('mockEsqlEditor');
@@ -564,9 +564,8 @@ describe('AiIndexDetailPage', () => {
       );
     });
 
-    // Flyout closes and the detail data is refetched after a successful save.
     await waitFor(() => {
-      expect(screen.queryByTestId('contextEditSourcesFlyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
     });
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
@@ -714,6 +713,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
     expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
   });
 

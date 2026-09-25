@@ -10,14 +10,31 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
-import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
+import type { AiIndexSource, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type {
   UseDataConnectorsOptions,
   UseDataConnectorsResult,
 } from '../../hooks/use_data_connectors';
 import { SourcesPanel } from './sources_panel';
+
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: ({
+    query,
+    onTextLangQueryChange,
+  }: {
+    query: { esql: string };
+    onTextLangQueryChange: (query: { esql: string }) => void;
+  }) => (
+    <textarea
+      data-test-subj="mockEsqlEditor"
+      value={query.esql}
+      onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+    />
+  ),
+}));
 
 const mockUseDataConnectors = jest.fn(
   (_options?: UseDataConnectorsOptions): UseDataConnectorsResult => ({
@@ -34,8 +51,26 @@ jest.mock('../../hooks/use_data_connectors', () => ({
   useDataConnectors: (options?: UseDataConnectorsOptions) => mockUseDataConnectors(options),
 }));
 
-const renderWithProviders = (ui: React.ReactElement) =>
-  render(
+const baseAiIndex: GetAiIndexResponse = {
+  id: 'my-ai-index',
+  managed: false,
+  dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+  automations: [],
+  sources: [],
+  traces: [],
+  date_created: '2026-01-01T00:00:00.000Z',
+  date_modified: '2026-01-01T00:00:00.000Z',
+};
+
+const sources: AiIndexSource[] = [
+  { type: 'esql', value: 'FROM a' },
+  { type: 'esql', value: 'FROM b' },
+  { type: 'esql', value: 'FROM c' },
+];
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider
@@ -44,17 +79,19 @@ const renderWithProviders = (ui: React.ReactElement) =>
             triggersActionsUi: triggersActionsUiMock.createStart(),
           }}
         >
-          {ui}
+          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+};
 
-const sources: AiIndexSource[] = [
-  { type: 'esql', value: 'FROM a' },
-  { type: 'esql', value: 'FROM b' },
-  { type: 'esql', value: 'FROM c' },
-];
+const saveButton = () => screen.getByTestId('contextEditSourcesDoneButton');
+
+const addEsqlSource = (query: string) => {
+  fireEvent.change(screen.getByTestId('mockEsqlEditor'), { target: { value: query } });
+  fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
+};
 
 describe('SourcesPanel', () => {
   beforeEach(() => {
@@ -63,13 +100,7 @@ describe('SourcesPanel', () => {
 
   it('shows the loading skeleton while loading and no rows', () => {
     renderWithProviders(
-      <SourcesPanel
-        isLoading
-        sources={[]}
-        canEdit={false}
-        onEditSources={jest.fn()}
-        isManaged={false}
-      />
+      <SourcesPanel isLoading aiIndex={undefined} onSaved={jest.fn()} isManaged={false} />
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesLoading')).toBeInTheDocument();
@@ -81,9 +112,8 @@ describe('SourcesPanel', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
-        sources={[]}
-        canEdit
-        onEditSources={jest.fn()}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={jest.fn()}
         isManaged={false}
       />
     );
@@ -93,11 +123,18 @@ describe('SourcesPanel', () => {
       screen.getByText('No sources yet. Add a source to start building context for this AI index.')
     ).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddSourcesButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
   });
 
   it('shows read-only empty copy for managed AI indexes with no sources', () => {
     renderWithProviders(
-      <SourcesPanel isLoading={false} sources={[]} canEdit onEditSources={jest.fn()} isManaged />
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [], managed: true }}
+        onSaved={jest.fn()}
+        isManaged
+      />
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
@@ -108,24 +145,23 @@ describe('SourcesPanel', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
-        sources={sources}
-        canEdit
-        onEditSources={jest.fn()}
+        aiIndex={{ ...baseAiIndex, sources }}
+        onSaved={jest.fn()}
         isManaged={false}
       />
     );
 
     expect(screen.getAllByTestId('contextAiIndexSourceRow')).toHaveLength(sources.length);
     expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
   });
 
   it('does not fetch connectors when there are no connector sources', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
-        sources={sources}
-        canEdit
-        onEditSources={jest.fn()}
+        aiIndex={{ ...baseAiIndex, sources }}
+        onSaved={jest.fn()}
         isManaged={false}
       />
     );
@@ -137,9 +173,11 @@ describe('SourcesPanel', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
-        sources={[{ type: 'connector', value: 'connector-gdrive' }]}
-        canEdit
-        onEditSources={jest.fn()}
+        aiIndex={{
+          ...baseAiIndex,
+          sources: [{ type: 'connector', value: 'connector-gdrive' }],
+        }}
+        onSaved={jest.fn()}
         isManaged={false}
       />
     );
@@ -151,9 +189,11 @@ describe('SourcesPanel', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
-        sources={[{ type: 'connector', value: 'connector-gdrive' }]}
-        canEdit
-        onEditSources={jest.fn()}
+        aiIndex={{
+          ...baseAiIndex,
+          sources: [{ type: 'connector', value: 'connector-gdrive' }],
+        }}
+        onSaved={jest.fn()}
         isManaged={false}
       />
     );
@@ -161,48 +201,73 @@ describe('SourcesPanel', () => {
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('Google Drive');
   });
 
-  it('disables the edit button when editing is not allowed', () => {
+  it('hides header actions for managed AI indexes', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
-        sources={sources}
-        canEdit={false}
-        onEditSources={jest.fn()}
-        isManaged={false}
-      />
-    );
-
-    expect(screen.getByTestId('contextEditSourcesButton')).toBeDisabled();
-  });
-
-  it('hides the edit button for managed AI indexes', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={sources}
-        canEdit
-        onEditSources={jest.fn()}
+        aiIndex={{ ...baseAiIndex, sources, managed: true }}
+        onSaved={jest.fn()}
         isManaged
       />
     );
 
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
   });
 
-  it('calls onEditSources when the edit button is clicked', () => {
-    const onEditSources = jest.fn();
+  it('opens the inline editor when Add sources is clicked', async () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
-        sources={sources}
-        canEdit
-        onEditSources={onEditSources}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
+  });
+
+  it('disables Save when the current selection matches the sources loaded on open', async () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [{ type: 'esql', value: 'FROM My view' }] }}
+        onSaved={jest.fn()}
         isManaged={false}
       />
     );
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
-    expect(onEditSources).toHaveBeenCalledTimes(1);
+    expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
+    expect(saveButton()).toBeDisabled();
+  });
+
+  it('enables Save after adding a source and disables it again when the selection is reverted', async () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+
+    expect(saveButton()).toBeDisabled();
+
+    addEsqlSource('FROM logs-* | LIMIT 10');
+    expect(saveButton()).toBeEnabled();
+
+    const row = screen.getByTestId('contextSelectedSource-esql-0');
+    fireEvent.click(within(row).getByTestId('contextRemoveSourceButton'));
+
+    expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
+    expect(saveButton()).toBeDisabled();
   });
 });

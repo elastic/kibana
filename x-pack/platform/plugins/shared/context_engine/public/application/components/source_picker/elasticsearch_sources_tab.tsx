@@ -28,7 +28,7 @@ import { useIndices } from '../../hooks/use_indices';
 import { isIndexPickerSourceSelected } from '../../utils/sources';
 import type { SelectedSource } from './types';
 
-const EDITOR_INLINE_MIN_HEIGHT = 180;
+const ESQL_EDITOR_HEIGHT = 130;
 const SEARCH_DEBOUNCE_MS = 300;
 
 const getEsqlQuery = (query: AggregateQuery): string => ('esql' in query ? query.esql : '');
@@ -152,19 +152,18 @@ export const ElasticsearchSourcesTab = ({
       >
         <div data-test-subj="contextEsqlTab">
           <EuiFormRow fullWidth>
-            <div css={{ minHeight: EDITOR_INLINE_MIN_HEIGHT }}>
-              <ESQLLangEditor
-                query={{ esql: esqlQuery }}
-                onTextLangQueryChange={(next) => setEsqlQuery(getEsqlQuery(next))}
-                onTextLangQuerySubmit={async () => {}}
-                editorIsInline
-                hasOutline
-                hideRunQueryButton
-                hideQueryHistory
-                expandToFitQueryOnMount
-                isLoading={false}
-              />
-            </div>
+            <ESQLLangEditor
+              query={{ esql: esqlQuery }}
+              onTextLangQueryChange={(next) => setEsqlQuery(getEsqlQuery(next))}
+              onTextLangQuerySubmit={async () => {}}
+              editorIsInline
+              hasOutline
+              hideRunQueryButton
+              hideQueryHistory
+              expandToFitQueryOnMount
+              isLoading={false}
+              initialState={{ editorHeight: ESQL_EDITOR_HEIGHT }}
+            />
           </EuiFormRow>
           <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
