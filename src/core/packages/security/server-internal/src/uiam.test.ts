@@ -39,6 +39,7 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
         uiam.getElasticsearchClientAuthentication({
           credentialSource: 'inbound',
           credential,
+          relayedClientAuthentication: 'upstream-shared-secret',
           requestHeaders: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: VALID_ATTESTATION },
         })
       ).toBeUndefined();
@@ -67,9 +68,36 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
         uiam.getElasticsearchClientAuthentication({
           credentialSource: 'inbound',
           credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: undefined,
           requestHeaders: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: VALID_ATTESTATION },
         })
       ).toBe(SHARED_SECRET);
+    });
+
+    it.each([
+      ['a secret relayed from an upstream caller', 'upstream-shared-secret'],
+      ['an empty value, which is still the upstream speaking', ''],
+      ['a duplicated header, as the array it arrived as', ['one', 'two']],
+    ])('forwards %s for an inbound UIAM credential verbatim', (_label, relayed) => {
+      expect(
+        uiam.getElasticsearchClientAuthentication({
+          credentialSource: 'inbound',
+          credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: relayed,
+          requestHeaders: {},
+        })
+      ).toEqual(relayed);
+    });
+
+    it('forwards relayed client authentication over a valid attestation', () => {
+      expect(
+        uiam.getElasticsearchClientAuthentication({
+          credentialSource: 'inbound',
+          credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: 'upstream-shared-secret',
+          requestHeaders: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: VALID_ATTESTATION },
+        })
+      ).toBe('upstream-shared-secret');
     });
 
     it('returns undefined for an inbound UIAM credential with no attestation', () => {
@@ -77,6 +105,7 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
         uiam.getElasticsearchClientAuthentication({
           credentialSource: 'inbound',
           credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: undefined,
           requestHeaders: {},
         })
       ).toBeUndefined();
@@ -87,6 +116,7 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
         uiam.getElasticsearchClientAuthentication({
           credentialSource: 'inbound',
           credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: undefined,
           requestHeaders: {
             [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
               'a-different-secret',
@@ -102,6 +132,7 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
         uiam.getElasticsearchClientAuthentication({
           credentialSource: 'inbound',
           credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: undefined,
           requestHeaders: {
             [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
               SHARED_SECRET,
@@ -117,6 +148,7 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
         uiam.getElasticsearchClientAuthentication({
           credentialSource: 'inbound',
           credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: undefined,
           requestHeaders: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'short' },
         })
       ).toBeUndefined();
@@ -140,6 +172,7 @@ describe('createCoreUiamService attestation binding', () => {
       uiam.getElasticsearchClientAuthentication({
         credentialSource: 'inbound',
         credential: bearer,
+        relayedClientAuthentication: undefined,
         requestHeaders: {
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
             SHARED_SECRET,

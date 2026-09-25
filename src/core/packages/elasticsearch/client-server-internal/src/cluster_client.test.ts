@@ -1100,7 +1100,12 @@ describe('ClusterClient', () => {
         // trigger client instantiation via getter
         client = scopedClusterClient.asCurrentUser;
 
-        expect(security.uiam!.getElasticsearchClientAuthentication).not.toHaveBeenCalled();
+        expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+          expect.objectContaining({
+            credentialSource: 'inbound',
+            relayedClientAuthentication: clientAuthentication,
+          })
+        );
         expect(scopedClient.child).toHaveBeenCalledTimes(1);
         expect(scopedClient.child).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -1177,7 +1182,7 @@ describe('ClusterClient', () => {
       const authorization = new HTTPAuthorizationHeader('Bearer', 'essu_ephemeral_token');
       const authenticationHeaders = {
         [AUTHORIZATION_HEADER]: authorization.toString(),
-        ...(inbound === undefined ? {} : { [ES_CLIENT_AUTHENTICATION_HEADER]: inbound }),
+        [ES_CLIENT_AUTHENTICATION_HEADER]: inbound,
       };
       authHeaders.get.mockReturnValue(authenticationHeaders);
       const security = securityServiceMock.createInternalSetup();
@@ -1206,9 +1211,11 @@ describe('ClusterClient', () => {
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
-      // Client authentication that rode in with the token speaks for it, so the UIAM service is
-      // never asked and a valid attestation changes nothing.
-      expect(security.uiam!.getElasticsearchClientAuthentication).not.toHaveBeenCalled();
+      // Client authentication that rode in with the token speaks for it, so a valid attestation
+      // changes nothing.
+      expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+        expect.objectContaining({ credentialSource: 'inbound', relayedClientAuthentication: inbound })
+      );
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1359,6 +1366,57 @@ describe('ClusterClient', () => {
             ...defaultHeaders,
             [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+    });
+
+    it("replaces client authentication copied onto a fake request with Kibana's own", () => {
+      // Reporting replays a job's stored headers with a Kibana-granted API key swapped in, so a
+      // secret the job's creator sent rides along with a credential it was never issued for.
+      const security = securityServiceMock.createInternalSetup();
+      const clusterClient = new ClusterClient({
+        config: createConfig({
+          requestHeadersWhitelist: ['authorization', ES_CLIENT_AUTHENTICATION_HEADER],
+        }),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: {
+          [AUTHORIZATION_HEADER]: 'ApiKey essu_granted_key',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-shared-secret',
+        },
+      });
+
+      client = clusterClient.asScoped(fakeRequest).asCurrentUser;
+
+      expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+        expect.objectContaining({ credentialSource: 'internal' })
+      );
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'ApiKey essu_granted_key',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+
+      client = clusterClient.asScoped(fakeRequest).asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'ApiKey essu_granted_key',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
           },
         })
       );

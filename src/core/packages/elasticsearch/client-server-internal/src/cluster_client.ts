@@ -42,7 +42,6 @@ import {
   createInternalErrorHandler,
   type InternalUnauthorizedErrorHandler,
 } from './retry_unauthorized';
-import { resolveUiamClientAuthentication } from './uiam_client_authentication';
 import { createTransport, type OnRequestHandler } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
 
@@ -235,15 +234,27 @@ export class ClusterClient implements ICustomClusterClient {
 
     // The effective credential is whatever ends up in `scopedHeaders`: for real requests the auth
     // provider's post-authentication headers override the one that came in on the wire. The client
-    // authentication that travels with it is resolved from the same object, so a secret the
-    // request already carries is relayed rather than replaced.
-    const clientAuthentication = resolveUiamClientAuthentication({
-      uiam: this.security?.uiam,
-      credential: HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders }),
-      effectiveHeaders: scopedHeaders,
-      attestationHeaders: requestHeaders,
-      isExternalCredential,
-    });
+    // authentication that travels with it is read from the same object, so a secret the request
+    // already carries is relayed rather than replaced.
+    let clientAuthentication: string | string[] | undefined;
+    if (this.security?.uiam) {
+      const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
+      if (credential) {
+        clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
+          requestHeaders
+            ? {
+                credentialSource: 'inbound',
+                credential,
+                relayedClientAuthentication: scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER],
+                requestHeaders,
+              }
+            : {
+                credentialSource: isExternalCredential ? 'external' : 'internal',
+                credential,
+              }
+        );
+      }
+    }
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
@@ -271,19 +282,24 @@ export class ClusterClient implements ICustomClusterClient {
     // Unlike `getScopedHeaders`, this path never reads the wire. `authHeaders` is the
     // authentication provider's post-authentication output, so the credential has already been
     // through `_authenticate` and Kibana can vouch for it without an attestation. A UIAM bearer
-    // token is the exception: it may be bound to another client, so Kibana's own secret is never
-    // substituted for it and only an attestation Kibana could have minted itself will do.
+    // token on a real request is the exception: it may be bound to another client, so it keeps
+    // the client authentication the provider resolved for it, and only an attestation Kibana
+    // could have minted itself earns Kibana's own secret.
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
-    const requiresAttestation =
-      isRealRequest(request) && isUiamBearerCredential(authorizationHeader);
-    const clientAuthentication = resolveUiamClientAuthentication({
-      uiam: this.security?.uiam,
-      credential: authorizationHeader,
-      effectiveHeaders: authHeaders,
-      attestationHeaders: requiresAttestation ? ensureRawRequest(request).headers ?? {} : undefined,
-      isExternalCredential,
-    });
+    const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication(
+      isRealRequest(request) && isUiamBearerCredential(authorizationHeader)
+        ? {
+            credentialSource: 'inbound',
+            credential: authorizationHeader,
+            relayedClientAuthentication: authHeaders[ES_CLIENT_AUTHENTICATION_HEADER],
+            requestHeaders: ensureRawRequest(request).headers ?? {},
+          }
+        : {
+            credentialSource: isExternalCredential ? 'external' : 'internal',
+            credential: authorizationHeader,
+          }
+    );
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
