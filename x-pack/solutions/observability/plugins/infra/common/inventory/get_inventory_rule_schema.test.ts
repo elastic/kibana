@@ -18,6 +18,23 @@ describe('getInventoryRuleSchema', () => {
     expect(getInventoryRuleSchema('pod', null)).toBe('ecs');
   });
 
+  it('follows the stored pod schema once the caller owns the Pods Schema control', () => {
+    expect(getInventoryRuleSchema('pod', 'semconv', true)).toBe('semconv');
+    expect(getInventoryRuleSchema('pod', 'ecs', true)).toBe('ecs');
+    expect(getInventoryRuleSchema('pod', undefined, true)).toBeUndefined();
+    expect(getInventoryRuleSchema('pod', null, true)).toBeUndefined();
+  });
+
+  it('keeps the pod coerce when the control is explicitly disabled', () => {
+    expect(getInventoryRuleSchema('pod', 'semconv', false)).toBe('ecs');
+  });
+
+  it('ignores the pod flag for every other node type', () => {
+    expect(getInventoryRuleSchema('host', 'semconv', true)).toBe('semconv');
+    expect(getInventoryRuleSchema('host', undefined, true)).toBeUndefined();
+    expect(getInventoryRuleSchema('container', 'ecs', true)).toBe('ecs');
+  });
+
   it('keeps a host schema, including an omission', () => {
     expect(getInventoryRuleSchema('host', 'semconv')).toBe('semconv');
     expect(getInventoryRuleSchema('host', 'ecs')).toBe('ecs');

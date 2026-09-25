@@ -15,7 +15,8 @@ import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
-import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
+import { useInventoryRequestSchema } from '../../hooks/use_inventory_request_schema';
+import { snapshotMetricForCatalog } from '../../lib/snapshot_metric_for_catalog';
 import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
 import { WaffleSortControls } from '../waffle/waffle_sort_controls';
@@ -31,6 +32,8 @@ export const MetricsAndGroupByToolbarItems = ({
   preferredSchema,
   changePreferredSchema,
   allowSchemaSelection = false,
+  metric,
+  changeMetric,
   ...props
 }: Props) => {
   const inventoryModel = findInventoryModel(props.nodeType);
@@ -57,7 +60,7 @@ export const MetricsAndGroupByToolbarItems = ({
     timeRangeMetadata?.preferredSchema,
   ]);
 
-  const requestSchema = getInventoryRequestSchema(props.nodeType, preferredSchema);
+  const requestSchema = useInventoryRequestSchema(props.nodeType, preferredSchema);
 
   const { value: aggregations } = useAsync(
     () => inventoryModel.metrics.getAggregations({ schema: requestSchema }),
@@ -67,10 +70,22 @@ export const MetricsAndGroupByToolbarItems = ({
   const metricOptions = useMemo(
     () =>
       (Object.keys(aggregations?.getAll() ?? {}) as SnapshotMetricType[])
-        .map((metric) => toMetricOpt(metric, props.nodeType))
+        .map((metricType) => toMetricOpt(metricType, props.nodeType))
         .filter((v) => v) as Array<{ text: string; value: string }>,
     [aggregations, props.nodeType]
   );
+
+  useEffect(() => {
+    const nextMetric = snapshotMetricForCatalog(
+      metric,
+      metricOptions.map((option) => option.value),
+      inventoryModel.metrics.defaultSnapshot
+    );
+
+    if (nextMetric.type !== metric.type) {
+      changeMetric(nextMetric);
+    }
+  }, [changeMetric, inventoryModel.metrics.defaultSnapshot, metric, metricOptions]);
 
   const groupByOptions = useMemo(
     () => props.groupByFields.map((field) => ({ text: field, field })),
@@ -82,8 +97,8 @@ export const MetricsAndGroupByToolbarItems = ({
       <EuiFlexItem grow={false}>
         <WaffleMetricControls
           options={metricOptions}
-          metric={props.metric}
-          onChange={props.changeMetric}
+          metric={metric}
+          onChange={changeMetric}
           onChangeCustomMetrics={props.changeCustomMetrics}
           customMetrics={props.customMetrics}
         />
@@ -112,6 +127,7 @@ export const MetricsAndGroupByToolbarItems = ({
             schemas={schemas}
             isLoading={loading}
             onChange={changePreferredSchema}
+            entityDisplayName={inventoryModel.displayName.toLowerCase()}
           />
         </EuiFlexItem>
       )}

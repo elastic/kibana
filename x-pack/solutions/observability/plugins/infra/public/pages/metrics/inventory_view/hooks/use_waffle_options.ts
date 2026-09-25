@@ -31,6 +31,8 @@ import type {
   SnapshotGroupBy,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api/snapshot_api';
+import { preferredSchemaForInventoryView } from '../../../../../common/inventory/preferred_schema_for_inventory_view';
+import { useIsPodSchemaSelectorEnabled } from '../../../../hooks/use_is_pod_schema_selector_enabled';
 import { useInventoryViewsContext } from './use_inventory_views';
 
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
@@ -59,7 +61,10 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   preferredSchema: null,
 };
 
-function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
+function mapInventoryViewToState(
+  savedView: InventoryView,
+  isPodSchemaSelectorEnabled: boolean
+): WaffleOptionsState {
   const {
     metric,
     groupBy,
@@ -77,12 +82,12 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     preferredSchema,
   } = savedView.attributes;
 
-  // forces the default view to be set with what the time range metadata endpoint returns
-  const preferredSchemaValue =
-    nodeType === 'host' && savedView.id === staticInventoryViewId
-      ? preferredSchema ?? null
-      : // otherwise, use the preferred schema from the saved view
-        preferredSchema;
+  const preferredSchemaValue = preferredSchemaForInventoryView(
+    nodeType,
+    savedView.id,
+    preferredSchema,
+    isPodSchemaSelectorEnabled
+  );
 
   return {
     metric,
@@ -103,6 +108,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
 }
 
 export const useWaffleOptions = () => {
+  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
   const { currentView } = useInventoryViewsContext();
   const {
     inventoryPrefill: { setPrefillState },
@@ -110,26 +116,33 @@ export const useWaffleOptions = () => {
 
   const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
-    defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_OPTIONS_STATE,
+    defaultState: currentView
+      ? mapInventoryViewToState(currentView, isPodSchemaSelectorEnabled)
+      : DEFAULT_WAFFLE_OPTIONS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
     writeDefaultState: true,
   });
 
-  const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(null);
+  // Seed from URL so a remount/reload does not treat the initial null local
+  // state as authoritative and wipe a persisted preferredSchema from the URL.
+  const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(
+    urlState.preferredSchema ?? null
+  );
 
   const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      const state = mapInventoryViewToState(currentView);
+      const state = mapInventoryViewToState(currentView, isPodSchemaSelectorEnabled);
       updateTopbarMenuVisibilityBySchema(state.preferredSchema);
       setUrlState(state);
       previousViewId.current = currentView.id;
 
-      setPreferredSchema(currentView?.attributes.preferredSchema ?? null);
+      // Same mapping as URL state — do not seed from the raw saved-object field.
+      setPreferredSchema(state.preferredSchema ?? null);
     }
-  }, [currentView, setUrlState, updateTopbarMenuVisibilityBySchema]);
+  }, [currentView, isPodSchemaSelectorEnabled, setUrlState, updateTopbarMenuVisibilityBySchema]);
 
   // there is a lot going on with the url state management on this hook
   // when the state resets, many things need to be synchronized

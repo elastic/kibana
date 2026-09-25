@@ -182,6 +182,9 @@ export const createInventoryMetricThresholdExecutor =
       );
 
     const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
+    // Resolved once per execution so the search, the alert context, and the grouping field
+    // cannot disagree if the flag flips mid-run.
+    const isPodSchemaSelectorEnabled = await libs.isPodSchemaSelectorEnabled();
     const { dateEnd } = getTimeRange();
     const results = await Promise.all(
       criteria.map((condition) =>

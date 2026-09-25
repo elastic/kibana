@@ -17,7 +17,6 @@ import type {
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { createMetricAggregations } from './create_metric_aggregations';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
-import { getInventoryRuleSchema } from '../../../../../common/inventory/get_inventory_rule_schema';
 import { createBucketSelector } from './create_bucket_selector';
 import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
@@ -38,6 +37,13 @@ function wildcardToRegex(str: string) {
 }
 
 const ADDITIONAL_CONTEXT_ALLOW_LIST = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
+
+/**
+ * Kubeletstats equivalents of the ECS orchestrator context. SemConv pod documents index
+ * these flat (`k8s.pod.uid`, `k8s.namespace.name`, ...), matching the pod model's
+ * `schemaFields.semconv`. Without them a SemConv pod alert fires with empty context.
+ */
+const SEMCONV_POD_CONTEXT_ALLOW_LIST = ['k8s.*'];
 export const ADDITIONAL_CONTEXT_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
 
 export const ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX = new RegExp(
@@ -58,8 +64,7 @@ export const createRequest = async (
   schema?: DataSchemaFormat
 ): Promise<ESSearchRequest> => {
   const inventoryModels = findInventoryModel(nodeType);
-  const effectiveSchema = getInventoryRuleSchema(nodeType, schema);
-  const inventoryFields = findInventoryFields(nodeType, effectiveSchema);
+  const inventoryFields = findInventoryFields(nodeType, schema);
 
   const composite: estypes.AggregationsCompositeAggregation = {
     size: compositeSize,
@@ -72,7 +77,7 @@ export const createRequest = async (
     nodeType,
     metric,
     customMetric,
-    effectiveSchema
+    schema
   );
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
@@ -100,23 +105,26 @@ export const createRequest = async (
         }
       : undefined;
 
-  const allowList = !containerContextAgg
-    ? ADDITIONAL_CONTEXT_ALLOW_LIST.concat('container.*')
-    : ADDITIONAL_CONTEXT_ALLOW_LIST;
+  const baseAllowList =
+    schema === 'semconv' && nodeType === 'pod'
+      ? ADDITIONAL_CONTEXT_ALLOW_LIST.concat(SEMCONV_POD_CONTEXT_ALLOW_LIST)
+      : ADDITIONAL_CONTEXT_ALLOW_LIST;
+
+  const allowList = !containerContextAgg ? baseAllowList.concat('container.*') : baseAllowList;
 
   const additionalContextAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     additionalContext: {
       top_hits: {
         size: 1,
         _source:
-          effectiveSchema === 'semconv'
+          schema === 'semconv'
             ? false
             : {
                 includes: allowList,
                 excludes: ADDITIONAL_CONTEXT_BLOCKED_LIST,
               },
         // otel docs don't support _source to select fields, so we use docvalue_fields
-        docvalue_fields: effectiveSchema === 'semconv' ? allowList : [],
+        docvalue_fields: schema === 'semconv' ? allowList : [],
       },
     },
   };
@@ -136,9 +144,7 @@ export const createRequest = async (
               : [parsedFilters]
             : []),
           ...rangeQuery(timerange.from, timerange.to),
-          ...(effectiveSchema
-            ? inventoryModels.nodeFilter?.({ schema: effectiveSchema }) ?? []
-            : []),
+          ...(schema ? inventoryModels.nodeFilter?.({ schema }) ?? [] : []),
         ],
       },
     },
