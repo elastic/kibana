@@ -7,6 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const LINKED_INVESTIGATIONS_LABELS = Object.freeze({
+  sectionTitle: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.sectionTitle', {
+    defaultMessage: 'Linked investigations',
+  }),
+  typeBadge: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.typeBadge', {
+    defaultMessage: 'Investigation',
+  }),
+  statusOpen: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusOpen', {
+    defaultMessage: 'Open',
+  }),
+  statusClosed: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusClosed', {
+    defaultMessage: 'Closed',
+  }),
+  empty: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.empty', {
+    defaultMessage: 'No linked investigations',
+  }),
+  errorTitle: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.errorTitle', {
+    defaultMessage: 'Could not load linked investigations',
+  }),
+});
+
 export const DETAILS_FLYOUT_LABELS = Object.freeze({
   ariaLabel: i18n.translate('xpack.alertzero.detailsFlyout.ariaLabel', {
     defaultMessage: 'Conversation details',

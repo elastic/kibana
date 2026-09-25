@@ -9,7 +9,6 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { ScoutPage } from '@kbn/scout';
 import {
   findImportedSavedObjectId,
   getDashboardPanels,
@@ -21,38 +20,6 @@ const EXPORT_PATH = `${MIGRATION_SMOKE_EXPORTS_DIR}/controls_dashboard_migration
 const DASHBOARD_TITLE = '[8.0.0] Controls Dashboard';
 
 let dashboardId = '';
-
-const getControlIds = async (page: ScoutPage) => {
-  const controls = await page.locator('[data-control-id]').all();
-  return Promise.all(
-    controls.map(async (control) => (await control.getAttribute('data-control-id')) ?? '')
-  );
-};
-
-const openOptionsListPopover = async (page: ScoutPage, controlId: string) => {
-  await page.testSubj.click(`optionsList-control-${controlId}`);
-  await page.testSubj
-    .locator('optionsList-control-available-options')
-    .waitFor({ state: 'visible' });
-};
-
-const closeOptionsListPopover = async (page: ScoutPage, controlId: string) => {
-  await page.testSubj.click(`optionsList-control-${controlId}`);
-  await page.testSubj.locator('optionsList-control-available-options').waitFor({ state: 'hidden' });
-};
-
-const getAvailableOptionsCount = async (page: ScoutPage) => {
-  const availableOptions = page.testSubj.locator('optionsList-control-available-options');
-  return Number((await availableOptions.getAttribute('data-option-count')) ?? '0');
-};
-
-const getSelectionsString = async (page: ScoutPage, controlId: string) => {
-  const controlButton = page.testSubj.locator(`optionsList-control-${controlId}`);
-  const selections = controlButton.locator('[data-test-subj="optionsListSelections"]');
-  const [selectionText = ''] = await selections.allInnerTexts();
-  const buttonText = await controlButton.innerText();
-  return (selectionText || buttonText).trim();
-};
 
 spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -74,6 +41,8 @@ spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.stateful.clas
   spaceTest(
     'imports and renders controls without regressions',
     async ({ page, pageObjects, kbnClient, scoutSpace }) => {
+      const { controls } = pageObjects;
+
       await spaceTest.step('open the migrated dashboard', async () => {
         await openDashboard(page, dashboardId);
         await page.reload();
@@ -84,9 +53,9 @@ spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.stateful.clas
 
       await spaceTest.step('verify panels and controls render', async () => {
         await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
-        await expect(page.testSubj.locator('control-frame')).toHaveCount(2);
+        await expect(controls.frames).toHaveCount(2);
 
-        const controlIds = await getControlIds(page);
+        const controlIds = await controls.getControlIds();
         for (const controlId of controlIds) {
           const controlTitle = page.locator(`#control-title-${controlId}`);
           await expect(controlTitle.locator('[data-test-subj="embeddableError"]')).toHaveCount(0);
@@ -98,20 +67,20 @@ spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.stateful.clas
         const normalizedTitles = titles.map((title) => title.split('\n')[0].trim());
         expect(normalizedTitles).toStrictEqual(['Speaker Name', 'Play Name']);
 
-        const [speakerControlId, playControlId] = await getControlIds(page);
+        const [speakerControlId, playControlId] = await controls.getControlIds();
 
-        await openOptionsListPopover(page, speakerControlId);
-        await expect.poll(async () => getAvailableOptionsCount(page)).toBe(10);
-        await closeOptionsListPopover(page, speakerControlId);
+        await controls.optionsList.openPopover(speakerControlId);
+        await expect.poll(() => controls.optionsList.getAvailableOptionsCount()).toBe(10);
+        await controls.optionsList.ensurePopoverIsClosed();
 
-        await openOptionsListPopover(page, playControlId);
-        await expect.poll(async () => getAvailableOptionsCount(page)).toBe(5);
-        await closeOptionsListPopover(page, playControlId);
+        await controls.optionsList.openPopover(playControlId);
+        await expect.poll(() => controls.optionsList.getAvailableOptionsCount()).toBe(5);
+        await controls.optionsList.ensurePopoverIsClosed();
       });
 
       await spaceTest.step('verify default control selections', async () => {
-        const [speakerControlId] = await getControlIds(page);
-        const selectionString = await getSelectionsString(page, speakerControlId);
+        const [speakerControlId] = await controls.getControlIds();
+        const selectionString = await controls.optionsList.getSelectionsString(speakerControlId);
         expect(selectionString).toBe('HAMLET, ROMEO, JULIET, BRUTUS');
       });
 

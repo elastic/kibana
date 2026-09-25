@@ -25,9 +25,6 @@ export const SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH = 1024;
  * length follows the roles. UIAM signs a JWT of up to 65,536 bytes, then
  * compresses, checksums, base64-encodes and prefixes it. Incompressible input makes that ~88K
  * characters, which this cap covers with room to spare.
- *
- * The long-lived Elasticsearch token is a different shape with its own bound, in
- * {@link ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH}.
  */
 export const SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 128 * 1024;
 
@@ -52,13 +49,6 @@ export const ES_SERVICE_ACCOUNT_NAMESPACE = 'kibana';
  * from the account name alone.
  */
 export const ES_SERVICE_ACCOUNT_TOKEN_NAME = 'kibana-managed';
-
-/**
- * Cap on the length of the long-lived Elasticsearch service account token Kibana mints. The value
- * encodes the principal, the token name and a secret, so it is far shorter than this. Generous on
- * purpose, and only there to bound the validated response.
- */
-export const ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 1024;
 
 /**
  * The limits one backend puts on the roles a service account is created with. Each backend

@@ -24,7 +24,6 @@ import {
 import { EsServiceAccounts } from './es_service_accounts';
 import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH } from '../../common/service_accounts';
 import { securityTelemetry } from '../otel/instrumentation';
 
 jest.mock('../otel/instrumentation', () => ({
@@ -124,6 +123,7 @@ describe('EsServiceAccounts', () => {
     getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
 
     serviceAccounts = new EsServiceAccounts({
+      requestLifetimeMs: 600_000,
       logger,
       license,
       clusterClient,
@@ -357,6 +357,7 @@ describe('EsServiceAccounts', () => {
 
     it('rejects with a 424 when saved object encryption is unavailable', async () => {
       serviceAccounts = new EsServiceAccounts({
+        requestLifetimeMs: 600_000,
         logger,
         license,
         clusterClient,
@@ -396,21 +397,6 @@ describe('EsServiceAccounts', () => {
 
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('refuses a token longer than Elasticsearch should ever report, and rolls back', async () => {
-      esClient.asCurrentUser.transport.request
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({ created: true })
-        .mockResolvedValueOnce({
-          token: { value: 'a'.repeat(ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH + 1) },
-        });
-
-      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
-
-      expect(credentialStore.set).not.toHaveBeenCalled();
-      const calls = esClient.asCurrentUser.transport.request.mock.calls;
-      expect(calls[3][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
     });
 
     it('rolls back the token and the account when the credential cannot be stored', async () => {
@@ -1023,27 +1009,6 @@ describe('EsServiceAccounts', () => {
         output: { statusCode: 403 },
       });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('#createFakeRequest', () => {
-    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(serviceAccounts.createFakeRequest()).rejects.toMatchObject({
-        message: 'Creating requests for Elasticsearch service accounts is not yet implemented',
-        output: { statusCode: 501 },
-      });
-    });
-  });
-
-  describe('#reauthenticateFakeRequest', () => {
-    it('resolves to null so unrelated fake requests stay on the not-handled path', async () => {
-      await expect(serviceAccounts.reauthenticateFakeRequest()).resolves.toBeNull();
-    });
-  });
-
-  describe('#releaseFakeRequest', () => {
-    it('is a no-op since this backend never mints requests', () => {
-      expect(() => serviceAccounts.releaseFakeRequest()).not.toThrow();
     });
   });
 });
