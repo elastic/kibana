@@ -23,6 +23,7 @@ export const buildScheduledActionResultsQuery = ({
   pagination,
   integrationNamespaces,
   ccsEnabled,
+  matchMissingSpaceId,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
   // Top-level hit scoping is enforced centrally in the search strategy
   // (enforceSpaceScope). The aggregation below is a separate filter context that

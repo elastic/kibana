@@ -114,133 +114,156 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             activeSpace: from(Promise.resolve(osqueryContext.service.getActiveSpace(deps.request))),
           });
         }),
-        mergeMap(({ actionsIndexExists, newDataStreamIndexExists, ccsEnabled, activeSpace }) => {
-          const strictRequest = {
-            factoryQueryType: request.factoryQueryType,
-            kuery: request.kuery,
-            ...('pagination' in request ? { pagination: request.pagination } : {}),
-            ...('sort' in request ? { sort: request.sort } : {}),
-            ...('actionId' in request ? { actionId: request.actionId } : {}),
-            ...('startDate' in request ? { startDate: request.startDate } : {}),
-            ...('agentId' in request ? { agentId: request.agentId } : {}),
-            ...('agentIds' in request ? { agentIds: request.agentIds } : {}),
-            ...('policyIds' in request ? { policyIds: request.policyIds } : {}),
-            ...('integrationNamespaces' in request
-              ? { integrationNamespaces: request.integrationNamespaces }
-              : {}),
-            ...('scheduleId' in request ? { scheduleId: request.scheduleId } : {}),
-            ...('executionCount' in request ? { executionCount: request.executionCount } : {}),
-            ...('esFilters' in request ? { esFilters: request.esFilters } : {}),
-            // exportResults factory fields — baseFilter is required and unique to this
-            // factory type, so its presence is a reliable discriminator for all six fields.
-            ...('baseFilter' in request
-              ? {
-                  baseFilter: request.baseFilter,
-                  pit: 'pit' in request ? request.pit : undefined,
-                  searchAfter: 'searchAfter' in request ? request.searchAfter : undefined,
-                  size: 'size' in request ? request.size : undefined,
-                  ecsMapping: 'ecsMapping' in request ? request.ecsMapping : undefined,
-                  trackTotalHits: 'trackTotalHits' in request ? request.trackTotalHits : undefined,
-                }
-              : {}),
-          } as StrategyRequestType<T>;
+        mergeMap(
+          ({ actionsIndexExists, newDataStreamIndexExists, ccsEnabled, activeSpace }) => {
+            // Single decision for hit-level enforceSpaceScope and for any
+            // global-agg builder that cannot inherit the top-level query.
+            const matchActionDataSpaceId =
+              ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType) &&
+              !isScheduleBoundRequest(request);
 
-          const spaceId = activeSpace?.id ?? DEFAULT_SPACE_ID;
+            const strictRequest = {
+              factoryQueryType,
+              kuery: request.kuery,
+              ...('pagination' in request ? { pagination: request.pagination } : {}),
+              ...('sort' in request ? { sort: request.sort } : {}),
+              ...('actionId' in request ? { actionId: request.actionId } : {}),
+              ...('startDate' in request ? { startDate: request.startDate } : {}),
+              ...('agentId' in request ? { agentId: request.agentId } : {}),
+              ...('agentIds' in request ? { agentIds: request.agentIds } : {}),
+              ...('policyIds' in request ? { policyIds: request.policyIds } : {}),
+              ...('integrationNamespaces' in request
+                ? { integrationNamespaces: request.integrationNamespaces }
+                : {}),
+              ...('scheduleId' in request ? { scheduleId: request.scheduleId } : {}),
+              ...('executionCount' in request ? { executionCount: request.executionCount } : {}),
+              ...('esFilters' in request ? { esFilters: request.esFilters } : {}),
+              ...('matchMissingSpaceId' in request
+                ? { matchMissingSpaceId: request.matchMissingSpaceId }
+                : {}),
+              // exportResults factory fields — baseFilter is required and unique to this
+              // factory type, so its presence is a reliable discriminator for all six fields.
+              ...('baseFilter' in request
+                ? {
+                    baseFilter: request.baseFilter,
+                    pit: 'pit' in request ? request.pit : undefined,
+                    searchAfter: 'searchAfter' in request ? request.searchAfter : undefined,
+                    size: 'size' in request ? request.size : undefined,
+                    ecsMapping: 'ecsMapping' in request ? request.ecsMapping : undefined,
+                    trackTotalHits:
+                      'trackTotalHits' in request ? request.trackTotalHits : undefined,
+                  }
+                : {}),
+            } as StrategyRequestType<T>;
 
-          const dsl = enforceSpaceScope(
-            queryFactory.buildDsl({
+            const spaceId = activeSpace?.id ?? DEFAULT_SPACE_ID;
+
+            const spaceScopeOptions = {
+              ...('matchMissingSpaceId' in request && request.matchMissingSpaceId !== undefined
+                ? { matchMissingSpaceId: request.matchMissingSpaceId }
+                : {}),
+              matchActionDataSpaceId,
+            };
+
+            const factoryRequest = {
               ...strictRequest,
               spaceId,
               componentTemplateExists: actionsIndexExists,
               ccsEnabled,
-            } as StrategyRequestType<T>),
-            spaceId
-          );
+              matchActionDataSpaceId,
+            } as OsqueryFactoryRequest<T>;
 
-          // Select internal client for all osquery indices that require it.
-          // The 'osquery_manager' substring matches both local and CCS-prefixed patterns
-          // (e.g. '*:logs-osquery_manager.action...').
-          const indices = Array.isArray(dsl.index) ? dsl.index : dsl.index ? [dsl.index] : [];
-          es = indices.some((index) => index.includes('fleet') || index.includes('osquery_manager'))
-            ? data.search.searchAsInternalUser
-            : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+            const dsl = enforceSpaceScope(
+              queryFactory.buildDsl(factoryRequest),
+              spaceId,
+              spaceScopeOptions
+            );
 
-          // When a PIT is present ES rejects requests that also specify `index`,
-          // `allow_no_indices`, or `ignore_unavailable` (the PIT already encodes
-          // the index scope). Strip those fields from the params before the call
-          // while keeping `dsl.index` above for client-selection routing.
-          const esParams = dsl.pit
-            ? {
-                ...dsl,
-                index: undefined,
-                allow_no_indices: undefined,
-                ignore_unavailable: undefined,
-              }
-            : dsl;
+            // Select internal client for all osquery indices that require it.
+            // The 'osquery_manager' substring matches both local and CCS-prefixed patterns
+            // (e.g. '*:logs-osquery_manager.action...').
+            const indices = Array.isArray(dsl.index) ? dsl.index : dsl.index ? [dsl.index] : [];
+            es = indices.some(
+              (index) => index.includes('fleet') || index.includes('osquery_manager')
+            )
+              ? data.search.searchAsInternalUser
+              : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
-          const searchLegacyIndex$ = es.search(
-            {
-              ...strictRequest,
-              params: esParams,
-            },
-            options,
-            deps
-          );
+            // When a PIT is present ES rejects requests that also specify `index`,
+            // `allow_no_indices`, or `ignore_unavailable` (the PIT already encodes
+            // the index scope). Strip those fields from the params before the call
+            // while keeping `dsl.index` above for client-selection routing.
+            const esParams = dsl.pit
+              ? {
+                  ...dsl,
+                  index: undefined,
+                  allow_no_indices: undefined,
+                  ignore_unavailable: undefined,
+                }
+              : dsl;
 
-          // With the introduction of a new DS that sends data directly from an agent into the new index
-          // logs-osquery_manager.action.responses-default, instead of the old index .logs-osquery_manager.action.responses-default
-          // which was populated by a transform, we now need to check both places for results.
-          // The new index was introduced in integration package 1.12, so users running earlier versions won't have it.
-
-          return searchLegacyIndex$.pipe(
-            mergeMap((legacyIndexResponse) => {
-              if (
-                request.factoryQueryType === OsqueryQueries.actionResults &&
-                (newDataStreamIndexExists || ccsEnabled)
-              ) {
-                const dataStreamDsl = enforceSpaceScope(
-                  queryFactory.buildDsl({
-                    ...strictRequest,
-                    spaceId,
-                    componentTemplateExists: actionsIndexExists,
-                    ccsEnabled,
-                    useNewDataStream: true,
-                  } as StrategyRequestType<T>),
-                  spaceId
-                );
-
-                return from(
-                  es.search(
-                    {
-                      ...strictRequest,
-                      params: dataStreamDsl,
-                    },
-                    options,
-                    deps
-                  )
-                ).pipe(
-                  map((newDataStreamIndexResponse) => {
-                    if (newDataStreamIndexResponse.rawResponse.hits.total) {
-                      return newDataStreamIndexResponse;
-                    }
-
-                    return legacyIndexResponse;
-                  })
-                );
-              }
-
-              return of(legacyIndexResponse);
-            }),
-            map((response) => ({
-              ...response,
-              ...{
-                rawResponse: shimHitsTotal(response.rawResponse, options),
+            const searchLegacyIndex$ = es.search(
+              {
+                ...strictRequest,
+                params: esParams,
               },
-              total: response.rawResponse.hits.total as number,
-            })),
-            mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
-          );
-        })
+              options,
+              deps
+            );
+
+            // With the introduction of a new DS that sends data directly from an agent into the new index
+            // logs-osquery_manager.action.responses-default, instead of the old index .logs-osquery_manager.action.responses-default
+            // which was populated by a transform, we now need to check both places for results.
+            // The new index was introduced in integration package 1.12, so users running earlier versions won't have it.
+
+            return searchLegacyIndex$.pipe(
+              mergeMap((legacyIndexResponse) => {
+                if (
+                  factoryQueryType === OsqueryQueries.actionResults &&
+                  (newDataStreamIndexExists || ccsEnabled)
+                ) {
+                  const dataStreamDsl = enforceSpaceScope(
+                    queryFactory.buildDsl({
+                      ...factoryRequest,
+                      useNewDataStream: true,
+                    } as OsqueryFactoryRequest<T>),
+                    spaceId,
+                    spaceScopeOptions
+                  );
+
+                  return from(
+                    es.search(
+                      {
+                        ...strictRequest,
+                        params: dataStreamDsl,
+                      },
+                      options,
+                      deps
+                    )
+                  ).pipe(
+                    map((newDataStreamIndexResponse) => {
+                      if (newDataStreamIndexResponse.rawResponse.hits.total) {
+                        return newDataStreamIndexResponse;
+                      }
+
+                      return legacyIndexResponse;
+                    })
+                  );
+                }
+
+                return of(legacyIndexResponse);
+              }),
+              map((response) => ({
+                ...response,
+                ...{
+                  rawResponse: shimHitsTotal(response.rawResponse, options),
+                },
+                total: response.rawResponse.hits.total as number,
+              })),
+              mergeMap((esSearchRes) => queryFactory.parse(factoryRequest, esSearchRes))
+            );
+          }
+        )
       );
     },
     cancel: async (id, options, deps) => {
