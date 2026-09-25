@@ -41,8 +41,9 @@ import type {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './types';
-import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { pollEsNodesVersion } from './version_check/ensure_es_version';
+import type { NodesVersionCompatibility } from './version_check/nodes_version_compatibility';
+import { pollEsNodesVersion } from './version_check/nodes_version_rxjs';
+import { pollEsNodesClockSkew } from './version_check/clock_skew';
 import { calculateStatus$ } from './status';
 import { isValidConnection } from './is_valid_connection';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
@@ -145,6 +146,14 @@ export class ElasticsearchService
         this.log.error(message);
       }
     });
+
+    const clockSkewLifetime = new AbortController();
+    this.stop$.subscribe(() => clockSkewLifetime.abort());
+    pollEsNodesClockSkew({
+      log: this.log,
+      internalClient: this.client.asInternalUser,
+      signal: clockSkewLifetime.signal,
+    }).catch((error) => this.log.error(error));
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
 

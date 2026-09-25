@@ -12,17 +12,17 @@ export { config, configSchema, ElasticsearchConfig } from './src/elasticsearch_c
 export type { ElasticsearchConfigType } from './src/elasticsearch_config';
 export type {
   NodesVersionCompatibility,
-  PollEsNodesVersionOptions,
   NodesInfo,
   NodeInfo,
-} from './src/version_check/ensure_es_version';
+} from './src/version_check/nodes_version_compatibility';
+export type { PollEsNodesVersionOptions } from './src/version_check/nodes_version_rxjs';
 export type {
   ElasticsearchStatusMeta,
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './src/types';
-export { pollEsNodesVersion } from './src/version_check/ensure_es_version';
+export { pollEsNodesVersion } from './src/version_check/nodes_version_rxjs';
 export {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,

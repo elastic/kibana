@@ -15,8 +15,12 @@ jest.mock('./is_valid_connection', () => ({
 }));
 
 // Mocking this module to force different statuses to help with the unit tests
-jest.mock('./version_check/ensure_es_version', () => ({
+jest.mock('./version_check/nodes_version_rxjs', () => ({
   pollEsNodesVersion: jest.fn(),
+}));
+
+jest.mock('./version_check/clock_skew', () => ({
+  pollEsNodesClockSkew: jest.fn(() => new Promise(() => {})),
 }));
 
 import {
@@ -25,7 +29,7 @@ import {
   getClusterInfoMock,
 } from './elasticsearch_service.test.mocks';
 
-import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import type { NodesVersionCompatibility } from './version_check/nodes_version_compatibility';
 import { BehaviorSubject, firstValueFrom, of, throwError } from 'rxjs';
 import { first, concatMap } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -42,16 +46,28 @@ import type { SetupDeps } from './elasticsearch_service';
 import { ElasticsearchService } from './elasticsearch_service';
 import { duration } from 'moment';
 import { isValidConnection } from './is_valid_connection';
-import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
+import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/nodes_version_rxjs';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
-  './version_check/ensure_es_version'
+  './version_check/nodes_version_rxjs'
 );
 
 const isValidConnectionMock = isValidConnection as jest.Mock;
 
 const TICK = 10;
 const tick = (ticks = 1) => jest.advanceTimersByTime(TICK * ticks);
+const sleepWithFakeTimers = (durationMs: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, durationMs);
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        reject(new Error('aborted'));
+      },
+      { once: true }
+    );
+  });
 
 const configService = configServiceMock.create();
 
@@ -107,7 +123,9 @@ beforeEach(() => {
   getClusterInfoMock.mockReturnValue(of({ cluster_uuid: 'test-cluster-uuid' }));
 
   // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
-  pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
+  pollEsNodesVersionMocked.mockImplementation((options) =>
+    pollEsNodesVersionActual(options, { now: () => performance.now(), sleep: sleepWithFakeTimers })
+  );
 });
 
 afterEach(async () => {
@@ -242,10 +260,14 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
+    // The machine yields its initial state before its first request, so the
+    // request lands a microtask after subscription rather than synchronously.
+    await jest.advanceTimersByTimeAsync(0);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
-    tick();
+    await jest.advanceTimersByTimeAsync(0);
+    await jest.advanceTimersByTimeAsync(TICK);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
@@ -260,12 +282,16 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
+    // The machine yields its initial state before its first request, so the
+    // request lands a microtask after subscription rather than synchronously.
+    await jest.advanceTimersByTimeAsync(0);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
     await firstValueFrom(setupContract.esNodesCompatibility$);
 
-    tick();
+    await jest.advanceTimersByTimeAsync(0);
+    await jest.advanceTimersByTimeAsync(TICK);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
   });
@@ -520,11 +546,12 @@ describe('#stop', () => {
       setupContract.esNodesCompatibility$.pipe(
         concatMap(async () => {
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-          tick();
+          await jest.advanceTimersByTimeAsync(0);
+          await jest.advanceTimersByTimeAsync(TICK);
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
           await elasticsearchService.stop();
-          tick(10);
+          await jest.advanceTimersByTimeAsync(TICK * 10);
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
         })
       )
