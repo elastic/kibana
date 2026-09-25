@@ -35,16 +35,25 @@ export const GetEvaluationExperimentRunsRequestQuery = lazySchema(() =>
     /**
      * Filter by suite ID
      */
-    suite_id: z.string().max(256).optional(),
+    suite_id: z.string().max(256).optional().describe('Filter by suite ID'),
     /**
      * Filter by task model ID
      */
-    model_id: z.string().max(256).optional(),
+    model_id: z.string().max(256).optional().describe('Filter by task model ID'),
     page: z.coerce.number().int().min(1).optional().default(1),
     /**
      * Runs per page. Bounded because each run carries its full task output and example input.
      */
-    per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(20)
+      .describe(
+        'Runs per page. Bounded because each run carries its full task output and example input.'
+      ),
   })
 );
 export type GetEvaluationExperimentRunsRequestQuery = z.infer<
@@ -73,7 +82,12 @@ export const GetEvaluationExperimentRunsResponse = lazySchema(() =>
     /**
      * Total distinct runs the experiment produced, capped at 10000 (the same ceiling the score retrieval endpoints apply to score documents).
      */
-    total: z.number().int(),
+    total: z
+      .number()
+      .int()
+      .describe(
+        'Total distinct runs the experiment produced, capped at 10000 (the same ceiling the score retrieval endpoints apply to score documents).'
+      ),
     page: z.number().int(),
     per_page: z.number().int(),
   })

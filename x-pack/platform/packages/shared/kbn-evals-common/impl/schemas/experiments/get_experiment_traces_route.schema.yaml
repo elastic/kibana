@@ -43,10 +43,12 @@ paths:
           required: false
           schema:
             type: string
+            minLength: 1
             maxLength: 256
           description: >-
             Restrict evaluator traces to this evaluator name. Only valid
-            together with role=evaluator.
+            together with role=evaluator; an empty name is rejected rather
+            than silently matching every evaluator.
         - name: page
           in: query
           required: false

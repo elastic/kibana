@@ -547,6 +547,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(400);
       });
 
+      it('rejects an empty evaluator name instead of matching every evaluator', async () => {
+        await adminClient
+          .get(tracesPath(tracedExperimentId))
+          .query({ role: 'evaluator', evaluator: '' })
+          .expect(400);
+      });
+
       it('returns 404 for an unknown experiment or evaluator', async () => {
         await adminClient.get(tracesPath(`missing-${suiteId}`)).expect(404);
         await adminClient

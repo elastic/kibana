@@ -38,16 +38,37 @@ export const GetEvaluationExperimentTracesRequestQuery = lazySchema(() =>
     /**
      * Return only task traces or only evaluator traces. When omitted, traces of both roles are returned, task traces first.
      */
-    role: z.enum(['task', 'evaluator']).optional(),
+    role: z
+      .enum(['task', 'evaluator'])
+      .optional()
+      .describe(
+        'Return only task traces or only evaluator traces. When omitted, traces of both roles are returned, task traces first.'
+      ),
     /**
-     * Restrict evaluator traces to this evaluator name. Only valid together with role=evaluator.
+     * Restrict evaluator traces to this evaluator name. Only valid together with role=evaluator; an empty name is rejected rather than silently matching every evaluator.
      */
-    evaluator: z.string().max(256).optional(),
+    evaluator: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe(
+        'Restrict evaluator traces to this evaluator name. Only valid together with role=evaluator; an empty name is rejected rather than silently matching every evaluator.'
+      ),
     page: z.coerce.number().int().min(1).optional().default(1),
     /**
      * Traces per page. Bounded tighter than the runs endpoint because each trace carries all of its spans.
      */
-    per_page: z.coerce.number().int().min(1).max(50).optional().default(10),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(50)
+      .optional()
+      .default(10)
+      .describe(
+        'Traces per page. Bounded tighter than the runs endpoint because each trace carries all of its spans.'
+      ),
   })
 );
 export type GetEvaluationExperimentTracesRequestQuery = z.infer<
@@ -76,7 +97,12 @@ export const GetEvaluationExperimentTracesResponse = lazySchema(() =>
     /**
      * Total distinct traces the experiment's score documents reference, capped at 10000 per role (the same ceiling the score retrieval endpoints apply to score documents).
      */
-    total: z.number().int(),
+    total: z
+      .number()
+      .int()
+      .describe(
+        "Total distinct traces the experiment's score documents reference, capped at 10000 per role (the same ceiling the score retrieval endpoints apply to score documents)."
+      ),
     page: z.number().int(),
     per_page: z.number().int(),
   })
