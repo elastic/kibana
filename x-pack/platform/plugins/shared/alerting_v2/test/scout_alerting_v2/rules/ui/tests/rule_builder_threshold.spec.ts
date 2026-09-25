@@ -204,6 +204,10 @@ test.describe(
       pageObjects,
     }) => {
       await test.step('login as viewer', async () => {
+        // beforeEach leaves the rules app open as the editor. Replacing the
+        // session cookie in place makes that page redirect on the next 401,
+        // which aborts the following goto (net::ERR_ABORTED).
+        await page.goto('about:blank');
         await browserAuth.loginAsAlertingV2Viewer();
         await pageObjects.rulesList.goto();
         await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
