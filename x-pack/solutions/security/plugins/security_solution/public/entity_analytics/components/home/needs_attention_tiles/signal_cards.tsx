@@ -39,25 +39,38 @@ const DIMMED_OPACITY = 0.7;
 
 /** v.5 title overrides (tooltip uses the same string). */
 const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
-  entitiesWithAlerts: 'Entities with alerts',
-  entitiesWithAnomalies: 'Entities with anomalies',
-  riskMovers: 'Risk movers',
-  newlyHighCritical: 'Newly high/critical',
-  watchlisted: 'Watchlisted',
-  newEntity: 'New entity',
+  entitiesWithAlerts: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCards.entitiesWithAlerts',
+    { defaultMessage: 'Entities with alerts' }
+  ),
+  entitiesWithAnomalies: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCards.entitiesWithAnomalies',
+    { defaultMessage: 'Entities with anomalies' }
+  ),
+  riskMovers: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCards.riskMovers',
+    { defaultMessage: 'Risk movers' }
+  ),
+  newlyHighCritical: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCards.newlyHighCritical',
+    { defaultMessage: 'Newly high/critical' }
+  ),
+  watchlisted: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCards.watchlisted',
+    { defaultMessage: 'Watchlisted' }
+  ),
+  newEntity: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCards.newEntity',
+    { defaultMessage: 'New entity' }
+  ),
 };
 
-/** v.5 subtitle / description overrides (shared mock corpus stays unchanged). */
-const V5_CARD_DESCRIPTIONS: Partial<Record<SignalCardId, string>> = {
-  entitiesWithAlerts: 'Entities with at least one alert in the last 24h',
-  entitiesWithAnomalies: 'Entities with at least one ML anomaly in the last 24h',
-  // riskMovers, newlyHighCritical, watchlisted, newEntity descriptions are dynamic — driven by the selected time range from the page
-};
+// All descriptions are dynamic — driven by the selected time range from the page.
+// Do not add static overrides here; use i18n.translate in the page's signalCards config instead.
 
 const displayTitleFor = (card: SignalCardData): string => V3_CARD_TITLES[card.id] ?? card.title;
 
-const displayDescriptionFor = (card: SignalCardData): string =>
-  V5_CARD_DESCRIPTIONS[card.id] ?? card.description;
+const displayDescriptionFor = (card: SignalCardData): string => card.description;
 
 const filterTableTooltip = (title: string) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCards.filterTableTooltip', {
@@ -217,7 +230,20 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
       tabIndex={interactive ? 0 : -1}
       aria-pressed={interactive ? selected : undefined}
       aria-disabled={isZero || undefined}
-      aria-label={displayTitle}
+      aria-label={
+        isLoading
+          ? i18n.translate(
+              'xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelLoading',
+              { defaultMessage: '{title}: loading', values: { title: displayTitle } }
+            )
+          : i18n.translate(
+              'xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelCount',
+              {
+                defaultMessage: '{title}: {count}',
+                values: { title: displayTitle, count: isZero ? 0 : card.value },
+              }
+            )
+      }
       data-test-subj={`eaFaceliftSignalCard-${card.id}`}
       onClick={interactive ? onToggle : undefined}
       onKeyDown={onKeyDown}
@@ -423,13 +449,13 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
         paddingSize="none"
         data-test-subj="eaFaceliftSignalCards"
         css={css`
-          overflow: hidden;
+          overflow-x: auto;
         `}
       >
         <div
           css={css`
             display: grid;
-            grid-template-columns: repeat(${columns}, minmax(0, 1fr));
+            grid-template-columns: repeat(${columns}, minmax(140px, 1fr));
             gap: ${euiTheme.size.s};
             block-size: 100%;
           `}
