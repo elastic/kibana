@@ -17,6 +17,7 @@ import {
   checkInvestigationFieldSoValue,
   combineToNdJson,
   getCustomQueryRuleParams,
+  getMLRuleParams,
 } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -110,6 +111,80 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(403);
 
         await detectionsApi.readRule({ query: { rule_id: 'rbac-import-denied' } }).expect(404);
+      });
+
+      it('returns 403 when overwriting as a user without rules write privilege', async () => {
+        const existing = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rbac-overwrite-denied',
+            name: 'Before denied overwrite',
+            enabled: false,
+          })
+        );
+        const ndjson = combineToNdJson(
+          getCustomQueryRuleParams({
+            rule_id: 'rbac-overwrite-denied',
+            name: 'After denied overwrite',
+            enabled: false,
+          })
+        );
+
+        await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true`)
+          .auth(ROLES.t1_analyst, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(403);
+
+        const { body } = await detectionsApi
+          .readRule({ query: { rule_id: 'rbac-overwrite-denied' } })
+          .expect(200);
+
+        expect(body.id).toBe(existing.id);
+        expect(body.name).toBe('Before denied overwrite');
+        expect(body.revision).toBe(existing.revision);
+      });
+
+      it('returns a per-rule error when the user is not an ML admin', async () => {
+        const ndjson = combineToNdJson(
+          getMLRuleParams({
+            rule_id: 'ml-authz-denied',
+            enabled: false,
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'query-ok',
+            enabled: false,
+          })
+        );
+
+        const { body } = await supertestWithoutAuth
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
+          .auth(ROLES.hunter, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).toMatchObject({
+          success: false,
+          success_count: 1,
+          rules_count: 2,
+          errors: [
+            {
+              error: {
+                message: 'The current user is not a machine learning administrator.',
+                status_code: 400,
+              },
+              rule_id: 'ml-authz-denied',
+            },
+          ],
+        });
+
+        await detectionsApi.readRule({ query: { rule_id: 'ml-authz-denied' } }).expect(404);
+        await detectionsApi.readRule({ query: { rule_id: 'query-ok' } }).expect(200);
       });
 
       it('should successfully import rules without actions when user has no actions privileges', async () => {

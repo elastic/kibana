@@ -35,13 +35,10 @@ export async function createNewAPIKeySet(
   let isAuthTypeApiKey = false;
   try {
     const name = generateAPIKeyName(id, ruleName);
-    const resolved = await resolveRuleAPIKey(
-      context,
-      name,
-      shouldUpdateApiKey,
+    const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey, {
       apiKeyOwnership,
-      refresh
-    );
+      refresh,
+    });
     createdAPIKey = resolved.createdAPIKey;
     isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
