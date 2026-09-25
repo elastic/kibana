@@ -29,6 +29,11 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { agentIdCondition, assignAgentById } from './assign_by_condition';
 import { PackagePolicyService } from './package_policy_service';
 import * as getPrivateLocationsModule from '../get_private_locations';
+import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
+
+jest.mock('../../tasks/clean_up_package_policies_task', () => ({
+  scheduleTestNowCleanUp: jest.fn(),
+}));
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
@@ -1303,6 +1308,58 @@ describe('SyntheticsPrivateLocation', () => {
       );
 
       expect(policy?.name).toBe(expectedName);
+    });
+  });
+
+  describe('Test Now clean up', () => {
+    const makePrivateLocation = () =>
+      new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents: jest.fn() } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+
+    beforeEach(() => {
+      (scheduleTestNowCleanUp as jest.Mock).mockClear();
+    });
+
+    it('hands the run-once policies it created to the Test Now clean up', async () => {
+      const created = [{ id: 'tn-1', name: BROWSER_TEST_NOW_RUN }];
+      jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({ created, failed: [] } as any);
+
+      await makePrivateLocation().createPackagePolicies(
+        [{ config: testConfig, globalParams: {} }],
+        [mockPrivateLocation],
+        'default',
+        [],
+        'test-run-id',
+        true
+      );
+
+      expect(scheduleTestNowCleanUp).toHaveBeenCalledWith(expect.anything(), created);
+    });
+
+    it('does not schedule a Test Now clean up for a regular monitor create', async () => {
+      jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({ created: [{ id: 'm1-loc1' }], failed: [] } as any);
+
+      await makePrivateLocation().createPackagePolicies(
+        [{ config: testConfig, globalParams: {} }],
+        [mockPrivateLocation],
+        'default',
+        []
+      );
+
+      expect(scheduleTestNowCleanUp).not.toHaveBeenCalled();
     });
   });
 

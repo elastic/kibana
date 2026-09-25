@@ -22,7 +22,7 @@ import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
-import { scheduleCleanUpTask } from './clean_up_task';
+import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import type {
@@ -446,7 +446,7 @@ export class SyntheticsPrivateLocation {
       });
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
-        void scheduleCleanUpTask(this.server);
+        void scheduleTestNowCleanUp(this.server, result.created);
       }
       return result;
     } catch (e) {
