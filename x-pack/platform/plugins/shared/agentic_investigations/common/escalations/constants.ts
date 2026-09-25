@@ -16,6 +16,10 @@ export const ESCALATIONS_SUGGEST_USERS_URL =
 /** URL for the per-escalation assignment route. */
 export const ESCALATION_ASSIGN_URL = `${ESCALATION_BY_ID_URL}/assignees` as const;
 
+/** URL for fetching the linked investigations of a single escalation. */
+export const ESCALATION_LINKED_INVESTIGATIONS_URL =
+  `${ESCALATION_BY_ID_URL}/linked_investigations` as const;
+
 /** Template ids. Owned by agent_builder_platform; referenced here for guard checks. */
 export const ESCALATION_TEMPLATE_ID = 'escalation' as const;
 export const INVESTIGATION_TEMPLATE_ID = 'investigation' as const;
@@ -60,3 +64,7 @@ export const ESCALATIONS_UI_CAPABILITY_MANAGE = 'manageEscalations' as const;
  */
 export const MAX_ESCALATIONS_PAGE_SIZE = 50;
 export const MAX_ESCALATIONS_RESULT_WINDOW = 10_000;
+
+export const ESCALATION_STATUS_URL = `${ESCALATIONS_INTERNAL_URL}/{id}/status` as const;
+export const ESCALATION_CLOSE_PREVIEW_URL =
+  `${ESCALATIONS_INTERNAL_URL}/{id}/_close_preview` as const;

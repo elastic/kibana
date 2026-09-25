@@ -375,6 +375,20 @@ export interface ProposalChartsSummaryResponse {
 export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'pending';
 
+/**
+ * Approved, but the action it triggers has not finished running yet — `executing`, or briefly
+ * still `pending` while the gate workflow's post-gate write is catching up with an approve call
+ * that already returned. Declining has no action to run, so a decline never reads this; it
+ * settles as soon as it is decided.
+ *
+ * Meant for a query's own `refetchInterval`: while true, the proposal is worth re-checking on a
+ * short cadence, since whatever shows it (a badge, a modal) is actively watching for the moment
+ * it finishes.
+ */
+export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status'>): boolean =>
+  proposal.decision === 'approved' &&
+  (proposal.status === 'pending' || proposal.status === 'executing');
+
 export const isExpired = (proposal: Pick<Proposal, 'expiresAt'>, now = Date.now()): boolean => {
   if (!proposal.expiresAt) {
     return false;

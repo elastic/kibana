@@ -25,6 +25,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { agentIdCondition, assignAgentById } from './assign_by_condition';
 import { PackagePolicyService } from './package_policy_service';
 import * as getPrivateLocationsModule from '../get_private_locations';
@@ -63,6 +64,12 @@ describe('SyntheticsPrivateLocation', () => {
   } as unknown as HeartbeatConfig;
   const mockBuildPackagePolicy = jest.fn().mockReturnValue(undefined);
 
+  const enterpriseLicensing = {
+    getLicense: jest
+      .fn()
+      .mockResolvedValue(licenseMock.createLicense({ license: { type: 'enterprise' } })),
+  };
+
   const serverMock: SyntheticsServerSetup = {
     syntheticsEsClient: { search: jest.fn() },
     logger: loggerMock.create(),
@@ -92,6 +99,7 @@ describe('SyntheticsPrivateLocation', () => {
       savedObjects: savedObjectsServiceMock.createStartContract(),
       elasticsearch: elasticsearchServiceMock.createStart(),
     },
+    pluginsStart: { licensing: enterpriseLicensing },
   } as unknown as SyntheticsServerSetup;
   beforeEach(() => {
     mockBuildPackagePolicy.mockReturnValue(undefined);
@@ -475,7 +483,6 @@ describe('SyntheticsPrivateLocation', () => {
       label: 'Condition location',
       agentPolicyId: 'single-agent-policy',
       isServiceManaged: false,
-      isAgentSharding: true,
     } as unknown as PrivateLocationAttributes;
 
     afterEach(() => {
@@ -495,7 +502,9 @@ describe('SyntheticsPrivateLocation', () => {
         [],
         undefined,
         undefined,
-        { agentIds }
+        { agentIds },
+        undefined,
+        'active'
       );
 
       expect(policy?.policy_id).toBe('single-agent-policy');
@@ -520,7 +529,8 @@ describe('SyntheticsPrivateLocation', () => {
         undefined,
         undefined,
         { agentIds },
-        existingCondition
+        existingCondition,
+        'active'
       );
 
       expect(policy?.condition).toBe(existingCondition);
@@ -540,10 +550,76 @@ describe('SyntheticsPrivateLocation', () => {
         undefined,
         undefined,
         { agentIds },
-        agentIdCondition('departed-agent')
+        agentIdCondition('departed-agent'),
+        'active'
       );
 
       expect(policy?.condition).toBe(assignAgentById(testConfig.id, agentIds)?.condition);
+    });
+
+    it.each([
+      ['keeps', agentIdCondition('agent-b'), agentIdCondition('agent-b')],
+      ['does not add', undefined, undefined],
+    ])('%s a pin while the license cannot be read', async (_label, existingCondition, expected) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        undefined,
+        existingCondition,
+        'unknown'
+      );
+
+      expect(policy?.condition).toBe(expected);
+    });
+
+    it('keeps existing pins on edit without listing agents while the license cannot be read', async () => {
+      const policyId = `testId-${conditionLocation.id}`;
+      const existingCondition = agentIdCondition('agent-a');
+      const listAgents = jest.fn();
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          licensing: { getLicense: jest.fn().mockRejectedValue(new Error('es unavailable')) },
+        },
+      } as unknown as SyntheticsServerSetup);
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: [{ id: policyId, condition: existingCondition }],
+        allSpaces: new Set(['default']),
+      });
+      const bulkUpdate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdate')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkDelete').mockResolvedValue(undefined);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config: { ...testConfig, locations: [conditionLocation] }, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      expect(bulkUpdate.mock.calls[0][0].policiesToUpdate[0].condition).toBe(existingCondition);
+      expect(listAgents).not.toHaveBeenCalled();
     });
 
     it('omits condition when no agent is enrolled instead of stamping a sentinel pin', async () => {
@@ -578,7 +654,7 @@ describe('SyntheticsPrivateLocation', () => {
         undefined,
         { agentIds: ['agent-a', 'agent-b'] },
         undefined,
-        false
+        'inactive'
       );
 
       expect(policy?.condition).toBeUndefined();
@@ -599,7 +675,7 @@ describe('SyntheticsPrivateLocation', () => {
         undefined,
         { agentIds: ['agent-a', 'agent-b'] },
         existingCondition,
-        false
+        'inactive'
       );
 
       expect(policy?.condition).toBeNull();
@@ -642,7 +718,7 @@ describe('SyntheticsPrivateLocation', () => {
       expect(policy?.condition).toBeNull();
     });
 
-    it('clears existing agent conditions when editing monitors on a location that is no longer sharded', async () => {
+    it('clears existing agent conditions when editing monitors without an Enterprise license', async () => {
       const policyId = 'testId-policyId';
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
@@ -651,6 +727,13 @@ describe('SyntheticsPrivateLocation', () => {
           packagePolicyService: {
             ...serverMock.fleet.packagePolicyService,
             buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          licensing: {
+            getLicense: jest
+              .fn()
+              .mockResolvedValue(licenseMock.createLicense({ license: { type: 'platinum' } })),
           },
         },
       } as unknown as SyntheticsServerSetup);
@@ -787,6 +870,7 @@ describe('SyntheticsPrivateLocation', () => {
           },
         },
         pluginsStart: {
+          licensing: enterpriseLicensing,
           taskManager: {
             get: jest.fn().mockResolvedValue({
               state: { rebalancePrivateLocationShardsEnabled: false },
@@ -839,6 +923,7 @@ describe('SyntheticsPrivateLocation', () => {
           },
         },
         pluginsStart: {
+          licensing: enterpriseLicensing,
           taskManager: {
             get: jest.fn().mockResolvedValue({
               state: { rebalancePrivateLocationShardsEnabled: false },
@@ -885,6 +970,7 @@ describe('SyntheticsPrivateLocation', () => {
           },
         },
         pluginsStart: {
+          licensing: enterpriseLicensing,
           taskManager: {
             get: jest.fn().mockResolvedValue({
               state: { rebalancePrivateLocationShardsEnabled: false },
@@ -927,17 +1013,17 @@ describe('SyntheticsPrivateLocation', () => {
           agentService: { asInternalUser: { listAgents } },
         },
       } as unknown as SyntheticsServerSetup);
-      const getScalableAgentsByLocation = (
+      const getEnrolledAgentsByLocation = (
         syntheticsPrivateLocation as unknown as {
-          getScalableAgentsByLocation: (
-            locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
+          getEnrolledAgentsByLocation: (
+            locations: Array<{ id: string; agentPolicyId: string }>
           ) => Promise<Map<string, { agentIds: string[] }>>;
         }
-      ).getScalableAgentsByLocation.bind(syntheticsPrivateLocation);
+      ).getEnrolledAgentsByLocation.bind(syntheticsPrivateLocation);
 
-      const result = await getScalableAgentsByLocation([
-        { id: 'condition-location', agentPolicyId: 'single-agent-policy', isAgentSharding: true },
-        { id: 'condition-location', agentPolicyId: 'single-agent-policy', isAgentSharding: true },
+      const result = await getEnrolledAgentsByLocation([
+        { id: 'condition-location', agentPolicyId: 'single-agent-policy' },
+        { id: 'condition-location', agentPolicyId: 'single-agent-policy' },
       ]);
 
       expect(listAgents).toHaveBeenCalledTimes(2);
@@ -955,19 +1041,18 @@ describe('SyntheticsPrivateLocation', () => {
           agentService: { asInternalUser: { listAgents } },
         },
       } as unknown as SyntheticsServerSetup);
-      const getScalableAgentsByLocation = (
+      const getEnrolledAgentsByLocation = (
         syntheticsPrivateLocation as unknown as {
-          getScalableAgentsByLocation: (
-            locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
+          getEnrolledAgentsByLocation: (
+            locations: Array<{ id: string; agentPolicyId: string }>
           ) => Promise<Map<string, { agentIds: string[] }>>;
         }
-      ).getScalableAgentsByLocation.bind(syntheticsPrivateLocation);
+      ).getEnrolledAgentsByLocation.bind(syntheticsPrivateLocation);
 
-      await getScalableAgentsByLocation([
+      await getEnrolledAgentsByLocation([
         {
           id: 'condition-location',
           agentPolicyId: `agent-policy" or true or "`,
-          isAgentSharding: true,
         },
       ]);
 
@@ -975,8 +1060,8 @@ describe('SyntheticsPrivateLocation', () => {
         expect.objectContaining({ kuery: `policy_id:"agent-policy\\" or true or \\""` })
       );
     });
-    it('does not resolve agents for scalable locations unused by monitor creation', async () => {
-      const listAgents = jest.fn();
+    it('does not resolve agents for private locations unused by monitor creation', async () => {
+      const listAgents = jest.fn().mockResolvedValue({ agents: [], total: 0 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
         fleet: {
@@ -1000,11 +1085,14 @@ describe('SyntheticsPrivateLocation', () => {
         []
       );
 
-      expect(listAgents).not.toHaveBeenCalled();
+      expect(listAgents).toHaveBeenCalledTimes(1);
+      expect(listAgents).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: 'policy_id:"policyId"' })
+      );
     });
 
-    it('does not resolve agents for scalable locations unused by monitor edits', async () => {
-      const listAgents = jest.fn();
+    it('does not resolve agents for private locations unused by monitor edits', async () => {
+      const listAgents = jest.fn().mockResolvedValue({ agents: [], total: 0 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
         fleet: {
@@ -1034,7 +1122,10 @@ describe('SyntheticsPrivateLocation', () => {
         []
       );
 
-      expect(listAgents).not.toHaveBeenCalled();
+      expect(listAgents).toHaveBeenCalledTimes(1);
+      expect(listAgents).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: 'policy_id:"policyId"' })
+      );
     });
 
     it('uses an enrolled agent condition when inspecting a scalable location', async () => {
@@ -1071,6 +1162,46 @@ describe('SyntheticsPrivateLocation', () => {
       );
     });
 
+    it.each([
+      ['enterprise', agentIdCondition('agent-a')],
+      ['trial', agentIdCondition('agent-a')],
+      ['platinum', undefined],
+      ['basic', undefined],
+    ] as const)('with a %s license, sets the create condition to %s', async (type, expected) => {
+      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          taskManager: { get: jest.fn().mockResolvedValue({ state: {} }) },
+          licensing: {
+            getLicense: jest
+              .fn()
+              .mockResolvedValue(licenseMock.createLicense({ license: { type } })),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const bulkCreate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({ created: [], failed: [] });
+
+      await syntheticsPrivateLocation.createPackagePolicies(
+        [{ config: testConfig, globalParams: {} }],
+        [mockPrivateLocation],
+        'default',
+        []
+      );
+
+      expect(bulkCreate.mock.calls[0][0].newPolicies[0].condition).toBe(expected);
+    });
+
     it('omits condition when inspecting while shard rebalance is disabled', async () => {
       const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
@@ -1084,6 +1215,7 @@ describe('SyntheticsPrivateLocation', () => {
           },
         },
         pluginsStart: {
+          licensing: enterpriseLicensing,
           taskManager: {
             get: jest.fn().mockResolvedValue({
               state: { rebalancePrivateLocationShardsEnabled: false },
@@ -1109,11 +1241,11 @@ describe('SyntheticsPrivateLocation', () => {
       expect(listAgents).not.toHaveBeenCalled();
     });
 
-    it('clears agent pins only on scalable private-location package policies', async () => {
+    it('clears agent pins on every private location, listing each agent policy once', async () => {
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
-        { id: 'loc-1', agentPolicyId: 'ap-1', isAgentSharding: true },
-        { id: 'loc-2', agentPolicyId: 'ap-1', isAgentSharding: true },
-        { id: 'loc-3', agentPolicyId: 'ap-2', isAgentSharding: true },
+        { id: 'loc-1', agentPolicyId: 'ap-1' },
+        { id: 'loc-2', agentPolicyId: 'ap-1' },
+        { id: 'loc-3', agentPolicyId: 'ap-2' },
       ] as never);
       const listByAgentPolicy = jest
         .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
@@ -1149,25 +1281,6 @@ describe('SyntheticsPrivateLocation', () => {
         ],
       });
       expect(result.cleared).toBe(1);
-      expect(result.failed).toBe(0);
-    });
-
-    it('does not list Fleet policies for classic private locations', async () => {
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
-        { id: 'classic', agentPolicyId: 'ap-classic' },
-        { id: 'sharded', agentPolicyId: 'ap-sharded', isAgentSharding: true },
-      ] as never);
-      const listByAgentPolicy = jest
-        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
-        .mockResolvedValue([]);
-      jest.spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace').mockResolvedValue([]);
-
-      const result = await new SyntheticsPrivateLocation(serverMock).clearShardConditions();
-
-      expect(listByAgentPolicy).toHaveBeenCalledTimes(1);
-      expect(listByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'ap-sharded' });
-      expect(listByAgentPolicy).not.toHaveBeenCalledWith({ agentPolicyId: 'ap-classic' });
-      expect(result.cleared).toBe(0);
       expect(result.failed).toBe(0);
     });
   });

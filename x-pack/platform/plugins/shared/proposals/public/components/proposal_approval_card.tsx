@@ -8,69 +8,63 @@
 import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
   ApprovalContent,
+  getProposalDecision,
   getProposalTone,
   isProposalExpired,
-  toActionImpactItems,
 } from '@kbn/proposals-ui';
 import type { ApprovalAction } from '@kbn/proposals-ui';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { isAwaitingDecision } from '@kbn/proposals-common';
-import type { DismissReason, ProposalDecision } from '@kbn/proposals-common';
+import type { DismissReason } from '@kbn/proposals-common';
 import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
-import { useApproveProposal, useDismissProposal, useProposal } from '../hooks/use_proposals_api';
+import {
+  useApproveProposal,
+  useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
+  useProposal,
+} from '../hooks/use_proposals_api';
+import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 import { ProposalDismissForm } from './proposal_dismiss_form';
 
 type CardMode = 'view' | 'dismissing';
 
-/** What the analyst concluded, which is separate from how far it then got. */
-const DECISION_LABELS: Record<ProposalDecision, string> = {
-  approved: i18n.translate('xpack.proposals.proposalCard.decision.approved', {
-    defaultMessage: 'approved',
-  }),
-  dismissed: i18n.translate('xpack.proposals.proposalCard.decision.dismissed', {
-    defaultMessage: 'dismissed',
-  }),
-};
-
-type ErrorCallout =
-  | { type: 'conflict'; message: string }
-  | { type: 'expired'; message: string }
-  | { type: 'error'; message: string };
-
-const mapError = (error: unknown): ErrorCallout => {
+/**
+ * Turns a decision mutation's rejection into the friendly text `ApprovalContent` shows in its own
+ * error banner — the HTTP-status nuance (already decided, deadline passed) belongs here, where
+ * the plugin can read `isHttpFetchError`; the shared package only ever sees the resulting message.
+ */
+const toFriendlyError = (error: unknown): Error => {
   if (isHttpFetchError(error)) {
     if (error.response?.status === 409) {
-      return {
-        type: 'conflict',
-        message: i18n.translate('xpack.proposals.proposalCard.conflictError', {
+      return new Error(
+        i18n.translate('xpack.proposals.proposalCard.conflictError', {
           defaultMessage:
             'This proposal has already been decided. Refresh the page to see its status.',
-        }),
-      };
+        })
+      );
     }
     if (error.response?.status === 410) {
-      return {
-        type: 'expired',
-        message: i18n.translate('xpack.proposals.proposalCard.expiredError', {
+      return new Error(
+        i18n.translate('xpack.proposals.proposalCard.expiredError', {
           defaultMessage:
             'The decision deadline has passed and this proposal can no longer be decided.',
-        }),
-      };
+        })
+      );
     }
   }
-  return {
-    type: 'error',
-    message:
-      error instanceof Error
-        ? error.message
-        : i18n.translate('xpack.proposals.proposalCard.genericError', {
-            defaultMessage: 'The decision could not be recorded. Please try again.',
-          }),
-  };
+  return error instanceof Error
+    ? error
+    : new Error(
+        i18n.translate('xpack.proposals.proposalCard.genericError', {
+          defaultMessage: 'The decision could not be recorded. Please try again.',
+        })
+      );
 };
 
 export interface ProposalApprovalCardProps {
@@ -96,6 +90,10 @@ const MAX_SUPERSEDE_HOPS = 50;
  *
  * Renders inside the framework's `EuiSplitPanel.Inner paddingSize="none"`, so
  * the card adds its own horizontal padding.
+ *
+ * Shares `ApprovalContent`'s own decision engine with the AlertZero flyout's approval modal — the
+ * "Applying"/"Applied"/"Declined" states, the badge, and the outcome banner are the same UI
+ * whether the proposal is reached from the queue or from the chat page a worker posted it to.
  */
 export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
   ({ proposalId, chainHops = 0 }) => {
@@ -107,52 +105,48 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
     const proposalQuery = useProposal(proposalId);
     const approveMutation = useApproveProposal();
     const dismissMutation = useDismissProposal();
+    const isApproving = useIsApprovingProposal(proposalId);
+    const isDeclining = useIsDecliningProposal(proposalId);
+    const isSubmitting = isApproving ? 'applying' : isDeclining ? 'declining' : undefined;
+    const { data: currentUserProfile } = useCurrentUserProfile();
 
-    const isLoading = approveMutation.isLoading || dismissMutation.isLoading;
-    const mutationError = approveMutation.error ?? dismissMutation.error;
-    const errorCallout = mutationError ? mapError(mutationError) : null;
-
-    const resetMutations = useCallback(() => {
-      approveMutation.reset();
-      dismissMutation.reset();
-    }, [approveMutation, dismissMutation]);
+    const currentActorName = currentUserProfile
+      ? getUserDisplayName(currentUserProfile.user)
+      : undefined;
 
     const handleApprove = useCallback(async () => {
-      resetMutations();
       try {
         await approveMutation.mutateAsync({
           id: proposalId,
           body: { actionInput: proposalQuery.data?.actionInput },
         });
-        setMode('view');
-      } catch {
-        // shown via errorCallout
+      } catch (err) {
+        throw toFriendlyError(err);
       }
-    }, [approveMutation, proposalQuery.data?.actionInput, proposalId, resetMutations]);
+    }, [approveMutation, proposalQuery.data?.actionInput, proposalId]);
 
     const handleDismissClick = useCallback(() => {
-      resetMutations();
       setMode('dismissing');
-    }, [resetMutations]);
+    }, []);
 
     const handleDismissConfirm = useCallback(async () => {
-      resetMutations();
       try {
         await dismissMutation.mutateAsync({
           id: proposalId,
           body: { dismissReason, rationale: rationale.trim() || undefined },
         });
+        // Otherwise the inline form stays rendered (still gated on `mode`, not `isPending`)
+        // beside the outcome banner `ApprovalContent` now shows for the decision that just landed.
         setMode('view');
-      } catch {
-        // shown via errorCallout
+      } catch (err) {
+        throw toFriendlyError(err);
       }
-    }, [dismissMutation, dismissReason, proposalId, rationale, resetMutations]);
+    }, [dismissMutation, dismissReason, proposalId, rationale]);
 
     const handleDismissCancel = useCallback(() => {
       setMode('view');
       setRationale('');
-      resetMutations();
-    }, [resetMutations]);
+    }, []);
 
     const liveProposal = proposalQuery.data;
 
@@ -200,10 +194,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
 
     const isPending = isAwaitingDecision(liveProposal);
     const isExpired = isProposalExpired(liveProposal);
-    // The decision, not the status: a proposal stays `pending` while its
-    // approval is still travelling through the gate workflow, and an expired one
-    // is settled without anyone having decided anything.
-    const decision = liveProposal.decision;
+    const decision = getProposalDecision(liveProposal);
 
     let primaryAction: ApprovalAction | undefined;
     let secondaryActions: ApprovalAction[] | undefined;
@@ -216,8 +207,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           }),
           color: 'success',
           onClick: handleApprove,
-          isDisabled: isExpired || isLoading,
-          isLoading,
+          isDisabled: isExpired,
           'data-test-subj': `proposalApprove-${proposalId}`,
         };
         secondaryActions = [
@@ -227,7 +217,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
             }),
             color: 'danger',
             onClick: handleDismissClick,
-            isDisabled: isExpired || isLoading,
+            isDisabled: isExpired,
             'data-test-subj': `proposalDismiss-${proposalId}`,
           },
         ];
@@ -239,8 +229,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           }),
           color: 'danger',
           onClick: handleDismissConfirm,
-          isDisabled: isLoading || !rationale.trim(),
-          isLoading,
+          isDisabled: !rationale.trim(),
           'data-test-subj': `proposalDismissConfirm-${proposalId}`,
         };
         secondaryActions = [
@@ -250,7 +239,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
             }),
             color: 'text',
             onClick: handleDismissCancel,
-            isDisabled: isLoading,
             'data-test-subj': `proposalDismissCancel-${proposalId}`,
           },
         ];
@@ -268,7 +256,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           tone={getProposalTone(liveProposal)}
           iconType="lock"
           comment={liveProposal.comment}
-          actionImpact={{ variant: 'list', items: toActionImpactItems(liveProposal) }}
+          decision={decision}
+          isSubmitting={isSubmitting}
+          currentActorName={currentActorName}
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}
         >
@@ -278,6 +268,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
               <EuiSpacer size="m" />
               <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
                 <KbnWarningCallout
+                  announceOnMount
                   size="s"
                   title={i18n.translate('xpack.proposals.proposalCard.previousFailureCallout', {
                     defaultMessage: 'A previous attempt at this action failed',
@@ -289,7 +280,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
             </>
           )}
 
-          {/* Outcome callouts for decided/expired states */}
+          {/* An expired proposal nobody decided is not itself an outcome `ApprovalContent`
+              models — `decision` covers only a human's actual approve/dismiss. */}
           {isExpired && !decision && (
             <>
               <EuiSpacer size="m" />
@@ -300,22 +292,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
                   title={i18n.translate('xpack.proposals.proposalCard.expiredCallout', {
                     defaultMessage:
                       'The decision deadline has passed. This proposal can no longer be actioned.',
-                  })}
-                />
-              </div>
-            </>
-          )}
-          {decision && (
-            <>
-              <EuiSpacer size="m" />
-              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <KbnInfoCallout
-                  announceOnMount
-                  size="s"
-                  title={i18n.translate('xpack.proposals.proposalCard.decidedCallout', {
-                    defaultMessage:
-                      'This proposal has already been decided ({decision}). No further action is needed.',
-                    values: { decision: DECISION_LABELS[decision] },
                   })}
                 />
               </div>
@@ -333,24 +309,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
                 onRationaleChange={setRationale}
                 data-test-subj={`proposalDismissForm-${proposalId}`}
               />
-            </>
-          )}
-
-          {/* Decision mutation error feedback */}
-          {errorCallout?.type === 'conflict' && (
-            <>
-              <EuiSpacer size="s" />
-              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <KbnWarningCallout announceOnMount size="s" title={errorCallout.message} />
-              </div>
-            </>
-          )}
-          {(errorCallout?.type === 'expired' || errorCallout?.type === 'error') && (
-            <>
-              <EuiSpacer size="s" />
-              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <KbnDangerCallout announceOnMount size="s" title={errorCallout.message} />
-              </div>
             </>
           )}
         </ApprovalContent>
