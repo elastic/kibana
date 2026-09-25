@@ -32,7 +32,6 @@ export function ChartConfigPanel({
   lensAdapters,
   dataLoading$,
   currentSuggestionContext,
-  isFlyoutVisible,
   setIsFlyoutVisible,
   isPlainRecord,
   query,
@@ -54,6 +53,9 @@ export function ChartConfigPanel({
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
+  // ChartConfigPanel only mounts while the flyout is visible. Load once so aborted
+  // charts still get an editor; do not remount on every visContext.attributes tick.
+  const hasLoadedEditorRef = useRef(false);
 
   const isApproximate$ = useRef(new BehaviorSubject<boolean | undefined>(undefined));
   useEffect(() => {
@@ -132,9 +134,11 @@ export function ChartConfigPanel({
         previousQuery.current = query;
       }
     }
-    // ChartConfigPanel only mounts while the flyout is visible, so load the editor
-    // from attributes even when Lens table adapters are missing (aborted/error chart).
-    if (isPlainRecord && (dataHasChanged || isFlyoutVisible)) {
+    if (!isPlainRecord) {
+      return;
+    }
+    if (!hasLoadedEditorRef.current || dataHasChanged) {
+      hasLoadedEditorRef.current = true;
       fetchLensConfigComponent();
     }
   }, [
@@ -144,7 +148,6 @@ export function ChartConfigPanel({
     updateSuggestion,
     isPlainRecord,
     query,
-    isFlyoutVisible,
     setIsFlyoutVisible,
     lensAdapters,
     dataLoading$,
