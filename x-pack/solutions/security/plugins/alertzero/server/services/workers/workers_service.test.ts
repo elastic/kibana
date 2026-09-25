@@ -10,6 +10,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -422,11 +423,15 @@ describe('WorkersService', () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
     await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
-    // A document from an older development shape: no interval, no extras. It stays in the
-    // persistent store, so every read (list and get) sees it.
+    // A present value outside its bounds is not repaired, so the Worker stays unavailable.
     const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
     if (!document) throw new Error('Expected the Rule Tuning document to be installed');
-    document.values = { settingsVersion: 1, autonomyLevel: 'manual' };
+    document.values = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+      extras: { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 0 },
+    };
 
     const { workers } = await service.list(request, SPACE);
     const ruleTuning = workers.find(({ id }) => id === RULE_TUNING);
@@ -536,6 +541,57 @@ describe('WorkersService', () => {
       fpCountThreshold: 4,
       fpRateThresholdPct: 80,
     };
+
+    const version4Values = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+    };
+
+    it('reads a document stored before extras existed and keeps its revision', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+      const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
+      if (!document) throw new Error('Expected the Rule Tuning document to be installed');
+      document.values = version4Values;
+
+      const worker = await service.get(RULE_TUNING, request, SPACE);
+
+      expect(worker).toMatchObject({
+        state: 'ok',
+        settingsRevision: document.version,
+        settings: {
+          workerId: RULE_TUNING,
+          autonomy: 'manual',
+          scheduleInterval: '2h',
+          extras: RULE_TUNING_DEFAULT_EXTRAS,
+        },
+      });
+    });
+
+    it('persists default extras when a document stored without them is updated', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+      const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
+      if (!document) throw new Error('Expected the Rule Tuning document to be installed');
+      document.values = version4Values;
+
+      const updated = await service.update(
+        RULE_TUNING,
+        { settings: { scheduleInterval: '6h' }, settingsRevision: document.version },
+        SPACE,
+        request
+      );
+
+      expect(updated.outcome).toBe('updated');
+      expect(harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.values).toEqual({
+        ...version4Values,
+        scheduleInterval: '6h',
+        extras: RULE_TUNING_DEFAULT_EXTRAS,
+      });
+    });
 
     const enableRuleTuning = async () => {
       const harness = createPersistentHarness();
