@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
+import type { Message, Deanonymization, Anonymization, ToolCall } from '@kbn/inference-common';
 import { isEmpty } from 'lodash';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
+
+/** Shape produced by `getAnonymizableMessageParts` for an assistant message's tool calls. */
+interface AnonymizableToolCall {
+  function: ToolCall['function'];
+}
 
 interface DeanonymizeMaskMatch {
   start: number;
@@ -109,6 +114,24 @@ export function deanonymize<TMessage extends Message>(
   const anonymized = getAnonymizableMessageParts(message);
   const allDeanonymizations: Deanonymization[] = [];
 
+  // `getAnonymizableMessageParts` deliberately omits `toolCallId` from what gets walked/
+  // deanonymized above (it's a technical identifier, not PII — see that function's doc comment).
+  // Spreading the stripped-down (function-only) result directly onto the message would silently
+  // wipe every tool call's id, breaking tool-call reconstruction downstream. Restore each id from
+  // the original message by index instead.
+  const restoreToolCallIds = (
+    deanonymizedToolCalls: AnonymizableToolCall[] | undefined
+  ): ToolCall[] | undefined => {
+    const originalToolCalls = (message as unknown as { toolCalls?: ToolCall[] }).toolCalls;
+    if (!originalToolCalls || !deanonymizedToolCalls) {
+      return originalToolCalls;
+    }
+    return originalToolCalls.map((toolCall, index) => ({
+      ...toolCall,
+      function: deanonymizedToolCalls[index]?.function ?? toolCall.function,
+    }));
+  };
+
   if (anonymized.content && typeof anonymized.content === 'string') {
     const { content, ...rest } = anonymized;
 
@@ -123,6 +146,9 @@ export function deanonymize<TMessage extends Message>(
       message: {
         ...message,
         ...(deanonymizedRest ?? {}),
+        ...('toolCalls' in (deanonymizedRest ?? {})
+          ? { toolCalls: restoreToolCallIds((deanonymizedRest as typeof anonymized).toolCalls) }
+          : {}),
         content: contentDeanonymization.output,
       },
       deanonymizations: allDeanonymizations,
@@ -139,6 +165,9 @@ export function deanonymize<TMessage extends Message>(
     message: {
       ...message,
       ...deanonymizedParts,
+      ...('toolCalls' in deanonymizedParts
+        ? { toolCalls: restoreToolCallIds(deanonymizedParts.toolCalls) }
+        : {}),
     },
     deanonymizations: allDeanonymizations,
   };
