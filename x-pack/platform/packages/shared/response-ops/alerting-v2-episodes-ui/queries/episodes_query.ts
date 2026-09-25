@@ -41,6 +41,11 @@ export interface AlertEpisode extends BaseAlertEpisode {
    */
   'rule.name'?: string;
   /**
+   * Human-readable rule type name from the alert document (e.g. "Custom threshold").
+   * Only set for classic alert rows; v2 episodes never set this.
+   */
+  rule_category?: string;
+  /**
    * Identifies which `EpisodeDataSource` produced this row. Undefined for rows
    * from the v2 pipeline. Stamped on classic rows by the list fetch (and by
    * `fetchEpisodesFromSource`).
@@ -65,6 +70,12 @@ export interface AlertEpisode extends BaseAlertEpisode {
 
 /** True when the row came from an additional episode data source, not the v2 pipeline. */
 export const isSourceEpisode = (episode: AlertEpisode): boolean => episode.source_id != null;
+
+/**
+ * Native v2 rules always include `kind`. Classic adapters omit it so a source-stamped
+ * episode whose rule was loaded from the v2 API can still take the v2 flyout path.
+ */
+export const isNativeV2Rule = (rule: { kind?: unknown }): boolean => rule.kind != null;
 
 /** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */
 export const episodeSupportsActions = (episode: AlertEpisode): boolean =>
@@ -105,7 +116,7 @@ export const buildEpisodesKpisQuery = (
     )
     .pipe`EVAL _is_unassigned  = CASE(last_assignee_uid IS NULL, 1, 0)`
     .pipe`EVAL _is_acked       = CASE(last_ack_action == "ack", 1, 0)`
-    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snooze_expiry IS NULL OR TO_DATETIME(snooze_expiry) > NOW()), 1, 0)`
+    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snoozed_until IS NULL OR TO_DATETIME(snoozed_until) > NOW()), 1, 0)`
     .pipe`STATS
       alerts_count   = COUNT(*),
       firing_rules   = COUNT_DISTINCT(_active_rule_id),

@@ -6,15 +6,14 @@
  */
 
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +22,9 @@ import React from 'react';
 import { useWatch } from 'react-hook-form';
 import type { FormValues } from '../../../form/types';
 import { MatchedPolicyReason } from './matched_policy_reason';
+import { useActionPolicyConnectorTypes } from './use_action_policy_connector_types';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
+import { WorkflowConnectorIcons } from './workflow_connector_icons';
 
 const actionPoliciesTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.title',
@@ -69,6 +70,10 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
   const { isLoading, error, items } = useMatchedActionPolicies({ http, tags });
   const ruleTags = tags ?? [];
 
+  const { connectorTypesByPolicy } = useActionPolicyConnectorTypes(
+    items.map(({ action_policy: actionPolicy }) => actionPolicy)
+  );
+
   return (
     <>
       <EuiTitle size="xs">
@@ -100,6 +105,7 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
             </EuiText>
             {items.map(({ action_policy: actionPolicy, category }) => {
               const editLabel = getEditLabel(actionPolicy.name);
+              const connectorTypes = connectorTypesByPolicy.get(actionPolicy.id) ?? [];
               return (
                 <EuiFlexItem key={actionPolicy.id}>
                   <EuiPanel
@@ -109,10 +115,25 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
                     data-test-subj={`linkedActionPolicyRow-${actionPolicy.id}`}
                   >
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          <strong>{actionPolicy.name}</strong>
-                        </EuiText>
+                      <EuiFlexItem grow={false}>
+                        <EuiLink
+                          href={http.basePath.prepend(
+                            `${ACTION_POLICY_EDIT_BASE}/${encodeURIComponent(actionPolicy.id)}`
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          external={false}
+                          aria-label={editLabel}
+                          data-test-subj={`linkedActionPolicyEdit-${actionPolicy.id}`}
+                        >
+                          {actionPolicy.name}
+                        </EuiLink>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow>
+                        <WorkflowConnectorIcons
+                          types={connectorTypes}
+                          data-test-subj={`linkedActionPolicyConnectorIcons-${actionPolicy.id}`}
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <MatchedPolicyReason
@@ -120,20 +141,6 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
                           matcher={actionPolicy.matcher}
                           ruleTags={ruleTags}
                         />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content={editLabel} disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            iconType="external"
-                            href={http.basePath.prepend(
-                              `${ACTION_POLICY_EDIT_BASE}/${encodeURIComponent(actionPolicy.id)}`
-                            )}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={editLabel}
-                            data-test-subj={`linkedActionPolicyEdit-${actionPolicy.id}`}
-                          />
-                        </EuiToolTip>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiPanel>

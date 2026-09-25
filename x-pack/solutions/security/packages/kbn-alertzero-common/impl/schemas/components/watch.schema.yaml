@@ -206,7 +206,7 @@ components:
           description: Always includes watch, plus a tier tag when known
         color:
           type: string
-          description: Accent color for coverage strip and cards (hex or CSS var)
+          description: EUI token key resolved with resolveWatchAccent (`euiColorVisN` or `textAssistance`)
         enabled:
           type: boolean
         draft:

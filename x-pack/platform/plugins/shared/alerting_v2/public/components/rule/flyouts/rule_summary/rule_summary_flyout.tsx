@@ -86,7 +86,7 @@ export const RuleSummaryFlyout = ({
   } = useFetchRuleExecutions({
     ruleIds: [rule.id],
     perPage: 1,
-    sort: 'startedAt',
+    sortField: 'startedAt',
     sortOrder: 'desc',
     enabled: canReadExecutionHistory,
   });

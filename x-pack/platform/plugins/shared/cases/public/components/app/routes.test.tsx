@@ -21,7 +21,7 @@ import { CasesRoutes } from './routes';
 import type { CasesPermissions } from '../../../common';
 import { KibanaServices } from '../../common/lib/kibana';
 
-jest.mock('../cases_redesign/all_cases', () => ({
+jest.mock('../all_cases', () => ({
   __esModule: true,
   default: () => <div>{'All cases'}</div>,
 }));

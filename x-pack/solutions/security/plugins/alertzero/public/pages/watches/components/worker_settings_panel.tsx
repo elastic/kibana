@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -25,11 +26,13 @@ import {
   type WorkerSettings,
   type WorkerSettingsWrite,
 } from '@kbn/alertzero-common';
+import type { CoreStart } from '@kbn/core/public';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
-import { WorkerSkillsTable } from './worker_skills_table';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerDescription, workerName } from '../workers/translations';
@@ -77,14 +80,22 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   draftResetKey,
 }: WorkerSettingsPanelProps) {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
   const name = workerName(worker.id, worker.name);
   const description = workerDescription(worker.id);
   const autonomyLabel = settingsI18n.autonomyLevelName(settings.autonomy);
-  const triggerLabel =
+  const scheduleLabel =
     settings.scheduleInterval != null
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
-      : settingsI18n.MANUAL_RUN_LABEL;
+      : undefined;
   const controlsDisabled = settingsLocked || isSaving;
+  const executionsHref = worker.workflowId
+    ? application.getUrlForApp(WORKFLOWS_APP_ID, {
+        path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
+      })
+    : undefined;
   const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
   const autonomyIntro = getAutonomyLevelCards(worker.id)?.intro;
 
@@ -179,9 +190,13 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{autonomyLabel}</EuiBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{triggerLabel}</EuiBadge>
-          </EuiFlexItem>
+          {scheduleLabel ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj={`alertZeroWorkerScheduleBadge-${worker.id}`}>
+                {scheduleLabel}
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
           {/* Carried on the band itself so a collapsed Worker still reports a failed save. */}
           {error ? (
             <EuiFlexItem grow={false}>
@@ -211,6 +226,29 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       onChange={(event) => onEnabledChange(event.target.checked)}
       data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
     />
+  );
+
+  const headerActions = (
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
+      {executionsHref ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            color="text"
+            iconType="external"
+            iconSide="right"
+            href={executionsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={settingsI18n.viewExecutionsAriaLabel(name)}
+            data-test-subj={`alertZeroWorkerViewExecutions-${worker.id}`}
+          >
+            {settingsI18n.VIEW_EXECUTIONS}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>{enabledSwitch}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const settingsBody = (
@@ -268,8 +306,6 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           onExtrasChange={(extras) => onSettingsChange({ extras })}
         />
       ) : null}
-      <EuiSpacer size="m" />
-      <WorkerSkillsTable skills={worker.skills} />
     </>
   );
 
@@ -308,7 +344,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
               onClick={stopAccordionToggle}
               onKeyDown={stopAccordionToggle}
             >
-              {enabledSwitch}
+              {headerActions}
             </div>
           }
           data-test-subj={`alertZeroWatchWorkerAccordion-${worker.id}`}
@@ -344,7 +380,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         `}
       >
         <div css={{ flex: 1, minWidth: 0 }}>{headerBandContent(`${worker.id}-heading`, 'h2')}</div>
-        {enabledSwitch}
+        <div css={{ flexShrink: 0 }}>{headerActions}</div>
       </div>
       <div css={{ padding: euiTheme.size.base }}>{settingsBody}</div>
     </EuiPanel>

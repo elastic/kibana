@@ -6,12 +6,18 @@
  */
 
 import type { EscalationRouteDependencies } from '../types';
+import { registerAssignEscalationRoute } from './assign_escalation';
 import { registerCreateEscalationRoute } from './create_escalation';
 import { registerListEscalationsRoute } from './list_escalations';
+import { registerListLinkedInvestigationsRoute } from './list_linked_investigations';
+import { registerSuggestUsersRoute } from './suggest_users';
 import { registerUpdateEscalationRoute } from './update_escalation';
 
 export const registerEscalationRoutes = (deps: EscalationRouteDependencies) => {
   registerCreateEscalationRoute(deps);
   registerListEscalationsRoute(deps);
+  registerListLinkedInvestigationsRoute(deps);
   registerUpdateEscalationRoute(deps);
+  registerSuggestUsersRoute(deps);
+  registerAssignEscalationRoute(deps);
 };

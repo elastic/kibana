@@ -22,4 +22,5 @@ export {
 } from './lib/helpers';
 
 export { withApmSpan } from './utils/with_apm_span';
-export { accessKnownApmEventFields } from './utils/access_known_fields';
+export { accessKnownApmEventFields, type ApmDocument } from './utils/access_known_fields';
+export { getMissingRequiredApmFields } from './utils/utility_types';

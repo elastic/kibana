@@ -9,6 +9,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
@@ -19,6 +20,17 @@ import { useKibana } from '../hooks/use_kibana';
 jest.mock('../hooks/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
+
+jest.mock('../investigation/start_investigation_panel', () => ({
+  START_INVESTIGATION_PANEL_ID: 'nightshiftStartInvestigationPanel',
+  StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="nightshiftStartInvestigationPanel">
+      <button onClick={onClose} type="button">
+        Cancel investigation
+      </button>
+    </div>
+  ),
+}));
 
 jest.mock('../investigation/investigation_detail_flyout', () => ({
   InvestigationDetailFlyout: ({
@@ -71,6 +83,11 @@ const highInvestigation: ListInvestigationItem = {
 };
 
 const refetchAll = jest.fn();
+
+const manageCapabilities = {
+  [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+  [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+};
 
 // jsdom implements neither, and scrolling to a section is how a tile and `?severity=` both work.
 const scrollIntoView = jest.fn();
@@ -162,6 +179,7 @@ describe('NightshiftApp', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
+          capabilities: { nightshift: manageCapabilities },
           getUrlForApp: () => '/app/significant_events/significant_events',
         },
         nightshiftInvestigations: { investigationsClient: {} },
@@ -199,7 +217,10 @@ describe('NightshiftApp', () => {
   it('shows the unavailable callout and reports ready when the optional plugin is absent', () => {
     mockUseKibana.mockReturnValue({
       services: {
-        application: { getUrlForApp: () => '/app/significant_events/significant_events' },
+        application: {
+          capabilities: { nightshift: manageCapabilities },
+          getUrlForApp: () => '/app/significant_events/significant_events',
+        },
       },
     });
     setSections({ sections: defaultSections() });
@@ -375,5 +396,38 @@ describe('NightshiftApp', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByText('Flyout: investigation-1')).not.toBeInTheDocument();
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('');
+  });
+
+  it('opens and closes the start investigation panel from the header', () => {
+    renderApp();
+
+    const startButton = screen.getByTestId('o11yNightshiftAppStartInvestigationButton');
+    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
+
+    fireEvent.click(startButton);
+    expect(screen.getByTestId('nightshiftStartInvestigationPanel')).toBeInTheDocument();
+    expect(startButton).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel investigation' }));
+    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
+  });
+
+  it('hides the start investigation button without the Nightshift manage privilege', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: { nightshift: { [NIGHTSHIFT_UI_PRIVILEGES.show]: true } },
+          getUrlForApp: () => '/app/significant_events/significant_events',
+        },
+        nightshiftInvestigations: { investigationsClient: {} },
+      },
+    });
+
+    renderApp();
+
+    expect(
+      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toBeInTheDocument();
   });
 });

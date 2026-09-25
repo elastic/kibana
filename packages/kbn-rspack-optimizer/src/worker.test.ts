@@ -40,7 +40,7 @@ describe('worker', () => {
     it('calls runBuild with mapped options and default theme tags', async () => {
       jest.mocked(runBuild).mockResolvedValue({
         success: true,
-        entryCount: 1,
+        bundleCount: 1,
         totalSize: 100,
       });
 
@@ -82,7 +82,7 @@ describe('worker', () => {
     it('maps explicit start options to runBuild', async () => {
       jest.mocked(runBuild).mockResolvedValue({
         success: true,
-        entryCount: 1,
+        bundleCount: 1,
         totalSize: 0,
       });
 
@@ -122,7 +122,7 @@ describe('worker', () => {
     it('sends done with summary on success', async () => {
       jest.mocked(runBuild).mockResolvedValue({
         success: true,
-        entryCount: 2,
+        bundleCount: 2,
         totalSize: 1024,
       });
 
@@ -137,7 +137,7 @@ describe('worker', () => {
       expect(processSend).toHaveBeenCalledWith({
         type: 'done',
         success: true,
-        summary: '2 entries, 1.0 KB',
+        summary: '2 bundles, 1.0 KB',
       });
     });
 
@@ -188,7 +188,7 @@ describe('worker', () => {
         opts.log?.success('s');
         opts.log?.debug('d');
         expect(opts.log?.write()).toBe(true);
-        return { success: true, entryCount: 1, totalSize: 0 };
+        return { success: true, bundleCount: 1, totalSize: 0 };
       });
 
       (process as unknown as NodeJS.EventEmitter).emit('message', {
@@ -217,7 +217,7 @@ describe('worker', () => {
 
       jest.mocked(runBuild).mockResolvedValue({
         success: true,
-        entryCount: 1,
+        bundleCount: 1,
         totalSize: 0,
       });
 
