@@ -60,7 +60,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./blended_vector_layer'));
     loadTestFile(require.resolve('./saved_object_management'));
-    loadTestFile(require.resolve('./sample_data'));
     loadTestFile(require.resolve('./auto_fit_to_bounds'));
   });
 }
