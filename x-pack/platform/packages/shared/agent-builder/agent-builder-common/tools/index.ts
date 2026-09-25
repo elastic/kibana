@@ -19,6 +19,7 @@ export {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  customAppsTools,
   attachmentTools,
   internalTools,
   activeToolsCountWarningThreshold,

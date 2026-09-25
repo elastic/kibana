@@ -508,6 +508,12 @@ importers:
       '@hello-pangea/dnd':
         specifier: 18.0.1
         version: 18.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@kbn/a2ui-eui-catalog':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-a2ui-eui-catalog
+      '@kbn/a2ui-renderer':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-a2ui-renderer
       '@kbn/aad-fixtures-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/alerting_api_integration/common/plugins/aad
@@ -1729,6 +1735,9 @@ importers:
       '@kbn/css-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-css-utils
+      '@kbn/custom-apps-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/custom_apps
       '@kbn/custom-branding-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/custom_branding
@@ -7895,6 +7904,10 @@ importers:
 
   src/platform/packages/shared/home/sample_data_types: {}
 
+  src/platform/packages/shared/kbn-a2ui-eui-catalog: {}
+
+  src/platform/packages/shared/kbn-a2ui-renderer: {}
+
   src/platform/packages/shared/kbn-actions-types: {}
 
   src/platform/packages/shared/kbn-actions-utils: {}
@@ -9218,6 +9231,8 @@ importers:
   x-pack/platform/plugins/private/cloud_integrations/cloud_links: {}
 
   x-pack/platform/plugins/private/cross_cluster_replication: {}
+
+  x-pack/platform/plugins/private/custom_apps: {}
 
   x-pack/platform/plugins/private/custom_branding: {}
 

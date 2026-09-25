@@ -1,0 +1,216 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://a2ui.org/specification/v1_0/agent_to_renderer.json",
+    "title": "A2UI Message Schema",
+    "description": "Describes a JSON payload for an A2UI (Agent to UI) message, which is used to dynamically construct and update user interfaces.",
+    "type": "object",
+    "oneOf": [
+        { "$ref": "#/$defs/CreateSurfaceMessage" },
+        { "$ref": "#/$defs/UpdateComponentsMessage" },
+        { "$ref": "#/$defs/UpdateDataModelMessage" },
+        { "$ref": "#/$defs/DeleteSurfaceMessage" },
+        { "$ref": "#/$defs/CallRendererFunctionMessage" },
+        { "$ref": "#/$defs/AgentFunctionResponseMessage" }
+    ],
+    "$defs": {
+        "CreateSurfaceMessage": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "const": "v1.0"
+                },
+                "createSurface": {
+                    "type": "object",
+                    "description": "Signals the renderer to create a new surface and begin rendering it. Creating a surface implicitly instantiates the canonical 'Surface' container component ('common_types.json#/$defs/Surface') with 'child': 'root'. It is an error to try to create a surface with an existing ID without first deleting it; surfaceId MUST be globally unique for the renderer's lifetime. When this message is sent, the renderer expects 'updateComponents' and/or 'updateDataModel' messages for the same surfaceId to define the component tree.",
+                    "properties": {
+                        "surfaceId": {
+                            "type": "string",
+                            "description": "The unique identifier for the UI surface to be rendered. It must be globally unique for the renderer's lifetime."
+                        },
+                        "catalogId": {
+                            "description": "A string that uniquely identifies the default catalog for this surface. It is recommended to prefix this with an internet domain that you own, to avoid conflicts e.g. 'mycompany.com:somecatalog'. Components and function calls that do not explicitly specify a catalogId will use this surface-level default catalogId.",
+                            "type": "string"
+                        },
+                        "sendDataModel": {
+                            "type": "boolean",
+                            "description": "If true, the renderer will send the full data model of this surface in the metadata of every A2A message sent to the agent that created the surface. Defaults to false."
+                        },
+                        "components": {
+                            "$ref": "#/$defs/ComponentsList"
+                        },
+                        "dataModel": {
+                            "type": "object",
+                            "description": "The initial root data model object for the surface.",
+                            "additionalProperties": true
+                        },
+                        "metadata": {
+                            "type": "object",
+                            "description": "Optional surface-level metadata.",
+                            "properties": {
+                                "extensions": {
+                                    "$ref": "common_types.json#/$defs/Extensions"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": ["surfaceId"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["createSurface", "version"],
+            "additionalProperties": false
+        },
+        "Component": {
+            "description": "A UI component for the surface, combining baseline envelope properties with the catalog component definition.",
+            "allOf": [
+                {
+                    "$ref": "common_types.json#/$defs/ComponentCommon"
+                },
+                {
+                    "$ref": "catalog.json#/$defs/anyComponent"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "component": {
+                            "not": {
+                                "const": "Surface"
+                            }
+                        }
+                    }
+                }
+            ],
+            "unevaluatedProperties": false
+        },
+        "ComponentsList": {
+            "type": "array",
+            "description": "A list containing UI components for the surface.",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/Component"
+            }
+        },
+        "UpdateComponentsMessage": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "const": "v1.0"
+                },
+                "updateComponents": {
+                    "type": "object",
+                    "description": "Updates a surface with a new set of components. This message can be sent multiple times to update the component tree of an existing surface. One of the components in one of the components lists MUST have an 'id' of 'root' to serve as the root of the component tree. The createSurface message MUST have been previously sent for this surfaceId.",
+                    "properties": {
+                        "surfaceId": {
+                            "type": "string",
+                            "description": "The unique identifier for the UI surface to be updated. It must be globally unique for the renderer's lifetime."
+                        },
+                        "components": {
+                            "$ref": "#/$defs/ComponentsList"
+                        }
+                    },
+                    "required": ["surfaceId", "components"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["updateComponents", "version"],
+            "additionalProperties": false
+        },
+        "UpdateDataModelMessage": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "const": "v1.0"
+                },
+                "updateDataModel": {
+                    "type": "object",
+                    "description": "Updates the data model for an existing surface. This message can be sent multiple times to update the data model. The createSurface message MUST have been previously sent for this surfaceId.",
+                    "properties": {
+                        "surfaceId": {
+                            "type": "string",
+                            "description": "The unique identifier for the UI surface this data model update applies to. It must be globally unique for the renderer's lifetime."
+                        },
+                        "path": {
+                            "type": "string",
+                            "description": "An optional path to a location within the data model (e.g., '/user/name'). If omitted, or set to '/', refers to the entire data model."
+                        },
+                        "value": {
+                            "description": "The data to be updated in the data model. To delete the key/value at 'path', set 'value' explicitly to null."
+                        }
+                    },
+                    "required": ["surfaceId", "value"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["updateDataModel", "version"],
+            "additionalProperties": false
+        },
+        "DeleteSurfaceMessage": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "const": "v1.0"
+                },
+                "deleteSurface": {
+                    "type": "object",
+                    "description": "Signals the renderer to delete the surface identified by 'surfaceId'. The createSurface message MUST have been previously sent for this surfaceId.",
+                    "properties": {
+                        "surfaceId": {
+                            "type": "string",
+                            "description": "The unique identifier for the UI surface to be deleted. It must be globally unique for the renderer's lifetime."
+                        }
+                    },
+                    "required": ["surfaceId"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["deleteSurface", "version"],
+            "additionalProperties": false
+        },
+        "CallRendererFunctionMessage": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "const": "v1.0"
+                },
+                "callRendererFunction": {
+                    "type": "object",
+                    "description": "Signals the renderer to execute a function locally on behalf of the agent.",
+                    "properties": {
+                        "functionCallId": {
+                            "$ref": "common_types.json#/$defs/CallId",
+                            "description": "Unique ID for this instance of the function call. The renderer MUST copy this ID into the return response."
+                        },
+                        "callFunction": {
+                            "allOf": [
+                                {
+                                    "$ref": "common_types.json#/$defs/FunctionCall"
+                                },
+                                {
+                                    "required": ["catalogId"]
+                                }
+                            ]
+                        }
+                    },
+                    "required": ["functionCallId", "callFunction"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["callRendererFunction", "version"],
+            "additionalProperties": false
+        },
+        "AgentFunctionResponseMessage": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "const": "v1.0"
+                },
+                "agentFunctionResponse": {
+                    "$ref": "common_types.json#/$defs/FunctionResponse"
+                }
+            },
+            "required": ["agentFunctionResponse", "version"],
+            "additionalProperties": false
+        }
+    }
+}

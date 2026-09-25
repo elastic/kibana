@@ -1,0 +1,1220 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+    "protocolVersion": "1.0",
+    "title": "A2UI Basic Catalog",
+    "description": "Unified catalog of basic A2UI components and functions.",
+    "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+    "instructions": "For layout, use the Row and Column components to organize other components.\n\n## Catalog Guidelines\n\n1. String Concatenation & Formatting: A2UI does not support binary operators like '+' or formatting symbols. To concatenate strings or dynamically inject data bindings into text, you must use the catalog function `formatString(value)` where the value string contains placeholders formatted as `${expression}`:\n   formatString(\"Hello ${/user/name}\")\n\n2. Strict Hierarchy: You must strictly adhere to the requested component nesting and hierarchy. If the prompt specifies that a component is 'inside' or 'contained in' another component, you MUST place it as a child of that specific component, not as a sibling or in a different container.\n\n3. Validation Checks: When components support validation checks, specify any custom error messages directly as the 'message' inside the check. Do NOT create separate text-display components to display validation errors.\n\n## Examples\n\nExample 1: Dynamic text form\n```json\n[\n  {\n    \"version\": \"v1.0\",\n    \"createSurface\": {\n      \"surfaceId\": \"main\",\n      \"components\": [\n        {\n          \"id\": \"root\",\n          \"component\": \"Column\",\n          \"children\": [\"repField\", \"valueField\"]\n        },\n        {\n          \"id\": \"repField\",\n          \"component\": \"TextField\",\n          \"label\": \"Representative\",\n          \"value\": {\"path\": \"/form/rep\"},\n          \"placeholder\": \"Enter name\"\n        },\n        {\n          \"id\": \"valueField\",\n          \"component\": \"TextField\",\n          \"label\": \"Deal Value\",\n          \"value\": {\"path\": \"/form/value\"},\n          \"placeholder\": \"0.00\",\n          \"variant\": \"number\",\n          \"checks\": [\n            {\"call\": \"required\"}\n          ]\n        }\n      ],\n      \"dataModel\": {\n        \"form\": {\n          \"rep\": \"John Doe\",\n          \"value\": 1500.00\n        }\n      }\n    }\n  }\n]\n```\n\nExample 2: Dynamic list with templates\n```json\n[\n  {\n    \"version\": \"v1.0\",\n    \"createSurface\": {\n      \"surfaceId\": \"main\",\n      \"components\": [\n        {\n          \"id\": \"root\",\n          \"component\": \"Card\",\n          \"child\": \"breedList\"\n        },\n        {\n          \"id\": \"breedList\",\n          \"component\": \"List\",\n          \"children\": {\n            \"path\": \"/breeds\",\n            \"componentId\": \"breedTemplate\"\n          },\n          \"direction\": \"horizontal\"\n        },\n        {\n          \"id\": \"breedTemplate\",\n          \"component\": \"Image\",\n          \"url\": {\"path\": \"url\"}\n        }\n      ],\n      \"dataModel\": {\n        \"breeds\": [\n          {\n            \"url\": \"https://example.com/poodle.jpg\"\n          },\n          {\n            \"url\": \"https://example.com/lab.jpg\"\n          }\n        ]\n      }\n    }\n  }\n]\n```",
+    "components": {
+        "Text": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "Text"
+                },
+                "text": {
+                    "$ref": "common_types.json#/$defs/DynamicString",
+                    "description": "The text content to display. While simple Markdown formatting is supported (i.e. without HTML, images, or links), utilizing dedicated UI components is generally preferred for a richer and more structured presentation."
+                },
+                "variant": {
+                    "type": "string",
+                    "description": "A hint for the base text style.",
+                    "enum": ["caption", "body"],
+                    "default": "body"
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "text"]
+        },
+        "Image": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "Image"
+                },
+                "url": {
+                    "$ref": "common_types.json#/$defs/DynamicString",
+                    "description": "The URL of the image to display."
+                },
+                "description": {
+                    "$ref": "common_types.json#/$defs/DynamicString",
+                    "description": "Accessibility text for the image."
+                },
+                "fit": {
+                    "type": "string",
+                    "description": "Specifies how the image should be resized to fit its container. This corresponds to the CSS 'object-fit' property.",
+                    "enum": ["contain", "cover", "fill", "none", "scaleDown"],
+                    "default": "fill"
+                },
+                "variant": {
+                    "type": "string",
+                    "description": "A hint for the image size and style.",
+                    "enum": ["icon", "avatar", "smallFeature", "mediumFeature", "largeFeature", "header"],
+                    "default": "mediumFeature"
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "url"]
+        },
+        "Icon": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "Icon"
+                },
+                "name": {
+                    "description": "The name of the icon to display.",
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "enum": [
+                                "accountCircle",
+                                "add",
+                                "arrowBack",
+                                "arrowForward",
+                                "attachFile",
+                                "calendarToday",
+                                "call",
+                                "camera",
+                                "check",
+                                "close",
+                                "delete",
+                                "download",
+                                "edit",
+                                "event",
+                                "error",
+                                "fastForward",
+                                "favorite",
+                                "favoriteOff",
+                                "folder",
+                                "help",
+                                "home",
+                                "info",
+                                "locationOn",
+                                "lock",
+                                "lockOpen",
+                                "mail",
+                                "menu",
+                                "moreVert",
+                                "moreHoriz",
+                                "notificationsOff",
+                                "notifications",
+                                "pause",
+                                "payment",
+                                "person",
+                                "phone",
+                                "photo",
+                                "play",
+                                "print",
+                                "refresh",
+                                "rewind",
+                                "search",
+                                "send",
+                                "settings",
+                                "share",
+                                "shoppingCart",
+                                "skipNext",
+                                "skipPrevious",
+                                "star",
+                                "starHalf",
+                                "starOff",
+                                "stop",
+                                "upload",
+                                "visibility",
+                                "visibilityOff",
+                                "volumeDown",
+                                "volumeMute",
+                                "volumeOff",
+                                "volumeUp",
+                                "warning"
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "svgPath": {
+                                    "$ref": "common_types.json#/$defs/DynamicString"
+                                }
+                            },
+                            "required": ["svgPath"],
+                            "additionalProperties": false
+                        },
+                        {
+                            "$ref": "common_types.json#/$defs/DataBinding"
+                        }
+                    ]
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "name"]
+        },
+        "Video": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "Video"
+                },
+                "url": {
+                    "$ref": "common_types.json#/$defs/DynamicString",
+                    "description": "The URL of the video to display."
+                },
+                "posterUrl": {
+                    "$ref": "common_types.json#/$defs/DynamicString",
+                    "description": "The URL of the poster image to display before the video plays."
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "url"]
+        },
+        "AudioPlayer": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "AudioPlayer"
+                },
+                "url": {
+                    "$ref": "common_types.json#/$defs/DynamicString",
+                    "description": "The URL of the audio to be played."
+                },
+                "description": {
+                    "description": "A description of the audio, such as a title or summary.",
+                    "$ref": "common_types.json#/$defs/DynamicString"
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "url"]
+        },
+        "Row": {
+            "type": "object",
+            "description": "A layout component that arranges its children horizontally. To create a grid layout, nest Columns within this Row.",
+            "properties": {
+                "component": {
+                    "const": "Row"
+                },
+                "children": {
+                    "description": "Defines the children. Use an array of strings for a fixed set of children, or a template object to generate children from a data list. Children cannot be defined inline, they must be referred to by ID.",
+                    "$ref": "common_types.json#/$defs/ChildList"
+                },
+                "justify": {
+                    "type": "string",
+                    "description": "Defines the arrangement of children along the main axis (horizontally). Use 'spaceBetween' to push items to the edges, or 'start'/'end'/'center' to pack them together.",
+                    "enum": [
+                        "center",
+                        "end",
+                        "spaceAround",
+                        "spaceBetween",
+                        "spaceEvenly",
+                        "start",
+                        "stretch"
+                    ],
+                    "default": "start"
+                },
+                "align": {
+                    "type": "string",
+                    "description": "Defines the alignment of children along the cross axis (vertically). This is similar to the CSS 'align-items' property, but uses camelCase values (e.g., 'start').",
+                    "enum": ["start", "center", "end", "stretch"],
+                    "default": "stretch"
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "children"]
+        },
+        "Column": {
+            "type": "object",
+            "description": "A layout component that arranges its children vertically. To create a grid layout, nest Rows within this Column.",
+            "properties": {
+                "component": {
+                    "const": "Column"
+                },
+                "children": {
+                    "description": "Defines the children. Use an array of strings for a fixed set of children, or a template object to generate children from a data list. Children cannot be defined inline, they must be referred to by ID.",
+                    "$ref": "common_types.json#/$defs/ChildList"
+                },
+                "justify": {
+                    "type": "string",
+                    "description": "Defines the arrangement of children along the main axis (vertically). Use 'spaceBetween' to push items to the edges (e.g. header at top, footer at bottom), or 'start'/'end'/'center' to pack them together.",
+                    "enum": [
+                        "start",
+                        "center",
+                        "end",
+                        "spaceBetween",
+                        "spaceAround",
+                        "spaceEvenly",
+                        "stretch"
+                    ],
+                    "default": "start"
+                },
+                "align": {
+                    "type": "string",
+                    "description": "Defines the alignment of children along the cross axis (horizontally). This is similar to the CSS 'align-items' property.",
+                    "enum": ["center", "end", "start", "stretch"],
+                    "default": "stretch"
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "children"]
+        },
+        "List": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "List"
+                },
+                "children": {
+                    "description": "Defines the children. Use an array of strings for a fixed set of children, or a template object to generate children from a data list.",
+                    "$ref": "common_types.json#/$defs/ChildList"
+                },
+                "direction": {
+                    "type": "string",
+                    "description": "The direction in which the list items are laid out.",
+                    "enum": ["vertical", "horizontal"],
+                    "default": "vertical"
+                },
+                "align": {
+                    "type": "string",
+                    "description": "Defines the alignment of children along the cross axis.",
+                    "enum": ["start", "center", "end", "stretch"],
+                    "default": "stretch"
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "children"]
+        },
+        "Card": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "Card"
+                },
+                "child": {
+                    "$ref": "common_types.json#/$defs/Child",
+                    "description": "The ID of the single child component to be rendered inside the card. To display multiple elements, you MUST wrap them in a layout component (like Column or Row) and pass that container's ID here. Do NOT pass multiple IDs or a non-existent ID."
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "child"]
+        },
+        "Tabs": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "Tabs"
+                },
+                "tabs": {
+                    "type": "array",
+                    "description": "An array of objects, where each object defines a tab with a title and a child component.",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {
+                                "description": "The tab title.",
+                                "$ref": "common_types.json#/$defs/DynamicString"
+                            },
+                            "child": {
+                                "$ref": "common_types.json#/$defs/Child",
+                                "description": "The ID of the child component."
+                            }
+                        },
+                        "required": ["title", "child"],
+                        "additionalProperties": false
+                    }
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "tabs"]
+        },
+        "Modal": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "Modal"
+                },
+                "trigger": {
+                    "$ref": "common_types.json#/$defs/Child",
+                    "description": "The ID of the component that opens the modal when interacted with (e.g., a button)."
+                },
+                "content": {
+                    "$ref": "common_types.json#/$defs/Child",
+                    "description": "The ID of the component to be displayed inside the modal."
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component", "trigger", "content"]
+        },
+        "Divider": {
+            "type": "object",
+            "properties": {
+                "component": {
+                    "const": "Divider"
+                },
+                "axis": {
+                    "type": "string",
+                    "description": "The orientation of the divider.",
+                    "enum": ["horizontal", "vertical"],
+                    "default": "horizontal"
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                }
+            },
+            "required": ["component"]
+        },
+        "Button": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "common_types.json#/$defs/Checkable"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "component": {
+                            "const": "Button"
+                        },
+                        "child": {
+                            "$ref": "common_types.json#/$defs/Child",
+                            "description": "The ID of the child component. Use a 'Text' component for a labeled button. Only use an 'Icon' if the requirements explicitly ask for an icon-only button."
+                        },
+                        "variant": {
+                            "type": "string",
+                            "description": "A hint for the button style. If omitted, a default button style is used. 'primary' indicates this is the main call-to-action button. 'borderless' means the button has no visual border or background, making its child content appear like a clickable link.",
+                            "enum": ["default", "primary", "borderless"],
+                            "default": "default"
+                        },
+                        "action": {
+                            "$ref": "common_types.json#/$defs/Action"
+                        },
+                        "weight": {
+                            "type": "number",
+                            "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                        }
+                    },
+                    "required": ["component", "child", "action"]
+                }
+            ]
+        },
+        "TextField": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "common_types.json#/$defs/Checkable"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "component": {
+                            "const": "TextField"
+                        },
+                        "label": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The text label for the input field."
+                        },
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The value of the text field."
+                        },
+                        "placeholder": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The placeholder text for the input field."
+                        },
+                        "variant": {
+                            "type": "string",
+                            "description": "The type of input field to display.",
+                            "enum": ["longText", "number", "shortText", "obscured"],
+                            "default": "shortText"
+                        },
+                        "weight": {
+                            "type": "number",
+                            "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                        }
+                    },
+                    "required": ["component", "label"]
+                }
+            ]
+        },
+        "CheckBox": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "common_types.json#/$defs/Checkable"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "component": {
+                            "const": "CheckBox"
+                        },
+                        "label": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The text to display next to the checkbox."
+                        },
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicBoolean",
+                            "description": "The current state of the checkbox (true for checked, false for unchecked)."
+                        },
+                        "weight": {
+                            "type": "number",
+                            "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                        }
+                    },
+                    "required": ["component", "label", "value"]
+                }
+            ]
+        },
+        "ChoicePicker": {
+            "type": "object",
+            "description": "A component that allows selecting one or more options from a list.",
+            "allOf": [
+                {
+                    "$ref": "common_types.json#/$defs/Checkable"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "component": {
+                            "const": "ChoicePicker"
+                        },
+                        "label": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The label for the group of options."
+                        },
+                        "variant": {
+                            "type": "string",
+                            "description": "A hint for how the choice picker should be displayed and behave.",
+                            "enum": ["multipleSelection", "mutuallyExclusive"],
+                            "default": "mutuallyExclusive"
+                        },
+                        "options": {
+                            "type": "array",
+                            "description": "The list of available options to choose from.",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "label": {
+                                        "description": "The text to display for this option.",
+                                        "$ref": "common_types.json#/$defs/DynamicString"
+                                    },
+                                    "value": {
+                                        "type": "string",
+                                        "description": "The stable value associated with this option."
+                                    }
+                                },
+                                "required": ["label", "value"],
+                                "additionalProperties": false
+                            }
+                        },
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicStringList",
+                            "description": "The list of currently selected values. This should be bound to a string array in the data model."
+                        },
+                        "displayStyle": {
+                            "type": "string",
+                            "description": "The display style of the component.",
+                            "enum": ["checkbox", "chips"],
+                            "default": "checkbox"
+                        },
+                        "filterable": {
+                            "type": "boolean",
+                            "description": "If true, displays a search input to filter the options.",
+                            "default": false
+                        },
+                        "weight": {
+                            "type": "number",
+                            "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                        }
+                    },
+                    "required": ["component", "options", "value"]
+                }
+            ]
+        },
+        "Slider": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "common_types.json#/$defs/Checkable"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "component": {
+                            "const": "Slider"
+                        },
+                        "label": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The label for the slider."
+                        },
+                        "min": {
+                            "type": "number",
+                            "description": "The minimum value of the slider.",
+                            "default": 0
+                        },
+                        "max": {
+                            "type": "number",
+                            "description": "The maximum value of the slider."
+                        },
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicNumber",
+                            "description": "The current value of the slider."
+                        },
+                        "steps": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "The number of discrete divisions in the slider range. If specified, the slider will snap to discrete values."
+                        },
+                        "weight": {
+                            "type": "number",
+                            "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                        }
+                    },
+                    "required": ["component", "value", "max"]
+                }
+            ]
+        },
+        "DateTimeInput": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "common_types.json#/$defs/Checkable"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "component": {
+                            "const": "DateTimeInput"
+                        },
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The selected date and/or time value in ISO 8601 format. If not yet set, initialize with an empty string."
+                        },
+                        "enableDate": {
+                            "type": "boolean",
+                            "description": "If true, allows the user to select a date.",
+                            "default": false
+                        },
+                        "enableTime": {
+                            "type": "boolean",
+                            "description": "If true, allows the user to select a time.",
+                            "default": false
+                        },
+                        "min": {
+                            "allOf": [
+                                {
+                                    "$ref": "common_types.json#/$defs/DynamicString"
+                                },
+                                {
+                                    "if": {
+                                        "type": "string"
+                                    },
+                                    "then": {
+                                        "oneOf": [
+                                            {
+                                                "format": "date"
+                                            },
+                                            {
+                                                "format": "time"
+                                            },
+                                            {
+                                                "format": "date-time"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "description": "The minimum allowed date/time in ISO 8601 format."
+                        },
+                        "max": {
+                            "allOf": [
+                                {
+                                    "$ref": "common_types.json#/$defs/DynamicString"
+                                },
+                                {
+                                    "if": {
+                                        "type": "string"
+                                    },
+                                    "then": {
+                                        "oneOf": [
+                                            {
+                                                "format": "date"
+                                            },
+                                            {
+                                                "format": "time"
+                                            },
+                                            {
+                                                "format": "date-time"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "description": "The maximum allowed date/time in ISO 8601 format."
+                        },
+                        "label": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The text label for the input field."
+                        },
+                        "weight": {
+                            "type": "number",
+                            "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+                        }
+                    },
+                    "required": ["component", "value"]
+                }
+            ]
+        }
+    },
+    "functions": {
+        "required": {
+            "type": "object",
+            "description": "Checks that the value is not null, undefined, or empty.",
+            "returnType": "validationResult",
+            "properties": {
+                "call": {
+                    "const": "required"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "description": "The value to check."
+                        }
+                    },
+                    "required": ["value"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "regex": {
+            "type": "object",
+            "description": "Checks that the value matches a regular expression string.",
+            "returnType": "validationResult",
+            "properties": {
+                "call": {
+                    "const": "regex"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicString"
+                        },
+                        "pattern": {
+                            "type": "string",
+                            "description": "The regex pattern to match against."
+                        }
+                    },
+                    "required": ["value", "pattern"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "length": {
+            "type": "object",
+            "description": "Checks string length constraints.",
+            "returnType": "validationResult",
+            "properties": {
+                "call": {
+                    "const": "length"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicString"
+                        },
+                        "min": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "The minimum allowed length."
+                        },
+                        "max": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "The maximum allowed length."
+                        }
+                    },
+                    "required": ["value"],
+                    "anyOf": [
+                        {
+                            "required": ["min"]
+                        },
+                        {
+                            "required": ["max"]
+                        }
+                    ],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "numeric": {
+            "type": "object",
+            "description": "Checks numeric range constraints.",
+            "returnType": "validationResult",
+            "properties": {
+                "call": {
+                    "const": "numeric"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicNumber"
+                        },
+                        "min": {
+                            "type": "number",
+                            "description": "The minimum allowed value."
+                        },
+                        "max": {
+                            "type": "number",
+                            "description": "The maximum allowed value."
+                        }
+                    },
+                    "required": ["value"],
+                    "anyOf": [
+                        {
+                            "required": ["min"]
+                        },
+                        {
+                            "required": ["max"]
+                        }
+                    ],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "email": {
+            "type": "object",
+            "description": "Checks that the value is a valid email address.",
+            "returnType": "validationResult",
+            "properties": {
+                "call": {
+                    "const": "email"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicString"
+                        }
+                    },
+                    "required": ["value"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "formatString": {
+            "type": "object",
+            "description": "Performs string interpolation of data model values and other functions in the catalog functions list and returns the resulting string. The value string can contain interpolated expressions in the `${expression}` format. Supported expression types include: JSON Pointer paths to the data model (e.g., `${/absolute/path}` or `${relative/path}`), and renderer-side function calls (e.g., `${now()}`). Function arguments must be named (e.g., `${formatDate(value:${/currentDate}, format:'MM-dd')}`). To include a literal `${` sequence, escape it as `\\${`.",
+            "returnType": "string",
+            "properties": {
+                "call": {
+                    "const": "formatString"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicString"
+                        }
+                    },
+                    "required": ["value"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "formatNumber": {
+            "type": "object",
+            "description": "Formats a number with the specified grouping and decimal precision.",
+            "returnType": "string",
+            "properties": {
+                "call": {
+                    "const": "formatNumber"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicNumber",
+                            "description": "The number to format."
+                        },
+                        "decimals": {
+                            "$ref": "common_types.json#/$defs/DynamicNumber",
+                            "description": "Optional. The number of decimal places to show. Defaults to 0 or 2 depending on locale."
+                        },
+                        "grouping": {
+                            "$ref": "common_types.json#/$defs/DynamicBoolean",
+                            "description": "Optional. If true, uses locale-specific grouping separators (e.g. '1,000'). If false, returns raw digits (e.g. '1000'). Defaults to true."
+                        }
+                    },
+                    "required": ["value"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "formatCurrency": {
+            "type": "object",
+            "description": "Formats a number as a currency string.",
+            "returnType": "string",
+            "properties": {
+                "call": {
+                    "const": "formatCurrency"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicNumber",
+                            "description": "The monetary amount."
+                        },
+                        "currency": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The ISO 4217 currency code (e.g., 'USD', 'EUR')."
+                        },
+                        "decimals": {
+                            "$ref": "common_types.json#/$defs/DynamicNumber",
+                            "description": "Optional. The number of decimal places to show. Defaults to 0 or 2 depending on locale."
+                        },
+                        "grouping": {
+                            "$ref": "common_types.json#/$defs/DynamicBoolean",
+                            "description": "Optional. If true, uses locale-specific grouping separators (e.g. '1,000'). If false, returns raw digits (e.g. '1000'). Defaults to true."
+                        }
+                    },
+                    "required": ["currency", "value"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "formatDate": {
+            "type": "object",
+            "description": "Formats a timestamp into a string using a pattern.",
+            "returnType": "string",
+            "properties": {
+                "call": {
+                    "const": "formatDate"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicValue",
+                            "description": "The date to format."
+                        },
+                        "format": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "A Unicode TR35 date pattern string.\n\nToken Reference:\n- Year: 'yy' (26), 'yyyy' (2026)\n- Month: 'M' (1), 'MM' (01), 'MMM' (Jan), 'MMMM' (January)\n- Day: 'd' (1), 'dd' (01), 'E' (Tue), 'EEEE' (Tuesday)\n- Hour (12h): 'h' (1-12), 'hh' (01-12) - requires 'a' for AM/PM\n- Hour (24h): 'H' (0-23), 'HH' (00-23) - Military Time\n- Minute: 'mm' (00-59)\n- Second: 'ss' (00-59)\n- Period: 'a' (AM/PM)\n\nExamples:\n- 'MMM dd, yyyy' -> 'Jan 16, 2026'\n- 'HH:mm' -> '14:30' (Military)\n- 'h:mm a' -> '2:30 PM'\n- 'EEEE, d MMMM' -> 'Friday, 16 January'"
+                        }
+                    },
+                    "required": ["format", "value"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "pluralize": {
+            "type": "object",
+            "description": "Returns a localized string based on the Common Locale Data Repository (CLDR) plural category of the count (zero, one, two, few, many, other). Requires an 'other' fallback. For English, just use 'one' and 'other'.",
+            "returnType": "string",
+            "properties": {
+                "call": {
+                    "const": "pluralize"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicNumber",
+                            "description": "The numeric value used to determine the plural category."
+                        },
+                        "zero": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "String for the 'zero' category (e.g., 0 items)."
+                        },
+                        "one": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "String for the 'one' category (e.g., 1 item)."
+                        },
+                        "two": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "String for the 'two' category (used in Arabic, Welsh, etc.)."
+                        },
+                        "few": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "String for the 'few' category (e.g., small groups in Slavic languages)."
+                        },
+                        "many": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "String for the 'many' category (e.g., large groups in various languages)."
+                        },
+                        "other": {
+                            "$ref": "common_types.json#/$defs/DynamicString",
+                            "description": "The default/fallback string (used for general plural cases)."
+                        }
+                    },
+                    "required": ["value", "other"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "openUrl": {
+            "type": "object",
+            "description": "Opens the specified URL in a browser or handler (requires user activation). This function has no return value.",
+            "returnType": "void",
+            "requiresUserActivation": true,
+            "properties": {
+                "call": {
+                    "const": "openUrl"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "description": "The URL to open.",
+                            "oneOf": [
+                                {
+                                    "type": "string",
+                                    "format": "uri"
+                                },
+                                {
+                                    "$ref": "common_types.json#/$defs/DataBinding"
+                                },
+                                {
+                                    "$ref": "common_types.json#/$defs/FunctionCall"
+                                }
+                            ]
+                        }
+                    },
+                    "required": ["url"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "and": {
+            "type": "object",
+            "description": "Performs a logical AND operation on a list of boolean values.",
+            "returnType": "boolean",
+            "properties": {
+                "call": {
+                    "const": "and"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "values": {
+                            "type": "array",
+                            "description": "The list of boolean values to evaluate.",
+                            "items": {
+                                "$ref": "common_types.json#/$defs/DynamicBoolean"
+                            },
+                            "minItems": 2
+                        }
+                    },
+                    "required": ["values"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "or": {
+            "type": "object",
+            "description": "Performs a logical OR operation on a list of boolean values.",
+            "returnType": "boolean",
+            "properties": {
+                "call": {
+                    "const": "or"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "values": {
+                            "type": "array",
+                            "description": "The list of boolean values to evaluate.",
+                            "items": {
+                                "$ref": "common_types.json#/$defs/DynamicBoolean"
+                            },
+                            "minItems": 2
+                        }
+                    },
+                    "required": ["values"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        },
+        "not": {
+            "type": "object",
+            "description": "Performs a logical NOT operation on a boolean value.",
+            "returnType": "boolean",
+            "properties": {
+                "call": {
+                    "const": "not"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "common_types.json#/$defs/DynamicBoolean",
+                            "description": "The boolean value to negate."
+                        }
+                    },
+                    "required": ["value"],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["call", "args"]
+        }
+    },
+    "$defs": {
+        "anyComponent": {
+            "oneOf": [
+                {
+                    "$ref": "#/components/Text"
+                },
+                {
+                    "$ref": "#/components/Image"
+                },
+                {
+                    "$ref": "#/components/Icon"
+                },
+                {
+                    "$ref": "#/components/Video"
+                },
+                {
+                    "$ref": "#/components/AudioPlayer"
+                },
+                {
+                    "$ref": "#/components/Row"
+                },
+                {
+                    "$ref": "#/components/Column"
+                },
+                {
+                    "$ref": "#/components/List"
+                },
+                {
+                    "$ref": "#/components/Card"
+                },
+                {
+                    "$ref": "#/components/Tabs"
+                },
+                {
+                    "$ref": "#/components/Modal"
+                },
+                {
+                    "$ref": "#/components/Divider"
+                },
+                {
+                    "$ref": "#/components/Button"
+                },
+                {
+                    "$ref": "#/components/TextField"
+                },
+                {
+                    "$ref": "#/components/CheckBox"
+                },
+                {
+                    "$ref": "#/components/ChoicePicker"
+                },
+                {
+                    "$ref": "#/components/Slider"
+                },
+                {
+                    "$ref": "#/components/DateTimeInput"
+                }
+            ],
+            "discriminator": {
+                "propertyName": "component"
+            }
+        },
+        "anyFunction": {
+            "oneOf": [
+                {
+                    "$ref": "#/functions/required"
+                },
+                {
+                    "$ref": "#/functions/regex"
+                },
+                {
+                    "$ref": "#/functions/length"
+                },
+                {
+                    "$ref": "#/functions/numeric"
+                },
+                {
+                    "$ref": "#/functions/email"
+                },
+                {
+                    "$ref": "#/functions/formatString"
+                },
+                {
+                    "$ref": "#/functions/formatNumber"
+                },
+                {
+                    "$ref": "#/functions/formatCurrency"
+                },
+                {
+                    "$ref": "#/functions/formatDate"
+                },
+                {
+                    "$ref": "#/functions/pluralize"
+                },
+                {
+                    "$ref": "#/functions/openUrl"
+                },
+                {
+                    "$ref": "#/functions/and"
+                },
+                {
+                    "$ref": "#/functions/or"
+                },
+                {
+                    "$ref": "#/functions/not"
+                }
+            ]
+        }
+    }
+}

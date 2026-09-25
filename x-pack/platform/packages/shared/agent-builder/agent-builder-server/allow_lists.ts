@@ -10,6 +10,7 @@ import {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  customAppsTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -27,6 +28,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
   ...Object.values(platformSignificantEventsTools),
+
+  // Custom Apps (prototype), registered by the custom_apps plugin
+  ...Object.values(customAppsTools),
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,

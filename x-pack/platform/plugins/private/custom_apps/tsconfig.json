@@ -1,0 +1,49 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@testing-library/jest-dom",
+      "@emotion/react/types/css-prop"
+    ]
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "scripts/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/zod",
+    "@kbn/grid-layout",
+    "@kbn/a2ui-renderer",
+    "@kbn/a2ui-eui-catalog",
+    "@kbn/embeddable-plugin",
+    "@kbn/lens-common",
+    "@kbn/presentation-publishing",
+    "@kbn/es-query",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/data-plugin",
+    "@kbn/esql-utils",
+    "@kbn/search-types",
+    "@kbn/es-types",
+    "@kbn/datemath",
+    "@kbn/charts-theme",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/dev-cli-runner",
+    "@kbn/tooling-log",
+    "@kbn/setup-node-env",
+    "@kbn/esql-types",
+    "@kbn/custom-content-renderer"
+  ]
+}
