@@ -1522,6 +1522,15 @@ importers:
       '@kbn/core-provider-plugin':
         specifier: workspace:*
         version: link:src/platform/test/plugin_functional/plugins/core_provider_plugin
+      '@kbn/core-pubsub-server':
+        specifier: workspace:*
+        version: link:src/core/packages/pubsub/server
+      '@kbn/core-pubsub-server-internal':
+        specifier: workspace:*
+        version: link:src/core/packages/pubsub/server-internal
+      '@kbn/core-pubsub-server-mocks':
+        specifier: workspace:*
+        version: link:src/core/packages/pubsub/server-mocks
       '@kbn/core-rendering-browser':
         specifier: workspace:*
         version: link:src/core/packages/rendering/browser
@@ -7416,6 +7425,12 @@ importers:
   src/core/packages/pricing/server-internal: {}
 
   src/core/packages/pricing/server-mocks: {}
+
+  src/core/packages/pubsub/server: {}
+
+  src/core/packages/pubsub/server-internal: {}
+
+  src/core/packages/pubsub/server-mocks: {}
 
   src/core/packages/rendering/browser: {}
 
