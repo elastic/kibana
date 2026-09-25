@@ -15,6 +15,12 @@ import {
 } from './kibana_cli_args';
 
 describe('parseRawFlags()', () => {
+  it('preserves config files in order so Kibana loads every configuration layer', () => {
+    expect(
+      parseRawFlags(['--config=tracing.yml', '--config=sandbox.yml', '--config=telemetry.yml'])
+    ).toEqual(['--config=tracing.yml', '--config=sandbox.yml', '--config=telemetry.yml']);
+  });
+
   it('produces a sorted list of flags', () => {
     expect(parseRawFlags(['--foo=bar', '--a=b', '--c.b.a=0', '--a.b.c=1'])).toMatchInlineSnapshot(`
       Array [

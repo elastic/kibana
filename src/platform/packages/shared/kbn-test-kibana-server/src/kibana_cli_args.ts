@@ -24,7 +24,7 @@ const ALIASES = new Map([
 /**
  * These are the only flag names that allow duplicate definitions
  */
-const ALLOW_DUPLICATES = new Set(['plugin-path']);
+const ALLOW_DUPLICATES = new Set(['plugin-path', 'config']);
 
 export type KibanaCliArg = string & {
   readonly __cliArgBrand: unique symbol;
