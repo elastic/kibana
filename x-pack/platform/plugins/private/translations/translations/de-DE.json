@@ -18592,7 +18592,6 @@
     "xpack.dataFederation.createFlyout.s3.fields.accessKey": "Zugriffsschlüssel",
     "xpack.dataFederation.createFlyout.s3.fields.accessKeyRequired": "Ein Zugangsschlüssel ist erforderlich.",
     "xpack.dataFederation.createFlyout.s3.fields.endpoint": "Endpoint",
-    "xpack.dataFederation.createFlyout.s3.fields.jwtAudience": "JWT-Zielgruppe",
     "xpack.dataFederation.createFlyout.s3.fields.region": "Region",
     "xpack.dataFederation.createFlyout.s3.fields.regionRequired": "Eine Region ist erforderlich.",
     "xpack.dataFederation.createFlyout.s3.fields.roleArn": "Rollen-ARN",
