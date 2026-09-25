@@ -13,6 +13,7 @@ import type { SearchConnectorsPluginSetupDependencies } from '../config';
 import { elasticsearchErrorHandler } from '../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../utils/identify_exceptions';
 import { createError } from '../utils/create_error';
+import { indexNameSchema } from './schemas';
 
 export function registerMappingRoute({ router, log }: SearchConnectorsPluginSetupDependencies) {
   router.get(
@@ -26,7 +27,7 @@ export function registerMappingRoute({ router, log }: SearchConnectorsPluginSetu
       },
       validate: {
         params: schema.object({
-          index_name: schema.string(),
+          index_name: indexNameSchema,
         }),
       },
     },
