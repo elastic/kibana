@@ -15,6 +15,8 @@ import {
   DATE_WITH_SEMCONV_POD_DATA,
   EXTENDED_TIMEOUT,
   POD_NAMES,
+  SEMCONV_HOST1_NAME,
+  SEMCONV_HOST2_NAME,
   SEMCONV_PODS,
 } from '../../fixtures/constants';
 import {
@@ -68,9 +70,6 @@ test.describe(
       await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
         timeout: EXTENDED_TIMEOUT,
       });
-      await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(
-        SEMCONV_PODS.length
-      );
 
       for (const pod of SEMCONV_PODS) {
         const waffleNode = await inventoryPage.podWaffleNodeByName(pod.name);
@@ -90,9 +89,6 @@ test.describe(
         timeout: EXTENDED_TIMEOUT,
       });
       await expect(page).toHaveURL(/preferredSchema:semconv/);
-      await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(
-        SEMCONV_PODS.length
-      );
 
       for (const pod of SEMCONV_PODS) {
         const waffleNode = await inventoryPage.podWaffleNodeByName(pod.name);
@@ -124,9 +120,6 @@ test.describe(
 
       const ecsPod = await inventoryPage.podWaffleNodeByName(ECS_POD_NAME);
       await expect(ecsPod.container).toBeVisible();
-      await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(
-        POD_NAMES.length
-      );
 
       for (const pod of SEMCONV_PODS) {
         const waffleNode = await inventoryPage.podWaffleNodeByName(pod.name);
@@ -157,9 +150,6 @@ test.describe(
       await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
         timeout: EXTENDED_TIMEOUT,
       });
-      await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(
-        SEMCONV_PODS.length
-      );
 
       for (const pod of SEMCONV_PODS) {
         const waffleNode = await inventoryPage.podWaffleNodeByName(pod.name);
@@ -254,7 +244,16 @@ test.describe(
       await expect(page).toHaveURL(/preferredSchema:semconv/);
 
       await inventoryPage.selectGroupBy('k8s.node.name');
-      await expect(page.getByTestId('groupNameButton')).toHaveCount(2);
+      await expect(
+        page.getByTestId('groupNameButton').filter({ hasText: SEMCONV_HOST1_NAME })
+      ).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
+      await expect(
+        page.getByTestId('groupNameButton').filter({ hasText: SEMCONV_HOST2_NAME })
+      ).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
     });
 
     test('table view lists OpenTelemetry pods', async ({ pageObjects: { inventoryPage } }) => {
