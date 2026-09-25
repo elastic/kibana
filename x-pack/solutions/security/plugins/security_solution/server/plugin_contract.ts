@@ -94,10 +94,10 @@ export interface SecuritySolutionPluginSetupDependencies {
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   cps?: CPSServerSetup;
   /**
-   * Optional. When present, `enabled` is the AlertZero soft-enable switch
+   * Optional. When present, `isEnabled` is the AlertZero soft-enable switch
    * (`xpack.alertzero.enabled`). Threat-intel supply gates on this.
    */
-  alertzero?: { enabled: boolean };
+  alertzero?: { isEnabled: boolean };
 }
 
 export interface SecuritySolutionPluginStartDependencies {

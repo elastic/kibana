@@ -16,6 +16,7 @@ import {
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 const UpdateWorkerRequestParams = z.object({
   workerId: z.string().min(1).max(128),
@@ -48,7 +49,7 @@ export const registerUpdateWorkerRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
           const { workerId } = request.params;
           const result = await getWorkersService().update(
@@ -130,6 +131,6 @@ export const registerUpdateWorkerRoute = ({
             },
           });
         }
-      }
+      })
     );
 };

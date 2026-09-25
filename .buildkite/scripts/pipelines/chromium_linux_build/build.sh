@@ -25,7 +25,7 @@ ARTIFACT_QUERY="chromium-${CHROMIUM_COMMIT_HASH:0:7}-.*_$PLATFORM_VARIANT"
 
 # Query to determine if expected build artifact from a prior build exists, 
 # the build.py script uploads the build artifact to the staging bucket
-artifacts=$(gsutil ls "$ARTIFACT_STAGING_STORAGE_BUCKET" | grep "$ARTIFACT_QUERY" || true)
+artifacts=$(gcloud storage ls "$ARTIFACT_STAGING_STORAGE_BUCKET" | grep "$ARTIFACT_QUERY" || true)
 
 if [[ -z "$artifacts" ]]; then
   echo "No files found matching the query: $ARTIFACT_QUERY"
@@ -55,7 +55,7 @@ if [[ -z "$artifacts" ]]; then
 
     echo "---Upload build artefact to prod storage bucket"
 
-    gsutil cp "$BUILD_ROOT_DIR/chromium/src/out/headless/chromium-*" "$ARTIFACT_PROD_STORAGE_BUCKET"
+    gcloud storage cp "$BUILD_ROOT_DIR/chromium/src/out/headless/chromium-*" "$ARTIFACT_PROD_STORAGE_BUCKET"
 
     echo "---Persisting build artefact to buildkite for following steps"
 
@@ -63,7 +63,7 @@ if [[ -z "$artifacts" ]]; then
 
 else
   echo "$artifacts" | while read -r file; do
-    gsutil cp "$file" .
+    gcloud storage cp "$file" .
   done
 
   shopt -s nullglob
