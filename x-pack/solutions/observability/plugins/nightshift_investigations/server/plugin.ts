@@ -387,13 +387,14 @@ export class NightshiftInvestigationsPlugin
       });
     }
 
+    const investigationSweepRepository = createInvestigationSweepRepository(
+      coreStart.savedObjects,
+      this.logger
+    );
+
     return {
       getInvestigationsClient: this.getInvestigationsClient,
-      deleteAllInvestigations: () =>
-        createInvestigationSweepRepository(
-          coreStart.savedObjects,
-          this.logger
-        ).deleteAllAcrossSpaces(),
+      deleteAllInvestigations: () => investigationSweepRepository.deleteAllAcrossSpaces(),
       isInvestigationAvailable: (request) =>
         isInvestigationAvailable({
           request,
