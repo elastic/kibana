@@ -318,6 +318,7 @@ export class AlertsClient {
     // Deduplicate authorization checks: authorization is granted per (ruleTypeId, consumer)
     // pair, so we only need to call `ensureAuthorized` once per unique pair.
     const ownersAndRuleTypeIds = new Map<string, { ruleTypeId: string; consumer: string }>();
+    const unauthorizableIds: string[] = [];
 
     items.forEach((hit) => {
       hitIds.push(hit._id);
@@ -327,19 +328,31 @@ export class AlertsClient {
 
       if (ruleTypeId != null && consumer != null) {
         ownersAndRuleTypeIds.set(`${ruleTypeId}|${consumer}`, { ruleTypeId, consumer });
+      } else {
+        unauthorizableIds.push(hit._id);
       }
     });
 
-    return Promise.all(
-      Array.from(ownersAndRuleTypeIds.values()).map(({ ruleTypeId, consumer }) =>
-        this.authorization.ensureAuthorized({
-          ruleTypeId,
-          consumer,
-          operation,
-          entity: AlertingAuthorizationEntity.Alert,
-        })
-      )
-    ).catch((error) => {
+    try {
+      if (unauthorizableIds.length > 0) {
+        const errorMessage = `Invalid alert found with id of "${unauthorizableIds.join(
+          ', '
+        )}" and operation ${operation}`;
+        this.logger.error(errorMessage);
+        throw Boom.badData(errorMessage);
+      }
+
+      await Promise.all(
+        Array.from(ownersAndRuleTypeIds.values()).map(({ ruleTypeId, consumer }) =>
+          this.authorization.ensureAuthorized({
+            ruleTypeId,
+            consumer,
+            operation,
+            entity: AlertingAuthorizationEntity.Alert,
+          })
+        )
+      );
+    } catch (error) {
       for (const hitId of hitIds) {
         this.auditLogger?.log(
           alertAuditEvent({
@@ -350,7 +363,7 @@ export class AlertsClient {
         );
       }
       throw error;
-    });
+    }
   }
 
   /**
