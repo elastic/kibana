@@ -26,8 +26,10 @@
  * ```
  *
  * The client certificate and key default to where serverless mounts Kibana's
- * Cloud-issued certificate. When `enabled` is `true`, Kibana fails to start if
- * any referenced file cannot be read.
+ * Cloud-issued certificate. If neither is set and that mount does not exist,
+ * Kibana connects without a client certificate and relies on `api_key` alone.
+ * When `enabled` is `true`, Kibana fails to start if a configured file cannot
+ * be read.
  *
  * When `enabled` is `false` (the default), or when `api_key` is absent,
  * `SandboxPluginStart.getSession` throws a descriptive error for every call.

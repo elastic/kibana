@@ -8,8 +8,21 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import Path from 'path';
-import { config, DEFAULT_CERTIFICATE_PATH, DEFAULT_KEY_PATH } from './config';
-import { readTlsCredentials } from './tls_credentials';
+import { DEFAULT_CERTIFICATE_PATH, DEFAULT_KEY_PATH, readTlsCredentials } from './tls_credentials';
+
+const mockDefaultMount = new Map<string, string>();
+
+jest.mock('fs', () => {
+  const actual = jest.requireActual('fs');
+  return {
+    ...actual,
+    existsSync: (path: string) => mockDefaultMount.has(path) || actual.existsSync(path),
+    readFileSync: (path: string) => {
+      const contents = mockDefaultMount.get(path);
+      return contents === undefined ? actual.readFileSync(path) : Buffer.from(contents);
+    },
+  };
+});
 
 describe('readTlsCredentials', () => {
   let directory: string;
@@ -18,6 +31,7 @@ describe('readTlsCredentials', () => {
   let certificateAuthorities: string;
 
   beforeEach(() => {
+    mockDefaultMount.clear();
     directory = mkdtempSync(Path.join(tmpdir(), 'sandbox-tls-'));
     certificate = Path.join(directory, 'tls.crt');
     key = Path.join(directory, 'tls.key');
@@ -45,7 +59,25 @@ describe('readTlsCredentials', () => {
     expect(readTlsCredentials({ certificate, key }).rootCertPem).toBeUndefined();
   });
 
-  it('throws naming the setting and path when a file cannot be read', () => {
+  it('uses the serverless mount when certificate and key are not configured', () => {
+    mockDefaultMount.set(DEFAULT_CERTIFICATE_PATH, 'MOUNT_CERT');
+    mockDefaultMount.set(DEFAULT_KEY_PATH, 'MOUNT_KEY');
+    expect(readTlsCredentials({})).toEqual({
+      rootCertPem: undefined,
+      clientCertPem: Buffer.from('MOUNT_CERT'),
+      clientKeyPem: Buffer.from('MOUNT_KEY'),
+    });
+  });
+
+  it('skips the client certificate when nothing is configured and the mount is missing', () => {
+    expect(readTlsCredentials({})).toEqual({ rootCertPem: undefined });
+    mockDefaultMount.set(DEFAULT_CERTIFICATE_PATH, 'MOUNT_CERT');
+    expect(readTlsCredentials({ certificate_authorities: certificateAuthorities })).toEqual({
+      rootCertPem: Buffer.from('CA'),
+    });
+  });
+
+  it('throws naming the setting and path when a configured file cannot be read', () => {
     const missing = Path.join(directory, 'missing.key');
     expect(() => readTlsCredentials({ certificate, key: missing })).toThrow(
       `Unable to read xpack.sandbox.ssl.key from "${missing}"`
@@ -54,19 +86,10 @@ describe('readTlsCredentials', () => {
       readTlsCredentials({ certificate, key, certificate_authorities: missing })
     ).toThrow('xpack.sandbox.ssl.certificate_authorities');
   });
-});
 
-describe('sandbox ssl config', () => {
-  it('defaults the client certificate and key to the serverless mount', () => {
-    expect(config.schema.validate({ enabled: true }).ssl).toEqual({
-      certificate: DEFAULT_CERTIFICATE_PATH,
-      key: DEFAULT_KEY_PATH,
-    });
-  });
-
-  it('uses configured paths over the defaults', () => {
-    expect(
-      config.schema.validate({ ssl: { certificate: '/certs/tls.crt', key: '/certs/tls.key' } }).ssl
-    ).toEqual({ certificate: '/certs/tls.crt', key: '/certs/tls.key' });
+  it('requires the default key when only the certificate is configured', () => {
+    expect(() => readTlsCredentials({ certificate })).toThrow(
+      `Unable to read xpack.sandbox.ssl.key from "${DEFAULT_KEY_PATH}"`
+    );
   });
 });

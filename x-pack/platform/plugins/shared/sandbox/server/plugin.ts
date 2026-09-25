@@ -19,7 +19,7 @@ import type { SandboxPluginConfig } from './config';
 import { SandboxApiClient } from './grpc_client';
 import { SandboxSessionImpl } from './sandbox_session';
 import type { SandboxSession } from './sandbox_session';
-import { readTlsCredentials } from './tls_credentials';
+import { DEFAULT_CERTIFICATE_PATH, readTlsCredentials } from './tls_credentials';
 import type { SandboxTlsCredentials } from './tls_credentials';
 
 interface SandboxPluginStartDeps {
@@ -111,6 +111,11 @@ export class SandboxPlugin
     const config = this.ctx.config.get();
     if (config.enabled) {
       this.tlsCredentials = readTlsCredentials(config.ssl);
+      if (!this.tlsCredentials.clientCertPem) {
+        this.logger.info(
+          `No client certificate at ${DEFAULT_CERTIFICATE_PATH} and xpack.sandbox.ssl.certificate is not set — connecting to sandbox-api without mTLS, authenticated by api_key only`
+        );
+      }
     }
     return {
       isAvailable: config.enabled && !!config.api_key,

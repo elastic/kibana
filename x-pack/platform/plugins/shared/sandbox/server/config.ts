@@ -9,14 +9,10 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
-// Where the Kibana controller mounts the Cloud-issued client certificate in serverless.
-export const DEFAULT_CERTIFICATE_PATH = '/mnt/elastic-internal/http-certs/tls.crt';
-export const DEFAULT_KEY_PATH = '/mnt/elastic-internal/http-certs/tls.key';
-
 const sslConfigSchema = schema.object({
   certificate_authorities: schema.maybe(schema.string()),
-  certificate: schema.string({ defaultValue: DEFAULT_CERTIFICATE_PATH }),
-  key: schema.string({ defaultValue: DEFAULT_KEY_PATH }),
+  certificate: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
 });
 
 const configSchema = schema.object({
@@ -27,7 +23,8 @@ const configSchema = schema.object({
   port: schema.number({ defaultValue: 9090 }),
   // API key required by sandbox-api (ApiKey scheme). Required when enabled.
   api_key: schema.maybe(schema.string()),
-  // mTLS PEM file paths. The client certificate and key default to the serverless mount.
+  // mTLS PEM file paths. Unset certificate/key fall back to the serverless mount, and to no
+  // client certificate (API key only) when that mount does not exist.
   ssl: sslConfigSchema,
 });
 

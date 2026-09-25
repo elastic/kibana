@@ -448,13 +448,14 @@ export class SandboxApiClient {
     port: number;
     apiKey: string;
     rootCertPem?: Buffer;
-    clientCertPem: Buffer;
-    clientKeyPem: Buffer;
+    clientCertPem?: Buffer;
+    clientKeyPem?: Buffer;
   }) {
+    // Without a client certificate this is plain TLS and sandbox-api relies on the API key.
     const credentials = grpc.credentials.createSsl(
       rootCertPem ?? null,
-      clientKeyPem,
-      clientCertPem
+      clientKeyPem ?? null,
+      clientCertPem ?? null
     );
     this.client = new SandboxServiceConstructor(`${host}:${port}`, credentials);
     this.apiKey = apiKey;
