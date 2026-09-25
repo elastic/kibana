@@ -35,11 +35,13 @@ jest.mock('../../../action_policy/details_flyout/action_policy_details_flyout_co
   ActionPolicyDetailsFlyoutContainer: ({
     policyId,
     onClose,
+    session,
   }: {
     policyId: string;
     onClose: () => void;
+    session?: string;
   }) => (
-    <div data-test-subj="actionPolicyDetailsFlyoutMock">
+    <div data-test-subj="actionPolicyDetailsFlyoutMock" data-session={session}>
       <span data-test-subj="actionPolicyDetailsFlyoutMockId">{policyId}</span>
       <button type="button" onClick={onClose}>
         close
@@ -95,11 +97,14 @@ const idleHookResult = {
   error: null,
 };
 
-const renderSubsection = (rule: RuleApiResponse = baseRule) =>
+const renderSubsection = (
+  rule: RuleApiResponse = baseRule,
+  props: Partial<React.ComponentProps<typeof ActionPoliciesArtifactsSubsection>> = {}
+) =>
   render(
     <MockLocatorProvider locators={mockLocators}>
       <I18nProvider>
-        <ActionPoliciesArtifactsSubsection rule={rule} />
+        <ActionPoliciesArtifactsSubsection rule={rule} {...props} />
       </I18nProvider>
     </MockLocatorProvider>
   );
@@ -156,6 +161,11 @@ describe('ActionPoliciesArtifactsSubsection', () => {
   it('renders an empty prompt when no policies match', () => {
     renderSubsection();
     expect(screen.getByTestId('ruleActionPoliciesArtifactsEmpty')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('ruleActionPoliciesArtifactsEmpty')
+        .querySelector('[data-euiicon-type="tablePlay"]')
+    ).toBeInTheDocument();
     expect(screen.getByText('No matching action policies')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleActionPolicyArtifactRow-policy-1')).not.toBeInTheDocument();
     expect(
@@ -224,7 +234,13 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       'target',
       '_blank'
     );
+    expect(
+      screen
+        .getByTestId('ruleActionPoliciesArtifactsOpenLink')
+        .querySelector('[data-euiicon-type="external"]')
+    ).toBeInTheDocument();
     expect(screen.getByText('Open action policies')).toBeInTheDocument();
+    expect(screen.getByText('Action policies')).toBeInTheDocument();
   });
 
   it('truncates policy names longer than 28 characters', () => {
@@ -325,11 +341,32 @@ describe('ActionPoliciesArtifactsSubsection', () => {
 
     expect(screen.queryByTestId('actionPolicyDetailsFlyoutMock')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('ruleActionPolicyArtifactName-policy-match'));
-    expect(screen.getByTestId('actionPolicyDetailsFlyoutMock')).toBeInTheDocument();
+    expect(screen.getByTestId('actionPolicyDetailsFlyoutMock')).toHaveAttribute(
+      'data-session',
+      'start'
+    );
     expect(screen.getByTestId('actionPolicyDetailsFlyoutMockId')).toHaveTextContent('policy-match');
 
     fireEvent.click(screen.getByText('close'));
     expect(screen.queryByTestId('actionPolicyDetailsFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('hides the card title and inherits the flyout session when a parent heading is present', () => {
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      items: [buildItem('tags', { id: 'policy-match', name: 'Tag policy' })],
+    });
+
+    renderSubsection(baseRule, { showTitle: false, flyoutSession: 'inherit' });
+
+    expect(screen.queryByText('Action policies')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleActionPolicyArtifactName-policy-match'));
+    expect(screen.getByTestId('actionPolicyDetailsFlyoutMock')).toHaveAttribute(
+      'data-session',
+      'inherit'
+    );
   });
 
   it('shows disabled and snoozed badges when the policy would not fire', () => {

@@ -84,6 +84,7 @@ jest.mock('../../../hooks/use_update_action_policy_api_key', () => ({
 
 interface FlyoutMockProps {
   policy: ActionPolicyResponse;
+  session?: string;
   onClose: () => void;
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
@@ -97,7 +98,7 @@ interface FlyoutMockProps {
 
 jest.mock('./action_policy_details_flyout', () => ({
   ActionPolicyDetailsFlyout: (props: FlyoutMockProps) => (
-    <div data-test-subj="mockFlyout">
+    <div data-test-subj="mockFlyout" data-session={props.session}>
       <button
         data-test-subj="flyout-edit"
         onClick={() => props.onEdit(props.policy.id)}
@@ -207,10 +208,14 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     ...overrides,
   } as ActionPolicyResponse);
 
-const renderContainer = () =>
+const renderContainer = (session?: 'start' | 'inherit') =>
   render(
     <I18nProvider>
-      <ActionPolicyDetailsFlyoutContainer policyId="policy-1" onClose={mockOnClose} />
+      <ActionPolicyDetailsFlyoutContainer
+        policyId="policy-1"
+        onClose={mockOnClose}
+        session={session}
+      />
     </I18nProvider>
   );
 
@@ -248,7 +253,13 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
   it('renders the flyout once the policy is loaded', () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
     renderContainer();
-    expect(screen.getByTestId('mockFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-session', 'start');
+  });
+
+  it('keeps an inherited session when opened from another flyout', () => {
+    mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+    renderContainer('inherit');
+    expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-session', 'inherit');
   });
 
   it('navigates to the edit page and calls onClose on edit', async () => {

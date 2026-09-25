@@ -12,6 +12,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import { actionPolicyKeys } from './query_key_factory';
+import { useCreateActionPolicy } from './use_create_action_policy';
 import { useDeleteActionPolicy } from './use_delete_action_policy';
 import { useDisableActionPolicy } from './use_disable_action_policy';
 import { useEnableActionPolicy } from './use_enable_action_policy';
@@ -37,6 +38,7 @@ const wrap = (queryClient: QueryClient) => {
 
 describe('action policy mutations refresh matched policies', () => {
   const api = {
+    createActionPolicy: jest.fn(),
     deleteActionPolicy: jest.fn(),
     disableActionPolicy: jest.fn(),
     enableActionPolicy: jest.fn(),
@@ -56,6 +58,7 @@ describe('action policy mutations refresh matched policies', () => {
       }
       return undefined as never;
     });
+    api.createActionPolicy.mockResolvedValue({ id: 'policy-clone' });
     api.deleteActionPolicy.mockResolvedValue(undefined);
     api.disableActionPolicy.mockResolvedValue({ id: 'policy-1' });
     api.enableActionPolicy.mockResolvedValue({ id: 'policy-1' });
@@ -64,6 +67,12 @@ describe('action policy mutations refresh matched policies', () => {
   });
 
   const cases = [
+    {
+      name: 'create',
+      useHook: useCreateActionPolicy,
+      mutate: (mutate: (value: never) => void) =>
+        mutate({ name: 'Tag policy [clone]', destinations: [] } as never),
+    },
     {
       name: 'delete',
       useHook: useDeleteActionPolicy,

@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
 import {
@@ -80,38 +81,54 @@ const disabledBadgeLabel = i18n.translate(
 
 const tooltipAnchorProps = { css: { display: 'flex' } };
 
-const ActionPoliciesSubsectionHeader = ({ openHref }: { openHref: string }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+const ActionPoliciesOpenLink = ({ openHref }: { openHref: string }) => (
+  <EuiText size="xs">
+    <EuiLink
+      color="text"
+      href={openHref}
+      target="_blank"
+      rel="noopener noreferrer"
+      external={true}
+      css={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}
+      data-test-subj="ruleActionPoliciesArtifactsOpenLink"
+    >
+      {openLinkLabel}
+    </EuiLink>
+  </EuiText>
+);
+
+const ActionPoliciesSubsectionHeader = ({
+  openHref,
+  showTitle,
+}: {
+  openHref: string;
+  showTitle: boolean;
+}) => (
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent={showTitle ? 'spaceBetween' : 'flexEnd'}
+    responsive={false}
+  >
+    {showTitle ? (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="tablePlay" size="m" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <strong>
+                {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.title', {
+                  defaultMessage: 'Action policies',
+                })}
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    ) : null}
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="tablePlay" size="m" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.title', {
-                defaultMessage: 'Action policies',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs">
-        <EuiLink
-          color="text"
-          href={openHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          external={false}
-          css={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}
-          data-test-subj="ruleActionPoliciesArtifactsOpenLink"
-        >
-          {openLinkLabel}
-        </EuiLink>
-      </EuiText>
+      <ActionPoliciesOpenLink openHref={openHref} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -310,7 +327,7 @@ const ArtifactsSubsectionBody = ({
     return (
       <>
         <EuiEmptyPrompt
-          icon={<EuiIcon type="reporter" size="l" aria-hidden={true} />}
+          icon={<EuiIcon type="tablePlay" size="l" aria-hidden={true} />}
           titleSize="xs"
           paddingSize="m"
           data-test-subj="ruleActionPoliciesArtifactsEmpty"
@@ -381,7 +398,16 @@ const ArtifactsSubsectionBody = ({
   );
 };
 
-export const ActionPoliciesArtifactsSubsection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
+type ActionPoliciesArtifactsSubsectionProps = RuleSummarySectionProps & {
+  /** `inherit` when this card is already inside a managed flyout. */
+  flyoutSession?: EuiFlyoutProps['session'];
+  /** Hide the card title when a parent heading already names this section. */
+  showTitle?: boolean;
+};
+
+export const ActionPoliciesArtifactsSubsection: React.FC<
+  ActionPoliciesArtifactsSubsectionProps
+> = ({ rule, flyoutSession = 'start', showTitle = true }) => {
   const { actionPolicyLocators } = useAlertingLocators();
   const ruleTags = rule.metadata.tags ?? [];
   const { items, evaluatedCount, isMatchTruncated, isLoading, isError } =
@@ -404,7 +430,7 @@ export const ActionPoliciesArtifactsSubsection: React.FC<RuleSummarySectionProps
         css={{ minWidth: 0 }}
         data-test-subj="ruleActionPoliciesArtifactsSection"
       >
-        <ActionPoliciesSubsectionHeader openHref={openActionPoliciesHref} />
+        <ActionPoliciesSubsectionHeader openHref={openActionPoliciesHref} showTitle={showTitle} />
         <EuiSpacer size="m" />
         <ArtifactsSubsectionBody
           items={items}
@@ -419,7 +445,11 @@ export const ActionPoliciesArtifactsSubsection: React.FC<RuleSummarySectionProps
       </EuiPanel>
 
       {policyToViewId ? (
-        <ActionPolicyDetailsFlyoutContainer policyId={policyToViewId} onClose={handleCloseFlyout} />
+        <ActionPolicyDetailsFlyoutContainer
+          policyId={policyToViewId}
+          onClose={handleCloseFlyout}
+          session={flyoutSession}
+        />
       ) : null}
     </>
   );
