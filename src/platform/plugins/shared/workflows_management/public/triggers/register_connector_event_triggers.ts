@@ -17,7 +17,7 @@ import {
 } from '../../common/triggers/connector_event_triggers';
 
 /** Plugs glyph for connector events that have no brand icon. */
-export const connectorEventPlugsIcon = React.lazy(() =>
+export const connectorEventPlugsIcon: React.ComponentType = React.lazy(() =>
   import('@elastic/eui/es/components/icon/assets/plugs').then(({ icon }) => ({ default: icon }))
 );
 
