@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/workflows-yaml'
   - '@kbn/agent-builder-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/search-inference-endpoints'
   - '@kbn/scout'
 tags:
   - plugin
