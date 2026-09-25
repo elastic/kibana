@@ -114,7 +114,18 @@ const collectFilterPredicates = (root: ESQLAstQueryExpression): ESQLAstNode[] =>
 
 /** Operators and functions that constrain matching rows to the value they carry. */
 const POSITIVE_MATCH_OPERATORS: ReadonlySet<string> = new Set(['==', 'in', 'like', 'rlike', ':']);
-const FULL_TEXT_FUNCTIONS: ReadonlySet<string> = new Set(['match', 'match_phrase', 'qstr', 'kql']);
+const FULL_TEXT_FUNCTIONS: ReadonlySet<string> = new Set(['match', 'match_phrase', ':']);
+
+/**
+ * Functions whose argument is a query in another language. Their syntax can express alternation
+ * — `QSTR("event.action: AssumeRole OR event.outcome: success")` returns the report's evidence
+ * *and* every successful event — so grounding one term of the string says nothing about the rows
+ * that come back, and reading the string as text cannot tell the two apart. Parsing Lucene and
+ * KQL to find the alternatives is more than this gate should carry, so a query written in one of
+ * them grounds nothing and keeps the non-executable placeholder. The generation contract asks
+ * for comparisons on ECS fields and never for these, so this costs no query it asked for.
+ */
+const QUERY_STRING_FUNCTIONS: ReadonlySet<string> = new Set(['qstr', 'kql']);
 
 /**
  * Operators that exclude the value they carry. A report artifact under one of these is the
@@ -140,23 +151,24 @@ const isMetadataColumn = (node: ESQLAstNode): boolean =>
 
 const LIKE_WILDCARDS = /[*?]+/;
 const REGEXP_METACHARACTERS = /[.*+?()[\]{}^$\\]+/;
-const QUERY_STRING_SYNTAX = /[\s:()"']+/;
 
 /**
- * What a literal has to match for the operator reading it to be grounded, as a list of
- * alternatives each of which needs one grounded fragment.
+ * What a literal has to match for the operator reading it to be grounded, expressed as a list
+ * of alternatives each of which needs one grounded fragment.
  *
- * A `LIKE`/`RLIKE` pattern is a report artifact plus metacharacters the report does not
- * contain, and a query-string literal wraps its terms in field syntax, so comparing either
- * one whole against the report rejects a query that does search for the artifact — which is
- * the shape the generation contract asks for. Splitting on those characters is what lets the
- * fragment be recognised.
+ * A `LIKE`/`RLIKE` pattern is a report artifact plus metacharacters the report does not contain,
+ * so comparing the pattern whole rejects a query that does search for the artifact — and a tight
+ * pattern derived from an artifact is a shape the generation contract explicitly asks for.
+ * Splitting on those characters is what lets the fragment be recognised.
  *
- * A regular expression's alternation is the one case where a fragment is optional rather than
- * required, so `|` splits the pattern into alternatives that must each be grounded — the same
- * rule `OR` gets, for the same reason. A query string can express alternation too, in syntax
- * this deliberately does not parse; a `QSTR` mixing a grounded term with an ungrounded `OR`
- * branch is the known gap.
+ * Two places a fragment is *optional* rather than required, and both get the `OR` rule because
+ * they are the `OR` problem written inside a string:
+ *
+ * - a regular expression's alternation, so `|` splits the pattern into alternatives that must
+ *   each be grounded;
+ * - a full-text match's terms, which are ORed by default, so each term has to be grounded.
+ *   Terms below `MIN_GROUNDING_LENGTH` are dropped rather than required, because that is the
+ *   length at which this gate stops being able to judge a value in either direction.
  */
 const groundingRequirements = (operator: string, literal: string): string[][] => {
   if (operator === 'like') {
@@ -167,8 +179,9 @@ const groundingRequirements = (operator: string, literal: string): string[][] =>
       .split('|')
       .map((alternative) => [alternative, ...alternative.split(REGEXP_METACHARACTERS)]);
   }
-  if (operator === 'qstr' || operator === 'kql') {
-    return [[literal, ...literal.split(QUERY_STRING_SYNTAX)]];
+  if (FULL_TEXT_FUNCTIONS.has(operator)) {
+    const terms = literal.split(/\s+/).filter((term) => term.length >= MIN_GROUNDING_LENGTH);
+    return terms.length > 0 ? terms.map((term) => [term]) : [[literal]];
   }
   return [[literal]];
 };
@@ -214,7 +227,7 @@ const isPositivelyGrounded = (
   const operator = fn.name.toLowerCase();
   if (operator === 'and') return fn.args.some((arg) => isPositivelyGrounded(arg, grounds));
   if (operator === 'or') return fn.args.every((arg) => isPositivelyGrounded(arg, grounds));
-  if (NEGATING_OPERATORS.has(operator)) return false;
+  if (NEGATING_OPERATORS.has(operator) || QUERY_STRING_FUNCTIONS.has(operator)) return false;
   if (!POSITIVE_MATCH_OPERATORS.has(operator) && !FULL_TEXT_FUNCTIONS.has(operator)) {
     // Range comparisons and everything else: a report value under `>` is a threshold, not a
     // search for the artifact.
@@ -244,15 +257,16 @@ const isPositivelyGrounded = (
  * rather than away from it: `WHERE event.action != "AssumeRole"` filters on the report's
  * artifact to return everything that is not the report's evidence.
  *
- * A literal grounds the query when it equals an extracted IOC or appears verbatim in the
- * report text — or, for pattern and query-string operators, when a fragment of it does, since
- * the wildcards in `LIKE "*AssumeRole*"` are not in the report and the generation contract
- * asks for exactly that shape.
+ * A literal grounds the query when it equals an extracted IOC or appears verbatim in the report
+ * text — or, for a pattern operator, when a fragment of it does, since the wildcards in
+ * `LIKE "*AssumeRole*"` are not in the report and the generation contract asks for exactly that
+ * shape. A query written in another language (`QSTR`, `KQL`) grounds nothing at all: its own
+ * syntax can widen the result in ways reading it as text cannot see.
  *
- * It remains a value test rather than a semantic one: it establishes that the report
- * constrains the rows, not that the constraint is tight. A tautology disjoined onto a grounded
- * comparison is caught as an ungrounded `OR` branch, but a predicate that is grounded and
- * still matches most of the index is not something this can see.
+ * It remains a value test rather than a semantic one: it establishes that the report constrains
+ * the rows, not that the constraint is tight. A tautology disjoined onto a grounded comparison is
+ * caught as an ungrounded `OR` branch, but a predicate that is grounded and still matches most of
+ * the index is not something this can see.
  */
 export const assertEsqlGroundedInReport = (
   query: string,

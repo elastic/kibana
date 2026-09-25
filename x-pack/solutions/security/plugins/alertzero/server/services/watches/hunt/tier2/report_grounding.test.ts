@@ -279,9 +279,43 @@ describe('assertEsqlGroundedInReport', () => {
       ).toBe(true);
     });
 
-    it('grounds a query-string term wrapped in field syntax', () => {
-      const query = 'FROM logs-aws.* | WHERE QSTR("event.action: AssumeRole")';
-      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(true);
+    it.each([
+      ['QSTR', 'FROM logs-aws.* | WHERE QSTR("event.action: AssumeRole")'],
+      [
+        'QSTR with an ungrounded OR branch',
+        'FROM logs-aws.* | WHERE QSTR("event.action: AssumeRole OR event.outcome: success")',
+      ],
+      ['KQL', 'FROM logs-aws.* | WHERE KQL("event.action: AssumeRole")'],
+    ])('does not let %s ground the query, even carrying a report value', (_label, query) => {
+      // The syntax can widen the result in ways reading the string as text cannot see: the
+      // `success` branch returns unrelated events that would be counted as corroboration. The
+      // generation contract asks for comparisons on ECS fields and never for these.
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
+    });
+
+    it('requires every judgeable term of a full-text match to be grounded', () => {
+      // A match query ORs its terms by default, so an ungrounded term widens the result exactly
+      // as an ungrounded OR branch does.
+      const grounded = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role")';
+      const widened = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role unrelated-term")';
+      const text = 'the actor reached escalated-role';
+      expect(assertEsqlGroundedInReport(grounded, { reportText: text, iocValues: [] }).ok).toBe(
+        true
+      );
+      expect(assertEsqlGroundedInReport(widened, { reportText: text, iocValues: [] }).ok).toBe(
+        false
+      );
+    });
+
+    it('ignores a term too short for the gate to judge either way', () => {
+      // `in` and `the` are below MIN_GROUNDING_LENGTH, so they are dropped rather than required.
+      const query = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role in the")';
+      expect(
+        assertEsqlGroundedInReport(query, {
+          reportText: 'the actor reached escalated-role',
+          iocValues: [],
+        }).ok
+      ).toBe(true);
     });
   });
 
