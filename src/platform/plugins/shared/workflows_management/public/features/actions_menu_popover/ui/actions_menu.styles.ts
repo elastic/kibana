@@ -41,25 +41,30 @@ export const componentStyles = {
       overflow: 'hidden',
       borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
-  listFill: css({
-    flex: 1,
-    minHeight: 0,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    '& > *': {
+  listFill: ({ euiTheme }: UseEuiTheme) =>
+    css({
       flex: 1,
       minHeight: 0,
-    },
-    // Square rows; own padding lives on optionPad (EUI list items add their own).
-    '.euiSelectableListItem': {
-      borderRadius: 0,
-      padding: 0,
-    },
-    '.euiSelectableListItem__text': {
-      padding: 0,
-    },
-  }),
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      '& > *': {
+        flex: 1,
+        minHeight: 0,
+      },
+      // Square rows; horizontal inset lives on optionPad so it matches the search field.
+      '.euiSelectableListItem': {
+        borderRadius: 0,
+        padding: 0,
+      },
+      '.euiSelectableListItem__text': {
+        padding: 0,
+      },
+      // EUI group labels use textPadding (size.xs). Match header/optionPad (size.base).
+      '.euiSelectableList__groupLabel': {
+        paddingInline: euiTheme.size.base,
+      },
+    }),
   optionInfo: css({
     flex: 1,
     minWidth: 0,

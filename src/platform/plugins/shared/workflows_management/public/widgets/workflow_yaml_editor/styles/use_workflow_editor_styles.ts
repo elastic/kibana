@@ -187,7 +187,6 @@ const editorStyleMap = {
       minWidth: 0,
       overflowY: 'auto',
       minHeight: 0,
-      paddingLeft: euiTheme.size.xl,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
         backgroundColor: euiTheme.colors.backgroundBasePlain,
