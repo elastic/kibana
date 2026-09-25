@@ -20,44 +20,38 @@ import {
  * accept fails the test — something the RTL suite cannot catch because it
  * asserts against a mocked client.
  */
-test.describe(
-  'Action Policies - create and edit',
-  { tag: ['@local-stateful-classic'] },
-  () => {
-    const RUN_ID = Date.now().toString();
-    const CREATED_POLICY_NAME = `scout-action-policy-created-${RUN_ID}`;
-    const SEEDED_POLICY_NAME = `scout-action-policy-to-edit-${RUN_ID}`;
-    const EDITED_POLICY_NAME = `scout-action-policy-edited-${RUN_ID}`;
-    // Intentionally includes a legacy `rule.*` field: with no form validation (AC#3) the expression
-    // round-trips through the edit form unchanged, proving backward compatibility.
-    const MATCHER = 'episode_status: "active" and rule.tags: "scout"';
+test.describe('Action Policies - create and edit', { tag: ['@local-stateful-classic'] }, () => {
+  const RUN_ID = Date.now().toString();
+  const CREATED_POLICY_NAME = `scout-action-policy-created-${RUN_ID}`;
+  const SEEDED_POLICY_NAME = `scout-action-policy-to-edit-${RUN_ID}`;
+  const EDITED_POLICY_NAME = `scout-action-policy-edited-${RUN_ID}`;
+  // Intentionally includes a legacy `rule.*` field: with no form validation (AC#3) the expression
+  // round-trips through the edit form unchanged, proving backward compatibility.
+  const MATCHER = 'episode_status: "active" and rule.tags: "scout"';
 
-    let workflowId: string;
-    let workflowName: string;
-    const createdPolicyIds: string[] = [];
+  let workflowId: string;
+  let workflowName: string;
+  const createdPolicyIds: string[] = [];
 
-    test.beforeAll(async ({ apiServices }) => {
-      // Action policy destinations are workflow references, so the form's
-      // workflows combo box needs a real workflow to offer.
-      workflowName = `scout-action-policy-destination-${Date.now()}`;
-      const workflow = await apiServices.alertingV2.workflows.create(
-        buildWorkflowYaml(workflowName)
-      );
-      workflowId = workflow.id;
-    });
+  test.beforeAll(async ({ apiServices }) => {
+    // Action policy destinations are workflow references, so the form's
+    // workflows combo box needs a real workflow to offer.
+    workflowName = `scout-action-policy-destination-${Date.now()}`;
+    const workflow = await apiServices.alertingV2.workflows.create(buildWorkflowYaml(workflowName));
+    workflowId = workflow.id;
+  });
 
-    test.afterAll(async ({ apiServices }) => {
-      for (const id of createdPolicyIds) {
-        await apiServices.alertingV2.actionPolicies.delete(id);
-      }
-      await apiServices.alertingV2.workflows.bulkDelete([workflowId]);
-    });
+  test.afterAll(async ({ apiServices }) => {
+    for (const id of createdPolicyIds) {
+      await apiServices.alertingV2.actionPolicies.delete(id);
+    }
+    await apiServices.alertingV2.workflows.bulkDelete([workflowId]);
+  });
 
-    test('creates a policy from the form and persists what was typed', { tag: ['@local-serverless-observability_complete'] }, async ({
-      apiServices,
-      browserAuth,
-      pageObjects,
-    }) => {
+  test(
+    'creates a policy from the form and persists what was typed',
+    { tag: ['@local-serverless-observability_complete'] },
+    async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
       const { actionPoliciesList, actionPolicyForm } = pageObjects;
 
@@ -104,46 +98,46 @@ test.describe(
           destinations: [{ type: 'workflow', id: workflowId }],
         });
       });
+    }
+  );
+
+  test('edits an existing policy without dropping untouched fields', async ({
+    apiServices,
+    browserAuth,
+    pageObjects,
+  }) => {
+    const seeded = await apiServices.alertingV2.actionPolicies.create(
+      buildCreateActionPolicyData({
+        name: SEEDED_POLICY_NAME,
+        matcher: { expression: MATCHER },
+        destinations: [{ type: 'workflow', id: workflowId }],
+      })
+    );
+    createdPolicyIds.push(seeded.id);
+
+    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
+    const { actionPoliciesList, actionPolicyForm } = pageObjects;
+
+    await test.step('the edit form hydrates from the persisted policy', async () => {
+      await actionPolicyForm.gotoEdit(seeded.id);
+      await expect(actionPolicyForm.nameInput).toHaveValue(SEEDED_POLICY_NAME);
+      await expect(actionPolicyForm.matcherInput).toHaveValue(MATCHER);
     });
 
-    test('edits an existing policy without dropping untouched fields', async ({
-      apiServices,
-      browserAuth,
-      pageObjects,
-    }) => {
-      const seeded = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({
-          name: SEEDED_POLICY_NAME,
-          matcher: { expression: MATCHER },
-          destinations: [{ type: 'workflow', id: workflowId }],
-        })
-      );
-      createdPolicyIds.push(seeded.id);
+    await test.step('rename the policy and submit', async () => {
+      await actionPolicyForm.setName(EDITED_POLICY_NAME);
+      await actionPolicyForm.submit();
+      await expect(actionPoliciesList.detailsLink(EDITED_POLICY_NAME)).toBeVisible();
+    });
 
-      await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
-      const { actionPoliciesList, actionPolicyForm } = pageObjects;
+    await test.step('the update carries the hydrated fields back unchanged', async () => {
+      const updated = await apiServices.alertingV2.actionPolicies.get(seeded.id);
 
-      await test.step('the edit form hydrates from the persisted policy', async () => {
-        await actionPolicyForm.gotoEdit(seeded.id);
-        await expect(actionPolicyForm.nameInput).toHaveValue(SEEDED_POLICY_NAME);
-        await expect(actionPolicyForm.matcherInput).toHaveValue(MATCHER);
-      });
-
-      await test.step('rename the policy and submit', async () => {
-        await actionPolicyForm.setName(EDITED_POLICY_NAME);
-        await actionPolicyForm.submit();
-        await expect(actionPoliciesList.detailsLink(EDITED_POLICY_NAME)).toBeVisible();
-      });
-
-      await test.step('the update carries the hydrated fields back unchanged', async () => {
-        const updated = await apiServices.alertingV2.actionPolicies.get(seeded.id);
-
-        expect(updated).toMatchObject({
-          name: EDITED_POLICY_NAME,
-          matcher: { expression: MATCHER },
-          destinations: [{ type: 'workflow', id: workflowId }],
-        });
+      expect(updated).toMatchObject({
+        name: EDITED_POLICY_NAME,
+        matcher: { expression: MATCHER },
+        destinations: [{ type: 'workflow', id: workflowId }],
       });
     });
-  }
-);
+  });
+});
