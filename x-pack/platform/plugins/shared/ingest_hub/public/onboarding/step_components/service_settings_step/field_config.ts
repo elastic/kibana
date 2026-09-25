@@ -97,7 +97,8 @@ export function toTyped(
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean);
-    if (strRaw === undefined && Array.isArray(meta.def.default)) return meta.def.default as string[];
+    if (strRaw === undefined && Array.isArray(meta.def.default))
+      return meta.def.default as string[];
     return [];
   }
   const s = Array.isArray(strRaw) ? strRaw.join(',') : strRaw;
