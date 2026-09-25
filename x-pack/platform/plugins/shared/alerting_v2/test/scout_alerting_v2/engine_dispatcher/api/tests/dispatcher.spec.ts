@@ -992,17 +992,8 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       const eventTs = (sec: number) => relativeTime(sec, baseTime);
       const actionTs = (sec: number) => relativeTime(sec, baseTime);
 
-      await apiServices.alertingV2.ruleEvents.seed([
-        buildAlertEvent({
-          ruleId: 'rule-006',
-          groupHash: 'rule-006-series-1',
-          episodeId: 'rule-006-series-1-episode-2',
-          episodeStatus: 'active',
-          status: 'breached',
-          timestamp: eventTs(60),
-        }),
-      ]);
-
+      // Seed the ack first: the dispatcher only picks up episodes from `.rule-events`, so it can
+      // never evaluate episode-2 without the ack already in place.
       await apiServices.alertingV2.alertActionsEvents.seed([
         buildAlertAction({
           ruleId: 'rule-006',
@@ -1011,6 +1002,17 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           actionType: 'ack',
           lastSeriesEventTimestamp: eventTs(180),
           timestamp: actionTs(120),
+        }),
+      ]);
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-006',
+          groupHash: 'rule-006-series-1',
+          episodeId: 'rule-006-series-1-episode-2',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: eventTs(60),
         }),
       ]);
 
