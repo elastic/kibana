@@ -126,6 +126,10 @@ export interface GenerateEsqlOptions {
    */
   includeDatasets?: boolean;
   /**
+   * If true, frozen tier indices are queried.
+   */
+  includeFrozen?: boolean;
+  /**
    * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
    */
   sessionId?: string;
@@ -144,6 +148,7 @@ export const generateEsql = async ({
   timeRange: inputTimeRange,
   disableNamedParams,
   includeDatasets = false,
+  includeFrozen = false,
   model: inputModel,
   modelProvider,
   esClient,
@@ -165,6 +170,7 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
+    includeFrozen,
     sessionId,
   });
 
@@ -212,6 +218,7 @@ export const generateEsql = async ({
               esClient,
               limit: 1,
               includeDatasets,
+              includeFrozen,
               model,
               logger,
             }),

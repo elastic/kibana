@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 import { AppMenu } from './app_menu';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
@@ -15,7 +16,7 @@ import { SavedObjectSaveModal } from './saved_object_save_modal';
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
-  public readonly mapContainer;
+  public readonly mapsPlugin;
   public readonly mapRenderComplete;
   public readonly saveAndReturnButton;
   public readonly saveButton;
@@ -26,14 +27,17 @@ export class MapsPage {
   public readonly documentsItem;
   public readonly fullScreenModeButton;
   public readonly exitFullScreenButton;
-  private readonly mapLayerToc;
   private readonly layerTocTooltip;
   private readonly appMenu: AppMenu;
+  private readonly mapContainer;
+  private readonly setViewForm;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
 
   constructor(private readonly page: ScoutPage) {
-    this.mapContainer = this.page.locator('#maps-plugin');
+    // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
+    this.mapsPlugin = this.page.locator('#maps-plugin');
+    // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
     this.mapRenderComplete = this.page.locator('#maps-plugin[data-map-loaded="true"]');
     this.saveAndReturnButton = this.page.testSubj.locator('mapSaveAndReturnButton');
     this.saveButton = this.page.testSubj.locator('mapSaveButton');
@@ -45,8 +49,9 @@ export class MapsPage {
     this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
     this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
     this.appMenu = new AppMenu(this.page);
-    this.mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
+    this.mapContainer = this.page.testSubj.locator('mapContainer');
+    this.setViewForm = this.page.testSubj.locator('mapSetViewForm');
     this.saveModal = new SavedObjectSaveModal(this.page);
   }
 
@@ -73,7 +78,7 @@ export class MapsPage {
 
   async waitForRenderComplete() {
     // first wait for the top level container to be present
-    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    await this.mapsPlugin.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     // then wait for the map to be fully rendered
     return this.mapRenderComplete.waitFor({
       state: 'attached',
@@ -118,26 +123,51 @@ export class MapsPage {
     await this.saveAndReturnButton.click();
   }
 
-  /** Waits until Map layer TOC has entries and loading indicators are gone (FTR parity). */
+  /** Waits until map layers are loaded. Works in both standalone (expanded TOC) and minimized TOC contexts. */
   async waitForLayersToLoad() {
-    await this.mapLayerToc.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
-    // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
+    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+
+    // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
+    // visible before that, so gate both branches on this signal.
     await this.page.waitForFunction(
-      () => {
-        const toc = document.querySelector('[data-test-subj="mapLayerTOC"]');
-        if (!toc) {
-          return false;
-        }
-        const layerCount = toc.querySelectorAll(
-          '[data-test-subj^="layerTocActionsPanelToggleButton"]'
-        ).length;
-        const spinnerCount = toc.querySelectorAll('[role="progressbar"]').length;
-        return layerCount > 0 && spinnerCount === 0;
-      },
+      () =>
+        Boolean(document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas')),
       undefined,
       { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
     );
+
+    // Wait until one of the two TOC states has rendered before branching; an immediate
+    // isVisible() snapshot after mapContainer can race with the TOC appearing.
+    const mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
+    const expandButton = this.page.testSubj.locator('mapExpandLayerControlButton');
+    await this.page
+      .locator('[data-test-subj="mapLayerTOC"], [data-test-subj="mapExpandLayerControlButton"]')
+      .waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+
+    if (await mapLayerToc.isVisible()) {
+      // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
+      // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
+      await this.page.waitForFunction(
+        () => {
+          const toc = document.querySelector('[data-test-subj="mapLayerTOC"]');
+          if (!toc) {
+            return false;
+          }
+          const layerCount = toc.querySelectorAll(
+            '[data-test-subj^="layerTocActionsPanelToggleButton"]'
+          ).length;
+          const spinnerCount = toc.querySelectorAll('[role="progressbar"]').length;
+          return layerCount > 0 && spinnerCount === 0;
+        },
+        undefined,
+        { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
+      );
+    } else {
+      await expandButton.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+      await expect(expandButton.locator('[role="progressbar"]')).toHaveCount(0, {
+        timeout: DEFAULT_MAP_LOADING_TIMEOUT,
+      });
+    }
   }
 
   async getLayerTocTooltipMsg(layerName: string): Promise<string> {
@@ -157,5 +187,81 @@ export class MapsPage {
       await dialog.accept();
     });
     await this.page.reload();
+  }
+
+  private async openSetViewPopover() {
+    // timeout: 0 prevents waiting for the element to appear — the form only exists in
+    // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
+    if (!(await this.setViewForm.isVisible({ timeout: 1_000 }))) {
+      await this.page.testSubj.click('toggleSetViewVisibilityButton');
+      await this.setViewForm.waitFor({ state: 'visible' });
+    }
+  }
+
+  private async closeSetViewPopover() {
+    // timeout: 0 prevents waiting for the element to appear — the form only exists in
+    // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
+    if (await this.setViewForm.isVisible({ timeout: 1_000 })) {
+      // page.keyboard.press is more robust than setViewForm.press in embedded contexts:
+      // during map panning the dashboard re-renders the panel, detaching the form element,
+      // which causes locator.press to retry until it times out.
+      await this.page.keyboard.press('Escape');
+      await this.setViewForm.waitFor({ state: 'hidden', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    }
+  }
+
+  async setView(lat: number, lon: number, zoom: number) {
+    await this.openSetViewPopover();
+    await this.page.testSubj.locator('latitudeInput').fill(lat.toString());
+    await this.page.testSubj.locator('longitudeInput').fill(lon.toString());
+    await this.page.testSubj.locator('zoomInput').fill(zoom.toString());
+    await this.page.testSubj.click('submitViewButton');
+    await this.waitForMapPanAndZoom();
+  }
+
+  async waitForMapPanAndZoom() {
+    let prevView: { lat: number; lon: number; zoom: number } | undefined;
+    await expect
+      .poll(
+        async () => {
+          const currentView = await this.getView();
+          const stable =
+            prevView !== undefined && JSON.stringify(prevView) === JSON.stringify(currentView);
+          prevView = currentView;
+          return stable;
+        },
+        { timeout: DEFAULT_MAP_LOADING_TIMEOUT, intervals: [1000] }
+      )
+      .toBe(true);
+    await this.waitForLayersToLoad();
+  }
+
+  async getView(): Promise<{ lat: number; lon: number; zoom: number }> {
+    await this.openSetViewPopover();
+    const lat = await this.page.testSubj.locator('latitudeInput').inputValue();
+    const lon = await this.page.testSubj.locator('longitudeInput').inputValue();
+    const zoom = await this.page.testSubj.locator('zoomInput').inputValue();
+    await this.closeSetViewPopover();
+    return { lat: parseFloat(lat), lon: parseFloat(lon), zoom: parseFloat(zoom) };
+  }
+
+  /**
+   * Clicks the map at a position relative to the container's center to lock the tooltip.
+   * xOffset/yOffset follow the FTR convention: positive x = right, negative y = up.
+   * Waits for layers to be ready before clicking, then asserts the locked tooltip separately.
+   */
+  async lockTooltipAtPosition(xOffset: number, yOffset: number) {
+    await this.waitForLayersToLoad();
+
+    const box = await this.mapContainer.boundingBox();
+    if (!box) throw new Error('Map container bounding box not found');
+    const x = box.x + box.width / 2 + xOffset;
+    const y = box.y + box.height / 2 + yOffset;
+    await this.page.mouse.move(x, y);
+    await this.page.mouse.click(x, y);
+
+    await this.page.testSubj
+      .locator('mapTooltipCloseButton')
+      .waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
   }
 }

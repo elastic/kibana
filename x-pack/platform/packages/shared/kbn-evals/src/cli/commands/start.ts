@@ -50,6 +50,7 @@ export const startCmd: Command<void> = {
       evaluationConnectorId,
       projects,
       profileEnvOverrides,
+      suiteScoutEnv,
       exportProfile,
       datasetsProfile,
       requiresEisCcm,
@@ -59,6 +60,7 @@ export const startCmd: Command<void> = {
       flagsReader,
       profile,
       dryRun: flagsReader.boolean('dry-run'),
+      suite,
     });
 
     const skipServer = flagsReader.boolean('skip-server');
@@ -103,6 +105,7 @@ export const startCmd: Command<void> = {
         repoRoot,
         log,
         profileEnvOverrides,
+        suiteScoutEnv,
         serverConfigSet: suite?.serverConfigSet,
         requiresEisCcm,
       });
@@ -117,6 +120,7 @@ export const startCmd: Command<void> = {
       skipServer,
       suite,
       profileEnvOverrides,
+      suiteScoutEnv,
       flagsReader,
       log,
     });

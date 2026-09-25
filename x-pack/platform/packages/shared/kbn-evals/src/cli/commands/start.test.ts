@@ -60,6 +60,7 @@ const runStart = async (flags: Record<string, FlagInput | undefined>) => {
     evaluationConnectorId: 'eis-test-connector',
     projects: [],
     profileEnvOverrides: {},
+    suiteScoutEnv: {},
     requiresEisCcm: true,
   });
 

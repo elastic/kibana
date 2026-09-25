@@ -9,11 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import {
-  AskUserQuestionPrompt,
-  AuthorizationPrompt,
-  ConfirmationPrompt,
-} from '../../conversation_rounds/round_prompt';
+import { AskUserQuestionPrompt, AuthorizationPrompt, ConfirmationPrompt } from '../prompts';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 
 export interface PendingPromptsProps {
