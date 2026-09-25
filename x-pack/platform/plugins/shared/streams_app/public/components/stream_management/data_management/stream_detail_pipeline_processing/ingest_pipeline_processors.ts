@@ -223,6 +223,11 @@ const processorStepToNativeProcessor = (
     ignore_failure: ignoreFailure,
   };
 
+  if (typeof config.if === 'string') {
+    const condition = config.if.trim();
+    config.if = condition.length > 0 ? condition : undefined;
+  }
+
   if (action === 'registered_domain') {
     const { expression, prefix, ...registeredDomainConfig } = config;
     const processorConfig = removeUndefinedValues({
