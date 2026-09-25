@@ -332,18 +332,31 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               ([id]) => !cleanedLiveStale.includes(id)
             )
           );
+          // Only persist the reduced services list when all cleanup succeeded. If cleanup partially
+          // failed, remainingPending is non-empty and the old services must be kept so a resume can
+          // retry the failed cleanup rather than losing the pending target permanently.
+          const cleanupFullySucceeded = Object.keys(remainingPending).length === 0;
           await updateDeployment(onboardingDeploymentId, {
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
             packagePolicyIds: [...new Set(Object.values({ ...priorIds, ...policyIdsByInstance }))],
-            services: selectedServiceIds,
-            serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
-              string,
-              Record<string, unknown>
-            >,
+            // Always update mechanisms so that a record originally created for managed_integration
+            // (when the user switched deployment method after a failed MI attempt) is corrected.
+            // Without this, agent-based PUTs using assume_role are rejected by the handler, and
+            // static_keys PUTs succeed but hydrate back into managed_integration mode on resume.
+            mechanisms: ['agent_based'],
             // Refresh authMethod so a credential-method change between deploys (Back→change→Next)
             // is reflected on resume rather than presenting the original method's form.
             authMethod: toSOAuthMethod(agentCredentialMethod),
             status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
+            ...(cleanupFullySucceeded
+              ? {
+                  services: selectedServiceIds,
+                  serviceVars: toSOServiceVars(
+                    storedServiceVars,
+                    servicesMap ?? new Map()
+                  ) as Record<string, Record<string, unknown>>,
+                }
+              : {}),
           });
         }
 
