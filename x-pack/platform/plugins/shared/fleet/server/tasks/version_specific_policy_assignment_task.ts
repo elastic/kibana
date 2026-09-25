@@ -554,6 +554,7 @@ export class VersionSpecificPolicyAssignmentTask {
           agentIds,
           showInactive: false,
           spaceId: '*',
+          _internalCrossSpace: true,
         },
         targetPolicyId
       );
@@ -826,7 +827,7 @@ export class VersionSpecificPolicyAssignmentTask {
         await reassignAgents(
           soClient,
           esClient,
-          { agentIds, showInactive: true, spaceId: '*' },
+          { agentIds, showInactive: true, spaceId: '*', _internalCrossSpace: true },
           parentPolicyId
         );
 

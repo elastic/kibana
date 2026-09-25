@@ -408,7 +408,21 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
     mockGetAgentsById.mockRestore();
   });
 
-  it('throws when spaceId "*" is used with a non-default-space scoped soClient', async () => {
+  it('throws when spaceId "*" is used without _internalCrossSpace flag', async () => {
+    const { esClient, regularAgentPolicySO2 } = createClientMock();
+    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue(undefined) } as any;
+
+    await expect(
+      reassignAgents(
+        scopedClient,
+        esClient,
+        { agentIds: ['agent-1'], spaceId: '*' },
+        regularAgentPolicySO2.id
+      )
+    ).rejects.toThrow(FleetError);
+  });
+
+  it('throws when spaceId "*" with _internalCrossSpace is used with a custom-space scoped soClient', async () => {
     const { esClient, regularAgentPolicySO2 } = createClientMock();
     const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue('space-a') } as any;
 
@@ -416,7 +430,7 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
       reassignAgents(
         scopedClient,
         esClient,
-        { agentIds: ['agent-1'], spaceId: '*' },
+        { agentIds: ['agent-1'], spaceId: '*', _internalCrossSpace: true },
         regularAgentPolicySO2.id
       )
     ).rejects.toThrow(FleetError);
@@ -431,7 +445,7 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
     await reassignAgents(
       soClient,
       esClient,
-      { agentIds: ['agent-1'], spaceId: '*' },
+      { agentIds: ['agent-1'], spaceId: '*', _internalCrossSpace: true },
       regularAgentPolicySO2.id
     );
 

@@ -12,6 +12,7 @@ import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import {
   AgentReassignmentError,
+  FleetError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
 } from '../../errors';
@@ -107,15 +108,33 @@ export async function reassignAgents(
     dryRun?: boolean;
     /** Space ID for the target policy lookup. Pass '*' when using an unscoped SO client. */
     spaceId?: string;
+    /**
+     * Must be set to `true` when spaceId is '*'. Only task code that holds an unscoped
+     * internal SO client may enable cross-space reassignment. Route handlers must never set
+     * this flag (user-supplied input is blocked by the API schema before reaching this layer).
+     * @internal
+     */
+    _internalCrossSpace?: true;
   },
   newAgentPolicyId: string
 ): Promise<{ actionId: string } | { count: number }> {
-  // '*' is only valid with an unscoped internal SO client. Reject it when the client is
-  // already scoped to a concrete space to prevent cross-space privilege escalation.
-  if (options.spaceId === '*' && soClient.getCurrentNamespace() !== undefined) {
-    throw new FleetError(
-      `spaceId '*' requires an unscoped SO client; got client scoped to '${soClient.getCurrentNamespace()}'`
-    );
+  // Guard cross-space reassignment behind two checks:
+  // 1. Explicit internal flag: callers that intend cross-space must opt in; route handlers
+  //    never set this, so user-facing paths are blocked regardless of soClient type.
+  // 2. getCurrentNamespace() check: catches the most obvious misuse (custom-space scoped
+  //    client). Note: a default-space user client also returns undefined here, but that
+  //    case is already blocked by check 1 since route handlers never pass spaceId '*'.
+  if (options.spaceId === '*') {
+    if (!options._internalCrossSpace) {
+      throw new FleetError(
+        `spaceId '*' requires _internalCrossSpace: true and an unscoped internal SO client`
+      );
+    }
+    if (soClient.getCurrentNamespace() !== undefined) {
+      throw new FleetError(
+        `spaceId '*' requires an unscoped SO client; got client scoped to '${soClient.getCurrentNamespace()}'`
+      );
+    }
   }
   await verifyNewAgentPolicy(soClient, newAgentPolicyId, { spaceId: options.spaceId });
 
