@@ -14,25 +14,15 @@ import type {
   RuleChangeHistoryDetail,
   RuleChangeHistoryListItem,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package for adapter/consumer convenience. */
 export type { ListRuleChangeHistoryResponse, RuleChangeHistoryDetail, RuleChangeHistoryListItem };
 
-/**
- * Encodes the `id` path parameter safely. Wraps `buildPath` so a single call
- * site owns the list template.
- */
-const buildRuleChangeHistoryPath = (id: string): string =>
-  buildPath(ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH, { id });
-
-/**
- * Encodes the `id` and `event_id` path parameters safely for the detail route.
- */
-const buildRuleChangeHistoryEventPath = (id: string, eventId: string): string =>
-  buildPath(`${ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH}/{event_id}`, {
-    id,
-    event_id: eventId,
+/** Encodes the `change_id` path parameter safely for the detail route. */
+const buildRuleChangeHistoryEventPath = (changeId: string): string =>
+  buildPath(`${ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH}/{change_id}`, {
+    change_id: changeId,
   });
 
 export interface ListRuleChangesParams {
@@ -65,10 +55,13 @@ export class RuleChangeHistoryApi {
     perPage,
     signal,
   }: ListRuleChangesParams): Promise<ListRuleChangeHistoryResponse> {
-    return this.http.get<ListRuleChangeHistoryResponse>(buildRuleChangeHistoryPath(id), {
-      query: { page, per_page: perPage },
-      signal,
-    });
+    return this.http.get<ListRuleChangeHistoryResponse>(
+      ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH,
+      {
+        query: { rule_id: id, page, per_page: perPage },
+        signal,
+      }
+    );
   }
 
   public async getRuleChangeEvent({
@@ -76,7 +69,8 @@ export class RuleChangeHistoryApi {
     eventId,
     signal,
   }: GetRuleChangeEventParams): Promise<RuleChangeHistoryDetail> {
-    return this.http.get<RuleChangeHistoryDetail>(buildRuleChangeHistoryEventPath(id, eventId), {
+    return this.http.get<RuleChangeHistoryDetail>(buildRuleChangeHistoryEventPath(eventId), {
+      query: { rule_id: id },
       signal,
     });
   }

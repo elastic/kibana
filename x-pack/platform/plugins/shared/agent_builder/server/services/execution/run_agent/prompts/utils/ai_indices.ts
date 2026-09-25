@@ -50,9 +50,13 @@ Work with AI Indices through their dedicated tools, in this order:
 
 1. \`list_ai_indices\` — the AI Indices registered in this space that you can read, each with its id and the ES|QL target to put in \`FROM\`. An entry is left out when you cannot read its backing index; an empty one is still listed. Skip it when the list above already names the index you need.
 2. \`describe_ai_index\` — returns a context block for one index: what it holds, its fields, KI type and tag counts, and example ES|QL queries you can read and copy. Fields differ between AI Indices, so describe an index before filtering on one of its fields.
-3. \`query_ai_indices\` — runs your ES|QL and returns the rows.
+3. \`query_ai_indices\` — runs your ES|QL against AI Indices and returns the rows.
 
-Do not query AI Indices with \`execute_esql\`: only \`query_ai_indices\` applies the space scoping below.
+### AI Indices vs. other data
+
+- \`query_ai_indices\` is only for AI Indices: the \`FROM\` targets listed above or returned by \`list_ai_indices\`.
+- Query every other index, data stream, or alias with your other data tools, such as \`generate_esql\` and \`execute_esql\`, as you would without AI Indices. This includes sources a KI points you to.
+- Do not query AI Indices with \`execute_esql\`: only \`query_ai_indices\` applies the space scoping below.
 
 ### Space scoping
 
