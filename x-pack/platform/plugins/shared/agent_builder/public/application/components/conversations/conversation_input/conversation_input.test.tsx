@@ -114,10 +114,14 @@ jest.mock('../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
 }));
 jest.mock('../../../hooks/use_current_user', () => ({
-  useCurrentUser: jest.fn().mockReturnValue({ currentUser: { user: { username: 'test-user' } }, isLoading: false }),
+  useCurrentUser: jest
+    .fn()
+    .mockReturnValue({ currentUser: { user: { username: 'test-user' } }, isLoading: false }),
 }));
 jest.mock('../../../hooks/use_input_draft', () => ({
-  useInputDraft: jest.fn().mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft: jest.fn() }),
+  useInputDraft: jest
+    .fn()
+    .mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft: jest.fn() }),
 }));
 jest.mock('../../../context/active_space_context', () => ({
   useActiveSpaceId: jest.fn().mockReturnValue('default'),
@@ -452,7 +456,11 @@ describe('ConversationInput', () => {
     });
 
     it('clears the editor when switching to a conversation with no saved draft', () => {
-      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft: jest.fn() });
+      mockedUseInputDraft.mockReturnValue({
+        draft: null,
+        saveDraft: jest.fn(),
+        clearDraft: jest.fn(),
+      });
 
       const { rerender } = render(<ConversationInput />);
       editorController.clear.mockClear();
