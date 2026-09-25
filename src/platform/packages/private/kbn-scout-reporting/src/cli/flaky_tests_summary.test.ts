@@ -66,6 +66,7 @@ const entry = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEntry => ({
       latestRun: { status: 'passed', timestamp: new Date('2026-09-07T09:00:00.000Z') },
     }),
   ],
+  byTarget: [],
   firstFailedAt: new Date('2026-09-01T00:00:00.000Z'),
   lastFailedAt: new Date('2026-09-02T00:00:00.000Z'),
   latestRun: { status: 'passed', timestamp: new Date('2026-09-07T09:00:00.000Z'), branch: 'main' },

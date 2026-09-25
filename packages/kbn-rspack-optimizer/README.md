@@ -1,6 +1,6 @@
 # @kbn/rspack-optimizer
 
-RSPack-based bundler for Kibana platform plugins. Builds core and all plugins in a single unified compilation using RSPack's Rust-based engine.
+The Kibana optimizer: an Rspack-based bundler for Kibana platform plugins. Builds core and all plugins in a single unified compilation using Rspack's Rust-based engine.
 
 ## Architecture
 
@@ -59,16 +59,13 @@ Shared dependencies are NOT bundled into `kibana.bundle.js`. They are externaliz
 
 ```bash
 # Full production build (minified, no source maps)
-node scripts/build_rspack_bundles.js --dist
+node scripts/build_kibana_platform_plugins.js --dist
 
 # Development with watch mode
-node scripts/build_rspack_bundles.js --watch
+node scripts/build_kibana_platform_plugins.js --watch
 
-# Rspack is the default dev-mode optimizer
+# Dev mode starts the optimizer in watch mode automatically
 pnpm start
-
-# Opt out to the legacy webpack optimizer
-KBN_USE_RSPACK=false pnpm start
 ```
 
 ### CLI Options
@@ -79,6 +76,8 @@ Build Options:
   --dist                    Build for distribution (minified, no source maps)
   --examples                Include example plugins
   --test-plugins            Include test plugins
+  --no-dev-only             Exclude devOnly plugins (included by default, even with --dist;
+                            node scripts/build always excludes them)
   --themes <tags>           Comma-separated theme tags to build (default: all)
   --output-root <dir>       Output root directory (default: repo root)
   --no-cache                Disable filesystem caching
@@ -111,10 +110,10 @@ When profiling, the full stats for 200+ plugins can exceed memory limits if modu
 
 ```bash
 # Profile only the dashboard plugin and its chunks
-node scripts/build_rspack_bundles.js --profile --profile-focus=dashboard
+node scripts/build_kibana_platform_plugins.js --profile --profile-focus=dashboard
 
 # Profile multiple plugins
-node scripts/build_rspack_bundles.js --profile-stats-only --profile-focus=dashboard,data,discover
+node scripts/build_kibana_platform_plugins.js --profile-stats-only --profile-focus=dashboard,data,discover
 ```
 
 Chunks are included if their name exactly matches `plugin-<id>`, or if they are shared chunks containing modules from the focused plugin's source directory. The focused stats include:
@@ -131,10 +130,10 @@ By default, when the parent Node.js process is started with `--inspect` or `--in
 
 ```bash
 # Workers will be inspectable at port 9230, 9231, etc.
-node --inspect scripts/build_rspack_bundles.js
+node --inspect scripts/build_kibana_platform_plugins.js
 
 # Disable worker inspection
-node --inspect scripts/build_rspack_bundles.js --no-inspect-workers
+node --inspect scripts/build_kibana_platform_plugins.js --no-inspect-workers
 ```
 
 ### Profiling
@@ -143,13 +142,13 @@ Generate bundle analysis data to identify optimization opportunities:
 
 ```bash
 # Full profiling: stats.json + RsDoctor interactive report
-node scripts/build_rspack_bundles.js --profile
+node scripts/build_kibana_platform_plugins.js --profile
 
 # Quick profiling: stats.json only (faster, no RsDoctor)
-node scripts/build_rspack_bundles.js --profile-stats-only
+node scripts/build_kibana_platform_plugins.js --profile-stats-only
 
 # Profile a production build
-node scripts/build_rspack_bundles.js --dist --profile
+node scripts/build_kibana_platform_plugins.js --dist --profile
 ```
 
 After profiling, analyze the output:
@@ -194,14 +193,14 @@ When building with `--dist`:
 Third-party plugins are built using `kbn-plugin-helpers`, which uses a separate RSPack configuration (`createExternalPluginConfig`) that is independent of the unified internal build:
 
 ```bash
-# Build an external plugin with RSPack
-KBN_USE_RSPACK=true node /path/to/kibana/scripts/plugin_helpers build
+# Build an external plugin
+node /path/to/kibana/scripts/plugin_helpers build
 
 # Or programmatically
 import { createExternalPluginConfig } from '@kbn/rspack-optimizer';
 ```
 
-External plugins do **not** use the unified `build_rspack_bundles.js` script — they have their own standalone compilation config that links against Kibana's shared dependencies (DLL bundles).
+External plugins do **not** use the unified `build_kibana_platform_plugins.js` script — they have their own standalone compilation config that links against Kibana's shared dependencies (DLL bundles).
 
 ## Programmatic API
 
@@ -245,20 +244,5 @@ if (result.success) {
 
 | Variable | Description |
 |----------|-------------|
-| `KBN_USE_RSPACK=false` | Use the legacy webpack optimizer instead of the default Rspack optimizer in dev mode and distributable builds |
-| `KBN_HMR=false` | Disable HMR (RSPack only, alternative to `--no-hmr`) |
-| `KBN_HMR_PORT=5678` | Override the HMR SSE server port (RSPack only, default: 5678) |
-
-## Migration from @kbn/optimizer
-
-1. No plugin code changes needed -- plugin source works as-is
-2. Same output location -- `target/public/bundles/`
-3. Same CI approach -- swap the build command
-
-```bash
-# Before (webpack)
-node scripts/build_kibana_platform_plugins.js
-
-# After (RSPack)
-node scripts/build_rspack_bundles.js --dist
-```
+| `KBN_HMR=false` | Disable HMR (alternative to `--no-hmr`) |
+| `KBN_HMR_PORT=5678` | Override the HMR SSE server port (default: 5678) |

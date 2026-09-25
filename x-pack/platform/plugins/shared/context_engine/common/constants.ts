@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-export const publicApiPath = '/api/context_engine';
-export const internalApiPath = '/internal/context_engine';
+import type { AiIndexType } from './http_api/ai_indices';
 
-export const aiIndexPath = `${publicApiPath}/ai_index`;
-export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
+export const PUBLIC_API_PATH = '/api/context_engine';
+export const INTERNAL_API_PATH = '/internal/context_engine';
+
+export const AI_INDEX_PATH = `${PUBLIC_API_PATH}/ai_index`;
+export const AI_INDEX_BY_ID_PATH = `${AI_INDEX_PATH}/{aiIndexId}`;
 /** Id-less; ids cannot start with `_` (`AI_INDEX_ID_PATTERN`), so this never collides with `{aiIndexId}`. */
-export const aiIndexQueryPath = `${aiIndexPath}/_query`;
-export const aiIndexDescribePath = `${aiIndexByIdPath}/_describe`;
-export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
-export const aiIndexFeedbackAnalysisPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_analysis`;
-export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
-export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
+export const AI_INDEX_QUERY_PATH = `${AI_INDEX_PATH}/_query`;
+export const AI_INDEX_DESCRIBE_PATH = `${AI_INDEX_BY_ID_PATH}/_describe`;
+export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/ki_summary`;
+export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
+export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
+export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
@@ -27,14 +29,14 @@ export const KI_SUMMARY_PAGE_SIZE = 0;
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
-export const signalGroupsPath = `${internalApiPath}/signals/groups`;
-export const signalsPath = `${internalApiPath}/signals`;
+export const SIGNAL_GROUPS_PATH = `${INTERNAL_API_PATH}/signals/groups`;
+export const SIGNALS_PATH = `${INTERNAL_API_PATH}/signals`;
 
 /** Version of the internal Signals API, shared between route registration and the browser client. */
 export const SIGNALS_INTERNAL_API_VERSION = '1';
 
 /** Read-only internal route for searching data streams, backing the AI index trace picker. */
-export const dataStreamsSearchPath = `${internalApiPath}/data_streams`;
+export const DATA_STREAMS_SEARCH_PATH = `${INTERNAL_API_PATH}/data_streams`;
 
 /** Version of the internal data streams search API, shared between route registration and the browser client. */
 export const DATA_STREAMS_SEARCH_INTERNAL_API_VERSION = '1';
@@ -76,16 +78,24 @@ export const AI_INDEX_DATA_STREAM_PREFIX = `${AI_INDEX_DEST_PREFIX}ds-`;
 export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
 
 /**
+ * Storage type used for AI indexes created from the UI. The `data_stream` type still exists
+ * and is supported by the API/server for solutions and expert users; only the UI is defaulted.
+ */
+export const DEFAULT_AI_INDEX_TYPE: AiIndexType = 'index';
+
+/**
  * Hard limit on the number of AI indices returned by the list API.
  * TODO: Remove this limit (or make it configurable) and add pagination support to List API.
  */
 export const MAX_AI_INDICES = 100;
 
-export const MAX_AI_INDEX_ID_LENGTH = 256;
 export const MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH = 256;
 export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_INDEX_NAME_BYTES = 255;
+export const KI_VIEW_NAME_PREFIX = 'v-ai-index-';
+// The view name `v-ai-index-<id>` must fit an index name.
+export const MAX_AI_INDEX_ID_LENGTH = MAX_INDEX_NAME_BYTES - KI_VIEW_NAME_PREFIX.length;
 export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;

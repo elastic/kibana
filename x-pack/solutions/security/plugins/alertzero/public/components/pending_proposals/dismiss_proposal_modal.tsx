@@ -7,15 +7,16 @@
 
 import React, { useState } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import type { DismissReason } from '@kbn/agentic-investigations-plugin/common';
-import { DISMISS_REASON_OPTIONS } from '@kbn/agentic-investigations-plugin/public';
+import type { DismissReason } from '@kbn/proposals-common';
+import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-plugin/public';
 import { BaseActionModal } from '@kbn/agentic-investigations-common';
 import * as i18n from './translations';
 
 export interface DismissProposalModalProps {
   proposalId: string;
   onClose: () => void;
-  onConfirm: (params: { dismissReason: DismissReason; rationale: string }) => void;
+  /** Awaited by the modal, which shows the Dismiss button's own loading state for as long as this takes. */
+  onConfirm: (params: { dismissReason: DismissReason; rationale: string }) => Promise<void>;
 }
 
 /**

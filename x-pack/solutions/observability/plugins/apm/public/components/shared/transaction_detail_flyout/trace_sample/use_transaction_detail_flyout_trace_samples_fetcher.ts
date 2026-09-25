@@ -7,7 +7,6 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { isErrorMessage } from '../../../app/correlations/utils/is_error_message';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
@@ -18,14 +17,14 @@ export function useTransactionDetailFlyoutTraceSamplesFetcher({
   transactionName,
   transactionType,
   environment,
-  rangeFrom,
-  rangeTo,
+  start,
+  end,
 }: TransactionDetailFlyoutFilters) {
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const {
     deps: {
       core: { notifications },
     },
+    refreshToken,
   } = useTransactionDetailFlyoutContext();
 
   const fetchParams = useMemo(
@@ -43,6 +42,7 @@ export function useTransactionDetailFlyoutTraceSamplesFetcher({
 
   const { data, status, error } = useFetcher(
     (callApmApi) => {
+      void refreshToken;
       if (
         fetchParams.serviceName &&
         fetchParams.start &&
@@ -67,7 +67,7 @@ export function useTransactionDetailFlyoutTraceSamplesFetcher({
         });
       }
     },
-    [fetchParams]
+    [fetchParams, refreshToken]
   );
 
   useEffect(() => {

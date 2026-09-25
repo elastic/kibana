@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/workflows'
+  - '@kbn/agent-builder-server'
 tags:
   - shared-common
   - package
