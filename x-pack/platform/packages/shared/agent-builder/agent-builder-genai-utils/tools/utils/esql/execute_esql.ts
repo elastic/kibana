@@ -9,6 +9,7 @@ import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { MAX_ES_RESPONSE_SIZE_BYTES } from '../../constants';
+import { excludeFrozenTierQuery } from '../data_tiers';
 import { applyLimit } from './apply_limit';
 
 export interface EsqlResponse {
@@ -30,11 +31,13 @@ export const executeEsql = async ({
   query,
   params,
   limit,
+  includeFrozen = false,
   esClient,
 }: {
   query: string;
   params?: Array<Record<string, FieldValue>>;
   limit?: number;
+  includeFrozen?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<EsqlResponse> => {
   const effectiveQuery = limit !== undefined ? applyLimit(query, limit) : query;
@@ -46,6 +49,7 @@ export const executeEsql = async ({
         drop_null_columns: true,
         allow_partial_results: true,
         ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
+        ...(includeFrozen ? {} : { filter: excludeFrozenTierQuery() }),
       },
       { maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES }
     );

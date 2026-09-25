@@ -100,6 +100,10 @@ export interface GenerateEsqlOptions {
    * If true, external ES|QL datasets are considered when discovering and resolving the target.
    */
   includeDatasets?: boolean;
+  /**
+   * If true, frozen tier indices are queried.
+   */
+  includeFrozen?: boolean;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -115,6 +119,7 @@ export const generateEsql = async ({
   timeRange: inputTimeRange,
   disableNamedParams,
   includeDatasets = false,
+  includeFrozen = false,
   model: inputModel,
   modelProvider,
   esClient,
@@ -136,6 +141,7 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
+    includeFrozen,
   });
 
   return withActiveInferenceSpan(
@@ -163,6 +169,7 @@ export const generateEsql = async ({
             esClient,
             limit: 1,
             includeDatasets,
+            includeFrozen,
             model,
             logger,
           });
