@@ -23143,7 +23143,7 @@ paths:
                         - index
                       type: string
                     value:
-                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index id. System indices are not allowed.
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index ID. System indices are not allowed.
                       maxLength: 1024
                       minLength: 1
                       type: string
@@ -23244,7 +23244,7 @@ paths:
                     - enabled
                 id:
                   description: The unique identifier of the AI Index.
-                  maxLength: 256
+                  maxLength: 244
                   minLength: 1
                   type: string
                 sources:
@@ -23782,7 +23782,7 @@ paths:
           name: aiIndexId
           required: true
           schema:
-            maxLength: 256
+            maxLength: 244
             minLength: 1
             type: string
         - description: When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI Index still uses the same dest. Defaults to false.
@@ -23933,7 +23933,7 @@ paths:
           name: aiIndexId
           required: true
           schema:
-            maxLength: 256
+            maxLength: 244
             minLength: 1
             type: string
       responses:
@@ -24219,7 +24219,7 @@ paths:
           name: aiIndexId
           required: true
           schema:
-            maxLength: 256
+            maxLength: 244
             minLength: 1
             type: string
       requestBody:
@@ -24284,7 +24284,7 @@ paths:
                         - index
                       type: string
                     value:
-                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index id. System indices are not allowed.
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index ID. System indices are not allowed.
                       maxLength: 1024
                       minLength: 1
                       type: string
@@ -24686,7 +24686,7 @@ paths:
           name: aiIndexId
           required: true
           schema:
-            maxLength: 256
+            maxLength: 244
             minLength: 1
             type: string
       responses:
