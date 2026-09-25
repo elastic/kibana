@@ -37,7 +37,28 @@ import { installKibanaRequestFake, withFakeAuthorizationHeader } from './kibana_
  * compute from a hash — the suite pins its own so assertions can key on it
  * directly rather than re-deriving the same hash the workflow does. */
 export const FAKE_ATTACK_DISCOVERY_ID = 'fake-attack-discovery-id';
-export const FAKE_INVESTIGATION_ID = 'fake-investigation-id-0000-0000-0000-000000000000';
+/**
+ * The review DERIVES the Investigation id from the attack id — it is not an
+ * independent value. `attack_discovery_review.yaml` `resolve_investigation_id`
+ * re-slices the attack id into a UUID shape:
+ *
+ *   {{ attack | slice: 0,8 }}-{{ attack | slice: 8,4 }}-8{{ attack | slice: 12,3 }}
+ *     -8{{ attack | slice: 15,3 }}-{{ attack | slice: 18,12 }}
+ *
+ * For a real 32-hex attack id that is a valid UUID; `FAKE_ATTACK_DISCOVERY_ID` is
+ * not a UUID, so the slices reassemble it into something that is not one. Mirrored
+ * from the YAML rather than hardcoded, so a change to its slicing turns the gate's
+ * payload assertion red instead of silently following.
+ */
+const deriveInvestigationId = (attackDiscoveryId: string): string =>
+  [
+    attackDiscoveryId.slice(0, 8),
+    attackDiscoveryId.slice(8, 12),
+    `8${attackDiscoveryId.slice(12, 15)}`,
+    `8${attackDiscoveryId.slice(15, 18)}`,
+    attackDiscoveryId.slice(18, 30),
+  ].join('-');
+export const FAKE_INVESTIGATION_ID = deriveInvestigationId(FAKE_ATTACK_DISCOVERY_ID);
 export const FAKE_REVIEW_EXECUTION_ID = 'fake_workflow_execution_id';
 
 /** The gate's literal `timeout` (`system-create-proposal`'s `settings.timeout`
@@ -114,13 +135,10 @@ export interface AttackDiscoveryChainFixture {
    * SAME shared repository. */
   runReview: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the escalation gate as an analyst would, then drives the chain to
-   * settle. */
-  resumeEscalationGate: (decision: {
-    approved: boolean;
-    respondedBy?: string;
-    dismissReason?: string;
-    rationale?: string;
-  }) => Promise<void>;
+   * settle. Mirrors the platform's real resume payload, which is a bare
+   * `{approved}` (`proposals_service.ts` `resumeGate`) — the route's annotate
+   * path that would carry a dismiss reason is not part of this seam. */
+  resumeEscalationGate: (decision: { approved: boolean; respondedBy?: string }) => Promise<void>;
   /** Wakes the parked escalation gate past its 72h decision deadline with no
    * answer — what the scheduled wake task does in production, per the review's
    * own `176h` workflow timeout comment (the gate has to settle before that
@@ -361,12 +379,7 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
       });
       await drive();
     },
-    resumeEscalationGate: async ({
-      approved,
-      respondedBy = 'analyst',
-      dismissReason,
-      rationale,
-    }) => {
+    resumeEscalationGate: async ({ approved, respondedBy = 'analyst' }) => {
       const gateExecution = [
         ...engine.workflowExecutionRepositoryMock.workflowExecutions.values(),
       ].find(
@@ -378,11 +391,7 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
       }
       gateExecution.context = {
         ...gateExecution.context,
-        resumeInput: {
-          approved,
-          ...(dismissReason ? { dismissReason } : {}),
-          ...(rationale ? { rationale } : {}),
-        },
+        resumeInput: { approved },
         resumedBy: respondedBy,
       };
       engine.workflowExecutionRepositoryMock.workflowExecutions.set(

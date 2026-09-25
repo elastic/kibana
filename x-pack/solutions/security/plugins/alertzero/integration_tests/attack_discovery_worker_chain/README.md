@@ -43,7 +43,7 @@ node scripts/jest_integration.js \
   --runInBand
 ```
 
-25/25 passing as of this suite's introduction.
+26/26 passing as of this suite's introduction.
 
 ## Files
 

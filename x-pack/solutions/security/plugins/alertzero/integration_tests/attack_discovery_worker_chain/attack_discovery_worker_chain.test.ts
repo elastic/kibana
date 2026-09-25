@@ -9,6 +9,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import {
   createAttackDiscoveryChainFixture,
   FAKE_ATTACK_DISCOVERY_ID,
+  FAKE_INVESTIGATION_ID,
 } from './attack_discovery_chain_fixture';
 import type { AttackDiscoveryChainFixture } from './attack_discovery_chain_fixture';
 
@@ -101,6 +102,19 @@ describe('AlertZero Attack Discovery worker chain (review -> fp/tp analysis -> e
         expect(proposal.status).toBe('succeeded');
       });
 
+      it('asks the gate to approve this attack, at the analysed verdict', () => {
+        // The payload the review hands the gate was otherwise unasserted: a
+        // regression proposing the wrong attack, investigation or verdict kept
+        // every other test green, because the gate's own assertions only read
+        // back the decision it was given.
+        expect(fixture.onlyProposal().actionInput).toMatchObject({
+          ai_index_id: 'security-investigations',
+          attack_discovery_id: FAKE_ATTACK_DISCOVERY_ID,
+          investigation_id: FAKE_INVESTIGATION_ID,
+          classification: 'true_positive',
+        });
+      });
+
       it('writes the forensics handoff knowledge indicator', () => {
         expect(fixture.backend.knowledgeIndicators.size).toBe(1);
         const [[, ki]] = [...fixture.backend.knowledgeIndicators];
@@ -128,8 +142,6 @@ describe('AlertZero Attack Discovery worker chain (review -> fp/tp analysis -> e
         await fixture.resumeEscalationGate({
           approved: false,
           respondedBy: 'analyst-1',
-          dismissReason: 'low_value',
-          rationale: 'Not worth a deep dive.',
         });
       });
 
@@ -148,6 +160,11 @@ describe('AlertZero Attack Discovery worker chain (review -> fp/tp analysis -> e
           ids: [FAKE_ATTACK_DISCOVERY_ID],
           status: 'closed',
         });
+        // Stated outright rather than inferred from `toContainEqual`'s
+        // extra-property inequality: a dismissal that wrongly closed the attack
+        // as `false_positive` must fail here, not merely differ from the fixture.
+        const [closeCall] = fixture.backend.attackStatusCalls;
+        expect(closeCall.reason).toBeUndefined();
         const [investigation] = fixture.backend.conversations.values();
         expect(investigation.metadata.status).toBe('closed');
       });
