@@ -43,7 +43,9 @@ export function ServiceFlyoutHeader({
   const { capabilities } = useServiceFlyoutContext();
   const { apm } = useServiceFlyoutLinks();
   const serviceOverviewHref = apm.overviewTab;
-  const showServiceNameLink = capabilities.header?.serviceNameLink ?? false;
+  const showServiceNameLink = Boolean(
+    serviceOverviewHref && (capabilities.header?.serviceNameLink ?? false)
+  );
 
   return (
     <EuiFlyoutHeader>
