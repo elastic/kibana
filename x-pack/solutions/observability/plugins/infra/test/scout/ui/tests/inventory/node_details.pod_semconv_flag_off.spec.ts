@@ -16,6 +16,8 @@ test.describe(
   'Pod Metric Detail - schema selector flag off',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    // Sequential project so turning the pod schema flag off cannot leak into
+    // parallel Inventory workers. This URL check does not need indexed pods.
     test.beforeAll(async ({ apiServices }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': {

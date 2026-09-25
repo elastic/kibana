@@ -15,6 +15,10 @@ import {
   POD_NAMES,
   SEMCONV_PODS,
 } from '../../fixtures/constants';
+import {
+  cleanInventoryPodsSemconvSynthtraceData,
+  ingestInventoryPodsSemconvSynthtraceData,
+} from '../../fixtures/sequential_pods_synthtrace';
 
 const SEMCONV_POD = SEMCONV_PODS[0];
 const ECS_POD_NAME = POD_NAMES[0];
@@ -23,12 +27,17 @@ test.describe(
   'Pod Metric Detail - OpenTelemetry kubeletstats',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
+    // Sequential project (`playwright.config.ts` / `testDir: './tests'`). The flag
+    // override is server-wide, so this must not run beside parallel Inventory.
+    // Sequential specs also do not run `parallel_tests/global.setup.ts`.
+    test.beforeAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': {
           'observability.infra.podSchemaSelectorEnabled': true,
         },
       });
+      log.info('Sequential suite: ingesting pod metric detail SemConv fixtures');
+      await ingestInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
@@ -37,7 +46,9 @@ test.describe(
       await inventoryPage.goToPage();
     });
 
-    test.afterAll(async ({ apiServices }) => {
+    test.afterAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
+      log.info('Sequential suite: cleaning pod metric detail SemConv fixtures');
+      await cleanInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
       await apiServices.core.settings({
         'feature_flags.overrides': {
           'observability.infra.podSchemaSelectorEnabled': false,

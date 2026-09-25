@@ -74,8 +74,8 @@ const indexInfra = async (
 };
 
 /**
- * Indexes the Inventory SemConv pod windows used by
- * `tests/inventory/inventory_pods_semconv.spec.ts`.
+ * Indexes the Inventory SemConv pod windows used by sequential Inventory and
+ * Pod Metric Detail specs under `tests/inventory/`.
  */
 export const ingestInventoryPodsSemconvSynthtraceData = async (
   deps: SequentialSynthtraceWorkerDeps
