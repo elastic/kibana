@@ -171,6 +171,20 @@ export interface DiscoverServices {
   feedback?: DiscoverStartPlugins['feedback'];
 }
 
+/**
+ * The getters stay synchronous. `getBooleanValue$` emits the current evaluation as soon as it is subscribed.
+ */
+const readBooleanFlag = (core: CoreStart, flagName: string, fallback: boolean): boolean => {
+  let value = fallback;
+  core.featureFlags
+    .getBooleanValue$(flagName, fallback)
+    .subscribe((next) => {
+      value = next;
+    })
+    .unsubscribe();
+  return value;
+};
+
 export const buildServices = ({
   core,
   plugins,
@@ -219,9 +233,8 @@ export const buildServices = ({
     discoverShared: plugins.discoverShared,
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
-        core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
-      getIsEsqlDefault: () =>
-        core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
+        readBooleanFlag(core, CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
+      getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,

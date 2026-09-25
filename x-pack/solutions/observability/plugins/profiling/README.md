@@ -1,21 +1,26 @@
-# Universal Profiling (Beta)
+# Universal Profiling
 
 ## Overview
+
 Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 ### Universal profiling setup
+
 Universal Profiling is enabled by default on [Elastic Cloud](https://www.elastic.co/cloud/), and you can find it under **Observability**. To see data in Universal Profiling, you need to initialize it.
 
 ##### **Initialize Universal Profiling**
+
 Initialize Universal Profiling by navigating to one of the views and clicking the **Set up** button. Clicking this will trigger some checks and install some packages so data can be processed.
 
 The following are some of the actions and checks that occur during initialization:
+
 - Check that the APM integration is installed and configured.
 - Create Universal Profiling indices.
 - Install the Collector integration.
 - Install the Symbolizer integration.
 
 ### Collector integration
+
 The Collector is the component that receives data from the profiling agents deployed on users machines.
 
 It runs a gRPC server over HTTPS and exposes an endpoint where the profiling agents can send data.
@@ -28,6 +33,7 @@ The "Add data" page will display instructions for several deployment methodologi
 The instructions contain both the endpoint and the token that allow profiling agent to connect to the Collector.
 
 ### Symbolizer integration
+
 The Symbolizer is the component processing debug symbols for the received profiles data, enriching with source-code metadata the profiling visualizations.
 
 It processes both publicly-available debug symbols and "private" debug symbols.
@@ -38,8 +44,45 @@ For private symbols, an HTTPS endpoint is provided to users for uploading the de
 
 The authentication and authorization on this endpoint are provided as part of the request, in form of an Elasticsearch API key.
 
+## Local development
+
+### Reading profiling data from a remote cluster
+
+Universal Profiling needs a lot of real data to be interesting, and ingesting it locally is slow. `xpack.profiling.elasticsearch` lets you point the profiling views at a cluster that already has data, while the rest of Kibana keeps using your local Elasticsearch.
+
+Add to `kibana.dev.yml`:
+
+```yaml
+xpack.profiling.enabled: true
+xpack.profiling.elasticsearch.hosts: https://mycluster.es.us-west2.gcp.elastic-cloud.com
+xpack.profiling.elasticsearch.username: elastic
+xpack.profiling.elasticsearch.password: changeme
+```
+
+**This is a development-only setting.** It is rejected by the config schema in a distributable build, so Kibana will refuse to start if it is set in a released build. It is never available in production, and no deployment reads profiling data across clusters.
+
+#### What it redirects
+
+Every profiling Elasticsearch client, across both the `profiling` and `profilingDataAccess` plugins — flamegraph, functions, top N, storage explorer, the setup status check, and the profiling views embedded in APM and Infra.
+
+#### What it does not redirect
+
+Anything that isn't an Elasticsearch call. Saved objects and Fleet always target the local cluster, so the Collector, Symbolizer and APM package policies, the "Add data" instructions, and privilege checks all describe your local Kibana. On cloud, this means the setup status combines Elasticsearch answers from the remote cluster with Fleet answers from the local one.
+
+Autocompletion in the search bar also still queries the local cluster with your own credentials, so expect field suggestion errors while this is set.
+
+#### Setting up while it is configured
+
+Applying setup (`POST /api/profiling/setup/es_resources`) is rejected with a 400 while this setting is present. The credentials are meant to grant read-only access to another cluster, and setup writes cluster settings — so rather than reading from one cluster and writing to another, Kibana refuses. If the remote cluster reports that Universal Profiling is not set up, you can:
+
+- set up Universal Profiling on the remote cluster itself,
+- point the setting at a cluster that is already set up, or
+- remove the setting and set up your local cluster.
+
+The setting is defined once, in [`profiling_data_access/server/config.ts`](../profiling_data_access/server/config.ts), and shared by both plugins.
 
 ## Testing (unit, e2e)
+
 ### Unit Tests (Jest)
 
 ```
@@ -53,4 +96,5 @@ The E2E tests are located in [`x-pack/solutions/observability/plugins/profiling/
 Universal Profiling uses [Scout](https://github.com/elastic/kibana/tree/main/x-pack/solutions/observability/packages/kbn-scout-oblt) (Playwright-based test framework) to run the e2e tests. For detailed instructions on how to run the tests, see the [Scout tests README](./test/scout/README.md).
 
 ## Other resources
+
 - [Official Profiling documentation](https://www.elastic.co/observability/universal-profiling)

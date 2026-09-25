@@ -110,6 +110,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-agent-builder'
+  - '@kbn/deeplinks-observability'
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/core-user-profile-browser'
   - '@kbn/datemath'
@@ -155,6 +156,8 @@ dependsOn:
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/content-list-common'
   - '@kbn/core-ui-settings-server'
+  - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
 tags:
   - plugin
   - prod

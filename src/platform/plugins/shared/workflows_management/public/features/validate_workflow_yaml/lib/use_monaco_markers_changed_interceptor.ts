@@ -11,13 +11,13 @@ import { useCallback, useRef, useState } from 'react';
 import type YAML from 'yaml';
 import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import { validationResultFingerprint, type YamlValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
 import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 import { getYamlMarkerRuleId } from './get_yaml_marker_rule_id';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import { validationResultFingerprint, type YamlValidationResult } from '../model/types';
 
 export interface UseMonacoMarkersChangedInterceptorResult {
   transformMonacoMarkers: (

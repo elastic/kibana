@@ -234,10 +234,8 @@ describe('ModelDetailFlyout', () => {
       ]);
 
       const callout = screen.getByTestId('modelDetailFlyoutRegionUnavailableCallout');
-      expect(callout).toHaveTextContent('Model not available based on region preferences');
-      expect(callout).toHaveTextContent(
-        "This model isn't available in the locations allowed by your region preferences. To use it, update your region preferences to include a supported location."
-      );
+      expect(callout).toHaveTextContent('Model not available for use');
+      expect(screen.getByTestId('modelDetailFlyoutViewDetailsButton')).toBeInTheDocument();
     });
 
     it('hides the callout when denied_by_region_policy is missing', () => {
@@ -262,15 +260,72 @@ describe('ModelDetailFlyout', () => {
         screen.queryByTestId('modelDetailFlyoutRegionUnavailableCallout')
       ).not.toBeInTheDocument();
     });
+  });
 
-    it('hides the callout after it is dismissed', () => {
-      renderFlyout(MODEL_ID, [deniedEndpoint]);
+  describe('preview and end-of-life callouts', () => {
+    it('shows the preview callout when the model is in preview', () => {
+      renderFlyout(MODEL_ID, [createEndpoint({ metadata: { heuristics: { status: 'preview' } } })]);
 
-      fireEvent.click(screen.getByTestId('modelDetailFlyoutRegionUnavailableCalloutDismiss'));
-
+      const callout = screen.getByTestId('modelDetailFlyoutPreviewCallout');
+      expect(callout).toHaveTextContent(
+        'Model is still in Technical Preview and not recommended for production use.'
+      );
+      expect(screen.queryByTestId('modelDetailFlyoutEolCallout')).not.toBeInTheDocument();
       expect(
         screen.queryByTestId('modelDetailFlyoutRegionUnavailableCallout')
       ).not.toBeInTheDocument();
+    });
+
+    it('hides the preview callout when the model is not in preview', () => {
+      renderFlyout();
+
+      expect(screen.queryByTestId('modelDetailFlyoutPreviewCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows the end-of-life callout when the model has reached end of life', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint({
+          metadata: { heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' } },
+        }),
+      ]);
+
+      const callout = screen.getByTestId('modelDetailFlyoutEolCallout');
+      expect(callout).toHaveTextContent('Model not available for use');
+      expect(screen.getByTestId('modelDetailFlyoutEolViewDetailsButton')).toHaveTextContent(
+        'View details'
+      );
+      expect(screen.queryByTestId('modelDetailFlyoutPreviewCallout')).not.toBeInTheDocument();
+    });
+
+    it('hides the end-of-life callout when the model has not reached end of life', () => {
+      renderFlyout(MODEL_ID, [createEndpoint({ metadata: { heuristics: { status: 'ga' } } })]);
+
+      expect(screen.queryByTestId('modelDetailFlyoutEolCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows the region callout instead of preview when the model is also blocked', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint({
+          metadata: { heuristics: { status: 'preview' }, denied_by_region_policy: true },
+        }),
+      ]);
+
+      expect(screen.getByTestId('modelDetailFlyoutRegionUnavailableCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('modelDetailFlyoutPreviewCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows the region callout instead of end-of-life when the model is also blocked', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint({
+          metadata: {
+            heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
+            denied_by_region_policy: true,
+          },
+        }),
+      ]);
+
+      expect(screen.getByTestId('modelDetailFlyoutRegionUnavailableCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('modelDetailFlyoutEolCallout')).not.toBeInTheDocument();
     });
   });
 

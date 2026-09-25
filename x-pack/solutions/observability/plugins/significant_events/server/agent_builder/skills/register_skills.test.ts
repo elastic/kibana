@@ -39,6 +39,8 @@ const telemetry = {} as EbtTelemetryClient;
 const streamsKIsOnboardingClient = {} as SignificantEventsKIsOnboardingClient;
 const maintenanceService = {} as SignificantEventsMaintenanceService;
 
+const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+
 const createOptions = (
   overrides: Partial<Parameters<typeof registerSignificantEventsSkills>[0]> = {}
 ) => {
@@ -50,6 +52,7 @@ const createOptions = (
     maintenanceService,
     logger: loggerMock.create(),
     isAvailable: jest.fn().mockResolvedValue(true),
+    availability,
     ...overrides,
   };
   return { agentBuilder, options };
@@ -80,22 +83,35 @@ describe('registerSignificantEventsSkills', () => {
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length);
   });
 
-  it('keeps feature-identification tools private and gates them by availability', async () => {
-    const isAvailable = jest.fn().mockResolvedValue(true);
-    const { agentBuilder, options } = createOptions({ isAvailable });
+  // Registration cannot be undone, so without `availability` on each skill they stay advertised to
+  // the model after the feature flag is turned off.
+  it('registers every skill with the shared availability gate', async () => {
+    const { agentBuilder, options } = createOptions();
+
+    await registerSignificantEventsSkills(options);
+
+    const registered = agentBuilder.skills.register.mock.calls.map(([skill]) => skill);
+    expect(registered.length).toBeGreaterThan(0);
+    for (const skill of registered) {
+      expect(skill.availability).toBe(availability);
+    }
+  });
+
+  // Inline tools stay private to the skill rather than entering the shared registry, so hiding the
+  // skill is what hides them; they are only ever resolved for a skill the registry handed back.
+  it('keeps feature-identification tools private to the skill', async () => {
+    const { agentBuilder, options } = createOptions();
 
     await registerSignificantEventsSkills(options);
     const featureIdentificationSkill = agentBuilder.skills.register.mock.calls.find(
       ([skill]) => skill.id === FEATURE_IDENTIFICATION_SKILL_ID
     )![0];
     expect(featureIdentificationSkill.experimental).toBe(true);
-    await expect(featureIdentificationSkill.getInlineTools!()).resolves.toEqual(
+    // `getInlineTools` is declared as MaybePromise, and the skill's own implementation is sync.
+    expect(await featureIdentificationSkill.getInlineTools!()).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: FINALIZE_FEATURES_TOOL_ID })])
     );
     expect(featureIdentificationSkill.getRegistryTools).toBeUndefined();
-
-    isAvailable.mockResolvedValue(false);
-    await expect(featureIdentificationSkill.getInlineTools!()).resolves.toEqual([]);
   });
 
   it('registers the investigation skill as part of core skills when available', async () => {

@@ -392,6 +392,7 @@ function DiscoverDocumentsComponent({
   );
   // New result identity after refresh - keeps sparkline cache from reusing a stale series.
   const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);
+  const abortSignal = dataStateContainer.getAbortController()?.signal;
   const searchContext = useMemo(() => {
     if (!isEsqlMode || !esqlTable || !query) {
       return undefined;
@@ -406,8 +407,10 @@ function DiscoverDocumentsComponent({
       // Match the table's ES|QL fast-mode setting on the sparkline follow-up.
       isApproximate: esqlApproximation,
       requestId,
+      abortSignal,
     };
   }, [
+    abortSignal,
     esqlApproximation,
     esqlTable,
     esqlVariables,
