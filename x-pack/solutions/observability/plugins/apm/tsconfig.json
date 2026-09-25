@@ -181,7 +181,8 @@
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-browser-hooks",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/core-http-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }
