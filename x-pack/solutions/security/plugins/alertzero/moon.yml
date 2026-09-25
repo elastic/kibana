@@ -68,7 +68,6 @@ dependsOn:
   - '@kbn/security-mitre-attack-common'
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
-  - '@kbn/context-engine-plugin'
   - '@kbn/ui-callout'
 tags:
   - plugin
