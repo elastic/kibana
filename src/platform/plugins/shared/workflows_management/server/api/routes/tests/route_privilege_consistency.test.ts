@@ -408,6 +408,14 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
     query: { token: 'test-token' },
     body: {},
   },
+  'POST:/internal/workflows/executions/_filter_suggestions': {
+    body: {
+      kind: 'dsl',
+      index: '.workflows-executions',
+      size: 10,
+      fieldName: 'status',
+    },
+  },
 };
 
 /** Public routes that authenticate via external resume token, not Kibana privileges. */
@@ -700,6 +708,7 @@ describe('Route privilege/ES-operation consistency', () => {
       config: defaultConfig,
       spaces: mockSpaces,
       audit: mockAudit,
+      getAutocompleteSettings: () => ({ terminateAfter: 100_000, timeout: 1_000 }),
     };
 
     registerWorkflowRoutes(deps);

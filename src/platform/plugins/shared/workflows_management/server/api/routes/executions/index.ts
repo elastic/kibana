@@ -11,6 +11,7 @@ import { isHitlExternalResumeEnabled } from '@kbn/workflows';
 
 import { registerCancelExecutionRoute } from './cancel_execution';
 import { registerCancelWorkflowExecutionsRoute } from './cancel_workflow_executions';
+import { registerExecutionFilterSuggestionsRoute } from './filter_suggestions';
 import { registerGetChildrenExecutionsRoute } from './get_children_executions';
 import { registerGetExecutionRoute } from './get_execution';
 import { registerGetExecutionLogsRoute } from './get_execution_logs';
@@ -50,4 +51,5 @@ export function registerExecutionRoutes(deps: RouteDependencies) {
     registerExternalResumeFormRoute(deps);
   }
   registerGetChildrenExecutionsRoute(deps);
+  registerExecutionFilterSuggestionsRoute(deps);
 }

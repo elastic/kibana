@@ -20,6 +20,7 @@ jest.mock('@kbn/workflows-execution-engine/server', () => ({
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import { dataPluginMock as kqlPluginMock } from '@kbn/kql/server/mocks';
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
@@ -63,6 +64,7 @@ describe('WorkflowsPlugin', () => {
     plugin.setup(coreSetup, {
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
+      kql: kqlPluginMock.createSetupContract(),
     });
 
     const start = plugin.start(coreMock.createStart(), {
@@ -91,6 +93,7 @@ describe('WorkflowsPlugin', () => {
     plugin.setup(coreMock.createSetup(), {
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
+      kql: kqlPluginMock.createSetupContract(),
     });
     plugin.start(coreMock.createStart(), {
       taskManager: {} as any,
@@ -127,6 +130,7 @@ describe('WorkflowsPlugin', () => {
       actions,
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
+      kql: kqlPluginMock.createSetupContract(),
     });
 
     const connectorEventRegistrations =
@@ -155,6 +159,7 @@ describe('WorkflowsPlugin', () => {
       actions,
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
+      kql: kqlPluginMock.createSetupContract(),
     });
 
     expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(

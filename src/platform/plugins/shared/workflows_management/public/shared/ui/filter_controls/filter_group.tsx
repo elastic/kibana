@@ -54,6 +54,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     setControlsUrlState,
     maxControls = Infinity,
     Storage,
+    optionsListSuggestionsPath,
     storageKey,
     disableLocalStorageSync = false,
   } = props;
@@ -444,6 +445,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
                 query={validatedQuery}
                 filters={validatedFilters}
                 viewMode={filterGroupMode}
+                optionsListSuggestionsPath={optionsListSuggestionsPath}
               />
               {!controlGroup ? <FilterGroupLoading /> : null}
             </EuiFlexItem>

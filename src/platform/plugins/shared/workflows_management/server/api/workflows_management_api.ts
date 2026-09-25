@@ -9,6 +9,7 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type {
   SmlIndexAction,
@@ -27,6 +28,7 @@ import type {
   BulkScheduleWorkflowResult,
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowExecution,
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
   ResumeWorkflowExecutionResponseDto,
@@ -49,7 +51,10 @@ import type {
   WorkflowPartialDetailDto,
   WorkflowSortField,
 } from '@kbn/workflows/types/v1';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type {
+  ExecutionsSearchRequest,
+  WorkflowsExecutionEnginePluginStart,
+} from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
   ExecutionLogsParams,
@@ -900,6 +905,16 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     return this.workflowsService.searchExecutionsView(params, spaceId);
+  }
+
+  /**
+   * Runs an aggregation-only search over workflow executions with the internal user. Callers must
+   * authorize the request and scope the query themselves.
+   */
+  public async aggregateExecutions(
+    request: ExecutionsSearchRequest
+  ): Promise<estypes.SearchResponse<EsWorkflowExecution>> {
+    return this.workflowsService.aggregateExecutions(request);
   }
 
   public async getWorkflowExecution(

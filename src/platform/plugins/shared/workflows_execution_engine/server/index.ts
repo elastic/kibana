@@ -20,6 +20,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type {
   DataClient,
+  ExecutionsSearchRequest,
   GetStepExecutionsByIdsOptions,
   GetWorkflowExecutionsByIdsOptions,
   StepExecutionsDataClient,

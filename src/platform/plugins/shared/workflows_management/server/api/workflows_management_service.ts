@@ -20,6 +20,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowExecution,
   EsWorkflowStepExecution,
   ExecutionStatus,
   ExecutionType,
@@ -51,6 +52,7 @@ import type {
   WorkflowPartialDetailDto,
 } from '@kbn/workflows/types/v1';
 import type {
+  ExecutionsSearchRequest,
   LogSearchResult,
   WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginStart,
@@ -552,6 +554,13 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.searchExecutionsView(params, spaceId);
+  }
+
+  public async aggregateExecutions(
+    request: ExecutionsSearchRequest
+  ): Promise<estypes.SearchResponse<EsWorkflowExecution>> {
+    await this.ensureInitialized();
+    return this.executionQueryService.aggregateExecutions(request);
   }
 
   public async listWaitingForInputSteps(

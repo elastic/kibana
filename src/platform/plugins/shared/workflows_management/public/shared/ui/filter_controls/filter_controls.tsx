@@ -77,7 +77,10 @@ export const FilterControls = (props: FilterControlsProps) => {
     let cancelled = false;
     if (dataViewSpec?.id) {
       (async () => {
-        await dataViews.create(dataViewSpec);
+        // `skipFetchFields` keeps the field list supplied in the spec. Refreshing it would
+        // overwrite the fields with whatever the current user can see on the index, which is
+        // nothing when the index is not covered by their Elasticsearch privileges.
+        await dataViews.create(dataViewSpec, true);
         if (!cancelled) {
           setLoadingPageFilters(false);
         }

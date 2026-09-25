@@ -10,6 +10,7 @@
 import type { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest, debounceTime, startWith, switchMap, tap, withLatestFrom } from 'rxjs';
 
+import { apiHasOptionsListSuggestionsPath } from '@kbn/controls-renderer';
 import { fetch$, type PublishingSubject } from '@kbn/presentation-publishing';
 import type {
   OptionsListSearchTechnique,
@@ -133,7 +134,13 @@ export function fetchAndValidate$({
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {
-          const result = await requestCache.runFetchRequest(built.body, newAbortController.signal);
+          const result = await requestCache.runFetchRequest(
+            built.body,
+            newAbortController.signal,
+            apiHasOptionsListSuggestionsPath(api.parentApi)
+              ? api.parentApi.getOptionsListSuggestionsPath()
+              : undefined
+          );
           if ('error' in result) {
             const err = (result as OptionsListFailureResponse).error;
             return { error: err === 'aborted' ? new Error('Request aborted') : err };

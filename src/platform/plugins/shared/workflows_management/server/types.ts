@@ -20,6 +20,7 @@ import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
+import type { PluginSetup as KqlPluginSetup } from '@kbn/kql/server';
 import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
@@ -52,6 +53,7 @@ export interface WorkflowsServerPluginSetupDeps {
   actions?: ActionsPluginSetupContract;
   alerting?: AlertingServerSetup;
   spaces: SpacesPluginSetup;
+  kql: KqlPluginSetup;
   serverless?: ServerlessServerSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   /**

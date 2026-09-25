@@ -18,6 +18,7 @@ import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
   EXECUTION_FILTERS_STORAGE_KEY,
 } from './workflow_executions_page_constants';
+import { WORKFLOW_EXECUTION_FILTER_SUGGESTIONS_PATH } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
 import {
@@ -79,6 +80,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
           maxControls={4}
           onFiltersChange={onFiltersChange}
           onInit={onFilterGroupInit}
+          optionsListSuggestionsPath={WORKFLOW_EXECUTION_FILTER_SUGGESTIONS_PATH}
           query={query}
           services={services}
           setControlsUrlState={setControlsUrlState}

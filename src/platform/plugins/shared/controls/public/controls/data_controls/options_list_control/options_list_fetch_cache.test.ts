@@ -67,6 +67,25 @@ describe('OptionsListFetchCache', () => {
     invalidSelections: [] as string[],
   };
 
+  it('POSTs to a caller-supplied path and keeps its responses out of the default path cache', async () => {
+    const cache = new OptionsListFetchCache();
+    const request = baseDslRequest();
+
+    await cache.runFetchRequest(request, new AbortController().signal, '/internal/my_app/fetch');
+    expect(fetchSpy).toHaveBeenLastCalledWith(
+      '/internal/my_app/fetch',
+      expect.objectContaining({ method: 'POST' })
+    );
+
+    // Same request body, default path: must not be served from the override's cache entry.
+    await cache.runFetchRequest(request, new AbortController().signal);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(fetchSpy).toHaveBeenLastCalledWith(
+      '/internal/controls/optionsList/fetch',
+      expect.objectContaining({ method: 'POST' })
+    );
+  });
+
   it('POSTs ES|QL requests to the unified fetch route with the pre-built filter', async () => {
     fetchSpy.mockResolvedValueOnce(okSuggestionsResponse);
     const cache = new OptionsListFetchCache();
