@@ -1793,10 +1793,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
+        // Click without the inner click retry so an intercepted click fails this attempt fast and
+        // the next attempt can dismiss whatever covered the button.
         if (await testSubjects.waitForExists(`lnsLayerSplitButton--${index}`)) {
-          await testSubjects.click(`lnsLayerSplitButton--${index}`);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerSplitButton--${index}`);
         }
-        await testSubjects.click(`lnsLayerRemove--${index}`);
+        await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerRemove--${index}`);
         if (await testSubjects.waitForExists('lnsLayerRemoveModal')) {
           await testSubjects.click('lnsLayerRemoveConfirmButton');
         }

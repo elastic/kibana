@@ -347,7 +347,9 @@ export class SecurityPageObject extends FtrService {
       );
       // Unload the app first. Requests that outlive the page (e.g. keepalive) can still
       // re-set the session cookie after it is deleted, so clear until it stays cleared.
-      await this.browser.get(this.deployment.getHostPort() + '/bootstrap-anonymous.js');
+      const hostPort = this.deployment.getHostPort();
+      const originalUrl = await this.browser.getCurrentUrl();
+      await this.browser.get(hostPort + '/bootstrap-anonymous.js');
       const alert = await this.browser.getAlert();
       if (alert) await alert.accept();
       await browserAuth.cleanBrowserState();
@@ -361,6 +363,11 @@ export class SecurityPageObject extends FtrService {
         clearedChecks++;
         return clearedChecks >= 2;
       });
+      // Return to the original page; without a session Kibana redirects it to the login page,
+      // which callers rely on.
+      if (originalUrl.startsWith(hostPort)) {
+        await this.browser.get(originalUrl);
+      }
       return;
     }
 
