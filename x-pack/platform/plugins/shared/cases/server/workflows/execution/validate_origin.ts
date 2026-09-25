@@ -36,12 +36,19 @@ interface DocumentPair {
   _index: string;
 }
 
+export interface WorkflowSelectionTarget {
+  id: string;
+  index: string;
+}
+
+export type TriggerSelectionType = 'alert' | 'document';
+
 interface DocumentValidationContext {
   selected: DocumentPair[];
   attached: DocumentResponse;
 }
 
-/** The maximum number of documents that may be submitted in `inputs.event.documents` per run. */
+/** The maximum number of documents that may be selected for a single case workflow run. */
 const MAX_DOCUMENTS_PER_WORKFLOW_RUN = 1000 as const;
 
 /**
@@ -79,10 +86,10 @@ const parseIndexedPairs = (value: unknown, inputPath: string, max: number): Docu
 };
 
 /**
- * Reads the (id, index) pairs from `inputs.event.alertIds`.
+ * Reads the explicit (id, index) pairs from `inputs.event.alertIds`.
  *
  * Malformed entries are rejected, never skipped. The pairs returned here are the ones
- * `validateOrigin` checks for case membership, while alert preprocessing fetches from the *raw*
+ * `validateOrigin` checks for case membership, while trigger preprocessing fetches from the *raw*
  * `inputs.event.alertIds` array — so dropping an entry would let it escape the membership check
  * and still be fetched and injected into the workflow event. A nullish `alertIds` is treated as
  * "no alert inputs" to match how preprocessing decides whether to expand alerts at all.
@@ -94,20 +101,118 @@ export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): Docume
   return parseIndexedPairs(alertIds, 'inputs.event.alertIds', MAX_ALERTS_PER_CASE);
 };
 
+/** Resolves a Cases trigger selection from its discriminator or selection fields. */
+export const getTriggerSelectionType = (
+  inputs: Record<string, unknown>
+): TriggerSelectionType | undefined => {
+  const event = getRecord(inputs.event);
+  if (!event) {
+    return undefined;
+  }
+
+  const hasAlertSelection = event.alertIds != null || event.alerts != null;
+  const hasDocumentSelection = event.documentIds != null || event.documents != null;
+
+  if (hasAlertSelection && hasDocumentSelection) {
+    throw Boom.badRequest('Case workflow inputs cannot mix alert and document selections.');
+  }
+
+  let inferredSelectionType: TriggerSelectionType | undefined;
+  if (hasAlertSelection) {
+    inferredSelectionType = 'alert';
+  } else if (hasDocumentSelection) {
+    inferredSelectionType = 'document';
+  }
+  const { triggerType } = event;
+
+  if (triggerType === 'alert' || triggerType === 'document') {
+    if (inferredSelectionType !== undefined && inferredSelectionType !== triggerType) {
+      throw Boom.badRequest(
+        `Case workflow ${inferredSelectionType} selection does not match triggerType "${triggerType}".`
+      );
+    }
+    return triggerType;
+  }
+
+  if (triggerType !== undefined && inferredSelectionType !== undefined) {
+    throw Boom.badRequest(
+      `Case workflow ${inferredSelectionType} selection requires triggerType "${inferredSelectionType}".`
+    );
+  }
+
+  return inferredSelectionType;
+};
+
+export const rejectQuerySelection = (inputs: Record<string, unknown>): void => {
+  const { querySelection } = getRecord(inputs.event) ?? {};
+  if (querySelection !== undefined) {
+    throw Boom.badRequest('Query-based trigger selections are not supported for case workflows.');
+  }
+};
+
 /**
- * Reads the (id, index) pairs from `inputs.event.documents`.
- *
- * Unlike alerts, documents are not re-fetched by `preprocessAlertInputs` (which early-returns for
- * non-alert triggers) — they are forwarded verbatim to the workflow engine. This check therefore
- * prevents a caller from referencing documents outside the case. Content of the forwarded
- * documents remains client-supplied; activity enrichment is derived server-side from the case.
- *
- * Malformed entries are rejected, never skipped. A nullish or missing value is treated as
- * "no document inputs".
+ * Reads the concrete alert or document pairs supplied to a case workflow.
  */
-export const parseSelectedDocumentPairs = (inputs: Record<string, unknown>): DocumentPair[] => {
-  const { documents } = getRecord(inputs.event) ?? {};
-  return parseIndexedPairs(documents, 'inputs.event.documents', MAX_DOCUMENTS_PER_WORKFLOW_RUN);
+export const parseSelectedTriggerPairs = (
+  inputs: Record<string, unknown>,
+  selectionType: TriggerSelectionType
+): WorkflowSelectionTarget[] => {
+  const event = getRecord(inputs.event);
+  if (selectionType === 'alert') {
+    const alertIds = parseSelectedAlertPairs(inputs);
+    if (alertIds.length > 0) {
+      return alertIds.map(({ _id, _index }) => ({ id: _id, index: _index }));
+    }
+  }
+
+  const preExpandedSelection = event?.[selectionType === 'alert' ? 'alerts' : 'documents'];
+  const explicitDocumentIds = selectionType === 'document' ? event?.documentIds : undefined;
+  const selection =
+    Array.isArray(preExpandedSelection) && preExpandedSelection.length > 0
+      ? preExpandedSelection
+      : explicitDocumentIds ?? preExpandedSelection;
+
+  if (!Array.isArray(selection)) {
+    throw Boom.badRequest(`Case workflow ${selectionType} selection must be an array.`);
+  }
+  if (selection.length === 0) {
+    throw Boom.badRequest(`Case workflow ${selectionType} selection cannot be empty.`);
+  }
+  const maxEntries =
+    selectionType === 'alert' ? MAX_ALERTS_PER_CASE : MAX_DOCUMENTS_PER_WORKFLOW_RUN;
+  if (selection.length > maxEntries) {
+    throw Boom.badRequest(
+      `Case workflow ${selectionType} selection cannot contain more than ${maxEntries} entries.`
+    );
+  }
+
+  return selection.map((entry) => {
+    const record = getRecord(entry);
+    const usesExplicitDocumentIds = selection === explicitDocumentIds;
+    const id =
+      selectionType === 'alert' || usesExplicitDocumentIds
+        ? record?._id
+        : record?.id ?? record?._id;
+    const index =
+      selectionType === 'alert' || usesExplicitDocumentIds
+        ? record?._index
+        : record?.index ?? record?._index;
+    const hasConflictingDocumentIdentity =
+      selectionType === 'document' &&
+      !usesExplicitDocumentIds &&
+      ((record?.id !== undefined && record?._id !== undefined && record.id !== record._id) ||
+        (record?.index !== undefined &&
+          record?._index !== undefined &&
+          record.index !== record._index));
+
+    if (typeof id !== 'string' || typeof index !== 'string' || hasConflictingDocumentIdentity) {
+      throw Boom.badRequest(
+        `Every selected ${selectionType} must contain string id and index properties.`
+      );
+    }
+
+    return { id, index };
+  });
 };
 
 const getDefaultTargets = ({
@@ -279,9 +384,8 @@ const validateDefaultTargetAlignment = ({
  * enforced regardless of `origin.type` so callers cannot bypass them by using a `cases.case`
  * or `cases.observable` origin type while still injecting arbitrary documents into the workflow.
  *
- * `selectedAlerts` must come from `parseSelectedAlertPairs` and `selectedDocuments` must come
- * from `parseSelectedDocumentPairs` — each is the sole reader of its respective input field,
- * which keeps the validated set identical to the set that processing later uses.
+ * `selectedAlerts` and `selectedDocuments` must come from `parseSelectedTriggerPairs` so malformed
+ * identities cannot be skipped during membership validation.
  */
 export const validateOrigin = ({
   origin,
@@ -346,10 +450,8 @@ export const validateOrigin = ({
     )
   );
 
-  // Step 2 — alert-membership check: applied whenever alertIds appear in inputs,
-  // regardless of origin type, using (id, index) pairs for precise matching.
-  // `selectedAlerts` comes from `parseSelectedAlertPairs` — the same parsed set that alert
-  // preprocessing will later fetch, so the validated set and the fetched set are identical.
+  // Step 2 — alert-membership check: applied whenever alerts appear in inputs, regardless of
+  // origin type, using (id, index) pairs for precise matching.
   if (selectedAlerts.length > 0) {
     const attachedPairs = new Set([
       ...attachedAlerts.map(({ id, index }) => `${id}|${index}`),
@@ -362,8 +464,6 @@ export const validateOrigin = ({
 
   // Step 3 — document-membership check: applied whenever documents appear in inputs,
   // regardless of origin type, using (id, index) pairs for precise matching.
-  // Unlike alerts, documents are forwarded verbatim (no server-side re-fetch), so this check
-  // is the only guard against a caller referencing documents outside the case.
   if (selectedDocuments.length > 0) {
     const attachedEventPairs = new Set([
       ...attachedEvents.map(({ id, index }) => `${id}|${index}`),

@@ -20,6 +20,7 @@ import { executionStepsQuerySchema } from './get_execution_steps';
 import type { WorkflowsManagementConfig } from '../../../config';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
+import { TriggerEventDocumentsForbiddenError } from '../../trigger_event_documents_forbidden_error';
 import type { RouteDependencies } from '../types';
 import { MAX_WORKFLOW_ENTITY_ID_LENGTH } from '../utils/route_constants';
 import { executionIdParamSchema } from '../utils/schemas';
@@ -98,7 +99,7 @@ describe('Execution Routes', () => {
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
     mockApi = {
       getWorkflow: jest.fn(),
-      runWorkflowWithAlertPreprocessing: jest.fn(),
+      runWorkflowWithPreprocessing: jest.fn(),
       testWorkflow: jest.fn(),
       testStep: jest.fn(),
       getWorkflowExecutions: jest.fn(),
@@ -180,7 +181,7 @@ describe('Execution Routes', () => {
 
     it('should call api methods with correct arguments when workflow is valid', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflowWithAlertPreprocessing.mockResolvedValue({
+      mockApi.runWorkflowWithPreprocessing.mockResolvedValue({
         workflowExecutionId: 'exec-1',
         inputs: { k: 'v' },
       });
@@ -193,7 +194,7 @@ describe('Execution Routes', () => {
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
-      expect(mockApi.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
+      expect(mockApi.runWorkflowWithPreprocessing).toHaveBeenCalledWith({
         workflow: {
           id: 'wf-1',
           name: 'Test',
@@ -219,7 +220,7 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
-      expect(mockApi.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+      expect(mockApi.runWorkflowWithPreprocessing).not.toHaveBeenCalled();
     });
 
     it('should return bad request when workflow is not valid', async () => {
@@ -259,9 +260,9 @@ describe('Execution Routes', () => {
       });
     });
 
-    it('should return custom error when api.runWorkflowWithAlertPreprocessing throws', async () => {
+    it('should return custom error when api.runWorkflowWithPreprocessing throws', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflowWithAlertPreprocessing.mockRejectedValue(new Error('engine failed'));
+      mockApi.runWorkflowWithPreprocessing.mockRejectedValue(new Error('engine failed'));
       const h = handler('POST', path)!;
       const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
 
@@ -278,6 +279,22 @@ describe('Execution Routes', () => {
       );
       expect(mockResponse.customError).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'customError', body: expect.objectContaining({}) });
+    });
+
+    it('should return forbidden when the selected trigger documents are unreadable', async () => {
+      mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockApi.runWorkflowWithPreprocessing.mockRejectedValue(
+        new TriggerEventDocumentsForbiddenError(['secret'])
+      );
+      const h = handler('POST', path)!;
+      const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: { message: 'Not authorized to read the selected documents in: secret' },
+      });
+      expect(result).toMatchObject({ type: 'forbidden' });
     });
   });
 
