@@ -17,16 +17,37 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { DEDUCTIVE_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
-import { ungradedPlaceholder } from './placeholder';
+import {
+  ANTI_LEAKAGE_EVALUATOR,
+  CAUSE_COMPLETENESS_EVALUATOR,
+  GOAL_PASS_EVALUATOR,
+  createInvestigationJudges,
+} from './judges';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertAgentTrace, assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
 evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
   evaluate(
-    'persists ungraded investigations and complete agent traces',
-    async ({ executorClient, connector, fetch, evalsClient, traceEsClient, repetitions, log }) => {
+    'grades investigations with the RCA judges and persists complete agent traces',
+    async ({
+      executorClient,
+      connector,
+      fetch,
+      evalsClient,
+      traceEsClient,
+      repetitions,
+      log,
+      inferenceClient,
+      evaluationConnector,
+    }) => {
       const dataset = await loadInvestigationDataset(evalsClient);
+      // The judges score with the evaluation connector, not the model under test.
+      const judges = createInvestigationJudges({
+        inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
+        evaluationConnector,
+        log,
+      });
       const concurrency = 16;
       evaluate.setTimeout(
         Math.ceil((dataset.examples.length * repetitions) / concurrency) *
@@ -79,14 +100,14 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         .toBe(true);
       const [experiment] = await executorClient.runExperiment(
         {
-          name: 'Nightshift ungraded investigation traces',
+          name: 'Nightshift graded investigation traces',
           datasets: [dataset],
           trustUpstreamDataset: Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
           concurrency,
           metadata: { concurrency },
           task: (example) => runInvestigation(fetch, example),
         },
-        [ungradedPlaceholder]
+        judges
       );
 
       const runs = Object.values(experiment.runs);
@@ -94,23 +115,25 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
       expect(new Set(runs.map(({ metadata }) => metadata?.case_id))).toEqual(
         new Set(dataset.examples.map(({ metadata }) => metadata.case_id))
       );
+      const scoresPerRun = judges.length;
       await expect
         .poll(async () => (await evalsClient.getExperimentScores(experiment.id)).length, {
           timeout: 60_000,
         })
-        .toBe(runs.length);
+        .toBe(runs.length * scoresPerRun);
       const { examples } = await evalsClient.getExperimentDatasetExamples(
         experiment.id,
         experiment.datasetId
       );
       const scores = examples.flatMap((example) => example.scores);
-      expect(scores).toHaveLength(runs.length);
+      expect(scores).toHaveLength(runs.length * scoresPerRun);
 
       await pMap(
         runs,
         async (run) => {
           const output = run.output as InvestigationTaskOutput;
-          // The placeholder stays at one even on failure; these checks alone establish execution acceptance.
+          // These execution-acceptance checks alone establish that the run itself succeeded,
+          // independently of the quality scores the judges assign.
           expect(output.execution_error).toBeUndefined();
           expect(output.workflow_status).toBe('completed');
           expect(output.investigation_id).toEqual(expect.any(String));
@@ -135,7 +158,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
               score.example.index === run.exampleIndex &&
               score.task.repetition_index === run.repetition
           );
-          expect(exampleScores).toHaveLength(1);
+          expect(exampleScores).toHaveLength(scoresPerRun);
           const [score] = exampleScores;
           expect(score.example.metadata?.case_id).toBe(output.case_id);
           expect(score.task.trace_id).toBe(output.traceId);
@@ -147,15 +170,21 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
             run.repetition
           );
           expect(details.task.output).toEqual(JSON.parse(JSON.stringify(output)));
-          expect(score.evaluator).toMatchObject({
-            name: 'ungraded_placeholder',
-            kind: 'code',
-            direction: 'neutral',
-            score: 1,
-            label: 'ungraded',
-            explanation: expect.stringContaining('no quality evaluation was performed'),
-          });
-          expect(score.evaluator.trace_id).not.toBe(output.traceId);
+          // All three RCA judges scored this run, each in its own evaluation trace.
+          expect(new Set(exampleScores.map((each) => each.evaluator.name))).toEqual(
+            new Set([GOAL_PASS_EVALUATOR, CAUSE_COMPLETENESS_EVALUATOR, ANTI_LEAKAGE_EVALUATOR])
+          );
+          for (const exampleScore of exampleScores) {
+            expect(exampleScore.evaluator.kind).toBe('llm');
+            expect(exampleScore.evaluator.direction).toBe('maximize');
+            expect(exampleScore.evaluator.trace_id).not.toBe(output.traceId);
+            const { score: judgeScore } = exampleScore.evaluator;
+            // Judges emit a normalized [0, 1] score, or null when a dimension does not apply.
+            if (judgeScore !== null && judgeScore !== undefined) {
+              expect(judgeScore).toBeGreaterThanOrEqual(0);
+              expect(judgeScore).toBeLessThanOrEqual(1);
+            }
+          }
 
           const agentTraceIds = conversation.rounds.flatMap(({ trace_id: traceId }) =>
             typeof traceId === 'string' ? [traceId] : traceId ?? []
@@ -186,7 +215,9 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
               investigation_id: output.investigation_id,
               conversation_id: output.conversation_id,
               trace_id: output.traceId,
-              evaluation: 'ungraded',
+              scores: Object.fromEntries(
+                exampleScores.map((each) => [each.evaluator.name, each.evaluator.score])
+              ),
             })
           );
         },
@@ -196,9 +227,9 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
       const evaluatorTraces = experiment.evaluationRuns
         .map(({ traceId }) => traceId)
         .filter((traceId): traceId is string => Boolean(traceId));
-      expect(experiment.evaluationRuns).toHaveLength(runs.length);
-      expect(experiment.evaluationRuns.every(({ kind }) => kind === 'CODE')).toBe(true);
-      expect(evaluatorTraces).toHaveLength(runs.length);
+      expect(experiment.evaluationRuns).toHaveLength(runs.length * scoresPerRun);
+      expect(experiment.evaluationRuns.every(({ kind }) => kind === 'LLM')).toBe(true);
+      expect(evaluatorTraces).toHaveLength(runs.length * scoresPerRun);
       await pMap(
         evaluatorTraces,
         async (traceId) => {
@@ -217,18 +248,28 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         },
         { concurrency }
       );
-      const judgeCalls = await traceEsClient.count({
-        index: 'traces-*',
-        query: {
-          bool: {
-            filter: [
-              { terms: { 'trace.id': evaluatorTraces } },
-              { exists: { field: 'attributes.gen_ai.input.messages' } },
-            ],
-          },
-        },
-      });
-      expect(judgeCalls.count).toBe(0);
+      // Unlike the former ungraded placeholder, the LLM judges call the evaluation model, so their
+      // evaluation traces must carry gen_ai judge calls. goal_pass and rca_cause_completeness always
+      // call the judge; rca_anti_leakage may short-circuit its clean cases without one.
+      await expect
+        .poll(
+          async () =>
+            (
+              await traceEsClient.count({
+                index: 'traces-*',
+                query: {
+                  bool: {
+                    filter: [
+                      { terms: { 'trace.id': evaluatorTraces } },
+                      { exists: { field: 'attributes.gen_ai.input.messages' } },
+                    ],
+                  },
+                },
+              })
+            ).count,
+          { timeout: 60_000 }
+        )
+        .toBeGreaterThan(0);
     }
   );
 });
