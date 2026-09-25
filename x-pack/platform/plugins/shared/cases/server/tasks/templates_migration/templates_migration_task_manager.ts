@@ -28,6 +28,9 @@ import {
 import {
   CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS,
   CASE_BACKFILL_RESCHEDULE_DELAY_MS,
+  CASE_BACKFILL_RUN_BUDGET_MS,
+  CASE_BACKFILL_SCAN_BUDGET,
+  CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT,
   MAX_CASE_BACKFILL_FAILED_RUNS,
   MAX_CONCURRENT_MIGRATIONS,
 } from './types';
@@ -81,7 +84,7 @@ export class TemplatesMigrationTaskManager {
       [CASES_TEMPLATES_MIGRATION_TASK_TYPE]: {
         title: 'Cases Templates V2 Migration',
         description: 'One-shot migration of legacy templates and custom fields to the v2 system',
-        timeout: '10m',
+        timeout: CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT,
         maxAttempts: 3,
         createTaskRunner: ({ taskInstance, signal }: RunContext) => {
           // Same guard as IncrementalIdTaskManager: if Task Manager fires between setup() and
@@ -90,15 +93,11 @@ export class TemplatesMigrationTaskManager {
             throw new Error('TemplatesMigrationTaskManager: internal repository not initialized');
           }
           const repo = this.internalRepo;
-          const log = this.logger;
           const previousState = (taskInstance?.state ?? {}) as MigrationTaskState;
           // Task Manager aborts this signal on timeout/cancel; the backfill checks it between pages
           // and persists its cursor so the next run resumes rather than running past the timeout.
           return {
             run: () => this.run(repo, previousState, signal),
-            cancel: async () => {
-              log.debug('Cases templates v2 migration task cancelled — aborting scan');
-            },
           };
         },
       },
@@ -157,7 +156,12 @@ export class TemplatesMigrationTaskManager {
   ) {
     const log = this.logger;
     const executionId = uuidv4();
+    const startedAt = Date.now();
     log.debug(`[${executionId}] Starting cases templates v2 migration`);
+
+    const runDeadline = startedAt + CASE_BACKFILL_RUN_BUDGET_MS;
+    const runBudgetExceeded = () => Date.now() >= runDeadline;
+    const shouldPause = () => signal.aborted || runBudgetExceeded();
 
     const configures = await findAllConfigurations(repo, log, executionId);
     log.debug(`[${executionId}] Found ${configures.length} cases-configure SOs to inspect`);
@@ -258,13 +262,15 @@ export class TemplatesMigrationTaskManager {
       repo,
       configures,
       previousState.caseBackfill,
-      signal,
+      shouldPause,
       executionId,
       log
     );
 
+    const durationMs = Date.now() - startedAt;
+
     log.info(
-      `[${executionId}] Cases templates v2 migration run complete: ` +
+      `[${executionId}] Cases templates v2 migration run complete in ${durationMs}ms: ` +
         `${configures.length} configure SOs inspected ` +
         `(fieldsAndTemplates migrated=${totals.migrated}, skipped=${totals.skipped}, errored=${totals.errored}); ` +
         `field definitions created=${totals.fieldDefsCreated}, reused=${totals.fieldDefsReused}; ` +
@@ -272,6 +278,24 @@ export class TemplatesMigrationTaskManager {
         `cases backfilled this run=${backfill.backfilled}` +
         `${backfill.complete ? '' : ' (more cases remain — rescheduling)'}`
     );
+
+    if (runBudgetExceeded()) {
+      log.warn(
+        `[${executionId}] Cases templates v2 migration run took ${durationMs}ms, over its ` +
+          `${CASE_BACKFILL_RUN_BUDGET_MS}ms run budget${
+            backfill.complete
+              ? ' (the backfill still completed).'
+              : `, so it stopped before the ${CASE_BACKFILL_SCAN_BUDGET}-case scan budget and the ` +
+                'next run resumes from the persisted cursor.'
+          } The budget keeps the run inside the ${CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT} task ` +
+          `timeout, past which the resume cursor would be discarded. If this repeats every run, ` +
+          `lower CASE_BACKFILL_SCAN_BUDGET.`
+      );
+      this.migrationUsageCounter?.incrementCounter({
+        counterName: 'caseBackfillRunBudgetExceeded',
+        incrementBy: 1,
+      });
+    }
 
     // A space whose Phase-1 migrateOneConfigure keeps throwing never gets its
     // legacyCustomFieldsMigrated/legacyTemplatesMigrated flags set, so configureNeedsCaseBackfill
