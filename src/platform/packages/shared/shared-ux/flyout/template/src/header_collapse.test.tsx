@@ -11,26 +11,6 @@ import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
 
-// EUI's test-env `EuiFlyout` omits the `.euiFlyout__content` wrapper the collapse hook scrolls
-// through, so without it the wheel tests could never reach an outer scroller.
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  const { createElement } = jest.requireActual('react');
-  return {
-    ...actual,
-    EuiFlyout: ({ children, ...props }: { children?: React.ReactNode }) =>
-      createElement(
-        actual.EuiFlyout,
-        props,
-        createElement(
-          'div',
-          { className: 'euiFlyout__content', 'data-test-subj': 'euiFlyoutContent' },
-          children
-        )
-      ),
-  };
-});
-
 const noop = () => {};
 
 describe('FlyoutTemplate header collapse on scroll', () => {
@@ -396,9 +376,13 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     Object.defineProperty(overflowEl, 'scrollBy', { value: scrollBy, configurable: true });
     // Page mode derives its pixel delta from the viewport height.
     setScrollState(overflowEl, scrollState);
-    // `.euiFlyout__content` wraps header, body, and footer, and scrolls at short viewports.
-    if (outerScrollState) setScrollState(screen.getByTestId('euiFlyoutContent'), outerScrollState);
-    return { headerEl, scrollBy };
+    // Stands in for the outer container `EuiFlyout` makes scrollable at short viewports.
+    const outerEl = headerEl.closest<HTMLElement>('[role="dialog"]')!;
+    if (outerScrollState) {
+      outerEl.style.overflowY = 'auto';
+      setScrollState(outerEl, outerScrollState);
+    }
+    return { headerEl, outerEl, scrollBy };
   };
 
   it('forwards pixel-mode wheel events on the header to the body scroll container', () => {
@@ -472,8 +456,8 @@ describe('FlyoutTemplate header collapse on scroll', () => {
       notCancelled = fireEvent.wheel(headerEl, { deltaY: 50 });
     });
 
-    // Cancelling here would also cancel scroll chaining, stranding the enclosing
-    // `.euiFlyout__content` scroller and the footer inside it.
+    // Cancelling here would also cancel scroll chaining, stranding the enclosing scroller and
+    // the footer inside it.
     expect(notCancelled).toBe(true);
     expect(scrollBy).not.toHaveBeenCalled();
   });
@@ -507,6 +491,21 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     // Releasing here would chain the scroll out to the page behind the flyout.
     expect(notCancelled).toBe(false);
     expect(scrollBy).not.toHaveBeenCalled();
+  });
+
+  it('swallows the wheel event when an ancestor has room but is not a scroll container', () => {
+    const { headerEl, outerEl } = setUpWheelForwarding(
+      { scrollTop: 600, scrollHeight: 1000, clientHeight: 400 },
+      { scrollTop: 0, scrollHeight: 800, clientHeight: 400 }
+    );
+    outerEl.style.overflowY = 'visible';
+
+    let notCancelled = true;
+    act(() => {
+      notCancelled = fireEvent.wheel(headerEl, { deltaY: 50 });
+    });
+
+    expect(notCancelled).toBe(false);
   });
 
   it('still forwards the wheel event when scrolling away from an edge', () => {

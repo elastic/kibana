@@ -44,6 +44,22 @@ const canScrollBy = (element: HTMLElement, delta: number): boolean => {
   return element.scrollTop < element.scrollHeight - element.clientHeight - SCROLL_EDGE_EPSILON;
 };
 
+const SCROLLABLE_OVERFLOW = new Set(['auto', 'scroll', 'overlay']);
+
+/**
+ * Whether a scroll container between `from` and its dialog can still move in the delta's
+ * direction. Stops at the dialog, so the page behind the flyout never counts.
+ */
+const canAncestorScrollBy = (from: HTMLElement, delta: number): boolean => {
+  for (let el = from.parentElement; el; el = el.parentElement) {
+    if (SCROLLABLE_OVERFLOW.has(getComputedStyle(el).overflowY) && canScrollBy(el, delta)) {
+      return true;
+    }
+    if (el.getAttribute('role') === 'dialog') return false;
+  }
+  return false;
+};
+
 /**
  * Normalizes a wheel delta to pixels, which is the only unit `scrollBy` accepts.
  *
@@ -251,9 +267,6 @@ export const useHeaderCollapse = ({
     // Walk up to the flyout header element to cover its padding, which the inner wrapper does not.
     const header = node?.closest<HTMLElement>('.euiFlyoutHeader');
     if (!header) return;
-    // `EuiFlyout` wraps the header, body, and footer in this element, which becomes a scroll
-    // container of its own at short viewports.
-    const outerScroller = header.closest<HTMLElement>('.euiFlyout__content');
 
     const onWheel = (event: Event) => {
       const scroller = scrollerRef.current;
@@ -272,8 +285,9 @@ export const useHeaderCollapse = ({
       }
 
       // `preventDefault()` cancels scroll chaining along with the default scroll, so releasing the
-      // event is the only way the outer container — and the footer inside it — stays reachable.
-      if (outerScroller && canScrollBy(outerScroller, delta)) return;
+      // event is the only way an outer container, which `EuiFlyout` makes scrollable at short
+      // viewports, stays reachable along with the footer inside it.
+      if (canAncestorScrollBy(header, delta)) return;
 
       // Nothing inside the flyout can take the scroll, so releasing would only move the page.
       event.preventDefault();
