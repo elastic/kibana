@@ -91,11 +91,10 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     hideTimerRef.current = setTimeout(() => setIsHovered(false), 300);
   }, []);
 
-  const toolbarItems: NodeToolbarItem[] = useMemo(
-    () => (toolbarItemsFn ? toolbarItemsFn(props) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [toolbarItemsFn, props.id]
-  );
+  // No useMemo: toolbarItemsFn reads filter-active state imperatively at call time.
+  // The node only re-renders (and this runs) when nodes = useMemo in GraphInvestigation
+  // recomputes — on graph-data or filter changes via the searchFilters dep.
+  const toolbarItems: NodeToolbarItem[] = toolbarItemsFn ? toolbarItemsFn(props) : [];
 
   return (
     <>

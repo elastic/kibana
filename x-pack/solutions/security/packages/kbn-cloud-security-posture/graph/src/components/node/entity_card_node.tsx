@@ -594,6 +594,10 @@ const computeRiskBadge = (
   };
 };
 
+/** Returns the display string for a grouped node's entity count badge. */
+const getCountDisplay = (count: number | undefined): string =>
+  count != null && count > 99 ? '99+' : String(count ?? '');
+
 /**
  * Shared horizontal card node rendered by all entity node shape types
  * (hexagon, pentagon, ellipse, rectangle, diamond). Always renders the full
@@ -622,10 +626,10 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   const fillColor = useNodeFillColor(color ?? 'primary');
   const iconBgColor = getIconColorByRiskScore(riskScore, fillColor);
   // Hover state for NodeToolbar visibility.
-  // A generous hide-delay (400ms) keeps the toolbar alive while the mouse
-  // travels from the card into the toolbar, which lives in a separate DOM
-  // subtree and has a small visual gap above the card.
+  // A generous hide-delay keeps the toolbar alive while the mouse travels from
+  // the card into the toolbar, which lives in a separate DOM subtree (portal).
   const [isHovered, setIsHovered] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToolbar = useCallback(() => {
     if (hideTimerRef.current) {
@@ -637,16 +641,25 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   const hideToolbar = useCallback(() => {
     hideTimerRef.current = setTimeout(() => setIsHovered(false), 300);
   }, []);
-
-  // Compute toolbar items once per render (reflects current filter/relationship state).
-  const toolbarItems: NodeToolbarItem[] = useMemo(
-    () => (toolbarItemsFn ? toolbarItemsFn(props) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [toolbarItemsFn, props.id]
+  // When the cursor leaves the toolbar portal div, only start the hide timer if
+  // it is NOT moving into the NodeContainer — otherwise cursor approaching from
+  // the top would instantly trigger a mouseLeave as it passed through the
+  // overlap zone between the portal and NodeContainer's top edge.
+  const handleToolbarMouseLeave = useCallback(
+    (e: React.MouseEvent) => {
+      if (containerRef.current?.contains(e.relatedTarget as Node)) return;
+      hideToolbar();
+    },
+    [hideToolbar]
   );
 
+  // No useMemo: toolbarItemsFn reads filter-active state imperatively at call time.
+  // The node only re-renders (and this runs) when nodes = useMemo in GraphInvestigation
+  // recomputes — on graph-data or filter changes via the searchFilters dep.
+  const toolbarItems: NodeToolbarItem[] = toolbarItemsFn ? toolbarItemsFn(props) : [];
+
   const isGrouped = showStackedShape(count);
-  const countDisplay = count != null && count > 99 ? '99+' : String(count ?? '');
+  const countDisplay = getCountDisplay(count);
 
   // Risk score: derive display value and severity colors matching Entity Analytics.
   // For grouped nodes (min !== max) use the max score to determine severity level.
@@ -673,6 +686,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
   return (
     <NodeContainer
+      ref={containerRef}
       data-test-subj={GRAPH_ENTITY_NODE_ID}
       onMouseEnter={showToolbar}
       onMouseLeave={hideToolbar}
@@ -682,19 +696,14 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
           Opacity controls visual show/hide; WebDriver ignores opacity for
           interactability checks so FTR can always click the buttons. */}
       {interactive && toolbarItems.length > 0 && (
-        <NodeToolbar isVisible={true} position={Position.Top} align="center" offset={4}>
+        <NodeToolbar isVisible={true} position={Position.Top} align="center" offset={-8}>
           <div
             onMouseEnter={showToolbar}
-            onMouseLeave={hideToolbar}
+            onMouseLeave={handleToolbarMouseLeave}
             css={css`
               display: flex;
               align-items: center;
               gap: 2px;
-              background: ${euiTheme.colors.backgroundBasePlain};
-              border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
-              border-radius: ${euiTheme.border.radius.medium};
-              padding: 2px;
-              box-shadow: ${shadow};
               opacity: ${isHovered ? 1 : 0};
               pointer-events: ${isHovered ? 'auto' : 'none'};
               transition: opacity 150ms ease;
@@ -718,10 +727,17 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
         </NodeToolbar>
       )}
 
-      {/* NodeShapeContainer grows to the card's content height. The layout uses
-          node.measured?.height so the card's visual centre lands at dagreNode.y —
-          the same point where relationship/event nodes are placed. */}
-      <NodeShapeContainer>
+      {/* The entity card is shorter than the full NODE_HEIGHT reservation.
+          justify-content: center vertically centres the card in the container
+          so top: 50% on the handles lands at the card's true visual centre —
+          the same dagreNode.y where relationship/event nodes are placed. */}
+      <NodeShapeContainer
+        css={css`
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        `}
+      >
         {/* Relative wrapper — stacked cards peek from the bottom of EntityCardWrapper */}
         <div
           css={css`

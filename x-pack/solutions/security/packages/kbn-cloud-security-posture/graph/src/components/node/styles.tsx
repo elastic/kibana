@@ -50,8 +50,11 @@ export const NODE_WIDTH = 300;
  *   entity_node_top = dagreNode.y − NODE_HEIGHT / 2
  * so the card's visual centre aligns with the Dagre Y, which is where
  * relationship/event nodes are placed by the layout algorithm.
- * Approximate actual rendered height: 60 px header + ~175 px metadata ≈ 235 px.
- * Rounded up to the nearest GRID_SIZE × 2 multiple (20 px).
+ * Approximate actual rendered height ranges from ~196 px (single entity, 2 metadata rows)
+ * to ~223 px (grouped entity with multiple criticality levels). With justify-content: center
+ * on NodeShapeContainer, any card from ~196–223 px is centred so its visual midpoint lands
+ * at exactly NODE_HEIGHT / 2 = 120 px — matching the handle and connector node positions.
+ * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const NODE_HEIGHT = 240;
 
