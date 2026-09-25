@@ -94,7 +94,7 @@ describe('ExecuteRuleQueryStep', () => {
     expect(results[0].type).toBe('continue');
     expect(results[0].state.queryPayload).toBeDefined();
     expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
-    expect(results[0].state.mvExpandFields).toEqual([]);
+    expect(results[0].state.deduplication).toEqual({ eligible: true, mvExpandFields: [] });
     expect(mockLogger.debug).toHaveBeenCalledWith(
       'Executing ES|QL query',
       expect.objectContaining({
@@ -285,7 +285,26 @@ describe('ExecuteRuleQueryStep', () => {
 
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(results[0].state.mvExpandFields).toEqual(['host.ip']);
+    expect(results[0].state.deduplication).toEqual({
+      eligible: true,
+      mvExpandFields: ['host.ip'],
+    });
+  });
+
+  it('marks aggregating queries as not eligible for deduplication', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const rule = createRuleResponse({
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+      },
+    });
+    const state = createRulePipelineState({ rule });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results[0].state.deduplication).toEqual({ eligible: false, mvExpandFields: [] });
   });
 
   it('throws abort error when signal is aborted', async () => {

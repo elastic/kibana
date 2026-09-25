@@ -37,6 +37,9 @@ const IDS_QUERY_CHUNK_SIZE = 10_000;
  * `StoreAlertEventsStep`, the second layer. Both layers feed the
  * `ruleEventsDeduplicated` counter with disjoint counts.
  *
+ * Runs only when `state.deduplication.eligible` is set by
+ * `ExecuteRuleQueryStep`; otherwise the batch passes through untouched.
+ *
  * Failure of the Elasticsearch lookup is not fatal: the affected events are
  * kept and the second layer deduplicates them at write time.
  */
@@ -48,8 +51,15 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return guardedMapStep(streamState, ['alertEventsBatch'], async (state) => {
+      if (!state.deduplication?.eligible) {
+        return { type: 'continue', state };
+      }
+
       const logger = state.logger.withLabels({ step: this.name });
-      const candidateIds = resolveCandidateIds(state.alertEventsBatch, state.mvExpandFields);
+      const candidateIds = resolveCandidateIds(
+        state.alertEventsBatch,
+        state.deduplication.mvExpandFields
+      );
 
       if (candidateIds.size === 0) {
         return { type: 'continue', state };
@@ -131,7 +141,7 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
  */
 const resolveCandidateIds = (
   events: readonly AlertEvent[],
-  mvExpandFields: readonly string[] = []
+  mvExpandFields: readonly string[]
 ): ReadonlyMap<AlertEvent, string> =>
   new Map(
     events.flatMap((event) => {

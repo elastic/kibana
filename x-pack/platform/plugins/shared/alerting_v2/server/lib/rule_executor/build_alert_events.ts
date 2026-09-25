@@ -116,20 +116,21 @@ export function buildRuleEventId({
  * Resolves the deterministic `_id` for a rule event, or `undefined` when
  * Elasticsearch should generate one.
  *
- * An event qualifies only when it is a `breached` event whose row carries the
- * complete source-document identity injected by `injectDeduplicationMetadata`
- * for non-aggregating queries: a string `_id`, a string `_index` and a
- * `_version`. If any of the three is missing — rows from aggregating queries,
- * `recovered` / `no_data` / continued-breach events, or a query whose `DROP`
- * or `RENAME` removed one of the columns — the event falls back to an
- * Elasticsearch-generated id and is written exactly as it was before
- * deduplication existed. Requiring all three also stops an author-defined
- * `_id` column (`EVAL _id = …`, `STATS … BY _id`) from being mistaken for a
- * source-document identity.
+ * Callers must only invoke this for runs whose query
+ * `planDeduplicationQuery` judged eligible (`state.deduplication.eligible`);
+ * eligibility is a property of the query, not of a row, and is decided
+ * upstream so that an aggregating query or one that reassigns `_id` is never
+ * deduplicated no matter what its rows contain. Within an eligible run an
+ * event still qualifies only when it is a `breached` event carrying the
+ * complete injected identity — a string `_id`, a string `_index` and a
+ * `_version` — plus a value for every `mvExpandFields` column. Anything
+ * short of that (`recovered` / `no_data` / continued-breach events, or a row
+ * unexpectedly missing a column) falls back to an Elasticsearch-generated id
+ * and is written exactly as before deduplication existed.
  *
- * `mvExpandFields` (from `state.mvExpandFields`, derived by
- * `ExecuteRuleQueryStep`) names the columns whose per-row values are folded
- * into the id so `MV_EXPAND`ed rows from one document do not collide.
+ * `mvExpandFields` (from `state.deduplication`) names the columns whose
+ * per-row values are folded into the id so `MV_EXPAND`ed rows from one
+ * document do not collide.
  *
  * Used at both deduplication points: `FilterDuplicateEventsStep` resolves ids
  * to pre-check `.rule-events`, and `StoreAlertEventsStep` passes it as
@@ -149,6 +150,8 @@ export function resolveRuleEventId(
   const sourceIndex = event.data?._index;
   const sourceVersion = event.data?._version;
 
+  const expandedValues = mvExpandFields.map((field) => event.data?.[field]);
+
   const hasSourceIdentity =
     event.status === 'breached' &&
     ruleId != null &&
@@ -156,7 +159,8 @@ export function resolveRuleEventId(
     sourceId !== '' &&
     typeof sourceIndex === 'string' &&
     sourceIndex !== '' &&
-    (typeof sourceVersion === 'number' || typeof sourceVersion === 'string');
+    (typeof sourceVersion === 'number' || typeof sourceVersion === 'string') &&
+    expandedValues.every((value) => value !== undefined);
 
   return hasSourceIdentity
     ? buildRuleEventId({
@@ -165,7 +169,7 @@ export function resolveRuleEventId(
         sourceId,
         sourceIndex,
         sourceVersion: String(sourceVersion),
-        expandedValues: mvExpandFields.map((field) => event.data[field] ?? null),
+        expandedValues,
       })
     : undefined;
 }

@@ -5,110 +5,128 @@
  * 2.0.
  */
 
-import { getMvExpandFields, injectDeduplicationMetadata } from './deduplication_query';
+import { planDeduplicationQuery } from './deduplication_query';
 
-describe('injectDeduplicationMetadata', () => {
-  it('adds METADATA _id, _index, _version to a bare FROM', () => {
-    expect(injectDeduplicationMetadata('FROM logs-*')).toBe(
-      'FROM logs-* METADATA _id, _index, _version'
-    );
+const METADATA = 'METADATA _id, _index, _version';
+
+describe('planDeduplicationQuery', () => {
+  describe('eligible queries', () => {
+    it('adds METADATA _id, _index, _version to a bare FROM', () => {
+      expect(planDeduplicationQuery('FROM logs-*')).toEqual({
+        query: `FROM logs-* ${METADATA}`,
+        eligible: true,
+        mvExpandFields: [],
+      });
+    });
+
+    it('injects before downstream commands', () => {
+      expect(planDeduplicationQuery('FROM logs-* | WHERE x > 5 | LIMIT 10').query).toBe(
+        `FROM logs-* ${METADATA} | WHERE x > 5 | LIMIT 10`
+      );
+    });
+
+    it('keeps an existing full METADATA clause as-is', () => {
+      expect(planDeduplicationQuery(`FROM logs-* ${METADATA}`).query).toBe(
+        `FROM logs-* ${METADATA}`
+      );
+    });
+
+    it('appends only the missing fields to an existing METADATA clause', () => {
+      expect(planDeduplicationQuery('FROM logs-* METADATA _index').query).toBe(
+        'FROM logs-* METADATA _index, _id, _version'
+      );
+    });
+
+    it('appends the fields to KEEP so they survive projection', () => {
+      expect(planDeduplicationQuery('FROM logs-* | KEEP host.name, message').query).toBe(
+        `FROM logs-* ${METADATA} | KEEP host.name, message, _id, _index, _version`
+      );
+    });
+
+    it('does not duplicate fields already present in KEEP', () => {
+      expect(planDeduplicationQuery('FROM logs-* METADATA _id | KEEP _id, host.name').query).toBe(
+        `FROM logs-* ${METADATA} | KEEP _id, host.name, _index, _version`
+      );
+    });
+
+    it('appends the fields to every KEEP in the pipeline', () => {
+      expect(planDeduplicationQuery('FROM logs-* | KEEP a, b | EVAL c = a | KEEP a, c').query).toBe(
+        `FROM logs-* ${METADATA} | KEEP a, b, _id, _index, _version | EVAL c = a | KEEP a, c, _id, _index, _version`
+      );
+    });
+
+    it('stays eligible when EVAL only reads a metadata field', () => {
+      expect(planDeduplicationQuery('FROM logs-* | EVAL doc = _id | KEEP host.name')).toEqual({
+        query: `FROM logs-* ${METADATA} | EVAL doc = _id | KEEP host.name, _id, _index, _version`,
+        eligible: true,
+        mvExpandFields: [],
+      });
+    });
+
+    it('stays eligible when a non-wildcard DROP targets an unrelated column', () => {
+      expect(planDeduplicationQuery('FROM logs-* | DROP message').eligible).toBe(true);
+    });
   });
 
-  it('injects before downstream commands', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* | WHERE x > 5 | LIMIT 10')).toBe(
-      'FROM logs-* METADATA _id, _index, _version | WHERE x > 5 | LIMIT 10'
-    );
+  describe('MV_EXPAND', () => {
+    it('records the expanded columns in pipeline order', () => {
+      expect(
+        planDeduplicationQuery('FROM logs-* | MV_EXPAND host.ip | WHERE x > 1 | MV_EXPAND tags')
+          .mvExpandFields
+      ).toEqual(['host.ip', 'tags']);
+    });
+
+    it('carries the expanded column through KEEP alongside the metadata', () => {
+      expect(planDeduplicationQuery('FROM logs-* | MV_EXPAND host.ip | KEEP host.name').query).toBe(
+        `FROM logs-* ${METADATA} | MV_EXPAND host.ip | KEEP host.name, _id, _index, _version, host.ip`
+      );
+    });
+
+    it('stays eligible when the expanded column is created by an EVAL before the MV_EXPAND', () => {
+      expect(
+        planDeduplicationQuery('FROM logs-* | EVAL parts = SPLIT(message, ",") | MV_EXPAND parts')
+      ).toEqual({
+        query: `FROM logs-* ${METADATA} | EVAL parts = SPLIT(message, ",") | MV_EXPAND parts`,
+        eligible: true,
+        mvExpandFields: ['parts'],
+      });
+    });
+
+    it.each([
+      ['RENAME', 'FROM logs-* | MV_EXPAND tags | RENAME tags AS tag | KEEP tag'],
+      ['DROP', 'FROM logs-* | MV_EXPAND tags | DROP tags'],
+      ['EVAL assignment', 'FROM logs-* | MV_EXPAND tags | EVAL tags = TO_UPPER(tags)'],
+    ])('is not eligible when the expanded column is later changed by %s', (_name, query) => {
+      expect(planDeduplicationQuery(query)).toEqual({
+        query,
+        eligible: false,
+        mvExpandFields: [],
+      });
+    });
   });
 
-  it('is a no-op when all three fields are already declared', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* METADATA _id, _index, _version')).toBe(
-      'FROM logs-* METADATA _id, _index, _version'
-    );
-  });
-
-  it('appends only the missing fields to an existing METADATA clause', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* METADATA _index')).toBe(
-      'FROM logs-* METADATA _index, _id, _version'
-    );
-  });
-
-  it('leaves aggregating queries untouched, including formatting', () => {
-    const query = 'FROM metrics-*\n| STATS avg(cpu) BY host.name\n| WHERE avg(cpu) > 0.9';
-    expect(injectDeduplicationMetadata(query)).toBe(query);
-  });
-
-  it('appends the fields to KEEP so they survive projection', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* | KEEP host.name, message')).toBe(
-      'FROM logs-* METADATA _id, _index, _version | KEEP host.name, message, _id, _index, _version'
-    );
-  });
-
-  it('does not duplicate fields already present in KEEP', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* METADATA _id | KEEP _id, host.name')).toBe(
-      'FROM logs-* METADATA _id, _index, _version | KEEP _id, host.name, _index, _version'
-    );
-  });
-
-  it('stops KEEP injection after an explicit DROP of the field', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* | DROP _id | KEEP host.name')).toBe(
-      'FROM logs-* METADATA _id, _index, _version | DROP _id | KEEP host.name, _index, _version'
-    );
-  });
-
-  it('stops KEEP injection after a wildcard DROP', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* | DROP _* | KEEP host.name')).toBe(
-      'FROM logs-* METADATA _id, _index, _version | DROP _* | KEEP host.name'
-    );
-  });
-
-  it('stops KEEP injection after RENAME of the field', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* | RENAME _id AS doc_id | KEEP host.name')).toBe(
-      'FROM logs-* METADATA _id, _index, _version | RENAME _id AS doc_id | KEEP host.name, _index, _version'
-    );
-  });
-
-  it('stops KEEP injection after RENAME in the `new = old` form', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* | RENAME doc_id = _id | KEEP host.name')).toBe(
-      'FROM logs-* METADATA _id, _index, _version | RENAME doc_id = _id | KEEP host.name, _index, _version'
-    );
-  });
-
-  it('stops KEEP injection when RENAME overwrites the field', () => {
-    expect(
-      injectDeduplicationMetadata('FROM logs-* | RENAME host.name AS _id | KEEP message')
-    ).toBe(
-      'FROM logs-* METADATA _id, _index, _version | RENAME host.name AS _id | KEEP message, _index, _version'
-    );
-  });
-
-  it('keeps injecting when EVAL only reads the field', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* | EVAL doc = _id | KEEP host.name')).toBe(
-      'FROM logs-* METADATA _id, _index, _version | EVAL doc = _id | KEEP host.name, _id, _index, _version'
-    );
-  });
-
-  it('stops KEEP injection after EVAL overwrites the field', () => {
-    expect(injectDeduplicationMetadata('FROM logs-* | EVAL _version = 1 | KEEP host.name')).toBe(
-      'FROM logs-* METADATA _id, _index, _version | EVAL _version = 1 | KEEP host.name, _id, _index'
-    );
-  });
-
-  it.each([
-    ['ROW', 'ROW x = 1 | WHERE x > 0'],
-    ['TS', 'TS metrics-* | WHERE cpu > 0.9'],
-  ])('leaves a %s source unchanged because there is no FROM to carry METADATA', (_name, query) => {
-    expect(injectDeduplicationMetadata(query)).toBe(query);
-  });
-});
-
-describe('getMvExpandFields', () => {
-  it('returns the expanded columns in pipeline order', () => {
-    expect(
-      getMvExpandFields('FROM logs-* | MV_EXPAND host.ip | WHERE x > 1 | MV_EXPAND tags')
-    ).toEqual(['host.ip', 'tags']);
-  });
-
-  it('returns an empty list when the query has no MV_EXPAND', () => {
-    expect(getMvExpandFields('FROM logs-* | WHERE x > 1')).toEqual([]);
+  describe('ineligible queries are returned untouched', () => {
+    it.each([
+      ['STATS', 'FROM metrics-*\n| STATS avg(cpu) BY host.name\n| WHERE avg(cpu) > 0.9'],
+      [
+        'STATS grouped by the metadata fields',
+        `FROM logs-* ${METADATA} | STATS c = COUNT(*) BY _id, _index, _version`,
+      ],
+      ['ROW source', 'ROW x = 1 | WHERE x > 0'],
+      ['TS source', 'TS metrics-* | WHERE cpu > 0.9 | KEEP host.name'],
+      ['DROP _id', 'FROM logs-* | DROP _id | KEEP host.name'],
+      ['wildcard DROP', 'FROM logs-* | DROP labels.* | KEEP host.name'],
+      ['RENAME _id AS …', 'FROM logs-* | RENAME _id AS doc_id | KEEP host.name'],
+      ['RENAME … = _id', 'FROM logs-* | RENAME doc_id = _id | KEEP host.name'],
+      ['RENAME overwriting _id', 'FROM logs-* | RENAME host.name AS _id | KEEP message'],
+      ['EVAL _version = …', 'FROM logs-* | EVAL _version = 1 | KEEP host.name'],
+      ['EVAL _id = … without KEEP', 'FROM logs-* | EVAL _id = "fixed"'],
+    ])('%s', (_name, query) => {
+      expect(planDeduplicationQuery(query)).toEqual({
+        query,
+        eligible: false,
+        mvExpandFields: [],
+      });
+    });
   });
 });

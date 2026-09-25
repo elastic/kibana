@@ -27,7 +27,12 @@ import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
 const { SCHEDULE_INTERVAL } = testData;
 
-const SOURCE_INDEX = 'test-alerting-v2-rule-event-deduplication-source';
+/**
+ * Per-run unique index so documents left behind by an interrupted or
+ * concurrent run can never satisfy this suite's exact-count assertions, and
+ * teardown never deletes another run's index.
+ */
+const SOURCE_INDEX = `test-alerting-v2-rule-event-deduplication-${Date.now().toString(36)}`;
 
 /**
  * Wide enough that the single source document stays inside the lookback for

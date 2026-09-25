@@ -17,7 +17,7 @@ import { toQueryResponseSizeExceededError } from '../../errors/query_response_si
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
-import { getMvExpandFields, injectDeduplicationMetadata } from '../deduplication_query';
+import { planDeduplicationQuery, type DeduplicationQueryPlan } from '../deduplication_query';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
@@ -49,10 +49,12 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   }
 
   /**
-   * Second stage of the query pipeline (`breach query -> dedup metadata ->
-   * row limit`): rewrites a non-aggregating query so each row carries
-   * `_id`, `_index` and `_version`, the identity `resolveRuleEventId` hashes
-   * downstream. See `injectDeduplicationMetadata` for the exact rewrite.
+   * Second stage of the query pipeline (`breach query -> dedup plan -> row
+   * limit`): decides whether this run's rule events may be deduplicated and,
+   * if so, rewrites the query so each row carries `_id`, `_index` and
+   * `_version`, the identity `resolveRuleEventId` hashes downstream. The
+   * decision travels on `state.deduplication`; see `planDeduplicationQuery`
+   * for the eligibility rules and the exact rewrite.
    *
    * This is the executor's only deviation from the stored rule query, and it
    * lives here rather than in `getBreachEsqlQuery` because that helper is
@@ -60,21 +62,21 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
    * author wrote it.
    *
    * Failure is contained: if the AST rewrite throws, the original query runs
-   * and `RULE_EXECUTION_DEDUP_METADATA_INJECTION_FAILED` is logged. The run
-   * then behaves as it did before deduplication existed — every re-match is
-   * written — which is preferable to failing the rule execution.
+   * as not eligible and `RULE_EXECUTION_DEDUP_METADATA_INJECTION_FAILED` is
+   * logged. The run then behaves as it did before deduplication existed —
+   * every re-match is written — which is preferable to failing the rule.
    */
-  private withDeduplicationMetadata(query: string, logger: LoggerServiceContract): string {
+  private planDeduplication(query: string, logger: LoggerServiceContract): DeduplicationQueryPlan {
     try {
-      return injectDeduplicationMetadata(query);
+      return planDeduplicationQuery(query);
     } catch (error) {
       logger.warn({
         code: ALERTING_LOG_CODES.RULE_EXECUTION_DEDUP_METADATA_INJECTION_FAILED,
         message:
-          'Could not inject deduplication metadata into the rule query. Executing the original query.',
+          'Could not inject deduplication metadata into the rule query. Executing the original query without deduplication.',
         error,
       });
-      return query;
+      return { query, eligible: false, mvExpandFields: [] };
     }
   }
 
@@ -86,7 +88,10 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       const logger = state.logger.withLabels({ step: step.name });
 
       const breachQuery = getBreachEsqlQuery(rule.query);
-      const effectiveQuery = step.withDeduplicationMetadata(breachQuery, logger);
+      const { query: effectiveQuery, ...deduplication } = step.planDeduplication(
+        breachQuery,
+        logger
+      );
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
       const timeField = rule.time_field;
 
@@ -101,7 +106,6 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       const format = step.esqlResponseFormatService.get();
       const queryRowLimit = getQueryRowLimit(step.pluginConfig, format);
       const boundedQuery = appendLimitToQuery(effectiveQuery, queryRowLimit);
-      const mvExpandFields = getMvExpandFields(effectiveQuery);
 
       logger.debug({
         message: 'Executing ES|QL query',
@@ -139,7 +143,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
           yield {
             type: 'continue',
-            state: { ...state, queryPayload, esqlRowBatch: batch, mvExpandFields },
+            state: { ...state, queryPayload, esqlRowBatch: batch, deduplication },
             meta: { counters },
           };
         }

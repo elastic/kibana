@@ -8,6 +8,7 @@
 import type { SpaceId } from '@kbn/core-spaces-common';
 
 import type { QueryPayload } from './get_query_payload';
+import type { DeduplicationQueryPlan } from './deduplication_query';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
@@ -36,12 +37,13 @@ export interface RulePipelineState {
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
   /**
-   * Columns expanded by `MV_EXPAND` in the effective breach query, derived
-   * once per run by `ExecuteRuleQueryStep`. `resolveRuleEventId` folds their
-   * per-row values into the deterministic rule-event `_id` so expanded rows
-   * from one source document are not deduplicated against each other.
+   * Rule-event deduplication decision for this run, derived once from the
+   * breach query by `ExecuteRuleQueryStep`. `FilterDuplicateEventsStep` and
+   * `StoreAlertEventsStep` only assign deterministic ids when `eligible`;
+   * `mvExpandFields` are folded into those ids. Absent (e.g. before the
+   * query step ran) is treated as not eligible.
    */
-  readonly mvExpandFields?: ReadonlyArray<string>;
+  readonly deduplication?: Pick<DeduplicationQueryPlan, 'eligible' | 'mvExpandFields'>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
 }

@@ -933,6 +933,11 @@ describe('resolveRuleEventId', () => {
       expect(resolveRuleEventId(run1, ['host.ip'])).toBe(resolveRuleEventId(run2, ['host.ip']));
     });
 
+    it('returns undefined when an expanded value is missing from the row', () => {
+      const event = createAlertEvent({ ...base, data: sourceRow });
+      expect(resolveRuleEventId(event, ['host.ip'])).toBeUndefined();
+    });
+
     it('leaves the id unchanged when no fields are expanded', () => {
       const event = createAlertEvent({ ...base, data: sourceRow });
       expect(resolveRuleEventId(event, [])).toBe(resolveRuleEventId(event));
