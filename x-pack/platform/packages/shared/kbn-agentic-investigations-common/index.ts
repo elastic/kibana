@@ -41,8 +41,6 @@ export {
 export {
   ConversationHeaderBlocks,
   type ConversationHeaderBlocksProps,
-  InvestigationHeaderBlocks,
-  type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
 export {
   OverviewTab,

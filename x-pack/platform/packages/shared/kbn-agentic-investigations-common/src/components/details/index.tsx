@@ -13,11 +13,7 @@ export {
   ConversationDetailsFlyoutFooter,
   type ConversationDetailsFlyoutFooterProps,
 } from './flyout_footer';
-export {
-  ConversationHeaderBlocks,
-  type ConversationHeaderBlocksProps,
-  type InvestigationHeaderBlocksProps,
-} from './header_blocks';
+export { ConversationHeaderBlocks, type ConversationHeaderBlocksProps } from './header_blocks';
 export {
   EscalationFlyoutHeader,
   type EscalationFlyoutHeaderProps,

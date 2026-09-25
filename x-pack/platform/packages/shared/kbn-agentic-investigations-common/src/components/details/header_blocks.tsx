@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InfoBlocks, type InfoBlockItem } from '@kbn/flyout-info-blocks';
-import type { Investigation } from '../../types';
 import { getEmptyValue } from '../helpers';
 import { TEMPLATE_UI_LABELS } from '../../template_ui/translations';
 
@@ -73,13 +72,3 @@ export const ConversationHeaderBlocks = ({
 
   return <InfoBlocks items={items} maxColumns={2} data-test-subj={dataTestSubj} />;
 };
-
-// ---------------------------------------------------------------------------
-// Legacy wrapper kept for API stability.
-// ---------------------------------------------------------------------------
-
-export interface InvestigationHeaderBlocksProps {
-  investigation: Investigation;
-  /** Optional pre-rendered interactive assignee picker from the consuming plugin. */
-  assigneesNode?: React.ReactNode;
-}
