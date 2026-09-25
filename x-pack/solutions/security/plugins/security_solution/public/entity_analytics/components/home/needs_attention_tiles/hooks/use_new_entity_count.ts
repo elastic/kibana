@@ -9,15 +9,15 @@ import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
-import { getEntitiesAlias, ENTITY_LATEST } from '../constants';
-import type { TimeRange } from '../use_time_range_param';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../constants';
+import type { TimeRange } from '../../use_time_range_param';
 import {
   getEntityFilterESQL,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../use_entity_filters_param';
+} from '../../use_entity_filters_param';
 
 const TIME_RANGE_TO_ESQL: Record<TimeRange, string> = {
   '24h': '24 hours',

@@ -12,17 +12,17 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useErrorToast } from '../../../../common/hooks/use_error_toast';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
-import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
+import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
-import type { TimeRange } from '../use_time_range_param';
+import type { TimeRange } from '../../use_time_range_param';
 import {
   getEntityFilterESQL,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../use_entity_filters_param';
+} from '../../use_entity_filters_param';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],

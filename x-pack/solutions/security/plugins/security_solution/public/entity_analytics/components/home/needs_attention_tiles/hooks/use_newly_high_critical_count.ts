@@ -10,16 +10,16 @@ import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
-import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
+import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_critical_query';
-import type { TimeRange } from '../use_time_range_param';
+import type { TimeRange } from '../../use_time_range_param';
 import {
   getEntityFilterESQL,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../use_entity_filters_param';
+} from '../../use_entity_filters_param';
 
 export const useNewlyHighCriticalCount = ({
   spaceId,
@@ -90,14 +90,15 @@ export const useNewlyHighCriticalCount = ({
     }
   );
 
-  const filteredError = (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
-    ? undefined
-    : (error as SecurityAppError | undefined);
+  const isMissingIndex =
+    (error as SecurityAppError | undefined)?.message?.includes('Unknown index') ?? false;
+  const filteredError = isMissingIndex ? undefined : (error as SecurityAppError | undefined);
 
   return {
     count: queryResult?.count ?? 0,
     entityIds: queryResult?.entityIds ?? [],
     isLoading: isStatusLoading || isIndexLoading || isLoading,
+    isMissingIndex,
     error: filteredError,
   };
 };

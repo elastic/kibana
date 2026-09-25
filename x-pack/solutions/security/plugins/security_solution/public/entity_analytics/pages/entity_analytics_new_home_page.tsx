@@ -141,11 +141,13 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     count: riskMoversCount,
     entityIds: riskMoversEntityIds,
     isLoading: riskMoversLoading,
+    isMissingIndex: riskMoversMissingIndex,
   } = useRiskMoversCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
   const {
     count: newlyHCCount,
     entityIds: newlyHCEntityIds,
     isLoading: newlyHCLoading,
+    isMissingIndex: newlyHCMissingIndex,
   } = useNewlyHighCriticalCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
@@ -187,21 +189,27 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       {
         id: 'entitiesWithAlerts',
         title: 'Entities with alerts',
-        value: alertBasedLoading ? 0 : alertsCount,
+        value: alertsCount,
+        isLoading: alertBasedLoading,
         description: `Entities with at least one alert in the last ${timeRange}`,
         filterLabel: `Entities with alerts (${timeRange})`,
       },
       {
         id: 'entitiesWithAnomalies',
         title: 'Entities with anomalies',
-        value: anomaliesLoading ? 0 : anomaliesCount,
+        value: anomaliesCount,
+        isLoading: anomaliesLoading,
         description: `Entities with at least one ML anomaly in the last ${timeRange}`,
         filterLabel: `Entities with anomalies (${timeRange})`,
       },
       {
         id: 'riskMovers',
         title: 'Risk movers',
-        value: riskMoversLoading ? 0 : riskMoversCount,
+        value: riskMoversCount,
+        isLoading: riskMoversLoading,
+        noDataMessage: riskMoversMissingIndex
+          ? 'Requires risk score history data'
+          : undefined,
         description:
           timeRange === '24h'
             ? 'Entities whose risk score rose ≥10 points vs yesterday'
@@ -211,7 +219,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       {
         id: 'newlyHighCritical',
         title: 'Newly high/critical',
-        value: newlyHCLoading ? 0 : newlyHCCount,
+        value: newlyHCCount,
+        isLoading: newlyHCLoading,
+        noDataMessage: newlyHCMissingIndex
+          ? 'Requires risk score history data'
+          : undefined,
         description:
           timeRange === '24h'
             ? 'Entities that crossed into High or Critical risk since yesterday'
@@ -221,14 +233,16 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       {
         id: 'watchlisted',
         title: 'Watchlisted',
-        value: alertBasedLoading ? 0 : watchlistedCount,
+        value: watchlistedCount,
+        isLoading: alertBasedLoading,
         description: `Entities on a watchlist with at least one alert in the last ${timeRange}`,
         filterLabel: 'Watchlisted',
       },
       {
         id: 'newEntity',
         title: 'New entity',
-        value: newEntityLoading ? 0 : newEntityCount,
+        value: newEntityCount,
+        isLoading: newEntityLoading,
         description: `Entities first seen in the last ${timeRange} with a risk score above zero`,
         filterLabel: `New entity (last ${timeRange})`,
       },

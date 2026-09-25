@@ -17,6 +17,9 @@ export interface SignalCardData {
   id: SignalCardId;
   title: string;
   value: number;
+  isLoading?: boolean;
+  /** Short hint shown under the dash when value is 0, e.g. which index needs data. */
+  noDataMessage?: string;
   description: string;
   delta?: number;
   filterLabel: string;

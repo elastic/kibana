@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -50,8 +51,7 @@ const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
 const V5_CARD_DESCRIPTIONS: Partial<Record<SignalCardId, string>> = {
   entitiesWithAlerts: 'Entities with at least one alert in the last 24h',
   entitiesWithAnomalies: 'Entities with at least one ML anomaly in the last 24h',
-  watchlisted: 'Entities on a watchlist with a risk score above zero',
-  // riskMovers, newlyHighCritical, newEntity descriptions are dynamic — driven by the selected time range from the page
+  // riskMovers, newlyHighCritical, watchlisted, newEntity descriptions are dynamic — driven by the selected time range from the page
 };
 
 const displayTitleFor = (card: SignalCardData): string => V3_CARD_TITLES[card.id] ?? card.title;
@@ -181,7 +181,8 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   const [hovered, setHovered] = useState(false);
 
   const isZero = card.value === 0;
-  const interactive = !isZero;
+  const isLoading = card.isLoading ?? false;
+  const interactive = !isZero && !isLoading;
   // Hover only — mouse clicks must not leave focus chrome that looks like hover after deselect.
   const emphasized = interactive && hovered;
 
@@ -328,16 +329,35 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                 align-items: flex-end;
               `}
             >
-              <EuiTitle
-                size="l"
-                css={css`
-                  line-height: ${METRIC_LINE_HEIGHT};
-                  text-align: end;
-                  ${isExpanded ? `font-size: calc(${euiTheme.base}px * 2.5);` : ''}
-                `}
-              >
-                <span>{card.value}</span>
-              </EuiTitle>
+              {isLoading ? (
+                <EuiLoadingSpinner size="l" />
+              ) : (
+                <>
+                  <EuiTitle
+                    size="l"
+                    css={css`
+                      line-height: ${METRIC_LINE_HEIGHT};
+                      text-align: end;
+                      ${isExpanded ? `font-size: calc(${euiTheme.base}px * 2.5);` : ''}
+                    `}
+                  >
+                    <span>{isZero ? '—' : card.value.toLocaleString()}</span>
+                  </EuiTitle>
+                  {isZero && card.noDataMessage && (
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      css={css`
+                        text-align: end;
+                        margin-block-start: ${euiTheme.size.xs};
+                        font-style: italic;
+                      `}
+                    >
+                      {card.noDataMessage}
+                    </EuiText>
+                  )}
+                </>
+              )}
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>

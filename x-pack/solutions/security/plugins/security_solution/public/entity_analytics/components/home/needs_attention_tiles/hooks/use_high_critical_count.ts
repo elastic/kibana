@@ -9,10 +9,10 @@ import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
-import { getEntitiesAlias, ENTITY_LATEST } from '../constants';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
+import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../constants';
 import { buildHcCountQueryBody } from '../queries/hc_count_query';
 
 export const useHighCriticalCount = ({
