@@ -35,6 +35,14 @@ export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
 type KbnClientFixture = ApiWorkerFixtures['kbnClient'];
 type SamlAuthFixture = ApiWorkerFixtures['samlAuth'];
 type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
+
+const DEFAULT_LOG_EXTRACTION_CONFIG = {
+  docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+  maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+  maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+  additionalIndexPatterns: [] as string[],
+};
 /**
  * Normalizes values that may be stored as a single keyword or as keyword[] after
  * log extraction (e.g. `entity.relationships.*` bags).
@@ -202,20 +210,7 @@ export const installEntityStoreSuite = async ({
 
   // Always normalize mutable extraction config so each suite starts from the same baseline,
   // including the already-installed (200) path that preserves previous settings.
-  const resetConfigResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-    headers: defaultHeaders,
-    responseType: 'json',
-    body: {
-      logExtraction: {
-        docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
-        maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-        maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
-        maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
-        additionalIndexPatterns: [],
-      },
-    },
-  });
-  expect(resetConfigResponse.statusCode).toBe(200);
+  await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
 
   const enableEmailRuleResponse = await apiClient.put(
     ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
@@ -253,6 +248,39 @@ export const uninstallEntityStoreSuite = async ({
   expect(uninstallResponse.statusCode).toBe(200);
   await clearEntityStoreIndices(esClient);
 };
+
+export const updateLogExtractionConfig = async ({
+  apiClient,
+  headers,
+  logExtraction,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  logExtraction: Record<string, unknown>;
+}) => {
+  const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+    headers,
+    responseType: 'json',
+    body: { logExtraction },
+  });
+  expect(response.statusCode).toBe(200);
+  return response;
+};
+
+export const resetLogExtractionConfig = async ({
+  apiClient,
+  headers,
+  overrides = {},
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  overrides?: Record<string, unknown>;
+}) =>
+  await updateLogExtractionConfig({
+    apiClient,
+    headers,
+    logExtraction: { ...DEFAULT_LOG_EXTRACTION_CONFIG, ...overrides },
+  });
 
 export const uninstallEntityStoreSuiteWithKbnClient = async ({
   esClient,
