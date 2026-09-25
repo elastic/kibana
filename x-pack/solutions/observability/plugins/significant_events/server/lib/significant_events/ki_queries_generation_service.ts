@@ -22,6 +22,7 @@ import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 export interface GenerateKIQueriesParams {
   streamName: string;
   connectorId?: string;
+  runId: string;
 }
 
 export interface GenerateKIQueriesDependencies {
@@ -39,7 +40,7 @@ export async function generateKIQueries(
   params: GenerateKIQueriesParams,
   deps: GenerateKIQueriesDependencies
 ): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
-  const { streamName, connectorId: connectorIdOverride } = params;
+  const { streamName, connectorId: connectorIdOverride, runId } = params;
   const {
     streamsClient,
     kiClient,
@@ -80,6 +81,7 @@ export async function generateKIQueries(
     agentBuilder,
     request,
     connectorId,
+    interactionId: runId,
     definition,
     existingQueries,
     signal,
