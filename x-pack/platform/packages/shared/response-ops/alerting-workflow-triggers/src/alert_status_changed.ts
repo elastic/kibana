@@ -50,11 +50,11 @@ export const alertStatusChangedEventSchema = z.object({
           }
         )
       ),
-      consumer: z.string().describe(
+      consumer: z.string().nullable().describe(
         i18n.translate(
           'xpack.alertingWorkflowTriggers.triggers.alertStatusChanged.schema.rule.consumer',
           {
-            defaultMessage: 'Plugin that owns this rule (e.g. "alerts", "observability").',
+            defaultMessage: 'Plugin that owns this rule (e.g. "alerts", "observability"). Null for rule engines that do not expose this field.',
           }
         )
       ),
