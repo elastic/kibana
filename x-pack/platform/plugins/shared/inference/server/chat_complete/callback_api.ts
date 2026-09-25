@@ -243,6 +243,7 @@ function createChatCompletePipeline({
           usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
           requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
           saltPromise: anonymization?.saltPromise,
+          onFailurePromise: anonymization?.onFailurePromise,
           resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
           metadata,
           system,

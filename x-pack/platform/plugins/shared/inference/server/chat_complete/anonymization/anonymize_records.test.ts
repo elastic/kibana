@@ -429,6 +429,37 @@ describe('anonymizeRecords', () => {
     expect(result.anonymizations.some((entry) => entry.rule.type === 'RegExp')).toBe(true);
   });
 
+  it('throws when regex execution fails and onFailure is "block" (default)', async () => {
+    jest.spyOn(regexWorker, 'run').mockRejectedValueOnce(new Error('regex worker crashed'));
+
+    await expect(
+      anonymizeRecords({
+        input: [{ content: 'jorge21@gmail.com' }],
+        anonymizationRules: [regexRule],
+        regexWorker,
+        esClient: mockEsClient,
+      })
+    ).rejects.toThrow('regex worker crashed');
+  });
+
+  it('proceeds unmasked and logs a warning when regex execution fails and onFailure is "allow_unsafe"', async () => {
+    jest.spyOn(regexWorker, 'run').mockRejectedValueOnce(new Error('regex worker crashed'));
+
+    const input = [{ content: 'jorge21@gmail.com' }];
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+      onFailure: 'allow_unsafe',
+      logger,
+    });
+
+    expect(result.records[0].content).toBe('jorge21@gmail.com');
+    expect(result.anonymizations).toHaveLength(0);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('regex worker crashed'));
+  });
+
   it('applies known replacements before regex processing', async () => {
     const input = [{ content: 'Alice and alice@example.com' }];
 

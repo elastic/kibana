@@ -6,12 +6,17 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ChatCompleteAnonymizationTarget } from '@kbn/inference-common';
+import type {
+  ChatCompleteAnonymizationTarget,
+  AnonymizationFailureMode,
+} from '@kbn/inference-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 
 export interface InferenceAnonymizationOptions {
   /** Promise resolving per-space salt for deterministic tokenization. */
   saltPromise?: Promise<string | undefined>;
+  /** Promise resolving how the pipeline should react if anonymization cannot run. Defaults to `block`. */
+  onFailurePromise?: Promise<AnonymizationFailureMode>;
   resolveEffectivePolicy?: (
     target?: ChatCompleteAnonymizationTarget
   ) => Promise<EffectivePolicy | undefined>;
