@@ -13,8 +13,10 @@ import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors
 import {
   EXECUTION_FAILED_NOTICE_MAX_LENGTH,
   createCycleLimitSystemMessage,
+  formatExecutionAbortedNotice,
   formatExecutionFailedNotice,
   formatHandover,
+  formatInterruptionNotice,
   formatRetryNotice,
   formatSubagentRosterNotice,
   formatSystemNotice,
@@ -160,7 +162,7 @@ describe('formatExecutionFailedNotice', () => {
     expect(notice).toContain('<system_notice>');
     // the apostrophe is escaped like everything else
     expect(notice).toContain(
-      'The agent&apos;s attempt to answer the previous message failed. No response was produced.'
+      'The agent&apos;s attempt to answer the previous message failed. The steps above were completed; no response was produced.'
     );
     expect(notice).toContain('<error code="internalError">');
     expect(notice).toContain('bad &lt;tag&gt; &amp;');
@@ -196,5 +198,53 @@ describe('formatExecutionFailedNotice', () => {
 
     const rendered = /<error code="internalError">([\s\S]*?)<\/error>/.exec(notice)![1].trim();
     expect(rendered).toBe(`${'x'.repeat(EXECUTION_FAILED_NOTICE_MAX_LENGTH)}…`);
+  });
+});
+
+describe('formatExecutionAbortedNotice', () => {
+  it('renders the aborted notice without a source', () => {
+    const notice = formatExecutionAbortedNotice();
+
+    expect(notice).toContain('<system_notice>');
+    expect(notice).toContain('interrupted before the agent finished');
+    expect(notice).toContain('The steps above were completed; no response was produced.');
+    expect(notice).not.toContain('<interruption');
+  });
+
+  it('renders the aborted notice with the source', () => {
+    expect(formatExecutionAbortedNotice({ source: 'task_manager' })).toContain(
+      '<interruption source="task_manager"'
+    );
+  });
+});
+
+describe('formatInterruptionNotice', () => {
+  it('renders the aborted notice for an abort, with its source when known', () => {
+    expect(formatInterruptionNotice({ type: 'aborted' })).toContain(
+      'interrupted before the agent finished'
+    );
+    expect(formatInterruptionNotice({ type: 'aborted' })).not.toContain('<interruption');
+    expect(
+      formatInterruptionNotice({ type: 'aborted', aborted_by: { source: 'task_manager' } })
+    ).toContain('<interruption source="task_manager"');
+  });
+
+  it('renders the failed notice with code and bounded cause chain', () => {
+    const notice = formatInterruptionNotice({
+      type: 'failed',
+      error: {
+        code: 'internalError',
+        message: 'x'.repeat(600),
+        causes: [{ code: 'c', message: 'root' }],
+      } as never,
+    });
+
+    expect(notice).toContain(
+      'attempt to answer the previous message failed. The steps above were completed; no response was produced.'
+    );
+    expect(notice).toContain('<error code="internalError">');
+    expect(notice).toContain('<cause code="c">');
+    expect(notice).toContain('root');
+    expect(notice).toContain('…');
   });
 });

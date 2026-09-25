@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { edotEnvHash, isEdotStale } from './services';
+import { edotEnvHash, isEdotStale, scoutEnvHash } from './services';
 
 const LOCAL_ES = 'http://elastic:changeme@localhost:9200';
 const CLOUD_ES = 'https://kbn-evals-serverless.es.us-central1.gcp.elastic.cloud';
@@ -76,5 +76,26 @@ describe('isEdotStale', () => {
 
   it('says nothing when no collector was ever started', () => {
     expect(isEdotStale(repoRoot, LOCAL_ES)).toEqual({ stale: false });
+  });
+});
+
+describe('scoutEnvHash', () => {
+  const base = { TRACING_EXPORTERS: '[]', GCS_CREDENTIALS: '{}' };
+
+  it('keeps the hash of stacks started without scoutHook output', () => {
+    expect(scoutEnvHash({ ...base })).toBe(scoutEnvHash(base));
+    expect(scoutEnvHash(undefined)).toBe(scoutEnvHash({}));
+  });
+
+  it('changes when a scoutHook variable is added or changed', () => {
+    const withHook = scoutEnvHash({ ...base, SUITE_KEY: 'a' });
+    expect(withHook).not.toBe(scoutEnvHash(base));
+    expect(scoutEnvHash({ ...base, SUITE_KEY: 'b' })).not.toBe(withHook);
+  });
+
+  it('ignores the order scoutHook variables were provided in', () => {
+    expect(scoutEnvHash({ ...base, B: 'k', A: 'h' })).toBe(
+      scoutEnvHash({ ...base, A: 'h', B: 'k' })
+    );
   });
 });
