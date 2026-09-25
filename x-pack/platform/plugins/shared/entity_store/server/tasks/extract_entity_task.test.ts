@@ -241,7 +241,14 @@ describe('extract entity task metrics', () => {
       logger: loggerMock.create(),
       entityTypes: ['user'],
       core: {
-        getStartServices: jest.fn().mockResolvedValue([{ featureFlags: {} }]),
+        getStartServices: jest.fn().mockResolvedValue([
+          {
+            featureFlags: {},
+            executionContext: {
+              withContext: jest.fn().mockImplementation((_ctx: unknown, fn: () => unknown) => fn()),
+            },
+          },
+        ]),
       } as unknown as types.EntityStoreCoreSetup,
       isServerless: false,
     });
