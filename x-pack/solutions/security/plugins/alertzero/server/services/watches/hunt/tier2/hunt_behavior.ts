@@ -129,6 +129,15 @@ const MAX_ESQL_PROMPT_IOCS = 30;
 const MAX_ESQL_PROMPT_TEXT_CHARS = 6000;
 /** Concurrent `generateEsql` calls; each one is a multi-step LLM graph plus mapping lookups. */
 const ESQL_GENERATION_CONCURRENCY = 3;
+/**
+ * How many behaviors get a grounded query. Concurrency bounds how much runs at
+ * once, not how much runs in total, and the report text decides how many
+ * candidates reach generation — so without this bound one report can spend
+ * arbitrarily many LLM graphs and ES|QL executes. Behaviors past the budget keep
+ * the non-executable placeholder they were built with: they still appear in
+ * `behaviors`, they just do not spend a generation call.
+ */
+const MAX_GENERATED_BEHAVIORS = 20;
 /** LIMIT the generator writes into a proposed rule when the caller has no row bound. */
 const DEFAULT_PROPOSED_RULE_LIMIT = 100;
 /**
@@ -602,11 +611,22 @@ export const huntBehavior = async (
   }
 
   if (validated.length > 0 && esClient) {
+    // Highest confidence first, so a report that overruns the budget spends it on
+    // its best-supported behaviors rather than whichever the model emitted first.
+    const generationTargets = [...validated]
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, MAX_GENERATED_BEHAVIORS);
+    if (generationTargets.length < validated.length) {
+      logger.info(
+        `[hunt:esql] ${validated.length} validated behaviors exceed the generation budget of ` +
+          `${MAX_GENERATED_BEHAVIORS}; the remainder keep a non-executable placeholder.`
+      );
+    }
     const groundedEsql = await generateGroundedEsql({
       model,
       esClient,
       logger,
-      behaviors: validated,
+      behaviors: generationTargets,
       text,
       iocs,
       articleContext,

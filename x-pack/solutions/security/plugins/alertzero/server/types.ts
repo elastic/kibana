@@ -49,7 +49,14 @@ export interface AlertZeroStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   agenticInvestigations: AgenticInvestigationsPluginStart;
   proposals: ProposalsPluginStart;
-  inference: InferenceServerStart;
+  /**
+   * Optional, matching the plugin manifest. Requiring it would take the whole
+   * plugin down with it, including the index-scope, Tier 1 and candidates routes
+   * that need no model at all. Absence is handled at the Tier 2 boundary
+   * instead: `resolveScopedModel` reports `no_inference_plugin`, the coordinator
+   * degrades to Tier 1, and the standalone Tier 2 route answers 503.
+   */
+  inference?: InferenceServerStart;
   /**
    * Optional, matching the plugin manifest. Setup registers the AlertZero model
    * tiers through it; start needs it again so hunt routes can resolve the
