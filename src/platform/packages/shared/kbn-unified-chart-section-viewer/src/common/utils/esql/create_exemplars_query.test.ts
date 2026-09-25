@@ -28,6 +28,7 @@ describe('createExemplarsQuery', () => {
   it('builds the exemplars query for an OTel metric', () => {
     expect(createExemplarsQuery({ metricItem: mockMetric })).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
   | KEEP @timestamp, metric_name, value, trace.id, span.id, \`attributes.http.route\`, \`resource.attributes.service.name\`
@@ -35,6 +36,12 @@ FROM exemplars-generic.otel-default
   | LIMIT 500
 `.trim()
     );
+  });
+
+  it('nullifies unmapped fields so a dimension absent from the exemplars stream cannot fail KEEP', () => {
+    const query = createExemplarsQuery({ metricItem: mockMetric });
+
+    expect(query.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(true);
   });
 
   it('appends each non-empty where statement as its own WHERE pipe before KEEP', () => {
@@ -50,6 +57,7 @@ FROM exemplars-generic.otel-default
       })
     ).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
   | WHERE attributes.http.route == "/orders"
@@ -64,6 +72,7 @@ FROM exemplars-generic.otel-default
   it('keeps only the trace correlation columns when the metric declares no dimensions', () => {
     expect(createExemplarsQuery({ metricItem: { ...mockMetric, dimensionFields: [] } })).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
   | KEEP @timestamp, metric_name, value, trace.id, span.id
@@ -81,6 +90,7 @@ FROM exemplars-generic.otel-default
       })
     ).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
   | KEEP @timestamp, metric_name, value, trace.id, span.id
@@ -101,6 +111,7 @@ FROM exemplars-generic.otel-default
       })
     ).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "odd\\"name"
   | KEEP @timestamp, metric_name, value, trace.id, span.id, \`attributes.odd\`\`dimension\`

@@ -54,7 +54,11 @@ export function createExemplarsQuery({
     return '';
   }
 
+  // The exemplars mapping is dynamic, so a dimension that has never appeared on an exemplar
+  // document is unmapped and would fail `KEEP` verification, as would an inherited `WHERE`
+  // on a metric field that only exists in the metrics stream.
   const query = esql.from(exemplarsIndex);
+  query.addSetCommand('unmapped_fields', 'NULLIFY');
 
   const exemplarMetricName = escapeStringValue(metricName.replace(/^metrics\./, ''));
   query.pipe(`WHERE ${EXEMPLARS_METRIC_NAME_FIELD} == ${exemplarMetricName}`);
