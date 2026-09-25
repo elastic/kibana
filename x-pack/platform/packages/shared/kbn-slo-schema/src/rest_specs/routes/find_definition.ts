@@ -7,7 +7,7 @@
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH, MAX_QUERY_LENGTH } from '../../schema/zod/limits';
+import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
 import { transformHealthSchema } from '../../schema/zod/health';
 import { sloDefinitionSchema } from '../../schema/zod/slo';
 
@@ -17,7 +17,7 @@ const findSloDefinitionsParamsSchema = z.object({
       search: z.string().max(MAX_KEYWORD_LENGTH).optional(),
       includeOutdatedOnly: BooleanFromString.optional(),
       includeHealth: BooleanFromString.optional(),
-      tags: z.string().max(MAX_QUERY_LENGTH).optional(),
+      tags: z.string().optional(),
       page: z.string().optional(),
       perPage: z.string().optional(),
     })

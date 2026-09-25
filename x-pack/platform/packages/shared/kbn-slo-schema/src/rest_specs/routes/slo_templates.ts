@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH, MAX_QUERY_LENGTH } from '../../schema/zod/limits';
+import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
 import type { sloTemplateSchema } from '../../schema/zod/slo_template';
 
 const getSLOTemplateParamsSchema = z.object({
@@ -21,7 +21,6 @@ const findSLOTemplatesParamsSchema = z.object({
       search: z.string().max(MAX_KEYWORD_LENGTH).optional(),
       tags: z
         .string()
-        .max(MAX_QUERY_LENGTH)
         .transform((s) => s.split(',').map((t) => t.trim()))
         .pipe(z.array(z.string()).max(MAX_ARRAY_LENGTH))
         .optional(),

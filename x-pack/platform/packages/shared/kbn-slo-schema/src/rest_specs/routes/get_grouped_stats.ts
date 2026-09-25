@@ -6,14 +6,14 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH, MAX_QUERY_LENGTH } from '../../schema/zod/limits';
+import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
 
 const apmBodyParamsSchema = z.object({
   type: z.literal('apm'),
   size: z.number().optional(),
   serviceNames: z.array(z.string().max(MAX_KEYWORD_LENGTH)).max(MAX_ARRAY_LENGTH).optional(),
   environment: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-  kqlQuery: z.string().max(MAX_QUERY_LENGTH).optional(),
+  kqlQuery: z.string().optional(),
   statusFilters: z.array(z.string().max(MAX_KEYWORD_LENGTH)).max(MAX_ARRAY_LENGTH).optional(),
 });
 
