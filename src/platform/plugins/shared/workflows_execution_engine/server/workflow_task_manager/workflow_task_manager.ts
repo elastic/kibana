@@ -10,8 +10,10 @@
 import { v4 } from 'uuid';
 import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  type RunSoonOptions,
   TaskAlreadyRunningError,
   type TaskManagerStartContract,
+  TaskPriority,
   TaskStatus,
 } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
@@ -22,6 +24,9 @@ import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
 import { generateExecutionTaskScope } from '../utils';
 
 export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
+
+export const getTaskPriority = (context?: Record<string, unknown> | null): TaskPriority =>
+  context?.isUserInteractive === true ? TaskPriority.UserInteractive : TaskPriority.Standard;
 
 /** Stable task id so idle-timeout (workflow + enclosing step) resumes dedupe per execution. */
 export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string): string =>
@@ -171,6 +176,8 @@ export class WorkflowTaskManager {
 
     await this.taskManager.removeIfExists(taskId);
 
+    const priority = getTaskPriority(workflowExecution.context);
+
     const task = await this.taskManager.schedule(
       {
         id: taskId,
@@ -187,6 +194,7 @@ export class WorkflowTaskManager {
         runAt,
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
+        priority,
       },
       { request, cloneApiKey: true }
     );
@@ -248,12 +256,16 @@ export class WorkflowTaskManager {
     executionId,
     spaceId,
     fakeRequest,
+    isUserInteractive,
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
+    const priority = getTaskPriority({ isUserInteractive });
+
     await this.taskManager.ensureScheduled(
       {
         id: taskId,
@@ -261,6 +273,7 @@ export class WorkflowTaskManager {
         params: { workflowRunId: executionId, spaceId } satisfies ResumeWorkflowExecutionParams,
         state: {},
         scope: [`workflow:execution:${executionId}`],
+        priority,
       },
       fakeRequest ? { request: fakeRequest, cloneApiKey: true } : undefined
     );
@@ -272,10 +285,13 @@ export class WorkflowTaskManager {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
   }): Promise<boolean> {
     const { taskId } = await this.scheduleImmediateResume(params);
     try {
-      const result = await this.taskManager.runSoon(taskId);
+      const result = params.isUserInteractive
+        ? await this.taskManager.runSoon(taskId, { priority: TaskPriority.UserInteractive })
+        : await this.taskManager.runSoon(taskId);
       return !result?.conflict;
     } catch (error) {
       // The task may complete between ensureScheduled and runSoon. Neither a busy
@@ -295,11 +311,15 @@ export class WorkflowTaskManager {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
   }): Promise<void> {
     if (await this.tryRunImmediateResume(params)) return;
     await this.ensureWakeTask(params);
     try {
-      await this.runSoonWithConflictRetry(getWorkflowWakeTaskId(params.executionId));
+      await this.runSoonWithConflictRetry(
+        getWorkflowWakeTaskId(params.executionId),
+        params.isUserInteractive ? { priority: TaskPriority.UserInteractive } : undefined
+      );
     } catch (error) {
       // A claimed wake task is retained and polls again; it cannot delete this request on success.
       if (!(error instanceof TaskAlreadyRunningError)) throw error;
@@ -366,10 +386,12 @@ export class WorkflowTaskManager {
     }
   }
 
-  private async runSoonWithConflictRetry(taskId: string): Promise<void> {
+  private async runSoonWithConflictRetry(taskId: string, options?: RunSoonOptions): Promise<void> {
     // Re-read after a conflicting update; never report a wake-up that was not accepted.
     for (let attempt = 0; attempt < 3; attempt++) {
-      const result = await this.taskManager.runSoon(taskId);
+      const result = options
+        ? await this.taskManager.runSoon(taskId, options)
+        : await this.taskManager.runSoon(taskId);
       if (!result.conflict) return;
     }
     throw SavedObjectsErrorHelpers.createConflictError(
