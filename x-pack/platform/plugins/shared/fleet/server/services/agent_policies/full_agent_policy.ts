@@ -114,7 +114,7 @@ export async function getFullAgentPolicy(
     agentPolicy = options.agentPolicy;
   } else {
     logger.debug(`Fetching agent policy doc for [${id}]`);
-    agentPolicy = await fetchAgentPolicy(soClient, id, { spaceId: options?.spaceId });
+    agentPolicy = await fetchAgentPolicy(soClient, id, options?.spaceId ? { spaceId: options.spaceId } : {});
   }
 
   if (!agentPolicy) {

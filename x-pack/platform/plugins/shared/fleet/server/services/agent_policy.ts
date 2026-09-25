@@ -1919,7 +1919,7 @@ class AgentPolicyService {
         }
 
         const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds, {
-          spaceId: options?.spaceId,
+          ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
         });
         const policiesMap = keyBy(policies, 'id');
 
@@ -1934,7 +1934,7 @@ class AgentPolicyService {
             agentPolicyService
               .getFullAgentPolicy(soClient, agentPolicyId, {
                 agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
-                spaceId: options?.spaceId,
+                ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
               })
               .then((response) => {
                 if (!response) {
@@ -2024,7 +2024,7 @@ class AgentPolicyService {
               fleetServerPolicy,
               fullPolicy,
               agentVersionsToUse,
-              { spaceId: options?.spaceId }
+              options?.spaceId ? { spaceId: options.spaceId } : {}
             );
             fleetServerPolicies.push(...versionSpecificPolicies);
           }
