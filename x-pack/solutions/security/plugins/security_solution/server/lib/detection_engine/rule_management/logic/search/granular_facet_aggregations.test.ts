@@ -65,6 +65,23 @@ describe('expandRawAggregationResult', () => {
       enabled: { true: 1, false: 0 },
     });
   });
+
+  it('prefers key_as_string over the numeric key Elasticsearch returns for boolean fields', () => {
+    const raw = {
+      facet_enabled: {
+        buckets: [
+          { key: 1, key_as_string: 'true', doc_count: 4 },
+          { key: 0, key_as_string: 'false', doc_count: 8 },
+        ],
+      },
+    };
+
+    const counts = expandRawAggregationResult(raw, ['enabled']);
+
+    expect(counts).toEqual({
+      enabled: { true: 4, false: 8 },
+    });
+  });
 });
 
 describe('fetchGranularFacetCountsChunked', () => {
