@@ -817,7 +817,60 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
 
     expect(mockUpdateDeployment).toHaveBeenCalledWith(
       'so-id-cleanup',
-      expect.objectContaining({ services: ['svcB'] })
+      expect.objectContaining({
+        services: ['svcB'],
+        // After cleanup of instA (pkg-policy-A) and instB (pkg-policy-B), neither deleted ID
+        // should appear in the persisted policy list.
+        packagePolicyIds: [],
+        policyIdsByInstance: {},
+      })
+    );
+  });
+
+  it('no-cleanup no-deploy path: reconciles SO services and packagePolicyIds when a failed service with no policy is deselected', async () => {
+    // Scenario: A was deployed (instA→pkg-policy-A), B failed with no package policy.
+    // User deselects B. targets=[instA already deployed], no cleanup (B had no policy),
+    // so handleDeploy hits the early return. SO must be refreshed to remove B from services.
+    mockCreateDeployment.mockResolvedValue('so-id-reconcile');
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svcA'] },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { instA: 'pkg-policy-A' },
+        pendingCleanupPolicyIds: {},
+        onboardingDeploymentId: 'so-id-reconcile',
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: undefined,
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
+    // All instances are already deployed → targetsToDeploy is empty.
+    mockBuildAgentBasedTargets.mockReturnValue([{ instanceIds: ['instA'], packageIds: [] }]);
+    // policyIdsByInstance has instA, so targets.filter(not already deployed) = []
+    // and hasPendingCleanup = false → early return path.
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    let deployResult: { failed: boolean } | undefined;
+    await act(async () => {
+      deployResult = await result.current.handleDeploy();
+    });
+
+    expect(deployResult).toEqual({ failed: false });
+    expect(mockCleanupAgentBasedPolicies).not.toHaveBeenCalled();
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-reconcile',
+      expect.objectContaining({
+        services: ['svcA'],
+        packagePolicyIds: ['pkg-policy-A'],
+      })
     );
   });
 

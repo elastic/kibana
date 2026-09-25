@@ -149,7 +149,24 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
       const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
 
-      if (targetsToDeploy.length === 0 && !hasPendingCleanup) return { failed: false };
+      if (targetsToDeploy.length === 0 && !hasPendingCleanup) {
+        // No deploy targets and no cleanup to run, but the service selection may still have
+        // changed (e.g., a previously-failed service with no package policy was deselected).
+        // Reconcile the SO services list so resume reflects the current selection.
+        const existingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
+        if (existingDeploymentId) {
+          const remainingPolicyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+          await updateDeployment(existingDeploymentId, {
+            services: selectedServiceIds,
+            serviceVars: toSOServiceVars(
+              serviceSettings?.serviceVars ?? {},
+              servicesMap ?? new Map()
+            ) as Record<string, Record<string, unknown>>,
+            packagePolicyIds: [...new Set(Object.values(remainingPolicyIdsByInstance))],
+          });
+        }
+        return { failed: false };
+      }
 
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
@@ -228,12 +245,21 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             Object.keys(remainingPending).length === 0 &&
             allLiveStaleSucceeded
           ) {
+            // Build the post-cleanup policy map: exclude instance IDs removed by cleanup so the
+            // persisted packagePolicyIds and policyIdsByInstance don't reference deleted policies.
+            const postCleanupPolicyIdsByInstance = Object.fromEntries(
+              Object.entries(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
+                ([id]) => !cleanedLiveStale.includes(id)
+              )
+            );
             await updateDeployment(onboardingDeploymentId, {
               services: selectedServiceIds,
               serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
                 string,
                 Record<string, unknown>
               >,
+              packagePolicyIds: [...new Set(Object.values(postCleanupPolicyIdsByInstance))],
+              policyIdsByInstance: postCleanupPolicyIdsByInstance,
             });
           }
           // Cleanup is best-effort — any entries that couldn't be cleared remain staged for
