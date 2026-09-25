@@ -296,7 +296,8 @@ export function runRspackCli(options: CliOptions = {}): void {
             --dist                    Build for distribution (minified, no source maps)
             --examples                Include example plugins
             --test-plugins            Include test plugins
-            --no-dev-only             Exclude devOnly plugins (distributable builds always exclude them)
+            --no-dev-only             Exclude devOnly plugins (included by default, even with --dist;
+                                      node scripts/build always excludes them)
             --themes <tags>           Comma-separated theme tags to build (default: all)
             --plugin-groups <groups>  Comma-separated plugin groups to build (default: all).
                                       Mirrors the server's plugins.allowlistPluginGroups setting.
