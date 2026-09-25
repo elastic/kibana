@@ -189,6 +189,8 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
     parts.push('severity IS NULL');
   }
   if (!parts.length) {
+    // No selected severity is a v2 value — exclude all v2 rows
+    query.pipe('WHERE false');
     return;
   }
   query.pipe(`WHERE ${parts.join(' OR ')}`);
@@ -320,8 +322,13 @@ export const buildEpisodesQuery = (
 
   addDurationLowerBoundFlag(query);
 
+  const sortedQuery =
+    sortState.sortField === 'severity'
+      ? query.sort([sortField, sortDir], ['@timestamp', sortDir])
+      : query.sort([sortField, sortDir]);
+
   return asTypedEsqlQuery<AlertEpisodeEsqlRow>(
-    query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
+    sortedQuery.pipe`LIMIT ${pageSizeParam}`.keep(
       ...ALERT_EPISODE_FIELDS,
       DURATION_LOWER_BOUND_FIELD
     )
