@@ -12,8 +12,7 @@ import { useSearchStrategy } from '../../../common/containers/use_search_strateg
 import { useRiskEngineStatus } from './use_risk_engine_status';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
-import { EntityType } from '../../../../common/search_strategy';
-import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
+import { EntityType, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
@@ -67,10 +66,9 @@ beforeEach(() => {
 
 describe('useRiskScoreKpi', () => {
   it('forwards executionContext to useSearchStrategy', () => {
-    renderHook(
-      () => useRiskScoreKpi({ riskEntity: EntityType.host, executionContext }),
-      { wrapper: TestProviders }
-    );
+    renderHook(() => useRiskScoreKpi({ riskEntity: EntityType.host, executionContext }), {
+      wrapper: TestProviders,
+    });
 
     expect(mockUseSearchStrategy).toHaveBeenCalledWith(
       expect.objectContaining({ executionContext })
@@ -78,10 +76,9 @@ describe('useRiskScoreKpi', () => {
   });
 
   it('forwards executionContext to useRiskEngineStatus', () => {
-    renderHook(
-      () => useRiskScoreKpi({ riskEntity: EntityType.host, executionContext }),
-      { wrapper: TestProviders }
-    );
+    renderHook(() => useRiskScoreKpi({ riskEntity: EntityType.host, executionContext }), {
+      wrapper: TestProviders,
+    });
 
     expect(mockUseRiskEngineStatus).toHaveBeenCalledWith(
       {},
