@@ -96,14 +96,12 @@ export class EsqlEditor {
   /** Replaces the query in this editor (and only this one) and returns the applied value. */
   async setQuery(query: string): Promise<string> {
     await this.waitReady();
-    const modelIndex = await this.codeEditor.getModelIndexByContainer(this.editor);
-    return this.codeEditor.setCodeEditorValue(query, modelIndex);
+    return this.codeEditor.setCodeEditorValueByContainer(this.editor, query);
   }
 
   async getQuery(): Promise<string> {
     await this.waitReady();
-    const modelIndex = await this.codeEditor.getModelIndexByContainer(this.editor);
-    return this.codeEditor.getCodeEditorValue(modelIndex);
+    return this.codeEditor.getCodeEditorValueByContainer(this.editor);
   }
 
   /**
@@ -191,8 +189,9 @@ export class EsqlEditor {
     decorationClassName: string,
     optionText: string
   ): Promise<void> {
-    await this.getDecoration(decorationClassName).waitFor({ state: 'visible' });
-    await this.codeEditor.selectDecorationHoverOption(decorationClassName, optionText);
+    const decoration = this.getDecoration(decorationClassName);
+    await decoration.waitFor({ state: 'visible' });
+    await this.codeEditor.selectDecorationHoverOption(decoration, optionText);
   }
 
   // ── Help menu ──────────────────────────────────────────────────────────────
@@ -245,7 +244,7 @@ export class EsqlEditor {
   }
 
   async openStarredQueriesTab(): Promise<void> {
-    await this.page.testSubj.click('starred-queries-tab');
+    await this.scope.getByTestId('starred-queries-tab').click();
     await this.scope.getByTestId('ESQLEditor-starredQueries').waitFor({ state: 'visible' });
   }
 
