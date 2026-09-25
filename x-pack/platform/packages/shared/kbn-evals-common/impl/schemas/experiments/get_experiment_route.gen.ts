@@ -23,15 +23,21 @@ export const GetEvaluationExperimentRequestQuery = lazySchema(() =>
     /**
      * Filter stats by suite ID
      */
-    suite_id: z.string().max(256).optional(),
+    suite_id: z.string().max(256).optional().describe('Filter stats by suite ID'),
     /**
      * Filter stats by task model ID
      */
-    model_id: z.string().max(256).optional(),
+    model_id: z.string().max(256).optional().describe('Filter stats by task model ID'),
     /**
      * When provided, fetches all experiments in this execution instead of the single experiment from the path param
      */
-    execution_id: z.string().max(1024).optional(),
+    execution_id: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe(
+        'When provided, fetches all experiments in this execution instead of the single experiment from the path param'
+      ),
   })
 );
 export type GetEvaluationExperimentRequestQuery = z.infer<
@@ -63,12 +69,23 @@ export const GetEvaluationExperimentResponse = lazySchema(() =>
     /**
      * The distinct models this experiment's evaluators judged with, the one that produced the most scores first, so consumers can tell that they differ. `evaluator_model` is the first. Capped at 20, which no realistic experiment reaches. Empty when only code evaluators scored the experiment.
      */
-    evaluator_models: z.array(Model).max(20).optional(),
+    evaluator_models: z
+      .array(Model)
+      .max(20)
+      .optional()
+      .describe(
+        "The distinct models this experiment's evaluators judged with, the one that produced the most scores first, so consumers can tell that they differ. `evaluator_model` is the first. Capped at 20, which no realistic experiment reaches. Empty when only code evaluators scored the experiment."
+      ),
     execution_id: z.string().max(1024).optional(),
     /**
      * The suite ID when this experiment belongs to a suite run
      */
-    suite_id: z.string().max(256).nullable().optional(),
+    suite_id: z
+      .string()
+      .max(256)
+      .nullable()
+      .optional()
+      .describe('The suite ID when this experiment belongs to a suite run'),
     total_repetitions: z.number().int().optional(),
     git_branch: z.string().max(256).nullable().optional(),
     git_commit_sha: z.string().max(256).nullable().optional(),

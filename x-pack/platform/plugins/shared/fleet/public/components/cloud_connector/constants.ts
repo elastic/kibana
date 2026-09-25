@@ -4,8 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
+
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
+export const TEMPLATE_URL_ELASTIC_RESOURCE_TYPE_ENV_VAR = 'RESOURCE_TYPE';
+export const TEMPLATE_URL_ELASTIC_ORGANIZATION_ID_ENV_VAR = 'ORGANIZATION_ID';
+export const TEMPLATE_URL_CLOUD_PROVIDER_ENV_VAR = 'CLOUD_PROVIDER';
+export const TEMPLATE_URL_CLOUD_REGION_ENV_VAR = 'CLOUD_REGION';
+export const TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR = 'CLOUD_ENVIRONMENT';
+
+export const TEMPLATE_URL_TOKENS = [
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_RESOURCE_TYPE_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_ORGANIZATION_ID_ENV_VAR,
+  TEMPLATE_URL_CLOUD_PROVIDER_ENV_VAR,
+  TEMPLATE_URL_CLOUD_REGION_ENV_VAR,
+  TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR,
+] as const;
+export type TemplateUrlToken = (typeof TEMPLATE_URL_TOKENS)[number];
+
+export const ELASTIC_RESOURCE_TYPE_DEPLOYMENT = 'deployment';
+export const ELASTIC_RESOURCE_TYPE_PROJECT = 'project';
+export type ElasticResourceType =
+  | typeof ELASTIC_RESOURCE_TYPE_DEPLOYMENT
+  | typeof ELASTIC_RESOURCE_TYPE_PROJECT;
+
+export const ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION = 'production';
+export const ELASTIC_CLOUD_ENVIRONMENT_STAGING = 'staging';
+export const ELASTIC_CLOUD_ENVIRONMENT_QA = 'qa';
+export type ElasticCloudEnvironment =
+  | typeof ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION
+  | typeof ELASTIC_CLOUD_ENVIRONMENT_STAGING
+  | typeof ELASTIC_CLOUD_ENVIRONMENT_QA;
+
 export const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS =
   'cloud_formation_cloud_connectors_template';
 export const ARM_TEMPLATE_URL_CLOUD_CONNECTORS = 'arm_template_cloud_connectors_url';
@@ -68,3 +101,17 @@ export const CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.2.2
 //
 export const CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION = '3.3.0-preview06';
 export const CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.5.0-preview04';
+
+/**
+ * Warning toast for a failed template-details write after a successful policy save. The
+ * pending payload lives in memory only, so the retry happens on a later save in this same tab.
+ */
+export const IAC_TEMPLATE_WRITE_FAILED_TOAST = {
+  title: i18n.translate('xpack.fleet.cloudConnector.iacTemplateWriteFailed.title', {
+    defaultMessage: 'Template details were not saved on the identity',
+  }),
+  text: i18n.translate('xpack.fleet.cloudConnector.iacTemplateWriteFailed.text', {
+    defaultMessage:
+      'The integration was saved, but Kibana could not record which CloudFormation template this identity uses, so it may be reported as needing an update. Kibana will retry if you edit and save this integration again.',
+  }),
+};

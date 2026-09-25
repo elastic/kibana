@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { StreamsUnitService } from './streams_unit_service';
 import type { PublishUnitConfig } from '../unit_config/types';
+import type {
+  StreamsConfigurationSavedObjectAttributes,
+  StreamsUiMetadataSavedObjectAttributes,
+} from './streams_configuration';
 
 const unit: StreamsUnit.Configuration = {
   sources: [
@@ -47,17 +52,30 @@ const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
   'default'
 );
 
-const storedConfiguration = {
-  id: 'default',
-  attributes: { unit_id: 'default', unit, secrets },
-  references: [
-    {
-      name: 'streamsMetadata',
-      type: 'streams-ui-metadata',
-      id: 'default-streams-ui-metadata',
-    },
-  ],
-};
+const asSavedObject = <T>(
+  type: string,
+  attributes: T,
+  { id = 'default', references = [] }: { id?: string; references?: SavedObject['references'] } = {}
+): SavedObject<T> => ({
+  id,
+  type,
+  attributes,
+  references,
+});
+
+const storedConfiguration = asSavedObject<StreamsConfigurationSavedObjectAttributes>(
+  'streams-configuration',
+  { unit_id: 'default', unit, secrets },
+  {
+    references: [
+      {
+        name: 'streamsMetadata',
+        type: 'streams-ui-metadata',
+        id: 'default-streams-ui-metadata',
+      },
+    ],
+  }
+);
 
 const createService = ({
   soClient,
@@ -65,13 +83,13 @@ const createService = ({
   encryptedSavedObjectsClient,
   canEncrypt = true,
 }: {
-  soClient: Pick<SavedObjectsClientContract, 'get' | 'create' | 'delete' | 'getCurrentNamespace'>;
+  soClient: ReturnType<typeof savedObjectsClientMock.create>;
   publishUnit?: PublishUnitConfig;
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
   canEncrypt?: boolean;
 }) => {
   return new StreamsUnitService({
-    soClient: soClient as SavedObjectsClientContract,
+    soClient,
     logger: loggerMock.create(),
     publishUnit,
     encryptedSavedObjectsClient,
@@ -79,29 +97,24 @@ const createService = ({
   });
 };
 
-const createSoClient = (
-  overrides: Partial<
-    Pick<SavedObjectsClientContract, 'get' | 'create' | 'delete' | 'getCurrentNamespace'>
-  > = {}
-) => ({
-  get: jest.fn(),
-  create: jest.fn(),
-  delete: jest.fn(),
-  getCurrentNamespace: jest.fn().mockReturnValue('default'),
-  ...overrides,
-});
+const createSoClient = () => {
+  const soClient = savedObjectsClientMock.create();
+  soClient.getCurrentNamespace.mockReturnValue('default');
+  return soClient;
+};
 
 describe('StreamsUnitService', () => {
   it('returns stored unit configuration and UI metadata without secrets', async () => {
-    const soClient = createSoClient({
-      get: jest.fn().mockImplementation(async (type: string) => {
-        if (type === 'streams-configuration') {
-          return storedConfiguration;
-        }
-        return {
-          attributes: { metadata: { nodes: { 'otlp-input': { x: 1, y: 2 } } } },
-        };
-      }),
+    const soClient = createSoClient();
+    soClient.get.mockImplementation(async (type: string) => {
+      if (type === 'streams-configuration') {
+        return storedConfiguration;
+      }
+      return asSavedObject<StreamsUiMetadataSavedObjectAttributes>(
+        'streams-ui-metadata',
+        { metadata: { nodes: { 'otlp-input': { x: 1, y: 2 } } } },
+        { id: 'default-streams-ui-metadata' }
+      );
     });
     const encryptedSavedObjectsClient = {
       getDecryptedAsInternalUser: jest.fn(),
@@ -121,9 +134,8 @@ describe('StreamsUnitService', () => {
   });
 
   it('throws 404 when the unit does not exist', async () => {
-    const soClient = createSoClient({
-      get: jest.fn().mockRejectedValue(notFoundError),
-    });
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(notFoundError);
 
     const service = createService({ soClient });
 
@@ -134,11 +146,11 @@ describe('StreamsUnitService', () => {
 
   it('writes the configuration saved object with secrets, publishes, then writes UI metadata', async () => {
     const order: string[] = [];
-    const soClient = createSoClient({
-      get: jest.fn().mockRejectedValue(notFoundError),
-      create: jest.fn().mockImplementation(async (type: string) => {
-        order.push(`create:${type}`);
-      }),
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(notFoundError);
+    soClient.create.mockImplementation(async (type: string, attributes) => {
+      order.push(`create:${type}`);
+      return asSavedObject(type, attributes);
     });
     const publishUnit = jest.fn().mockImplementation(async () => {
       order.push('publish');
@@ -200,10 +212,9 @@ describe('StreamsUnitService', () => {
   });
 
   it('keeps stored secrets when the PUT omits them', async () => {
-    const soClient = createSoClient({
-      get: jest.fn().mockRejectedValue(new Error('should decrypt rather than use stripped get')),
-      create: jest.fn().mockResolvedValue({}),
-    });
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(new Error('should decrypt rather than use stripped get'));
+    soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
     const encryptedSavedObjectsClient = {
       getDecryptedAsInternalUser: jest.fn().mockResolvedValue(storedConfiguration),
     } as unknown as EncryptedSavedObjectsClient;
@@ -231,9 +242,8 @@ describe('StreamsUnitService', () => {
   });
 
   it('overlays newly sent secrets onto the stored bag', async () => {
-    const soClient = createSoClient({
-      create: jest.fn().mockResolvedValue({}),
-    });
+    const soClient = createSoClient();
+    soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
     const encryptedSavedObjectsClient = {
       getDecryptedAsInternalUser: jest.fn().mockResolvedValue(storedConfiguration),
     } as unknown as EncryptedSavedObjectsClient;
@@ -273,11 +283,10 @@ describe('StreamsUnitService', () => {
   });
 
   it('rolls back a newly created configuration when publish fails', async () => {
-    const soClient = createSoClient({
-      get: jest.fn().mockRejectedValue(notFoundError),
-      create: jest.fn().mockResolvedValue({}),
-      delete: jest.fn().mockResolvedValue({}),
-    });
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(notFoundError);
+    soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
+    soClient.delete.mockResolvedValue({});
     const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
 
     const service = createService({ soClient, publishUnit });
@@ -297,11 +306,10 @@ describe('StreamsUnitService', () => {
   });
 
   it('still throws the publish error when rollback fails', async () => {
-    const soClient = createSoClient({
-      get: jest.fn().mockRejectedValue(notFoundError),
-      create: jest.fn().mockResolvedValue({}),
-      delete: jest.fn().mockRejectedValue(new Error('saved object delete failed')),
-    });
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(notFoundError);
+    soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
+    soClient.delete.mockRejectedValue(new Error('saved object delete failed'));
     const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
 
     const service = createService({ soClient, publishUnit });
@@ -316,10 +324,9 @@ describe('StreamsUnitService', () => {
   });
 
   it('restores the previous decrypted configuration when publish fails on update', async () => {
-    const soClient = createSoClient({
-      get: jest.fn().mockResolvedValue(storedConfiguration),
-      create: jest.fn().mockResolvedValue({}),
-    });
+    const soClient = createSoClient();
+    soClient.get.mockResolvedValue(storedConfiguration);
+    soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
     const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
 
     const service = createService({ soClient, publishUnit });
@@ -346,11 +353,92 @@ describe('StreamsUnitService', () => {
     );
   });
 
-  it('deletes the configuration and UI metadata saved objects', async () => {
-    const soClient = createSoClient({
-      get: jest.fn().mockResolvedValue(storedConfiguration),
-      delete: jest.fn().mockResolvedValue({}),
+  it('keeps stored UI metadata on a YAML-style PUT that omits it, pruning stale nodes', async () => {
+    const unitWithFileDrop: StreamsUnit.Configuration = {
+      ...unit,
+      sources: [
+        ...unit.sources,
+        {
+          id: 'file-drop',
+          type: 'file',
+          supported_telemetry: ['logs'],
+        },
+      ],
+    };
+    let storedMetadata: StreamsUnit.UiMetadata | undefined;
+    let hasConfiguration = false;
+    const soClient = createSoClient();
+    soClient.get.mockImplementation(async (type: string) => {
+      if (type === 'streams-configuration') {
+        if (!hasConfiguration) {
+          throw notFoundError;
+        }
+        return storedConfiguration;
+      }
+      if (storedMetadata === undefined) {
+        throw notFoundError;
+      }
+      return asSavedObject<StreamsUiMetadataSavedObjectAttributes>(
+        'streams-ui-metadata',
+        { metadata: storedMetadata },
+        { id: 'default-streams-ui-metadata' }
+      );
     });
+    soClient.create.mockImplementation(async (type: string, attributes) => {
+      if (type === 'streams-configuration') {
+        hasConfiguration = true;
+      }
+      if (type === 'streams-ui-metadata') {
+        storedMetadata = (attributes as StreamsUiMetadataSavedObjectAttributes).metadata;
+      }
+      return asSavedObject(type, attributes);
+    });
+
+    const service = createService({ soClient });
+
+    await service.upsertUnit({
+      unitId: 'default',
+      unit: unitWithFileDrop,
+      ui_metadata: {
+        nodes: {
+          'otlp-input': { x: 1, y: 2 },
+          'file-drop': { x: 3, y: 4 },
+          stale: { x: 9, y: 9 },
+        },
+      },
+    });
+
+    await service.upsertUnit({
+      unitId: 'default',
+      unit,
+    });
+
+    const uiMetadataWrites = soClient.create.mock.calls.filter(
+      ([type]) => type === 'streams-ui-metadata'
+    );
+
+    expect(uiMetadataWrites).toHaveLength(2);
+    expect(uiMetadataWrites[0][1]).toEqual({
+      metadata: {
+        nodes: {
+          'otlp-input': { x: 1, y: 2 },
+          'file-drop': { x: 3, y: 4 },
+        },
+      },
+    });
+    expect(uiMetadataWrites[1][1]).toEqual({
+      metadata: {
+        nodes: {
+          'otlp-input': { x: 1, y: 2 },
+        },
+      },
+    });
+  });
+
+  it('deletes the configuration and UI metadata saved objects', async () => {
+    const soClient = createSoClient();
+    soClient.get.mockResolvedValue(storedConfiguration);
+    soClient.delete.mockResolvedValue({});
 
     const service = createService({ soClient });
     await service.resetUnit('default');
@@ -367,9 +455,8 @@ describe('StreamsUnitService', () => {
   });
 
   it('does nothing when the unit is not stored', async () => {
-    const soClient = createSoClient({
-      get: jest.fn().mockRejectedValue(notFoundError),
-    });
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(notFoundError);
 
     const service = createService({ soClient });
     await service.resetUnit('default');

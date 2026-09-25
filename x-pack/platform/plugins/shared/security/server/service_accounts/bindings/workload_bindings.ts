@@ -18,11 +18,11 @@ import type {
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 import type { WorkloadBindingCoordinates } from './binding_saved_object';
-import { resolveWorkloadBinder } from './resolve_workload_binder';
+import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
 import type { WorkloadBindingStore } from './workload_binding_store';
 import type { AuthenticatedUser, SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
-import { ensureManageSecurityPrivilege } from '../manage_security_privilege';
+import { ensureClusterPrivilege } from '../cluster_privilege';
 import type { ServiceAccountsBackend } from '../types';
 
 /**
@@ -136,7 +136,10 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       workloadId,
       serviceAccountId,
       spaceId: this.getSpaceId(request),
-      boundBy: await resolveWorkloadBinder(user, () => this.resolveUserProfileId(request)),
+      boundBy: await resolveWorkloadBinder(
+        user,
+        bestEffortUserProfileIdResolver(this.getCurrentUserProfileId, request, this.logger)
+      ),
       boundAt: new Date().toISOString(),
       // Fresh per bind, so no two generations of a binding share one. This does not make a
       // rebind irreversible; see the attribute's own note.
@@ -248,23 +251,6 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     }
   }
 
-  /**
-   * Best-effort: attribution is worth an extra lookup, but never worth failing a bind the
-   * caller is otherwise entitled to make.
-   */
-  private async resolveUserProfileId(request: KibanaRequest): Promise<string | undefined> {
-    try {
-      return (await this.getCurrentUserProfileId(request)) ?? undefined;
-    } catch (e) {
-      this.logger.debug(
-        `Could not resolve a user profile for the principal binding a service account: ${getDetailedErrorMessage(
-          e
-        )}`
-      );
-      return undefined;
-    }
-  }
-
   private async requireBinding(
     coordinates: WorkloadBindingCoordinates
   ): Promise<ServiceAccountWorkloadBinding> {
@@ -280,7 +266,8 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   }
 
   private ensureCanManage(request: KibanaRequest, action: string): Promise<void> {
-    return ensureManageSecurityPrivilege({
+    return ensureClusterPrivilege({
+      privilege: 'manage_security',
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
@@ -312,24 +299,3 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     }
   }
 }
-
-/**
- * Stand-in for runtimes whose service account backend cannot execute workloads. Bind refuses
- * too: a binding that can never be exchanged for a credential is a promise Kibana cannot keep.
- *
- * See https://github.com/elastic/kibana/issues/284466.
- */
-export const createNotImplementedWorkloadBindings = (): ServiceAccountWorkloadBindingsApi => {
-  const notImplemented = () => {
-    throw Boom.notImplemented(
-      'Service account workload bindings are not yet implemented for the Elasticsearch backend'
-    );
-  };
-
-  return {
-    bindWorkload: async () => notImplemented(),
-    unbindWorkload: async () => notImplemented(),
-    getBinding: async () => notImplemented(),
-    withScopedRequest: async () => notImplemented(),
-  };
-};

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
-  enableWorkflowsFeatureFlag,
   getScheduleAdminRoleDescriptor,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
@@ -18,20 +17,21 @@ import {
 
 apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let spaceId: string;
 
-  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-    await enableWorkflowsFeatureFlag(apiServices);
+  apiTest.beforeAll(async ({ samlAuth, scheduleSpace }) => {
+    spaceId = scheduleSpace.id;
 
     const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    await deleteAllWorkflowSchedules(apiClient, defaultHeaders);
+  apiTest.afterEach(async ({ discoveriesApi }) => {
+    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders, spaceId);
   });
 
-  apiTest('should return empty result when no schedules exist', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return empty result when no schedules exist', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
     const { body, statusCode } = await apis.findSchedules();
 
@@ -42,19 +42,19 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(result.total).toBe(0);
   });
 
-  apiTest('should return all created schedules', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return all created schedules', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule A' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule B' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule C' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Schedule A' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Schedule B' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Schedule C' }));
 
     // Schedules are Alerting rules backed by saved objects, so a create is not
     // guaranteed to be searchable immediately (index refresh lag). Wait until
     // all three are retrievable before asserting (see the pagination test).
     await expect
       .poll(async () => {
-        const found = await apis.findSchedules({ per_page: '100' });
+        const found = await apis.findSchedules({ per_page: 100 });
         return (found.body as { data: unknown[] }).data.length;
       })
       .toBe(3);
@@ -71,18 +71,18 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(names).toStrictEqual(['Schedule A', 'Schedule B', 'Schedule C']);
   });
 
-  apiTest('should sort by name ascending', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should sort by name ascending', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Charlie' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Alpha' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Bravo' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Charlie' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Alpha' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Bravo' }));
 
     // Wait until all three are searchable before asserting order (index refresh
     // lag; see the pagination test).
     await expect
       .poll(async () => {
-        const found = await apis.findSchedules({ per_page: '100' });
+        const found = await apis.findSchedules({ per_page: 100 });
         return (found.body as { data: unknown[] }).data.length;
       })
       .toBe(3);
@@ -99,18 +99,18 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(names).toStrictEqual(['Alpha', 'Bravo', 'Charlie']);
   });
 
-  apiTest('should sort by name descending', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should sort by name descending', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Charlie' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Alpha' }));
-    await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Bravo' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Charlie' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Alpha' }));
+    await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: 'Bravo' }));
 
     // Wait until all three are searchable before asserting order (index refresh
     // lag; see the pagination test).
     await expect
       .poll(async () => {
-        const found = await apis.findSchedules({ per_page: '100' });
+        const found = await apis.findSchedules({ per_page: 100 });
         return (found.body as { data: unknown[] }).data.length;
       })
       .toBe(3);
@@ -127,11 +127,11 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(names).toStrictEqual(['Charlie', 'Bravo', 'Alpha']);
   });
 
-  apiTest('should support pagination', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should support pagination', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
     for (let i = 1; i <= 5; i++) {
-      await apis.createSchedule(getSimpleWorkflowSchedule({ name: `Schedule ${i}` }));
+      await apis.createSchedule(getSimpleWorkflowSchedule(spaceId, { name: `Schedule ${i}` }));
     }
 
     // Schedules are Alerting rules backed by saved objects, so a create is not
@@ -140,7 +140,7 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     // pagination, so the test does not race the refresh.
     await expect
       .poll(async () => {
-        const { body } = await apis.findSchedules({ per_page: '100' });
+        const { body } = await apis.findSchedules({ per_page: 100 });
         return (body as { data: unknown[] }).data.length;
       })
       .toBe(5);
@@ -155,8 +155,8 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     // return a row on multiple pages (or skip one), making the counts flaky.
     const sortByName = { sort_direction: 'asc', sort_field: 'name' } as const;
 
-    const firstPage = await apis.findSchedules({ ...sortByName, page: '0', per_page: '2' });
-    expect(firstPage.statusCode).toBe(200);
+    const firstPage = await apis.findSchedules({ ...sortByName, page: 0, per_page: 2 });
+    expect(firstPage).toHaveStatusCode(200);
 
     const firstPageBody = firstPage.body as {
       data: unknown[];
@@ -169,15 +169,15 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(firstPageBody.page).toBe(0);
     expect(firstPageBody.per_page).toBe(2);
 
-    const secondPage = await apis.findSchedules({ ...sortByName, page: '1', per_page: '2' });
-    expect(secondPage.statusCode).toBe(200);
+    const secondPage = await apis.findSchedules({ ...sortByName, page: 1, per_page: 2 });
+    expect(secondPage).toHaveStatusCode(200);
 
     const secondPageBody = secondPage.body as { data: unknown[]; page: number };
     expect(secondPageBody.data).toHaveLength(2);
     expect(secondPageBody.page).toBe(1);
 
-    const thirdPage = await apis.findSchedules({ ...sortByName, page: '2', per_page: '2' });
-    expect(thirdPage.statusCode).toBe(200);
+    const thirdPage = await apis.findSchedules({ ...sortByName, page: 2, per_page: 2 });
+    expect(thirdPage).toHaveStatusCode(200);
 
     const thirdPageBody = thirdPage.body as { data: unknown[] };
     expect(thirdPageBody.data).toHaveLength(1);

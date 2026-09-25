@@ -319,6 +319,7 @@ export interface RawAction extends Record<string, unknown> {
   apiKey?: string | null;
   uiamApiKey?: string | null;
   uiamApiKeyExternal?: boolean;
+  hasInboundEventIdentity?: boolean;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

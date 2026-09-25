@@ -27,21 +27,18 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/storage-adapter'
   - '@kbn/workflows'
-  - '@kbn/workflows-execution-engine'
   - '@kbn/workflows-extensions'
-  - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
   - '@kbn/core-http-server-mocks'
   - '@kbn/zod-helpers'
-  - '@kbn/agent-builder-browser'
-  - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
-  - '@kbn/agentic-investigations-common'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-platform-plugin'
+  - '@kbn/agent-builder-browser'
   - '@kbn/core-http-browser'
-  - '@kbn/ui-callout'
-  - '@kbn/std'
   - '@kbn/react-query'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod
@@ -54,7 +51,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - integration_tests/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

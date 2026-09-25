@@ -1,9 +1,10 @@
 version: "1"
-name: Edit detection rule query
+name: Edit detection rule
 description: >
-  AlertZero action: replaces the query of an existing detection rule. Executed by
-  the investigation proposal gate once an analyst approves, so the change is
-  attributed to the approver.
+  AlertZero action: changes one or more fields of an existing detection rule,
+  leaving every field it is not given untouched. Executed by the investigation
+  proposal gate once an analyst approves, so the change is attributed to the
+  approver.
 enabled: true
 tags:
   # Generic tag every action workflow carries, so the catalog can be
@@ -14,11 +15,12 @@ consts:
   # Self-describing catalog metadata, read back by the proposals service when a
   # proposal referencing this workflow is created or rendered. Metadata has to
   # live under `consts`: unknown top-level keys are stripped by the schema.
+  #
+  # No `impact`: the caller's value wins, and each edit declares its own.
   actionMetadata:
-    name: Edit detection rule query
-    description: Replaces the query of an existing detection rule, leaving every other field as is.
+    name: Edit detection rule
+    description: Changes the given fields of an existing detection rule. Fields that are not supplied are left exactly as they are.
     category: configure
-    impact: medium
     reversible: true
     approvalPolicy: always-gate
 triggers:
@@ -28,24 +30,76 @@ triggers:
         actionInput:
           type: object
           description: >
-            Rule identity and the new query. Only `query` is patched: the patch
-            step overwrites every field it receives and a YAML object cannot omit
-            a key conditionally, so accepting optional fields here would blank
-            out whatever the proposer left unset.
+            The edit to apply. `id` identifies the rule; every other property is
+            optional, and fields not supplied are left unchanged. To make another
+            field editable, add it here.
           properties:
             id:
               type: string
               maxLength: 512
               description: >-
-                Saved-object id of the rule, so the patch lands on the exact rule
+                Saved-object id of the rule, so the edit lands on the exact rule
                 incarnation the proposal was built against.
             query:
               type: string
               maxLength: 65536
               description: New query, written in the rule's own language.
+            risk_score:
+              type: integer
+              minimum: 0
+              maximum: 100
+              description: New risk score, on the detection engine's 0-100 scale.
+            severity:
+              type: string
+              enum: [low, medium, high, critical]
+              description: New severity, which should stay consistent with the risk score.
+            threshold:
+              type: object
+              description: >-
+                New threshold settings. Treated as an atomic replacement: the
+                detection API replaces the whole threshold object, so callers
+                must supply every field. Use [] to clear optional arrays.
+              properties:
+                value:
+                  type: integer
+                  minimum: 1
+                  description: Minimum event count to trigger an alert.
+                field:
+                  type: array
+                  items:
+                    type: string
+                    maxLength: 512
+                  maxItems: 5
+                  description: Fields to group events by before counting. Use [] to count all events.
+                cardinality:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                        maxLength: 512
+                      value:
+                        type: integer
+                        minimum: 0
+                    required: [field, value]
+                  description: Unique-value conditions. Use [] to remove all cardinality conditions.
+            interval:
+              type: string
+              maxLength: 32
+              description: >-
+                How often the rule runs, e.g. "5m" or "1h". Must be a valid
+                Elasticsearch date math duration.
+            from:
+              type: string
+              maxLength: 64
+              description: >-
+                How far back each rule execution looks, e.g. "now-6m". Must be
+                a valid Elasticsearch date math expression and should overlap
+                with interval to avoid gaps.
           required:
             - id
-            - query
+          additionalProperties: false
       required:
         - actionInput
       additionalProperties: false
@@ -56,13 +110,21 @@ outputs:
     type: string
   - name: query
     type: string
+  - name: risk_score
+    type: number
+  - name: severity
+    type: string
+  - name: interval
+    type: string
+  - name: from
+    type: string
 steps:
+  # The whole object is the patch body: the API changes only the keys it
+  # receives, and a YAML object cannot omit a key conditionally.
   - name: patch_rule
     type: security.patchRule
     with:
-      patch:
-        id: "{{ inputs.actionInput.id }}"
-        query: "{{ inputs.actionInput.query }}"
+      patch: "${{ inputs.actionInput }}"
 
   # `workflow.execute` declares its output as unknown, so the parent falls back
   # to a heuristic read of the last step unless the child emits explicitly.
@@ -73,3 +135,8 @@ steps:
       id: "{{ steps.patch_rule.output.id }}"
       name: "{{ steps.patch_rule.output.name }}"
       query: "{{ steps.patch_rule.output.query }}"
+      risk_score: "${{ steps.patch_rule.output.risk_score }}"
+      severity: "{{ steps.patch_rule.output.severity }}"
+      threshold: "${{ steps.patch_rule.output.threshold }}"
+      interval: "{{ steps.patch_rule.output.interval }}"
+      from: "{{ steps.patch_rule.output.from }}"
