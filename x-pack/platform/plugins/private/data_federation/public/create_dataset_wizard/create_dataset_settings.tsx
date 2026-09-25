@@ -187,10 +187,13 @@ export function CreateDatasetAdditionalSettings({
           data-test-subj="createDatasetWizardAdvancedSettings"
           style={{ padding: 16 }}
         >
-          <SharedAdvancedSettings control={control} />
           {FormatAdvancedSettingsComponent ? (
-            <FormatAdvancedSettingsComponent control={control} />
+            <>
+              <FormatAdvancedSettingsComponent control={control} />
+              <EuiSpacer size="m" />
+            </>
           ) : null}
+          <SharedAdvancedSettings control={control} />
         </div>
       ) : (
         <EuiAccordion
@@ -204,10 +207,13 @@ export function CreateDatasetAdditionalSettings({
           initialIsOpen={false}
           paddingSize="m"
         >
-          <SharedAdvancedSettings control={control} />
           {FormatAdvancedSettingsComponent ? (
-            <FormatAdvancedSettingsComponent control={control} />
+            <>
+              <FormatAdvancedSettingsComponent control={control} />
+              <EuiSpacer size="m" />
+            </>
           ) : null}
+          <SharedAdvancedSettings control={control} />
         </EuiAccordion>
       )}
     </>
