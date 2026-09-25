@@ -838,6 +838,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await createUsersAndRoles(getService, users, roles);
         await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
+        // Wait for ES to index the user profiles; without this the suggest
+        // API returns no results immediately after login.
+        await retry.waitFor('user profiles to be searchable', async () => {
+          const results = await cases.api.suggestUserProfiles({
+            name: casesAllUser.username,
+            owners: ['cases'],
+          });
+          return results.length > 0;
+        });
       });
 
       afterEach(async () => {
@@ -875,6 +884,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.selectUserInAssigneesPopover('cases_all_user');
         await cases.singleCase.closeAssigneesPopover();
         await header.waitUntilLoadingHasFinished();
+        await retry.waitFor('assignee to appear in the case header', async () => {
+          return testSubjects.exists('user-profile-assigned-user-cases_all_user-remove-group');
+        });
         await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
 
         await testSubjects.existOrFail('case-view-participants-field-panel');
