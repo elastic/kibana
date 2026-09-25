@@ -55,7 +55,11 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsSecurityRole('soc_manager');
+      // The alerts page requires manage on `.lists-*` and `.items-*`. soc_manager
+      // does not have it, so the page stops on the privileges callout and the
+      // alerts table never reaches its loaded state. platform_engineer has that
+      // index access and actions-log read, which is what the response details need.
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterAll(async () => {
