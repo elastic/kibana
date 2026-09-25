@@ -397,7 +397,14 @@ export const huntCoordinator = async (
   const truncated = reportContext?.truncated;
   const lostToTruncation = [
     ...(truncated?.iocs && callerIocs === undefined
-      ? [`${truncated.iocs.dropped} IOC(s) beyond the first ${truncated.iocs.kept}`]
+      ? [
+          ...(truncated.iocs.dropped > 0
+            ? [`${truncated.iocs.dropped} IOC(s) beyond the first ${truncated.iocs.kept}`]
+            : []),
+          ...(truncated.iocs.oversized
+            ? [`${truncated.iocs.oversized} IOC value(s) too long for a hunt to search for`]
+            : []),
+        ]
       : []),
     ...(truncated?.techniques && callerTechniques === undefined
       ? [

@@ -23,7 +23,12 @@ export interface ReportHuntContext {
    * caller retires the report as hunted on that basis.
    */
   truncated?: {
-    iocs?: { kept: number; dropped: number };
+    /**
+     * `dropped` counts IOCs lost to the count bound, `oversized` those lost to the
+     * value-length bound. Both are coverage the run did not have; they are separated only
+     * so it can say which happened, since neither is fixed by hunting the report again.
+     */
+    iocs?: { kept: number; dropped: number; oversized?: number };
     techniques?: { kept: number; dropped: number };
     text?: { kept: number; dropped: number };
   };
@@ -46,11 +51,20 @@ const MAX_HUNT_IOC_VALUE_CHARS = 2048;
 export const MAX_HUNT_REPORT_TECHNIQUES = 100;
 const MAX_HUNT_TECHNIQUE_CHARS = 32;
 
-const isHuntIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc =>
+/**
+ * A stored IOC of a kind Tier 1 can map to an ECS field, carrying something to search for.
+ * The value-length bound is deliberately not part of this test: a supported IOC whose value
+ * is too long is coverage the run loses and has to report, whereas a kind Tier 1 cannot map
+ * is dropped by design and is not a gap. Folding both into one predicate is what let an
+ * overlength value disappear from the truncation count.
+ */
+const isSearchableIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc =>
   typeof ioc.value === 'string' &&
-  ioc.value.length > 0 &&
-  ioc.value.length <= MAX_HUNT_IOC_VALUE_CHARS &&
+  ioc.value.trim().length > 0 &&
   HuntIocType.safeParse(ioc.type).success;
+
+const isWithinIocValueBound = ({ value }: HuntIoc): boolean =>
+  value.length <= MAX_HUNT_IOC_VALUE_CHARS;
 
 const isHuntTechnique = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= MAX_HUNT_TECHNIQUE_CHARS;
@@ -95,17 +109,23 @@ export const loadReportHuntContext = async ({
   const hasText = typeof rawText === 'string' && rawText.length > 0;
   const text = hasText ? rawText.slice(0, MAX_HUNT_REPORT_TEXT_CHARS) : undefined;
 
-  // Counted before the bound is applied, and only over values that survived
+  // Counted before the bounds are applied, and only over values that survived
   // validation: an IOC kind Tier 1 cannot map is dropped by design and is not lost
-  // coverage, whereas one pushed past the limit is.
-  const mappableIocs = (source.extracted?.iocs ?? []).filter(isHuntIoc);
+  // coverage, whereas one pushed past a limit is — by either limit, the count or the
+  // value length. An overlength technique id is malformed rather than lost, since a real
+  // ATT&CK id is a third of the bound, so those stay uncounted.
+  const searchableIocs = (source.extracted?.iocs ?? []).filter(isSearchableIoc);
+  const mappableIocs = searchableIocs.filter(isWithinIocValueBound);
+  const oversizedIocs = searchableIocs.length - mappableIocs.length;
   const validTechniques = (source.extracted?.ttps?.techniques ?? []).filter(isHuntTechnique);
 
+  const keptIocs = Math.min(mappableIocs.length, MAX_HUNT_REPORT_IOCS);
   const truncated = {
-    ...(mappableIocs.length > MAX_HUNT_REPORT_IOCS && {
+    ...((mappableIocs.length > keptIocs || oversizedIocs > 0) && {
       iocs: {
-        kept: MAX_HUNT_REPORT_IOCS,
-        dropped: mappableIocs.length - MAX_HUNT_REPORT_IOCS,
+        kept: keptIocs,
+        dropped: mappableIocs.length - keptIocs,
+        ...(oversizedIocs > 0 && { oversized: oversizedIocs }),
       },
     }),
     ...(validTechniques.length > MAX_HUNT_REPORT_TECHNIQUES && {

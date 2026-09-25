@@ -190,6 +190,107 @@ describe('loadReportHuntContext', () => {
     });
   });
 
+  it('counts a supported IOC value that is too long as lost coverage', async () => {
+    // The value-length bound and the unmappable-kind filter used to be one predicate, so an
+    // overlength URL was discarded before the count was taken: a report with one short IOC
+    // and one long one finished `complete` with the long one never hunted.
+    esClient.search.mockResolvedValue(
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            extracted: {
+              iocs: [
+                { type: 'url', value: 'https://example.test/' + 'a'.repeat(2048) },
+                { type: 'ip', value: '192.0.2.30' },
+              ],
+              ttps: { techniques: ['T1078.004'] },
+            },
+          },
+        },
+      ])
+    );
+
+    const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+
+    expect(context?.iocs).toEqual([{ type: 'ip', value: '192.0.2.30' }]);
+    expect(context?.truncated).toEqual({ iocs: { kept: 1, dropped: 0, oversized: 1 } });
+  });
+
+  it('does not count an overlength technique id as lost coverage', async () => {
+    // A real ATT&CK id is a third of the 32-character bound, so a longer string is malformed
+    // input rather than coverage lost, and reporting a gap for it would cry wolf.
+    esClient.search.mockResolvedValue(
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            extracted: {
+              iocs: [{ type: 'ip', value: '192.0.2.30' }],
+              ttps: { techniques: ['T1078.004', 'T'.repeat(33), 42] },
+            },
+          },
+        },
+      ])
+    );
+
+    const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+
+    expect(context?.techniques).toEqual(['T1078.004']);
+    expect(context?.truncated).toBeUndefined();
+  });
+
+  it('reports both limits when a report hits the count bound and carries a long value', async () => {
+    esClient.search.mockResolvedValue(
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            extracted: {
+              iocs: [
+                ...Array.from({ length: 102 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+                { type: 'url', value: 'https://example.test/' + 'a'.repeat(2048) },
+              ],
+              ttps: { techniques: ['T1078.004'] },
+            },
+          },
+        },
+      ])
+    );
+
+    const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+
+    expect(context?.truncated).toEqual({ iocs: { kept: 100, dropped: 2, oversized: 1 } });
+  });
+
+  it('does not count a blank IOC value, which is not coverage either way', async () => {
+    esClient.search.mockResolvedValue(
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            extracted: {
+              iocs: [
+                { type: 'ip', value: ' ' },
+                { type: 'ip', value: '192.0.2.30' },
+              ],
+              ttps: { techniques: ['T1078.004'] },
+            },
+          },
+        },
+      ])
+    );
+
+    const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+
+    expect(context?.iocs).toEqual([{ type: 'ip', value: '192.0.2.30' }]);
+    expect(context?.truncated).toBeUndefined();
+  });
+
   it('drops IOC values and technique ids longer than the request schema allows', async () => {
     esClient.search.mockResolvedValue(
       respond([

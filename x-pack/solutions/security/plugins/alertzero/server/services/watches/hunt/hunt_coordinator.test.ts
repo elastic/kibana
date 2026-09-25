@@ -1102,6 +1102,36 @@ describe('huntCoordinator', () => {
       expect(result.next_step).toContain('50 IOC(s)');
     });
 
+    it('says an IOC value was too long to search for, not that it was beyond a count', async () => {
+      // Two different limits lose coverage; the detail has to name the one that applied, or
+      // it reads as though the report simply carried more IOCs than a hunt takes.
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        truncated: { iocs: { kept: 1, dropped: 0, oversized: 1 } },
+      });
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(tier2Result());
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-oversized',
+          report_id: 'rpt-1',
+        }
+      );
+
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.next_step).toContain('1 IOC value(s) too long');
+      expect(result.next_step).not.toContain('beyond the first');
+    });
+
     it('ignores what the report lost when the caller supplied its own IOCs', async () => {
       // The caller's array replaces the report's, so what the loader dropped from the
       // report is not coverage this run lost.
