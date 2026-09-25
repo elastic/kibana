@@ -30,6 +30,10 @@ const resolverFromMap = (map: Record<string, z.ZodType>): ConnectorParamsSchemaR
   return (stepType) => map[stepType] ?? null;
 };
 
+beforeEach(() => {
+  clearEnrichmentCache();
+});
+
 describe('formatZodError', () => {
   it('should format invalid trigger type', () => {
     const { error } = z
@@ -421,6 +425,83 @@ describe('formatZodError', () => {
     });
   });
 
+  describe('invalid_union nested leaf resolution', () => {
+    const indexParamsSchema = z.union([
+      z.strictObject({
+        document: z.record(z.string(), z.unknown()).optional(),
+        id: z.string(),
+        index: z.string(),
+      }),
+      z.strictObject({
+        document: z.record(z.string(), z.unknown()).optional(),
+        index: z.string(),
+      }),
+    ]);
+
+    const workflowSchema = z.object({
+      steps: z.array(
+        z.object({
+          name: z.string(),
+          type: z.string(),
+          with: indexParamsSchema,
+        })
+      ),
+    });
+
+    it('reports the offending leaf field instead of dumping union alternatives', () => {
+      const parseResult = workflowSchema.safeParse({
+        steps: [
+          {
+            name: 'index_repo_data',
+            type: 'elasticsearch.index',
+            with: {
+              index: 'sophie-repro',
+              id: 'elastic-kibana',
+              document: 'd',
+            },
+          },
+        ],
+      });
+      expect(parseResult.success).toBe(false);
+      if (!parseResult.success) {
+        const result = formatZodError(parseResult.error, { schema: workflowSchema });
+        expect(result.message).toContain('document expects record<string, unknown>');
+        expect(result.message).not.toContain('must be one of');
+        expect(result.formattedError.issues[0].path).toEqual(['steps', 0, 'with', 'document']);
+      }
+    });
+
+    it('keeps "must be one of" when every branch fails at the union node', () => {
+      const schema = z.object({
+        mode: z.union([z.literal('fast'), z.literal('slow'), z.literal('auto')]),
+      });
+      const parseResult = schema.safeParse({ mode: 'invalid' });
+      expect(parseResult.success).toBe(false);
+      if (!parseResult.success) {
+        const result = formatZodError(parseResult.error, { schema });
+        expect(result.message).toContain('mode must be one of:');
+        expect(result.formattedError.issues[0].path).toEqual(['mode']);
+      }
+    });
+
+    it('descends through nested unions to the best matching leaf', () => {
+      const inner = z.union([
+        z.object({ kind: z.literal('a'), n: z.number() }),
+        z.object({ kind: z.literal('b'), s: z.string() }),
+      ]);
+      const schema = z.object({
+        data: z.union([inner, z.string()]),
+      });
+      const parseResult = schema.safeParse({ data: { kind: 'a', n: 'x' } });
+      expect(parseResult.success).toBe(false);
+      if (!parseResult.success) {
+        const result = formatZodError(parseResult.error, { schema });
+        expect(result.message).toContain('n expects');
+        expect(result.formattedError.issues[0].path).toEqual(['data', 'n']);
+      }
+    });
+  });
+
   describe('analyzeUnionSchema with different schema types', () => {
     it('should describe string option in union', () => {
       const schema = z.object({
@@ -505,9 +586,8 @@ describe('formatZodError', () => {
 
       const result = formatLoose(mockError, schema);
       expect(result.message).toContain('item must be one of:');
-      // The union has objects with discriminators (type: "a", type: "b")
-      expect(result.message).toContain('type: "a"');
-      expect(result.message).toContain('type: "b"');
+      expect(result.message).toContain('object with: age, name');
+      expect(result.message).toContain('object with: title');
     });
   });
 
@@ -1019,10 +1099,6 @@ describe('Dynamic validation system behavior', () => {
 
 describe('Nested step support', () => {
   const dummySchema = z.object({ steps: z.array(z.any()) });
-
-  beforeEach(() => {
-    clearEnrichmentCache();
-  });
 
   it('should enrich errors for steps nested in foreach', () => {
     const connectorParamsSchemaResolver = resolverFromMap({
