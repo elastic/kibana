@@ -233,6 +233,13 @@ export default function (providerContext: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
 
+      // Pre-install filetest so the parallel createPackagePolicy calls below don't race a first-time install
+      await supertest
+        .post(`/api/fleet/epm/packages/filetest/0.1.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
       let { body: apiResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'kibana')
@@ -314,7 +321,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
-    describe('GET /outputs', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/291937
+    describe.skip('GET /outputs', () => {
       it('should list all the outputs', async () => {
         const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 

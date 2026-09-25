@@ -72,7 +72,6 @@ export const composeFormToCreateRequest = (
     metadata: {
       name: formValues.metadata.name,
       description: formValues.metadata.description,
-      owner: formValues.metadata.owner,
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
       ...(builderType ? { builder_type: builderType } : {}),
     },
@@ -146,7 +145,6 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
       name: rule.metadata.name,
       description: rule.metadata.description,
       enabled: rule.enabled,
-      owner: rule.metadata.owner,
       tags: rule.metadata.tags,
     },
     timeField: rule.time_field,

@@ -27,7 +27,7 @@ const PLACEHOLDER_SCHEDULE: Watch['schedule'] = {
 };
 
 /**
- * Live not-installed row: catalog identity plus empty runtime fields. Does not read mock fixtures.
+ * Live not-installed row: catalog identity plus empty runtime fields.
  */
 export function createCatalogWatchPlaceholder(watchId: CatalogWatchId): Watch {
   const index = SYSTEM_SECURITY_WATCH_IDS.indexOf(watchId);
@@ -48,7 +48,6 @@ export function createCatalogWatchPlaceholder(watchId: CatalogWatchId): Watch {
     sortOrder: (index + 1) * 10,
     mandate: '',
     description: '',
-    ...('isBeta' in entry && entry.isBeta ? { lifecycle: 'beta' as const } : {}),
     schedule: { ...PLACEHOLDER_SCHEDULE },
     triggers: [],
     coverage: [],
@@ -98,4 +97,24 @@ export interface WatchDisplaySortable {
 export function compareWatchesForDisplay(a: WatchDisplaySortable, b: WatchDisplaySortable): number {
   if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
   return a.name.localeCompare(b.name);
+}
+
+/**
+ * Resolve a Watch accent for paint. Catalog `color` is an EUI token key (`euiColorVisN` or
+ * `textAssistance`). Unknown values fall back to `textAssistance` rather than being painted as CSS.
+ */
+export function resolveWatchAccent(
+  colors: { vis: Record<string, string>; textAssistance: string },
+  value: string
+): string {
+  if (value === 'textAssistance') {
+    return colors.textAssistance;
+  }
+  if (Object.hasOwn(colors.vis, value)) {
+    const visColor = colors.vis[value];
+    if (typeof visColor === 'string') {
+      return visColor;
+    }
+  }
+  return colors.textAssistance;
 }

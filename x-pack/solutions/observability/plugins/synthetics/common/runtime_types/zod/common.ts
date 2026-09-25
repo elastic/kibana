@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-/**
- * zod twins of the hand-written io-ts scalar codecs in `../common.ts`.
- *
- * Nothing imports these yet — they exist so the parity suites can prove they
- * accept and reject exactly what the io-ts originals do before any call site
- * switches over. Export names deliberately match the io-ts ones so the final
- * phase can delete the io-ts module and move this one up a directory.
- *
- * The validation of each io-ts original lives in its *decode* function rather
- * than its `.is()` guard, so each twin reproduces the decode-side rule.
- */
-
 import { z } from '@kbn/zod';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import {

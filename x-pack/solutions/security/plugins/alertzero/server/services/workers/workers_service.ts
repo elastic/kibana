@@ -10,6 +10,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   touchesWorkerSettings,
   type UpdateWorkerRequestBody,
   type Worker,
@@ -30,6 +31,14 @@ import {
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
+
+/**
+ * Workers hidden until the named skill is registered. These skills may be
+ * behind a feature flag and so are conditionally registered
+ */
+const WORKER_IDS_BY_REQUIRED_SKILL: Readonly<Record<string, readonly string[]>> = {
+  'endpoint-forensic-analysis': [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID],
+};
 
 const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYaml | null => {
   const managedDef: ManagedWorkflowDefinition | undefined = getManagedWorkflowDefinition(
@@ -108,13 +117,44 @@ export class WorkersService {
     return buildAgentLookup(this.agentOpts.agentBuilder, this.agentTypeMap, request, this.logger);
   }
 
+  private async hiddenWorkerIds(request: KibanaRequest): Promise<ReadonlySet<string>> {
+    const entries = Object.entries(WORKER_IDS_BY_REQUIRED_SKILL);
+    const gatedWorkerIds = entries.flatMap(([, workerIds]) => workerIds);
+    if (gatedWorkerIds.length === 0) return new Set();
+
+    const { agentBuilder } = this.agentOpts;
+    if (!agentBuilder) return new Set(gatedWorkerIds);
+
+    try {
+      const registry = await agentBuilder.skills.getRegistry({ request });
+      const checks = await Promise.all(
+        entries.map(async ([skillId, workerIds]) => ({
+          workerIds,
+          registered: await registry.has(skillId),
+        }))
+      );
+      return new Set(
+        checks.filter(({ registered }) => !registered).flatMap(({ workerIds }) => workerIds)
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to read worker skill gates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return new Set(gatedWorkerIds);
+    }
+  }
+
   async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
     await this.ensureAgent(spaceId);
 
     const agentLookup = await this.buildAgentLookup(request);
+    const hiddenWorkerIds = await this.hiddenWorkerIds(request);
     const workers = await Promise.all(
       workerRegistry
         .list()
+        .filter((registration) => !hiddenWorkerIds.has(registration.id))
         .map((registration) => this.projectWorker(registration, spaceId, agentLookup))
     );
     return ListWorkersResponse.parse({ workers });
@@ -130,6 +170,9 @@ export class WorkersService {
     if (!registration) {
       return undefined;
     }
+    if ((await this.hiddenWorkerIds(request)).has(registration.id)) {
+      return undefined;
+    }
 
     const agentLookup = await this.buildAgentLookup(request);
     return this.projectWorker(registration, spaceId, agentLookup);
@@ -143,6 +186,9 @@ export class WorkersService {
   ): Promise<WorkerUpdateResult> {
     const registration = workerRegistry.get(workerId);
     if (!registration) {
+      return { outcome: 'not-found' };
+    }
+    if ((await this.hiddenWorkerIds(request)).has(registration.id)) {
       return { outcome: 'not-found' };
     }
 
@@ -305,6 +351,8 @@ export class WorkersService {
         : {}),
       settings,
       settingsRevision,
+      // `installed` is any document at this id, including a user workflow that is not ours.
+      workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }

@@ -17,8 +17,8 @@ import type {
   UpdateWorkerResponse,
   Worker,
 } from '@kbn/alertzero-common';
+import { retryOnTransientError } from './retry_on_transient_error';
 import { queryKeys } from '../query_keys';
-import { retryOnTransientError } from './use_watches_api';
 
 export const useWorkers = () => {
   const { services } = useKibana();

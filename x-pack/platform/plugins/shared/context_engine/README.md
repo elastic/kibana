@@ -4,16 +4,17 @@ Server-side plugin for the Context Engine.
 
 ## AI Indices API
 
-AI indices attach a logical name to an existing user index pattern or data
-stream. AI index records are stored in a hidden Kibana system index
+AI Indices attach a logical name to a single user index or data stream. AI Index records are stored in a hidden Kibana system index
 (`.contextengine-ai-indices`), separate from the backing data.
 
 | Method   | Path                                                            | Description                          |
 | -------- | --------------------------------------------------------------- | ------------------------------------ |
-| `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI index         |
-| `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI index by id                |
-| `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
-| `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
+| `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI Index         |
+| `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI Index by id                |
+| `GET`    | `/api/context_engine/ai_index`                                    | List AI Indices available to the caller (max 100) |
+| `POST`   | `/api/context_engine/ai_index/_query`                             | Run ES\|QL against AI Indices        |
+| `GET`    | `/api/context_engine/ai_index/{id}/_describe`                     | Describe an AI Index for querying    |
+| `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI Index                   |
 | `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
 
 Notes:
@@ -26,9 +27,10 @@ Notes:
   spans into per-space signals, and no-ops while the setting is off.
 - The backing store is set via `dest`, an object of the form
   `{ "type": "data_stream" | "index", "value": "<data stream or index>" }`.
-  `dest.value` must match `dest.type`. Every
-  expression in `dest.value` must start with `ai-index-ds-` for data streams or
-  `ai-index-idx-` for indices (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`);
+  `dest.value` must match `dest.type` and name a single data stream or index;
+  wildcards and comma-separated lists are rejected. It must start with
+  `ai-index-ds-` for data streams or `ai-index-idx-` for indices (e.g.
+  `ai-index-ds-foo`, `ai-index-idx-foo`), followed by a valid AI index id;
   system indices are not allowed.
 - `automations` is an array of `{ "type": "workflow", "value": "<name>" }`
   objects. Required, may be empty.
@@ -38,16 +40,190 @@ Notes:
     instance id (from Stack Management → Connectors). See
     [Connector sources](#connector-sources) below.
   Required, may be empty.
-- Deleting an AI index deletes **only** the AI index entry. Backing indices
+- Deleting an AI Index deletes **only** the AI Index entry. Backing indices
   are left untouched and must be removed with the Delete index API if desired.
 - `feedback_analysis` configures this index's feedback loop. See
   [Feedback analysis configuration](#feedback-analysis-configuration) below.
 
+## Listing AI Indices
+
+`GET /api/context_engine/ai_index` returns the AI Indices the caller can use
+in the current space. AI Index records are stored per space, so the list
+starts from the entries registered in the request's space (from the URL:
+`/s/{spaceId}/api/...`, default space otherwise). An entry is then listed
+when the caller can read its backing index, including when that index is
+empty or does not exist yet. It is not listed when the caller lacks `read` on
+the backing index.
+
+To decide, Kibana runs one small search per AI Index as the current user, in
+a single `msearch`. Any error, timeout or failed shard on that search hides
+the entry. The search deliberately does not set `ignore_unavailable`: with it,
+an index the caller cannot read would look empty and be listed anyway. The
+agent prompt's AI-index catalog uses the same rule.
+
+## Querying AI Indices
+
+`POST /api/context_engine/ai_index/_query` runs caller-supplied ES|QL as the
+current user. Body: `{ query, params?, limit? }`. Two things are server-owned
+and cannot be overridden:
+
+- **Space filter.** Documents are visible when they carry no
+  `permissions.kibana.privileges` element (public), or when one is scoped to
+  the request's space or to `*`. The space comes from the request URL
+  (`/s/{spaceId}/api/...`, default space otherwise), so a caller cannot read
+  another space's documents on any path. `contextEngine:enabled` is a per-space
+  setting, so the route 404s in any space where it is off.
+- **Row limit.** `limit` defaults to 100 and cannot exceed 1000. A trailing
+  `LIMIT` in the query is capped to it; otherwise one is appended.
+
+The query is otherwise a pass-through: it decides which indices it reads
+(`FROM ai-index-idx-a,ai-index-ds-b` and `FROM ai-index-*` both work) and
+Elasticsearch index privileges bound what it can reach. Elasticsearch 4xx
+errors (bad ES|QL, missing index privilege) are returned with their status.
+
+## Describing AI Indices
+
+`GET /api/context_engine/ai_index/{id}/_describe` is the step before writing a
+query. It returns `{ response: string }`: a free-form text context block meant
+to be handed to an agent as-is, not parsed.
+
+```
+AI index: sales-knowledge
+Curated sales knowledge.
+Query with ES|QL against: ai-index-idx-sales-knowledge
+
+Fields
+@timestamp: date, searchable, aggregatable
+content.semantic: semantic_text, searchable
+title: text, searchable
+type: keyword, searchable, aggregatable
+
+Semantic fields
+content.semantic
+
+Knowledge item types
+"document": 41
+"detection rule": 3
+
+Tags
+"billing": 12
+
+Example queries (adapt field names for non-canonical indices)
+
+Full text search, lexical and semantic fused together (?query)
+FROM ai-index-idx-sales-knowledge METADATA _id, _index, _score
+| FORK
+    ( WHERE MATCH(title, ?query) OR ... | SORT _score DESC | LIMIT 20 )
+    ( WHERE MATCH(title.semantic, ?query) OR ... | SORT _score DESC | LIMIT 20 )
+| FUSE
+...
+
+Filter by knowledge item type and tag (?type, ?tag; tags is multi-valued, so MATCH)
+...
+
+Count by type
+...
+```
+
+- The `Query with ES|QL against` line is `dest.value`, the string to put after
+  `FROM`.
+- `Fields` lists every mapped field, mapping-defined runtime fields included
+  (`path: type`, then `searchable` and/or `aggregatable` when true), one per
+  line, sorted by path and capped at 500;
+  the heading becomes `Fields (showing 500 of N)` when capped. Types come from
+  `_mapping`; `searchable`/`aggregatable` from `_field_caps`. A path mapped to
+  different types across the matched indices is reported as `conflict`.
+- `Semantic fields` lists the searchable `semantic_text` fields among those
+  shown, detected from the mapping type. Omitted when there are none.
+- `Knowledge item types` and `Tags` show the top 20 `type` / `tags` values by
+  document count in the current space, one `"value": count` per line. Each
+  section is omitted unless its field is an aggregatable `keyword` — always the
+  case on canonical KI indices, but a custom index that maps `type` / `tags` as
+  `text`, or inconsistently across a pattern, gets no counts. One `terms`
+  aggregation backs both; it errors rather than return undercounts if a shard
+  fails. Both sections are also omitted when the caller lacks `read` on the
+  backing indices; the rest of the block still renders.
+- `Example queries` are three fixed ES|QL shapes written for the canonical KI
+  schema (`title`, `description`, `content`, their `.semantic` multi-fields,
+  `type`, `tags`) with only the `FROM` target substituted. They use named
+  parameters (`?query`; `?type` and `?tag`) meant for `_query`'s `params`. They
+  run as-is on canonical indices; for other mappings the agent adapts field
+  names from `Fields`.
+
+Describe runs no ES|QL. It issues `_mapping` and `_field_caps` (both needed:
+`_field_caps` reports `semantic_text` as `text`) plus the one aggregation, all
+as the current user. 404 when the AI Index is not registered; Elasticsearch 4xx
+from `_mapping` / `_field_caps` (missing `view_index_metadata`) is returned
+with its status. The aggregation is the exception: its 403 (missing `read`)
+drops the counts sections instead. Each `_mapping` /
+`_field_caps` response is capped at 20 MB before the field cap applies; a
+target broad enough to exceed it returns 400.
+
+### Privileges
+
+`contextEngine:read` grants the routes; it grants **no** Elasticsearch index
+privileges. Callers also need, on every backing index (`ai-index-*`):
+
+- `read` to be listed. Without it the AI Index is left out of the list; there
+  is no error;
+- `read` to query, or Elasticsearch returns 403;
+- `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
+  Elasticsearch returns 403. The counts aggregation also needs `read`; without
+  it the two counts sections are omitted and the rest of the block is returned.
+
+Two things decide what a caller can see: the space filter Kibana adds, and the
+caller's own Elasticsearch permissions on the backing indices. Nothing checks
+whether the caller could open the Kibana object a knowledge indicator describes.
+That matters for the built-in SML index (`ai-index-idx-sml-data`): anyone with
+Elasticsearch `read` on it may see knowledge indicators for dashboards, rules or
+connectors they cannot open in Kibana. This is by design; the Elastic AI Index
+is queried like any other index.
+
+## Agent Builder tools
+
+The `contextEngineAgentBuilder` plugin adds three read-only tools under
+`platform.context_engine.*`. Each one runs the same code as the matching route
+above, as the same user, so a tool and its route always return the same thing:
+
+| Tool                | Route                                             | Result                                                                            |
+| ------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `list_ai_indices`   | `GET /api/context_engine/ai_index`                | `{ id, esql_target, description, managed, assigned_to_agent? }` per listed entry  |
+| `describe_ai_index` | `GET /api/context_engine/ai_index/{id}/_describe` | `{ response }`, the text block describing the index                               |
+| `query_ai_indices`  | `POST /api/context_engine/ai_index/_query`        | `{ columns, values }`                                                             |
+
+`assigned_to_agent` is only set when an Agent Builder agent calls the tool. It
+says whether that agent is configured with the index. Any other caller, such as
+an MCP client, does not get the field.
+
+`query_ai_indices` has no `time_range` or `filter` parameters. Time constraints
+go in the ES|QL itself or in `params`. Its rows come back as a plain `other`
+result, not `esql_results`. This is deliberate. In chat, an `esql_results`
+result gets a "See in Discover" link that opens the raw query in Discover, and
+when the agent asks for a chart the UI runs the raw query again in Lens. Both
+run the query as written, without the space filter and row limit the server
+adds, so they could show documents from other spaces.
+
+To see the tools, a caller needs Agent Builder's `read` privilege; that is the
+only check the MCP server does. To use them, the caller also needs Context
+Engine's `read` privilege. Every tool checks this itself and returns an error
+result when it is missing.
+
+In Agent Builder chat, any agent with at least one AI Index gets these three
+tools automatically (while the `aiIndices` experimental feature is on). Its
+system prompt tells it to list, then describe, then query, and leaves space
+scoping to `query_ai_indices` rather than handing the agent a filter to copy.
+The `ki-retrieval` skill teaches the same steps with the same tools.
+
+The space always comes from the request; it cannot be passed as a parameter. In
+Agent Builder chat, it is the agent's space. Over MCP, it is the space in the
+URL the MCP server is served from: `/api/agent_builder/mcp` is the default
+space and `/s/{spaceId}/api/agent_builder/mcp` is another space.
+
 ## Feedback analysis configuration
 
 Signal *generation* is global — one background task, one advanced setting.
-Signal *analysis* is per AI index, because the improvement it proposes targets
-that index's KI pipeline. The configuration therefore lives on the AI index
+Signal *analysis* is per AI Index, because the improvement it proposes targets
+that index's KI pipeline. The configuration therefore lives on the AI Index
 record:
 
 ```json
@@ -92,8 +268,8 @@ record:
   change.
 
 The dedicated `PUT .../feedback_analysis` route replaces only this block,
-leaving the rest of the record untouched. Unlike a full AI index replace it is
-permitted on **managed** AI indices: their definition is owned by the plugin
+leaving the rest of the record untouched. Unlike a full AI Index replace it is
+permitted on **managed** AI Indices: their definition is owned by the plugin
 that registers them, but which agent analyzes them and how often is operator
 preference. Without that carve-out, the indices that ship by default would be
 the only ones that could never be analyzed.
@@ -105,7 +281,7 @@ in to the Context Engine — i.e. its spec declares `contextEngine` in
 `supportedFeatureIds`. The value stored on the source is the connector
 **instance id** (not the connector type). Human-readable names are resolved
 at render time via the Actions API, so renaming a connector in Stack
-Management does not leave a stale label on the AI index.
+Management does not leave a stale label on the AI Index.
 
 Which connector types are eligible is derived at runtime from the Actions
 plugin's connector-types registry:
@@ -121,7 +297,7 @@ No changes to the Context Engine plugin are required.
 ## Signals
 
 Signals are observations classified from Agent Builder traces and stored in the
-per-space `context-engine-signals-<space>` index. The AI index detail page
+per-space `context-engine-signals-<space>` index. The AI Index detail page
 renders a read-only **Signals** panel: a preaggregated grouped-by-tag list, a
 drill-down into a group's individual signals (each with a trace waterfall in a
 flyout), and an "Analyze & improve" button that opens Agent Builder when a chat
@@ -136,7 +312,7 @@ user against the current space's signals index):
 | `GET`  | `/internal/context_engine/signals`        | The individual signals for a `tag` (paginated)         |
 
 Both routes are gated by the same `contextEngine:enabled` advanced setting as
-the AI index API (they return 404 while it is off).
+the AI Index API (they return 404 while it is off).
 
 ### Self-referential exclusion
 
@@ -163,17 +339,17 @@ the same guidance in its instructions goes unmarked.
 
 ## Improvements
 
-An **improvement** is a proposed change to one AI index's KI pipeline, derived
+An **improvement** is a proposed change to one AI Index's KI pipeline, derived
 from that index's signals. They live in the `context-engine-improvements` index,
 exposed to the server as
 `ContextEnginePluginStart.getImprovementsService(esClient, spaceId)` and written
 by an analysis run (see [Feedback analysis runs](#feedback-analysis-runs)). The
 review UI that applies them comes later.
 
-Improvements are **scoped to the space of the AI index they target**, which is
+Improvements are **scoped to the space of the AI Index they target**, which is
 the space the service is constructed for. Every read filters on it and every
 write stamps it, so `list`, `get`, `transition` and `deleteByAiIndex` cannot
-reach another space's rows, and the same AI index id in two spaces keeps two
+reach another space's rows, and the same AI Index id in two spaces keeps two
 independent sets of improvements. Documents written before the store was
 space-scoped carry no `space` and are treated as belonging to the default
 space.
@@ -203,7 +379,7 @@ record of what the loop did to a user's index survives every transition:
 - OCC only guards a lineage that already has a head. The first revision of a
   brand-new `improvement_id` has nothing to guard it, so two runs writing the
   same new improvement concurrently can both append a head. Analysis runs for
-  one AI index are therefore expected to be serialized. Should it happen anyway,
+  one AI Index are therefore expected to be serialized. Should it happen anyway,
   it is self-healing rather than permanent: a head lookup returns every head of
   a lineage and the next `write` or `transition` retires all of them, so the
   lineage converges back to a single head.

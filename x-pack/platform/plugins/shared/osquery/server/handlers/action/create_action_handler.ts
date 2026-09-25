@@ -15,7 +15,11 @@ import { createDynamicQueries, replacedQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { convertSOQueriesToPack } from '../../routes/pack/utils';
+import {
+  convertSOQueriesToPack,
+  isPackQueryEnabled,
+  resolveEffectiveQueryExecution,
+} from '../../routes/pack/utils';
 import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
@@ -53,10 +57,11 @@ export const createActionHandler = async (
 ) => {
   const [coreStartServices] = await osqueryContext.getStartServices();
   const esClientInternal = coreStartServices.elasticsearch.client.asInternalUser;
+  const actionSpaceId = options.space?.id ?? DEFAULT_SPACE_ID;
 
   const spaceScopedInternalSavedObjectsClient = getInternalSavedObjectsClientForSpaceId(
     coreStartServices,
-    options.space?.id ?? DEFAULT_SPACE_ID
+    actionSpaceId
   );
 
   const { metadata, alertData, error } = options;
@@ -76,7 +81,7 @@ export const createActionHandler = async (
       allAgentsSelected: !!agentAll,
       platformsSelected: agentPlatforms,
       policiesSelected: agentPolicyIds,
-      spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+      spaceId: actionSpaceId,
     }
   );
 
@@ -116,33 +121,43 @@ export const createActionHandler = async (
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
     tags: [],
-    space_id: options.space?.id ?? DEFAULT_SPACE_ID,
+    space_id: actionSpaceId,
     queries: packSO
-      ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
-          const replacedQuery = replacedQueries(packQuery.query, alertData);
+      ? map(
+          pickBy(convertSOQueriesToPack(packSO.attributes.queries), isPackQueryEnabled),
+          (packQuery, packQueryId) => {
+            const replacedQuery = replacedQueries(packQuery.query, alertData);
+            // Same per-query-wins / empty-or-all-OS-inherits rule as the
+            // scheduled emit. `result_type` is intentionally not applied —
+            // live-query Fleet actions do not carry snapshot/removed.
+            const { version, platform } = resolveEffectiveQueryExecution(packQuery, {
+              min_osquery_version: packSO.attributes.min_osquery_version,
+              platform: packSO.attributes.platform ?? undefined,
+            });
 
-          return pickBy(
-            {
-              action_id: uuidv4(),
-              id: packQueryId,
-              ...replacedQuery,
-              ...(error ? { error } : {}),
-              ecs_mapping: packQuery.ecs_mapping,
-              version: packQuery.version,
-              platform: packQuery.platform,
-              timeout: packQuery.timeout,
-              agents: selectedAgents,
-            },
-            (value) => !isEmpty(value) || isNumber(value)
-          );
-        })
+            return pickBy(
+              {
+                action_id: uuidv4(),
+                id: packQueryId,
+                ...replacedQuery,
+                ...(error ? { error } : {}),
+                ecs_mapping: packQuery.ecs_mapping,
+                version,
+                platform,
+                timeout: packQuery.timeout,
+                agents: selectedAgents,
+              },
+              (value) => !isEmpty(value) || isNumber(value)
+            );
+          }
+        )
       : await createDynamicQueries({
           params,
           alertData,
           agents: selectedAgents,
           osqueryContext,
           error,
-          spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+          spaceId: actionSpaceId,
           spaceScopedClient: spaceScopedInternalSavedObjectsClient,
         }),
   };
@@ -159,9 +174,18 @@ export const createActionHandler = async (
           input_type: 'osquery',
           agents: query.agents as string[],
           user_id: metadata?.currentUser,
-          space_id: options.space?.id ?? DEFAULT_SPACE_ID,
+          space_id: actionSpaceId,
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
-          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']) as {
+          data: {
+            ...pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+            // The top-level space_id above never reaches the agent: Fleet Server's
+            // action model has no such field, and its checkin conversion copies a
+            // fixed whitelist. `data` is an opaque passthrough, and osquerybeat
+            // copies it verbatim onto result and action-response documents as
+            // `action_data` — so this is what makes the originating space visible
+            // in named spaces. Read back via `matchActionDataSpaceId`.
+            space_id: actionSpaceId,
+          } as {
             [k: string]: unknown;
           },
         })
