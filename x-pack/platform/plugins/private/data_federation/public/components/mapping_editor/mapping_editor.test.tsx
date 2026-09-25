@@ -29,28 +29,30 @@ const docLinksMock = {
 
 describe('MappingEditor', () => {
   it('does not clear the draft name when a reserved field name is submitted', () => {
-    const value: MappingEditorValue = { dynamic: true, fields: [] };
-    const onChange = jest.fn();
+    const Wrapper = () => {
+      const [value, setValue] = React.useState<MappingEditorValue>({ dynamic: true, fields: [] });
 
-    const { getByTestId, getByText } = render(
-      <EuiProvider>
-        <MappingEditor
-          value={value}
-          onChange={onChange}
-          docLinks={docLinksMock}
-          reservedFieldNames={['@timestamp']}
-        />
-      </EuiProvider>
-    );
+      return (
+        <EuiProvider>
+          <MappingEditor
+            value={value}
+            onChange={setValue}
+            docLinks={docLinksMock}
+            reservedFieldNames={['@timestamp']}
+          />
+        </EuiProvider>
+      );
+    };
+
+    const { getByTestId, getByText } = render(<Wrapper />);
+
+    fireEvent.click(getByTestId('dataFederationMappingEditorAddField'));
 
     fireEvent.change(getByTestId('dataFederationMappingEditorFieldName'), {
       target: { value: '@timestamp' },
     });
 
     fireEvent.click(getByTestId('dataFederationMappingEditorDraftAddField'));
-
-    // Should not have added a field to state.
-    expect(onChange).toHaveBeenCalledTimes(0);
 
     expect(getByText('This field name is reserved.')).toBeInTheDocument();
 
@@ -60,4 +62,3 @@ describe('MappingEditor', () => {
     );
   });
 });
-

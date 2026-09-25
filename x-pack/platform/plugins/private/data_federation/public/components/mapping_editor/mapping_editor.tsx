@@ -112,6 +112,8 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   );
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [creatingFieldIds, setCreatingFieldIds] = useState<readonly string[]>([]);
+  const [validatedFieldIds, setValidatedFieldIds] = useState<readonly string[]>([]);
+  const [isAddFieldFormOpen, setIsAddFieldFormOpen] = useState(false);
   const [draftField, setDraftField] = useState<MappingEditorField>(() => ({
     id: 'draft',
     name: '',
@@ -119,7 +121,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     type: 'keyword',
     format: '',
   }));
-  const [validatedFieldIds, setValidatedFieldIds] = useState<readonly string[]>([]);
   const [draftValidationAttempted, setDraftValidationAttempted] = useState(false);
 
   const markFieldValidated = useCallback((id: string) => {
@@ -132,24 +133,71 @@ export const MappingEditor: FC<MappingEditorProps> = ({
 
   const shouldShowValidationCallout = hasValidatedFieldErrors;
 
-  const addField = useCallback(() => {
+  const openAddFieldForm = useCallback(() => {
+    setIsAddFieldFormOpen(true);
+  }, []);
+
+  const closeAddFieldForm = useCallback(() => {
+    setIsAddFieldFormOpen(false);
+    setDraftField({
+      id: 'draft',
+      name: '',
+      path: '',
+      type: 'keyword',
+      format: '',
+    });
+    setDraftValidationAttempted(false);
+  }, []);
+
+  const draftFieldErrors = useMemo(() => {
+    if (!draftValidationAttempted) return {};
+    const validationWithDraft = validateMappingEditorValue(
+      {
+        ...value,
+        fields: [...value.fields, draftField],
+      },
+      { reservedFieldNames }
+    );
+    return validationWithDraft.fieldErrorsById[draftField.id] ?? {};
+  }, [draftField, draftValidationAttempted, reservedFieldNames, value]);
+
+  const addDraftField = useCallback(() => {
+    setDraftValidationAttempted(true);
+    const validationWithDraft = validateMappingEditorValue(
+      {
+        ...value,
+        fields: [...value.fields, draftField],
+      },
+      { reservedFieldNames }
+    );
+    const draftErrors = validationWithDraft.fieldErrorsById[draftField.id];
+    if (draftErrors) return;
+
     const id = `mapping-field-${nextId.current++}`;
     onChange((prev) => ({
       ...prev,
       fields: [
         ...prev.fields,
         {
+          ...draftField,
           id,
-          name: '',
-          path: '',
-          type: 'keyword',
-          format: '',
+          name: draftField.name.trim(),
+          path: draftField.path.trim(),
+          format: draftField.format.trim(),
         },
       ],
     }));
-    setEditingFieldId(id);
-    setCreatingFieldIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-  }, [onChange]);
+
+    // Keep the form open so additional fields can be added.
+    setDraftField({
+      id: 'draft',
+      name: '',
+      path: '',
+      type: 'keyword',
+      format: '',
+    });
+    setDraftValidationAttempted(false);
+  }, [draftField, onChange, reservedFieldNames, value]);
 
   const removeField = useCallback(
     (id: string) => {
@@ -206,90 +254,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     },
     [replaceField]
   );
-
-  const draftFieldErrors = useMemo(() => {
-    if (!draftValidationAttempted) return {};
-
-    const errors: { name?: string; type?: string; format?: string } = {};
-    const name = draftField.name.trim();
-    const type = draftField.type;
-
-    if (!name) {
-      errors.name = i18n.translate('xpack.dataFederation.mappingEditor.validation.nameRequired', {
-        defaultMessage: 'Logical name is required.',
-      });
-    } else if (reservedFieldNames?.some((n) => n.trim() === name)) {
-      errors.name = i18n.translate('xpack.dataFederation.mappingEditor.validation.nameReserved', {
-        defaultMessage: 'This field name is reserved.',
-      });
-    } else {
-      const isDuplicate = value.fields.some((f) => f.name.trim() === name);
-      if (isDuplicate) {
-        errors.name = i18n.translate(
-          'xpack.dataFederation.mappingEditor.validation.nameDuplicate',
-          {
-            defaultMessage: 'Names must be unique.',
-          }
-        );
-      }
-    }
-
-    if (!type) {
-      errors.type = i18n.translate('xpack.dataFederation.mappingEditor.validation.typeRequired', {
-        defaultMessage: 'Type is required.',
-      });
-    }
-
-    const format = draftField.format.trim();
-    if (format && type !== 'date') {
-      errors.format = i18n.translate(
-        'xpack.dataFederation.mappingEditor.validation.formatDateOnly',
-        {
-          defaultMessage: 'Format is only valid for type date.',
-        }
-      );
-    }
-
-    return errors;
-  }, [draftField, draftValidationAttempted, reservedFieldNames, value.fields]);
-
-  const addDraftField = useCallback(() => {
-    setDraftValidationAttempted(true);
-
-    const name = draftField.name.trim();
-    const type = draftField.type;
-    const format = draftField.format.trim();
-    const isDuplicate = Boolean(name) && value.fields.some((f) => f.name.trim() === name);
-    const isReserved = Boolean(name) && (reservedFieldNames ?? []).some((n) => n.trim() === name);
-    const hasErrors =
-      !name || !type || isDuplicate || isReserved || (Boolean(format) && type !== 'date');
-    if (hasErrors) return;
-
-    const id = `mapping-field-${nextId.current++}`;
-    onChange((prev) => ({
-      ...prev,
-      fields: [
-        ...prev.fields,
-        {
-          ...draftField,
-          id,
-          name,
-          path: draftField.path.trim(),
-          format: draftField.format.trim(),
-        },
-      ],
-    }));
-
-    // Reset draft for subsequent additions (only visible in empty state).
-    setDraftField({
-      id: 'draft',
-      name: '',
-      path: '',
-      type: 'keyword',
-      format: '',
-    });
-    setDraftValidationAttempted(false);
-  }, [draftField, onChange, reservedFieldNames, value.fields]);
 
   return (
     <div data-test-subj="dataFederationMappingEditor">
@@ -356,27 +320,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         </>
       ) : null}
       <EuiSpacer size="s" />
-      {value.fields.length === 0 ? (
-        <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
-          <FieldMappingForm
-            value={draftField}
-            onChange={(patch) =>
-              setDraftField((prev) => ({ ...prev, ...(patch as Partial<MappingEditorField>) }))
-            }
-            typeHelpText={
-              draftField.type
-                ? getFieldTypeDocsHelpText(
-                    draftField.type as DatasetMappingFieldType,
-                    typeInfoByValue
-                  )
-                : undefined
-            }
-            errors={draftFieldErrors}
-            mode="create"
-            onSubmit={addDraftField}
-          />
-        </EuiPanel>
-      ) : (
+      {value.fields.length > 0 ? (
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
             {value.fields.map((f) => {
@@ -452,25 +396,53 @@ export const MappingEditor: FC<MappingEditorProps> = ({
             })}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          {editingFieldId === null ? (
-            <EuiFlexGroup justifyContent="flexStart" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  color="primary"
-                  fill
-                  onClick={addField}
-                  data-test-subj="dataFederationMappingEditorAddField"
-                >
-                  {i18n.translate('xpack.dataFederation.mappingEditor.addFieldButton', {
-                    defaultMessage: 'Add field',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
         </>
-      )}
+      ) : null}
+      {editingFieldId === null ? (
+        <EuiFlexGroup justifyContent="flexStart" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {!isAddFieldFormOpen ? (
+              <EuiButton
+                size="s"
+                color="primary"
+                fill
+                onClick={openAddFieldForm}
+                data-test-subj="dataFederationMappingEditorAddField"
+              >
+                {i18n.translate('xpack.dataFederation.mappingEditor.addFieldButton', {
+                  defaultMessage: 'Add field',
+                })}
+              </EuiButton>
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
+
+      {isAddFieldFormOpen && editingFieldId === null ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
+            <FieldMappingForm
+              value={draftField}
+              onChange={(patch) =>
+                setDraftField((prev) => ({ ...prev, ...(patch as Partial<MappingEditorField>) }))
+              }
+              typeHelpText={
+                draftField.type
+                  ? getFieldTypeDocsHelpText(
+                      draftField.type as DatasetMappingFieldType,
+                      typeInfoByValue
+                    )
+                  : undefined
+              }
+              errors={draftFieldErrors}
+              mode="create"
+              onSubmit={addDraftField}
+              onCancel={closeAddFieldForm}
+            />
+          </EuiPanel>
+        </>
+      ) : null}
     </div>
   );
 };
