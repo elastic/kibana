@@ -28,6 +28,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type { IAsyncSearchOptions } from '@kbn/data-plugin/common';
 import type { SpaceId } from '@kbn/core-spaces-common';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
 import type { AlertsService } from '../alerts_service/alerts_service';
@@ -204,6 +205,7 @@ export interface RuleTypeRunnerContext {
   spaceId: SpaceId;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export interface RuleRunnerErrorStackTraceLog {
@@ -250,6 +252,13 @@ export interface TaskRunnerContext {
    * run fails because UIAM no longer knows the stored key. Absent when UIAM is not configured.
    */
   uiamConvert?: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
+  /**
+   * Optional — absent when the `workflowsExtensions` plugin is not loaded
+   * (e.g. some Serverless tiers). When present, rule executions emit
+   * `alerting.alertStatusChanged` workflow trigger events on genuine alert
+   * status transitions.
+   */
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

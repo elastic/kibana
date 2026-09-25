@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/alerting-workflow-triggers",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "shared"
+}
