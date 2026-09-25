@@ -119,7 +119,7 @@ const eventsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<SignificantEventResponse>> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -134,7 +134,7 @@ const eventsSearchRoute = createServerRoute({
       ...rest
     } = params.query ?? {};
 
-    const eventClient = await getEventClient();
+    const eventClient = await getEventSearchClient();
     return eventClient.findLatestByCurrentStatePaginated({
       ...rest,
       from,
