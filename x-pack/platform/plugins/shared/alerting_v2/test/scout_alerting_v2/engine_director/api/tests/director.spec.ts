@@ -1117,7 +1117,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           state_transition: {
             pending_count: 1000,
             pending_timeframe: '1s',
-            pending_operator: 'OR',
+            pending_operator: 'or',
           },
         })
       );
@@ -1145,7 +1145,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'transitions recovering -> inactive via recovering_timeframe when recovering_operator is OR',
+    'transitions recovering -> inactive via recovering_timeframe when recovering_operator is or',
     async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
@@ -1174,7 +1174,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             pending_count: 0,
             recovering_count: 1000,
             recovering_timeframe: '1s',
-            recovering_operator: 'OR',
+            recovering_operator: 'or',
           },
         })
       );
@@ -1212,7 +1212,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator AND',
+    'keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator and',
     async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
@@ -1243,7 +1243,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             pending_count: 0,
             recovering_count: 1000,
             recovering_timeframe: '1s',
-            recovering_operator: 'AND',
+            recovering_operator: 'and',
           },
         })
       );
@@ -1292,7 +1292,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'keeps the latest episode in pending when only pending_timeframe is met under pending_operator AND',
+    'keeps the latest episode in pending when only pending_timeframe is met under pending_operator and',
     async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
@@ -1322,7 +1322,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           state_transition: {
             pending_count: 1000,
             pending_timeframe: '1s',
-            pending_operator: 'AND',
+            pending_operator: 'and',
           },
         })
       );
@@ -1362,7 +1362,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'transitions pending -> active under pending_operator AND when both count and timeframe are met',
+    'transitions pending -> active under pending_operator and when both count and timeframe are met',
     async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
@@ -1392,7 +1392,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           state_transition: {
             pending_count: 2,
             pending_timeframe: '1s',
-            pending_operator: 'AND',
+            pending_operator: 'and',
           },
         })
       );

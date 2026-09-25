@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { take } from 'lodash';
+import { chunk, take } from 'lodash';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesRequest, FindRulesResponse, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
-import { ALERT_EPISODES_LIST_PAGE_SIZE } from '../constants';
+import { ALERT_EPISODES_LIST_PAGE_SIZE, RULES_RESOLUTION_BATCH_SIZE } from '../constants';
 
 export interface FetchRulesByIdsParams {
   http: HttpStart;
@@ -23,7 +23,8 @@ const buildRuleIdsFilter = (ids: string[]): string =>
   );
 
 /**
- * Resolves rules by id via the find API and a KQL id filter.
+ * Resolves rules by id via the find API and a KQL id filter, in batches of
+ * {@link RULES_RESOLUTION_BATCH_SIZE}.
  * Missing/deleted ids are omitted from the response without failing the request.
  */
 export const fetchRulesByIds = async ({
@@ -35,14 +36,17 @@ export const fetchRulesByIds = async ({
     return [];
   }
 
-  const queryInput: FindRulesRequest = {
-    filter: buildRuleIdsFilter(idsToFetch),
-    per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
-    page: 1,
-  };
-  const response = await http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
-    query: queryInput,
-  });
+  const responses = await Promise.all(
+    chunk(idsToFetch, RULES_RESOLUTION_BATCH_SIZE).map((batch) => {
+      const queryInput: FindRulesRequest = {
+        filter: buildRuleIdsFilter(batch),
+        per_page: RULES_RESOLUTION_BATCH_SIZE,
+        page: 1,
+      };
 
-  return response.items;
+      return http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, { query: queryInput });
+    })
+  );
+
+  return responses.flatMap(({ items }) => items);
 };

@@ -91,7 +91,7 @@ describe('deactivateHandler', () => {
   });
 
   describe('precondition: rejects only when the episode is already inactive', () => {
-    it('rejects deactivate with INVALID_EPISODE_STATE_TRANSITION (400) when episode_status is inactive', () => {
+    it('rejects deactivate with INVALID_EPISODE_STATE_TRANSITION (409) when episode_status is inactive', () => {
       try {
         deactivateHandler.prepare(
           buildItem(buildAlertEventRecord({ episode_status: alertEpisodeStatus.inactive }))
@@ -99,7 +99,7 @@ describe('deactivateHandler', () => {
         throw new Error('expected handler to throw');
       } catch (error) {
         expect(Boom.isBoom(error)).toBe(true);
-        expect(error.output.statusCode).toBe(400);
+        expect(error.output.statusCode).toBe(409);
         expect(error.data).toMatchObject({
           code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
           details: {

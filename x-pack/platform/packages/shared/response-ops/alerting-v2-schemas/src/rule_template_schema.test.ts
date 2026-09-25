@@ -295,7 +295,7 @@ describe('rule template create-rule schema coupling', () => {
                 },
                 "id": Object {
                   "description": "Artifact identifier.",
-                  "maxLength": 256,
+                  "maxLength": 150,
                   "minLength": 1,
                   "type": "string",
                 },
@@ -563,10 +563,10 @@ describe('rule template create-rule schema coupling', () => {
                       "type": "integer",
                     },
                     "pending_operator": Object {
-                      "description": "The operator that combines \`pending_count\` and \`pending_timeframe\`. \`AND\` requires both. \`OR\` requires either.",
+                      "description": "The operator that combines \`pending_count\` and \`pending_timeframe\`. \`and\` requires both. \`or\` requires either.",
                       "enum": Array [
-                        "AND",
-                        "OR",
+                        "and",
+                        "or",
                       ],
                       "type": "string",
                     },
@@ -582,10 +582,10 @@ describe('rule template create-rule schema coupling', () => {
                       "type": "integer",
                     },
                     "recovering_operator": Object {
-                      "description": "The operator that combines \`recovering_count\` and \`recovering_timeframe\`. \`AND\` requires both. \`OR\` requires either.",
+                      "description": "The operator that combines \`recovering_count\` and \`recovering_timeframe\`. \`and\` requires both. \`or\` requires either.",
                       "enum": Array [
-                        "AND",
-                        "OR",
+                        "and",
+                        "or",
                       ],
                       "type": "string",
                     },
@@ -605,7 +605,7 @@ describe('rule template create-rule schema coupling', () => {
             "time_field": Object {
               "default": "@timestamp",
               "description": "Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`.",
-              "maxLength": 128,
+              "maxLength": 256,
               "minLength": 1,
               "type": "string",
             },
