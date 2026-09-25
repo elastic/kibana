@@ -71,7 +71,13 @@ describe('cortexHydrateStepDefinition', () => {
       signal: expect.any(AbortSignal),
       logger: expect.anything(),
     });
-    expect(result).toEqual({ output: { sandbox_id: 'default__conv-1', notification: '' } });
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        conversation_id: 'conv-1',
+        notification: '',
+      },
+    });
   });
 
   it('uses the obtained sandbox_id without re-scoping it', async () => {
@@ -87,7 +93,13 @@ describe('cortexHydrateStepDefinition', () => {
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'marketing' })
     );
-    expect(result).toEqual({ output: { sandbox_id: 'marketing__conv-1', notification: '' } });
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'marketing__conv-1',
+        conversation_id: 'conv-1',
+        notification: '',
+      },
+    });
   });
 
   it('scopes a legacy conversation_id using the workflow Space', async () => {
@@ -103,7 +115,13 @@ describe('cortexHydrateStepDefinition', () => {
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'marketing' })
     );
-    expect(result).toEqual({ output: { sandbox_id: 'marketing__conv-1', notification: '' } });
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'marketing__conv-1',
+        conversation_id: 'conv-1',
+        notification: '',
+      },
+    });
   });
 
   it('rejects input missing both sandbox_id and conversation_id', async () => {
@@ -142,7 +160,12 @@ describe('cortexHydrateStepDefinition', () => {
 
     expect(hydrateCortexWorkspace).not.toHaveBeenCalled();
     expect(result).toEqual({
-      output: { sandbox_id: 'default__conv-1', skipped: true, notification: '' },
+      output: {
+        sandbox_id: 'default__conv-1',
+        conversation_id: 'conv-1',
+        skipped: true,
+        notification: '',
+      },
     });
   });
 });

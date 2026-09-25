@@ -57,6 +57,7 @@ export const cortexHydrateStepDefinition = ({
       ),
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that was hydrated.'),
+      conversation_id: z.string().describe('Unscoped conversation id for legacy consumers.'),
       skipped: z.boolean().optional(),
       notification: z
         .string()
@@ -73,10 +74,18 @@ export const cortexHydrateStepDefinition = ({
       if (sandboxId === undefined) {
         throw new Error('Either sandbox_id or conversation_id is required.');
       }
+      const resolvedConversationId = conversationId ?? unscopeConversationId(spaceId, sandboxId);
 
       if (isEnabled && !isEnabled()) {
         context.logger.info(`Skipped Cortex hydrate for sandbox ${sandboxId} (flag off)`);
-        return { output: { sandbox_id: sandboxId, skipped: true, notification: '' } };
+        return {
+          output: {
+            sandbox_id: sandboxId,
+            conversation_id: resolvedConversationId,
+            skipped: true,
+            notification: '',
+          },
+        };
       }
 
       const sandboxStart = getSandboxStart();
@@ -108,6 +117,12 @@ export const cortexHydrateStepDefinition = ({
         `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
       );
 
-      return { output: { sandbox_id: sandboxId, notification: '' } };
+      return {
+        output: {
+          sandbox_id: sandboxId,
+          conversation_id: resolvedConversationId,
+          notification: '',
+        },
+      };
     },
   });
