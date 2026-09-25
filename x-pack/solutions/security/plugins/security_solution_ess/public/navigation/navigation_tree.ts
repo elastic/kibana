@@ -260,6 +260,7 @@ export const createNavigationTree = (
             title: i18nStrings.stackManagement.ai.title,
             children: [
               { link: 'management:genAiSettings' },
+              { link: 'management:aiAnonymizationSettings' },
               { link: 'management:evals' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
