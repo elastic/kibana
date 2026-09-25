@@ -1,5 +1,5 @@
 {
-  "sha1": "2ec6f231e3a361dc4a7ffa8d84113f145f82a488",
+  "sha1": "9fd81f046ee77576d4c098135e6b0c6993364dcb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -195,7 +195,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 37,
+        "line": 38,
         "column": 41
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 54,
+        "line": 56,
         "column": 13
       }
     },
@@ -221,8 +221,47 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 54,
+        "line": 56,
         "column": 13
+      }
+    },
+    {
+      "id": "faa998808538e40-3fc7f735d77fec2",
+      "title": "Flyout System - full surface accessibility component body callouts stack in the banner and stay out of the heading outline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 63,
+        "column": 79
+      }
+    },
+    {
+      "id": "faa998808538e40-c8a42909b052ef2",
+      "title": "Flyout System - full surface accessibility service body callouts stack in the banner and stay out of the heading outline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 63,
+        "column": 79
+      }
+    },
+    {
+      "id": "faa998808538e40-23b7b822074b45f",
+      "title": "Flyout System - full surface accessibility flyout-wide callouts stay mounted across tab switches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 88,
+        "column": 9
       }
     },
     {
@@ -234,8 +273,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 61,
-        "column": 11
+        "line": 96,
+        "column": 9
       }
     },
     {
@@ -247,8 +286,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 74,
-        "column": 28
+        "line": 115,
+        "column": 20
       }
     },
     {
@@ -260,8 +299,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 74,
-        "column": 28
+        "line": 115,
+        "column": 20
       }
     },
     {
@@ -273,8 +312,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 90,
-        "column": 15
+        "line": 129,
+        "column": 11
       }
     },
     {
@@ -286,8 +325,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 101,
-        "column": 30
+        "line": 141,
+        "column": 57
       }
     },
     {
@@ -299,8 +338,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 101,
-        "column": 30
+        "line": 141,
+        "column": 57
       }
     },
     {
@@ -312,8 +351,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 122,
-        "column": 25
+        "line": 161,
+        "column": 7
       }
     },
     {
@@ -325,8 +364,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 154,
-        "column": 7
+        "line": 199,
+        "column": 30
       }
     },
     {
@@ -338,8 +377,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 154,
-        "column": 7
+        "line": 199,
+        "column": 30
       }
     },
     {

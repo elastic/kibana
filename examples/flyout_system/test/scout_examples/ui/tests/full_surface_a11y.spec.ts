@@ -30,9 +30,10 @@ test.describe(
       const session = app.session('component');
       await app.openFlyout('component', session);
 
-      // Wait for header blocks to render before testing.
+      // Wait for header blocks and body banner to render before testing.
       await expect(app.infoBlocks('component', session)).toBeVisible();
       await expect(app.badgeOverflow('component', session)).toBeVisible();
+      await expect(app.bodyBanner('component', session)).toBeVisible();
 
       const { violations } = await page.checkA11y({
         include: [app.rootSelector('component', session)],
@@ -50,6 +51,7 @@ test.describe(
 
       await expect(app.infoBlocks('service', session)).toBeVisible();
       await expect(flyout.getByRole('tablist')).toBeVisible();
+      await expect(app.bodyBanner('service', session)).toBeVisible();
 
       const { violations } = await page.checkA11y({
         include: [app.rootSelector('service', session)],
@@ -67,6 +69,51 @@ test.describe(
         await expect(flyout).toHaveAccessibleName(session);
       });
     }
+
+    for (const form of FORMS) {
+      test(`${form} body callouts stack in the banner and stay out of the heading outline`, async ({
+        pageObjects,
+      }) => {
+        const app = pageObjects.flyoutSystem;
+        const session = app.session(form);
+        const flyout = await app.openFlyout(form, session);
+
+        const disabled = app.bodyCallout(form, session, 'Disabled');
+        const failures = app.bodyCallout(form, session, 'Failures');
+        await expect(disabled).toBeVisible();
+        await expect(failures).toBeVisible();
+        await expect(disabled).toContainText('Rule is disabled');
+        await expect(failures).toContainText('3 actions failed');
+
+        // Source order is preserved: the warning renders above the danger callout.
+        const disabledBox = await disabled.boundingBox();
+        const failuresBox = await failures.boundingBox();
+        expect(disabledBox!.y).toBeLessThan(failuresBox!.y);
+
+        // Callout titles render as paragraphs, so the outline stays header h3 > section h4 > subsection h5.
+        await expect(flyout.getByRole('heading', { name: 'Rule is disabled' })).toHaveCount(0);
+        await expect(flyout.getByRole('heading', { name: '3 actions failed' })).toHaveCount(0);
+      });
+    }
+
+    test('flyout-wide callouts stay mounted across tab switches', async ({ pageObjects }) => {
+      const app = pageObjects.flyoutSystem;
+      const session = app.session('service');
+      await app.openFlyout('service', session);
+
+      // Mark the DOM node; a remount would replace it with an unmarked one.
+      const disabled = app.bodyCallout('service', session, 'Disabled');
+      await disabled.evaluate((el) => el.setAttribute('data-remount-marker', 'original'));
+
+      await app.tab('service', session, 'Activity').click();
+      await expect(app.tab('service', session, 'Activity')).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      await expect(disabled).toBeVisible();
+      await expect(disabled).toHaveAttribute('data-remount-marker', 'original');
+    });
 
     test('regular sections are exposed as named regions', async ({ pageObjects }) => {
       const app = pageObjects.flyoutSystem;
@@ -173,9 +220,12 @@ test.describe(
       await expect(panel).toBeVisible();
       await expect(panel).toHaveAttribute('aria-labelledby', /.+/);
 
-      // EUI gives the body overflow container tabIndex={0}, which appears before the tab panel.
+      // EUI gives the body overflow container tabIndex={0}. The banner sits inside it, so its
+      // callout action comes after the container and before the tab panel.
       await activity.press('Tab');
       await expect(app.scrollContainer('service', session)).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(app.bodyCalloutRetry('service', session)).toBeFocused();
       await page.keyboard.press('Tab');
       await expect(panel).toBeFocused();
     });
