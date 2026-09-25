@@ -9,6 +9,7 @@
 
 import type { BehaviorSubject } from 'rxjs';
 import type { UnifiedChangePointGridProps } from '@kbn/change-point-chart-viewer';
+import type { ChangePointSummarySeriesCache } from './change_point_summary_series';
 
 export const CHANGE_POINT_DATA_SOURCE_PROFILE_ID = 'change-point-data-source-profile';
 
@@ -24,3 +25,7 @@ export type ChangePointChartSectionSnapshot = Pick<
 export type ChangePointChartSectionProps$ = BehaviorSubject<
   ChangePointChartSectionSnapshot | undefined
 >;
+
+export interface ChangePointSummaryContext {
+  summarySeriesCache: ChangePointSummarySeriesCache;
+}

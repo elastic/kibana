@@ -91,8 +91,10 @@ index_proposal() {
 }
 
 # Creates an Agent Builder attachment that links to an existing proposal via
-# its `origin` field. The card renderer reads `attachment.origin` to look up
-# live proposal data; the `data` snapshot drives the badge rendering only.
+# its `origin` field. Everything rendered is read live from the proposal, so the
+# attachment carries the id and nothing else. Only needed here because this
+# script writes proposals straight to Elasticsearch — a proposal created through
+# the service attaches itself.
 add_attachment() {
   local conversation_id="$1"
   local payload="$2"
@@ -144,26 +146,13 @@ index_proposal "$P1_ID" "$(jq -n \
 ATTACH1=$(add_attachment "$CONV1" "$(jq -n \
   --arg type "$PROPOSAL_ATTACHMENT_TYPE" \
   --arg origin "$P1_ID" \
-  --arg cid "$CONV1" \
-  --arg now "$NOW" \
-  --arg space "$KIBANA_SPACE" \
   '{
     type: $type,
     origin: $origin,
     render_inline: true,
     data: {
-      id: $origin,
-      spaceId: $space,
-      conversationId: $cid,
-      comment: "Block outbound traffic from the compromised host to prevent data exfiltration.",
-      actionWorkflowId: "system-alertzero-action-create-rule",
-      status: "pending",
-      impact: "low",
-      confidence: "high",
-      category: "configure",
-      origin: "worker",
-      createdAt: $now,
-      expired: false
+      proposalId: $origin,
+      title: "Block outbound \u2014 seed"
     }
   }')")
 
@@ -205,28 +194,13 @@ index_proposal "$P2_ID" "$(jq -n \
 ATTACH2=$(add_attachment "$CONV2" "$(jq -n \
   --arg type "$PROPOSAL_ATTACHMENT_TYPE" \
   --arg origin "$P2_ID" \
-  --arg cid "$CONV2" \
-  --arg now "$NOW" \
-  --arg expiry "$FUTURE_EXPIRY" \
-  --arg space "$KIBANA_SPACE" \
   '{
     type: $type,
     origin: $origin,
     render_inline: true,
     data: {
-      id: $origin,
-      spaceId: $space,
-      conversationId: $cid,
-      comment: "Create a detection rule for repeated SSH login failures from external IP ranges.",
-      actionWorkflowId: "system-alertzero-action-create-rule",
-      status: "pending",
-      impact: "medium",
-      confidence: "high",
-      category: "configure",
-      origin: "worker",
-      expiresAt: $expiry,
-      createdAt: $now,
-      expired: false
+      proposalId: $origin,
+      title: "Detect repeated SSH login failures"
     }
   }')")
 
@@ -264,30 +238,11 @@ index_proposal "$P3_ID" "$(jq -n \
 ATTACH3=$(add_attachment "$CONV3" "$(jq -n \
   --arg type "$PROPOSAL_ATTACHMENT_TYPE" \
   --arg origin "$P3_ID" \
-  --arg cid "$CONV3" \
-  --arg now "$NOW" \
-  --arg space "$KIBANA_SPACE" \
   '{
     type: $type,
     origin: $origin,
     render_inline: true,
-    data: {
-      id: $origin,
-      spaceId: $space,
-      conversationId: $cid,
-      comment: "Create a detection rule for repeated failed logins from this IP range.",
-      status: "no_action",
-      decision: "dismissed",
-      impact: "medium",
-      confidence: "medium",
-      origin: "worker",
-      decidedAt: $now,
-      decidedBy: { username: "elastic", fullName: null, email: null },
-      dismissReason: "already_handled",
-      rationale: "We already have a rule covering this pattern from last sprint.",
-      createdAt: $now,
-      expired: false
-    }
+    data: { proposalId: $origin }
   }')")
 
 echo "  conversation: $CONV3, proposal: $P3_ID, attachment: $ATTACH3"

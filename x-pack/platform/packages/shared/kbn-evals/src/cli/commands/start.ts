@@ -50,10 +50,11 @@ export const startCmd: Command<void> = {
       evaluationConnectorId,
       projects,
       profileEnvOverrides,
+      suiteScoutEnv,
       exportProfile,
       datasetsProfile,
       requiresEisCcm,
-    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
+    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
     const skipServer = flagsReader.boolean('skip-server');
 
@@ -97,6 +98,7 @@ export const startCmd: Command<void> = {
         repoRoot,
         log,
         profileEnvOverrides,
+        suiteScoutEnv,
         serverConfigSet: suite?.serverConfigSet,
         requiresEisCcm,
       });
@@ -111,6 +113,7 @@ export const startCmd: Command<void> = {
       skipServer,
       suite,
       profileEnvOverrides,
+      suiteScoutEnv,
       flagsReader,
       log,
     });

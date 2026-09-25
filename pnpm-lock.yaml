@@ -2796,7 +2796,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-nightshift-decision-trees
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/nightshift_investigations
+        version: link:x-pack/solutions/observability/plugins/nightshift_investigations
       '@kbn/nightshift-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift
@@ -3226,6 +3226,9 @@ importers:
       '@kbn/saved-search-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/saved_search
+      '@kbn/schema-string-helpers':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-schema-string-helpers
       '@kbn/screenshot-mode-example-plugin':
         specifier: workspace:*
         version: link:examples/screenshot_mode_example
@@ -3499,6 +3502,9 @@ importers:
       '@kbn/serverless-workplace-ai-settings':
         specifier: workspace:*
         version: link:src/platform/packages/shared/serverless/settings/workplace_ai_project
+      '@kbn/service-accounts-test-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
       '@kbn/session-notifications-plugin':
         specifier: workspace:*
         version: link:src/platform/test/plugin_functional/plugins/session_notifications
@@ -4106,11 +4112,11 @@ importers:
         specifier: 1.5.5
         version: 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.4.3))(ws@8.21.3))(@smithy/signature-v4@5.7.3)(ws@8.21.3)
       '@launchdarkly/node-server-sdk':
-        specifier: 9.13.2
-        version: 9.13.2(supports-color@10.2.2)
+        specifier: 9.13.3
+        version: 9.13.3(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.1
-        version: 2.0.1(@launchdarkly/node-server-sdk@9.13.2(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.0.2
+        version: 2.0.2(@launchdarkly/node-server-sdk@9.13.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -4969,7 +4975,7 @@ importers:
         version: 12.1.0(openapi-types@12.1.3)
       '@axe-core/playwright':
         specifier: 4.13.0
-        version: 4.13.0(playwright-core@1.62.1)
+        version: 4.13.0(playwright-core@1.63.0)
       '@babel/core':
         specifier: 7.29.7
         version: 7.29.7(supports-color@10.2.2)
@@ -5041,7 +5047,7 @@ importers:
         version: 3.0.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       '@elastic/eui-test-helpers':
         specifier: 1.8.0
-        version: 1.8.0(@playwright/test@1.62.1)
+        version: 1.8.0(@playwright/test@1.63.0)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -5375,6 +5381,12 @@ importers:
       '@kbn/dev-cli-runner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-cli-runner
+      '@kbn/dev-comments':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-dev-comments
+      '@kbn/dev-comments-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/private/dev_comments
       '@kbn/dev-proc-runner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-proc-runner
@@ -5471,6 +5483,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-agent-builder':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder
+      '@kbn/evals-suite-attack-discovery-fp-tp':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -5491,7 +5506,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/ml/evals
       '@kbn/evals-suite-nightshift-investigations':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations
+        version: link:x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
       '@kbn/evals-suite-observability-ai':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai
@@ -5958,8 +5973,8 @@ importers:
         specifier: 2.5.1
         version: 2.5.1
       '@playwright/test':
-        specifier: 1.62.1
-        version: 1.62.1
+        specifier: 1.63.0
+        version: 1.63.0
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.6.2
         version: 0.6.2(@types/webpack@5.28.5(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-dev-server@5.2.6)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
@@ -6489,8 +6504,8 @@ importers:
         specifier: 4.0.2
         version: 4.0.2(eslint@8.57.0(supports-color@10.2.2))
       eslint-plugin-playwright:
-        specifier: 2.9.0
-        version: 2.9.0(eslint@8.57.0(supports-color@10.2.2))
+        specifier: 2.12.0
+        version: 2.12.0(eslint@8.57.0(supports-color@10.2.2))
       eslint-plugin-prettier:
         specifier: 4.2.1
         version: 4.2.1(eslint-config-prettier@9.1.0(eslint@8.57.0(supports-color@10.2.2)))(eslint@8.57.0(supports-color@10.2.2))(prettier@2.8.8)
@@ -6661,7 +6676,10 @@ importers:
         version: 12.1.3
       oxlint:
         specifier: 1.80.0
-        version: 1.80.0
+        version: 1.80.0(oxlint-tsgolint@7.0.2002)
+      oxlint-tsgolint:
+        specifier: 7.0.2002
+        version: 7.0.2002
       peggy:
         specifier: 5.1.0
         version: 5.1.0
@@ -6675,8 +6693,8 @@ importers:
         specifier: 5.3.0
         version: 5.3.0
       playwright:
-        specifier: 1.62.1
-        version: 1.62.1
+        specifier: 1.63.0
+        version: 1.63.0
       pngjs:
         specifier: 7.0.0
         version: 7.0.0
@@ -7603,6 +7621,8 @@ importers:
 
   src/platform/packages/private/kbn-data-streams: {}
 
+  src/platform/packages/private/kbn-dev-comments: {}
+
   src/platform/packages/private/kbn-discover-session-constants: {}
 
   src/platform/packages/private/kbn-dot-text: {}
@@ -8193,6 +8213,8 @@ importers:
 
   src/platform/packages/shared/kbn-saved-search-component: {}
 
+  src/platform/packages/shared/kbn-schema-string-helpers: {}
+
   src/platform/packages/shared/kbn-scout: {}
 
   src/platform/packages/shared/kbn-scout-synthtrace: {}
@@ -8508,6 +8530,8 @@ importers:
   src/platform/packages/shared/shared-ux/toolbar_selector: {}
 
   src/platform/plugins/private/advanced_settings: {}
+
+  src/platform/plugins/private/dev_comments: {}
 
   src/platform/plugins/private/event_annotation: {}
 
@@ -9007,8 +9031,6 @@ importers:
 
   x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2: {}
 
-  x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations: {}
-
   x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests: {}
 
   x-pack/platform/packages/shared/kbn-evals-suite-streams: {}
@@ -9379,8 +9401,6 @@ importers:
 
   x-pack/platform/plugins/shared/ml/evals: {}
 
-  x-pack/platform/plugins/shared/nightshift_investigations: {}
-
   x-pack/platform/plugins/shared/nightshift_sources: {}
 
   x-pack/platform/plugins/shared/notification_center: {}
@@ -9499,6 +9519,8 @@ importers:
 
   x-pack/platform/test/security_api_integration/plugins/saml_provider: {}
 
+  x-pack/platform/test/security_api_integration/plugins/service_accounts: {}
+
   x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer: {}
 
   x-pack/platform/test/security_functional/plugins/test_endpoints: {}
@@ -9522,6 +9544,8 @@ importers:
   x-pack/solutions/observability/packages/kbn-alerts-grouping: {}
 
   x-pack/solutions/observability/packages/kbn-apm-embeddable-common: {}
+
+  x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations: {}
 
   x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai: {}
 
@@ -9560,6 +9584,8 @@ importers:
   x-pack/solutions/observability/plugins/metrics_data_access: {}
 
   x-pack/solutions/observability/plugins/nightshift: {}
+
+  x-pack/solutions/observability/plugins/nightshift_investigations: {}
 
   x-pack/solutions/observability/plugins/observability: {}
 
@@ -9670,6 +9696,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
 
@@ -12395,19 +12423,19 @@ packages:
   '@launchdarkly/js-sdk-common@2.25.2':
     resolution: {integrity: sha512-l/OJiIGnLS6Qt6J/Lc3KgUXL4vAES5wsxIgNZcw3yCUbDEuTyVR9Qya9Aqy1klg2kF1VsHiY2wvaKimlIZK7+g==}
 
-  '@launchdarkly/js-server-sdk-common@2.21.0':
-    resolution: {integrity: sha512-/pdv5QW4LqNkBkJDNIxRl2p2LEQ5TA4IBKmTOGOxN2tUre6cE+V6SnYKJOOUotSn7+zmg6M+RXdS2V3OCuMpGA==}
+  '@launchdarkly/js-server-sdk-common@2.21.1':
+    resolution: {integrity: sha512-JJ4sCTCxJddiD7eLOSORNxR6HI/AEgz0H1KpPhcix1DAErfCwlYuM0OxeotF7Y8P1tZ5XGXPXT7WP8GaVNjWDA==}
 
-  '@launchdarkly/node-server-sdk@9.13.2':
-    resolution: {integrity: sha512-qzq86AzWOZ2I4yhSuLByO9bj0jAq/yNOg65i/jLD408mqUfyGuzz43zMc6sT0BIaETk/4VO4y7NnWJcEJtNeYA==}
+  '@launchdarkly/node-server-sdk@9.13.3':
+    resolution: {integrity: sha512-6El8S4aLbu4BDLFAYo3i3Zh7LckYHiCQev9hkVKQ+ROOlWu/SMVnH+gF8nALtkNub+zKrq5Qyn4yTnM7+fjkhw==}
 
   '@launchdarkly/openfeature-js-server-common@2.0.0':
     resolution: {integrity: sha512-WfNXSeMcPrsW1IY5lqRLfYvuVls2+qPTfjijsjLLzBEJ2gF0ts4QmecSlzublR3q4hKXSyzVZ57NrN1Jc+KQXg==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.1':
-    resolution: {integrity: sha512-gPYXHSoy4DGDxyfk7rSdDCXUYznIK+O7+lrWS7DMpIMoUNu+78ShzR3WpNm+9rHMRlC1NXVDClP1eeri5qM60A==}
+  '@launchdarkly/openfeature-node-server@2.0.2':
+    resolution: {integrity: sha512-cHrGNHvLFvepdijt+VIGUjq8KkbtN7vVy3BI/VYDiqpTHnFL7KSFoKF6nbTovJKbK5Xz5Xuy/wceF8o6LqIJdA==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -13618,6 +13646,36 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@oxlint-tsgolint/darwin-arm64@7.0.2002':
+    resolution: {integrity: sha512-E3yYb/tI+5M3SqGgKwrwUD0nmjA2FMGD1xFbma46qi8Y7+nPTlGY6bZk/hqxijc9Vda/tdtUxQ2d5zGIEX9qlg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@oxlint-tsgolint/darwin-x64@7.0.2002':
+    resolution: {integrity: sha512-qEaMySdvzs8faaJwMO4dFtPFCa+degFCz+HbkFQ0REcIJqJ16KmC0smt30FAI9TeEHCoAtz6sU/6acJvi4uaxg==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oxlint-tsgolint/linux-arm64@7.0.2002':
+    resolution: {integrity: sha512-bqPObCNIR6tDQSc0Xn9Nu7EfWRXFB+qFzADRl/q6YA8zT9YUg3pGUbmicV2hV91uLpiot74so9ocGjx35SaX6w==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxlint-tsgolint/linux-x64@7.0.2002':
+    resolution: {integrity: sha512-E5CcRALAYdiQMbdYjEqlLOiYuEdt21RtXiyxIoD8bfypdfkpWppacijKOR4i0DtLXFRVwCGQggZBWk5bOIpU1A==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxlint-tsgolint/win32-arm64@7.0.2002':
+    resolution: {integrity: sha512-L+ul0ZFDiz/ZmTwCQ1J/qS7S6s45ktiaFqb+ZIzx+1sSdtdRxm8/H0+p4VDQYrCKBFzKNb6VjUlm48bNEe3BUg==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@oxlint-tsgolint/win32-x64@7.0.2002':
+    resolution: {integrity: sha512-zkZeJfo4UmYiCzj77u85eCDpdxOiQiSAsV6j9Pvj5e7Vu5+MvwLtK1xmVutE77tJmUJ3eBOSXHR6WgY4AwHHGQ==}
+    cpu: [x64]
+    os: [win32]
+
   '@oxlint/binding-android-arm-eabi@1.80.0':
     resolution: {integrity: sha512-RM3Plj+biQpxa5d1GOOX6ciDlcUROmm4OZ/pLTpitkQt2mJv4jhtY4cbgaetOm5UKWZe05/TGQ6o1Vl8EOHkrA==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -13895,8 +13953,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@playwright/test@1.62.1':
-    resolution: {integrity: sha512-DTcUc8qii+cpHvtOwggMtBRMjKZHXYWdw8syRYu2vtzuq4Wxphqq4NfCs5Zt44L6mA8rfDfj+PHnxFc/FeK6mQ==}
+  '@playwright/test@1.63.0':
+    resolution: {integrity: sha512-oxMK4vllB9RK5NQ2l1pq1IfOf2AvnEuj/vYGDj0H2nMtmtZpKtCwt/l00GEO6xjGfpBNAvjovvYdCm50dRQkpQ==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -18592,8 +18650,8 @@ packages:
     peerDependencies:
       eslint: ^6 || ^7 || ^8
 
-  eslint-plugin-playwright@2.9.0:
-    resolution: {integrity: sha512-k3xrG6YzrallWNFMoGUjMNeu3SFFKXN79KJQBD2PkM4PasJegqV2Up+mPY5od2UmPKQGT+MeIhCmWH8r5eYuQQ==}
+  eslint-plugin-playwright@2.12.0:
+    resolution: {integrity: sha512-7HpSKR/D2oCH4RKRauFskcrnDrHvLQKopW7Nen8lqrFZtx/SB+FgqVaH+zyQd32noZSZy9Lrsa+DsYrVUpn6hg==}
     engines: {node: '>=16.9.0'}
     peerDependencies:
       eslint: '>=8.40.0'
@@ -19146,11 +19204,6 @@ packages:
 
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
-
-  fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
-    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
-    os: [darwin]
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -22183,6 +22236,10 @@ packages:
   oxc-resolver@11.24.2:
     resolution: {integrity: sha512-FY91FiDBj7ls5MsFS9jN3tjz2o0/zsdSsymlakySaBwVJZorHhkWyICLZMKxlu1R9vYo+sd3z1jwb4J8x7bNDw==}
 
+  oxlint-tsgolint@7.0.2002:
+    resolution: {integrity: sha512-rQAj2RAQM57nCwTd3PhtnAkREGW2StqI47tzudNlJF8WwGommM7rVpeP4O1O8/ZiuDZ9f2GnTESzLHGTluwkvQ==}
+    hasBin: true
+
   oxlint@1.80.0:
     resolution: {integrity: sha512-5nTiSps4qdbCWLbxzuO00alHkEO2exR9YMN/ig6QXWrLsYSG0KaObOAM+l6oU2LcKPWoSAGYbkZIGEu1ViiWKA==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -22537,13 +22594,13 @@ packages:
   platform@1.3.6:
     resolution: {integrity: sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==}
 
-  playwright-core@1.62.1:
-    resolution: {integrity: sha512-wPYSwEBJY9GHraISXqyqtx0na0LpO3XEX7jNDhntbex7tzUS7kLnZsOlFruFJB4Hi/rhDMjXGqHewDZ68nYZVw==}
+  playwright-core@1.63.0:
+    resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.62.1:
-    resolution: {integrity: sha512-0M+L3LAD8/nm554LOla9Ayx0j0tmFZ0FBcoQ7F1VuVHpM/XpiC8RcDzBQB8W5+hA8L22THxELzeF+2WcUzvcLg==}
+  playwright@1.63.0:
+    resolution: {integrity: sha512-+7ziBLidS4NaNCdt57SUDT+wYmmd5fmiQejUic/kb+YsYSCPyOOE9sebzMjNmQrsnNpDJqd4WHvV/8lfKfUDUg==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -26604,10 +26661,10 @@ snapshots:
 
   '@aws/lambda-invoke-store@0.3.0': {}
 
-  '@axe-core/playwright@4.13.0(playwright-core@1.62.1)':
+  '@axe-core/playwright@4.13.0(playwright-core@1.63.0)':
     dependencies:
       axe-core: 4.13.0
-      playwright-core: 1.62.1
+      playwright-core: 1.63.0
 
   '@babel/code-frame@7.26.2':
     dependencies:
@@ -27892,9 +27949,9 @@ snapshots:
 
   '@elastic/eui-illustrations@1.1.0': {}
 
-  '@elastic/eui-test-helpers@1.8.0(@playwright/test@1.62.1)':
+  '@elastic/eui-test-helpers@1.8.0(@playwright/test@1.63.0)':
     optionalDependencies:
-      '@playwright/test': 1.62.1
+      '@playwright/test': 1.63.0
 
   '@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
@@ -29672,14 +29729,14 @@ snapshots:
 
   '@launchdarkly/js-sdk-common@2.25.2': {}
 
-  '@launchdarkly/js-server-sdk-common@2.21.0':
+  '@launchdarkly/js-server-sdk-common@2.21.1':
     dependencies:
       '@launchdarkly/js-sdk-common': 2.25.2
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.13.2(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.13.3(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.21.0
+      '@launchdarkly/js-server-sdk-common': 2.21.1
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
       launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
@@ -29690,9 +29747,9 @@ snapshots:
       '@launchdarkly/js-sdk-common': 2.25.2
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.1(@launchdarkly/node-server-sdk@9.13.2(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.0.2(@launchdarkly/node-server-sdk@9.13.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.13.2(supports-color@10.2.2)
+      '@launchdarkly/node-server-sdk': 9.13.3(supports-color@10.2.2)
       '@launchdarkly/openfeature-js-server-common': 2.0.0(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
@@ -30958,6 +31015,24 @@ snapshots:
   '@oxc-resolver/binding-win32-x64-msvc@11.24.2':
     optional: true
 
+  '@oxlint-tsgolint/darwin-arm64@7.0.2002':
+    optional: true
+
+  '@oxlint-tsgolint/darwin-x64@7.0.2002':
+    optional: true
+
+  '@oxlint-tsgolint/linux-arm64@7.0.2002':
+    optional: true
+
+  '@oxlint-tsgolint/linux-x64@7.0.2002':
+    optional: true
+
+  '@oxlint-tsgolint/win32-arm64@7.0.2002':
+    optional: true
+
+  '@oxlint-tsgolint/win32-x64@7.0.2002':
+    optional: true
+
   '@oxlint/binding-android-arm-eabi@1.80.0':
     optional: true
 
@@ -31193,9 +31268,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@playwright/test@1.62.1':
+  '@playwright/test@1.63.0':
     dependencies:
-      playwright: 1.62.1
+      playwright: 1.63.0
 
   '@pmmmwh/react-refresh-webpack-plugin@0.6.2(@types/webpack@5.28.5(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-dev-server@5.2.6)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)':
     dependencies:
@@ -36589,7 +36664,7 @@ snapshots:
     dependencies:
       eslint: 8.57.0(supports-color@10.2.2)
 
-  eslint-plugin-playwright@2.9.0(eslint@8.57.0(supports-color@10.2.2)):
+  eslint-plugin-playwright@2.12.0(eslint@8.57.0(supports-color@10.2.2)):
     dependencies:
       eslint: 8.57.0(supports-color@10.2.2)
       globals: 17.12.0
@@ -37334,9 +37409,6 @@ snapshots:
   fs-monkey@1.1.0: {}
 
   fs.realpath@1.0.0: {}
-
-  fsevents@2.3.2:
-    optional: true
 
   fsevents@2.3.3:
     optional: true
@@ -41149,7 +41221,16 @@ snapshots:
       '@oxc-resolver/binding-win32-arm64-msvc': 11.24.2
       '@oxc-resolver/binding-win32-x64-msvc': 11.24.2
 
-  oxlint@1.80.0:
+  oxlint-tsgolint@7.0.2002:
+    optionalDependencies:
+      '@oxlint-tsgolint/darwin-arm64': 7.0.2002
+      '@oxlint-tsgolint/darwin-x64': 7.0.2002
+      '@oxlint-tsgolint/linux-arm64': 7.0.2002
+      '@oxlint-tsgolint/linux-x64': 7.0.2002
+      '@oxlint-tsgolint/win32-arm64': 7.0.2002
+      '@oxlint-tsgolint/win32-x64': 7.0.2002
+
+  oxlint@1.80.0(oxlint-tsgolint@7.0.2002):
     optionalDependencies:
       '@oxlint/binding-android-arm-eabi': 1.80.0
       '@oxlint/binding-android-arm64': 1.80.0
@@ -41170,6 +41251,7 @@ snapshots:
       '@oxlint/binding-win32-arm64-msvc': 1.80.0
       '@oxlint/binding-win32-ia32-msvc': 1.80.0
       '@oxlint/binding-win32-x64-msvc': 1.80.0
+      oxlint-tsgolint: 7.0.2002
 
   p-cancelable@2.1.1: {}
 
@@ -41529,13 +41611,11 @@ snapshots:
 
   platform@1.3.6: {}
 
-  playwright-core@1.62.1: {}
+  playwright-core@1.63.0: {}
 
-  playwright@1.62.1:
+  playwright@1.63.0:
     dependencies:
-      playwright-core: 1.62.1
-    optionalDependencies:
-      fsevents: 2.3.2
+      playwright-core: 1.63.0
 
   plugin-error@1.0.1:
     dependencies:

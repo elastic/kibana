@@ -57,9 +57,14 @@ The source query is the corpus definition. It should:
 - **Keep the fields the generation step needs**, and no more. `KEEP` the id, the title-ish field,
   and the body. Carrying whole documents costs tokens on every run.
 - **Carry the corpus filter** described below.
+- **Quote what the mapping says to quote.** A field name with a space or another character ES|QL
+  does not accept bare goes in backticks: `` `Order Date` ``, `` `Unit Price USD` ``. The mapping
+  gives the exact name; an "Unknown column" error on a name you copied from it is almost always a
+  missing backtick.
 - **Run before it ships.** `platform.core.execute_esql` reads and writes nothing, so there is no
   reason to propose an unrun query. `platform.core.generate_esql` will rewrite one that fails,
-  given the query, the error and the mapping.
+  given the query, the error and the mapping. When a run fails, change the thing the error names
+  and run the changed query; never resend the same one.
 
 ## Connector sources
 
@@ -78,19 +83,16 @@ Two things follow from a connector being external:
 
 ## The corpus filter
 
-Every source is a filtered slice, not the whole thing: a time window (last 90 days), a status
-condition (resolved cases only), or a numeric cap (at most 1,000 indicators). Agree the filter
-before an automation is drafted. Running without one risks cost and index bloat, and the Context
-Engine is a cache — generating over an entire corpus eagerly defeats the point.
+Every source is a filtered slice, not the whole thing. What a corpus filter is, why every
+automation needs one, and how it shapes a coverage-gap diagnosis are in the `strategy_catalog`
+reference attached to this skill. What belongs here is where the filter lives: it is written into
+the ES|QL source query, it comes from the strategy's third answer (how units are found), and it is
+agreed before an automation is drafted.
 
-**Read the filter before diagnosing a coverage gap.** When agents keep reaching for data no
-indicator covers, the most common cause is not that generation is failing — it is that the corpus
-filter excluded that data. Those are different fixes: widening a filter is cheap and reversible,
-redesigning a generation prompt is neither. A coverage-gap conclusion that does not say which it is
-has not finished the job.
-
-A filter is also the natural first lever. When the evidence supports widening a window or relaxing
-a status condition, propose that before proposing a new automation.
+**Read the filter before diagnosing a coverage gap.** Run the source with the filter and without
+it; if the missing data appears once the filter is gone, the filter is the fix, and widening it is
+cheap and reversible where redesigning a generation prompt is neither. When the evidence supports
+widening a window or relaxing a status condition, propose that before proposing a new automation.
 
 ## Diagnosing a source
 

@@ -144,6 +144,29 @@ describe('createSuggestAutomationProvider', () => {
     expect(initialMessage).not.toMatch(/attachment/i);
   });
 
+  it('uses a short attachment label even when the AI index description is long', () => {
+    const { provider, openChat } = createProvider();
+    const longDescription = 'a'.repeat(1500);
+
+    provider.suggestAutomation({
+      aiIndex: { ...aiIndex, description: longDescription },
+      onSaved: jest.fn(),
+    });
+
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            description: 'AI index my-ai-index',
+            data: expect.objectContaining({
+              description: longDescription,
+            }),
+          }),
+        ],
+      })
+    );
+  });
+
   it('opens agent builder chat with the AI index attachment', () => {
     const { provider, openChat } = createProvider();
 
@@ -160,6 +183,7 @@ describe('createSuggestAutomationProvider', () => {
           expect.objectContaining({
             id: 'my-ai-index',
             type: AI_INDEX_ATTACHMENT_TYPE,
+            description: 'AI index my-ai-index',
             data: {
               id: 'my-ai-index',
               description: 'Support tickets',

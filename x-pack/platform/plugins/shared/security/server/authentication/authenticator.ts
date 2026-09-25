@@ -989,7 +989,7 @@ export class Authenticator {
         const { username } = authenticationResult.user;
         this.options.userActivity.trackUserAction({
           message: `User logged in via ${provider.type} provider "${provider.name}".`,
-          event: { action: 'log_in_user', type: 'start' },
+          event: { action: 'log_in_user', type: ['start'] },
           object: {
             id: userProfileId ?? username,
             name: username,
@@ -1037,7 +1037,7 @@ export class Authenticator {
 
       this.options.userActivity.trackUserAction({
         message: `User logged out via ${sessionValue.provider.type} provider "${sessionValue.provider.name}".`,
-        event: { action: 'log_out_user', type: 'end' },
+        event: { action: 'log_out_user', type: ['end'] },
         object: {
           id: sessionValue.userProfileId ?? sessionValue.username,
           name: sessionValue.username,

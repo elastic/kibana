@@ -22,7 +22,7 @@ import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolv
 import type { WorkloadBindingStore } from './workload_binding_store';
 import type { AuthenticatedUser, SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
-import { ensureManageSecurityPrivilege } from '../manage_security_privilege';
+import { ensureClusterPrivilege } from '../cluster_privilege';
 import type { ServiceAccountsBackend } from '../types';
 
 /**
@@ -266,7 +266,8 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   }
 
   private ensureCanManage(request: KibanaRequest, action: string): Promise<void> {
-    return ensureManageSecurityPrivilege({
+    return ensureClusterPrivilege({
+      privilege: 'manage_security',
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
@@ -298,24 +299,3 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     }
   }
 }
-
-/**
- * Stand-in for runtimes whose service account backend cannot execute workloads. Bind refuses
- * too: a binding that can never be exchanged for a credential is a promise Kibana cannot keep.
- *
- * See https://github.com/elastic/kibana/issues/284466.
- */
-export const createNotImplementedWorkloadBindings = (): ServiceAccountWorkloadBindingsApi => {
-  const notImplemented = () => {
-    throw Boom.notImplemented(
-      'Service account workload bindings are not yet implemented for the Elasticsearch backend'
-    );
-  };
-
-  return {
-    bindWorkload: async () => notImplemented(),
-    unbindWorkload: async () => notImplemented(),
-    getBinding: async () => notImplemented(),
-    withScopedRequest: async () => notImplemented(),
-  };
-};
