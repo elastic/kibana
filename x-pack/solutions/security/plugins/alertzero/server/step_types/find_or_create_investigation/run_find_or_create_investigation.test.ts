@@ -6,13 +6,18 @@
  */
 
 import { createConversationAlreadyExistsError } from '@kbn/agent-builder-common';
-import { buildHuntInvestigationConversationId } from '../../services/watches/hunt/common/hunt_investigation_id';
+import {
+  buildHuntInvestigationConversationId,
+  buildHuntTriggerAttachmentId,
+} from '../../services/watches/hunt/common/hunt_investigation_id';
 import { HUNT_INVESTIGATION_TEMPLATE_ID } from '../../conversation_templates/hunt_investigation';
 import { runFindOrCreateInvestigation } from './run_find_or_create_investigation';
 import type { FindOrCreateConversationClient } from './run_find_or_create_investigation';
 
+const spaceId = 'default';
 const reportId = 'rpt-find-or-create-1';
 const conversationId = buildHuntInvestigationConversationId(reportId);
+const triggerAttachmentId = buildHuntTriggerAttachmentId({ spaceId, reportId });
 
 const buildClient = (
   overrides: Partial<FindOrCreateConversationClient> = {}
@@ -26,9 +31,9 @@ describe('runFindOrCreateInvestigation', () => {
   it('creates a new Investigation and returns its deterministic id', async () => {
     const conversationClient = buildClient();
 
-    const output = await runFindOrCreateInvestigation({ reportId }, { conversationClient });
+    const output = await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient });
 
-    expect(output).toEqual({ investigationConversationId: conversationId });
+    expect(output).toEqual({ investigationConversationId: conversationId, triggerAttachmentId });
     expect(conversationClient.create).toHaveBeenCalledWith(
       expect.objectContaining({ id: conversationId, templateId: HUNT_INVESTIGATION_TEMPLATE_ID })
     );
@@ -42,9 +47,9 @@ describe('runFindOrCreateInvestigation', () => {
         .mockRejectedValue(createConversationAlreadyExistsError({ conversationId })),
     });
 
-    const output = await runFindOrCreateInvestigation({ reportId }, { conversationClient });
+    const output = await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient });
 
-    expect(output).toEqual({ investigationConversationId: conversationId });
+    expect(output).toEqual({ investigationConversationId: conversationId, triggerAttachmentId });
     expect(conversationClient.get).toHaveBeenCalledWith(conversationId);
   });
 
@@ -54,7 +59,7 @@ describe('runFindOrCreateInvestigation', () => {
     });
 
     await expect(
-      runFindOrCreateInvestigation({ reportId }, { conversationClient })
+      runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient })
     ).rejects.toThrow('boom');
     expect(conversationClient.get).not.toHaveBeenCalled();
   });
@@ -68,7 +73,7 @@ describe('runFindOrCreateInvestigation', () => {
     });
 
     await expect(
-      runFindOrCreateInvestigation({ reportId }, { conversationClient })
+      runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient })
     ).rejects.toThrow('not found');
   });
 });

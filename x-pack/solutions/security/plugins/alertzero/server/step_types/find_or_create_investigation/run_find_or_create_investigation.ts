@@ -10,7 +10,10 @@ import {
   DEFAULT_CONVERSATION_TITLE,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
-import { buildHuntInvestigationConversationId } from '../../services/watches/hunt/common/hunt_investigation_id';
+import {
+  buildHuntInvestigationConversationId,
+  buildHuntTriggerAttachmentId,
+} from '../../services/watches/hunt/common/hunt_investigation_id';
 import { HUNT_INVESTIGATION_TEMPLATE_ID } from '../../conversation_templates/hunt_investigation';
 import type { FindOrCreateInvestigationOutput } from '../../../common/step_types/find_or_create_investigation';
 
@@ -42,10 +45,11 @@ export interface RunFindOrCreateInvestigationDeps {
  * trusting the create-time race alone.
  */
 export const runFindOrCreateInvestigation = async (
-  { reportId }: { reportId: string },
+  { spaceId, reportId }: { spaceId: string; reportId: string },
   { conversationClient }: RunFindOrCreateInvestigationDeps
 ): Promise<FindOrCreateInvestigationOutput> => {
   const investigationConversationId = buildHuntInvestigationConversationId(reportId);
+  const triggerAttachmentId = buildHuntTriggerAttachmentId({ spaceId, reportId });
 
   try {
     await conversationClient.create({
@@ -61,5 +65,5 @@ export const runFindOrCreateInvestigation = async (
     await conversationClient.get(investigationConversationId);
   }
 
-  return { investigationConversationId };
+  return { investigationConversationId, triggerAttachmentId };
 };

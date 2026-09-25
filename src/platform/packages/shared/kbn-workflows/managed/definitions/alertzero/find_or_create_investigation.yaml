@@ -20,6 +20,11 @@ triggers:
         reportId:
           type: string
           description: Threat report id to find-or-create a Hunt Watch Investigation for.
+        runId:
+          type: string
+          description: >-
+            Optional run id the Worker's fan-out minted for this sweep, named
+            in the trigger message narrative when present.
       required:
         - reportId
       additionalProperties: false
@@ -46,6 +51,53 @@ steps:
             status: failed
             stage: find_or_create
             reason: "{{ steps.find_or_create.error.message }}"
+
+  # By reference (security.threat's own contract: report_id plus optional
+  # captured-fallback fields; the live report document is resolved
+  # space-projected at render time, so no fallback fields are required here).
+  # `triggerAttachmentId` (trigger-{sha256(space|reportId)}, computed by the
+  # native step alongside the deterministic conversation id) is fixed per
+  # (space, reportId), so a rerun against the same conversation 409s rather
+  # than appending a second copy, and packaging's documented fallback lookup
+  # (section B: `conversations.search({ filter: 'attachment_id: <this id>' })`)
+  # resolves to it. `on-failure: continue: true` because losing this pill is
+  # not a reason to fail an otherwise-successful find-or-create. Skipped when
+  # find_or_create itself failed: there is no conversation id to attach to.
+  - name: attach_threat_report
+    type: ai.attachment.add
+    if: "${{ steps.find_or_create.output.investigationConversationId != nil and steps.find_or_create.output.investigationConversationId != empty }}"
+    with:
+      conversation_id: "{{ steps.find_or_create.output.investigationConversationId }}"
+      id: "{{ steps.find_or_create.output.triggerAttachmentId }}"
+      type: security.threat
+      data:
+        report_id: "{{ inputs.reportId }}"
+      description: The threat report this Investigation hunts against
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # Decoupled from the attachment above (Steph, 2026-09-25): a separate
+  # journal_note call rather than one converse call carrying both, since this
+  # message type does not depend on the attachment landing to be useful on its
+  # own. Same skip guard; a rerun gets its own trigger message on the same
+  # Investigation (section B: a manual rerun appends a new run cycle, it does
+  # not create a second Investigation).
+  - name: write_trigger_message
+    type: workflow.execute
+    if: "${{ steps.find_or_create.output.investigationConversationId != nil and steps.find_or_create.output.investigationConversationId != empty }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      inputs:
+        conversation_id: "{{ steps.find_or_create.output.investigationConversationId }}"
+        message: >-
+          {%- if inputs.runId != nil and inputs.runId != empty -%}
+          Investigation opened for threat report {{ inputs.reportId }} under hunt run {{ inputs.runId }}; results will be appended to this Investigation.
+          {%- else -%}
+          Investigation opened for threat report {{ inputs.reportId }}; results will be appended to this Investigation.
+          {%- endif -%}
+    on-failure:
+      continue: true
 
   # `data.set` first, since `workflow.output`'s `with:` values are read, not
   # templated with `{% if %}` blocks directly (the hunt.yaml convention).

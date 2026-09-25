@@ -139,6 +139,7 @@ steps:
           workflow-id: system-security-hunt-find-or-create-investigation
           inputs:
             reportId: "{{ foreach.item }}"
+            runId: "{{ workflow.runId }}"
 
       - name: hunt
         type: workflow.execute

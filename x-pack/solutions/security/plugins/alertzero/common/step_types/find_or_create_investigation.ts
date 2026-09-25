@@ -24,6 +24,11 @@ export const findOrCreateInvestigationOutputSchema = z.object({
   investigationConversationId: z
     .string()
     .describe('uuidv5(hunt:report:{reportId}); minted or verified existing.'),
+  triggerAttachmentId: z
+    .string()
+    .describe(
+      "trigger-{sha256(space|reportId)}; the security.threat attachment id the caller attaches to name this Investigation's report."
+    ),
 });
 
 export type FindOrCreateInvestigationInput = z.infer<typeof findOrCreateInvestigationInputSchema>;

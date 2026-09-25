@@ -25,11 +25,15 @@ export const getFindOrCreateInvestigationStepDefinition = ({
         const input = findOrCreateInvestigationStepCommonDefinition.inputSchema.parse(
           context.input
         );
+        const spaceId = context.contextManager.getContext().workflow.spaceId;
         const request = context.contextManager.getFakeRequest();
         const conversations = getConversations();
         const conversationClient = await conversations.getScopedClient({ request });
 
-        const output = await runFindOrCreateInvestigation(input, { conversationClient });
+        const output = await runFindOrCreateInvestigation(
+          { spaceId, reportId: input.reportId },
+          { conversationClient }
+        );
 
         return { output };
       } catch (error) {
