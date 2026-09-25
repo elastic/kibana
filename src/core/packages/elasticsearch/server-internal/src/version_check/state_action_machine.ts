@@ -81,10 +81,8 @@ export interface StateActionMachine<S extends Scheduled, R, E extends DomainEven
 }
 
 /**
- * Monotonic, so a wall-clock adjustment cannot move a scheduled action or
- * falsify the ordering the schedule relies on. These values order and
- * schedule; nothing displays them. `ref: false` unrefs the timer so a pending
- * wait never keeps the process alive.
+ * Monotonic, so a wall-clock adjustment cannot move a scheduled action. The
+ * unref'd timer never keeps the process alive on its own.
  */
 export const realClock: Clock = {
   now: () => performance.now(),

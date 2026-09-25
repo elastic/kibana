@@ -124,8 +124,8 @@ describe('one scheduling policy', () => {
   const { healthCheckInterval: interval } = config;
 
   it('a retry stays on the grid anchored at the failed request, like a settle', () => {
-    // Due at 1000, failed at 1400 after a slow request. v3 would retry at
-    // 1400 + interval; the grid point is 1000 + interval.
+    // Due at 1000, failed at 1400 after a slow request. A fixed delay would
+    // retry at 1400 + interval; the grid point is 1000 + interval.
     const { state: retried } = model(config, normal, fail(requestError, 1_400));
     const { state: settled } = model(
       config,

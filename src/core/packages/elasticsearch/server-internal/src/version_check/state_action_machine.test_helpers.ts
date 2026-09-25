@@ -9,13 +9,7 @@
 
 import type { Clock } from './state_action_machine';
 
-/**
- * A virtual clock for running a machine on virtual time: `sleep` advances the
- * clock by the requested duration, so an action completes at exactly the
- * instant the machine scheduled it for, and `advance` lets a fake action add
- * its own duration. The deadline math is exercised for real; only the clock is
- * fake.
- */
+/** `sleep` advances the clock by the requested duration; `advance` lets a fake action take time. */
 export interface VirtualClock extends Clock {
   readonly advance: (duration: number) => void;
 }

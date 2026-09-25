@@ -195,11 +195,7 @@ describe('pollEsNodesClockSkew', () => {
 
   const statsResponse = (timestamp: number) => ({ nodes: { 'node-0': { timestamp } } });
 
-  /**
-   * Runs the check on a virtual clock, answering each request from `responses`
-   * (the last one repeating) and aborting after the last request. Resolves once
-   * the machine has stopped, with the virtual instant it stopped at.
-   */
+  /** Answers each request from `responses` (the last repeating), aborts after the last, and returns the virtual stop time. */
   const runRequests = async (responses: Array<() => Promise<unknown>>): Promise<number> => {
     const controller = new AbortController();
     let calls = 0;

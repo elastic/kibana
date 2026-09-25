@@ -8,28 +8,17 @@
  */
 
 /**
- * The Kibana/Elasticsearch clock skew check as a state-action machine. This
- * module is the domain only: its state, its one action, and its model:
+ * The Kibana/Elasticsearch clock skew check as a state-action machine.
  *
- *   state   `ClockSkewState` and `initialState`; the control state selects the
- *           polling interval: healthy checks every ten minutes, skewed reminds
+ *   state   `ClockSkewState`: healthy checks every ten minutes, skewed reminds
  *           every hour
  *   action  `sampleClocks`: one node stats request, bracketed by Kibana's wall
- *           clock, returning a `ClockSkewSample`
- *   model   `model`: classifies the sample, and says what the step meant as a
+ *           clock
+ *   model   `model`: classifies the sample and says what the step meant as a
  *           `ClockSkewEvent`
  *
- * `clockSkewMachine` bundles them for the driver; its `next` always returns
- * the one action, since there is only one.
- *
- * Two clocks, kept apart: the driver schedules on a monotonic clock, while the
- * skew itself is measured on the wall clock, which the action reads before and
- * after the round trip and returns as data. The model never reads either.
- *
- * The event is the domain's account of the transition: whether the skew was
- * detected, persists, or cleared. Only the model has both the state it left
- * and the state it reached, so that judgement is made here, once. Presenting
- * an event is the logger's concern.
+ * The driver schedules on a monotonic clock; the skew is measured on the wall
+ * clock, read inside the action. The model never reads either.
  */
 
 import type { Logger } from '@kbn/logging';
@@ -105,7 +94,7 @@ const pollingInterval = (controlState: ClockSkewControlState): number =>
 
 // Action
 
-/** The one action: sample every node's clock, bracketed by Kibana's own. */
+/** Sample every node's clock, bracketed by Kibana's own. */
 export const sampleClocks =
   (internalClient: ElasticsearchClient): Action<ClockSkewSample> =>
   async (signal) => {
@@ -148,7 +137,6 @@ export const classifyClockSkew = ({
   };
 };
 
-/** The transition function: everything that drives the machine is here. */
 export const model = (
   state: ClockSkewState,
   result: ActionResult<ClockSkewSample>
@@ -176,7 +164,7 @@ export const model = (
 
 // Machine
 
-/** The machine, given its one action; `next` is constant because there is only one. */
+/** `next` is constant: there is only one action. */
 export const clockSkewMachine = (
   action: Action<ClockSkewSample>
 ): StateActionMachine<ClockSkewState, ClockSkewSample, ClockSkewEvent> => ({
@@ -192,7 +180,7 @@ const describeSkew = (still: '' | 'still ', { ms, kibanaTime, elasticsearchTime 
     kibanaTime
   ).toISOString()}; Elasticsearch time: ${new Date(elasticsearchTime).toISOString()}.`;
 
-/** How each event is told to the operator. Memoryless: the event already says what changed. */
+/** Memoryless: the event already says what changed. */
 export const logClockSkewEvent = (log: Logger, event: ClockSkewEvent | InitialEvent): void => {
   switch (event.type) {
     case 'initial':

@@ -8,19 +8,10 @@
  */
 
 /**
- * RxJS glue for the version check machine: turns a machine into the
- * `esNodesCompatibility$` observable the rest of the service expects. The
- * domain lives in nodes_version; nothing here knows how the cluster is asked.
- * RxJS does only what a pull-based generator cannot give those consumers:
- *
- *   - multicast, so one poller serves all of them rather than each iterator
- *     getting a disjoint slice of the states
- *   - replay, since `isValidConnection` and the saved objects service subscribe
- *     late and take `first(...)`
- *   - teardown, since unsubscribing aborts the machine at its wait
- *
- * The pipeline after `from(...)` is pure distribution: keep the steps whose
- * compatibility changed, share the latest.
+ * RxJS glue: turns the version check machine into the `esNodesCompatibility$`
+ * observable the service expects. RxJS adds only what a generator cannot give
+ * several consumers: multicast, replay for late `first(...)` subscribers, and
+ * teardown that aborts the machine. Nothing here knows how the cluster is asked.
  */
 
 import { defer, filter, finalize, from, map, shareReplay, type Observable } from 'rxjs';

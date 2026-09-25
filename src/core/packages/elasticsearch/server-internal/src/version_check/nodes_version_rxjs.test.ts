@@ -131,12 +131,3 @@ describe('pollEsNodesVersion', () => {
     );
   });
 });
-
-/*
- * Timing parity with the upstream marble contract is asserted in
- * nodes_version_timeline.test.ts by injecting time into the machine
- * directly, not here. Change detection is asserted in nodes_version.test.ts,
- * where it now lives. This delivery layer runs the machine on real time, which
- * TestScheduler cannot pump; it only proves distribution (multicast, replay,
- * teardown).
- */

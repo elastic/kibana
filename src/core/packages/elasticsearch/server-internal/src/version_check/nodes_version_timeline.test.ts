@@ -8,16 +8,9 @@
  */
 
 /**
- * Marble-equivalent tests, without the marble scheduler.
- *
- * Instead of driving the machine through RxJS's TestScheduler (which cannot
- * pump a Promise- or generator-based source on virtual time), we run it on the
- * driver's virtual clock. The assertions then read the timeline the machine
- * produced, the instant, content, and event of each emission, which is exactly
- * what a marble diagram encodes, but as plain data.
- *
- * The sequence begins with the initial state and its initial event, so every
- * timeline starts with the STARTUP state that has no compatibility yet.
+ * Marble-equivalent tests: the machine runs on the virtual clock and the
+ * assertions read the timeline of states it produced, which is what a marble
+ * diagram encodes, as plain data.
  */
 
 import {
@@ -154,8 +147,8 @@ describe('the machine on a virtual clock (marble-equivalent)', () => {
   });
 
   it('keeps the fixed grid when a slow request changes the polling interval', async () => {
-    // Upstream restarts its `interval()` when the regime changes, so it would
-    // request at 230 here. The machine stays on the grid anchored at the time
+    // The RxJS original restarted its `interval()` when the regime changed, so
+    // it would request at 230 here. The machine stays on the grid anchored at the time
     // the request that changed the regime was due: 0 + 2 * 100.
     const timeline = await runTimeline(
       [compatible, compatible],
@@ -194,8 +187,8 @@ describe('the machine on a virtual clock (marble-equivalent)', () => {
   });
 
   it('keeps a slow failing request on the grid instead of delaying the retry by its duration', async () => {
-    // The request due at 100 takes 50ms to fail. v3 and upstream would retry at
-    // 150 + 100 = 250; the grid point is 200. The retry keeps the last
+    // The request due at 100 takes 50ms to fail. A fixed delay would retry at
+    // 250; the grid point is 200. The retry keeps the last
     // compatibility, so the compatible request that follows changes nothing.
     const timeline = await runTimeline(
       [compatible, requestError, compatible],

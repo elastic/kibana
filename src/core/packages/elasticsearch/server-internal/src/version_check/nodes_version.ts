@@ -8,35 +8,21 @@
  */
 
 /**
- * The Elasticsearch version health check as a state-action machine. This
- * module is the domain only: its state, its one action, and its model:
+ * The Elasticsearch version health check as a state-action machine.
  *
- *   state   `NodesVersionState` and `initialState`; the control state selects
- *           the polling interval
+ *   state   `NodesVersionState`; the control state selects the polling
+ *           interval: STARTUP until a compatible response, FAILING while the
+ *           request itself fails, NORMAL once the cluster answered
  *   action  `fetchNodesInfo`: one node info request for every node's version
  *           and address
- *   model   `model`: maps the response to a compatibility, and says whether
- *           it changed as a `NodesVersionEvent`
+ *   model   `model`: maps the response to a compatibility and says whether it
+ *           changed
  *
- * A step settles when its result becomes the known compatibility. A retry
- * uses an attempt instead and settles nothing.
- *
- * One scheduling policy: every step, whether it settles a compatibility or
- * uses a retry attempt, schedules the next action on the grid anchored at
- * the time the action that just ran was due. The RxJS original scheduled
- * retries at a fixed delay from the failed request instead; that was the shape
- * of RxJS `retry({ delay })`, not a requirement of the health check.
- *
- * The control state selects the polling interval, and means:
- *
- *   STARTUP  no compatible response yet
- *   FAILING  the node info request itself is failing
- *   NORMAL   the cluster answered
- *
- * The event of a step says whether it settled a compatibility and whether that
- * differs from the last one. Change is judged here, against the compatibility
- * in the state it left, so the compatibility is in the state because a
- * transition reads it, not because a consumer wants it.
+ * A step settles when its result becomes the known compatibility; a retry
+ * uses an attempt and settles nothing. Every step, retries included,
+ * schedules the next request on the grid anchored at the time the last one
+ * was due. The RxJS original retried at a fixed delay after the failure;
+ * that was the shape of `retry({ delay })`, not a requirement.
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -76,7 +62,6 @@ export interface NodesVersionState extends Scheduled {
   readonly compatibility: NodesVersionCompatibility | undefined;
   /** Requests left before a request error becomes the known compatibility. */
   readonly attemptsLeft: number;
-  /** When this state's action is due. */
   readonly nextActionAt: number;
 }
 
@@ -114,7 +99,7 @@ const pollingInterval = (
   }
 };
 
-/** The one action: ask every node for its version and address. */
+/** Ask every node for its version and address. */
 export const fetchNodesInfo =
   (internalClient: ElasticsearchClient): Action<NodesInfo> =>
   (signal) =>
@@ -145,7 +130,7 @@ const nextControlState = (
 
 const sameNode = (a: NodeInfo, b: NodeInfo): boolean => a.ip === b.ip && a.version === b.version;
 
-/** Are two compatibilities observably equal? Ports the upstream `compareNodes`. */
+/** Are two compatibilities observably equal? Ports the original `compareNodes`. */
 export const sameCompatibility = (
   prev: NodesVersionCompatibility,
   curr: NodesVersionCompatibility
@@ -157,7 +142,6 @@ export const sameCompatibility = (
   prev.warningNodes.every((node, i) => sameNode(node, curr.warningNodes[i])) &&
   prev.nodesInfoRequestError?.message === curr.nodesInfoRequestError?.message;
 
-/** The transition function: everything that drives the machine is here. */
 export const model = (
   config: NodesVersionConfig,
   state: NodesVersionState,
@@ -199,12 +183,7 @@ export const model = (
   };
 };
 
-/**
- * The machine, given its action; `next` is constant because there is only
- * one. Run it with `run` for a single consumer, or through the RxJS glue
- * (`esNodesCompatibility$` in nodes_version_rxjs) for the multi-consumer
- * change-only signal.
- */
+/** `next` is constant: there is only one action. */
 export const nodesVersionMachine = (
   action: Action<NodesInfo>,
   config: NodesVersionConfig
