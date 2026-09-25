@@ -9,7 +9,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../../common/constants';
-import { MAX_IAC_RENDER_INTEGRATIONS } from '../../../../common/types/rest_spec/iac_provisioner';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  MAX_IAC_RENDER_INTEGRATIONS,
+} from '../../../../common/types/rest_spec/iac_provisioner';
 import { apiTest, testData } from '../fixtures';
 
 const { VALID_RENDER_BODY } = testData;
@@ -65,7 +68,7 @@ apiTest.describe(
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
           provider: 'aws',
-          workflow: 'federated_identity',
+          workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
           integrations: VALID_RENDER_BODY.integrations,
         },
         responseType: 'json',

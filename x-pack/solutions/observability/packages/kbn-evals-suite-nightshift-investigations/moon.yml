@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/significant-events-schema'
   - '@kbn/workflows'
   - '@kbn/zod'
+  - '@kbn/config'
+  - '@kbn/config-schema'
 tags:
   - functional-tests
   - package
