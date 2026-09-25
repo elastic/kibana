@@ -884,10 +884,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.selectUserInAssigneesPopover('cases_all_user');
         await cases.singleCase.closeAssigneesPopover();
         await header.waitUntilLoadingHasFinished();
-        await retry.waitFor('assignee to appear in the case header', async () => {
-          return testSubjects.exists('user-profile-assigned-user-cases_all_user-remove-group');
+        await retry.waitFor('assignee avatar to appear in the sidebar', async () => {
+          return testSubjects.exists('case-user-profile-avatar-cases_all_user');
         });
-        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
 
         await testSubjects.existOrFail('case-view-participants-field-panel');
         await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user');
