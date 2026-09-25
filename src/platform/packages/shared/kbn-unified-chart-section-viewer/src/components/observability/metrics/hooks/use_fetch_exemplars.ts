@@ -75,6 +75,7 @@ export const useFetchExemplars = ({
         reportError({ error, source: 'useFetchExemplars', labels: { profile_id: profileId } });
 
       const metricsByStream = await probeExemplarsAvailability({
+        fetchId: fetchParams.lastReloadRequestTime,
         search,
         dataView,
         uiSettings,
@@ -105,8 +106,8 @@ export const useFetchExemplars = ({
         return undefined;
       }
     },
-    // `fetchParams.timeRange` and `filters` are rebuilt once per Discover fetch (see
-    // `processFetchParams` in kbn-unified-histogram), so this re-fires at the chart's cadence.
+    // `fetchParams.timeRange`, `filters` and `lastReloadRequestTime` are rebuilt once per Discover
+    // fetch (see `processFetchParams` in kbn-unified-histogram), so this re-fires at the chart's cadence.
     [
       isExemplarsEnabled,
       dataView,
@@ -116,6 +117,7 @@ export const useFetchExemplars = ({
       search,
       fetchParams.timeRange,
       fetchParams.filters,
+      fetchParams.lastReloadRequestTime,
       uiSettings,
       profileId,
       reportError,

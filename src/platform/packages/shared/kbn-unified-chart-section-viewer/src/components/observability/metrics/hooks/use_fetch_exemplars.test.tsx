@@ -231,6 +231,7 @@ describe('useFetchExemplars', () => {
 
     await flushAsync();
     expect(mockProbe).toHaveBeenCalledWith({
+      fetchId: params.fetchParams.lastReloadRequestTime,
       search: params.services.data.search.search,
       dataView: params.fetchParams.dataView,
       uiSettings: params.services.uiSettings,
@@ -248,6 +249,25 @@ describe('useFetchExemplars', () => {
       profileId: TEST_PROFILE_ID,
       executionContextName: MetricsExecutionContextName.EXEMPLARS,
     });
+  });
+
+  it('probes again under the new fetch id when the Discover fetch changes', async () => {
+    const params = createParams();
+    const { rerender } = renderHook((props: UseFetchExemplarsParams) => useFetchExemplars(props), {
+      initialProps: params,
+    });
+    await flushAsync();
+
+    const nextFetchParams = {
+      ...params.fetchParams,
+      lastReloadRequestTime: params.fetchParams.lastReloadRequestTime + 1,
+      timeRange: { ...params.fetchParams.timeRange },
+    };
+    rerender({ ...params, fetchParams: nextFetchParams });
+    await flushAsync();
+
+    expect(mockProbe).toHaveBeenCalledTimes(2);
+    expect(mockProbe.mock.calls[1][0].fetchId).toBe(nextFetchParams.lastReloadRequestTime);
   });
 
   it('routes probe errors to the chart section error reporter', async () => {

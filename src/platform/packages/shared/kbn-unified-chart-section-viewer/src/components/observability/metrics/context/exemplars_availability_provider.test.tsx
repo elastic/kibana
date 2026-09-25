@@ -32,6 +32,7 @@ const requestParams = {
   uiSettings: {} as IUiSettingsClient,
   profileId: 'metrics-data-source-profile',
 };
+const fetchId = 1_700_000_000_000;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ExemplarsAvailabilityProvider>{children}</ExemplarsAvailabilityProvider>
@@ -54,7 +55,7 @@ describe('ExemplarsAvailabilityProvider', () => {
   it('forwards the request parameters to the probe fetch', async () => {
     const probe = renderProbe();
 
-    await probe({ ...requestParams, onError: jest.fn() });
+    await probe({ ...requestParams, fetchId, onError: jest.fn() });
 
     expect(mockFetch).toHaveBeenCalledWith(requestParams);
   });
@@ -63,36 +64,45 @@ describe('ExemplarsAvailabilityProvider', () => {
     const probe = renderProbe();
 
     const [first, second] = await Promise.all([
-      probe({ ...requestParams, onError: jest.fn() }),
-      probe({ ...requestParams, onError: jest.fn() }),
+      probe({ ...requestParams, fetchId, onError: jest.fn() }),
+      probe({ ...requestParams, fetchId, onError: jest.fn() }),
     ]);
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(first).toBe(second);
   });
 
-  it('caches a non-empty result for later callers', async () => {
+  it('caches a non-empty result for later callers in the same fetch', async () => {
     const probe = renderProbe();
 
-    await probe({ ...requestParams, onError: jest.fn() });
-    await probe({ ...requestParams, onError: jest.fn() });
+    await probe({ ...requestParams, fetchId, onError: jest.fn() });
+    await probe({ ...requestParams, fetchId, onError: jest.fn() });
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts a new probe when the fetch id changes', async () => {
+    const probe = renderProbe();
+
+    await probe({ ...requestParams, fetchId, onError: jest.fn() });
+    await probe({ ...requestParams, fetchId: fetchId + 1, onError: jest.fn() });
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
   it('does not cache an empty result', async () => {
     mockFetch.mockResolvedValue(new Map());
     const probe = renderProbe();
 
-    expect((await probe({ ...requestParams, onError: jest.fn() })).size).toBe(0);
-    await probe({ ...requestParams, onError: jest.fn() });
+    expect((await probe({ ...requestParams, fetchId, onError: jest.fn() })).size).toBe(0);
+    await probe({ ...requestParams, fetchId, onError: jest.fn() });
 
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
   it('does not share state between provider instances', async () => {
-    await renderProbe()({ ...requestParams, onError: jest.fn() });
-    await renderProbe()({ ...requestParams, onError: jest.fn() });
+    await renderProbe()({ ...requestParams, fetchId, onError: jest.fn() });
+    await renderProbe()({ ...requestParams, fetchId, onError: jest.fn() });
 
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
@@ -107,8 +117,8 @@ describe('ExemplarsAvailabilityProvider', () => {
       const secondOnError = jest.fn();
 
       const [first, second] = await Promise.all([
-        probe({ ...requestParams, onError: firstOnError }),
-        probe({ ...requestParams, onError: secondOnError }),
+        probe({ ...requestParams, fetchId, onError: firstOnError }),
+        probe({ ...requestParams, fetchId, onError: secondOnError }),
       ]);
 
       expect(first.size).toBe(0);
@@ -117,7 +127,7 @@ describe('ExemplarsAvailabilityProvider', () => {
       expect(firstOnError).toHaveBeenCalledWith(probeError);
       expect(secondOnError).not.toHaveBeenCalled();
 
-      await probe({ ...requestParams, onError: jest.fn() });
+      await probe({ ...requestParams, fetchId, onError: jest.fn() });
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 
@@ -128,7 +138,7 @@ describe('ExemplarsAvailabilityProvider', () => {
       const probe = renderProbe();
       const onError = jest.fn();
 
-      expect((await probe({ ...requestParams, onError })).size).toBe(0);
+      expect((await probe({ ...requestParams, fetchId, onError })).size).toBe(0);
       expect(onError).not.toHaveBeenCalled();
     });
   });

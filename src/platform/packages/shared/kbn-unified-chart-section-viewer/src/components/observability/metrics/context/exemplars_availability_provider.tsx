@@ -16,6 +16,12 @@ import {
 } from '../utils/fetch_metrics_with_exemplars';
 
 export interface ProbeExemplarsAvailabilityParams extends FetchMetricsWithExemplarsParams {
+  /**
+   * Identifies the Discover fetch the caller belongs to (`fetchParams.lastReloadRequestTime`).
+   * Every chart in one fetch shares a single probe; a new id starts a new probe, so a metric
+   * that gains its first exemplar is picked up on the next refresh.
+   */
+  fetchId: number;
   /** Called at most once per probe request, never for aborts. */
   onError: (error: unknown) => void;
 }
@@ -30,34 +36,47 @@ const ExemplarsAvailabilityContext = createContext<ProbeExemplarsAvailability | 
   undefined
 );
 
+interface CachedProbe {
+  fetchId: number;
+  request: Promise<MetricsWithExemplars>;
+}
+
 /**
- * Shares one exemplars availability probe between every chart in the grid. The probe never
- * rejects: a failure is reported once through `onError` and resolves to an empty set.
+ * Shares one exemplars availability probe between every chart in the grid for each Discover
+ * fetch. The probe never rejects: a failure is reported once through `onError` and resolves to
+ * an empty set.
  */
 export const ExemplarsAvailabilityProvider = ({ children }: { children: React.ReactNode }) => {
-  const pendingProbe = useRef<Promise<MetricsWithExemplars> | undefined>(undefined);
+  const cachedProbe = useRef<CachedProbe | undefined>(undefined);
 
-  const probe = useCallback<ProbeExemplarsAvailability>(({ onError, ...requestParams }) => {
-    if (!pendingProbe.current) {
+  const probe = useCallback<ProbeExemplarsAvailability>(
+    ({ fetchId, onError, ...requestParams }) => {
+      const cached = cachedProbe.current;
+      if (cached?.fetchId === fetchId) {
+        return cached.request;
+      }
+
       const request = fetchMetricsWithExemplars(requestParams).catch((error: unknown) => {
         if (!isSuppressedFetchError(error)) {
           onError(error);
         }
         return NO_METRICS;
       });
-      pendingProbe.current = request;
+      const entry: CachedProbe = { fetchId, request };
+      cachedProbe.current = entry;
 
       // The exemplars stream is created on the first exemplar write, so an empty or failed
-      // result may be transient. Only a non-empty result stays cached.
+      // result may be transient. Only a non-empty result stays cached for this fetch.
       void request.then((metricsByStream) => {
-        if (metricsByStream.size === 0 && pendingProbe.current === request) {
-          pendingProbe.current = undefined;
+        if (metricsByStream.size === 0 && cachedProbe.current === entry) {
+          cachedProbe.current = undefined;
         }
       });
-    }
 
-    return pendingProbe.current;
-  }, []);
+      return request;
+    },
+    []
+  );
 
   return (
     <ExemplarsAvailabilityContext.Provider value={probe}>
