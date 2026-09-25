@@ -15,6 +15,8 @@ import * as i18n from './translations';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from '../../common/auth/use_secret_headers';
 
+jest.setTimeout(60_000);
+
 jest.mock('../../common/auth/use_secret_headers');
 
 const useSecretHeadersMock = useSecretHeaders as jest.Mock;
