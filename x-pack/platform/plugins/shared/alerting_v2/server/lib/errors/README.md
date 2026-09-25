@@ -61,14 +61,14 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `RULE_NOT_FOUND`                    | 404    | `getRule` / `updateRule` / `deleteRule` cannot find a rule by id                                                                    | `{ rule_id }`                              |
 | `RULE_ALREADY_EXISTS`               | 409 / 200 (per-item) | `createRule` collides with an existing id; bulk create reports it per item                                                          | `{ rule_id }` (single create)              |
 | `RULE_VERSION_CONFLICT`             | 409    | An update / delete races another writer (`if_seq_no` mismatch)                                                                      | `{ rule_id }`                              |
-| `INVALID_RULE_DATA`                 | 400    | The submitted body fails the domain-level schema check                                                                              | `{ context, errors }` (tree-shaped errors) |
+| `INVALID_RULE_DATA`                 | 400    | The submitted body fails the domain-level schema check. In-process callers only (HTTP callers are rejected at the route)                                                                              | `{ context, errors }` (tree-shaped errors) |
 | `INVALID_ARTIFACT_DATA`             | 400    | A registered artifact's `data` failed its type-specific schema                                                                      | `{ artifact_id, artifact_type, errors? }` |
 | `INVALID_STATE_TRANSITION`          | 400    | `state_transition` is incompatible with the rule's `kind`                                                                           | `{ rule_id, kind, transition }`            |
 | `INVALID_SIGNAL_RULE`               | 400    | An update would leave a signal rule in an invalid shape                                                                             | `{ rule_id, rule_kind }`                   |
 | `INVALID_RULE_QUERY_CONFIG`         | 400    | An update would desynchronize a `recovery_strategy`/`no_data_strategy` from its `query.recovery`/`query.no_data` block              | `{ rule_id }`                              |
 | `INVALID_STATE_TRANSITION_CONFIG`   | 400    | A recovery delay (`state_transition.recovering_count`/`recovering_timeframe`) is set while recovery is disabled, where it is inert  | `{ rule_id }`                              |
 | `BULK_QUERY_MATCH_LIMIT_EXCEEDED`   | 400    | By-query bulk operation with `force: true` matched more resources than the per-request cap; rejected before any resource is mutated | `{ match_count, limit }`                   |
-| `IMMUTABLE_FIELDS_CHANGED`          | 400    | PUT (upsert) request changes a field flagged as immutable                                                                           | `{ fields }`                               |
+| `IMMUTABLE_FIELDS_CHANGED`          | 409    | PUT (upsert) request changes a field flagged as immutable                                                                           | `{ fields }`                               |
 | `INVALID_FILTER_FIELD`              | 400    | The `filter` references a field that is not in the allow-list                                                                       | `{ field, allowed_fields }`                |
 | `UNSUPPORTED_FILTER_FUNCTION`       | 400    | The `filter` uses a KQL function we do not translate yet                                                                            | `{ function }`                             |
 | `SCHEDULE_INTERVAL_TOO_SHORT`       | 400    | `schedule.every` is below `xpack.alerting_v2.rules.minimumScheduleInterval`                                                         | `{ interval, minimumScheduleInterval }`    |
@@ -87,7 +87,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `ACTION_POLICY_NOT_FOUND`        | 404                  | `get` / `update` / `delete` cannot find an action policy by id                                                                                                                                                                                                          | `{ action_policy_id }`                 |
 | `ACTION_POLICY_ALREADY_EXISTS`   | 409                  | `createActionPolicy` collides with an existing id                                                                                                                                                                                                                       | `{ action_policy_id }`                 |
 | `ACTION_POLICY_VERSION_CONFLICT` | 409                  | An update / delete races another writer                                                                                                                                                                                                                                 | `{ action_policy_id }`                 |
-| `INVALID_ACTION_POLICY_DATA`     | 400                  | The submitted body fails the domain-level schema check                                                                                                                                                                                                                  | `{ context, errors }`                  |
+| `INVALID_ACTION_POLICY_DATA`     | 400                  | The submitted body fails the domain-level schema check. In-process callers only (HTTP callers are rejected at the route)                                                                                                                                                                                                                  | `{ context, errors }`                  |
 | `INVALID_DATE_STRING`            | 400                  | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing                                                                                                                                                                                                      | `{ value }`                            |
 | `API_KEY_INVALIDATION_FAILED`    | 500 / 200 (per-item) | Delete-only. The policy's API key could not be queued for invalidation, so the policy was deliberately left in place — deleting it would strand a valid key with nothing referencing it. Safe to retry. The single delete returns 500; bulk delete reports it per item. | `{ action_policy_id }` (single delete) |
 | `ACTION_POLICY_LICENSE_NOT_SUPPORTED` | 403             | Create / update / upsert / enable / bulk enable is rejected because the current license is not an active Enterprise license (action policies dispatch to Workflows). Checked before any side effect. Get / list / disable / snooze / delete stay available so existing policies can be cleaned up. | `{ required_license, current_license, license_status }` |
@@ -99,7 +99,8 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `ALERT_EVENT_NOT_FOUND`            | 404                  | No alert event matches the supplied `group_hash` (+ optional `episode_id`). Single-action route.                                                                                                                                                         | `{ group_hash, episode_id? }`                             |
 | `ALERT_GROUP_NOT_FOUND`            | 200 (per-item)       | Bulk-only. No alert event matches an item's `group_hash`. Reported per item in the `errors[]` array; the request still succeeds for the rest of the batch.                                                                                               | `{ group_hash }`                                          |
 | `ALERT_EPISODE_NOT_FOUND`          | 200 (per-item)       | Bulk-only. The item's `group_hash` resolved, but its `episode_id` did not match the group's latest episode (superseded). Reported per item in the `errors[]` array.                                                                                      | `{ group_hash, episode_id }`                              |
-| `INVALID_EPISODE_STATE_TRANSITION` | 400 / 200 (per-item) | The requested action is a no-op against the current lifecycle state: `activate` of an already-`active` episode, or `deactivate` of an already-`inactive` episode. Every other transition is allowed. Single route returns 400; bulk reports it per item. | `{ group_hash, episode_id, episode_status, action_type }` |
+| `ALERT_EPISODE_NOT_LATEST`         | 409 / 200 (per-item) | The episode exists but has been superseded by a newer episode of its series. Only the lifecycle actions (`activate` / `deactivate`) require the latest episode. Single route returns 409; bulk reports it per item.                                       | `{ episode_id, group_hash }`                              |
+| `INVALID_EPISODE_STATE_TRANSITION` | 409 / 200 (per-item) | The requested action is a no-op against the current lifecycle state: `activate` of an already-`active` episode, or `deactivate` of an already-`inactive` episode. Every other transition is allowed. Only the lifecycle actions carry this precondition — the audit-only actions (`ack`/`unack`/`assign`/`tag`/`snooze`/`unsnooze`) record a repeat rather than rejecting it. Single route returns 409; bulk reports it per item. | `{ group_hash, episode_id, episode_status, action_type }` |
 
 ### Rule doctor insights (`server/lib/rule_doctor_insights_client/`)
 
@@ -160,6 +161,22 @@ is attached to `boom.data`. Prefer domain codes whenever possible.
 | 504         | `GATEWAY_TIMEOUT`       |
 | other 4xx   | `BAD_REQUEST`           |
 | other       | `INTERNAL_SERVER_ERROR` |
+
+## Where a bad request body is rejected
+
+Routes validate the body against the same schema the domain client re-parses, so
+an HTTP caller is always rejected at the route and sees `BAD_REQUEST` with
+`details: { source, errors }`. The domain codes below guard the clients when they
+are called in-process (`getRulesClientWithRequest`, the agent-builder tools),
+where no route validation has run:
+
+| Code                         | Reached by                      |
+| ---------------------------- | ------------------------------- |
+| `BAD_REQUEST`                | Every HTTP caller               |
+| `INVALID_RULE_DATA`          | In-process `RulesClient` callers |
+| `INVALID_ACTION_POLICY_DATA` | In-process `ActionPolicyClient` callers |
+
+All three carry the same treeified `details.errors`.
 
 ## How to throw a domain error
 
