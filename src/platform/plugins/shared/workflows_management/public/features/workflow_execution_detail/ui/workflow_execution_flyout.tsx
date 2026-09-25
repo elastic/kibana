@@ -263,7 +263,14 @@ const StepDataSection = ({
               size="xs"
               css={{ flexShrink: 0, width: '12px', height: '12px', margin: 0 }}
             />
-            <EuiToolTip content={field} position="top">
+            {/* The tooltip anchors are the flex items: the name's must be able to shrink, and the
+                copy button's must not, or a long name pushes the button out of the capped column.
+                The name's anchor is a flex container so the span inside can truncate. */}
+            <EuiToolTip
+              content={field}
+              position="top"
+              anchorProps={{ css: { display: 'flex', minWidth: 0 } }}
+            >
               <span
                 tabIndex={0}
                 css={{
@@ -287,6 +294,7 @@ const StepDataSection = ({
                   defaultMessage: 'Copy field path',
                 })}
                 disableScreenReaderOutput
+                anchorProps={{ css: { flexShrink: 0 } }}
               >
                 <EuiButtonIcon
                   iconType="copy"
