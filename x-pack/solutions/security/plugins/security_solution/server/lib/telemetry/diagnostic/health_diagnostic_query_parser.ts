@@ -20,15 +20,15 @@ import {
 const VALID_VERSIONS = [1, 2, 3, 4] as const;
 type ValidVersion = (typeof VALID_VERSIONS)[number];
 
-const filterlistSchema = z.record(z.string(), z.enum(Action));
-const queryTypeSchema = z.enum(QueryType);
+const filterlistSchema = z.record(z.string(), z.nativeEnum(Action));
+const queryTypeSchema = z.nativeEnum(QueryType);
 // Accepts YYYY-MM-DD dates, full ISO datetime strings, and YAML Date objects.
 // The complete input is validated (no truncation) and normalised to an ISO instant:
 // a bare date maps to start-of-day UTC, a datetime keeps its exact instant.
 const expiresAtSchema = z
   .preprocess(
     (val) => (val instanceof Date ? val.toISOString() : val),
-    z.union([z.iso.date(), z.iso.datetime({ offset: true })])
+    z.union([z.string().date(), z.string().datetime({ offset: true })])
   )
   .transform((val) => new Date(val).toISOString())
   .optional();
@@ -363,7 +363,7 @@ const QueryDescriptor: z.ZodType<HealthDiagnosticQuery, z.ZodTypeDef, unknown> =
     return 'version' in obj ? obj : { ...obj, version: 1 };
   }, z.union([v1Schema, v2Schema, v3ApiSchema, v3IndexSchema, v4ApiSchema, v4IndexSchema]))
   .catch((ctx) => {
-    const raw = ctx.value as Record<string, unknown> | null;
+    const raw = ctx.input as Record<string, unknown> | null;
     const version = raw?.version;
     // unknown_version: silently dropped, debug log only, no telemetry stat doc.
     // invalid_descriptor: warning logged + skipped stat doc emitted.
@@ -376,7 +376,7 @@ const QueryDescriptor: z.ZodType<HealthDiagnosticQuery, z.ZodTypeDef, unknown> =
     return {
       id: raw?.id as string | undefined,
       name: raw?.name as string | undefined,
-      _raw: ctx.value,
+      _raw: ctx.input,
       failureReason,
     } as unknown as IndexQuery;
   });
