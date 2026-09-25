@@ -505,6 +505,42 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     });
   });
 
+  it('correlates telemetry by rule ID and version', async () => {
+    const queryRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'shared-rule' };
+    const eqlRule = {
+      ...getCreateRulesSchemaMock(),
+      type: 'eql' as const,
+      language: 'eql' as const,
+      query: 'process where true',
+      version: 2,
+      rule_id: 'shared-rule',
+    };
+
+    rulesClient.bulkCreateRules.mockImplementation(async ({ rules: inputRules }) => ({
+      successfulIds: inputRules.map((rule) => getOptionsId(rule)),
+      errors: [],
+      total: inputRules.length,
+    }));
+
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [queryRule, eqlRule],
+      changeTracking,
+    });
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(DETECTION_RULE_INSTALL_EVENT.eventType, {
+      ruleId: result.results[0].id,
+      ruleType: 'query',
+      isPrebuilt: true,
+      isCustomized: false,
+    });
+    expect(analytics.reportEvent).toHaveBeenCalledWith(DETECTION_RULE_INSTALL_EVENT.eventType, {
+      ruleId: result.results[1].id,
+      ruleType: 'eql',
+      isPrebuilt: true,
+      isCustomized: false,
+    });
+  });
+
   it('does not send telemetry for failed or empty installs', async () => {
     await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: [],

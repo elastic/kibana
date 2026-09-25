@@ -155,9 +155,11 @@ export const createDetectionRulesClient = ({
         const result = await bulkCreatePrebuiltRules({ actionsClient, rulesClient, mlAuthz, args });
 
         if (analytics) {
-          const typeByRuleId = new Map(args.rules.map((rule) => [rule.rule_id, rule.type]));
+          const typeByRule = new Map(
+            args.rules.map((rule) => [`${rule.rule_id}:${rule.version}`, rule.type])
+          );
           for (const item of result.results) {
-            const type = typeByRuleId.get(item.rule_id);
+            const type = typeByRule.get(`${item.rule_id}:${item.version}`);
             if (type) {
               sendRuleLifecycleTelemetryEvent(
                 analytics,
