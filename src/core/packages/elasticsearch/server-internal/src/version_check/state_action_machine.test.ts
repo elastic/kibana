@@ -127,36 +127,23 @@ describe('run', () => {
     }),
   });
 
-  it('yields the initial state, then one augmented state per completed action', async () => {
+  it('yields the initial state, then one augmented state per action, with the event the model chose', async () => {
     const clock = virtualClock();
-    const steps = await take(
-      run(
-        counter(async () => 1),
-        clock
-      ),
-      3
-    );
+    let calls = 0;
+    const request = async () => {
+      if (++calls === 2) {
+        throw new Error('boom');
+      }
+      return 1;
+    };
+
+    const steps = await take(run(counter(request), clock), 3);
 
     expect(steps).toEqual([
       { state: { count: 0, nextActionAt: 0 }, event: { type: 'initial' } },
       { state: { count: 1, nextActionAt: 100 }, event: { type: 'added', by: 1 } },
-      { state: { count: 2, nextActionAt: 200 }, event: { type: 'added', by: 1 } },
+      { state: { count: 1, nextActionAt: 200 }, event: { type: 'missed' } },
     ]);
-  });
-
-  it('carries the event the model chose, so a failure is told in the domain’s words', async () => {
-    const clock = virtualClock();
-    const steps = await take(
-      run(
-        counter(async () => {
-          throw new Error('boom');
-        }),
-        clock
-      ),
-      2
-    );
-
-    expect(steps[1]).toEqual({ state: { count: 0, nextActionAt: 100 }, event: { type: 'missed' } });
   });
 
   it('does not act until the states are pulled', async () => {

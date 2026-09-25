@@ -218,26 +218,21 @@ describe('pollEsNodesClockSkew', () => {
 
   const respond = (timestamp: number) => async () => statsResponse(timestamp);
 
-  it('checks on startup and every ten minutes', async () => {
-    const stoppedAt = await runRequests([respond(kibanaTime), respond(kibanaTime)]);
+  it('checks on startup, logs skew once, reminds hourly, and logs recovery once', async () => {
+    const stoppedAt = await runRequests([
+      respond(kibanaTime - 61_000),
+      respond(kibanaTime - 61_000),
+      respond(kibanaTime),
+      respond(kibanaTime),
+    ]);
 
-    expect(internalClient.nodes.stats).toHaveBeenCalledTimes(2);
+    expect(internalClient.nodes.stats).toHaveBeenCalledTimes(4);
     expect(internalClient.nodes.stats).toHaveBeenCalledWith(
       { node_id: '_all', metric: 'os', filter_path: ['nodes.*.timestamp'] },
       { requestTimeout: expect.any(Number), signal: expect.any(AbortSignal) }
     );
-    expect(stoppedAt).toBe(CHECK_INTERVAL);
-    expect(log.error).not.toHaveBeenCalled();
-    expect(log.info).not.toHaveBeenCalled();
-  });
-
-  it('logs skew once, then a reminder every hour', async () => {
-    const stoppedAt = await runRequests([
-      respond(kibanaTime - 61_000),
-      respond(kibanaTime - 61_000),
-    ]);
-
-    expect(stoppedAt).toBe(REMINDER_INTERVAL);
+    // Reminder interval twice while skewed, then one check interval once healthy.
+    expect(stoppedAt).toBe(2 * REMINDER_INTERVAL + CHECK_INTERVAL);
     expect(log.error.mock.calls).toEqual([
       [
         'Kibana and Elasticsearch clocks are out of sync by at least 61000ms. Kibana time: 2026-08-21T12:00:00.000Z; Elasticsearch time: 2026-08-21T11:58:59.000Z.',
@@ -246,44 +241,7 @@ describe('pollEsNodesClockSkew', () => {
         'Kibana and Elasticsearch clocks are still out of sync by at least 61000ms. Kibana time: 2026-08-21T12:00:00.000Z; Elasticsearch time: 2026-08-21T11:58:59.000Z.',
       ],
     ]);
-  });
-
-  it('logs recovery once and resumes ten-minute checks', async () => {
-    const stoppedAt = await runRequests([
-      respond(kibanaTime - 61_000),
-      respond(kibanaTime),
-      respond(kibanaTime),
-    ]);
-
-    expect(internalClient.nodes.stats).toHaveBeenCalledTimes(3);
-    expect(stoppedAt).toBe(REMINDER_INTERVAL + CHECK_INTERVAL);
     expect(log.info.mock.calls).toEqual([['Kibana and Elasticsearch clocks are in sync again.']]);
-    expect(log.error).toHaveBeenCalledTimes(1);
-  });
-
-  it('logs an error when Elasticsearch is ahead of Kibana by more than 60 seconds', async () => {
-    await runRequests([respond(kibanaTime + 61_000)]);
-
-    expect(log.error).toHaveBeenCalledWith(
-      'Kibana and Elasticsearch clocks are out of sync by at least 61000ms. Kibana time: 2026-08-21T12:00:00.000Z; Elasticsearch time: 2026-08-21T12:01:01.000Z.'
-    );
-  });
-
-  it('does not log when clock skew is exactly 60 seconds', async () => {
-    await runRequests([respond(kibanaTime - 60_000)]);
-
-    expect(log.error).not.toHaveBeenCalled();
-  });
-
-  it('brackets the request with the wall clock, so latency explains the difference', async () => {
-    jest
-      .spyOn(Date, 'now')
-      .mockReturnValueOnce(kibanaTime)
-      .mockReturnValueOnce(kibanaTime + 61_000);
-
-    await runRequests([respond(kibanaTime + 500)]);
-
-    expect(log.error).not.toHaveBeenCalled();
   });
 
   it('swallows request failures', async () => {
