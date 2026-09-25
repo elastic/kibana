@@ -293,6 +293,10 @@ export interface CellRenderersSearchContext {
    * Stable per completed grid-result identity; changes on refresh so series caches invalidate.
    */
   requestId?: number;
+  /**
+   * Lifetime of the grid search that produced this context.
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**

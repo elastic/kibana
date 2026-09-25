@@ -16,7 +16,10 @@ import { buildChangePointCards } from '@kbn/change-point-chart-viewer';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { CellRenderersSearchContext } from '../../../types';
 import { ChangePointSummaryCell } from './change_point_summary_cell';
-import type { ChangePointSummarySeriesState } from './change_point_summary_series';
+import type {
+  ChangePointSummarySeriesCache,
+  ChangePointSummarySeriesState,
+} from './change_point_summary_series';
 
 jest.mock('./change_point_summary_chart', () => ({
   ChangePointSummaryChart: ({
@@ -110,6 +113,9 @@ describe('ChangePointSummaryCell', () => {
   const cellContext = {
     typeColumnId: 'type',
     pvalueColumnId: 'pvalue',
+    summarySeriesCache: {
+      getSeries$: jest.fn(),
+    } as ChangePointSummarySeriesCache,
   };
 
   beforeEach(() => {

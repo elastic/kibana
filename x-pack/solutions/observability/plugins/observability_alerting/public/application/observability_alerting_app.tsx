@@ -13,7 +13,10 @@ import type {
 } from '@kbn/alerting-v2-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
@@ -21,7 +24,6 @@ import { Redirect } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
