@@ -190,11 +190,11 @@ export const createDetectionRulesClient = ({
     },
 
     async bulkDeleteRules({
-      ruleIds,
+      rules,
       changeTracking,
     }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
       return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
-        return bulkDeleteRules({ rulesClient, ruleIds, changeTracking });
+        return bulkDeleteRules({ rulesClient, rules, changeTracking });
       });
     },
 
