@@ -520,6 +520,32 @@ describe('useWorkflowUrlState', () => {
       );
     });
 
+    // Iteration and case-branch ids embed author-controlled step names and case matches.
+    it.each([
+      ['a foreach iteration of a step named with &', 'foreach-iteration:loop&x:0'],
+      ['a switch case matching R&D', 'enter-case-branch:case_R&D:0:completed'],
+      ['#', 'foreach-iteration:a#b:0'],
+      ['%', 'foreach-iteration:100%:0'],
+      ['+', 'foreach-iteration:a+b:0'],
+      ['=', 'foreach-iteration:k=v:0'],
+      ['a space', 'foreach-iteration:with space:0'],
+    ])('keeps the step selection intact for %s, including after a reload', (_label, id) => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution(id);
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe(id);
+      const params = new URLSearchParams(result.current.history.location.search);
+      expect(params.get('stepExecutionId')).toBe(id);
+      expect([...params.keys()].sort()).toEqual(['executionId', 'stepExecutionId']);
+
+      // A reload or a shared link starts from the written URL alone.
+      const { result: reloaded } = renderWithHistory([result.current.history.location.search]);
+      expect(reloaded.current.urlState.selectedStepExecutionId).toBe(id);
+    });
+
     it('replaces the entry when a selection is normalised with replace', () => {
       const { result } = renderWithHistory(['/?executionId=exec-1']);
 
