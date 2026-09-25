@@ -63,7 +63,7 @@ export async function cleanupManagedIntegrationsPolicies(
   return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
 }
 
-async function updateManagedIntegrationsPolicy(
+export async function updateManagedIntegrationsPolicy(
   policyId: string,
   survivingInstanceIds: string[],
   opts: BuildPolicyBodyOpts

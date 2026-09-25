@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -19,12 +20,14 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
+import { detectServiceVarsDrift, detectAuthDrift } from './authenticate_and_deploy_step/detect_drift';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
@@ -71,6 +74,38 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   );
   const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
 
+  // ── Drift detection ───────────────────────────────────────────────────────────
+  // At Deploy step mount (edit mode only), compare current session values against the SO to
+  // detect settings drift. isDirty gates the callout and enables a redeploy on Next/Deploy.
+  const { onboardingDeploymentId } = detectAndReviewStep;
+  useEffect(() => {
+    if (!onboardingDeploymentId || awsServicesMap === undefined) return;
+    sendGetCloudOnboardingDeployment(onboardingDeploymentId)
+      .then(({ item }) => {
+        if (!item) return;
+        const dirtyVarIds = detectServiceVarsDrift(
+          serviceSettings?.serviceVars ?? {},
+          (item.serviceVars ?? {}) as Record<string, Record<string, unknown>>,
+          awsServicesMap
+        );
+        const authDirty = detectAuthDrift(
+          {
+            authMethod: authenticateAndDeployStep.authMethod,
+            connectorId: authenticateAndDeployStep.connectorId,
+          },
+          { authMethod: item.authMethod, connectorId: item.connectorId }
+        );
+        const dirty = dirtyVarIds.length > 0 || authDirty;
+        updateDetectAndReviewStep({ isDirty: dirty });
+      })
+      .catch(() => {});
+    // Run only when the deployment id is set (edit mode) and the matrix is available.
+    // Capturing authenticateAndDeployStep and serviceSettings from the render closure is
+    // intentional: we compare the values in context when the check first becomes runnable,
+    // not on every change. Static-key replacement sets isDirty via onReadyChange instead.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingDeploymentId, awsServicesMap]);
+
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
   // ECF instances: prefer session-storage instances because they carry duplicate-instance ARNs
@@ -98,9 +133,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   } = useDeploy({
     onContinue: () => {},
   });
+  const isDirty = detectAndReviewStep.isDirty ?? false;
   const [deployAttempted, setDeployAttempted] = useState(false);
+  // Not done when isDirty: force the Deploy button visible so the user can apply updated settings.
   const isMiDone =
-    isAlreadyDeployed || (deployAttempted && !isDeploying && failedInstances.length === 0);
+    (isAlreadyDeployed && !isDirty) ||
+    (deployAttempted && !isDeploying && failedInstances.length === 0);
   // hasFailed is NOT gated on deployAttempted: if the hook is seeded with persisted failures on
   // remount (after navigating Back/Next), the callout and Retry must still appear even though no
   // deploy was attempted in this component lifetime.
@@ -491,6 +529,28 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       />
 
       {showMiSection && <EuiHorizontalRule margin="l" />}
+
+      {showMiSection && isDirty && !deployAttempted && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
+                defaultMessage="Settings changed since last deployment"
+              />
+            }
+            color="warning"
+            iconType="warning"
+            data-test-subj="authenticateAndDeployStep-driftCallout"
+          >
+            <FormattedMessage
+              id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
+              defaultMessage="Service settings have changed since last deployment. Click Deploy to apply the updated configuration."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {showMiSection && (
         <ManagedIntegrationsSection

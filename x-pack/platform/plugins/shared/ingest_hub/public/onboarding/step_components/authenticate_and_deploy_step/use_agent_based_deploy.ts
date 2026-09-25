@@ -20,8 +20,13 @@ import {
   buildAgentPolicyName,
 } from './agent_based_deploy';
 import type { AgentCredentialVars } from './package_inputs';
+import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
-import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
+import {
+  cleanupAgentBasedPolicies,
+  updateAgentBasedPolicy,
+} from './policy_cleanup_agent_based';
+import { useOnboardingSO } from './use_onboarding_so';
 import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
@@ -57,6 +62,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     agentBasedDeployment,
     setAgentBasedDeployment,
   } = useOnboardingFlow();
+  const { updateDeployment: updateDeploymentSO } = useOnboardingSO();
 
   const { selectedServiceIds } = servicesStep;
 
@@ -144,7 +150,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
       const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
 
-      if (targetsToDeploy.length === 0 && !hasPendingCleanup) return { failed: false };
+      if (targetsToDeploy.length === 0 && !hasPendingCleanup && !(detectAndReviewStep.isDirty ?? false))
+        return { failed: false };
 
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
@@ -193,6 +200,49 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             succeededIds
           );
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
+        }
+
+        // Dirty redeploy: credentials or service settings changed. Update all deployed package
+        // policies with the current session vars so they reflect the new configuration.
+        if (targetsToDeploy.length === 0 && (detectAndReviewStep.isDirty ?? false)) {
+          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+
+          const byPolicy = new Map<string, string[]>();
+          for (const [instanceId, policyId] of Object.entries(
+            detectAndReviewStep.policyIdsByInstance ?? {}
+          )) {
+            if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
+            byPolicy.get(policyId)!.push(instanceId);
+          }
+          await Promise.allSettled(
+            [...byPolicy.entries()].map(([policyId, instanceIds]) =>
+              updateAgentBasedPolicy(policyId, instanceIds, {
+                instances: serviceSettings?.instances ?? [],
+                storedServiceVars,
+                globalRegion,
+                namespace,
+                authenticateAndDeployStep,
+                servicesMap: servicesMap ?? new Map(),
+                selectedAgentPolicyIds: targetPolicyIds,
+                agentCredentials: agentCredentialsRef.current,
+              })
+            )
+          );
+
+          const { onboardingDeploymentId } = detectAndReviewStep;
+          if (onboardingDeploymentId) {
+            await updateDeploymentSO(onboardingDeploymentId, {
+              services: selectedServiceIds,
+              serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+                string,
+                Record<string, unknown>
+              >,
+            });
+          }
+
+          setIsDeploying(false);
+          updateDetectAndReviewStep({ isDeploying: false, isDirty: false });
+          return { failed: false };
         }
 
         if (targetsToDeploy.length === 0) {
@@ -284,6 +334,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       targets,
       namespace,
       serviceSettings,
+      selectedServiceIds,
       authenticateAndDeployStep,
       agentBasedDeployment,
       setAgentBasedDeployment,
@@ -292,6 +343,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       removeDeployInstances,
       getLatestFailedInstances,
       servicesMap,
+      updateDeploymentSO,
     ]
   );
 

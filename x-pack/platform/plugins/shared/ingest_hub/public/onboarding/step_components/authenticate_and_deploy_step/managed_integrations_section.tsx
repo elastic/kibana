@@ -74,8 +74,13 @@ export function ManagedIntegrationsSection({
   isCleanupOnly = false,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
-  const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
-    useOnboardingFlow();
+  const {
+    setConnectorId,
+    setStaticKeys,
+    setPendingIacTemplate,
+    authenticateAndDeployStep,
+    updateDetectAndReviewStep,
+  } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
   // The Existing Identity check renders the stack update without writing the key; the template
@@ -289,7 +294,10 @@ export function ManagedIntegrationsSection({
                 />
               ) : isStaticKeysEditMode ? (
                 <StaticKeysReplaceView
-                  onReadyChange={setIsDeployReady}
+                  onReadyChange={(ready) => {
+                    setIsDeployReady(ready);
+                    if (ready) updateDetectAndReviewStep({ isDirty: true });
+                  }}
                   onFieldsChange={handleStaticKeysChange}
                 />
               ) : (
