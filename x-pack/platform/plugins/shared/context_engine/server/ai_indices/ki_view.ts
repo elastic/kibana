@@ -10,7 +10,7 @@ import { kiViewName } from '../../common/constants';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { formatErrorMessage } from '../utils/format_es_error';
 
-const LIFECYCLE_FILTERS = [
+export const LIFECYCLE_FILTERS = [
   'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
   'WHERE expires_at IS NULL OR expires_at > NOW()',
   'DROP governance.*',

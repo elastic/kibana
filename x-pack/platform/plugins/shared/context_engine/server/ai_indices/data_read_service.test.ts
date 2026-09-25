@@ -60,6 +60,10 @@ describe('AiIndexDataReadService', () => {
   });
 
   describe('query', () => {
+    beforeEach(() => {
+      aiIndexService.list.mockResolvedValue([]);
+    });
+
     it('runs the query in the service space and audit-logs success', async () => {
       esqlQuery.mockResolvedValue({ columns: [], values: [] });
 
@@ -78,6 +82,20 @@ describe('AiIndexDataReadService', () => {
           message: 'User has queried an AI index',
           event: expect.objectContaining({ action: 'ai_index_query', outcome: 'success' }),
         })
+      );
+    });
+
+    it('applies the lifecycle pipeline to a managed backing store', async () => {
+      esqlQuery.mockResolvedValue({ columns: [], values: [] });
+      aiIndexService.list.mockResolvedValue([
+        { id: 'elastic', managed: true, dest: { type: 'index', value: '.ai-index-idx-elastic' } },
+        { id: 'mine', managed: false, dest: { type: 'index', value: 'ai-index-idx-mine' } },
+      ]);
+
+      await service.query({ query: 'FROM .ai-index-idx-elastic | KEEP title', limit: 10 });
+
+      expect(esqlQuery.mock.calls[0][0].query.replace(/\s+/g, ' ')).toBe(
+        'FROM .ai-index-idx-elastic | WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW() | DROP governance.* | KEEP title | LIMIT 10'
       );
     });
 

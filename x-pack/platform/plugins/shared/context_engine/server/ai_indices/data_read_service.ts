@@ -45,9 +45,12 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
   ) {}
 
   async query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse> {
-    const { esClient, spaceId, auditLogger } = this.deps;
+    const { esClient, spaceId, auditLogger, aiIndexService } = this.deps;
     try {
-      const response = await queryAiIndices({ esClient, spaceId, ...request });
+      const managedDests = (await aiIndexService.list(spaceId))
+        .filter(({ managed }) => managed)
+        .map(({ dest }) => dest.value);
+      const response = await queryAiIndices({ esClient, spaceId, managedDests, ...request });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.QUERY }));
       return response;
     } catch (error) {

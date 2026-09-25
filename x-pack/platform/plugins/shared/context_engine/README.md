@@ -87,7 +87,8 @@ dropped. Data stream views keep the latest revision per `id`. The view is
 created with the AI index and deleted with it. Managed AI indices have no
 view: their documents carry nested per-document space permissions, and ES|QL
 applies the request filter to a view's output, where nested fields are not
-visible.
+visible. The query API applies the same lifecycle pipeline to a query that
+reads a managed backing store, so both kinds return the same shape.
 
 ## Describing AI Indices
 

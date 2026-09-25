@@ -19,11 +19,14 @@ import type {
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { validateQueryAiIndicesRequest } from '../../common/validation';
 import { applyLimit } from './apply_limit';
+import { applyManagedLifecycle } from './apply_managed_lifecycle';
 import { AiIndexQueryResponseTooLargeError, InvalidAiIndexQueryError } from './errors';
 
 export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
   esClient: ElasticsearchClient;
   spaceId: string;
+  /** Backing stores of managed AI indices, which get the view's lifecycle pipeline applied here. */
+  managedDests?: string[];
 }
 
 /**
@@ -36,6 +39,7 @@ export const queryAiIndices = async ({
   query,
   params,
   limit,
+  managedDests = [],
 }: QueryAiIndicesParams): Promise<QueryAiIndicesResponse> => {
   const validationError = validateQueryAiIndicesRequest({ query, params, limit });
   if (validationError) {
@@ -49,7 +53,10 @@ export const queryAiIndices = async ({
   try {
     const { columns, values } = await esClient.esql.query(
       {
-        query: applyLimit(query, limit ?? DEFAULT_AI_INDEX_QUERY_LIMIT),
+        query: applyLimit(
+          applyManagedLifecycle(query, managedDests),
+          limit ?? DEFAULT_AI_INDEX_QUERY_LIMIT
+        ),
         filter: buildAiIndexSpaceFilter(spaceId),
         drop_null_columns: true,
         allow_partial_results: true,
