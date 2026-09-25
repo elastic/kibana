@@ -5,34 +5,25 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React, { lazy, Suspense, useState } from 'react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { ComponentType, FunctionComponent } from 'react';
+import React, { useState } from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import type { ESQLEditorProps } from '@kbn/esql-editor';
 import type { EsqlView } from '@kbn/esql-types';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
 import { PLUGIN_NAME } from '../common';
+import { EsqlViewForm } from './esql_view_form';
 import { EsqlViewsTable } from './esql_views_table';
 import { translations } from './translations';
 import { useEsqlViews } from './use_esql_views';
-
-const LazyEsqlViewForm = lazy(async () => {
-  const { EsqlViewForm } = await import('./esql_view_form');
-  return { default: EsqlViewForm };
-});
 
 interface ManagementAppProps {
   canCreate: boolean;
   canEdit: boolean;
   client: EsqlViewsClient;
   documentationUrl: string;
+  EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
 }
 
 type FormState = { type: 'create' } | { type: 'edit'; view: EsqlView };
@@ -42,6 +33,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   canEdit,
   client,
   documentationUrl,
+  EsqlEditor,
 }) => {
   const { error, isLoading, reload, status, views } = useEsqlViews(client);
   const [formState, setFormState] = useState<FormState>();
@@ -127,34 +119,16 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
       <EuiSpacer size="l" />
       {content}
       {formState && (
-        <Suspense
-          fallback={
-            <EuiFlyout
-              aria-label={translations.loadingFormTitle}
-              data-test-subj="esqlViewFormLoading"
-              onClose={() => setFormState(undefined)}
-              ownFocus
-              size="l"
-            >
-              <EuiFlyoutBody>
-                <EuiEmptyPrompt
-                  icon={<EuiLoadingSpinner size="xl" />}
-                  title={<h2>{translations.loadingFormTitle}</h2>}
-                />
-              </EuiFlyoutBody>
-            </EuiFlyout>
-          }
-        >
-          <LazyEsqlViewForm
-            client={client}
-            onClose={() => setFormState(undefined)}
-            onSave={async () => {
-              await reload();
-              setFormState(undefined);
-            }}
-            view={formState.type === 'edit' ? formState.view : undefined}
-          />
-        </Suspense>
+        <EsqlViewForm
+          client={client}
+          EsqlEditor={EsqlEditor}
+          onClose={() => setFormState(undefined)}
+          onSave={async () => {
+            await reload();
+            setFormState(undefined);
+          }}
+          view={formState.type === 'edit' ? formState.view : undefined}
+        />
       )}
     </div>
   );

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import type { ESQLEditorProps } from '@kbn/esql-editor';
 import type { EsqlViewsResult } from '@kbn/esql-types';
 import {
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
@@ -20,26 +22,21 @@ import {
 import { getQueryPreview } from './esql_views_table';
 import { ManagementApp } from './management_app';
 
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: ({
-    dataTestSubj,
-    isDisabled,
-    onTextLangQueryChange,
-    query,
-  }: {
-    dataTestSubj?: string;
-    isDisabled?: boolean;
-    onTextLangQueryChange: (nextQuery: { esql: string }) => void;
-    query: { esql: string };
-  }) => (
-    <textarea
-      data-test-subj={dataTestSubj}
-      disabled={isDisabled}
-      onChange={({ target }) => onTextLangQueryChange({ esql: target.value })}
-      value={query.esql}
-    />
-  ),
-}));
+type EsqlEditorProps = Omit<ESQLEditorProps, 'ref'>;
+
+const MockEsqlEditor = ({
+  dataTestSubj,
+  isDisabled,
+  onTextLangQueryChange,
+  query,
+}: EsqlEditorProps) => (
+  <textarea
+    data-test-subj={dataTestSubj}
+    disabled={isDisabled}
+    onChange={({ target }) => onTextLangQueryChange({ esql: target.value })}
+    value={'esql' in query ? query.esql : ''}
+  />
+);
 
 const documentationUrl = 'https://www.elastic.co/docs/reference/query-languages/esql/esql-views';
 
@@ -56,7 +53,15 @@ const createClient = (): jest.Mocked<EsqlViewsClient> => ({
 
 const renderApp = (
   client: EsqlViewsClient,
-  { canCreate = true, canEdit = true }: { canCreate?: boolean; canEdit?: boolean } = {}
+  {
+    canCreate = true,
+    canEdit = true,
+    EsqlEditor = MockEsqlEditor,
+  }: {
+    canCreate?: boolean;
+    canEdit?: boolean;
+    EsqlEditor?: ComponentType<EsqlEditorProps>;
+  } = {}
 ) =>
   render(
     <EuiProvider>
@@ -66,6 +71,7 @@ const renderApp = (
           canEdit={canEdit}
           client={client}
           documentationUrl={documentationUrl}
+          EsqlEditor={EsqlEditor}
         />
       </MockAppHeaderProvider>
     </EuiProvider>
@@ -126,6 +132,38 @@ describe('ManagementApp', () => {
     expect(screen.queryByTestId('esqlViewsActionsButton')).not.toBeInTheDocument();
   });
 
+  it('renders the form fields while the ES|QL editor loads', async () => {
+    const client = createClient();
+    let resolveEditor: ((module: { default: ComponentType<EsqlEditorProps> }) => void) | undefined;
+    const LazyEsqlEditor = React.lazy(
+      () =>
+        new Promise<{ default: ComponentType<EsqlEditorProps> }>((resolve) => {
+          resolveEditor = resolve;
+        })
+    );
+    client.getViews.mockResolvedValue({ views: [] });
+
+    renderApp(client, { EsqlEditor: LazyEsqlEditor });
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+
+    expect(screen.getByTestId('esqlViewFormFlyout')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('e.g. my-view')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Describe this view')).toBeInTheDocument();
+    expect(screen.getByTestId('esqlViewEditorLoading')).toHaveTextContent('Loading ES|QL editor');
+    expect(screen.queryByTestId('esqlViewQueryEditor')).not.toBeInTheDocument();
+
+    await act(async () => {
+      if (!resolveEditor) {
+        throw new Error('Editor request was not started');
+      }
+      resolveEditor({ default: MockEsqlEditor });
+    });
+
+    expect(await screen.findByTestId('esqlViewQueryEditor')).toBeInTheDocument();
+  });
+
   it('validates fields while creating a view and refetches after saving', async () => {
     const client = createClient();
     client.getViews.mockResolvedValueOnce({ views: [] }).mockResolvedValueOnce({
@@ -144,7 +182,6 @@ describe('ManagementApp', () => {
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
 
-    expect(screen.getByTestId('esqlViewFormLoading')).toHaveTextContent('Loading ES|QL view form');
     expect(
       await screen.findByText(
         'Changes affect every dashboard, alert, and other saved object that uses this view.'

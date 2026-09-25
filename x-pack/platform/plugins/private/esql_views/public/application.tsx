@@ -13,6 +13,11 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { ESQL_VIEWS_CAPABILITIES, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ManagementApp } from './management_app';
 
+const LazyEsqlEditor = React.lazy(async () => {
+  const { ESQLLangEditor } = await import('@kbn/esql/public');
+  return { default: ESQLLangEditor };
+});
+
 export const mountManagementSection = (
   coreStart: CoreStart,
   { element, setBreadcrumbs }: ManagementAppMountParams
@@ -31,6 +36,7 @@ export const mountManagementSection = (
         canEdit={capabilities?.[ESQL_VIEWS_CAPABILITIES.edit] === true}
         client={client}
         documentationUrl={coreStart.docLinks.links.query.queryESQLViews}
+        EsqlEditor={LazyEsqlEditor}
       />
     )
   );

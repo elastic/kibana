@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FormEvent, FunctionComponent, ReactNode } from 'react';
-import React, { useId, useState } from 'react';
+import type { ComponentType, FormEvent, FunctionComponent, ReactNode } from 'react';
+import React, { Suspense, useId, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,12 +21,13 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIconTip,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { ESQLLangEditor } from '@kbn/esql/public';
+import type { ESQLEditorProps } from '@kbn/esql-editor';
 import type { EsqlView } from '@kbn/esql-types';
 import {
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
@@ -44,6 +45,7 @@ import { translations } from './translations';
 
 interface EsqlViewFormProps {
   client: EsqlViewsClient;
+  EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
   view?: EsqlView;
   onClose: () => void;
   onSave: () => Promise<void>;
@@ -70,6 +72,7 @@ const getNameValidationMessage = (
 
 export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   client,
+  EsqlEditor,
   view,
   onClose,
   onSave,
@@ -263,24 +266,46 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
           <EuiSpacer size="m" />
 
           <EuiFormRow error={queryError} fullWidth isInvalid={Boolean(queryError)}>
-            <ESQLLangEditor
-              dataTestSubj="esqlViewQueryEditor"
-              disableAutoFocus
-              editorIsInline
-              errors={queryError ? [new Error(queryError)] : []}
-              hasOutline
-              hideQueryHistory
-              hideRunQueryButton
-              isDisabled={isSaving}
-              mergeExternalMessages
-              onTextLangQueryChange={(nextQuery) => {
-                setQuery(nextQuery.esql);
-                setQueryError(undefined);
-                setSaveError(undefined);
-              }}
-              onTextLangQuerySubmit={async () => {}}
-              query={{ esql: query }}
-            />
+            <Suspense
+              fallback={
+                <EuiFlexGroup
+                  alignItems="center"
+                  data-test-subj="esqlViewEditorLoading"
+                  gutterSize="s"
+                  justifyContent="center"
+                  responsive={false}
+                  css={{ minHeight: 180 }}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="l" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="subdued" size="s">
+                      {translations.loadingEditorTitle}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              <EsqlEditor
+                dataTestSubj="esqlViewQueryEditor"
+                disableAutoFocus
+                editorIsInline
+                errors={queryError ? [new Error(queryError)] : []}
+                hasOutline
+                hideQueryHistory
+                hideRunQueryButton
+                isDisabled={isSaving}
+                mergeExternalMessages
+                onTextLangQueryChange={(nextQuery) => {
+                  setQuery(nextQuery.esql);
+                  setQueryError(undefined);
+                  setSaveError(undefined);
+                }}
+                onTextLangQuerySubmit={async () => {}}
+                query={{ esql: query }}
+              />
+            </Suspense>
           </EuiFormRow>
 
           {saveError && (
