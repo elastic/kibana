@@ -30,6 +30,10 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { WorkflowsUiServices } from '@kbn/workflows-ui';
+import { WorkflowsUiServicesProvider } from '@kbn/workflows-ui';
 import { RulesApp } from './rules_app';
 import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
@@ -45,6 +49,19 @@ const locatorsForManagementHost = (container: Container) => {
   const share = container.get(PluginStart('share')) as SharePluginStart;
   return bindLocatorsToHost(getAlertingV2Locators(share), MANAGEMENT_HOST);
 };
+
+/**
+ * Registries the `@kbn/workflows-ui` components resolve step and connector icons
+ * from. Without them a workflow step falls back to the generic `plugs` glyph.
+ */
+const workflowsUiServices = (container: Container): WorkflowsUiServices => ({
+  workflowsExtensions: container.get(
+    PluginStart('workflowsExtensions')
+  ) as WorkflowsExtensionsPublicPluginStart,
+  triggersActionsUi: container.get(
+    PluginStart('triggersActionsUi')
+  ) as TriggersAndActionsUIPublicPluginStart,
+});
 
 interface AlertingV2MountParams {
   element: HTMLElement;
@@ -74,7 +91,9 @@ export const mountAlertingV2App = async ({
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
               <I18nProvider>
                 <Router history={history}>
-                  <RulesApp />
+                  <WorkflowsUiServicesProvider services={workflowsUiServices(container)}>
+                    <RulesApp />
+                  </WorkflowsUiServicesProvider>
                 </Router>
               </I18nProvider>
             </BreadcrumbProvider>
@@ -110,7 +129,9 @@ export const mountRuleLibraryApp = async ({
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
               <I18nProvider>
                 <Router history={history}>
-                  <RuleLibraryApp />
+                  <WorkflowsUiServicesProvider services={workflowsUiServices(container)}>
+                    <RuleLibraryApp />
+                  </WorkflowsUiServicesProvider>
                 </Router>
               </I18nProvider>
             </BreadcrumbProvider>
@@ -177,7 +198,9 @@ export const mountEpisodesApp = async ({
                 <I18nProvider>
                   <Router history={history}>
                     <RedirectAppLinks coreStart={coreStart}>
-                      <EpisodesApp />
+                      <WorkflowsUiServicesProvider services={workflowsUiServices(container)}>
+                        <EpisodesApp />
+                      </WorkflowsUiServicesProvider>
                     </RedirectAppLinks>
                   </Router>
                 </I18nProvider>
@@ -215,7 +238,9 @@ export const mountActionPoliciesApp = async ({
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
               <I18nProvider>
                 <Router history={history}>
-                  <ActionPoliciesApp />
+                  <WorkflowsUiServicesProvider services={workflowsUiServices(container)}>
+                    <ActionPoliciesApp />
+                  </WorkflowsUiServicesProvider>
                 </Router>
               </I18nProvider>
             </BreadcrumbProvider>
@@ -251,7 +276,9 @@ export const mountExecutionHistoryApp = async ({
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
               <I18nProvider>
                 <Router history={history}>
-                  <ExecutionHistoryApp />
+                  <WorkflowsUiServicesProvider services={workflowsUiServices(container)}>
+                    <ExecutionHistoryApp />
+                  </WorkflowsUiServicesProvider>
                 </Router>
               </I18nProvider>
             </BreadcrumbProvider>

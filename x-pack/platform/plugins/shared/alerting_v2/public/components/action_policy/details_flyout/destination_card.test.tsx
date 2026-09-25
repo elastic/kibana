@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
 import { DestinationCard } from './destination_card';
+import { MockWorkflowsUiServicesProvider } from '../../../test_utils/test_providers';
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -50,7 +51,9 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
 const renderCard = (destination: ActionPolicyDestination) =>
   render(
     <I18nProvider>
-      <DestinationCard destination={destination} />
+      <MockWorkflowsUiServicesProvider>
+        <DestinationCard destination={destination} />
+      </MockWorkflowsUiServicesProvider>
     </I18nProvider>
   );
 
