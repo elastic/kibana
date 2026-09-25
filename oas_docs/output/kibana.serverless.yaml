@@ -8633,6 +8633,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -8641,7 +8651,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '500':
           content:
             application/json:
@@ -9002,6 +9012,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -9010,7 +9030,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '500':
           content:
             application/json:
@@ -9795,6 +9815,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -9803,7 +9833,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '404':
           content:
             application/json:
@@ -10018,6 +10048,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -10026,7 +10066,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '409':
           content:
             application/json:
@@ -10343,6 +10383,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -10351,7 +10401,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '404':
           content:
             application/json:
@@ -43734,6 +43784,12 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      policyIdsByInstance:
+                        additionalProperties:
+                          maxLength: 255
+                          type: string
+                        description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                        type: object
                       provider:
                         description: Cloud provider.
                         enum:
@@ -44050,6 +44106,12 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      policyIdsByInstance:
+                        additionalProperties:
+                          maxLength: 255
+                          type: string
+                        description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                        type: object
                       provider:
                         description: Cloud provider.
                         enum:
@@ -44195,6 +44257,17 @@ paths:
                   description: Incremented by callers performing a retry.
                   minimum: 1
                   type: number
+                authMethod:
+                  enum:
+                    - identity_federation
+                    - static_keys
+                    - null
+                  nullable: true
+                  type: string
+                connectorId:
+                  maxLength: 255
+                  nullable: true
+                  type: string
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
                   maxLength: 2048
@@ -44231,11 +44304,36 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                mechanisms:
+                  description: Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.
+                  items:
+                    description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                    enum:
+                      - managed_integration
+                      - ecf
+                      - agent_based
+                    type: string
+                  maxItems: 10
+                  type: array
                 packagePolicyIds:
                   items:
                     maxLength: 255
                     type: string
                   maxItems: 100
+                  type: array
+                policyIdsByInstance:
+                  additionalProperties:
+                    maxLength: 255
+                    type: string
+                  type: object
+                services:
+                  description: Updated service list. Replaces the stored services array.
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  maxItems: 1000
+                  minItems: 1
                   type: array
                 serviceVars:
                   additionalProperties:
@@ -44368,6 +44466,12 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      policyIdsByInstance:
+                        additionalProperties:
+                          maxLength: 255
+                          type: string
+                        description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                        type: object
                       provider:
                         description: Cloud provider.
                         enum:
@@ -44610,6 +44714,12 @@ paths:
                             type: string
                           maxItems: 100
                           type: array
+                        policyIdsByInstance:
+                          additionalProperties:
+                            maxLength: 255
+                            type: string
+                          description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                          type: object
                         provider:
                           description: Cloud provider.
                           enum:
@@ -129048,7 +129158,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}. If a page exceeds Kibana's response buffer, the handler still returns 200 with `results: []` and the page `total`.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
+        Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}. If a page exceeds Kibana's response buffer, the handler returns 413.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-steps
       parameters:
         - description: Workflow execution ID
@@ -129102,7 +129212,9 @@ paths:
                         workflowRunId: exec-a1b2c3d4-e5f6-7890
                     size: 1000
                     total: 1
-          description: "Indicates a successful response. If the page exceeds Kibana's response buffer, the handler still returns 200 with results: [] and the page total."
+          description: Indicates a successful response.
+        '413':
+          description: The step page exceeds the response size limit. Request fewer steps per page.
       summary: Get execution step executions
       tags:
         - workflows
@@ -155410,7 +155522,7 @@ components:
         job_ids:
           description: Anomaly detection job or group IDs whose results are shown in the charts.
           items:
-            maxLength: 1000
+            maxLength: 2048
             minLength: 1
             type: string
           maxItems: 10000
@@ -155485,8 +155597,8 @@ components:
                 type: object
                 properties:
                   min:
-                    enum:
-                      - 75
+                    maximum: 100
+                    minimum: 0
                     type: number
                 required:
                   - min
@@ -155516,7 +155628,7 @@ components:
             job_ids:
               description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
               items:
-                maxLength: 1000
+                maxLength: 2048
                 minLength: 1
                 type: string
               maxItems: 10000
@@ -155525,6 +155637,11 @@ components:
             per_page:
               description: Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.
               minimum: 1
+              type: number
+            severity_threshold:
+              description: Minimum anomaly score (0–100) to show in the swim lane. Anomalies with scores at or above this value are displayed.
+              maximum: 100
+              minimum: 0
               type: number
             swimlane_type:
               enum:
@@ -155553,7 +155670,7 @@ components:
             job_ids:
               description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
               items:
-                maxLength: 1000
+                maxLength: 2048
                 minLength: 1
                 type: string
               maxItems: 10000
@@ -155562,6 +155679,11 @@ components:
             per_page:
               description: Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.
               minimum: 1
+              type: number
+            severity_threshold:
+              description: Minimum anomaly score (0–100) to show in the swim lane. Anomalies with scores at or above this value are displayed.
+              maximum: 100
+              minimum: 0
               type: number
             swimlane_type:
               enum:
@@ -155574,7 +155696,7 @@ components:
               type: string
             view_by:
               description: Field name used to split anomalies into a view-by swim lane.
-              maxLength: 1000
+              maxLength: 2048
               minLength: 1
               type: string
           required:
@@ -155592,11 +155714,11 @@ components:
           type: string
         forecast_id:
           description: Identifier of a forecast to overlay on the chart.
-          maxLength: 1000
+          maxLength: 2048
           type: string
         function_description:
           description: 'For detectors that use the `metric` function, selects which value to plot: `min`, `max`, or `mean`. Ignored for other detector functions. When omitted, the viewer derives a default from the highest-scoring anomaly record.'
-          maxLength: 1000
+          maxLength: 2048
           type: string
         hide_border:
           description: When true, the panel border is hidden. Defaults to false.
@@ -155607,7 +155729,7 @@ components:
         job_ids:
           description: Anomaly detection job ID whose results are shown in the single metric viewer.
           items:
-            maxLength: 1000
+            maxLength: 2048
             minLength: 1
             type: string
           maxItems: 1
