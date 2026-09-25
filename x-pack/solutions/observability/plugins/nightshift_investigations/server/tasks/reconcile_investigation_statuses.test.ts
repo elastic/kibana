@@ -59,6 +59,7 @@ const execution = (status: ExecutionStatus, message?: string): ExecutionSummary 
 const createMockInvestigations = () => ({
   findAcrossSpaces: jest.fn().mockResolvedValue(page([])),
   updateInSpace: jest.fn().mockResolvedValue(undefined),
+  deleteAllAcrossSpaces: jest.fn().mockResolvedValue({ deleted: 0, failures: [] }),
 });
 
 const setup = () => {
