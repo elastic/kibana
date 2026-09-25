@@ -89,22 +89,18 @@ export const LinkedInvestigationsList = memo<LinkedInvestigationsListProps>(
                   borderTop: index > 0 ? euiTheme.border.thin : undefined,
                 })}
               >
-                {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus */}
-                <div
-                  role="button"
-                  tabIndex={0}
+                <button
+                  type="button"
                   onClick={() => onClickItem(item.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onClickItem(item.id);
-                    }
-                  }}
                   css={css({
                     display: 'flex',
                     alignItems: 'center',
                     gap: euiTheme.size.s,
                     padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+                    width: '100%',
+                    background: 'none',
+                    border: 'none',
+                    textAlign: 'left',
                     cursor: 'pointer',
                     '&:hover': {
                       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
@@ -133,7 +129,7 @@ export const LinkedInvestigationsList = memo<LinkedInvestigationsListProps>(
                       ? LINKED_INVESTIGATIONS_LABELS.statusOpen
                       : LINKED_INVESTIGATIONS_LABELS.statusClosed}
                   </EuiBadge>
-                </div>
+                </button>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
