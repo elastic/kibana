@@ -40,7 +40,7 @@ describe('buildAssumableBy', () => {
       projectType,
     });
 
-    expect(entry.project_type).toBe(projectType);
+    expect(entry).toMatchObject({ project_type: projectType });
   });
 
   it('adds the Relay platform service account from the server-owned id', () => {

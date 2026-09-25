@@ -11,7 +11,7 @@ import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import type { Logger } from '@kbn/logging';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import type {
   CheckPrivileges,
   CheckPrivilegesResponse,
@@ -33,7 +33,7 @@ describe('UiamServiceAccounts', () => {
   let mockUiam: jest.Mocked<UiamServicePublic>;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
   let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
-  let logger: Logger;
+  let logger: MockedLogger;
   let getCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
 
   const clusterPrivilegesResponse = (authorized: boolean): CheckPrivilegesResponse => ({
@@ -71,7 +71,7 @@ describe('UiamServiceAccounts', () => {
   beforeEach(() => {
     mockLicense = licenseMock.create();
     mockLicense.isEnabled.mockReturnValue(true);
-    logger = loggingSystemMock.create().get('service-accounts');
+    logger = loggingSystemMock.create().get('service-accounts') as MockedLogger;
     mockUiam = uiamServiceMock.create();
     getCurrentUser = jest.fn().mockReturnValue(null);
     mockCheckPrivileges = {

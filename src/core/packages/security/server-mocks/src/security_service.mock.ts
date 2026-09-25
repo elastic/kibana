@@ -28,6 +28,7 @@ const createServiceAccountsStartMock = (): jest.MockedObjectDeep<CoreServiceAcco
   lazyObject({
     isEnabled: jest.fn().mockReturnValue(false),
     create: jest.fn(),
+    authorize: jest.fn(),
     bindWorkload: jest.fn(),
     unbindWorkload: jest.fn(),
     getWorkloadBinding: jest.fn().mockResolvedValue(null),
