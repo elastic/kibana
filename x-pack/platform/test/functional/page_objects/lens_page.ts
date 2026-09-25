@@ -788,7 +788,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `input[data-test-subj="${testSubj}"][type='number']`
       );
       await numericInput.click();
-      await numericInput.clearValue();
+      // These inputs are controlled by React state, so the clear has to arrive as real key events
+      await numericInput.clearValueWithKeyboard();
       return numericInput;
     },
 
