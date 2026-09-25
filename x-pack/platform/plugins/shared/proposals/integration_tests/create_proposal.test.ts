@@ -70,6 +70,26 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(hoursUntilDeadline(fixture, before)).toBeCloseTo(4, 1);
     });
 
+    it('should park the gate for that deadline, not for the default', async () => {
+      // The recorded `expiresAt` and the duration the gate is actually held
+      // for are two different values, and only the second one decides when an
+      // unanswered proposal expires. This reads the rendered `dynamicTimeout`
+      // the engine froze at wait-entry, which is what the idle wake-up and the
+      // resume check both consult.
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, expiresIn: '4h' });
+
+      const parkedSeconds = Number(String(fixture.gateTimeout()).replace(/s$/, ''));
+      expect(parkedSeconds).toBeGreaterThan(3.9 * 3600);
+      expect(parkedSeconds).toBeLessThanOrEqual(4 * 3600);
+    });
+
+    it('should expire at that deadline rather than holding for 72h', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, expiresIn: '4h' });
+      await fixture.timeOutGate(5 * 60 * 60 * 1000);
+
+      expect(fixture.onlyProposal().status).toBe('expired');
+    });
+
     it('should record the execution so approving resumes the run that created it', async () => {
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
 

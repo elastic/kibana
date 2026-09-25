@@ -323,6 +323,21 @@ describe('create-investigation-proposal workflow', () => {
       expect(workflow.consts?.max_attempts).toBeUndefined();
     });
 
+    it('settles the record when the loop exits without having settled it', () => {
+      // `on-limit: continue` leaves the loop with nothing written, and the run
+      // would otherwise report `pending` against an execution that is over —
+      // a proposal nothing can ever decide, which is the outcome the rest of
+      // this definition exists to prevent. The budget gets the same treatment
+      // as every other way out of the loop.
+      const top = workflow.steps.map(({ name }) => name);
+      const settle = findStep(workflow.steps, 'settle_unfinished');
+
+      expect(settle?.condition).toContain('variables.completed != true');
+      expect(findStep(workflow.steps, 'record_unfinished')?.with?.status).toBe('expired');
+      expect(top.indexOf('settle_unfinished')).toBeGreaterThan(top.indexOf('decision_loop'));
+      expect(top.indexOf('settle_unfinished')).toBeLessThan(top.indexOf('output_result'));
+    });
+
     it('derives each attempt from the fixed deadline, so a retry cannot extend it', () => {
       const init = findStep(workflow.steps, 'init_state');
       const remaining = findStep(workflow.steps, 'compute_remaining');

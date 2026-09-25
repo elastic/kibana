@@ -111,7 +111,19 @@ export interface ProposalGateFixture {
   stepExecutions: (
     stepId: string,
     stepType?: string
-  ) => Array<{ status: string; stepType?: string; input?: unknown; output?: unknown }>;
+  ) => Array<{
+    status: string;
+    stepType?: string;
+    input?: unknown;
+    output?: unknown;
+    state?: Record<string, unknown>;
+  }>;
+  /**
+   * The duration the parked gate will actually be held for — the rendered
+   * `dynamicTimeout` frozen on step state at wait-entry, which is what the
+   * idle wake-up and the resume check both read.
+   */
+  gateTimeout: () => string | undefined;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
@@ -131,8 +143,11 @@ export interface ProposalGateFixture {
    * scheduled wake task does in production. The fixture's task manager mock has
    * no `ensureScheduled`, so the task is never really scheduled here and the
    * wake has to be driven by hand.
+   *
+   * `advanceMs` overrides how far the clock jumps, for a gate parked against a
+   * caller-supplied deadline rather than the 72h default.
    */
-  timeOutGate: () => Promise<void>;
+  timeOutGate: (advanceMs?: number) => Promise<void>;
   /** Flips what `proposals.checkDecidePrivileges` reports. */
   setCanDecide: (canDecide: boolean) => void;
   /** Replaces what the action workflow declares, e.g. to make it `always-gate`. */
@@ -212,6 +227,14 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
         .filter((step) => step.stepId === stepId)
         .filter((step) => stepType === undefined || step.stepType === stepType)
         .sort((a, b) => (a.stepExecutionIndex ?? 0) - (b.stepExecutionIndex ?? 0)),
+    gateTimeout: () => {
+      const parks = [...engine.stepExecutionRepositoryMock.stepExecutions.values()]
+        .filter((step) => step.stepId === 'await_decision' && step.stepType === 'waitForApproval')
+        .sort((a, b) => (a.stepExecutionIndex ?? 0) - (b.stepExecutionIndex ?? 0));
+      const latest = parks[parks.length - 1];
+      const dynamicTimeout = latest?.state?.dynamicTimeout;
+      return typeof dynamicTimeout === 'string' ? dynamicTimeout : undefined;
+    },
     start: async (inputs = {}) => {
       await engine.runWorkflow({
         workflowYaml: gateWorkflowYaml(),
@@ -243,10 +266,10 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);
       await service.revise({ id: live.id, ...overrides }, live.spaceId ?? 'fake_space_id');
     },
-    timeOutGate: async () => {
+    timeOutGate: async (advanceMs = GATE_TIMEOUT_MS + 60_000) => {
       // No `resumeInput`, which is the whole signal: the step reads the wait as
       // expired and fails itself with a `TimeoutError`.
-      jest.useFakeTimers({ now: new Date(Date.now() + GATE_TIMEOUT_MS + 60_000) });
+      jest.useFakeTimers({ now: new Date(Date.now() + advanceMs) });
       try {
         await engine.resumeWorkflow();
       } finally {

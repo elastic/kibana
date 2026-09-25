@@ -210,9 +210,9 @@ steps:
     #
     # `continue` rather than `fail`: `ExitWhileNodeImpl` throws on `fail`, and
     # `handleWorkflowLevelOnFailure` skips flow-control steps, so that error
-    # reaches no handler and strands the record. `continue` exits the loop and
-    # falls through to `output_result`, reporting `pending` — the honest answer
-    # when nothing settled the record.
+    # reaches no handler and strands the record. `continue` exits the loop
+    # cleanly, and `settle_unfinished` below records the expiry the loop never
+    # got to.
     max-iterations:
       limit: 200
       on-limit: continue
@@ -513,6 +513,30 @@ steps:
                   needs_gate: true
               - name: park_on_clone
                 type: loop.continue
+
+  # The loop can also end without settling anything: `on-limit: continue` exits
+  # cleanly once `max-iterations` is spent, and nothing in the body wrote a
+  # terminal status. Leaving it there would strand the record `pending` against
+  # a finished execution, which is the outcome this whole definition exists to
+  # prevent — so the budget gets the same treatment as every other way out.
+  #
+  # No adopt of its own. If a revision superseded the carried id the write is
+  # refused, and the workflow-level handler picks it up, adopts, and settles
+  # the live head. Either way the record ends up terminal.
+  - name: settle_unfinished
+    type: if
+    condition: '${{ variables.completed != true }}'
+    steps:
+      - name: record_unfinished
+        type: proposals.updateProposal
+        with:
+          proposalId: '{{ variables.current_proposal_id }}'
+          status: expired
+          executionError: 'No decision was reached within the attempt budget.'
+      - name: complete_unfinished
+        type: data.set
+        with:
+          final_status: expired
 
   # Reads variables, never loop-body step outputs: those are evicted on exit.
   - name: output_result

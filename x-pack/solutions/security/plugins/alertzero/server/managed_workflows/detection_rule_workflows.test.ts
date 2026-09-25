@@ -309,13 +309,16 @@ describe('detection rule workflows', () => {
       ) as WorkflowYaml;
       const hours = (timeout: unknown) => Number(String(timeout).replace(/h$/, ''));
 
-      // None of this workflow's three gates passes `expiresIn`, so each takes
-      // the gate's 72h default. A gate that starts asking for its own deadline
-      // has to be checked against the ceiling here.
-      const proposals = (review.steps as Array<Record<string, any>>).filter(
+      // None of this workflow's gates passes `expiresIn`, so each takes the
+      // gate's 72h default. A gate that starts asking for its own deadline has
+      // to be checked against the ceiling here.
+      //
+      // Flattened, not top-level: only `propose_entry` sits at the top, and
+      // the other four hang off `propose_tuning`'s switch cases and default.
+      const proposals = flattenSteps(review.steps as NestedStep[]).filter(
         (step) => step.with?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
       );
-      expect(proposals.length).toBeGreaterThan(0);
+      expect(proposals.length).toBe(5);
       for (const proposal of proposals) {
         expect(proposal.with?.inputs?.expiresIn).toBeUndefined();
       }
