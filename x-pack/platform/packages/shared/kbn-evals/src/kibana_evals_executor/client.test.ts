@@ -415,6 +415,101 @@ describe('KibanaEvalsClient', () => {
     expect(seenOutputTraceId).toBe('client-task-span-trace');
   });
 
+  it('derives the run traceId from this task span and backfills output.traceId', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    const task = async () => ({ value: 1 });
+
+    // The span handed to the callback is the source of truth, not the ambient active
+    // span: a stale ambient id must not win over this run's own span id.
+    (getCurrentTraceId as jest.Mock).mockReturnValue('stale-ambient-trace');
+    (withTaskSpan as jest.Mock).mockImplementationOnce(
+      (_name: string, _opts: unknown, cb: (span?: unknown) => unknown) =>
+        cb({ spanContext: () => ({ traceId: 'this-task-span-trace' }) })
+    );
+
+    let seenOutputTraceId: string | undefined;
+    const evaluators: Array<
+      Evaluator<EvaluationDataset['examples'][number], { value: number; traceId?: string }>
+    > = [
+      {
+        name: 'CapturesTraceId',
+        kind: 'CODE',
+        direction: 'maximize',
+        evaluate: async ({ output }) => {
+          seenOutputTraceId = output?.traceId;
+          return { score: 1 };
+        },
+      },
+    ];
+
+    const [exp] = await client.runExperiment({ datasets: [dataset], task }, evaluators);
+    const [firstRun] = Object.values(exp.runs);
+
+    expect(firstRun.traceId).toBe('this-task-span-trace');
+    // Backfilled so the recorded output and the run agree deterministically.
+    expect((firstRun.output as { traceId?: string }).traceId).toBe('this-task-span-trace');
+    expect(seenOutputTraceId).toBe('this-task-span-trace');
+  });
+
+  it('does not overwrite a task-surfaced traceId with this task span id', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    const task = async () => ({ value: 1, traceId: 'task-response-trace' });
+
+    (withTaskSpan as jest.Mock).mockImplementationOnce(
+      (_name: string, _opts: unknown, cb: (span?: unknown) => unknown) =>
+        cb({ spanContext: () => ({ traceId: 'this-task-span-trace' }) })
+    );
+
+    const [exp] = await client.runExperiment({ datasets: [dataset], task }, []);
+    const [firstRun] = Object.values(exp.runs);
+
+    expect(firstRun.traceId).toBe('task-response-trace');
+    expect((firstRun.output as { traceId?: string }).traceId).toBe('task-response-trace');
+  });
+
+  it('derives the evaluator traceId from this evaluator span', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    const task = async () => ({ value: 1 });
+
+    (getCurrentTraceId as jest.Mock).mockReturnValue('stale-ambient-trace');
+    (withEvaluatorSpan as jest.Mock).mockImplementationOnce(
+      (_name: string, _opts: unknown, cb: (span?: unknown) => unknown) =>
+        cb({ spanContext: () => ({ traceId: 'this-evaluator-span-trace' }) })
+    );
+
+    const [exp] = await client.runExperiment(
+      {
+        datasets: [dataset],
+        task,
+      },
+      [
+        {
+          name: 'HasValue',
+          kind: 'CODE',
+          direction: 'maximize',
+          evaluate: async () => ({ score: 1 }),
+        },
+      ]
+    );
+
+    expect(exp.evaluationRuns[0].traceId).toBe('this-evaluator-span-trace');
+  });
+
   it('limits concurrent task execution using the concurrency option', async () => {
     const client = createClient();
 
@@ -642,7 +737,9 @@ describe('KibanaEvalsClient', () => {
         expect.objectContaining({
           exampleIndex: 0,
           repetition: 0,
-          output: { value: 1 },
+          // The task did not surface a trace id, so the client backfills the task-span id
+          // onto the output (kept as `default-trace-id` by the tracing mock).
+          output: { value: 1, traceId: 'default-trace-id' },
         })
       );
       expect(event.evaluationRun).toEqual(
