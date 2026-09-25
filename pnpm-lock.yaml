@@ -4063,9 +4063,6 @@ importers:
       exponential-backoff:
         specifier: 3.1.1
         version: 3.1.1
-      extract-zip:
-        specifier: 2.0.1
-        version: 2.0.1(supports-color@10.2.2)
       fast-deep-equal:
         specifier: 3.1.3
         version: 3.1.3
@@ -5648,9 +5645,6 @@ importers:
       '@types/express':
         specifier: 4.17.21
         version: 4.17.21
-      '@types/extract-zip':
-        specifier: 2.0.3
-        version: 2.0.3(supports-color@10.2.2)
       '@types/fetch-mock':
         specifier: 7.3.1
         version: 7.3.1
@@ -14183,10 +14177,6 @@ packages:
 
   '@types/express@4.17.25':
     resolution: {integrity: sha512-dVd04UKsfpINUnK0yBoYHDF3xu7xVH4BuDotC/xGuycx4CgbP48X/KF/586bcObxT0HENHXEU8Nqtu6NR+eKhw==}
-
-  '@types/extract-zip@2.0.3':
-    resolution: {integrity: sha512-yrO7h+0qOIGxHCmBeL5fKFzR+PBafh9LG6sOLBFFi2JuN+Hj663TAxfnqJh5vkQn963VimrhBF1GZzea3A+4Ig==}
-    deprecated: This is a stub types definition. extract-zip provides its own type definitions, so you do not need this installed.
 
   '@types/fetch-mock@7.3.1':
     resolution: {integrity: sha512-2U4vZWHNbsbK7TRmizgr/pbKe0FKopcxu+hNDtIBDiM1wvrKRItybaYj7VQ6w/hZJStU/JxRiNi5ww4YDEvKbA==}
@@ -31879,12 +31869,6 @@ snapshots:
       '@types/express-serve-static-core': 4.19.9
       '@types/qs': 6.15.1
       '@types/serve-static': 1.15.10
-
-  '@types/extract-zip@2.0.3(supports-color@10.2.2)':
-    dependencies:
-      extract-zip: 2.0.1(supports-color@10.2.2)
-    transitivePeerDependencies:
-      - supports-color
 
   '@types/fetch-mock@7.3.1': {}
 
