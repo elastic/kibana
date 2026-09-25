@@ -66,11 +66,10 @@ export function buildCoverageOverviewMitreGraph(
     }
   }
 
-  const sortedTactics = [...tactics].sort((a, b) => a.position - b.position);
-
   const result: CoverageOverviewMitreTactic[] = [];
 
-  for (const tactic of sortedTactics) {
+  // Tactics arrive in matrix order from the MITRE configuration; no re-sort here.
+  for (const tactic of tactics) {
     result.push({
       id: tactic.id,
       name: tactic.name,

@@ -16,6 +16,9 @@ import { CoverageOverviewDashboardContextProvider } from './coverage_overview_da
 
 jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview_query');
+jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
+  useMitreConfiguration: () => ({ frameworkVersion: '16.1' }),
+}));
 
 // The invalid MITRE rules callout is gated behind the mitreAttackUpdatesUIEnabled
 // feature flag, which is off by default. Force it on for this test suite.

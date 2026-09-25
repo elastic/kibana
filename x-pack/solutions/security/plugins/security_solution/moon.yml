@@ -277,6 +277,7 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/mitre-attack-plugin'
   - '@kbn/security-mitre-attack-common'
+  - '@kbn/security-mitre-attack-server'
   - '@kbn/lazy-object'
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
@@ -330,7 +331,6 @@ fileGroups:
     - test/scout/**/*
     - test/scout_ai_value_report/**/*
     - test/scout_cps_local/**/*
-    - test/scout_managed_mitre/**/*
     - test/scout_es_max_response_size/**/*
     - test/scout_security_attacks_alignment/**/*
     - test/scout_threat_intel/**/*

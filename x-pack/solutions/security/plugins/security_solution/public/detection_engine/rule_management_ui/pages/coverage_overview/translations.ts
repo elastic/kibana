@@ -273,3 +273,17 @@ export const INVALID_MITRE_ID_BADGE_TOOLTIP = (id: string) =>
       defaultMessage: 'Open MITRE ATT&CK\u00AE reference for {id}',
     }
   );
+
+export const ATTACK_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.attackTabLabel',
+  {
+    defaultMessage: 'MITRE ATT&CK',
+  }
+);
+
+export const ATLAS_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.atlasTabLabel',
+  {
+    defaultMessage: 'MITRE ATLAS',
+  }
+);

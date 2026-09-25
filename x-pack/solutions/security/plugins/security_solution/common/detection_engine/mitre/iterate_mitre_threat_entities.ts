@@ -8,6 +8,7 @@
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export const MITRE_ATTACK_FRAMEWORK = 'MITRE ATT&CK';
+export const MITRE_ATLAS_FRAMEWORK = 'MITRE ATLAS';
 
 export type MitreThreatEntityType = 'tactic' | 'technique' | 'subtechnique';
 
@@ -18,8 +19,9 @@ export interface MitreThreatEntity {
 
 /**
  * Walks a rule's `threat` array and yields one `MitreThreatEntity` per
- * tactic, technique, and subtechnique entry found under the MITRE ATT&CK™
- * framework. Threat entries from other frameworks are skipped.
+ * tactic, technique, and subtechnique entry found across all supported MITRE
+ * frameworks (ATT&CK and ATLAS). Threat entries from unrecognized frameworks
+ * are skipped.
  *
  * Order is depth-first within each threat item:
  *   tactic, technique[0], technique[0].subtechnique[0..n], technique[1], ...
@@ -35,7 +37,10 @@ export function* iterateMitreThreatEntities(
   }
 
   for (const threatItem of threats) {
-    if (threatItem.framework === MITRE_ATTACK_FRAMEWORK) {
+    if (
+      threatItem.framework === MITRE_ATTACK_FRAMEWORK ||
+      threatItem.framework === MITRE_ATLAS_FRAMEWORK
+    ) {
       yield { type: 'tactic', id: threatItem.tactic.id };
 
       for (const technique of threatItem.technique ?? []) {
