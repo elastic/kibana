@@ -53,7 +53,7 @@ export const apmServiceGroups: SavedObjectsType = {
   },
   management: {
     importableAndExportable: true,
-    icon: 'apmApp',
+    icon: 'folder',
     getTitle: (savedObject) =>
       `${i18n.translate('xpack.apm.apmServiceGroups.title', {
         defaultMessage: 'Service Group',

@@ -23,7 +23,7 @@ export const metricsDataSourceSavedObjectType: SavedObjectsType = {
     getTitle(savedObject: SavedObject<MetricsDataSavedObject>) {
       return `Metrics data source [id=${savedObject.id}]`;
     },
-    icon: 'metricsApp',
+    icon: 'chartGauge',
     importableAndExportable: true,
   },
   mappings: {

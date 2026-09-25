@@ -24,7 +24,7 @@ export const apmCustomDashboards: SavedObjectsType = {
   },
   management: {
     importableAndExportable: true,
-    icon: 'apmApp',
+    icon: 'productDashboard',
     getTitle: () =>
       i18n.translate('xpack.apm.apmServiceDashboards.title', {
         defaultMessage: 'APM Service Custom Dashboards',

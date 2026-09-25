@@ -34,7 +34,7 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
   },
   management: {
     importableAndExportable: true,
-    icon: 'infraApp',
+    icon: 'productDashboard',
     getTitle: () =>
       i18n.translate('xpack.infra.infraAssetCustomDashboards.', {
         defaultMessage: 'Infrastructure Asset Custom Dashboards',

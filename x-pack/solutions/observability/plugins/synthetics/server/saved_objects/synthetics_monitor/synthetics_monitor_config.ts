@@ -19,7 +19,7 @@ export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType =>
     mappings: monitorConfigMappings,
     management: {
       importableAndExportable: false,
-      icon: 'uptimeApp',
+      icon: 'heart',
       getTitle: (savedObject) =>
         i18n.translate('xpack.synthetics.syntheticsMonitors.multiple.label', {
           defaultMessage: '{name} - (Synthetics Monitor)',
