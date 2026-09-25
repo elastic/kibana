@@ -65,6 +65,7 @@ const createStore = (overrides: Partial<MemoryPageStore> = {}): MemoryPageStore 
     update: jest.fn().mockResolvedValue({}),
     applyCounterUpdates: jest.fn().mockResolvedValue(undefined),
     archive: jest.fn().mockResolvedValue({}),
+    archiveVersioned: jest.fn().mockResolvedValue({}),
     delete: jest.fn(),
     pruneDuplicates: jest.fn(),
     ...overrides,
@@ -373,7 +374,14 @@ describe('applyMemoryEdits', () => {
         telemetry: expect.objectContaining({ impressions: 2, conversions: 1 }),
       })
     );
-    expect(store.archive).toHaveBeenCalledWith('memory_kafka-lag', 'merged');
+    expect(store.archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: expect.objectContaining({ id: 'memory_kafka-lag' }),
+        seqNo: 1,
+        primaryTerm: 1,
+      }),
+      'merged'
+    );
     expect(store.create).not.toHaveBeenCalledWith(
       expect.objectContaining({ slug: 'checkout-kafka' })
     );
@@ -483,7 +491,7 @@ describe('applyMemoryEdits', () => {
 
     expect(store.create).not.toHaveBeenCalled();
     expect(store.update).not.toHaveBeenCalled();
-    expect(store.archive).not.toHaveBeenCalled();
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
     expect(summary.mergeSuccessCount).toBe(0);
   });
 
@@ -529,6 +537,14 @@ describe('applyMemoryEdits', () => {
     expect(store.create).toHaveBeenCalledWith(
       expect.objectContaining({ content: 'Refreshed fact.' })
     );
+    expect(store.archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: expect.objectContaining({ content: 'Refreshed fact.' }),
+        seqNo: 2,
+        primaryTerm: 1,
+      }),
+      'merged'
+    );
     expect(summary.mergeSuccessCount).toBe(1);
   });
 
@@ -571,7 +587,7 @@ describe('applyMemoryEdits', () => {
     expect(synthesizeMemoryGroup).toHaveBeenCalledTimes(3);
     expect(store.create).not.toHaveBeenCalled();
     expect(store.update).not.toHaveBeenCalled();
-    expect(store.archive).not.toHaveBeenCalled();
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
     expect(summary).toEqual(
       expect.objectContaining({ mergeSuccessCount: 0, writeFailureCount: 1 })
     );
@@ -608,9 +624,78 @@ describe('applyMemoryEdits', () => {
     });
 
     expect(store.create).toHaveBeenCalledTimes(1);
-    expect(store.archive).toHaveBeenCalledWith(source.id, 'merged');
+    expect(store.archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: expect.objectContaining({ id: source.id }),
+        seqNo: 1,
+        primaryTerm: 1,
+      }),
+      'merged'
+    );
     expect((store.create as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
-      (store.archive as jest.Mock).mock.invocationCallOrder[0]
+      (store.archiveVersioned as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it('leaves a concurrently changed source live when guarded archival conflicts', async () => {
+    const source = page('memory_kafka-lag', 'Kafka consumer lag', 'Original fact.');
+    const newerSource = { ...source, content: 'New fact committed after canonical creation.' };
+    let liveSource = source;
+    const archiveVersioned = jest.fn(async () => {
+      liveSource = newerSource;
+      throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+    });
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === source.id ? liveSource : undefined)),
+      getVersioned: jest.fn().mockResolvedValue({
+        page: source,
+        seqNo: 7,
+        primaryTerm: 2,
+      }),
+      archiveVersioned,
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-kafka',
+          title: source.title,
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup: async () => ({
+        title: 'Merged Kafka',
+        content: 'Merged original fact.',
+        context: 'kafka lag',
+      }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.create).toHaveBeenCalledTimes(1);
+    expect(archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({ page: source, seqNo: 7, primaryTerm: 2 }),
+      'merged'
+    );
+    expect((store.create as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      archiveVersioned.mock.invocationCallOrder[0]
+    );
+    expect(liveSource).toBe(newerSource);
+    expect(liveSource.status).toBe('established');
+    expect(store.archive).not.toHaveBeenCalled();
+    expect(summary).toEqual(
+      expect.objectContaining({
+        mergeSuccessCount: 1,
+        mergedSourceArchiveCount: 0,
+        writeFailureCount: 1,
+      })
     );
   });
 
@@ -645,7 +730,7 @@ describe('applyMemoryEdits', () => {
     });
 
     expect(store.create).not.toHaveBeenCalled();
-    expect(store.archive).not.toHaveBeenCalled();
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
     expect(summary).toEqual(
       expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0 })
     );
@@ -678,7 +763,7 @@ describe('applyMemoryEdits', () => {
     });
 
     expect(store.create).not.toHaveBeenCalled();
-    expect(store.archive).not.toHaveBeenCalled();
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
     expect(summary).toEqual(
       expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0, writeFailureCount: 1 })
     );
@@ -715,7 +800,7 @@ describe('applyMemoryEdits', () => {
     });
 
     expect(store.create).not.toHaveBeenCalled();
-    expect(store.archive).not.toHaveBeenCalled();
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
   });
 
   it('does not overwrite a live page when every canonical slug candidate is occupied', async () => {
@@ -757,7 +842,7 @@ describe('applyMemoryEdits', () => {
       expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0 })
     );
     expect(store.create).not.toHaveBeenCalled();
-    expect(store.archive).not.toHaveBeenCalled();
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
   });
 
   it('merges a catalog overlap and sums decayed telemetry', async () => {
@@ -810,7 +895,10 @@ describe('applyMemoryEdits', () => {
         telemetry: expect.objectContaining({ impressions: 4, conversions: 2 }),
       })
     );
-    expect(store.archive).toHaveBeenCalledWith('memory_checkout-redis', 'merged');
+    expect(store.archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({ page: expect.objectContaining({ id: 'memory_checkout-redis' }) }),
+      'merged'
+    );
     expect(summary).toEqual(
       expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 1 })
     );
@@ -859,7 +947,7 @@ describe('applyMemoryEdits', () => {
       }),
       expect.objectContaining({ seqNo: 7, primaryTerm: 2 })
     );
-    expect(store.archive).not.toHaveBeenCalledWith('memory_checkout-redis', 'merged');
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
     expect(store.create).not.toHaveBeenCalled();
   });
 
@@ -941,7 +1029,7 @@ describe('applyMemoryEdits', () => {
     });
 
     expect(store.update).toHaveBeenCalledTimes(3);
-    expect(store.archive).not.toHaveBeenCalled();
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
     expect(summary).toEqual(
       expect.objectContaining({ mergeSuccessCount: 0, writeFailureCount: 1 })
     );

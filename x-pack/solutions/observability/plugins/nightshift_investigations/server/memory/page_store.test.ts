@@ -825,7 +825,78 @@ describe('createMemoryPageStore', () => {
     );
   });
 
-  it('retries archive conflicts using the latest page fields and version', async () => {
+  it('archives an exact supplied version without rereading', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 4,
+        _primary_term: 2,
+        _source: source,
+      }),
+      index: jest.fn().mockResolvedValue({}),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+    const version = await store.getVersioned('memory_kafka-lag');
+    if (!version) {
+      throw new Error('Expected versioned page');
+    }
+    esClient.get.mockClear();
+
+    await store.archiveVersioned(version, 'merged');
+
+    expect(esClient.get).not.toHaveBeenCalled();
+    expect(esClient.index).toHaveBeenCalledTimes(1);
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'space-a:memory_kafka-lag',
+        if_seq_no: 4,
+        if_primary_term: 2,
+        document: expect.objectContaining({
+          attributes: expect.objectContaining({
+            status: 'archived',
+            archive_reason: 'merged',
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('does not reread or retry when exact-version archival conflicts', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 4,
+        _primary_term: 2,
+        _source: source,
+      }),
+      index: jest.fn().mockRejectedValue({ statusCode: 409 }),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+    const version = await store.getVersioned('memory_kafka-lag');
+    if (!version) {
+      throw new Error('Expected versioned page');
+    }
+    esClient.get.mockClear();
+
+    await expect(store.archiveVersioned(version, 'merged')).rejects.toEqual({ statusCode: 409 });
+    expect(esClient.get).not.toHaveBeenCalled();
+    expect(esClient.index).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries harmful archive conflicts using the latest page fields and version', async () => {
     const latest = {
       ...source,
       title: 'Concurrent canonical title',
@@ -861,7 +932,7 @@ describe('createMemoryPageStore', () => {
       now: () => T0,
     });
 
-    await store.archive('memory_kafka-lag', 'merged');
+    await store.archive('memory_kafka-lag', 'harmful');
 
     expect(esClient.index).toHaveBeenCalledTimes(2);
     expect(esClient.index.mock.calls[1][0]).toEqual(
