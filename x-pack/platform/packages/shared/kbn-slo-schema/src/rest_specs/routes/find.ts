@@ -6,7 +6,6 @@
  */
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
-import { MAX_QUERY_LENGTH } from '../../schema/zod/limits';
 import { sloWithDataResponseSchemaZod } from '../slo';
 
 const sortDirectionSchema = z.union([z.literal('asc'), z.literal('desc')]);
@@ -50,8 +49,8 @@ const searchAfterSchema = z.codec(
 );
 
 const findSLOQuerySchema = z.object({
-  filters: z.string().max(MAX_QUERY_LENGTH).optional(),
-  kqlQuery: z.string().max(MAX_QUERY_LENGTH).optional(),
+  filters: z.string().optional(),
+  kqlQuery: z.string().optional(),
   // Used for page-based pagination; kept as strings to preserve backward compatibility
   page: z.string().optional(),
   perPage: z.string().optional(),

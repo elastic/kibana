@@ -18,9 +18,6 @@
 /** Free-form identifiers: names, field names, ids, urls. */
 export const MAX_KEYWORD_LENGTH = 1024;
 
-/** KQL query strings and filters, which can embed long generated clauses. */
-export const MAX_QUERY_LENGTH = 8192;
-
 /** Wire-form date strings; covers ISO 8601 and the verbose formats `new Date()` accepts. */
 export const MAX_DATE_STRING_LENGTH = 128;
 

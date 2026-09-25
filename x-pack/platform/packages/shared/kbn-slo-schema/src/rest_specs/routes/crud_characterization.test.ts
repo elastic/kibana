@@ -278,6 +278,22 @@ describe('findSLOParamsSchema', () => {
     expect(decode(findSLOParamsSchema, { query: { searchAfter } }).success).toBe(false);
   });
 
+  it('accepts long kqlQuery and filters values', () => {
+    const kqlQuery = `slo.id:(${Array.from({ length: 1000 }, (_, i) => `slo-${i}`).join(' or ')})`;
+    const filters = JSON.stringify({
+      filter: [{ terms: { 'slo.id': Array.from({ length: 1000 }, (_, i) => `slo-${i}`) } }],
+    });
+    expect(kqlQuery.length).toBeGreaterThan(8192);
+    expect(filters.length).toBeGreaterThan(8192);
+
+    const result = decode(findSLOParamsSchema, { query: { kqlQuery, filters } });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value.query?.kqlQuery).toBe(kqlQuery);
+      expect(result.value.query?.filters).toBe(filters);
+    }
+  });
+
   it('accepts every documented sortBy value', () => {
     const sortByValues = [
       'error_budget_consumed',
