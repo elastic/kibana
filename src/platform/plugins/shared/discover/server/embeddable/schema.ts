@@ -16,8 +16,10 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { classicTabSchema, esqlTabSchema, tabSchema } from '@kbn/as-code-discover-schema';
-import { panelOverridesSchema, panelTabSchema } from '@kbn/as-code-discover-schema';
+import {
+  discoverSessionApiEmbeddableByValueConfigSchema,
+  discoverSessionApiEmbeddableByReferenceConfigSchema,
+} from '@kbn/as-code-discover-schema';
 
 const DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
@@ -42,31 +44,13 @@ function withPanelSchemas<T extends z.ZodRawShape>(
   };
 }
 
-const discoverSessionByValuePropsSchema = z
-  .object({
-    tabs: z.array(panelTabSchema).min(1).max(1).meta({
-      description:
-        'Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.',
-    }),
-  })
-  .strict();
 const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
-  discoverSessionByValuePropsSchema,
+  discoverSessionApiEmbeddableByValueConfigSchema,
   BY_VALUE_SCHEMA_META
 );
 
-const discoverSessionByReferencePropsSchema = z
-  .object({
-    ref_id: z.string(),
-    selected_tab_id: z.string().optional().meta({
-      description:
-        'Tab to select from the referenced saved object. If omitted, defaults to the first tab.',
-    }),
-    overrides: panelOverridesSchema,
-  })
-  .strict();
 const getDiscoverSessionByReferenceEmbeddableSchema = withPanelSchemas(
-  discoverSessionByReferencePropsSchema,
+  discoverSessionApiEmbeddableByReferenceConfigSchema,
   BY_REF_SCHEMA_META
 );
 
@@ -78,17 +62,6 @@ export const getDiscoverSessionEmbeddableSchema = (
     getDiscoverSessionByReferenceEmbeddableSchema(getDrilldownsSchema),
   ]);
 
-export type DiscoverSessionPanelOverrides = z.output<typeof panelOverridesSchema>;
-export type DiscoverSessionClassicTab = z.output<typeof classicTabSchema>;
-export type DiscoverSessionEsqlTab = z.output<typeof esqlTabSchema>;
-export type DiscoverSessionTab = z.output<typeof tabSchema>;
-export type DiscoverSessionEmbeddableByValueProps = z.output<
-  typeof discoverSessionByValuePropsSchema
->;
-export type DiscoverSessionEmbeddableByReferenceProps = z.output<
-  typeof discoverSessionByReferencePropsSchema
->;
-
 export type DiscoverSessionEmbeddableByValueState = z.output<
   ReturnType<typeof getDiscoverSessionByValueEmbeddableSchema>
 >;
@@ -96,16 +69,5 @@ export type DiscoverSessionEmbeddableByReferenceState = z.output<
   ReturnType<typeof getDiscoverSessionByReferenceEmbeddableSchema>
 >;
 export type DiscoverSessionEmbeddableState = z.output<
-  ReturnType<typeof getDiscoverSessionEmbeddableSchema>
->;
-
-// Input types (shape accepted before defaults are applied)
-export type DiscoverSessionEmbeddableByValueStateInput = z.input<
-  ReturnType<typeof getDiscoverSessionByValueEmbeddableSchema>
->;
-export type DiscoverSessionEmbeddableByReferenceStateInput = z.input<
-  ReturnType<typeof getDiscoverSessionByReferenceEmbeddableSchema>
->;
-export type DiscoverSessionEmbeddableStateInput = z.input<
   ReturnType<typeof getDiscoverSessionEmbeddableSchema>
 >;

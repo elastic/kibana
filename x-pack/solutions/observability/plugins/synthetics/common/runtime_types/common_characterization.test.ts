@@ -37,7 +37,7 @@ interface CodecUnderTest<A> {
   decode: (input: unknown) => DecodeOutcome<A>;
 }
 
-const ioTsCodec = <A, O>(codec: t.Type<A, O, unknown>): CodecUnderTest<A> => ({
+const ioTsCodec = (codec: t.Any | z.ZodType): CodecUnderTest<unknown> => ({
   flavor: 'io-ts',
   decode: (input) => decode(codec, input),
 });
@@ -277,13 +277,8 @@ describe('custom failure messages', () => {
     expect(zodMessages(zod, input)).toEqual(expected);
   });
 
-  // These two report through the field key instead, so inventing a message for
-  // the twin would silently change what users see. Reproducing the key-derived
-  // text is the job of the shared zod error formatter in a later phase.
-  it.each([
-    { label: 'TimeoutString', ioTs: TimeoutString, input: 'not-a-number' },
-    { label: 'NonEmptyString', ioTs: NonEmptyString, input: '   ' },
-  ])('$label: io-ts supplies no custom message', ({ ioTs, input }) => {
-    expect(ioTsCustomMessages(ioTs, input)).toEqual([]);
+  // NonEmptyString reports through the field key, so it carries no custom message.
+  it('NonEmptyString: io-ts supplies no custom message', () => {
+    expect(ioTsCustomMessages(NonEmptyString, '   ')).toEqual([]);
   });
 });

@@ -8,47 +8,14 @@
 export {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   AGENTIC_INVESTIGATIONS_INTERNAL_URL,
-  AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID,
   AGENTIC_INVESTIGATIONS_PLUGIN_ID,
 } from './constants';
 
+export { userSchema } from './user';
+export type { User } from './user';
+
 // Each entity this plugin owns keeps its own barrel; the umbrella re-exports
 // them so consumers have a single entry point per the plugin's public surface.
-export {
-  ACTION_WORKFLOW_TAG,
-  PROPOSAL_ATTACHMENT_TYPE,
-  MAX_CHARTS_SUMMARY_BUCKETS,
-  PROPOSALS_INDEX_NAME,
-  PROPOSALS_INTERNAL_URL,
-  PROPOSAL_UNCATEGORIZED,
-  PROPOSALS_RESUME_CHANNEL,
-  PROPOSALS_UI_CAPABILITY_DECIDE,
-  PROPOSALS_UI_CAPABILITY_SHOW,
-  PROPOSAL_APPROVE_URL,
-  PROPOSAL_BY_ID_URL,
-  PROPOSAL_DISMISS_URL,
-  PROPOSAL_CHARTS_SUMMARY_URL,
-  actionMetadataSchema,
-  approveProposalRequestSchema,
-  boundedActionInput,
-  createProposalRequestSchema,
-  dismissProposalRequestSchema,
-  dismissReasonSchema,
-  isAwaitingDecision,
-  isExpired,
-  listProposalsQuerySchema,
-  proposalFiltersSchema,
-  proposalCategorySchema,
-  proposalConfidenceSchema,
-  proposalDecisionSchema,
-  proposalImpactSchema,
-  proposalOriginSchema,
-  proposalSchema,
-  proposalChartsSummaryQuerySchema,
-  proposalStatusSchema,
-  proposalUserSchema,
-} from './proposals';
-
 export {
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
@@ -65,29 +32,6 @@ export {
   impactEntitySchema,
   impactSchema,
 } from './impact';
-
-export type {
-  ActionMetadata,
-  ApproveProposalRequest,
-  CreateProposalRequest,
-  DismissProposalRequest,
-  DismissReason,
-  ListProposalsQuery,
-  ListProposalsResponse,
-  Proposal,
-  ProposalCategory,
-  ProposalConfidence,
-  ProposalDecision,
-  ProposalFilters,
-  ProposalImpact,
-  ProposalOrigin,
-  ProposalChartsSummaryBucket,
-  ProposalChartsSummaryQuery,
-  ProposalChartsSummaryResponse,
-  ProposalStatus,
-  ProposalUser,
-  ProposalWithMetadata,
-} from './proposals';
 
 export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
 

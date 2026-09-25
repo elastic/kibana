@@ -235,7 +235,7 @@ describe('conversationToInvestigation', () => {
               type: TimelineEventType.attachmentAdded,
               data: {
                 attachment_id: 'a1',
-                attachment_type: 'investigation_proposal',
+                attachment_type: 'platform.proposal',
                 current_version: 1,
                 render_inline: false,
                 source: 'workflow',
@@ -245,7 +245,7 @@ describe('conversationToInvestigation', () => {
         })
       );
 
-      expect(result.events[0].summary).toBe('Added a investigation_proposal attachment');
+      expect(result.events[0].summary).toBe('Added a platform.proposal attachment');
     });
 
     it('falls back to the username when the actor has no display name', () => {

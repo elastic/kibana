@@ -8,6 +8,7 @@
  */
 
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type { DiscoverSessionApiClassicTabBase } from '@kbn/as-code-discover-schema';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getSearchEmbeddableTransforms } from './search_embeddable_transforms';
 import type {
@@ -16,7 +17,6 @@ import type {
   StoredSearchEmbeddableState,
 } from './types';
 import type {
-  DiscoverSessionClassicTab,
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableByValueState,
   DiscoverSessionEmbeddableState,
@@ -131,7 +131,7 @@ describe('searchEmbeddableTransforms', () => {
         view_mode: viewMode,
         density,
         data_source: dataSource,
-      } = result.tabs[0] as DiscoverSessionClassicTab;
+      } = result.tabs[0] as DiscoverSessionApiClassicTabBase;
       expect(sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
       expect(viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
       expect(density).toBeUndefined();

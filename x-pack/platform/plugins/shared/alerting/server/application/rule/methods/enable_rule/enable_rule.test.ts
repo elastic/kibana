@@ -499,6 +499,36 @@ describe('enable()', () => {
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
+  test('clones the caller API key instead of persisting it when the borrowed-key flag is set', async () => {
+    // A rule created disabled stores no key, so on enable the caller's declaration that its
+    // API key is borrowed (cloneApiKeysOnCreate) must mint a framework-owned clone rather
+    // than persist the borrowed credential.
+    const clientWithBorrowedKey = new RulesClient({
+      ...rulesClientParams,
+      cloneApiKeysOnCreate: true,
+    });
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRuleWithoutApiKey);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValue(true);
+    rulesClientParams.cloneAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: 'cloned', name: 'Alerting: myType/name', api_key: 'cloned-secret' },
+    });
+
+    await clientWithBorrowedKey.enableRule({ id: '1' });
+
+    expect(rulesClientParams.cloneAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        enabled: true,
+        apiKey: Buffer.from('cloned:cloned-secret').toString('base64'),
+        apiKeyCreatedByUser: false,
+      }),
+      expect.anything()
+    );
+  });
+
   test('enables task when scheduledTaskId is defined and task exists', async () => {
     await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();

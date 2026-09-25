@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
 export const CLOSED_GROUP_KEY = 'closed' as const;
 

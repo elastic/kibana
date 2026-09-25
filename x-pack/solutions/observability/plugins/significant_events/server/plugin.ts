@@ -593,6 +593,10 @@ export class SignificantEventsPlugin
         getScopedClients: this.getScopedClients,
         logger: this.logger,
         isAvailable,
+        availability: createSignificantEventsAvailability({
+          server: this.server,
+          logger: this.logger,
+        }),
       })
         .then(({ ensureRegistered }) => {
           const onFlip = () => {

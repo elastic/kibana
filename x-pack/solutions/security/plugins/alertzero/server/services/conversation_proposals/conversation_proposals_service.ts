@@ -9,11 +9,11 @@ import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
-import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
 
-type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
+type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
 /** Conversation-derived fields merged onto a proposal on read. Absent when unreadable. */
 type ConversationDecoration = Pick<

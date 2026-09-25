@@ -53,7 +53,7 @@ test.describe(
       );
 
       await expect(async () => {
-        await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+        await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
           MOCKED_RESPONSE
         );
         await expect(page.testSubj.locator('agentBuilderConversationTitleButton')).toContainText(

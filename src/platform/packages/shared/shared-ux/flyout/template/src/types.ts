@@ -11,16 +11,17 @@ import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
 import type {
   DataAttributeProps,
   EuiBadgeProps,
-  EuiButtonProps,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuProps,
   EuiFlyoutProps,
   EuiIconProps,
+  EuiTabProps,
 } from '@elastic/eui';
 // FIXME: change to import from `@elastic/eui` once https://github.com/elastic/eui/pull/10064 is merged.
 import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
+import type { MetaBlock } from '@kbn/flyout-meta-blocks';
 import type {
   FlyoutSectionAction,
   FlyoutSectionProps,
@@ -28,17 +29,22 @@ import type {
   FlyoutAccordionProps,
 } from '@kbn/flyout-sections';
 
-/** Props for a single tab entry in the root `tabs` array. */
-export interface FlyoutTabProps {
-  /** Stable identifier, used to link the tab to its `Body.TabPanel`. */
-  id: string;
-  /** Tab label rendered inside `EuiTab`. */
-  label: ReactNode;
-  disabled?: boolean;
-  prepend?: ReactNode;
-  append?: ReactNode;
-  'data-test-subj'?: string;
-}
+type TabBarOwnedProps = 'aria-controls' | 'children' | 'id' | 'isSelected' | 'onClick';
+
+/**
+ * Props for a single tab entry in the root `tabs` array. Everything besides `id` and `label`
+ * reaches the underlying `EuiTab`.
+ */
+export type FlyoutTabProps = Omit<EuiTabProps, TabBarOwnedProps> &
+  DataAttributeProps & {
+    /**
+     * Stable identifier, used to link the tab to its `Body.TabPanel`. Distinct from the tab's
+     * DOM id, which the template generates to pair the tab with its panel.
+     */
+    id: string;
+    /** Tab label rendered inside `EuiTab`. */
+    label: ReactNode;
+  };
 
 /** Props for the declarative `FlyoutTemplate.Body.TabPanel` part. */
 export interface FlyoutBodyTabPanelProps {
@@ -71,49 +77,51 @@ export interface FlyoutHeaderProps {
   collapsed?: boolean;
 }
 
+/** A block part authors its value as children, and the header zone fills in its `id`. */
+type BlockPartOwnedProps = 'id' | 'value';
+
 /** Props for the declarative `FlyoutTemplate.Header.MetaBlock` part. */
-export interface FlyoutHeaderMetaBlockProps {
-  /** Optional explicit instance id; auto-generated when omitted. */
-  id?: string;
-  /** The pair's key, rendered bold ahead of the value. */
-  title: ReactNode;
-  /** The pair's value; accepts rich content such as links. */
-  children: ReactNode;
-  'data-test-subj'?: string;
-}
+export type FlyoutHeaderMetaBlockProps = Omit<MetaBlock, BlockPartOwnedProps> &
+  DataAttributeProps & {
+    /** Optional explicit instance id; auto-generated when omitted. */
+    id?: string;
+    /** The pair's value; accepts rich content such as links. */
+    children: ReactNode;
+  };
+
+/** Props owned by the template. `children` is the badge label and `id` identifies the part instance. */
+type BadgePartOwnedProps = 'children' | 'id';
 
 /**
- * Props for the declarative `FlyoutTemplate.Header.Badge` part.
- *
- * The template composes the `EuiBadge` itself, so only presentational options are
- * exposed. Badges in a flyout header label the subject; they are not controls.
+ * Props that would turn the badge into a control. Badges in a flyout header are meant to label the
+ * subject, not act as controls.
  */
-export interface FlyoutHeaderBadgeProps {
-  /** Optional explicit instance id; auto-generated when omitted. */
-  id?: string;
-  /** Badge label. */
-  children: ReactNode;
-  /** Palette color name or hex value. */
-  color?: EuiBadgeProps['color'];
-  /** Icon shown inside the badge. */
-  iconType?: EuiBadgeProps['iconType'];
-  /** Which side of the label the icon sits on. */
-  iconSide?: EuiBadgeProps['iconSide'];
-  'data-test-subj'?: string;
-}
+type BadgeControlProps =
+  | 'onClick'
+  | 'onClickAriaLabel'
+  | 'iconOnClick'
+  | 'iconOnClickAriaLabel'
+  | 'href'
+  | 'target'
+  | 'rel';
+
+/** Props for the declarative `FlyoutTemplate.Header.Badge` part. */
+export type FlyoutHeaderBadgeProps = Omit<EuiBadgeProps, BadgePartOwnedProps | BadgeControlProps> &
+  DataAttributeProps & {
+    /** Optional explicit instance id; auto-generated when omitted. */
+    id?: string;
+    /** Badge label. */
+    children: ReactNode;
+  };
 
 /** Props for the declarative `FlyoutTemplate.Header.InfoBlock` part. */
-export interface FlyoutHeaderInfoBlockProps {
-  /** Optional explicit instance id; auto-generated when omitted. */
-  id?: string;
-  /** Fixed-style text label rendered above the value. */
-  title: string;
-  /** The block's value content. */
-  children: ReactNode;
-  size?: InfoBlockItem['size'];
-  color?: InfoBlockItem['color'];
-  'data-test-subj'?: string;
-}
+export type FlyoutHeaderInfoBlockProps = Omit<InfoBlockItem, BlockPartOwnedProps> &
+  DataAttributeProps & {
+    /** Optional explicit instance id; auto-generated when omitted. */
+    id?: string;
+    /** The block's value content. */
+    children: ReactNode;
+  };
 
 /** Action link rendered right-aligned on a section or accordion title row. */
 export type FlyoutBodySectionAction = FlyoutSectionAction;
@@ -137,24 +145,37 @@ export interface FlyoutBodyProps {
   children?: ReactNode;
 }
 
-/** Props shared by the declarative footer action parts. */
-export interface FlyoutFooterActionBaseProps {
+type ActionOwnedProps =
+  | 'buttonRef'
+  | 'children'
+  | 'color'
+  | 'element'
+  | 'fill'
+  | 'fullWidth'
+  | 'size';
+
+/** Props shared by the declarative footer action parts. Both render a button and never an anchor. */
+interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   /** HTML id forwarded to the button element. */
   id?: string;
   /** Button label. */
   label: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
-  iconType?: EuiButtonProps['iconType'];
-  isLoading?: boolean;
-  isDisabled?: boolean;
-  'data-test-subj'?: string;
 }
 
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
-export type FlyoutFooterPrimaryActionProps = FlyoutFooterActionBaseProps;
+export type FlyoutFooterPrimaryActionProps = Omit<
+  EuiButtonPropsForButton,
+  ActionOwnedProps | 'onClick'
+> &
+  FlyoutFooterActionBaseProps;
 
 /** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
-export type FlyoutFooterSecondaryActionProps = FlyoutFooterActionBaseProps;
+export type FlyoutFooterSecondaryActionProps = Omit<
+  EuiButtonPropsForButton,
+  ActionOwnedProps | 'onClick' | 'minWidth'
+> &
+  FlyoutFooterActionBaseProps;
 
 /**
  * A single item in a footer action menu (either a clickable action or a separator).
@@ -181,21 +202,16 @@ export type FlyoutFooterMenuPanel = Omit<
   content?: never;
 };
 
-/**
- * Trigger button props the template sets itself, so a consumer value would be discarded.
- *
- * `onClick` is always `togglePopover`; `isSelected` is excluded because it applies
- * `aria-pressed`, which describes a toggle button — a popover trigger uses `aria-expanded`
- * instead, which EUI sets automatically; `aria-haspopup` is always `"dialog"`.
- */
 type MenuTriggerOwnedProps =
   | 'children'
+  | 'color'
   | 'fill'
   | 'iconType'
   | 'iconSide'
   | 'element'
   | 'onClick'
   | 'isSelected'
+  | 'size'
   | 'aria-haspopup'
   | 'aria-pressed'
   | 'type';
@@ -238,39 +254,27 @@ export interface FlyoutFooterProps {
   children?: ReactNode;
 }
 
-/** Props for the root `FlyoutTemplate` component. */
-export type FlyoutTemplateProps = Pick<
-  EuiFlyoutProps,
-  | 'onClose'
-  | 'size'
-  | 'minWidth'
-  | 'type'
-  | 'maxWidth'
-  | 'paddingSize'
-  | 'ownFocus'
-  | 'resizable'
-  | 'onResize'
-  | 'session'
-  | 'historyKey'
-  | 'onActive'
-  | 'flyoutMenuProps'
-  | 'id'
-  | 'hasChildBackground'
-  | 'outsideClickCloses'
-  | 'focusTrapProps'
-  | 'closeButtonProps'
-> & {
-  'aria-label'?: EuiFlyoutProps['aria-label'];
-  'aria-labelledby'?: EuiFlyoutProps['aria-labelledby'];
-  'data-test-subj'?: string;
-  /** Declarative zone children: `FlyoutTemplate.Header`, `.Body`, `.Footer`. */
-  children?: ReactNode;
-  /** Tabs rendered in the header bar. Omit for a flyout with no tabs. */
-  tabs?: FlyoutTabProps[];
-  /** Initial selected tab id (uncontrolled); ignored when `selectedTabId` is provided. */
-  defaultSelectedTabId?: string;
-  /** Currently selected tab id (controlled); `onTabChange` fires on every click either way. */
-  selectedTabId?: string;
-  /** Called when the user clicks a tab. */
-  onTabChange?: (id: string) => void;
-};
+/**
+ * `children` represents the declarative zones rather than free-form flyout content.
+ * `flyoutMenuDisplayMode` is always set to `auto`.
+ * `ref` is omitted because the template does not forward it.
+ */
+type TemplateOwnedFlyoutProps = 'children' | 'flyoutMenuDisplayMode' | 'ref';
+
+/**
+ * Props for the root `FlyoutTemplate` component. Any props not explicitly named by the template,
+ * as well as any `data-*` attributes, are passed to the underlying `EuiFlyout`.
+ */
+export type FlyoutTemplateProps = Omit<EuiFlyoutProps, TemplateOwnedFlyoutProps> &
+  DataAttributeProps & {
+    /** Declarative zone children: `FlyoutTemplate.Header`, `.Body`, `.Footer`. */
+    children?: ReactNode;
+    /** Tabs rendered in the header bar. Omit for a flyout with no tabs. */
+    tabs?: FlyoutTabProps[];
+    /** Initial selected tab id (uncontrolled); ignored when `selectedTabId` is provided. */
+    defaultSelectedTabId?: string;
+    /** Currently selected tab id (controlled); `onTabChange` fires on every click either way. */
+    selectedTabId?: string;
+    /** Called when the user clicks a tab. */
+    onTabChange?: (id: string) => void;
+  };

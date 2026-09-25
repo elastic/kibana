@@ -15,16 +15,10 @@ import { ConversationTitle } from './conversation_title';
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
  * `start`, so anything this module imports statically lands in that plugin's page load bundle.
- * All five share one chunk, which the first opened flyout pulls in.
+ * All three share one chunk, which the first opened flyout pulls in.
  */
 const LazyOverviewSlot = lazy(() =>
   import('./slots').then(({ OverviewSlot }) => ({ default: OverviewSlot }))
-);
-const LazyAttachmentsSlot = lazy(() =>
-  import('./slots').then(({ AttachmentsSlot }) => ({ default: AttachmentsSlot }))
-);
-const LazyTimelineSlot = lazy(() =>
-  import('./slots').then(({ TimelineSlot }) => ({ default: TimelineSlot }))
 );
 const LazyHeaderSlot = lazy(() =>
   import('./slots').then(({ HeaderSlot }) => ({ default: HeaderSlot }))
@@ -35,13 +29,10 @@ const LazyFooterSlot = lazy(() =>
 
 /**
  * Tab ids are prefixed with the solution's template id because Agent Builder's tab ids are a
- * global keyspace and duplicate registration throws. `timeline` is deliberately not reused: Agent
- * Builder's built-in tab of that name renders chat execution events, not investigation events.
+ * global keyspace and duplicate registration throws.
  */
 export const getInvestigationTabIds = (templateId: string): readonly string[] => [
   `${templateId}.overview`,
-  `${templateId}.attachments`,
-  `${templateId}.timeline`,
 ];
 
 export interface RegisterAgenticInvestigationTemplateUIOptions {
@@ -60,8 +51,8 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
 }
 
 /**
- * Registers one solution's agentic investigation flyout UI: the tabs Agent Builder renders, plus
- * the header and footer of its conversation details flyout.
+ * Registers one solution's agentic investigation flyout UI: the overview tab Agent Builder
+ * renders, plus the header and footer of its conversation details flyout.
  *
  * Call once per solution from the plugin's `start`. Tabs are registered per template rather than
  * shared, so each solution's tab components stay independent.
@@ -73,7 +64,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   icon,
   renderEscalationModal,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
-  const [overviewTabId, attachmentsTabId, timelineTabId] = getInvestigationTabIds(templateId);
+  const [overviewTabId] = getInvestigationTabIds(templateId);
 
   conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
@@ -86,37 +77,12 @@ export const registerAgenticInvestigationTemplateUI = ({
     },
   }));
 
-  conversationTemplates.registerTab(attachmentsTabId, ({ attachmentsService }) => ({
-    label: DETAILS_FLYOUT_LABELS.tabs.attachments,
-    content: function AttachmentsTabContent({ conversation }) {
-      return (
-        <Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyAttachmentsSlot
-            conversation={conversation}
-            attachmentsService={attachmentsService}
-          />
-        </Suspense>
-      );
-    },
-  }));
-
-  conversationTemplates.registerTab(timelineTabId, () => ({
-    label: DETAILS_FLYOUT_LABELS.tabs.timeline,
-    content: function TimelineTabContent({ conversation }) {
-      return (
-        <Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyTimelineSlot conversation={conversation} />
-        </Suspense>
-      );
-    },
-  }));
-
   conversationTemplates.registerTemplateUIDefinition(
     templateId,
     ({ openFullscreenConversation }) => ({
       name,
       icon,
-      tabs: [overviewTabId, attachmentsTabId, timelineTabId],
+      tabs: [overviewTabId],
       detailsFlyout: {
         header: function InvestigationFlyoutHeader({ conversation }) {
           return (

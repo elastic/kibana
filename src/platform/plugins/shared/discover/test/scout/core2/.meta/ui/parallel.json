@@ -1,5 +1,5 @@
 {
-  "sha1": "9ae18a8202a429f437c1b9226994c59cdb31bc21",
+  "sha1": "0d0849f55ffdd66f22fa385141ab8df71bd798a5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1072,7 +1072,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/panels_toggle_data_view.spec.ts",
-        "line": 35,
+        "line": 40,
         "column": 25
       }
     },
@@ -1163,8 +1163,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_cancellation.spec.ts",
-        "line": 31,
-        "column": 23
+        "line": 48,
+        "column": 13
+      }
+    },
+    {
+      "id": "f21ee4af972064b-9f0fc828458be5d",
+      "title": "Discover request cancellation recovers when a newer time range aborts an active request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_cancellation.spec.ts",
+        "line": 60,
+        "column": 11
       }
     },
     {

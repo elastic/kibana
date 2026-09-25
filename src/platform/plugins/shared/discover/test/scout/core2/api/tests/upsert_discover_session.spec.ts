@@ -13,7 +13,7 @@ import { expect } from '@kbn/scout/api';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import {
   COMMON_HEADERS,
   DISCOVER_SESSION_API_BASE_PATH,

@@ -62,6 +62,61 @@ describe('deductive investigation agent type', () => {
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/elastic.md');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
+    expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
+  });
+
+  it('adds the decision-tree hydrate hook and documents the index when decision trees are enabled', () => {
+    const base = staticBase(
+      getDeductiveInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        decisionTreesEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-cortex-hydrate',
+      'system-nightshift-decision-tree-hydrate',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-cortex-optimize',
+      'system-nightshift-decision-tree-reinforce',
+    ]);
+    // The investigator is told where to read prior trees from its workspace.
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
+    expect(base.instructions).toContain('<decision_trees>');
+    expect(base.instructions).not.toContain('{{decision_trees_load_step}}');
+    expect(base.instructions).not.toContain('{{decision_trees_section}}');
+  });
+
+  it('omits the decision-tree hook and monitors.md instruction when decision trees are disabled', () => {
+    const base = staticBase(
+      getDeductiveInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        decisionTreesEnabled: false,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual(['system-nightshift-cortex-hydrate']);
+    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-cortex-optimize']);
+    expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
+    expect(base.instructions).not.toContain('<decision_trees>');
+    expect(base.instructions).not.toContain('{{decision_trees_load_step}}');
+    expect(base.instructions).not.toContain('{{decision_trees_section}}');
+  });
+
+  it('drops the decision-tree hydrate hook when the sandbox is not configured', () => {
+    const base = staticBase(
+      getDeductiveInvestigationAgentType({
+        sandboxEnabled: false,
+        cortexEnabled: true,
+        decisionTreesEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toBeUndefined();
+    expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
   });
 
   it('drops both cortex workflows when cortex is disabled', () => {
