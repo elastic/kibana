@@ -1776,6 +1776,105 @@ describe('Alerts Client', () => {
           expect(rawActiveAlerts).toEqual({});
         });
 
+        test('should recover the restored alert doc, not the older recovered one, when the alert stops firing', async () => {
+          // Instance 1 recovered as u1, fired again as u2 in a run that died before its
+          // state was saved. Task state still holds the recovered u1 entry only.
+          const recoveredDoc = {
+            ...fetchedAlert1,
+            [ALERT_UUID]: 'u1',
+            [ALERT_STATUS]: 'recovered',
+            [ALERT_END]: '2023-03-28T13:27:28.159Z',
+            [ALERT_TRACKED]: true,
+          };
+          const activeDoc = {
+            ...fetchedAlert1,
+            [ALERT_UUID]: 'u2',
+            [ALERT_START]: '2023-03-28T14:27:28.159Z',
+            [ALERT_FLAPPING_HISTORY]: [true, false],
+            [ALERT_TRACKED]: true,
+          };
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 2 },
+              hits: [
+                {
+                  _id: 'u1',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: recoveredDoc,
+                },
+                {
+                  _id: 'u2',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 42,
+                  _primary_term: 665,
+                  _source: activeDoc,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, enabled: true },
+            recoveredAlertsFromState: {
+              '1': { meta: { uuid: 'u1', flappingHistory: [true, true] } },
+            },
+          });
+
+          // Instance 1 does not fire this run
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // The recovered state now points at the restored lifecycle
+          const { rawActiveAlerts, rawRecoveredAlerts } =
+            alertsClient.getRawAlertInstancesForState();
+          expect(rawActiveAlerts).toEqual({});
+          expect(rawRecoveredAlerts['1'].meta?.uuid).toBe('u2');
+
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          // u2 is recovered in place
+          expect(bulkBody).toContainEqual({
+            index: {
+              _id: 'u2',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              if_seq_no: 42,
+              if_primary_term: 665,
+              require_alias: false,
+            },
+          });
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'u2')).toEqual(
+            expect.objectContaining({
+              [ALERT_STATUS]: 'recovered',
+              [EVENT_ACTION]: 'close',
+              [ALERT_END]: date,
+              [ALERT_START]: '2023-03-28T14:27:28.159Z',
+            })
+          );
+          // u1 is a closed historical span: only untracked, not recovered again
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'u1')).toEqual(
+            expect.objectContaining({
+              [ALERT_STATUS]: 'recovered',
+              [ALERT_TRACKED]: false,
+              [ALERT_END]: '2023-03-28T13:27:28.159Z',
+            })
+          );
+        });
+
         test('should log when a recovered alert has no existing AAD document', async () => {
           clusterClient.search.mockResolvedValue({
             took: 10,

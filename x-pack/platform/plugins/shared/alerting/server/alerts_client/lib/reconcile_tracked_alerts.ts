@@ -97,6 +97,7 @@ export async function reconcileTrackedAlertsWithState<AlertData extends RuleAler
   const restored = restoreStateFromTrackedAlerts({
     trackedAlerts,
     activeAlertsFromState,
+    recoveredAlertsFromState,
     maxAlerts,
     ...logContext,
   });
@@ -151,11 +152,13 @@ export interface RestoreStateFromTrackedAlertsParams<AlertData extends RuleAlert
   extends LogContext {
   trackedAlerts: TrackedAADAlerts<AlertData>;
   activeAlertsFromState: Record<string, RawAlertInstance>;
+  recoveredAlertsFromState: Record<string, RawAlertInstance>;
   maxAlerts: number;
 }
 
 export interface RestoreStateFromTrackedAlertsResult {
   activeAlertsFromState: Record<string, RawAlertInstance>;
+  recoveredAlertsFromState: Record<string, RawAlertInstance>;
   restoredInstanceIds: string[];
   skippedInstanceIds: string[];
 }
@@ -168,6 +171,7 @@ export interface RestoreStateFromTrackedAlertsResult {
 export function restoreStateFromTrackedAlerts<AlertData extends RuleAlertData>({
   trackedAlerts,
   activeAlertsFromState,
+  recoveredAlertsFromState,
   maxAlerts,
   logger,
   ruleInfoMessage,
@@ -175,12 +179,13 @@ export function restoreStateFromTrackedAlerts<AlertData extends RuleAlertData>({
 }: RestoreStateFromTrackedAlertsParams<AlertData>): RestoreStateFromTrackedAlertsResult {
   const restoredInstanceIds: string[] = [];
   const skippedInstanceIds: string[] = [];
-  // The state is copied on the first restore only, so the common case returns it untouched.
-  let reconciled = activeAlertsFromState;
+  // Both maps are copied on the first change only, so the common case returns them untouched.
+  let reconciledActive = activeAlertsFromState;
+  let reconciledRecovered = recoveredAlertsFromState;
   let reconciledCount: number | undefined;
 
   const restore = (instanceId: string, uuid: string) => {
-    if (reconciled[instanceId]) {
+    if (reconciledActive[instanceId]) {
       return;
     }
     reconciledCount ??= Object.keys(activeAlertsFromState).length;
@@ -188,12 +193,22 @@ export function restoreStateFromTrackedAlerts<AlertData extends RuleAlertData>({
       skippedInstanceIds.push(instanceId);
       return;
     }
-    if (reconciled === activeAlertsFromState) {
-      reconciled = { ...activeAlertsFromState };
+    if (reconciledActive === activeAlertsFromState) {
+      reconciledActive = { ...activeAlertsFromState };
     }
-    reconciled[instanceId] = alertDocToRawAlertInstance(trackedAlerts.all[uuid]);
+    reconciledActive[instanceId] = alertDocToRawAlertInstance(trackedAlerts.all[uuid]);
     reconciledCount++;
     restoredInstanceIds.push(instanceId);
+
+    // The restored document started a new lifecycle for this instance. An older recovered
+    // entry left in state would win in setFlappingHistoryAndTrackedAlerts once the alert
+    // recovers again and send the recovery write to the old document.
+    if (reconciledRecovered[instanceId]) {
+      if (reconciledRecovered === recoveredAlertsFromState) {
+        reconciledRecovered = { ...recoveredAlertsFromState };
+      }
+      delete reconciledRecovered[instanceId];
+    }
   };
 
   // Active first, so an instance with both an active and a delayed document keeps the active one.
@@ -225,7 +240,12 @@ export function restoreStateFromTrackedAlerts<AlertData extends RuleAlertData>({
     );
   }
 
-  return { activeAlertsFromState: reconciled, restoredInstanceIds, skippedInstanceIds };
+  return {
+    activeAlertsFromState: reconciledActive,
+    recoveredAlertsFromState: reconciledRecovered,
+    restoredInstanceIds,
+    skippedInstanceIds,
+  };
 }
 
 /**

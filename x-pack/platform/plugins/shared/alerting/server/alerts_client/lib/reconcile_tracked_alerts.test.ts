@@ -153,11 +153,13 @@ const buildTrackedAlerts = (docs: Array<Alert & RuleAlertData>) => {
 const restore = (
   trackedAlerts: ReturnType<typeof buildTrackedAlerts>,
   activeAlertsFromState: Record<string, RawAlertInstance> = {},
-  maxAlerts = 1000
+  maxAlerts = 1000,
+  recoveredAlertsFromState: Record<string, RawAlertInstance> = {}
 ) =>
   restoreStateFromTrackedAlerts({
     trackedAlerts,
     activeAlertsFromState,
+    recoveredAlertsFromState,
     maxAlerts,
     logger,
     ruleInfoMessage,
@@ -298,10 +300,41 @@ describe('reconcile_tracked_alerts', () => {
         makeDoc({ uuid: 'active-uuid', instanceId: 'host-1', status: ALERT_STATUS_ACTIVE }),
       ]);
       const activeAlertsFromState = {};
+      const recoveredAlertsFromState = { 'host-1': { meta: { uuid: 'old-uuid' } } };
 
-      restore(trackedAlerts, activeAlertsFromState);
+      restore(trackedAlerts, activeAlertsFromState, 1000, recoveredAlertsFromState);
 
       expect(activeAlertsFromState).toEqual({});
+      expect(recoveredAlertsFromState).toEqual({ 'host-1': { meta: { uuid: 'old-uuid' } } });
+    });
+
+    it('drops the recovered state entry of an instance whose active document is restored', () => {
+      const trackedAlerts = buildTrackedAlerts([
+        makeDoc({ uuid: 'old-uuid', instanceId: 'host-1', status: ALERT_STATUS_RECOVERED }),
+        makeDoc({ uuid: 'new-uuid', instanceId: 'host-1', status: ALERT_STATUS_ACTIVE }),
+      ]);
+      const recoveredAlertsFromState = {
+        'host-1': { meta: { uuid: 'old-uuid' } },
+        'host-2': { meta: { uuid: 'other-uuid' } },
+      };
+
+      const result = restore(trackedAlerts, {}, 1000, recoveredAlertsFromState);
+
+      expect(result.activeAlertsFromState['host-1'].meta?.uuid).toBe('new-uuid');
+      expect(result.recoveredAlertsFromState).toEqual({
+        'host-2': { meta: { uuid: 'other-uuid' } },
+      });
+    });
+
+    it('returns the recovered state untouched when nothing is restored', () => {
+      const trackedAlerts = buildTrackedAlerts([
+        makeDoc({ uuid: 'old-uuid', instanceId: 'host-1', status: ALERT_STATUS_RECOVERED }),
+      ]);
+      const recoveredAlertsFromState = { 'host-1': { meta: { uuid: 'old-uuid' } } };
+
+      const result = restore(trackedAlerts, {}, 1000, recoveredAlertsFromState);
+
+      expect(result.recoveredAlertsFromState).toBe(recoveredAlertsFromState);
     });
 
     it('restores the most recently started document when several active documents share an instance id', () => {

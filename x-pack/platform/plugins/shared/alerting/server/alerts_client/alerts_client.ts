@@ -166,9 +166,14 @@ export class AlertsClient<
       return;
     }
 
-    const { trackedAlerts, activeAlertsFromState } = await this.reconcileTrackedAlerts(opts);
+    const { trackedAlerts, activeAlertsFromState, recoveredAlertsFromState } =
+      await this.reconcileTrackedAlerts(opts);
     this.trackedAlerts = trackedAlerts;
-    await this.legacyAlertsClient.initializeExecution({ ...opts, activeAlertsFromState });
+    await this.legacyAlertsClient.initializeExecution({
+      ...opts,
+      activeAlertsFromState,
+      recoveredAlertsFromState,
+    });
   }
 
   // Loads the tracked alert documents and makes them agree with the task state, so a run that
