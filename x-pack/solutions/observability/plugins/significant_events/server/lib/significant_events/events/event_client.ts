@@ -12,8 +12,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   SignificantEvent,
   SignificantEventResponse,
-  Severity,
-  SignificantEventStatus,
   SignalEntry,
   SignalVerdict,
 } from '@kbn/significant-events-schema';
@@ -21,10 +19,15 @@ import { SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS } from '@kbn/significant-events
 import {
   type BulkCreateOptions,
   type CommonSearchOptions,
-  type PaginatedSearchOptions,
   type PaginatedResponse,
+  MAX_DEDUP_SCAN_LIMIT,
   throwOnBulkCreateErrors,
 } from '../query_utils';
+import type {
+  EventsFilterOptions,
+  EventsPaginatedSearchOptions,
+  SignificantEventsReadClient,
+} from './read_client';
 import {
   andWhere,
   applyTimeRange,
@@ -78,13 +81,6 @@ const normalizeLegacyVerification = (event: SignificantEvent): SignificantEvent 
   signals: event.signals?.map((signal) => normalizeLegacyVerdict(signal as LegacySignal)),
 });
 
-/**
- * Maximum number of distinct active events returned by findLatestActive. With stream+rule
- * narrowing the result is proportional to the write batch size, so this cap is a safety bound
- * rather than an operational limit.
- */
-const MAX_DEDUP_SCAN_LIMIT = 500;
-
 const multiValueContainsAnyFilter = ({
   where,
   field,
@@ -137,26 +133,16 @@ const topologyFeatureFilter = (
   )}, [${values}]) OR MV_INTERSECTS(${esql.col('blast_radius.feature_id')}, [${values}]))`;
 };
 
-export interface EventsFilterOptions {
-  status?: SignificantEventStatus[];
-  severity?: Severity[];
-  stream?: string[];
-  search?: string;
-  eventIds?: string[];
-  ruleUuids?: string[];
-  topologyFeatureIds?: string[];
-}
-
 type EventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
 
-export type EventsPaginatedSearchOptions = PaginatedSearchOptions & EventsFilterOptions;
+export type { EventsFilterOptions, EventsPaginatedSearchOptions };
 
 export type EventsBatchSearchOptions = EventsCurrentStateSearchOptions & {
   afterEventId?: string;
   batchSize: number;
 };
 
-export class EventClient {
+export class EventClient implements SignificantEventsReadClient {
   constructor(
     private readonly clients: {
       dataStreamClient: EventDataStreamClient;

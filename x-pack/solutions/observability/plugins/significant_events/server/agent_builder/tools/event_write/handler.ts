@@ -14,7 +14,10 @@ import {
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { EventClient } from '../../../lib/significant_events/events';
+import type {
+  EventClient,
+  SignificantEventsReadClient,
+} from '../../../lib/significant_events/events';
 import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
@@ -238,7 +241,7 @@ const markDuplicateKeys = (
 
 /** Single scan for dedup candidates: fetch all currently-active events for the batch. */
 const fetchActiveEventsForDedup = async (
-  eventClient: EventClient,
+  eventSearchClient: SignificantEventsReadClient,
   dedupCandidates: DedupCandidate[]
 ): Promise<SignificantEvent[]> => {
   if (dedupCandidates.length === 0) return [];
@@ -249,7 +252,7 @@ const fetchActiveEventsForDedup = async (
     (c) => c.input.stream_names.length > 0
   );
   const allCandidatesHaveRuleUuids = dedupCandidates.every((c) => c.ruleUuids.length > 0);
-  const { hits } = await eventClient.findLatestActive({
+  const { hits } = await eventSearchClient.findLatestActive({
     streamNames: allCandidatesHaveStreamNames
       ? [...new Set(dedupCandidates.flatMap((c) => c.input.stream_names))]
       : undefined,
@@ -328,38 +331,54 @@ const resolveDedupSkips = (
 
 /** Full history for remaining continuation writes (lineage merge). */
 const fetchPriorDocsByEventId = async (
+  eventSearchClient: SignificantEventsReadClient,
   eventClient: EventClient,
   candidates: WriteCandidate[]
 ): Promise<{
   latestByEventId: Map<string, SignificantEvent>;
+  latestLegacyByEventId: Map<string, SignificantEvent>;
   priorDocsByEventId: Map<string, SignificantEvent[]>;
 }> => {
   const latestByEventId = new Map<string, SignificantEvent>();
+  const latestLegacyByEventId = new Map<string, SignificantEvent>();
   const priorDocsByEventId = new Map<string, SignificantEvent[]>();
   await Promise.all(
     candidates
       .filter((c) => c.input.event_id !== undefined)
       .map(async (c) => {
-        const { hits } = await eventClient.findByEventId(c.eventId);
+        const { hits } = await eventSearchClient.findByEventId(c.eventId);
+        // When flag is OFF, eventSearchClient === eventClient (same shared instance from
+        // getSharedEventClient()). The identity check avoids a redundant second ES round-trip
+        // by reusing the already-fetched hits as the canonical legacy lineage.
+        const legacyHits =
+          eventSearchClient === eventClient
+            ? hits
+            : (await eventClient.findByEventId(c.eventId)).hits;
         priorDocsByEventId.set(c.eventId, hits);
         const latest = hits.at(-1);
         if (latest !== undefined) {
           latestByEventId.set(c.eventId, latest);
         }
+        const latestLegacy = legacyHits.at(-1);
+        if (latestLegacy !== undefined) {
+          latestLegacyByEventId.set(c.eventId, latestLegacy);
+        }
       })
   );
-  return { latestByEventId, priorDocsByEventId };
+  return { latestByEventId, latestLegacyByEventId, priorDocsByEventId };
 };
 
 const buildPendingWrite = (
   candidate: WriteCandidate,
   timestamp: string,
   latestByEventId: Map<string, SignificantEvent>,
+  latestLegacyByEventId: Map<string, SignificantEvent>,
   priorDocsByEventId: Map<string, SignificantEvent[]>
 ) => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
   const latestEvent = latestByEventId.get(candidate.eventId);
+  const latestLegacyEvent = latestLegacyByEventId.get(candidate.eventId);
   const isContinuation = candidate.input.event_id !== undefined;
 
   const signals = isContinuation
@@ -405,8 +424,8 @@ const buildPendingWrite = (
       '@timestamp': timestamp,
       event_uuid: candidate.eventUuid,
       event_id: candidate.eventId,
-      previous_event_uuid: latestEvent?.event_uuid,
-      investigations: latestEvent?.investigations,
+      previous_event_uuid: latestLegacyEvent?.event_uuid,
+      investigations: latestLegacyEvent?.investigations,
       signals,
       stream_names: episodeContext.streamNames,
       causal_features: episodeContext.causalFeatures,
@@ -470,12 +489,21 @@ const applyBulkResults = (
  */
 export async function eventsWriteBulkHandler({
   eventClient,
+  eventSearchClient,
   inputs,
   source,
   alertEventsClient,
   logger,
 }: {
+  /** Full-surface EventClient — writes and canonical lineage lookups always go here. */
   eventClient: EventClient;
+  /**
+   * Flag-aware read surface (`getEventSearchClient()`). When `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ`
+   * is on, routes reads to `.rule-events`; otherwise returns the same shared `EventClient` instance
+   * as `eventClient` (no extra ES round-trip). Defaults to `eventClient` for legacy tests.
+   * Production callers must always supply this.
+   */
+  eventSearchClient?: SignificantEventsReadClient;
   inputs: EventsWriteInput[];
   source?: EventsWriteSource;
   /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
@@ -483,6 +511,7 @@ export async function eventsWriteBulkHandler({
   logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
+  const dedupSearchClient = eventSearchClient ?? eventClient;
 
   assertValidBulkWriteSize(inputs);
 
@@ -491,13 +520,11 @@ export async function eventsWriteBulkHandler({
   const validCandidates = markDuplicateKeys(candidates, results);
 
   const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
-  const activeEvents = await fetchActiveEventsForDedup(eventClient, dedupCandidates);
+  const activeEvents = await fetchActiveEventsForDedup(dedupSearchClient, dedupCandidates);
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
-  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId(
-    eventClient,
-    toWrite
-  );
+  const { latestByEventId, latestLegacyByEventId, priorDocsByEventId } =
+    await fetchPriorDocsByEventId(dedupSearchClient, eventClient, toWrite);
   const calibrated = toWrite.map((candidate) => ({
     ...candidate,
     input: {
@@ -538,7 +565,13 @@ export async function eventsWriteBulkHandler({
   }
 
   const pendingToWrite = remaining.map((candidate) =>
-    buildPendingWrite(candidate, timestamp, latestByEventId, priorDocsByEventId)
+    buildPendingWrite(
+      candidate,
+      timestamp,
+      latestByEventId,
+      latestLegacyByEventId,
+      priorDocsByEventId
+    )
   );
 
   let response;
