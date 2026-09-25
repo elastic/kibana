@@ -15,6 +15,7 @@ import { Router } from '@kbn/shared-ux-router';
 
 import { FlyoutWithComponent } from './_flyout_with_component';
 import { FlyoutWithOverlays } from './_flyout_with_overlays';
+import { PushPaddingScenarios } from './_push_padding_scenarios';
 
 interface AppDeps {
   history: AppMountParameters['history'];
@@ -48,6 +49,10 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays }) => {
 
       <EuiPageTemplate.Section grow={false} alignment="top">
         <FlyoutWithOverlays historyKey={historyKey} overlays={overlays} />
+      </EuiPageTemplate.Section>
+
+      <EuiPageTemplate.Section grow={false} alignment="top">
+        <PushPaddingScenarios overlays={overlays} />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
