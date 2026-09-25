@@ -314,7 +314,7 @@ export const EXTRACT_OBSERVABLES_DEFAULT_LABEL = i18n.translate(
   }
 );
 
-export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.casesRedesign.settings.title', {
+export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.settings.title', {
   defaultMessage: 'Cases settings',
 });
 
