@@ -101,4 +101,23 @@ describe('dedupeAggs', () => {
 
     expect(newAggs[0].functions[0].getArgument('orderBy')?.[0]).toBe('1');
   });
+
+  it('should update any multi-terms order-by reference', () => {
+    const aggs = [
+      'aggMultiTerms id="0" enabled=true schema="segment" fields="clientip" fields="url.keyword" orderBy="3" order="desc" size=5 otherBucket=true otherBucketLabel="Other"',
+      'aggMedian id="1" enabled=true schema="metric" field="bytes"',
+      'aggMedian id="2" enabled=true schema="metric" field="bytes"',
+      'aggMedian id="3" enabled=true schema="metric" field="bytes"',
+    ].map((expression) => buildExpression(parseExpression(expression)));
+
+    const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+    const { aggs: newAggs } = dedupeAggs(aggs, esAggsIdMap, aggsToIdsMap, [
+      operationDefinitionMap.median,
+    ]);
+
+    expect(newAggs).toHaveLength(2);
+
+    expect(newAggs[0].functions[0].getArgument('orderBy')?.[0]).toBe('1');
+  });
 });
