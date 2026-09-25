@@ -170,7 +170,10 @@ export const metricExample = ({
 }: {
   question: string;
   query: string;
-  /** Primary metric first; a second entry is the secondary metric. */
+  /**
+   * Primary metric first; a second entry is the secondary metric. Each gold item
+   * pins its `type`, because array items are matched regardless of order.
+   */
   metrics: string[];
   /** Column that renders one metric tile per value. */
   breakdownBy?: string;
@@ -187,7 +190,10 @@ export const metricExample = ({
     config: {
       type: 'metric',
       data_source: esql(query),
-      metrics: metrics.map(column),
+      metrics: metrics.map((name, index) => ({
+        type: index === 0 ? ('primary' as const) : ('secondary' as const),
+        ...column(name),
+      })),
       ...(breakdownBy === undefined ? {} : { breakdown_by: column(breakdownBy) }),
     },
     goldenToolPath: GOLDEN_TOOL_PATH,

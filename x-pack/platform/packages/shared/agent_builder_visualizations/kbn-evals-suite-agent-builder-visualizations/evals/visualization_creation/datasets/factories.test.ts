@@ -130,7 +130,10 @@ describe('metricExample', () => {
     });
     expect(example.output?.config).toEqual(
       expect.objectContaining({
-        metrics: [{ column: 'Total' }, { column: 'Count' }],
+        metrics: [
+          { type: 'primary', column: 'Total' },
+          { type: 'secondary', column: 'Count' },
+        ],
         breakdown_by: { column: 'os' },
       })
     );
