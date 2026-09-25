@@ -135,7 +135,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isDeploying: isAgentDeploying,
     failedInstances: agentFailedInstances,
     isAlreadyDeployed: isAgentAlreadyDeployed,
-    isCleanupOnly: isAgentCleanupOnly,
     handleDeploy: handleAgentDeploy,
     setAgentCredentials,
   } = useAgentBasedDeploy();
@@ -481,10 +480,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     (hasAnyEcf && !isEcfDone) ||
     isSavingSO ||
     (showAgentSection && isAgentDeploying) ||
-    // Cleanup-only: all services are already deployed, only stale policies need removing.
-    // Credentials are not re-required to enable Next in this case — the in-memory ref carries
-    // whatever was last set, and cleanup will use it. isAgentNextReady is intentionally bypassed.
-    (showAgentSection && !isAgentDone && !isAgentNextReady && !isAgentCleanupOnly);
+    (showAgentSection && !isAgentDone && !isAgentNextReady);
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
