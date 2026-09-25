@@ -27,7 +27,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLocation } from 'react-router-dom';
 import {
@@ -74,7 +73,7 @@ export function ManagedIntegrationsSection({
   hasFailed,
   isCleanupOnly = false,
 }: ManagedIntegrationsSectionProps) {
-  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
+  const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
   const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
     useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
@@ -145,7 +144,6 @@ export function ManagedIntegrationsSection({
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
   );
-  const cloud = services.cloud as CloudSetupForCloudConnector | undefined;
 
   const radioOptions = [
     {
@@ -281,7 +279,7 @@ export function ManagedIntegrationsSection({
             <Suspense fallback={<EuiLoadingSpinner />}>
               {preferredMethod === 'identity_federation' ? (
                 <LazyAwsIdentityFederationSetup
-                  cloud={cloud}
+                  cloud={services.cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   integrations={iacIntegrations}
                   onReadyChange={setIsDeployReady}
