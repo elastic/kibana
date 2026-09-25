@@ -1162,7 +1162,7 @@ describe('ai indices routes', () => {
     it('deletes the retrieval view with the AI index', async () => {
       aiIndexService.delete.mockResolvedValue(undefined);
 
-      await callRoute('DELETE', aiIndexByIdPath, {
+      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support' },
       });
 
@@ -1176,7 +1176,7 @@ describe('ai indices routes', () => {
       aiIndexService.delete.mockResolvedValue(undefined);
       esDeleteView.mockRejectedValue(new Error('security_exception'));
 
-      await callRoute('DELETE', aiIndexByIdPath, {
+      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support' },
       });
 
@@ -2483,7 +2483,7 @@ describe('ai indices routes', () => {
 
   describe('create body validation', () => {
     const validateBody = (body: unknown) => {
-      const { validate } = getRoute('POST', aiIndexPath);
+      const { validate } = getRoute('POST', AI_INDEX_PATH);
       if (validate === false || !validate.request?.body) {
         throw new Error('Expected a body schema');
       }
