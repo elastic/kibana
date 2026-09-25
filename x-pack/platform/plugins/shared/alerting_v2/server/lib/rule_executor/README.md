@@ -175,7 +175,7 @@ Formats are strategies under [`services/query_service/formats`](../services/quer
 | `queryPayload` | `ExecuteRuleQueryStep` | ES\|QL query/filter/params for the current run. |
 | `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |
 | `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
-| `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
+| `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once for every `kind: 'alert'` rule (bounded by `alerts.max`) so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
 
 ## Execution steps
 
@@ -186,7 +186,7 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
 | 2 | `FetchRuleStep` | Load the current rule saved object. |
 | 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
-| 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) and thread them onto `state.activeGroups`. |
+| 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `alerts.max`) and thread them onto `state.activeGroups`. |
 | 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
 | 6 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
 | 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when both `recovery_strategy` and `no_data_strategy` are `'none'`. |
