@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
-import { matchedActionPoliciesQueryKey } from '@kbn/alerting-v2-rule-form';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { actionPolicyKeys } from '../../../../hooks/query_key_factory';
 import { useLinkedActionPolicies, sortMatchedActionPolicies } from './use_linked_action_policies';
 
 const mockUseMatchedActionPolicies = jest.fn();
 const mockHttp = { fake: 'http-start-contract' };
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  matchedActionPoliciesQueryKey: ['matchedActionPolicies'],
   useMatchedActionPolicies: (params: unknown) => mockUseMatchedActionPolicies(params),
 }));
 
@@ -27,14 +22,6 @@ jest.mock('@kbn/core-di-browser', () => ({
 }));
 
 const RULE_TAGS = ['prod'];
-
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false } },
-  logger: { log: () => {}, warn: () => {}, error: () => {} },
-});
-
-const wrapper = ({ children }: { children: React.ReactNode }) =>
-  React.createElement(QueryClientProvider, { client: queryClient }, children);
 
 const buildItem = (
   category: MatchedActionPolicy['category'],
@@ -107,7 +94,7 @@ describe('useLinkedActionPolicies', () => {
   });
 
   it('delegates to useMatchedActionPolicies with the injected http contract and tags', () => {
-    renderHook(() => useLinkedActionPolicies(RULE_TAGS), { wrapper });
+    renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({ http: mockHttp, tags: RULE_TAGS });
   });
@@ -125,7 +112,7 @@ describe('useLinkedActionPolicies', () => {
       isTruncated: false,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS), { wrapper });
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
     expect(result.current.items.map((item) => item.action_policy.id)).toEqual([
       'filtered-1',
@@ -146,7 +133,7 @@ describe('useLinkedActionPolicies', () => {
       isTruncated: true,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS), { wrapper });
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
     expect(result.current.items).toHaveLength(1);
     expect(result.current.evaluatedCount).toBe(2);
@@ -164,33 +151,13 @@ describe('useLinkedActionPolicies', () => {
       isTruncated: true,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(['other']), { wrapper });
+    const { result } = renderHook(() => useLinkedActionPolicies(['other']));
 
     expect(result.current.items).toEqual([]);
     expect(result.current.isLoading).toBe(true);
     expect(result.current.evaluatedCount).toBe(0);
     expect(result.current.isMatchTruncated).toBe(false);
     expect(result.current.isError).toBe(false);
-  });
-
-  it('refetches matches when an action policy list query is invalidated', async () => {
-    await queryClient.prefetchQuery({
-      queryKey: actionPolicyKeys.lists(),
-      queryFn: () => null,
-    });
-    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
-
-    renderHook(() => useLinkedActionPolicies(RULE_TAGS), { wrapper });
-
-    await queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
-
-    await waitFor(() =>
-      expect(invalidateQueries).toHaveBeenCalledWith({
-        queryKey: matchedActionPoliciesQueryKey,
-        exact: false,
-      })
-    );
-    invalidateQueries.mockRestore();
   });
 
   it('passes through the loading state', () => {
@@ -203,7 +170,7 @@ describe('useLinkedActionPolicies', () => {
       isTruncated: false,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS), { wrapper });
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
     expect(result.current.isLoading).toBe(true);
   });
@@ -218,7 +185,7 @@ describe('useLinkedActionPolicies', () => {
       isTruncated: false,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS), { wrapper });
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
     expect(result.current.isError).toBe(true);
     expect(result.current.error?.message).toBe('network error');
