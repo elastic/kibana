@@ -40,8 +40,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       ...INTERNAL_HEADERS,
     };
     await clearInstalledEntityStoreDocuments(esClient);
-    // This test triggers snapshots via FORCE_HISTORY_SNAPSHOT, so schedule frequency
-    // (for example the previous 24h install override) does not affect assertions.
+    // Snapshot frequency is irrelevant here; this test uses FORCE_HISTORY_SNAPSHOT directly.
     const startResponse = await startEntityTypes(apiClient, defaultHeaders, ['host']);
     expect(startResponse.statusCode).toBe(200);
 
