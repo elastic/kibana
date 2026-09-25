@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { runCortexOptimize } from '../cortex/register_cortex';
 import { cortexOptimizeStepDefinition } from './cortex_optimize';
 
@@ -20,8 +21,15 @@ describe('cortexOptimizeStepDefinition', () => {
   const getFakeRequest = jest.fn().mockReturnValue(request);
   const getInference = jest.fn();
   const getSearchInferenceEndpoints = jest.fn();
+  const analytics = coreMock.createSetup().analytics;
 
-  const createContext = (input: { prompt: string; response: string; agent_id?: string }) =>
+  const createContext = (input: {
+    prompt: string;
+    response: string;
+    agent_id?: string;
+    conversation_id?: string;
+    round_id?: string;
+  }) =>
     ({
       input,
       rawInput: input,
@@ -42,6 +50,7 @@ describe('cortexOptimizeStepDefinition', () => {
     const definition = cortexOptimizeStepDefinition({
       getInference,
       getSearchInferenceEndpoints,
+      analytics,
       logger: loggerMock.create(),
     });
 
@@ -50,6 +59,8 @@ describe('cortexOptimizeStepDefinition', () => {
         prompt: 'why is checkout slow?',
         response: 'Redis evictions.',
         agent_id: 'nightshift.investigation',
+        conversation_id: 'conv-1',
+        round_id: 'round-1',
       })
     );
 
@@ -61,6 +72,9 @@ describe('cortexOptimizeStepDefinition', () => {
       esClient,
       spaceId: 'default',
       signal: expect.any(AbortSignal),
+      analytics,
+      conversationId: 'conv-1',
+      roundId: 'round-1',
       logger: expect.anything(),
       getInference,
       getSearchInferenceEndpoints,
