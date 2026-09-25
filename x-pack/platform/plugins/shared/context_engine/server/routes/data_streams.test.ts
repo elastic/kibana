@@ -8,7 +8,7 @@
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { registerDataStreamsRoutes } from './data_streams';
-import { dataStreamsSearchPath, MAX_DATA_STREAM_SEARCH_RESULTS } from '../../common/constants';
+import { DATA_STREAMS_SEARCH_PATH, MAX_DATA_STREAM_SEARCH_RESULTS } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 
 interface RegisteredRoute {
@@ -70,7 +70,7 @@ describe('data streams routes', () => {
   });
 
   it('registers the route as an internal read route', () => {
-    expect(getRoute(dataStreamsSearchPath).config).toMatchObject({
+    expect(getRoute(DATA_STREAMS_SEARCH_PATH).config).toMatchObject({
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
@@ -79,7 +79,7 @@ describe('data streams routes', () => {
   it('returns 404 when the context engine is disabled', async () => {
     featureFlagEnabled = false;
 
-    await callRoute(dataStreamsSearchPath, {});
+    await callRoute(DATA_STREAMS_SEARCH_PATH, {});
 
     expect(response.notFound).toHaveBeenCalledTimes(1);
     expect(getDataStream).not.toHaveBeenCalled();
@@ -88,7 +88,7 @@ describe('data streams routes', () => {
   it('lists all data streams when search is omitted', async () => {
     getDataStream.mockResolvedValue({ data_streams: [{ name: 'logs-genai-default' }] });
 
-    await callRoute(dataStreamsSearchPath, { query: {} });
+    await callRoute(DATA_STREAMS_SEARCH_PATH, { query: {} });
 
     expect(getDataStream).toHaveBeenCalledWith({ name: '*', expand_wildcards: 'all' });
     expect(response.ok).toHaveBeenCalledWith({
@@ -99,7 +99,7 @@ describe('data streams routes', () => {
   it('wraps the search term in wildcards', async () => {
     getDataStream.mockResolvedValue({ data_streams: [{ name: 'logs-genai-default' }] });
 
-    await callRoute(dataStreamsSearchPath, { query: { search: 'lo' } });
+    await callRoute(DATA_STREAMS_SEARCH_PATH, { query: { search: 'lo' } });
 
     expect(getDataStream).toHaveBeenCalledWith({ name: '*lo*', expand_wildcards: 'all' });
   });
@@ -114,7 +114,7 @@ describe('data streams routes', () => {
       ],
     });
 
-    await callRoute(dataStreamsSearchPath, { query: {} });
+    await callRoute(DATA_STREAMS_SEARCH_PATH, { query: {} });
 
     expect(response.ok).toHaveBeenCalledWith({
       body: { dataStreams: ['zeta-stream', 'managed-stream', 'alpha-stream'] },
@@ -128,7 +128,7 @@ describe('data streams routes', () => {
     }));
     getDataStream.mockResolvedValue({ data_streams: dataStreams });
 
-    await callRoute(dataStreamsSearchPath, { query: {} });
+    await callRoute(DATA_STREAMS_SEARCH_PATH, { query: {} });
 
     expect(response.ok).toHaveBeenCalledWith({
       body: {

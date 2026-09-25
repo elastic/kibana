@@ -14,10 +14,12 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerFeatures } from './features';
+import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import { createImpactPrivilegesChecker } from './impact/services/check_impact_privileges';
 import { createImpactClient } from './impact/services/impact_client';
 import { ImpactService } from './impact/services/impact_service';
+import { registerImpactStepDefinitions } from './impact/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
@@ -56,9 +58,24 @@ export class AgenticInvestigationsPlugin
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    { features }: AgenticInvestigationsSetupDependencies
+    { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features });
+
+    registerImpactAttachment(agentBuilder);
+
+    registerImpactStepDefinitions({
+      workflowsExtensions,
+      getImpactService: () => this.requireImpactService(),
+      resolveUser: (request) => this.requireUserResolver()(request),
+      // Steps register during setup but only run once Kibana has started, so
+      // the authorization service is resolved per call rather than captured
+      // here — `security.authz` does not exist yet.
+      privileges: createImpactPrivilegesChecker({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        logger: this.logger,
+      }),
+    });
 
     const router = coreSetup.http.createRouter();
 
