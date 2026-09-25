@@ -16,9 +16,10 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { ConnectionTransactionsResponse } from '@kbn/apm-api-shared';
 import { ApmDocumentType } from '../../../common/document_type';
 import {
+  PARENT_ID,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  TRACE_ID,
+  SPAN_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
@@ -49,7 +50,7 @@ export function getConnectionTransactions({
 }: {
   apmEventClient: APMEventClient;
   sourceServiceName: string;
-  /** Present for service→service edges. Triggers trace-level Phase 1 instead of resource-based. */
+  /** Present for service→service edges. Triggers parent-span Phase 1 instead of resource-based. */
   targetServiceName?: string;
   dependencies: string[];
   environment: Environment;
@@ -63,18 +64,22 @@ export function getConnectionTransactions({
 
     if (targetServiceName) {
       //
-      // Service→service Phase 1: trace-level join.
+      // Service→service Phase 1: parent-span join.
       //
-      // For service→service edges the resources array in the edge data comes from whichever
-      // exit span was merged into the target service node. That exit span may have originated
-      // from a different caller, so its span.destination.service.resource value may not match
-      // what sourceService actually uses when calling targetService. A trace-level join is
-      // semantically correct: find sourceService transactions that participate in traces that
-      // also contain targetService.
+      // A trace-level join (find sourceService tx IDs in any trace that also contains
+      // targetService) is too broad: in multi-hop traces like A→B→C it would incorrectly
+      // include A→B transactions even when A never calls C directly.
       //
-      // Phase 1a: collect trace IDs containing targetService transactions.
-      const targetTraceResponse = await apmEventClient.search(
-        'get_connection_transactions_target_traces',
+      // A parent-span join is precise: every targetService entry transaction has a
+      // parent.id that is the span.id of the exit span in sourceService that created it.
+      // Collecting those parent.id values and then looking up which sourceService
+      // transactions contain those span IDs gives exactly the sourceService transactions
+      // that directly called targetService.
+      //
+      // Phase 1a: collect the parent.id values of targetService entry transactions.
+      // These are the span.id values of exit spans in sourceService.
+      const targetEntryResponse = await apmEventClient.search(
+        'get_connection_transactions_target_parent_ids',
         {
           apm: { events: [ProcessorEvent.transaction] },
           track_total_hits: false,
@@ -83,39 +88,41 @@ export function getConnectionTransactions({
             bool: {
               filter: [
                 { term: { [SERVICE_NAME]: targetServiceName } },
+                { exists: { field: PARENT_ID } },
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
               ],
             },
           },
           aggs: {
-            trace_ids: {
-              terms: { field: TRACE_ID, size: MAX_IDS },
+            parent_ids: {
+              terms: { field: PARENT_ID, size: MAX_IDS },
             },
           },
         }
       );
 
-      const traceIds = (targetTraceResponse.aggregations?.trace_ids.buckets ?? []).map((b) =>
+      const parentIds = (targetEntryResponse.aggregations?.parent_ids.buckets ?? []).map((b) =>
         String(b.key)
       );
 
-      if (traceIds.length === 0) {
+      if (parentIds.length === 0) {
         return { transactionGroups: [], isMaxTransactionsReached: false };
       }
 
-      // Phase 1b: collect sourceService transaction IDs in those traces.
+      // Phase 1b: find sourceService spans whose span.id is in parentIds, then collect
+      // the transaction.id of each containing transaction.
       const sourceTxResponse = await apmEventClient.search(
         'get_connection_transactions_source_tx_ids',
         {
-          apm: { events: [ProcessorEvent.transaction] },
+          apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
           track_total_hits: false,
           size: 0,
           query: {
             bool: {
               filter: [
                 { term: { [SERVICE_NAME]: sourceServiceName } },
-                { terms: { [TRACE_ID]: traceIds } },
+                { terms: { [SPAN_ID]: parentIds } },
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
               ],
@@ -132,7 +139,7 @@ export function getConnectionTransactions({
       const sourceBuckets = sourceTxResponse.aggregations?.transaction_ids.buckets ?? [];
       transactionIds = sourceBuckets.map((b) => String(b.key));
       isMaxTransactionsReached =
-        traceIds.length >= MAX_IDS || transactionIds.length >= MAX_IDS;
+        parentIds.length >= MAX_IDS || transactionIds.length >= MAX_IDS;
     } else {
       //
       // Service→dependency Phase 1: resource-based join.
