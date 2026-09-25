@@ -207,9 +207,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         title: 'Risk movers',
         value: riskMoversCount,
         isLoading: riskMoversLoading,
-        noDataMessage: riskMoversMissingIndex
-          ? 'Requires risk score history data'
-          : undefined,
+        noDataMessage: riskMoversMissingIndex ? 'Requires risk score history data' : undefined,
         description:
           timeRange === '24h'
             ? 'Entities whose risk score rose ≥10 points vs yesterday'
@@ -221,9 +219,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         title: 'Newly high/critical',
         value: newlyHCCount,
         isLoading: newlyHCLoading,
-        noDataMessage: newlyHCMissingIndex
-          ? 'Requires risk score history data'
-          : undefined,
+        noDataMessage: newlyHCMissingIndex ? 'Requires risk score history data' : undefined,
         description:
           timeRange === '24h'
             ? 'Entities that crossed into High or Critical risk since yesterday'
