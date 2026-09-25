@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
+  BaseConnectorStepSchema,
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
   DataSetStepSchema,
@@ -1328,10 +1329,33 @@ describe('dynamic timeout schema', () => {
     expect(WaitForInputStepSchema.safeParse({ ...input, timeout: overLimit }).success).toBe(false);
   });
 
-  it('does not accept templates on connector TimeoutPropSchema', () => {
+  it('accepts a duration or a Liquid template as a connector/action step timeout', () => {
+    const step = { name: 's', type: 'slack' };
+    expect(BaseConnectorStepSchema.safeParse({ ...step, timeout: '5m' }).success).toBe(true);
+    expect(BaseConnectorStepSchema.safeParse({ ...step, timeout: templated }).success).toBe(true);
+    expect(BaseConnectorStepSchema.safeParse({ ...step, timeout: 'soon' }).success).toBe(false);
+  });
+
+  it('does not accept templates on flow-control TimeoutPropSchema', () => {
     expect(TimeoutPropSchema.safeParse({ timeout: templated }).success).toBe(false);
     expect(TimeoutPropSchema.safeParse({ timeout: '5m' }).success).toBe(true);
     expect(TimeoutPropSchema.safeParse({ timeout: '1h30m' }).success).toBe(true);
+  });
+
+  it('accepts a duration or a Liquid template on the wait step duration', () => {
+    const wait = { name: 's', type: 'wait' as const };
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: '5s' } }).success).toBe(true);
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: '1h30m' } }).success).toBe(true);
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: templated } }).success).toBe(true);
+  });
+
+  it('rejects a non-duration, non-template wait step duration', () => {
+    const wait = { name: 's', type: 'wait' as const };
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: 'soon' } }).success).toBe(false);
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: '{{ open' } }).success).toBe(
+      false
+    );
+    expect(WaitStepSchema.safeParse({ ...wait, with: {} }).success).toBe(false);
   });
 
   it('emits duration and Liquid patterns in JSON Schema for Monaco', () => {

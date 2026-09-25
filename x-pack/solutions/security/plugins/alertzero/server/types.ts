@@ -7,6 +7,10 @@
 
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type {
+  AgenticInvestigationsPluginSetup,
+  AgenticInvestigationsPluginStart,
+} from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
@@ -15,7 +19,15 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
-export type AlertZeroPluginSetup = Record<string, never>;
+export interface AlertZeroPluginSetup {
+  /**
+   * `false` when the `xpack.alertzero.enabled` kill switch is off, in which case AlertZero
+   * registered nothing — including its `securitySolution:enableAlertZero` advanced setting.
+   * Serverless checks this before allowlisting that setting: allowlisting an unregistered key
+   * fails startup in dev (`UiSettingsService#validateAllowlist`).
+   */
+  isEnabled: boolean;
+}
 export type AlertZeroPluginStart = Record<string, never>;
 
 export interface AlertZeroSetupDependencies {
@@ -23,6 +35,7 @@ export interface AlertZeroSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
+  agenticInvestigations: AgenticInvestigationsPluginSetup;
   proposals: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
@@ -31,6 +44,7 @@ export interface AlertZeroStartDependencies {
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   agentBuilder: AgentBuilderPluginStart;
+  agenticInvestigations: AgenticInvestigationsPluginStart;
   proposals: ProposalsPluginStart;
 }
 

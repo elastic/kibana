@@ -7,8 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID } from '../agents/investigation';
-import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { hydrateCortexWorkspace, runCortexOptimize } from './register_cortex';
 import { optimizeCortex } from './optimize';
 import { materializeCortex } from './materialize';
@@ -123,13 +122,13 @@ describe('runCortexOptimize', () => {
     jest.clearAllMocks();
   });
 
-  it('runs for the deductive investigation agent', async () => {
-    await run(NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID);
+  it('runs for the Nightshift investigation agent', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
     expect(optimizeCortex).toHaveBeenCalled();
   });
 
-  it('skips the significant-events investigator, which does not write to Cortex', async () => {
-    await run(SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID);
+  it('skips another agent', async () => {
+    await run('other-agent');
     expect(optimizeCortex).not.toHaveBeenCalled();
   });
 

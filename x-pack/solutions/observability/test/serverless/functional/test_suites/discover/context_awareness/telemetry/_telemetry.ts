@@ -30,6 +30,27 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
 
+  // Re-clicks only while the column is still not in the requested state, so the toggle stays idempotent.
+  const toggleColumnInFlyout = async (fieldName: string, shouldBeAdded: boolean) => {
+    const headerCell = `dataGridHeaderCell-${fieldName}`;
+
+    await retry.waitForWithTimeout(
+      `${fieldName} column to be ${shouldBeAdded ? 'added to' : 'removed from'} the data grid`,
+      30 * 1000,
+      async () => {
+        if ((await testSubjects.exists(headerCell, { timeout: 2000 })) === shouldBeAdded) {
+          return true;
+        }
+
+        await dataGrid.clickFieldActionInFlyout(fieldName, 'toggleColumnButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        return (await testSubjects.exists(headerCell, { timeout: 5000 })) === shouldBeAdded;
+      }
+    );
+  };
+
   describe('telemetry', () => {
     describe('context', () => {
       before(async () => {
@@ -361,14 +382,10 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         await discover.isShowingDocViewer();
 
         // event 1
-        await dataGrid.clickFieldActionInFlyout('service.name', 'toggleColumnButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await toggleColumnInFlyout('service.name', true);
 
         // event 2
-        await dataGrid.clickFieldActionInFlyout('log.level', 'toggleColumnButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await toggleColumnInFlyout('log.level', false);
 
         // event 3
         await dataGrid.clickFieldActionInFlyout('log.level', 'addFilterOutValueButton');
@@ -417,14 +434,10 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         await discover.isShowingDocViewer();
 
         // event 1
-        await dataGrid.clickFieldActionInFlyout('service.name', 'toggleColumnButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await toggleColumnInFlyout('service.name', true);
 
         // event 2
-        await dataGrid.clickFieldActionInFlyout('log.level', 'toggleColumnButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await toggleColumnInFlyout('log.level', false);
 
         // event 3
         await dataGrid.clickFieldActionInFlyout('log.level', 'addFilterOutValueButton');
