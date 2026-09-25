@@ -9,7 +9,7 @@ pricing.tiers.products:
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'observability']
 
-# Significant Events is re-enabled only for Observability Complete
+# Significant Events and Nightshift Sources are re-enabled only for Observability Complete
 xpack.significantEvents.enabled: false
 xpack.nightshiftSources.enabled: false
 
