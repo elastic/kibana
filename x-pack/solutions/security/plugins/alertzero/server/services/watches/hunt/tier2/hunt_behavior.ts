@@ -610,6 +610,12 @@ export const huntBehavior = async (
     );
   }
 
+  // Techniques the generation budget left unsearched. Reported rather than only
+  // logged: a behavior that kept its placeholder is indistinguishable in
+  // `behaviors` from one whose grounded query ran and found nothing, and the
+  // caller retires the report either way.
+  const uncorroboratedIds: string[] = [];
+
   if (validated.length > 0 && esClient) {
     // Highest confidence first, so a report that overruns the budget spends it on
     // its best-supported behaviors rather than whichever the model emitted first.
@@ -617,9 +623,14 @@ export const huntBehavior = async (
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, MAX_GENERATED_BEHAVIORS);
     if (generationTargets.length < validated.length) {
-      logger.info(
+      const targeted = new Set(generationTargets.map((b) => b.technique_id));
+      uncorroboratedIds.push(
+        ...validated.filter((b) => !targeted.has(b.technique_id)).map((b) => b.technique_id)
+      );
+      logger.warn(
         `[hunt:esql] ${validated.length} validated behaviors exceed the generation budget of ` +
-          `${MAX_GENERATED_BEHAVIORS}; the remainder keep a non-executable placeholder.`
+          `${MAX_GENERATED_BEHAVIORS}; ${uncorroboratedIds.length} techniques are left ` +
+          `uncorroborated and keep a non-executable placeholder: ${uncorroboratedIds.join(', ')}.`
       );
     }
     const groundedEsql = await generateGroundedEsql({
@@ -663,6 +674,13 @@ export const huntBehavior = async (
       `has_hit=${hasHit} report_id=${reportId}`
   );
 
+  const partialSuffix =
+    uncorroboratedIds.length > 0
+      ? ` ${uncorroboratedIds.length} of ${validated.length} techniques exceeded the per-run ` +
+        `generation budget and were never searched, so this report is only partially ` +
+        `corroborated: ${uncorroboratedIds.join(', ')}.`
+      : '';
+
   return {
     status: validated.length === 0 ? 'no_behaviors_validated' : 'behaviors_proposed',
     report_id: reportId,
@@ -670,13 +688,14 @@ export const huntBehavior = async (
     indexed_behaviors: toIndexedBehaviors(validated, reportId),
     has_hit: hasHit,
     ...(droppedIds.length > 0 && { dropped_unknown_ids: droppedIds }),
+    ...(uncorroboratedIds.length > 0 && { uncorroborated_technique_ids: uncorroboratedIds }),
     next_step:
       validated.length === 0
         ? 'No candidates matched the canonical ATT&CK catalog. The LLM may have ' +
           'hallucinated technique IDs; consider lowering the LLM threshold or falling ' +
           'back to IOC matching for this report.'
         : hasHit
-        ? 'Behaviors proposed; at least one grounded query hit a required index.'
-        : 'Behaviors proposed for Investigation staging.',
+        ? `Behaviors proposed; at least one grounded query hit a required index.${partialSuffix}`
+        : `Behaviors proposed for Investigation staging.${partialSuffix}`,
   };
 };

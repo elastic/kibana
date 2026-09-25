@@ -507,6 +507,33 @@ describe('huntCoordinator', () => {
     expect(result.has_confirmed_hit).toBe(true);
   });
 
+  it('surfaces a budget-truncated Tier 2 without failing the run', async () => {
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    mockT2.mockResolvedValueOnce({
+      status: 'behaviors_proposed',
+      behaviors: [{ technique_id: 'T1078.004' }],
+      indexed_behaviors: [],
+      has_hit: false,
+      uncorroborated_technique_ids: ['T1059', 'T1105'],
+      next_step: 'partial',
+    });
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      mockModel,
+      logger,
+      { spaceId: 'default', trigger: 'scheduled', run_id: 'run-partial', text: 'report text' }
+    );
+
+    expect(result.tier2?.uncorroborated_technique_ids).toEqual(['T1059', 'T1105']);
+    expect(result.next_step).toContain('T1059, T1105');
+    expect(result.message).toContain('2 uncorroborated');
+    // A deterministic budget cut must not re-open the report: the next sweep would
+    // truncate it identically and re-spend the whole budget on the same techniques.
+    expect(result.completed_successfully).toBe(true);
+  });
+
   it('forwards the Tier 1 window into huntBehavior for execute', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
