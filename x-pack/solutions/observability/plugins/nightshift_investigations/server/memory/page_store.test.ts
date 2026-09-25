@@ -352,11 +352,60 @@ describe('createMemoryPageStore', () => {
     expect(pages.map(({ id }) => id)).toEqual(['memory_kafka-lag']);
   });
 
-  it('applies useful then unrelated as one bulk write with a shared now', async () => {
+  it('writes only decayed counters with optimistic concurrency', async () => {
     const esClient = {
-      bulk: jest.fn().mockResolvedValue({ errors: false }),
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 12,
+        _primary_term: 3,
+        _source: source,
+      }),
+      update: jest.fn().mockResolvedValue({}),
     };
 
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0 + HALF_LIFE_SEC,
+    });
+
+    await store.applyCounterUpdates([{ id: 'memory_kafka-lag', addImp: 1, addConv: 1 }]);
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      {
+        index: MEMORY_INDEX,
+        id: 'space-a:memory_kafka-lag',
+        if_seq_no: 12,
+        if_primary_term: 3,
+        refresh: 'wait_for',
+        doc: {
+          attributes: {
+            impressions: expect.any(Number),
+            conversions: expect.any(Number),
+            last_impression_time: epochSecondsToIso(T0 + HALF_LIFE_SEC),
+          },
+        },
+      },
+      expect.anything()
+    );
+    expect(esClient.update.mock.calls[0][0].doc.attributes.impressions).toBeCloseTo(6, 12);
+    expect(esClient.update.mock.calls[0][0].doc.attributes.conversions).toBeCloseTo(2.5, 12);
+    expect(esClient.update.mock.calls[0][0].doc).not.toHaveProperty('content');
+    expect(esClient.update.mock.calls[0][0]).not.toHaveProperty('script');
+  });
+
+  it('aggregates duplicate deltas before reading and decaying once', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 12,
+        _primary_term: 3,
+        _source: source,
+      }),
+      update: jest.fn().mockResolvedValue({}),
+    };
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
@@ -370,34 +419,113 @@ describe('createMemoryPageStore', () => {
       { id: 'memory_kafka-lag', addImp: 1, addConv: 0 },
     ]);
 
-    expect(esClient.bulk).toHaveBeenCalledTimes(1);
-    const bulkBody = esClient.bulk.mock.calls[0][0];
-    expect(bulkBody.refresh).toBe('wait_for');
-    expect(bulkBody.operations[0]).toEqual({
-      update: {
-        _index: MEMORY_INDEX,
-        _id: 'space-a:memory_kafka-lag',
-        retry_on_conflict: 3,
-      },
-    });
-    expect(bulkBody.operations[1]).toEqual({
-      script: expect.objectContaining({
-        source: expect.stringContaining("attributes.status == 'archived'"),
-        params: {
-          now: T0 + HALF_LIFE_SEC,
-          decayLambda: Math.log(2) / HALF_LIFE_SEC,
-          addImp: 2,
-          addConv: 1,
-        },
-      }),
-      scripted_upsert: true,
-      upsert: {},
-    });
+    expect(esClient.get).toHaveBeenCalledTimes(1);
+    expect(esClient.update).toHaveBeenCalledTimes(1);
+    const written = esClient.update.mock.calls[0][0].doc.attributes;
+    expect(written.impressions).toBeCloseTo(7, 12);
+    expect(written.conversions).toBeCloseTo(2.5, 12);
+    expect(written.last_impression_time).toBe(epochSecondsToIso(T0 + HALF_LIFE_SEC));
   });
 
-  it('throws when a counter bulk write contains item errors', async () => {
+  it('rereads and recomputes after a conflict so both logical increments survive', async () => {
+    const concurrentSource = {
+      ...source,
+      attributes: {
+        ...source.attributes,
+        impressions: 6,
+        conversions: 1.5,
+        last_impression_time: epochSecondsToIso(T0 + HALF_LIFE_SEC),
+      },
+    };
     const esClient = {
-      bulk: jest.fn().mockResolvedValue({ errors: true }),
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({
+          found: true,
+          _seq_no: 12,
+          _primary_term: 3,
+          _source: source,
+        })
+        .mockResolvedValueOnce({
+          found: true,
+          _seq_no: 13,
+          _primary_term: 3,
+          _source: concurrentSource,
+        }),
+      update: jest.fn().mockRejectedValueOnce({ statusCode: 409 }).mockResolvedValueOnce({}),
+    };
+
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0 + HALF_LIFE_SEC,
+    });
+
+    await store.applyCounterUpdates([{ id: 'memory_kafka-lag', addImp: 1, addConv: 0 }]);
+
+    expect(esClient.get).toHaveBeenCalledTimes(2);
+    expect(esClient.update).toHaveBeenCalledTimes(2);
+    expect(esClient.update.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        if_seq_no: 13,
+        if_primary_term: 3,
+        doc: {
+          attributes: {
+            impressions: 7,
+            conversions: 1.5,
+            last_impression_time: epochSecondsToIso(T0 + HALF_LIFE_SEC),
+          },
+        },
+      })
+    );
+  });
+
+  it('noops archived and missing pages', async () => {
+    const archived = {
+      ...source,
+      attributes: { ...source.attributes, status: 'archived' as const },
+    };
+    const esClient = {
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({
+          found: true,
+          _seq_no: 12,
+          _primary_term: 3,
+          _source: archived,
+        })
+        .mockRejectedValueOnce({ statusCode: 404 }),
+      update: jest.fn(),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+
+    await store.applyCounterUpdates([
+      { id: 'memory_archived', addImp: 1, addConv: 1 },
+      { id: 'memory_missing', addImp: 1, addConv: 1 },
+    ]);
+
+    expect(esClient.get).toHaveBeenCalledTimes(2);
+    expect(esClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws a non-conflict update failure without retrying', async () => {
+    const failure = Object.assign(new Error('unavailable'), { statusCode: 503 });
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 12,
+        _primary_term: 3,
+        _source: source,
+      }),
+      update: jest.fn().mockRejectedValue(failure),
     };
     const store = createMemoryPageStore({
       esClient: esClient as never,
@@ -409,14 +537,54 @@ describe('createMemoryPageStore', () => {
 
     await expect(
       store.applyCounterUpdates([{ id: 'memory_kafka-lag', addImp: 1, addConv: 1 }])
-    ).rejects.toThrow('Memory counter bulk update failed');
+    ).rejects.toBe(failure);
+    expect(esClient.get).toHaveBeenCalledTimes(1);
+    expect(esClient.update).toHaveBeenCalledTimes(1);
   });
 
-  it('uses a scripted upsert that noops archived pages and missing docs', async () => {
+  it('throws visibly after three counter update conflicts', async () => {
     const esClient = {
-      bulk: jest.fn().mockResolvedValue({ errors: false }),
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 12,
+        _primary_term: 3,
+        _source: source,
+      }),
+      update: jest.fn().mockRejectedValue({ statusCode: 409 }),
     };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
 
+    await expect(
+      store.applyCounterUpdates([{ id: 'memory_kafka-lag', addImp: 1, addConv: 1 }])
+    ).rejects.toThrow('Memory counter update exhausted 3 version conflicts');
+    expect(esClient.get).toHaveBeenCalledTimes(3);
+    expect(esClient.update).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not regress last_impression_time when the stored timestamp is newer', async () => {
+    const futureTime = T0 + 60;
+    const futureSource = {
+      ...source,
+      attributes: {
+        ...source.attributes,
+        last_impression_time: epochSecondsToIso(futureTime),
+      },
+    };
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 12,
+        _primary_term: 3,
+        _source: futureSource,
+      }),
+      update: jest.fn().mockResolvedValue({}),
+    };
     const store = createMemoryPageStore({
       esClient: esClient as never,
       logger,
@@ -426,11 +594,12 @@ describe('createMemoryPageStore', () => {
     });
 
     await store.applyCounterUpdates([{ id: 'memory_kafka-lag', addImp: 1, addConv: 1 }]);
-    const operations = esClient.bulk.mock.calls[0][0].operations;
-    expect(operations[0]).toHaveProperty('update');
-    expect(operations[1]).toMatchObject({ scripted_upsert: true, upsert: {} });
-    expect(operations[1].script.source).toContain("ctx.op == 'create'");
-    expect(operations[1].script.source).toContain("ctx.op = 'noop'");
+
+    expect(esClient.update.mock.calls[0][0].doc.attributes).toEqual({
+      impressions: 11,
+      conversions: 4,
+      last_impression_time: epochSecondsToIso(futureTime),
+    });
   });
 
   it('retrieves browse candidates without a query and search hits with one', async () => {
