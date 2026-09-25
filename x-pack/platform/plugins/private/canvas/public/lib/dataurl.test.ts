@@ -46,6 +46,16 @@ describe('dataurl', () => {
     it('returns null for an invalid base64 image', () => {
       expect(parseDataUrl(INVALID_BASE64_PIXEL)).toBeNull();
     });
+    it('returns a null extension for an unknown MIME type', () => {
+      expect(parseDataUrl('data:application/x-unknown;base64,VGhpcyBpcyBhIHRlc3Q=')).toEqual({
+        charset: undefined,
+        data: null,
+        encoding: 'base64',
+        extension: null,
+        isImage: false,
+        mimetype: 'application/x-unknown',
+      });
+    });
     it('returns correct values for text data urls', () => {
       expect(parseDataUrl(BASE64_TEXT)).toEqual({
         charset: 'utf-8',

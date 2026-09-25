@@ -29,6 +29,37 @@ describe('When initializing file client via createESFileClient()', () => {
     logger = loggingSystemMock.createLogger();
   });
 
+  it.each([
+    ['image/png', 'png'],
+    ['image/jpeg', 'jpeg'],
+    ['application/pdf', 'pdf'],
+    ['text/plain; charset=utf-8', 'txt'],
+    ['application/x-unknown', undefined],
+    [undefined, undefined],
+  ])('derives the file extension from MIME type %s', async (mime, extension) => {
+    const fileClient = createEsFileClient({
+      logger,
+      metadataIndex: 'file-meta',
+      blobStorageIndex: 'file-data',
+      elasticsearchClient: esClient,
+      indexIsAlias: true,
+    });
+
+    const file = await fileClient.create({
+      id: '123',
+      metadata: { name: 'myfile', mime },
+    });
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          file: expect.objectContaining({ extension }),
+        }),
+      })
+    );
+    expect(file.toJSON().extension).toBe(extension);
+  });
+
   describe('and `indexIsAlias` argument is used', () => {
     let fileClient: FileClient;
     let searchResponse: estypes.SearchResponse<FileDocument<{}>>;
