@@ -66,7 +66,7 @@ describe('validateUnitForWrite', () => {
   });
 
   it('still calls the distributor hook for incomplete units', async () => {
-    const validate = jest.fn().mockResolvedValue(undefined);
+    const validate = jest.fn().mockResolvedValue({});
     const incomplete: StreamsUnit.Configuration = {
       sources: unit.sources,
       destinations: [],
@@ -76,5 +76,13 @@ describe('validateUnitForWrite', () => {
     await validateUnitForWrite(incomplete, { validate });
 
     expect(validate).toHaveBeenCalledWith(incomplete);
+  });
+
+  it('returns compiled_config from the distributor hook', async () => {
+    const validate = jest.fn().mockResolvedValue({ compiled_config: 'receivers: {}' });
+
+    await expect(validateUnitForWrite(unit, { validate })).resolves.toEqual({
+      compiled_config: 'receivers: {}',
+    });
   });
 });

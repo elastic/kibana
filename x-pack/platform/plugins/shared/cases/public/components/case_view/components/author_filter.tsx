@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { sortBy, uniqBy } from 'lodash';
 import type { CaseUI } from '../../../../common';
-import type { MultiSelectFilterOption } from '../../all_cases/multi_select_filter';
-import { MultiSelectFilter } from '../../all_cases/multi_select_filter';
+import type { MultiSelectFilterOption } from '../../all_cases/components/multi_select_filter';
+import { MultiSelectFilter } from '../../all_cases/components/multi_select_filter';
 import { getAttachmentAuthorKey, getAttachmentAuthorLabel } from './helpers';
 import * as i18n from './translations';
 

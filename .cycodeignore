@@ -62,13 +62,13 @@ packages/kbn-lint-*
 packages/kbn-managed-vscode-*
 packages/kbn-manifest
 packages/kbn-mock-idp-plugin
-packages/kbn-optimizer
 packages/kbn-peggy-loader
 packages/kbn-performance-testing-dataset-extractor
 packages/kbn-picomatcher
 packages/kbn-plugin-*
 packages/kbn-relocate
 packages/kbn-repo-*
+packages/kbn-rspack-optimizer
 packages/kbn-set-map
 packages/kbn-sort-package-json
 packages/kbn-styled-components-mapping-cli

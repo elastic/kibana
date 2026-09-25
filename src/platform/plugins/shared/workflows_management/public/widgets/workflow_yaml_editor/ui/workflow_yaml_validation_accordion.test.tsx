@@ -9,8 +9,8 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
-import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { TestProvider } from '../../../shared/mocks/test_providers';
 
 const sampleError: YamlValidationResult = {

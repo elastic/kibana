@@ -4895,7 +4895,7 @@ describe('update()', () => {
   });
 
   describe('missing UIAM API key tagging', () => {
-    test('should add missing UIAM API key tag when updating rule with API key rotation and missing UIAM key in serverless', async () => {
+    test('should defer missing UIAM API key tagging until rule execution', async () => {
       // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
@@ -4963,11 +4963,11 @@ describe('update()', () => {
         shouldIncrementRevision: () => true,
       });
 
-      // Verify the missing UIAM key tag was added
+      // Rule execution owns the missing UIAM key tag.
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
+          tags: ['existing-tag'],
         }),
         expect.anything()
       );

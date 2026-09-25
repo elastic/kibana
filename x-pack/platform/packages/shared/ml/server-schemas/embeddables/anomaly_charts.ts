@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
+import { MAX_STRING_LENGTH } from '../constants';
 
 export const severityThresholdSchema = z.union([
   z
@@ -37,9 +38,11 @@ export const severityThresholdSchema = z.union([
       max: z.literal(ML_ANOMALY_THRESHOLD.CRITICAL),
     })
     .strict(),
+  // Open-ended floor: scores >= min. Covers the canonical critical band
+  // (`min: 75`) and arbitrary 0–100 thresholds (e.g. agent-builder charts).
   z
     .object({
-      min: z.literal(ML_ANOMALY_THRESHOLD.CRITICAL),
+      min: z.number().min(0).max(100),
     })
     .strict(),
 ]);
@@ -50,7 +53,7 @@ export const anomalyChartsEmbeddableStateSchema = z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
-    job_ids: z.array(z.string().min(1).max(1000)).min(1).max(10000).meta({
+    job_ids: z.array(z.string().min(1).max(MAX_STRING_LENGTH)).min(1).max(10000).meta({
       description: 'Anomaly detection job or group IDs whose results are shown in the charts.',
     }),
     max_series_to_plot: z.number().min(1).max(50).optional().meta({

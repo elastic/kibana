@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from 'react';
 import { buildChangePointCards, type ChangePointCardModel } from '@kbn/change-point-chart-viewer';
-import type { UnifiedChangePointGridProps } from '@kbn/change-point-chart-viewer';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getTime } from '@kbn/data-plugin/public';
 import {
@@ -18,8 +18,9 @@ import {
   getChangePointSeriesColumns,
   getNamedParams,
 } from '@kbn/esql-utils';
-import { isOfAggregateQueryType, buildEsQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType, isOfQueryType, buildEsQuery } from '@kbn/es-query';
 import { Observable, of } from 'rxjs';
+import type { CellRenderersSearchContext } from '../../../types';
 
 import { downsampleSparklinePoints } from './downsample_sparkline_points';
 import {
@@ -32,7 +33,9 @@ import {
   type ChangePointSeriesByEntity,
 } from './change_point_summary_series_helpers';
 
-type ChangePointFetchParams = UnifiedChangePointGridProps['fetchParams'];
+export type ChangePointSummaryFetchParams = CellRenderersSearchContext & {
+  dataView: DataView;
+};
 
 export const SUMMARY_SERIES_STATUS = {
   IDLE: 'idle',
@@ -65,54 +68,70 @@ export type ChangePointSummarySeriesState =
     };
 
 const LINE_SERIES_LIMIT = 10000;
-const MAX_DONE_SERIES_CACHE = 8;
 
 type SeriesCacheEntry =
   | { kind: 'in-flight'; observable: Observable<ChangePointSummarySeriesState> }
   | { kind: 'done'; state: ChangePointSummarySeriesState };
 
-const getEsqlQuery = (query: ChangePointFetchParams['query']): string | undefined =>
+interface SeriesCacheSlot {
+  key: string;
+  entry: SeriesCacheEntry;
+}
+
+interface SeriesSubscriber {
+  next: (value: ChangePointSummarySeriesState) => void;
+  complete: () => void;
+}
+
+export interface ChangePointSummarySeriesCache {
+  getSeries$: (
+    fetchParams: ChangePointSummaryFetchParams,
+    data: DataPublicPluginStart
+  ) => Observable<ChangePointSummarySeriesState>;
+}
+
+const getEsqlQuery = (query: ChangePointSummaryFetchParams['query']): string | undefined =>
   isOfAggregateQueryType(query) ? query.esql : undefined;
 
-export const getSeriesCacheKey = (fetchParams: ChangePointFetchParams): string => {
+export const getSeriesCacheKey = (fetchParams: ChangePointSummaryFetchParams): string => {
   const table = fetchParams.table;
   const columnIds = table?.columns.map((c) => c.id).join(',') ?? '';
   const rowCount = table?.rows.length ?? 0;
   return [
     fetchParams.searchSessionId ?? '',
-    String(fetchParams.lastReloadRequestTime),
+    String(fetchParams.requestId ?? ''),
     getEsqlQuery(fetchParams.query) ?? '',
+    JSON.stringify(fetchParams.filterQuery ?? null),
     fetchParams.timeRange?.from ?? '',
     fetchParams.timeRange?.to ?? '',
     JSON.stringify(fetchParams.filters ?? []),
     JSON.stringify(fetchParams.esqlVariables ?? []),
+    fetchParams.projectRouting ?? '',
+    String(fetchParams.isApproximate ?? ''),
     columnIds,
     String(rowCount),
   ].join('\0');
-};
-
-// One shared series load per Discover refetch; many Summary cells reuse it.
-const seriesCache = new Map<string, SeriesCacheEntry>();
-
-/** Clears the shared series cache (tests only). */
-export const clearChangePointSummarySeriesCache = (): void => {
-  seriesCache.clear();
-};
-
-const evictOldestDoneEntries = (keepKey: string): void => {
-  if (seriesCache.size <= MAX_DONE_SERIES_CACHE) return;
-  for (const [key, entry] of seriesCache) {
-    if (seriesCache.size <= MAX_DONE_SERIES_CACHE) break;
-    if (key !== keepKey && entry.kind === 'done') {
-      seriesCache.delete(key);
-    }
-  }
 };
 
 const downsampleSeriesByEntity = (
   seriesByEntity: ChangePointSeriesByEntity
 ): ChangePointSeriesByEntity =>
   new Map([...seriesByEntity].map(([key, points]) => [key, downsampleSparklinePoints(points)]));
+
+const prepareSeriesQuery = (fetchParams: ChangePointSummaryFetchParams) => {
+  const rawEsql = getEsqlQuery(fetchParams.query);
+  const esql = rawEsql
+    ? fixESQLQueryWithVariables(rawEsql, fetchParams.esqlVariables ?? [])
+    : undefined;
+  const table = fetchParams.table;
+
+  return {
+    cards: esql && table?.columns?.length ? buildChangePointCards({ table, esql }) : undefined,
+    entityColumnIds: esql && table?.columns?.length ? getEntityColumnIds(esql, table) : [],
+    seriesColumns: esql ? getChangePointSeriesColumns(esql) : undefined,
+    baseLineEsql: esql ? buildChangePointLineDataQuery(esql) : undefined,
+  };
+};
 
 /**
  * Loads the pre-CHANGE_POINT line series (same ES|QL Lens uses).
@@ -127,7 +146,7 @@ const loadLineSeries = async ({
   abortSignal,
   cards,
 }: {
-  fetchParams: ChangePointFetchParams;
+  fetchParams: ChangePointSummaryFetchParams;
   data: DataPublicPluginStart;
   seriesColumns: { timeColumn: string; valueColumn: string } | undefined;
   baseLineEsql: string | undefined;
@@ -136,6 +155,7 @@ const loadLineSeries = async ({
   cards: ChangePointCardModel[] | undefined;
 }): Promise<ChangePointSummarySeriesState> => {
   const table = fetchParams.table;
+  // Nothing to chart when the query has no line series or the table is empty.
   if (!seriesColumns || !baseLineEsql || !table?.columns?.length) {
     return { status: SUMMARY_SERIES_STATUS.UNAVAILABLE };
   }
@@ -145,6 +165,7 @@ const loadLineSeries = async ({
 
   let lineEsql = baseLineEsql;
 
+  // BY queries only fetch the entities shown in the current table.
   if (entityColumnIds.length > 0 && table.rows) {
     lineEsql = appendDistinctEntityWhereToLineEsql(
       lineEsql,
@@ -153,20 +174,29 @@ const loadLineSeries = async ({
     );
   }
 
-  const timeRange = getSummarySeriesTimeRange(fetchParams.timeRange, earliestAnnotationMs);
-  const timeFilter = getTime(fetchParams.dataView, timeRange);
+  // Pull the range back when a change point sits before Discover's from so that it shows up.
+  const timeRange = fetchParams.timeRange
+    ? getSummarySeriesTimeRange(fetchParams.timeRange, earliestAnnotationMs)
+    : undefined;
+  const timeFilter = timeRange ? getTime(fetchParams.dataView, timeRange) : undefined;
+  const queries =
+    fetchParams.filterQuery && isOfQueryType(fetchParams.filterQuery)
+      ? [fetchParams.filterQuery]
+      : [];
   let filter: ReturnType<typeof buildEsQuery> | undefined;
   try {
-    filter = buildEsQuery(
-      fetchParams.dataView,
-      [],
-      [...(fetchParams.filters ?? []), ...(timeFilter ? [timeFilter] : [])]
-    );
+    filter = buildEsQuery(fetchParams.dataView, queries, [
+      ...(fetchParams.filters ?? []),
+      ...(timeFilter ? [timeFilter] : []),
+    ]);
   } catch {
+    // A bad filter should not fail the sparkline.
     filter = undefined;
   }
 
+  // Cap the line query so a wide range cannot return an unbounded series.
   const query = `${lineEsql} | LIMIT ${LINE_SERIES_LIMIT}`;
+  // Named params fill in the time and control placeholders in the ES|QL.
   const namedParams = getNamedParams(query, timeRange, fetchParams.esqlVariables);
   const { rawResponse } = await data.search.esql(
     {
@@ -178,6 +208,8 @@ const loadLineSeries = async ({
       abortSignal,
       sessionId: fetchParams.searchSessionId,
       dropNullColumns: true,
+      projectRouting: fetchParams.projectRouting,
+      approximation: fetchParams.isApproximate,
       executionContext: {
         type: 'discover',
         name: 'change_point_summary_series',
@@ -186,6 +218,7 @@ const loadLineSeries = async ({
   );
 
   const rows = esqlResponseToRows(rawResponse);
+  // One point series per entity, thinned for the sparkline.
   return {
     status: SUMMARY_SERIES_STATUS.READY,
     seriesByEntity: downsampleSeriesByEntity(
@@ -203,98 +236,129 @@ const isAbortError = (err: unknown): boolean =>
   (err instanceof Error && err.name === 'AbortError');
 
 /**
- * Shared series stream for Summary cells.
- * N cells subscribe. At most, one line ES|QL fetch runs per Discover refetch.
+ * One series request shared by every Summary cell on this profile.
+ * A parent search keeps that request alive when the grid unmounts.
  */
-export const getChangePointSummarySeries$ = (
-  fetchParams: ChangePointFetchParams,
-  data: DataPublicPluginStart
-): Observable<ChangePointSummarySeriesState> => {
-  const cacheKey = getSeriesCacheKey(fetchParams);
-  const cached = seriesCache.get(cacheKey);
-  if (cached?.kind === 'done') {
-    return of(cached.state);
-  }
-  if (cached?.kind === 'in-flight') {
-    return cached.observable;
-  }
+export const createChangePointSummarySeriesCache = (): ChangePointSummarySeriesCache => {
+  // Replaced when the query changes, so only the latest request is kept.
+  let currentEntry: SeriesCacheSlot | undefined;
 
-  const rawEsql = getEsqlQuery(fetchParams.query);
-  const esql = rawEsql
-    ? fixESQLQueryWithVariables(rawEsql, fetchParams.esqlVariables ?? [])
-    : undefined;
-  const table = fetchParams.table;
-  const cards = esql && table?.columns?.length ? buildChangePointCards({ table, esql }) : undefined;
-  const entityColumnIds = esql && table?.columns?.length ? getEntityColumnIds(esql, table) : [];
-  const seriesColumns = esql ? getChangePointSeriesColumns(esql) : undefined;
-  const baseLineEsql = esql ? buildChangePointLineDataQuery(esql) : undefined;
-
-  const abortController = new AbortController();
-  const subscribers = new Set<{
-    next: (value: ChangePointSummarySeriesState) => void;
-    complete: () => void;
-  }>();
-  let current: ChangePointSummarySeriesState = {
-    status: SUMMARY_SERIES_STATUS.LOADING,
-    cards,
-  };
-
-  const finish = (state: ChangePointSummarySeriesState): void => {
-    current = state;
-    seriesCache.set(cacheKey, { kind: 'done', state });
-    evictOldestDoneEntries(cacheKey);
-    for (const subscriber of subscribers) {
-      subscriber.next(state);
-      subscriber.complete();
+  const getSeries$ = (
+    fetchParams: ChangePointSummaryFetchParams,
+    data: DataPublicPluginStart
+  ): Observable<ChangePointSummarySeriesState> => {
+    const cacheKey = getSeriesCacheKey(fetchParams);
+    // Replay a finished result or join the request already in flight.
+    if (currentEntry?.key === cacheKey) {
+      return currentEntry.entry.kind === 'done'
+        ? of(currentEntry.entry.state)
+        : currentEntry.entry.observable;
     }
-  };
 
-  const observable = new Observable<ChangePointSummarySeriesState>((subscriber) => {
-    subscribers.add(subscriber);
-    subscriber.next(current);
-    return () => {
-      subscribers.delete(subscriber);
-      if (subscribers.size === 0 && seriesCache.get(cacheKey)?.kind === 'in-flight') {
-        abortController.abort();
-        seriesCache.delete(cacheKey);
-      }
+    const { cards, entityColumnIds, seriesColumns, baseLineEsql } = prepareSeriesQuery(fetchParams);
+
+    // Used only when no parent search owns the request.
+    const localAbortController = new AbortController();
+    const abortSignal = fetchParams.abortSignal ?? localAbortController.signal;
+    const subscribers = new Set<SeriesSubscriber>();
+    const loadingState: ChangePointSummarySeriesState = {
+      status: SUMMARY_SERIES_STATUS.LOADING,
+      cards,
     };
-  });
+    let isSettled = false;
 
-  seriesCache.set(cacheKey, { kind: 'in-flight', observable });
+    // A newer request may have replaced this one before it finishes.
+    const isCurrentEntry = (): boolean =>
+      currentEntry?.key === cacheKey &&
+      currentEntry.entry.kind === 'in-flight' &&
+      currentEntry.entry.observable === observable;
 
-  loadLineSeries({
-    fetchParams,
-    data,
-    seriesColumns,
-    baseLineEsql,
-    entityColumnIds,
-    abortSignal: abortController.signal,
-    cards,
-  })
-    .then((state) => {
-      if (abortController.signal.aborted) return;
-      finish(state);
-    })
-    .catch((err) => {
-      if (abortController.signal.aborted || isAbortError(err)) {
+    // Search abort - drop the request and do not store a result.
+    const cancelInFlight = (): void => {
+      if (isSettled) return;
+      isSettled = true;
+      abortSignal.removeEventListener('abort', cancelInFlight);
+      if (isCurrentEntry()) {
+        currentEntry = undefined;
+      }
+      for (const subscriber of subscribers) {
+        subscriber.complete();
+      }
+      subscribers.clear();
+    };
+
+    // Store a ready or error result so later cells can replay it.
+    const settle = (state: ChangePointSummarySeriesState): void => {
+      if (isSettled || abortSignal.aborted) return;
+      isSettled = true;
+      abortSignal.removeEventListener('abort', cancelInFlight);
+      if (isCurrentEntry()) {
+        currentEntry = { key: cacheKey, entry: { kind: 'done', state } };
+      }
+      for (const subscriber of subscribers) {
+        subscriber.next(state);
+        subscriber.complete();
+      }
+      subscribers.clear();
+    };
+
+    const observable = new Observable<ChangePointSummarySeriesState>((subscriber) => {
+      if (isSettled) {
+        subscriber.complete();
         return;
       }
-      finish({
-        status: SUMMARY_SERIES_STATUS.ERROR,
-        error: err instanceof Error ? err : new Error(String(err)),
-        entityColumnIds,
-        cards,
-      });
+      subscribers.add(subscriber);
+      subscriber.next(loadingState);
+      return () => {
+        subscribers.delete(subscriber);
+        // A parent-owned request keeps running after the last cell unmounts.
+        if (!fetchParams.abortSignal && subscribers.size === 0 && isCurrentEntry()) {
+          localAbortController.abort();
+        }
+      };
     });
 
-  return observable;
+    currentEntry = { key: cacheKey, entry: { kind: 'in-flight', observable } };
+    // Parent search abort cancels the request even while no cells are mounted.
+    abortSignal.addEventListener('abort', cancelInFlight, { once: true });
+
+    if (abortSignal.aborted) {
+      cancelInFlight();
+      return observable;
+    }
+
+    loadLineSeries({
+      fetchParams,
+      data,
+      seriesColumns,
+      baseLineEsql,
+      entityColumnIds,
+      abortSignal,
+      cards,
+    })
+      .then(settle)
+      .catch((err) => {
+        // Abort is already handled. Only a real failure is stored as an error.
+        if (abortSignal.aborted || isAbortError(err)) return;
+        settle({
+          status: SUMMARY_SERIES_STATUS.ERROR,
+          error: err instanceof Error ? err : new Error(String(err)),
+          entityColumnIds,
+          cards,
+        });
+      });
+
+    return observable;
+  };
+
+  return { getSeries$ };
 };
 
-/** Hook for Summary cells to read the shared series map. */
+/** Hook for Summary cells to read the profile-scoped series cache. */
 export const useChangePointSummarySeries = (
-  fetchParams: ChangePointFetchParams | undefined,
-  data: DataPublicPluginStart | undefined
+  fetchParams: ChangePointSummaryFetchParams | undefined,
+  data: DataPublicPluginStart | undefined,
+  cache: ChangePointSummarySeriesCache
 ): ChangePointSummarySeriesState => {
   const [state, setState] = useState<ChangePointSummarySeriesState>({
     status: SUMMARY_SERIES_STATUS.LOADING,
@@ -307,9 +371,9 @@ export const useChangePointSummarySeries = (
       return;
     }
 
-    const subscription = getChangePointSummarySeries$(fetchParams, data).subscribe(setState);
+    const subscription = cache.getSeries$(fetchParams, data).subscribe(setState);
     return () => subscription.unsubscribe();
-  }, [fetchParams, data]);
+  }, [fetchParams, data, cache]);
 
   return state;
 };

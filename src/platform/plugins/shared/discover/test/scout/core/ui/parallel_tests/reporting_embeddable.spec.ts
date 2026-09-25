@@ -9,8 +9,8 @@
 
 import type { ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverSessionApiTabBase } from '@kbn/as-code-discover-schema';
 import { VIEW_MODE } from '../../../../../common/constants';
-import type { DiscoverSessionTab } from '../../../../../server';
 import { spaceTest, testData, type DiscoverScoutSpace } from '../../../common/ui/fixtures';
 
 const ESQL_SESSION_TITLE = 'Reporting ES|QL session';
@@ -20,7 +20,7 @@ const createDashboardWithSessionPanel = async (
   spaceId: string,
   sessionTitle: string,
   dashboardTitle: string,
-  tab: DiscoverSessionTab
+  tab: DiscoverSessionApiTabBase
 ): Promise<string> =>
   apiServices.dashboard.create(
     {
@@ -46,7 +46,7 @@ const createDashboardWithSessionPanel = async (
 const getSessionTab = (
   mode: 'classic' | 'ES|QL',
   discoverScoutSpace: DiscoverScoutSpace
-): DiscoverSessionTab => {
+): DiscoverSessionApiTabBase => {
   if (mode === 'ES|QL') {
     return {
       data_source: {

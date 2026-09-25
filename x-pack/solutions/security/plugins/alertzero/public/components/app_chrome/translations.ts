@@ -13,20 +13,12 @@ export const BRAND_TITLE = i18n.translate('xpack.alertzero.chrome.brand', {
   defaultMessage: 'AlertZero',
 });
 
-export const NAV_CHATS = i18n.translate('xpack.alertzero.chrome.nav.chats', {
-  defaultMessage: 'Chats',
-});
-
 export const NAV_ALERTS = i18n.translate('xpack.alertzero.chrome.nav.alerts', {
   defaultMessage: 'Alerts',
 });
 
 export const NAV_ATTACKS = i18n.translate('xpack.alertzero.chrome.nav.attacks', {
   defaultMessage: 'Attacks',
-});
-
-export const NAV_RECORDS = i18n.translate('xpack.alertzero.chrome.nav.records', {
-  defaultMessage: 'Records',
 });
 
 export const NAV_THREAT_HUNT = i18n.translate('xpack.alertzero.chrome.nav.threatHunt', {
@@ -37,10 +29,10 @@ export const NAV_STREAMS = i18n.translate('xpack.alertzero.chrome.nav.streams', 
   defaultMessage: 'Streams',
 });
 
-export const NAV_WATCHES = i18n.translate('xpack.alertzero.chrome.nav.watches', {
-  defaultMessage: 'Watches',
+export const NAV_ESCALATIONS = i18n.translate('xpack.alertzero.chrome.nav.escalations', {
+  defaultMessage: 'Escalations',
 });
 
-export const ASK_ALERTZERO_LABEL = i18n.translate('xpack.alertzero.chrome.askAlertZero', {
-  defaultMessage: 'Ask AlertZero',
+export const NAV_WATCHES = i18n.translate('xpack.alertzero.chrome.nav.watches', {
+  defaultMessage: 'Watches',
 });

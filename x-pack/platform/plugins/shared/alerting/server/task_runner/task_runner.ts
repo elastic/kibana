@@ -60,6 +60,7 @@ import { IN_MEMORY_METRICS } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
+import { updateRuleMissingUiamKeyTag } from './update_rule_missing_uiam_key_tag';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';
@@ -340,6 +341,7 @@ export class TaskRunner<
     fakeRequest,
     rule,
     effectiveApiKey,
+    uiamApiKeyId,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     const { activeInstances, expiredInstances } = evaluatePerAlertSnoozeExpiry(
@@ -509,6 +511,9 @@ export class TaskRunner<
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
+      // Carry the UIAM key id so the connector tasks are visible to the API key invalidation
+      // task's in-use guard, which cannot see the encrypted key material itself.
+      uiamApiKeyId,
       // Mirror the rule run's own credential treatment onto the connector tasks: the request is
       // marked by getFakeKibanaRequest from the rule's persisted `uiamApiKeyExternal`, so asking
       // it here cannot drift from what the cluster client will decide for this very run.
@@ -550,11 +555,16 @@ export class TaskRunner<
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const alerts = alertsClient.getRawAlertInstancesForState(true);
+      // Do not drop recovered alerts from task state unless AAD was persisted
+      // with tracked: false for those same ids.
+      const shouldOptimizeTaskState = this.shouldLogAndScheduleActionsForAlerts();
+      const alerts = alertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
       alertsToReturn = alerts.rawActiveAlerts;
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
-      alertsToUpdateWithLastScheduledActions =
-        alertsClient.getAlertsToUpdateWithLastScheduledActions();
+      if (shouldOptimizeTaskState) {
+        alertsToUpdateWithLastScheduledActions =
+          alertsClient.getAlertsToUpdateWithLastScheduledActions();
+      }
     }
 
     if (this.shouldLogAndScheduleActionsForAlerts()) {
@@ -674,8 +684,11 @@ export class TaskRunner<
         this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
       }
 
-      const ruleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
+      const loadedRuleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
         getDecryptedRule(this.context, ruleId, spaceId)
+      );
+      const ruleData = await withAlertingSpan('alerting:update-missing-uiam-api-key-tag', () =>
+        updateRuleMissingUiamKeyTag(this.context, ruleId, spaceId, loadedRuleData)
       );
 
       // Check that this task is current
