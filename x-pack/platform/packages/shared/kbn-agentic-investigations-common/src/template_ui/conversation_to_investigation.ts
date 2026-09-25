@@ -34,6 +34,11 @@ const readFirstAssignee = (value: MetadataFieldValue | undefined): string | null
   return readString(value) ?? null;
 };
 
+const readStringArray = (value: MetadataFieldValue | undefined): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is string => typeof v === 'string' && v.length > 0);
+};
+
 /**
  * Step events are deliberately dropped: one agent run emits a step per tool call and per reasoning
  * block, which would bury the handful of events an analyst reads a timeline for.
@@ -102,6 +107,25 @@ const toTimelineEvents = (events: Conversation['events']): TimelineEvent[] =>
   });
 
 /**
+ * Parses the escalation-specific metadata fields from a conversation into a plain object.
+ *
+ * The field names intentionally duplicate the constants from `agentic_investigations/common`
+ * (which cannot be imported from this package without crossing a plugin boundary).
+ * See the comment at the top of `escalation_flyout_header.tsx` for the authoritative source.
+ */
+export const conversationToEscalationHeader = (
+  conversation: Conversation
+): { status: string; assigneeUids: string[]; linkedInvestigationIds: string[] } => {
+  const metadata = conversation.metadata ?? {};
+  return {
+    // The server treats a missing status as 'open' (escalations_service filters on `not closed`).
+    status: readString(metadata.status) ?? 'open',
+    assigneeUids: readStringArray(metadata.assignees),
+    linkedInvestigationIds: readStringArray(metadata.linked_investigations),
+  };
+};
+
+/**
  * Projects an Agent Builder conversation into the `Investigation` shape the flyout components read.
  *
  * Fields with no conversation equivalent are deliberately left out rather than invented:
@@ -116,6 +140,7 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
 
   return {
     id: conversation.id,
+    conversationId: conversation.id,
     // The flyout only renders for the investigation template, so this is the template it came from.
     template_id: 'investigation',
     title: conversation.title,
@@ -126,6 +151,7 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
     status: readString(metadata.status),
     severity: readString(metadata.severity),
     assignee: readFirstAssignee(metadata.assignees),
+    assignees: readStringArray(metadata.assignees),
     // `summary` is the long form; `description` is the single-line one. Prefer the richer field and
     // fall back, because a template only requires `status`.
     summary: readString(metadata.summary) ?? readString(metadata.description),

@@ -16,17 +16,19 @@ import * as i18n from './translations';
 
 interface Props {
   canUserCreateAndReadCases: () => boolean;
-  title: string;
   onClick?: () => void;
+  onSuccess?: (isNewCase: boolean) => void;
+  title: string;
 }
 
-export const useAddToNewCase = ({
+export const useAddToCase = ({
   canUserCreateAndReadCases,
-  title,
   onClick,
+  onSuccess,
+  title,
 }: Props): {
   disabled: boolean;
-  onAddToNewCase: ({
+  onAddToCase: ({
     alertIds,
     markdownComments,
     replacements,
@@ -38,23 +40,33 @@ export const useAddToNewCase = ({
 } => {
   const { cases } = useKibana().services;
   const { alertsIndexPattern } = useAssistantContext();
+  const headerContent = useMemo(
+    () => <div>{i18n.CREATE_A_CASE_FOR_ATTACK_DISCOVERY(title)}</div>,
+    [title]
+  );
 
-  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
-    initialValue: {
-      description: i18n.CASE_DESCRIPTION(title),
-      title,
+  const { open: openSelectCaseModal } = cases.hooks.useCasesAddToExistingCaseModal({
+    createCaseFlyout: {
+      headerContent,
+      initialValue: {
+        description: i18n.CASE_DESCRIPTION(title),
+        title,
+      },
     },
-    toastContent: i18n.ADD_TO_CASE_SUCCESS,
+    onClose: onClick,
+    onSuccess: (_theCase, isNewCase) => onSuccess?.(isNewCase),
+    successToaster: {
+      content: i18n.ADD_TO_CASE_SUCCESS,
+    },
   });
-  const openCreateCaseFlyout = useCallback(
+
+  const onAddToCase = useCallback(
     ({
       alertIds,
-      headerContent,
       markdownComments,
       replacements,
     }: {
       alertIds: string[];
-      headerContent?: React.ReactNode;
       markdownComments: string[];
       replacements?: Replacements;
     }) => {
@@ -76,42 +88,15 @@ export const useAddToNewCase = ({
         },
       }));
 
-      const attachments = [...userCommentAttachments, ...alertAttachments];
-
-      createCaseFlyout.open({
-        attachments,
-        headerContent,
+      openSelectCaseModal({
+        getAttachments: () => [...userCommentAttachments, ...alertAttachments],
       });
     },
-    [alertsIndexPattern, createCaseFlyout]
-  );
-
-  const headerContent = useMemo(
-    () => <div>{i18n.CREATE_A_CASE_FOR_ATTACK_DISCOVERY(title)}</div>,
-    [title]
-  );
-
-  const onAddToNewCase = useCallback(
-    ({
-      alertIds,
-      markdownComments,
-      replacements,
-    }: {
-      alertIds: string[];
-      markdownComments: string[];
-      replacements?: Replacements;
-    }) => {
-      if (onClick) {
-        onClick();
-      }
-
-      openCreateCaseFlyout({ alertIds, headerContent, markdownComments, replacements });
-    },
-    [headerContent, onClick, openCreateCaseFlyout]
+    [alertsIndexPattern, openSelectCaseModal]
   );
 
   return {
     disabled: !canUserCreateAndReadCases(),
-    onAddToNewCase,
+    onAddToCase,
   };
 };

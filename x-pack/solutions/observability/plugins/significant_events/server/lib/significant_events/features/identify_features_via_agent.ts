@@ -21,6 +21,8 @@ import {
 import {
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
 } from '@kbn/significant-events-schema';
 import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
 import {
@@ -44,6 +46,7 @@ export interface ExecuteFeatureIdentificationAgentOptions {
   excludedFeatures?: ExcludedFeatureSummary[];
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
+  interactionId: string;
   signal?: AbortSignal;
   logger: Logger;
 }
@@ -57,6 +60,7 @@ export async function executeFeatureIdentificationAgent({
   excludedFeatures,
   previouslyIdentifiedFeatures = [],
   knownFeatureIds = '',
+  interactionId,
   signal,
   logger,
 }: ExecuteFeatureIdentificationAgentOptions): Promise<{
@@ -79,7 +83,7 @@ export async function executeFeatureIdentificationAgent({
   const conversation = await conversationClient.create({
     agentId: FEATURE_IDENTIFICATION_AGENT_ID,
     title: `Feature identification: ${streamName}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
-    accessControl: { access_mode: ConversationAccessControlMode.Private },
+    accessControl: { access_mode: ConversationAccessControlMode.Public },
   });
 
   const { events$ } = await agentBuilder.execution.executeAgent({
@@ -96,6 +100,9 @@ export async function executeFeatureIdentificationAgent({
       telemetryMetadata: {
         pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
         aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+        productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+        productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+        interactionId,
       },
     },
   });

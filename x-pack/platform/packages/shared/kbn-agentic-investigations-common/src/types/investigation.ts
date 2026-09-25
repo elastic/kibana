@@ -32,16 +32,26 @@ export interface Investigation {
   watch_tier?: string;
   severity?: string;
   assignee?: string | null;
+  /** Full list of assignee user-profile uids. Used by the interactive assignee picker in the flyout. */
+  assignees: string[];
   status?: string;
   pendingProposalCount: number;
   recommendedAction?: RecommendedAction;
   /** Primary asset or surface impacted */
   affectedSurface?: string;
+  /**
+   * Opaque entity ids this investigation is about. The landing-page pills and
+   * their filter read this list; `affectedSurface` remains the single-value
+   * fallback used by sample data and the flyout Overview row.
+   */
+  entityIds?: string[];
   summary?: string;
   /** Brief priority score (0-100) for queue ranking */
   priorityScore?: number;
   /** Durable record label shown in Brief (e.g. CASE-2047) */
   recordId?: string;
+  /** The underlying Agent Builder conversation id, required for escalation linking. */
+  conversationId?: string;
   /** Leading proposal CTA label for Brief cards */
   primaryActionLabel?: string;
   events: TimelineEvent[];

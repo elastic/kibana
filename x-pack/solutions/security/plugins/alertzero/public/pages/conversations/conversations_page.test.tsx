@@ -12,21 +12,79 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, type MemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
-import { useProposalsByCategory, useClosedProposals } from '../../hooks/use_proposals_api';
+import {
+  useApproveProposal,
+  useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
+} from '@kbn/proposals-plugin/public';
+import {
+  useAssignInvestigation,
+  useUserProfiles,
+  useSuggestUserProfiles,
+} from '@kbn/agentic-investigations-plugin/public';
+import {
+  useProposalsByCategory,
+  useProposalsByCategoryCount,
+  useClosedProposals,
+  useClosedProposalsCount,
+} from '../../hooks/use_proposals_api';
+import { CATEGORY_PAGE_SIZE, CLOSED_PAGE_SIZE } from './queue/use_queue_section';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
 // Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
 // the dismiss modal's select needs for real.
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+jest.mock('@kbn/proposals-plugin/public', () => ({
+  ...jest.requireActual('@kbn/proposals-plugin/public'),
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
+  useIsApprovingProposal: jest.fn(),
+  useIsDecliningProposal: jest.fn(),
 }));
+// Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
+// jest.mock calls for the same module would silently replace one another rather than merge.
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+  useCurrentUserProfile: jest.fn(() => ({ data: null })),
+  useAssignInvestigation: jest.fn(),
+  useUserProfiles: jest.fn(),
+  useSuggestUserProfiles: jest.fn(),
+}));
+jest.mock('@kbn/agentic-investigations-common', () => {
+  const actual = jest.requireActual('@kbn/agentic-investigations-common');
+  return {
+    ...actual,
+    // Replace AssignToUsers with a minimal stub so the queue renders without needing
+    // a full EUI/user-profile environment.
+    // eslint-disable-next-line react/display-name
+    AssignToUsers: ({
+      conversationId,
+      onChange,
+      canManage,
+    }: {
+      conversationId: string;
+      onChange: (s: unknown[]) => void;
+      canManage: boolean;
+    }) =>
+      canManage ? (
+        <button
+          data-test-subj={`mock-assign-${conversationId}`}
+          onClick={() =>
+            onChange([{ uid: 'user-uid-1', enabled: true, user: { username: 'alice' }, data: {} }])
+          }
+        >
+          Assign
+        </button>
+      ) : (
+        <span data-test-subj={`mock-assignees-readonly-${conversationId}`}>Read-only</span>
+      ),
+  };
+});
 jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
@@ -34,24 +92,79 @@ jest.mock('../../components/proposals_trend_chart', () => ({
 }));
 
 const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
+const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock;
 const mockUseClosedProposals = useClosedProposals as jest.Mock;
+const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
+const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
+const mockUseIsDecliningProposal = useIsDecliningProposal as jest.Mock;
+const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
+const mockUseUserProfiles = useUserProfiles as jest.Mock;
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 
-/** Fans a category→proposals map across the per-category and closed page hooks. */
+/** Records the fetchNextPage of each bucket, so a Show more click can be asserted. */
+const fetchNextPage: Record<string, jest.Mock> = {};
+
+/**
+ * Fans a category→proposals map across the four hooks a section uses: a count-only
+ * read, and an infinite rows query that only runs while open. Both answer nothing
+ * while disabled, which is what makes the badge's source observable. `total` is the
+ * whole bucket and the pages only what was asked for, so the fake keeps them apart.
+ */
 const mockProposals = (groups: Record<string, ProposalItem[]>) => {
-  mockUseProposalsByCategory.mockImplementation((category: string) => {
-    const proposals = groups[category] ?? [];
-    return { data: { proposals, total: proposals.length }, isLoading: false, error: undefined };
-  });
-  const closed = groups.closed ?? [];
-  mockUseClosedProposals.mockReturnValue({
-    data: { proposals: closed, total: closed.length },
+  const count = (all: ProposalItem[], enabled: boolean) => ({
+    data: enabled ? { proposals: [], total: all.length } : undefined,
     isLoading: false,
     error: undefined,
   });
+
+  const pages = (bucket: string, all: ProposalItem[], firstPageSize: number, enabled: boolean) => {
+    // Resolves, like the real one: the caller waits on it to hear that a page failed.
+    fetchNextPage[bucket] = fetchNextPage[bucket] ?? jest.fn().mockResolvedValue({});
+    if (!enabled) {
+      return {
+        data: undefined,
+        fetchNextPage: fetchNextPage[bucket],
+        hasNextPage: undefined,
+        isFetchingNextPage: false,
+        isInitialLoading: false,
+        error: undefined,
+      };
+    }
+    return {
+      data: {
+        pages: [{ proposals: all.slice(0, firstPageSize), total: all.length }],
+        pageParams: [undefined],
+      },
+      fetchNextPage: fetchNextPage[bucket],
+      hasNextPage: all.length > firstPageSize,
+      isFetchingNextPage: false,
+      isInitialLoading: false,
+      error: undefined,
+    };
+  };
+
+  mockUseProposalsByCategoryCount.mockImplementation((category: string, enabled: boolean) =>
+    count(groups[category] ?? [], enabled)
+  );
+  mockUseClosedProposalsCount.mockImplementation((enabled: boolean) =>
+    count(groups.closed ?? [], enabled)
+  );
+
+  mockUseProposalsByCategory.mockImplementation(
+    (category: string, { firstPageSize, enabled }: { firstPageSize: number; enabled: boolean }) =>
+      pages(category, groups[category] ?? [], firstPageSize, enabled)
+  );
+  mockUseClosedProposals.mockImplementation(
+    ({ firstPageSize, enabled }: { firstPageSize: number; enabled: boolean }) =>
+      pages('closed', groups.closed ?? [], firstPageSize, enabled)
+  );
 };
+
+/** The Closed accordion starts collapsed, so its rows need an expand first. */
+const expandClosed = () => fireEvent.click(screen.getByRole('button', { name: /^Closed/ }));
 
 /** The header count comes from the charts-summary scalar, not from the pages above. */
 const mockOpenCount = (currentOpen: number) =>
@@ -80,25 +193,33 @@ const proposal: ProposalItem = {
   conversationAssignees: [],
 };
 
-const renderPage = (initialEntry: string) => {
+const renderPage = (
+  initialEntry: string,
+  { capabilities = {} }: { capabilities?: Record<string, unknown> } = {}
+) => {
   const core = coreMock.createStart();
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
   core.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
+  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
   const agentBuilder = agentBuilderMocks.createStart();
   const closeFlyout = jest.fn();
   (agentBuilder.openConversationDetails as jest.Mock).mockResolvedValue(closeFlyout);
   const history: MemoryHistory = createMemoryHistory({ initialEntries: [initialEntry] });
 
+  // The sections discard their accumulated pages through the query client on
+  // collapse, so the page needs a real one even with the hooks stubbed.
   render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={{ ...core, agentBuilder }}>
-          <Router history={history}>
-            <ConversationsPage />
-          </Router>
+          <QueryClientProvider client={new QueryClient()}>
+            <Router history={history}>
+              <ConversationsPage />
+            </Router>
+          </QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
@@ -107,12 +228,20 @@ const renderPage = (initialEntry: string) => {
   return { core, agentBuilder, closeFlyout, history };
 };
 
-const approveMutate = jest.fn();
-const dismissMutate = jest.fn();
+const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
+const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
+const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
-  mockUseApproveProposal.mockReturnValue({ mutate: approveMutate });
-  mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate });
+  approveMutateAsync.mockResolvedValue(undefined);
+  dismissMutateAsync.mockResolvedValue(undefined);
+  mockUseApproveProposal.mockReturnValue({ mutateAsync: approveMutateAsync });
+  mockUseDismissProposal.mockReturnValue({ mutateAsync: dismissMutateAsync });
+  mockUseIsApprovingProposal.mockReturnValue(false);
+  mockUseIsDecliningProposal.mockReturnValue(false);
+  mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
+  mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
+  mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockOpenCount(0);
 });
 
@@ -212,7 +341,7 @@ describe('ConversationsPage open in chat', () => {
 
   const chatControl = () => screen.getByTestId('conversationCardOpenInChat');
 
-  it("navigates to the conversation's Agent Builder page", () => {
+  it("navigates to the conversation's Agent Builder page with the details flyout open", () => {
     const { core } = renderPage('/');
 
     fireEvent.click(chatControl());
@@ -220,7 +349,7 @@ describe('ConversationsPage open in chat', () => {
     // The chat is the investigation's own Agent Builder conversation, so the card resolves its
     // proposal to that conversation and its agent — the route is scoped to the agent.
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
     });
   });
 
@@ -228,11 +357,11 @@ describe('ConversationsPage open in chat', () => {
     const { core } = renderPage('/');
 
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
     });
     expect(chatControl()).toHaveAttribute(
       'href',
-      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1'
+      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true'
     );
   });
 
@@ -245,7 +374,7 @@ describe('ConversationsPage open in chat', () => {
     fireEvent.click(chatControl());
 
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/conversations/inv-1',
+      path: '/conversations/inv-1?openConversationDetails=true',
     });
   });
 
@@ -293,32 +422,31 @@ describe('ConversationsPage decisions', () => {
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
-    expect(approveMutate).toHaveBeenCalledWith(
-      { id: 'prop-1', body: { actionInput: { user: 'cfo@corp' } } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(approveMutateAsync).toHaveBeenCalledWith({
+      id: 'prop-1',
+      body: { actionInput: { user: 'cfo@corp' } },
+    });
   });
 
-  it('keeps the approval modal open until the mutation succeeds', () => {
+  it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {
+    mockUseIsApprovingProposal.mockImplementation((id: string) => id === 'prop-1');
     renderPage('/');
     openApproval();
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
-    // A refusal — expired deadline, someone decided first — must not close the modal as
-    // though the decision had landed. onSuccess is the only thing that closes it.
+    // The decision's own outcome shows in place — the modal never auto-closes, so a refusal
+    // (expired deadline, someone decided first) reads the same way: still open. Approving only
+    // resumes the gate workflow, whose action still runs afterward, so being in flight must not
+    // yet claim "Applied" — only a refetched, real decision can.
+    expect(approvalDialog().getAllByText('Applying').length).toBeGreaterThan(0);
+    expect(approvalDialog().queryByText('Applied')).not.toBeInTheDocument();
     expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
-
-    const [, handlers] = approveMutate.mock.calls[0];
-    act(() => handlers.onSuccess());
-
-    expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
   });
 
   it('hands Dismiss off to the dismiss modal rather than deciding without a reason', () => {
     renderPage('/');
     openApproval();
 
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Dismiss' }));
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
     // The approval modal closes and the reason form takes over for the same proposal: a
     // dismissal is a decision with a reason, never a silent close.
@@ -331,10 +459,10 @@ describe('ConversationsPage decisions', () => {
     fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Not worth chasing.' } });
     fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
 
-    expect(dismissMutate).toHaveBeenCalledWith(
-      { id: 'prop-1', body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(dismissMutateAsync).toHaveBeenCalledWith({
+      id: 'prop-1',
+      body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' },
+    });
   });
 
   it('dismisses with the reason the analyst chose rather than a default', () => {
@@ -353,25 +481,21 @@ describe('ConversationsPage decisions', () => {
     fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Handled out of band.' } });
     fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
 
-    expect(dismissMutate).toHaveBeenCalledWith(
-      {
-        id: 'prop-1',
-        body: { dismissReason: 'already_handled', rationale: 'Handled out of band.' },
-      },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(dismissMutateAsync).toHaveBeenCalledWith({
+      id: 'prop-1',
+      body: { dismissReason: 'already_handled', rationale: 'Handled out of band.' },
+    });
   });
 
-  it('offers no decision on a proposal that was already decided', () => {
+  it('hides the actions menu trigger for a decided proposal when escalation is not available', () => {
+    // A decided investigation without `canManageEscalations` has no available actions —
+    // the menu trigger must not be rendered at all, not just show an empty popover.
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
 
     renderPage('/');
-    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+    expandClosed();
 
-    // Asserted inside the open menu, since that is now the only place the decision
-    // could appear — a card-level assertion would pass whatever the menu contained.
-    expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
-    expect(screen.queryByText('Dismiss')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
   });
 
   // That the scalar itself excludes decided proposals is covered in the service tests.
@@ -387,14 +511,281 @@ describe('ConversationsPage decisions', () => {
     expect(screen.getByText('1 action needs you')).toBeInTheDocument();
   });
 
+  it('keeps the last good count when a poll fails, rather than reporting it lost', () => {
+    mockProposals({ respond: [actionProposal] });
+    // React Query keeps `data` and sets `error` when a background refetch fails.
+    mockUseProposalChartsSummary.mockReturnValue({
+      data: { currentOpen: 1, buckets: [] },
+      isLoading: false,
+      error: new Error('poll failed'),
+    });
+
+    renderPage('/');
+
+    expect(screen.getByText('1 action needs you')).toBeInTheDocument();
+    expect(screen.queryByText("Your action count couldn't be loaded")).not.toBeInTheDocument();
+  });
+
   it('reads as an empty queue when the window holds only decisions already made', () => {
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
     mockOpenCount(0);
 
     renderPage('/');
 
-    // Closed rows are still rendered, but they are not work: the header must not read
+    // Closed holds rows, but they are not work: the header must not read
     // "0 actions need you" beside them.
     expect(screen.getByText('No events found')).toBeInTheDocument();
+  });
+});
+
+describe('ConversationsPage queue sections', () => {
+  const closedProposal = { ...proposal, id: 'prop-c', decidedAt: '2024-01-02T00:00:00Z' };
+  const bucketOf = (size: number, overrides: Partial<ProposalItem> = {}) =>
+    Array.from({ length: size }, (_, i) => ({ ...proposal, id: `prop-${i}`, ...overrides }));
+
+  it('starts Closed collapsed and runs no rows query', () => {
+    mockProposals({ closed: [closedProposal] });
+
+    renderPage('/');
+
+    expect(mockUseClosedProposals).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+    expect(screen.queryByText(closedProposal.conversationTitle!)).not.toBeInTheDocument();
+  });
+
+  it('shows the bucket total on a collapsed section, which has loaded no rows', () => {
+    mockProposals({ closed: [closedProposal, { ...closedProposal, id: 'prop-d' }] });
+
+    renderPage('/');
+
+    expect(screen.getByRole('button', { name: /^Closed/ })).toHaveTextContent('2');
+  });
+
+  it('fetches rows once Closed is expanded', () => {
+    mockProposals({ closed: [closedProposal] });
+
+    renderPage('/');
+    expandClosed();
+
+    expect(mockUseClosedProposals).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: true, firstPageSize: CLOSED_PAGE_SIZE })
+    );
+    expect(screen.getByText(closedProposal.conversationTitle!)).toBeInTheDocument();
+  });
+
+  it('stops the rows query again when Closed is collapsed', () => {
+    mockProposals({ closed: [closedProposal] });
+
+    renderPage('/');
+    expandClosed();
+    expandClosed();
+
+    expect(mockUseClosedProposals).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+  });
+
+  it('counts the whole bucket, not the page it rendered', () => {
+    mockProposals({ respond: bucketOf(CATEGORY_PAGE_SIZE + 5, { category: 'respond' }) });
+
+    renderPage('/');
+
+    expect(screen.getByRole('button', { name: /^Respond/ })).toHaveTextContent(
+      String(CATEGORY_PAGE_SIZE + 5)
+    );
+  });
+
+  it('drops the count-only request for a section whose rows already report the total', () => {
+    mockProposals({
+      respond: bucketOf(CATEGORY_PAGE_SIZE + 5, { category: 'respond' }),
+      closed: [closedProposal],
+    });
+
+    renderPage('/');
+
+    expect(mockUseProposalsByCategoryCount).toHaveBeenCalledWith('respond', false);
+    // Collapsed, so nothing else can report it.
+    expect(mockUseClosedProposalsCount).toHaveBeenLastCalledWith(true);
+  });
+
+  describe('show more', () => {
+    it('offers the rows still to come', () => {
+      mockProposals({ respond: bucketOf(CATEGORY_PAGE_SIZE + 5, { category: 'respond' }) });
+
+      renderPage('/');
+
+      expect(screen.getByTestId('conversationQueueShowMore-respond')).toHaveTextContent(
+        'Show more (5)'
+      );
+    });
+
+    it('is absent once the bucket fits in one page', () => {
+      mockProposals({ respond: bucketOf(CATEGORY_PAGE_SIZE, { category: 'respond' }) });
+
+      renderPage('/');
+
+      expect(screen.queryByTestId('conversationQueueShowMore-respond')).not.toBeInTheDocument();
+    });
+
+    it('asks the query for the next page', () => {
+      mockProposals({ respond: bucketOf(CATEGORY_PAGE_SIZE + 5, { category: 'respond' }) });
+
+      renderPage('/');
+      fireEvent.click(screen.getByTestId('conversationQueueShowMore-respond'));
+
+      expect(fetchNextPage.respond).toHaveBeenCalled();
+    });
+
+    it('is offered on Closed too, once expanded', () => {
+      mockProposals({
+        closed: bucketOf(CLOSED_PAGE_SIZE + 7).map((p) => ({
+          ...p,
+          decidedAt: '2024-01-02T00:00:00Z',
+        })),
+      });
+
+      renderPage('/');
+      expandClosed();
+
+      expect(screen.getByTestId('conversationQueueShowMore-closed')).toHaveTextContent(
+        'Show more (7)'
+      );
+    });
+  });
+
+  it('reports a failed section without letting its neighbours vouch for it', () => {
+    // The review this fixes: an aggregate across all four queries let a healthy
+    // `respond` suppress a broken `investigate`, which then read as simply empty.
+    mockProposals({ respond: [proposal] });
+    mockUseProposalsByCategory.mockImplementation((category: string) =>
+      category === 'investigate'
+        ? {
+            data: undefined,
+            fetchNextPage: jest.fn(),
+            hasNextPage: undefined,
+            isFetchingNextPage: false,
+            isInitialLoading: false,
+            error: new Error('boom'),
+          }
+        : {
+            data: {
+              pages: [{ proposals: category === 'respond' ? [proposal] : [], total: 1 }],
+              pageParams: [undefined],
+            },
+            fetchNextPage: jest.fn(),
+            hasNextPage: false,
+            isFetchingNextPage: false,
+            isInitialLoading: false,
+            error: undefined,
+          }
+    );
+
+    renderPage('/');
+
+    expect(screen.getByTestId('conversationQueueError-investigate')).toBeInTheDocument();
+    // The healthy neighbour still renders its rows rather than being blanked with it.
+    expect(screen.getByText(proposal.conversationTitle!)).toBeInTheDocument();
+    expect(screen.queryByTestId('conversationQueueError-respond')).not.toBeInTheDocument();
+  });
+
+  it('scaffolds only as many rows as the bucket holds, not a whole page', () => {
+    // The count read already said the bucket holds 3, so a 25-row scaffold would
+    // promise rows that are never coming.
+    mockProposals({});
+    mockUseClosedProposalsCount.mockReturnValue({
+      data: { proposals: [], total: 3 },
+      isLoading: false,
+      error: undefined,
+    });
+    mockUseClosedProposals.mockReturnValue({
+      data: undefined,
+      fetchNextPage: jest.fn(),
+      hasNextPage: undefined,
+      isFetchingNextPage: false,
+      isInitialLoading: true,
+      error: undefined,
+    });
+
+    renderPage('/');
+    expandClosed();
+
+    const scaffold = screen.getByLabelText('Loading events…');
+    expect(within(scaffold).getAllByRole('progressbar')).toHaveLength(6);
+  });
+});
+
+describe('ConversationsPage impact pills', () => {
+  const hostProposal: ProposalItem = {
+    ...proposal,
+    id: 'prop-host',
+    conversationTitle: 'Host investigation',
+    entityIds: ['host-1'],
+  };
+  const userProposal: ProposalItem = {
+    ...proposal,
+    id: 'prop-user',
+    conversationTitle: 'User investigation',
+    entityIds: ['user-1'],
+  };
+
+  beforeEach(() => {
+    mockProposals({ investigate: [hostProposal, userProposal] });
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('filters the queue to conversations whose entity ids include the selected pill', () => {
+    renderPage('/');
+
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+    expect(screen.getByText('User investigation')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+    expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+  });
+});
+
+describe('ConversationsPage assignee picker', () => {
+  beforeEach(() => {
+    mockProposals({ investigate: [proposal] });
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('passes the conversationId (not the proposal id) to the assignment mutation', async () => {
+    renderPage('/', { capabilities: { manageInvestigations: true } });
+
+    // The stub AssignToUsers is keyed by getRowKey (proposal id), so the button test-id uses it.
+    fireEvent.click(screen.getByTestId('mock-assign-prop-1'));
+
+    await waitFor(() =>
+      expect(assignInvestigationMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ investigationId: 'inv-1' })
+      )
+    );
+    // The proposal id 'prop-1' must NOT appear as the investigation id.
+    expect(assignInvestigationMutate).not.toHaveBeenCalledWith(
+      expect.objectContaining({ investigationId: 'prop-1' })
+    );
+  });
+
+  it('does not open the conversation flyout when the assign button is clicked', async () => {
+    const { agentBuilder } = renderPage('/', { capabilities: { manageInvestigations: true } });
+
+    fireEvent.click(screen.getByTestId('mock-assign-prop-1'));
+
+    // Wait for any async handlers.
+    await waitFor(() => expect(assignInvestigationMutate).toHaveBeenCalled());
+    expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
+  });
+
+  it('renders the assignee picker as read-only when manageInvestigations is false', () => {
+    renderPage('/', { capabilities: { manageInvestigations: false } });
+
+    expect(screen.getByTestId('mock-assignees-readonly-prop-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-assign-prop-1')).not.toBeInTheDocument();
   });
 });

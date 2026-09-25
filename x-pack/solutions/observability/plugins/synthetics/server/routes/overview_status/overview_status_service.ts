@@ -26,13 +26,20 @@ import type {
   EncryptedSyntheticsMonitorAttributes,
   OverviewStaleStatus,
   OverviewStalePriorRun,
+  OverviewStatusFilterId,
   OverviewStatusMetaData,
 } from '../../../common/runtime_types';
 import {
   HEARTBEAT_UNMAPPED_LOCATION_ID,
   HEARTBEAT_UNMAPPED_LOCATION_LABEL,
 } from '../../../common/runtime_types';
-import { getOverviewConfigKey, isRunStale } from '../../../common/lib';
+import {
+  getOverviewConfigKey,
+  isRunStale,
+  mergeLinkedRemoteLocations,
+  overviewStatusFilterIdKey,
+  toOverviewStatusFilterId,
+} from '../../../common/lib';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   FINAL_SUMMARY_FILTER,
@@ -50,6 +57,78 @@ const STATUS_RANK: Record<string, number> = {
   [MONITOR_STATUS_ENUM.DISABLED]: 2,
   [MONITOR_STATUS_ENUM.PENDING]: 3,
   [MONITOR_STATUS_ENUM.STALE]: 4,
+};
+
+// `processMonitors` only sees saved-object configs. Heartbeat/remote monitors
+// are synthesized later into the status buckets, so union those filter IDs
+// into `allIds` or a free-text search would drop them from the activity chart.
+// Skip the union when a schedule filter is active: schedules only apply to
+// saved-object configs, and ping-synthesized monitors would otherwise leak
+// onto the activity chart. Identity must include cluster + location for
+// one-location external rows — a string `monitorQueryId` list cannot tell two
+// CCS/Heartbeat copies of the same id apart.
+const allIdsIncludingStatusBuckets = (
+  savedObjectIds: string[],
+  buckets: Array<Record<string, OverviewStatusMetaData>>
+): OverviewStatusFilterId[] => {
+  const ids = new Map<string, OverviewStatusFilterId>();
+  const add = (id: OverviewStatusFilterId) => {
+    const key = overviewStatusFilterIdKey(id);
+    const existing = ids.get(key);
+    if (!existing) {
+      ids.set(key, id);
+      return;
+    }
+    const linkedRemoteLocations = mergeLinkedRemoteLocations(
+      existing.linkedRemoteLocations,
+      id.linkedRemoteLocations
+    );
+    ids.set(key, {
+      ...existing,
+      ...id,
+      ...(linkedRemoteLocations ? { linkedRemoteLocations } : {}),
+    });
+  };
+  for (const monitorQueryId of savedObjectIds) {
+    add({ monitorQueryId });
+  }
+  for (const bucket of buckets) {
+    for (const config of Object.values(bucket)) {
+      add(toOverviewStatusFilterId(config));
+    }
+  }
+  return [...ids.values()];
+};
+
+const toStatusFilterIds = (
+  configs: Record<string, OverviewStatusMetaData>
+): OverviewStatusFilterId[] => Object.values(configs).map(toOverviewStatusFilterId);
+
+const savedObjectFilterId = (
+  monitorQueryId: string,
+  buckets: Array<Record<string, OverviewStatusMetaData>>
+): OverviewStatusFilterId => {
+  for (const bucket of buckets) {
+    for (const config of Object.values(bucket)) {
+      if (config.monitorQueryId === monitorQueryId) {
+        return toOverviewStatusFilterId(config);
+      }
+    }
+  }
+  return { monitorQueryId };
+};
+
+const addLinkedRemoteLocation = (
+  meta: OverviewStatusMetaData,
+  remoteName: string | undefined,
+  locationId: string
+) => {
+  if (!remoteName) {
+    return;
+  }
+  meta.linkedRemoteLocations = mergeLinkedRemoteLocations(meta.linkedRemoteLocations, [
+    { remoteName, locationId },
+  ]);
 };
 
 interface LocationStatusEntry {
@@ -143,7 +222,7 @@ export class OverviewStatusService {
     // overview never silently hides one. Monitors with no run in the queried
     // window surface as `pending`; in a live window, monitors whose latest run
     // went stale surface as `stale` (see `processOverviewStatus`).
-    return this.buildOverviewStatusResult(rawConfigs, statusResult);
+    return await this.buildOverviewStatusResult(rawConfigs, statusResult);
   }
 
   /**
@@ -157,10 +236,10 @@ export class OverviewStatusService {
   ) {
     this.filterData = await getMonitorFilters(this.routeContext);
     const statusResult = await this.getQueryResult();
-    return this.buildOverviewStatusResult(allConfigs, statusResult);
+    return await this.buildOverviewStatusResult(allConfigs, statusResult);
   }
 
-  private buildOverviewStatusResult(
+  private async buildOverviewStatusResult(
     allConfigs: Array<
       SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
     >,
@@ -170,26 +249,39 @@ export class OverviewStatusService {
     const { page, perPage } = params;
     const isPaginated = page != null && perPage != null;
 
-    const {
-      up,
-      down,
-      pending,
-      stale,
-      upConfigs,
-      downConfigs,
-      pendingConfigs,
-      staleConfigs,
-      disabledConfigs,
-    } = this.processOverviewStatus(allConfigs, statusResult);
+    const processed = this.processOverviewStatus(allConfigs, statusResult);
+    let pending = processed.pending;
+    let stale = processed.stale;
+    const { up, down, upConfigs, downConfigs, pendingConfigs, staleConfigs, disabledConfigs } =
+      processed;
+
+    // Any status filter paginates from one bucket, so a pending-before-window
+    // monitor is dropped from the page before the client can promote it.
+    // Classify first so the counts and unpaginated ids stay in sync while
+    // Up/Down/Disabled is selected, not only after a Stale or Pending click.
+    const statusFilter = params.statusFilter;
+    if (this.shouldApplyFreshnessGuard() && statusFilter) {
+      await this.promotePendingFromPriorWindow(pendingConfigs, staleConfigs);
+      pending = Object.values(pendingConfigs).length;
+      stale = Object.values(staleConfigs).length;
+    }
 
     const {
       enabledMonitorQueryIds,
       disabledMonitorQueryIds,
-      allIds,
+      allIds: savedObjectIds,
       disabledCount,
       disabledMonitorsCount,
       projectMonitorsCount,
     } = processMonitors(allConfigs, this.filterData?.locationIds);
+
+    const statusBuckets = [upConfigs, downConfigs, pendingConfigs, staleConfigs, disabledConfigs];
+    // Schedule filters omit ping-synthesized rows, but a saved-object monitor
+    // can still have a location stored on a linked cluster. Keep that on the
+    // id so the chart does not treat the row as local-index-only.
+    const allIds = isEmpty(params.schedules)
+      ? allIdsIncludingStatusBuckets(savedObjectIds, statusBuckets)
+      : savedObjectIds.map((monitorQueryId) => savedObjectFilterId(monitorQueryId, statusBuckets));
 
     if (!isPaginated) {
       return {
@@ -245,6 +337,19 @@ export class OverviewStatusService {
       pendingConfigs: pagePendingConfigs,
       staleConfigs: pageStaleConfigs,
       disabledConfigs: pageDisabledConfigs,
+      // Unpaginated — computed above, before `paginateConfigs` slices the
+      // `*Configs` maps down to the current page. These buckets are keyed by
+      // `configId` (see `getOverviewConfigKey`), but consumers apply the
+      // result as a `monitor.id` filter, which matches on `monitorQueryId` —
+      // the two differ for e.g. project monitors with multiple locations, so
+      // map to `monitorQueryId` rather than using the map's keys directly.
+      // `remoteName` and `locationId` are required when two CCS/Heartbeat
+      // copies share a query id: a bare id list cannot tell an Up copy from
+      // a Down copy, or one location from another.
+      upIds: toStatusFilterIds(upConfigs),
+      downIds: toStatusFilterIds(downConfigs),
+      pendingIds: toStatusFilterIds(pendingConfigs),
+      staleIds: toStatusFilterIds(staleConfigs),
       configs,
       total,
       page,
@@ -288,8 +393,13 @@ export class OverviewStatusService {
     const monitorIds = (
       Array.isArray(monitorQueryIds) ? monitorQueryIds : monitorQueryIds ? [monitorQueryIds] : []
     ).filter(Boolean);
+
+    return { priorRuns: await this.getPriorRunsBeforeWindow(monitorIds) };
+  }
+
+  private async getPriorRunsBeforeWindow(monitorIds: string[]): Promise<OverviewStalePriorRun[]> {
     if (monitorIds.length === 0) {
-      return { priorRuns: [] };
+      return [];
     }
 
     const { from } = this.getStatusQueryRange();
@@ -323,7 +433,76 @@ export class OverviewStatusService {
       });
     });
 
-    return { priorRuns };
+    return priorRuns;
+  }
+
+  private async promotePendingFromPriorWindow(
+    pendingConfigs: Record<string, OverviewStatusMetaData>,
+    staleConfigs: Record<string, OverviewStatusMetaData>
+  ) {
+    const monitorQueryIds = [
+      ...new Set(
+        Object.values(pendingConfigs)
+          .map((config) => config.monitorQueryId)
+          .filter(Boolean)
+      ),
+    ];
+    const priorRuns = await this.getPriorRunsBeforeWindow(monitorQueryIds);
+    if (priorRuns.length === 0) {
+      return;
+    }
+
+    const runsByMonitor = new Map<string, Map<string, OverviewStalePriorRun>>();
+    for (const run of priorRuns) {
+      let byLocation = runsByMonitor.get(run.monitorQueryId);
+      if (!byLocation) {
+        byLocation = new Map();
+        runsByMonitor.set(run.monitorQueryId, byLocation);
+      }
+      byLocation.set(run.locationId, run);
+    }
+
+    for (const [configId, meta] of Object.entries(pendingConfigs)) {
+      const byLocation = runsByMonitor.get(meta.monitorQueryId);
+      if (!byLocation) {
+        continue;
+      }
+
+      const scheduleMinutes = Number(meta.schedule) || 0;
+      let hasStale = false;
+      let latestTimestamp: string | undefined;
+
+      const locations = meta.locations.map((location) => {
+        const run = byLocation.get(location.id);
+        if (run && isRunStale(run.timestamp, scheduleMinutes)) {
+          hasStale = true;
+          if (!latestTimestamp || Date.parse(run.timestamp) > Date.parse(latestTimestamp)) {
+            latestTimestamp = run.timestamp;
+          }
+          return { ...location, status: MONITOR_STATUS_ENUM.STALE, lastStatus: run.status };
+        }
+        return { ...location, status: MONITOR_STATUS_ENUM.PENDING };
+      });
+
+      if (!hasStale) {
+        continue;
+      }
+
+      locations.sort((a, b) => {
+        if (a.status === b.status) {
+          return 0;
+        }
+        return a.status === MONITOR_STATUS_ENUM.PENDING ? 1 : -1;
+      });
+
+      staleConfigs[configId] = {
+        ...meta,
+        overallStatus: MONITOR_STATUS_ENUM.STALE,
+        timestamp: latestTimestamp,
+        locations,
+      };
+      delete pendingConfigs[configId];
+    }
   }
 
   paginateConfigs({
@@ -1068,6 +1247,7 @@ export class OverviewStatusService {
           locations: [location],
           overallStatus: status,
         };
+        addLinkedRemoteLocation(meta, remote?.remoteName, monLocation.id);
         switch (status) {
           case MONITOR_STATUS_ENUM.DOWN:
             down += 1;
@@ -1087,6 +1267,7 @@ export class OverviewStatusService {
           const existingMeta =
             downConfigs[meta.configId] || upConfigs[meta.configId] || pendingConfigs[meta.configId];
           existingMeta.locations.push(location);
+          addLinkedRemoteLocation(existingMeta, remote?.remoteName, monLocation.id);
           // check if urls is missing from existing meta and update it
           if (!existingMeta.urls && meta.urls) {
             existingMeta.urls = meta.urls;

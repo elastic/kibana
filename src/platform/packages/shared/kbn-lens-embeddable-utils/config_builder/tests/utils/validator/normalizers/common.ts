@@ -799,16 +799,16 @@ const isLastValueColumn = (col: GenericIndexPatternColumn): col is LastValueInde
   col.operationType === 'last_value';
 
 /**
- * Default a missing/`null` `params.showArrayValues` to `true` on `last_value` columns on the ORIGINAL
- * side to match the 8.2.0 saved-object migration `commonSetLastValueShowArrayValues`
- * (`server/migrations/common_migrations.ts`) that coerces any non-boolean `showArrayValues` to `true` at load.
+ * Default a missing/`null` `params.showArrayValues` to `false` on `last_value` columns on the ORIGINAL
+ * side to match the `?? false` fallback in `fromLastValueLensStateToAPI`
+ * (`config_builder/transforms/columns/last_value.ts`).
  */
 const normalizeLastValueShowArrayValues = (col: GenericIndexPatternColumn): void => {
   if (!isLastValueColumn(col)) {
     return;
   }
   if (col.params.showArrayValues == null) {
-    col.params.showArrayValues = true;
+    col.params.showArrayValues = false;
   }
 };
 

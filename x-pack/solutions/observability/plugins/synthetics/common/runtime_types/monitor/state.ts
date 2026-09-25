@@ -5,111 +5,99 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+import type { SchemaOutput } from '../schema_output';
 import { PingErrorType, PingType } from '../ping/ping';
 
-export const StateType = t.intersection([
-  t.type({
-    timestamp: t.string,
-    url: t.partial({
-      domain: t.string,
-      full: t.string,
-      path: t.string,
-      port: t.number,
-      scheme: t.string,
-    }),
-    summaryPings: t.array(PingType),
-    summary: t.partial({
-      status: t.string,
-      up: t.number,
-      down: t.number,
-    }),
-    monitor: t.intersection([
-      t.partial({
-        name: t.string,
-        checkGroup: t.string,
-        duration: t.type({ us: t.number }),
-      }),
-      t.type({
-        type: t.string,
-      }),
-    ]),
+export const StateType = z.looseObject({
+  timestamp: z.string(),
+  url: z.looseObject({
+    domain: z.string().optional(),
+    full: z.string().optional(),
+    path: z.string().optional(),
+    port: z.number().optional(),
+    scheme: z.string().optional(),
   }),
-  t.partial({
-    tls: t.partial({
-      not_after: t.union([t.string, t.null]),
-      not_before: t.union([t.string, t.null]),
-    }),
-    observer: t.type({
-      geo: t.type({
-        name: t.array(t.string),
-      }),
-    }),
-    service: t.partial({
-      name: t.string,
-    }),
-    error: PingErrorType,
+  summaryPings: z.array(PingType),
+  summary: z.looseObject({
+    status: z.string().optional(),
+    up: z.number().optional(),
+    down: z.number().optional(),
   }),
-]);
-
-export type MonitorSummaryState = t.TypeOf<typeof StateType>;
-
-export const HistogramPointType = t.type({
-  timestamp: t.number,
-  up: t.union([t.number, t.undefined]),
-  down: t.union([t.number, t.undefined]),
+  monitor: z.looseObject({
+    type: z.string(),
+    name: z.string().optional(),
+    checkGroup: z.string().optional(),
+    duration: z.looseObject({ us: z.number() }).optional(),
+  }),
+  tls: z
+    .looseObject({
+      not_after: z.union([z.string(), z.null()]).optional(),
+      not_before: z.union([z.string(), z.null()]).optional(),
+    })
+    .optional(),
+  observer: z
+    .looseObject({
+      geo: z.looseObject({
+        name: z.array(z.string()),
+      }),
+    })
+    .optional(),
+  service: z
+    .looseObject({
+      name: z.string().optional(),
+    })
+    .optional(),
+  error: PingErrorType.optional(),
 });
 
-export type HistogramPoint = t.TypeOf<typeof HistogramPointType>;
+export type MonitorSummaryState = SchemaOutput<typeof StateType>;
 
-export const HistogramType = t.type({
-  points: t.array(HistogramPointType),
+export const HistogramPointType = z.looseObject({
+  timestamp: z.number(),
+  // Missing key and explicit undefined both accepted (io-ts was union with undefined).
+  up: z.union([z.number(), z.undefined()]).optional(),
+  down: z.union([z.number(), z.undefined()]).optional(),
 });
 
-export type Histogram = t.TypeOf<typeof HistogramType>;
+export type HistogramPoint = SchemaOutput<typeof HistogramPointType>;
 
-export const MonitorSummaryType = t.intersection([
-  t.type({
-    monitor_id: t.string,
-    state: StateType,
-  }),
-  t.partial({
-    histogram: HistogramType,
-    minInterval: t.number,
-    configId: t.string,
-  }),
-]);
+export const HistogramType = z.looseObject({
+  points: z.array(HistogramPointType),
+});
 
-export type MonitorSummary = t.TypeOf<typeof MonitorSummaryType>;
+export type Histogram = SchemaOutput<typeof HistogramType>;
 
-export const MonitorSummariesResultType = t.intersection([
-  t.partial({
-    totalSummaryCount: t.number,
-  }),
-  t.type({
-    summaries: t.array(MonitorSummaryType),
-    prevPagePagination: t.union([t.string, t.null]),
-    nextPagePagination: t.union([t.string, t.null]),
-  }),
-]);
+export const MonitorSummaryType = z.looseObject({
+  monitor_id: z.string(),
+  state: StateType,
+  histogram: HistogramType.optional(),
+  minInterval: z.number().optional(),
+  configId: z.string().optional(),
+});
 
-export type MonitorSummariesResult = t.TypeOf<typeof MonitorSummariesResultType>;
+export type MonitorSummary = SchemaOutput<typeof MonitorSummaryType>;
 
-export const FetchMonitorStatesQueryArgsType = t.intersection([
-  t.partial({
-    pagination: t.string,
-    filters: t.string,
-    statusFilter: t.string,
-    query: t.string,
-  }),
-  t.type({
-    dateRangeStart: t.string,
-    dateRangeEnd: t.string,
-    pageSize: t.number,
-  }),
-]);
+export const MonitorSummariesResultType = z.looseObject({
+  totalSummaryCount: z.number().optional(),
+  summaries: z.array(MonitorSummaryType),
+  prevPagePagination: z.union([z.string(), z.null()]),
+  nextPagePagination: z.union([z.string(), z.null()]),
+});
 
-export type FetchMonitorStatesQueryArgs = t.TypeOf<typeof FetchMonitorStatesQueryArgsType>;
+export type MonitorSummariesResult = SchemaOutput<typeof MonitorSummariesResultType>;
+
+export const FetchMonitorStatesQueryArgsType = z.looseObject({
+  pagination: z.string().optional(),
+  filters: z.string().optional(),
+  statusFilter: z.string().optional(),
+  query: z.string().optional(),
+  dateRangeStart: z.string(),
+  dateRangeEnd: z.string(),
+  pageSize: z.number(),
+});
+
+export type FetchMonitorStatesQueryArgs = SchemaOutput<typeof FetchMonitorStatesQueryArgsType>;
 
 export enum CursorDirection {
   AFTER = 'AFTER',

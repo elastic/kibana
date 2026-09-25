@@ -16,12 +16,15 @@ const { AI_INDEX_COLLECTION_PATH, AI_INDEX_QUERY_PATH, API_HEADERS, CONTEXT_ENGI
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
 const INDEX_A = `ai-index-idx-scout-describe-${RUN_ID}-a`;
+// Bare index: keeps the built-in `ai-index-idx-*` template mappings.
 const INDEX_B = `ai-index-idx-scout-describe-${RUN_ID}-b`;
-const INDEX_PATTERN = `ai-index-idx-scout-describe-${RUN_ID}-*`;
 const DATA_STREAM = `ai-index-ds-scout-describe-${RUN_ID}`;
-const PATTERN_AI_INDEX_ID = `scout-describe-pattern-${RUN_ID}`;
+// Deliberately never created: a just-registered AI Index has no backing store yet.
+const MISSING_INDEX = `ai-index-idx-scout-describe-${RUN_ID}-missing`;
 const SINGLE_AI_INDEX_ID = `scout-describe-single-${RUN_ID}`;
+const TEMPLATE_AI_INDEX_ID = `scout-describe-template-${RUN_ID}`;
 const DATA_STREAM_AI_INDEX_ID = `scout-describe-ds-${RUN_ID}`;
+const MISSING_AI_INDEX_ID = `scout-describe-missing-index-${RUN_ID}`;
 
 const describePath = (id: string) => `${AI_INDEX_COLLECTION_PATH}/${id}/_describe`;
 const QUERY_PATH = AI_INDEX_QUERY_PATH;
@@ -95,11 +98,29 @@ const READ_ONLY_ROLE: KibanaRole = {
   kibana: [CONTEXT_ENGINE_READ],
 };
 
-/** `view_index_metadata` only, no `read`: fields resolve, the counts aggregation is refused. */
+/** `view_index_metadata` only, no `read`: can't list or describe it. */
 const METADATA_ONLY_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
     indices: [{ names: ['ai-index-idx-scout-describe-*'], privileges: ['view_index_metadata'] }],
+  },
+  kibana: [CONTEXT_ENGINE_READ],
+};
+
+/**
+ * `contextEngine:read` in Kibana, but the backing indices are outside the role's index pattern, so
+ * the caller holds no privilege on them at all. Kibana authz lets the request through: only the
+ * AI-Index-level readability check can stop it.
+ */
+const OTHER_INDEX_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      {
+        names: [`ai-index-idx-scout-describe-unrelated-${RUN_ID}-*`],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
   },
   kibana: [CONTEXT_ENGINE_READ],
 };
@@ -119,12 +140,14 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   let describeCredentials: RoleApiCredentials;
   let readOnlyCredentials: RoleApiCredentials;
   let metadataOnlyCredentials: RoleApiCredentials;
+  let otherIndexCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, esClient, apiClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
     describeCredentials = await requestAuth.getApiKeyForCustomRole(DESCRIBE_ROLE);
     readOnlyCredentials = await requestAuth.getApiKeyForCustomRole(READ_ONLY_ROLE);
     metadataOnlyCredentials = await requestAuth.getApiKeyForCustomRole(METADATA_ONLY_ROLE);
+    otherIndexCredentials = await requestAuth.getApiKeyForCustomRole(OTHER_INDEX_ROLE);
 
     await esClient.indices.create({
       index: INDEX_A,
@@ -151,10 +174,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
         },
       },
     });
-    await esClient.indices.create({
-      index: INDEX_B,
-      mappings: { properties: { title: { type: 'text' }, status: { type: 'long' } } },
-    });
+    await esClient.indices.create({ index: INDEX_B });
     await esClient.indices.createDataStream({ name: DATA_STREAM });
     await esClient.bulk({
       index: INDEX_A,
@@ -163,9 +183,10 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     });
 
     for (const body of [
-      registerAiIndex(PATTERN_AI_INDEX_ID, { type: 'index', value: INDEX_PATTERN }),
       registerAiIndex(SINGLE_AI_INDEX_ID, { type: 'index', value: INDEX_A }),
+      registerAiIndex(TEMPLATE_AI_INDEX_ID, { type: 'index', value: INDEX_B }),
       registerAiIndex(DATA_STREAM_AI_INDEX_ID, { type: 'data_stream', value: DATA_STREAM }),
+      registerAiIndex(MISSING_AI_INDEX_ID, { type: 'index', value: MISSING_INDEX }),
     ]) {
       const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
         headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
@@ -177,7 +198,12 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    for (const id of [PATTERN_AI_INDEX_ID, SINGLE_AI_INDEX_ID, DATA_STREAM_AI_INDEX_ID]) {
+    for (const id of [
+      SINGLE_AI_INDEX_ID,
+      TEMPLATE_AI_INDEX_ID,
+      DATA_STREAM_AI_INDEX_ID,
+      MISSING_AI_INDEX_ID,
+    ]) {
       await apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${id}`, {
         headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
@@ -187,8 +213,8 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     await esClient.indices.deleteDataStream({ name: DATA_STREAM }, { ignore: [404] });
   });
 
-  apiTest('merges mapping types with field caps across a pattern', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(PATTERN_AI_INDEX_ID), {
+  apiTest('describes the fields of a single index', async ({ apiClient }) => {
+    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
       headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
     });
@@ -196,14 +222,14 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
     expect(block.split('\n').slice(0, 3)).toStrictEqual([
-      `AI index: ${PATTERN_AI_INDEX_ID}`,
-      `Scout describe fixture ${PATTERN_AI_INDEX_ID}`,
-      `Query with ES|QL against: ${INDEX_PATTERN}`,
+      `AI index: ${SINGLE_AI_INDEX_ID}`,
+      `Scout describe fixture ${SINGLE_AI_INDEX_ID}`,
+      `Query with ES|QL against: ${INDEX_A}`,
     ]);
     // Fields not truncated: plain heading, no `(showing …)`.
     expect(block).toContain('\n\nFields\n');
 
-    expect(fieldLine(block, 'status')).toBe('status: conflict, searchable, aggregatable');
+    expect(fieldLine(block, 'status')).toBe('status: keyword, searchable, aggregatable');
     expect(fieldLine(block, 'title.keyword')).toBe(
       'title.keyword: keyword, searchable, aggregatable'
     );
@@ -212,25 +238,21 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     );
     const paths = fieldPaths(block);
     expect(paths).toStrictEqual([...paths].sort());
-
-    // Built-in `ai-index-idx-*` template adds `semantic_text` fields.
-    const semanticFields = sectionLines(block, 'Semantic fields');
-    expect(semanticFields.length).toBeGreaterThan(0);
-    for (const path of semanticFields) {
-      expect(fieldLine(block, path)).toBe(`${path}: semantic_text, searchable`);
-    }
   });
 
-  apiTest('reports the exact type for a single index', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+  apiTest('lists the semantic fields from the built-in template', async ({ apiClient }) => {
+    const response = await apiClient.get(describePath(TEMPLATE_AI_INDEX_ID), {
       headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${INDEX_A}\n`);
-    expect(fieldLine(block, 'status')).toBe('status: keyword, searchable, aggregatable');
+    const semanticFields = sectionLines(block, 'Semantic fields');
+    expect(semanticFields.length).toBeGreaterThan(0);
+    for (const path of semanticFields) {
+      expect(fieldLine(block, path)).toBe(`${path}: semantic_text, searchable`);
+    }
   });
 
   apiTest('resolves a data stream through its backing indices', async ({ apiClient }) => {
@@ -308,7 +330,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   });
 
   apiTest(
-    'returns Elasticsearch 403 when the caller lacks view_index_metadata',
+    'returns Elasticsearch 403 when the caller lacks view_index_metadata privilege',
     async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...readOnlyCredentials.apiKeyHeader, ...API_HEADERS },
@@ -322,19 +344,41 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   );
 
   apiTest(
-    'omits counts, not the whole block, when the caller lacks read',
+    'returns Elasticsearch 403 when the caller lacks read privilege',
     async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...metadataOnlyCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
       });
 
-      expect(response).toHaveStatusCode(200);
-      const block = blockOf(response.body);
-      expect(fieldLine(block, 'type')).toBe('type: keyword, searchable, aggregatable');
-      expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([]);
-      expect(sectionLines(block, 'Tags')).toStrictEqual([]);
-      expect(block).toContain('\n\nCount by type\n');
+      expect(response).toHaveStatusCode(403);
+      // No `read` anywhere: Elasticsearch refuses the whole readability probe.
+      expect(response.body.message).toMatch(/security_exception|unauthorized/i);
     }
   );
+
+  apiTest(
+    'returns 403 when the caller holds no privilege on the backing index',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+        headers: { ...otherIndexCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toContain(`AI index '${SINGLE_AI_INDEX_ID}' is not readable`);
+    }
+  );
+
+  apiTest('describes an entry whose backing index does not exist yet', async ({ apiClient }) => {
+    const response = await apiClient.get(describePath(MISSING_AI_INDEX_ID), {
+      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    const block = blockOf(response.body);
+    expect(block).toContain(`\nQuery with ES|QL against: ${MISSING_INDEX}\n`);
+    expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
+  });
 });

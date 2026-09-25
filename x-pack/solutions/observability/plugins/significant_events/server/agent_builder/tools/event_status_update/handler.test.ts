@@ -7,6 +7,9 @@
 
 import { updateEventStatusToolHandler } from './handler';
 
+const makeLogger = () =>
+  ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as never);
+
 describe('updateEventStatusToolHandler', () => {
   it('creates a new event version when status changes', async () => {
     const eventClient = {
@@ -23,6 +26,7 @@ describe('updateEventStatusToolHandler', () => {
       eventClient: eventClient as never,
       eventUuid: 'event-1',
       status: 'closed',
+      logger: makeLogger(),
     });
 
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
@@ -49,6 +53,7 @@ describe('updateEventStatusToolHandler', () => {
       eventClient: eventClientMissing as never,
       eventUuid: 'event-1',
       status: 'dismissed',
+      logger: makeLogger(),
     });
     expect(missing).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'dismissed' });
 
@@ -65,6 +70,7 @@ describe('updateEventStatusToolHandler', () => {
       eventClient: eventClientSame as never,
       eventUuid: 'event-1',
       status: 'dismissed',
+      logger: makeLogger(),
     });
     expect(same).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'dismissed' });
   });

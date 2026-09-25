@@ -15,7 +15,7 @@ const mockNavigateToApp = jest.fn();
 
 jest.mock('../../../../../hooks', () => ({
   useStartServices: () => ({
-    featureFlags: { getBooleanValue: mockGetBooleanValue },
+    featureFlags: { useBooleanValue: mockGetBooleanValue },
     application: {
       navigateToApp: mockNavigateToApp,
       getUrlForApp: mockGetUrlForApp,
@@ -99,6 +99,15 @@ describe('useOnboardingOverride', () => {
       expect(output[0].name).toBe('aws-onboarding');
     });
 
+    it('filters the aws policy template tiles', () => {
+      const cards = [makeCard('aws', 'epr:aws-cloudtrail'), makeCard('aws', 'epr:aws-ec2')];
+      const { result } = renderHook(() => useOnboardingOverride());
+      const output = result.current.applyOnboardingOverride(cards);
+
+      expect(output).toHaveLength(1);
+      expect(output[0].name).toBe('aws-onboarding');
+    });
+
     it('preserves non-AWS cards', () => {
       const nonAwsCard = makeCard('elastic_agent', 'epr:elastic_agent');
       const cards = [...ALL_HIDDEN_NAMES.map((name) => makeCard(name)), nonAwsCard];
@@ -118,9 +127,37 @@ describe('useOnboardingOverride', () => {
       expect(output[0].name).toBe('aws-onboarding');
     });
 
+    it('sends the onboarding tile straight to the onboarding flow with a new session', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([makeCard('aws')]);
+
+      expect(tile.url).toBe('/app/onboarding/aws');
+      tile.onCardClick?.();
+      expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
+        path: '/aws',
+        state: { newSession: true },
+      });
+    });
+
     it('isOnboardingEnabled is true', () => {
       const { result } = renderHook(() => useOnboardingOverride());
       expect(result.current.isOnboardingEnabled).toBe(true);
+    });
+
+    it('navigateToOnboarding starts a new session in the onboarding app', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+      result.current.navigateToOnboarding();
+
+      expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
+        path: '/aws',
+        state: { newSession: true },
+      });
+    });
+
+    it('exposes the onboarding url for the detail page button', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+
+      expect(result.current.onboardingUrl).toBe('/app/onboarding/aws');
     });
   });
 });

@@ -31,6 +31,11 @@ export * from './convert_value_to_string';
 export * from './local_storage_utils';
 export * from './sorting';
 export * from './format_json_content';
-export { DiscoverFlyouts, dismissAllFlyoutsExceptFor, dismissFlyouts } from './dismiss_flyouts';
+export {
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  dismissFlyouts,
+  openAfterDismissingOtherFlyouts,
+} from './dismiss_flyouts';
 export { prepareDataViewForEditing } from './prepare_data_view_for_editing';
 export { getEsqlDataView } from './get_esql_data_view';

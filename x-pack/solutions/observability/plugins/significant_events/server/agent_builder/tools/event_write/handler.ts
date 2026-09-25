@@ -11,6 +11,9 @@ import {
   type SignificantEvent,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
 } from '@kbn/significant-events-schema';
+import pLimit from 'p-limit';
+import type { Logger } from '@kbn/core/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { EventClient } from '../../../lib/significant_events/events';
 import {
   assertValidBulkWriteSize,
@@ -31,6 +34,9 @@ import {
   preserveStableNarrative,
 } from './episode_context';
 import { getCalibratedSeverity, type EventsWriteSource } from './severity_calibration_guard';
+import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
+
+const DUAL_WRITE_CONCURRENCY = 10;
 
 export type EventsWriteInput = Pick<
   SignificantEvent,
@@ -466,10 +472,15 @@ export async function eventsWriteBulkHandler({
   eventClient,
   inputs,
   source,
+  alertEventsClient,
+  logger,
 }: {
   eventClient: EventClient;
   inputs: EventsWriteInput[];
   source?: EventsWriteSource;
+  /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
+  alertEventsClient?: AlertEventsClientApi;
+  logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
 
@@ -549,16 +560,30 @@ export async function eventsWriteBulkHandler({
   // Notify subscribed workflows (fire-and-forget) for successfully written docs only: no prior
   // version -> created; a prior version with a different status (e.g. triage re-open) -> status
   // changed. Emission is best-effort and guarded, so it never affects the returned results.
-  pendingToWrite.forEach(({ candidate, document }, responseIndex) => {
+  const dualWriteLimit = alertEventsClient ? pLimit(DUAL_WRITE_CONCURRENCY) : null;
+  const dualWritePromises = pendingToWrite.flatMap(({ candidate, document }, responseIndex) => {
     if (createResults[responseIndex].error) {
-      return;
+      return [];
     }
     emitSignificantEventWriteTriggers({
       eventClient,
       significantEvent: document,
       priorSignificantEvent: latestByEventId.get(candidate.eventId),
     });
+    if (alertEventsClient && dualWriteLimit) {
+      return [
+        dualWriteLimit(() => alertEventsClient.createAlertEvent(toRuleEvent(document))).catch(
+          (err) => {
+            logger?.error(
+              `Failed to write to .rule-events: ${err instanceof Error ? err.message : err}`
+            );
+          }
+        ),
+      ];
+    }
+    return [];
   });
+  await Promise.all(dualWritePromises);
 
   return alignResults(results, 'Event bulk results were not aligned with every input');
 }
@@ -571,11 +596,21 @@ export async function eventsWriteBulkHandler({
 export async function eventsWriteHandler({
   eventClient,
   input,
+  alertEventsClient,
+  logger,
 }: {
   eventClient: EventClient;
   input: EventsWriteInput;
+  /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
+  alertEventsClient?: AlertEventsClientApi;
+  logger?: Logger;
 }): Promise<EventsWriteResult | EventsWriteNoOpResult> {
-  const [result] = await eventsWriteBulkHandler({ eventClient, inputs: [input] });
+  const [result] = await eventsWriteBulkHandler({
+    eventClient,
+    inputs: [input],
+    alertEventsClient,
+    logger,
+  });
   if (result === undefined) {
     throw createBulkWriteOutcomeUnknownError('Event bulk write did not return a result');
   }

@@ -122,7 +122,7 @@ export const RunLimitsBanner = () => {
         limits={data.limits}
         counts={data.counts}
         canManage={data.canManage}
-        manageHref={router.link('/{tab}', { path: { tab: 'settings' } })}
+        manageHref={router.link('/settings')}
       />
       <EuiSpacer />
     </>
