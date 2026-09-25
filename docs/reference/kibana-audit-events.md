@@ -316,7 +316,7 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://reference/index.md) specification.
 
-{applies_to}`serverless: preview` In {{serverless-full}}, {{kib}} audit logs delivered through [audit trail log delivery](docs-content://deploy-manage/monitor/log-delivery/audit-trail.md) use OpenTelemetry field names. Refer to [Serverless OpenTelemetry audit logs](#serverless-otel-audit-logs).
+{applies_to}`serverless: preview` In {{serverless-full}}, {{kib}} audit logs delivered through [audit trail log delivery](docs-content://deploy-manage/monitor/log-delivery/audit-trail.md) use OpenTelemetry field names. Refer to [Serverless OpenTelemetry field names](#serverless-otel-field-names).
 
 ### Base fields
 
@@ -388,7 +388,7 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | --- | --- |
 | `trace.id` | Unique identifier allowing events of the same transaction from {{kib}} and {{es}} to be correlated. |
 
-### Serverless OpenTelemetry audit logs [serverless-otel-audit-logs]
+### Serverless OpenTelemetry field names [serverless-otel-field-names]
 
 ```{applies_to}
 serverless: preview
