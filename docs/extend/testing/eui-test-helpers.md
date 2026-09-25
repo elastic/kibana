@@ -110,8 +110,8 @@ The Kibana PR is a reference and is closed once the upgrade PR lands. Details an
 ### When something fails [scout-eui-test-helpers-failures]
 
 - **Helper spec fails on an EUI PR**: the component change broke the helper. Fix the helper in the same PR, or the component change is not mergeable.
-- **Nightly Kibana build is red**: an unreleased EUI or helper change breaks Kibana. Either the change needs a prep commit (above), or the change itself needs fixing before Monday's release. The EUI team is notified in Slack. If the failure is in Scout specs that use a helper, it is usually ours to look at.
-- **Kibana CI fails after a version bump on `main`**: the upgrade PR missed a consumer. Fix forward in Kibana; the nightly should have caught it, so also check why it did not.
+- **Nightly Kibana build is red**: an unreleased EUI or helper change breaks Kibana. Either the change needs a prep commit (above), or the change itself needs fixing before Monday's release. The EUI team is notified in Slack.
+- **CI fails on the Kibana upgrade PR**: the release contains something the nightly did not catch, for example a prep commit that was never registered or Kibana code that changed after the last nightly. Fix it in the upgrade PR.
 
 ## Release [scout-eui-test-helpers-release]
 
