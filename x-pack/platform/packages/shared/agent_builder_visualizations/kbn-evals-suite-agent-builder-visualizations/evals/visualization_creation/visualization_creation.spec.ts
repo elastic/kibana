@@ -21,7 +21,9 @@ evaluate.describe(
     let hostLoadFixture: HostLoadFixture | undefined;
 
     evaluate.beforeAll(async ({ fetch, esClient, log }) => {
-      [, , hostLoadFixture] = await Promise.all([
+      // allSettled so a failed sample-data install still records the seeded fixture
+      // for afterAll to clean up.
+      const [logsInstall, ecommerceInstall, hostLoadSeed] = await Promise.allSettled([
         fetch('/api/sample_data/logs', {
           method: 'POST',
           version: '2023-10-31',
@@ -32,6 +34,14 @@ evaluate.describe(
         }),
         seedHostLoadMetrics(esClient, log),
       ]);
+      if (hostLoadSeed.status === 'fulfilled') {
+        hostLoadFixture = hostLoadSeed.value;
+      }
+      for (const setupStep of [logsInstall, ecommerceInstall, hostLoadSeed]) {
+        if (setupStep.status === 'rejected') {
+          throw setupStep.reason;
+        }
+      }
     });
 
     evaluate.afterAll(async ({ esClient, log }) => {

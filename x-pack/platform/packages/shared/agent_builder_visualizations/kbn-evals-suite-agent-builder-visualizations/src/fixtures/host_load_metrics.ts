@@ -95,11 +95,18 @@ export async function seedHostLoadMetrics(
     refreshAfterIndex: true,
   }).getClients({ clients: ['infraEsClient'] });
 
-  await infraEsClient.index(Readable.from(buildHostLoadEvents()));
-  await assertHostLoadMetricsReady(esClient);
+  const fixture: HostLoadFixture = { createdDataStream: !existed };
+  try {
+    await infraEsClient.index(Readable.from(buildHostLoadEvents()));
+    await assertHostLoadMetricsReady(esClient);
+  } catch (error) {
+    // The caller never receives the fixture on failure, so undo a partial seed here.
+    await cleanHostLoadMetrics(esClient, fixture, log);
+    throw error;
+  }
   log.info(`Seeded ${HOST_METRICS_INDEX} with synthtrace host load metrics`);
 
-  return { createdDataStream: !existed };
+  return fixture;
 }
 
 /**
