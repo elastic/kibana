@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/nightshift_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 

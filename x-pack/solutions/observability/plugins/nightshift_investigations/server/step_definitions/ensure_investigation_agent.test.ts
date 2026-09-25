@@ -7,10 +7,8 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import { installNightshiftInvestigationAgent } from '../lib/install_nightshift_investigation_agent';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { installDecisionTreeReinforcementAgent } from '../lib/install_decision_tree_reinforcement_agent';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID } from '../agents/investigation';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/nightshift_investigation';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import { ensureInvestigationAgentStepDefinition } from './ensure_investigation_agent';
 
@@ -18,14 +16,9 @@ jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('../lib/install_nightshift_investigation_agent', () => ({
-  installNightshiftInvestigationAgent: jest.fn().mockResolvedValue(undefined),
-}));
-
 jest.mock('../lib/install_decision_tree_reinforcement_agent', () => ({
   installDecisionTreeReinforcementAgent: jest.fn().mockResolvedValue(undefined),
 }));
-
 describe('ensureInvestigationAgentStepDefinition', () => {
   const callKibanaApi = jest.fn().mockResolvedValue(undefined);
   const agentBuilder = { agents: { ensure: jest.fn() } } as never;
@@ -61,7 +54,7 @@ describe('ensureInvestigationAgentStepDefinition', () => {
     }).handler(createContext(input));
 
   // A step that omits `with` never reaches the input schema, so the default has to hold for `{}`.
-  it('installs the significant-events investigator when no agent is requested', async () => {
+  it('installs the Nightshift investigator when no agent is requested', async () => {
     const result = await run({});
 
     expect(installInvestigationAgent).toHaveBeenCalledWith({
@@ -69,25 +62,23 @@ describe('ensureInvestigationAgentStepDefinition', () => {
       spaceId: 'space-1',
       availability,
     });
-    expect(installNightshiftInvestigationAgent).not.toHaveBeenCalled();
     expect(callKibanaApi).toHaveBeenCalledWith({
       method: 'GET',
-      path: `/api/agent_builder/agents/${SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID}`,
+      path: `/api/agent_builder/agents/${NIGHTSHIFT_INVESTIGATION_AGENT_ID}`,
     });
     expect(result).toEqual({
-      output: { space_id: 'space-1', agent_id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID },
+      output: { space_id: 'space-1', agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID },
     });
   });
 
-  it('installs the Nightshift investigation agent when it is requested', async () => {
+  it('installs the Nightshift investigator when it is requested', async () => {
     const result = await run({ agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID });
 
-    expect(installNightshiftInvestigationAgent).toHaveBeenCalledWith({
+    expect(installInvestigationAgent).toHaveBeenCalledWith({
       agentBuilder,
       spaceId: 'space-1',
       availability,
     });
-    expect(installInvestigationAgent).not.toHaveBeenCalled();
     expect(callKibanaApi).toHaveBeenCalledWith({
       method: 'GET',
       path: `/api/agent_builder/agents/${NIGHTSHIFT_INVESTIGATION_AGENT_ID}`,

@@ -11,17 +11,14 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID } from '../agents/investigation';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/nightshift_investigation';
-import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import { installNightshiftInvestigationAgent } from '../lib/install_nightshift_investigation_agent';
+import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import { installDecisionTreeReinforcementAgent } from '../lib/install_decision_tree_reinforcement_agent';
 
-/** Which agent a workflow wants installed. Defaults to the significant-events investigator. */
+/** Which agent a workflow wants installed. */
 const AGENT_INSTALLERS = {
-  [SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID]: installInvestigationAgent,
-  [NIGHTSHIFT_INVESTIGATION_AGENT_ID]: installNightshiftInvestigationAgent,
+  [NIGHTSHIFT_INVESTIGATION_AGENT_ID]: installInvestigationAgent,
   [NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID]: installDecisionTreeReinforcementAgent,
 } as const;
 
@@ -49,14 +46,10 @@ export const ensureInvestigationAgentStepDefinition = ({
       'Installs an investigation agent in the space this workflow runs in, so any caller can start an investigation without installing it first. Idempotent: an existing agent is left untouched.',
     inputSchema: z.object({
       agent_id: z
-        .enum([
-          SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-          NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-          NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
-        ])
+        .enum([NIGHTSHIFT_INVESTIGATION_AGENT_ID, NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID])
         .optional()
         .describe(
-          `Which investigation agent to install. Defaults to ${SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID}.`
+          `Which investigation agent to install. Defaults to ${NIGHTSHIFT_INVESTIGATION_AGENT_ID}.`
         ),
     }),
     outputSchema: z.object({
@@ -72,7 +65,7 @@ export const ensureInvestigationAgentStepDefinition = ({
       const { spaceId } = context.contextManager.getContext().workflow;
       // Defaulted here rather than on the schema: a step that omits `with` altogether never
       // reaches zod, so a schema-level default would leave `agent_id` undefined at runtime.
-      const agentId = context.input.agent_id ?? SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID;
+      const agentId = context.input.agent_id ?? NIGHTSHIFT_INVESTIGATION_AGENT_ID;
 
       await AGENT_INSTALLERS[agentId]({
         agentBuilder,

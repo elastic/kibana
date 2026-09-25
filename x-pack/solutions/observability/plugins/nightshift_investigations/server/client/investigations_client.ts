@@ -7,10 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import {
-  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -18,7 +15,7 @@ import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import { installNightshiftInvestigationAgent } from '../lib/install_nightshift_investigation_agent';
+import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
@@ -87,25 +84,6 @@ const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
 const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
   typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
 
-const INVESTIGATION_WORKFLOW_IDS = new Set([
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-]);
-
-/**
- * A manual investigation has no stored entity to write results back to, so it runs the lean
- * Nightshift investigation workflow; every other subject runs the significant-events workflow,
- * which attaches its findings to the event or alert it was started from.
- */
-const workflowIdForSubject = (subject: InvestigationSubject): string =>
-  subject.type === 'manual'
-    ? NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID
-    : SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
-
-/** Each workflow calls its own agent, so the pre-install has to follow the same split. */
-const installAgentForSubject = (subject: InvestigationSubject) =>
-  subject.type === 'manual' ? installNightshiftInvestigationAgent : installInvestigationAgent;
-
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
 
@@ -136,13 +114,6 @@ const withDerivedSubjectSummary = (
   return { ...subject, summary };
 };
 
-const isInvestigationWorkflowExecution = (execution: {
-  workflowId?: string | null;
-  originManagedWorkflowId?: string | null;
-}): boolean =>
-  INVESTIGATION_WORKFLOW_IDS.has(execution.workflowId ?? '') ||
-  INVESTIGATION_WORKFLOW_IDS.has(execution.originManagedWorkflowId ?? '');
-
 interface ExecutionInvestigationMetadata {
   subject?: InvestigationSubject;
   title?: string;
@@ -150,14 +121,12 @@ interface ExecutionInvestigationMetadata {
   concurrencyKey?: string;
 }
 /**
- * Context fields each subject type's id may arrive under, in precedence order. A significant event
- * has two spellings because discovery's `workflow.executeAsync` sends `event_id` while `start()`
- * sends `significant_event_id`; both must resolve to the same subject. The `satisfies` clause is
- * what makes a newly added {@link InvestigationSubjectType} a compile error rather than a run that
- * silently recovers no subject.
+ * Context fields each subject type's id arrives under. The `satisfies` clause is what makes a
+ * newly added {@link InvestigationSubjectType} a compile error rather than a run that silently
+ * recovers no subject.
  */
 const SUBJECT_ID_FIELDS = {
-  significant_event: ['event_id', 'significant_event_id'],
+  significant_event: ['significant_event_id'],
   alert: ['alert_id'],
   manual: ['manual_id'],
 } as const satisfies Record<InvestigationSubjectType, readonly string[]>;
@@ -240,7 +209,6 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
     hypotheses: record.hypotheses,
     recommendations: recommendations.success ? recommendations.data : undefined,
     blind_spots: blindSpots.success ? blindSpots.data : undefined,
-    trigger_feedback: record.trigger_feedback,
     conversation_id: record.conversation_id,
     impact: record.impact,
   };
@@ -415,7 +383,7 @@ export class NightshiftInvestigationsClient {
 
     const spaceId = this.getSpaceId();
 
-    const workflowId = workflowIdForSubject(subject);
+    const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
     const workflow = await this.workflowsManagement.management.getWorkflow(workflowId, spaceId);
 
     if (!workflow?.definition) {
@@ -447,7 +415,7 @@ export class NightshiftInvestigationsClient {
     // below executes the *stored* workflow definition, which predates that step until the managed
     // install has upgraded it — and that install is fire-and-forget. Deliberately without the
     // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await installAgentForSubject(subject)({
+    await installInvestigationAgent({
       agentBuilder: this.agentBuilder,
       spaceId,
       availability: this.agentAvailability,

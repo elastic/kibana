@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/nightshift_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { decisionTreePrepareStepDefinition } from './decision_tree_prepare';
 

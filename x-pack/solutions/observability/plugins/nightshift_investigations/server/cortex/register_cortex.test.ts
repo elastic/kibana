@@ -6,8 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID } from '../agents/investigation';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/nightshift_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { runCortexOptimize } from './register_cortex';
 import { optimizeCortex } from './optimize';
 
@@ -56,8 +55,8 @@ describe('runCortexOptimize', () => {
     expect(optimizeCortex).toHaveBeenCalled();
   });
 
-  it('skips the significant-events investigator, which does not write to Cortex', async () => {
-    await run(SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID);
+  it('skips another agent', async () => {
+    await run('other-agent');
     expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
