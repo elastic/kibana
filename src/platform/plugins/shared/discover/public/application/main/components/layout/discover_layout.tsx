@@ -48,6 +48,7 @@ import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import type { DiscoverTopNavProps } from '../top_nav/discover_topnav';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
+import { DiscoverActivityInvestigation } from '../activity_investigation/discover_activity_investigation';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import type { DataMainMsg } from '../../state_management/discover_data_state_container';
@@ -403,6 +404,7 @@ export function DiscoverLayout() {
         isLoading={isLoading}
         onCancelClick={onCancelClick}
       />
+      <DiscoverActivityInvestigation />
       <EuiPageBody css={styles.pageBody}>
         <SavedSearchURLConflictCallout
           discoverSession={discoverSession}

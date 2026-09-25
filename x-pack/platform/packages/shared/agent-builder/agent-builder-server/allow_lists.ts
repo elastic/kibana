@@ -344,6 +344,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Discover
   'esql.query_results',
+  'discover.activity_investigation',
 
   // Platform – Workflows
   'workflow.yaml',

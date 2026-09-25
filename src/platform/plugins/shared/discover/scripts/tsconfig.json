@@ -1,0 +1,14 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["activity_benchmark/**/*.ts", "../../../../../../typings/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/discover-plugin",
+    "@kbn/dev-cli-runner",
+    "@kbn/esql-utils",
+    "@kbn/zod"
+  ]
+}

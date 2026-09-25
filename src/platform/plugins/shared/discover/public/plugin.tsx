@@ -65,6 +65,7 @@ import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_
 import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
+import { registerActivityInvestigationAttachmentUi } from './agent_builder/register_activity_investigation_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 import { getDiscoverRecentlyAccessedService } from './services/discover_recently_accessed_service';
 
@@ -258,6 +259,7 @@ export class DiscoverPlugin
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
     if (plugins.agentBuilder) {
       registerEsqlResultsAttachmentUi(plugins.agentBuilder);
+      registerActivityInvestigationAttachmentUi(plugins.agentBuilder);
     }
 
     plugins.navigation.registerNavigationLinks({
