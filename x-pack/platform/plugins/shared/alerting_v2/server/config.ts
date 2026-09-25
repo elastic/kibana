@@ -33,8 +33,8 @@ const MIN_MAX_QUERY_RESPONSE_SIZE = '1kb';
 /**
  * Upper bound on `maxResponseSize`. At Task Manager capacity 10 and the 4× heap
  * multiplier, 200 MB requires ~8 GB Kibana heap — a large but real deployment.
- * Beyond this, operators should use Arrow or NDJSON streaming rather than
- * increasing the JSON body limit.
+ * The active transport (JSON vs streaming) is determined by the
+ * `alertingV2.esqlResponseFormat` feature flag, not by this setting.
  */
 const MAX_MAX_QUERY_RESPONSE_SIZE = '200mb';
 
@@ -53,9 +53,10 @@ const rulesRunSchema = schema.object({
    * default === max: can only be tightened; tied to `alerts.max` as the upper
    * bound because a single run cannot produce more new groups than it fetches rows.
    *
-   * Under the JSON path (`alerts.max` ≤ `NON_STREAMING_MAX_ROWS`=1000) this cap
-   * can never fire at its default 10000 — it only becomes live when explicitly
-   * lowered below the effective row ceiling.
+   * When the `alertingV2.esqlResponseFormat` flag resolves to `json`, the
+   * effective row ceiling is `min(alerts.max, NON_STREAMING_MAX_ROWS=1000)`, so
+   * this cap can never fire at its default 10000 — it only becomes live when
+   * explicitly lowered below the active row ceiling.
    */
   maxGroupsPerExecution: schema.number({
     defaultValue: MAX_ALERTS_PER_RUN,
@@ -78,8 +79,10 @@ const rulesRunSchema = schema.object({
      * or a plain number of bytes. Defaults to 50mb; `config/serverless.yml`
      * lowers it to 10mb for the default Serverless background-tasks pod.
      *
-     * This guard applies only to the JSON transport path — Arrow uses chunked
+     * This guard applies only when the `alertingV2.esqlResponseFormat` feature
+     * flag resolves to `json`. Streaming transports (Arrow, NDJSON) use chunked
      * transfer without `Content-Length`, so there `alerts.max` is the sole bound.
+     * The active transport is selected by the feature flag, not by this setting.
      */
     maxResponseSize: schema.byteSize({
       defaultValue: DEFAULT_MAX_QUERY_RESPONSE_SIZE,
