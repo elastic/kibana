@@ -41,6 +41,7 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import { useRouteAccessConfig } from '../../../../../hooks/use_route_access_config';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_agent_id';
+import { useIsAgentAvailable } from '../../../../../hooks/agents/use_is_agent_available';
 import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
@@ -110,6 +111,8 @@ export const ConversationSidebarView: React.FC = () => {
   } = useKibana();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const validateAgentId = useValidateAgentId();
+  const { available: isCurrentAgentAvailable, isChecking: isCurrentAgentChecking } =
+    useIsAgentAvailable(agentId);
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
   const routeAccessConfig = useRouteAccessConfig();
@@ -216,7 +219,8 @@ export const ConversationSidebarView: React.FC = () => {
       isLastAgentIdReady &&
       isAgentsFetched &&
       !conversationId &&
-      !validateAgentId(agentId) &&
+      !isCurrentAgentAvailable &&
+      !isCurrentAgentChecking &&
       validateAgentId(lastAgentId)
     ) {
       navigateToAgentBuilderUrl(appPaths.agent.root({ agentId: lastAgentId }));
@@ -225,7 +229,8 @@ export const ConversationSidebarView: React.FC = () => {
     isLastAgentIdReady,
     isAgentsFetched,
     conversationId,
-    agentId,
+    isCurrentAgentAvailable,
+    isCurrentAgentChecking,
     lastAgentId,
     validateAgentId,
     navigateToAgentBuilderUrl,

@@ -18,7 +18,7 @@ import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
-import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
+import { useIsAgentAvailable } from '../../../hooks/agents/use_is_agent_available';
 import {
   useAgentId,
   useConversationReadOnly,
@@ -132,10 +132,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       messageEditorController,
     });
 
-  const validateAgentId = useValidateAgentId();
-  const isAgentIdValid = validateAgentId(agentId);
+  const { available: isAgentIdValid, isChecking: isAgentAvailabilityChecking } =
+    useIsAgentAvailable(agentId);
 
-  const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
+  const isAgentDeleted =
+    !isAgentIdValid && !isAgentAvailabilityChecking && isFetched && Boolean(agentId);
   const isInputDisabled =
     isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
   const isSubmitDisabled =
