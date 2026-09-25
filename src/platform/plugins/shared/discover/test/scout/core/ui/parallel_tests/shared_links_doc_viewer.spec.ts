@@ -145,7 +145,7 @@ spaceTest.describe('Discover shared links - doc viewer', { tag: '@local-stateful
   spaceTest(
     'carries the ES|QL control and its selection onto a shared document link',
     async ({ page, browserAuth, pageObjects }) => {
-      const { dashboard, dataGrid, discover, docViewer } = pageObjects;
+      const { controls, dataGrid, discover, docViewer } = pageObjects;
 
       await browserAuth.loginAsViewer();
       await discover.goto({ queryMode: 'esql' });
@@ -155,15 +155,17 @@ spaceTest.describe('Discover shared links - doc viewer', { tag: '@local-stateful
       await discover.createEsqlControl(ESQL_CONTROL_QUERY_START);
       await discover.waitUntilTabIsLoaded();
 
-      const controlId = await dashboard.getOnlyControlId();
-      await dashboard.optionsListOpenPopover(controlId);
-      await dashboard.optionsListPopoverSelectOption(CONTROL_SELECTION);
-      await dashboard.optionsListEnsurePopoverIsClosed();
+      const controlId = await controls.getOnlyControlId();
+      await controls.optionsList.openPopover(controlId);
+      await controls.optionsList.selectOption(CONTROL_SELECTION);
+      await controls.optionsList.ensurePopoverIsClosed();
       await discover.waitUntilTabIsLoaded();
       await dataGrid.waitForLoad();
       await dataGrid.waitForDocTableRendered();
 
-      await expect(discover.controls.getSelectionsLocator(controlId)).toHaveText(CONTROL_SELECTION);
+      await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
+        CONTROL_SELECTION
+      );
 
       // Open a document and copy its direct link.
       await docViewer.openAndWaitForFlyout({ rowIndex: TARGET_ROW_INDEX });
@@ -178,10 +180,10 @@ spaceTest.describe('Discover shared links - doc viewer', { tag: '@local-stateful
       await docViewer.waitForFlyoutOpen();
       await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp);
 
-      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
-      await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
-      const restoredControlId = await dashboard.getOnlyControlId();
-      await expect(discover.controls.getSelectionsLocator(restoredControlId)).toHaveText(
+      await expect(controls.group).toBeVisible();
+      await expect(controls.frames).toHaveCount(1);
+      const restoredControlId = await controls.getOnlyControlId();
+      await expect(controls.optionsList.getSelectionsLocator(restoredControlId)).toHaveText(
         CONTROL_SELECTION
       );
     }
