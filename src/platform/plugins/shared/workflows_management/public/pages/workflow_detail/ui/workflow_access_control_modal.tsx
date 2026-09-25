@@ -8,8 +8,11 @@
  */
 
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -28,7 +31,7 @@ import { AccessControlForm } from '@kbn/entity-access-control-ui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   WorkflowAccessControlRole,
@@ -127,11 +130,39 @@ export const WorkflowAccessControlModal = ({
       css={css({ width: euiTheme.breakpoint.m })}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id="workflowAccessTitle">
-          {i18n.translate('workflows.access.modalTitle', { defaultMessage: 'Workflow access' })}
-        </EuiModalHeaderTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
+          <EuiFlexItem grow={false}>
+            <EuiModalHeaderTitle id="workflowAccessTitle">
+              {i18n.translate('workflows.access.modalTitle', { defaultMessage: 'Workflow access' })}
+            </EuiModalHeaderTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate('workflows.access.technicalPreviewLabel', {
+                defaultMessage: 'Technical preview',
+              })}
+              size="s"
+              color="hollow"
+              tooltipContent={i18n.translate('workflows.access.technicalPreviewTooltip', {
+                defaultMessage:
+                  'Workflow access control is in technical preview and may change or be removed in a future release. It is not covered by the support SLA.',
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
+        <KbnWarningCallout
+          size="s"
+          title={i18n.translate('workflows.access.executionDataWarningTitle', {
+            defaultMessage: 'Private access does not restrict execution data queries',
+          })}
+          text={i18n.translate('workflows.access.executionDataWarningDescription', {
+            defaultMessage:
+              'Workflow access rules apply in the Workflows UI and APIs. Users with Elasticsearch access to execution or step data can still read it through Discover, ES|QL, or direct queries, even when the workflow is private.',
+          })}
+        />
+        <EuiSpacer size="m" />
         {(hasError || isSearchError || isCurrentProfileError) && (
           <>
             <KbnDangerCallout

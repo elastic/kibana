@@ -376,6 +376,39 @@ Workflows are space-aware and respect Kibana Spaces boundaries.
 
 ## Workflow access control
 
+Workflow access control is in **technical preview**. It may change or be removed
+in a future release and is not covered by the support SLA.
+
+### Known limitation: queryable execution data
+
+Workflow ACLs apply to the Workflows UI and APIs. They do not restrict direct
+Elasticsearch queries of `.workflows-executions*` or `.workflows-step-executions*`
+when those indices are available as queryable hidden indices. This includes
+queries from Discover, Lens, ES|QL, and the Elasticsearch API.
+
+The Read Workflow Execution privilege, included in Workflows Read, can grant
+access to this data within a space. Those Elasticsearch grants filter by space,
+managed status, and allowed fields, but do not check the workflow owner or ACL.
+No separate index grant is needed for this path. Explicit index grants can
+provide broader access under Elasticsearch authorization rules.
+
+For example, Alice makes workflow X private and does not grant Bob access. Bob
+cannot open X or its execution history through the Workflows UI or APIs. If Bob
+has Read Workflow Execution in that space, he can still query the permitted
+execution and step fields through Elasticsearch. Marking an index as hidden does
+not enforce the workflow ACL.
+
+This is a known technical preview limitation. Enforcing workflow ACLs for
+queryable execution data is planned follow-up work. Until then, do not rely on
+private workflow access to keep execution data confidential from users who can
+query these indices.
+
+See the queryable execution data changes in
+[Kibana #284860](https://github.com/elastic/kibana/pull/284860) and
+[Elasticsearch #156669](https://github.com/elastic/elasticsearch/pull/156669).
+
+### Access model
+
 The workflow Access dialog uses `@kbn/entity-access-control` and
 `@kbn/entity-access-control-ui`. Its ACL has the same field structure as Agent
 Builder conversations: `access_mode` and `entries` with `type`, profile `id`,

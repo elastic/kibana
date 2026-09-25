@@ -128,6 +128,7 @@ export class WorkflowAccessControlService {
     });
   }
 
+  /** Applies workflow ACLs to Kibana execution queries, not direct Elasticsearch reads. */
   async executionFilter(
     spaceId: string,
     request?: KibanaRequest
