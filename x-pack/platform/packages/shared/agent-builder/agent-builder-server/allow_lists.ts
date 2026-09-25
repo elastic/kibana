@@ -272,7 +272,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'attack-discovery-workflow-troubleshooting',
 
   // O11Y
-  'observability.rca',
   'observability.investigation',
   'observability.service-map',
   'observability.investigate-service-map',
