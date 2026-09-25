@@ -38,7 +38,8 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     return awsServiceMatrix.filter(
       (s) =>
         s.showInUI &&
-        (s.dataFormat ?? 'ecs') === dataFormat &&
+        // Agent-based-only services bypass the ECS/OTel pipeline entirely — show them always.
+        (isAgentBasedOnly(s) || (s.dataFormat ?? 'ecs') === dataFormat) &&
         (signalFilter === 'all' || s.signalTypes.includes(signalFilter)) &&
         (q === '' || s.name.toLowerCase().includes(q))
     );
@@ -78,7 +79,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
       awsServiceMatrix.filter(
         (s) =>
           s.showInUI &&
-          (s.dataFormat ?? 'ecs') === dataFormat &&
+          (isAgentBasedOnly(s) || (s.dataFormat ?? 'ecs') === dataFormat) &&
           (signalFilter === 'all' || s.signalTypes.includes(signalFilter))
       ),
     [awsServiceMatrix, signalFilter, dataFormat]
