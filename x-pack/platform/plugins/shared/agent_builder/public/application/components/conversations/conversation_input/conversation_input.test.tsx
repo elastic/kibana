@@ -28,6 +28,7 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
@@ -72,6 +73,10 @@ jest.mock('./message_editor', () => ({
   ),
   CommandBadgeSerializationError: class extends Error {},
 }));
+jest.mock('./input_actions/connector_selector', () => ({
+  ConnectorSelector: () => <div data-test-subj="mockConnectorSelector" />,
+}));
+jest.mock('@kbn/ebt-click', () => ({ getEbtProps: () => ({}) }));
 jest.mock('./input_actions', () => ({
   InputActions: ({
     showTriggerModeSelector,
@@ -167,6 +172,9 @@ const editorController = {
 };
 
 const renderInput = (ui: React.ReactElement) => render(ui, { wrapper: EuiProvider });
+
+// ConversationInput replaces this bar with a fake selector. These cases render the real one.
+const { InputActions } = jest.requireActual('./input_actions') as typeof import('./input_actions');
 
 describe('ConversationInput', () => {
   beforeEach(() => {
@@ -456,5 +464,49 @@ describe('ConversationInput', () => {
 
       expect(removeAttachment).toHaveBeenCalledWith(0);
     });
+  });
+});
+
+describe('InputActions', () => {
+  beforeEach(() => {
+    mockedUseConversationStream.mockReturnValue({
+      canCancel: false,
+      cancel: jest.fn(),
+      isCancelling: false,
+      pendingMessage: undefined,
+      isResuming: false,
+      isResponseLoading: false,
+      sendMessage: jest.fn(),
+    } as never);
+  });
+
+  it('shows the connector selector when talking to the agent and users', () => {
+    renderInput(
+      <InputActions
+        onSubmit={jest.fn()}
+        isSubmitDisabled={false}
+        isSubmitting={false}
+        showTriggerModeSelector
+        triggerMode={ChatTriggerMode.Always}
+        onTriggerModeChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('mockConnectorSelector')).toBeInTheDocument();
+  });
+
+  it('hides the connector selector when talking to users only', () => {
+    renderInput(
+      <InputActions
+        onSubmit={jest.fn()}
+        isSubmitDisabled={false}
+        isSubmitting={false}
+        showTriggerModeSelector
+        triggerMode={ChatTriggerMode.Never}
+        onTriggerModeChange={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId('mockConnectorSelector')).not.toBeInTheDocument();
   });
 });

@@ -53,7 +53,6 @@ export const TriggerModeSelector: React.FC<TriggerModeSelectorProps> = ({
           size="s"
           iconType="chevronSingleDown"
           iconSide="right"
-          aria-haspopup="menu"
           data-test-subj="agentBuilderTriggerModeSelectorButton"
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
         >
