@@ -14,9 +14,10 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
 /**
  * Data stored inside a rule attachment.
  *
- * Server-generated fields (id, enabled, created_at, updated_at, metadata.version)
- * are optional so that the same schema covers both:
- *   - proposed rules (by-value, not yet saved — no id or audit fields)
+ * Server-generated fields (id, enabled, created_at, updated_at, metadata.version,
+ * metadata.revision, metadata.signature_id, metadata.source) are optional so that the
+ * same schema covers both:
+ *   - proposed rules (by-value, not yet saved — no id, audit fields, or server counters)
  *   - saved rules    (by-reference, linked via attachment.origin = rule saved object id)
  *
  * The `created_by` / `updated_by` actors are excluded entirely: nothing on the
@@ -40,7 +41,19 @@ export const ruleAttachmentDataSchema = ruleResponseSchema
     enabled: opt(shape.enabled),
     created_at: opt(shape.created_at),
     updated_at: opt(shape.updated_at),
-    metadata: shape.metadata.extend({ version: opt(shape.metadata.shape.version) }).strip(),
+    metadata: shape.metadata
+      .extend({
+        version: opt(shape.metadata.shape.version),
+        // revision, signature_id, source, and ownership are server-generated/stamped,
+        // so they are absent on proposed (not-yet-saved) rules — the server stamps
+        // them at create time.
+        revision: opt(shape.metadata.shape.revision),
+        signature_id: opt(shape.metadata.shape.signature_id),
+        source: opt(shape.metadata.shape.source),
+        // Step 4.4: ownership is server-derived at create time; absent on proposed rules.
+        ownership: opt(shape.metadata.shape.ownership),
+      })
+      .strip(),
   })
   .strip();
 

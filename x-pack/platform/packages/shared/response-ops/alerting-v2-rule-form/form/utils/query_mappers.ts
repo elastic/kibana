@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse, Query } from '@kbn/alerting-v2-schemas';
+import type { RuleKind, RuleResponse, Query } from '@kbn/alerting-v2-schemas';
 import type { RuleQuery } from '../types';
 
 /**
@@ -31,11 +31,21 @@ export const ruleQueryToApiQuery = (query: RuleQuery): Query => {
 /**
  * Maps an API `Query` response back to the form's `RuleQuery`. Recovery is
  * only included when `recovery_strategy` is `'query'`.
+ *
+ * When `q` is absent (execution-compiled rules have no persisted query), returns
+ * the kind's empty form query so the editor still opens without pretending the
+ * empty text is the rule's persisted query.
  */
 export const apiQueryToFormQuery = (
   q: RuleResponse['query'],
-  recoveryStrategy?: RuleResponse['recovery_strategy']
+  recoveryStrategy?: RuleResponse['recovery_strategy'],
+  kind?: RuleKind
 ): RuleQuery => {
+  if (q == null) {
+    return kind === 'signal'
+      ? { format: 'standalone', breach: { query: '' } }
+      : { format: 'composed', base: '', breach: { segment: '' } };
+  }
   if (q.format === 'composed') {
     return {
       format: 'composed',

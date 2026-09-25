@@ -7,6 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { getNoDataEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
+import type { Query } from '@kbn/alerting-v2-schemas';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { PluginConfig } from '../../../config';
@@ -119,8 +120,24 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       return [];
     }
 
+    // Use the effective query from pipeline state (set by CompileRuleQueryStep,
+    // which always runs before this step).
+
+    const effectiveQuery = state.effectiveQuery!;
+
+    // executionWindow is always set by CompileRuleQueryStep, which runs before
+    // this step. Absence is a pipeline assembly error — fail loudly rather than
+    // silently reverting to Date.now() and misaligning the time window.
+    if (!state.executionWindow) {
+      throw new Error(
+        'ClassifyAbsentGroupsStep requires executionWindow (set by CompileRuleQueryStep) — ' +
+          'check that CompileRuleQueryStep is bound before this step'
+      );
+    }
+    const now = new Date(state.executionWindow.end).getTime();
+
     const recoveryEnabled = rule.recovery_strategy != null && rule.recovery_strategy !== 'none';
-    const noDataEnabled = getNoDataEsqlQuery(rule.query, rule.no_data_strategy) != null;
+    const noDataEnabled = getNoDataEsqlQuery(effectiveQuery, rule.no_data_strategy) != null;
 
     if (!recoveryEnabled && !noDataEnabled) {
       return [];
@@ -147,6 +164,8 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           queryService: this.scopedQueryService,
           rule,
           input,
+          effectiveQuery,
+          now,
           logger: state.logger.withLabels({ step: this.name }),
           maxResponseSize: this.maxQueryResponseSize,
         })
@@ -160,6 +179,8 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           activeGroups,
           breachedGroupHashes,
           dataPresentGroupHashes,
+          effectiveQuery,
+          now,
           logger: state.logger.withLabels({ step: this.name }),
         })
       : [];
@@ -186,6 +207,8 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     activeGroups,
     breachedGroupHashes,
     dataPresentGroupHashes,
+    effectiveQuery,
+    now,
     logger,
   }: {
     rule: RuleResponse;
@@ -193,17 +216,22 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     activeGroups: ActiveAlertGroupHash[];
     breachedGroupHashes: ReadonlySet<string>;
     dataPresentGroupHashes?: ReadonlySet<string>;
+    /** The run's effective query from pipeline state. */
+    effectiveQuery: Query;
+    /** Shared run-level now, ms since epoch. */
+    now?: number;
     logger: RulePipelineState['logger'];
   }): Promise<AlertEvent[]> {
-    const effectiveQuery = getRecoverEsqlQuery(rule.query, rule.recovery_strategy);
+    const recoveryQueryText = getRecoverEsqlQuery(effectiveQuery, rule.recovery_strategy);
 
-    if (effectiveQuery) {
+    if (recoveryQueryText) {
       return executeRecoveryQuery({
         queryService: this.scopedQueryService,
         logger,
         rule,
-        effectiveQuery,
+        effectiveQuery: recoveryQueryText,
         input,
+        now,
         activeGroupHashes: activeGroups,
         breachedGroupHashes,
         maxResponseSize: this.maxQueryResponseSize,
