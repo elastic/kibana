@@ -425,7 +425,20 @@ describe('editSyntheticsMonitorRoute', () => {
     );
   });
 
-  it('masks parameter values in the edit response', async () => {
+  it.each([
+    {
+      title: 'masks parameter values in the edit response for a caller without read permission',
+      canReadParamValues: false,
+      submittedParams: '{"password":"********"}',
+      expectedParams: '{"password":"********"}',
+    },
+    {
+      title: 'returns parameter values in the edit response for an authorized caller',
+      canReadParamValues: true,
+      submittedParams: '{"password":"changeme"}',
+      expectedParams: '{"password":"changeme"}',
+    },
+  ])('$title', async ({ canReadParamValues, submittedParams, expectedParams }) => {
     const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
       './monitor_locations_utils'
     );
@@ -437,6 +450,11 @@ describe('editSyntheticsMonitorRoute', () => {
     );
 
     const { routeContext, serverMock } = getRouteContextMock();
+    serverMock.coreStart!.capabilities = {
+      resolveCapabilities: jest.fn().mockResolvedValue({
+        uptime: { save: true, canReadParamValues },
+      }),
+    } as any;
     routeContext.response = {
       ok: (value: unknown) => value,
       badRequest: (value: unknown) => value,
@@ -461,7 +479,7 @@ describe('editSyntheticsMonitorRoute', () => {
       query: { internal: true },
       body: {
         [ConfigKey.MONITOR_TYPE]: 'http',
-        [ConfigKey.PARAMS]: '{"password":"********"}',
+        [ConfigKey.PARAMS]: submittedParams,
       },
     } as any;
     routeContext.spaceId = 'default';
@@ -488,7 +506,7 @@ describe('editSyntheticsMonitorRoute', () => {
 
     const result = await editSyntheticsMonitorRoute().handler(routeContext);
 
-    expect(result[ConfigKey.PARAMS]).toBe('{"password":"********"}');
+    expect(result[ConfigKey.PARAMS]).toBe(expectedParams);
     const writeCall =
       (serverMock.authSavedObjectsClient?.create as jest.Mock).mock.calls[0] ??
       (serverMock.authSavedObjectsClient?.update as jest.Mock).mock.calls[0];

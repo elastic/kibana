@@ -262,7 +262,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       editMonitorAPI.initDefaultAlerts(editedMonitorSavedObject.attributes.name);
 
       const warning = getBrowserTimeoutWarningForMonitor(monitorWithRevision, monitorId);
-      // The saved monitor keeps the real values. The response must not echo them.
+      // Match GET semantics so authorized API clients can safely round-trip the response.
       const monitorResponse = mapSavedObjectToMonitor({
         internal: reqQuery.internal,
         monitor: {
@@ -270,9 +270,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
           created_at: previousMonitor.created_at,
           attributes: {
             ...editedMonitorSavedObject.attributes,
-            [ConfigKey.PARAMS]: maskMonitorParams(
-              editedMonitorSavedObject.attributes[ConfigKey.PARAMS]
-            ),
+            [ConfigKey.PARAMS]: shouldRestoreMaskedParams
+              ? maskMonitorParams(editedMonitorSavedObject.attributes[ConfigKey.PARAMS])
+              : editedMonitorSavedObject.attributes[ConfigKey.PARAMS],
           },
         },
       });
