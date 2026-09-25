@@ -17,6 +17,12 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   useGetPackageInfoByKeyQuery: jest.fn(),
+  pagePathGetters: {
+    integration_details_policies: ({ pkgkey }: { pkgkey: string }) => [
+      '/app/integrations',
+      `/detail/${pkgkey}/policies`,
+    ],
+  },
 }));
 
 jest.mock('./use_service_data_detection', () => ({
@@ -48,7 +54,9 @@ jest.mock('./agent_setup_callout', () => ({
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: {} }),
+  useKibana: () => ({
+    services: { http: { basePath: { prepend: (path: string) => `/base${path}` } } },
+  }),
 }));
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -166,6 +174,74 @@ describe('DetectAndReviewStep', () => {
       renderStep();
       const btn = screen.getByTestId('detectAndReviewStep-continueButton');
       expect(btn).not.toHaveAttribute('href');
+    });
+  });
+
+  describe('finish button', () => {
+    const INSTALLED_AWS_PACKAGE = {
+      item: {
+        version: '3.0.0',
+        installationInfo: { version: '2.5.0', installed_kibana: [], installed_es: [] },
+      },
+    };
+
+    it('renders next to the continue button', () => {
+      setupMocks({ packageData: INSTALLED_AWS_PACKAGE });
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveTextContent('Finish');
+      expect(screen.getByTestId('detectAndReviewStep-continueButton')).toBeInTheDocument();
+    });
+
+    it('calls onContinue when clicked', () => {
+      setupMocks({ packageData: INSTALLED_AWS_PACKAGE });
+      const onContinue = jest.fn();
+      renderStep({ onContinue });
+      fireEvent.click(screen.getByTestId('detectAndReviewStep-finishButton'));
+      expect(onContinue).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses the installed package version for the Policies tab href', () => {
+      setupMocks({ packageData: INSTALLED_AWS_PACKAGE });
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
+        'href',
+        '/base/app/integrations/detail/aws-2.5.0/policies'
+      );
+    });
+
+    it('falls back to the registry version when the package is not installed', () => {
+      setupMocks({ packageData: { item: { version: '3.0.0' } } });
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
+        'href',
+        '/base/app/integrations/detail/aws-3.0.0/policies'
+      );
+    });
+
+    it('is disabled while package info is loading, then enables when it arrives', () => {
+      setupMocks({ packageData: undefined });
+      const onContinue = jest.fn();
+      const { rerender } = renderStep({ onContinue });
+
+      const loadingButton = screen.getByTestId('detectAndReviewStep-finishButton');
+      expect(loadingButton).toBeDisabled();
+      expect(loadingButton).not.toHaveAttribute('href');
+      fireEvent.click(loadingButton);
+      expect(onContinue).not.toHaveBeenCalled();
+
+      mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: INSTALLED_AWS_PACKAGE });
+      rerender(
+        <I18nProvider>
+          <DetectAndReviewStep onContinue={onContinue} />
+        </I18nProvider>
+      );
+
+      const readyButton = screen.getByTestId('detectAndReviewStep-finishButton');
+      expect(readyButton).not.toBeDisabled();
+      expect(readyButton).toHaveAttribute(
+        'href',
+        '/base/app/integrations/detail/aws-2.5.0/policies'
+      );
     });
   });
 
