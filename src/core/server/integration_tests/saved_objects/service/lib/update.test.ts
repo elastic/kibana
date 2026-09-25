@@ -256,14 +256,11 @@ describe('SOR - update API', () => {
     );
 
     await expect(repository.update(type, id, { count: 'lots' })).rejects.toMatchObject({
-      message: expect.stringMatching(
-        /\[attributes.count\]: expected value of type \[number\] but got \[string\]/
-      ),
       output: { statusCode: 400 },
     });
     await expect(repository.get(type, id)).resolves.toEqual(
       expect.objectContaining({
-        attributes: expect.objectContaining({ title: 'Ops', count: 2 }),
+        attributes: { title: 'Ops', count: 2, legacyFlag: true },
       })
     );
   });

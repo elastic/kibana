@@ -67,13 +67,9 @@ export class SavedObjectsTypeValidator {
       const validationSchema = createSavedObjectSanitizedDocSchema(validationRule);
       validationSchema.validate(document);
     } catch (e) {
-      try {
-        this.log.warn(
-          `Error validating object of type [${this.type}] against version [${usedVersion}]`
-        );
-      } catch {
-        // ignored
-      }
+      this.log.warn(
+        `Error validating object of type [${this.type}] against version [${usedVersion}]`
+      );
       throw e;
     }
   }
