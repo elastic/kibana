@@ -122,8 +122,8 @@ export const ESCALATION_SUCCESS = Object.freeze({
   addToTitle: i18n.translate('xpack.alertzero.escalation.addToSuccess.title', {
     defaultMessage: 'Investigation added to escalation',
   }),
-  linkText: i18n.translate('xpack.alertzero.escalation.success.linkText', {
-    defaultMessage: 'View all escalations',
+  linkText: i18n.translate('xpack.alertzero.escalation.success.openEscalation', {
+    defaultMessage: 'Open escalation',
   }),
 });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -26,6 +27,11 @@ import {
   type EpisodeSourceError,
 } from '../utils/fetch_from_sources';
 import { useToastSourceErrors } from './use_toast_source_errors';
+import {
+  buildSeverityRegistry,
+  toSeverityRegistryMap,
+  createSeverityRankResolver,
+} from '../components/severity/severity_registry';
 
 interface CombinedEpisodesResult {
   episodes: AlertEpisode[];
@@ -60,6 +66,11 @@ export const useFetchAlertingEpisodesQuery = ({
   const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const spaceId = useSpaceId(services.spaces);
   const dataView = useAlertingEpisodesDataView({ services });
+
+  const severityRankResolver = useMemo(() => {
+    const entries = buildSeverityRegistry(additionalEpisodesDataSource?.severityExtensions);
+    return createSeverityRankResolver(toSeverityRegistryMap(entries));
+  }, [additionalEpisodesDataSource?.severityExtensions]);
 
   const queryKey = queryKeys.list(
     spaceId,
@@ -105,7 +116,12 @@ export const useFetchAlertingEpisodesQuery = ({
       }));
 
       return {
-        episodes: mergeEpisodes([v2Episodes, ...additional], sortState, pageSize),
+        episodes: mergeEpisodes(
+          [v2Episodes, ...additional],
+          sortState,
+          pageSize,
+          severityRankResolver
+        ),
         sourceErrors: errors,
       };
     },

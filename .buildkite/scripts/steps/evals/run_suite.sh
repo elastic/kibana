@@ -485,6 +485,24 @@ echo "--- Disk usage before starting Scout"
 df -h .
 du -sh .es node_modules "${KIBANA_BUILD_LOCATION:-}" 2>/dev/null || true
 
+# A suite's `scoutHook` reads the evals config on stdin and prints `{ env }`, exported for Scout and
+# Playwright so the suite's server config set can read it.
+EVAL_SUITE_SCOUT_HOOK="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutHook // empty' 2>/dev/null || true)"
+if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
+  if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
+    _scout_hook_config="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d)"
+  else
+    _scout_hook_config='{}'
+  fi
+  _scout_hook_output="$(printf '%s' "$_scout_hook_config" | bash "$EVAL_SUITE_SCOUT_HOOK")"
+  # Piped, not `<<<`: older bash backs here-strings with a temp file, and this holds the private key.
+  while IFS= read -r _scout_hook_name; do
+    [[ -z "$_scout_hook_name" ]] && continue
+    export "$_scout_hook_name=$(printf '%s' "$_scout_hook_output" | jq -r --arg name "$_scout_hook_name" '.env[$name]')"
+  done < <(printf '%s' "$_scout_hook_output" | jq -r '(.env // {}) | keys[]')
+  unset _scout_hook_config _scout_hook_output _scout_hook_name
+fi
+
 # Start Scout server in background (run Kibana from the distributable)
 SCOUT_SERVER_ARGS=(start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
 if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then

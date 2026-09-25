@@ -58,7 +58,6 @@
     "@kbn/aiops-test-utils",
     "@kbn/ml-agg-utils",
     "@kbn/tooling-log",
-    "@kbn/snapshot-restore-plugin",
     "@kbn/monitoring-plugin",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
@@ -168,6 +167,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-common",
     "@kbn/nightshift-shared",
-    "@kbn/alerting-v2-schemas"
+    "@kbn/alerting-v2-schemas",
+    "@kbn/core-chrome-browser-components"
   ]
 }

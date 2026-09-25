@@ -23,6 +23,8 @@
     "@kbn/nightshift-investigations-plugin",
     "@kbn/significant-events-schema",
     "@kbn/workflows",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/config",
+    "@kbn/config-schema"
   ]
 }
