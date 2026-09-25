@@ -205,8 +205,21 @@ export const createMemoryPageStore = ({
   now?: () => number;
 }): MemoryPageStore => {
   const isIndexNotFoundError = (err: unknown): boolean => {
-    const statusCode = (err as { statusCode?: number }).statusCode;
-    if (statusCode === 404) return true;
+    const error = err as {
+      body?: { error?: { type?: unknown } | string };
+      meta?: { body?: { error?: { type?: unknown } | string } };
+    };
+    const bodyError = error.meta?.body?.error ?? error.body?.error;
+    if (typeof bodyError === 'string' && bodyError.includes('index_not_found_exception')) {
+      return true;
+    }
+    if (
+      typeof bodyError === 'object' &&
+      bodyError !== null &&
+      bodyError.type === 'index_not_found_exception'
+    ) {
+      return true;
+    }
     const message = err instanceof Error ? err.message : String(err);
     return message.includes('index_not_found_exception');
   };
