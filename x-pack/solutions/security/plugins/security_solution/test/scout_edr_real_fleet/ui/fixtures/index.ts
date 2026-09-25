@@ -25,7 +25,11 @@ import {
 import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
 import { startFleetServerIfNecessary } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { deleteEndpointDataAndTestSuperuser, stopAndDeleteFleetServer } from './cleanup';
+import {
+  deleteEndpointDataAndTestSuperuser,
+  hasExistingFleetServerPolicy,
+  stopAndDeleteFleetServer,
+} from './cleanup';
 import {
   createEndpointPolicy,
   deleteEndpointPolicy,
@@ -76,6 +80,7 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
     ) => {
       const created: {
         fleetServer?: Awaited<ReturnType<typeof startFleetServerIfNecessary>>;
+        deleteFleetServerPolicy?: boolean;
         indexedPolicy?: IndexedFleetEndpointPolicyResponse;
         host?: CreateAndEnrollEndpointHostResponse;
       } = {};
@@ -85,10 +90,17 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
         await setupFleetForEndpoint(kbnClient, log);
 
         log.info('[edr_real_fleet] starting Fleet Server if needed');
+        const hadFleetServerPolicy = await hasExistingFleetServerPolicy(kbnClient).catch(
+          (error) => {
+            log.warning(`[edr_real_fleet] Fleet Server policy lookup failed: ${error}`);
+            return true;
+          }
+        );
         created.fleetServer = await startFleetServerIfNecessary({
           kbnClient,
           logger: log,
         });
+        created.deleteFleetServerPolicy = Boolean(created.fleetServer) && !hadFleetServerPolicy;
 
         created.indexedPolicy = await createEndpointPolicy(
           kbnClient,
@@ -196,11 +208,11 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
         }
 
         if (created.fleetServer) {
-          await stopAndDeleteFleetServer(kbnClient, esClient, log, created.fleetServer).catch(
-            (error) => {
-              log.warning(`[edr_real_fleet] stopAndDeleteFleetServer failed: ${error}`);
-            }
-          );
+          await stopAndDeleteFleetServer(kbnClient, log, created.fleetServer, {
+            deletePolicy: Boolean(created.deleteFleetServerPolicy),
+          }).catch((error) => {
+            log.warning(`[edr_real_fleet] stopAndDeleteFleetServer failed: ${error}`);
+          });
         }
       }
     },

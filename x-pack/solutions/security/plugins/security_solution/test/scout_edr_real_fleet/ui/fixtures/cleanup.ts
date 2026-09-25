@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import { FLEET_SERVER_PACKAGE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { EsClient, KbnClient, ScoutLogger } from '@kbn/scout-security';
 import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import {
   deleteAgentPolicy,
   fetchFleetAgents,
+  fetchIntegrationPolicyList,
   unEnrollFleetAgent,
 } from '../../../../scripts/endpoint/common/fleet_services';
 import type { StartedFleetServer } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 
 const TEST_SUPERUSER = 'super_superuser';
 const TEST_SUPERUSER_ROLE = 'superuser_restricted_indices';
-const FLEET_SERVER_SERVICE_TOKENS_PATH = '_security/service/elastic/fleet-server/credential/token';
 
 const warn = (log: ScoutLogger, message: string, error: unknown): void => {
   log.warning(`[edr_real_fleet] ${message}: ${error}`);
@@ -44,57 +45,46 @@ export const deleteEndpointDataAndTestSuperuser = async (
   log: ScoutLogger,
   agentIds: string[]
 ): Promise<void> => {
-  await deleteAllEndpointData(esClient, log, agentIds);
-  await deleteTestSuperuser(esClient, log);
+  try {
+    await deleteAllEndpointData(esClient, log, agentIds);
+  } finally {
+    await deleteTestSuperuser(esClient, log);
+  }
 };
 
-const deleteFleetServerServiceTokens = async (
-  esClient: EsClient,
-  log: ScoutLogger
-): Promise<void> => {
-  const response = await esClient.transport
-    .request<{ tokens?: Record<string, unknown> }>({
-      method: 'GET',
-      path: FLEET_SERVER_SERVICE_TOKENS_PATH,
-    })
-    .catch((error) => {
-      warn(log, 'list Fleet Server service tokens failed', error);
-      return undefined;
-    });
-
-  const tokenNames = Object.keys(response?.tokens ?? {});
-  await Promise.all(
-    tokenNames.map((tokenName) =>
-      esClient.transport
-        .request({
-          method: 'DELETE',
-          path: `${FLEET_SERVER_SERVICE_TOKENS_PATH}/${tokenName}`,
-        })
-        .catch((error) => {
-          warn(log, `delete Fleet Server service token ${tokenName} failed`, error);
-        })
-    )
-  );
+export const hasExistingFleetServerPolicy = async (kbnClient: KbnClient): Promise<boolean> => {
+  const existing = await fetchIntegrationPolicyList(kbnClient, {
+    perPage: 1,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${FLEET_SERVER_PACKAGE}"`,
+  });
+  return Boolean(existing.items[0]);
 };
 
 /**
- * Stops the Fleet Server container and removes the policy, enrolled Fleet
- * Server agent, and service tokens created for this worker.
+ * Stops the Fleet Server container this worker started. Deletes the agent policy
+ * only when this run created it — a reused policy and its service tokens are left
+ * for the stack that already owned them.
  */
 export const stopAndDeleteFleetServer = async (
   kbnClient: KbnClient,
-  esClient: EsClient,
   log: ScoutLogger,
-  fleetServer: StartedFleetServer
+  fleetServer: StartedFleetServer,
+  { deletePolicy }: { deletePolicy: boolean }
 ): Promise<void> => {
-  await fleetServer.stop();
+  await fleetServer.stop().catch((error) => {
+    warn(log, 'stop Fleet Server container failed', error);
+  });
+
+  if (!deletePolicy) {
+    return;
+  }
 
   const agents = await fetchFleetAgents(kbnClient, {
     perPage: 100,
     kuery: `policy_id:"${fleetServer.policyId}"`,
     showInactive: true,
   }).catch((error) => {
-    warn(log, `list Fleet Server policy agents failed`, error);
+    warn(log, 'list Fleet Server policy agents failed', error);
     return { items: [] };
   });
 
@@ -107,5 +97,4 @@ export const stopAndDeleteFleetServer = async (
   );
 
   await deleteAgentPolicy(kbnClient, fleetServer.policyId);
-  await deleteFleetServerServiceTokens(esClient, log);
 };
