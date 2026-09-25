@@ -323,7 +323,7 @@ replace, read the stored indicator and merge through `context-engine.updateKi`.
 
 **Targeted KIs** (`type: constraint`, `workaround`, `disambiguation`, `task_recipe`) — template
 **`targeted-ki-writer`**. No model call: the KIs are written verbatim from a `kis` list in `consts`,
-each through `verifyKi` and `createKi` with a stable `ki_id`. The content comes from the counted
+each through `createKi` with `verifiers` and a stable `ki_id`. The content comes from the counted
 finding in the brief, and so does the provenance — `trace_ids`, `conversation_id`, `error_text`,
 `source_index` — from ids that already exist. Any ES|QL the KI recommends goes in
 `attributes.esql` as well as `content`, so the verifiers run it; a KI with none leaves the key out.
