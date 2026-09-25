@@ -16,12 +16,8 @@ import type { NightshiftAutomationAttributes } from '../../lib/automations/types
 const triggerRowSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('significant_event'),
-    severities: z
-      .array(z.enum(['80-critical', '60-high', '40-medium', '20-low']))
-      .optional(),
-    statuses: z
-      .array(z.enum(['pending', 'open', 'closed', 'dismissed']))
-      .optional(),
+    severities: z.array(z.enum(['80-critical', '60-high', '40-medium', '20-low'])).optional(),
+    statuses: z.array(z.enum(['pending', 'open', 'closed', 'dismissed'])).optional(),
     streamNames: z.array(z.string()).optional(),
   }),
   z.object({
@@ -118,7 +114,11 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     let workflowId: string;
     try {
       const yaml = generateWorkflowYaml(created.id, attributes);
-      const workflow = await workflowsManagement.management.createWorkflow({ yaml }, spaceId, request);
+      const workflow = await workflowsManagement.management.createWorkflow(
+        { yaml },
+        spaceId,
+        request
+      );
       workflowId = workflow.id;
     } catch (err) {
       await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id);

@@ -52,9 +52,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       name: z.string().min(1).max(500).optional(),
       description: z.string().max(5000).optional(),
       isEnabled: z.boolean().optional(),
-      trigger: z
-        .object({ rows: z.array(triggerRowSchema).min(1) })
-        .optional(),
+      trigger: z.object({ rows: z.array(triggerRowSchema).min(1) }).optional(),
       execution: z
         .object({
           promptTemplate: z.string().optional(),
