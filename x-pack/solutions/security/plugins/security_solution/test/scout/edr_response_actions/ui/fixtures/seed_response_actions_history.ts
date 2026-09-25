@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import type { EsClient, KbnClient, ScoutTestConfig } from '@kbn/scout-security';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import {
   ENDPOINT_ACTIONS_INDEX,
   METADATA_DATASTREAM,
@@ -116,15 +117,17 @@ const indexResponseActionHost = ({
   numResponseActions,
   alertIds,
   isServerless,
+  hostNamePrefix = 'history-log',
 }: Omit<SeedResponseActionsHistoryParams, 'spaceId' | 'config'> & {
   numResponseActions: number;
   alertIds?: string[];
   isServerless: boolean;
+  hostNamePrefix?: string;
 }): Promise<IndexedHostsAndAlertsResponse> => {
   return indexHostsAndAlerts(
     esClient,
     kbnClient,
-    `history-log-${randomUUID()}`,
+    `${hostNamePrefix}-${randomUUID()}`,
     1,
     1,
     METADATA_DATASTREAM,
@@ -283,5 +286,176 @@ const assertAutomatedActionRuleId = async (esClient: EsClient, agentId: string):
     throw new Error(
       `Expected the seeded automated response action to reference rule "${SEEDED_AUTOMATED_ACTION_RULE_ID}", got "${ruleId}"`
     );
+  }
+};
+
+export interface SeededAlertFlyoutResponseAction {
+  readonly alertId: string;
+  cleanup: () => Promise<void>;
+}
+
+const SPACE_ALERTS_INDEX_PREFIX = '.alerts-security.alerts-';
+
+/**
+ * The rule-alert loader always writes `.alerts-security.alerts-default`. A Scout
+ * worker space reads its own alerts index, so copy the document there after the
+ * detection engine has created that index.
+ */
+const copyAlertIntoSpace = async (
+  esClient: EsClient,
+  sourceIndex: string,
+  alertId: string,
+  spaceId: string
+): Promise<void> => {
+  if (spaceId === 'default') {
+    return;
+  }
+
+  const spaceIndex = `${SPACE_ALERTS_INDEX_PREFIX}${spaceId}`;
+  const document = await esClient.get<Record<string, unknown>>({
+    index: sourceIndex,
+    id: alertId,
+  });
+  if (!document._source) {
+    throw new Error(`Indexed alert "${alertId}" has no source document to copy into ${spaceIndex}`);
+  }
+
+  await esClient.index({
+    index: spaceIndex,
+    id: alertId,
+    body: document._source,
+    refresh: 'wait_for',
+  });
+};
+
+const ensureSpaceAlertsIndex = async (kbnClient: KbnClient): Promise<void> => {
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: DETECTION_ENGINE_INDEX_URL,
+      headers: {
+        'elastic-api-version': '2023-10-31',
+        'x-elastic-internal-origin': 'kibana',
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!/already exists|resource_already_exists/i.test(message)) {
+      throw error;
+    }
+  }
+};
+
+/**
+ * Indexes one endpoint rule alert and one automated isolate action for that
+ * alert. The action status is chosen by the shared data loader, so callers
+ * should accept pending, successful, and failed isolate copy.
+ */
+export const seedAlertFlyoutResponseAction = async ({
+  esClient,
+  kbnClient: rootKbnClient,
+  spaceId,
+  config,
+}: SeedResponseActionsHistoryParams): Promise<SeededAlertFlyoutResponseAction> => {
+  const kbnClient = scopeKbnClientToSpace(rootKbnClient, spaceId);
+  const systemEsClient = await createSystemIndicesEsClient(esClient, config);
+  let alerts: IndexedEndpointRuleAlerts | undefined;
+  let host: IndexedHostsAndAlertsResponse | undefined;
+  let alertId: string | undefined;
+  let cleanupStarted = false;
+
+  const cleanup = async (): Promise<void> => {
+    if (cleanupStarted) {
+      return;
+    }
+    cleanupStarted = true;
+
+    const deletions: Array<Promise<unknown>> = [];
+    if (host) {
+      deletions.push(deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, host));
+    }
+    if (alerts) {
+      deletions.push(alerts.cleanup());
+    }
+    if (alertId && spaceId !== 'default') {
+      deletions.push(
+        systemEsClient
+          .delete({
+            index: `${SPACE_ALERTS_INDEX_PREFIX}${spaceId}`,
+            id: alertId,
+            refresh: 'wait_for',
+          })
+          .catch((error: unknown) => {
+            const message = error instanceof Error ? error.message : String(error);
+            if (!message.includes('404')) {
+              throw error;
+            }
+          })
+      );
+    }
+
+    const results = await Promise.allSettled(deletions);
+    const failures = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
+
+    try {
+      await systemEsClient.close();
+    } catch (error) {
+      failures.push(error);
+    }
+
+    const errors = failures.map((failure) =>
+      failure instanceof Error ? failure : new Error(String(failure))
+    );
+    if (errors.length === 1) {
+      throw errors[0];
+    }
+    if (errors.length > 1) {
+      throw new AggregateError(
+        errors,
+        'Failed to clean up the seeded alert flyout response action'
+      );
+    }
+  };
+
+  try {
+    await ensureSpaceAlertsIndex(kbnClient);
+
+    const endpointAgentId = randomUUID();
+    alerts = await indexEndpointRuleAlerts({
+      esClient: systemEsClient,
+      kbnClient,
+      endpointAgentId,
+      endpointHostname: `flyout-results-${randomUUID()}`,
+      endpointIsolated: false,
+    });
+
+    const indexedAlert = alerts.alerts[0];
+    alertId = indexedAlert?._id;
+    const sourceIndex = indexedAlert?._index;
+    if (!alertId || !sourceIndex) {
+      throw new Error('Failed to index an endpoint rule alert for the flyout response action');
+    }
+
+    await copyAlertIntoSpace(systemEsClient, sourceIndex, alertId, spaceId);
+
+    host = await indexResponseActionHost({
+      esClient: systemEsClient,
+      kbnClient,
+      numResponseActions: 1,
+      alertIds: [alertId],
+      isServerless: config.serverless,
+      hostNamePrefix: 'flyout-results',
+    });
+
+    const seededAlertId = alertId;
+    return {
+      alertId: seededAlertId,
+      cleanup,
+    };
+  } catch (error) {
+    await cleanup().catch(() => undefined);
+    throw error;
   }
 };
