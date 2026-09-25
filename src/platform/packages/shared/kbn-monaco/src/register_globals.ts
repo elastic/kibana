@@ -60,6 +60,16 @@ declare module 'monaco-editor/editor/editor.api' {
             };
           })
         | undefined;
+      getContribution(id: 'editor.contrib.inspectTokens'):
+        | (editor.IEditorContribution & {
+            // add type augmentation for the inspectTokens contribution for the _widget property,
+            // which is not documented in monaco but is available on the vscode upstream,
+            // see https://github.com/microsoft/vscode/blob/d52f2195fba39dbf8eeed219d735f11b8b49a057/src/vs/editor/standalone/browser/inspectTokens/inspectTokens.ts#L35
+            _widget: {
+              getDomNode: () => HTMLElement;
+            } | null;
+          })
+        | undefined;
     }
 
     /**

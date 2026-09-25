@@ -28,6 +28,7 @@ import { css, Global } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
+  getEditorInputSurface,
 } from './react_monaco_editor';
 import { remeasureFonts } from './utils/remeasure_fonts';
 import {
@@ -41,27 +42,6 @@ import {
   usePersistHoverContentWidget,
 } from './mods';
 import { styles } from './editor.styles';
-
-/** Monaco action ID for Escape; use `editor.trigger()` — synthetic key events are unreliable in EditContext mode (Monaco 0.54+). */
-export const KBN_A11Y_HANDLE_ESCAPE_ACTION_ID = 'kbn.a11y.handleEscape' as const;
-
-/**
- * Resolves the editor's real, focusable keyboard-input surface.
- *
- * Monaco 0.54+ defaults to Chrome's native EditContext API whenever it's available
- * (`typeof globalThis.EditContext === 'function'`), which renders the actual input
- * target as a focusable `<div class="native-edit-context">` and demotes the plain
- * `<textarea>` to a `readonly`, `aria-hidden` IME/composition fallback that's never
- * part of the tab order. Code that manages the editor's tab stop or its
- * `aria-describedby` must target whichever of the two is actually live in the current
- * browser, or it silently no-ops in Chrome.
- */
-const getRealInputSurface = (editorDomNode: HTMLElement | null): HTMLElement | null =>
-  editorDomNode?.querySelector<HTMLElement>(
-    '.native-edit-context[aria-roledescription="editor"]'
-  ) ??
-  editorDomNode?.querySelector<HTMLElement>('textarea[aria-roledescription="editor"]') ??
-  null;
 
 export interface CodeEditorProps
   extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
@@ -79,12 +59,6 @@ export interface CodeEditorProps
 
   /** Function invoked when text in editor is changed */
   onChange?: (value: string, event: monaco.editor.IModelContentChangedEvent) => void;
-
-  /**
-   * Sets whether the new experimental edit context should be used instead of the text area.
-   * See https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor_editor_api.editor.IEditorOptions.html#editContext
-   */
-  editContext?: boolean;
 
   /**
    * Options for the Monaco Code Editor
@@ -282,7 +256,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   links = false,
   onFocus,
   onBlur,
-  editContext = false,
   overflowWidgetsContainerZIndexOverride,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -346,7 +319,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       if (ev.keyCode === monaco.KeyCode.Escape) {
         const inspectTokensWidget = editor?.getContribution(
           'editor.contrib.inspectTokens'
-          // @ts-expect-errors -- "_widget" is not part of the TS interface but does exist
         )?._widget;
         // If the inspect tokens widget is open then we want to let monaco handle ESCAPE for it,
         // otherwise widget will not close.
@@ -541,7 +513,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       remeasureFonts();
 
-      const inputSurface = getRealInputSurface(editor.getDomNode());
+      const inputSurface = getEditorInputSurface(editor.getDomNode());
       if (inputSurface) {
         // Make sure the real input surface is not directly accessible with TAB
         inputSurface.tabIndex = -1;
@@ -560,22 +532,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         onKeydownMonaco(ev, editor);
       });
       editor.onDidBlurEditorText(onBlurMonaco);
-
-      // Expose the Escape key a11y logic as a triggerable action so that tests
-      // can invoke it via editor.trigger() without relying on real keyboard events,
-      // which are not reliably routed through Monaco's handler in EditContext mode.
-      editor.addAction({
-        id: KBN_A11Y_HANDLE_ESCAPE_ACTION_ID,
-        label: 'Handle Escape: close suggestions or show accessibility hint',
-        run: () => {
-          if (isSuggestionMenuOpen.current) {
-            editor.trigger('keyboard', 'hideSuggestWidget', {});
-          } else {
-            stopEditing();
-            editorHint.current?.focus();
-          }
-        },
-      });
 
       const messageContribution = editor.getContribution('editor.contrib.messageController');
 
@@ -613,7 +569,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       editorDidMount,
       onBlurMonaco,
       onKeydownMonaco,
-      stopEditing,
       readOnlyMessage,
       enableCustomContextMenu,
       registerContextMenuActions,
@@ -653,7 +608,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   useEffect(() => {
     // apply aria described by on editor element
     if (_editor && ariaDescribedBy) {
-      getRealInputSurface(_editor.getDomNode() ?? null)?.setAttribute(
+      getEditorInputSurface(_editor.getDomNode())?.setAttribute(
         'aria-describedby',
         ariaDescribedBy
       );
@@ -712,7 +667,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             overflowWidgetsContainerZIndexOverride={overflowWidgetsContainerZIndexOverride}
             options={{
               padding: allowFullScreen || isCopyable ? { top: 24 } : {},
-              editContext,
+              // Opt-out of the new EditContext API for now.
+              editContext: false,
               renderLineHighlight: 'none',
               scrollBeyondLastLine: false,
               stickyScroll: { enabled: false },

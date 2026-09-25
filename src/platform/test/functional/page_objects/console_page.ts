@@ -22,7 +22,7 @@ export class ConsolePageObject extends FtrService {
 
   public async getTextArea() {
     const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
-    return await codeEditor.findByTagName('textarea');
+    return await codeEditor.findByCssSelector('textarea[aria-roledescription="editor"]');
   }
 
   public async getEditorText() {
@@ -56,11 +56,17 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async scrollOutputToTop() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoOutput', 'cursorTop');
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    const textArea = await outputEditor.findByTagName('textarea');
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await textArea.pressKeys([selectionKey, Key.HOME]);
   }
 
   public async selectAllOutputText() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoOutput', 'selectAll');
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    const textArea = await outputEditor.findByTagName('textarea');
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await textArea.pressKeys([selectionKey, 'a']);
   }
 
   public async getOutputText() {
@@ -68,11 +74,8 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async pressEnter() {
-    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', '\n');
-  }
-
-  public async acceptAutocompleteSuggestion() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'acceptSelectedSuggestion');
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys(Key.ENTER);
   }
 
   public async enterText(text: string) {
@@ -151,31 +154,23 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async pressUp(shift: boolean = false) {
-    await this.monacoEditor.simulateKeyCommand(
-      'consoleMonacoEditor',
-      shift ? 'cursorUpSelect' : 'cursorUp'
-    );
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.UP] : Key.UP);
   }
 
   public async pressDown(shift: boolean = false) {
-    await this.monacoEditor.simulateKeyCommand(
-      'consoleMonacoEditor',
-      shift ? 'cursorDownSelect' : 'cursorDown'
-    );
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.DOWN] : Key.DOWN);
   }
 
   public async pressRight(shift: boolean = false) {
-    await this.monacoEditor.simulateKeyCommand(
-      'consoleMonacoEditor',
-      shift ? 'cursorRightSelect' : 'cursorRight'
-    );
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.RIGHT] : Key.RIGHT);
   }
 
   public async pressLeft(shift: boolean = false) {
-    await this.monacoEditor.simulateKeyCommand(
-      'consoleMonacoEditor',
-      shift ? 'cursorLeftSelect' : 'cursorLeft'
-    );
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
   }
 
   public async pressDelete(times: number = 1) {
@@ -186,35 +181,52 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async pressCtrlSpace() {
-    await this.triggerSuggest();
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.SPACE,
+    ]);
   }
 
   public async pressCtrlEnter() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'sendRequest');
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.ENTER,
+    ]);
   }
 
   public async pressCtrlI() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'autoIndent');
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'i']);
   }
 
   public async pressCtrlUp() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'moveUp');
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], Key.UP]);
   }
 
   public async pressCtrlDown() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'moveDown');
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.DOWN,
+    ]);
   }
 
   public async pressCtrlL() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'moveToLine');
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'l']);
   }
 
   public async pressCtrlSlash() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'openDocs');
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], '/']);
   }
 
   public async pressEscape() {
-    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'Escape');
+    const textArea = await this.getTextArea();
+    await textArea.pressKeys(Key.ESCAPE);
   }
 
   public async selectAllRequests() {

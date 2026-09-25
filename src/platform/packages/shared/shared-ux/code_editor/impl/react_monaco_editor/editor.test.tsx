@@ -109,14 +109,14 @@ describe('react monaco editor', () => {
     cleanupMonaco = undefined;
   });
 
-  beforeAll(() => {
-    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
-      (contextId, options) =>
-        ({
-          webkitBackingStorePixelRatio: 1,
-        } as unknown as RenderingContext)
-    );
-  });
+  // beforeAll(() => {
+  //   jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
+  //     (contextId, options) =>
+  //       ({
+  //         webkitBackingStorePixelRatio: 1,
+  //       } as unknown as RenderingContext)
+  //   );
+  // });
 
   afterAll(() => {
     jest.resetAllMocks();
