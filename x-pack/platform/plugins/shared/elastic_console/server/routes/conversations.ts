@@ -11,6 +11,7 @@ import type { CoreSetup, CoreStart, IRouter, KibanaRequest, Logger } from '@kbn/
 import { type ConversationRound, isToolCallStep } from '@kbn/agent-builder-common';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { createConversationClient } from '../lib/conversation_storage';
+import { conversationSchemaVersion, eventsFromRounds, hydrateRounds } from '../lib/timeline';
 import { isElasticConsoleEnabled } from './is_enabled';
 
 /**
@@ -173,10 +174,12 @@ export const registerConversationRoutes = ({
           return response.notFound();
         }
 
+        const source = hit._source;
         return response.ok({
           body: {
             id: hit._id,
-            ...hit._source,
+            ...source,
+            conversation_rounds: hydrateRounds(source.conversation_rounds, source.events),
           },
         });
       } catch (error) {
@@ -236,13 +239,20 @@ export const registerConversationRoutes = ({
         const id = uuidv4();
         const now = new Date().toISOString();
         const rounds = request.body.conversation_rounds as unknown as ConversationRound[];
+        const serialized = serializeConversationRounds(rounds);
 
         await client.index({
           id,
           document: {
             agent_id: request.body.agent_id,
             title: request.body.title,
-            conversation_rounds: serializeConversationRounds(rounds),
+            conversation_rounds: serialized,
+            events: eventsFromRounds(rounds, {
+              agentId: request.body.agent_id,
+              username: user.username,
+              userId: user.userId,
+            }),
+            schema_version: conversationSchemaVersion,
             user_id: user.userId,
             user_name: user.username,
             space,
@@ -329,6 +339,12 @@ export const registerConversationRoutes = ({
           ...(request.body.title !== undefined && { title: request.body.title }),
           ...(rounds !== undefined && {
             conversation_rounds: serializeConversationRounds(rounds),
+            events: eventsFromRounds(rounds, {
+              agentId: hit._source.agent_id,
+              username: user.username,
+              userId: user.userId,
+            }),
+            schema_version: conversationSchemaVersion,
           }),
           updated_at: new Date().toISOString(),
         };
