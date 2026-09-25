@@ -99,6 +99,11 @@ const mockDashboardsTab: Tab = {
   name: 'Dashboards',
 };
 
+const mockOsqueryTab: Tab = {
+  id: ContentTabIds.OSQUERY,
+  name: 'Osquery',
+};
+
 describe('usePageHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -281,6 +286,53 @@ describe('usePageHeader', () => {
 
       expect(dashboardsTabEntry).toBeUndefined();
     });
+  });
+
+  describe('osquery tab visibility', () => {
+    const renderOsqueryTab = ({
+      osqueryEnabled,
+      schema,
+    }: {
+      osqueryEnabled: boolean;
+      schema: 'ecs' | 'semconv';
+    }) => {
+      usePluginConfigMock.mockReturnValue({
+        featureFlags: { osqueryEnabled },
+      } as unknown as ReturnType<typeof usePluginConfig>);
+      useAssetDetailsRenderPropsContextMock.mockReturnValue({
+        schema,
+        entity: {
+          id: 'test-host-1',
+          name: 'test-host-1',
+          type: 'host',
+        },
+      } as unknown as ReturnType<typeof useAssetDetailsRenderPropsContext>);
+
+      const { result } = renderHook(() => usePageHeader([mockOverviewTab, mockOsqueryTab], []));
+
+      return result.current.tabEntries.find((tab) => tab.id === ContentTabIds.OSQUERY);
+    };
+
+    it('should include the osquery tab when the feature flag is on and the schema is ECS', () => {
+      const osqueryTabEntry = renderOsqueryTab({ osqueryEnabled: true, schema: 'ecs' });
+
+      expect(osqueryTabEntry).toBeDefined();
+      expect(osqueryTabEntry?.['data-test-subj']).toBe('infraAssetDetailsOsqueryTab');
+      expect(osqueryTabEntry?.label).toBe('Osquery');
+    });
+
+    // Osquery only reports ECS fields, so it is hidden for the semconv schema even when enabled,
+    // and hidden on deployments where the feature flag is off (for example serverless).
+    it.each([
+      { osqueryEnabled: true, schema: 'semconv' as const },
+      { osqueryEnabled: false, schema: 'ecs' as const },
+      { osqueryEnabled: false, schema: 'semconv' as const },
+    ])(
+      'should exclude the osquery tab when enabled is $osqueryEnabled and schema is $schema',
+      (options) => {
+        expect(renderOsqueryTab(options)).toBeUndefined();
+      }
+    );
   });
 
   describe('return breadcrumb visibility', () => {
