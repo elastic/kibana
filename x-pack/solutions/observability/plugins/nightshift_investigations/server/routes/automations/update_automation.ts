@@ -15,16 +15,10 @@ import type { NightshiftAutomationAttributes } from '../../lib/automations/types
 
 const triggerRowSchema = z.discriminatedUnion('kind', [
   z.object({
-    kind: z.literal('significant_event'),
-    severities: z.array(z.enum(['80-critical', '60-high', '40-medium', '20-low'])).optional(),
-    statuses: z.array(z.enum(['pending', 'open', 'closed', 'dismissed'])).optional(),
-    streamNames: z.array(z.string()).optional(),
-  }),
-  z.object({
     kind: z.literal('alert'),
     ruleNamePattern: z.string().optional(),
     ruleNameMatchMode: z.enum(['substring', 'regex']).optional(),
-    alertStatus: z.enum(['firing', 'recovered', 'any']).optional(),
+    alertStatus: z.enum(['active', 'inactive', 'any']).optional(),
     tags: z.array(z.string()).optional(),
   }),
   z.object({
