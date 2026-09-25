@@ -480,4 +480,8 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     // Auth drift detected: session connectorId 'new-connector' differs from SO 'old-connector'.
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
   });
+
+  // TODO: add agent-based dirty redeploy test (service-var drift → package_policies PUT called).
+  // Blocked on kibana#292385 which adds SO creation on first agent-based deploy — without
+  // onboardingDeploymentId in session the drift effect returns early and isDirty is never set.
 });
