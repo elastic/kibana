@@ -80,8 +80,10 @@ export function TransactionDetailFlyoutFooter() {
                 size="s"
                 iconType="chevronSingleDown"
                 iconSide="right"
-                isLoading={loading}
-                disabled={loading || actionGroups.length === 0}
+                // Indices loading only affects Discover; keep the menu open when other
+                // actions (e.g. transaction details via locator) are already available.
+                isLoading={loading && actionGroups.length === 0}
+                disabled={actionGroups.length === 0}
                 data-test-subj="transactionDetailFlyoutActionsButton"
                 {...getEbtProps({
                   action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,

@@ -91,8 +91,32 @@ describe('TransactionDetailFlyoutFooter', () => {
     expect(detailsAction).toHaveAttribute('data-ebt-detail', 'transactionDetails');
   });
 
-  it('disables the actions button while links are loading', () => {
-    mockUseTransactionDetailFlyoutLinks.mockReturnValue(makeLinks({ loading: true }));
+  it('keeps the actions button enabled while indices load if transaction details is available', () => {
+    mockUseTransactionDetailFlyoutLinks.mockReturnValue({
+      loading: true,
+      apm: { transactionDetailsHref: '/app/apm/services/checkout/transactions/view' },
+      discover: { href: undefined, openInDiscoverTab: undefined },
+    });
+
+    renderFooter();
+
+    expect(screen.getByTestId('transactionDetailFlyoutActionsButton')).not.toBeDisabled();
+
+    openActionsMenu();
+    expect(
+      screen.getByTestId('transactionDetailFlyoutActionsMenuItem-openTransactionDetails')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('transactionDetailFlyoutActionsMenuItem-openTracesInDiscover')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows loading and disables the actions button when no actions are available yet', () => {
+    mockUseTransactionDetailFlyoutLinks.mockReturnValue({
+      loading: true,
+      apm: { transactionDetailsHref: undefined },
+      discover: { href: undefined, openInDiscoverTab: undefined },
+    });
 
     renderFooter();
 
