@@ -51,6 +51,14 @@ xpack.sandbox.host: elastic-sandbox-api.elastic-observability-ocp.elastic.dev
 xpack.sandbox.port: 9090
 xpack.sandbox.api_key: xxx
 
+# Nightshift investigations e2e test (deductive investigations run in the sandbox)
+xpack.nightshift_investigations.enabled: true
+xpack.nightshift_investigations.sandbox.telemetry_connector_id: nightshift-telemetry
+feature_flags.overrides.nightshift.enabled: true
+uiSettings.overrides.workflows:ui:enabled: true
+uiSettings.overrides.workflows:aiAgent:enabled: true
+uiSettings.overrides.agentBuilder:experimentalFeatures: true
+
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
 xpack.fleet.internal.registry.excludePackages: [
