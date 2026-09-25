@@ -25,17 +25,17 @@ const mockCaseRunWorkflow = jest.fn();
 const OUTSIDE_CASE_RUN_PROPS = {
   runWorkflow: undefined,
   showSuccessToast: true,
-  caseRouting: 'outside',
 };
 const CASES_ROUTED_RUN_PROPS = {
   runWorkflow: mockCaseRunWorkflow,
   showSuccessToast: false,
-  caseRouting: 'available',
 };
 const mockUseCaseAttachmentWorkflowRun = jest.fn();
+const mockUseCaseAttachmentWorkflowRouting = jest.fn();
 
 jest.mock('@kbn/cases-plugin/public', () => ({
   useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
 }));
 
 const mockMutate = jest.fn();
@@ -159,6 +159,7 @@ describe('useRunDocumentWorkflowPanel', () => {
   beforeEach(() => {
     mockRunWorkflowPanelProps.length = 0;
     mockUseCaseAttachmentWorkflowRun.mockReturnValue(OUTSIDE_CASE_RUN_PROPS);
+    mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
     mockUseRunWorkflow.mockReturnValue({ mutate: mockMutate });
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
@@ -195,10 +196,18 @@ describe('useRunDocumentWorkflowPanel', () => {
       });
     });
 
-    it('calls the generic attachment hook without a target when originEventId is absent', async () => {
-      const { result } = renderHook(() => useRunDocumentWorkflowPanel(defaultProps), {
-        wrapper: TestProviders,
-      });
+    it('calls the generic attachment hook with a bulk target of the document ids when originEventId is absent', async () => {
+      const { result } = renderHook(
+        () =>
+          useRunDocumentWorkflowPanel({
+            ...defaultProps,
+            documents: [
+              { _id: 'doc-1', _index: 'documents-index' },
+              { _id: 'doc-2', _index: 'documents-index' },
+            ],
+          }),
+        { wrapper: TestProviders }
+      );
       renderContextMenu(
         result.current.runWorkflowMenuItem,
         result.current.runDocumentWorkflowPanel
@@ -206,12 +215,13 @@ describe('useRunDocumentWorkflowPanel', () => {
       await waitFor(() => {
         expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
           attachmentType: 'security.event',
-          target: undefined,
+          target: { attachmentIds: ['doc-1', 'doc-2'] },
         });
       });
     });
 
     it('passes the Cases executor as runWorkflow when originEventId is set and hook returns an executor', async () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
       mockUseCaseAttachmentWorkflowRun.mockReturnValue(CASES_ROUTED_RUN_PROPS);
       const { result } = renderHook(
         () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
@@ -314,7 +324,7 @@ describe('useRunDocumentWorkflowPanel', () => {
     });
 
     it('returns the menu item inside a case with originEventId when Cases runs are available', () => {
-      mockUseCaseAttachmentWorkflowRun.mockReturnValue(CASES_ROUTED_RUN_PROPS);
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
       const { result } = renderHook(
         () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
@@ -325,25 +335,31 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(result.current.runDocumentWorkflowPanel).toHaveLength(1);
     });
 
-    it('returns empty lists inside a case without originEventId', () => {
-      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
-        ...OUTSIDE_CASE_RUN_PROPS,
-        caseRouting: 'available',
-      });
+    it('returns the menu item inside a case for a bulk selection without originEventId', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
       const { result } = renderHook(() => useRunDocumentWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
       });
+
+      expect(result.current.runWorkflowMenuItem).toHaveLength(1);
+      expect(result.current.runDocumentWorkflowPanel).toHaveLength(1);
+    });
+
+    it('returns empty lists inside a case with no documents and no originEventId', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, documents: [] }),
+        { wrapper: TestProviders }
+      );
 
       expect(result.current.runWorkflowMenuItem).toEqual([]);
       expect(result.current.runDocumentWorkflowPanel).toEqual([]);
     });
 
     it('returns empty lists inside a case where Cases workflow runs are unavailable', () => {
-      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
-        ...OUTSIDE_CASE_RUN_PROPS,
-        caseRouting: 'unavailable',
-      });
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('unavailable');
 
       const { result } = renderHook(
         () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),

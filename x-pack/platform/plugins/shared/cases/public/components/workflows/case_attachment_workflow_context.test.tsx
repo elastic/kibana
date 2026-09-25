@@ -31,9 +31,9 @@ describe('useCaseAttachmentWorkflowContext', () => {
     mockUseCanRunCaseWorkflow.mockReturnValue(true);
   });
 
-  it('returns undefined when rendered outside a CaseAttachmentWorkflowProvider', () => {
+  it('returns an outside status when rendered without a CaseAttachmentWorkflowProvider', () => {
     const { result } = renderHook(() => useCaseAttachmentWorkflowContext());
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual({ status: 'outside' });
   });
 
   it('returns the case id and an executor factory inside a CaseAttachmentWorkflowProvider', () => {

@@ -18,7 +18,11 @@ import {
   useWorkflowsUIEnabledSetting,
 } from '@kbn/workflows-ui';
 import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import { useCaseAttachmentWorkflowRun } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentWorkflowTarget } from '@kbn/cases-plugin/public';
+import {
+  useCaseAttachmentWorkflowRouting,
+  useCaseAttachmentWorkflowRun,
+} from '@kbn/cases-plugin/public';
 import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
 
@@ -36,11 +40,10 @@ export interface DocumentWorkflowsPanelProps {
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
   /**
-   * When set, the panel was opened from a single-document row action inside a case. The
-   * executor routes through the Cases API with a `cases.attachment` origin so the run appears in
-   * the case activity feed. Outside a case the value is ignored — the panel falls back to
-   * the generic Workflows API. Inside a case, `useRunDocumentWorkflowPanel` does not render this
-   * panel without it.
+   * When set, the panel was opened from a single-document row action. Inside a case the executor
+   * routes through the Cases API with a `cases.attachment` origin so the run appears in the case
+   * activity feed. Absent for bulk actions, which use `cases.attachments` with the document ids.
+   * Outside a case the value is ignored — the panel falls back to the generic Workflows API.
    */
   originEventId?: string;
 }
@@ -52,9 +55,16 @@ export const DocumentWorkflowsPanel = ({
   onExecute,
   originEventId,
 }: DocumentWorkflowsPanelProps) => {
+  const target = useMemo(
+    (): CaseAttachmentWorkflowTarget =>
+      originEventId !== undefined
+        ? { attachmentId: originEventId }
+        : { attachmentIds: documents.map(({ _id }) => _id) },
+    [documents, originEventId]
+  );
   const { runWorkflow, showSuccessToast } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
-    target: originEventId !== undefined ? { attachmentId: originEventId } : undefined,
+    target,
   });
 
   const inputs = useMemo(
@@ -86,10 +96,9 @@ export interface UseRunDocumentWorkflowPanelProps {
   documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
   closePopover: () => void;
   /**
-   * When set, the document panel routes the run through the Cases API with a `cases.attachment`
-   * origin. Pass `ecsRowData._id` from the case events table row action. Callers outside a
-   * case context omit this and get the generic Workflows API executor. Inside a case, the menu
-   * item is hidden when this is omitted or when Cases runs are unavailable.
+   * Pass `ecsRowData._id` from a row action so a run inside a case uses a `cases.attachment`
+   * origin. Omit for bulk actions. Outside a case the value is ignored. Inside a case, the menu
+   * item is hidden when Cases runs are unavailable or there is no document to target.
    */
   originEventId?: string;
 }
@@ -109,11 +118,9 @@ export const useRunDocumentWorkflowPanel = ({
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   // Inside a case, only offer the action when the run can be recorded on the case.
-  const { caseRouting } = useCaseAttachmentWorkflowRun({
-    attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
-  });
-  const canRunInCase =
-    caseRouting === 'outside' || (caseRouting === 'available' && originEventId !== undefined);
+  const caseRouting = useCaseAttachmentWorkflowRouting();
+  const hasCaseTarget = originEventId !== undefined || documents.length > 0;
+  const canRunInCase = caseRouting === 'outside' || (caseRouting === 'available' && hasCaseTarget);
 
   const canRunWorkflow = useMemo(
     () => workflowUIEnabled && canExecuteWorkflow && canRunInCase,

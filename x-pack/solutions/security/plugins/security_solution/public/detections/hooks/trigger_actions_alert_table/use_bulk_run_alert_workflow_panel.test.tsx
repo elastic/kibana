@@ -22,14 +22,9 @@ jest.mock('@kbn/workflows-ui', () => ({
 }));
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 
-const OUTSIDE_CASE_RUN_PROPS = {
-  runWorkflow: undefined,
-  showSuccessToast: true,
-  caseRouting: 'outside',
-};
-const mockUseCaseAttachmentWorkflowRun = jest.fn();
+const mockUseCaseAttachmentWorkflowRouting = jest.fn();
 jest.mock('@kbn/cases-plugin/public', () => ({
-  useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
 }));
 
 const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as jest.MockedFunction<
@@ -80,7 +75,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
-    mockUseCaseAttachmentWorkflowRun.mockReturnValue(OUTSIDE_CASE_RUN_PROPS);
+    mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
   });
 
   afterEach(() => {
@@ -149,10 +144,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     });
 
     it('returns empty arrays inside a case where Cases workflow runs are unavailable', () => {
-      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
-        ...OUTSIDE_CASE_RUN_PROPS,
-        caseRouting: 'unavailable',
-      });
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('unavailable');
 
       const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
         wrapper: TestProviders,
@@ -163,11 +155,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     });
 
     it('returns run workflow items inside a case where Cases workflow runs are available', () => {
-      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
-        runWorkflow: jest.fn(),
-        showSuccessToast: false,
-        caseRouting: 'available',
-      });
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
       const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
         wrapper: TestProviders,

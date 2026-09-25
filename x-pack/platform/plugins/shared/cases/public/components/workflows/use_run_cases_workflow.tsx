@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import type { CasesUI } from '../../containers/types';
 import {
-  NO_WORKFLOW_TAGS,
-  createCaseWorkflowFilter,
-  createCaseWorkflowComparator,
+  untaggedCaseWorkflowFilter,
+  untaggedCaseWorkflowComparator,
   useCanRunCaseWorkflow,
 } from './use_run_case_workflow';
 import { useRunWorkflowOnCases } from './use_run_workflow_on_cases';
@@ -58,10 +57,6 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
 
   const runWorkflow = useRunWorkflowOnCases({ cases: selectedCases });
 
-  // No tag override at the list level — use the empty stable default.
-  const filterWorkflow = useMemo(() => createCaseWorkflowFilter(NO_WORKFLOW_TAGS), []);
-  const sortWorkflow = useMemo(() => createCaseWorkflowComparator(NO_WORKFLOW_TAGS), []);
-
   return {
     canRunWorkflow,
     isModalOpen,
@@ -69,7 +64,7 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
     closeModal,
     selectedCases,
     runWorkflow,
-    filterWorkflow,
-    sortWorkflow,
+    filterWorkflow: untaggedCaseWorkflowFilter,
+    sortWorkflow: untaggedCaseWorkflowComparator,
   };
 };
