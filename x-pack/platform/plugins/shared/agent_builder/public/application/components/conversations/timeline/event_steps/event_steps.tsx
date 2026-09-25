@@ -34,9 +34,8 @@ export const EventSteps: React.FC<EventStepsProps> = ({
   attachmentRefs,
   conversationId,
 }) => {
-  if (steps.length === 0) return null;
-
   const displayItems = groupSteps(steps);
+  if (displayItems.length === 0) return null;
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="agentBuilderThinkingPanel">

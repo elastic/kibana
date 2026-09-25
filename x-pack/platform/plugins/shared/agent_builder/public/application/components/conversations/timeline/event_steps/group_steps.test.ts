@@ -8,6 +8,7 @@
 import {
   ConversationRoundStepType,
   createReasoningStep,
+  createSubstitutionStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
@@ -270,6 +271,20 @@ describe('groupSteps', () => {
       { kind: 'group', steps: [a] },
       { kind: 'step', step: r2, index: 4 },
     ]);
+  });
+
+  it('hides a SubstitutionStep without splitting the surrounding tool group', () => {
+    const substitution = createSubstitutionStep({
+      trigger: 'intra_round',
+      reason: 'input_tokens_threshold',
+      substituted_tool_call_ids: ['a'],
+    });
+    const a = toolStep('a');
+    const b = toolStep('b');
+
+    const result = groupSteps([a, substitution, b]);
+
+    expect(result).toEqual([{ kind: 'group', steps: [a, b] }]);
   });
 
   it('flushes the tool buffer when an AskUserQuestionStep arrives and renders it as a step', () => {

@@ -9,7 +9,10 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
-import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import {
+  createSubstitutionStep,
+  createToolCallStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import { EventSteps } from './event_steps';
 
 const renderWithProviders = (ui: React.ReactElement) =>
@@ -36,5 +39,20 @@ describe('EventSteps — single vs grouped tool calls', () => {
     );
     expect(screen.getByTestId('agentBuilderToolCallGroup')).toBeInTheDocument();
     expect(screen.queryByTestId('agentBuilderToolCallStep')).not.toBeInTheDocument();
+  });
+
+  it('renders nothing when every step is hidden', () => {
+    renderWithProviders(
+      <EventSteps
+        steps={[
+          createSubstitutionStep({
+            trigger: 'round_start',
+            reason: 'cache_cold',
+            substituted_tool_call_ids: ['tc-1'],
+          }),
+        ]}
+      />
+    );
+    expect(screen.queryByTestId('agentBuilderThinkingPanel')).not.toBeInTheDocument();
   });
 });
