@@ -103,7 +103,8 @@ const waitFor = async (fn, expected, timeoutMs = 40000) => {
 const GEO_LIST = 'poc-crud-geo';
 
 const cleanup = async () => {
-  for (const id of [LIST, RANGE_LIST, IMPORT_FILE, GEO_LIST]) await kbn('DELETE', `/api/lists?id=${id}`);
+  for (const id of [LIST, RANGE_LIST, IMPORT_FILE, GEO_LIST])
+    await kbn('DELETE', `/api/lists?id=${id}`);
 };
 
 const main = async () => {
@@ -205,12 +206,33 @@ const main = async () => {
   // Items carry who wrote them and when. `10.1.1.1` was written first and again last, so
   // it is the oldest by created_at and the newest by updated_at, and the items table's
   // default sort (updated_at desc) puts it first.
-  const byUpdated = await kbn('GET', `/api/lists/items/_find?list_id=${LIST}&page=1&per_page=10&sort_field=updated_at&sort_order=desc`);
-  check('find sorts by updated_at desc, the re-written value first', byUpdated.json.data?.[0]?.value === '10.1.1.1', JSON.stringify(byUpdated.json.data?.map((d) => d.value)));
-  const byCreated = await kbn('GET', `/api/lists/items/_find?list_id=${LIST}&page=1&per_page=10&sort_field=created_at&sort_order=asc`);
-  check('find sorts by created_at asc, the first written value first', byCreated.json.data?.[0]?.value === '10.1.1.1' && byCreated.json.data?.[2]?.value === '192.168.5.5', JSON.stringify(byCreated.json.data?.map((d) => d.value)));
+  const byUpdated = await kbn(
+    'GET',
+    `/api/lists/items/_find?list_id=${LIST}&page=1&per_page=10&sort_field=updated_at&sort_order=desc`
+  );
+  check(
+    'find sorts by updated_at desc, the re-written value first',
+    byUpdated.json.data?.[0]?.value === '10.1.1.1',
+    JSON.stringify(byUpdated.json.data?.map((d) => d.value))
+  );
+  const byCreated = await kbn(
+    'GET',
+    `/api/lists/items/_find?list_id=${LIST}&page=1&per_page=10&sort_field=created_at&sort_order=asc`
+  );
+  check(
+    'find sorts by created_at asc, the first written value first',
+    byCreated.json.data?.[0]?.value === '10.1.1.1' &&
+      byCreated.json.data?.[2]?.value === '192.168.5.5',
+    JSON.stringify(byCreated.json.data?.map((d) => d.value))
+  );
   const stamped = byCreated.json.data?.[0];
-  check('items carry real creation and update stamps', stamped?.created_by === 'elastic' && stamped?.updated_by === 'elastic' && stamped?.created_at < stamped?.updated_at, JSON.stringify({ c: stamped?.created_at, u: stamped?.updated_at }));
+  check(
+    'items carry real creation and update stamps',
+    stamped?.created_by === 'elastic' &&
+      stamped?.updated_by === 'elastic' &&
+      stamped?.created_at < stamped?.updated_at,
+    JSON.stringify({ c: stamped?.created_at, u: stamped?.updated_at })
+  );
 
   log('\n=== equality list: update, patch, delete by id ===');
   const updated = await kbn('PUT', '/api/lists/items', { id: a.json.id, value: '10.9.9.9' });
@@ -317,23 +339,55 @@ const main = async () => {
   // A `lat,lon` value is stored as an object by the shared serializer. Two spellings of
   // the same pair share one document, and reads render it back as `lat,lon`, as the
   // shared stream does, so export regenerates the input instead of `[object Object]`.
-  const geoCreated = await kbn('POST', '/api/lists', { id: GEO_LIST, type: 'geo_point', name: GEO_LIST, description: GEO_LIST });
-  check('geo_point lookup list created', geoCreated.status === 200 && geoCreated.json.storage?.type === 'lookup_index', JSON.stringify(geoCreated.json?.message ?? ''));
+  const geoCreated = await kbn('POST', '/api/lists', {
+    id: GEO_LIST,
+    type: 'geo_point',
+    name: GEO_LIST,
+    description: GEO_LIST,
+  });
+  check(
+    'geo_point lookup list created',
+    geoCreated.status === 200 && geoCreated.json.storage?.type === 'lookup_index',
+    JSON.stringify(geoCreated.json?.message ?? '')
+  );
   const geoIds = [];
   for (const value of [' 41.12 , -71.34 ', '41.12,-71.34', 'POINT (-71.34 41.12)']) {
     const added = await kbn('POST', '/api/lists/items', { list_id: GEO_LIST, value });
-    check(`geo item ${JSON.stringify(value)} accepted`, added.status === 200, JSON.stringify(added.json?.message ?? ''));
+    check(
+      `geo item ${JSON.stringify(value)} accepted`,
+      added.status === 200,
+      JSON.stringify(added.json?.message ?? '')
+    );
     geoIds.push(added.json?.id);
   }
-  check('two spellings of one lat,lon pair share one item id', geoIds[0] != null && geoIds[0] === geoIds[1] && geoIds[1] !== geoIds[2]);
+  check(
+    'two spellings of one lat,lon pair share one item id',
+    geoIds[0] != null && geoIds[0] === geoIds[1] && geoIds[1] !== geoIds[2]
+  );
   const geoFind = await kbn('GET', `/api/lists/items/_find?list_id=${GEO_LIST}&page=1&per_page=10`);
   const geoValues = (geoFind.json.data ?? []).map((d) => d.value).sort();
-  check('find renders geo values as lat,lon and WKT', JSON.stringify(geoValues) === JSON.stringify(['41.12,-71.34', 'POINT (-71.34 41.12)']), JSON.stringify(geoValues));
+  check(
+    'find renders geo values as lat,lon and WKT',
+    JSON.stringify(geoValues) === JSON.stringify(['41.12,-71.34', 'POINT (-71.34 41.12)']),
+    JSON.stringify(geoValues)
+  );
   const geoById = await kbn('GET', `/api/lists/items?id=${geoIds[0]}`);
-  check('geo item read by id returns lat,lon', geoById.status === 200 && geoById.json.value === '41.12,-71.34', JSON.stringify(geoById.json?.value));
-  const geoExport = await fetch(`${KBN}/api/lists/items/_export?list_id=${GEO_LIST}`, { method: 'POST', headers: kh });
+  check(
+    'geo item read by id returns lat,lon',
+    geoById.status === 200 && geoById.json.value === '41.12,-71.34',
+    JSON.stringify(geoById.json?.value)
+  );
+  const geoExport = await fetch(`${KBN}/api/lists/items/_export?list_id=${GEO_LIST}`, {
+    method: 'POST',
+    headers: kh,
+  });
   const geoExported = (await geoExport.text()).split('\n').filter(Boolean).sort();
-  check('export regenerates the geo input', geoExport.status === 200 && JSON.stringify(geoExported) === JSON.stringify(['41.12,-71.34', 'POINT (-71.34 41.12)']), JSON.stringify(geoExported));
+  check(
+    'export regenerates the geo input',
+    geoExport.status === 200 &&
+      JSON.stringify(geoExported) === JSON.stringify(['41.12,-71.34', 'POINT (-71.34 41.12)']),
+    JSON.stringify(geoExported)
+  );
 
   log('\n=== summary ===');
   log(

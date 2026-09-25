@@ -359,15 +359,34 @@ const main = async () => {
   // no such field, so that query matches no indicator. The run must say so as a partial
   // failure rather than succeed with no alerts.
   const lookupTwin = TWINS.find((cell) => cell.storage === 'lookup');
-  const defaultQueryRule = ruleHandle(await createRule(DEFAULT_QUERY_RULE, 'lookup', twinList(lookupTwin), { threat_query: DEFAULT_THREAT_QUERY }), DEFAULT_QUERY_RULE, 'lookup', twinList(lookupTwin));
+  const defaultQueryRule = ruleHandle(
+    await createRule(DEFAULT_QUERY_RULE, 'lookup', twinList(lookupTwin), {
+      threat_query: DEFAULT_THREAT_QUERY,
+    }),
+    DEFAULT_QUERY_RULE,
+    'lookup',
+    twinList(lookupTwin)
+  );
   const since3 = now();
   await sleep(1000);
   await kbn('POST', `/internal/alerting/rule/${defaultQueryRule.id}/_run_soon`);
   const last3 = await waitForExecution(DEFAULT_QUERY_RULE, since3);
-  check(`${DEFAULT_QUERY_RULE}: run is a partial failure`, last3?.status === 'partial failure', String(last3?.status));
-  check(`${DEFAULT_QUERY_RULE}: the message names the timestamp filter and the lookup index`, String(last3?.message ?? '').includes('carries no timestamp field') && String(last3?.message ?? '').includes(concreteIndex(twinList(lookupTwin))), String(last3?.message ?? '').slice(0, 200));
+  check(
+    `${DEFAULT_QUERY_RULE}: run is a partial failure`,
+    last3?.status === 'partial failure',
+    String(last3?.status)
+  );
+  check(
+    `${DEFAULT_QUERY_RULE}: the message names the timestamp filter and the lookup index`,
+    String(last3?.message ?? '').includes('carries no timestamp field') &&
+      String(last3?.message ?? '').includes(concreteIndex(twinList(lookupTwin))),
+    String(last3?.message ?? '').slice(0, 200)
+  );
   await sleep(3000);
-  check(`${DEFAULT_QUERY_RULE}: no alerts, since the query matches no indicator`, same(await alertsFor(DEFAULT_QUERY_RULE), []));
+  check(
+    `${DEFAULT_QUERY_RULE}: no alerts, since the query matches no indicator`,
+    same(await alertsFor(DEFAULT_QUERY_RULE), [])
+  );
 
   // The same rule reading the list through its alias. The alias is the name under
   // `.items*` a rule can read with the roles it holds today, and field caps resolves it to
@@ -385,8 +404,17 @@ const main = async () => {
   await sleep(1000);
   await kbn('POST', `/internal/alerting/rule/${aliasRule.id}/_run_soon`);
   const last3b = await waitForExecution(ALIAS_QUERY_RULE, since3b);
-  check(`${ALIAS_QUERY_RULE}: run through the alias is a partial failure too`, last3b?.status === 'partial failure', String(last3b?.status));
-  check(`${ALIAS_QUERY_RULE}: the message names the concrete lookup index the alias resolves to`, String(last3b?.message ?? '').includes('carries no timestamp field') && String(last3b?.message ?? '').includes(concreteIndex(twinList(lookupTwin))), String(last3b?.message ?? '').slice(0, 200));
+  check(
+    `${ALIAS_QUERY_RULE}: run through the alias is a partial failure too`,
+    last3b?.status === 'partial failure',
+    String(last3b?.status)
+  );
+  check(
+    `${ALIAS_QUERY_RULE}: the message names the concrete lookup index the alias resolves to`,
+    String(last3b?.message ?? '').includes('carries no timestamp field') &&
+      String(last3b?.message ?? '').includes(concreteIndex(twinList(lookupTwin))),
+    String(last3b?.message ?? '').slice(0, 200)
+  );
 
   log('\n=== summary ===');
   log(
