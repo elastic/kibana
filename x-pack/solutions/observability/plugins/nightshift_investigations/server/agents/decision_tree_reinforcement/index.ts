@@ -38,7 +38,7 @@ export const DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION =
  * Builds the decision-tree reinforcement agent type. It runs after an investigation rather than
  * during one: the reinforce workflow hands it the round's transcript, its own beforeAgent hook
  * materializes the stored trees into `/workspace/decision-trees`, and it edits them with the
- * sandbox file tools before `submit_optimizer_result` validates and persists the result.
+ * sandbox file tools before `nightshift_submit_optimizer_result` validates and persists the result.
  */
 export const getDecisionTreeReinforcementAgentType = (): AgentTypeDefinition => ({
   id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
