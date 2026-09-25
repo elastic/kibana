@@ -109,13 +109,22 @@ const shouldUpdateMetaValues = (
   currentLicenseUUID: string,
   currentIsServerlessEnabled: boolean
 ) => {
+  const { meta } = endpointPackagePolicy;
+
+  // A partially-populated policy value coming from an API/UI update may omit
+  // `meta` entirely; treat a missing `meta` as needing an update rather than
+  // dereferencing undefined and throwing.
+  if (!meta) {
+    return true;
+  }
+
   return (
-    endpointPackagePolicy.meta.license !== currentLicenseType ||
-    endpointPackagePolicy.meta.cloud !== currentCloudInfo ||
-    endpointPackagePolicy.meta.cluster_name !== currentClusterName ||
-    endpointPackagePolicy.meta.cluster_uuid !== currentClusterUUID ||
-    endpointPackagePolicy.meta.license_uuid !== currentLicenseUUID ||
-    endpointPackagePolicy.meta.serverless !== currentIsServerlessEnabled
+    meta.license !== currentLicenseType ||
+    meta.cloud !== currentCloudInfo ||
+    meta.cluster_name !== currentClusterName ||
+    meta.cluster_uuid !== currentClusterUUID ||
+    meta.license_uuid !== currentLicenseUUID ||
+    meta.serverless !== currentIsServerlessEnabled
   );
 };
 
@@ -334,12 +343,18 @@ export const getPackagePolicyUpdateCallback = (
         cloud?.isServerlessEnabled
       )
     ) {
-      newEndpointPackagePolicy.meta.license = licenseService.getLicenseType();
-      newEndpointPackagePolicy.meta.cloud = cloud?.isCloudEnabled;
-      newEndpointPackagePolicy.meta.cluster_name = esClientInfo.cluster_name;
-      newEndpointPackagePolicy.meta.cluster_uuid = esClientInfo.cluster_uuid;
-      newEndpointPackagePolicy.meta.license_uuid = licenseService.getLicenseUID();
-      newEndpointPackagePolicy.meta.serverless = cloud?.isServerlessEnabled;
+      // A partially-populated policy value may omit `meta`; rebuild it from any
+      // existing values so the derived fields can be assigned without
+      // dereferencing an undefined `meta`.
+      newEndpointPackagePolicy.meta = {
+        ...newEndpointPackagePolicy.meta,
+        license: licenseService.getLicenseType(),
+        cloud: cloud?.isCloudEnabled,
+        cluster_name: esClientInfo.cluster_name,
+        cluster_uuid: esClientInfo.cluster_uuid,
+        license_uuid: licenseService.getLicenseUID(),
+        serverless: cloud?.isServerlessEnabled,
+      };
 
       endpointIntegrationData.inputs[0].config.policy.value = newEndpointPackagePolicy;
     }
@@ -367,7 +382,10 @@ export const getPackagePolicyUpdateCallback = (
 
     updateAntivirusRegistrationEnabled(newEndpointPackagePolicy);
 
-    newEndpointPackagePolicy.meta.billable = isBillablePolicy(newEndpointPackagePolicy);
+    newEndpointPackagePolicy.meta = {
+      ...newEndpointPackagePolicy.meta,
+      billable: isBillablePolicy(newEndpointPackagePolicy),
+    };
 
     return endpointIntegrationData;
   };

@@ -35,6 +35,36 @@ describe('policy_config and licenses', () => {
   };
 
   describe('isEndpointPolicyValidForLicense', () => {
+    it.each([
+      ['windows', Platinum],
+      ['windows', Basic],
+      ['mac', Platinum],
+      ['mac', Basic],
+      ['linux', Platinum],
+      ['linux', Basic],
+    ])(
+      'does not throw and rejects a policy missing the %s protection config (license: %s)',
+      (osKey, license) => {
+        const policy = policyFactory();
+        // Simulate a partially-populated PolicyConfig coming from an update
+        // request where a whole OS section (and its nested objects) is missing.
+        delete (policy as Partial<PolicyConfig>)[osKey as 'windows' | 'mac' | 'linux'];
+
+        expect(() => isEndpointPolicyValidForLicense(policy, license)).not.toThrow();
+        expect(isEndpointPolicyValidForLicense(policy, license)).toBe(false);
+      }
+    );
+
+    it('does not throw when nested protection objects are missing', () => {
+      const policy = policyFactory();
+      // e.g. advanced-settings edits can drop `ransomware`/`meta` sub-objects
+      delete (policy.windows as Partial<PolicyConfig['windows']>).ransomware;
+      delete (policy.mac as Partial<PolicyConfig['mac']>).ransomware;
+
+      expect(() => isEndpointPolicyValidForLicense(policy, Platinum)).not.toThrow();
+      expect(() => isEndpointPolicyValidForLicense(policy, Basic)).not.toThrow();
+    });
+
     it('allows malware notification to be disabled with a Platinum license', () => {
       const policy = policyFactory();
       disableEnterpriseFeatures(policy);
