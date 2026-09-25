@@ -27,7 +27,7 @@ export const createUnsnoozeAction = (
       order: 21,
       displayName: i18n.UNSNOOZE,
       iconType: 'bell',
-      isCompatible: (ep) => isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry),
+      isCompatible: (ep) => isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until),
       execute: (episodes, http) =>
         bulkUnsnoozeSeriesActions(
           http,

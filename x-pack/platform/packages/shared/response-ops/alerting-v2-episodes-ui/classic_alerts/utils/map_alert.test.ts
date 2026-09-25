@@ -144,7 +144,7 @@ describe('mapClassicAlertToEpisode', () => {
     const episode = mapClassicAlertToEpisode(baseSource, TEST_INDEX);
     expect(episode.last_ack_action).toBeNull();
     expect(episode).not.toHaveProperty('last_snooze_action');
-    expect(episode).not.toHaveProperty('snooze_expiry');
+    expect(episode).not.toHaveProperty('snoozed_until');
   });
 
   it('preserves classic warning severity without mapping it to medium', () => {

@@ -29,10 +29,10 @@ type ActivateAlertActionBody = Extract<
  * defensively-nullable status) is treated as reactivatable: user
  * intent overrides the engine's assessment.
  *
- * Failures throw `Boom.badRequest` carrying
- * `INVALID_EPISODE_STATE_TRANSITION`; the bulk path catches that
- * (400-class) and records it as a per-item error, the single path lets it
- * propagate to the route as a 400 response.
+ * Failures throw `Boom.conflict` carrying
+ * `INVALID_EPISODE_STATE_TRANSITION`; the bulk path records it as a
+ * per-item error, the single path lets it propagate to the route as a
+ * 409 response.
  */
 const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
   const status = alertEvent.episode_status;
@@ -40,7 +40,7 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
     return;
   }
 
-  throw Boom.badRequest(getCannotActivateEpisodeMessage(alertEvent.episode_id), {
+  throw Boom.conflict(getCannotActivateEpisodeMessage(alertEvent.episode_id), {
     code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
     details: {
       group_hash: alertEvent.group_hash,

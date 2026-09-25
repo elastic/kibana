@@ -56,7 +56,7 @@ describe('AlertActionsClient', () => {
         groupHash: 'test-group-hash',
         action: {
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          expiry: '2026-08-12T00:00:00.000Z',
+          snoozed_until: '2026-08-12T00:00:00.000Z',
         },
       });
 
@@ -254,7 +254,7 @@ describe('AlertActionsClient', () => {
           action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE, reason: 'reopen' },
         })
       ).rejects.toMatchObject({
-        output: { statusCode: 404 },
+        output: { statusCode: 409 },
         data: {
           code: 'ALERT_EPISODE_NOT_LATEST',
           details: { episode_id: 'old-episode', group_hash: 'group-1' },
@@ -326,7 +326,7 @@ describe('AlertActionsClient', () => {
         {
           group_hash: 'group-1',
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          expiry: '2026-08-12T00:00:00.000Z',
+          snoozed_until: '2026-08-12T00:00:00.000Z',
         },
         { group_hash: 'group-2', action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       ];
