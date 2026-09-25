@@ -149,7 +149,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   ),
   packagePolicyIds: schema.maybe(
     schema.arrayOf(schema.string(), {
-      maxSize: 100,
+      maxSize: 1000,
       meta: {
         description:
           'Package policy IDs created for this deployment (managed_integration and agent_based).',
@@ -312,21 +312,24 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),
+    connectorId: schema.maybe(schema.nullable(schema.string({ maxLength: 255 }))),
     authMethod: schema.maybe(
-      schema.oneOf(
-        [
-          schema.literal('identity_federation'),
-          schema.literal('static_keys'),
-          schema.literal('temporary_keys'),
-          schema.literal('shared_credentials'),
-          schema.literal('assume_role'),
-        ],
-        {
-          meta: {
-            description:
-              'Authentication method. Refreshed on each successful deploy so a credential-method change between deploys is reflected on resume.',
-          },
-        }
+      schema.nullable(
+        schema.oneOf(
+          [
+            schema.literal('identity_federation'),
+            schema.literal('static_keys'),
+            schema.literal('temporary_keys'),
+            schema.literal('shared_credentials'),
+            schema.literal('assume_role'),
+          ],
+          {
+            meta: {
+              description:
+                'Authentication method. Refreshed on each successful deploy so a credential-method change between deploys is reflected on resume.',
+            },
+          }
+        )
       )
     ),
     agentPolicyIds: schema.maybe(
@@ -370,12 +373,6 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         maxSize: 10,
         meta: { description: 'ECF CloudFormation stacks to record for this deployment.' },
       })
-    ),
-    connectorId: schema.maybe(schema.nullable(schema.string({ maxLength: 255 }))),
-    authMethod: schema.maybe(
-      schema.nullable(
-        schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
-      )
     ),
   }),
 };

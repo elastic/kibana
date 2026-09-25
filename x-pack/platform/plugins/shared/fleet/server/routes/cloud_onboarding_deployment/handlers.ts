@@ -155,17 +155,22 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
   }
 
   try {
-    // Validate authMethod against the deployment's persisted mechanisms so a client cannot
-    // change an agent-based record to identity_federation or a managed-integration record
-    // to assume_role — the same invariant enforced on POST.
-    if (request.body.authMethod) {
+    // Validate authMethod against the effective mechanisms after this PUT — either the
+    // incoming mechanisms (if the request changes them) or the persisted ones. This prevents
+    // a PUT { mechanisms: ['managed_integration'] } from leaving a stale assume_role method
+    // that POST would have rejected, and vice-versa.
+    if (request.body.authMethod !== undefined || request.body.mechanisms) {
       const existing = await cloudOnboardingDeploymentService.getById(
         internalSoClient,
         request.params.id
       );
-      const authMethodError = validateAuthMethod(existing.mechanisms, request.body.authMethod);
-      if (authMethodError) {
-        return response.badRequest({ body: { message: authMethodError } });
+      const effectiveMechanisms = request.body.mechanisms ?? existing.mechanisms;
+      const effectiveAuthMethod = request.body.authMethod ?? existing.authMethod;
+      if (effectiveAuthMethod) {
+        const authMethodError = validateAuthMethod(effectiveMechanisms, effectiveAuthMethod);
+        if (authMethodError) {
+          return response.badRequest({ body: { message: authMethodError } });
+        }
       }
     }
 

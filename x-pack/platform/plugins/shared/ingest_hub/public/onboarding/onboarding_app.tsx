@@ -99,8 +99,11 @@ export async function hydrateOnboardingSession(
             // 'existing' mode — otherwise the hook's new-policy route would create another.
             agentHostsMode: policyIds.length ? 'existing' : 'new',
             selectedAgentPolicyIds: policyIds,
+            // agentPolicyId is intentionally NOT seeded here: useAgentPolicySummary falls back to
+            // selectedAgentPolicyIds[0] for enrollment-token/count queries, and seeding it would
+            // cause useAgentBasedDeploy to narrow a multi-policy deployment to only the first id.
             // Secrets are never persisted; restoring the method puts the right form in front of the user.
-            agentCredentialMethod: fromSOAuthMethod(item.authMethod), // CodeQL[js/clear-text-storage-of-sensitive-data] false positive: authMethod is a UI selector enum ('static_keys', 'assume_role', etc.), not a credential
+            agentCredentialMethod: fromSOAuthMethod(item.authMethod ?? undefined), // CodeQL[js/clear-text-storage-of-sensitive-data] false positive: authMethod is a UI selector enum ('static_keys', 'assume_role', etc.), not a credential
           })
         : item.connectorId
         ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
@@ -114,14 +117,12 @@ export async function hydrateOnboardingSession(
     // id as a placeholder for all services in the SO's services list.
     // Only seed for fully succeeded deploys — a failed status means some services need retry
     // and fabricating completion for them would prevent that retry path from running.
+    // Fallback for V1 docs that lack policyIdsByInstance: use packagePolicyIds[0] for every
+    // service — we can't reconstruct the per-instance mapping from a flat list, but any truthy
+    // value satisfies the isAlreadyDeployed check on resume.
     const policyIdsByInstance: Record<string, string> =
       item.status === 'succeeded' && item.packagePolicyIds?.length && item.services?.length
-        ? Object.fromEntries(
-            item.services.map((svc, i) => [
-              svc,
-              item.packagePolicyIds![i] ?? item.packagePolicyIds![0],
-            ])
-          )
+        ? Object.fromEntries(item.services.map((svc) => [svc, item.packagePolicyIds![0]]))
         : {};
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'detectAndReviewStep'),
