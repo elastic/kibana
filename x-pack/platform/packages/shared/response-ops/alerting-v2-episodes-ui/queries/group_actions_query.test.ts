@@ -16,7 +16,7 @@ describe('buildGroupActionsQuery', () => {
     expect(queryString).toContain('"gh-1"');
     expect(queryString).toContain('"gh-2"');
     expect(queryString).toContain('last_snooze_action');
-    expect(queryString).toContain('snooze_expiry');
+    expect(queryString).toContain('snoozed_until');
     expect(queryString).toContain('last_snooze_actor');
     expect(queryString).toContain('last_deactivate_actor');
     expect(queryString).toContain('BY group_hash, rule_id');

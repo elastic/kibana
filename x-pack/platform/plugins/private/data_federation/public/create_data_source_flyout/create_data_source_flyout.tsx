@@ -48,8 +48,8 @@ import {
 import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
-import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
 import { FlyoutErrorBanner } from './flyout_error_banner';
+
 import {
   authenticationModeFromDataSource,
   dataSourceToFlyoutFormValues,
@@ -309,18 +309,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
-          {dataSourceType === 's3' && (
-            <CreateDataSourceFlyoutTypeSettingsS3Region
+          {dataSourceType !== 's3' && (
+            <CreateDataSourceFlyoutTypeSettingsBlock
               control={control}
+              dataSourceType={dataSourceType}
               unregister={unregister}
-              isRequired={!isEditMode}
             />
           )}
-          <CreateDataSourceFlyoutTypeSettingsBlock
-            control={control}
-            dataSourceType={dataSourceType}
-            unregister={unregister}
-          />
           <EuiHorizontalRule margin="m" />
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}

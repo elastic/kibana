@@ -62,7 +62,6 @@ describe('LinkedActionPoliciesStep', () => {
           category: 'catch_all',
         },
       ],
-      total: 1,
       evaluatedCount: 1,
       isTruncated: false,
     });
@@ -83,7 +82,6 @@ describe('LinkedActionPoliciesStep', () => {
       isPreviousData: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -99,7 +97,6 @@ describe('LinkedActionPoliciesStep', () => {
       isPreviousData: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -121,7 +118,6 @@ describe('LinkedActionPoliciesStep', () => {
           category: 'catch_all',
         },
       ],
-      total: 1,
       evaluatedCount: 1,
       isTruncated: false,
     });
@@ -150,7 +146,6 @@ describe('LinkedActionPoliciesStep', () => {
           category: 'tags',
         },
       ],
-      total: 1,
       evaluatedCount: 1,
       isTruncated: false,
     });
@@ -181,7 +176,6 @@ describe('LinkedActionPoliciesStep', () => {
           category: 'tags',
         },
       ],
-      total: 1,
       evaluatedCount: 1,
       isTruncated: false,
     });
@@ -206,7 +200,6 @@ describe('LinkedActionPoliciesStep', () => {
           category: 'catch_all',
         },
       ],
-      total: 1,
       evaluatedCount: 1,
       isTruncated: false,
     });
@@ -244,7 +237,6 @@ describe('LinkedActionPoliciesStep', () => {
           category: 'catch_all',
         },
       ],
-      total: 1,
       evaluatedCount: 1,
       isTruncated: false,
     });
@@ -277,7 +269,6 @@ describe('LinkedActionPoliciesStep', () => {
           category: 'catch_all',
         },
       ],
-      total: 1,
       evaluatedCount: 1,
       isTruncated: false,
     });
@@ -293,7 +284,6 @@ describe('LinkedActionPoliciesStep', () => {
       isPreviousData: false,
       error: new Error('Network error'),
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -310,7 +300,6 @@ describe('LinkedActionPoliciesStep', () => {
       isPreviousData: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });

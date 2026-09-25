@@ -7,9 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
+import type { UseMatchedActionPoliciesResult } from '@kbn/alerting-v2-rule-form';
 import { useLinkedActionPolicies, sortMatchedActionPolicies } from './use_linked_action_policies';
 
-const mockUseMatchedActionPolicies = jest.fn();
+const mockUseMatchedActionPolicies = jest.fn<UseMatchedActionPoliciesResult, [unknown]>();
 const mockHttp = { fake: 'http-start-contract' };
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
@@ -85,9 +86,9 @@ describe('useLinkedActionPolicies', () => {
     jest.clearAllMocks();
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -102,12 +103,12 @@ describe('useLinkedActionPolicies', () => {
   it('returns matched items sorted matching-criteria first', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         buildItem('catch_all', { id: 'catch-all-1', name: 'Catch-all' }),
         buildItem('tags', { id: 'filtered-1', name: 'Matching' }),
       ],
-      total: 2,
       evaluatedCount: 2,
       isTruncated: false,
     });
@@ -126,9 +127,9 @@ describe('useLinkedActionPolicies', () => {
   it('flags truncated matches when some policies were not evaluated', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [buildItem('tags')],
-      total: 3,
       evaluatedCount: 2,
       isTruncated: true,
     });
@@ -146,7 +147,6 @@ describe('useLinkedActionPolicies', () => {
       isPreviousData: true,
       error: null,
       items: [buildItem('tags', { id: 'stale', name: 'Stale policy' })],
-      total: 1,
       evaluatedCount: 4,
       isTruncated: true,
     });
@@ -163,9 +163,9 @@ describe('useLinkedActionPolicies', () => {
   it('passes through the loading state', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: true,
+      isPreviousData: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -178,9 +178,9 @@ describe('useLinkedActionPolicies', () => {
   it('surfaces API errors', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: new Error('network error'),
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });

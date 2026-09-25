@@ -26,7 +26,6 @@ describe('useMatchedActionPolicies', () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
       items: [{ action_policy: { id: 'ap-1', name: 'Policy 1' }, category: 'tags' }],
-      total: 42,
       evaluated_count: 42,
       is_truncated: false,
     };
@@ -44,7 +43,6 @@ describe('useMatchedActionPolicies', () => {
 
     expect(result.current.error).toBeNull();
     expect(result.current.items).toEqual(fakeResponse.items);
-    expect(result.current.total).toBe(fakeResponse.total);
     expect(result.current.evaluatedCount).toBe(fakeResponse.evaluated_count);
     expect(result.current.isTruncated).toBe(fakeResponse.is_truncated);
     expect(http.fetch).toHaveBeenCalledWith(
@@ -69,7 +67,6 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.error?.message).toBe('Network error');
     expect(result.current.items).toEqual([]);
-    expect(result.current.total).toBe(0);
     expect(result.current.evaluatedCount).toBe(0);
     expect(result.current.isTruncated).toBe(false);
   });
@@ -79,13 +76,11 @@ describe('useMatchedActionPolicies', () => {
     http.fetch
       .mockResolvedValueOnce({
         items: [{ action_policy: { id: 'ap-1' }, category: 'tags' }],
-        total: 1,
         evaluated_count: 1,
         is_truncated: false,
       } as any)
       .mockResolvedValueOnce({
         items: [{ action_policy: { id: 'ap-2' }, category: 'catch_all' }],
-        total: 1,
         evaluated_count: 1,
         is_truncated: false,
       } as any);
@@ -147,7 +142,6 @@ describe('useMatchedActionPolicies', () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
       items: [{ action_policy: { id: 'ap-global', name: 'Global Policy' }, category: 'catch_all' }],
-      total: 1,
       evaluated_count: 1,
       is_truncated: false,
     };
