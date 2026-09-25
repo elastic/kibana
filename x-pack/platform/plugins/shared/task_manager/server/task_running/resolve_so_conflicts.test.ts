@@ -187,7 +187,27 @@ describe('resolveTaskDocumentConflicts', () => {
     expect(store.get).toHaveBeenCalledTimes(3);
     expect(store.partialUpdate).toHaveBeenCalledTimes(3);
     expect(logger.error).toHaveBeenCalledWith(
-      'Error resolving task document version conflict after task run: persistent conflict',
+      'Error resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": persistent conflict',
+      LOG_META
+    );
+  });
+
+  test('retries when partialUpdate rejects with a non-Error bulk update result', async () => {
+    const currentTask = createTask({ version: 'WzIsMV0=', startedAt: originalTask.startedAt });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockRejectedValue({
+      type: 'task',
+      id: originalTask.id,
+      status: 409,
+      error: { type: 'version_conflict_engine_exception' },
+    });
+
+    await resolve();
+
+    expect(store.get).toHaveBeenCalledTimes(3);
+    expect(store.partialUpdate).toHaveBeenCalledTimes(3);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": {"type":"task","id":"task-1","status":409,"error":{"type":"version_conflict_engine_exception"}}',
       LOG_META
     );
   });
