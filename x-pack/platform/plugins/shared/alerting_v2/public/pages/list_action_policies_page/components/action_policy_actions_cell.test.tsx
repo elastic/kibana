@@ -11,6 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyActionsCell } from './action_policy_actions_cell';
 
+let mockIsLicenseValid = true;
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
+
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
   version: 'v1',
@@ -46,12 +51,23 @@ const renderCell = (canWrite: boolean) =>
   );
 
 describe('ActionPolicyActionsCell', () => {
+  beforeEach(() => {
+    mockIsLicenseValid = true;
+  });
+
   describe('when the user has write privilege', () => {
     it('renders the edit and more actions affordances', () => {
       renderCell(true);
 
-      expect(screen.getByLabelText('Edit this action policy')).toBeInTheDocument();
+      expect(screen.getByLabelText('Edit this action policy')).toBeEnabled();
       expect(screen.getByLabelText('More actions')).toBeInTheDocument();
+    });
+
+    it('disables the edit button when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      renderCell(true);
+
+      expect(screen.getByTestId('editActionPolicyButton-policy-1')).toBeDisabled();
     });
 
     it('does not render a standalone view details button (the name link covers it)', () => {
