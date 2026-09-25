@@ -3780,6 +3780,13 @@ describe('TaskManagerRunner', () => {
           monitor: true,
           warn_threshold: 5000,
         },
+        event_loop_watchdog: {
+          enabled: false,
+          threshold_ms: 500,
+          heartbeat_interval_ms: 100,
+          live_report_interval_ms: 3000,
+          dedup_window_ms: 300000,
+        },
       }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
       getPollInterval: () => 500,
