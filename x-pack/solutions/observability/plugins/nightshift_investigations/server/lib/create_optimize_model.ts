@@ -39,10 +39,14 @@ export const createOptimizeModel = async ({
 
   try {
     const model = await modelProvider.getDefaultModel();
-    logger.info(`Optimize using Agent Builder connector ${model.connector.connectorId}`);
+    logger.info('Optimize model resolved from Agent Builder');
+    logger.debug(`Optimize connector=${model.connector.connectorId}`);
     return model;
   } catch (err) {
-    logger.info(`Optimize skipped — no Agent Builder model: ${(err as Error).message}`);
+    logger.info('Optimize skipped — no Agent Builder model');
+    logger.debug(
+      `Optimize model resolution failed: ${err instanceof Error ? err.message : String(err)}`
+    );
     return undefined;
   }
 };

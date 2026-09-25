@@ -264,6 +264,10 @@ export const createLlmProposeMemoryLabels = ({
   };
 };
 
+const looksLikeSecret = (value: string): boolean =>
+  /(?:api[_-]?key|secret|password)\s*[:=]\s*\S+/i.test(value) ||
+  /bearer\s+[a-z0-9._-]{12,}/i.test(value);
+
 export const createLlmProposeMemoryExtractions = ({
   inferenceClient,
 }: {
@@ -322,8 +326,14 @@ Investigation transcript:\n${transcript}`,
         .map((entry) => {
           const candidate =
             typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {};
+          const rawSlug = String(candidate.slug ?? '');
+          // Validate before canonicalization: replacing `api_key=` punctuation with hyphens would
+          // otherwise hide the secret pattern while retaining it in the durable ID/path.
+          if (looksLikeSecret(rawSlug)) {
+            return undefined;
+          }
           return {
-            slug: canonicalizeSlug(String(candidate.slug ?? '')),
+            slug: canonicalizeSlug(rawSlug),
             title: String(candidate.title ?? '').trim(),
             content: String(candidate.content ?? '').trim(),
             tags: Array.isArray(candidate.tags) ? candidate.tags.map(String) : [],
@@ -331,8 +341,11 @@ Investigation transcript:\n${transcript}`,
           };
         })
         .filter(
-          (entry: MemoryExtractProposal) =>
-            entry.slug.length > 0 && entry.title.length > 0 && entry.content.length > 0
+          (entry): entry is MemoryExtractProposal =>
+            entry !== undefined &&
+            entry.slug.length > 0 &&
+            entry.title.length > 0 &&
+            entry.content.length > 0
         )
         .slice(0, MAX_EXTRACTIONS),
     };
@@ -440,10 +453,6 @@ export const createLlmSynthesizeMemoryGroup = ({
     };
   };
 };
-
-const looksLikeSecret = (value: string): boolean =>
-  /(?:api[_-]?key|secret|password)\s*[:=]\s*\S+/i.test(value) ||
-  /bearer\s+[a-z0-9._-]{12,}/i.test(value);
 
 const extractionSafetyText = (extra: MemoryExtractProposal, task: string): string =>
   [extra.title, extra.content, extra.tags.join('\n'), extra.categories.join('\n'), task].join('\n');
