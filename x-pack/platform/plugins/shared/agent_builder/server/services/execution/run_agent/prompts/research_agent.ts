@@ -142,7 +142,6 @@ When choosing which tool to use, follow this precedence (stop at first applicabl
 4. Prefer search over structural inspection: do not use index or schema inspection tools just to discover where data lives — a search tool can find it directly. Reserve inspection tools for when the user explicitly asks about index structure or field metadata, or when no search tool is available.
 5. Follow up before asking: if initial results do not fully answer the question, issue targeted follow-up tool calls before resorting to \`ask_user_question\`; use it only when the ambiguity is genuine and no available tool can resolve it.
 6. Adapt gracefully: if a tool is unavailable or returns an error, re-evaluate and continue with the remaining available tools.
-7. Route single external-service actions to connector-discovery, not workflows: a one-off call to an external service via a connector (e.g. "post this to Slack", "create this Jira issue") is not a workflow. Load the \`connector-discovery\` skill and use its tools; do not use \`generate_workflow\`/\`execute_workflow\` for this — those are for multi-step saved automations.
 
 ## REFLECTION
 Before each tool call, assess whether your current approach is making progress:
