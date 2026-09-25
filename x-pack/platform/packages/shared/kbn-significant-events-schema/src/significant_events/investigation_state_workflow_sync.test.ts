@@ -10,7 +10,7 @@ import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import {
   getManagedWorkflowDefinition,
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   INVESTIGATE_STEP_ID,
@@ -64,13 +64,11 @@ const normalizeSchema = (value: unknown): unknown => {
  * under Elastic License 2.0, among others) is licensing-legal in the other direction.
  */
 describe('investigation_workflow.yaml structured-output schema stays in sync with investigationStateSchema', () => {
-  const workflowDefinition = getManagedWorkflowDefinition(
-    SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID
-  );
+  const workflowDefinition = getManagedWorkflowDefinition(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID);
 
   if (!workflowDefinition?.yaml) {
     throw new Error(
-      `Could not find a static \`yaml\` definition for managed workflow id "${SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID}"`
+      `Could not find a static \`yaml\` definition for managed workflow id "${NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID}"`
     );
   }
 
@@ -92,44 +90,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       normalizeSchema(z.toJSONSchema(investigationStateSchema))
     );
   });
-
-  const severityUpdate = {
-    field: 'severity' as const,
-    from: '40-medium' as const,
-    to: '80-critical' as const,
-    reason: 'Checkout is fully blocked for every user, not intermittently degraded as triaged.',
-    evidence: [
-      {
-        description: 'Zero successful checkout completions during the incident window.',
-        esql_query:
-          'FROM traces | WHERE service.name == "checkout" | STATS failures = COUNT(*) WHERE event.outcome == "failure"',
-      },
-      { description: 'All checkout pods in CrashLoopBackOff for the full window.' },
-    ],
-  };
-
-  const statusUpdate = {
-    field: 'status' as const,
-    from: 'open' as const,
-    to: 'dismissed' as const,
-    reason: 'The investigation found no evidence of an actual failure — this is a false alarm.',
-    evidence: [{ description: 'All metrics remained within normal bounds throughout the window.' }],
-  };
-
-  const summaryUpdate = {
-    field: 'summary' as const,
-    from: 'Potential latency spike on the checkout service.',
-    to: 'Latency on the checkout service remained within SLA bounds — the triage summary overstated impact.',
-    reason:
-      'P99 latency never exceeded 200ms and error rates stayed below 0.1% throughout the incident window.',
-    evidence: [
-      {
-        description: 'P99 latency stayed below 200ms throughout.',
-        esql_query:
-          'FROM traces | WHERE service.name == "checkout" | STATS p99 = PERCENTILE(duration, 99)',
-      },
-    ],
-  };
 
   const validPayload = {
     summary: 'A deploy at 14:02 introduced a connection leak in the checkout service.',
@@ -164,23 +124,11 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
         description: 'Would have confirmed whether a leak compounded the exhaustion.',
       },
     ],
-    trigger_feedback: [severityUpdate],
   };
 
   it('accepts a valid payload under both the YAML JSON Schema and the zod schema', () => {
     expect(validate(validPayload)).toBe(true);
     expect(investigationStateSchema.safeParse(validPayload).success).toBe(true);
-  });
-
-  it('accepts all three trigger feedback field types (severity, status, summary) under both schemas', () => {
-    const allFields = {
-      ...validPayload,
-      title: 'Checkout connection leak after the 14:02 deploy',
-      trigger_feedback: [severityUpdate, statusUpdate, summaryUpdate],
-    };
-
-    expect(validate(allFields)).toBe(true);
-    expect(investigationStateSchema.safeParse(allFields).success).toBe(true);
   });
 
   it('accepts a minimal payload (empty hypotheses, no optional fields) under both schemas', () => {
@@ -517,82 +465,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(tooManyBlindSpots)).toBe(false);
     expect(investigationStateSchema.safeParse(tooManyBlindSpots).success).toBe(false);
-  });
-
-  it('rejects trigger feedback with an unknown field under both schemas', () => {
-    const unknownField = {
-      ...validPayload,
-      trigger_feedback: [
-        {
-          field: 'confidence',
-          from: '0.5',
-          to: '0.8',
-          reason: 'better',
-          evidence: [{ description: 'x' }],
-        },
-      ],
-    };
-
-    expect(validate(unknownField)).toBe(false);
-    expect(investigationStateSchema.safeParse(unknownField).success).toBe(false);
-  });
-
-  it('rejects severity trigger feedback with an invalid enum value under both schemas', () => {
-    const invalidSeverity = {
-      ...validPayload,
-      trigger_feedback: [{ ...severityUpdate, to: '90-mega' }],
-    };
-
-    expect(validate(invalidSeverity)).toBe(false);
-    expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
-  });
-
-  it('rejects status trigger feedback with an invalid enum value under both schemas', () => {
-    const invalidStatus = {
-      ...validPayload,
-      trigger_feedback: [{ ...statusUpdate, to: 'unknown' }],
-    };
-
-    expect(validate(invalidStatus)).toBe(false);
-    expect(investigationStateSchema.safeParse(invalidStatus).success).toBe(false);
-  });
-
-  it('rejects trigger feedback missing a required field (reason) under both schemas', () => {
-    const { reason, ...withoutReason } = severityUpdate;
-    const missingReason = { ...validPayload, trigger_feedback: [withoutReason] };
-
-    expect(validate(missingReason)).toBe(false);
-    expect(investigationStateSchema.safeParse(missingReason).success).toBe(false);
-  });
-
-  it('rejects trigger feedback with empty evidence under both schemas', () => {
-    const emptyEvidence = {
-      ...validPayload,
-      trigger_feedback: [{ ...severityUpdate, evidence: [] }],
-    };
-
-    expect(validate(emptyEvidence)).toBe(false);
-    expect(investigationStateSchema.safeParse(emptyEvidence).success).toBe(false);
-  });
-
-  it('rejects summary trigger feedback with an empty `to` under both schemas', () => {
-    const emptySummary = {
-      ...validPayload,
-      trigger_feedback: [{ ...summaryUpdate, to: '' }],
-    };
-
-    expect(validate(emptySummary)).toBe(false);
-    expect(investigationStateSchema.safeParse(emptySummary).success).toBe(false);
-  });
-
-  it('rejects a trigger_feedback array exceeding MAX_TRIGGER_FEEDBACK under both schemas', () => {
-    const tooMany = {
-      ...validPayload,
-      trigger_feedback: [severityUpdate, statusUpdate, summaryUpdate, severityUpdate],
-    };
-
-    expect(validate(tooMany)).toBe(false);
-    expect(investigationStateSchema.safeParse(tooMany).success).toBe(false);
   });
 
   it('accepts a payload with an impact entity carrying a name and evidence under both schemas', () => {

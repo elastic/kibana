@@ -7,9 +7,11 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { AssignmentsService } from '../assignments/assignments_service';
+import type { InvestigationStatusService } from './services/investigation_status_service';
 
 export interface InvestigationRouteDependencies {
   router: IRouter;
   logger: Logger;
   getAssignmentsService: () => AssignmentsService;
+  getInvestigationStatusService?: () => InvestigationStatusService;
 }

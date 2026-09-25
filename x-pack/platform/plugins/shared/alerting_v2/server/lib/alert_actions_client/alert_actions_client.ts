@@ -100,6 +100,12 @@ const boomToBulkActionError = (id: string, error: Boom.Boom): BulkAlertActionErr
  * episode of the series. The other episode actions are pure audit records
  * and may target any existing episode.
  */
+/**
+ * Per-item rejections a bulk request absorbs into `errors[]`. Anything else
+ * thrown while preparing an item is a real failure and aborts the batch.
+ */
+const EXPECTED_BULK_ITEM_STATUS_CODES = new Set([400, 404, 409]);
+
 const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
   actionType === ALERT_EPISODE_ACTION_TYPE.ACTIVATE ||
   actionType === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
@@ -152,8 +158,8 @@ export class AlertActionsClient {
    * `group_hash` — the caller never supplies it.
    *
    * Lifecycle actions additionally require the episode to be the latest of
-   * its series (see {@link isLifecycleActionType}); an old episode is
-   * rejected with a 404 `ALERT_EPISODE_NOT_LATEST`.
+   * its series (see {@link isLifecycleActionType}); a superseded episode is
+   * rejected with a 409 `ALERT_EPISODE_NOT_LATEST`.
    */
   public async createEpisodeAction(params: {
     episodeId: string;
@@ -178,7 +184,7 @@ export class AlertActionsClient {
       });
 
       if (latestOfGroup?.episode_id !== episodeId) {
-        throw Boom.notFound(getEpisodeNotLatestMessage(episodeId, alertEvent.group_hash), {
+        throw Boom.conflict(getEpisodeNotLatestMessage(episodeId, alertEvent.group_hash), {
           code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
           details: { episode_id: episodeId, group_hash: alertEvent.group_hash },
         });
@@ -204,10 +210,11 @@ export class AlertActionsClient {
    * surface relies on.
    *
    * Shared between the single-action paths (which let the throw bubble
-   * back to the route) and the bulk paths (which convert expected Boom
-   * 400 / 404 rejections into per-item `errors[]` entries so the rest of
-   * the batch still gets persisted). All I/O the prep would have needed
-   * has already happened by the time this is called.
+   * back to the route) and the bulk paths (which convert the Boom
+   * rejections in {@link EXPECTED_BULK_ITEM_STATUS_CODES} into per-item
+   * `errors[]` entries so the rest of the batch still gets persisted).
+   * All I/O the prep would have needed has already happened by the time
+   * this is called.
    */
   private prepareAction(params: {
     action: CreateAlertActionBody;
@@ -302,10 +309,7 @@ export class AlertActionsClient {
           })
         );
       } catch (error) {
-        if (
-          Boom.isBoom(error) &&
-          (error.output.statusCode === 400 || error.output.statusCode === 404)
-        ) {
+        if (Boom.isBoom(error) && EXPECTED_BULK_ITEM_STATUS_CODES.has(error.output.statusCode)) {
           errors.push(boomToBulkActionError(item.group_hash, error));
           continue;
         }
@@ -400,10 +404,7 @@ export class AlertActionsClient {
           })
         );
       } catch (error) {
-        if (
-          Boom.isBoom(error) &&
-          (error.output.statusCode === 400 || error.output.statusCode === 404)
-        ) {
+        if (Boom.isBoom(error) && EXPECTED_BULK_ITEM_STATUS_CODES.has(error.output.statusCode)) {
           errors.push(boomToBulkActionError(item.episode_id, error));
           continue;
         }
@@ -429,10 +430,11 @@ export class AlertActionsClient {
     docEpisodeId: string | null;
   }): AlertAction {
     const { action, alertEvent, userProfileUid, docEpisodeId } = params;
-    // Strip the identifiers bulk items carry alongside the action payload
-    // (`group_hash` on series items, `episode_id` on episode items) — the
-    // doc's own identifier fields below are authoritative.
     const actionData = omit(action, ['group_hash', 'episode_id', 'action_type']);
+    const storageActionData =
+      action.action_type === ALERT_EPISODE_ACTION_TYPE.SNOOZE
+        ? { ...omit(actionData, ['snoozed_until']), expiry: action.snoozed_until }
+        : actionData;
 
     return {
       '@timestamp': new Date().toISOString(),
@@ -444,7 +446,7 @@ export class AlertActionsClient {
       group_hash: alertEvent.group_hash,
       episode_id: docEpisodeId,
       space_id: alertEvent.space_id,
-      ...actionData,
+      ...storageActionData,
     };
   }
 }

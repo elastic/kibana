@@ -524,6 +524,10 @@ src/platform/packages/shared/deeplinks/vectordb @elastic/search-ml-ux
 src/platform/packages/shared/deeplinks/workflows @elastic/workflows-eng
 src/platform/packages/shared/deeplinks/workplace_ai @elastic/search-ml-ux
 src/platform/packages/shared/esql/kbn-esql-browser @elastic/kibana-discover
+src/platform/packages/shared/esql/kbn-esql-language @elastic/kibana-discover
+src/platform/packages/shared/esql/kbn-esql-server-utils @elastic/kibana-discover
+src/platform/packages/shared/esql/kbn-esql-types @elastic/kibana-discover
+src/platform/packages/shared/esql/kbn-esql-utils @elastic/kibana-discover
 src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
@@ -604,12 +608,8 @@ src/platform/packages/shared/kbn-es-query-constants @elastic/kibana-discover
 src/platform/packages/shared/kbn-es-query-server @elastic/kibana-discover
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core
 src/platform/packages/shared/kbn-esql-composer @elastic/obs-signals-metrics-team @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-esql-language @elastic/kibana-discover
 src/platform/packages/shared/kbn-esql-resource-browser @elastic/kibana-management
 src/platform/packages/shared/kbn-esql-resource-browser/.storybook @elastic/kibana-management
-src/platform/packages/shared/kbn-esql-server-utils @elastic/kibana-discover
-src/platform/packages/shared/kbn-esql-types @elastic/kibana-discover
-src/platform/packages/shared/kbn-esql-utils @elastic/kibana-discover
 src/platform/packages/shared/kbn-eval-kql @elastic/workflows-eng
 src/platform/packages/shared/kbn-evals-suite-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-dashboards
@@ -2658,12 +2658,14 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/buildkite/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/censys/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/databricks/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/dropbox/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/elasticsearch/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/figma/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_iam/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_secret_manager/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/gitlab/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitoring/** @elastic/nightshift-context-and-research-team
@@ -2777,7 +2779,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/platform/test/stack_functional_integration/apps/management @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/*_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
-/src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-management
+/src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-discover
 /src/platform/test/functional/services/management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/remote_clusters @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/indexpattern_field_editor_page.ts @elastic/kibana-discover
@@ -3829,6 +3831,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
 # codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
+/.agents/skills/cypress-to-scout-migration/** @elastic/appex-qa @elastic/security-engineering-productivity
 /.agents/skills/ftr-testing/** @elastic/appex-qa
 /.agents/skills/scout-api-testing/** @elastic/appex-qa
 /.agents/skills/scout-best-practices-reviewer/** @elastic/appex-qa
