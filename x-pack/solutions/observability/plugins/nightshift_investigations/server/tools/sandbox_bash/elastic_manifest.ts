@@ -9,7 +9,10 @@ import type { Logger } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 
 /** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
-export const renderElasticManifest = (connectorId: string): string =>
+export const renderElasticManifest = (
+  connectorId: string,
+  { readableIndices }: { readableIndices?: string } = {}
+): string =>
   [
     '# Elasticsearch telemetry',
     '',
@@ -22,19 +25,24 @@ export const renderElasticManifest = (connectorId: string): string =>
     'Reference those variables directly and never hard-code their values. A command that omits',
     '`connector_id` gets no credentials and cannot reach Elasticsearch.',
     '',
-    'Readable indices: `logs-*`, `metrics-*`, `traces-*`. List remote clusters with',
-    '`GET /_remote/info` (empty if none). Query a remote as `cluster:index`, e.g. `FROM *:logs-*`.',
+    readableIndices?.trim() || 'Readable indices: `logs-*`, `metrics-*`, `traces-*`.',
+    '',
+    '## Query guidance',
+    '',
+    '- Use the readable patterns above in place of `logs-*` in the example below.',
+    '- Name each remote explicitly as `remote:index`; never use wildcard remote names in',
+    '  `_resolve/cluster`, `_cat/indices` or searches. Use `GET /_remote/info` only if remote names',
+    '  are not supplied above.',
+    '- Bound every telemetry query with a `@timestamp` range and every curl with `--max-time 120`.',
+    '- Discover fields with `_field_caps` on a narrow index pattern. Prefer `_count` or ES|QL',
+    '  `STATS` for totals and a small `LIMIT` for raw documents.',
     '',
     '```bash',
     '# connector_id must be set on every one of these commands',
-    'curl -s -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
+    'curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
     '  "$CONNECTOR_CONFIG_URL/_remote/info"',
     '',
-    'curl -s -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
-    '  -H "Content-Type: application/json" \\',
-    '  "$CONNECTOR_CONFIG_URL/logs-*/_count"',
-    '',
-    'curl -s -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
+    'curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
     '  -H "Content-Type: application/json" \\',
     '  "$CONNECTOR_CONFIG_URL/_query" \\',
     '  -d \'{"query":"FROM logs-* | WHERE @timestamp >= \\"2026-01-01T00:00:00Z\\" AND @timestamp < \\"2026-01-01T01:00:00Z\\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20"}\'',
@@ -45,18 +53,21 @@ export const renderElasticManifest = (connectorId: string): string =>
 export const writeElasticManifest = async ({
   session,
   connectorId,
+  readableIndices,
   logger,
 }: {
   session: SandboxSession;
   connectorId: string;
+  readableIndices?: string;
   logger: Logger;
 }): Promise<void> => {
   logger.debug(`Writing Elasticsearch manifest`);
 
-  await session.writeFiles([
+  const [result] = await session.writeFiles([
     {
       path: '/workspace/elastic.md',
-      content: Buffer.from(renderElasticManifest(connectorId), 'utf8'),
+      content: Buffer.from(renderElasticManifest(connectorId, { readableIndices }), 'utf8'),
     },
   ]);
+  if (!result?.success) throw new Error('Failed to write sandbox telemetry guidance');
 };
