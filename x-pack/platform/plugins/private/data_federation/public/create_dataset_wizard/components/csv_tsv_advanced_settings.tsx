@@ -13,6 +13,7 @@ import { useController } from 'react-hook-form';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
   DEFAULT_COLUMN_PREFIX,
+  DEFAULT_CSV_ESCAPE,
   DEFAULT_CSV_QUOTE,
   validateEscapeCharacter,
   validateQuoteCharacter,
@@ -40,12 +41,6 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
   });
   const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
   const { field: trimSpacesField } = useController({ name: 'settings.trim_spaces', control });
-
-  React.useEffect(() => {
-    if (!columnPrefixField.value) {
-      columnPrefixField.onChange(DEFAULT_COLUMN_PREFIX);
-    }
-  }, [columnPrefixField]);
 
   return (
     <div data-test-subj="createDatasetCsvTsvAdvancedSettings">
@@ -77,10 +72,10 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         label={
           <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsEscapeLabel}
-            infoText={createDatasetWizardStrings.settingsEscapeCharacterDescription}
+            infoText={createDatasetWizardStrings.settingsEscapeHelp}
           />
         }
-        helpText={createDatasetWizardStrings.settingsEscapeHelp}
+        helpText={helpTextDefault(DEFAULT_CSV_ESCAPE)}
         fullWidth
         isInvalid={Boolean(escapeState.error)}
         error={escapeState.error?.message}
@@ -88,6 +83,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         <EuiFieldText
           data-test-subj="createDatasetSettingsEscape"
           fullWidth
+          placeholder={createDatasetWizardStrings.settingsEscapePlaceholder}
           maxLength={1}
           isInvalid={Boolean(escapeState.error)}
           value={escapeField.value}
@@ -100,15 +96,16 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         label={
           <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsColumnPrefixLabel}
-            infoText={createDatasetWizardStrings.settingsColumnPrefixDescription}
+            infoText={createDatasetWizardStrings.settingsColumnPrefixHelp}
           />
         }
-        helpText={createDatasetWizardStrings.settingsColumnPrefixHelp}
+        helpText={helpTextDefault(DEFAULT_COLUMN_PREFIX)}
         fullWidth
       >
         <EuiFieldText
           data-test-subj="createDatasetSettingsColumnPrefix"
           fullWidth
+          placeholder={createDatasetWizardStrings.settingsColumnPrefixPlaceholder}
           value={columnPrefixField.value}
           onChange={(e) => columnPrefixField.onChange(e.target.value)}
           name={columnPrefixField.name}

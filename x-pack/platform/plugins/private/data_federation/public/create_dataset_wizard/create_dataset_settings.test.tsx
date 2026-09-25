@@ -322,6 +322,30 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(
       within(quoteRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
     ).toBeInTheDocument();
+    const columnPrefixField = getByTestId('createDatasetSettingsColumnPrefix') as HTMLInputElement;
+    expect(columnPrefixField).toHaveValue('');
+    expect(columnPrefixField).toHaveAttribute(
+      'placeholder',
+      createDatasetWizardStrings.settingsColumnPrefixPlaceholder
+    );
+    const columnPrefixRow = columnPrefixField.closest('.euiFormRow');
+    expect(columnPrefixRow).not.toBeNull();
+    expect(within(columnPrefixRow as HTMLElement).getByText('col')).toBeInTheDocument();
+    expect(
+      within(columnPrefixRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
+    ).toBeInTheDocument();
+    const escapeField = getByTestId('createDatasetSettingsEscape') as HTMLInputElement;
+    expect(escapeField).toHaveValue('');
+    expect(escapeField).toHaveAttribute(
+      'placeholder',
+      createDatasetWizardStrings.settingsEscapePlaceholder
+    );
+    const escapeRow = escapeField.closest('.euiFormRow');
+    expect(escapeRow).not.toBeNull();
+    expect(within(escapeRow as HTMLElement).getByText('\\')).toBeInTheDocument();
+    expect(
+      within(escapeRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
+    ).toBeInTheDocument();
     // API-only / passthrough-only fields are never shown in the UI
     expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
     expect(queryByTestId('createDatasetSettingsComment')).toBeNull();

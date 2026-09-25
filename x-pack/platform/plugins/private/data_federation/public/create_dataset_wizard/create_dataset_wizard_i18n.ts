@@ -840,6 +840,13 @@ export const createDatasetWizardStrings = {
     defaultMessage: 'The character used to escape special characters.',
   }),
 
+  settingsEscapePlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEscapePlaceholder',
+    {
+      defaultMessage: 'Enter an escape character',
+    }
+  ),
+
   settingsEscapeInvalid: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEscapeInvalid',
     {
@@ -872,6 +879,13 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsColumnPrefixHelp',
     {
       defaultMessage: 'Prefix for generated column names. Only applies when header_row is false.',
+    }
+  ),
+
+  settingsColumnPrefixPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsColumnPrefixPlaceholder',
+    {
+      defaultMessage: 'Enter a column prefix',
     }
   ),
 
