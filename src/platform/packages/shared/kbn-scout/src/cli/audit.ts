@@ -326,8 +326,8 @@ export function formatAuditText(report: AuditReport): string {
     subsetsBySet.set(set, [...(subsetsBySet.get(set) ?? []), of]);
   }
   section(
-    'Config sets whose differences are a subset of another set, could share it',
-    [...subsetsBySet.entries()].map(([set, ofs]) => `${set} is a subset of: ${ofs.join(', ')}`)
+    'Config sets whose settings another set already includes, their tests could run on that set',
+    [...subsetsBySet.entries()].map(([set, ofs]) => `${set} is covered by ${ofs.join(', ')}`)
   );
 
   if (lines.length === 1) lines.push('', 'No findings.');

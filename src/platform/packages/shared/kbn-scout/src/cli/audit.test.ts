@@ -260,7 +260,7 @@ describe('formatAuditText', () => {
     expect(text).toContain('flags_only (stateful)');
     expect(text).toContain('a (stateful/x.config.ts) = b (stateful/x.config.ts)');
     expect(text).toContain(
-      'small (stateful/x.config.ts) is a subset of: big (stateful/x.config.ts), bigger (stateful/x.config.ts)'
+      'small (stateful/x.config.ts) is covered by big (stateful/x.config.ts), bigger (stateful/x.config.ts)'
     );
     expect(text).not.toContain('dashboard');
   });
@@ -351,28 +351,12 @@ describe('config set audit, pure parts', () => {
       'flags_plus_boot (stateful)',
     ]);
     expect(report.identical).toEqual([['twin_a (stateful)', 'twin_b (stateful)']]);
-    // subsets: same flavor and file, not identical, and neither side has non-arg differences
+    // subsets: one line per identical group (twin_b is represented by twin_a), only the
+    // nearest superset (flags_plus_boot ⊆ ... is not transitive here, big is unrelated to flags)
     expect(report.subsets).toEqual([
-      {
-        set: 'flags_only (stateful)',
-        of: 'flags_plus_boot (stateful)',
-      },
-      {
-        set: 'twin_a (stateful)',
-        of: 'flags_plus_boot (stateful)',
-      },
-      {
-        set: 'twin_a (stateful)',
-        of: 'big (stateful)',
-      },
-      {
-        set: 'twin_b (stateful)',
-        of: 'flags_plus_boot (stateful)',
-      },
-      {
-        set: 'twin_b (stateful)',
-        of: 'big (stateful)',
-      },
+      { set: 'flags_only (stateful)', of: 'flags_plus_boot (stateful)' },
+      { set: 'twin_a (stateful)', of: 'flags_plus_boot (stateful)' },
+      { set: 'twin_a (stateful)', of: 'big (stateful)' },
     ]);
   });
 });

@@ -271,19 +271,26 @@ export function summarizeConfigSets(
     .filter((group) => group.length > 1)
     .map((group) => group.map(label).sort());
 
+  // One representative per identical group, so twins do not repeat each other's lines.
+  const representatives = [...bySignature.values()].map((group) => group[0]);
+  const covers = (a: ConfigSetOverrides, b: ConfigSetOverrides) =>
+    a !== b &&
+    a.flavor === b.flavor &&
+    a.file === b.file &&
+    signature(a) !== signature(b) &&
+    isSubset(a.kibana, b.kibana) &&
+    isSubset(a.elasticsearch, b.elasticsearch);
+
   const subsets: Array<{ set: string; of: string }> = [];
-  for (const a of sets) {
-    for (const b of sets) {
-      if (a === b || a.flavor !== b.flavor || a.file !== b.file) continue;
-      if (signature(a) === signature(b)) continue;
-      const aSize = Object.keys(a.kibana).length + Object.keys(a.elasticsearch).length;
-      // Only plain arg-level supersets: a set that also needs docker, a license or
-      // preboot is not a merge target for one that does not.
-      if (aSize === 0 || a.other.length > 0 || b.other.length > 0) continue;
-      if (isSubset(a.kibana, b.kibana) && isSubset(a.elasticsearch, b.elasticsearch)) {
-        subsets.push({ set: label(a), of: label(b) });
-      }
-    }
+  for (const a of representatives) {
+    const aSize = Object.keys(a.kibana).length + Object.keys(a.elasticsearch).length;
+    // Only plain arg-level supersets: a set that also needs docker, a license or
+    // preboot is not a merge target for one that does not.
+    if (aSize === 0 || a.other.length > 0) continue;
+    const supersets = representatives.filter((b) => b.other.length === 0 && covers(a, b));
+    // Nearest supersets only: if A ⊆ B ⊆ C, listing C under A adds nothing.
+    const nearest = supersets.filter((b) => !supersets.some((c) => c !== b && covers(c, b)));
+    for (const b of nearest) subsets.push({ set: label(a), of: label(b) });
   }
 
   return { sets, runtimeOnly, bootFeatureFlags, identical, subsets, runtimeKeys };
