@@ -183,8 +183,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
-          /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-          await pageObjects.header.waitUntilLoadingHasFinished();
+          // Wait for the data grid to display the newly sorted results before reading
+          // values. waitUntilLoadingHasFinished polls the global indicator, which
+          // background requests from the CSP plugin keep active indefinitely, causing
+          // the test to time out after ~132s (issue #292420). Instead, wait until the
+          // column cells contain values that match the expected sort order, which is
+          // the content-specific signal that the sort query completed.
+          await retry.waitFor(`${columnName} ${dir} sort results`, async () => {
+            const vals = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
+            if (vals.length !== data.length) return false;
+            const expected = [...vals].sort((a, b) =>
+              dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)
+            );
+            return vals.every((v, i) => v === expected[i]);
+          });
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const sorted = values
@@ -230,8 +242,41 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Remove fields from the Findings DataTable', async () => {
+        // Ensure both columns are present before trying to remove them.
+        // This test must be self-contained: it cannot rely on Test 13 having
+        // run first and persisted agent.id/agent.name columns in localStorage.
+        const isAgentIdPresent = await testSubjects.exists('dataGridHeaderCell-agent.id', {
+          timeout: 0,
+        });
+        const isAgentNamePresent = await testSubjects.exists('dataGridHeaderCell-agent.name', {
+          timeout: 0,
+        });
+        if (!isAgentIdPresent || !isAgentNamePresent) {
+          const setupButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+          await setupButton.click();
+          await testSubjects.existOrFail(CSP_FIELDS_SELECTOR_MODAL);
+          if (!isAgentIdPresent) {
+            const agentIdSetupCheckbox = await testSubjects.find(
+              'cloud-security-fields-selector-item-agent.id'
+            );
+            await agentIdSetupCheckbox.click();
+            await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+          }
+          if (!isAgentNamePresent) {
+            const agentNameSetupCheckbox = await testSubjects.find(
+              'cloud-security-fields-selector-item-agent.name'
+            );
+            await agentNameSetupCheckbox.click();
+            await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
+          }
+          const setupCloseButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+          await setupCloseButton.click();
+          await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
+        }
+
         const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
         await fieldsButton.click();
+        await testSubjects.existOrFail(CSP_FIELDS_SELECTOR_MODAL);
 
         const agentIdCheckbox = await testSubjects.find(
           'cloud-security-fields-selector-item-agent.id'
