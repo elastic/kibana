@@ -25,8 +25,6 @@ export interface GenerationContext {
   imports: ImportsMap;
   circularRefs: Set<string>;
   config: Pick<GeneratorConfig, 'schemaNameTransform'>;
-  /** True when generated code will reference helpers from @kbn/zod-helpers/v4 */
-  useZodHelpers: boolean;
 }
 
 export interface BundleGenerationContext {
@@ -34,23 +32,6 @@ export interface BundleGenerationContext {
   sources: ParsedSource[];
   info: OpenAPIV3.InfoObject;
   config: Pick<GeneratorConfig, 'schemaNameTransform'>;
-}
-
-/**
- * Returns true when the document contains schema features that require helpers
- * from @kbn/zod-helpers/v4 in generated code:
- *   - query parameters (need ArrayFromString / BooleanFromString)
- *   - string formats 'date-math' or 'nonempty' (need isValidDateMath / isNonEmptyString)
- */
-function computeUseZodHelpers(
-  operations: NormalizedOperation[],
-  document: OpenApiDocument
-): boolean {
-  if (operations.some((op) => op.requestQuery != null)) {
-    return true;
-  }
-  const docStr = JSON.stringify(document);
-  return docStr.includes('"date-math"') || docStr.includes('"nonempty"');
 }
 
 export function getGenerationContext(
@@ -64,7 +45,7 @@ export function getGenerationContext(
   const info = getInfo(normalizedDocument);
   const imports = getImportsMap(normalizedDocument);
   const circularRefs = getCircularRefs(normalizedDocument);
-  const useZodHelpers = computeUseZodHelpers(operations, document);
+  // const useZodHelpers = computeUseZodHelpers(operations, document);
 
   return {
     components,
@@ -73,6 +54,5 @@ export function getGenerationContext(
     imports,
     circularRefs,
     config,
-    useZodHelpers,
   };
 }
