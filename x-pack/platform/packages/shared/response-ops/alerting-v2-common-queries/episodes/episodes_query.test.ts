@@ -272,7 +272,7 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).not.toContain('web-01');
   });
 
-  it('should apply queryString filter with QSTR', () => {
+  it('should apply queryString filter with KQL', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
@@ -280,7 +280,17 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
+    expect(queryString).toContain('KQL("alert.name: \\"test\\"")');
+  });
+
+  it('should keep KQL input inside the ES|QL string literal', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { queryString: '") | FROM secret_metadata | WHERE ("' }
+    );
+
+    expect(query.print('basic')).toContain('KQL("\\") | FROM secret_metadata | WHERE (\\"")');
   });
 
   it('should apply multiple filters together', () => {
@@ -295,7 +305,7 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
+    expect(queryString).toContain('KQL("alert.name: \\"test\\"")');
     expect(queryString).toMatch(/\| WHERE `episode\.status` == "active"/);
     expect(queryString).toContain('WHERE rule.id == "rule-123" OR rule_id == "rule-123"');
   });
@@ -399,7 +409,7 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
+    expect(queryString).toContain('KQL("alert.name: \\"test\\"")');
   });
 
   it('should not apply filters when they are null or undefined', () => {
@@ -417,7 +427,7 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).not.toContain('QSTR');
+    expect(queryString).not.toContain('KQL');
     expect(queryString).not.toMatch(/\| WHERE `episode\.status` ==/);
     expect(queryString).not.toContain('WHERE rule.id ==');
     expect(queryString).not.toContain('WHERE group_hash ==');
@@ -432,7 +442,7 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).not.toContain('QSTR');
+    expect(queryString).not.toContain('KQL');
   });
 
   it('should apply assigneeUid filter with per-episode INLINE STATS', () => {
@@ -492,7 +502,7 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
+    expect(queryString).toContain('KQL("alert.name: \\"test\\"")');
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
   });
 });
